@@ -2,7 +2,10 @@
 <project version="4">
   <component name="UserContentModel">
     <attachedFolders />
-    <explicitIncludes />
+    <explicitIncludes>
+      <Path>Source/Private/MainGame/BaseGameClass</Path>
+      <Path>Source/Private/MainGame/SpecialGameClasses</Path>
+    </explicitIncludes>
     <explicitExcludes />
   </component>
 </project>
