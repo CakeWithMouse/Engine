@@ -1,0 +1,14 @@
+S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\Source\Private\Components\SpecificComponents\CubeComponent.cpp;S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\1_Lab\Debug\CubeComponent.obj
+S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\Source\Private\Display\Display.cpp;S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\1_Lab\Debug\Display.obj
+S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\Source\Private\InputDevice\Delegates.cpp;S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\1_Lab\Debug\Delegates.obj
+S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\Source\Private\InputDevice\InputDevice.cpp;S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\1_Lab\Debug\InputDevice.obj
+S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\Source\Private\MainGame\BaseGame.cpp;S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\1_Lab\Debug\BaseGame.obj
+S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\Source\Private\MainGame\Game.cpp;S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\1_Lab\Debug\Game.obj
+S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\Source\Private\MainGame\PingPong\Ball.cpp;S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\1_Lab\Debug\Ball.obj
+S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\Source\Private\MainGame\PingPong\PongGame.cpp;S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\1_Lab\Debug\PongGame.obj
+S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\Source\Private\MainGame\PingPong\Rocket.cpp;S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\1_Lab\Debug\Rocket.obj
+S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\Source\Private\MainGame\PingPong\Wall.cpp;S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\1_Lab\Debug\Wall.obj
+S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\Source\Private\MainGame\Player.cpp;S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\1_Lab\Debug\Player.obj
+S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\Source\StartMain.cpp;S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\1_Lab\Debug\StartMain.obj
+S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\Source\Private\Components\GameComponents.cpp;S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\1_Lab\Debug\GameComponents.obj
+S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\Source\Private\Components\SpecificComponents\TriangleComponent.cpp;S:\ITMO\SecondSemester\ComputerGraphic\1_Lab\1_Lab\Debug\TriangleComponent.obj
