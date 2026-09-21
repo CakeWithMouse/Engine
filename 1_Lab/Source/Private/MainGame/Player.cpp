@@ -76,6 +76,7 @@ void Player::StopRotate(bool yaw, bool pitch)
 
 void Player::ProcessInput(float deltaTime)
 {
+    if (!GamePtr) { return; }
     InputDevice* input = GamePtr->GetInputDevice();
     if (!input) { return; }
 
@@ -141,17 +142,20 @@ void Player::ProcessInput(float deltaTime)
         if (orbitYaw < 0) orbitYaw += DirectX::XM_2PI;
     }
 
+    // The wheel is an event quantity (accumulated per frame), so it is not scaled by frame time.
+    // 0.13 keeps the step per notch equal to the old per-frame behaviour.
+    constexpr float WheelStep = 0.13f;
     int wheelDelta = input->MouseWheelDelta;
     if (wheelDelta != 0)
     {
         if (cameraMode == CameraMode::Orbital)
         {
-            orbitRadius -= wheelDelta * zoomSpeed * deltaTime;
+            orbitRadius -= wheelDelta * zoomSpeed * WheelStep;
             orbitRadius = std::max(minimalOrbitRadius, std::min(maximalOrbitRadius, orbitRadius));
         }
         else
         {
-            moveSpeed += wheelDelta * deltaTime;
+            moveSpeed += wheelDelta * WheelStep;
             moveSpeed = std::max(2.0f, std::min(50.0f, moveSpeed));
         }
     }
@@ -230,10 +234,11 @@ void Player::UpdateProjectionMatrix()
 
     if (!GamePtr || !GamePtr->GetDisplay()) { return; }
 
-    const float aspect = GamePtr->GetDisplay()->GetWidth() / static_cast<float>(GamePtr->GetDisplay()->GetHeight());
-    constexpr float fov = XMConvertToRadians(60.0f);
+    const int height = GamePtr->GetDisplay()->GetHeight();
+    if (height <= 0) { return; }
+    const float aspect = GamePtr->GetDisplay()->GetWidth() / static_cast<float>(height);
 
-    const XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(fov, aspect, nearPlane, farPlane);
+    const XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(GetFovY(), aspect, nearPlane, farPlane);
     const XMMATRIX projTransposed = XMMatrixTranspose(projMatrix);
     XMStoreFloat4x4(&ProjectionMatrix, projTransposed);
 }

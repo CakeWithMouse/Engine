@@ -21,8 +21,11 @@ public:
     {
     }
     
-    void CreateBuffers(Microsoft::WRL::ComPtr<ID3D11Device> Device) override {}
+    // A light has no geometry: it is never drawn and never casts a shadow.
+    void CreateBuffers(ID3D11Device* Device) override {}
     void Render(ID3D11DeviceContext* context) override {}
+    bool IsRenderable() const override { return false; }
+    bool CastsShadow() const override { return false; }
     
     glm::vec3 GetLightColor() const { return LightColor; }
     float GetIntensity() const { return Intensity; }

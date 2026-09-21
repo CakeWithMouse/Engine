@@ -30,3 +30,22 @@
 *.exe
 *.out
 *.app
+
+# Visual Studio / MSBuild outputs
+.vs/
+[Dd]ebug/
+[Rr]elease/
+x64/
+*.pdb
+*.ilk
+*.idb
+*.tlog/
+*.tlog
+*.recipe
+*.lastbuildstate
+*.FileListAbsolute.txt
+*.Build.CppClean.log
+*.vcxproj.user
+
+# vcpkg manifest-mode install tree
+vcpkg_installed/

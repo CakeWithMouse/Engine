@@ -3,15 +3,13 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
-#include <d3dcompiler.h>
 #include <iostream>
 #include <random>
-
-#pragma comment(lib, "d3dcompiler.lib")
+#include "../../../Public/Render/ShaderCompiler.h"
 
 namespace
 {
-    std::wstring ParticleShaderPath = L"Source/Shaders/GPUParticleSystem.hlsl";
+    const std::wstring ParticleShaderPath = L"Source/Shaders/GPUParticleSystem.hlsl";
 
     unsigned int NextPowerOfTwo(unsigned int value)
     {
@@ -22,16 +20,6 @@ namespace
         }
 
         return result;
-    }
-
-    template <typename T>
-    void ReleaseIfValid(T*& resource)
-    {
-        if (resource)
-        {
-            resource->Release();
-            resource = nullptr;
-        }
     }
 }
 
@@ -47,27 +35,7 @@ ParticleSystemComponent::ParticleSystemComponent(glm::vec3 pos, glm::vec3 rot, g
     bHasOpacity = true;
 }
 
-ParticleSystemComponent::~ParticleSystemComponent()
-{
-    for (int i = 0; i < 2; ++i)
-    {
-        if (ParticleUAV[i]) ParticleUAV[i]->Release();
-        if (ParticleSRV[i]) ParticleSRV[i]->Release();
-        if (ParticleBuffers[i]) ParticleBuffers[i]->Release();
-    }
-
-    ReleaseIfValid(ParticleSortUAV);
-    ReleaseIfValid(ParticleSortSRV);
-    ReleaseIfValid(ParticleSortBuffer);
-    if (ComputeShader) ComputeShader->Release();
-    if (BuildSortKeysShader) BuildSortKeysShader->Release();
-    if (BitonicSortShader) BitonicSortShader->Release();
-    if (ParticleVertexShader) ParticleVertexShader->Release();
-    if (ParticlePixelShader) ParticlePixelShader->Release();
-    if (SimulationCB) SimulationCB->Release();
-    if (RenderCB) RenderCB->Release();
-    if (SortCB) SortCB->Release();
-}
+ParticleSystemComponent::~ParticleSystemComponent() = default;
 
 void ParticleSystemComponent::SetParticleCount(unsigned int newCount)
 {
@@ -78,20 +46,10 @@ void ParticleSystemComponent::SetParticleCount(unsigned int newCount)
     }
 
     ParticleCount = clampedCount;
-    if (GamePtr == nullptr || GamePtr->GetContext() == nullptr)
+    if (GamePtr != nullptr && GamePtr->GetDevice() != nullptr)
     {
-        return;
+        CreateParticleBuffers(GamePtr->GetDevice());
     }
-
-    ID3D11Device* device = nullptr;
-    GamePtr->GetContext()->GetDevice(&device);
-    if (!device)
-    {
-        return;
-    }
-
-    CreateParticleBuffers(device);
-    device->Release();
 }
 
 void ParticleSystemComponent::SetRandomness(float speedRandomness, float sizeRandomness)
@@ -100,107 +58,95 @@ void ParticleSystemComponent::SetRandomness(float speedRandomness, float sizeRan
     SizeRandomness = std::max(0.0f, sizeRandomness);
 }
 
-void ParticleSystemComponent::CreateBuffers(Microsoft::WRL::ComPtr<ID3D11Device> device)
+void ParticleSystemComponent::CreateBuffers(ID3D11Device* device)
 {
     if (!device)
     {
         return;
     }
 
-    if (!CompileShaders(device.Get()))
+    if (!CompileShaders(device))
     {
         std::cout << "ParticleSystemComponent: failed to compile shaders." << std::endl;
         return;
     }
 
-    if (!CreateParticleBuffers(device.Get()))
+    if (!CreateParticleBuffers(device))
     {
         std::cout << "ParticleSystemComponent: failed to create particle buffers." << std::endl;
         return;
     }
 
-    D3D11_BUFFER_DESC simCBDesc = {};
-    simCBDesc.Usage = D3D11_USAGE_DEFAULT;
-    simCBDesc.ByteWidth = sizeof(GPUParticleSimulationCB);
-    simCBDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    simCBDesc.CPUAccessFlags = 0;
-    device->CreateBuffer(&simCBDesc, nullptr, &SimulationCB);
+    auto createConstantBuffer = [device](UINT byteWidth, Microsoft::WRL::ComPtr<ID3D11Buffer>& buffer)
+    {
+        D3D11_BUFFER_DESC desc = {};
+        desc.Usage = D3D11_USAGE_DEFAULT;
+        desc.ByteWidth = byteWidth;
+        desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        return SUCCEEDED(device->CreateBuffer(&desc, nullptr, buffer.ReleaseAndGetAddressOf()));
+    };
 
-    D3D11_BUFFER_DESC renderCBDesc = {};
-    renderCBDesc.Usage = D3D11_USAGE_DEFAULT;
-    renderCBDesc.ByteWidth = sizeof(GPUParticleRenderCB);
-    renderCBDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    renderCBDesc.CPUAccessFlags = 0;
-    device->CreateBuffer(&renderCBDesc, nullptr, &RenderCB);
-
-    D3D11_BUFFER_DESC sortCBDesc = {};
-    sortCBDesc.Usage = D3D11_USAGE_DEFAULT;
-    sortCBDesc.ByteWidth = sizeof(GPUParticleSortCB);
-    sortCBDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    sortCBDesc.CPUAccessFlags = 0;
-    device->CreateBuffer(&sortCBDesc, nullptr, &SortCB);
+    if (!createConstantBuffer(sizeof(GPUParticleSimulationCB), SimulationCB) ||
+        !createConstantBuffer(sizeof(GPUParticleRenderCB), RenderCB) ||
+        !createConstantBuffer(sizeof(GPUParticleSortCB), SortCB))
+    {
+        std::cout << "ParticleSystemComponent: failed to create constant buffers." << std::endl;
+    }
 }
 
 void ParticleSystemComponent::Tick(float deltaTime)
 {
     GameComponent::Tick(deltaTime);
-    LastDeltaTime = std::max(0.0f, std::min(deltaTime, 0.05f));
+    LastDeltaTime = std::max(0.0f, std::min(deltaTime * SimulationRate, MaxSimulationStep));
     SimulationTime += LastDeltaTime;
 }
 
-void ParticleSystemComponent::Render(ID3D11DeviceContext* context)
+bool ParticleSystemComponent::IsReady() const
 {
-    if (!context || !ComputeShader || !ParticleVertexShader || !ParticlePixelShader ||
-        !BuildSortKeysShader || !BitonicSortShader ||
-        !SimulationCB || !RenderCB || !SortCB ||
-        !ParticleSRV[ReadBufferIndex] || !ParticleUAV[1u - ReadBufferIndex] ||
-        !ParticleSortSRV || !ParticleSortUAV)
+    return ComputeShader && ParticleVertexShader && ParticlePixelShader &&
+           BuildSortKeysShader && BitonicSortShader &&
+           SimulationCB && RenderCB && SortCB &&
+           ParticleSRV[0] && ParticleSRV[1] && ParticleUAV[0] && ParticleUAV[1] &&
+           ParticleSortSRV && ParticleSortUAV;
+}
+
+void ParticleSystemComponent::DispatchCompute(ID3D11DeviceContext* context)
+{
+    if (!context || !IsReady())
     {
         return;
     }
 
     DispatchSimulation(context);
-    DispatchSort(context);
+    if (bSortingEnabled)
+    {
+        DispatchSort(context);
+    }
+}
+
+void ParticleSystemComponent::Render(ID3D11DeviceContext* context)
+{
+    if (!context || !IsReady())
+    {
+        return;
+    }
+
     UpdateRenderConstants(context);
 
-    ID3D11InputLayout* previousLayout = nullptr;
-    D3D11_PRIMITIVE_TOPOLOGY previousTopology = D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
-    context->IAGetInputLayout(&previousLayout);
-    context->IAGetPrimitiveTopology(&previousTopology);
-
-    context->VSSetShader(ParticleVertexShader, nullptr, 0);
-    context->PSSetShader(ParticlePixelShader, nullptr, 0);
-    context->VSSetConstantBuffers(0, 1, &RenderCB);
-    context->PSSetConstantBuffers(0, 1, &RenderCB);
-    ID3D11ShaderResourceView* vertexSRVs[2] = {ParticleSRV[ReadBufferIndex], ParticleSortSRV};
+    context->VSSetShader(ParticleVertexShader.Get(), nullptr, 0);
+    context->PSSetShader(ParticlePixelShader.Get(), nullptr, 0);
+    context->VSSetConstantBuffers(0, 1, RenderCB.GetAddressOf());
+    context->PSSetConstantBuffers(0, 1, RenderCB.GetAddressOf());
+    ID3D11ShaderResourceView* vertexSRVs[2] = {ParticleSRV[ReadBufferIndex].Get(), ParticleSortSRV.Get()};
     context->VSSetShaderResources(0, 2, vertexSRVs);
     context->IASetInputLayout(nullptr);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
     context->DrawInstanced(4, ParticleCount, 0, 0);
+    if (GamePtr) GamePtr->CountDraw(4, ParticleCount);
 
     ID3D11ShaderResourceView* nullSRVs[2] = {nullptr, nullptr};
     context->VSSetShaderResources(0, 2, nullSRVs);
-    context->IASetInputLayout(previousLayout);
-    context->IASetPrimitiveTopology(previousTopology);
-    if (previousLayout)
-    {
-        previousLayout->Release();
-    }
-}
-
-void ParticleSystemComponent::RenderShadow(ID3D11DeviceContext* context,
-                                           ID3D11VertexShader* shadowVertexShader,
-                                           ID3D11Buffer* shadowCB,
-                                           ID3D11InputLayout* shadowPrimitiveLayout,
-                                           ID3D11InputLayout* shadowMeshLayout,
-                                           const DirectX::XMFLOAT4X4& lightViewProjection)
-{
-    (void)context;
-    (void)shadowVertexShader;
-    (void)shadowCB;
-    (void)shadowPrimitiveLayout;
-    (void)shadowMeshLayout;
-    (void)lightViewProjection;
+    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 bool ParticleSystemComponent::CompileShaders(ID3D11Device* device)
@@ -210,119 +156,54 @@ bool ParticleSystemComponent::CompileShaders(ID3D11Device* device)
         return false;
     }
 
-    ID3DBlob* vsBlob = nullptr;
-    ID3DBlob* psBlob = nullptr;
-    ID3DBlob* csBlob = nullptr;
-    ID3DBlob* buildSortBlob = nullptr;
-    ID3DBlob* bitonicSortBlob = nullptr;
-    ID3DBlob* errorBlob = nullptr;
-
-    auto releaseBlobs = [&]()
+    auto compileEntry = [](const char* entryPoint, const char* target, Microsoft::WRL::ComPtr<ID3DBlob>& blob) -> bool
     {
-        if (vsBlob) { vsBlob->Release(); vsBlob = nullptr; }
-        if (psBlob) { psBlob->Release(); psBlob = nullptr; }
-        if (csBlob) { csBlob->Release(); csBlob = nullptr; }
-        if (buildSortBlob) { buildSortBlob->Release(); buildSortBlob = nullptr; }
-        if (bitonicSortBlob) { bitonicSortBlob->Release(); bitonicSortBlob = nullptr; }
-        if (errorBlob)
+        std::string errors;
+        const HRESULT hr = ShaderCompiler::CompileFromFile(ParticleShaderPath, nullptr, entryPoint, target,
+                                                           blob.ReleaseAndGetAddressOf(), &errors);
+        if (FAILED(hr))
         {
-            errorBlob->Release();
-            errorBlob = nullptr;
+            std::cout << "Particle shader " << entryPoint << ": " << errors << std::endl;
+            return false;
         }
+        return true;
     };
 
-    auto compileEntry = [&](const char* entryPoint, const char* target, ID3DBlob** blob) -> bool
+    Microsoft::WRL::ComPtr<ID3DBlob> vsBlob;
+    Microsoft::WRL::ComPtr<ID3DBlob> psBlob;
+    Microsoft::WRL::ComPtr<ID3DBlob> csBlob;
+    Microsoft::WRL::ComPtr<ID3DBlob> buildSortBlob;
+    Microsoft::WRL::ComPtr<ID3DBlob> bitonicSortBlob;
+    if (!compileEntry("VSMain", "vs_5_0", vsBlob) ||
+        !compileEntry("PSMain", "ps_5_0", psBlob) ||
+        !compileEntry("CSMain", "cs_5_0", csBlob) ||
+        !compileEntry("CSBuildSortKeys", "cs_5_0", buildSortBlob) ||
+        !compileEntry("CSBitonicSort", "cs_5_0", bitonicSortBlob))
     {
-        HRESULT hr = D3DCompileFromFile(
-            ParticleShaderPath.c_str(),
-            nullptr,
-            nullptr,
-            entryPoint,
-            target,
-            D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
-            0,
-            blob,
-            &errorBlob
-        );
-        if (SUCCEEDED(hr))
-        {
-            if (errorBlob)
-            {
-                errorBlob->Release();
-                errorBlob = nullptr;
-            }
-            return true;
-        }
-
-        if (errorBlob)
-        {
-            std::cout << static_cast<const char*>(errorBlob->GetBufferPointer()) << std::endl;
-            errorBlob->Release();
-            errorBlob = nullptr;
-        }
-
-        return false;
-    };
-
-    if (!compileEntry("VSMain", "vs_5_0", &vsBlob) ||
-        !compileEntry("PSMain", "ps_5_0", &psBlob) ||
-        !compileEntry("CSMain", "cs_5_0", &csBlob) ||
-        !compileEntry("CSBuildSortKeys", "cs_5_0", &buildSortBlob) ||
-        !compileEntry("CSBitonicSort", "cs_5_0", &bitonicSortBlob))
-    {
-        releaseBlobs();
         return false;
     }
 
-    ID3D11VertexShader* newVertexShader = nullptr;
-    ID3D11PixelShader* newPixelShader = nullptr;
-    ID3D11ComputeShader* newComputeShader = nullptr;
-    ID3D11ComputeShader* newBuildSortKeysShader = nullptr;
-    ID3D11ComputeShader* newBitonicSortShader = nullptr;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> newVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> newPixelShader;
+    Microsoft::WRL::ComPtr<ID3D11ComputeShader> newComputeShader;
+    Microsoft::WRL::ComPtr<ID3D11ComputeShader> newBuildSortKeysShader;
+    Microsoft::WRL::ComPtr<ID3D11ComputeShader> newBitonicSortShader;
 
-    HRESULT hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, &newVertexShader);
-    if (SUCCEEDED(hr))
+    if (FAILED(device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, newVertexShader.GetAddressOf())) ||
+        FAILED(device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, newPixelShader.GetAddressOf())) ||
+        FAILED(device->CreateComputeShader(csBlob->GetBufferPointer(), csBlob->GetBufferSize(), nullptr, newComputeShader.GetAddressOf())) ||
+        FAILED(device->CreateComputeShader(buildSortBlob->GetBufferPointer(), buildSortBlob->GetBufferSize(), nullptr, newBuildSortKeysShader.GetAddressOf())) ||
+        FAILED(device->CreateComputeShader(bitonicSortBlob->GetBufferPointer(), bitonicSortBlob->GetBufferSize(), nullptr, newBitonicSortShader.GetAddressOf())))
     {
-        hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, &newPixelShader);
-    }
-    if (SUCCEEDED(hr))
-    {
-        hr = device->CreateComputeShader(csBlob->GetBufferPointer(), csBlob->GetBufferSize(), nullptr, &newComputeShader);
-    }
-    if (SUCCEEDED(hr))
-    {
-        hr = device->CreateComputeShader(buildSortBlob->GetBufferPointer(), buildSortBlob->GetBufferSize(), nullptr, &newBuildSortKeysShader);
-    }
-    if (SUCCEEDED(hr))
-    {
-        hr = device->CreateComputeShader(bitonicSortBlob->GetBufferPointer(), bitonicSortBlob->GetBufferSize(), nullptr, &newBitonicSortShader);
-    }
-
-    releaseBlobs();
-
-    if (FAILED(hr) || !newVertexShader || !newPixelShader || !newComputeShader ||
-        !newBuildSortKeysShader || !newBitonicSortShader)
-    {
-        if (newVertexShader) newVertexShader->Release();
-        if (newPixelShader) newPixelShader->Release();
-        if (newComputeShader) newComputeShader->Release();
-        if (newBuildSortKeysShader) newBuildSortKeysShader->Release();
-        if (newBitonicSortShader) newBitonicSortShader->Release();
         return false;
     }
 
-    if (ParticleVertexShader) ParticleVertexShader->Release();
-    if (ParticlePixelShader) ParticlePixelShader->Release();
-    if (ComputeShader) ComputeShader->Release();
-    if (BuildSortKeysShader) BuildSortKeysShader->Release();
-    if (BitonicSortShader) BitonicSortShader->Release();
-
+    // Published together only after every stage succeeded.
     ParticleVertexShader = newVertexShader;
     ParticlePixelShader = newPixelShader;
     ComputeShader = newComputeShader;
     BuildSortKeysShader = newBuildSortKeysShader;
     BitonicSortShader = newBitonicSortShader;
-
     return true;
 }
 
@@ -335,29 +216,23 @@ bool ParticleSystemComponent::CreateParticleBuffers(ID3D11Device* device)
 
     for (int i = 0; i < 2; ++i)
     {
-        if (ParticleUAV[i]) { ParticleUAV[i]->Release(); ParticleUAV[i] = nullptr; }
-        if (ParticleSRV[i]) { ParticleSRV[i]->Release(); ParticleSRV[i] = nullptr; }
-        if (ParticleBuffers[i]) { ParticleBuffers[i]->Release(); ParticleBuffers[i] = nullptr; }
+        ParticleUAV[i].Reset();
+        ParticleSRV[i].Reset();
+        ParticleBuffers[i].Reset();
     }
-    ReleaseIfValid(ParticleSortUAV);
-    ReleaseIfValid(ParticleSortSRV);
-    ReleaseIfValid(ParticleSortBuffer);
+    ParticleSortUAV.Reset();
+    ParticleSortSRV.Reset();
+    ParticleSortBuffer.Reset();
     SortElementCount = NextPowerOfTwo(ParticleCount);
 
-    std::vector<GPUParticleData> initialParticles;
-    initialParticles.resize(ParticleCount);
+    std::vector<GPUParticleData> initialParticles(ParticleCount);
 
-    std::mt19937 rng(
-        static_cast<unsigned int>(
-            std::chrono::high_resolution_clock::now().time_since_epoch().count()
-        )
-    );
+    std::mt19937 rng(static_cast<unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
     std::uniform_real_distribution<float> rand01(0.0f, 1.0f);
     std::uniform_real_distribution<float> randSigned(-1.0f, 1.0f);
 
-    for (unsigned int i = 0; i < ParticleCount; ++i)
+    for (GPUParticleData& p : initialParticles)
     {
-        GPUParticleData& p = initialParticles[i];
         p.PositionLife = DirectX::XMFLOAT4(0.0f, -100000.0f, 0.0f, 0.0f);
         p.VelocityLifetime = DirectX::XMFLOAT4(randSigned(rng), 1.0f + rand01(rng), randSigned(rng), BaseLifetime);
         p.ColorSize = DirectX::XMFLOAT4(Color.x, Color.y, Color.z, BaseSize);
@@ -367,7 +242,6 @@ bool ParticleSystemComponent::CreateParticleBuffers(ID3D11Device* device)
     bufferDesc.Usage = D3D11_USAGE_DEFAULT;
     bufferDesc.ByteWidth = static_cast<UINT>(sizeof(GPUParticleData) * initialParticles.size());
     bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
-    bufferDesc.CPUAccessFlags = 0;
     bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
     bufferDesc.StructureByteStride = sizeof(GPUParticleData);
 
@@ -376,30 +250,19 @@ bool ParticleSystemComponent::CreateParticleBuffers(ID3D11Device* device)
         D3D11_SUBRESOURCE_DATA initData = {};
         initData.pSysMem = initialParticles.data();
 
-        HRESULT hr = device->CreateBuffer(&bufferDesc, &initData, &ParticleBuffers[i]);
-        if (FAILED(hr))
-        {
-            return false;
-        }
-
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
         srvDesc.Format = DXGI_FORMAT_UNKNOWN;
         srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-        srvDesc.Buffer.FirstElement = 0;
         srvDesc.Buffer.NumElements = ParticleCount;
-        hr = device->CreateShaderResourceView(ParticleBuffers[i], &srvDesc, &ParticleSRV[i]);
-        if (FAILED(hr))
-        {
-            return false;
-        }
 
         D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
         uavDesc.Format = DXGI_FORMAT_UNKNOWN;
         uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-        uavDesc.Buffer.FirstElement = 0;
         uavDesc.Buffer.NumElements = ParticleCount;
-        hr = device->CreateUnorderedAccessView(ParticleBuffers[i], &uavDesc, &ParticleUAV[i]);
-        if (FAILED(hr))
+
+        if (FAILED(device->CreateBuffer(&bufferDesc, &initData, ParticleBuffers[i].GetAddressOf())) ||
+            FAILED(device->CreateShaderResourceView(ParticleBuffers[i].Get(), &srvDesc, ParticleSRV[i].GetAddressOf())) ||
+            FAILED(device->CreateUnorderedAccessView(ParticleBuffers[i].Get(), &uavDesc, ParticleUAV[i].GetAddressOf())))
         {
             return false;
         }
@@ -409,34 +272,22 @@ bool ParticleSystemComponent::CreateParticleBuffers(ID3D11Device* device)
     sortBufferDesc.Usage = D3D11_USAGE_DEFAULT;
     sortBufferDesc.ByteWidth = static_cast<UINT>(sizeof(GPUParticleSortPair) * SortElementCount);
     sortBufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
-    sortBufferDesc.CPUAccessFlags = 0;
     sortBufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
     sortBufferDesc.StructureByteStride = sizeof(GPUParticleSortPair);
-
-    HRESULT hr = device->CreateBuffer(&sortBufferDesc, nullptr, &ParticleSortBuffer);
-    if (FAILED(hr))
-    {
-        return false;
-    }
 
     D3D11_SHADER_RESOURCE_VIEW_DESC sortSRVDesc = {};
     sortSRVDesc.Format = DXGI_FORMAT_UNKNOWN;
     sortSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-    sortSRVDesc.Buffer.FirstElement = 0;
     sortSRVDesc.Buffer.NumElements = SortElementCount;
-    hr = device->CreateShaderResourceView(ParticleSortBuffer, &sortSRVDesc, &ParticleSortSRV);
-    if (FAILED(hr))
-    {
-        return false;
-    }
 
     D3D11_UNORDERED_ACCESS_VIEW_DESC sortUAVDesc = {};
     sortUAVDesc.Format = DXGI_FORMAT_UNKNOWN;
     sortUAVDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
-    sortUAVDesc.Buffer.FirstElement = 0;
     sortUAVDesc.Buffer.NumElements = SortElementCount;
-    hr = device->CreateUnorderedAccessView(ParticleSortBuffer, &sortUAVDesc, &ParticleSortUAV);
-    if (FAILED(hr))
+
+    if (FAILED(device->CreateBuffer(&sortBufferDesc, nullptr, ParticleSortBuffer.GetAddressOf())) ||
+        FAILED(device->CreateShaderResourceView(ParticleSortBuffer.Get(), &sortSRVDesc, ParticleSortSRV.GetAddressOf())) ||
+        FAILED(device->CreateUnorderedAccessView(ParticleSortBuffer.Get(), &sortUAVDesc, ParticleSortUAV.GetAddressOf())))
     {
         return false;
     }
@@ -460,25 +311,20 @@ void ParticleSystemComponent::DispatchSimulation(ID3D11DeviceContext* context)
     simulationData.SpeedRandomness = SpeedRandomness;
     simulationData.MinLifeFraction = MinLifeFraction;
     simulationData.MaxDistance = MaxDistance * std::max(0.001f, ComponentScale.x);
-    simulationData.BaseVelocity = DirectX::XMFLOAT3(BaseVelocity.x, BaseVelocity.y, BaseVelocity.z);
-    simulationData.Acceleration = DirectX::XMFLOAT3(Acceleration.x, Acceleration.y, Acceleration.z);
-    simulationData.BaseColor = DirectX::XMFLOAT4(Color.x, Color.y, Color.z, Color.w);
+    simulationData.BaseVelocity = XMFLOAT3(BaseVelocity.x, BaseVelocity.y, BaseVelocity.z);
+    simulationData.Acceleration = XMFLOAT3(Acceleration.x, Acceleration.y, Acceleration.z);
+    simulationData.BaseColor = XMFLOAT4(Color.x, Color.y, Color.z, Color.w);
     simulationData.BaseSize = BaseSize * std::max(0.001f, ComponentScale.x);
     simulationData.SizeRandomness = SizeRandomness;
-    if (GamePtr && GamePtr->GetPlayer())
+    if (GamePtr)
     {
-        simulationData.SimulationViewMatrix = GamePtr->GetViewMatrix();
-        simulationData.SimulationProjectionMatrix = GamePtr->GetProjectionMatrix();
-
-        const XMMATRIX viewStored = XMLoadFloat4x4(&simulationData.SimulationViewMatrix);
-        const XMMATRIX projStored = XMLoadFloat4x4(&simulationData.SimulationProjectionMatrix);
-        const XMMATRIX viewOriginal = XMMatrixTranspose(viewStored);
-        const XMMATRIX projOriginal = XMMatrixTranspose(projStored);
-        XMStoreFloat4x4(&simulationData.SimulationInvViewMatrix, XMMatrixTranspose(XMMatrixInverse(nullptr, viewOriginal)));
-        XMStoreFloat4x4(&simulationData.SimulationInvProjectionMatrix, XMMatrixTranspose(XMMatrixInverse(nullptr, projOriginal)));
-
-        const glm::vec3 cameraPosition = GamePtr->GetPlayer()->GetPosition();
-        simulationData.SimulationCameraPosition = XMFLOAT4(cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f);
+        // Camera data of the current frame snapshot (inverses are computed once per frame).
+        const FrameConstants& frame = GamePtr->GetFrameConstants();
+        simulationData.SimulationViewMatrix = frame.viewMatrix;
+        simulationData.SimulationProjectionMatrix = frame.projectionMatrix;
+        simulationData.SimulationInvViewMatrix = frame.invViewMatrix;
+        simulationData.SimulationInvProjectionMatrix = frame.invProjectionMatrix;
+        simulationData.SimulationCameraPosition = frame.CameraPosition;
     }
 
     ID3D11ShaderResourceView* depthSRV = GamePtr ? GamePtr->GetDepthStencilSRV() : nullptr;
@@ -494,19 +340,23 @@ void ParticleSystemComponent::DispatchSimulation(ID3D11DeviceContext* context)
     ID3D11DepthStencilView* previousDSV = nullptr;
     if (useDepthCollision)
     {
+        // The depth buffer is read as an SRV, so it must not stay bound as the depth target.
         context->OMGetRenderTargets(1, &previousRTV, &previousDSV);
         context->OMSetRenderTargets(0, nullptr, nullptr);
     }
 
-    context->UpdateSubresource(SimulationCB, 0, nullptr, &simulationData, 0, 0);
-    context->CSSetShader(ComputeShader, nullptr, 0);
-    context->CSSetConstantBuffers(0, 1, &SimulationCB);
-    context->CSSetShaderResources(0, 1, &ParticleSRV[ReadBufferIndex]);
+    context->UpdateSubresource(SimulationCB.Get(), 0, nullptr, &simulationData, 0, 0);
+    context->CSSetShader(ComputeShader.Get(), nullptr, 0);
+    context->CSSetConstantBuffers(0, 1, SimulationCB.GetAddressOf());
+    ID3D11ShaderResourceView* particleSRV = ParticleSRV[ReadBufferIndex].Get();
+    context->CSSetShaderResources(0, 1, &particleSRV);
     context->CSSetShaderResources(2, 1, &depthSRV);
-    context->CSSetUnorderedAccessViews(0, 1, &ParticleUAV[1u - ReadBufferIndex], nullptr);
+    ID3D11UnorderedAccessView* particleUAV = ParticleUAV[1u - ReadBufferIndex].Get();
+    context->CSSetUnorderedAccessViews(0, 1, &particleUAV, nullptr);
 
     const unsigned int dispatchCount = (ParticleCount + ThreadGroupSize - 1u) / ThreadGroupSize;
     context->Dispatch(dispatchCount, 1, 1);
+    if (GamePtr) GamePtr->CountDispatch();
 
     ID3D11ShaderResourceView* nullSRVs[3] = {nullptr, nullptr, nullptr};
     ID3D11UnorderedAccessView* nullUAV = nullptr;
@@ -534,8 +384,7 @@ void ParticleSystemComponent::DispatchSimulation(ID3D11DeviceContext* context)
 
 void ParticleSystemComponent::DispatchSort(ID3D11DeviceContext* context)
 {
-    if (!context || !SortCB || !BuildSortKeysShader || !BitonicSortShader ||
-        !ParticleSRV[ReadBufferIndex] || !ParticleSortUAV || SortElementCount == 0u)
+    if (SortElementCount == 0u)
     {
         return;
     }
@@ -543,32 +392,37 @@ void ParticleSystemComponent::DispatchSort(ID3D11DeviceContext* context)
     GPUParticleSortCB sortData = {};
     if (GamePtr)
     {
-        sortData.SortViewMatrix = GamePtr->GetViewMatrix();
+        sortData.SortViewMatrix = GamePtr->GetFrameConstants().viewMatrix;
     }
     sortData.SortParticleCount = ParticleCount;
     sortData.SortElementCount = SortElementCount;
 
-    context->UpdateSubresource(SortCB, 0, nullptr, &sortData, 0, 0);
-    context->CSSetShader(BuildSortKeysShader, nullptr, 0);
-    context->CSSetConstantBuffers(1, 1, &SortCB);
-    context->CSSetShaderResources(0, 1, &ParticleSRV[ReadBufferIndex]);
-    context->CSSetUnorderedAccessViews(1, 1, &ParticleSortUAV, nullptr);
+    context->UpdateSubresource(SortCB.Get(), 0, nullptr, &sortData, 0, 0);
+    context->CSSetShader(BuildSortKeysShader.Get(), nullptr, 0);
+    context->CSSetConstantBuffers(1, 1, SortCB.GetAddressOf());
+    ID3D11ShaderResourceView* particleSRV = ParticleSRV[ReadBufferIndex].Get();
+    context->CSSetShaderResources(0, 1, &particleSRV);
+    ID3D11UnorderedAccessView* sortUAV = ParticleSortUAV.Get();
+    context->CSSetUnorderedAccessViews(1, 1, &sortUAV, nullptr);
 
     const unsigned int sortDispatchCount = (SortElementCount + ThreadGroupSize - 1u) / ThreadGroupSize;
     context->Dispatch(sortDispatchCount, 1, 1);
+    if (GamePtr) GamePtr->CountDispatch();
 
     ID3D11ShaderResourceView* nullSRV = nullptr;
     context->CSSetShaderResources(0, 1, &nullSRV);
 
-    context->CSSetShader(BitonicSortShader, nullptr, 0);
+    // Full bitonic network: k(k+1)/2 dispatches for 2^k elements.
+    context->CSSetShader(BitonicSortShader.Get(), nullptr, 0);
     for (unsigned int level = 2u; level <= SortElementCount; level <<= 1u)
     {
         sortData.BitonicLevel = level;
         for (unsigned int levelMask = level >> 1u; levelMask > 0u; levelMask >>= 1u)
         {
             sortData.BitonicLevelMask = levelMask;
-            context->UpdateSubresource(SortCB, 0, nullptr, &sortData, 0, 0);
+            context->UpdateSubresource(SortCB.Get(), 0, nullptr, &sortData, 0, 0);
             context->Dispatch(sortDispatchCount, 1, 1);
+            if (GamePtr) GamePtr->CountDispatch();
         }
     }
 
@@ -587,8 +441,8 @@ void ParticleSystemComponent::UpdateRenderConstants(ID3D11DeviceContext* context
     }
 
     GPUParticleRenderCB renderData = {};
-    renderData.ViewMatrix = GamePtr->GetViewMatrix();
-    renderData.ProjectionMatrix = GamePtr->GetProjectionMatrix();
+    renderData.ViewMatrix = GamePtr->GetFrameConstants().viewMatrix;
+    renderData.ProjectionMatrix = GamePtr->GetFrameConstants().projectionMatrix;
 
     const Player* player = GamePtr->GetPlayer();
     glm::vec3 camRight = player->GetRight();
@@ -604,11 +458,11 @@ void ParticleSystemComponent::UpdateRenderConstants(ID3D11DeviceContext* context
     renderData.GlobalTint = DirectX::XMFLOAT4(Color.x, Color.y, Color.z, Color.w);
     renderData.Brightness = Brightness;
 
-    context->UpdateSubresource(RenderCB, 0, nullptr, &renderData, 0, 0);
+    context->UpdateSubresource(RenderCB.Get(), 0, nullptr, &renderData, 0, 0);
 }
 
 DirectX::XMFLOAT3 ParticleSystemComponent::GetEmitterWorldPosition()
 {
-    const DirectX::XMFLOAT4X4 world = GetWorldMatrix();
-    return DirectX::XMFLOAT3(world._41, world._42, world._43);
+    const glm::vec3 position = GetWorldPosition();
+    return DirectX::XMFLOAT3(position.x, position.y, position.z);
 }

@@ -8,43 +8,13 @@ void PongGame::AddScore(glm::vec2 ScoreAdded)
     printScore();
 }
 
-void PongGame::Draw(ID3D11RasterizerState* RasterState)
+void PongGame::TickComponents(float deltaTime)
 {
-    Context->ClearState();
-    Context->RSSetState(RasterState);
-
-    D3D11_VIEWPORT viewport = {};
-    viewport.Width = static_cast<float>(DisplayPtr->GetWidth());
-    viewport.Height = static_cast<float>(DisplayPtr->GetHeight());
-    viewport.TopLeftX = 0;
-    viewport.TopLeftY = 0;
-    viewport.MinDepth = 0;
-    viewport.MaxDepth = 1.0f;
-
-    Context->RSSetViewports(1, &viewport);
-    Context->IASetInputLayout(layout);
-    Context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    // Set render target
-    Context->OMSetRenderTargets(1, &RenderTargetView, nullptr);
-
-    //Change back layout
-    static constexpr int SecondsToChangeColor = 10;
-    //float AddedRed = 0.7f * (static_cast<int>(TotalTime) % SecondsToChangeColor) / SecondsToChangeColor;
-    float color[] = {0.05f, 0.1f, 0.05f, 1.0f};
-    Context->ClearRenderTargetView(RenderTargetView, color);
-
-    //UpdateConstantBuffer();
+    // Walls and rackets move first, then the ball reacts to their new positions.
     std::vector<GameComponent*> HasCollision;
-    FirstPlayer->UpdateCamera(0.13f);
-    for (int i = 0; i < Components.size(); ++i)
+    for (size_t i = 0; i < Components.size(); ++i)
     {
-        const auto KeyVal = Components.find(std::to_string(i + 1));
-        if (KeyVal == Components.end())
-        {
-            continue;
-        }
-        GameComponent* Component = KeyVal->second;
+        GameComponent* Component = FindComponent(std::to_string(i + 1));
         if (Component == nullptr)
         {
             continue;
@@ -53,20 +23,34 @@ void PongGame::Draw(ID3D11RasterizerState* RasterState)
         {
             HasCollision.push_back(Component);
         }
-        Component->Tick(0.13f);
-        Component->Update();
-        Component->Render(Context);
+        Component->Tick(deltaTime);
     }
-    //BallZone
-    const auto KeyVal = Components.find("PongBall");
-    BallComponent* Component = static_cast<BallComponent*>(KeyVal->second);
-    Component->CheckCollisions(HasCollision);
-    Component->Tick(0.13f);
-    Component->Update();
-    Component->Render(Context);
 
-    Context->OMSetRenderTargets(0, nullptr, nullptr);
-    EndFrame();
+    BallComponent* Ball = dynamic_cast<BallComponent*>(FindComponent("PongBall"));
+    if (Ball != nullptr)
+    {
+        Ball->CheckCollisions(HasCollision);
+        Ball->Tick(deltaTime);
+    }
+}
+
+void PongGame::Draw()
+{
+    BeginMainPass(false);
+
+    auto drawComponent = [this](GameComponent* Component)
+    {
+        if (Component != nullptr && BindComponentShaders(Component, ShaderCompileVariant::Default))
+        {
+            Component->Render(Context.Get());
+        }
+    };
+
+    for (size_t i = 0; i < Components.size(); ++i)
+    {
+        drawComponent(FindComponent(std::to_string(i + 1)));
+    }
+    drawComponent(FindComponent("PongBall"));
 }
 
 void PongGame::printScore()

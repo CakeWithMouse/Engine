@@ -1,3 +1,6 @@
+// Instanced sphere (asteroids, stars). Forward-only material: emissive stars and the tone mapping
+// below cannot be represented in the G-buffer, so the deferred renderer draws it in its forward pass.
+
 cbuffer ConstantBuffer : register(b0)
 {
     float4x4 viewMatrix;
@@ -15,13 +18,6 @@ cbuffer ConstantBuffer : register(b0)
     float4 ShadowParams;
     float4 LightDirection;
     float4 DirectionalLightColorIntensity;
-};
-
-struct GBufferOut
-{
-    float4 Albedo : SV_Target0;
-    float4 Normal : SV_Target1;
-    float4 Material : SV_Target2;
 };
 
 struct InstData
@@ -81,19 +77,6 @@ PS_IN VSMain(VS_IN input, uint ind : SV_InstanceID)
     return output;
 }
 
-#if defined(DEFERRED_GBUFFER)
-GBufferOut PSMain(PS_IN input)
-{
-    float3 normal = normalize(input.normal);
-    float3 baseColor = NormalizeHDRColor(input.col.rgb);
-
-    GBufferOut output;
-    output.Albedo = float4(saturate(baseColor), 1.0f);
-    output.Normal = float4(normal * 0.5f + 0.5f, 1.0f);
-    output.Material = float4(input.worldPos, 1.0f);
-    return output;
-}
-#else
 float4 PSMain(PS_IN input) : SV_Target
 {
     float emissiveFactor = saturate(input.col.a - 1.0f);
@@ -167,4 +150,3 @@ float4 PSMain(PS_IN input) : SV_Target
 
     return float4(saturate(colorOut.rgb), 1.0f);
 }
-#endif

@@ -1,0 +1,9 @@
+{
+  "name": "engine-1-lab",
+  "version-string": "0.1.0",
+  "description": "Direct3D 11 educational engine (1_Lab)",
+  "dependencies": [
+    "assimp"
+  ],
+  "builtin-baseline": "a1cae005c39be7b18ba319fced856b68d7276271"
+}

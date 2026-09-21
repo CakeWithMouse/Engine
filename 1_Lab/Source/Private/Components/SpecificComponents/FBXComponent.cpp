@@ -1,352 +1,228 @@
 #include "../../../Public/Components/SpecificComponents/FBXComponent.h"
-#include <iostream>
-#include <d3dcompiler.h>
-#include <stb_image.h>
 #include <algorithm>
 #include <cctype>
 #include <cmath>
-#include <mutex>
+#include <cstring>
+#include <filesystem>
+#include <iostream>
+#include <map>
 #include <unordered_map>
-
-#pragma comment(lib, "d3dcompiler.lib")
+#include <utility>
+#include "../../../Public/Render/TextureLoader.h"
 
 namespace
 {
-    std::unordered_map<std::string, std::weak_ptr<CachedFBXModel>> modelCache;
-    std::unordered_map<std::string, std::weak_ptr<CachedFBXTexture>> textureCache;
-    std::mutex cacheMutex;
+    constexpr UINT MeshVertexStride = sizeof(DirectX::XMFLOAT4) * 3;
 
-    std::string NormalizeCachePath(std::string path)
+    // Main-thread caches. Weak references: an asset lives while at least one component uses it.
+    std::unordered_map<std::string, std::weak_ptr<const FBXImportedModel>> importedModelCache;
+    std::map<std::pair<const ID3D11Device*, std::string>, std::weak_ptr<const FBXGpuModel>> gpuModelCache;
+    std::map<std::pair<const ID3D11Device*, std::string>, std::weak_ptr<CachedFBXTexture>> textureCache;
+
+    /** Canonical asset identity: absolute, normalised, case-folded (Windows paths are case-insensitive). */
+    std::string MakeAssetKey(const std::string& path)
     {
-        std::transform(path.begin(), path.end(), path.begin(), [](unsigned char c)
+        std::error_code error;
+        std::filesystem::path fsPath = std::filesystem::u8path(path);
+        std::filesystem::path canonical = std::filesystem::weakly_canonical(fsPath, error);
+        std::string key = (error ? fsPath.lexically_normal() : canonical).generic_u8string();
+        std::transform(key.begin(), key.end(), key.begin(), [](unsigned char c)
         {
-            if (c == '\\')
-            {
-                return '/';
-            }
             return static_cast<char>(std::tolower(c));
         });
-        return path;
+        return key;
+    }
+
+    DirectX::XMFLOAT4 ReadDiffuseColor(const aiMaterial* material)
+    {
+        aiColor4D color(1.0f, 1.0f, 1.0f, 1.0f);
+        if (material)
+        {
+            material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+        }
+        return DirectX::XMFLOAT4(color.r, color.g, color.b, color.a);
+    }
+
+    FBXImportedMesh ImportMesh(const aiMesh* mesh, const aiScene* scene)
+    {
+        FBXImportedMesh result;
+        result.Vertices.reserve(static_cast<size_t>(mesh->mNumVertices) * 3);
+
+        for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
+        {
+            const aiVector3D& position = mesh->mVertices[i];
+            const aiVector3D normal = mesh->HasNormals() ? mesh->mNormals[i] : aiVector3D(0.0f, 1.0f, 0.0f);
+            const aiVector3D uv = mesh->HasTextureCoords(0) ? mesh->mTextureCoords[0][i] : aiVector3D(0.0f, 0.0f, 0.0f);
+
+            result.Vertices.emplace_back(position.x, position.y, position.z, 1.0f);
+            result.Vertices.emplace_back(normal.x, normal.y, normal.z, 0.0f);
+            result.Vertices.emplace_back(uv.x, uv.y, 0.0f, 0.0f);
+        }
+
+        result.Indices.reserve(static_cast<size_t>(mesh->mNumFaces) * 3);
+        for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
+        {
+            const aiFace& face = mesh->mFaces[i];
+            for (unsigned int j = 0; j < face.mNumIndices; ++j)
+            {
+                result.Indices.push_back(face.mIndices[j]);
+            }
+        }
+
+        const aiMaterial* material = mesh->mMaterialIndex < scene->mNumMaterials ? scene->mMaterials[mesh->mMaterialIndex] : nullptr;
+        result.Color = ReadDiffuseColor(material);
+        return result;
+    }
+
+    void CollectNodeMeshes(const aiNode* node, const aiScene* scene, FBXImportedModel& model)
+    {
+        for (unsigned int i = 0; i < node->mNumMeshes; ++i)
+        {
+            FBXImportedMesh mesh = ImportMesh(scene->mMeshes[node->mMeshes[i]], scene);
+            if (mesh.Indices.empty())
+            {
+                continue;
+            }
+            model.TotalIndexCount += static_cast<int>(mesh.Indices.size());
+            model.Meshes.push_back(std::move(mesh));
+        }
+
+        for (unsigned int i = 0; i < node->mNumChildren; ++i)
+        {
+            CollectNodeMeshes(node->mChildren[i], scene, model);
+        }
+    }
+
+    std::shared_ptr<const FBXImportedModel> ImportModel(const std::string& filePath)
+    {
+        Assimp::Importer importer;
+        // PreTransformVertices bakes every node transform into the vertices and normals, so the
+        // node hierarchy of the file is preserved in the geometry.
+        const aiScene* scene = importer.ReadFile(filePath,
+            aiProcess_Triangulate |
+            aiProcess_ConvertToLeftHanded |
+            aiProcess_GenNormals |
+            aiProcess_PreTransformVertices |
+            aiProcess_OptimizeMeshes);
+
+        if (!scene || (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !scene->mRootNode)
+        {
+            std::cerr << "Assimp error (" << filePath << "): " << importer.GetErrorString() << std::endl;
+            return nullptr;
+        }
+
+        std::shared_ptr<FBXImportedModel> model = std::make_shared<FBXImportedModel>();
+        CollectNodeMeshes(scene->mRootNode, scene, *model);
+
+        float maxRadiusSq = 0.0f;
+        for (const FBXImportedMesh& mesh : model->Meshes)
+        {
+            for (size_t i = 0; i < mesh.Vertices.size(); i += 3)
+            {
+                const DirectX::XMFLOAT4& p = mesh.Vertices[i];
+                maxRadiusSq = std::max(maxRadiusSq, p.x * p.x + p.y * p.y + p.z * p.z);
+            }
+        }
+        model->BoundingRadius = std::sqrt(maxRadiusSq);
+        return model;
+    }
+
+    std::shared_ptr<const FBXGpuModel> CreateGpuModel(ID3D11Device* device, const FBXImportedModel& model)
+    {
+        std::shared_ptr<FBXGpuModel> gpuModel = std::make_shared<FBXGpuModel>();
+        gpuModel->Meshes.reserve(model.Meshes.size());
+
+        for (const FBXImportedMesh& mesh : model.Meshes)
+        {
+            D3D11_BUFFER_DESC vertexBufDesc = {};
+            vertexBufDesc.Usage = D3D11_USAGE_IMMUTABLE;
+            vertexBufDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+            vertexBufDesc.ByteWidth = static_cast<UINT>(sizeof(DirectX::XMFLOAT4) * mesh.Vertices.size());
+            D3D11_SUBRESOURCE_DATA vertexData = {};
+            vertexData.pSysMem = mesh.Vertices.data();
+
+            D3D11_BUFFER_DESC indexBufDesc = {};
+            indexBufDesc.Usage = D3D11_USAGE_IMMUTABLE;
+            indexBufDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+            indexBufDesc.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * mesh.Indices.size());
+            D3D11_SUBRESOURCE_DATA indexData = {};
+            indexData.pSysMem = mesh.Indices.data();
+
+            FBXGpuMesh gpuMesh;
+            gpuMesh.Color = mesh.Color;
+            gpuMesh.IndexCount = static_cast<UINT>(mesh.Indices.size());
+            if (FAILED(device->CreateBuffer(&vertexBufDesc, &vertexData, gpuMesh.VertexBuffer.GetAddressOf())) ||
+                FAILED(device->CreateBuffer(&indexBufDesc, &indexData, gpuMesh.IndexBuffer.GetAddressOf())))
+            {
+                // Nothing partial is ever published to the cache.
+                return nullptr;
+            }
+            gpuModel->Meshes.push_back(std::move(gpuMesh));
+        }
+
+        return gpuModel;
     }
 }
 
 FBXComponent::FBXComponent() : GameComponent()
 {
     ObjectType = GameComponentNames::GeometryType::Object3D;
+    Color = glm::vec4(1.0f); // untextured sub-meshes show their material colour
 }
 
-FBXComponent::FBXComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) 
+FBXComponent::FBXComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
     : GameComponent(pos, rot, scale)
 {
     ObjectType = GameComponentNames::GeometryType::Object3D;
+    Color = glm::vec4(1.0f);
 }
 
-FBXComponent::FBXComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm::vec4 color) 
+FBXComponent::FBXComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm::vec4 color)
     : GameComponent(pos, rot, scale, color)
 {
     ObjectType = GameComponentNames::GeometryType::Object3D;
 }
 
-FBXComponent::~FBXComponent()
-{
-    for (auto& mesh : renderMeshes)
-    {
-        if (mesh.VertexBuffer) mesh.VertexBuffer->Release();
-        if (mesh.IndexBuffer) mesh.IndexBuffer->Release();
-    }
-    if (textureSRV) textureSRV->Release();
-    if (samplerState) samplerState->Release();
-    if (inputLayout) inputLayout->Release();
-}
-
+FBXComponent::~FBXComponent() = default;
 
 bool FBXComponent::LoadModel(const std::string& filePath)
 {
-    for (auto& mesh : renderMeshes)
+    const std::string cacheKey = MakeAssetKey(filePath);
+
+    std::shared_ptr<const FBXImportedModel> model = importedModelCache[cacheKey].lock();
+    if (model)
     {
-        if (mesh.VertexBuffer)
+        std::cout << "Model cache hit: " << filePath << " (" << model->Meshes.size() << " meshes)" << std::endl;
+    }
+    else
+    {
+        model = ImportModel(filePath);
+        if (!model)
         {
-            mesh.VertexBuffer->Release();
-            mesh.VertexBuffer = nullptr;
+            return false;
         }
-        if (mesh.IndexBuffer)
-        {
-            mesh.IndexBuffer->Release();
-            mesh.IndexBuffer = nullptr;
-        }
-    }
-    renderMeshes.clear();
-    totalIndexCount = 0;
-    baseBoundingRadius = 0.0f;
-
-    const std::string cacheKey = NormalizeCachePath(filePath);
-    {
-        std::lock_guard<std::mutex> lock(cacheMutex);
-        auto found = modelCache.find(cacheKey);
-        if (found != modelCache.end())
-        {
-            cachedModel = found->second.lock();
-            if (cachedModel)
-            {
-                renderMeshes.reserve(cachedModel->Meshes.size());
-                for (const CachedFBXMesh& cachedMesh : cachedModel->Meshes)
-                {
-                    RenderMesh mesh;
-                    mesh.Color = cachedMesh.Color;
-                    mesh.IndexCount = cachedMesh.IndexCount;
-                    mesh.VertexCount = cachedMesh.VertexCount;
-                    mesh.VertexBuffer = cachedMesh.VertexBuffer.Get();
-                    mesh.IndexBuffer = cachedMesh.IndexBuffer.Get();
-                    if (mesh.VertexBuffer) mesh.VertexBuffer->AddRef();
-                    if (mesh.IndexBuffer) mesh.IndexBuffer->AddRef();
-                    renderMeshes.push_back(mesh);
-                }
-                totalIndexCount = cachedModel->TotalIndexCount;
-                baseBoundingRadius = cachedModel->BaseBoundingRadius;
-                modelPath = filePath;
-                std::cout << "Model cache hit: " << filePath << " (" << renderMeshes.size() << " meshes)" << std::endl;
-                return true;
-            }
-        }
+        importedModelCache[cacheKey] = model;
+        std::cout << "Model loaded: " << filePath << " (" << model->Meshes.size() << " meshes)" << std::endl;
     }
 
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(filePath, 
-        aiProcess_Triangulate | 
-        aiProcess_ConvertToLeftHanded |
-        aiProcess_GenNormals |
-        aiProcess_OptimizeMeshes);
-    
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-    {
-        std::cerr << "Assimp error: " << importer.GetErrorString() << std::endl;
-        return false;
-    }
-    
-    modelPath = filePath;
-    ProcessNode(scene->mRootNode, scene);
+    importedModel = model;
+    gpuModel.reset();
+    modelPath = cacheKey;
+    totalIndexCount = model->TotalIndexCount;
+    baseBoundingRadius = model->BoundingRadius;
 
-    float maxRadiusSq = 0.0f;
-    for (const auto& mesh : renderMeshes)
+    if (GamePtr && GamePtr->GetDevice())
     {
-        for (size_t i = 0; i < mesh.vertices.size(); i += 3)
-        {
-            const DirectX::XMFLOAT4& position = mesh.vertices[i];
-            const float radiusSq = position.x * position.x + position.y * position.y + position.z * position.z;
-            maxRadiusSq = std::max(maxRadiusSq, radiusSq);
-        }
+        CreateBuffers(GamePtr->GetDevice());
     }
-    baseBoundingRadius = std::sqrt(maxRadiusSq);
-
-    CreateMeshBuffers();
-
-    std::shared_ptr<CachedFBXModel> newCachedModel = std::make_shared<CachedFBXModel>();
-    newCachedModel->TotalIndexCount = totalIndexCount;
-    newCachedModel->BaseBoundingRadius = baseBoundingRadius;
-    newCachedModel->Meshes.reserve(renderMeshes.size());
-    for (const RenderMesh& mesh : renderMeshes)
-    {
-        CachedFBXMesh cachedMesh;
-        cachedMesh.Color = mesh.Color;
-        cachedMesh.IndexCount = mesh.IndexCount;
-        cachedMesh.VertexCount = mesh.VertexCount;
-        cachedMesh.VertexBuffer = mesh.VertexBuffer;
-        cachedMesh.IndexBuffer = mesh.IndexBuffer;
-        newCachedModel->Meshes.push_back(std::move(cachedMesh));
-    }
-    cachedModel = newCachedModel;
-    {
-        std::lock_guard<std::mutex> lock(cacheMutex);
-        modelCache[cacheKey] = newCachedModel;
-    }
-    
-    std::cout << "Model loaded (cached): " << renderMeshes.size() << " meshes" << std::endl;
     return true;
 }
 
-void FBXComponent::CreateInputLayout()
+void FBXComponent::CreateBuffers(ID3D11Device* Device)
 {
-    ID3D11Device* device = nullptr;
-    if (GamePtr && GamePtr->GetContext())
+    if (Device == nullptr)
     {
-        GamePtr->GetContext()->GetDevice(&device);
-    }
-    
-    if (!device) return;
-    
-    // HLSL код вершинного шейдера (должен совпадать с вашим BaseFBX.hlsl)
-    const char* vertexShaderCode = R"(
-        struct VS_IN
-        {
-            float4 pos : POSITION;
-            float4 normal : NORMAL;
-            float4 texCoord : TEXCOORD;
-        };
-        
-        struct PS_IN
-        {
-            float4 pos : SV_POSITION;
-            float3 normal : NORMAL;
-            float2 texCoord : TEXCOORD;
-        };
-        
-        cbuffer ConstantBuffer : register(b0)
-        {
-            float4x4 worldMatrix;
-            float4x4 viewMatrix;
-            float4x4 projectionMatrix;
-            float4 ObjectColor;
-        };
-        
-        PS_IN VSMain(VS_IN input)
-        {
-            PS_IN output = (PS_IN)0;
-            
-            float4 worldPos = mul(input.pos, worldMatrix);
-            float4 viewPos = mul(worldPos, viewMatrix);
-            float4 projectionPos = mul(viewPos, projectionMatrix);
-            
-            output.pos = projectionPos;
-            output.normal = mul(input.normal.xyz, (float3x3)worldMatrix);
-            output.texCoord = input.texCoord.xy;
-            
-            return output;
-        }
-    )";
-    
-    // Компилируем шейдер чтобы получить blob для создания InputLayout
-    ID3DBlob* vsBlob = nullptr;
-    ID3DBlob* errorBlob = nullptr;
-    
-    HRESULT hr = D3DCompile(vertexShaderCode, strlen(vertexShaderCode), nullptr, nullptr, nullptr,
-                             "VSMain", "vs_5_0", 0, 0, &vsBlob, &errorBlob);
-    if (FAILED(hr))
-    {
-        if (errorBlob)
-        {
-            OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-            errorBlob->Release();
-        }
-        std::cout << "Failed to compile vertex shader for InputLayout" << std::endl;
         return;
-    }
-    
-    // Описание Input Layout для 48-байтной вершины (3 x XMFLOAT4)
-    D3D11_INPUT_ELEMENT_DESC layoutDesc[] = {
-        // POSITION: XMFLOAT4, смещение 0, 16 байт
-        {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        
-        // NORMAL: XMFLOAT4, смещение 16, 16 байт (читаем все 4 компонента)
-        {"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        
-        // TEXCOORD: читаем только первые 2 компонента из XMFLOAT4, смещение 32
-        // Используем R32G32_FLOAT, потому что шейдер ожидает float2
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0}
-    };
-    
-    // Создаем InputLayout
-    hr = device->CreateInputLayout(layoutDesc, 3, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), &inputLayout);
-    
-    if (FAILED(hr))
-    {
-        std::cout << "Failed to create InputLayout for FBXComponent" << std::endl;
-    }
-    else
-    {
-        std::cout << "FBXComponent InputLayout created successfully" << std::endl;
-    }
-    
-    vsBlob->Release();
-    device->Release();
-}
-
-void FBXComponent::ProcessNode(aiNode* node, const aiScene* scene)
-{
-    for (unsigned int i = 0; i < node->mNumMeshes; i++)
-    {
-        aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        MeshData meshData = ProcessMesh(mesh, scene);
-        
-        RenderMesh renderMesh;
-        renderMesh.Color = meshData.Color;
-        
-        for (const auto& vertex : meshData.Vertices)
-        {
-            renderMesh.vertices.push_back(DirectX::XMFLOAT4(vertex.Position.x, vertex.Position.y, vertex.Position.z, 1.0f));
-            renderMesh.vertices.push_back(DirectX::XMFLOAT4(vertex.Normal.x, vertex.Normal.y, vertex.Normal.z, 1.0f));
-            renderMesh.vertices.push_back(DirectX::XMFLOAT4(vertex.TexCoord.x, vertex.TexCoord.y, 0.0f, 1.0f));
-        }
-        
-        renderMesh.indices = meshData.Indices;
-        renderMesh.IndexCount = meshData.Indices.size();
-        renderMesh.VertexCount = meshData.Vertices.size();
-        
-        totalIndexCount += renderMesh.IndexCount;
-        renderMeshes.push_back(renderMesh);
-    }
-    
-    for (unsigned int i = 0; i < node->mNumChildren; i++)
-    {
-        ProcessNode(node->mChildren[i], scene);
-    }
-}
-
-MeshData FBXComponent::ProcessMesh(aiMesh* mesh, const aiScene* scene)
-{
-    MeshData meshData;
-    
-    for (unsigned int i = 0; i < mesh->mNumVertices; i++)
-    {
-        VertexData vertex;
-        vertex.Position = DirectX::XMFLOAT3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-        
-        if (mesh->HasNormals())
-        {
-            vertex.Normal = DirectX::XMFLOAT3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
-        }
-        else
-        {
-            vertex.Normal = DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f);
-        }
-        
-        if (mesh->HasTextureCoords(0))
-        {
-            vertex.TexCoord = DirectX::XMFLOAT2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
-        }
-        else
-        {
-            vertex.TexCoord = DirectX::XMFLOAT2(0.0f, 0.0f);
-        }
-        
-        meshData.Vertices.push_back(vertex);
-    }
-    
-    for (unsigned int i = 0; i < mesh->mNumFaces; i++)
-    {
-        aiFace face = mesh->mFaces[i];
-        for (unsigned int j = 0; j < face.mNumIndices; j++)
-        {
-            meshData.Indices.push_back(face.mIndices[j]);
-        }
-    }
-    
-    if (mesh->mMaterialIndex >= 0)
-    {
-        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-        meshData.Color = ProcessMaterial(material);
-    }
-    else
-    {
-        meshData.Color = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-    }
-    return meshData;
-}
-
-void FBXComponent::CreateBuffers(Microsoft::WRL::ComPtr<ID3D11Device> Device)
-{
-    if (!vertexShader || !pixelShader || !inputLayout)
-    {
-        GameComponent::CreateBuffers(Device);
     }
 
     if (!cb)
@@ -355,192 +231,64 @@ void FBXComponent::CreateBuffers(Microsoft::WRL::ComPtr<ID3D11Device> Device)
         bufferDesc.Usage = D3D11_USAGE_DEFAULT;
         bufferDesc.ByteWidth = sizeof(ConstantBufferData);
         bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-        bufferDesc.CPUAccessFlags = 0;
-        Device->CreateBuffer(&bufferDesc, nullptr, &cb);
-    }
-
-    bool hasMissingBuffers = false;
-    for (const auto& mesh : renderMeshes)
-    {
-        if (!mesh.VertexBuffer || !mesh.IndexBuffer)
+        if (FAILED(Device->CreateBuffer(&bufferDesc, nullptr, cb.GetAddressOf())))
         {
-            hasMissingBuffers = true;
-            break;
+            std::cout << "FBXComponent: failed to create constant buffer." << std::endl;
+            return;
         }
     }
 
-    if (hasMissingBuffers)
+    if (gpuModel || !importedModel)
     {
-        CreateMeshBuffers();
+        return;
     }
-}
 
-DirectX::XMFLOAT4 FBXComponent::ProcessMaterial(aiMaterial* material)
-{
-    aiColor4D color(1.0f, 1.0f, 1.0f, 1.0f);
-    material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-    return DirectX::XMFLOAT4(color.r, color.g, color.b, color.a);
+    const auto gpuKey = std::make_pair(static_cast<const ID3D11Device*>(Device), modelPath);
+    gpuModel = gpuModelCache[gpuKey].lock();
+    if (!gpuModel)
+    {
+        gpuModel = CreateGpuModel(Device, *importedModel);
+        if (!gpuModel)
+        {
+            std::cout << "FBXComponent: failed to create GPU buffers for " << modelPath << std::endl;
+            return;
+        }
+        gpuModelCache[gpuKey] = gpuModel;
+    }
 }
 
 bool FBXComponent::LoadTexture(const std::string& texturePath)
 {
-    hasTexture = false;
-    if (textureSRV)
+    ID3D11Device* device = GamePtr ? GamePtr->GetDevice() : nullptr;
+    ID3D11DeviceContext* context = GamePtr ? GamePtr->GetContext() : nullptr;
+    if (device == nullptr || context == nullptr)
     {
-        textureSRV->Release();
-        textureSRV = nullptr;
-    }
-    if (samplerState)
-    {
-        samplerState->Release();
-        samplerState = nullptr;
-    }
-
-    const std::string cacheKey = NormalizeCachePath(texturePath);
-    {
-        std::lock_guard<std::mutex> lock(cacheMutex);
-        auto found = textureCache.find(cacheKey);
-        if (found != textureCache.end())
-        {
-            cachedTexture = found->second.lock();
-            if (cachedTexture)
-            {
-                textureSRV = cachedTexture->TextureSRV.Get();
-                samplerState = cachedTexture->SamplerState.Get();
-                if (textureSRV) textureSRV->AddRef();
-                if (samplerState) samplerState->AddRef();
-                GameComponent::textureSRV = textureSRV;
-                GameComponent::samplerState = samplerState;
-                hasTexture = (textureSRV != nullptr && samplerState != nullptr);
-                std::cout << "Texture cache hit: " << texturePath << std::endl;
-                return hasTexture;
-            }
-        }
-    }
-
-    ID3D11Device* device = nullptr;
-    if (GamePtr && GamePtr->GetContext())
-    {
-        GamePtr->GetContext()->GetDevice(&device);
-    }
-    
-    if (!device) return false;
-    
-    int width, height, channels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char* imageData = stbi_load(texturePath.c_str(), &width, &height, &channels, 4);
-    
-    if (!imageData)
-    {
-        std::cout << "Failed to load texture: " << texturePath << std::endl;
-        device->Release();
+        std::cout << "FBXComponent::LoadTexture requires SetGame with an initialized Game." << std::endl;
         return false;
     }
-    
-    D3D11_TEXTURE2D_DESC texDesc = {};
-    texDesc.Width = width;
-    texDesc.Height = height;
-    texDesc.MipLevels = 1;
-    texDesc.ArraySize = 1;
-    texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    texDesc.SampleDesc.Count = 1;
-    texDesc.Usage = D3D11_USAGE_DEFAULT;
-    texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-    
-    D3D11_SUBRESOURCE_DATA initData = {};
-    initData.pSysMem = imageData;
-    initData.SysMemPitch = width * 4;
-    
-    ID3D11Texture2D* texture = nullptr;
-    HRESULT hr = device->CreateTexture2D(&texDesc, &initData, &texture);
-    
-    if (SUCCEEDED(hr))
+
+    const auto cacheKey = std::make_pair(static_cast<const ID3D11Device*>(device), MakeAssetKey(texturePath));
+    std::shared_ptr<CachedFBXTexture> texture = textureCache[cacheKey].lock();
+    if (texture)
     {
-        hr = device->CreateShaderResourceView(texture, nullptr, &textureSRV);
-        texture->Release();
-        
-        if (SUCCEEDED(hr))
+        std::cout << "Texture cache hit: " << texturePath << std::endl;
+    }
+    else
+    {
+        std::shared_ptr<CachedFBXTexture> newTexture = std::make_shared<CachedFBXTexture>();
+        if (!TextureLoader::LoadTexture2D(device, context, texturePath, true, newTexture->TextureSRV) ||
+            !TextureLoader::CreateLinearSampler(device, D3D11_TEXTURE_ADDRESS_WRAP, newTexture->SamplerState))
         {
-            // Создаем сэмплер
-            D3D11_SAMPLER_DESC sampDesc = {};
-            sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-            sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-            sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-            sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-            sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-            sampDesc.MinLOD = 0;
-            sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-            
-            device->CreateSamplerState(&sampDesc, &samplerState);
-            GameComponent::textureSRV = textureSRV;
-            GameComponent::samplerState = samplerState;
-            
-            hasTexture = true;
-            std::shared_ptr<CachedFBXTexture> newCachedTexture = std::make_shared<CachedFBXTexture>();
-            newCachedTexture->TextureSRV = textureSRV;
-            newCachedTexture->SamplerState = samplerState;
-            cachedTexture = newCachedTexture;
-            {
-                std::lock_guard<std::mutex> lock(cacheMutex);
-                textureCache[cacheKey] = newCachedTexture;
-            }
-            std::cout << "Texture loaded: " << texturePath << " (" << width << "x" << height << ")" << std::endl;
+            return false;
         }
-    }
-    
-    stbi_image_free(imageData);
-    device->Release();
-    
-    return hasTexture;
-}
-
-void FBXComponent::CreateMeshBuffers()
-{
-    ID3D11Device* device = nullptr;
-    if (GamePtr && GamePtr->GetContext())
-    {
-        GamePtr->GetContext()->GetDevice(&device);
-    }
-    
-    if (!device) return;
-    
-    for (auto& mesh : renderMeshes)
-    {
-        if (mesh.VertexBuffer && mesh.IndexBuffer)
-        {
-            continue;
-        }
-
-        D3D11_BUFFER_DESC vertexBufDesc = {};
-        vertexBufDesc.Usage = D3D11_USAGE_DEFAULT;
-        vertexBufDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-        vertexBufDesc.ByteWidth = sizeof(DirectX::XMFLOAT4) * mesh.vertices.size();
-        
-        D3D11_SUBRESOURCE_DATA vertexData = {};
-        vertexData.pSysMem = mesh.vertices.data();
-        
-        D3D11_BUFFER_DESC indexBufDesc = {};
-        indexBufDesc.Usage = D3D11_USAGE_DEFAULT;
-        indexBufDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-        indexBufDesc.ByteWidth = sizeof(int) * mesh.indices.size();
-        
-        D3D11_SUBRESOURCE_DATA indexData = {};
-        indexData.pSysMem = mesh.indices.data();
-        device->CreateBuffer(&vertexBufDesc, &vertexData, &mesh.VertexBuffer);
-        device->CreateBuffer(&indexBufDesc, &indexData, &mesh.IndexBuffer);
+        texture = newTexture;
+        textureCache[cacheKey] = texture;
     }
 
-    if (!cb)
-    {
-        D3D11_BUFFER_DESC bufferDesc = {};
-        bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-        bufferDesc.ByteWidth = sizeof(ConstantBufferData);
-        bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-        bufferDesc.CPUAccessFlags = 0;
-        device->CreateBuffer(&bufferDesc, nullptr, &cb);
-    }
-    
-    device->Release();
+    cachedTexture = texture;
+    textureSRV = texture->TextureSRV;
+    samplerState = texture->SamplerState;
+    return true;
 }
 
 void FBXComponent::Tick(float deltaTime)
@@ -556,119 +304,82 @@ float FBXComponent::GetBoundingRadius() const
 
 void FBXComponent::Render(ID3D11DeviceContext* Context)
 {
-    if (renderMeshes.empty()) return;
-    
+    if (Context == nullptr || !gpuModel || !cb || vertexShader == nullptr || pixelShader == nullptr)
+    {
+        return;
+    }
+
+    Context->IASetInputLayout(GamePtr ? GamePtr->GetInputLayout(VertexFormat::Mesh) : nullptr);
+    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     Context->VSSetShader(vertexShader, nullptr, 0);
     Context->PSSetShader(pixelShader, nullptr, 0);
-    if (!inputLayout)
-    {
-        CreateInputLayout();
-    }
-    
-    Context->IASetInputLayout(inputLayout);
-    
-    if (hasTexture && textureSRV && samplerState)
-    {
-        Context->PSSetShaderResources(0, 1, &textureSRV);
-        Context->PSSetSamplers(0, 1, &samplerState);
-    }
-    if (cubeMapSRV && cubeMapSamplerState)
-    {
-        Context->PSSetShaderResources(1, 1, &cubeMapSRV);
-        Context->PSSetSamplers(1, 1, &cubeMapSamplerState);
-    }
-    if (GamePtr && GamePtr->IsShadowEnabled())
-    {
-        ID3D11ShaderResourceView* shadowMapSRV = GamePtr->GetShadowMapSRV();
-        ID3D11SamplerState* shadowMapSampler = GamePtr->GetShadowSampler();
-        if (shadowMapSRV && shadowMapSampler)
-        {
-            Context->PSSetShaderResources(4, 1, &shadowMapSRV);
-            Context->PSSetSamplers(4, 1, &shadowMapSampler);
-        }
-    }
-    
-    Update();
-    Context->UpdateSubresource(cb, 0, nullptr, &ConstantPositionBuffer, 0, 0);
-    Context->VSSetConstantBuffers(0, 1, &cb);
-    Context->PSSetConstantBuffers(0, 1, &cb);
-    
-    UINT stride = sizeof(DirectX::XMFLOAT4) * 3;
-    UINT offset = 0;
-    
-    for (const auto& mesh : renderMeshes)
-    {
-        if (mesh.VertexBuffer && mesh.IndexBuffer)
-        {
-            ID3D11Buffer* vbArray[] = {mesh.VertexBuffer};
-            Context->IASetVertexBuffers(0, 1, vbArray, &stride, &offset);
-            Context->IASetIndexBuffer(mesh.IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-            Context->DrawIndexed(mesh.IndexCount, 0, 0);
-        }
-    }
+    BindMaterialResources(Context);
+    Context->VSSetConstantBuffers(0, 1, cb.GetAddressOf());
+    Context->PSSetConstantBuffers(0, 1, cb.GetAddressOf());
 
-    ID3D11ShaderResourceView* nullSRV = nullptr;
-    Context->PSSetShaderResources(0, 1, &nullSRV);
-    Context->PSSetShaderResources(1, 1, &nullSRV);
-    Context->PSSetShaderResources(4, 1, &nullSRV);
+    // Object constants were prepared in the update phase; only the sub-mesh colour changes here.
+    const DirectX::XMFLOAT4 objectColor = ConstantPositionBuffer.ObjectColor;
+    bool bUploaded = false;
+    DirectX::XMFLOAT4 uploadedColor = {};
+
+    const UINT stride = MeshVertexStride;
+    const UINT offset = 0;
+    for (const FBXGpuMesh& mesh : gpuModel->Meshes)
+    {
+        const DirectX::XMFLOAT4 meshColor(objectColor.x * mesh.Color.x, objectColor.y * mesh.Color.y,
+                                          objectColor.z * mesh.Color.z, objectColor.w * mesh.Color.w);
+        if (!bUploaded || std::memcmp(&meshColor, &uploadedColor, sizeof(meshColor)) != 0)
+        {
+            ConstantPositionBuffer.ObjectColor = meshColor;
+            Context->UpdateSubresource(cb.Get(), 0, nullptr, &ConstantPositionBuffer, 0, 0);
+            uploadedColor = meshColor;
+            bUploaded = true;
+        }
+
+        ID3D11Buffer* vbArray[] = {mesh.VertexBuffer.Get()};
+        Context->IASetVertexBuffers(0, 1, vbArray, &stride, &offset);
+        Context->IASetIndexBuffer(mesh.IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+        Context->DrawIndexed(mesh.IndexCount, 0, 0);
+        if (GamePtr) GamePtr->CountDraw(mesh.IndexCount);
+    }
+    ConstantPositionBuffer.ObjectColor = objectColor;
+
+    UnbindMaterialResources(Context);
 }
 
-void FBXComponent::RenderShadow(ID3D11DeviceContext* context,
-                                ID3D11VertexShader* shadowVertexShader,
-                                ID3D11Buffer* shadowCB,
-                                ID3D11InputLayout* shadowPrimitiveLayout,
-                                ID3D11InputLayout* shadowMeshLayout,
-                                const DirectX::XMFLOAT4X4& lightViewProjection)
+void FBXComponent::RenderShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass)
 {
-    (void)shadowPrimitiveLayout;
-
-    if (context == nullptr || shadowVertexShader == nullptr || shadowCB == nullptr || renderMeshes.empty())
+    if (context == nullptr || !CastsShadow() || !gpuModel ||
+        shadowPass.VertexShader == nullptr || shadowPass.ConstantBuffer == nullptr || shadowPass.MeshLayout == nullptr)
     {
         return;
     }
 
-    if (bHasOpacity || bIsSkybox)
-    {
-        return;
-    }
-
-    Update();
+    // The world matrix comes from this frame's update phase.
     ShadowPassBufferData shadowData = {};
     shadowData.worldMatrix = ConstantPositionBuffer.worldMatrix;
-    shadowData.lightViewProjection = lightViewProjection;
+    shadowData.lightViewProjection = shadowPass.LightViewProjection;
 
-    context->IASetInputLayout(shadowMeshLayout ? shadowMeshLayout : inputLayout);
-    context->VSSetShader(shadowVertexShader, nullptr, 0);
+    context->IASetInputLayout(shadowPass.MeshLayout);
+    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    context->VSSetShader(shadowPass.VertexShader, nullptr, 0);
     context->PSSetShader(nullptr, nullptr, 0);
-    context->UpdateSubresource(shadowCB, 0, nullptr, &shadowData, 0, 0);
-    context->VSSetConstantBuffers(0, 1, &shadowCB);
+    context->UpdateSubresource(shadowPass.ConstantBuffer, 0, nullptr, &shadowData, 0, 0);
+    context->VSSetConstantBuffers(0, 1, &shadowPass.ConstantBuffer);
 
-    UINT stride = sizeof(DirectX::XMFLOAT4) * 3;
-    UINT offset = 0;
-
-    for (const auto& mesh : renderMeshes)
+    const UINT stride = MeshVertexStride;
+    const UINT offset = 0;
+    for (const FBXGpuMesh& mesh : gpuModel->Meshes)
     {
-        if (mesh.VertexBuffer && mesh.IndexBuffer)
-        {
-            ID3D11Buffer* vbArray[] = {mesh.VertexBuffer};
-            context->IASetVertexBuffers(0, 1, vbArray, &stride, &offset);
-            context->IASetIndexBuffer(mesh.IndexBuffer, DXGI_FORMAT_R32_UINT, 0);
-            context->DrawIndexed(mesh.IndexCount, 0, 0);
-        }
+        ID3D11Buffer* vbArray[] = {mesh.VertexBuffer.Get()};
+        context->IASetVertexBuffers(0, 1, vbArray, &stride, &offset);
+        context->IASetIndexBuffer(mesh.IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+        context->DrawIndexed(mesh.IndexCount, 0, 0);
+        if (GamePtr) GamePtr->CountDraw(mesh.IndexCount);
     }
 }
 
 void FBXComponent::InitPoints(DirectX::XMFLOAT4* NewPoints, int pointCount, int* NewIndices, int indexCount)
 {
     GameComponent::InitPoints(NewPoints, pointCount, NewIndices, indexCount);
-}
-
-DirectX::XMFLOAT4X4 FBXComponent::ConvertMatrix(const aiMatrix4x4& matrix)
-{
-    DirectX::XMFLOAT4X4 result;
-    result._11 = matrix.a1; result._12 = matrix.a2; result._13 = matrix.a3; result._14 = matrix.a4;
-    result._21 = matrix.b1; result._22 = matrix.b2; result._23 = matrix.b3; result._24 = matrix.b4;
-    result._31 = matrix.c1; result._32 = matrix.c2; result._33 = matrix.c3; result._34 = matrix.c4;
-    result._41 = matrix.d1; result._42 = matrix.d2; result._43 = matrix.d3; result._44 = matrix.d4;
-    return result;
 }

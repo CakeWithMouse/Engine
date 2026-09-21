@@ -44,6 +44,9 @@ PS_IN VSMain(VS_IN input)
     float4 worldPos = mul(input.pos, worldMatrix);
     float4 viewPos = mul(worldPos, viewMatrix);
     output.pos = mul(viewPos, projectionMatrix);
+    // Pin to the far plane: drawn after opaque geometry with LESS_EQUAL and no depth write,
+    // the skybox only fills pixels nothing else covered, whatever its cube size.
+    output.pos.z = output.pos.w;
     output.sampleDir = normalize(worldPos.xyz - CameraPosition.xyz);
     return output;
 }

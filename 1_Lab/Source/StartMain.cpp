@@ -11,6 +11,8 @@
 #include <directxmath.h>
 #include <chrono>
 #include <algorithm>
+#include <filesystem>
+#include <memory>
 
 #include "Public/Components/Light/CubeMap.h"
 #include "Public/Components/SpecificComponents/CubeComponent.h"
@@ -34,11 +36,11 @@
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "dxguid.lib")
 
-void FirstLabStart_a();
-void FirstLabStart_b();
-void SecondLabStart();
-void ThirdLabStart(std::string Path);
-void ForthLabStart(std::string Path);
+int FirstLabStart_a();
+int FirstLabStart_b();
+int SecondLabStart();
+int ThirdLabStart(std::string Path);
+int ForthLabStart(std::string Path);
 
 
 namespace main_lib
@@ -46,8 +48,7 @@ namespace main_lib
     //Type
     constexpr GameType CurrentGameType = ThirdLab;
     constexpr RenderType RenderingType = Deffered;
-    constexpr bool Computer = false;
-    
+
     //Light
     constexpr float SunDistanceMult = 1.f;
     constexpr glm::vec3 SunDirectional = glm::vec3(-0.35f, -0.85f, -0.2f) * SunDistanceMult;
@@ -58,9 +59,6 @@ namespace main_lib
     //Shadows
     constexpr float ShadowDist = 14000.f;
     constexpr bool ShadowCasting = true;
-    
-    std::string NoteBookPath = "E:/ComputerGraphic";
-    std::string ComputerPath = "O:/ITMO/ComputerGraphic";
     
     constexpr glm::vec4 White{1.0f, 1.0f, 1.f, 1.f};
     constexpr glm::vec4 Red{0.5f, 0.0f, 0.f, 1.f};
@@ -89,47 +87,127 @@ namespace main_lib
 
 using namespace main_lib;
 
+namespace
+{
+    std::wstring ReadEnvironmentVariable(const wchar_t* name)
+    {
+        const DWORD length = GetEnvironmentVariableW(name, nullptr, 0);
+        if (length == 0)
+        {
+            return std::wstring();
+        }
+        std::wstring value(length, L'\0');
+        const DWORD written = GetEnvironmentVariableW(name, value.data(), length);
+        value.resize(written);
+        return value;
+    }
+
+    /**
+     * Project directory = the folder that contains Source/Shaders (1_Lab). Shaders and models are
+     * loaded relative to it. Searched upwards from the working directory and from the executable,
+     * so the program works from Visual Studio, from the build output folder and from the command line.
+     * ENGINE_PROJECT_DIR overrides the search.
+     */
+    std::filesystem::path FindProjectDirectory()
+    {
+        const std::wstring overridePath = ReadEnvironmentVariable(L"ENGINE_PROJECT_DIR");
+        if (!overridePath.empty())
+        {
+            return std::filesystem::path(overridePath);
+        }
+
+        std::vector<std::filesystem::path> searchStarts;
+        std::error_code error;
+        searchStarts.push_back(std::filesystem::current_path(error));
+
+        wchar_t modulePath[MAX_PATH] = {};
+        if (GetModuleFileNameW(nullptr, modulePath, MAX_PATH) > 0)
+        {
+            searchStarts.push_back(std::filesystem::path(modulePath).parent_path());
+        }
+
+        for (const std::filesystem::path& start : searchStarts)
+        {
+            for (std::filesystem::path current = start; !current.empty(); current = current.parent_path())
+            {
+                if (std::filesystem::exists(current / "Source" / "Shaders" / "Common.hlsli", error))
+                {
+                    return current;
+                }
+                if (std::filesystem::exists(current / "1_Lab" / "Source" / "Shaders" / "Common.hlsli", error))
+                {
+                    return current / "1_Lab";
+                }
+                if (current == current.root_path())
+                {
+                    break;
+                }
+            }
+        }
+        return std::filesystem::path();
+    }
+
+    /**
+     * Root for lab assets (cube map images, Models): the repository root, i.e. the parent of the
+     * project directory. Kept relative ("..") so paths stay ASCII for the image/model loaders.
+     * ENGINE_CONTENT_ROOT overrides it.
+     */
+    std::string ResolveContentRoot()
+    {
+        const std::wstring overridePath = ReadEnvironmentVariable(L"ENGINE_CONTENT_ROOT");
+        if (!overridePath.empty())
+        {
+            return std::filesystem::path(overridePath).generic_u8string();
+        }
+        return "..";
+    }
+}
+
 int main()
 {
-    std::string ProjectPath = Computer ? ComputerPath : NoteBookPath;
-    
+    const std::filesystem::path projectDirectory = FindProjectDirectory();
+    if (projectDirectory.empty())
+    {
+        std::cerr << "Cannot find the project directory (Source/Shaders). "
+                     "Run from 1_Lab or set ENGINE_PROJECT_DIR." << std::endl;
+        return 1;
+    }
+    std::error_code error;
+    std::filesystem::current_path(projectDirectory, error);
+    if (error)
+    {
+        std::cerr << "Cannot enter the project directory: " << error.message() << std::endl;
+        return 1;
+    }
+
+    const std::string ContentRoot = ResolveContentRoot();
+
     switch (CurrentGameType)
     {
     case FirstLabTriangles:
-        {
-            FirstLabStart_a();
-            break;
-        }
+        return FirstLabStart_a();
     case FirstLabCubes:
-        {
-            FirstLabStart_b();
-            break;
-        }
+        return FirstLabStart_b();
     case SecondLab:
-        {
-            SecondLabStart();
-            break;
-        }
+        return SecondLabStart();
     case ThirdLab:
-        {
-            ThirdLabStart(ProjectPath);
-            break;
-        }
+        return ThirdLabStart(ContentRoot);
     case ForthLab:
-        {
-            ForthLabStart(ProjectPath);
-            break;
-        }
-    default: break;
+        return ForthLabStart(ContentRoot);
+    default:
+        return 0;
     }
 }
 
 
 
-void FirstLabStart_a()
+int FirstLabStart_a()
 {
-    BaseGame* MainGame = new BaseGame();
-    MainGame->Initialize();
+    auto MainGame = std::make_unique<BaseGame>();
+    if (!MainGame->Initialize())
+    {
+        return 1;
+    }
     MainGame->SetGameType(CurrentGameType);
 
     TriangleComponent* square1 = new TriangleComponent();
@@ -142,26 +220,32 @@ void FirstLabStart_a()
     square2->SetRotationSpeed(-1.5f);
     MainGame->RegisterComponent("2", square2);
 
-    MainGame->StartGame();
+    return MainGame->StartGame();
 }
 
-void FirstLabStart_b()
+int FirstLabStart_b()
 {
-    BaseGame* MainGame = new BaseGame();
-    MainGame->Initialize();
+    auto MainGame = std::make_unique<BaseGame>();
+    if (!MainGame->Initialize())
+    {
+        return 1;
+    }
     MainGame->SetGameType(CurrentGameType);
 
     CubeComponent* Cube = new CubeComponent();
     Cube->InitCube();
     MainGame->RegisterComponent("1", Cube);
 
-    MainGame->StartGame();
+    return MainGame->StartGame();
 }
 
-void SecondLabStart()
+int SecondLabStart()
 {
-    PongGame* MainGame = new PongGame();
-    MainGame->Initialize();
+    auto MainGame = std::make_unique<PongGame>();
+    if (!MainGame->Initialize())
+    {
+        return 1;
+    }
     MainGame->SetGameType(CurrentGameType);
 
     glm::vec3 ComponentPositionLeft{-4.5f, 0.0f, 0.0f};
@@ -235,17 +319,20 @@ void SecondLabStart()
     WallRight->SetWallType(WallType::RightWall);
     MainGame->RegisterComponent("2", WallRight);
 
-    MainGame->StartGame();
+    return MainGame->StartGame();
 }
 
 constexpr int ActeroidCount = 500;
 constexpr int ActeroidSunCount = 900;
 constexpr int StarCount = 500;
 constexpr float StartsItensity = 2.1f;
-void ThirdLabStart(std::string Path)
+int ThirdLabStart(std::string Path)
 {
-    SunGame* MainGame = new SunGame();
-    MainGame->Initialize();
+    auto MainGame = std::make_unique<SunGame>();
+    if (!MainGame->Initialize())
+    {
+        return 1;
+    }
     MainGame->SetDirectionalLight(SunDirectional,SunLightColor,SunItensity);
     //MainGame->SetShadowSettings(ShadowCasting, ShadowDist);
     MainGame->SetGameType(CurrentGameType);
@@ -488,6 +575,7 @@ void ThirdLabStart(std::string Path)
         }
     }
 
+    SphereComponent* UranusAsteroids = nullptr;
     for (int i = 0; i < ActeroidCount; ++i)
     {
         float asteroidSize_mul = 2.f;
@@ -503,14 +591,23 @@ void ThirdLabStart(std::string Path)
         float asteroidSize = 0.08f * asteroidSize_mul + (rand() % 15 * asteroidSize_mul) / 100.0f;
         glm::vec3 asteroidScale{asteroidSize, asteroidSize, asteroidSize};
 
-        SphereComponent* Asteroid = new SphereComponent(asteroidPos, sunRot, asteroidScale,
-                                                        glm::vec4(0.6f, 0.5f, 0.4f, 1.0f));
-        Asteroid->InitSphere(asteroidSize * 8.0f, 15, 15);
+        // InstanceSphereFigure reads the world matrix from the instance stream, so these asteroids
+        // must be instances of one template (like the rings around the Sun), not separate objects.
+        if (UranusAsteroids == nullptr)
+        {
+            UranusAsteroids = new SphereComponent(asteroidPos, sunRot, asteroidScale,
+                                                  glm::vec4(0.6f, 0.5f, 0.4f, 1.0f));
+            UranusAsteroids->InitSphere(asteroidSize * 8.0f, 15, 15);
+            UranusAsteroids->SetParent(Uranus);
+            MainGame->RegisterComponent("UranusAsteroids", UranusAsteroids, InstanceSphereVertex, InstanceMaterial);
+            continue;
+        }
+        SphereComponent* Asteroid = UranusAsteroids->CreateSphereInstance(asteroidPos, sunRot, asteroidScale,
+                                                                          glm::vec4(0.6f, 0.5f, 0.4f, 1.0f));
         Asteroid->SetOrbitSpeed(1.5f + (rand() % 30) / 20.0f);
         Asteroid->SetOrbitDistance(distance);
         Asteroid->SetOrbitCenter(sunPos);
         Asteroid->SetParent(Uranus);
-        MainGame->RegisterComponent("Asteroid" + std::to_string(i), Asteroid, InstanceSphereVertex, InstanceMaterial);
     }
 
     auto RandomFloat = [](float minValue, float maxValue)
@@ -684,13 +781,16 @@ void ThirdLabStart(std::string Path)
     );
 
 
-    MainGame->StartGame();
+    return MainGame->StartGame();
 }
 
-void ForthLabStart(std::string Path)
+int ForthLabStart(std::string Path)
 {
-    KatamariGame* MainGame = new KatamariGame();
-    MainGame->Initialize();
+    auto MainGame = std::make_unique<KatamariGame>();
+    if (!MainGame->Initialize())
+    {
+        return 1;
+    }
     MainGame->SetDirectionalLight(SunDirectional,SunLightColor,SunItensity);
     MainGame->SetShadowSettings(ShadowCasting, ShadowDist);
     MainGame->SetGameType(CurrentGameType);
@@ -752,7 +852,7 @@ void ForthLabStart(std::string Path)
                                                                 glm::vec4(1.0f, 0.9f, 0.3f, 1.0f));
     Ball->InitSphere(BallRadius, 100, 100);
     Ball->SetCollision(true);
-    Ball->SetGame(MainGame);
+    Ball->SetGame(MainGame.get());
     Ball->SetTexture(Path +"/1_Lab/Source/Models/2.jpg");
     Ball->SetCubeMap(MainGame->GetCubeMap("MySky"));
     Ball->SetReflectionSettings(0.72f, 5.5f);
@@ -770,7 +870,7 @@ void ForthLabStart(std::string Path)
         glm::vec3(0.0f, 45.0f, 0.0f), // поворот на 45 градусов
         glm::vec3(2.0f, 2.0f, 2.0f) // масштаб в 2 раза больше
     );
-    TestCube->SetGame(MainGame);
+    TestCube->SetGame(MainGame.get());
     TestCube->LoadModel(Path + "/1_Lab/Source/Models/test_cube.obj");
     TestCube->SetCubeMap(MainGame->GetCubeMap("MySky"));
     TestCube->SetReflectionSettings(0.45f, 4.0f);
@@ -794,7 +894,7 @@ void ForthLabStart(std::string Path)
             );
             
             //Вывод GBuffer
-            Object->SetGame(MainGame);
+            Object->SetGame(MainGame.get());
             Object->SetCollision(true);
             int ModelNum = rand() % 3 + 1;
             //E:\ComputerGraphic\1_Lab
@@ -814,5 +914,5 @@ void ForthLabStart(std::string Path)
     MainGame->GetPlayer()->EnableWASD(false);
     MainGame->GetPlayer()->SetOrbitRadius(50.f);
     MainGame->GetPlayer()->SetMinMaximalOrbitRadius(25.f, 200.f);
-    MainGame->StartGame();
+    return MainGame->StartGame();
 }

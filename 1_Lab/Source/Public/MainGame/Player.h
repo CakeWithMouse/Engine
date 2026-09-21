@@ -28,6 +28,9 @@ public:
     const DirectX::XMFLOAT4X4& GetProjectionMatrix() const { return ProjectionMatrix; }
     glm::vec3 GetPosition() const { return position; }
     CameraMode GetCameraMode() const { return cameraMode; }
+    float GetNearPlane() const { return nearPlane; }
+    float GetFarPlane() const { return farPlane; }
+    float GetFovY() const { return DirectX::XMConvertToRadians(60.0f); }
 
     void SetCameraMode(CameraMode mode)
     {

@@ -1,16 +1,16 @@
 #pragma once
 #include "../../BaseGameClass/Game.h"
 
+/** Katamari scene: the ball collects objects with collision. Rendering is shared with Game. */
 class KatamariGame : public Game
 {
 public:
-    KatamariGame(){};
+    KatamariGame() {}
     virtual void AfterInitialize() override;
-    //Player* GetPlayer(){return FirstPlayer;}
 
 protected:
-    virtual void Draw(ID3D11RasterizerState* RasterState) override;
-    virtual void DrawForward(ID3D11RasterizerState* RasterState) override;
-    virtual void DrawDeffered(ID3D11RasterizerState* RasterState) override;
+    void PreUpdate(float deltaTime) override;
+    std::array<float, 4> GetClearColor() const override { return {0.201f, 0.201f, 0.901f, 1.0f}; }
+
     std::vector<GameComponent*> HasCollision;
 };

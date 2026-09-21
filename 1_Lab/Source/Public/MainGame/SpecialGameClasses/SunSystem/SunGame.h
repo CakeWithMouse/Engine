@@ -1,13 +1,12 @@
 #pragma once
 #include "../../BaseGameClass/Game.h"
 
+/** Solar system scene. Uses the shared forward/deferred renderer of Game. */
 class SunGame : public Game
 {
 public:
-    SunGame() : Game(){};
+    SunGame() : Game() {}
 
 protected:
-    virtual void Draw(ID3D11RasterizerState* RasterState) override;
-    virtual void DrawForward(ID3D11RasterizerState* RasterState) override;
-    virtual void DrawDeffered(ID3D11RasterizerState* RasterState) override;
+    std::array<float, 4> GetClearColor() const override { return {0.001f, 0.001f, 0.001f, 1.0f}; }
 };

@@ -5,8 +5,6 @@
 
 InputDevice::InputDevice(Game* inGame) : game(inGame)
 {
-	keys = new std::unordered_set<Keys>();
-	
 	RAWINPUTDEVICE Rid[2];
 
 	Rid[0].usUsagePage = 0x01;
@@ -26,10 +24,7 @@ InputDevice::InputDevice(Game* inGame) : game(inGame)
 	}
 }
 
-InputDevice::~InputDevice()
-{
-	delete keys;
-}
+InputDevice::~InputDevice() = default;
 
 void InputDevice::OnKeyDown(KeyboardInputEventArgs args)
 {
@@ -39,11 +34,11 @@ void InputDevice::OnKeyDown(KeyboardInputEventArgs args)
 
 	if (args.MakeCode == 42) key = Keys::LeftShift;
 	if (args.MakeCode == 54) key = Keys::RightShift;
-	
+
 	if(Break) {
-		if(keys->count(key))	RemovePressedKey(key);
+		RemovePressedKey(key);
 	} else {
-		if (!keys->count(key))	AddPressedKey(key);
+		AddPressedKey(key);
 	}
 }
 
@@ -65,28 +60,41 @@ void InputDevice::OnMouseMove(RawMouseEventArgs args)
 	POINT p;
 	GetCursorPos(&p);
 	ScreenToClient(game->GetDisplay()->GetHwnd(), &p);
-	
-	MousePosition	= glm::vec2(p.x, p.y);
-	MouseOffset		= glm::vec2(args.X, args.Y);
-	MouseWheelDelta = args.WheelDelta;
 
-	const MouseMoveEventArgs moveArgs = {MousePosition, MouseOffset, MouseWheelDelta};
+	// Several Raw Input events can arrive per frame: accumulate instead of keeping only the last one.
+	const glm::vec2 eventOffset(static_cast<float>(args.X), static_cast<float>(args.Y));
+	const int eventWheel = (args.ButtonFlags & static_cast<int>(MouseButtonFlags::MouseWheel)) ? args.WheelDelta : 0;
+	MousePosition = glm::vec2(p.x, p.y);
+	MouseOffset += eventOffset;
+	MouseWheelDelta += eventWheel;
+
+	const MouseMoveEventArgs moveArgs = {MousePosition, eventOffset, eventWheel};
 
 	MouseMove.Broadcast(moveArgs);
 }
 
 void InputDevice::AddPressedKey(Keys key)
 {
-	keys->insert(key);
+	keys.insert(key);
 }
 
 void InputDevice::RemovePressedKey(Keys key)
 {
-	keys->erase(key);
+	keys.erase(key);
 }
 
-bool InputDevice::IsKeyDown(Keys key)
+bool InputDevice::IsKeyDown(Keys key) const
 {
-	return keys->count(key);
+	return keys.count(key) != 0;
 }
 
+void InputDevice::ClearPressedKeys()
+{
+	keys.clear();
+}
+
+void InputDevice::EndFrame()
+{
+	MouseOffset = glm::vec2(0.0f, 0.0f);
+	MouseWheelDelta = 0;
+}

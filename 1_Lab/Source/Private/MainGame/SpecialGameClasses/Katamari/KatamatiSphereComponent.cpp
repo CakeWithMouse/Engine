@@ -35,14 +35,9 @@ KatamatiSphereComponent::KatamatiSphereComponent(glm::vec3 pos, glm::vec3 rot, g
     ComponentQuaternion = glm::quat(glm::radians(rot));
 }
 
-DirectX::XMFLOAT4X4 KatamatiSphereComponent::GetWorldMatrix()
+DirectX::XMMATRIX KatamatiSphereComponent::GetLocalMatrix() const
 {
     using namespace DirectX;
-
-    if (!bTransformDirty && Parent == nullptr)
-    {
-        return CachedWorldMatrix;
-    }
 
     const XMMATRIX scaleMatrix = XMMatrixScaling(
         ComponentScale.x,
@@ -64,23 +59,7 @@ DirectX::XMFLOAT4X4 KatamatiSphereComponent::GetWorldMatrix()
         ComponentPosition.z
     );
 
-    XMMATRIX worldMatrixXM = scaleMatrix * rotationMatrix * translationMatrix;
-
-    if (Parent != nullptr)
-    {
-        XMFLOAT4X4 parentMatrix = Parent->GetWorldMatrix();
-        XMMATRIX parentWorldMatrix = XMLoadFloat4x4(&parentMatrix);
-        if (!bApplyParentScale)
-        {
-            parentWorldMatrix = RemoveScaleFromMatrixLocal(parentWorldMatrix);
-        }
-        worldMatrixXM = worldMatrixXM * parentWorldMatrix;
-    }
-
-    XMStoreFloat4x4(&CachedWorldMatrix, worldMatrixXM);
-    bTransformDirty = false;
-
-    return CachedWorldMatrix;
+    return scaleMatrix * rotationMatrix * translationMatrix;
 }
 
 void KatamatiSphereComponent::CheckCollisions(std::vector<GameComponent*> ComponentsWithCollision)
@@ -284,7 +263,7 @@ void KatamatiSphereComponent::InitSphere(float radius, int slices, int stacks)
         points.push_back(v);
     }
     
-    InitPoints(points.data(), points.size(), indices.data(), indices.size());
+    InitPoints(points.data(), static_cast<int>(points.size()), indices.data(), static_cast<int>(indices.size()));
 }
 
 void KatamatiSphereComponent::Tick(float deltaTime)

@@ -32,7 +32,11 @@ public:
     
     void InitSphere(float radius = 0.5f, int slices = 20, int stacks = 20);
     void Tick(float deltaTime) override;
-    DirectX::XMFLOAT4X4 GetWorldMatrix() override;
+protected:
+    /** Rolling uses its own quaternion; parent/caching logic is inherited from GameComponent. */
+    DirectX::XMMATRIX GetLocalMatrix() const override;
+
+public:
     void SetSpeed(float speed){Speed = speed;};
     
     void CheckCollisions(std::vector<GameComponent*> ComponentsWithCollision);

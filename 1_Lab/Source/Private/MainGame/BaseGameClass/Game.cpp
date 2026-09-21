@@ -6,25 +6,33 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <cstring>
+#include <d3d11shader.h>
 #include <d3dcompiler.h>
 #include <directxmath.h>
 #include <iostream>
 #include "../../../Public/Components/GameComponents.h"
 #include "../../../Public/Components/Light/PointLightComponent.h"
-#include "../../../Public/Components/SpecificComponents/FBXComponent.h"
+#include "../../../Public/Render/ShaderCompiler.h"
 #include "stb_image.h"
-#define FIXED_FPS true
+
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxguid.lib")
 
 namespace
 {
-    //std::wstring shaderPath = L"Source/Shaders/BaseShader.hlsl"; //Base
-    const std::wstring shaderPath = L"Source/Shaders/RotatedFigure.hlsl"; // Rotated
-    const std::string shaderColor = "float4(1.0f, 1.0f, 0.0f, 1.0f)";
+    const std::wstring shaderPath = L"Source/Shaders/RotatedFigure.hlsl";
+    const std::wstring shadowShaderPath = L"Source/Shaders/ShadowDepth.hlsl";
     const std::string vs_additional = "VSMainvs_5_0";
     const std::string ps_additional = "PSMainps_5_0";
     const std::string variant_default = "VARIANT_DEFAULT";
     const std::string variant_deferred_gbuffer = "VARIANT_DEFERRED_GBUFFER";
     const std::string variant_deferred_lighting = "VARIANT_DEFERRED_LIGHTING";
+
+    // Largest real time step fed into the simulation (prevents huge jumps after stalls).
+    constexpr float MaxFrameDeltaSeconds = 0.1f;
 
     const D3D_SHADER_MACRO shaderDefinesDeferredGBuffer[] =
     {
@@ -37,6 +45,23 @@ namespace
         {"DEFERRED_LIGHTING", "1"},
         {nullptr, nullptr}
     };
+
+    std::string DefaultShaderPath()
+    {
+        return "Source/Shaders/RotatedFigure.hlsl";
+    }
+
+    std::wstring ToWide(const std::string& value)
+    {
+        if (value.empty())
+        {
+            return std::wstring();
+        }
+        const int length = MultiByteToWideChar(CP_UTF8, 0, value.c_str(), static_cast<int>(value.size()), nullptr, 0);
+        std::wstring result(static_cast<size_t>(length), L'\0');
+        MultiByteToWideChar(CP_UTF8, 0, value.c_str(), static_cast<int>(value.size()), result.data(), length);
+        return result;
+    }
 
     std::string GetVariantTag(const ShaderCompileVariant variant)
     {
@@ -70,7 +95,32 @@ namespace
                                    const std::string& stageTag,
                                    const ShaderCompileVariant variant)
     {
-        return shaderName + "|" + stageTag + "|" + GetVariantTag(variant);
+        return shaderName + "|" + stageTag + "|" + GetVariantTag(variant) + "|" + ShaderCompiler::GetPolicyTag();
+    }
+
+    UINT CountRenderTargetOutputs(ID3DBlob* pixelShaderBlob)
+    {
+        Microsoft::WRL::ComPtr<ID3D11ShaderReflection> reflection;
+        if (pixelShaderBlob == nullptr ||
+            FAILED(D3DReflect(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(),
+                              IID_ID3D11ShaderReflection, reinterpret_cast<void**>(reflection.GetAddressOf()))))
+        {
+            return 0;
+        }
+
+        D3D11_SHADER_DESC desc = {};
+        reflection->GetDesc(&desc);
+        UINT targets = 0;
+        for (UINT i = 0; i < desc.OutputParameters; ++i)
+        {
+            D3D11_SIGNATURE_PARAMETER_DESC parameter = {};
+            reflection->GetOutputParameterDesc(i, &parameter);
+            if (parameter.SystemValueType == D3D_NAME_TARGET)
+            {
+                ++targets;
+            }
+        }
+        return targets;
     }
 
     uint32_t PackColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255)
@@ -104,26 +154,13 @@ namespace
         );
     }
 
-    DirectX::XMVECTOR LoadVec3As4(const DirectX::XMFLOAT4& vector4)
-    {
-        return DirectX::XMVectorSet(vector4.x, vector4.y, vector4.z, 0.0f);
-    }
-
     DirectX::XMFLOAT3 NormalizeFloat3(const DirectX::XMFLOAT4& value)
     {
         using namespace DirectX;
-        const XMVECTOR vector = XMVector3Normalize(LoadVec3As4(value));
+        const XMVECTOR vector = XMVector3Normalize(XMVectorSet(value.x, value.y, value.z, 0.0f));
         XMFLOAT3 result = {};
         XMStoreFloat3(&result, vector);
         return result;
-    }
-
-    float DistanceToPointLight(const PointLightInfo& light, const DirectX::XMFLOAT3& position)
-    {
-        const float dx = light.Position.x - position.x;
-        const float dy = light.Position.y - position.y;
-        const float dz = light.Position.z - position.z;
-        return std::sqrt(dx * dx + dy * dy + dz * dz);
     }
 
     std::vector<uint32_t> CreateProceduralFace(CubeMapPreset preset, int faceIndex, int faceSize)
@@ -187,40 +224,366 @@ namespace
 
         return pixels;
     }
-    
-    
+
+    // Tiny vertex shaders whose only purpose is to provide input signatures for the shared layouts.
+    const char* PrimitiveSignatureShader = R"(
+        struct VS_IN { float4 pos : POSITION; float4 col : COLOR; };
+        float4 VSMain(VS_IN input) : SV_Position { return input.pos + input.col * 1e-9f; }
+    )";
+
+    const char* MeshSignatureShader = R"(
+        struct VS_IN { float4 pos : POSITION; float4 normal : NORMAL; float2 uv : TEXCOORD; };
+        float4 VSMain(VS_IN input) : SV_Position { return input.pos + input.normal * 1e-9f + float4(input.uv, 0.0f, 0.0f) * 1e-9f; }
+    )";
+
+    bool CompileSignatureShader(const char* source, Microsoft::WRL::ComPtr<ID3DBlob>& blob)
+    {
+        Microsoft::WRL::ComPtr<ID3DBlob> errors;
+        const HRESULT hr = D3DCompile(source, std::strlen(source), nullptr, nullptr, nullptr,
+                                      "VSMain", "vs_5_0", 0, 0, blob.GetAddressOf(), errors.GetAddressOf());
+        if (FAILED(hr) && errors)
+        {
+            std::cout << static_cast<const char*>(errors->GetBufferPointer()) << std::endl;
+        }
+        return SUCCEEDED(hr);
+    }
 }
 
-void Game::CreateDepthBuffer(Microsoft::WRL::ComPtr<ID3D11Device> device, int width, int height)
+const char* ToString(RegisterResult result)
+{
+    switch (result)
+    {
+    case RegisterResult::Ok: return "Ok";
+    case RegisterResult::NullComponent: return "NullComponent";
+    case RegisterResult::EmptyName: return "EmptyName";
+    case RegisterResult::DuplicateName: return "DuplicateName";
+    case RegisterResult::DeviceNotReady: return "DeviceNotReady";
+    default: return "Unknown";
+    }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Construction / destruction
+// ---------------------------------------------------------------------------------------------
+
+Game::Game() = default;
+
+Game::~Game()
+{
+    DestroyResources();
+}
+
+void Game::DestroyResources()
+{
+    if (Context)
+    {
+        Context->ClearState();
+        Context->Flush();
+    }
+
+    // Components first: they observe cube maps and shaders owned by the caches below.
+    PointLights.clear();
+    Components.clear();
+    cubeMapCache.clear();
+
+    vertexShaderCache.clear();
+    pixelShaderCache.clear();
+    pixelShaderTargetCount.clear();
+    shaderCache.clear();
+    BaseVertexShader.Reset();
+    BasePixelShader.Reset();
+    layout.Reset();
+    meshLayout.Reset();
+
+    gBufferAlbedoTexture.Reset();
+    gBufferAlbedoRTV.Reset();
+    gBufferAlbedoSRV.Reset();
+    gBufferNormalTexture.Reset();
+    gBufferNormalRTV.Reset();
+    gBufferNormalSRV.Reset();
+    gBufferWorldPositionTexture.Reset();
+    gBufferWorldPositionRTV.Reset();
+    gBufferWorldPositionSRV.Reset();
+    gBufferSamplerState.Reset();
+    deferredLightingCB.Reset();
+
+    shadowTexture.Reset();
+    shadowSRV.Reset();
+    for (auto& dsv : shadowDSVs)
+    {
+        dsv.Reset();
+    }
+    shadowSampler.Reset();
+    shadowVertexShader.Reset();
+    shadowInstancedVertexShader.Reset();
+    shadowVertexShaderBlob.Reset();
+    shadowInputLayoutPrimitive.Reset();
+    shadowInputLayoutMesh.Reset();
+    shadowPassCB.Reset();
+    shadowRasterState.Reset();
+    bShadowResourcesReady = false;
+
+    for (int i = 0; i < GpuTimerLatency; ++i)
+    {
+        GpuTimerDisjoint[i].Reset();
+        GpuTimerBegin[i].Reset();
+        GpuTimerEnd[i].Reset();
+    }
+
+    transparentBlendState.Reset();
+    opaqueBlendState.Reset();
+    depthStencilState.Reset();
+    depthStencilStateReadOnly.Reset();
+    depthStencilStateSkybox.Reset();
+    DefaultRasterState.Reset();
+    ReleaseSwapChainResources();
+
+    if (SwapChain)
+    {
+        SwapChain->SetFullscreenState(FALSE, nullptr);
+    }
+    SwapChain.Reset();
+    Context.Reset();
+    Device.Reset();
+
+    // The input device and the window go last: the swap chain referenced the window.
+    InputDevicePtr.reset();
+    FirstPlayer.reset();
+    DisplayPtr.reset();
+    bInitialized = false;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Initialization
+// ---------------------------------------------------------------------------------------------
+
+bool Game::Initialize()
+{
+    if (bInitialized)
+    {
+        return true;
+    }
+
+    auto fail = [this](const char* reason) -> bool
+    {
+        std::cout << "Initialization failed: " << reason << std::endl;
+        DestroyResources();
+        return false;
+    };
+
+    DisplayPtr = std::make_unique<Display>();
+    if (!DisplayPtr->GetHwnd())
+    {
+        return fail("window creation");
+    }
+    DisplayPtr->SetGamePointer(this);
+
+    FirstPlayer = std::make_unique<Player>();
+    FirstPlayer->SetGamePointer(this);
+    InputDevicePtr = std::make_unique<InputDevice>(this);
+
+    const HWND hWnd = DisplayPtr->GetHwnd();
+    ShowWindow(hWnd, SW_SHOW);
+    SetForegroundWindow(hWnd);
+    SetFocus(hWnd);
+    ShowCursor(true);
+
+    const int width = std::max(DisplayPtr->GetWidth(), 1);
+    const int height = std::max(DisplayPtr->GetHeight(), 1);
+    InitSwapChainDesc(width, height);
+
+    if (!CreateDeviceAndSwapChain())
+    {
+        return fail("Direct3D 11 device (feature level 11_0 is required)");
+    }
+    if (!CreateSwapChainResources(width, height))
+    {
+        return fail("back buffer / depth buffer");
+    }
+    if (GetFileAttributesW(shaderPath.c_str()) == INVALID_FILE_ATTRIBUTES)
+    {
+        MessageBox(hWnd, L"Source/Shaders/RotatedFigure.hlsl was not found. Run from the project directory.",
+                   L"Missing shader", MB_OK);
+        return fail("shader files not found");
+    }
+    if (!InitShaderBuffers())
+    {
+        return fail("base shaders");
+    }
+    if (!CreateInputLayouts())
+    {
+        return fail("input layouts");
+    }
+    if (!CreateRenderStates())
+    {
+        return fail("render states");
+    }
+    CreateGpuTimer();
+
+    // A resize that arrived while the window was being shown is already reflected in the sizes above.
+    bResizePending = false;
+    bInitialized = true;
+    AfterInitialize();
+    return true;
+}
+
+void Game::InitSwapChainDesc(int width, int height)
+{
+    ZeroMemory(&SwapChainDescription, sizeof(DXGI_SWAP_CHAIN_DESC));
+
+    SwapChainDescription.BufferCount = 1;
+    SwapChainDescription.BufferDesc.Width = static_cast<UINT>(width);
+    SwapChainDescription.BufferDesc.Height = static_cast<UINT>(height);
+    SwapChainDescription.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    SwapChainDescription.BufferDesc.RefreshRate.Numerator = 0;
+    SwapChainDescription.BufferDesc.RefreshRate.Denominator = 1;
+    SwapChainDescription.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+    SwapChainDescription.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+    SwapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    SwapChainDescription.OutputWindow = DisplayPtr->GetHwnd();
+    SwapChainDescription.Windowed = TRUE;
+    SwapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+    SwapChainDescription.Flags = 0;
+    SwapChainDescription.SampleDesc.Count = 1;
+    SwapChainDescription.SampleDesc.Quality = 0;
+}
+
+bool Game::CreateDeviceAndSwapChain()
+{
+    // The renderer needs SM5 and compute shaders, so lower feature levels are not accepted.
+    const D3D_FEATURE_LEVEL FeatureLevels[] = {
+        D3D_FEATURE_LEVEL_11_1,
+        D3D_FEATURE_LEVEL_11_0
+    };
+    D3D_FEATURE_LEVEL selectedFeatureLevel = D3D_FEATURE_LEVEL_11_0;
+
+    auto tryCreate = [&](UINT flags, const D3D_FEATURE_LEVEL* levels, UINT levelCount) -> HRESULT
+    {
+        SwapChain.Reset();
+        Context.Reset();
+        Device.Reset();
+        return D3D11CreateDeviceAndSwapChain(
+            nullptr,
+            D3D_DRIVER_TYPE_HARDWARE,
+            nullptr,
+            flags,
+            levels,
+            levelCount,
+            D3D11_SDK_VERSION,
+            &SwapChainDescription,
+            SwapChain.GetAddressOf(),
+            Device.GetAddressOf(),
+            &selectedFeatureLevel,
+            Context.GetAddressOf());
+    };
+
+    UINT createDeviceFlags = 0;
+#ifdef _DEBUG
+    createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+    HRESULT hr = tryCreate(createDeviceFlags, FeatureLevels, ARRAYSIZE(FeatureLevels));
+    if (hr == E_INVALIDARG)
+    {
+        // Runtimes without 11.1 reject the whole array; retry with 11.0 only.
+        hr = tryCreate(createDeviceFlags, &FeatureLevels[1], 1);
+    }
+    if (FAILED(hr) && (createDeviceFlags & D3D11_CREATE_DEVICE_DEBUG))
+    {
+        std::cout << "Debug layer unavailable (0x" << std::hex << hr << std::dec << "), retrying without it." << std::endl;
+        hr = tryCreate(0, FeatureLevels, ARRAYSIZE(FeatureLevels));
+        if (hr == E_INVALIDARG)
+        {
+            hr = tryCreate(0, &FeatureLevels[1], 1);
+        }
+    }
+
+    if (FAILED(hr))
+    {
+        std::cout << "D3D11CreateDeviceAndSwapChain failed with error: 0x" << std::hex << hr << std::dec << std::endl;
+        SwapChain.Reset();
+        Context.Reset();
+        Device.Reset();
+        return false;
+    }
+
+    std::cout << "Created device with feature level "
+              << (selectedFeatureLevel == D3D_FEATURE_LEVEL_11_1 ? "11.1" : "11.0") << std::endl;
+    return true;
+}
+
+bool Game::CreateSwapChainResources(int width, int height)
+{
+    HRESULT hr = SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(BackTexture.ReleaseAndGetAddressOf()));
+    if (FAILED(hr))
+    {
+        std::cout << "Failed to get the swap chain back buffer." << std::endl;
+        return false;
+    }
+
+    hr = Device->CreateRenderTargetView(BackTexture.Get(), nullptr, RenderTargetView.ReleaseAndGetAddressOf());
+    if (FAILED(hr))
+    {
+        std::cout << "Failed to create the back buffer render target view." << std::endl;
+        return false;
+    }
+
+    return CreateDepthBuffer(width, height);
+}
+
+void Game::ReleaseSwapChainResources()
+{
+    RenderTargetView.Reset();
+    BackTexture.Reset();
+    depthStencilView.Reset();
+    depthStencilSRV.Reset();
+    depthStencilBuffer.Reset();
+
+    // Screen-sized G-buffer is recreated on the next deferred frame.
+    gBufferAlbedoTexture.Reset();
+    gBufferAlbedoRTV.Reset();
+    gBufferAlbedoSRV.Reset();
+    gBufferNormalTexture.Reset();
+    gBufferNormalRTV.Reset();
+    gBufferNormalSRV.Reset();
+    gBufferWorldPositionTexture.Reset();
+    gBufferWorldPositionRTV.Reset();
+    gBufferWorldPositionSRV.Reset();
+    deferredBufferWidth = 0;
+    deferredBufferHeight = 0;
+}
+
+bool Game::CreateDepthBuffer(int width, int height)
 {
     D3D11_TEXTURE2D_DESC depthDesc = {};
-    depthDesc.Width = width;
-    depthDesc.Height = height;
+    depthDesc.Width = static_cast<UINT>(width);
+    depthDesc.Height = static_cast<UINT>(height);
     depthDesc.MipLevels = 1;
     depthDesc.ArraySize = 1;
     depthDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
     depthDesc.SampleDesc.Count = 1;
-    depthDesc.SampleDesc.Quality = 0;
     depthDesc.Usage = D3D11_USAGE_DEFAULT;
     depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-    depthDesc.CPUAccessFlags = 0;
-    depthDesc.MiscFlags = 0;
 
-    HRESULT hr = device->CreateTexture2D(&depthDesc, nullptr, depthStencilBuffer.GetAddressOf());
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> newBuffer;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> newDSV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> newSRV;
+
+    HRESULT hr = Device->CreateTexture2D(&depthDesc, nullptr, newBuffer.GetAddressOf());
     if (FAILED(hr))
     {
-        OutputDebugStringA("Failed to create depth buffer texture\n");
+        std::cout << "Failed to create depth buffer texture." << std::endl;
+        return false;
     }
 
     D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
     dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
     dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-    dsvDesc.Texture2D.MipSlice = 0;
-
-    hr = device->CreateDepthStencilView(depthStencilBuffer.Get(), &dsvDesc, depthStencilView.GetAddressOf());
+    hr = Device->CreateDepthStencilView(newBuffer.Get(), &dsvDesc, newDSV.GetAddressOf());
     if (FAILED(hr))
     {
-        OutputDebugStringA("Failed to create depth stencil view\n");
+        std::cout << "Failed to create depth stencil view." << std::endl;
+        return false;
     }
 
     D3D11_SHADER_RESOURCE_VIEW_DESC depthSrvDesc = {};
@@ -228,204 +591,262 @@ void Game::CreateDepthBuffer(Microsoft::WRL::ComPtr<ID3D11Device> device, int wi
     depthSrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
     depthSrvDesc.Texture2D.MostDetailedMip = 0;
     depthSrvDesc.Texture2D.MipLevels = 1;
-    hr = device->CreateShaderResourceView(depthStencilBuffer.Get(), &depthSrvDesc, depthStencilSRV.GetAddressOf());
+    hr = Device->CreateShaderResourceView(newBuffer.Get(), &depthSrvDesc, newSRV.GetAddressOf());
     if (FAILED(hr))
     {
-        OutputDebugStringA("Failed to create depth SRV\n");
+        std::cout << "Failed to create depth SRV." << std::endl;
+        return false;
     }
 
-    D3D11_DEPTH_STENCIL_DESC depthStateDesc = {};
-    depthStateDesc.DepthEnable = TRUE;
-    depthStateDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-    depthStateDesc.DepthFunc = D3D11_COMPARISON_LESS;
-    
-    depthStateDesc.StencilEnable = FALSE;
-    depthStateDesc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
-    depthStateDesc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
-    
-    depthStateDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-    depthStateDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    depthStateDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStateDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
-    
-    depthStateDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-    depthStateDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-    depthStateDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-    depthStateDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
-
-    hr = device->CreateDepthStencilState(&depthStateDesc, depthStencilState.GetAddressOf());
-    if (FAILED(hr))
-    {
-        OutputDebugStringA("Failed to create depth stencil state\n");
-    }
-    Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
-    Context->OMSetRenderTargets(1, &RenderTargetView, depthStencilView.Get());
-
+    // Publish only after every view was created.
+    depthStencilBuffer = newBuffer;
+    depthStencilView = newDSV;
+    depthStencilSRV = newSRV;
+    return true;
 }
 
-
-Game::~Game()
+bool Game::CreateRenderStates()
 {
-    for (auto& shader : vertexShaderCache)
+    // Culling stays disabled: the procedural meshes do not share a consistent winding yet.
+    CD3D11_RASTERIZER_DESC rastDesc(D3D11_DEFAULT);
+    rastDesc.CullMode = D3D11_CULL_NONE;
+    rastDesc.FillMode = D3D11_FILL_SOLID;
+    rastDesc.FrontCounterClockwise = FALSE;
+    rastDesc.DepthClipEnable = TRUE;
+    if (FAILED(Device->CreateRasterizerState(&rastDesc, DefaultRasterState.ReleaseAndGetAddressOf())))
     {
-        if (shader.second)
-        {
-            shader.second->Release();
-        }
+        std::cout << "Failed to create rasterizer state." << std::endl;
+        return false;
     }
-    for (auto& shader : pixelShaderCache)
+
+    D3D11_BLEND_DESC transparentDesc = {};
+    transparentDesc.RenderTarget[0].BlendEnable = TRUE;
+    transparentDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+    transparentDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+    transparentDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    transparentDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    transparentDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+    transparentDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    transparentDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    D3D11_BLEND_DESC opaqueDesc = {};
+    opaqueDesc.RenderTarget[0].BlendEnable = FALSE;
+    opaqueDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    if (FAILED(Device->CreateBlendState(&transparentDesc, transparentBlendState.ReleaseAndGetAddressOf())) ||
+        FAILED(Device->CreateBlendState(&opaqueDesc, opaqueBlendState.ReleaseAndGetAddressOf())))
     {
-        if (shader.second)
-        {
-            shader.second->Release();
-        }
+        std::cout << "Failed to create blend states." << std::endl;
+        return false;
     }
-    
-    delete InputDevicePtr;
-    delete DisplayPtr;
-    delete FirstPlayer;
+
+    CD3D11_DEPTH_STENCIL_DESC opaqueDepth(D3D11_DEFAULT); // LESS, write all
+    CD3D11_DEPTH_STENCIL_DESC readOnlyDepth(D3D11_DEFAULT);
+    readOnlyDepth.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    CD3D11_DEPTH_STENCIL_DESC skyboxDepth(D3D11_DEFAULT);
+    skyboxDepth.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+    skyboxDepth.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+
+    if (FAILED(Device->CreateDepthStencilState(&opaqueDepth, depthStencilState.ReleaseAndGetAddressOf())) ||
+        FAILED(Device->CreateDepthStencilState(&readOnlyDepth, depthStencilStateReadOnly.ReleaseAndGetAddressOf())) ||
+        FAILED(Device->CreateDepthStencilState(&skyboxDepth, depthStencilStateSkybox.ReleaseAndGetAddressOf())))
+    {
+        std::cout << "Failed to create depth stencil states." << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
-void Game::Initialize()
+bool Game::CreateInputLayouts()
 {
-    DisplayPtr = new Display();
-    DisplayPtr->SetGamePointer(this);
-    FirstPlayer = new Player();
-    FirstPlayer->SetGamePointer(this);
-    InputDevicePtr = new InputDevice(this);
-    //init window
-    const WNDCLASSEX WinClass = DisplayPtr->GetWinClass();
-    RegisterClassEx(&WinClass);
-
-    //init rect
-    RECT WindowRect = DisplayPtr->GetWinRect();
-    AdjustWindowRect(&WindowRect, WS_OVERLAPPEDWINDOW, FALSE);
-
-    //init hWnd
-    HWND hWnd = DisplayPtr->GetHwnd();
-    ShowWindow(hWnd, SW_SHOW);
-    SetForegroundWindow(hWnd);
-    SetFocus(hWnd);
-
-    ShowCursor(true);
-
-    InitSwapChainDesc(DisplayPtr->GetWinRect());
-    HRESULT res = CreateDeviceAndSwapChain();
-    if (FAILED(res))
+    Microsoft::WRL::ComPtr<ID3DBlob> primitiveBlob;
+    Microsoft::WRL::ComPtr<ID3DBlob> meshBlob;
+    if (!CompileSignatureShader(PrimitiveSignatureShader, primitiveBlob) ||
+        !CompileSignatureShader(MeshSignatureShader, meshBlob))
     {
-        std::cout << "Well, that was unexpected" << '\n';
-    }
-    res = InitRenderTarget();
-    if (FAILED(res))
-    {
-        std::cout << "Error in creature RenderTargetView!\n";
-        return;
-    }
-    if (GetFileAttributesW(shaderPath.c_str()) == INVALID_FILE_ATTRIBUTES)
-    {
-        MessageBox(DisplayPtr->GetHwnd(), L"Shader file not found!", L"Error", MB_OK);
-        return;
+        std::cout << "Failed to compile input signature shaders." << std::endl;
+        return false;
     }
 
-    CreateBackBuffer();
-    CreateBlendStates();
-    InitDeferredResources();
-    InitShadowResources();
-    AfterInitialize();
+    const D3D11_INPUT_ELEMENT_DESC primitiveElements[] = {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0}
+    };
+    const D3D11_INPUT_ELEMENT_DESC meshElements[] = {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0}
+    };
+
+    if (FAILED(Device->CreateInputLayout(primitiveElements, ARRAYSIZE(primitiveElements),
+                                         primitiveBlob->GetBufferPointer(), primitiveBlob->GetBufferSize(),
+                                         layout.ReleaseAndGetAddressOf())) ||
+        FAILED(Device->CreateInputLayout(meshElements, ARRAYSIZE(meshElements),
+                                         meshBlob->GetBufferPointer(), meshBlob->GetBufferSize(),
+                                         meshLayout.ReleaseAndGetAddressOf())))
+    {
+        std::cout << "Failed to create input layouts." << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
-void Game::StartGame()
+ID3D11InputLayout* Game::GetInputLayout(VertexFormat format) const
 {
-    Run();
+    return format == VertexFormat::Mesh ? meshLayout.Get() : layout.Get();
 }
 
-bool Game::RegisterComponent(std::string Name, GameComponent* GameComponent,std::string PShaderName, std::string VShaderName)
+bool Game::InitShaderBuffers()
 {
-    if (!Device) 
+    const std::string defaultPath = DefaultShaderPath();
+    RegisterShaders(defaultPath, vs_additional, ShaderCompileVariant::Default);
+    RegisterShaders(defaultPath, ps_additional, ShaderCompileVariant::Default);
+
+    auto vs = vertexShaderCache.find(MakeShaderCacheKey(defaultPath, vs_additional, ShaderCompileVariant::Default));
+    auto ps = pixelShaderCache.find(MakeShaderCacheKey(defaultPath, ps_additional, ShaderCompileVariant::Default));
+    if (vs == vertexShaderCache.end() || ps == pixelShaderCache.end())
     {
         return false;
     }
-    
-    GameComponent->SetGame(this);
-    PointLightComponent* pointLight = dynamic_cast<PointLightComponent*>(GameComponent);
-    if (pointLight)
+
+    BaseVertexShader = vs->second;
+    BasePixelShader = ps->second;
+    return true;
+}
+
+HRESULT Game::CreateShader(HWND hWnd, const D3D_SHADER_MACRO* pDefines, LPCWSTR FileName, LPCSTR pEntrypoint,
+                           LPCSTR pTarget, ID3DBlob** Buffer)
+{
+    std::string errors;
+    const HRESULT res = ShaderCompiler::CompileFromFile(FileName, pDefines, pEntrypoint, pTarget, Buffer, &errors);
+    if (FAILED(res))
+    {
+        std::wcout << L"Shader compilation failed: " << FileName << std::endl;
+        std::cout << errors << std::endl;
+        if (GetFileAttributesW(FileName) == INVALID_FILE_ATTRIBUTES)
+        {
+            MessageBox(hWnd, FileName, L"Missing Shader File", MB_OK);
+        }
+    }
+    return res;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Scene registry
+// ---------------------------------------------------------------------------------------------
+
+RegisterResult Game::RegisterComponent(const std::string& Name, GameComponent* Component,
+                                       const std::string& PShaderName, const std::string& VShaderName)
+{
+    // Every check happens before any side effect, so a failed registration leaves no trace.
+    RegisterResult result = RegisterResult::Ok;
+    if (Component == nullptr)
+    {
+        result = RegisterResult::NullComponent;
+    }
+    else if (Name.empty())
+    {
+        result = RegisterResult::EmptyName;
+    }
+    else if (!Device)
+    {
+        result = RegisterResult::DeviceNotReady;
+    }
+    else if (Components.find(Name) != Components.end())
+    {
+        result = RegisterResult::DuplicateName;
+    }
+
+    if (result != RegisterResult::Ok)
+    {
+        std::cout << "RegisterComponent('" << Name << "') failed: " << ToString(result) << std::endl;
+        return result;
+    }
+
+    Component->SetGame(this);
+    PointLightComponent* pointLight = dynamic_cast<PointLightComponent*>(Component);
+    if (pointLight == nullptr)
+    {
+        Component->SetShaderNames(VShaderName, PShaderName);
+        Component->CreateBuffers(Device.Get());
+        // Compile the forward variant now instead of on the first frame.
+        BindComponentShaders(Component, ShaderCompileVariant::Default);
+    }
+
+    Components.emplace(Name, std::unique_ptr<GameComponent>(Component));
+    if (pointLight != nullptr)
     {
         PointLights.push_back(pointLight);
     }
-    else
+    return RegisterResult::Ok;
+}
+
+bool Game::UnregisterComponent(const std::string& Name)
+{
+    auto it = Components.find(Name);
+    if (it == Components.end())
     {
-        const ShaderCompileVariant shaderVariant = ShouldUseDeferredGeometryVariant(GameComponent)
-                                                       ? ShaderCompileVariant::DeferredGBuffer
-                                                       : ShaderCompileVariant::Default;
-        const std::string defaultShaderPath(shaderPath.begin(), shaderPath.end());
-
-        if (VShaderName.empty())
-        {
-            if (shaderVariant == ShaderCompileVariant::Default)
-            {
-                GameComponent->SetVertexShader(GetVertexShader());
-            }
-            else
-            {
-                GameComponent->SetVertexShader(GetVertexShader(defaultShaderPath, shaderVariant));
-            }
-        }
-        else
-        {
-            GameComponent->SetVertexShader(GetVertexShader(VShaderName, shaderVariant));
-        }
-
-        if (PShaderName.empty())
-        {
-            if (shaderVariant == ShaderCompileVariant::Default)
-            {
-                GameComponent->SetPixelShader(GetPixelShader());
-            }
-            else
-            {
-                GameComponent->SetPixelShader(GetPixelShader(defaultShaderPath, shaderVariant));
-            }
-        }
-        else
-        {
-            GameComponent->SetPixelShader(GetPixelShader(PShaderName, shaderVariant));
-        }
-
-        GameComponent->CreateBuffers(Device);
+        return false;
     }
-    
-    Components.emplace(Name, GameComponent);
+
+    GameComponent* removed = it->second.get();
+    PointLights.erase(std::remove(PointLights.begin(), PointLights.end(), removed), PointLights.end());
+    for (auto& pair : Components)
+    {
+        pair.second->ClearParentReferences(removed);
+    }
+
+    Components.erase(it);
     return true;
+}
+
+GameComponent* Game::FindComponent(const std::string& Name) const
+{
+    auto it = Components.find(Name);
+    return it != Components.end() ? it->second.get() : nullptr;
 }
 
 std::vector<PointLightInfo> Game::GetPointLights(size_t maxLights) const
 {
     std::vector<PointLightInfo> result;
     result.reserve(std::min(maxLights, PointLights.size()));
-    
+
     for (PointLightComponent* pointLight : PointLights)
     {
         if (!pointLight)
         {
             continue;
         }
-        
+
         PointLightInfo info;
-        info.Position = pointLight->GetCenter();
+        info.Position = pointLight->GetWorldPosition();
         info.Color = pointLight->GetLightColor();
         info.Intensity = pointLight->GetIntensity();
         info.Radius = pointLight->GetRadius();
         info.bEnabled = pointLight->IsEnabled();
         result.push_back(info);
-        
+
         if (result.size() >= maxLights)
         {
             break;
         }
     }
-    
+
     return result;
 }
+
+void Game::CountDraw(uint32_t indexCount, uint32_t instanceCount)
+{
+    ++Stats.DrawCalls;
+    Stats.InstancesDrawn += instanceCount;
+    Stats.IndicesDrawn += static_cast<uint64_t>(indexCount) * instanceCount;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Settings
+// ---------------------------------------------------------------------------------------------
 
 void Game::SetShadowSettings(bool enabled, float shadowDistance)
 {
@@ -436,6 +857,10 @@ void Game::SetShadowSettings(bool enabled, float shadowDistance)
     const float cascade2 = ShadowDistance * 1.0f;
     CascadeSplits = DirectX::XMFLOAT4(cascade0, cascade1, cascade2, 0.0f);
     ShadowParams.x = enabled ? 1.0f : 0.0f;
+    if (enabled)
+    {
+        bShadowInitFailed = false;
+    }
 }
 
 void Game::SetDirectionalLight(const glm::vec3& direction, const glm::vec3& color, float intensity)
@@ -466,399 +891,167 @@ void Game::SetDirectionalLightIntensity(float intensity)
     DirectionalLightColorIntensity.w = std::max(0.0f, intensity);
 }
 
-bool Game::ShouldUseDeferredGeometryVariant(GameComponent* Component) const
+// ---------------------------------------------------------------------------------------------
+// Shaders
+// ---------------------------------------------------------------------------------------------
+
+void Game::RegisterShaders(const std::string& ShaderName, const std::string& AdditionalAttributeToName,
+                           ShaderCompileVariant variant)
 {
-    if (RenderingType != Deffered || Component == nullptr)
+    const std::string cacheKey = MakeShaderCacheKey(ShaderName, AdditionalAttributeToName, variant);
+    if (shaderCache.find(cacheKey) != shaderCache.end())
+    {
+        return;
+    }
+    const bool isVertexShader = (AdditionalAttributeToName == vs_additional);
+    const bool isPixelShader = (AdditionalAttributeToName == ps_additional);
+    if (!isVertexShader && !isPixelShader)
+    {
+        std::cout << "Unknown shader type for: " << ShaderName << std::endl;
+        return;
+    }
+
+    // A failed key is remembered (null blob) so a broken shader is not recompiled every frame.
+    shaderCache.emplace(cacheKey, nullptr);
+
+    const LPCSTR entryPoint = isVertexShader ? "VSMain" : "PSMain";
+    const LPCSTR target = isVertexShader ? "vs_5_0" : "ps_5_0";
+    const std::wstring wideShaderPath = ToWide(ShaderName);
+    Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;
+    const HRESULT res = CreateShader(DisplayPtr ? DisplayPtr->GetHwnd() : nullptr, GetVariantDefines(variant),
+                                     wideShaderPath.c_str(), entryPoint, target, shaderBlob.GetAddressOf());
+    if (FAILED(res))
+    {
+        std::cout << "Failed to compile shader: " << ShaderName << std::endl;
+        return;
+    }
+
+    if (isVertexShader)
+    {
+        Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
+        if (FAILED(Device->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(),
+                                              nullptr, vertexShader.GetAddressOf())))
+        {
+            std::cout << "Failed to create vertex shader: " << ShaderName << std::endl;
+            return;
+        }
+        vertexShaderCache.emplace(cacheKey, vertexShader);
+    }
+    else
+    {
+        Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
+        if (FAILED(Device->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(),
+                                             nullptr, pixelShader.GetAddressOf())))
+        {
+            std::cout << "Failed to create pixel shader: " << ShaderName << std::endl;
+            return;
+        }
+        pixelShaderCache.emplace(cacheKey, pixelShader);
+        pixelShaderTargetCount[cacheKey] = CountRenderTargetOutputs(shaderBlob.Get());
+    }
+
+    shaderCache[cacheKey] = shaderBlob;
+    std::cout << "Successfully registered shader: " << ShaderName << " [" << GetVariantTag(variant) << "]" << std::endl;
+}
+
+ID3D11VertexShader* Game::GetVertexShader(const std::string& VertexShaderName, ShaderCompileVariant variant)
+{
+    const std::string cacheKey = MakeShaderCacheKey(VertexShaderName, vs_additional, variant);
+    auto it = vertexShaderCache.find(cacheKey);
+    if (it == vertexShaderCache.end())
+    {
+        RegisterShaders(VertexShaderName, vs_additional, variant);
+        it = vertexShaderCache.find(cacheKey);
+    }
+    if (it != vertexShaderCache.end())
+    {
+        return it->second.Get();
+    }
+
+    std::cout << "Warning: Failed to get vertex shader: " << VertexShaderName << ", using base shader" << std::endl;
+    return BaseVertexShader.Get();
+}
+
+ID3D11PixelShader* Game::GetPixelShader(const std::string& PixelShaderName, ShaderCompileVariant variant)
+{
+    const std::string cacheKey = MakeShaderCacheKey(PixelShaderName, ps_additional, variant);
+    auto it = pixelShaderCache.find(cacheKey);
+    if (it == pixelShaderCache.end())
+    {
+        RegisterShaders(PixelShaderName, ps_additional, variant);
+        it = pixelShaderCache.find(cacheKey);
+    }
+    if (it != pixelShaderCache.end())
+    {
+        return it->second.Get();
+    }
+
+    std::cout << "Warning: Failed to get pixel shader: " << PixelShaderName << ", using base shader" << std::endl;
+    return BasePixelShader.Get();
+}
+
+ComponentShaderVariant& Game::ResolveComponentShaders(GameComponent* Component, ShaderCompileVariant variant)
+{
+    ComponentShaderVariant& slot = Component->GetShaderVariant(variant);
+    if (slot.bResolved)
+    {
+        return slot;
+    }
+
+    const std::string defaultPath = DefaultShaderPath();
+    const std::string& vsName = Component->GetVertexShaderName().empty() ? defaultPath : Component->GetVertexShaderName();
+    const std::string& psName = Component->GetPixelShaderName().empty() ? defaultPath : Component->GetPixelShaderName();
+
+    slot.VertexShader = GetVertexShader(vsName, variant);
+    slot.PixelShader = GetPixelShader(psName, variant);
+    if (variant == ShaderCompileVariant::DeferredGBuffer)
+    {
+        // A define does not create MRT outputs: only a shader that really writes the G-buffer qualifies.
+        auto targets = pixelShaderTargetCount.find(MakeShaderCacheKey(psName, ps_additional, variant));
+        slot.bWritesGBuffer = targets != pixelShaderTargetCount.end() && targets->second >= 3;
+    }
+    slot.bResolved = true;
+    return slot;
+}
+
+bool Game::BindComponentShaders(GameComponent* Component, ShaderCompileVariant variant)
+{
+    if (Component == nullptr)
+    {
+        return false;
+    }
+    if (variant == ShaderCompileVariant::DeferredLighting)
+    {
+        variant = ShaderCompileVariant::Default;
+    }
+
+    ComponentShaderVariant& slot = ResolveComponentShaders(Component, variant);
+    if (variant == ShaderCompileVariant::DeferredGBuffer && !slot.bWritesGBuffer)
+    {
+        return false;
+    }
+    if (slot.VertexShader == nullptr || slot.PixelShader == nullptr)
     {
         return false;
     }
 
-    if (Component->IsSkybox() || Component->HasOpacity())
-    {
-        return false;
-    }
-
+    Component->SetVertexShader(slot.VertexShader);
+    Component->SetPixelShader(slot.PixelShader);
     return true;
 }
 
-bool Game::InitDeferredResources()
+bool Game::SupportsDeferredGeometry(GameComponent* Component)
 {
-    if (Device.Get() == nullptr || DisplayPtr == nullptr)
+    if (Component == nullptr || Component->IsSkybox() || Component->HasOpacity())
     {
         return false;
     }
-
-    const int width = std::max(DisplayPtr->GetWidth(), 1);
-    const int height = std::max(DisplayPtr->GetHeight(), 1);
-    if (deferredBufferWidth == width && deferredBufferHeight == height &&
-        gBufferAlbedoRTV && gBufferNormalRTV && gBufferMaterialRTV &&
-        gBufferAlbedoSRV && gBufferNormalSRV && gBufferMaterialSRV &&
-        deferredLightingCB)
-    {
-        return true;
-    }
-
-    auto createGBufferTarget = [&](DXGI_FORMAT format,
-                                   Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture,
-                                   Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& rtv,
-                                   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& srv) -> bool
-    {
-        D3D11_TEXTURE2D_DESC texDesc = {};
-        texDesc.Width = width;
-        texDesc.Height = height;
-        texDesc.MipLevels = 1;
-        texDesc.ArraySize = 1;
-        texDesc.Format = format;
-        texDesc.SampleDesc.Count = 1;
-        texDesc.Usage = D3D11_USAGE_DEFAULT;
-        texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-
-        HRESULT hr = Device->CreateTexture2D(&texDesc, nullptr, texture.ReleaseAndGetAddressOf());
-        if (FAILED(hr))
-        {
-            return false;
-        }
-
-        hr = Device->CreateRenderTargetView(texture.Get(), nullptr, rtv.ReleaseAndGetAddressOf());
-        if (FAILED(hr))
-        {
-            return false;
-        }
-
-        hr = Device->CreateShaderResourceView(texture.Get(), nullptr, srv.ReleaseAndGetAddressOf());
-        if (FAILED(hr))
-        {
-            return false;
-        }
-
-        return true;
-    };
-
-    if (!createGBufferTarget(DXGI_FORMAT_R8G8B8A8_UNORM, gBufferAlbedoTexture, gBufferAlbedoRTV, gBufferAlbedoSRV))
-    {
-        std::cout << "Failed to create deferred albedo target." << std::endl;
-        return false;
-    }
-    if (!createGBufferTarget(DXGI_FORMAT_R16G16B16A16_FLOAT, gBufferNormalTexture, gBufferNormalRTV, gBufferNormalSRV))
-    {
-        std::cout << "Failed to create deferred normal target." << std::endl;
-        return false;
-    }
-    if (!createGBufferTarget(DXGI_FORMAT_R16G16B16A16_FLOAT, gBufferMaterialTexture, gBufferMaterialRTV, gBufferMaterialSRV))
-    {
-        std::cout << "Failed to create deferred material target." << std::endl;
-        return false;
-    }
-
-    if (!gBufferSamplerState)
-    {
-        D3D11_SAMPLER_DESC samplerDesc = {};
-        samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-        samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-        samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-        samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-        samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-        samplerDesc.MinLOD = 0;
-        samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-        HRESULT hr = Device->CreateSamplerState(&samplerDesc, gBufferSamplerState.ReleaseAndGetAddressOf());
-        if (FAILED(hr))
-        {
-            std::cout << "Failed to create deferred sampler." << std::endl;
-            return false;
-        }
-    }
-
-    if (!deferredLightingCB)
-    {
-        D3D11_BUFFER_DESC bufferDesc = {};
-        bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-        bufferDesc.ByteWidth = sizeof(DeferredLightingBufferData);
-        bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-        bufferDesc.CPUAccessFlags = 0;
-
-        HRESULT hr = Device->CreateBuffer(&bufferDesc, nullptr, deferredLightingCB.ReleaseAndGetAddressOf());
-        if (FAILED(hr))
-        {
-            std::cout << "Failed to create deferred lighting constant buffer." << std::endl;
-            return false;
-        }
-    }
-
-    deferredBufferWidth = width;
-    deferredBufferHeight = height;
-
-    return true;
+    return ResolveComponentShaders(Component, ShaderCompileVariant::DeferredGBuffer).bWritesGBuffer;
 }
 
-void Game::UpdateDeferredLightingBuffer()
-{
-    using namespace DirectX;
-
-    if (deferredLightingCB.Get() == nullptr || FirstPlayer == nullptr)
-    {
-        return;
-    }
-
-    DeferredLightingBufferData data = {};
-    data.worldMatrix = Identity4x4();
-    data.viewMatrix = FirstPlayer->GetViewMatrix();
-    data.projectionMatrix = FirstPlayer->GetProjectionMatrix();
-    {
-        const XMMATRIX viewStored = XMLoadFloat4x4(&data.viewMatrix);
-        const XMMATRIX projStored = XMLoadFloat4x4(&data.projectionMatrix);
-        const XMMATRIX viewOriginal = XMMatrixTranspose(viewStored);
-        const XMMATRIX projOriginal = XMMatrixTranspose(projStored);
-        const XMMATRIX invViewOriginal = XMMatrixInverse(nullptr, viewOriginal);
-        const XMMATRIX invProjOriginal = XMMatrixInverse(nullptr, projOriginal);
-        XMStoreFloat4x4(&data.invViewMatrix, XMMatrixTranspose(invViewOriginal));
-        XMStoreFloat4x4(&data.invProjectionMatrix, XMMatrixTranspose(invProjOriginal));
-    }
-    data.ObjectColor = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
-    data.UVOffset = DirectX::XMFLOAT2(0.0f, 0.0f);
-    data.HasTexture = 0.0f;
-    data.padding = 0.0f;
-
-    const glm::vec3 cameraPosition = FirstPlayer->GetPosition();
-    data.CameraPosition = DirectX::XMFLOAT4(cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f);
-
-    for (int i = 0; i < 8; ++i)
-    {
-        data.LightPositions[i] = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-        data.LightColors[i] = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-        data.LightParams[i] = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
-    }
-
-    const std::vector<PointLightInfo> pointLights = GetPointLights(8);
-    const int lightCount = static_cast<int>(std::min<size_t>(pointLights.size(), 8));
-    // Deferred scene looks significantly darker than forward because it lacks
-    // the small amount of extra indirect light the forward shaders effectively get.
-    // Raise ambient here without affecting forward rendering.
-    data.LightMeta = DirectX::XMFLOAT4(static_cast<float>(lightCount), 0.22f, 32.0f, 0.0f);
-
-    for (int i = 0; i < lightCount; ++i)
-    {
-        const PointLightInfo& light = pointLights[i];
-        data.LightPositions[i] = DirectX::XMFLOAT4(light.Position.x, light.Position.y, light.Position.z, 1.0f);
-        data.LightColors[i] = DirectX::XMFLOAT4(light.Color.x, light.Color.y, light.Color.z, 1.0f);
-        data.LightParams[i] = DirectX::XMFLOAT4(light.Intensity, light.Radius, light.bEnabled ? 1.0f : 0.0f, 0.0f);
-    }
-
-    data.ReflectionData = DirectX::XMFLOAT4(0.0f, 0.0f, 5.0f, 0.0f);
-    data.CascadeSplits = CascadeSplits;
-    data.ShadowParams = ShadowParams;
-    data.LightDirection = DirectionalLightDirection;
-    data.DirectionalLightColorIntensity = DirectionalLightColorIntensity;
-
-    for (int cascadeIndex = 0; cascadeIndex < MaxShadowCascades; ++cascadeIndex)
-    {
-        data.LightViewProjection[cascadeIndex] = CascadeLightViewProjection[cascadeIndex];
-    }
-
-    Context->UpdateSubresource(deferredLightingCB.Get(), 0, nullptr, &data, 0, 0);
-}
-
-void Game::RenderDeferredLightingPass(ID3D11RasterizerState* RasterState)
-{
-    if (!gBufferAlbedoSRV || !gBufferNormalSRV || !gBufferMaterialSRV || !deferredLightingCB)
-    {
-        return;
-    }
-
-    const std::string deferredShaderPath(shaderPath.begin(), shaderPath.end());
-    ID3D11VertexShader* deferredVS = GetVertexShader(deferredShaderPath, ShaderCompileVariant::DeferredLighting);
-    ID3D11PixelShader* deferredPS = GetPixelShader(deferredShaderPath, ShaderCompileVariant::DeferredLighting);
-    if (deferredVS == nullptr || deferredPS == nullptr)
-    {
-        return;
-    }
-
-    UpdateDeferredLightingBuffer();
-
-    Context->RSSetState(RasterState);
-    Context->IASetInputLayout(nullptr);
-    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    Context->OMSetRenderTargets(1, &RenderTargetView, nullptr);
-
-    ID3D11ShaderResourceView* gBufferSRVs[4] =
-    {
-        gBufferAlbedoSRV.Get(),
-        gBufferNormalSRV.Get(),
-        gBufferMaterialSRV.Get(),
-        depthStencilSRV.Get()
-    };
-
-    Context->VSSetShader(deferredVS, nullptr, 0);
-    Context->PSSetShader(deferredPS, nullptr, 0);
-    Context->VSSetConstantBuffers(0, 1, deferredLightingCB.GetAddressOf());
-    Context->PSSetConstantBuffers(0, 1, deferredLightingCB.GetAddressOf());
-    Context->PSSetShaderResources(0, 4, gBufferSRVs);
-
-    if (gBufferSamplerState)
-    {
-        Context->PSSetSamplers(0, 1, gBufferSamplerState.GetAddressOf());
-    }
-
-    if (IsShadowEnabled())
-    {
-        ID3D11ShaderResourceView* shadowMapSRV = GetShadowMapSRV();
-        ID3D11SamplerState* shadowMapSampler = GetShadowSampler();
-        if (shadowMapSRV)
-        {
-            Context->PSSetShaderResources(4, 1, &shadowMapSRV);
-        }
-        if (shadowMapSampler)
-        {
-            Context->PSSetSamplers(4, 1, &shadowMapSampler);
-        }
-    }
-
-    Context->Draw(3, 0);
-
-    ID3D11ShaderResourceView* nullSRVs[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
-    Context->PSSetShaderResources(0, 5, nullSRVs);
-}
-
-void Game::RenderDeferredDebugOverlay(ID3D11RasterizerState* RasterState)
-{
-    using namespace DirectX;
-
-    if (!gBufferAlbedoSRV || !gBufferNormalSRV || !gBufferMaterialSRV || !deferredLightingCB)
-    {
-        return;
-    }
-
-    const std::string deferredShaderPath(shaderPath.begin(), shaderPath.end());
-    ID3D11VertexShader* deferredVS = GetVertexShader(deferredShaderPath, ShaderCompileVariant::DeferredLighting);
-    ID3D11PixelShader* deferredPS = GetPixelShader(deferredShaderPath, ShaderCompileVariant::DeferredLighting);
-    if (deferredVS == nullptr || deferredPS == nullptr)
-    {
-        return;
-    }
-
-    Context->RSSetState(RasterState);
-    Context->IASetInputLayout(nullptr);
-    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    Context->OMSetRenderTargets(1, &RenderTargetView, nullptr);
-
-    ID3D11ShaderResourceView* gBufferSRVs[4] =
-    {
-        gBufferAlbedoSRV.Get(),
-        gBufferNormalSRV.Get(),
-        gBufferMaterialSRV.Get(),
-        depthStencilSRV.Get()
-    };
-
-    Context->VSSetShader(deferredVS, nullptr, 0);
-    Context->PSSetShader(deferredPS, nullptr, 0);
-    Context->VSSetConstantBuffers(0, 1, deferredLightingCB.GetAddressOf());
-    Context->PSSetConstantBuffers(0, 1, deferredLightingCB.GetAddressOf());
-    Context->PSSetShaderResources(0, 4, gBufferSRVs);
-
-    if (gBufferSamplerState)
-    {
-        Context->PSSetSamplers(0, 1, gBufferSamplerState.GetAddressOf());
-    }
-
-    D3D11_VIEWPORT debugViewports[4] = {};
-    const float debugWidth = std::max(160.0f, static_cast<float>(DisplayPtr->GetWidth()) * 0.22f);
-    const float debugHeight = std::max(90.0f, static_cast<float>(DisplayPtr->GetHeight()) * 0.22f);
-    const float startX = static_cast<float>(DisplayPtr->GetWidth()) - debugWidth * 2.0f - 24.0f;
-    const float startY = 24.0f;
-
-    for (int i = 0; i < 4; ++i)
-    {
-        debugViewports[i].Width = debugWidth;
-        debugViewports[i].Height = debugHeight;
-        debugViewports[i].MinDepth = 0.0f;
-        debugViewports[i].MaxDepth = 1.0f;
-    }
-
-    debugViewports[0].TopLeftX = startX;
-    debugViewports[0].TopLeftY = startY;
-    debugViewports[1].TopLeftX = startX + debugWidth + 8.0f;
-    debugViewports[1].TopLeftY = startY;
-    debugViewports[2].TopLeftX = startX;
-    debugViewports[2].TopLeftY = startY + debugHeight + 8.0f;
-    debugViewports[3].TopLeftX = startX + debugWidth + 8.0f;
-    debugViewports[3].TopLeftY = startY + debugHeight + 8.0f;
-
-    for (int debugMode = 1; debugMode <= 4; ++debugMode)
-    {
-        DeferredLightingBufferData debugData = {};
-        debugData.worldMatrix = Identity4x4();
-        debugData.viewMatrix = FirstPlayer->GetViewMatrix();
-        debugData.projectionMatrix = FirstPlayer->GetProjectionMatrix();
-        {
-            using DirectX::XMMATRIX;
-            const XMMATRIX viewStored = XMLoadFloat4x4(&debugData.viewMatrix);
-            const XMMATRIX projStored = XMLoadFloat4x4(&debugData.projectionMatrix);
-            const XMMATRIX viewOriginal = XMMatrixTranspose(viewStored);
-            const XMMATRIX projOriginal = XMMatrixTranspose(projStored);
-            const XMMATRIX invViewOriginal = XMMatrixInverse(nullptr, viewOriginal);
-            const XMMATRIX invProjOriginal = XMMatrixInverse(nullptr, projOriginal);
-            XMStoreFloat4x4(&debugData.invViewMatrix, XMMatrixTranspose(invViewOriginal));
-            XMStoreFloat4x4(&debugData.invProjectionMatrix, XMMatrixTranspose(invProjOriginal));
-        }
-        debugData.ObjectColor = DirectX::XMFLOAT4(static_cast<float>(debugMode), 0.0f, 1.0f, 1.0f);
-        debugData.UVOffset = DirectX::XMFLOAT2(0.0f, 0.0f);
-        debugData.HasTexture = 0.0f;
-        debugData.padding = 0.0f;
-        const glm::vec3 debugCameraPosition = FirstPlayer->GetPosition();
-        // Пересечения с буфером глубины частиц
-        debugData.CameraPosition = DirectX::XMFLOAT4(debugCameraPosition.x, debugCameraPosition.y, debugCameraPosition.z, 1.0f);
-        debugData.LightMeta = DirectX::XMFLOAT4(0.0f, 0.06f, 32.0f, 0.0f);
-        debugData.ReflectionData = DirectX::XMFLOAT4(0.0f, 0.0f, 5.0f, 0.0f);
-        debugData.CascadeSplits = CascadeSplits;
-        debugData.ShadowParams = ShadowParams;
-        if (RenderingType == Deffered)
-        {
-            debugData.ShadowParams.x = 0.0f;
-        }
-        debugData.LightDirection = DirectionalLightDirection;
-        debugData.DirectionalLightColorIntensity = DirectionalLightColorIntensity;
-        for (int i = 0; i < 8; ++i)
-        {
-            debugData.LightPositions[i] = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-            debugData.LightColors[i] = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-            debugData.LightParams[i] = DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
-        }
-        const std::vector<PointLightInfo> debugPointLights = GetPointLights(8);
-        const int debugLightCount = static_cast<int>(std::min<size_t>(debugPointLights.size(), 8));
-        debugData.LightMeta.x = static_cast<float>(debugLightCount);
-        for (int i = 0; i < 8; ++i)
-        {
-            if (i >= debugLightCount)
-            {
-                continue;
-            }
-            const PointLightInfo& light = debugPointLights[i];
-            debugData.LightPositions[i] = DirectX::XMFLOAT4(light.Position.x, light.Position.y, light.Position.z, 1.0f);
-            debugData.LightColors[i] = DirectX::XMFLOAT4(light.Color.x, light.Color.y, light.Color.z, 1.0f);
-            debugData.LightParams[i] = DirectX::XMFLOAT4(light.Intensity, light.Radius, light.bEnabled ? 1.0f : 0.0f, 0.0f);
-        }
-        for (int cascadeIndex = 0; cascadeIndex < MaxShadowCascades; ++cascadeIndex)
-        {
-            debugData.LightViewProjection[cascadeIndex] = CascadeLightViewProjection[cascadeIndex];
-        }
-
-        Context->RSSetViewports(1, &debugViewports[debugMode - 1]);
-        Context->UpdateSubresource(deferredLightingCB.Get(), 0, nullptr, &debugData, 0, 0);
-        Context->Draw(3, 0);
-    }
-
-    D3D11_VIEWPORT fullViewport = {};
-    fullViewport.Width = static_cast<float>(DisplayPtr->GetWidth());
-    fullViewport.Height = static_cast<float>(DisplayPtr->GetHeight());
-    fullViewport.TopLeftX = 0.0f;
-    fullViewport.TopLeftY = 0.0f;
-    fullViewport.MinDepth = 0.0f;
-    fullViewport.MaxDepth = 1.0f;
-    Context->RSSetViewports(1, &fullViewport);
-
-    ID3D11ShaderResourceView* nullSRVs[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
-    Context->PSSetShaderResources(0, 5, nullSRVs);
-}
+// ---------------------------------------------------------------------------------------------
+// Cube maps
+// ---------------------------------------------------------------------------------------------
 
 bool Game::CreateProceduralCubeMap(const std::string& cubeMapName, CubeMapPreset preset, int faceSize)
 {
@@ -867,8 +1060,7 @@ bool Game::CreateProceduralCubeMap(const std::string& cubeMapName, CubeMapPreset
         return false;
     }
 
-    auto existing = cubeMapCache.find(cubeMapName);
-    if (existing != cubeMapCache.end())
+    if (cubeMapCache.find(cubeMapName) != cubeMapCache.end())
     {
         return true;
     }
@@ -895,7 +1087,7 @@ bool Game::CreateProceduralCubeMap(const std::string& cubeMapName, CubeMapPreset
     textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
     textureDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
 
-    std::unique_ptr<CubeMapResource> cubeMap(new CubeMapResource());
+    std::unique_ptr<CubeMapResource> cubeMap = std::make_unique<CubeMapResource>();
     cubeMap->Name = cubeMapName;
 
     HRESULT hr = Device->CreateTexture2D(&textureDesc, subresources.data(), cubeMap->Texture.GetAddressOf());
@@ -943,8 +1135,7 @@ bool Game::CreateCubeMapFromFiles(const std::string& cubeMapName, const std::vec
         return false;
     }
 
-    auto existing = cubeMapCache.find(cubeMapName);
-    if (existing != cubeMapCache.end())
+    if (cubeMapCache.find(cubeMapName) != cubeMapCache.end())
     {
         return true;
     }
@@ -1019,7 +1210,7 @@ bool Game::CreateCubeMapFromFiles(const std::string& cubeMapName, const std::vec
     textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
     textureDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
 
-    std::unique_ptr<CubeMapResource> cubeMap(new CubeMapResource());
+    std::unique_ptr<CubeMapResource> cubeMap = std::make_unique<CubeMapResource>();
     cubeMap->Name = cubeMapName;
 
     HRESULT hr = Device->CreateTexture2D(&textureDesc, subresources.data(), cubeMap->Texture.GetAddressOf());
@@ -1065,53 +1256,250 @@ bool Game::CreateCubeMapFromFiles(const std::string& cubeMapName, const std::vec
 CubeMapResource* Game::GetCubeMap(const std::string& cubeMapName) const
 {
     auto it = cubeMapCache.find(cubeMapName);
-    if (it == cubeMapCache.end())
-    {
-        return nullptr;
-    }
-
-    return it->second.get();
+    return it == cubeMapCache.end() ? nullptr : it->second.get();
 }
 
-void Game::CreateBlendStates()
+// ---------------------------------------------------------------------------------------------
+// Deferred renderer resources and passes
+// ---------------------------------------------------------------------------------------------
+
+bool Game::InitDeferredResources()
 {
-    D3D11_BLEND_DESC transparentDesc = {};
-    transparentDesc.AlphaToCoverageEnable = FALSE;
-    transparentDesc.IndependentBlendEnable = FALSE;
-    
-    transparentDesc.RenderTarget[0].BlendEnable = TRUE;
-    transparentDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-    transparentDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-    transparentDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-    
-    transparentDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-    transparentDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-    transparentDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-    
-    transparentDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-    
-    HRESULT hr = Device->CreateBlendState(&transparentDesc, &transparentBlendState);
-    if (FAILED(hr))
+    if (!Device || !DisplayPtr)
     {
-        OutputDebugStringA("Failed to create transparent blend state\n");
+        return false;
     }
-    
-    D3D11_BLEND_DESC opaqueDesc = {};
-    opaqueDesc.AlphaToCoverageEnable = FALSE;
-    opaqueDesc.IndependentBlendEnable = FALSE;
-    opaqueDesc.RenderTarget[0].BlendEnable = FALSE;
-    opaqueDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-    
-    hr = Device->CreateBlendState(&opaqueDesc, &opaqueBlendState);
-    if (FAILED(hr))
+
+    const int width = std::max(DisplayPtr->GetWidth(), 1);
+    const int height = std::max(DisplayPtr->GetHeight(), 1);
+    if (deferredBufferWidth == width && deferredBufferHeight == height &&
+        gBufferAlbedoRTV && gBufferNormalRTV && gBufferWorldPositionRTV &&
+        gBufferAlbedoSRV && gBufferNormalSRV && gBufferWorldPositionSRV &&
+        deferredLightingCB)
     {
-        OutputDebugStringA("Failed to create opaque blend state\n");
+        return true;
     }
+
+    auto createGBufferTarget = [&](DXGI_FORMAT format,
+                                   Microsoft::WRL::ComPtr<ID3D11Texture2D>& texture,
+                                   Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& rtv,
+                                   Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& srv) -> bool
+    {
+        D3D11_TEXTURE2D_DESC texDesc = {};
+        texDesc.Width = width;
+        texDesc.Height = height;
+        texDesc.MipLevels = 1;
+        texDesc.ArraySize = 1;
+        texDesc.Format = format;
+        texDesc.SampleDesc.Count = 1;
+        texDesc.Usage = D3D11_USAGE_DEFAULT;
+        texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+
+        return SUCCEEDED(Device->CreateTexture2D(&texDesc, nullptr, texture.ReleaseAndGetAddressOf())) &&
+               SUCCEEDED(Device->CreateRenderTargetView(texture.Get(), nullptr, rtv.ReleaseAndGetAddressOf())) &&
+               SUCCEEDED(Device->CreateShaderResourceView(texture.Get(), nullptr, srv.ReleaseAndGetAddressOf()));
+    };
+
+    // Albedo.rgb + specular weight | normal.xyz + ambient model | world position (half float).
+    if (!createGBufferTarget(DXGI_FORMAT_R8G8B8A8_UNORM, gBufferAlbedoTexture, gBufferAlbedoRTV, gBufferAlbedoSRV) ||
+        !createGBufferTarget(DXGI_FORMAT_R16G16B16A16_FLOAT, gBufferNormalTexture, gBufferNormalRTV, gBufferNormalSRV) ||
+        !createGBufferTarget(DXGI_FORMAT_R16G16B16A16_FLOAT, gBufferWorldPositionTexture, gBufferWorldPositionRTV, gBufferWorldPositionSRV))
+    {
+        std::cout << "Failed to create G-buffer targets." << std::endl;
+        return false;
+    }
+
+    if (!gBufferSamplerState)
+    {
+        D3D11_SAMPLER_DESC samplerDesc = {};
+        samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+        samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+        samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+        samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+        samplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+        samplerDesc.MinLOD = 0;
+        samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+        if (FAILED(Device->CreateSamplerState(&samplerDesc, gBufferSamplerState.ReleaseAndGetAddressOf())))
+        {
+            std::cout << "Failed to create deferred sampler." << std::endl;
+            return false;
+        }
+    }
+
+    if (!deferredLightingCB)
+    {
+        D3D11_BUFFER_DESC bufferDesc = {};
+        bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+        bufferDesc.ByteWidth = sizeof(DeferredLightingBufferData);
+        bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+        if (FAILED(Device->CreateBuffer(&bufferDesc, nullptr, deferredLightingCB.ReleaseAndGetAddressOf())))
+        {
+            std::cout << "Failed to create deferred lighting constant buffer." << std::endl;
+            return false;
+        }
+    }
+
+    // The lighting shaders must exist before the resources are reported as ready.
+    const std::string defaultPath = DefaultShaderPath();
+    RegisterShaders(defaultPath, vs_additional, ShaderCompileVariant::DeferredLighting);
+    RegisterShaders(defaultPath, ps_additional, ShaderCompileVariant::DeferredLighting);
+    if (vertexShaderCache.find(MakeShaderCacheKey(defaultPath, vs_additional, ShaderCompileVariant::DeferredLighting)) == vertexShaderCache.end() ||
+        pixelShaderCache.find(MakeShaderCacheKey(defaultPath, ps_additional, ShaderCompileVariant::DeferredLighting)) == pixelShaderCache.end())
+    {
+        std::cout << "Deferred lighting shaders are unavailable." << std::endl;
+        return false;
+    }
+
+    deferredBufferWidth = width;
+    deferredBufferHeight = height;
+    return true;
 }
+
+void Game::FillFrameConstantBuffer(ConstantBufferData& data) const
+{
+    data = ConstantBufferData{};
+    data.worldMatrix = Identity4x4();
+    data.normalMatrix = Identity4x4();
+    ApplyFrameConstants(data, CurrentFrame);
+    data.ObjectColor = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+    data.ReflectionData = DirectX::XMFLOAT4(0.0f, 0.0f, 5.0f, 0.0f);
+}
+
+void Game::RenderDeferredLightingPass()
+{
+    if (!gBufferAlbedoSRV || !gBufferNormalSRV || !gBufferWorldPositionSRV || !deferredLightingCB)
+    {
+        return;
+    }
+
+    const std::string defaultPath = DefaultShaderPath();
+    ID3D11VertexShader* deferredVS = GetVertexShader(defaultPath, ShaderCompileVariant::DeferredLighting);
+    ID3D11PixelShader* deferredPS = GetPixelShader(defaultPath, ShaderCompileVariant::DeferredLighting);
+    if (deferredVS == nullptr || deferredPS == nullptr)
+    {
+        return;
+    }
+
+    // Same ambient/lights/shadows as the forward materials (no deferred-only compensation).
+    DeferredLightingBufferData data;
+    FillFrameConstantBuffer(data);
+    Context->UpdateSubresource(deferredLightingCB.Get(), 0, nullptr, &data, 0, 0);
+
+    const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    Context->RSSetState(DefaultRasterState.Get());
+    Context->IASetInputLayout(nullptr);
+    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
+    Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
+
+    ID3D11ShaderResourceView* gBufferSRVs[4] =
+    {
+        gBufferAlbedoSRV.Get(),
+        gBufferNormalSRV.Get(),
+        gBufferWorldPositionSRV.Get(),
+        depthStencilSRV.Get()
+    };
+
+    Context->VSSetShader(deferredVS, nullptr, 0);
+    Context->PSSetShader(deferredPS, nullptr, 0);
+    Context->VSSetConstantBuffers(0, 1, deferredLightingCB.GetAddressOf());
+    Context->PSSetConstantBuffers(0, 1, deferredLightingCB.GetAddressOf());
+    Context->PSSetShaderResources(0, 4, gBufferSRVs);
+    Context->PSSetSamplers(0, 1, gBufferSamplerState.GetAddressOf());
+
+    if (AreShadowsActive())
+    {
+        ID3D11ShaderResourceView* shadowMapSRV = shadowSRV.Get();
+        Context->PSSetShaderResources(4, 1, &shadowMapSRV);
+        Context->PSSetSamplers(4, 1, shadowSampler.GetAddressOf());
+    }
+
+    Context->Draw(3, 0);
+    CountDraw(3);
+
+    ID3D11ShaderResourceView* nullSRVs[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
+    Context->PSSetShaderResources(0, 5, nullSRVs);
+}
+
+void Game::RenderDeferredDebugOverlay()
+{
+    if (!gBufferAlbedoSRV || !gBufferNormalSRV || !gBufferWorldPositionSRV || !deferredLightingCB)
+    {
+        return;
+    }
+
+    const std::string defaultPath = DefaultShaderPath();
+    ID3D11VertexShader* deferredVS = GetVertexShader(defaultPath, ShaderCompileVariant::DeferredLighting);
+    ID3D11PixelShader* deferredPS = GetPixelShader(defaultPath, ShaderCompileVariant::DeferredLighting);
+    if (deferredVS == nullptr || deferredPS == nullptr)
+    {
+        return;
+    }
+
+    const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    Context->RSSetState(DefaultRasterState.Get());
+    Context->IASetInputLayout(nullptr);
+    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
+    Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
+
+    ID3D11ShaderResourceView* gBufferSRVs[4] =
+    {
+        gBufferAlbedoSRV.Get(),
+        gBufferNormalSRV.Get(),
+        gBufferWorldPositionSRV.Get(),
+        depthStencilSRV.Get()
+    };
+
+    Context->VSSetShader(deferredVS, nullptr, 0);
+    Context->PSSetShader(deferredPS, nullptr, 0);
+    Context->VSSetConstantBuffers(0, 1, deferredLightingCB.GetAddressOf());
+    Context->PSSetConstantBuffers(0, 1, deferredLightingCB.GetAddressOf());
+    Context->PSSetShaderResources(0, 4, gBufferSRVs);
+    Context->PSSetSamplers(0, 1, gBufferSamplerState.GetAddressOf());
+
+    const float screenWidth = static_cast<float>(DisplayPtr->GetWidth());
+    const float screenHeight = static_cast<float>(DisplayPtr->GetHeight());
+    const float debugWidth = std::max(160.0f, screenWidth * 0.22f);
+    const float debugHeight = std::max(90.0f, screenHeight * 0.22f);
+    const float startX = screenWidth - debugWidth * 2.0f - 24.0f;
+    const float startY = 24.0f;
+
+    // The debug views only differ in the mode selector, so the frame data is prepared once.
+    DeferredLightingBufferData debugData;
+    FillFrameConstantBuffer(debugData);
+
+    for (int debugMode = 1; debugMode <= 4; ++debugMode)
+    {
+        D3D11_VIEWPORT viewport = {};
+        viewport.Width = debugWidth;
+        viewport.Height = debugHeight;
+        viewport.MaxDepth = 1.0f;
+        viewport.TopLeftX = startX + ((debugMode - 1) % 2) * (debugWidth + 8.0f);
+        viewport.TopLeftY = startY + ((debugMode - 1) / 2) * (debugHeight + 8.0f);
+
+        debugData.ObjectColor.x = static_cast<float>(debugMode);
+        Context->RSSetViewports(1, &viewport);
+        Context->UpdateSubresource(deferredLightingCB.Get(), 0, nullptr, &debugData, 0, 0);
+        Context->Draw(3, 0);
+        CountDraw(3);
+    }
+
+    SetFullViewport();
+
+    ID3D11ShaderResourceView* nullSRVs[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
+    Context->PSSetShaderResources(0, 5, nullSRVs);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Shadows
+// ---------------------------------------------------------------------------------------------
 
 bool Game::InitShadowResources()
 {
-    if (Device.Get() == nullptr || Context == nullptr)
+    if (!Device || !Context)
     {
         return false;
     }
@@ -1189,56 +1577,53 @@ bool Game::InitShadowResources()
         return false;
     }
 
-    ID3DBlob* shadowVSBlobRaw = nullptr;
-    hr = CreateShader(DisplayPtr->GetHwnd(), nullptr, L"Source/Shaders/ShadowDepth.hlsl", "VSMain", "vs_5_0", &shadowVSBlobRaw);
-    if (FAILED(hr) || shadowVSBlobRaw == nullptr)
+    const HWND hWnd = DisplayPtr ? DisplayPtr->GetHwnd() : nullptr;
+    hr = CreateShader(hWnd, nullptr, shadowShaderPath.c_str(), "VSMain", "vs_5_0", shadowVertexShaderBlob.ReleaseAndGetAddressOf());
+    if (FAILED(hr))
     {
         std::cout << "Failed to compile shadow VS." << std::endl;
         return false;
     }
-    shadowVertexShaderBlob.Attach(shadowVSBlobRaw);
 
-    hr = Device->CreateVertexShader(
-        shadowVertexShaderBlob->GetBufferPointer(),
-        shadowVertexShaderBlob->GetBufferSize(),
-        nullptr,
-        shadowVertexShader.ReleaseAndGetAddressOf()
-    );
+    hr = Device->CreateVertexShader(shadowVertexShaderBlob->GetBufferPointer(), shadowVertexShaderBlob->GetBufferSize(),
+                                    nullptr, shadowVertexShader.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
         std::cout << "Failed to create shadow VS." << std::endl;
         return false;
     }
 
-    D3D11_INPUT_ELEMENT_DESC primitiveLayoutDesc[] = {
+    Microsoft::WRL::ComPtr<ID3DBlob> instancedBlob;
+    hr = CreateShader(hWnd, nullptr, shadowShaderPath.c_str(), "VSMainInstanced", "vs_5_0", instancedBlob.GetAddressOf());
+    if (FAILED(hr) ||
+        FAILED(Device->CreateVertexShader(instancedBlob->GetBufferPointer(), instancedBlob->GetBufferSize(),
+                                          nullptr, shadowInstancedVertexShader.ReleaseAndGetAddressOf())))
+    {
+        std::cout << "Failed to create instanced shadow VS." << std::endl;
+        return false;
+    }
+
+    const D3D11_INPUT_ELEMENT_DESC primitiveLayoutDesc[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
-    hr = Device->CreateInputLayout(
-        primitiveLayoutDesc,
-        ARRAYSIZE(primitiveLayoutDesc),
-        shadowVertexShaderBlob->GetBufferPointer(),
-        shadowVertexShaderBlob->GetBufferSize(),
-        shadowInputLayoutPrimitive.ReleaseAndGetAddressOf()
-    );
+    hr = Device->CreateInputLayout(primitiveLayoutDesc, ARRAYSIZE(primitiveLayoutDesc),
+                                   shadowVertexShaderBlob->GetBufferPointer(), shadowVertexShaderBlob->GetBufferSize(),
+                                   shadowInputLayoutPrimitive.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
         std::cout << "Failed to create shadow primitive input layout." << std::endl;
         return false;
     }
 
-    D3D11_INPUT_ELEMENT_DESC meshLayoutDesc[] = {
+    const D3D11_INPUT_ELEMENT_DESC meshLayoutDesc[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
-    hr = Device->CreateInputLayout(
-        meshLayoutDesc,
-        ARRAYSIZE(meshLayoutDesc),
-        shadowVertexShaderBlob->GetBufferPointer(),
-        shadowVertexShaderBlob->GetBufferSize(),
-        shadowInputLayoutMesh.ReleaseAndGetAddressOf()
-    );
+    hr = Device->CreateInputLayout(meshLayoutDesc, ARRAYSIZE(meshLayoutDesc),
+                                   shadowVertexShaderBlob->GetBufferPointer(), shadowVertexShaderBlob->GetBufferSize(),
+                                   shadowInputLayoutMesh.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
         std::cout << "Failed to create shadow mesh input layout." << std::endl;
@@ -1273,29 +1658,19 @@ bool Game::InitShadowResources()
     return true;
 }
 
-void Game::CreateBackBuffer()
-{
-    if (FAILED(InitShaderBuffers()))
-    {
-        std::cout << "Failed to Shader Buffers!\n";
-        return;
-    }
-}
-
 void Game::UpdateShadowCascades()
 {
     using namespace DirectX;
 
-    if (!bShadowsEnabled || !FirstPlayer || !DisplayPtr)
+    if (!AreShadowsActive() || !FirstPlayer || !DisplayPtr)
     {
         return;
     }
 
-    const float nearPlane = 0.1f;
+    const float nearPlane = FirstPlayer->GetNearPlane();
     const float farPlane = ShadowDistance;
     const float aspect = DisplayPtr->GetWidth() / static_cast<float>(std::max(DisplayPtr->GetHeight(), 1));
-    const float fovY = XMConvertToRadians(60.0f);
-    const float tanHalfFovY = std::tan(fovY * 0.5f);
+    const float tanHalfFovY = std::tan(FirstPlayer->GetFovY() * 0.5f);
 
     const glm::vec3 cameraPosition = FirstPlayer->GetPosition();
     glm::vec3 cameraForward = FirstPlayer->GetForward();
@@ -1317,8 +1692,7 @@ void Game::UpdateShadowCascades()
     }
 
     const XMFLOAT3 lightDirection = NormalizeFloat3(DirectionalLightDirection);
-    XMVECTOR lightDirV = XMVectorSet(lightDirection.x, lightDirection.y, lightDirection.z, 0.0f);
-    lightDirV = XMVector3Normalize(lightDirV);
+    const XMVECTOR lightDirV = XMVector3Normalize(XMVectorSet(lightDirection.x, lightDirection.y, lightDirection.z, 0.0f));
 
     const float splitDistances[MaxShadowCascades + 1] = {
         nearPlane,
@@ -1366,8 +1740,7 @@ void Game::UpdateShadowCascades()
         float radius = 0.0f;
         for (const XMVECTOR& corner : frustumCorners)
         {
-            const XMVECTOR toCorner = XMVectorSubtract(corner, centroid);
-            radius = std::max(radius, XMVectorGetX(XMVector3Length(toCorner)));
+            radius = std::max(radius, XMVectorGetX(XMVector3Length(XMVectorSubtract(corner, centroid))));
         }
         radius = std::max(radius, 1.0f);
 
@@ -1390,15 +1763,12 @@ void Game::UpdateShadowCascades()
         for (const XMVECTOR& corner : frustumCorners)
         {
             const XMVECTOR cornerLS = XMVector3TransformCoord(corner, lightView);
-            const float x = XMVectorGetX(cornerLS);
-            const float y = XMVectorGetY(cornerLS);
-            const float z = XMVectorGetZ(cornerLS);
-            minX = std::min(minX, x);
-            maxX = std::max(maxX, x);
-            minY = std::min(minY, y);
-            maxY = std::max(maxY, y);
-            minZ = std::min(minZ, z);
-            maxZ = std::max(maxZ, z);
+            minX = std::min(minX, XMVectorGetX(cornerLS));
+            maxX = std::max(maxX, XMVectorGetX(cornerLS));
+            minY = std::min(minY, XMVectorGetY(cornerLS));
+            maxY = std::max(maxY, XMVectorGetY(cornerLS));
+            minZ = std::min(minZ, XMVectorGetZ(cornerLS));
+            maxZ = std::max(maxZ, XMVectorGetZ(cornerLS));
         }
 
         const float depthPadding = std::max(80.0f, radius * 0.45f);
@@ -1406,546 +1776,719 @@ void Game::UpdateShadowCascades()
         maxZ += depthPadding;
 
         const XMMATRIX lightProjection = XMMatrixOrthographicOffCenterLH(minX, maxX, minY, maxY, minZ, maxZ);
-        const XMMATRIX lightViewProjection = XMMatrixMultiply(lightView, lightProjection);
-        XMStoreFloat4x4(&CascadeLightViewProjection[cascadeIndex], XMMatrixTranspose(lightViewProjection));
+        XMStoreFloat4x4(&CascadeLightViewProjection[cascadeIndex], XMMatrixTranspose(XMMatrixMultiply(lightView, lightProjection)));
     }
 }
 
 void Game::RenderShadowMaps()
 {
-    if (!bShadowsEnabled ||
-        shadowVertexShader.Get() == nullptr ||
-        shadowPassCB.Get() == nullptr ||
-        shadowRasterState.Get() == nullptr ||
-        shadowSRV.Get() == nullptr)
+    if (!AreShadowsActive())
     {
         return;
     }
-
-    UpdateShadowCascades();
 
     ID3D11ShaderResourceView* nullShadowSRV = nullptr;
     Context->PSSetShaderResources(4, 1, &nullShadowSRV);
 
     D3D11_VIEWPORT shadowViewport = {};
-    shadowViewport.TopLeftX = 0.0f;
-    shadowViewport.TopLeftY = 0.0f;
     shadowViewport.Width = static_cast<float>(ShadowMapSize);
     shadowViewport.Height = static_cast<float>(ShadowMapSize);
-    shadowViewport.MinDepth = 0.0f;
     shadowViewport.MaxDepth = 1.0f;
 
-    Context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     Context->RSSetState(shadowRasterState.Get());
     Context->RSSetViewports(1, &shadowViewport);
+    Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
+
+    ShadowPassContext shadowPass;
+    shadowPass.VertexShader = shadowVertexShader.Get();
+    shadowPass.InstancedVertexShader = shadowInstancedVertexShader.Get();
+    shadowPass.ConstantBuffer = shadowPassCB.Get();
+    shadowPass.PrimitiveLayout = shadowInputLayoutPrimitive.Get();
+    shadowPass.MeshLayout = shadowInputLayoutMesh.Get();
 
     for (int cascadeIndex = 0; cascadeIndex < MaxShadowCascades; ++cascadeIndex)
     {
         ID3D11DepthStencilView* cascadeDSV = shadowDSVs[cascadeIndex].Get();
         Context->OMSetRenderTargets(0, nullptr, cascadeDSV);
         Context->ClearDepthStencilView(cascadeDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
+        shadowPass.LightViewProjection = CascadeLightViewProjection[cascadeIndex];
 
         for (auto& componentPair : Components)
         {
-            GameComponent* component = componentPair.second;
-            if (component == nullptr || component->IsSkybox())
+            GameComponent* component = componentPair.second.get();
+            if (!component->IsRenderable() || component->IsSkybox())
             {
                 continue;
             }
-
-            component->RenderShadow(
-                Context,
-                shadowVertexShader.Get(),
-                shadowPassCB.Get(),
-                shadowInputLayoutPrimitive.Get(),
-                shadowInputLayoutMesh.Get(),
-                CascadeLightViewProjection[cascadeIndex]
-            );
+            component->RenderShadow(Context.Get(), shadowPass);
         }
     }
 
-    Context->OMSetRenderTargets(1, &RenderTargetView, depthStencilView.Get());
+    Context->RSSetState(DefaultRasterState.Get());
+    SetFullViewport();
+    Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
 }
 
-void Game::RegisterShaders(std::string ShaderName, std::string AdditionalAttributeToName, ShaderCompileVariant variant)
+// ---------------------------------------------------------------------------------------------
+// Frame loop
+// ---------------------------------------------------------------------------------------------
+
+int Game::StartGame()
 {
-    std::string cacheKey = MakeShaderCacheKey(ShaderName, AdditionalAttributeToName, variant);
-    if (shaderCache.find(cacheKey) != shaderCache.end())
+    if (!bInitialized)
     {
-        return;
+        std::cout << "StartGame called without a successful Initialize." << std::endl;
+        return 1;
     }
-    bool isVertexShader = (AdditionalAttributeToName == vs_additional);
-    bool isPixelShader = (AdditionalAttributeToName == ps_additional);
-    if (!isVertexShader && !isPixelShader)
+
+    Run();
+    return ExitCode;
+}
+
+bool Game::PumpMessages()
+{
+    MSG msg = {};
+    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
     {
-        std::cout << "Unknown shader type for: " << ShaderName << std::endl;
-        return;
-    }
-    LPCSTR entryPoint = isVertexShader ? "VSMain" : "PSMain";
-    LPCSTR target = isVertexShader ? "vs_5_0" : "ps_5_0";
-    std::wstring wideShaderPath = std::wstring(ShaderName.begin(), ShaderName.end());
-    ID3DBlob* shaderBlob = nullptr;
-    const D3D_SHADER_MACRO* compileDefines = GetVariantDefines(variant);
-    HRESULT res = CreateShader(DisplayPtr->GetHwnd(), compileDefines, wideShaderPath.c_str(),
-                               entryPoint, target, &shaderBlob);
-    if (FAILED(res))
-    {
-        std::cout << "Failed to compile shader: " << ShaderName << std::endl;
-        return;
-    }
-    shaderCache.emplace(cacheKey, shaderBlob);
-    if (isVertexShader)
-    {
-        ID3D11VertexShader* vertexShader = nullptr;
-        res = Device->CreateVertexShader(shaderBlob->GetBufferPointer(), 
-                                         shaderBlob->GetBufferSize(), 
-                                         nullptr, &vertexShader);
-        if (FAILED(res))
+        if (msg.message == WM_QUIT)
         {
-            std::cout << "Failed to create vertex shader: " << ShaderName << std::endl;
-            return;
+            ExitCode = static_cast<int>(msg.wParam);
+            bRunning = false;
+            return false;
         }
-        vertexShaderCache.emplace(cacheKey, vertexShader);
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
     }
-    else if (isPixelShader)
-    {
-        ID3D11PixelShader* pixelShader = nullptr;
-        res = Device->CreatePixelShader(shaderBlob->GetBufferPointer(), 
-                                        shaderBlob->GetBufferSize(), 
-                                        nullptr, &pixelShader);
-        if (FAILED(res))
-        {
-            std::cout << "Failed to create pixel shader: " << ShaderName << std::endl;
-            return;
-        }
-        pixelShaderCache.emplace(cacheKey, pixelShader);
-    }
-    
-    std::cout << "Successfully registered shader: " << ShaderName << std::endl;
+    return bRunning;
 }
 
 void Game::Run()
 {
-    //ToDo: maybe 2 rasters? 3d and 2d
-    // Инициализация растеризатора
-    CD3D11_RASTERIZER_DESC rastDesc = {};
-    rastDesc.CullMode = D3D11_CULL_NONE; // Мешает кубик смотреть
-    //rastDesc.CullMode = D3D11_CULL_BACK;
-    rastDesc.FillMode = D3D11_FILL_SOLID;
-    rastDesc.FrontCounterClockwise = false;
-    rastDesc.DepthBias = 0;
-    rastDesc.DepthBiasClamp = 0.0f;
-    rastDesc.SlopeScaledDepthBias = 0.0f;
-    rastDesc.DepthClipEnable = true;   
-    rastDesc.ScissorEnable = false;
-    rastDesc.MultisampleEnable = false;
-    rastDesc.AntialiasedLineEnable = false;
-    ID3D11RasterizerState* rastState;
-    HRESULT res = Device->CreateRasterizerState(&rastDesc, &rastState);
-    Context->RSSetState(rastState);
+    using Clock = std::chrono::steady_clock;
 
-    auto prevTime = std::chrono::high_resolution_clock::now();
+    bRunning = true;
+    auto prevTime = Clock::now();
 
-    MSG msg = {};
-    while (true)
+    while (bRunning)
     {
-        // Handle the windows messages.
-        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+        // A quit request ends the loop before any further update, draw or present.
+        if (!PumpMessages())
         {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
+            break;
+        }
 
-            if (msg.message == WM_QUIT)
-            {
-                break;
-            }
+        ApplyPendingResize();
+        if (!bRunning)
+        {
+            break;
         }
-        // Расчет времени кадра
-        auto currentTime = std::chrono::high_resolution_clock::now();
-        float deltaTime = std::chrono::duration<float>(currentTime - prevTime).count();
-        prevTime = currentTime;
+        if (bMinimized)
+        {
+            WaitMessage();
+            prevTime = Clock::now();
+            continue;
+        }
 
-        if (FIXED_FPS && deltaTime > 0.1f)
+        const auto frameStart = Clock::now();
+        float deltaTime = std::chrono::duration<float>(frameStart - prevTime).count();
+        prevTime = frameStart;
+        deltaTime = std::min(deltaTime, MaxFrameDeltaSeconds);
+
+        ++FrameIndex;
+        Stats.Reset();
+
+        UpdateFrame(deltaTime);
+
+        BeginGpuTimer();
+        RenderFrame();
+        EndGpuTimer();
+
+        CpuFrameMsAccumulator += std::chrono::duration<double, std::milli>(Clock::now() - frameStart).count();
+        EndFrame();
+
+        if (InputDevicePtr)
         {
-            deltaTime = 0.1f;
+            InputDevicePtr->EndFrame();
         }
-        Update(deltaTime);
-        float clearColor[] = {0.0f, 0.0f, 0.2f, 1.0f};
-        Context->ClearRenderTargetView(RenderTargetView, clearColor);
-        Context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-        switch (RenderingType)
-        {
-        case Forward :
-            {
-               DrawForward(rastState);
-               break;
-            }
-        case Deffered:
-            {
-                DrawDeffered(rastState);
-                break;
-            }
-        case Custom :
-            {
-                Draw(rastState);
-                break;
-            }
-        default:
-            {
-                DrawForward(rastState);
-                break;
-            }
-        }
-        
+        LastFrameStats = Stats;
+        UpdateWindowTitle(deltaTime);
+    }
+
+    bRunning = false;
+    if (Context)
+    {
+        Context->ClearState();
+        Context->Flush();
     }
 }
 
-
-void Game::Update(float deltaTime)
+void Game::OnWindowResized(int clientWidth, int clientHeight, bool minimized)
 {
-    TotalTime += deltaTime;
-    ProcessInput(deltaTime);
-
-    FrameCount++;
-    static float fpsUpdateTime = 0;
-    fpsUpdateTime += deltaTime;
-
-    if (fpsUpdateTime >= 0.5f) // Update FPS every 0.5 seconds
+    bMinimized = minimized || clientWidth <= 0 || clientHeight <= 0;
+    if (!bMinimized)
     {
-        float Fps = FrameCount / fpsUpdateTime;
-        WCHAR text[256];
-        swprintf_s(text, TEXT("FPS: %.1f | Objects: %zu"), Fps, Components.size());
-        SetWindowText(DisplayPtr->GetHwnd(), text);
+        PendingWidth = clientWidth;
+        PendingHeight = clientHeight;
+        bResizePending = true;
+    }
+}
 
-        FrameCount = 0;
-        fpsUpdateTime = 0;
+void Game::OnFocusLost()
+{
+    if (InputDevicePtr)
+    {
+        InputDevicePtr->ClearPressedKeys();
+    }
+}
+
+void Game::ApplyPendingResize()
+{
+    if (!bResizePending || !SwapChain || !DisplayPtr)
+    {
+        return;
+    }
+    bResizePending = false;
+
+    if (PendingWidth == DisplayPtr->GetWidth() && PendingHeight == DisplayPtr->GetHeight() && RenderTargetView)
+    {
+        return;
+    }
+
+    // Every view of the old back buffer must be released before ResizeBuffers.
+    Context->ClearState();
+    ReleaseSwapChainResources();
+    Context->Flush();
+
+    const HRESULT hr = SwapChain->ResizeBuffers(0, static_cast<UINT>(PendingWidth), static_cast<UINT>(PendingHeight),
+                                                DXGI_FORMAT_UNKNOWN, 0);
+    if (FAILED(hr))
+    {
+        std::cout << "ResizeBuffers failed: 0x" << std::hex << hr << std::dec << std::endl;
+        bRunning = false;
+        ExitCode = 3;
+        return;
+    }
+
+    DisplayPtr->SetClientSize(PendingWidth, PendingHeight);
+    if (!CreateSwapChainResources(PendingWidth, PendingHeight))
+    {
+        bRunning = false;
+        ExitCode = 3;
+    }
+}
+
+void Game::ProcessHotkeys()
+{
+    if (!InputDevicePtr)
+    {
+        return;
+    }
+
+    // F3: deferred debug overlay, F4: VSync, F5: forward <-> deferred.
+    const bool overlayDown = InputDevicePtr->IsKeyDown(Keys::F3);
+    if (overlayDown && !bOverlayKeyWasDown)
+    {
+        bShowDeferredDebugOverlay = !bShowDeferredDebugOverlay;
+    }
+    bOverlayKeyWasDown = overlayDown;
+
+    const bool vsyncDown = InputDevicePtr->IsKeyDown(Keys::F4);
+    if (vsyncDown && !bVSyncKeyWasDown)
+    {
+        bVSync = !bVSync;
+    }
+    bVSyncKeyWasDown = vsyncDown;
+
+    const bool renderTypeDown = InputDevicePtr->IsKeyDown(Keys::F5);
+    if (renderTypeDown && !bRenderTypeKeyWasDown && RenderingType != Custom)
+    {
+        RenderingType = RenderingType == Forward ? Deffered : Forward;
+    }
+    bRenderTypeKeyWasDown = renderTypeDown;
+}
+
+void Game::UpdateFrame(float realDeltaTime)
+{
+    const float deltaTime = realDeltaTime * SimulationTimeScale;
+    TotalTime += deltaTime;
+
+    ProcessHotkeys();
+
+    // camera -> world transforms -> lights/cascades -> frame constants -> object constants
+    PreUpdate(deltaTime);
+    FirstPlayer->UpdateCamera(deltaTime);
+    TickComponents(deltaTime);
+
+    if (bShadowsEnabled && !bShadowResourcesReady && !bShadowInitFailed)
+    {
+        bShadowResourcesReady = InitShadowResources();
+        bShadowInitFailed = !bShadowResourcesReady;
+    }
+    UpdateShadowCascades();
+    BuildFrameConstants();
+
+    for (auto& pair : Components)
+    {
+        pair.second->Update();
+    }
+}
+
+void Game::TickComponents(float deltaTime)
+{
+    const bool bPaused = InputDevicePtr && InputDevicePtr->IsKeyDown(Keys::Space);
+    for (auto& pair : Components)
+    {
+        GameComponent* Component = pair.second.get();
+        Component->Tick(bPaused && !Component->IsSkybox() ? 0.0f : deltaTime);
+    }
+}
+
+void Game::BuildFrameConstants()
+{
+    using namespace DirectX;
+
+    FrameConstants& frame = CurrentFrame;
+    frame.viewMatrix = FirstPlayer->GetViewMatrix();
+    frame.projectionMatrix = FirstPlayer->GetProjectionMatrix();
+
+    const XMMATRIX view = XMMatrixTranspose(XMLoadFloat4x4(&frame.viewMatrix));
+    const XMMATRIX projection = XMMatrixTranspose(XMLoadFloat4x4(&frame.projectionMatrix));
+    XMStoreFloat4x4(&frame.invViewMatrix, XMMatrixTranspose(XMMatrixInverse(nullptr, view)));
+    XMStoreFloat4x4(&frame.invProjectionMatrix, XMMatrixTranspose(XMMatrixInverse(nullptr, projection)));
+
+    const glm::vec3 cameraPosition = FirstPlayer->GetPosition();
+    frame.CameraPosition = XMFLOAT4(cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f);
+
+    for (int i = 0; i < MaxPointLights; ++i)
+    {
+        frame.LightPositions[i] = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+        frame.LightColors[i] = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+        frame.LightParams[i] = XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
+    }
+    const std::vector<PointLightInfo> pointLights = GetPointLights(MaxPointLights);
+    const int lightCount = static_cast<int>(pointLights.size());
+    for (int i = 0; i < lightCount; ++i)
+    {
+        const PointLightInfo& light = pointLights[i];
+        frame.LightPositions[i] = XMFLOAT4(light.Position.x, light.Position.y, light.Position.z, 1.0f);
+        frame.LightColors[i] = XMFLOAT4(light.Color.x, light.Color.y, light.Color.z, 1.0f);
+        frame.LightParams[i] = XMFLOAT4(light.Intensity, light.Radius, light.bEnabled ? 1.0f : 0.0f, 0.0f);
+    }
+    frame.LightMeta = XMFLOAT4(static_cast<float>(lightCount), AmbientIntensity, SpecularShininess, 0.0f);
+
+    // The directional light does not depend on shadows; shadow data does.
+    frame.LightDirection = DirectionalLightDirection;
+    frame.DirectionalLightColorIntensity = DirectionalLightColorIntensity;
+    const bool bShadows = AreShadowsActive();
+    for (int cascadeIndex = 0; cascadeIndex < MaxShadowCascades; ++cascadeIndex)
+    {
+        frame.LightViewProjection[cascadeIndex] = bShadows ? CascadeLightViewProjection[cascadeIndex] : Identity4x4();
+    }
+    frame.CascadeSplits = bShadows ? CascadeSplits : XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+    frame.ShadowParams = bShadows ? ShadowParams : XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+    frame.ShadowParams.x = bShadows ? 1.0f : 0.0f;
+
+    // Frustum planes of clip = v * (V * P): columns combined, normalised.
+    const XMMATRIX viewProjection = XMMatrixTranspose(XMMatrixMultiply(view, projection));
+    const XMVECTOR column0 = viewProjection.r[0];
+    const XMVECTOR column1 = viewProjection.r[1];
+    const XMVECTOR column2 = viewProjection.r[2];
+    const XMVECTOR column3 = viewProjection.r[3];
+    const XMVECTOR planes[6] = {
+        XMVectorAdd(column3, column0),      // left
+        XMVectorSubtract(column3, column0), // right
+        XMVectorAdd(column3, column1),      // bottom
+        XMVectorSubtract(column3, column1), // top
+        column2,                            // near (D3D clip z >= 0)
+        XMVectorSubtract(column3, column2)  // far
+    };
+    for (int i = 0; i < 6; ++i)
+    {
+        XMStoreFloat4(&frame.FrustumPlanes[i], XMPlaneNormalize(planes[i]));
+    }
+}
+
+void Game::RenderFrame()
+{
+    switch (RenderingType)
+    {
+    case Deffered:
+        DrawDeffered();
+        break;
+    case Custom:
+        Draw();
+        break;
+    case Forward:
+    default:
+        DrawForward();
+        break;
     }
 }
 
 void Game::EndFrame()
 {
-    SwapChain->Present(1, 0);
-}
-
-void Game::Exit()
-{
-    DestroyResources();
-    PostQuitMessage(0);
-}
-
-ID3D11VertexShader* Game::GetVertexShader(const std::string& VertexShaderName, ShaderCompileVariant variant)
-{
-    const std::string cacheKey = MakeShaderCacheKey(VertexShaderName, vs_additional, variant);
-    auto it = vertexShaderCache.find(cacheKey);
-    if (it != vertexShaderCache.end())
+    if (!SwapChain)
     {
-        return it->second;
-    }
-    
-    RegisterShaders(VertexShaderName, vs_additional, variant);
-    
-    it = vertexShaderCache.find(cacheKey);
-    if (it != vertexShaderCache.end())
-    {
-        return it->second;
-    }
-    
-    std::cout << "Warning: Failed to get vertex shader: " << VertexShaderName 
-              << ", using base shader" << std::endl;
-    return BaseVertexShader;
-}
-
-ID3D11PixelShader* Game::GetPixelShader(const std::string& PixelShaderName, ShaderCompileVariant variant)
-{
-    const std::string cacheKey = MakeShaderCacheKey(PixelShaderName, ps_additional, variant);
-    auto it = pixelShaderCache.find(cacheKey);
-    if (it != pixelShaderCache.end())
-    {
-        return it->second;
-    }
-    
-    RegisterShaders(PixelShaderName, ps_additional, variant);
-    
-    it = pixelShaderCache.find(cacheKey);
-    if (it != pixelShaderCache.end())
-    {
-        return it->second;
-    }
-    
-    std::cout << "Warning: Failed to get pixel shader: " << PixelShaderName 
-              << ", using base shader" << std::endl;
-    return BasePixelShader;
-}
-
-void Game::ProcessInput(float deltaTime)
-{
-    assert(InputDevicePtr);
-}
-
-void Game::MessageHandler()
-{
-    MSG msg = {};
-    while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
-    {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-
-        if (msg.message == WM_QUIT)
-        {
-            Exit();
-        }
-    }
-}
-
-void Game::InitSwapChainDesc(const RECT& WindowRect)
-{
-    HWND hWnd = DisplayPtr->GetHwnd();
-    
-    if (!hWnd || !IsWindow(hWnd))
-    {
-        std::cout << "ERROR: Invalid window handle in InitSwapChainDesc!" << std::endl;
         return;
     }
-    
-    int width = WindowRect.right - WindowRect.left;
-    int height = WindowRect.bottom - WindowRect.top;
-    
-    if (width <= 0 || height <= 0)
+
+    const HRESULT hr = SwapChain->Present(bVSync ? 1 : 0, 0);
+    if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
     {
-        width = 800;
-        height = 600;
+        const HRESULT reason = Device ? Device->GetDeviceRemovedReason() : hr;
+        std::cout << "GPU device lost (0x" << std::hex << reason << std::dec << "), stopping." << std::endl;
+        bRunning = false;
+        ExitCode = 2;
     }
-    
-    ZeroMemory(&SwapChainDescription, sizeof(DXGI_SWAP_CHAIN_DESC));
-    
-    SwapChainDescription.BufferCount = 1;
-    SwapChainDescription.BufferDesc.Width = width;
-    SwapChainDescription.BufferDesc.Height = height;
-    SwapChainDescription.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    SwapChainDescription.BufferDesc.RefreshRate.Numerator = 0;
-    SwapChainDescription.BufferDesc.RefreshRate.Denominator = 1;
-    SwapChainDescription.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-    SwapChainDescription.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-    SwapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-    SwapChainDescription.OutputWindow = hWnd;
-    SwapChainDescription.Windowed = TRUE;
-    SwapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-    SwapChainDescription.Flags = 0;
-    SwapChainDescription.SampleDesc.Count = 1;
-    SwapChainDescription.SampleDesc.Quality = 0;
-    
-    std::cout << "SwapChainDesc initialized: " << width << "x" << height << ", HWND: " << hWnd << std::endl;
+    else if (FAILED(hr))
+    {
+        std::cout << "Present failed: 0x" << std::hex << hr << std::dec << std::endl;
+        bRunning = false;
+        ExitCode = 2;
+    }
 }
 
-HRESULT Game::CreateDeviceAndSwapChain()
+void Game::UpdateWindowTitle(float realDeltaTime)
 {
-    // Правильный массив уровней — несколько уровней для обратной совместимости
-    D3D_FEATURE_LEVEL FeatureLevels[] = {
-        D3D_FEATURE_LEVEL_11_1,
-        D3D_FEATURE_LEVEL_11_0,
-        D3D_FEATURE_LEVEL_10_1,
-        D3D_FEATURE_LEVEL_10_0,
-        D3D_FEATURE_LEVEL_9_3,
-        D3D_FEATURE_LEVEL_9_2,
-        D3D_FEATURE_LEVEL_9_1
+    TitleUpdateAccumulator += realDeltaTime;
+    ++TitleFrameCount;
+    if (TitleUpdateAccumulator < 0.5f || !DisplayPtr)
+    {
+        return;
+    }
+
+    size_t instanceCount = 0;
+    for (const auto& pair : Components)
+    {
+        instanceCount += pair.second->GetInstanceCount();
+    }
+
+    const float fps = TitleFrameCount / TitleUpdateAccumulator;
+    const double cpuMs = CpuFrameMsAccumulator / std::max<uint32_t>(TitleFrameCount, 1);
+    const wchar_t* renderName = RenderingType == Deffered ? L"Deferred" : (RenderingType == Custom ? L"Custom" : L"Forward");
+
+    WCHAR text[256];
+    swprintf_s(text, L"%s | FPS: %.1f | CPU %.2f ms | GPU %.2f ms | Objects: %zu (+%zu inst) | Draws: %u | Culled: %u%s",
+               renderName, fps, cpuMs, LastGpuFrameMs, Components.size(), instanceCount,
+               LastFrameStats.DrawCalls, LastFrameStats.CulledObjects, bVSync ? L" | VSync" : L"");
+    SetWindowText(DisplayPtr->GetHwnd(), text);
+
+    TitleUpdateAccumulator = 0.0f;
+    TitleFrameCount = 0;
+    CpuFrameMsAccumulator = 0.0;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Render passes
+// ---------------------------------------------------------------------------------------------
+
+void Game::SetFullViewport()
+{
+    D3D11_VIEWPORT viewport = {};
+    viewport.Width = static_cast<float>(DisplayPtr->GetWidth());
+    viewport.Height = static_cast<float>(DisplayPtr->GetHeight());
+    viewport.MaxDepth = 1.0f;
+    Context->RSSetViewports(1, &viewport);
+}
+
+void Game::BeginMainPass(bool bUseDepth)
+{
+    // The renderer is the single owner of clears: nothing else clears the back buffer or depth.
+    Context->ClearState();
+    Context->RSSetState(DefaultRasterState.Get());
+    SetFullViewport();
+    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    const std::array<float, 4> clearColor = GetClearColor();
+    Context->ClearRenderTargetView(RenderTargetView.Get(), clearColor.data());
+    if (bUseDepth)
+    {
+        Context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
+        Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
+    }
+    else
+    {
+        Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
+    }
+
+    const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
+}
+
+void Game::Draw()
+{
+    DrawForward();
+}
+
+void Game::DrawForward()
+{
+    BeginMainPass(true);
+    RenderShadowMaps();
+    RenderOpaque(OpaqueFilter::All, ShaderCompileVariant::Default);
+    RenderSkybox();
+    DispatchComputePhase();
+    RenderTransparent();
+}
+
+void Game::DrawDeffered()
+{
+    if (!InitDeferredResources())
+    {
+        // Shader variants are chosen per pass, so the forward path is a valid fallback.
+        if (!bDeferredFailureReported)
+        {
+            std::cout << "Deferred renderer is unavailable, rendering forward instead." << std::endl;
+            bDeferredFailureReported = true;
+        }
+        DrawForward();
+        return;
+    }
+
+    Context->ClearState();
+    Context->RSSetState(DefaultRasterState.Get());
+    SetFullViewport();
+    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    RenderShadowMaps();
+
+    // 1. Geometry pass: only materials that really write the G-buffer.
+    ID3D11RenderTargetView* gBufferTargets[3] =
+    {
+        gBufferAlbedoRTV.Get(),
+        gBufferNormalRTV.Get(),
+        gBufferWorldPositionRTV.Get()
     };
-    UINT numFeatureLevels = ARRAYSIZE(FeatureLevels);
-    D3D_FEATURE_LEVEL selectedFeatureLevel;
+    Context->OMSetRenderTargets(3, gBufferTargets, depthStencilView.Get());
 
-    UINT createDeviceFlags = 0;
-#ifdef _DEBUG
-    createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
-    
-    // Создаем устройство и цепочку свопов
-    HRESULT hr = D3D11CreateDeviceAndSwapChain(
-        nullptr,
-        D3D_DRIVER_TYPE_HARDWARE,
-        nullptr,
-        createDeviceFlags,
-        FeatureLevels,
-        numFeatureLevels,
-        D3D11_SDK_VERSION,
-        &SwapChainDescription,
-        &SwapChain,
-        &Device,
-        &selectedFeatureLevel,
-        &Context);
-    
-    // Если не получилось с DEBUG флагом, пробуем без него
-    if (FAILED(hr))
+    const float clearAlbedo[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    const float clearNormal[4] = {0.5f, 0.5f, 1.0f, 0.0f};
+    const float clearWorldPosition[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    Context->ClearRenderTargetView(gBufferAlbedoRTV.Get(), clearAlbedo);
+    Context->ClearRenderTargetView(gBufferNormalRTV.Get(), clearNormal);
+    Context->ClearRenderTargetView(gBufferWorldPositionRTV.Get(), clearWorldPosition);
+    Context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+    RenderOpaque(OpaqueFilter::DeferredCapable, ShaderCompileVariant::DeferredGBuffer);
+
+    // 2. Lighting into the back buffer; background pixels keep the clear colour.
+    const std::array<float, 4> clearColor = GetClearColor();
+    Context->ClearRenderTargetView(RenderTargetView.Get(), clearColor.data());
+    RenderDeferredLightingPass();
+
+    // 3. Forward-only opaque materials (reflective, emissive, custom) against the G-buffer depth.
+    Context->RSSetState(DefaultRasterState.Get());
+    SetFullViewport();
+    Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
+    RenderOpaque(OpaqueFilter::ForwardOnly, ShaderCompileVariant::Default);
+
+    // 4. Skybox, GPU simulation, transparency.
+    RenderSkybox();
+    DispatchComputePhase();
+    RenderTransparent();
+
+    if (bShowDeferredDebugOverlay)
     {
-        std::cout << "First attempt failed with: 0x" << std::hex << hr << std::dec << std::endl;
-        
-        // Пробуем без DEBUG флага
-        createDeviceFlags = 0;
-        hr = D3D11CreateDeviceAndSwapChain(
-            nullptr,
-            D3D_DRIVER_TYPE_HARDWARE,
-            nullptr,
-            createDeviceFlags,
-            FeatureLevels,
-            numFeatureLevels,
-            D3D11_SDK_VERSION,
-            &SwapChainDescription,
-            &SwapChain,
-            &Device,
-            &selectedFeatureLevel,
-            &Context);
+        RenderDeferredDebugOverlay();
     }
-    
-    if (FAILED(hr))
+}
+
+bool Game::IsVisible(GameComponent* Component)
+{
+    if (!bFrustumCulling || !Component->SupportsFrustumCulling())
     {
-        std::cout << "D3D11CreateDeviceAndSwapChain failed with error: 0x" << std::hex << hr << std::dec << std::endl;
-        
-        // Расшифровка ошибки
-        switch (hr)
+        ++Stats.VisibleObjects;
+        return true;
+    }
+
+    const float radius = Component->GetWorldBoundingRadius();
+    if (radius <= 0.0f)
+    {
+        ++Stats.VisibleObjects;
+        return true;
+    }
+
+    const glm::vec3 center = Component->GetWorldPosition();
+    for (const DirectX::XMFLOAT4& plane : CurrentFrame.FrustumPlanes)
+    {
+        if (plane.x * center.x + plane.y * center.y + plane.z * center.z + plane.w < -radius)
         {
-        case DXGI_ERROR_UNSUPPORTED:
-            std::cout << "ERROR: DXGI_ERROR_UNSUPPORTED - The requested feature level is not supported." << std::endl;
-            break;
-        case DXGI_ERROR_INVALID_CALL:
-            std::cout << "ERROR: DXGI_ERROR_INVALID_CALL - Invalid parameters provided." << std::endl;
-            std::cout << "  Check: SwapChainDescription structure, especially SampleDesc and BufferDesc" << std::endl;
-            break;
-        case E_INVALIDARG:
-            std::cout << "ERROR: E_INVALIDARG - Invalid argument passed." << std::endl;
-            break;
-        default:
-            std::cout << "ERROR: Unknown error code." << std::endl;
-            break;
+            ++Stats.CulledObjects;
+            return false;
         }
-        
-        return hr;
     }
 
-    std::cout << "Successfully created device with feature level: ";
-    switch (selectedFeatureLevel)
-    {
-    case D3D_FEATURE_LEVEL_11_1: std::cout << "11.1"; break;
-    case D3D_FEATURE_LEVEL_11_0: std::cout << "11.0"; break;
-    case D3D_FEATURE_LEVEL_10_1: std::cout << "10.1"; break;
-    case D3D_FEATURE_LEVEL_10_0: std::cout << "10.0"; break;
-    case D3D_FEATURE_LEVEL_9_3: std::cout << "9.3"; break;
-    case D3D_FEATURE_LEVEL_9_2: std::cout << "9.2"; break;
-    case D3D_FEATURE_LEVEL_9_1: std::cout << "9.1"; break;
-    default: std::cout << "Unknown"; break;
-    }
-    std::cout << std::endl;
-    const auto WindowRect = DisplayPtr->GetWinRect();
-    const int ScreenW = WindowRect.right - WindowRect.left;
-    const int ScreenH = WindowRect.bottom - WindowRect.top;
-    CreateDepthBuffer(Device, ScreenW, ScreenH);
-    
-    return S_OK;
+    ++Stats.VisibleObjects;
+    return true;
 }
 
-HRESULT Game::InitRenderTarget()
+void Game::RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant)
 {
-    const HRESULT res = SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&BackTexture);
-    return FAILED(res) ? res: Device->CreateRenderTargetView(BackTexture, nullptr,&RenderTargetView);
+    const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
+    Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
+
+    for (auto& pair : Components)
+    {
+        GameComponent* Component = pair.second.get();
+        if (!Component->IsRenderable() || Component->IsSkybox() || Component->HasOpacity())
+        {
+            continue;
+        }
+
+        if (filter != OpaqueFilter::All)
+        {
+            const bool bDeferredCapable = SupportsDeferredGeometry(Component);
+            if ((filter == OpaqueFilter::DeferredCapable) != bDeferredCapable)
+            {
+                continue;
+            }
+        }
+
+        if (!IsVisible(Component) || !BindComponentShaders(Component, variant))
+        {
+            continue;
+        }
+        Component->Render(Context.Get());
+    }
 }
 
-HRESULT Game::InitShaderBuffers()
+void Game::RenderSkybox()
 {
-    //VertexShader
-    HRESULT res = CreateShader(DisplayPtr->GetHwnd(), nullptr, shaderPath.c_str(), "VSMain", "vs_5_0", &vertexBC);
-    if (FAILED(res))
+    // Skybox is drawn after opaque geometry at the far plane: it only fills empty pixels.
+    Context->OMSetDepthStencilState(depthStencilStateSkybox.Get(), 0);
+    for (auto& pair : Components)
     {
-        return res;
-    }
-    std::string ShaderPath(shaderPath.begin(), shaderPath.end());
-    std::string cacheVertexKey = ShaderPath + "VSMain" + "vs_5_0";
-    shaderCache.emplace(cacheVertexKey, vertexBC);
-
-    //PixelShader
-    res = CreateShader(DisplayPtr->GetHwnd(), nullptr, shaderPath.c_str(), "PSMain", "ps_5_0", &pixelBC);
-    if (FAILED(res))
-    {
-        return res;
-    }
-    std::string cachePixelKey = ShaderPath + "PSMain" + "ps_5_0";
-    shaderCache.emplace(cachePixelKey, pixelBC);
-
-    HRESULT CreateVertexShaderResult = Device->CreateVertexShader(
-        vertexBC->GetBufferPointer(),
-        vertexBC->GetBufferSize(),
-        nullptr, &BaseVertexShader);
-
-    if (FAILED(CreateVertexShaderResult))
-    {
-        std::cout << "Failed to create vertex shader!\n";
-        return CreateVertexShaderResult;
-    }
-    HRESULT CreatePixelShaderResult = Device->CreatePixelShader(
-        pixelBC->GetBufferPointer(),
-        pixelBC->GetBufferSize(),
-        nullptr, &BasePixelShader);
-    if (FAILED(CreatePixelShaderResult))
-    {
-        std::cout << "Failed to create pixel shader!\n";
-        return CreatePixelShaderResult;
-    }
-
-    D3D11_INPUT_ELEMENT_DESC inputElements[] = {
-        D3D11_INPUT_ELEMENT_DESC{
-            "POSITION",
-            0,
-            DXGI_FORMAT_R32G32B32A32_FLOAT,
-            0,
-            0,
-            D3D11_INPUT_PER_VERTEX_DATA,
-            0
-        },
-        D3D11_INPUT_ELEMENT_DESC{
-            "COLOR",
-            0,
-            DXGI_FORMAT_R32G32B32A32_FLOAT,
-            0,
-            D3D11_APPEND_ALIGNED_ELEMENT,
-            D3D11_INPUT_PER_VERTEX_DATA,
-            0
+        GameComponent* Component = pair.second.get();
+        if (!Component->IsSkybox() || !Component->IsRenderable())
+        {
+            continue;
         }
+        if (BindComponentShaders(Component, ShaderCompileVariant::Default))
+        {
+            Component->Render(Context.Get());
+        }
+    }
+    Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
+}
+
+void Game::DispatchComputePhase()
+{
+    for (auto& pair : Components)
+    {
+        pair.second->DispatchCompute(Context.Get());
+    }
+
+    // Compute work may unbind the output merger to read the depth buffer.
+    Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
+}
+
+void Game::RenderTransparent()
+{
+    struct SortedDraw
+    {
+        float DistanceSq;
+        GameComponent* Component;
     };
-    
-    Device->CreateInputLayout(
-        inputElements,
-        2,
-        vertexBC->GetBufferPointer(),
-        vertexBC->GetBufferSize(),
-        &layout);
-}
 
-HRESULT Game::CreateShader(HWND hWnd,CONST D3D_SHADER_MACRO* pDefines, LPCWSTR FileName, LPCSTR pEntrypoint,
-                           LPCSTR pTarget, ID3DBlob** Buffer)
-{
-    ID3DBlob* errorVertexCode = nullptr;
-    const HRESULT res = D3DCompileFromFile(FileName,
-                                           pDefines /*macros*/,
-                                           nullptr /*include*/,
-                                           pEntrypoint,
-                                           pTarget,
-                                           D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
-                                           0,
-                                           Buffer,
-                                           &errorVertexCode);
-
-
-    if (FAILED(res))
+    std::vector<SortedDraw> transparentDraws;
+    const glm::vec3 cameraPosition(CurrentFrame.CameraPosition.x, CurrentFrame.CameraPosition.y, CurrentFrame.CameraPosition.z);
+    for (auto& pair : Components)
     {
-        if (errorVertexCode)
+        GameComponent* Component = pair.second.get();
+        if (!Component->IsRenderable() || Component->IsSkybox() || !Component->HasOpacity() || !IsVisible(Component))
         {
-            char* compileErrors = (char*)(errorVertexCode->GetBufferPointer());
-
-            std::cout << compileErrors << std::endl;
+            continue;
         }
-        else
-        {
-            MessageBox(hWnd, L"MyVeryFirstShader.hlsl", L"Missing Shader File", MB_OK);
-        }
-
-        return res;
+        const glm::vec3 toCamera = Component->GetWorldPosition() - cameraPosition;
+        transparentDraws.push_back({glm::dot(toCamera, toCamera), Component});
     }
 
-    return S_OK;
+    // Back to front; ties keep registry order. Intersecting transparent meshes are not resolved.
+    std::stable_sort(transparentDraws.begin(), transparentDraws.end(),
+                     [](const SortedDraw& a, const SortedDraw& b) { return a.DistanceSq > b.DistanceSq; });
+
+    const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    Context->OMSetDepthStencilState(depthStencilStateReadOnly.Get(), 0);
+    Context->OMSetBlendState(transparentBlendState.Get(), blendFactor, 0xffffffff);
+
+    for (const SortedDraw& draw : transparentDraws)
+    {
+        if (BindComponentShaders(draw.Component, ShaderCompileVariant::Default))
+        {
+            draw.Component->Render(Context.Get());
+        }
+    }
+
+    Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
+    Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
+}
+
+// ---------------------------------------------------------------------------------------------
+// GPU timing
+// ---------------------------------------------------------------------------------------------
+
+void Game::CreateGpuTimer()
+{
+    D3D11_QUERY_DESC disjointDesc = {D3D11_QUERY_TIMESTAMP_DISJOINT, 0};
+    D3D11_QUERY_DESC timestampDesc = {D3D11_QUERY_TIMESTAMP, 0};
+    for (int i = 0; i < GpuTimerLatency; ++i)
+    {
+        if (FAILED(Device->CreateQuery(&disjointDesc, GpuTimerDisjoint[i].ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreateQuery(&timestampDesc, GpuTimerBegin[i].ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreateQuery(&timestampDesc, GpuTimerEnd[i].ReleaseAndGetAddressOf())))
+        {
+            // Timing is diagnostic only; the renderer works without it.
+            for (int j = 0; j < GpuTimerLatency; ++j)
+            {
+                GpuTimerDisjoint[j].Reset();
+                GpuTimerBegin[j].Reset();
+                GpuTimerEnd[j].Reset();
+            }
+            return;
+        }
+    }
+}
+
+void Game::BeginGpuTimer()
+{
+    GpuTimerSlot = static_cast<int>(FrameIndex % GpuTimerLatency);
+    const int slot = GpuTimerSlot;
+    if (!GpuTimerDisjoint[slot])
+    {
+        return;
+    }
+
+    // Results of the frame issued GpuTimerLatency frames ago; never wait for the GPU.
+    if (GpuTimerIssued[slot])
+    {
+        D3D11_QUERY_DATA_TIMESTAMP_DISJOINT disjoint = {};
+        UINT64 begin = 0;
+        UINT64 end = 0;
+        if (Context->GetData(GpuTimerDisjoint[slot].Get(), &disjoint, sizeof(disjoint), D3D11_ASYNC_GETDATA_DONOTFLUSH) == S_OK &&
+            Context->GetData(GpuTimerBegin[slot].Get(), &begin, sizeof(begin), D3D11_ASYNC_GETDATA_DONOTFLUSH) == S_OK &&
+            Context->GetData(GpuTimerEnd[slot].Get(), &end, sizeof(end), D3D11_ASYNC_GETDATA_DONOTFLUSH) == S_OK &&
+            !disjoint.Disjoint && disjoint.Frequency > 0 && end >= begin)
+        {
+            LastGpuFrameMs = static_cast<float>(static_cast<double>(end - begin) * 1000.0 / static_cast<double>(disjoint.Frequency));
+        }
+        GpuTimerIssued[slot] = false;
+    }
+
+    Context->Begin(GpuTimerDisjoint[slot].Get());
+    Context->End(GpuTimerBegin[slot].Get());
+}
+
+void Game::EndGpuTimer()
+{
+    const int slot = GpuTimerSlot;
+    if (!GpuTimerDisjoint[slot])
+    {
+        return;
+    }
+
+    Context->End(GpuTimerEnd[slot].Get());
+    Context->End(GpuTimerDisjoint[slot].Get());
+    GpuTimerIssued[slot] = true;
 }

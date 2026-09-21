@@ -41,6 +41,7 @@ void RocketComponent::Tick(float deltaTime)
         }
     }
     ComponentPosition.y = glm::clamp(ComponentPosition.y,-5.f,5.f);
+    MarkTransformDirty();
 }
 
 bool RocketComponent::DoSmthWithCollision(GameComponent* AnotherComponent)

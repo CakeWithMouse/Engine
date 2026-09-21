@@ -62,6 +62,7 @@ void BallComponent::Tick(float deltaTime)
     ComponentPosition.x = ResultX;
     ComponentPosition.y = ResultY;
     ComponentRotation.y += deltaTime * 20.0f * Speed;
+    MarkTransformDirty();
     //ComponentRotation.x += deltaTime * 45.0f;
     /*if (ComponentRotation.y >= 360.0f)
     {
@@ -82,4 +83,5 @@ void BallComponent::Restart()
     Speed = 0.6f;
     ComponentPosition.x = 0;
     ComponentPosition.y = 0;
+    MarkTransformDirty();
 }

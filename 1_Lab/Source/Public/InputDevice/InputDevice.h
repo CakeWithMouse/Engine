@@ -85,7 +85,7 @@ class InputDevice
 
     Game* game;
 
-    std::unordered_set<Keys>* keys;
+    std::unordered_set<Keys> keys;
 
 public:
     struct MouseMoveEventArgs
@@ -95,20 +95,27 @@ public:
         int WheelDelta;
     };
 
-    glm::vec2 MousePosition;
-    glm::vec2 MouseOffset;
-    int MouseWheelDelta;
+    glm::vec2 MousePosition{0.0f, 0.0f};
+    // Frame snapshot: relative motion and wheel are accumulated over every Raw Input event
+    // received during the frame and reset by EndFrame().
+    glm::vec2 MouseOffset{0.0f, 0.0f};
+    int MouseWheelDelta = 0;
 
     MulticastDelegate<const MouseMoveEventArgs&> MouseMove;
 
 public:
     InputDevice(Game* inGame);
     ~InputDevice();
-
+    InputDevice(const InputDevice&) = delete;
+    InputDevice& operator=(const InputDevice&) = delete;
 
     void AddPressedKey(Keys key);
     void RemovePressedKey(Keys key);
-    bool IsKeyDown(Keys key);
+    bool IsKeyDown(Keys key) const;
+    /** Releases every key, e.g. when the window loses focus. */
+    void ClearPressedKeys();
+    /** Called by the game loop after the frame was simulated and drawn. */
+    void EndFrame();
 
     void OnKeyDown(KeyboardInputEventArgs args);
     void OnMouseMove(RawMouseEventArgs args);

@@ -64,7 +64,7 @@ void SphereComponent::InitSphere(float radius, int slices, int stacks)
         points.push_back(v);
     }
     
-    InitPoints(points.data(), points.size(), indices.data(), indices.size());
+    InitPoints(points.data(), static_cast<int>(points.size()), indices.data(), static_cast<int>(indices.size()));
     
     std::cout << "Sphere initialized with " << vertices.size()/2 << " vertices and " 
               << indices.size() << " indices\n";
@@ -73,9 +73,9 @@ void SphereComponent::InitSphere(float radius, int slices, int stacks)
 void SphereComponent::Tick(float deltaTime)
 {
     GameComponent::Tick(deltaTime);
-    MarkTransformDirty();
     if (orbitSpeed != 0.0f)
     {
+        MarkTransformDirty();
         currentAngle += orbitSpeed * deltaTime;
         if (currentAngle > DirectX::XM_2PI)
             currentAngle -= DirectX::XM_2PI;
@@ -94,12 +94,11 @@ void SphereComponent::Tick(float deltaTime)
 
 SphereComponent* SphereComponent::CreateSphereInstance(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm::vec4 Color)
 {
-    SphereComponent* NewComponent = new SphereComponent(pos,rot,scale,Color);
-    NewComponent->GamePtr = GamePtr;
-    ID3D11Device* device = nullptr;
-    GamePtr->GetContext()->GetDevice(&device);
-    //device->Release();
-    InstanceArray.push_back(NewComponent);
-    CreateInstanceBuffer(device);
-    return NewComponent;
+    // Same post-conditions as GameComponent::CreateInstance: owned by this component, game set.
+    // The GPU instance stream grows lazily (geometric capacity) when it is next drawn.
+    std::unique_ptr<SphereComponent> NewComponent = std::make_unique<SphereComponent>(pos, rot, scale, Color);
+    NewComponent->SetGame(GamePtr);
+    SphereComponent* Result = NewComponent.get();
+    InstanceArray.push_back(std::move(NewComponent));
+    return Result;
 }
