@@ -52,7 +52,8 @@ enum class RegisterResult
     NullComponent,
     EmptyName,
     DuplicateName,
-    DeviceNotReady
+    DeviceNotReady,
+    AlreadyOwned
 };
 
 const char* ToString(RegisterResult result);
@@ -154,7 +155,7 @@ public:
 
     /**
      * Adds a component to the scene. On Ok the scene takes ownership of the pointer.
-     * On any other result nothing is changed and ownership stays with the caller.
+     * On any other result nothing is changed and ownership stays with its current owner.
      */
     RegisterResult RegisterComponent(const std::string& Name, GameComponent* Component,
                                      const std::string& PShaderName = {}, const std::string& VShaderName = {});

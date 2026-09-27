@@ -258,6 +258,7 @@ const char* ToString(RegisterResult result)
     case RegisterResult::EmptyName: return "EmptyName";
     case RegisterResult::DuplicateName: return "DuplicateName";
     case RegisterResult::DeviceNotReady: return "DeviceNotReady";
+    case RegisterResult::AlreadyOwned: return "AlreadyOwned";
     default: return "Unknown";
     }
 }
@@ -758,6 +759,10 @@ RegisterResult Game::RegisterComponent(const std::string& Name, GameComponent* C
     {
         result = RegisterResult::DuplicateName;
     }
+    else if (Component->RegisteredOwner != nullptr)
+    {
+        result = RegisterResult::AlreadyOwned;
+    }
 
     if (result != RegisterResult::Ok)
     {
@@ -776,6 +781,7 @@ RegisterResult Game::RegisterComponent(const std::string& Name, GameComponent* C
     }
 
     Components.emplace(Name, std::unique_ptr<GameComponent>(Component));
+    Component->RegisteredOwner = this;
     if (pointLight != nullptr)
     {
         PointLights.push_back(pointLight);

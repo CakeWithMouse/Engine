@@ -346,7 +346,8 @@ cbuffer ParticleRenderBuffer : register(b0)
     float4 CameraUp;
     float4 GlobalTint;
     float Brightness;
-    float3 RenderPadding;
+    uint SortingEnabled;
+    float2 RenderPadding;
 };
 
 StructuredBuffer<ParticleData> ParticleBuffer : register(t0);
@@ -361,7 +362,11 @@ struct VS_OUT
 VS_OUT VSMain(uint vertexId : SV_VertexID, uint instanceId : SV_InstanceID)
 {
     VS_OUT output = (VS_OUT)0;
-    uint particleIndex = SortedParticlePairs[instanceId].ParticleIndex;
+    uint particleIndex = instanceId;
+    if (SortingEnabled != 0)
+    {
+        particleIndex = SortedParticlePairs[instanceId].ParticleIndex;
+    }
     ParticleData p = ParticleBuffer[particleIndex];
 
     float lifeNorm = saturate(p.PositionLife.w / max(p.VelocityLifetime.w, 0.0001));

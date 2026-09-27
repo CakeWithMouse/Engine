@@ -63,7 +63,7 @@ struct GPUParticleRenderCB
     DirectX::XMFLOAT4 CameraUp;
     DirectX::XMFLOAT4 GlobalTint;
     float Brightness;
-    float padding0;
+    unsigned int SortingEnabled;
     float padding1;
     float padding2;
 };

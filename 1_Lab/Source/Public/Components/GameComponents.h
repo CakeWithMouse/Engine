@@ -201,6 +201,9 @@ protected:
     ID3D11PixelShader* pixelShader = nullptr;
 
 private:
+    friend class Game;
+    // Separate from GamePtr: components may be configured with a game before registration.
+    Game* RegisteredOwner = nullptr;
     std::string VertexShaderName;
     std::string PixelShaderName;
     ComponentShaderVariant ShaderVariants[2];

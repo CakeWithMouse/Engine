@@ -457,6 +457,7 @@ void ParticleSystemComponent::UpdateRenderConstants(ID3D11DeviceContext* context
     renderData.CameraUp = DirectX::XMFLOAT4(camUp.x, camUp.y, camUp.z, 0.0f);
     renderData.GlobalTint = DirectX::XMFLOAT4(Color.x, Color.y, Color.z, Color.w);
     renderData.Brightness = Brightness;
+    renderData.SortingEnabled = bSortingEnabled ? 1u : 0u;
 
     context->UpdateSubresource(RenderCB.Get(), 0, nullptr, &renderData, 0, 0);
 }
