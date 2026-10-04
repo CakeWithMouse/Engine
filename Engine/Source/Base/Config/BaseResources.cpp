@@ -1,6 +1,22 @@
 #include <Engine/Base/Config/BaseResources.h>
 
 #include <Windows.h>
+#include <cstdio>
+
+bool BaseResources::Initialize()
+{
+    if (initialized) return true;
+    initialized = true;
+    std::puts("ResourcesReady (stub)");
+    return true;
+}
+
+bool BaseResources::DeInitialize()
+{
+    if (initialized) std::puts("ResourcesStopped (stub)");
+    initialized = false;
+    return true;
+}
 
 std::filesystem::path BaseResources::FindProjectDirectory()
 {

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<ItemGroup Label="ProjectConfigurations">
+<ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
+<ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
+</ItemGroup>
+<PropertyGroup Label="Globals"><ProjectGuid>{7A86EB5A-6C85-5FFA-8266-59398BABE19F}</ProjectGuid><WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion></PropertyGroup>
+<Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props" />
+<PropertyGroup Label="Configuration"><ConfigurationType>DynamicLibrary</ConfigurationType><PlatformToolset>v145</PlatformToolset><CharacterSet>Unicode</CharacterSet><UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries><UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries></PropertyGroup>
+<Import Project="$(VCTargetsPath)/Microsoft.Cpp.props" />
+<Import Project="..\..\Engine\BuildSupport\Cpp.props" />
+<PropertyGroup><OutDir>$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/Runtime/Projects/RuntimeExample/</OutDir><TargetName>Game</TargetName></PropertyGroup>
+<ItemGroup><ClCompile Include="Source/Module.cpp" /></ItemGroup>
+<ItemGroup></ItemGroup>
+<Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets" />
+<Target Name="DeployRuntimeProject" AfterTargets="Build"><MakeDir Directories="$(OutDir)Content" /><Copy SourceFiles="$(MSBuildProjectDirectory)/Project.json" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" /><Copy SourceFiles="$(MSBuildProjectDirectory)/Content/README.md" DestinationFolder="$(OutDir)Content" SkipUnchangedFiles="true" /></Target>
+</Project>

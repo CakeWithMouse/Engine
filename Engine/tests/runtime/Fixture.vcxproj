@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals"><ProjectGuid>{A8C42A43-4D30-4D6E-B567-D6C962A88AA6}</ProjectGuid><WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion></PropertyGroup>
+  <Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration"><ConfigurationType>DynamicLibrary</ConfigurationType><PlatformToolset>v145</PlatformToolset><CharacterSet>Unicode</CharacterSet></PropertyGroup>
+  <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props" />
+  <Import Project="../../BuildSupport/Cpp.props" />
+  <PropertyGroup>
+    <OutDir>$(RepositoryRoot)Engine/build/$(Platform)/$(Configuration)/RuntimeFixtures/</OutDir>
+    <IntDir>$(RepositoryRoot)Engine/build/obj/$(Platform)/$(Configuration)/RuntimeFixtures/$(FixtureName)/</IntDir>
+    <TargetName>$(FixtureName)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup><ClCompile><PreprocessorDefinitions>FIXTURE_CASE=$(FixtureCase);%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile></ItemDefinitionGroup>
+  <ItemGroup><ClCompile Include="Fixture.cpp" /></ItemGroup>
+  <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets" />
+</Project>

@@ -1,8 +1,8 @@
-param([switch]$EnableAssimp)
+param([switch]$EnableAssimp, [string]$PlatformToolset = 'auto')
 $ErrorActionPreference = 'Stop'
 try {
     $repository = Split-Path $PSScriptRoot
-    & (Join-Path $repository 'build.ps1') -EnableAssimp:$EnableAssimp
+    & (Join-Path $repository 'build.ps1') -EnableAssimp:$EnableAssimp -PlatformToolset $PlatformToolset
     $launcher = Join-Path $repository '../Game/build/x64/Debug/EngineLauncher.exe'
     if (!(Test-Path -LiteralPath $launcher)) { throw "Launcher was not produced: $launcher" }
     # This is the interactive window explicitly requested by the user.
