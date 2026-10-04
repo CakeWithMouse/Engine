@@ -43,3 +43,4 @@
 | 028 | P2 | [Улучшения после разделения: legacy, ресурсы, стратегия, DLL](028-separation-followups.md) |
 | 029 | Развитие | [Самостоятельные игры и графический лаунчер](029-games-and-launcher.md) |
 | 030 | Организация | [Корень Engine / Game / Agent](030-repository-layout.md) |
+| 031 | Архитектура | [Перенести управление runtime в Engine](031-engine-runtime.md) |
