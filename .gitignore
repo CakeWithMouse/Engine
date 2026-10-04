@@ -49,3 +49,11 @@ x64/
 
 # vcpkg manifest-mode install tree
 vcpkg_installed/
+
+# New solution outputs
+build/
+!AGENTS.md
+!Game/Katamari/Content/Models/*.obj
+
+# Historical build outputs retained during directory cleanup
+Agent/Archive/

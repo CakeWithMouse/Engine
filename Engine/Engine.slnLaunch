@@ -1,0 +1,11 @@
+[
+  {
+    "Name": "EngineLauncher",
+    "Projects": [
+      {
+        "Path": "..\\Game\\Launcher\\EngineLauncher.vcxproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
