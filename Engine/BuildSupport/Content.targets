@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <EngineContent Include="$(RepositoryRoot)Engine\Content\**\*" />
+  </ItemGroup>
+  <Target Name="DeployEngineContent" AfterTargets="Build">
+    <Copy SourceFiles="@(EngineContent)" DestinationFiles="@(EngineContent->'$(OutDir)EngineContent\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+</Project>
