@@ -9,16 +9,28 @@ namespace
 {
 HWND list = nullptr;
 HWND status = nullptr;
+HWND editButton = nullptr;
 constexpr INT_PTR ListId = 100;
 constexpr INT_PTR LaunchId = 101;
+constexpr INT_PTR EditId = 102;
 
 std::filesystem::path GameDirectory(const GameEntry& entry)
 {
     return ExampleDeployment::ExecutableDirectory() / entry.directory;
 }
 
-std::filesystem::path Validate(const GameEntry& entry)
+std::filesystem::path Validate(const GameEntry& entry, bool editor = false)
 {
+    if (editor && !entry.runtime) throw std::runtime_error("Editing is not supported for legacy games");
+    if (entry.runtime)
+    {
+        const auto runtime = ExampleDeployment::ExecutableDirectory() / "Runtime";
+        const auto project = runtime / "Projects" / entry.directory;
+        for (const auto& file : {runtime / "EngineRuntime.exe", project / "Project.json",
+            editor ? runtime / "Editor.dll" : project / "Game.dll"})
+            if (!std::filesystem::is_regular_file(file)) throw std::runtime_error("Runtime file is missing: " + file.u8string());
+        return runtime / "EngineRuntime.exe";
+    }
     const auto directory = GameDirectory(entry);
     const auto executable = directory / (std::wstring(entry.directory) + L".exe");
     if (!std::filesystem::is_regular_file(executable))
@@ -27,17 +39,23 @@ std::filesystem::path Validate(const GameEntry& entry)
     return executable;
 }
 
-int Launch(const GameEntry& entry, bool smoke)
+int Launch(const GameEntry& entry, bool smoke, bool editor = false)
 {
-    const auto executable = Validate(entry);
+    const auto executable = Validate(entry, editor);
     std::wstring command = L"\"" + executable.wstring() + L"\"";
-    if (smoke) command += L" --smoke";
+    if (entry.runtime)
+    {
+        const auto project = executable.parent_path() / "Projects" / entry.directory / "Project.json";
+        command += L" --project \"" + project.wstring() + L"\" --mode " + (editor ? L"editor" : L"game");
+        if (smoke) command += L" --frames 3";
+    }
+    else if (smoke) command += L" --smoke";
     STARTUPINFOW startup{};
     startup.cb = sizeof(startup);
     PROCESS_INFORMATION process{};
     // Inherit the caller's CWD: games must locate content independently of it.
     if (!CreateProcessW(executable.c_str(), command.data(), nullptr, nullptr, FALSE,
-                        0, nullptr, nullptr, &startup, &process))
+                        entry.runtime && !smoke ? CREATE_NEW_CONSOLE : 0, nullptr, nullptr, &startup, &process))
         throw std::runtime_error("CreateProcess failed, Windows error " + std::to_string(GetLastError()));
     CloseHandle(process.hThread);
     if (!smoke) { CloseHandle(process.hProcess); return 0; }
@@ -64,10 +82,12 @@ const GameEntry& Selected()
 void UpdateStatus()
 {
     const auto& entry = Selected();
+    EnableWindow(editButton, entry.runtime);
     try
     {
         Validate(entry);
-        SetWindowTextW(status, L"Готово к запуску. Игра откроется отдельным процессом.");
+        SetWindowTextW(status, entry.runtime ? L"Один EngineRuntime: игра или редактор. Пока консольные заглушки. Enter — кадр, q — выход." :
+            L"Готово к запуску. Старый игровой exe; редактирование пока недоступно.");
     }
     catch (const std::exception& error)
     {
@@ -86,8 +106,10 @@ LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lPa
             18, 45, 670, 145, window, reinterpret_cast<HMENU>(ListId), nullptr, nullptr);
         for (const auto& game : Games) SendMessageW(list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(game.title));
         SendMessageW(list, LB_SETCURSEL, 0, 0);
-        CreateWindowW(L"BUTTON", L"Запустить", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON,
+        CreateWindowW(L"BUTTON", L"Играть", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON,
             18, 205, 155, 35, window, reinterpret_cast<HMENU>(LaunchId), nullptr, nullptr);
+        editButton = CreateWindowW(L"BUTTON", L"Редактировать", WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+            190, 205, 180, 35, window, reinterpret_cast<HMENU>(EditId), nullptr, nullptr);
         status = CreateWindowW(L"STATIC", L"", WS_CHILD | WS_VISIBLE | SS_LEFT,
             18, 255, 670, 120, window, nullptr, nullptr, nullptr);
         UpdateStatus();
@@ -97,12 +119,12 @@ LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lPa
         return 0;
     case WM_COMMAND:
         if (LOWORD(wParam) == ListId && HIWORD(wParam) == LBN_SELCHANGE) { UpdateStatus(); return 0; }
-        if (LOWORD(wParam) == LaunchId || (LOWORD(wParam) == ListId && HIWORD(wParam) == LBN_DBLCLK))
+        if (LOWORD(wParam) == LaunchId || LOWORD(wParam) == EditId || (LOWORD(wParam) == ListId && HIWORD(wParam) == LBN_DBLCLK))
         {
             try
             {
-                Launch(Selected(), false);
-                SetWindowTextW(status, L"Игра запущена отдельным процессом. Лаунчер можно закрыть.");
+                Launch(Selected(), false, LOWORD(wParam) == EditId);
+                SetWindowTextW(status, L"Приложение запущено. Лаунчер можно закрыть.");
             }
             catch (const std::exception& error)
             {
@@ -128,13 +150,15 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
     {
         if (diagnostic)
         {
-            if (argc != 3 || (std::wstring(argv[1]) != L"--check" && std::wstring(argv[1]) != L"--smoke"))
+            if (argc != 3 || (std::wstring(argv[1]) != L"--check" && std::wstring(argv[1]) != L"--smoke" &&
+                std::wstring(argv[1]) != L"--check-editor" && std::wstring(argv[1]) != L"--smoke-editor"))
             { LocalFree(argv); return 2; }
-            const bool smoke = std::wstring(argv[1]) == L"--smoke";
+            const bool smoke = std::wstring(argv[1]) == L"--smoke" || std::wstring(argv[1]) == L"--smoke-editor";
+            const bool editor = std::wstring(argv[1]) == L"--check-editor" || std::wstring(argv[1]) == L"--smoke-editor";
             const std::wstring name = argv[2];
             LocalFree(argv); argv = nullptr;
             for (const auto& entry : Games)
-                if (name == entry.directory) { Validate(entry); return smoke ? Launch(entry, true) : 0; }
+                if (name == entry.directory) { Validate(entry, editor); return smoke ? Launch(entry, true, editor) : 0; }
             return 2;
         }
         LocalFree(argv); argv = nullptr;

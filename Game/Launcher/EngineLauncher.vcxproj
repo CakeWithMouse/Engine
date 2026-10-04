@@ -22,6 +22,7 @@
   <PropertyGroup><OutDir>$(RepositoryRoot)Game\build\$(Platform)\$(Configuration)\</OutDir><IntDir>$(RepositoryRoot)Game\build\obj\$(Platform)\$(Configuration)\EngineLauncher\</IntDir></PropertyGroup>
   <ItemGroup><ClCompile Include="Source\Main.cpp" /><ClInclude Include="Source\Catalog.h" /></ItemGroup>
   <ItemDefinitionGroup><Link><SubSystem>Windows</SubSystem><AdditionalDependencies>shell32.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+  <ItemGroup><ProjectReference Include="../../Engine/Runtime/EngineRuntime.vcxproj"><Project>{30B3ACB8-B4EF-5CF4-8E65-FA5CB8AC1DC6}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference></ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 
 </Project>

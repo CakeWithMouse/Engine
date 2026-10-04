@@ -16,12 +16,30 @@ Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "SunGame", "..\Game\SunGame\
 EndProject
 Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "Katamari", "..\Game\Katamari\Katamari.vcxproj", "{66BCFD2D-77A1-4F9C-97A5-A95D097368FE}"
 EndProject
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "EngineRuntime", "Runtime\EngineRuntime.vcxproj", "{30B3ACB8-B4EF-5CF4-8E65-FA5CB8AC1DC6}"
+EndProject
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "EditorModule", "..\Editor\EditorModule.vcxproj", "{D1C7E1A4-515D-501E-AEC8-7E082E8D7425}"
+EndProject
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "RuntimeExample", "..\Game\RuntimeExample\RuntimeExample.vcxproj", "{7A86EB5A-6C85-5FFA-8266-59398BABE19F}"
+EndProject
 Global
   GlobalSection(SolutionConfigurationPlatforms) = preSolution
     Debug|x64 = Debug|x64
     Release|x64 = Release|x64
   EndGlobalSection
   GlobalSection(ProjectConfigurationPlatforms) = postSolution
+    {30B3ACB8-B4EF-5CF4-8E65-FA5CB8AC1DC6}.Debug|x64.ActiveCfg = Debug|x64
+    {30B3ACB8-B4EF-5CF4-8E65-FA5CB8AC1DC6}.Debug|x64.Build.0 = Debug|x64
+    {30B3ACB8-B4EF-5CF4-8E65-FA5CB8AC1DC6}.Release|x64.ActiveCfg = Release|x64
+    {30B3ACB8-B4EF-5CF4-8E65-FA5CB8AC1DC6}.Release|x64.Build.0 = Release|x64
+    {D1C7E1A4-515D-501E-AEC8-7E082E8D7425}.Debug|x64.ActiveCfg = Debug|x64
+    {D1C7E1A4-515D-501E-AEC8-7E082E8D7425}.Debug|x64.Build.0 = Debug|x64
+    {D1C7E1A4-515D-501E-AEC8-7E082E8D7425}.Release|x64.ActiveCfg = Release|x64
+    {D1C7E1A4-515D-501E-AEC8-7E082E8D7425}.Release|x64.Build.0 = Release|x64
+    {7A86EB5A-6C85-5FFA-8266-59398BABE19F}.Debug|x64.ActiveCfg = Debug|x64
+    {7A86EB5A-6C85-5FFA-8266-59398BABE19F}.Debug|x64.Build.0 = Debug|x64
+    {7A86EB5A-6C85-5FFA-8266-59398BABE19F}.Release|x64.ActiveCfg = Release|x64
+    {7A86EB5A-6C85-5FFA-8266-59398BABE19F}.Release|x64.Build.0 = Release|x64
     {0DF40264-80AB-4D4F-B271-3D0AE7A62B9E}.Debug|x64.ActiveCfg = Debug|x64
     {0DF40264-80AB-4D4F-B271-3D0AE7A62B9E}.Debug|x64.Build.0 = Debug|x64
     {0DF40264-80AB-4D4F-B271-3D0AE7A62B9E}.Release|x64.ActiveCfg = Release|x64

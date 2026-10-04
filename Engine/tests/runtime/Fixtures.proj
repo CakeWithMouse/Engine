@@ -1,0 +1,14 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Fixture Include="BadVersion"><Case>1</Case></Fixture>
+    <Fixture Include="WrongKind"><Case>2</Case></Fixture>
+    <Fixture Include="MissingExport"><Case>3</Case></Fixture>
+    <Fixture Include="FailGameStart"><Case>4</Case></Fixture>
+    <Fixture Include="FailEditorStart"><Case>5</Case></Fixture>
+    <Fixture Include="RequestExit"><Case>6</Case></Fixture>
+    <Fixture Include="FailUpdate"><Case>7</Case></Fixture>
+  </ItemGroup>
+  <Target Name="Build">
+    <MSBuild Projects="Fixture.vcxproj" Properties="Configuration=$(Configuration);Platform=$(Platform);PlatformToolset=$(PlatformToolset);FixtureName=%(Fixture.Identity);FixtureCase=%(Fixture.Case)" />
+  </Target>
+</Project>

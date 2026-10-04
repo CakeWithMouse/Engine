@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<ItemGroup Label="ProjectConfigurations">
+<ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
+<ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
+</ItemGroup>
+<PropertyGroup Label="Globals"><ProjectGuid>{30B3ACB8-B4EF-5CF4-8E65-FA5CB8AC1DC6}</ProjectGuid><WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion></PropertyGroup>
+<Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props" />
+<PropertyGroup Label="Configuration"><ConfigurationType>Application</ConfigurationType><PlatformToolset>v145</PlatformToolset><CharacterSet>Unicode</CharacterSet><UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries><UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries></PropertyGroup>
+<Import Project="$(VCTargetsPath)/Microsoft.Cpp.props" />
+<Import Project="..\BuildSupport\Cpp.props" />
+<PropertyGroup><OutDir>$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/Runtime/</OutDir><TargetName>EngineRuntime</TargetName></PropertyGroup>
+<ItemGroup><ClCompile Include="Main.cpp" /><ClCompile Include="Project.cpp" /></ItemGroup>
+<ItemGroup><ProjectReference Include="..\Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project><LinkLibraryDependencies>true</LinkLibraryDependencies></ProjectReference><ProjectReference Include="..\..\Editor\EditorModule.vcxproj"><Project>{D1C7E1A4-515D-501E-AEC8-7E082E8D7425}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference><ProjectReference Include="..\..\Game\RuntimeExample\RuntimeExample.vcxproj"><Project>{7A86EB5A-6C85-5FFA-8266-59398BABE19F}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference></ItemGroup>
+<Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets" />
+
+</Project>

@@ -9,9 +9,11 @@
 class BaseResources
 {
 public:
-    // Lifecycle declarations reserved for the next step; not implemented yet.
+    // Runtime skeleton: no actual GPU resources are created here yet.
     bool Initialize();
     bool DeInitialize();
+private:
+    bool initialized = false;
 public:  
     static constexpr glm::vec4 White{1.0f, 1.0f, 1.f, 1.f};
     static constexpr glm::vec4 Red{0.5f, 0.0f, 0.f, 1.f};

@@ -1,0 +1,5 @@
+{
+  "name": "Runtime Example",
+  "module": "Game.dll",
+  "content": "Content"
+}

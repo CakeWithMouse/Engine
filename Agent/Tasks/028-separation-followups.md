@@ -34,6 +34,8 @@
 
 ## 028-H. Основа BaseEngine / BaseResources / BaseGameConfig
 
+Обновление 032: жизненный цикл заглушек реализован для нового EngineRuntime.exe (game/editor DLL), с тестами Debug/Release. Ниже остаются открытыми перенос реальных обязанностей Game и подключение старых игровых сцен. См. [032](032-runtime-game-editor-modes.md).
+
 - [x] Перенести три класса из 1_Lab в публичные заголовки `Engine/Include/Engine/Base` и реализации `Engine/Source/Base`, включить cpp в Engine.vcxproj.
 - [x] Исправить include, заменить старые пути шейдеров на EnginePaths, исключить выбор лабораторной CurrentGameType из конфигурации ядра. Остальные поля сохранены.
 - [x] Проверить Debug-сборку, существующие тесты и запуск SunGame после переноса.

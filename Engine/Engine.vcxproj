@@ -34,6 +34,8 @@
     <ClCompile Include="Source\Base\Config\BaseResources.cpp" />
     <ClCompile Include="Source\Base\Config\BaseGameConfig.cpp" />
     <ClInclude Include="Include\Engine\Base\Base.h" />
+    <ClInclude Include="Include\Engine\Runtime\ModuleApi.h" />
+    <ClInclude Include="Include\Engine\Runtime\LaunchOptions.h" />
     <ClInclude Include="Include\Engine\Base\Config\BaseResources.h" />
     <ClInclude Include="Include\Engine\Base\Config\BaseGameConfig.h" />
     <ClCompile Include="Source\Components\GameComponents.cpp" />

@@ -1,10 +1,11 @@
 param([ValidateSet('Debug','Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All','Engine','EngineLauncher','BasicExamples','Pong','SunGame','Katamari')][string]$Target = 'All',
-    [string]$PlatformToolset = 'v145', [switch]$EnableAssimp)
+    [ValidateSet('All','Engine','EngineRuntime','EngineLauncher','BasicExamples','Pong','SunGame','Katamari')][string]$Target = 'All',
+    [string]$PlatformToolset = 'auto', [switch]$EnableAssimp)
 $ErrorActionPreference = 'Stop'
 $project = switch ($Target) {
     'All' { 'Engine.sln' }
     'Engine' { 'Engine.vcxproj' }
+    'EngineRuntime' { 'Runtime/EngineRuntime.vcxproj' }
     'EngineLauncher' { '../Game/Launcher/EngineLauncher.vcxproj' }
     default { "../Game/$Target/$Target.vcxproj" }
 }
