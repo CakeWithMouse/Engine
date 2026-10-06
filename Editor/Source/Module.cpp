@@ -1,50 +1,26 @@
 #include <Engine/Runtime/ModuleApi.h>
+#include "QtHost.h"
 #include <cstdio>
 #include <new>
 
 namespace
 {
-struct Session { EngineModuleHost host; uint64_t updates = 0; };
-void Log(Session* s, const char* text) { s->host.log(s->host.user, text); }
-void* __cdecl Create(const EngineModuleHost* host)
-{
-    if (!host || host->version != ENGINE_MODULE_VERSION || !host->log || !host->requestExit) return nullptr;
-    auto* s = new (std::nothrow) Session{*host};
-    if (s) Log(s, "EditorCreate");
-    return s;
+    void* __cdecl Create(const EngineModuleHost* host)
+    {
+        if (!host || host->version != ENGINE_MODULE_VERSION || !host->log || !host->requestExit) return nullptr;
+        try {
+            auto* e = new (std::nothrow) EditorQtHost(*host);
+            if (e) e->Log("EditorCreate");
+            return e;
+        } catch (...) { return nullptr; }
+    }
+    int __cdecl Start(void* i)   { auto* e = static_cast<EditorQtHost*>(i); if (!e) return 0; try { return e->Start() ? 1 : 0; } catch (...) { return 0; } }
+    int __cdecl Update(void* i, double dt) { auto* e = static_cast<EditorQtHost*>(i); if (!e) return 0; try { e->Update(dt); return 1; } catch (...) { return 0; } }
+    int __cdecl Overlay(void* i) { (void)i; return 1; } // Qt не immediate-mode: оверлей не нужен
+    void __cdecl Stop(void* i)   { auto* e = static_cast<EditorQtHost*>(i); if (!e) return; try { e->Stop(); } catch (...) {} }
+    void __cdecl Destroy(void* i){ auto* e = static_cast<EditorQtHost*>(i); if (!e) return; try { e->Log("EditorDestroy"); delete e; } catch (...) {} }
 }
-int __cdecl Start(void* instance)
-{
-    auto* s = static_cast<Session*>(instance);
-    Log(s, "EditorStart");
-    Log(s, "EditorOpenProject (stub)");
-    Log(s, s->host.projectName);
-    Log(s, s->host.projectFile);
-    return 1;
-}
-int __cdecl Update(void* instance, double)
-{
-    auto* s = static_cast<Session*>(instance);
-    ++s->updates;
-    Log(s, "EditorUpdate");
-    return 1;
-}
-int __cdecl Overlay(void* instance) { Log(static_cast<Session*>(instance), "EditorOverlay (stub)"); return 1; }
-void __cdecl Stop(void* instance)
-{
-    auto* s = static_cast<Session*>(instance);
-    char count[96];
-    std::snprintf(count, sizeof(count), "EditorUpdates=%llu", static_cast<unsigned long long>(s->updates));
-    Log(s, count);
-    Log(s, "EditorStop");
-}
-void __cdecl Destroy(void* instance)
-{
-    auto* s = static_cast<Session*>(instance);
-    Log(s, "EditorDestroy");
-    delete s;
-}
-}
+
 extern "C" __declspec(dllexport) int __cdecl EngineGetModuleApi(uint32_t version, EngineModuleApi* api)
 {
     if (!api || version != ENGINE_MODULE_VERSION) return 0;

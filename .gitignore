@@ -57,3 +57,4 @@ build/
 
 # Historical build outputs retained during directory cleanup
 Agent/Archive/
+/Editor/ThirdParty/*

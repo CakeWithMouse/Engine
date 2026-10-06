@@ -1,17 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-<ItemGroup Label="ProjectConfigurations">
-<ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
-<ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
-</ItemGroup>
-<PropertyGroup Label="Globals"><ProjectGuid>{D1C7E1A4-515D-501E-AEC8-7E082E8D7425}</ProjectGuid><WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion></PropertyGroup>
-<Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props" />
-<PropertyGroup Label="Configuration"><ConfigurationType>DynamicLibrary</ConfigurationType><PlatformToolset>v145</PlatformToolset><CharacterSet>Unicode</CharacterSet><UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries><UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries></PropertyGroup>
-<Import Project="$(VCTargetsPath)/Microsoft.Cpp.props" />
-<Import Project="..\Engine\BuildSupport\Cpp.props" />
-<PropertyGroup><OutDir>$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/Runtime/</OutDir><TargetName>Editor</TargetName></PropertyGroup>
-<ItemGroup><ClCompile Include="Source/Module.cpp" /></ItemGroup>
-<ItemGroup></ItemGroup>
-<Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets" />
+    <ItemGroup Label="ProjectConfigurations">
+        <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
+        <ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
+        <ProjectConfiguration Include="RelWithDebInfo|x64"><Configuration>RelWithDebInfo</Configuration><Platform>x64</Platform></ProjectConfiguration>
+    </ItemGroup>
 
+    <PropertyGroup Label="Globals">
+        <ProjectGuid>{D1C7E1A4-515D-501E-AEC8-7E082E8D7425}</ProjectGuid>
+        <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    </PropertyGroup>
+
+    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props" />
+
+    <PropertyGroup Label="Configuration">
+        <ConfigurationType>DynamicLibrary</ConfigurationType>
+        <PlatformToolset>v145</PlatformToolset>
+        <CharacterSet>Unicode</CharacterSet>
+        <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
+        <UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries>
+        <WholeProgramOptimization Condition="'$(Configuration)'=='Release'">true</WholeProgramOptimization>
+        <WholeProgramOptimization Condition="'$(Configuration)'!='Release'">false</WholeProgramOptimization>
+    </PropertyGroup>
+
+    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props" />
+    <Import Project="..\Engine\BuildSupport\Cpp.props" />
+
+    <!-- ===== Выходные пути, как у вас ===== -->
+    <PropertyGroup>
+        <GameConfig Condition="'$(Configuration)'=='RelWithDebInfo'">Debug</GameConfig>
+        <GameConfig Condition="'$(GameConfig)'==''">$(Configuration)</GameConfig>
+        <OutDir>$(RepositoryRoot)Game/build/$(Platform)/$(GameConfig)/Runtime/</OutDir>
+        <!-- obj/moc оставляем раздельными по конфигурациям редактора -->
+        <IntDir>$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/obj/Editor/</IntDir>
+        <TargetName>Editor</TargetName>
+    </PropertyGroup>
+
+    <!-- ===== Qt: подставьте свою версию/путь ===== -->
+    <PropertyGroup>
+        <QtInstallDir Condition="'$(QtInstallDir)'=='' AND '$(QTDIR)'!=''">$(QTDIR)</QtInstallDir>
+        <QtInstallDir Condition="'$(QtInstallDir)'==''">$(MSBuildThisFileDirectory)ThirdParty\Qt6.7</QtInstallDir>
+        <QtLibSuffix Condition="'$(Configuration)'=='Debug'">d</QtLibSuffix>
+        <QtLibSuffix Condition="'$(Configuration)'!='Debug'"></QtLibSuffix>
+    </PropertyGroup>
+
+    <!-- ===== Qt-настройки (кладем ПОСЛЕ Cpp.props, чтобы переопределить/дополнить) ===== -->
+    <ItemDefinitionGroup>
+        <ClCompile>
+            <!-- %(AdditionalIncludeDirectories) берёт include-пути из Cpp.props, сверху кладём Qt -->
+            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtWidgets;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtCore;$(IntDir)moc;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>            <PreprocessorDefinitions>QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <LanguageStandard>stdcpp17</LanguageStandard>
+            <ExceptionHandling>Sync</ExceptionHandling>
+            <MultiProcessorCompilation>true</MultiProcessorCompilation>
+            <AdditionalOptions>/utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+        </ClCompile>
+        <Link>
+            <AdditionalLibraryDirectories>$(QtInstallDir)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+            <!-- %(AdditionalDependencies) сохраняет всё, что дал Cpp.props -->
+            <AdditionalDependencies>Qt6Widgets$(QtLibSuffix).lib;Qt6Gui$(QtLibSuffix).lib;Qt6Core$(QtLibSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
+        </Link>
+        <PostBuildEvent>
+            <Message>windeployqt: Qt runtime -&gt; $(OutDir)</Message>
+            <Command>"$(QtInstallDir)/bin/windeployqt.exe" --no-translations --no-opengl-sw "$(TargetPath)"</Command>
+        </PostBuildEvent>
+    </ItemDefinitionGroup>
+
+    <!-- ===== Debug: /MDd + отладочная Qt (Qt6Widgetsd.lib) ===== -->
+    <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+        <ClCompile>
+            <Optimization>Disabled</Optimization>
+            <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+            <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+        </ClCompile>
+    </ItemDefinitionGroup>
+
+    <!-- ===== Release: /MD + релизная Qt, оптимизации для поставки ===== -->
+    <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+        <ClCompile>
+            <Optimization>MaxSpeed</Optimization>
+            <FunctionLevelLinking>true</FunctionLevelLinking>
+            <IntrinsicFunctions>true</IntrinsicFunctions>
+            <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+            <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+        </ClCompile>
+        <Link>
+            <OptimizeReferences>true</OptimizeReferences>
+            <EnableCOMDATFolding>true</EnableCOMDATFolding>
+            <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+        </Link>
+    </ItemDefinitionGroup>
+
+    <!-- ===== RelWithDebInfo: /MD + РЕЛИЗНАЯ Qt, но /Od и полный PDB ===== -->
+    <!-- Ключевое: NDEBUG (не _DEBUG!), иначе _ITERATOR_DEBUG_LEVEL/QT_NO_DEBUG -->
+    <!-- разъедутся с релизными Qt-библиотеками (LNK2038 / порча кучи). -->
+    <ItemDefinitionGroup Condition="'$(Configuration)'=='RelWithDebInfo'">
+        <ClCompile>
+            <Optimization>Disabled</Optimization>
+            <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+            <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+        </ClCompile>
+    </ItemDefinitionGroup>
+
+    <!-- ===== Исходники в Source/ (как у вас было Source/Module.cpp) ===== -->
+    <ItemGroup>
+        <ClCompile Include="Source/Module.cpp" />
+        <ClCompile Include="Source/QtHost.cpp" />
+        <ClCompile Include="Source/MainWindow.cpp" />
+        <ClCompile Include="$(IntDir)moc/moc_MainWindow.cpp" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ClInclude Include="Include/QtHost.h" />
+        <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->
+        <CustomBuild Include="Include/MainWindow.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+    </ItemGroup>
+
+    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets" />
+    <ImportGroup Label="ExtensionTargets" />
 </Project>
