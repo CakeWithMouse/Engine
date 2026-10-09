@@ -107,11 +107,13 @@
         <ClCompile Include="Source/Module.cpp" />
         <ClCompile Include="Source/QtHost.cpp" />
         <ClCompile Include="Source/MainWindow.cpp" />
+        <ClCompile Include="Source/FileBrowser.cpp" />
         <ClCompile Include="$(IntDir)moc/moc_MainWindow.cpp" />
     </ItemGroup>
 
     <ItemGroup>
         <ClInclude Include="Include/QtHost.h" />
+        <ClInclude Include="Include/FileBrowser.h" />
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->
         <CustomBuild Include="Include/MainWindow.h">
             <FileType>Document</FileType>

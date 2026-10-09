@@ -4,6 +4,7 @@
 class QLabel;
 class QPlainTextEdit;
 class EditorQtHost;
+class FileBrowserDock;
 
 class EditorMainWindow : public QMainWindow
 {
@@ -22,4 +23,6 @@ private:
     EditorQtHost* host_ = nullptr;
     QPlainTextEdit* console_ = nullptr;
     QLabel* statsLabel_ = nullptr;
+    QDockWidget* consoleDock_ = nullptr;
+    FileBrowserDock* fileDock_ = nullptr;
 };

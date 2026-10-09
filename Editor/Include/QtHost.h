@@ -4,11 +4,23 @@
 #include <cstdint>
 #include <deque>
 #include <mutex>
+#include <QString>
 #include <thread>
 
 class EditorMainWindow;
 
-enum class EditorCommand : uint32_t { None = 0, RequestExit, ReloadProject };
+struct EditorCommand
+{
+    enum Type : uint32_t
+    {
+        None = 0,
+        RequestExit,
+        ReloadProject,
+        LoadAsset,      // файл-менеджер: двойной клик по файлу
+    };
+    Type type = None;
+    QString path;
+};
 
 // Qt-часть редактора: отдельный поток со своим QApplication.
 // Движок -> UI: queued-слоты/атомики. UI -> движок: очередь команд (дрейнится в Update).
@@ -26,7 +38,7 @@ public:
     void Stop();                // поток движка
 
     void Log(const char* text);         // любой поток
-    void PostCommand(EditorCommand c);  // поток UI
+    void PostCommand(const EditorCommand &c);  // поток UI
     double LastDt() const { return lastDt_.load(); }
     uint64_t UpdateCount() const { return updates_.load(); }
     const EngineModuleHost& host() const { return host_; }

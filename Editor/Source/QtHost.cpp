@@ -88,7 +88,7 @@ void EditorQtHost::Log(const char* text)
     }
 }
 
-void EditorQtHost::PostCommand(EditorCommand cmd)
+void EditorQtHost::PostCommand(const EditorCommand& cmd)
 {
     std::lock_guard lk(commandMutex_);
     commands_.push_back(cmd);
@@ -97,10 +97,14 @@ void EditorQtHost::PostCommand(EditorCommand cmd)
 void EditorQtHost::DrainCommands()
 {
     std::deque<EditorCommand> pending;
-    { std::lock_guard lk(commandMutex_); pending.swap(commands_); }
-    for (EditorCommand c : pending)
     {
-        switch (c)
+        std::lock_guard lk(commandMutex_);
+        pending.swap(commands_);
+    }
+
+    for (const EditorCommand& cmd : pending)
+    {
+        switch (cmd.type)
         {
         case EditorCommand::RequestExit:
             Log("EditorRequestExit");
@@ -109,7 +113,16 @@ void EditorQtHost::DrainCommands()
         case EditorCommand::ReloadProject:
             Log("EditorReloadProject (stub)");
             break;
-        default: break;
+        case EditorCommand::LoadAsset:
+            {
+                // QString -> UTF-8 уже здесь, на потоке движка; в host.* wchar_t не уходит
+                const QByteArray utf8 = cmd.path.toUtf8();
+                const std::string msg = "EditorLoadAsset (stub): " + std::string(utf8.constData(), utf8.size());
+                Log(msg.c_str());
+                break;
+            }
+        default:
+            break;
         }
     }
 }
