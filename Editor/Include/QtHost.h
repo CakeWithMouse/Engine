@@ -13,13 +13,13 @@ struct EditorCommand
 {
     enum Type : uint32_t
     {
-        None = 0,
-        RequestExit,
-        ReloadProject,
-        LoadAsset,      // файл-менеджер: двойной клик по файлу
+        None = 0, RequestExit, ReloadProject, LoadAsset,
+        ViewportAttach, ViewportResize, ViewportDetach,
     };
     Type type = None;
     QString path;
+    void* hwnd = nullptr;
+    uint32_t w = 0, h = 0;
 };
 
 // Qt-часть редактора: отдельный поток со своим QApplication.
@@ -42,6 +42,9 @@ public:
     double LastDt() const { return lastDt_.load(); }
     uint64_t UpdateCount() const { return updates_.load(); }
     const EngineModuleHost& host() const { return host_; }
+    
+    bool HasViewport() const { return host_.viewportAttach != nullptr; }
+    bool ViewportActive() const { return viewportActive_.load(); }
 
 private:
     void UiThreadMain();
@@ -58,4 +61,5 @@ private:
     std::deque<EditorCommand> commands_;
     std::atomic<double> lastDt_{0.0};
     std::atomic<uint64_t> updates_{0};
+    std::atomic<bool> viewportActive_{ false };
 };

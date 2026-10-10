@@ -1,6 +1,8 @@
 ﻿#include "MainWindow.h"
 #include "QtHost.h"
 #include "FileBrowser.h"
+#include "ViewportWidget.h" 
+
 #include <QDockWidget>
 #include <QLabel>
 #include <QMenu>
@@ -25,23 +27,8 @@ void EditorMainWindow::BuildUi()
     setWindowTitle(QStringLiteral("Engine Editor"));
     resize(1280, 720);
 
-    auto* central = new QWidget(this);
-    auto* layout = new QVBoxLayout(central);
-
-    const EngineModuleHost& h = host_->host();
-    layout->addWidget(new QLabel(
-        QStringLiteral("Project: %1\nFile: %2")
-            .arg(QString::fromUtf8(h.projectName ? h.projectName : "-"),
-                 QString::fromUtf8(h.projectFile ? h.projectFile : "-")), central));
-
-    auto* exitBtn = new QPushButton(QStringLiteral("Request engine exit (host.requestExit)"), central);
-    connect(exitBtn, &QPushButton::clicked, this, [this] {
-        EditorCommand cmd; cmd.type = EditorCommand::RequestExit;
-        host_->PostCommand(cmd);
-    });
-    layout->addWidget(exitBtn);
-    layout->addStretch(1);
-    setCentralWidget(central);
+    viewport_ = new ViewportWidget(host_, this);
+    setCentralWidget(viewport_);
 
     console_ = new QPlainTextEdit(this);
     console_->setReadOnly(true);
@@ -61,12 +48,20 @@ void EditorMainWindow::BuildUi()
     statusBar()->addPermanentWidget(statsLabel_);
 
     QMenu* file = menuBar()->addMenu(QStringLiteral("&File"));
+    file->addAction(QStringLiteral("Request engine exit"), this, [this] {
+        EditorCommand cmd; cmd.type = EditorCommand::RequestExit; host_->PostCommand(cmd);
+    });
     file->addAction(QStringLiteral("Reload project (stub)"), this, [this] {
-        EditorCommand cmd; cmd.type = EditorCommand::ReloadProject;
-        host_->PostCommand(cmd);
+        EditorCommand cmd; cmd.type = EditorCommand::ReloadProject; host_->PostCommand(cmd);
     });
     file->addSeparator();
     file->addAction(QStringLiteral("Close editor"), this, [this] { close(); });
+
+    const EngineModuleHost& h = host_->host();
+    statusBar()->addWidget(new QLabel(
+        QStringLiteral("%1 | %2").arg(
+            QString::fromUtf8(h.projectName ? h.projectName : "-"),
+            QString::fromUtf8(h.projectFile ? h.projectFile : "-")), this));
 }
 
 void EditorMainWindow::AppendLine(const QString& line) { console_->appendPlainText(line); }
@@ -74,7 +69,8 @@ void EditorMainWindow::AppendLine(const QString& line) { console_->appendPlainTe
 void EditorMainWindow::RefreshStats()
 {
     const double dt = host_->LastDt();
-    statsLabel_->setText(QStringLiteral("updates: %1 | fps: %2")
+    statsLabel_->setText(QStringLiteral("updates: %1 | fps: %2 | vp: %3")
                              .arg(host_->UpdateCount())
-                             .arg(dt > 0.0 ? 1.0 / dt : 0.0, 0, 'f', 1));
+                             .arg(dt > 0.0 ? 1.0 / dt : 0.0, 0, 'f', 1)
+                             .arg(host_->ViewportActive() ? QStringLiteral("on") : QStringLiteral("off")));
 }

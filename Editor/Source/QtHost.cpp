@@ -42,6 +42,8 @@ void EditorQtHost::Update(double dt)
 void EditorQtHost::Stop()
 {
     if (!uiThread_.joinable()) return;
+    if (viewportActive_.exchange(false) && host_.viewportDetach)
+        host_.viewportDetach(host_.user);      // поток движка, до уничтожения виджетов
     if (uiReady_.load())
         QMetaObject::invokeMethod(QCoreApplication::instance(), &QCoreApplication::quit, Qt::QueuedConnection);
     uiThread_.join();
@@ -101,9 +103,17 @@ void EditorQtHost::DrainCommands()
         std::lock_guard lk(commandMutex_);
         pending.swap(commands_);
     }
+    
+    int lastResize = -1;
+    for (int i = (int)pending.size() - 1; i >= 0; --i)
+        if (pending[i].type == EditorCommand::ViewportResize) { lastResize = i; break; }
 
-    for (const EditorCommand& cmd : pending)
+
+    for (size_t i = 0; i < pending.size(); ++i)
     {
+        const EditorCommand& cmd = pending[i];
+        if (cmd.type == EditorCommand::ViewportResize && (int)i != lastResize)
+            continue; 
         switch (cmd.type)
         {
         case EditorCommand::RequestExit:
@@ -121,6 +131,20 @@ void EditorQtHost::DrainCommands()
                 Log(msg.c_str());
                 break;
             }
+        case EditorCommand::ViewportAttach:
+            if (host_.viewportAttach && host_.viewportAttach(host_.user, cmd.hwnd, cmd.w, cmd.h))
+            { viewportActive_.store(true); Log("EditorViewportAttach ok"); }
+            else Log("EditorViewportAttach failed");
+            break;
+        case EditorCommand::ViewportResize:
+            if (viewportActive_.load() && host_.viewportResize)
+                host_.viewportResize(host_.user, cmd.w, cmd.h);
+            break;
+        case EditorCommand::ViewportDetach:
+            if (viewportActive_.exchange(false) && host_.viewportDetach)
+                host_.viewportDetach(host_.user);
+            Log("EditorViewportDetach");
+            break;
         default:
             break;
         }

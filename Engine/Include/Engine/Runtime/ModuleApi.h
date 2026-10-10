@@ -6,7 +6,7 @@
 // Host and its user pointer remain valid until Destroy returns. Callbacks are
 // synchronous, on the host thread; modules must not keep work alive after Destroy.
 #define ENGINE_MODULE_CALL __cdecl
-#define ENGINE_MODULE_VERSION 1u
+#define ENGINE_MODULE_VERSION 2u
 #define ENGINE_MODULE_GAME 1u
 #define ENGINE_MODULE_EDITOR 2u
 
@@ -19,6 +19,10 @@ struct EngineModuleHost
     const char* projectName;
     const char* projectFile;
     const char* contentRoot;
+    // --- v2: опционально, nullptr = фичи нет ---
+    int (*viewportAttach)(void* user, void* hwnd, uint32_t w, uint32_t h);
+    int (*viewportResize)(void* user, uint32_t w, uint32_t h);
+    int (*viewportDetach)(void* user);
 };
 
 struct EngineModuleApi
