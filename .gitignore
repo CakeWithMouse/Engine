@@ -57,3 +57,6 @@ build/
 
 # Historical build outputs retained during directory cleanup
 Agent/Archive/
+
+# Hot-reload shadow cache
+**/.shadow_cache/
