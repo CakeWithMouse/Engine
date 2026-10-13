@@ -187,6 +187,7 @@ void GameComponent::UpdateObjectConstants()
     if (GamePtr)
     {
         ApplyFrameConstants(ConstantPositionBuffer, GamePtr->GetFrameConstants());
+        ApplyStaticShadowConstants(ConstantPositionBuffer, GamePtr->GetFrameConstants());
     }
 }
 
@@ -533,6 +534,9 @@ void GameComponent::BindMaterialResources(ID3D11DeviceContext* context)
         ID3D11SamplerState* shadowMapSampler = GamePtr->GetShadowSampler();
         context->PSSetShaderResources(4, 1, &shadowMapSRV);
         context->PSSetSamplers(4, 1, &shadowMapSampler);
+
+        ID3D11ShaderResourceView* staticShadowSRV = GamePtr->IsStaticShadowReady() ? GamePtr->GetStaticShadowSRV() : nullptr;
+        context->PSSetShaderResources(5, 1, &staticShadowSRV);
     }
 }
 
@@ -542,6 +546,7 @@ void GameComponent::UnbindMaterialResources(ID3D11DeviceContext* context)
     context->PSSetShaderResources(0, 1, &nullSRV);
     context->PSSetShaderResources(1, 1, &nullSRV);
     context->PSSetShaderResources(4, 1, &nullSRV);
+    context->PSSetShaderResources(5, 1, &nullSRV);
 }
 
 void GameComponent::Render(ID3D11DeviceContext* Context)

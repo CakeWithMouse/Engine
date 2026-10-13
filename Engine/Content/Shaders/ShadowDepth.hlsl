@@ -4,12 +4,8 @@ cbuffer ShadowBuffer : register(b0)
     float4x4 lightViewProjection;
 };
 
-// Same instance stream as the colour pass (InstData in ShaderConstants.h).
-struct InstData
-{
-    float4x4 World;
-    float4 color;
-};
+// Same instance stream as the colour pass.
+#include "Instancing.hlsli"
 
 StructuredBuffer<InstData> InstBuf : register(t0);
 

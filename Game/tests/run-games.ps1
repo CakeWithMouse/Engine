@@ -29,7 +29,7 @@ function Invoke-CheckedProcess([string]$File, [string]$Arguments, [int]$Expected
     $process.Dispose()
 }
 
-foreach ($game in @('BasicExamples','Pong','SunGame')) {
+foreach ($game in @('BasicExamples','Pong','SunGame','Battle')) {
     Invoke-CheckedProcess (Join-Path $output "$game/$game.exe") '--smoke'
     Invoke-CheckedProcess $launcher "--check $game"
     Invoke-CheckedProcess $launcher "--smoke $game"
@@ -38,6 +38,9 @@ foreach ($scene in @('triangles','cube')) {
     Invoke-CheckedProcess (Join-Path $output 'BasicExamples/BasicExamples.exe') "--scene $scene --smoke"
 }
 Invoke-CheckedProcess (Join-Path $output 'BasicExamples/BasicExamples.exe') '--smoke --scene unknown' 1
+# Mass units: a short measured run and rejection of an invalid unit count.
+Invoke-CheckedProcess (Join-Path $output 'Battle/Battle.exe') '--units 5000 --frames 60'
+Invoke-CheckedProcess (Join-Path $output 'Battle/Battle.exe') '--units 0 --smoke' 1
 if (Test-Path -LiteralPath (Join-Path $output 'Katamari/Katamari.exe')) {
     Invoke-CheckedProcess (Join-Path $output 'Katamari/Katamari.exe') '--smoke'
     Invoke-CheckedProcess $launcher '--smoke Katamari'

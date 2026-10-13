@@ -45,3 +45,5 @@
 | 030 | Организация | [Корень Engine / Game / Agent](030-repository-layout.md) |
 | 031 | Архитектура | [Перенести управление runtime в Engine](031-engine-runtime.md) |
 | 032 | Архитектура | [Один EngineRuntime.exe: игра и режим редактирования](032-runtime-game-editor-modes.md) — [промпт выполнения](032-execution-prompt.md) |
+| 033 | Рендер | [Массовая техника: инстансинг мешей и LOD](033-mass-unit-rendering.md) |
+| 034 | Рендер | [Стоимость теней: каскады для техники и запечённая карта](034-shadow-cost.md) |

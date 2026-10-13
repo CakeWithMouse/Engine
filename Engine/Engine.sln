@@ -14,6 +14,8 @@ Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "Pong", "..\Game\Pong\Pong.v
 EndProject
 Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "SunGame", "..\Game\SunGame\SunGame.vcxproj", "{38318807-45BB-4298-9CAA-836D9D274E04}"
 EndProject
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "Battle", "..\Game\Battle\Battle.vcxproj", "{9C2F5A41-3D7E-4B86-9F2A-1C5E7B4D0A33}"
+EndProject
 Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "Katamari", "..\Game\Katamari\Katamari.vcxproj", "{66BCFD2D-77A1-4F9C-97A5-A95D097368FE}"
 EndProject
 Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "EngineRuntime", "Runtime\EngineRuntime.vcxproj", "{30B3ACB8-B4EF-5CF4-8E65-FA5CB8AC1DC6}"
@@ -64,6 +66,10 @@ Global
     {38318807-45BB-4298-9CAA-836D9D274E04}.Debug|x64.Build.0 = Debug|x64
     {38318807-45BB-4298-9CAA-836D9D274E04}.Release|x64.ActiveCfg = Release|x64
     {38318807-45BB-4298-9CAA-836D9D274E04}.Release|x64.Build.0 = Release|x64
+    {9C2F5A41-3D7E-4B86-9F2A-1C5E7B4D0A33}.Debug|x64.ActiveCfg = Debug|x64
+    {9C2F5A41-3D7E-4B86-9F2A-1C5E7B4D0A33}.Debug|x64.Build.0 = Debug|x64
+    {9C2F5A41-3D7E-4B86-9F2A-1C5E7B4D0A33}.Release|x64.ActiveCfg = Release|x64
+    {9C2F5A41-3D7E-4B86-9F2A-1C5E7B4D0A33}.Release|x64.Build.0 = Release|x64
     {66BCFD2D-77A1-4F9C-97A5-A95D097368FE}.Debug|x64.ActiveCfg = Debug|x64
     {66BCFD2D-77A1-4F9C-97A5-A95D097368FE}.Release|x64.ActiveCfg = Release|x64
   EndGlobalSection

@@ -23,6 +23,7 @@ Game/
   BasicExamples/                две сцены: «Квадраты» / «Куб»
   Pong/                         ракетки и мяч
   SunGame/                      солнечная система
+  Battle/                       массовая техника: инстансинг, LOD, измерения
   Katamari/                     сбор объектов, нужен Assimp
   Common/                       общая обвязка примеров
   Launcher/                     графический EngineLauncher

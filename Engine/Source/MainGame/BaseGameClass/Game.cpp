@@ -311,6 +311,11 @@ void Game::DestroyResources()
 
     shadowTexture.Reset();
     shadowSRV.Reset();
+    staticShadowTexture.Reset();
+    staticShadowDSV.Reset();
+    staticShadowSRV.Reset();
+    bStaticShadowReady = false;
+    bStaticShadowDirty = true;
     for (auto& dsv : shadowDSVs)
     {
         dsv.Reset();
@@ -1044,6 +1049,7 @@ bool Game::BindComponentShaders(GameComponent* Component, ShaderCompileVariant v
 
     Component->SetVertexShader(slot.VertexShader);
     Component->SetPixelShader(slot.PixelShader);
+    CurrentPassVariant = variant;
     return true;
 }
 
@@ -1370,6 +1376,7 @@ void Game::FillFrameConstantBuffer(ConstantBufferData& data) const
     data.worldMatrix = Identity4x4();
     data.normalMatrix = Identity4x4();
     ApplyFrameConstants(data, CurrentFrame);
+    ApplyStaticShadowConstants(data, CurrentFrame);
     data.ObjectColor = DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
     data.ReflectionData = DirectX::XMFLOAT4(0.0f, 0.0f, 5.0f, 0.0f);
 }
@@ -1421,13 +1428,16 @@ void Game::RenderDeferredLightingPass()
         ID3D11ShaderResourceView* shadowMapSRV = shadowSRV.Get();
         Context->PSSetShaderResources(4, 1, &shadowMapSRV);
         Context->PSSetSamplers(4, 1, shadowSampler.GetAddressOf());
+
+        ID3D11ShaderResourceView* bakedShadowSRV = bStaticShadowReady ? staticShadowSRV.Get() : nullptr;
+        Context->PSSetShaderResources(5, 1, &bakedShadowSRV);
     }
 
     Context->Draw(3, 0);
     CountDraw(3);
 
-    ID3D11ShaderResourceView* nullSRVs[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
-    Context->PSSetShaderResources(0, 5, nullSRVs);
+    ID3D11ShaderResourceView* nullSRVs[6] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+    Context->PSSetShaderResources(0, 6, nullSRVs);
 }
 
 void Game::RenderDeferredDebugOverlay()
@@ -1496,8 +1506,8 @@ void Game::RenderDeferredDebugOverlay()
 
     SetFullViewport();
 
-    ID3D11ShaderResourceView* nullSRVs[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
-    Context->PSSetShaderResources(0, 5, nullSRVs);
+    ID3D11ShaderResourceView* nullSRVs[6] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+    Context->PSSetShaderResources(0, 6, nullSRVs);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1650,9 +1660,12 @@ bool Game::InitShadowResources()
 
     D3D11_RASTERIZER_DESC shadowRasterDesc = {};
     shadowRasterDesc.FillMode = D3D11_FILL_SOLID;
-    shadowRasterDesc.CullMode = D3D11_CULL_BACK;
-    shadowRasterDesc.DepthClipEnable = TRUE;
-    shadowRasterDesc.DepthBias = 2000;
+    // Casters must be drawn even when they stand outside the depth range of the cascade: with
+    // depth clipping on, everything between the light and the near plane disappeared and the
+    // shadows were cut short. Clamping to the near plane keeps those casters.
+    shadowRasterDesc.CullMode = D3D11_CULL_NONE;
+    shadowRasterDesc.DepthClipEnable = FALSE;
+    shadowRasterDesc.DepthBias = 600;
     shadowRasterDesc.SlopeScaledDepthBias = 2.0f;
     shadowRasterDesc.DepthBiasClamp = 0.0f;
     hr = Device->CreateRasterizerState(&shadowRasterDesc, shadowRasterState.ReleaseAndGetAddressOf());
@@ -1751,6 +1764,11 @@ void Game::UpdateShadowCascades()
         }
         radius = std::max(radius, 1.0f);
 
+        // Remembered for the shadow pass: casters are culled against this sphere per cascade.
+        XMFLOAT3 centroidPosition;
+        XMStoreFloat3(&centroidPosition, centroid);
+        CascadeSpheres[cascadeIndex] = XMFLOAT4(centroidPosition.x, centroidPosition.y, centroidPosition.z, radius);
+
         const XMVECTOR lightPosition = XMVectorSubtract(centroid, XMVectorScale(lightDirV, radius * 2.2f + 120.0f));
         XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
         if (std::abs(XMVectorGetX(XMVector3Dot(up, lightDirV))) > 0.95f)
@@ -1787,6 +1805,270 @@ void Game::UpdateShadowCascades()
     }
 }
 
+namespace
+{
+    /** Minimal 24-bit BMP writer used by the shadow map dump. */
+    bool WriteGrayscaleBmp(const std::string& path, const std::vector<uint8_t>& gray, int width, int height)
+    {
+        FILE* file = nullptr;
+        if (fopen_s(&file, path.c_str(), "wb") != 0 || file == nullptr)
+        {
+            return false;
+        }
+
+        const int rowSize = ((width * 3 + 3) / 4) * 4;
+        const int imageSize = rowSize * height;
+        const int fileSize = 54 + imageSize;
+        uint8_t header[54] = {};
+        header[0] = 'B'; header[1] = 'M';
+        std::memcpy(&header[2], &fileSize, 4);
+        const int dataOffset = 54;
+        std::memcpy(&header[10], &dataOffset, 4);
+        const int headerSize = 40;
+        std::memcpy(&header[14], &headerSize, 4);
+        std::memcpy(&header[18], &width, 4);
+        std::memcpy(&header[22], &height, 4);
+        const uint16_t planes = 1;
+        const uint16_t bits = 24;
+        std::memcpy(&header[26], &planes, 2);
+        std::memcpy(&header[28], &bits, 2);
+        std::memcpy(&header[34], &imageSize, 4);
+        fwrite(header, 1, sizeof(header), file);
+
+        std::vector<uint8_t> row(static_cast<size_t>(rowSize), 0);
+        for (int y = height - 1; y >= 0; --y)
+        {
+            for (int x = 0; x < width; ++x)
+            {
+                const uint8_t value = gray[static_cast<size_t>(y) * width + x];
+                row[static_cast<size_t>(x) * 3 + 0] = value;
+                row[static_cast<size_t>(x) * 3 + 1] = value;
+                row[static_cast<size_t>(x) * 3 + 2] = value;
+            }
+            fwrite(row.data(), 1, row.size(), file);
+        }
+        fclose(file);
+        return true;
+    }
+}
+
+bool Game::DumpShadowMaps(const std::string& pathPrefix)
+{
+    if (!Device || !Context)
+    {
+        return false;
+    }
+
+    auto dumpTexture = [&](ID3D11Texture2D* texture, UINT subresource, const std::string& name) -> bool
+    {
+        if (texture == nullptr)
+        {
+            return false;
+        }
+
+        D3D11_TEXTURE2D_DESC desc = {};
+        texture->GetDesc(&desc);
+        D3D11_TEXTURE2D_DESC stagingDesc = desc;
+        stagingDesc.ArraySize = 1;
+        stagingDesc.Usage = D3D11_USAGE_STAGING;
+        stagingDesc.BindFlags = 0;
+        stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        stagingDesc.MiscFlags = 0;
+
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> staging;
+        if (FAILED(Device->CreateTexture2D(&stagingDesc, nullptr, staging.GetAddressOf())))
+        {
+            return false;
+        }
+        Context->CopySubresourceRegion(staging.Get(), 0, 0, 0, 0, texture, subresource, nullptr);
+
+        D3D11_MAPPED_SUBRESOURCE mapped = {};
+        if (FAILED(Context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped)))
+        {
+            return false;
+        }
+
+        const int width = static_cast<int>(desc.Width);
+        const int height = static_cast<int>(desc.Height);
+        std::vector<uint8_t> gray(static_cast<size_t>(width) * height, 0);
+        float minDepth = 1.0f;
+        float maxDepth = 0.0f;
+        size_t occupied = 0;
+        for (int y = 0; y < height; ++y)
+        {
+            const uint8_t* rowStart = static_cast<const uint8_t*>(mapped.pData) + static_cast<size_t>(y) * mapped.RowPitch;
+            for (int x = 0; x < width; ++x)
+            {
+                float depth = 1.0f;
+                if (desc.Format == DXGI_FORMAT_R32_TYPELESS || desc.Format == DXGI_FORMAT_D32_FLOAT)
+                {
+                    depth = reinterpret_cast<const float*>(rowStart)[x];
+                }
+                else if (desc.Format == DXGI_FORMAT_R24G8_TYPELESS)
+                {
+                    const uint32_t packed = reinterpret_cast<const uint32_t*>(rowStart)[x];
+                    depth = static_cast<float>(packed & 0x00FFFFFF) / 16777215.0f;
+                }
+                if (depth < 1.0f)
+                {
+                    minDepth = std::min(minDepth, depth);
+                    maxDepth = std::max(maxDepth, depth);
+                    ++occupied;
+                }
+                // Stretch the used range so that a nearly flat depth map is still readable.
+                gray[static_cast<size_t>(y) * width + x] = static_cast<uint8_t>(std::min(255.0f, depth * 255.0f));
+            }
+        }
+        Context->Unmap(staging.Get(), 0);
+
+        const std::string file = pathPrefix + "-" + name + ".bmp";
+        const bool written = WriteGrayscaleBmp(file, gray, width, height);
+        std::cout << "shadow-dump " << name << " written=" << (written ? 1 : 0)
+                  << " occupied=" << occupied << " of " << (static_cast<size_t>(width) * height)
+                  << " depth_min=" << minDepth << " depth_max=" << maxDepth << std::endl;
+        return written;
+    };
+
+    bool result = true;
+    for (int cascade = 0; cascade < MaxShadowCascades; ++cascade)
+    {
+        result = dumpTexture(shadowTexture.Get(), static_cast<UINT>(cascade), "cascade" + std::to_string(cascade)) && result;
+    }
+    result = dumpTexture(staticShadowTexture.Get(), 0, "static") && result;
+    return result;
+}
+
+void Game::SetStaticShadowArea(const glm::vec3& center, float extent)
+{
+    StaticShadowCenter = center;
+    StaticShadowExtent = std::max(0.0f, extent);
+    bStaticShadowDirty = true;
+    bStaticShadowReady = false;
+}
+
+bool Game::InitStaticShadowResources()
+{
+    if (staticShadowDSV && staticShadowSRV)
+    {
+        return true;
+    }
+    if (!Device)
+    {
+        return false;
+    }
+
+    D3D11_TEXTURE2D_DESC desc = {};
+    desc.Width = static_cast<UINT>(StaticShadowMapSize);
+    desc.Height = static_cast<UINT>(StaticShadowMapSize);
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R32_TYPELESS;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+
+    D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+    dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+    dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = 1;
+
+    if (FAILED(Device->CreateTexture2D(&desc, nullptr, staticShadowTexture.ReleaseAndGetAddressOf())) ||
+        FAILED(Device->CreateDepthStencilView(staticShadowTexture.Get(), &dsvDesc, staticShadowDSV.ReleaseAndGetAddressOf())) ||
+        FAILED(Device->CreateShaderResourceView(staticShadowTexture.Get(), &srvDesc, staticShadowSRV.ReleaseAndGetAddressOf())))
+    {
+        std::cout << "Failed to create the baked shadow map." << std::endl;
+        staticShadowTexture.Reset();
+        staticShadowDSV.Reset();
+        staticShadowSRV.Reset();
+        return false;
+    }
+    return true;
+}
+
+void Game::RenderStaticShadowMap()
+{
+    using namespace DirectX;
+
+    if (StaticShadowExtent <= 0.0f || bStaticShadowFailed || !shadowVertexShader || !shadowPassCB)
+    {
+        return;
+    }
+    if (!InitStaticShadowResources())
+    {
+        bStaticShadowFailed = true;
+        return;
+    }
+
+    const XMFLOAT3 lightDirection = NormalizeFloat3(DirectionalLightDirection);
+    const XMVECTOR lightDirV = XMVector3Normalize(XMVectorSet(lightDirection.x, lightDirection.y, lightDirection.z, 0.0f));
+    const XMVECTOR center = XMVectorSet(StaticShadowCenter.x, StaticShadowCenter.y, StaticShadowCenter.z, 1.0f);
+    const float distance = StaticShadowExtent * 2.0f + 200.0f;
+    const XMVECTOR eye = XMVectorSubtract(center, XMVectorScale(lightDirV, distance));
+    XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+    if (std::abs(XMVectorGetX(XMVector3Dot(up, lightDirV))) > 0.95f)
+    {
+        up = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+    }
+
+    const XMMATRIX view = XMMatrixLookAtLH(eye, center, up);
+    const XMMATRIX projection = XMMatrixOrthographicLH(StaticShadowExtent * 2.0f, StaticShadowExtent * 2.0f,
+                                                       0.1f, distance + StaticShadowExtent * 2.0f);
+    XMStoreFloat4x4(&StaticShadowViewProjection, XMMatrixTranspose(XMMatrixMultiply(view, projection)));
+    StaticShadowParams = XMFLOAT4(1.0f, 1.0f / static_cast<float>(StaticShadowMapSize), StaticShadowBias, 0.0f);
+
+    D3D11_VIEWPORT viewport = {};
+    viewport.Width = static_cast<float>(StaticShadowMapSize);
+    viewport.Height = static_cast<float>(StaticShadowMapSize);
+    viewport.MaxDepth = 1.0f;
+
+    ID3D11ShaderResourceView* nullStaticSRV = nullptr;
+    Context->PSSetShaderResources(5, 1, &nullStaticSRV);
+    Context->OMSetRenderTargets(0, nullptr, staticShadowDSV.Get());
+    Context->ClearDepthStencilView(staticShadowDSV.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+    Context->RSSetState(shadowRasterState.Get());
+    Context->RSSetViewports(1, &viewport);
+    Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
+    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    // CascadeIndex -1 means "the baked pass": components draw all their static casters.
+    ShadowPassContext staticPass;
+    staticPass.VertexShader = shadowVertexShader.Get();
+    staticPass.InstancedVertexShader = shadowInstancedVertexShader.Get();
+    staticPass.ConstantBuffer = shadowPassCB.Get();
+    staticPass.PrimitiveLayout = shadowInputLayoutPrimitive.Get();
+    staticPass.MeshLayout = shadowInputLayoutMesh.Get();
+    staticPass.LightViewProjection = StaticShadowViewProjection;
+    staticPass.CascadeIndex = -1;
+    staticPass.CascadeCount = 1;
+    staticPass.LightDirection = DirectionalLightDirection;
+
+    uint32_t casterCount = 0;
+    for (auto& pair : Components)
+    {
+        GameComponent* component = pair.second.get();
+        if (!component->IsRenderable() || !component->IsStaticShadowCaster())
+        {
+            continue;
+        }
+        component->RenderShadow(Context.Get(), staticPass);
+        ++casterCount;
+    }
+
+    Context->OMSetRenderTargets(0, nullptr, nullptr);
+    Context->RSSetState(DefaultRasterState.Get());
+    SetFullViewport();
+
+    StaticShadowBakedLight = DirectionalLightDirection;
+    bStaticShadowDirty = false;
+    bStaticShadowReady = true;
+    std::cout << "Baked shadow map: " << casterCount << " static components at "
+              << StaticShadowMapSize << " px." << std::endl;
+}
+
 void Game::RenderShadowMaps()
 {
     if (!AreShadowsActive())
@@ -1813,6 +2095,8 @@ void Game::RenderShadowMaps()
     shadowPass.ConstantBuffer = shadowPassCB.Get();
     shadowPass.PrimitiveLayout = shadowInputLayoutPrimitive.Get();
     shadowPass.MeshLayout = shadowInputLayoutMesh.Get();
+    shadowPass.CascadeCount = MaxShadowCascades;
+    shadowPass.LightDirection = DirectionalLightDirection;
 
     for (int cascadeIndex = 0; cascadeIndex < MaxShadowCascades; ++cascadeIndex)
     {
@@ -1820,11 +2104,18 @@ void Game::RenderShadowMaps()
         Context->OMSetRenderTargets(0, nullptr, cascadeDSV);
         Context->ClearDepthStencilView(cascadeDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
         shadowPass.LightViewProjection = CascadeLightViewProjection[cascadeIndex];
+        shadowPass.CascadeIndex = cascadeIndex;
+        shadowPass.CascadeSphere = CascadeSpheres[cascadeIndex];
 
         for (auto& componentPair : Components)
         {
             GameComponent* component = componentPair.second.get();
             if (!component->IsRenderable() || component->IsSkybox())
+            {
+                continue;
+            }
+            // Static casters are already in the baked map: drawing them again would cost twice.
+            if (bStaticShadowReady && component->IsStaticShadowCaster())
             {
                 continue;
             }
@@ -2032,6 +2323,18 @@ void Game::UpdateFrame(float realDeltaTime)
         bShadowResourcesReady = InitShadowResources();
         bShadowInitFailed = !bShadowResourcesReady;
     }
+    // The baked map only has to be redrawn when the sun or the area changes.
+    if (AreShadowsActive() && StaticShadowExtent > 0.0f && !bStaticShadowFailed)
+    {
+        const bool bLightChanged = StaticShadowBakedLight.x != DirectionalLightDirection.x ||
+                                   StaticShadowBakedLight.y != DirectionalLightDirection.y ||
+                                   StaticShadowBakedLight.z != DirectionalLightDirection.z;
+        if (bStaticShadowDirty || bLightChanged)
+        {
+            RenderStaticShadowMap();
+        }
+    }
+
     UpdateShadowCascades();
     BuildFrameConstants();
 
@@ -2092,6 +2395,8 @@ void Game::BuildFrameConstants()
     {
         frame.LightViewProjection[cascadeIndex] = bShadows ? CascadeLightViewProjection[cascadeIndex] : Identity4x4();
     }
+    frame.StaticShadowViewProjection = bStaticShadowReady ? StaticShadowViewProjection : Identity4x4();
+    frame.StaticShadowParams = (bShadows && bStaticShadowReady) ? StaticShadowParams : XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
     frame.CascadeSplits = bShadows ? CascadeSplits : XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
     frame.ShadowParams = bShadows ? ShadowParams : XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
     frame.ShadowParams.x = bShadows ? 1.0f : 0.0f;
@@ -2175,10 +2480,11 @@ void Game::UpdateWindowTitle(float realDeltaTime)
     const double cpuMs = CpuFrameMsAccumulator / std::max<uint32_t>(TitleFrameCount, 1);
     const wchar_t* renderName = RenderingType == Deffered ? L"Deferred" : (RenderingType == Custom ? L"Custom" : L"Forward");
 
-    WCHAR text[256];
-    swprintf_s(text, L"%s | FPS: %.1f | CPU %.2f ms | GPU %.2f ms | Objects: %zu (+%zu inst) | Draws: %u | Culled: %u%s",
+    WCHAR text[320];
+    swprintf_s(text, L"%s | FPS: %.1f | CPU %.2f ms | GPU %.2f ms | Objects: %zu (+%zu inst) | Draws: %u | Drawn inst: %u | Culled: %u obj / %u inst%s",
                renderName, fps, cpuMs, LastGpuFrameMs, Components.size(), instanceCount,
-               LastFrameStats.DrawCalls, LastFrameStats.CulledObjects, bVSync ? L" | VSync" : L"");
+               LastFrameStats.DrawCalls, LastFrameStats.InstancesDrawn,
+               LastFrameStats.CulledObjects, LastFrameStats.CulledInstances, bVSync ? L" | VSync" : L"");
     SetWindowText(DisplayPtr->GetHwnd(), text);
 
     TitleUpdateAccumulator = 0.0f;

@@ -33,6 +33,9 @@ struct ConstantBufferData
     DirectX::XMFLOAT4 DirectionalLightColorIntensity;
     // Inverse-transpose of the world matrix for normals (stored in the same HLSL layout as worldMatrix).
     DirectX::XMFLOAT4X4 normalMatrix;
+    // Baked shadows of the static scene: one world-anchored map, independent of the camera.
+    DirectX::XMFLOAT4X4 StaticShadowViewProjection;
+    DirectX::XMFLOAT4 StaticShadowParams; // x enabled, y texel size, z depth bias, w unused
 };
 static_assert(sizeof(ConstantBufferData) % 16 == 0, "Constant buffer size must be a multiple of 16 bytes");
 
@@ -65,6 +68,8 @@ struct InstData
 {
     DirectX::XMFLOAT4X4 World;
     DirectX::XMFLOAT4 ObjectColor;
+    // x = fade of this instance in a LOD transition (1 = fully visible), yzw reserved.
+    DirectX::XMFLOAT4 Params{1.0f, 0.0f, 0.0f, 0.0f};
 };
 
 /** Layout of the cbuffer in Shaders/ShadowDepth.hlsl. */
@@ -94,6 +99,8 @@ struct FrameConstants
     DirectX::XMFLOAT4 ShadowParams;
     DirectX::XMFLOAT4 LightDirection;
     DirectX::XMFLOAT4 DirectionalLightColorIntensity;
+    DirectX::XMFLOAT4X4 StaticShadowViewProjection;
+    DirectX::XMFLOAT4 StaticShadowParams;
     // Camera frustum planes (xyz = inward normal, w = distance) for sphere culling.
     DirectX::XMFLOAT4 FrustumPlanes[6];
 };
@@ -121,4 +128,14 @@ void ApplyFrameConstants(TBuffer& target, const FrameConstants& frame)
     target.ShadowParams = frame.ShadowParams;
     target.LightDirection = frame.LightDirection;
     target.DirectionalLightColorIntensity = frame.DirectionalLightColorIntensity;
+}
+
+/**
+ * Baked shadow fields exist only in the full material buffer; the instanced buffer keeps the
+ * historic layout, so they are copied separately.
+ */
+inline void ApplyStaticShadowConstants(ConstantBufferData& target, const FrameConstants& frame)
+{
+    target.StaticShadowViewProjection = frame.StaticShadowViewProjection;
+    target.StaticShadowParams = frame.StaticShadowParams;
 }
