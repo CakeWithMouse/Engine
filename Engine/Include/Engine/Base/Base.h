@@ -1,6 +1,7 @@
 #pragma once
 #include <Engine/Base/Config/BaseResources.h>
 #include <Engine/Base/Config/BaseGameConfig.h>
+#include <Engine/Resources/VirtualFileSystem.h>
 #include <Engine/Runtime/LaunchOptions.h>
 #include <filesystem>
 #include <memory>
@@ -12,6 +13,7 @@ class BaseEngine final
 {
     BaseResources Resources;
     BaseGameConfig Config;
+    VirtualFileSystem Vfs;
     enum class State { New, Starting, Ready, Playing, Stopped };
     State state = State::New;
     bool exitRequested = false;
@@ -32,6 +34,9 @@ public:
     bool IsPlaying() const { return state == State::Playing; }
     void RequestExit() noexcept { exitRequested = true; }
     void Stop() noexcept;
+
+    VirtualFileSystem& GetVFS() noexcept { return Vfs; }
+    const VirtualFileSystem& GetVFS() const noexcept { return Vfs; }
 
     // Hot-Reload & Compilation Trigger
     bool ReloadActiveModule();

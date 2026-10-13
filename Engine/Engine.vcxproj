@@ -54,6 +54,7 @@
     <ClCompile Include="Source\Render\ImpostorAtlas.cpp" />
     <ClCompile Include="Source\Render\TextureLoader.cpp" />
     <ClCompile Include="Source\Resources\Paths.cpp" />
+    <ClCompile Include="Source\Resources\VirtualFileSystem.cpp" />
     <ClInclude Include="Include\Engine\Components\GameComponents.h" />
     <ClInclude Include="Include\Engine\Components\Light\CubeMap.h" />
     <ClInclude Include="Include\Engine\Components\Light\PointLightComponent.h" />
@@ -75,6 +76,7 @@
     <ClInclude Include="Include\Engine\Render\ShaderConstants.h" />
     <ClInclude Include="Include\Engine\Render\TextureLoader.h" />
     <ClInclude Include="Include\Engine\Resources\Paths.h" />
+    <ClInclude Include="Include\Engine\Resources\VirtualFileSystem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
