@@ -102,7 +102,7 @@ class BaseEngine::LoadedSession
     {
         if (!std::filesystem::exists(sourcePath))
         {
-            throw std::runtime_error("Source module does not exist: " + sourcePath.u8string());
+            throw std::runtime_error("Cannot load module: source does not exist: " + sourcePath.u8string());
         }
 
         const auto shadowDir = sourcePath.parent_path() / ".shadow_cache";
@@ -390,6 +390,7 @@ bool BaseEngine::Initialize(const BaseGameConfig& config, bool failForTest)
 
 bool BaseEngine::StartUp(bool failForTest)
 {
+    Resources.SetVFS(&Vfs);
     if (!Resources.Initialize()) return false;
     if (failForTest) throw std::runtime_error("Injected engine initialization failure");
     std::puts("EngineServicesReady (stub: no window or GPU)");
@@ -420,6 +421,30 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
 {
     if (state != State::Ready) throw std::runtime_error("Engine is not ready");
     activeOptions = options;
+
+    // Automatic VFS Mounts
+    auto engineContent = EnginePaths::ContentRoot();
+    if (!std::filesystem::exists(engineContent))
+    {
+        const auto repoRoot = FindRepositoryRoot(options.projectFile.empty() ? std::filesystem::path{} : std::filesystem::path(options.projectFile).parent_path());
+        if (!repoRoot.empty() && std::filesystem::exists(repoRoot / "Engine" / "Content"))
+        {
+            engineContent = repoRoot / "Engine" / "Content";
+        }
+    }
+    Vfs.Mount("/Engine", engineContent);
+    if (!options.contentRoot.empty())
+    {
+        Vfs.Mount("/Game", options.contentRoot);
+    }
+
+    for (const auto& mount : Vfs.GetMounts())
+    {
+        std::printf("[VFS] Mounted '%s' -> '%s'\n",
+            mount.virtualRoot.c_str(),
+            mount.physicalPath.generic_u8string().c_str());
+    }
+
     const EngineModuleHost host{ENGINE_MODULE_VERSION, &exitRequested, Log, Exit,
         options.projectName.c_str(), options.projectFile.c_str(), options.contentRoot.c_str()};
     activeSession = std::make_unique<LoadedSession>();
@@ -495,6 +520,8 @@ void BaseEngine::Stop() noexcept
         activeSession.reset();
     }
     Resources.DeInitialize();
+    Resources.SetVFS(nullptr);
+    Vfs.UnmountAll();
     state = State::Stopped;
     std::puts("EngineStopped");
 }

@@ -1,4 +1,5 @@
 #include <Engine/Resources/Paths.h>
+#include <Engine/Resources/VirtualFileSystem.h>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
@@ -269,6 +270,42 @@ void QuitMessage()
     CHECK(game.GetExitCode() == 17);
 }
 
+void VirtualFileSystemTests()
+{
+    VirtualFileSystem vfs;
+    const auto engineContent = EnginePaths::ContentRoot();
+
+    // Normalization check
+    CHECK(VirtualFileSystem::NormalizeVirtualPath("//Engine\\\\Shaders/../Shaders//foo.hlsl") == "/Engine/Shaders/foo.hlsl");
+    CHECK(VirtualFileSystem::NormalizeVirtualPath("/Engine/../../secret") == "/secret");
+    CHECK(VirtualFileSystem::NormalizeVirtualPath("") == "/");
+
+    // Mount & Resolve check
+    vfs.Mount("/Engine", engineContent);
+    const auto resolved = vfs.Resolve("/Engine/Shaders/RotatedFigure.hlsl");
+    CHECK(resolved.has_value());
+    CHECK(vfs.Exists("/Engine/Shaders/RotatedFigure.hlsl"));
+
+    // Case-insensitivity check on Windows
+    const auto resolvedLower = vfs.Resolve("/engine/shaders/rotatedfigure.hlsl");
+    CHECK(resolvedLower.has_value());
+
+    // ReadText check
+    const std::string shaderText = vfs.ReadText("/Engine/Shaders/RotatedFigure.hlsl");
+    CHECK(!shaderText.empty());
+    CHECK(shaderText.find("RotatedSpecularWeight") != std::string::npos);
+
+    // ReadBytes check
+    const auto shaderBytes = vfs.ReadBytes("/Engine/Shaders/RotatedFigure.hlsl");
+    CHECK(!shaderBytes.empty());
+    CHECK(shaderBytes.size() >= shaderText.size());
+
+    // Unmount check
+    CHECK(vfs.Unmount("/Engine"));
+    CHECK(!vfs.Exists("/Engine/Shaders/RotatedFigure.hlsl"));
+    CHECK(!vfs.Resolve("/Engine/Shaders/RotatedFigure.hlsl").has_value());
+}
+
 int main()
 {
     const std::pair<const char*, std::function<void()>> tests[] = {
@@ -276,7 +313,7 @@ int main()
         {"transform hierarchy and cache", TransformHierarchy}, {"unregister hierarchy and instances", UnregisterHierarchyAndInstances},
         {"frame light snapshot", LightSnapshot}, {"forward/deferred shader variants", ShaderVariants},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
-        {"WM_QUIT exit code", QuitMessage}
+        {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests}
     };
     int failures = 0;
     for (const auto& test : tests)

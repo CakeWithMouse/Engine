@@ -6,14 +6,19 @@
 #include <filesystem>
 #include <string>
 
+class VirtualFileSystem;
+
 class BaseResources
 {
 public:
     // Runtime skeleton: no actual GPU resources are created here yet.
     bool Initialize();
     bool DeInitialize();
+    void SetVFS(VirtualFileSystem* inVfs) noexcept { vfs = inVfs; }
+    VirtualFileSystem* GetVFS() const noexcept { return vfs; }
 private:
     bool initialized = false;
+    VirtualFileSystem* vfs = nullptr;
 public:  
     static constexpr glm::vec4 White{1.0f, 1.0f, 1.f, 1.f};
     static constexpr glm::vec4 Red{0.5f, 0.0f, 0.f, 1.f};
