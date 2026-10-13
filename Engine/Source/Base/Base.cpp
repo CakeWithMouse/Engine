@@ -67,6 +67,36 @@ std::filesystem::path FindRepositoryRoot(const std::filesystem::path& startHint 
     }
     return {};
 }
+
+std::vector<std::string> SplitCommandLine(std::string_view line)
+{
+    std::vector<std::string> args;
+    size_t i = 0;
+    while (i < line.size())
+    {
+        while (i < line.size() && (line[i] == ' ' || line[i] == '\t')) ++i;
+        if (i >= line.size()) break;
+        std::string token;
+        if (line[i] == '"' || line[i] == '\'')
+        {
+            const char quote = line[i++];
+            while (i < line.size() && line[i] != quote)
+            {
+                token += line[i++];
+            }
+            if (i < line.size()) ++i;
+        }
+        else
+        {
+            while (i < line.size() && line[i] != ' ' && line[i] != '\t')
+            {
+                token += line[i++];
+            }
+        }
+        args.push_back(std::move(token));
+    }
+    return args;
+}
 }
 
 class BaseEngine::LoadedSession
@@ -452,7 +482,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
     {
         activeSession->Open(options.module, options.mode == RuntimeMode::Game ? ENGINE_MODULE_GAME : ENGINE_MODULE_EDITOR, host);
         state = State::Playing;
-        if (!options.frames) std::puts("Interactive stub: Enter = frame, r = reload, b = build, br = build+reload, q = exit.");
+        if (!options.frames) std::puts("Interactive stub: Enter = frame, r = reload, b = build, br = build+reload, ls, find, import, info, mkdir, rm/del, mv, cp, cat, q = exit.");
         auto previous = std::chrono::steady_clock::now();
         for (uint64_t frame = 0; !exitRequested && (!options.frames || frame < options.frames); ++frame)
         {
@@ -475,6 +505,206 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
                     if (TriggerProjectBuild(true))
                     {
                         ReloadActiveModule();
+                    }
+                    continue;
+                }
+
+                auto tokens = SplitCommandLine(command);
+                if (tokens.empty())
+                {
+                    // Empty Enter advances a frame
+                }
+                else if (tokens[0] == "ls")
+                {
+                    const std::string path = tokens.size() > 1 ? tokens[1] : "/";
+                    const auto files = Vfs.EnumerateFiles(path, false);
+                    std::printf("[VFS] Listing '%s' (%zu file(s)):\n", path.c_str(), files.size());
+                    for (const auto& f : files)
+                    {
+                        std::printf("  [%-7s] %s (%llu bytes)\n",
+                            AssetTypeToString(f.type),
+                            f.virtualPath.c_str(),
+                            static_cast<unsigned long long>(f.sizeBytes));
+                    }
+                    continue;
+                }
+                else if (tokens[0] == "find")
+                {
+                    if (tokens.size() < 2)
+                    {
+                        std::puts("Usage: find <path> <type_or_pattern>");
+                        continue;
+                    }
+                    const std::string path = tokens[1];
+                    AssetType filterType = AssetType::Unknown;
+                    std::string pattern;
+
+                    if (tokens.size() >= 3)
+                    {
+                        const std::string& arg = tokens[2];
+                        const AssetType parsed = StringToAssetType(arg);
+                        if (parsed != AssetType::Unknown)
+                        {
+                            filterType = parsed;
+                            if (tokens.size() >= 4)
+                            {
+                                pattern = tokens[3];
+                            }
+                        }
+                        else
+                        {
+                            pattern = arg;
+                        }
+                    }
+
+                    const auto results = Vfs.FindFiles(path, filterType, pattern, true);
+                    std::printf("[VFS] Found %zu file(s) in '%s':\n", results.size(), path.c_str());
+                    for (const auto& f : results)
+                    {
+                        std::printf("  [%-7s] %s (%llu bytes)\n",
+                            AssetTypeToString(f.type),
+                            f.virtualPath.c_str(),
+                            static_cast<unsigned long long>(f.sizeBytes));
+                    }
+                    continue;
+                }
+                else if (tokens[0] == "import")
+                {
+                    if (tokens.size() < 3)
+                    {
+                        std::puts("Usage: import <external_source_path> <target_virtual_dir>");
+                        continue;
+                    }
+                    const std::filesystem::path srcPath = std::filesystem::u8path(tokens[1]);
+                    const std::string targetDir = tokens[2];
+                    const auto imported = Vfs.ImportFile(srcPath, targetDir);
+                    if (imported)
+                    {
+                        std::printf("[VFS] Successfully imported: %s\n", imported->virtualPath.c_str());
+                        std::printf("  Type:     %s\n", AssetTypeToString(imported->type));
+                        std::printf("  Physical: %s\n", imported->physicalPath.generic_u8string().c_str());
+                        std::printf("  Size:     %llu bytes\n", static_cast<unsigned long long>(imported->sizeBytes));
+                    }
+                    else
+                    {
+                        std::fprintf(stderr, "[VFS] Import failed for source: %s\n", tokens[1].c_str());
+                    }
+                    continue;
+                }
+                else if (tokens[0] == "info")
+                {
+                    if (tokens.size() < 2)
+                    {
+                        std::puts("Usage: info <virtual_path>");
+                        continue;
+                    }
+                    const std::string vpath = tokens[1];
+                    const auto info = Vfs.GetFileInfo(vpath);
+                    if (info)
+                    {
+                        std::printf("[VFS] Asset info for '%s':\n", info->virtualPath.c_str());
+                        std::printf("  Type:     %s\n", AssetTypeToString(info->type));
+                        std::printf("  Physical: %s\n", info->physicalPath.generic_u8string().c_str());
+                        std::printf("  Size:     %llu bytes\n", static_cast<unsigned long long>(info->sizeBytes));
+                        std::printf("  Ext:      %s\n", info->extension.c_str());
+                    }
+                    else
+                    {
+                        std::fprintf(stderr, "[VFS] Asset not found: %s\n", vpath.c_str());
+                    }
+                    continue;
+                }
+                else if (tokens[0] == "rm" || tokens[0] == "del")
+                {
+                    if (tokens.size() < 2)
+                    {
+                        std::puts("Usage: rm <virtual_path> (or del <virtual_path>)");
+                        continue;
+                    }
+                    const std::string path = tokens[1];
+                    bool deleted = Vfs.DeleteFile(path);
+                    if (!deleted)
+                    {
+                        deleted = Vfs.DeleteDir(path, true);
+                    }
+                    if (deleted)
+                    {
+                        std::printf("[VFS] Deleted '%s'\n", path.c_str());
+                    }
+                    else
+                    {
+                        std::fprintf(stderr, "[VFS] Failed to delete '%s' (protected or not found)\n", path.c_str());
+                    }
+                    continue;
+                }
+                else if (tokens[0] == "mkdir")
+                {
+                    if (tokens.size() < 2)
+                    {
+                        std::puts("Usage: mkdir <virtual_dir>");
+                        continue;
+                    }
+                    const std::string path = tokens[1];
+                    if (Vfs.CreateDir(path))
+                    {
+                        std::printf("[VFS] Created directory '%s'\n", path.c_str());
+                    }
+                    else
+                    {
+                        std::fprintf(stderr, "[VFS] Failed to create directory '%s'\n", path.c_str());
+                    }
+                    continue;
+                }
+                else if (tokens[0] == "mv")
+                {
+                    if (tokens.size() < 3)
+                    {
+                        std::puts("Usage: mv <src_virtual_path> <dst_virtual_path>");
+                        continue;
+                    }
+                    if (Vfs.Move(tokens[1], tokens[2]))
+                    {
+                        std::printf("[VFS] Moved '%s' -> '%s'\n", tokens[1].c_str(), tokens[2].c_str());
+                    }
+                    else
+                    {
+                        std::fprintf(stderr, "[VFS] Failed to move '%s' to '%s'\n", tokens[1].c_str(), tokens[2].c_str());
+                    }
+                    continue;
+                }
+                else if (tokens[0] == "cp")
+                {
+                    if (tokens.size() < 3)
+                    {
+                        std::puts("Usage: cp <src_virtual_path> <dst_virtual_path>");
+                        continue;
+                    }
+                    if (Vfs.Copy(tokens[1], tokens[2], true))
+                    {
+                        std::printf("[VFS] Copied '%s' -> '%s'\n", tokens[1].c_str(), tokens[2].c_str());
+                    }
+                    else
+                    {
+                        std::fprintf(stderr, "[VFS] Failed to copy '%s' to '%s'\n", tokens[1].c_str(), tokens[2].c_str());
+                    }
+                    continue;
+                }
+                else if (tokens[0] == "cat")
+                {
+                    if (tokens.size() < 2)
+                    {
+                        std::puts("Usage: cat <virtual_file>");
+                        continue;
+                    }
+                    try
+                    {
+                        const std::string text = Vfs.ReadText(tokens[1]);
+                        std::printf("[VFS] File '%s' (%zu bytes):\n", tokens[1].c_str(), text.size());
+                        std::puts(text.c_str());
+                    }
+                    catch (const std::exception& ex)
+                    {
+                        std::fprintf(stderr, "[VFS] Failed to read '%s': %s\n", tokens[1].c_str(), ex.what());
                     }
                     continue;
                 }

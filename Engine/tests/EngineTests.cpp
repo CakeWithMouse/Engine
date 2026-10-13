@@ -6,6 +6,7 @@
 #include <Engine/Render/ShaderCompiler.h>
 #include <cmath>
 #include <cstring>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <stdexcept>
@@ -270,6 +271,9 @@ void QuitMessage()
     CHECK(game.GetExitCode() == 17);
 }
 
+#ifdef DeleteFile
+#undef DeleteFile
+#endif
 void VirtualFileSystemTests()
 {
     VirtualFileSystem vfs;
@@ -299,6 +303,175 @@ void VirtualFileSystemTests()
     const auto shaderBytes = vfs.ReadBytes("/Engine/Shaders/RotatedFigure.hlsl");
     CHECK(!shaderBytes.empty());
     CHECK(shaderBytes.size() >= shaderText.size());
+
+    // Asset classification tests
+    CHECK(DeduceAssetType(".fbx") == AssetType::Model);
+    CHECK(DeduceAssetType("mesh.obj") == AssetType::Model);
+    CHECK(DeduceAssetType("scene.gltf") == AssetType::Model);
+    CHECK(DeduceAssetType("scene.glb") == AssetType::Model);
+    CHECK(DeduceAssetType("char.blend") == AssetType::Model);
+    CHECK(DeduceAssetType("asset.dae") == AssetType::Model);
+
+    CHECK(DeduceAssetType(".png") == AssetType::Texture);
+    CHECK(DeduceAssetType("diffuse.JPG") == AssetType::Texture);
+    CHECK(DeduceAssetType("photo.jpeg") == AssetType::Texture);
+    CHECK(DeduceAssetType("norm.tga") == AssetType::Texture);
+    CHECK(DeduceAssetType("sky.dds") == AssetType::Texture);
+    CHECK(DeduceAssetType("icon.bmp") == AssetType::Texture);
+    CHECK(DeduceAssetType("env.hdr") == AssetType::Texture);
+
+    CHECK(DeduceAssetType("shader.hlsl") == AssetType::Shader);
+    CHECK(DeduceAssetType("effect.fx") == AssetType::Shader);
+    CHECK(DeduceAssetType("code.glsl") == AssetType::Shader);
+    CHECK(DeduceAssetType("compiled.cso") == AssetType::Shader);
+
+    CHECK(DeduceAssetType("script.lua") == AssetType::Script);
+    CHECK(DeduceAssetType("config.json") == AssetType::Config);
+    CHECK(DeduceAssetType("settings.ini") == AssetType::Config);
+    CHECK(DeduceAssetType("layout.xml") == AssetType::Config);
+    CHECK(DeduceAssetType("notes.txt") == AssetType::Config);
+
+    CHECK(DeduceAssetType("sound.wav") == AssetType::Audio);
+    CHECK(DeduceAssetType("music.ogg") == AssetType::Audio);
+    CHECK(DeduceAssetType("song.mp3") == AssetType::Audio);
+    CHECK(DeduceAssetType("track.flac") == AssetType::Audio);
+
+    CHECK(DeduceAssetType("unknown.dat") == AssetType::Unknown);
+    CHECK(DeduceAssetType("") == AssetType::Unknown);
+
+    CHECK(vfs.GetAssetType("/Engine/Shaders/RotatedFigure.hlsl") == AssetType::Shader);
+    CHECK(vfs.GetAssetType("/Game/Textures/Wood.png") == AssetType::Texture);
+
+    // GetFileInfo test
+    const auto infoOpt = vfs.GetFileInfo("/Engine/Shaders/RotatedFigure.hlsl");
+    CHECK(infoOpt.has_value());
+    const auto& info = *infoOpt;
+    CHECK(info.virtualPath == "/Engine/Shaders/RotatedFigure.hlsl");
+    CHECK(info.type == AssetType::Shader);
+    CHECK(info.extension == ".hlsl");
+    CHECK(info.sizeBytes > 0);
+    CHECK(std::filesystem::exists(info.physicalPath));
+    CHECK(!vfs.GetFileInfo("/Engine/Shaders/NoSuchShader.hlsl").has_value());
+
+    // EnumerateFiles test
+    const auto allEngineFiles = vfs.EnumerateFiles("/Engine", true);
+    CHECK(!allEngineFiles.empty());
+    bool foundRotated = false;
+    for (const auto& file : allEngineFiles)
+    {
+        if (file.virtualPath == "/Engine/Shaders/RotatedFigure.hlsl")
+        {
+            foundRotated = true;
+            CHECK(file.type == AssetType::Shader);
+            CHECK(file.sizeBytes > 0);
+        }
+    }
+    CHECK(foundRotated);
+
+    const auto shaderDirFiles = vfs.EnumerateFiles("/Engine/Shaders", false);
+    CHECK(!shaderDirFiles.empty());
+
+    // FindFiles tests (type filter, pattern filter, and combined)
+    const auto shaderFiles = vfs.FindFiles("/Engine", AssetType::Shader, "", true);
+    CHECK(!shaderFiles.empty());
+    for (const auto& f : shaderFiles)
+    {
+        CHECK(f.type == AssetType::Shader);
+    }
+
+    const auto figureFiles = vfs.FindFiles("/Engine", AssetType::Unknown, "RotatedFigure*", true);
+    CHECK(!figureFiles.empty());
+    CHECK(figureFiles[0].virtualPath == "/Engine/Shaders/RotatedFigure.hlsl");
+
+    const auto hlslShaders = vfs.FindFiles("/Engine", AssetType::Shader, "*.hlsl", true);
+    CHECK(!hlslShaders.empty());
+    for (const auto& f : hlslShaders)
+    {
+        CHECK(f.type == AssetType::Shader);
+        CHECK(f.extension == ".hlsl");
+    }
+
+    const auto audioFiles = vfs.FindFiles("/Engine", AssetType::Audio, "", true);
+    CHECK(audioFiles.empty());
+
+    // ImportFile tests
+    const auto tempRoot = std::filesystem::temp_directory_path() / "EngineVfsTest";
+    std::error_code ec;
+    std::filesystem::remove_all(tempRoot, ec);
+    std::filesystem::create_directories(tempRoot / "External", ec);
+    std::filesystem::create_directories(tempRoot / "GameContent", ec);
+
+    const auto externalFile = tempRoot / "External" / "ImportedModel.obj";
+    {
+        std::ofstream out(externalFile);
+        out << "v 0.0 0.0 0.0\nv 1.0 1.0 1.0\n";
+    }
+
+    vfs.Mount("/Game", tempRoot / "GameContent");
+
+    const auto imported = vfs.ImportFile(externalFile, "/Game/Meshes");
+    CHECK(imported.has_value());
+    CHECK(imported->virtualPath == "/Game/Meshes/ImportedModel.obj");
+    CHECK(imported->type == AssetType::Model);
+    CHECK(imported->extension == ".obj");
+    CHECK(imported->sizeBytes > 0);
+    CHECK(std::filesystem::exists(imported->physicalPath));
+    CHECK(vfs.Exists("/Game/Meshes/ImportedModel.obj"));
+
+    const std::string importedText = vfs.ReadText("/Game/Meshes/ImportedModel.obj");
+    CHECK(importedText.find("v 1.0 1.0 1.0") != std::string::npos);
+
+    CHECK(!vfs.ImportFile(tempRoot / "External" / "NonExistent.fbx", "/Game/Meshes").has_value());
+    CHECK(!vfs.ImportFile(externalFile, "/UnmountedRoot/Meshes").has_value());
+
+    // Directory and file manipulation tests (CreateDir, WriteText, WriteBytes, Copy, Move, DeleteFile, DeleteDir)
+    // Root protection checks
+    CHECK(!vfs.DeleteFile("/"));
+    CHECK(!vfs.DeleteDir("/"));
+    CHECK(!vfs.DeleteFile("/Engine"));
+    CHECK(!vfs.DeleteDir("/Engine"));
+    CHECK(!vfs.DeleteFile("/Game"));
+    CHECK(!vfs.DeleteDir("/Game"));
+    CHECK(!vfs.WriteText("/", "fail"));
+    CHECK(!vfs.WriteText("/Engine", "fail"));
+
+    // CreateDir test
+    CHECK(vfs.CreateDir("/Game/WorkDir/Nested"));
+    CHECK(vfs.Exists("/Game/WorkDir/Nested"));
+    CHECK(vfs.CreateDir("/Game/WorkDir/Nested")); // idempotent
+
+    // WriteText & WriteBytes tests
+    CHECK(vfs.WriteText("/Game/WorkDir/notes.txt", "AlphaBetaGamma"));
+    CHECK(vfs.Exists("/Game/WorkDir/notes.txt"));
+    CHECK(vfs.ReadText("/Game/WorkDir/notes.txt") == "AlphaBetaGamma");
+
+    const std::vector<uint8_t> testBytes = { 0xDE, 0xAD, 0xBE, 0xEF };
+    CHECK(vfs.WriteBytes("/Game/WorkDir/data.bin", testBytes));
+    CHECK(vfs.ReadBytes("/Game/WorkDir/data.bin") == testBytes);
+
+    // Copy test
+    CHECK(vfs.Copy("/Game/WorkDir/notes.txt", "/Game/WorkDir/notes_copy.txt"));
+    CHECK(vfs.Exists("/Game/WorkDir/notes_copy.txt"));
+    CHECK(vfs.ReadText("/Game/WorkDir/notes_copy.txt") == "AlphaBetaGamma");
+
+    // Move test
+    CHECK(vfs.Move("/Game/WorkDir/notes_copy.txt", "/Game/WorkDir/notes_moved.txt"));
+    CHECK(!vfs.Exists("/Game/WorkDir/notes_copy.txt"));
+    CHECK(vfs.Exists("/Game/WorkDir/notes_moved.txt"));
+    CHECK(vfs.ReadText("/Game/WorkDir/notes_moved.txt") == "AlphaBetaGamma");
+
+    // DeleteFile test
+    CHECK(vfs.DeleteFile("/Game/WorkDir/notes_moved.txt"));
+    CHECK(!vfs.Exists("/Game/WorkDir/notes_moved.txt"));
+    CHECK(!vfs.DeleteFile("/Game/WorkDir/notes_moved.txt")); // already deleted
+
+    // DeleteDir test
+    CHECK(vfs.DeleteDir("/Game/WorkDir/Nested", false)); // delete empty dir
+    CHECK(!vfs.Exists("/Game/WorkDir/Nested"));
+    CHECK(vfs.DeleteDir("/Game/WorkDir", true)); // recursive delete
+    CHECK(!vfs.Exists("/Game/WorkDir"));
+
+    std::filesystem::remove_all(tempRoot, ec);
 
     // Unmount check
     CHECK(vfs.Unmount("/Engine"));
