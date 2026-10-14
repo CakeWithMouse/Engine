@@ -25,7 +25,9 @@ cbuffer ConstantBuffer : register(b0)
     float4 ShadowParams;         // x enabled, y cascades, z bias, w texel size
     float4 LightDirection;
     float4 DirectionalLightColorIntensity;
-    float4x4 normalMatrix;       // inverse-transpose of worldMatrix
+    float4x4 normalMatrix;              // inverse-transpose of worldMatrix
+    float4x4 StaticShadowViewProjection; // baked shadows of the static scene
+    float4 StaticShadowParams;           // x enabled, y texel size, z bias
 };
 
 // G-buffer contract:
@@ -64,7 +66,51 @@ GBufferOut EncodeGBuffer(float3 albedo, float3 normal, float3 worldPos, Material
 }
 
 Texture2DArray shadowMapTex : register(t4);
+Texture2D staticShadowMapTex : register(t5);
 SamplerState shadowSampler : register(s4);
+
+/**
+ * Shadow of the static scene (terrain, buildings): one map fixed to the world, rendered once.
+ * It does not follow the camera, so it is not re-rendered while the camera moves.
+ */
+float ComputeStaticShadowFactor(float3 worldPos, float3 normal, float3 toLightDir)
+{
+    if (StaticShadowParams.x < 0.5f)
+    {
+        return 1.0f;
+    }
+
+    float4 lightPos = mul(float4(worldPos, 1.0f), StaticShadowViewProjection);
+    float3 projCoords = lightPos.xyz / max(lightPos.w, 0.0001f);
+
+    float2 uv;
+    uv.x = projCoords.x * 0.5f + 0.5f;
+    uv.y = -projCoords.y * 0.5f + 0.5f;
+    if (uv.x < 0.0f || uv.x > 1.0f || uv.y < 0.0f || uv.y > 1.0f || projCoords.z <= 0.0f || projCoords.z >= 1.0f)
+    {
+        return 1.0f;
+    }
+
+    float baseBias = max(StaticShadowParams.z, 0.00005f);
+    float slopeBias = 1.0f - saturate(dot(normal, toLightDir));
+    float bias = max(baseBias * slopeBias, baseBias * 0.25f);
+    float texelSize = max(StaticShadowParams.y, 0.0001f);
+
+    float visibility = 0.0f;
+    [unroll]
+    for (int y = -1; y <= 1; ++y)
+    {
+        [unroll]
+        for (int x = -1; x <= 1; ++x)
+        {
+            float2 offset = float2((float)x, (float)y) * texelSize;
+            float sampledDepth = staticShadowMapTex.SampleLevel(shadowSampler, uv + offset, 0.0f).r;
+            visibility += ((projCoords.z - bias) <= sampledDepth) ? 1.0f : 0.0f;
+        }
+    }
+
+    return visibility / 9.0f;
+}
 
 int SelectCascade(float viewDepth)
 {
@@ -161,7 +207,10 @@ float3 ComputeSceneLighting(float3 albedo, float3 normal, float3 worldPos, Mater
 
     float3 directionalToLight = normalize(-LightDirection.xyz);
     float viewDepth = length(CameraPosition.xyz - worldPos);
-    float shadow = ComputeShadowFactor(worldPos, normal, directionalToLight, viewDepth);
+    // Dynamic cascades cover the units, the baked map covers the scenery; a pixel is lit only if
+    // neither of them blocks the sun.
+    float shadow = min(ComputeShadowFactor(worldPos, normal, directionalToLight, viewDepth),
+                       ComputeStaticShadowFactor(worldPos, normal, directionalToLight));
 
     float3 directionalColor = DirectionalLightColorIntensity.rgb;
     float directionalIntensity = DirectionalLightColorIntensity.a;

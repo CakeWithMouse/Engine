@@ -5,6 +5,7 @@ EngineContent/Shaders/BaseSphereFigure.hlsl
 EngineContent/Shaders/Common.hlsli
 EngineContent/Shaders/GPUParticleSystem.hlsl
 EngineContent/Shaders/InstanceSphereFigure.hlsl
+EngineContent/Shaders/Instancing.hlsli
 EngineContent/Shaders/ReflectiveFBX.hlsl
 EngineContent/Shaders/ReflectiveSphere.hlsl
 EngineContent/Shaders/RotatedFigure.hlsl

@@ -63,6 +63,12 @@ public:
     virtual void DispatchCompute(ID3D11DeviceContext* context) {}
     virtual bool IsRenderable() const { return true; }
     virtual bool CastsShadow() const { return !bHasOpacity && !bIsSkybox; }
+    /**
+     * Objects that never move (terrain, buildings): their shadow is baked once into the static
+     * shadow map instead of being redrawn into every cascade each frame.
+     */
+    void SetStaticShadowCaster(bool bStatic) { bStaticShadowCaster = bStatic; }
+    virtual bool IsStaticShadowCaster() const { return bStaticShadowCaster && CastsShadow(); }
     virtual bool SupportsFrustumCulling() const { return InstanceArray.empty() && !bIsSkybox; }
 
     // Shaders
@@ -154,6 +160,7 @@ protected:
     bool bHasCollision = false;
     bool bTransformDirty = true;
     bool bIsSkybox = false;
+    bool bStaticShadowCaster = false;
 
     float VelocitySpeed = 1.f;
     float RotationSpeed = 0.1f;

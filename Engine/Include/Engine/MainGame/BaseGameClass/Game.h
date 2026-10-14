@@ -86,6 +86,12 @@ struct ShadowPassContext
     ID3D11InputLayout* PrimitiveLayout = nullptr;
     ID3D11InputLayout* MeshLayout = nullptr;
     DirectX::XMFLOAT4X4 LightViewProjection{};
+    // Which cascade is being filled and the world sphere it covers: lets a component draw only
+    // the casters this cascade needs, with detail matching the cascade.
+    int CascadeIndex = 0;
+    int CascadeCount = 1;
+    DirectX::XMFLOAT4 CascadeSphere{}; // xyz centre, w radius
+    DirectX::XMFLOAT4 LightDirection{};
 };
 
 /** Per-frame counters shown in the window title. */
@@ -96,6 +102,8 @@ struct FrameStats
     uint32_t Dispatches = 0;
     uint32_t VisibleObjects = 0;
     uint32_t CulledObjects = 0;
+    // Instances dropped inside a component that culls its own instances (mass units).
+    uint32_t CulledInstances = 0;
     uint64_t IndicesDrawn = 0;
 
     void Reset() { *this = FrameStats{}; }
@@ -171,6 +179,24 @@ public:
     const DirectX::XMFLOAT4X4& GetViewMatrix() const { return FirstPlayer->GetViewMatrix(); }
     const DirectX::XMFLOAT4X4& GetProjectionMatrix() const { return FirstPlayer->GetProjectionMatrix(); }
     const DirectX::XMFLOAT4X4* GetShadowMatrices() const { return CascadeLightViewProjection; }
+    /** World sphere of each cascade (xyz centre, w radius); valid while shadows are active. */
+    const DirectX::XMFLOAT4* GetCascadeSpheres() const { return CascadeSpheres; }
+
+    /**
+     * Area covered by the baked shadow map of static objects (terrain, buildings). The map is
+     * anchored to the world, rendered once and reused while the sun and the area do not change,
+     * so moving the camera costs nothing. Components opt in with SetStaticShadowCaster.
+     */
+    /**
+     * Diagnostics: writes every shadow cascade and the baked map as 24-bit BMP files
+     * (<prefix>-cascade0.bmp, ...). Depth is remapped so that occupied texels are visible.
+     */
+    bool DumpShadowMaps(const std::string& pathPrefix);
+
+    void SetStaticShadowArea(const glm::vec3& center, float extent);
+    void InvalidateStaticShadow() { bStaticShadowDirty = true; }
+    bool IsStaticShadowReady() const { return bStaticShadowReady; }
+    ID3D11ShaderResourceView* GetStaticShadowSRV() const { return staticShadowSRV.Get(); }
     const DirectX::XMFLOAT4& GetCascadeSplits() const { return CascadeSplits; }
     const DirectX::XMFLOAT4& GetShadowParams() const { return ShadowParams; }
     const DirectX::XMFLOAT4& GetDirectionalLightDirection() const { return DirectionalLightDirection; }
@@ -182,6 +208,7 @@ public:
     FrameStats& GetFrameStats() { return Stats; }
     void CountDraw(uint32_t indexCount, uint32_t instanceCount = 1);
     void CountDispatch(uint32_t dispatchCount = 1) { Stats.Dispatches += dispatchCount; }
+    void CountCulledInstances(uint32_t count) { Stats.CulledInstances += count; }
 
     std::vector<PointLightInfo> GetPointLights(size_t maxLights = MaxPointLights) const;
 
@@ -202,6 +229,9 @@ public:
      * G-buffer output, so it must be drawn by the forward pass instead).
      */
     bool BindComponentShaders(GameComponent* Component, ShaderCompileVariant variant);
+    /** Variant of the pass that is currently submitting draws; components with extra materials
+     *  (for example an impostor level) resolve their own shaders for it. */
+    ShaderCompileVariant GetCurrentPassVariant() const { return CurrentPassVariant; }
     /** True if the component's material writes the full G-buffer (3 render targets). */
     bool SupportsDeferredGeometry(GameComponent* Component);
 
@@ -216,6 +246,8 @@ protected:
     bool CreateInputLayouts();
     bool InitShaderBuffers();
     bool InitShadowResources();
+    bool InitStaticShadowResources();
+    void RenderStaticShadowMap();
     bool InitDeferredResources();
     void DestroyResources();
 
@@ -349,6 +381,8 @@ protected:
     DirectX::XMFLOAT4 DirectionalLightDirection = DirectX::XMFLOAT4(-0.35f, -0.85f, -0.2f, 0.0f);
     DirectX::XMFLOAT4 DirectionalLightColorIntensity = DirectX::XMFLOAT4(0.95f, 0.93f, 0.90f, 0.80f);
     DirectX::XMFLOAT4X4 CascadeLightViewProjection[MaxShadowCascades] = {};
+    // World sphere covered by each cascade, filled by UpdateShadowCascades.
+    DirectX::XMFLOAT4 CascadeSpheres[MaxShadowCascades] = {};
     Microsoft::WRL::ComPtr<ID3D11Texture2D> shadowTexture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV;
     Microsoft::WRL::ComPtr<ID3D11DepthStencilView> shadowDSVs[MaxShadowCascades];
@@ -361,6 +395,21 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11Buffer> shadowPassCB;
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> shadowRasterState;
 
+    // Baked shadows of static geometry: world anchored, independent of the camera.
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> staticShadowTexture;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> staticShadowDSV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> staticShadowSRV;
+    DirectX::XMFLOAT4X4 StaticShadowViewProjection = {};
+    DirectX::XMFLOAT4 StaticShadowParams = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+    DirectX::XMFLOAT4 StaticShadowBakedLight = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+    glm::vec3 StaticShadowCenter{0.0f, 0.0f, 0.0f};
+    float StaticShadowExtent = 0.0f;
+    int StaticShadowMapSize = 2048;
+    float StaticShadowBias = 0.0015f;
+    bool bStaticShadowDirty = true;
+    bool bStaticShadowReady = false;
+    bool bStaticShadowFailed = false;
+
     Microsoft::WRL::ComPtr<ID3D11BlendState> transparentBlendState;
     Microsoft::WRL::ComPtr<ID3D11BlendState> opaqueBlendState;
 
@@ -368,6 +417,7 @@ protected:
     FrameConstants CurrentFrame{};
     FrameStats Stats;
     FrameStats LastFrameStats;
+    ShaderCompileVariant CurrentPassVariant = ShaderCompileVariant::Default;
     bool bVSync = true;
     bool bFrustumCulling = true;
     bool bOverlayKeyWasDown = false;

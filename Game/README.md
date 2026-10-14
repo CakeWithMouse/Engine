@@ -7,6 +7,7 @@
 - BasicExamples — выбор сцен «Квадраты» / «Куб».
 - Pong — ракетки и мяч.
 - SunGame — солнечная система.
+- Battle — 30000 единиц техники на поле: инстансинг, LOD, спрайты, тени ([как устроено](../Engine/docs/UNIT-RENDERING.md)).
 - Katamari — требует vcpkg/Assimp; после установки и настройки VCPKG_ROOT используйте [Start-With-Assimp.cmd](Start-With-Assimp.cmd).
 
 Лаунчер находится в `Launcher`, общий код примеров — в `Common`, проверки — в `tests`. В каждой игре свои Source, Content и проект. Старые лабораторные сохранены в `Archive/1_Lab` для сравнения и не участвуют в сборке.

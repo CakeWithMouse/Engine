@@ -20,11 +20,7 @@ cbuffer ConstantBuffer : register(b0)
     float4 DirectionalLightColorIntensity;
 };
 
-struct InstData
-{
-    float4x4 World;
-    float4 color;
-};
+#include "Instancing.hlsli"
 
 StructuredBuffer<InstData> InstBuf : register(t0);
 
@@ -69,7 +65,7 @@ PS_IN VSMain(VS_IN input, uint ind : SV_InstanceID)
     float3 objectCenter = mul(float4(0.0f, 0.0f, 0.0f, 1.0f), instanceData.World).xyz;
 
     output.pos = projectionPos;
-    output.col = instanceData.color;
+    output.col = instanceData.Color;
     output.worldPos = worldPos.xyz;
     output.normal = normalize(worldPos.xyz - objectCenter);
     output.objectCenter = objectCenter;

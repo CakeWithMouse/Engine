@@ -1,5 +1,5 @@
 param([ValidateSet('Debug','Release')][string]$Configuration = 'Debug',
-    [ValidateSet('All','Engine','EngineRuntime','EngineLauncher','BasicExamples','Pong','SunGame','Katamari')][string]$Target = 'All',
+    [ValidateSet('All','Engine','EngineRuntime','EngineLauncher','BasicExamples','Pong','SunGame','Battle','Katamari')][string]$Target = 'All',
     [string]$PlatformToolset = 'auto', [switch]$EnableAssimp)
 $ErrorActionPreference = 'Stop'
 $project = switch ($Target) {
