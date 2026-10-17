@@ -40,8 +40,9 @@
     <PropertyGroup>
         <QtInstallDir Condition="'$(QtInstallDir)'=='' AND '$(QTDIR)'!=''">$(QTDIR)</QtInstallDir>
         <QtInstallDir Condition="'$(QtInstallDir)'==''">$(MSBuildThisFileDirectory)ThirdParty\Qt6.7</QtInstallDir>
-        <QtLibSuffix Condition="'$(Configuration)'=='Debug'">d</QtLibSuffix>
-        <QtLibSuffix Condition="'$(Configuration)'!='Debug'"></QtLibSuffix>
+        <QtUseDebugLibraries Condition="'$(Configuration)'=='Debug' AND Exists('$(QtInstallDir)/lib/Qt6Widgetsd.lib')">true</QtUseDebugLibraries>
+        <QtLibSuffix Condition="'$(QtUseDebugLibraries)'=='true'">d</QtLibSuffix>
+        <QtLibSuffix Condition="'$(QtUseDebugLibraries)'!='true'"></QtLibSuffix>
     </PropertyGroup>
 
     <!-- ===== Qt-настройки (кладем ПОСЛЕ Cpp.props, чтобы переопределить/дополнить) ===== -->
@@ -66,12 +67,21 @@
     </ItemDefinitionGroup>
 
     <!-- ===== Debug: /MDd + отладочная Qt (Qt6Widgetsd.lib) ===== -->
-    <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' AND '$(QtUseDebugLibraries)'=='true'">
         <ClCompile>
             <Optimization>Disabled</Optimization>
             <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
             <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
             <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+        </ClCompile>
+    </ItemDefinitionGroup>
+
+    <!-- Some SDKs ship only release Qt. Keep symbols but match its CRT/iterator ABI.
+         Editor allocates and frees its own objects; the host boundary is the C ModuleApi. -->
+    <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' AND '$(QtUseDebugLibraries)'!='true'">
+        <ClCompile>
+            <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+            <PreprocessorDefinitions>NDEBUG;$([System.String]::Copy('%(PreprocessorDefinitions)').Replace('_DEBUG;', '').Replace(';_DEBUG', ''))</PreprocessorDefinitions>
         </ClCompile>
     </ItemDefinitionGroup>
 

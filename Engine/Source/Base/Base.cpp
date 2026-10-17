@@ -9,16 +9,20 @@
 #include <Engine/Base/Base.h>
 #include <Engine/Runtime/ModuleApi.h>
 #include <Engine/Resources/Paths.h>
+#include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/MainGame/Player.h>
 #include <chrono>
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+#include <thread>
 
 namespace
 {
 void __cdecl Log(void*, const char* message) { if (message) std::puts(message); }
-void __cdecl Exit(void* requestFlag) { *static_cast<bool*>(requestFlag) = true; }
+void __cdecl Exit(void* engine) { static_cast<BaseEngine*>(engine)->RequestExit(); }
 
 class ScopedHandle
 {
@@ -475,18 +479,60 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             mount.physicalPath.generic_u8string().c_str());
     }
 
-    const EngineModuleHost host{ENGINE_MODULE_VERSION, &exitRequested, Log, Exit,
+    EngineModuleHost host{ENGINE_MODULE_VERSION, this, Log, Exit,
         options.projectName.c_str(), options.projectFile.c_str(), options.contentRoot.c_str()};
+    if (options.mode == RuntimeMode::Editor && viewportFactory)
+    {
+        host.viewportAttach = [](void* user, void* hwnd, uint32_t w, uint32_t h) -> int {
+            auto& engine = *static_cast<BaseEngine*>(user);
+            try
+            {
+                if (!hwnd || !w || !h || w > INT_MAX || h > INT_MAX) return 0;
+                engine.viewportGame.reset();
+                auto scene = engine.viewportFactory();
+                if (!scene || !scene->InitializeViewport(static_cast<HWND>(hwnd), static_cast<int>(w), static_cast<int>(h)))
+                    return 0;
+                scene->SetVSync(false); // Host paces the editor, including when occluded.
+                engine.viewportGame = std::move(scene);
+                std::puts("ViewportReady");
+                return 1;
+            }
+            catch (const std::exception& error) { std::fprintf(stderr, "ViewportError: %s\n", error.what()); }
+            catch (...) { std::fputs("ViewportError: initialization failed\n", stderr); }
+            return 0;
+        };
+        host.viewportResize = [](void* user, uint32_t w, uint32_t h) -> int {
+            auto& scene = static_cast<BaseEngine*>(user)->viewportGame;
+            if (!scene || w > INT_MAX || h > INT_MAX) return 0;
+            scene->OnWindowResized(static_cast<int>(w), static_cast<int>(h), !w || !h);
+            return 1;
+        };
+        host.viewportCamera = [](void* user, float r, float u, float f, float y, float p, float z) {
+            auto& scene = static_cast<BaseEngine*>(user)->viewportGame;
+            if (scene && scene->GetPlayer()) {
+                scene->GetPlayer()->MoveEditorCamera(r, u, f, y, p, z);
+                if (std::getenv("ENGINE_VIEWPORT_INPUT_TRACE")) {
+                    const auto position = scene->GetPlayer()->GetPosition();
+                    std::printf("ViewportCamera movement=%.4f,%.4f,%.4f position=%.4f,%.4f,%.4f\n", r,u,f,position.x,position.y,position.z);
+                }
+            }
+        };
+        host.viewportDetach = [](void* user) -> int {
+            static_cast<BaseEngine*>(user)->viewportGame.reset();
+            std::puts("ViewportStopped");
+            return 1;
+        };
+    }
     activeSession = std::make_unique<LoadedSession>();
     try
     {
         activeSession->Open(options.module, options.mode == RuntimeMode::Game ? ENGINE_MODULE_GAME : ENGINE_MODULE_EDITOR, host);
         state = State::Playing;
-        if (!options.frames) std::puts("Interactive stub: Enter = frame, r = reload, b = build, br = build+reload, ls, find, import, info, mkdir, rm/del, mv, cp, cat, q = exit.");
+        if (!options.frames && options.mode != RuntimeMode::Editor) std::puts("Interactive stub: Enter = frame, r = reload, b = build, br = build+reload, ls, find, import, info, mkdir, rm/del, mv, cp, cat, q = exit.");
         auto previous = std::chrono::steady_clock::now();
         for (uint64_t frame = 0; !exitRequested && (!options.frames || frame < options.frames); ++frame)
         {
-            if (!options.frames)
+            if (!options.frames && options.mode != RuntimeMode::Editor)
             {
                 std::string command;
                 if (!std::getline(std::cin, command) || command == "q") break;
@@ -715,15 +761,30 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             if (activeSession && activeSession->IsStarted())
             {
                 activeSession->Update(dt);
-                std::puts("EngineUpdate (stub)");
-                std::puts("EngineRender (stub)");
+                if (viewportGame)
+                {
+                    if (!viewportGame->RenderViewportFrame(static_cast<float>(dt)))
+                        throw std::runtime_error("Viewport rendering failed");
+                    if (options.frames || frame == 0) std::puts("EngineRender (viewport)");
+                }
+                else
+                {
+                    if (options.frames || options.mode != RuntimeMode::Editor || frame == 0)
+                    {
+                        std::puts("EngineUpdate (stub)");
+                        std::puts("EngineRender (stub)");
+                    }
+                }
                 if (options.mode == RuntimeMode::Editor) activeSession->Overlay();
-                std::puts("EngineFrameEnd (stub)");
+                if (options.frames || options.mode != RuntimeMode::Editor)
+                    std::puts(viewportGame ? "EngineFrameEnd (viewport)" : "EngineFrameEnd (stub)");
             }
             else
             {
                 std::puts("EngineWaitingForModule (stub)");
             }
+            if (options.mode == RuntimeMode::Editor)
+                std::this_thread::sleep_until(now + std::chrono::milliseconds(16));
         }
     }
     catch (...)
@@ -749,6 +810,7 @@ void BaseEngine::Stop() noexcept
         activeSession->Close();
         activeSession.reset();
     }
+    viewportGame.reset();
     Resources.DeInitialize();
     Resources.SetVFS(nullptr);
     Vfs.UnmountAll();

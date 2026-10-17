@@ -317,3 +317,24 @@ void Player::Zoom(float delta)
         orbitRadius = std::max(minimalOrbitRadius, std::min(maximalOrbitRadius, orbitRadius));
     }
 }
+
+void Player::MoveEditorCamera(float right, float up, float forward, float yawDelta, float pitchDelta, float zoom)
+{
+    if (cameraMode == CameraMode::Orbital)
+    {
+        orbitYaw += yawDelta;
+        orbitPitch = std::max(-DirectX::XM_PIDIV2 + 0.01f,
+            std::min(DirectX::XM_PIDIV2 - 0.01f, orbitPitch + pitchDelta));
+        orbitRadius = std::max(minimalOrbitRadius,
+            std::min(maximalOrbitRadius, orbitRadius * std::exp(-zoom * 0.15f)));
+        UpdateOrbitalCamera(0);
+        orbitTarget += (-orbit_right * right + glm::vec3(0, up, 0) + orbit_forward * forward) * orbitRadius;
+        UpdateOrbitalCamera(0);
+    }
+    else
+    {
+        Rotate(-yawDelta, -pitchDelta);
+        position += (-free_right * right + glm::vec3(0, up, 0) + free_forward * (forward + zoom * 0.2f)) * 5.0f;
+    }
+    UpdateViewMatrix();
+}

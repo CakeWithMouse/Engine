@@ -89,6 +89,7 @@ public:
     void ClearParentReferences(const GameComponent* removed);
     void MarkTransformDirty() { bTransformDirty = true; }
     void SetPosition(glm::vec3 pos) { ComponentPosition = pos; MarkTransformDirty(); }
+    void SetColor(const glm::vec4& color) { Color = color; }
     void SetScale(glm::vec3 scale) { ComponentScale = scale; MarkTransformDirty(); }
     void SetRotation(glm::vec3 rot);
     void SetRotationQuat(const glm::quat& rotQuat);

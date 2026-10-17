@@ -106,8 +106,9 @@ RuntimeProject ReadRuntimeProject(const std::filesystem::path& path)
     if (json.empty() || !MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, json.data(), static_cast<int>(json.size()), nullptr, 0))
         throw std::runtime_error("Project.json must be valid UTF-8");
     const auto fields = ProjectJson(json).Read();
-    if (fields.size() != 3 || !fields.count("name") || !fields.count("module") || !fields.count("content"))
-        throw std::runtime_error("Project.json requires exactly name, module, content string fields");
+    if (!fields.count("name") || !fields.count("module") || !fields.count("content") ||
+        fields.size() != 3 + fields.count("preview"))
+        throw std::runtime_error("Project.json requires name, module, content; optional field: preview");
     for (const auto& field : fields)
         if (field.second.empty() || field.second.find_first_of(std::string("\0\r\n", 3)) != std::string::npos)
             throw std::runtime_error("Project fields must be nonempty single-line strings without NUL");
@@ -115,5 +116,6 @@ RuntimeProject ReadRuntimeProject(const std::filesystem::path& path)
         (file.parent_path() / std::filesystem::u8path(fields.at("module"))).lexically_normal(),
         (file.parent_path() / std::filesystem::u8path(fields.at("content"))).lexically_normal()};
     if (!std::filesystem::is_directory(project.content)) throw std::runtime_error("Project content directory is missing");
+    if (fields.count("preview")) project.preview = fields.at("preview");
     return project;
 }

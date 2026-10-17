@@ -6,6 +6,9 @@
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <functional>
+
+class Game;
 
 // Host owns this object; game/editor modules see only ModuleApi.h.
 // One run per instance. Legacy Game still owns its independent old launch path.
@@ -21,6 +24,8 @@ class BaseEngine final
     class LoadedSession;
     std::unique_ptr<LoadedSession> activeSession;
     RuntimeLaunchOptions activeOptions;
+    std::unique_ptr<Game> viewportGame;
+    std::function<std::unique_ptr<Game>()> viewportFactory;
 
     bool Initialize(const BaseGameConfig& config, bool failForTest);
     bool StartUp(bool failForTest);
@@ -34,6 +39,8 @@ public:
     bool IsPlaying() const { return state == State::Playing; }
     void RequestExit() noexcept { exitRequested = true; }
     void Stop() noexcept;
+    // The executable chooses a preview scene; Engine has no dependency on game examples.
+    void SetViewportFactory(std::function<std::unique_ptr<Game>()> factory) { viewportFactory = std::move(factory); }
 
     VirtualFileSystem& GetVFS() noexcept { return Vfs; }
     const VirtualFileSystem& GetVFS() const noexcept { return Vfs; }

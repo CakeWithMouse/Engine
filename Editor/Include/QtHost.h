@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <Engine/Runtime/ModuleApi.h>
 #include <atomic>
 #include <cstdint>
@@ -14,9 +14,10 @@ struct EditorCommand
     enum Type : uint32_t
     {
         None = 0, RequestExit, ReloadProject, LoadAsset,
-        ViewportAttach, ViewportResize, ViewportDetach,
+        ViewportAttach, ViewportResize, ViewportDetach, ViewportCamera,
     };
     Type type = None;
+    float right = 0, up = 0, forward = 0, yaw = 0, pitch = 0, zoom = 0;
     QString path;
     void* hwnd = nullptr;
     uint32_t w = 0, h = 0;
@@ -49,7 +50,6 @@ public:
 private:
     void UiThreadMain();
     void DrainCommands();
-    EditorMainWindow* GetWindow();
 
     EngineModuleHost host_;
     std::mutex logMutex_;

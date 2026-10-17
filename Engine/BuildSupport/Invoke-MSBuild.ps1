@@ -35,7 +35,7 @@ foreach ($entry in [Environment]::GetEnvironmentVariables().GetEnumerator()) {
     $start.EnvironmentVariables[$entry.Key.ToUpperInvariant()] = $entry.Value
 }
 $assimp = $EnableAssimp.IsPresent.ToString().ToLowerInvariant()
-$start.Arguments = '"' + $Project + '" /nologo /verbosity:minimal /m:1 /nr:false /p:UseStructuredOutput=false /p:Platform=x64 /p:Configuration=' + $Configuration + ' /p:PlatformToolset=' + $PlatformToolset + ' /p:EngineEnableAssimp=' + $assimp
+$start.Arguments = '"' + $Project + '" /nologo /verbosity:minimal /m:1 /nr:false /p:UseStructuredOutput=false /p:PreferredToolArchitecture=x64 /p:Platform=x64 /p:Configuration=' + $Configuration + ' /p:PlatformToolset=' + $PlatformToolset + ' /p:EngineEnableAssimp=' + $assimp
 $process = [Diagnostics.Process]::Start($start)
 $output = $process.StandardOutput.ReadToEndAsync()
 $errors = $process.StandardError.ReadToEndAsync()

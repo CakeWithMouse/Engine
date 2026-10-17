@@ -19,6 +19,9 @@ public slots:
 private slots:
     void RefreshStats();
 
+protected:
+    void closeEvent(QCloseEvent* event) override;
+
 private:
     void BuildUi();
     EditorQtHost* host_ = nullptr;

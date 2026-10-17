@@ -1,5 +1,6 @@
 {
   "name": "Runtime Example",
   "module": "Game.dll",
-  "content": "Content"
+  "content": "Content",
+  "preview": "BasicExamples"
 }

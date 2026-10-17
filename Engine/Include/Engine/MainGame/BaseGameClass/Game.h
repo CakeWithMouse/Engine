@@ -127,6 +127,10 @@ public:
 
     /** Creates window, device and base resources. Returns false (and releases everything) on failure. */
     bool Initialize();
+    // Embedded preview: host owns HWND and drives frames/resizes on the render thread.
+    // No Raw Input registration, window procedure replacement or nested message loop.
+    bool InitializeViewport(HWND window, int width, int height);
+    bool RenderViewportFrame(float deltaTime);
     /** Runs the frame loop until quit. Returns the process exit code. */
     int StartGame();
 
@@ -237,6 +241,7 @@ public:
 
 protected:
     // Initialization
+    bool InitializeInternal(HWND externalWindow, int width, int height);
     void InitSwapChainDesc(int width, int height);
     bool CreateDeviceAndSwapChain();
     bool CreateSwapChainResources(int width, int height);
@@ -304,6 +309,7 @@ protected:
     float SimulationTimeScale = 0.13f * 60.0f;
     uint64_t FrameIndex = 0;
     bool bInitialized = false;
+    bool bEmbedded = false;
     bool bRunning = false;
     int ExitCode = 0;
 

@@ -35,6 +35,7 @@
     <ClInclude Include="Source\Ball.h" />
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\PongGame.cpp" />
+    <ClCompile Include="Source\PongScene.cpp" />
     <ClInclude Include="Source\PongGame.h" />
     <ClCompile Include="Source\Rocket.cpp" />
     <ClInclude Include="Source\Rocket.h" />

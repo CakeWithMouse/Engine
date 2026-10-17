@@ -17,7 +17,7 @@ void RocketComponent::Tick(float deltaTime)
 {
     CubeComponent::Tick(deltaTime);
     InputDevice* InputDevice = GamePtr->GetInputDevice();
-    assert(InputDevice);
+    if (!InputDevice) return; // A scene preview has no gameplay keyboard capture.
 
     float Speed = 1.0f;
     //glm::vec2

@@ -1,4 +1,4 @@
-﻿#include "QtHost.h"
+#include "QtHost.h"
 #include "MainWindow.h"
 #include <QApplication>
 #include <QCoreApplication>
@@ -6,6 +6,7 @@
 #include <QString>
 #include <chrono>
 #include <cstdio>
+#include <stdexcept>
 
 namespace
 {
@@ -45,7 +46,9 @@ void EditorQtHost::Stop()
     if (viewportActive_.exchange(false) && host_.viewportDetach)
         host_.viewportDetach(host_.user);      // поток движка, до уничтожения виджетов
     if (uiReady_.load())
-        QMetaObject::invokeMethod(QCoreApplication::instance(), &QCoreApplication::quit, Qt::QueuedConnection);
+        // quit() asks windows to close and can be vetoed by our closeEvent guard.
+        // GPU resources are gone now: exit the UI loop directly, on its own thread.
+        QMetaObject::invokeMethod(QCoreApplication::instance(), [] { QCoreApplication::exit(0); }, Qt::QueuedConnection);
     uiThread_.join();
     char buf[96];
     std::snprintf(buf, sizeof(buf), "EditorUpdates=%llu", static_cast<unsigned long long>(updates_.load()));
@@ -56,6 +59,7 @@ void EditorQtHost::Stop()
 void EditorQtHost::UiThreadMain()
 {
     QApplication app(g_argc, g_argv);
+    app.setQuitOnLastWindowClosed(false);
     app.setApplicationName(QStringLiteral("Engine Editor"));
     QApplication::setStyle(QStringLiteral("Fusion"));
 
@@ -69,12 +73,6 @@ void EditorQtHost::UiThreadMain()
     { std::lock_guard lk(windowMutex_); window_ = nullptr; }
 }
 
-EditorMainWindow* EditorQtHost::GetWindow()
-{
-    std::lock_guard lk(windowMutex_);
-    return window_;
-}
-
 void EditorQtHost::Log(const char* text)
 {
     {
@@ -82,7 +80,9 @@ void EditorQtHost::Log(const char* text)
         if (host_.log) host_.log(host_.user, text);
     }
 
-    if (EditorMainWindow* w = GetWindow())
+    // Keep the window alive until invokeMethod has queued the call.
+    std::lock_guard windowLock(windowMutex_);
+    if (EditorMainWindow* w = window_)
     {
         const QString line = QString::fromUtf8(text);
         // типобезопасная форма: аргументы передаются как есть, без Q_ARG
@@ -134,11 +134,19 @@ void EditorQtHost::DrainCommands()
         case EditorCommand::ViewportAttach:
             if (host_.viewportAttach && host_.viewportAttach(host_.user, cmd.hwnd, cmd.w, cmd.h))
             { viewportActive_.store(true); Log("EditorViewportAttach ok"); }
-            else Log("EditorViewportAttach failed");
+            else
+            {
+                Log("EditorViewportAttach failed");
+                throw std::runtime_error("Cannot initialize editor viewport");
+            }
             break;
         case EditorCommand::ViewportResize:
             if (viewportActive_.load() && host_.viewportResize)
                 host_.viewportResize(host_.user, cmd.w, cmd.h);
+            break;
+        case EditorCommand::ViewportCamera:
+            if (viewportActive_.load() && host_.viewportCamera)
+                host_.viewportCamera(host_.user, cmd.right, cmd.up, cmd.forward, cmd.yaw, cmd.pitch, cmd.zoom);
             break;
         case EditorCommand::ViewportDetach:
             if (viewportActive_.exchange(false) && host_.viewportDetach)

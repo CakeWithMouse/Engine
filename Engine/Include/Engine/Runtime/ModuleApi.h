@@ -1,12 +1,12 @@
 #pragma once
 #include <stdint.h>
 
-// ABI v1: Windows x64, C calling convention, no STL, exceptions or cross-DLL deletes.
+// ABI v3: Windows x64, C calling convention, no STL, exceptions or cross-DLL deletes.
 // All strings are UTF-8 and borrowed for the duration of the session.
 // Host and its user pointer remain valid until Destroy returns. Callbacks are
 // synchronous, on the host thread; modules must not keep work alive after Destroy.
 #define ENGINE_MODULE_CALL __cdecl
-#define ENGINE_MODULE_VERSION 2u
+#define ENGINE_MODULE_VERSION 3u
 #define ENGINE_MODULE_GAME 1u
 #define ENGINE_MODULE_EDITOR 2u
 
@@ -19,10 +19,14 @@ struct EngineModuleHost
     const char* projectName;
     const char* projectFile;
     const char* contentRoot;
-    // --- v2: опционально, nullptr = фичи нет ---
+    // Optional v2 viewport services (nullptr = unavailable). Call on the host thread.
+    // Qt owns HWND and must keep it alive, pumping messages, until detach/Stop returns.
+    // Sizes are physical pixels; zero size suspends rendering. No input is captured.
     int (*viewportAttach)(void* user, void* hwnd, uint32_t w, uint32_t h);
     int (*viewportResize)(void* user, uint32_t w, uint32_t h);
     int (*viewportDetach)(void* user);
+    // v3: camera intent; movement is in seconds, look in radians, zoom in wheel steps.
+    void (*viewportCamera)(void* user, float right, float up, float forward, float yaw, float pitch, float zoom);
 };
 
 struct EngineModuleApi

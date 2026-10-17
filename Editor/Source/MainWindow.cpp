@@ -4,6 +4,7 @@
 #include "ViewportWidget.h" 
 
 #include <QDockWidget>
+#include <QCloseEvent>
 #include <QLabel>
 #include <QMenu>
 #include <QMenuBar>
@@ -24,7 +25,7 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
 
 void EditorMainWindow::BuildUi()
 {
-    setWindowTitle(QStringLiteral("Engine Editor"));
+    setWindowTitle(QStringLiteral("Engine Editor — %1").arg(QString::fromUtf8(host_->host().projectName)));
     resize(1280, 720);
 
     viewport_ = new ViewportWidget(host_, this);
@@ -65,6 +66,16 @@ void EditorMainWindow::BuildUi()
 }
 
 void EditorMainWindow::AppendLine(const QString& line) { console_->appendPlainText(line); }
+
+void EditorMainWindow::closeEvent(QCloseEvent* event)
+{
+    // Keep the HWND alive and Qt pumping messages until the render thread releases DXGI.
+    // Stop() then quits Qt and destroys the window. Never join the render thread from here.
+    event->ignore();
+    EditorCommand command;
+    command.type = EditorCommand::RequestExit;
+    host_->PostCommand(command);
+}
 
 void EditorMainWindow::RefreshStats()
 {
