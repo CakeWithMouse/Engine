@@ -142,17 +142,22 @@ namespace ShaderCompiler
 
         std::string utf8Path;
         const int pathLen = WideCharToMultiByte(CP_UTF8, 0, fileName.c_str(), static_cast<int>(fileName.size()), nullptr, 0, nullptr, nullptr);
-        if (pathLen > 0)
+        if (pathLen <= 0)
         {
-            utf8Path.resize(static_cast<size_t>(pathLen));
-            WideCharToMultiByte(CP_UTF8, 0, fileName.c_str(), static_cast<int>(fileName.size()), utf8Path.data(), pathLen, nullptr, nullptr);
+            const DWORD err = GetLastError();
+            std::cerr << "[ShaderCompiler] WideCharToMultiByte failed to calculate buffer size (error " << err << ")\n";
+            if (errorMessage) *errorMessage = "failed to convert shader file path to UTF-8";
+            return E_FAIL;
         }
-        else
+
+        utf8Path.resize(static_cast<size_t>(pathLen));
+        const int converted = WideCharToMultiByte(CP_UTF8, 0, fileName.c_str(), static_cast<int>(fileName.size()), utf8Path.data(), pathLen, nullptr, nullptr);
+        if (converted <= 0)
         {
-            for (wchar_t wc : fileName)
-            {
-                utf8Path.push_back(static_cast<char>(wc));
-            }
+            const DWORD err = GetLastError();
+            std::cerr << "[ShaderCompiler] WideCharToMultiByte failed to convert path to UTF-8 (error " << err << ")\n";
+            if (errorMessage) *errorMessage = "failed to convert shader file path to UTF-8";
+            return E_FAIL;
         }
 
         std::string virtualPath;
