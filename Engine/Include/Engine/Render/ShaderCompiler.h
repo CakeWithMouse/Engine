@@ -1,6 +1,12 @@
 #pragma once
 #include <d3dcompiler.h>
+#include <filesystem>
+#include <map>
 #include <string>
+#include <vector>
+#include <Windows.h>
+
+#include "../../../Source/Resources/VfsRead.h"
 
 /**
  * Single HLSL compilation policy for the whole application.
@@ -28,8 +34,91 @@ namespace ShaderCompiler
 #endif
     }
 
+    class VfsShaderInclude : public ID3DInclude
+    {
+    public:
+        explicit VfsShaderInclude(std::string baseVirtualDirectory)
+            : baseDir(std::move(baseVirtualDirectory))
+        {
+        }
+
+        HRESULT __stdcall Open(D3D_INCLUDE_TYPE includeType,
+                               LPCSTR pFileName,
+                               LPCVOID pParentData,
+                               LPCVOID* ppData,
+                               UINT* pBytes) override
+        {
+            if (!pFileName || !ppData || !pBytes)
+            {
+                return E_INVALIDARG;
+            }
+
+            std::string parentDir = baseDir;
+            if (pParentData != nullptr)
+            {
+                auto it = parentDirs.find(pParentData);
+                if (it != parentDirs.end())
+                {
+                    parentDir = it->second;
+                }
+            }
+
+            auto& vfs = VfsRead::GetVFS();
+            std::string targetVirtual = VirtualFileSystem::NormalizeVirtualPath(parentDir + "/" + pFileName);
+            if (!vfs.Exists(targetVirtual))
+            {
+                // Fallback: check /Engine/Shaders/<pFileName>
+                const std::string engineShaders = VirtualFileSystem::NormalizeVirtualPath("/Engine/Shaders/" + std::string(pFileName));
+                if (vfs.Exists(engineShaders))
+                {
+                    targetVirtual = engineShaders;
+                }
+                else
+                {
+                    std::string resolvedVirtual;
+                    auto testBytes = VfsRead::ReadBytes(pFileName, &resolvedVirtual);
+                    if (!testBytes.empty())
+                    {
+                        buffers.emplace_back(std::move(testBytes));
+                        const auto& stored = buffers.back();
+                        *ppData = stored.data();
+                        *pBytes = static_cast<UINT>(stored.size());
+                        parentDirs[stored.data()] = std::filesystem::path(resolvedVirtual).parent_path().generic_u8string();
+                        return S_OK;
+                    }
+                    return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+                }
+            }
+
+            try
+            {
+                std::vector<uint8_t> bytes = vfs.ReadBytes(targetVirtual);
+                buffers.emplace_back(std::move(bytes));
+                const auto& stored = buffers.back();
+                *ppData = stored.data();
+                *pBytes = static_cast<UINT>(stored.size());
+                parentDirs[stored.data()] = std::filesystem::path(targetVirtual).parent_path().generic_u8string();
+                return S_OK;
+            }
+            catch (...)
+            {
+                return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+            }
+        }
+
+        HRESULT __stdcall Close(LPCVOID pData) override
+        {
+            return S_OK;
+        }
+
+    private:
+        std::string baseDir;
+        std::vector<std::vector<uint8_t>> buffers;
+        std::map<const void*, std::string> parentDirs;
+    };
+
     /**
-     * Compiles an entry point from a file. #include "..." is resolved relative to the file.
+     * Compiles an entry point from a file via VFS. #include "..." is resolved via VFS relative to the file.
      * On failure returns the HRESULT and fills errorMessage (compiler output or a short reason).
      */
     inline HRESULT CompileFromFile(const std::wstring& fileName,
@@ -39,16 +128,53 @@ namespace ShaderCompiler
                                    ID3DBlob** blob,
                                    std::string* errorMessage = nullptr)
     {
+        if (fileName.empty())
+        {
+            if (errorMessage) *errorMessage = "shader file not found or unreadable";
+            return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+        }
+
+        std::string utf8Path;
+        const int pathLen = WideCharToMultiByte(CP_UTF8, 0, fileName.c_str(), static_cast<int>(fileName.size()), nullptr, 0, nullptr, nullptr);
+        if (pathLen > 0)
+        {
+            utf8Path.resize(static_cast<size_t>(pathLen));
+            WideCharToMultiByte(CP_UTF8, 0, fileName.c_str(), static_cast<int>(fileName.size()), utf8Path.data(), pathLen, nullptr, nullptr);
+        }
+        else
+        {
+            for (wchar_t wc : fileName)
+            {
+                utf8Path.push_back(static_cast<char>(wc));
+            }
+        }
+
+        std::string virtualPath;
+        const std::vector<uint8_t> shaderSource = VfsRead::ReadBytes(utf8Path, &virtualPath);
+        if (shaderSource.empty())
+        {
+            if (errorMessage)
+            {
+                *errorMessage = "shader file not found or unreadable";
+            }
+            return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+        }
+
+        const std::string baseVirtualDir = std::filesystem::path(virtualPath).parent_path().generic_u8string();
+        VfsShaderInclude includeHandler(baseVirtualDir);
+
         ID3DBlob* errors = nullptr;
-        const HRESULT hr = D3DCompileFromFile(fileName.c_str(),
-                                              defines,
-                                              D3D_COMPILE_STANDARD_FILE_INCLUDE,
-                                              entryPoint,
-                                              target,
-                                              GetCompileFlags(),
-                                              0,
-                                              blob,
-                                              &errors);
+        const HRESULT hr = D3DCompile(shaderSource.data(),
+                                      shaderSource.size(),
+                                      utf8Path.c_str(),
+                                      defines,
+                                      &includeHandler,
+                                      entryPoint,
+                                      target,
+                                      GetCompileFlags(),
+                                      0,
+                                      blob,
+                                      &errors);
         if (errorMessage)
         {
             if (errors)
@@ -57,7 +183,7 @@ namespace ShaderCompiler
             }
             else if (FAILED(hr))
             {
-                *errorMessage = "shader file not found or unreadable";
+                *errorMessage = "shader compilation failed";
             }
         }
         if (errors)
