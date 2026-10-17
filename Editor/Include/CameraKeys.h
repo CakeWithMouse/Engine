@@ -12,6 +12,7 @@ inline int CameraNavigationKey(unsigned scanCode, int logicalKey)
     case 0x1e: return 'A';
     case 0x1f: return 'S';
     case 0x20: return 'D';
+    case 0x19: return 'P'; // Play pause also follows the physical key on Russian layouts.
     default: return logicalKey;
     }
 }

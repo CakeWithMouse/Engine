@@ -261,6 +261,11 @@ void ParticleComponentModes()
         CHECK(constants != nullptr);
         auto data = ReadBuffer<GPUParticleRenderCB>(game, constants.Get());
         CHECK(data[0].SortingEnabled == (sorted ? 1u : 0u));
+        game.SetSimulationEnabled(false);
+        game.GetFrameStats().Reset();
+        particles.DispatchCompute(game.GetContext());
+        CHECK(game.GetFrameStats().Dispatches == (sorted ? 22u : 0u));
+        game.SetSimulationEnabled(true);
     }
 }
 

@@ -1,12 +1,12 @@
 #pragma once
 #include <stdint.h>
 
-// ABI v3: Windows x64, C calling convention, no STL, exceptions or cross-DLL deletes.
+// ABI v4: Windows x64, C calling convention, no STL, exceptions or cross-DLL deletes.
 // All strings are UTF-8 and borrowed for the duration of the session.
 // Host and its user pointer remain valid until Destroy returns. Callbacks are
 // synchronous, on the host thread; modules must not keep work alive after Destroy.
 #define ENGINE_MODULE_CALL __cdecl
-#define ENGINE_MODULE_VERSION 3u
+#define ENGINE_MODULE_VERSION 4u
 #define ENGINE_MODULE_GAME 1u
 #define ENGINE_MODULE_EDITOR 2u
 
@@ -27,6 +27,9 @@ struct EngineModuleHost
     int (*viewportDetach)(void* user);
     // v3: camera intent; movement is in seconds, look in radians, zoom in wheel steps.
     void (*viewportCamera)(void* user, float right, float up, float forward, float yaw, float pitch, float zoom);
+    // v4: 0 toggles Play/Stop, 1 toggles Pause/Resume. Returns state: 0 Edit,
+    // 1 Playing, 2 Paused; -1 on failure. No game callbacks run on the UI thread.
+    int (*viewportControl)(void* user, uint32_t command);
 };
 
 struct EngineModuleApi
