@@ -80,8 +80,9 @@ void EditorMainWindow::closeEvent(QCloseEvent* event)
 void EditorMainWindow::RefreshStats()
 {
     const double dt = host_->LastDt();
-    statsLabel_->setText(QStringLiteral("updates: %1 | fps: %2 | vp: %3")
+    statsLabel_->setText(QStringLiteral("%4 | Space: Play/Stop | P: Pause/Resume | updates: %1 | fps: %2 | vp: %3")
                              .arg(host_->UpdateCount())
                              .arg(dt > 0.0 ? 1.0 / dt : 0.0, 0, 'f', 1)
-                             .arg(host_->ViewportActive() ? QStringLiteral("on") : QStringLiteral("off")));
+                             .arg(host_->ViewportActive() ? QStringLiteral("on") : QStringLiteral("off"))
+                             .arg(host_->PlayState() == 0 ? QStringLiteral("Edit") : host_->PlayState() == 1 ? QStringLiteral("Play") : QStringLiteral("Pause")));
 }

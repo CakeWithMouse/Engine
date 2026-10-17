@@ -26,7 +26,7 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
         setAttribute(Qt::WA_NoSystemBackground, true);
     }
     setFocusPolicy(Qt::StrongFocus);
-    setToolTip("RMB drag: look/orbit | WASD: move | Q/E: down/up | Wheel: zoom | Shift: faster");
+    setToolTip("Space: Play/Stop | P: Pause/Resume | RMB: look | WASD: move | Q/E: down/up | Wheel: zoom");
     auto* timer = new QTimer(this);
     auto elapsed = std::make_shared<QElapsedTimer>();
     elapsed->start();
@@ -149,6 +149,16 @@ bool ViewportWidget::event(QEvent* e)
         if (!key->isAutoRepeat())
         {
             const int navigationKey = CameraNavigationKey(key->nativeScanCode(), key->key());
+            if ((navigationKey == Qt::Key_Space || navigationKey == Qt::Key_P) && isActiveWindow())
+            {
+                if (e->type() == QEvent::KeyPress)
+                {
+                    EditorCommand c;
+                    c.type = navigationKey == Qt::Key_Space ? EditorCommand::TogglePlay : EditorCommand::TogglePause;
+                    host_->PostCommand(c);
+                }
+                return true;
+            }
             if (e->type() == QEvent::KeyPress) keys_.insert(navigationKey);
             else keys_.remove(navigationKey);
         }

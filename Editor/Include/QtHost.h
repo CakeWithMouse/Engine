@@ -15,6 +15,7 @@ struct EditorCommand
     {
         None = 0, RequestExit, ReloadProject, LoadAsset,
         ViewportAttach, ViewportResize, ViewportDetach, ViewportCamera,
+        TogglePlay, TogglePause,
     };
     Type type = None;
     float right = 0, up = 0, forward = 0, yaw = 0, pitch = 0, zoom = 0;
@@ -46,6 +47,7 @@ public:
     
     bool HasViewport() const { return host_.viewportAttach != nullptr; }
     bool ViewportActive() const { return viewportActive_.load(); }
+    int PlayState() const { return playState_.load(); }
 
 private:
     void UiThreadMain();
@@ -62,4 +64,5 @@ private:
     std::atomic<double> lastDt_{0.0};
     std::atomic<uint64_t> updates_{0};
     std::atomic<bool> viewportActive_{ false };
+    std::atomic<int> playState_{0};
 };
