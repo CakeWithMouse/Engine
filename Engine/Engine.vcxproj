@@ -53,6 +53,7 @@
     <ClCompile Include="Source\MainGame\Player.cpp" />
     <ClCompile Include="Source\Render\ImpostorAtlas.cpp" />
     <ClCompile Include="Source\Render\TextureLoader.cpp" />
+    <ClCompile Include="Source\Render\ShaderCompiler.cpp" />
     <ClCompile Include="Source\Resources\Paths.cpp" />
     <ClCompile Include="Source\Resources\VirtualFileSystem.cpp" />
     <ClCompile Include="Source\Resources\VfsRead.cpp" />
