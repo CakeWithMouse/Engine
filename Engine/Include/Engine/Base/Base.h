@@ -16,7 +16,7 @@ class BaseEngine final
 {
     BaseResources Resources;
     BaseGameConfig Config;
-    VirtualFileSystem Vfs;
+    VirtualFileSystem& Vfs;
     enum class State { New, Starting, Ready, Playing, Stopped };
     State state = State::New;
     bool exitRequested = false;

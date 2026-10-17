@@ -9,6 +9,7 @@
 #include <Engine/Base/Base.h>
 #include <Engine/Runtime/ModuleApi.h>
 #include <Engine/Resources/Paths.h>
+#include "../Resources/VfsRead.h"
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/Player.h>
 #include <chrono>
@@ -315,7 +316,10 @@ public:
     }
 };
 
-BaseEngine::BaseEngine() = default;
+BaseEngine::BaseEngine()
+    : Vfs(VfsRead::GetVFS())
+{
+}
 BaseEngine::~BaseEngine() { Stop(); }
 
 bool BaseEngine::ReloadActiveModule()
