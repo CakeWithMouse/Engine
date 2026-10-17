@@ -1,8 +1,12 @@
 ﻿#include "MainWindow.h"
+
+#include <QDir>
+
 #include "QtHost.h"
 #include "FileBrowser.h"
 #include "ViewportWidget.h" 
 
+#include <QProcess>
 #include <QDockWidget>
 #include <QLabel>
 #include <QMenu>
@@ -12,6 +16,7 @@
 #include <QStatusBar>
 #include <QTimer>
 #include <QVBoxLayout>
+#include <QToolBar>
 
 EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     : QMainWindow(parent), host_(host)
@@ -56,6 +61,11 @@ void EditorMainWindow::BuildUi()
     });
     file->addSeparator();
     file->addAction(QStringLiteral("Close editor"), this, [this] { close(); });
+    
+    BuildToolBar();
+    playStateLabel_ = new QLabel(QStringLiteral("EDIT"), this);
+    statusBar()->addPermanentWidget(playStateLabel_);
+    UpdatePlayButtons();
 
     const EngineModuleHost& h = host_->host();
     statusBar()->addWidget(new QLabel(
@@ -73,4 +83,87 @@ void EditorMainWindow::RefreshStats()
                              .arg(host_->UpdateCount())
                              .arg(dt > 0.0 ? 1.0 / dt : 0.0, 0, 'f', 1)
                              .arg(host_->ViewportActive() ? QStringLiteral("on") : QStringLiteral("off")));
+    UpdatePlayButtons();
+}
+
+void EditorMainWindow::BuildToolBar()
+{
+    toolBar_ = addToolBar(QStringLiteral("Play"));
+    toolBar_->setMovable(false);
+
+    actPlay_    = toolBar_->addAction(QStringLiteral("▶ Play"));
+    actPause_   = toolBar_->addAction(QStringLiteral("⏸ Pause"));
+    actStop_    = toolBar_->addAction(QStringLiteral("⏹ Stop"));
+    toolBar_->addSeparator();
+    actExternal_ = toolBar_->addAction(QStringLiteral("🚀 External"));
+
+    connect(actPlay_,  &QAction::triggered, this, [this] { host_->RequestPlayMode(ENGINE_PLAY_RUNNING); });
+    connect(actPause_, &QAction::triggered, this, [this] {
+        // toggle Pause/Resume
+        host_->RequestPlayMode(host_->PlayMode() == ENGINE_PLAY_PAUSED
+                               ? ENGINE_PLAY_RUNNING : ENGINE_PLAY_PAUSED);
+    });
+    connect(actStop_,  &QAction::triggered, this, [this] { host_->RequestPlayMode(ENGINE_PLAY_EDIT); });
+    connect(actExternal_, &QAction::triggered, this, &EditorMainWindow::StartExternalGame);
+
+    // режимы доступны только если движок поддерживает setPlayMode
+    const bool canPlay = host_->HasPlayMode();
+    actPlay_->setEnabled(canPlay); actPause_->setEnabled(canPlay); actStop_->setEnabled(canPlay);
+}
+
+void EditorMainWindow::UpdatePlayButtons()
+{
+    if (!host_->HasPlayMode()) return;
+    const int m = host_->PlayMode();
+    actPlay_->setEnabled (m == ENGINE_PLAY_EDIT   || m == ENGINE_PLAY_PAUSED);
+    actPause_->setEnabled(m == ENGINE_PLAY_RUNNING|| m == ENGINE_PLAY_PAUSED);
+    actStop_->setEnabled (m != ENGINE_PLAY_EDIT);
+    actPause_->setText(m == ENGINE_PLAY_PAUSED ? QStringLiteral("⏵ Resume")
+                                               : QStringLiteral("⏸ Pause"));
+    playStateLabel_->setText(m == ENGINE_PLAY_RUNNING ? QStringLiteral("PLAYING")
+                             : m == ENGINE_PLAY_PAUSED ? QStringLiteral("PAUSED")
+                                                       : QStringLiteral("EDIT"));
+    playStateLabel_->setStyleSheet(m == ENGINE_PLAY_EDIT
+        ? QString()
+        : QStringLiteral("color:%1;font-weight:bold;")
+              .arg(m == ENGINE_PLAY_RUNNING ? "#4caf50" : "#ff9800"));
+}
+
+void EditorMainWindow::StartExternalGame()
+{
+    if (gameProc_ && gameProc_->state() != QProcess::NotRunning) return;
+
+    const QString runtimeDir = QCoreApplication::applicationDirPath();   // .../Runtime
+    QString launcher = QDir(runtimeDir).absoluteFilePath(QStringLiteral("../EngineLauncher.exe"));
+    if (!QFileInfo::exists(launcher))
+        launcher = QDir(runtimeDir).absoluteFilePath(QStringLiteral("../EngineRuntime.exe")); // fallback
+    const QString project = QString::fromUtf8(host_->host().projectFile ? host_->host().projectFile : "");
+
+    gameProc_ = new QProcess(this);
+    gameProc_->setProgram(launcher);
+    gameProc_->setArguments({ QStringLiteral("--project"), project, QStringLiteral("--no-editor") });
+    gameProc_->setWorkingDirectory(runtimeDir);
+    connect(gameProc_, &QProcess::finished, this, [this](int code) {
+        host_->Log(("ExternalGame exited code=" + std::to_string(code)).c_str());
+        actExternal_->setText(QStringLiteral("🚀 External"));
+    });
+    gameProc_->start();
+    if (!gameProc_->waitForStarted(2000))
+        host_->Log("ExternalGame: failed to start");
+    else
+        actExternal_->setText(QStringLiteral("🛑 Stop external"));
+}
+
+void EditorMainWindow::StopExternalGame()
+{
+    if (gameProc_ && gameProc_->state() != QProcess::NotRunning)
+        gameProc_->kill();
+}
+
+void EditorMainWindow::closeEvent(QCloseEvent* e)
+{
+    StopExternalGame();
+    if (host_->HasPlayMode() && host_->PlayMode() != ENGINE_PLAY_EDIT)
+        host_->RequestPlayMode(ENGINE_PLAY_EDIT);   // движок выйдет из play до смерти UI
+    QMainWindow::closeEvent(e);
 }

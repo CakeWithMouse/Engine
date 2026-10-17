@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <d3d11.h>
 #include <dxgi.h>
+#include <dxgi1_2.h>
 #include <map>
 #include <memory>
 #include <string>
@@ -129,6 +130,19 @@ public:
     bool Initialize();
     /** Runs the frame loop until quit. Returns the process exit code. */
     int StartGame();
+    
+    /** Headless-инициализация для редактора: device/шейдеры/стейты/сцена БЕЗ окна и основного swap chain. */
+    bool InitializeEditorMode();
+    /** Один кадр для редактора (вызывается из Update модуля GAME, поток движка). */
+    void StepEditorFrame(float dt);
+
+    // Точки backend-контракта (вызываются из потока кадров движка через обёртки модуля GAME).
+    int ViewportAttach(void* hwnd, uint32_t w, uint32_t h);
+    int ViewportResize(uint32_t w, uint32_t h);
+    int ViewportDetach();
+    int SetPlayMode(int mode);                 // EnginePlayMode
+    int  GetPlayMode() const { return PlayMode; }
+    bool IsEditorAttached() const { return bEditorAttached; }
 
     // Shader variants are resolved per pass, so the render type may be switched at any time.
     void SetRenderingType(RenderType NewType) { RenderingType = NewType; }
@@ -434,4 +448,36 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11Query> GpuTimerEnd[GpuTimerLatency];
     bool GpuTimerIssued[GpuTimerLatency] = {};
     int GpuTimerSlot = 0;
+    
+    bool InitCoreResources();                  // общий хвост: шейдеры/лейауты/стейты/таймер
+    bool CreateDeviceHeadless();               // device+context без swap chain
+    void ResizeEditorSwap(int width, int height);
+    bool CreateDepthFor(int width, int height,
+                        Microsoft::WRL::ComPtr<ID3D11Texture2D>& outTex,
+                        Microsoft::WRL::ComPtr<ID3D11DepthStencilView>& outDSV,
+                        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& outSRV);
+    void TakeSceneSnapshot();                  // TODO: сериализация графа сцены
+    void RestoreSceneSnapshot();               // TODO: десериализация
+
+    // Активный набор целей: редакторский swap, если прикреплён, иначе оконный.
+    ID3D11RenderTargetView*     ActiveRTV()      const { return bEditorAttached ? EditorRTV.Get()        : RenderTargetView.Get(); }
+    ID3D11DepthStencilView*     ActiveDSV()      const { return bEditorAttached ? EditorDSV.Get()        : depthStencilView.Get(); }
+    ID3D11ShaderResourceView*   ActiveDepthSRV() const { return bEditorAttached ? EditorDepthSRV.Get()   : depthStencilSRV.Get(); }
+    IDXGISwapChain*             ActiveSwap()     const { return bEditorAttached ? (IDXGISwapChain*)EditorSwap.Get() : SwapChain.Get(); }
+    void GetActiveSize(int& w, int& h) const {
+        if (bEditorAttached) { w = (int)EditorW; h = (int)EditorH; }
+        else if (DisplayPtr) { w = DisplayPtr->GetWidth(); h = DisplayPtr->GetHeight(); }
+        else { w = 1; h = 1; }
+    }
+    
+    // Редакторский вьюпорт (создаются в ViewportAttach, живут до ViewportDetach).
+    Microsoft::WRL::ComPtr<IDXGISwapChain1>        EditorSwap;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D>        EditorBackTexture;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> EditorRTV;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D>        EditorDepthTexture;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> EditorDSV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> EditorDepthSRV;
+    uint32_t EditorW = 0, EditorH = 0;
+    bool     bEditorAttached = false;
+    int      PlayMode = 0;   
 };

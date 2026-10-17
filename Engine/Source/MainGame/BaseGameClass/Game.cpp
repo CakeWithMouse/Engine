@@ -343,6 +343,14 @@ void Game::DestroyResources()
     depthStencilStateReadOnly.Reset();
     depthStencilStateSkybox.Reset();
     DefaultRasterState.Reset();
+    EditorRTV.Reset();
+    EditorDSV.Reset();
+    EditorDepthSRV.Reset();
+    EditorBackTexture.Reset();
+    EditorDepthTexture.Reset();
+    EditorSwap.Reset();
+    EditorW = EditorH = 0;
+    bEditorAttached = false;
     ReleaseSwapChainResources();
 
     if (SwapChain)
@@ -413,25 +421,186 @@ bool Game::Initialize()
                    L"Missing shader", MB_OK);
         return fail("shader files not found");
     }
-    if (!InitShaderBuffers())
+    if (!InitCoreResources())
     {
-        return fail("base shaders");
+        return fail("core resources");
     }
-    if (!CreateInputLayouts())
-    {
-        return fail("input layouts");
-    }
-    if (!CreateRenderStates())
-    {
-        return fail("render states");
-    }
-    CreateGpuTimer();
 
     // A resize that arrived while the window was being shown is already reflected in the sizes above.
     bResizePending = false;
     bInitialized = true;
     AfterInitialize();
     return true;
+}
+
+bool Game::InitCoreResources()
+{
+    if (!InitShaderBuffers())
+    {
+        std::cout << "Failed to init base shaders." << std::endl;
+        return false;
+    }
+    if (!CreateInputLayouts())
+    {
+        std::cout << "Failed to create input layouts." << std::endl;
+        return false;
+    }
+    if (!CreateRenderStates())
+    {
+        std::cout << "Failed to create render states." << std::endl;
+        return false;
+    }
+    CreateGpuTimer();
+    return true;
+}
+
+bool Game::CreateDeviceHeadless()
+{
+    const D3D_FEATURE_LEVEL FeatureLevels[] = {
+        D3D_FEATURE_LEVEL_11_1,
+        D3D_FEATURE_LEVEL_11_0
+    };
+    D3D_FEATURE_LEVEL selectedFeatureLevel = D3D_FEATURE_LEVEL_11_0;
+    UINT createDeviceFlags = 0;
+#ifdef _DEBUG
+    createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+    auto tryCreate = [&](UINT flags, const D3D_FEATURE_LEVEL* levels, UINT levelCount) -> HRESULT
+    {
+        Device.Reset();
+        Context.Reset();
+        return D3D11CreateDevice(
+            nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, flags,
+            levels, levelCount, D3D11_SDK_VERSION,
+            Device.GetAddressOf(), &selectedFeatureLevel, Context.GetAddressOf());
+    };
+    HRESULT hr = tryCreate(createDeviceFlags, FeatureLevels, ARRAYSIZE(FeatureLevels));
+    if (hr == E_INVALIDARG)
+    {
+        hr = tryCreate(createDeviceFlags, &FeatureLevels[1], 1);
+    }
+    if (FAILED(hr) && (createDeviceFlags & D3D11_CREATE_DEVICE_DEBUG))
+    {
+        std::cout << "Debug layer unavailable (0x" << std::hex << hr << std::dec << "), retrying without it." << std::endl;
+        hr = tryCreate(0, FeatureLevels, ARRAYSIZE(FeatureLevels));
+        if (hr == E_INVALIDARG)
+        {
+            hr = tryCreate(0, &FeatureLevels[1], 1);
+        }
+    }
+    if (FAILED(hr))
+    {
+        std::cout << "D3D11CreateDevice (headless) failed with error: 0x" << std::hex << hr << std::dec << std::endl;
+        Device.Reset();
+        Context.Reset();
+        return false;
+    }
+    std::cout << "Created headless device with feature level "
+              << (selectedFeatureLevel == D3D_FEATURE_LEVEL_11_1 ? "11.1" : "11.0") << std::endl;
+    return true;
+}
+
+bool Game::CreateDepthFor(int width, int height,
+                          Microsoft::WRL::ComPtr<ID3D11Texture2D>& outTex,
+                          Microsoft::WRL::ComPtr<ID3D11DepthStencilView>& outDSV,
+                          Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& outSRV)
+{
+    D3D11_TEXTURE2D_DESC depthDesc = {};
+    depthDesc.Width = static_cast<UINT>(width);
+    depthDesc.Height = static_cast<UINT>(height);
+    depthDesc.MipLevels = 1;
+    depthDesc.ArraySize = 1;
+    depthDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+    depthDesc.SampleDesc.Count = 1;
+    depthDesc.Usage = D3D11_USAGE_DEFAULT;
+    depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> newBuffer;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> newDSV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> newSRV;
+    if (FAILED(Device->CreateTexture2D(&depthDesc, nullptr, newBuffer.GetAddressOf())))
+    {
+        std::cout << "Failed to create depth buffer texture." << std::endl;
+        return false;
+    }
+    D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+    dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+    if (FAILED(Device->CreateDepthStencilView(newBuffer.Get(), &dsvDesc, newDSV.GetAddressOf())))
+    {
+        std::cout << "Failed to create depth stencil view." << std::endl;
+        return false;
+    }
+    D3D11_SHADER_RESOURCE_VIEW_DESC depthSrvDesc = {};
+    depthSrvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+    depthSrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    depthSrvDesc.Texture2D.MostDetailedMip = 0;
+    depthSrvDesc.Texture2D.MipLevels = 1;
+    if (FAILED(Device->CreateShaderResourceView(newBuffer.Get(), &depthSrvDesc, newSRV.GetAddressOf())))
+    {
+        std::cout << "Failed to create depth SRV." << std::endl;
+        return false;
+    }
+    outTex = newBuffer;
+    outDSV = newDSV;
+    outSRV = newSRV;
+    return true;
+}
+
+bool Game::CreateDepthBuffer(int width, int height)
+{
+    return CreateDepthFor(width, height, depthStencilBuffer, depthStencilView, depthStencilSRV);
+}
+
+void Game::ApplyPendingResize()
+{
+    if (!bResizePending)
+    {
+        return;
+    }
+    bResizePending = false;
+
+    if (bEditorAttached)
+    {
+        if (PendingWidth <= 0 || PendingHeight <= 0)
+        {
+            return;
+        }
+        if (static_cast<uint32_t>(PendingWidth) == EditorW &&
+            static_cast<uint32_t>(PendingHeight) == EditorH && EditorRTV)
+        {
+            return;
+        }
+        ResizeEditorSwap(PendingWidth, PendingHeight);
+        return;
+    }
+
+    // Standalone-путь (без изменений по смыслу, только guard перенесён сюда).
+    if (!SwapChain || !DisplayPtr)
+    {
+        return;
+    }
+    if (PendingWidth == DisplayPtr->GetWidth() && PendingHeight == DisplayPtr->GetHeight() && RenderTargetView)
+    {
+        return;
+    }
+    Context->ClearState();
+    ReleaseSwapChainResources();
+    Context->Flush();
+    const HRESULT hr = SwapChain->ResizeBuffers(0, static_cast<UINT>(PendingWidth), static_cast<UINT>(PendingHeight),
+                                                DXGI_FORMAT_UNKNOWN, 0);
+    if (FAILED(hr))
+    {
+        std::cout << "ResizeBuffers failed: 0x" << std::hex << hr << std::dec << std::endl;
+        bRunning = false;
+        ExitCode = 3;
+        return;
+    }
+    DisplayPtr->SetClientSize(PendingWidth, PendingHeight);
+    if (!CreateSwapChainResources(PendingWidth, PendingHeight))
+    {
+        bRunning = false;
+        ExitCode = 3;
+    }
 }
 
 void Game::InitSwapChainDesc(int width, int height)
@@ -558,58 +727,6 @@ void Game::ReleaseSwapChainResources()
     gBufferWorldPositionSRV.Reset();
     deferredBufferWidth = 0;
     deferredBufferHeight = 0;
-}
-
-bool Game::CreateDepthBuffer(int width, int height)
-{
-    D3D11_TEXTURE2D_DESC depthDesc = {};
-    depthDesc.Width = static_cast<UINT>(width);
-    depthDesc.Height = static_cast<UINT>(height);
-    depthDesc.MipLevels = 1;
-    depthDesc.ArraySize = 1;
-    depthDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
-    depthDesc.SampleDesc.Count = 1;
-    depthDesc.Usage = D3D11_USAGE_DEFAULT;
-    depthDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
-
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> newBuffer;
-    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> newDSV;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> newSRV;
-
-    HRESULT hr = Device->CreateTexture2D(&depthDesc, nullptr, newBuffer.GetAddressOf());
-    if (FAILED(hr))
-    {
-        std::cout << "Failed to create depth buffer texture." << std::endl;
-        return false;
-    }
-
-    D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-    dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-    dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-    hr = Device->CreateDepthStencilView(newBuffer.Get(), &dsvDesc, newDSV.GetAddressOf());
-    if (FAILED(hr))
-    {
-        std::cout << "Failed to create depth stencil view." << std::endl;
-        return false;
-    }
-
-    D3D11_SHADER_RESOURCE_VIEW_DESC depthSrvDesc = {};
-    depthSrvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-    depthSrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    depthSrvDesc.Texture2D.MostDetailedMip = 0;
-    depthSrvDesc.Texture2D.MipLevels = 1;
-    hr = Device->CreateShaderResourceView(newBuffer.Get(), &depthSrvDesc, newSRV.GetAddressOf());
-    if (FAILED(hr))
-    {
-        std::cout << "Failed to create depth SRV." << std::endl;
-        return false;
-    }
-
-    // Publish only after every view was created.
-    depthStencilBuffer = newBuffer;
-    depthStencilView = newDSV;
-    depthStencilSRV = newSRV;
-    return true;
 }
 
 bool Game::CreateRenderStates()
@@ -1278,13 +1395,14 @@ CubeMapResource* Game::GetCubeMap(const std::string& cubeMapName) const
 
 bool Game::InitDeferredResources()
 {
-    if (!Device || !DisplayPtr)
+    if (!Device)
     {
         return false;
     }
-
-    const int width = std::max(DisplayPtr->GetWidth(), 1);
-    const int height = std::max(DisplayPtr->GetHeight(), 1);
+    int aw = 1, ah = 1;
+    GetActiveSize(aw, ah);
+    const int width = std::max(aw, 1);
+    const int height = std::max(ah, 1);
     if (deferredBufferWidth == width && deferredBufferHeight == height &&
         gBufferAlbedoRTV && gBufferNormalRTV && gBufferWorldPositionRTV &&
         gBufferAlbedoSRV && gBufferNormalSRV && gBufferWorldPositionSRV &&
@@ -1405,7 +1523,8 @@ void Game::RenderDeferredLightingPass()
     Context->RSSetState(DefaultRasterState.Get());
     Context->IASetInputLayout(nullptr);
     Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
+    ID3D11RenderTargetView* rtv = ActiveRTV();
+    Context->OMSetRenderTargets(1, &rtv, nullptr);
     Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
 
     ID3D11ShaderResourceView* gBufferSRVs[4] =
@@ -1413,7 +1532,7 @@ void Game::RenderDeferredLightingPass()
         gBufferAlbedoSRV.Get(),
         gBufferNormalSRV.Get(),
         gBufferWorldPositionSRV.Get(),
-        depthStencilSRV.Get()
+        ActiveDepthSRV()
     };
 
     Context->VSSetShader(deferredVS, nullptr, 0);
@@ -1459,7 +1578,8 @@ void Game::RenderDeferredDebugOverlay()
     Context->RSSetState(DefaultRasterState.Get());
     Context->IASetInputLayout(nullptr);
     Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
+    ID3D11RenderTargetView* rtv = ActiveRTV();
+    Context->OMSetRenderTargets(1, &rtv, nullptr);
     Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
 
     ID3D11ShaderResourceView* gBufferSRVs[4] =
@@ -1477,8 +1597,10 @@ void Game::RenderDeferredDebugOverlay()
     Context->PSSetShaderResources(0, 4, gBufferSRVs);
     Context->PSSetSamplers(0, 1, gBufferSamplerState.GetAddressOf());
 
-    const float screenWidth = static_cast<float>(DisplayPtr->GetWidth());
-    const float screenHeight = static_cast<float>(DisplayPtr->GetHeight());
+    int aw = 1, ah = 1;
+    GetActiveSize(aw, ah);
+    const float screenWidth = static_cast<float>(aw);
+    const float screenHeight = static_cast<float>(ah);
     const float debugWidth = std::max(160.0f, screenWidth * 0.22f);
     const float debugHeight = std::max(90.0f, screenHeight * 0.22f);
     const float startX = screenWidth - debugWidth * 2.0f - 24.0f;
@@ -1682,14 +1804,16 @@ void Game::UpdateShadowCascades()
 {
     using namespace DirectX;
 
-    if (!AreShadowsActive() || !FirstPlayer || !DisplayPtr)
+    if (!AreShadowsActive() || !FirstPlayer)
     {
         return;
     }
 
     const float nearPlane = FirstPlayer->GetNearPlane();
     const float farPlane = ShadowDistance;
-    const float aspect = DisplayPtr->GetWidth() / static_cast<float>(std::max(DisplayPtr->GetHeight(), 1));
+    int aw = 1, ah = 1;
+    GetActiveSize(aw, ah);
+    const float aspect = static_cast<float>(aw) / static_cast<float>(std::max(ah, 1));
     const float tanHalfFovY = std::tan(FirstPlayer->GetFovY() * 0.5f);
 
     const glm::vec3 cameraPosition = FirstPlayer->GetPosition();
@@ -2101,7 +2225,8 @@ void Game::RenderShadowMaps()
     for (int cascadeIndex = 0; cascadeIndex < MaxShadowCascades; ++cascadeIndex)
     {
         ID3D11DepthStencilView* cascadeDSV = shadowDSVs[cascadeIndex].Get();
-        Context->OMSetRenderTargets(0, nullptr, cascadeDSV);
+        ID3D11RenderTargetView* rtv = ActiveRTV();
+        Context->OMSetRenderTargets(1, &rtv, ActiveDSV());
         Context->ClearDepthStencilView(cascadeDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
         shadowPass.LightViewProjection = CascadeLightViewProjection[cascadeIndex];
         shadowPass.CascadeIndex = cascadeIndex;
@@ -2237,42 +2362,6 @@ void Game::OnFocusLost()
     if (InputDevicePtr)
     {
         InputDevicePtr->ClearPressedKeys();
-    }
-}
-
-void Game::ApplyPendingResize()
-{
-    if (!bResizePending || !SwapChain || !DisplayPtr)
-    {
-        return;
-    }
-    bResizePending = false;
-
-    if (PendingWidth == DisplayPtr->GetWidth() && PendingHeight == DisplayPtr->GetHeight() && RenderTargetView)
-    {
-        return;
-    }
-
-    // Every view of the old back buffer must be released before ResizeBuffers.
-    Context->ClearState();
-    ReleaseSwapChainResources();
-    Context->Flush();
-
-    const HRESULT hr = SwapChain->ResizeBuffers(0, static_cast<UINT>(PendingWidth), static_cast<UINT>(PendingHeight),
-                                                DXGI_FORMAT_UNKNOWN, 0);
-    if (FAILED(hr))
-    {
-        std::cout << "ResizeBuffers failed: 0x" << std::hex << hr << std::dec << std::endl;
-        bRunning = false;
-        ExitCode = 3;
-        return;
-    }
-
-    DisplayPtr->SetClientSize(PendingWidth, PendingHeight);
-    if (!CreateSwapChainResources(PendingWidth, PendingHeight))
-    {
-        bRunning = false;
-        ExitCode = 3;
     }
 }
 
@@ -2440,24 +2529,31 @@ void Game::RenderFrame()
 
 void Game::EndFrame()
 {
-    if (!SwapChain)
+    IDXGISwapChain* swap = ActiveSwap();
+    if (!swap)
     {
         return;
     }
-
-    const HRESULT hr = SwapChain->Present(bVSync ? 1 : 0, 0);
+    const UINT syncInterval = bEditorAttached ? 0u : (bVSync ? 1u : 0u);
+    const HRESULT hr = swap->Present(syncInterval, 0);
     if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
     {
         const HRESULT reason = Device ? Device->GetDeviceRemovedReason() : hr;
         std::cout << "GPU device lost (0x" << std::hex << reason << std::dec << "), stopping." << std::endl;
-        bRunning = false;
-        ExitCode = 2;
+        if (!bEditorAttached)
+        {
+            bRunning = false;
+            ExitCode = 2;
+        }
     }
     else if (FAILED(hr))
     {
         std::cout << "Present failed: 0x" << std::hex << hr << std::dec << std::endl;
-        bRunning = false;
-        ExitCode = 2;
+        if (!bEditorAttached)
+        {
+            bRunning = false;
+            ExitCode = 2;
+        }
     }
 }
 
@@ -2499,8 +2595,10 @@ void Game::UpdateWindowTitle(float realDeltaTime)
 void Game::SetFullViewport()
 {
     D3D11_VIEWPORT viewport = {};
-    viewport.Width = static_cast<float>(DisplayPtr->GetWidth());
-    viewport.Height = static_cast<float>(DisplayPtr->GetHeight());
+    int aw = 1, ah = 1;
+    GetActiveSize(aw, ah);
+    viewport.Width = static_cast<float>(aw);
+    viewport.Height = static_cast<float>(ah);
     viewport.MaxDepth = 1.0f;
     Context->RSSetViewports(1, &viewport);
 }
@@ -2514,17 +2612,15 @@ void Game::BeginMainPass(bool bUseDepth)
     Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     const std::array<float, 4> clearColor = GetClearColor();
-    Context->ClearRenderTargetView(RenderTargetView.Get(), clearColor.data());
+    ID3D11RenderTargetView* rtv = ActiveRTV();
+    ID3D11DepthStencilView* dsv = bUseDepth ? ActiveDSV() : nullptr;
+    Context->ClearRenderTargetView(rtv, clearColor.data());
     if (bUseDepth)
     {
-        Context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-        Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
+        Context->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
         Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
     }
-    else
-    {
-        Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
-    }
+    Context->OMSetRenderTargets(1, &rtv, dsv);
 
     const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
@@ -2573,7 +2669,7 @@ void Game::DrawDeffered()
         gBufferNormalRTV.Get(),
         gBufferWorldPositionRTV.Get()
     };
-    Context->OMSetRenderTargets(3, gBufferTargets, depthStencilView.Get());
+    Context->OMSetRenderTargets(3, gBufferTargets, ActiveDSV());
 
     const float clearAlbedo[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     const float clearNormal[4] = {0.5f, 0.5f, 1.0f, 0.0f};
@@ -2581,19 +2677,20 @@ void Game::DrawDeffered()
     Context->ClearRenderTargetView(gBufferAlbedoRTV.Get(), clearAlbedo);
     Context->ClearRenderTargetView(gBufferNormalRTV.Get(), clearNormal);
     Context->ClearRenderTargetView(gBufferWorldPositionRTV.Get(), clearWorldPosition);
-    Context->ClearDepthStencilView(depthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    Context->ClearDepthStencilView(ActiveDSV(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     RenderOpaque(OpaqueFilter::DeferredCapable, ShaderCompileVariant::DeferredGBuffer);
 
     // 2. Lighting into the back buffer; background pixels keep the clear colour.
     const std::array<float, 4> clearColor = GetClearColor();
-    Context->ClearRenderTargetView(RenderTargetView.Get(), clearColor.data());
+    Context->ClearRenderTargetView(ActiveRTV(), clearColor.data());
     RenderDeferredLightingPass();
 
     // 3. Forward-only opaque materials (reflective, emissive, custom) against the G-buffer depth.
     Context->RSSetState(DefaultRasterState.Get());
     SetFullViewport();
-    Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
+    ID3D11RenderTargetView* rtv = ActiveRTV();
+    Context->OMSetRenderTargets(1, &rtv, ActiveDSV());
     RenderOpaque(OpaqueFilter::ForwardOnly, ShaderCompileVariant::Default);
 
     // 4. Skybox, GPU simulation, transparency.
@@ -2694,7 +2791,8 @@ void Game::DispatchComputePhase()
     }
 
     // Compute work may unbind the output merger to read the depth buffer.
-    Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
+    ID3D11RenderTargetView* rtv = ActiveRTV();
+    Context->OMSetRenderTargets(1, &rtv, ActiveDSV());
 }
 
 void Game::RenderTransparent()
@@ -2804,4 +2902,260 @@ void Game::EndGpuTimer()
     Context->End(GpuTimerEnd[slot].Get());
     Context->End(GpuTimerDisjoint[slot].Get());
     GpuTimerIssued[slot] = true;
+}
+
+
+bool Game::InitializeEditorMode()
+{
+    if (bInitialized)
+    {
+        return true;
+    }
+    auto fail = [this](const char* reason) -> bool
+    {
+        std::cout << "Editor initialization failed: " << reason << std::endl;
+        DestroyResources();
+        return false;
+    };
+    // Шейдеры обязательны; в headless нет окна для MessageBox — только лог.
+    if (GetFileAttributesW(ShaderPath().c_str()) == INVALID_FILE_ATTRIBUTES)
+    {
+        return fail("shader files not found");
+    }
+    if (!CreateDeviceHeadless())
+    {
+        return fail("Direct3D 11 device (headless)");
+    }
+    if (!InitCoreResources())
+    {
+        return fail("core resources");
+    }
+    // Камера нужна для BuildFrameConstants/UpdateShadowCascades; InputDevice НЕ создаём
+    // (он завязан на окно/сообщения, всех обращений к InputDevicePtr уже защищены null-check).
+    FirstPlayer = std::make_unique<Player>();
+    FirstPlayer->SetGamePointer(this);
+    bResizePending = false;
+    bInitialized = true;
+    AfterInitialize();
+    return true;
+}
+
+int Game::ViewportAttach(void* hwnd, uint32_t w, uint32_t h)
+{
+    if (!bInitialized || !Device || !hwnd || w == 0 || h == 0)
+    {
+        return 0;
+    }
+    if (bEditorAttached)
+    {
+        ViewportDetach();   // идемпотентность: перепристыковка
+    }
+    Microsoft::WRL::ComPtr<IDXGIDevice>   dxgiDev;
+    Microsoft::WRL::ComPtr<IDXGIAdapter>  adapter;
+    Microsoft::WRL::ComPtr<IDXGIFactory2> factory;
+    if (FAILED(Device->QueryInterface(IID_PPV_ARGS(&dxgiDev))) ||
+        FAILED(dxgiDev->GetAdapter(&adapter)) ||
+        FAILED(adapter->GetParent(IID_PPV_ARGS(&factory))))
+    {
+        return 0;
+    }
+    DXGI_SWAP_CHAIN_DESC1 sd{};
+    sd.Width = w;
+    sd.Height = h;
+    sd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;   // тот же формат, что у оконного swap chain
+    sd.SampleDesc.Count = 1;
+    sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+    sd.BufferCount = 2;
+    sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+    Microsoft::WRL::ComPtr<IDXGISwapChain1> swap;
+    if (FAILED(factory->CreateSwapChainForHwnd(Device.Get(), (HWND)hwnd, &sd, nullptr, nullptr, &swap)))
+    {
+        return 0;
+    }
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> back;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv;
+    if (FAILED(swap->GetBuffer(0, IID_PPV_ARGS(&back))) ||
+        FAILED(Device->CreateRenderTargetView(back.Get(), nullptr, rtv.GetAddressOf())))
+    {
+        return 0;
+    }
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> dTex;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> dsv;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> dSrv;
+    if (!CreateDepthFor((int)w, (int)h, dTex, dsv, dSrv))
+    {
+        return 0;
+    }
+    EditorSwap = swap;
+    EditorBackTexture = back;
+    EditorRTV = rtv;
+    EditorDepthTexture = dTex;
+    EditorDSV = dsv;
+    EditorDepthSRV = dSrv;
+    EditorW = w;
+    EditorH = h;
+    bEditorAttached = true;
+    // G-buffer под новый размер пересоздастся в InitDeferredResources на первом же кадре.
+    return 1;
+}
+
+int Game::ViewportResize(uint32_t w, uint32_t h)
+{
+    // Только помечаем: реальная работа — на границе кадра в ApplyPendingResize.
+    if (!bEditorAttached || w == 0 || h == 0)
+    {
+        return 0;
+    }
+    PendingWidth = (int)w;
+    PendingHeight = (int)h;
+    bResizePending = true;
+    return 1;
+}
+
+int Game::ViewportDetach()
+{
+    if (!bEditorAttached)
+    {
+        return 1;
+    }
+    EditorRTV.Reset();
+    EditorDSV.Reset();
+    EditorDepthSRV.Reset();
+    EditorBackTexture.Reset();
+    EditorDepthTexture.Reset();
+    EditorSwap.Reset();
+    EditorW = EditorH = 0;
+    bEditorAttached = false;
+    return 1;
+}
+
+void Game::ResizeEditorSwap(int width, int height)
+{
+    if (!EditorSwap)
+    {
+        return;
+    }
+    // Все виды старого back buffer и depth должны умереть ДО ResizeBuffers.
+    Context->ClearState();
+    EditorRTV.Reset();
+    EditorDSV.Reset();
+    EditorDepthSRV.Reset();
+    EditorBackTexture.Reset();
+    EditorDepthTexture.Reset();
+    Context->Flush();
+    const HRESULT hr = EditorSwap->ResizeBuffers(0, (UINT)width, (UINT)height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+    if (FAILED(hr))
+    {
+        std::cout << "Editor ResizeBuffers failed: 0x" << std::hex << hr << std::dec << std::endl;
+        bEditorAttached = false;
+        return;
+    }
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> back;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv;
+    if (FAILED(EditorSwap->GetBuffer(0, IID_PPV_ARGS(&back))) ||
+        FAILED(Device->CreateRenderTargetView(back.Get(), nullptr, rtv.GetAddressOf())))
+    {
+        bEditorAttached = false;
+        return;
+    }
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> dTex;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> dsv;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> dSrv;
+    if (!CreateDepthFor(width, height, dTex, dsv, dSrv))
+    {
+        bEditorAttached = false;
+        return;
+    }
+    EditorBackTexture = back;
+    EditorRTV = rtv;
+    EditorDepthTexture = dTex;
+    EditorDSV = dsv;
+    EditorDepthSRV = dSrv;
+    EditorW = (uint32_t)width;
+    EditorH = (uint32_t)height;
+    // G-buffer старого размера несовместим с новым DSV по размеру — форсируем пересоздание.
+    deferredBufferWidth = 0;
+    deferredBufferHeight = 0;
+}
+
+int Game::SetPlayMode(int mode)
+{
+    const int prev = PlayMode;
+    if (prev == mode)
+    {
+        return 1;
+    }
+    PlayMode = mode;
+    if (mode == 0 && prev != 0)
+    {
+        RestoreSceneSnapshot();
+    }
+    if (mode == 1 && prev == 0)
+    {
+        TakeSceneSnapshot();
+    }
+    return 1;
+}
+
+void Game::TakeSceneSnapshot()
+{
+    // TODO: сериализация графа сцены (Components) в буфер. Заглушка: Stop не чинит сцену, но и не падает.
+}
+
+void Game::RestoreSceneSnapshot()
+{
+    // TODO: десериализация. См. TakeSceneSnapshot.
+}
+
+void Game::StepEditorFrame(float realDeltaTime)
+{
+    if (!bInitialized || !bEditorAttached)
+    {
+        return;   // без активной цели рисовать некуда; логика тоже не тикается
+    }
+    ApplyPendingResize();                 // применит редакторский ресайз на границе кадра
+    if (!bEditorAttached)
+    {
+        return;                           // ResizeBuffers мог упасть и сбросить флаг
+    }
+
+    const float deltaTime = std::min(realDeltaTime, 0.1f) * SimulationTimeScale;
+    ++FrameIndex;
+    Stats.Reset();
+
+    if (PlayMode == 1)
+    {
+        TotalTime += deltaTime;
+        PreUpdate(deltaTime);
+        FirstPlayer->UpdateCamera(deltaTime);
+        TickComponents(deltaTime);
+        if (bShadowsEnabled && !bShadowResourcesReady && !bShadowInitFailed)
+        {
+            bShadowResourcesReady = InitShadowResources();
+            bShadowInitFailed = !bShadowResourcesReady;
+        }
+        if (AreShadowsActive() && StaticShadowExtent > 0.0f && !bStaticShadowFailed)
+        {
+            const bool bLightChanged = StaticShadowBakedLight.x != DirectionalLightDirection.x ||
+                                       StaticShadowBakedLight.y != DirectionalLightDirection.y ||
+                                       StaticShadowBakedLight.z != DirectionalLightDirection.z;
+            if (bStaticShadowDirty || bLightChanged)
+            {
+                RenderStaticShadowMap();
+            }
+        }
+        UpdateShadowCascades();
+    }
+    // Константы кадра пересобираем всегда (в EDIT/PAUSE камера статична, но данные должны быть валидны).
+    BuildFrameConstants();
+    for (auto& pair : Components)
+    {
+        pair.second->Update();
+    }
+
+    BeginGpuTimer();
+    RenderFrame();                        // рисует в ActiveRTV/DSV = редакторский набор
+    EndGpuTimer();
+    EndFrame();                           // Present на ActiveSwap = EditorSwap (sync 0)
+    LastFrameStats = Stats;
 }

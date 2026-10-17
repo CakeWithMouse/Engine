@@ -145,8 +145,24 @@ void EditorQtHost::DrainCommands()
                 host_.viewportDetach(host_.user);
             Log("EditorViewportDetach");
             break;
+        case EditorCommand::SetPlayMode:
+            if (host_.setPlayMode)
+                host_.setPlayMode(host_.user, cmd.mode);
+            {
+            const char* name = cmd.mode == ENGINE_PLAY_RUNNING ? "Running"
+                             : cmd.mode == ENGINE_PLAY_PAUSED  ? "Paused" : "Edit";
+            Log((std::string("EditorPlayMode=") + name).c_str());   // #include <string> уже есть
+            }
+            break;
         default:
             break;
         }
     }
+}
+
+void EditorQtHost::RequestPlayMode(int mode)
+{
+    playMode_.store(mode);                 // UI-источник истины обновляем сразу
+    EditorCommand c; c.type = EditorCommand::SetPlayMode; c.mode = mode;
+    PostCommand(c);
 }

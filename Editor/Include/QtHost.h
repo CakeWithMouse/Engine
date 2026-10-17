@@ -15,11 +15,13 @@ struct EditorCommand
     {
         None = 0, RequestExit, ReloadProject, LoadAsset,
         ViewportAttach, ViewportResize, ViewportDetach,
+        SetPlayMode,            // v3: поле mode
     };
     Type type = None;
     QString path;
     void* hwnd = nullptr;
     uint32_t w = 0, h = 0;
+    int mode = 0;               // EnginePlayMode для SetPlayMode
 };
 
 // Qt-часть редактора: отдельный поток со своим QApplication.
@@ -45,6 +47,10 @@ public:
     
     bool HasViewport() const { return host_.viewportAttach != nullptr; }
     bool ViewportActive() const { return viewportActive_.load(); }
+    
+    bool HasPlayMode() const { return host_.setPlayMode != nullptr; }
+    int  PlayMode() const    { return playMode_.load(); }
+    void RequestPlayMode(int mode);   // из UI-потока: меняет атомик + шлёт команду
 
 private:
     void UiThreadMain();
@@ -62,4 +68,5 @@ private:
     std::atomic<double> lastDt_{0.0};
     std::atomic<uint64_t> updates_{0};
     std::atomic<bool> viewportActive_{ false };
+    std::atomic<int> playMode_{ ENGINE_PLAY_EDIT };
 };
