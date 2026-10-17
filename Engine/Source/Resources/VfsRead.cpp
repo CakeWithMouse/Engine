@@ -1,6 +1,7 @@
 #include "VfsRead.h"
 
 #include <Engine/Resources/Paths.h>
+#include <cstdio>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -164,6 +165,8 @@ namespace VfsRead
             const auto parent = absPath.parent_path();
             const size_t h = std::hash<std::string>{}(parent.generic_u8string());
             const std::string vRoot = "/_ext_" + std::to_string(h);
+            std::fprintf(stderr, "[VfsRead] Dynamic mount '%s' -> '%s' (path '%s' outside registered mounts)\n",
+                vRoot.c_str(), parent.generic_u8string().c_str(), absGeneric.c_str());
             vfs.Mount(vRoot, parent);
             return vRoot + "/" + absPath.filename().generic_u8string();
         }
@@ -185,8 +188,16 @@ namespace VfsRead
         {
             return vfs.ReadBytes(vPath);
         }
+        catch (const std::exception& ex)
+        {
+            std::fprintf(stderr, "[VfsRead] Failed to read bytes for path '%s' (virtual: '%s'): %s\n",
+                std::string(path).c_str(), vPath.c_str(), ex.what());
+            return {};
+        }
         catch (...)
         {
+            std::fprintf(stderr, "[VfsRead] Failed to read bytes for path '%s' (virtual: '%s'): unknown exception\n",
+                std::string(path).c_str(), vPath.c_str());
             return {};
         }
     }
