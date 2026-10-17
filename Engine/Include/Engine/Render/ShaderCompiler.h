@@ -1,6 +1,7 @@
 #pragma once
 #include <d3dcompiler.h>
 #include <filesystem>
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -64,28 +65,30 @@ namespace ShaderCompiler
             }
 
             auto& vfs = VfsRead::GetVFS();
+            // Standard D3D include semantics:
+            // 1. Search relative to the file containing the #include
             std::string targetVirtual = VirtualFileSystem::NormalizeVirtualPath(parentDir + "/" + pFileName);
             if (!vfs.Exists(targetVirtual))
             {
-                // Fallback: check /Engine/Shaders/<pFileName>
-                const std::string engineShaders = VirtualFileSystem::NormalizeVirtualPath("/Engine/Shaders/" + std::string(pFileName));
-                if (vfs.Exists(engineShaders))
+                // 2. If not found and parentDir != baseDir, search relative to the root shader directory
+                if (parentDir != baseDir)
                 {
-                    targetVirtual = engineShaders;
+                    const std::string rootVirtual = VirtualFileSystem::NormalizeVirtualPath(baseDir + "/" + pFileName);
+                    if (vfs.Exists(rootVirtual))
+                    {
+                        targetVirtual = rootVirtual;
+                    }
+                    else
+                    {
+                        std::cout << "[ShaderCompiler] Include file not found in VFS: '" << pFileName
+                                  << "' (searched in '" << parentDir << "' and '" << baseDir << "')" << std::endl;
+                        return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+                    }
                 }
                 else
                 {
-                    std::string resolvedVirtual;
-                    auto testBytes = VfsRead::ReadBytes(pFileName, &resolvedVirtual);
-                    if (!testBytes.empty())
-                    {
-                        buffers.emplace_back(std::move(testBytes));
-                        const auto& stored = buffers.back();
-                        *ppData = stored.data();
-                        *pBytes = static_cast<UINT>(stored.size());
-                        parentDirs[stored.data()] = std::filesystem::path(resolvedVirtual).parent_path().generic_u8string();
-                        return S_OK;
-                    }
+                    std::cout << "[ShaderCompiler] Include file not found in VFS: '" << pFileName
+                              << "' (searched in '" << parentDir << "')" << std::endl;
                     return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
                 }
             }
@@ -100,8 +103,14 @@ namespace ShaderCompiler
                 parentDirs[stored.data()] = std::filesystem::path(targetVirtual).parent_path().generic_u8string();
                 return S_OK;
             }
+            catch (const std::exception& ex)
+            {
+                std::cout << "[ShaderCompiler] Failed to read include '" << targetVirtual << "' via VFS: " << ex.what() << std::endl;
+                return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+            }
             catch (...)
             {
+                std::cout << "[ShaderCompiler] Unknown exception while reading include '" << targetVirtual << "' via VFS" << std::endl;
                 return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
             }
         }
