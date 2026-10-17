@@ -8,7 +8,7 @@
 #define ENGINE_MODULE_CALL __cdecl
 #define ENGINE_MODULE_VERSION 3u
 #define ENGINE_MODULE_GAME 2u
-#define ENGINE_MODULE_EDITOR 2u
+#define ENGINE_MODULE_EDITOR 1u
 
 struct EngineGameBackend
 {

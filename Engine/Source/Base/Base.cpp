@@ -590,7 +590,12 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             // --- проход 1: игра (headless, без окна/основного swap chain внутри Game.dll) ---
             EngineModuleHost hostGame{};
             fillHost(hostGame, false);
-            const std::filesystem::path gamePath = options.module.parent_path() / L"Game.dll";
+            const std::filesystem::path projectDir =
+                options.projectFile.empty()
+                    ? std::filesystem::path()
+                    : std::filesystem::path(options.projectFile).parent_path();
+            const std::filesystem::path gamePath =
+                (projectDir.empty() ? options.module.parent_path() : projectDir) / L"Game.dll";
             if (std::filesystem::exists(gamePath))
             {
                 gameSession = std::make_unique<LoadedSession>();

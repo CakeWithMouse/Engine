@@ -35,13 +35,13 @@ namespace
     // Largest real time step fed into the simulation (prevents huge jumps after stalls).
     constexpr float MaxFrameDeltaSeconds = 0.1f;
 
-    const D3D_SHADER_MACRO shaderDefinesDeferredGBuffer[] =
+    constexpr D3D_SHADER_MACRO shaderDefinesDeferredGBuffer[] =
     {
         {"DEFERRED_GBUFFER", "1"},
         {nullptr, nullptr}
     };
 
-    const D3D_SHADER_MACRO shaderDefinesDeferredLighting[] =
+    constexpr D3D_SHADER_MACRO shaderDefinesDeferredLighting[] =
     {
         {"DEFERRED_LIGHTING", "1"},
         {nullptr, nullptr}
@@ -104,7 +104,7 @@ namespace
         Microsoft::WRL::ComPtr<ID3D11ShaderReflection> reflection;
         if (pixelShaderBlob == nullptr ||
             FAILED(D3DReflect(pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize(),
-                              IID_ID3D11ShaderReflection, reinterpret_cast<void**>(reflection.GetAddressOf()))))
+                IID_ID3D11ShaderReflection, reinterpret_cast<void**>(reflection.GetAddressOf()))))
         {
             return 0;
         }
@@ -127,9 +127,9 @@ namespace
     uint32_t PackColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255)
     {
         return static_cast<uint32_t>(r) |
-               (static_cast<uint32_t>(g) << 8) |
-               (static_cast<uint32_t>(b) << 16) |
-               (static_cast<uint32_t>(a) << 24);
+            (static_cast<uint32_t>(g) << 8) |
+            (static_cast<uint32_t>(b) << 16) |
+            (static_cast<uint32_t>(a) << 24);
     }
 
     float Hash01(int x, int y, int faceIndex)
@@ -227,12 +227,12 @@ namespace
     }
 
     // Tiny vertex shaders whose only purpose is to provide input signatures for the shared layouts.
-    const char* PrimitiveSignatureShader = R"(
+    auto PrimitiveSignatureShader = R"(
         struct VS_IN { float4 pos : POSITION; float4 col : COLOR; };
         float4 VSMain(VS_IN input) : SV_Position { return input.pos + input.col * 1e-9f; }
     )";
 
-    const char* MeshSignatureShader = R"(
+    auto MeshSignatureShader = R"(
         struct VS_IN { float4 pos : POSITION; float4 normal : NORMAL; float2 uv : TEXCOORD; };
         float4 VSMain(VS_IN input) : SV_Position { return input.pos + input.normal * 1e-9f + float4(input.uv, 0.0f, 0.0f) * 1e-9f; }
     )";
@@ -456,7 +456,7 @@ bool Game::InitCoreResources()
 
 bool Game::CreateDeviceHeadless()
 {
-    const D3D_FEATURE_LEVEL FeatureLevels[] = {
+    constexpr D3D_FEATURE_LEVEL FeatureLevels[] = {
         D3D_FEATURE_LEVEL_11_1,
         D3D_FEATURE_LEVEL_11_0
     };
@@ -481,7 +481,8 @@ bool Game::CreateDeviceHeadless()
     }
     if (FAILED(hr) && (createDeviceFlags & D3D11_CREATE_DEVICE_DEBUG))
     {
-        std::cout << "Debug layer unavailable (0x" << std::hex << hr << std::dec << "), retrying without it." << std::endl;
+        std::cout << "Debug layer unavailable (0x" << std::hex << hr << std::dec << "), retrying without it." <<
+            std::endl;
         hr = tryCreate(0, FeatureLevels, ARRAYSIZE(FeatureLevels));
         if (hr == E_INVALIDARG)
         {
@@ -496,7 +497,7 @@ bool Game::CreateDeviceHeadless()
         return false;
     }
     std::cout << "Created headless device with feature level "
-              << (selectedFeatureLevel == D3D_FEATURE_LEVEL_11_1 ? "11.1" : "11.0") << std::endl;
+        << (selectedFeatureLevel == D3D_FEATURE_LEVEL_11_1 ? "11.1" : "11.0") << std::endl;
     return true;
 }
 
@@ -627,7 +628,7 @@ void Game::InitSwapChainDesc(int width, int height)
 bool Game::CreateDeviceAndSwapChain()
 {
     // The renderer needs SM5 and compute shaders, so lower feature levels are not accepted.
-    const D3D_FEATURE_LEVEL FeatureLevels[] = {
+    constexpr D3D_FEATURE_LEVEL FeatureLevels[] = {
         D3D_FEATURE_LEVEL_11_1,
         D3D_FEATURE_LEVEL_11_0
     };
@@ -666,7 +667,8 @@ bool Game::CreateDeviceAndSwapChain()
     }
     if (FAILED(hr) && (createDeviceFlags & D3D11_CREATE_DEVICE_DEBUG))
     {
-        std::cout << "Debug layer unavailable (0x" << std::hex << hr << std::dec << "), retrying without it." << std::endl;
+        std::cout << "Debug layer unavailable (0x" << std::hex << hr << std::dec << "), retrying without it." <<
+            std::endl;
         hr = tryCreate(0, FeatureLevels, ARRAYSIZE(FeatureLevels));
         if (hr == E_INVALIDARG)
         {
@@ -684,13 +686,14 @@ bool Game::CreateDeviceAndSwapChain()
     }
 
     std::cout << "Created device with feature level "
-              << (selectedFeatureLevel == D3D_FEATURE_LEVEL_11_1 ? "11.1" : "11.0") << std::endl;
+        << (selectedFeatureLevel == D3D_FEATURE_LEVEL_11_1 ? "11.1" : "11.0") << std::endl;
     return true;
 }
 
 bool Game::CreateSwapChainResources(int width, int height)
 {
-    HRESULT hr = SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(BackTexture.ReleaseAndGetAddressOf()));
+    HRESULT hr = SwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D),
+                                      reinterpret_cast<void**>(BackTexture.ReleaseAndGetAddressOf()));
     if (FAILED(hr))
     {
         std::cout << "Failed to get the swap chain back buffer." << std::endl;
@@ -793,22 +796,22 @@ bool Game::CreateInputLayouts()
         return false;
     }
 
-    const D3D11_INPUT_ELEMENT_DESC primitiveElements[] = {
+    constexpr D3D11_INPUT_ELEMENT_DESC primitiveElements[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
-    const D3D11_INPUT_ELEMENT_DESC meshElements[] = {
+    constexpr D3D11_INPUT_ELEMENT_DESC meshElements[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
 
     if (FAILED(Device->CreateInputLayout(primitiveElements, ARRAYSIZE(primitiveElements),
-                                         primitiveBlob->GetBufferPointer(), primitiveBlob->GetBufferSize(),
-                                         layout.ReleaseAndGetAddressOf())) ||
+            primitiveBlob->GetBufferPointer(), primitiveBlob->GetBufferSize(),
+            layout.ReleaseAndGetAddressOf())) ||
         FAILED(Device->CreateInputLayout(meshElements, ARRAYSIZE(meshElements),
-                                         meshBlob->GetBufferPointer(), meshBlob->GetBufferSize(),
-                                         meshLayout.ReleaseAndGetAddressOf())))
+            meshBlob->GetBufferPointer(), meshBlob->GetBufferSize(),
+            meshLayout.ReleaseAndGetAddressOf())))
     {
         std::cout << "Failed to create input layouts." << std::endl;
         return false;
@@ -865,7 +868,7 @@ RegisterResult Game::RegisterComponent(const std::string& Name, GameComponent* C
                                        const std::string& PShaderName, const std::string& VShaderName)
 {
     // Every check happens before any side effect, so a failed registration leaves no trace.
-    RegisterResult result = RegisterResult::Ok;
+    auto result = RegisterResult::Ok;
     if (Component == nullptr)
     {
         result = RegisterResult::NullComponent;
@@ -894,7 +897,7 @@ RegisterResult Game::RegisterComponent(const std::string& Name, GameComponent* C
     }
 
     Component->SetGame(this);
-    PointLightComponent* pointLight = dynamic_cast<PointLightComponent*>(Component);
+    auto pointLight = dynamic_cast<PointLightComponent*>(Component);
     if (pointLight == nullptr)
     {
         Component->SetShaderNames(VShaderName, PShaderName);
@@ -1059,7 +1062,7 @@ void Game::RegisterShaders(const std::string& ShaderName, const std::string& Add
     {
         Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
         if (FAILED(Device->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(),
-                                              nullptr, vertexShader.GetAddressOf())))
+            nullptr, vertexShader.GetAddressOf())))
         {
             std::cout << "Failed to create vertex shader: " << ShaderName << std::endl;
             return;
@@ -1070,7 +1073,7 @@ void Game::RegisterShaders(const std::string& ShaderName, const std::string& Add
     {
         Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
         if (FAILED(Device->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(),
-                                             nullptr, pixelShader.GetAddressOf())))
+            nullptr, pixelShader.GetAddressOf())))
         {
             std::cout << "Failed to create pixel shader: " << ShaderName << std::endl;
             return;
@@ -1128,7 +1131,9 @@ ComponentShaderVariant& Game::ResolveComponentShaders(GameComponent* Component, 
     }
 
     const std::string defaultPath = DefaultShaderPath();
-    const std::string& vsName = Component->GetVertexShaderName().empty() ? defaultPath : Component->GetVertexShaderName();
+    const std::string& vsName = Component->GetVertexShaderName().empty()
+                                    ? defaultPath
+                                    : Component->GetVertexShaderName();
     const std::string& psName = Component->GetPixelShaderName().empty() ? defaultPath : Component->GetPixelShaderName();
 
     slot.VertexShader = GetVertexShader(vsName, variant);
@@ -1217,7 +1222,7 @@ bool Game::CreateProceduralCubeMap(const std::string& cubeMapName, CubeMapPreset
     textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
     textureDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
 
-    std::unique_ptr<CubeMapResource> cubeMap = std::make_unique<CubeMapResource>();
+    auto cubeMap = std::make_unique<CubeMapResource>();
     cubeMap->Name = cubeMapName;
 
     HRESULT hr = Device->CreateTexture2D(&textureDesc, subresources.data(), cubeMap->Texture.GetAddressOf());
@@ -1297,7 +1302,7 @@ bool Game::CreateCubeMapFromFiles(const std::string& cubeMapName, const std::vec
         }
 
         std::cout << "Cube face loaded: " << facePaths[faceIndex]
-                  << " (" << width << "x" << height << ", src channels: " << channels << ")" << std::endl;
+            << " (" << width << "x" << height << ", src channels: " << channels << ")" << std::endl;
 
         if (faceIndex == 0)
         {
@@ -1314,7 +1319,7 @@ bool Game::CreateCubeMapFromFiles(const std::string& cubeMapName, const std::vec
         if (width != height)
         {
             std::cout << "Cube map face must be square for Direct3D texture cube: "
-                      << facePaths[faceIndex] << " (" << width << "x" << height << ")" << std::endl;
+                << facePaths[faceIndex] << " (" << width << "x" << height << ")" << std::endl;
             stbi_image_free(imageData);
             return false;
         }
@@ -1340,15 +1345,15 @@ bool Game::CreateCubeMapFromFiles(const std::string& cubeMapName, const std::vec
     textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
     textureDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
 
-    std::unique_ptr<CubeMapResource> cubeMap = std::make_unique<CubeMapResource>();
+    auto cubeMap = std::make_unique<CubeMapResource>();
     cubeMap->Name = cubeMapName;
 
     HRESULT hr = Device->CreateTexture2D(&textureDesc, subresources.data(), cubeMap->Texture.GetAddressOf());
     if (FAILED(hr))
     {
         std::cout << "Failed to create cube map texture from files: " << cubeMapName
-                  << ", HRESULT=0x" << std::hex << hr << std::dec
-                  << ", faceSize=" << faceWidth << "x" << faceHeight << std::endl;
+            << ", HRESULT=0x" << std::hex << hr << std::dec
+            << ", faceSize=" << faceWidth << "x" << faceHeight << std::endl;
         return false;
     }
 
@@ -1427,14 +1432,16 @@ bool Game::InitDeferredResources()
         texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 
         return SUCCEEDED(Device->CreateTexture2D(&texDesc, nullptr, texture.ReleaseAndGetAddressOf())) &&
-               SUCCEEDED(Device->CreateRenderTargetView(texture.Get(), nullptr, rtv.ReleaseAndGetAddressOf())) &&
-               SUCCEEDED(Device->CreateShaderResourceView(texture.Get(), nullptr, srv.ReleaseAndGetAddressOf()));
+            SUCCEEDED(Device->CreateRenderTargetView(texture.Get(), nullptr, rtv.ReleaseAndGetAddressOf())) &&
+            SUCCEEDED(Device->CreateShaderResourceView(texture.Get(), nullptr, srv.ReleaseAndGetAddressOf()));
     };
 
     // Albedo.rgb + specular weight | normal.xyz + ambient model | world position (half float).
     if (!createGBufferTarget(DXGI_FORMAT_R8G8B8A8_UNORM, gBufferAlbedoTexture, gBufferAlbedoRTV, gBufferAlbedoSRV) ||
-        !createGBufferTarget(DXGI_FORMAT_R16G16B16A16_FLOAT, gBufferNormalTexture, gBufferNormalRTV, gBufferNormalSRV) ||
-        !createGBufferTarget(DXGI_FORMAT_R16G16B16A16_FLOAT, gBufferWorldPositionTexture, gBufferWorldPositionRTV, gBufferWorldPositionSRV))
+        !createGBufferTarget(DXGI_FORMAT_R16G16B16A16_FLOAT, gBufferNormalTexture, gBufferNormalRTV,
+                             gBufferNormalSRV) ||
+        !createGBufferTarget(DXGI_FORMAT_R16G16B16A16_FLOAT, gBufferWorldPositionTexture, gBufferWorldPositionRTV,
+                             gBufferWorldPositionSRV))
     {
         std::cout << "Failed to create G-buffer targets." << std::endl;
         return false;
@@ -1476,8 +1483,10 @@ bool Game::InitDeferredResources()
     const std::string defaultPath = DefaultShaderPath();
     RegisterShaders(defaultPath, vs_additional, ShaderCompileVariant::DeferredLighting);
     RegisterShaders(defaultPath, ps_additional, ShaderCompileVariant::DeferredLighting);
-    if (vertexShaderCache.find(MakeShaderCacheKey(defaultPath, vs_additional, ShaderCompileVariant::DeferredLighting)) == vertexShaderCache.end() ||
-        pixelShaderCache.find(MakeShaderCacheKey(defaultPath, ps_additional, ShaderCompileVariant::DeferredLighting)) == pixelShaderCache.end())
+    if (vertexShaderCache.find(MakeShaderCacheKey(defaultPath, vs_additional, ShaderCompileVariant::DeferredLighting))
+        == vertexShaderCache.end() ||
+        pixelShaderCache.find(MakeShaderCacheKey(defaultPath, ps_additional, ShaderCompileVariant::DeferredLighting)) ==
+        pixelShaderCache.end())
     {
         std::cout << "Deferred lighting shaders are unavailable." << std::endl;
         return false;
@@ -1519,7 +1528,7 @@ void Game::RenderDeferredLightingPass()
     FillFrameConstantBuffer(data);
     Context->UpdateSubresource(deferredLightingCB.Get(), 0, nullptr, &data, 0, 0);
 
-    const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    constexpr float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     Context->RSSetState(DefaultRasterState.Get());
     Context->IASetInputLayout(nullptr);
     Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1574,7 +1583,7 @@ void Game::RenderDeferredDebugOverlay()
         return;
     }
 
-    const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    constexpr float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     Context->RSSetState(DefaultRasterState.Get());
     Context->IASetInputLayout(nullptr);
     Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1604,7 +1613,7 @@ void Game::RenderDeferredDebugOverlay()
     const float debugWidth = std::max(160.0f, screenWidth * 0.22f);
     const float debugHeight = std::max(90.0f, screenHeight * 0.22f);
     const float startX = screenWidth - debugWidth * 2.0f - 24.0f;
-    const float startY = 24.0f;
+    constexpr float startY = 24.0f;
 
     // The debug views only differ in the mode selector, so the frame data is prepared once.
     DeferredLightingBufferData debugData;
@@ -1672,7 +1681,8 @@ bool Game::InitShadowResources()
         dsvDesc.Texture2DArray.FirstArraySlice = cascadeIndex;
         dsvDesc.Texture2DArray.MipSlice = 0;
 
-        hr = Device->CreateDepthStencilView(shadowTexture.Get(), &dsvDesc, shadowDSVs[cascadeIndex].ReleaseAndGetAddressOf());
+        hr = Device->CreateDepthStencilView(shadowTexture.Get(), &dsvDesc,
+                                            shadowDSVs[cascadeIndex].ReleaseAndGetAddressOf());
         if (FAILED(hr))
         {
             std::cout << "Failed to create cascade shadow DSV: " << cascadeIndex << std::endl;
@@ -1717,7 +1727,8 @@ bool Game::InitShadowResources()
     }
 
     const HWND hWnd = DisplayPtr ? DisplayPtr->GetHwnd() : nullptr;
-    hr = CreateShader(hWnd, nullptr, ShadowShaderPath().c_str(), "VSMain", "vs_5_0", shadowVertexShaderBlob.ReleaseAndGetAddressOf());
+    hr = CreateShader(hWnd, nullptr, ShadowShaderPath().c_str(), "VSMain", "vs_5_0",
+                      shadowVertexShaderBlob.ReleaseAndGetAddressOf());
     if (FAILED(hr))
     {
         std::cout << "Failed to compile shadow VS." << std::endl;
@@ -1733,16 +1744,17 @@ bool Game::InitShadowResources()
     }
 
     Microsoft::WRL::ComPtr<ID3DBlob> instancedBlob;
-    hr = CreateShader(hWnd, nullptr, ShadowShaderPath().c_str(), "VSMainInstanced", "vs_5_0", instancedBlob.GetAddressOf());
+    hr = CreateShader(hWnd, nullptr, ShadowShaderPath().c_str(), "VSMainInstanced", "vs_5_0",
+                      instancedBlob.GetAddressOf());
     if (FAILED(hr) ||
         FAILED(Device->CreateVertexShader(instancedBlob->GetBufferPointer(), instancedBlob->GetBufferSize(),
-                                          nullptr, shadowInstancedVertexShader.ReleaseAndGetAddressOf())))
+            nullptr, shadowInstancedVertexShader.ReleaseAndGetAddressOf())))
     {
         std::cout << "Failed to create instanced shadow VS." << std::endl;
         return false;
     }
 
-    const D3D11_INPUT_ELEMENT_DESC primitiveLayoutDesc[] = {
+    constexpr D3D11_INPUT_ELEMENT_DESC primitiveLayoutDesc[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
@@ -1755,7 +1767,7 @@ bool Game::InitShadowResources()
         return false;
     }
 
-    const D3D11_INPUT_ELEMENT_DESC meshLayoutDesc[] = {
+    constexpr D3D11_INPUT_ELEMENT_DESC meshLayoutDesc[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0}
@@ -1836,7 +1848,8 @@ void Game::UpdateShadowCascades()
     }
 
     const XMFLOAT3 lightDirection = NormalizeFloat3(DirectionalLightDirection);
-    const XMVECTOR lightDirV = XMVector3Normalize(XMVectorSet(lightDirection.x, lightDirection.y, lightDirection.z, 0.0f));
+    const XMVECTOR lightDirV = XMVector3Normalize(XMVectorSet(lightDirection.x, lightDirection.y, lightDirection.z,
+                                                              0.0f));
 
     const float splitDistances[MaxShadowCascades + 1] = {
         nearPlane,
@@ -1925,7 +1938,8 @@ void Game::UpdateShadowCascades()
         maxZ += depthPadding;
 
         const XMMATRIX lightProjection = XMMatrixOrthographicOffCenterLH(minX, maxX, minY, maxY, minZ, maxZ);
-        XMStoreFloat4x4(&CascadeLightViewProjection[cascadeIndex], XMMatrixTranspose(XMMatrixMultiply(lightView, lightProjection)));
+        XMStoreFloat4x4(&CascadeLightViewProjection[cascadeIndex],
+                        XMMatrixTranspose(XMMatrixMultiply(lightView, lightProjection)));
     }
 }
 
@@ -1944,16 +1958,17 @@ namespace
         const int imageSize = rowSize * height;
         const int fileSize = 54 + imageSize;
         uint8_t header[54] = {};
-        header[0] = 'B'; header[1] = 'M';
+        header[0] = 'B';
+        header[1] = 'M';
         std::memcpy(&header[2], &fileSize, 4);
-        const int dataOffset = 54;
+        constexpr int dataOffset = 54;
         std::memcpy(&header[10], &dataOffset, 4);
-        const int headerSize = 40;
+        constexpr int headerSize = 40;
         std::memcpy(&header[14], &headerSize, 4);
         std::memcpy(&header[18], &width, 4);
         std::memcpy(&header[22], &height, 4);
-        const uint16_t planes = 1;
-        const uint16_t bits = 24;
+        constexpr uint16_t planes = 1;
+        constexpr uint16_t bits = 24;
         std::memcpy(&header[26], &planes, 2);
         std::memcpy(&header[28], &bits, 2);
         std::memcpy(&header[34], &imageSize, 4);
@@ -2020,7 +2035,8 @@ bool Game::DumpShadowMaps(const std::string& pathPrefix)
         size_t occupied = 0;
         for (int y = 0; y < height; ++y)
         {
-            const uint8_t* rowStart = static_cast<const uint8_t*>(mapped.pData) + static_cast<size_t>(y) * mapped.RowPitch;
+            const uint8_t* rowStart = static_cast<const uint8_t*>(mapped.pData) + static_cast<size_t>(y) * mapped.
+                RowPitch;
             for (int x = 0; x < width; ++x)
             {
                 float depth = 1.0f;
@@ -2048,15 +2064,16 @@ bool Game::DumpShadowMaps(const std::string& pathPrefix)
         const std::string file = pathPrefix + "-" + name + ".bmp";
         const bool written = WriteGrayscaleBmp(file, gray, width, height);
         std::cout << "shadow-dump " << name << " written=" << (written ? 1 : 0)
-                  << " occupied=" << occupied << " of " << (static_cast<size_t>(width) * height)
-                  << " depth_min=" << minDepth << " depth_max=" << maxDepth << std::endl;
+            << " occupied=" << occupied << " of " << (static_cast<size_t>(width) * height)
+            << " depth_min=" << minDepth << " depth_max=" << maxDepth << std::endl;
         return written;
     };
 
     bool result = true;
     for (int cascade = 0; cascade < MaxShadowCascades; ++cascade)
     {
-        result = dumpTexture(shadowTexture.Get(), static_cast<UINT>(cascade), "cascade" + std::to_string(cascade)) && result;
+        result = dumpTexture(shadowTexture.Get(), static_cast<UINT>(cascade), "cascade" + std::to_string(cascade)) &&
+            result;
     }
     result = dumpTexture(staticShadowTexture.Get(), 0, "static") && result;
     return result;
@@ -2101,8 +2118,12 @@ bool Game::InitStaticShadowResources()
     srvDesc.Texture2D.MipLevels = 1;
 
     if (FAILED(Device->CreateTexture2D(&desc, nullptr, staticShadowTexture.ReleaseAndGetAddressOf())) ||
-        FAILED(Device->CreateDepthStencilView(staticShadowTexture.Get(), &dsvDesc, staticShadowDSV.ReleaseAndGetAddressOf())) ||
-        FAILED(Device->CreateShaderResourceView(staticShadowTexture.Get(), &srvDesc, staticShadowSRV.ReleaseAndGetAddressOf())))
+        FAILED(
+            Device->CreateDepthStencilView(staticShadowTexture.Get(), &dsvDesc, staticShadowDSV.ReleaseAndGetAddressOf()
+            )) ||
+        FAILED(
+            Device->CreateShaderResourceView(staticShadowTexture.Get(), &srvDesc, staticShadowSRV.ReleaseAndGetAddressOf
+                ())))
     {
         std::cout << "Failed to create the baked shadow map." << std::endl;
         staticShadowTexture.Reset();
@@ -2128,7 +2149,8 @@ void Game::RenderStaticShadowMap()
     }
 
     const XMFLOAT3 lightDirection = NormalizeFloat3(DirectionalLightDirection);
-    const XMVECTOR lightDirV = XMVector3Normalize(XMVectorSet(lightDirection.x, lightDirection.y, lightDirection.z, 0.0f));
+    const XMVECTOR lightDirV = XMVector3Normalize(XMVectorSet(lightDirection.x, lightDirection.y, lightDirection.z,
+                                                              0.0f));
     const XMVECTOR center = XMVectorSet(StaticShadowCenter.x, StaticShadowCenter.y, StaticShadowCenter.z, 1.0f);
     const float distance = StaticShadowExtent * 2.0f + 200.0f;
     const XMVECTOR eye = XMVectorSubtract(center, XMVectorScale(lightDirV, distance));
@@ -2190,7 +2212,7 @@ void Game::RenderStaticShadowMap()
     bStaticShadowDirty = false;
     bStaticShadowReady = true;
     std::cout << "Baked shadow map: " << casterCount << " static components at "
-              << StaticShadowMapSize << " px." << std::endl;
+        << StaticShadowMapSize << " px." << std::endl;
 }
 
 void Game::RenderShadowMaps()
@@ -2416,8 +2438,8 @@ void Game::UpdateFrame(float realDeltaTime)
     if (AreShadowsActive() && StaticShadowExtent > 0.0f && !bStaticShadowFailed)
     {
         const bool bLightChanged = StaticShadowBakedLight.x != DirectionalLightDirection.x ||
-                                   StaticShadowBakedLight.y != DirectionalLightDirection.y ||
-                                   StaticShadowBakedLight.z != DirectionalLightDirection.z;
+            StaticShadowBakedLight.y != DirectionalLightDirection.y ||
+            StaticShadowBakedLight.z != DirectionalLightDirection.z;
         if (bStaticShadowDirty || bLightChanged)
         {
             RenderStaticShadowMap();
@@ -2497,12 +2519,12 @@ void Game::BuildFrameConstants()
     const XMVECTOR column2 = viewProjection.r[2];
     const XMVECTOR column3 = viewProjection.r[3];
     const XMVECTOR planes[6] = {
-        XMVectorAdd(column3, column0),      // left
+        XMVectorAdd(column3, column0), // left
         XMVectorSubtract(column3, column0), // right
-        XMVectorAdd(column3, column1),      // bottom
+        XMVectorAdd(column3, column1), // bottom
         XMVectorSubtract(column3, column1), // top
-        column2,                            // near (D3D clip z >= 0)
-        XMVectorSubtract(column3, column2)  // far
+        column2, // near (D3D clip z >= 0)
+        XMVectorSubtract(column3, column2) // far
     };
     for (int i = 0; i < 6; ++i)
     {
@@ -2574,13 +2596,17 @@ void Game::UpdateWindowTitle(float realDeltaTime)
 
     const float fps = TitleFrameCount / TitleUpdateAccumulator;
     const double cpuMs = CpuFrameMsAccumulator / std::max<uint32_t>(TitleFrameCount, 1);
-    const wchar_t* renderName = RenderingType == Deffered ? L"Deferred" : (RenderingType == Custom ? L"Custom" : L"Forward");
+    const wchar_t* renderName = RenderingType == Deffered
+                                    ? L"Deferred"
+                                    : (RenderingType == Custom ? L"Custom" : L"Forward");
 
     WCHAR text[320];
-    swprintf_s(text, L"%s | FPS: %.1f | CPU %.2f ms | GPU %.2f ms | Objects: %zu (+%zu inst) | Draws: %u | Drawn inst: %u | Culled: %u obj / %u inst%s",
-               renderName, fps, cpuMs, LastGpuFrameMs, Components.size(), instanceCount,
-               LastFrameStats.DrawCalls, LastFrameStats.InstancesDrawn,
-               LastFrameStats.CulledObjects, LastFrameStats.CulledInstances, bVSync ? L" | VSync" : L"");
+    swprintf_s(
+        text,
+        L"%s | FPS: %.1f | CPU %.2f ms | GPU %.2f ms | Objects: %zu (+%zu inst) | Draws: %u | Drawn inst: %u | Culled: %u obj / %u inst%s",
+        renderName, fps, cpuMs, LastGpuFrameMs, Components.size(), instanceCount,
+        LastFrameStats.DrawCalls, LastFrameStats.InstancesDrawn,
+        LastFrameStats.CulledObjects, LastFrameStats.CulledInstances, bVSync ? L" | VSync" : L"");
     SetWindowText(DisplayPtr->GetHwnd(), text);
 
     TitleUpdateAccumulator = 0.0f;
@@ -2622,7 +2648,7 @@ void Game::BeginMainPass(bool bUseDepth)
     }
     Context->OMSetRenderTargets(1, &rtv, dsv);
 
-    const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    constexpr float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
 }
 
@@ -2671,9 +2697,9 @@ void Game::DrawDeffered()
     };
     Context->OMSetRenderTargets(3, gBufferTargets, ActiveDSV());
 
-    const float clearAlbedo[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-    const float clearNormal[4] = {0.5f, 0.5f, 1.0f, 0.0f};
-    const float clearWorldPosition[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    constexpr float clearAlbedo[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    constexpr float clearNormal[4] = {0.5f, 0.5f, 1.0f, 0.0f};
+    constexpr float clearWorldPosition[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     Context->ClearRenderTargetView(gBufferAlbedoRTV.Get(), clearAlbedo);
     Context->ClearRenderTargetView(gBufferNormalRTV.Get(), clearNormal);
     Context->ClearRenderTargetView(gBufferWorldPositionRTV.Get(), clearWorldPosition);
@@ -2735,7 +2761,7 @@ bool Game::IsVisible(GameComponent* Component)
 
 void Game::RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant)
 {
-    const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    constexpr float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
     Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
 
@@ -2804,7 +2830,8 @@ void Game::RenderTransparent()
     };
 
     std::vector<SortedDraw> transparentDraws;
-    const glm::vec3 cameraPosition(CurrentFrame.CameraPosition.x, CurrentFrame.CameraPosition.y, CurrentFrame.CameraPosition.z);
+    const glm::vec3 cameraPosition(CurrentFrame.CameraPosition.x, CurrentFrame.CameraPosition.y,
+                                   CurrentFrame.CameraPosition.z);
     for (auto& pair : Components)
     {
         GameComponent* Component = pair.second.get();
@@ -2820,7 +2847,7 @@ void Game::RenderTransparent()
     std::stable_sort(transparentDraws.begin(), transparentDraws.end(),
                      [](const SortedDraw& a, const SortedDraw& b) { return a.DistanceSq > b.DistanceSq; });
 
-    const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    constexpr float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     Context->OMSetDepthStencilState(depthStencilStateReadOnly.Get(), 0);
     Context->OMSetBlendState(transparentBlendState.Get(), blendFactor, 0xffffffff);
 
@@ -2877,12 +2904,15 @@ void Game::BeginGpuTimer()
         D3D11_QUERY_DATA_TIMESTAMP_DISJOINT disjoint = {};
         UINT64 begin = 0;
         UINT64 end = 0;
-        if (Context->GetData(GpuTimerDisjoint[slot].Get(), &disjoint, sizeof(disjoint), D3D11_ASYNC_GETDATA_DONOTFLUSH) == S_OK &&
-            Context->GetData(GpuTimerBegin[slot].Get(), &begin, sizeof(begin), D3D11_ASYNC_GETDATA_DONOTFLUSH) == S_OK &&
+        if (Context->GetData(GpuTimerDisjoint[slot].Get(), &disjoint, sizeof(disjoint),
+                             D3D11_ASYNC_GETDATA_DONOTFLUSH) == S_OK &&
+            Context->GetData(GpuTimerBegin[slot].Get(), &begin, sizeof(begin), D3D11_ASYNC_GETDATA_DONOTFLUSH) == S_OK
+            &&
             Context->GetData(GpuTimerEnd[slot].Get(), &end, sizeof(end), D3D11_ASYNC_GETDATA_DONOTFLUSH) == S_OK &&
             !disjoint.Disjoint && disjoint.Frequency > 0 && end >= begin)
         {
-            LastGpuFrameMs = static_cast<float>(static_cast<double>(end - begin) * 1000.0 / static_cast<double>(disjoint.Frequency));
+            LastGpuFrameMs = static_cast<float>(static_cast<double>(end - begin) * 1000.0 / static_cast<double>(disjoint
+                .Frequency));
         }
         GpuTimerIssued[slot] = false;
     }
@@ -2948,10 +2978,10 @@ int Game::ViewportAttach(void* hwnd, uint32_t w, uint32_t h)
     }
     if (bEditorAttached)
     {
-        ViewportDetach();   // идемпотентность: перепристыковка
+        ViewportDetach(); // идемпотентность: перепристыковка
     }
-    Microsoft::WRL::ComPtr<IDXGIDevice>   dxgiDev;
-    Microsoft::WRL::ComPtr<IDXGIAdapter>  adapter;
+    Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDev;
+    Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
     Microsoft::WRL::ComPtr<IDXGIFactory2> factory;
     if (FAILED(Device->QueryInterface(IID_PPV_ARGS(&dxgiDev))) ||
         FAILED(dxgiDev->GetAdapter(&adapter)) ||
@@ -2962,13 +2992,13 @@ int Game::ViewportAttach(void* hwnd, uint32_t w, uint32_t h)
     DXGI_SWAP_CHAIN_DESC1 sd{};
     sd.Width = w;
     sd.Height = h;
-    sd.Format = DXGI_FORMAT_R8G8B8A8_UNORM;   // тот же формат, что у оконного swap chain
+    sd.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // тот же формат, что у оконного swap chain
     sd.SampleDesc.Count = 1;
     sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
     sd.BufferCount = 2;
     sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
     Microsoft::WRL::ComPtr<IDXGISwapChain1> swap;
-    if (FAILED(factory->CreateSwapChainForHwnd(Device.Get(), (HWND)hwnd, &sd, nullptr, nullptr, &swap)))
+    if (FAILED(factory->CreateSwapChainForHwnd(Device.Get(), static_cast<HWND>(hwnd), &sd, nullptr, nullptr, &swap)))
     {
         return 0;
     }
@@ -2982,7 +3012,7 @@ int Game::ViewportAttach(void* hwnd, uint32_t w, uint32_t h)
     Microsoft::WRL::ComPtr<ID3D11Texture2D> dTex;
     Microsoft::WRL::ComPtr<ID3D11DepthStencilView> dsv;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> dSrv;
-    if (!CreateDepthFor((int)w, (int)h, dTex, dsv, dSrv))
+    if (!CreateDepthFor(static_cast<int>(w), static_cast<int>(h), dTex, dsv, dSrv))
     {
         return 0;
     }
@@ -3006,8 +3036,8 @@ int Game::ViewportResize(uint32_t w, uint32_t h)
     {
         return 0;
     }
-    PendingWidth = (int)w;
-    PendingHeight = (int)h;
+    PendingWidth = static_cast<int>(w);
+    PendingHeight = static_cast<int>(h);
     bResizePending = true;
     return 1;
 }
@@ -3043,7 +3073,8 @@ void Game::ResizeEditorSwap(int width, int height)
     EditorBackTexture.Reset();
     EditorDepthTexture.Reset();
     Context->Flush();
-    const HRESULT hr = EditorSwap->ResizeBuffers(0, (UINT)width, (UINT)height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+    const HRESULT hr = EditorSwap->ResizeBuffers(0, static_cast<UINT>(width), static_cast<UINT>(height),
+                                                 DXGI_FORMAT_R8G8B8A8_UNORM, 0);
     if (FAILED(hr))
     {
         std::cout << "Editor ResizeBuffers failed: 0x" << std::hex << hr << std::dec << std::endl;
@@ -3071,8 +3102,8 @@ void Game::ResizeEditorSwap(int width, int height)
     EditorDepthTexture = dTex;
     EditorDSV = dsv;
     EditorDepthSRV = dSrv;
-    EditorW = (uint32_t)width;
-    EditorH = (uint32_t)height;
+    EditorW = static_cast<uint32_t>(width);
+    EditorH = static_cast<uint32_t>(height);
     // G-buffer старого размера несовместим с новым DSV по размеру — форсируем пересоздание.
     deferredBufferWidth = 0;
     deferredBufferHeight = 0;
@@ -3111,12 +3142,12 @@ void Game::StepEditorFrame(float realDeltaTime)
 {
     if (!bInitialized || !bEditorAttached)
     {
-        return;   // без активной цели рисовать некуда; логика тоже не тикается
+        return; // без активной цели рисовать некуда; логика тоже не тикается
     }
-    ApplyPendingResize();                 // применит редакторский ресайз на границе кадра
+    ApplyPendingResize(); // применит редакторский ресайз на границе кадра
     if (!bEditorAttached)
     {
-        return;                           // ResizeBuffers мог упасть и сбросить флаг
+        return; // ResizeBuffers мог упасть и сбросить флаг
     }
 
     const float deltaTime = std::min(realDeltaTime, 0.1f) * SimulationTimeScale;
@@ -3137,8 +3168,8 @@ void Game::StepEditorFrame(float realDeltaTime)
         if (AreShadowsActive() && StaticShadowExtent > 0.0f && !bStaticShadowFailed)
         {
             const bool bLightChanged = StaticShadowBakedLight.x != DirectionalLightDirection.x ||
-                                       StaticShadowBakedLight.y != DirectionalLightDirection.y ||
-                                       StaticShadowBakedLight.z != DirectionalLightDirection.z;
+                StaticShadowBakedLight.y != DirectionalLightDirection.y ||
+                StaticShadowBakedLight.z != DirectionalLightDirection.z;
             if (bStaticShadowDirty || bLightChanged)
             {
                 RenderStaticShadowMap();
@@ -3154,8 +3185,8 @@ void Game::StepEditorFrame(float realDeltaTime)
     }
 
     BeginGpuTimer();
-    RenderFrame();                        // рисует в ActiveRTV/DSV = редакторский набор
+    RenderFrame(); // рисует в ActiveRTV/DSV = редакторский набор
     EndGpuTimer();
-    EndFrame();                           // Present на ActiveSwap = EditorSwap (sync 0)
+    EndFrame(); // Present на ActiveSwap = EditorSwap (sync 0)
     LastFrameStats = Stats;
 }
