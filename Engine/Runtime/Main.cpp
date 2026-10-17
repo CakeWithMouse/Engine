@@ -2,12 +2,15 @@
 #include <Engine/Base/Base.h>
 #include <Engine/Resources/Paths.h>
 #include "Project.h"
+#include "PreviewScenes.h"
 #include <cstdio>
 #include <set>
 #include <stdexcept>
 
 int wmain(int argc, wchar_t** argv)
 {
+    // Keep lifecycle/viewport diagnostics visible when launched with redirected output.
+    std::setvbuf(stdout, nullptr, _IONBF, 0);
     try
     {
         RuntimeLaunchOptions options;
@@ -48,6 +51,11 @@ int wmain(int argc, wchar_t** argv)
         EnginePaths::SetContentRoot(directory / "EngineContent");
         std::printf("Project: %s\nMode: %s\n", options.projectName.c_str(), options.mode == RuntimeMode::Game ? "game" : "editor");
         BaseEngine engine;
+        if (options.mode == RuntimeMode::Editor)
+        {
+            engine.SetViewportFactory(FindPreviewScene(project.preview, project.content));
+            std::printf("PreviewScene: %s\n", project.preview.empty() ? "none" : project.preview.c_str());
+        }
         return engine.Run(options);
     }
     catch (const std::exception& error)

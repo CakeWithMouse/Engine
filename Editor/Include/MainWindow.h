@@ -20,10 +20,10 @@ public slots:
 
 private slots:
     void RefreshStats();
-
-protected:
-    void closeEvent(QCloseEvent*) override;
     
+protected:
+    void closeEvent(QCloseEvent* event) override;
+
 private:
     void BuildUi();
     void BuildToolBar();

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemDefinitionGroup><ClCompile><AdditionalIncludeDirectories>$(MSBuildThisFileDirectory);$(MSBuildThisFileDirectory)../BasicExamples/Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories></ClCompile></ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)PreviewScenes.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)OrderedSceneGame.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)../BasicExamples/Source/TrianglesScene.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)../Pong/Source/PongGame.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)../Pong/Source/PongScene.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)../Pong/Source/Ball.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)../Pong/Source/Rocket.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)../Pong/Source/Wall.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)../SunGame/Source/SunGame.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)../Battle/Source/BattleGame.cpp" />
+  </ItemGroup>
+</Project>

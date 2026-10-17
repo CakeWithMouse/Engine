@@ -8,6 +8,7 @@
 
 #include <QProcess>
 #include <QDockWidget>
+#include <QCloseEvent>
 #include <QLabel>
 #include <QMenu>
 #include <QMenuBar>
@@ -29,7 +30,7 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
 
 void EditorMainWindow::BuildUi()
 {
-    setWindowTitle(QStringLiteral("Engine Editor"));
+    setWindowTitle(QStringLiteral("Engine Editor — %1").arg(QString::fromUtf8(host_->host().projectName)));
     resize(1280, 720);
 
     viewport_ = new ViewportWidget(host_, this);
@@ -81,6 +82,19 @@ void EditorMainWindow::BuildUi()
 }
 
 void EditorMainWindow::AppendLine(const QString& line) { console_->appendPlainText(line); }
+
+void EditorMainWindow::closeEvent(QCloseEvent* event)
+{
+    // Keep the HWND alive and Qt pumping messages until the render thread releases DXGI.
+    // Stop() then quits Qt and destroys the window. Never join the render thread from here.
+    event->ignore();
+    StopExternalGame();
+    if (host_->HasPlayMode() && host_->PlayMode() != ENGINE_PLAY_EDIT)
+        host_->RequestPlayMode(ENGINE_PLAY_EDIT); // движок выйдет из play до смерти UI
+    EditorCommand command;
+    command.type = EditorCommand::RequestExit;
+    host_->PostCommand(command);
+}
 
 void EditorMainWindow::RefreshStats()
 {
@@ -207,12 +221,4 @@ void EditorMainWindow::StopExternalGame()
 {
     if (gameProc_ && gameProc_->state() != QProcess::NotRunning)
         gameProc_->kill();
-}
-
-void EditorMainWindow::closeEvent(QCloseEvent* e)
-{
-    StopExternalGame();
-    if (host_->HasPlayMode() && host_->PlayMode() != ENGINE_PLAY_EDIT)
-        host_->RequestPlayMode(ENGINE_PLAY_EDIT); // движок выйдет из play до смерти UI
-    QMainWindow::closeEvent(e);
 }

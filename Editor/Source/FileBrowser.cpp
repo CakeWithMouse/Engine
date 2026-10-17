@@ -27,7 +27,7 @@ FileBrowserDock::FileBrowserDock(EditorQtHost* host, QWidget* parent)
     const QFileInfo projectFile(QString::fromUtf8(
         host_->host().projectFile ? host_->host().projectFile : ""));
     projectDir_ = projectFile.absoluteDir().absolutePath();
-    contentDir_ = projectFile.absoluteDir().absoluteFilePath(QStringLiteral("Content"));
+    contentDir_ = QString::fromUtf8(host_->host().contentRoot ? host_->host().contentRoot : "");
     if (projectDir_.isEmpty())
         projectDir_ = QDir::currentPath();
 

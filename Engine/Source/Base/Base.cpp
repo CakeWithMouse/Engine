@@ -8,142 +8,98 @@
 #include <Engine/Base/Base.h>
 #include <Engine/Runtime/ModuleApi.h>
 #include <Engine/Resources/Paths.h>
+#include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/MainGame/Player.h>
 #include <chrono>
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+#include <thread>
 
 namespace
 {
-    void __cdecl Log(void*, const char* message) { if (message) std::puts(message); }
-    void __cdecl Exit(void* requestFlag) { *static_cast<bool*>(requestFlag) = true; }
+void __cdecl Log(void*, const char* message) { if (message) std::puts(message); }
+void __cdecl Exit(void* engine) { static_cast<BaseEngine*>(engine)->RequestExit(); }
 
-    // -------------------------------------------------------------------------------------
-    // [BACKEND]  Игровой backend, вычитанный из Game.dll, и прокси движка.
-    //            Прокси вызываются ТОЛЬКО из кадрового потока (редактор дёргает их внутри
-    //            своего Update -> DrainCommands), поэтому глобального мьютекса нет:
-    //            StepEditorFrame игры и прокси живут в одном потоке движка.
-    //            Сбрасываются в начале каждого Play (см. BaseEngine::Play), чтобы предыдущий
-    //            Run не оставил висячий gameUser для следующего инстанса BaseEngine.
-    // -------------------------------------------------------------------------------------
-    EngineGameBackend g_backend{};
-    bool g_haveGame = false;
-
-    int __cdecl Proxy_ViewportAttach(void* /*user*/, void* hwnd, uint32_t w, uint32_t h)
+class ScopedHandle
+{
+    HANDLE handle = INVALID_HANDLE_VALUE;
+public:
+    ScopedHandle() = default;
+    explicit ScopedHandle(HANDLE h) noexcept : handle(h) {}
+    ~ScopedHandle() noexcept { Close(); }
+    ScopedHandle(const ScopedHandle&) = delete;
+    ScopedHandle& operator=(const ScopedHandle&) = delete;
+    ScopedHandle(ScopedHandle&& other) noexcept : handle(other.handle) { other.handle = INVALID_HANDLE_VALUE; }
+    ScopedHandle& operator=(ScopedHandle&& other) noexcept
     {
-        return (g_haveGame && g_backend.viewportAttach)
-                   ? g_backend.viewportAttach(g_backend.gameUser, hwnd, w, h)
-                   : 0;
-    }
-
-    int __cdecl Proxy_ViewportResize(void* /*user*/, uint32_t w, uint32_t h)
-    {
-        return (g_haveGame && g_backend.viewportResize)
-                   ? g_backend.viewportResize(g_backend.gameUser, w, h)
-                   : 0;
-    }
-
-    int __cdecl Proxy_ViewportDetach(void* /*user*/)
-    {
-        // 1 даже без игры: «успешно ничего не делать», чтобы редактор в Stop не получил fail.
-        return (g_haveGame && g_backend.viewportDetach)
-                   ? g_backend.viewportDetach(g_backend.gameUser)
-                   : 1;
-    }
-
-    int __cdecl Proxy_SetPlayMode(void* /*user*/, int mode)
-    {
-        return (g_haveGame && g_backend.setPlayMode)
-                   ? g_backend.setPlayMode(g_backend.gameUser, mode)
-                   : 0;
-    }
-
-    class ScopedHandle
-    {
-        HANDLE handle = INVALID_HANDLE_VALUE;
-
-    public:
-        ScopedHandle() = default;
-
-        explicit ScopedHandle(HANDLE h) noexcept : handle(h)
+        if (this != &other)
         {
+            Close();
+            handle = other.handle;
+            other.handle = INVALID_HANDLE_VALUE;
         }
-
-        ~ScopedHandle() noexcept { Close(); }
-        ScopedHandle(const ScopedHandle&) = delete;
-        ScopedHandle& operator=(const ScopedHandle&) = delete;
-        ScopedHandle(ScopedHandle&& other) noexcept : handle(other.handle) { other.handle = INVALID_HANDLE_VALUE; }
-
-        ScopedHandle& operator=(ScopedHandle&& other) noexcept
+        return *this;
+    }
+    void Close() noexcept
+    {
+        if (handle != INVALID_HANDLE_VALUE && handle != nullptr)
         {
-            if (this != &other)
+            CloseHandle(handle);
+            handle = INVALID_HANDLE_VALUE;
+        }
+    }
+    HANDLE Get() const noexcept { return handle; }
+    bool IsValid() const noexcept { return handle != INVALID_HANDLE_VALUE && handle != nullptr; }
+};
+
+std::filesystem::path FindRepositoryRoot(const std::filesystem::path& startHint = {})
+{
+    std::filesystem::path dir = startHint.empty() ? EnginePaths::ExecutableDirectory() : startHint;
+    while (!dir.empty())
+    {
+        if (std::filesystem::exists(dir / "Engine" / "build.ps1"))
+        {
+            return dir;
+        }
+        const auto parent = dir.parent_path();
+        if (parent == dir) break;
+        dir = parent;
+    }
+    return {};
+}
+
+std::vector<std::string> SplitCommandLine(std::string_view line)
+{
+    std::vector<std::string> args;
+    size_t i = 0;
+    while (i < line.size())
+    {
+        while (i < line.size() && (line[i] == ' ' || line[i] == '\t')) ++i;
+        if (i >= line.size()) break;
+        std::string token;
+        if (line[i] == '"' || line[i] == '\'')
+        {
+            const char quote = line[i++];
+            while (i < line.size() && line[i] != quote)
             {
-                Close();
-                handle = other.handle;
-                other.handle = INVALID_HANDLE_VALUE;
+                token += line[i++];
             }
-            return *this;
+            if (i < line.size()) ++i;
         }
-
-        void Close() noexcept
+        else
         {
-            if (handle != INVALID_HANDLE_VALUE && handle != nullptr)
+            while (i < line.size() && line[i] != ' ' && line[i] != '\t')
             {
-                CloseHandle(handle);
-                handle = INVALID_HANDLE_VALUE;
+                token += line[i++];
             }
         }
-
-        HANDLE Get() const noexcept { return handle; }
-        bool IsValid() const noexcept { return handle != INVALID_HANDLE_VALUE && handle != nullptr; }
-    };
-
-    std::filesystem::path FindRepositoryRoot(const std::filesystem::path& startHint = {})
-    {
-        std::filesystem::path dir = startHint.empty() ? EnginePaths::ExecutableDirectory() : startHint;
-        while (!dir.empty())
-        {
-            if (std::filesystem::exists(dir / "Engine" / "build.ps1"))
-            {
-                return dir;
-            }
-            const auto parent = dir.parent_path();
-            if (parent == dir) break;
-            dir = parent;
-        }
-        return {};
+        args.push_back(std::move(token));
     }
-
-    std::vector<std::string> SplitCommandLine(std::string_view line)
-    {
-        std::vector<std::string> args;
-        size_t i = 0;
-        while (i < line.size())
-        {
-            while (i < line.size() && (line[i] == ' ' || line[i] == '\t')) ++i;
-            if (i >= line.size()) break;
-            std::string token;
-            if (line[i] == '"' || line[i] == '\'')
-            {
-                const char quote = line[i++];
-                while (i < line.size() && line[i] != quote)
-                {
-                    token += line[i++];
-                }
-                if (i < line.size()) ++i;
-            }
-            else
-            {
-                while (i < line.size() && line[i] != ' ' && line[i] != '\t')
-                {
-                    token += line[i++];
-                }
-            }
-            args.push_back(std::move(token));
-        }
-        return args;
-    }
+    return args;
+}
 }
 
 class BaseEngine::LoadedSession
@@ -230,8 +186,7 @@ class BaseEngine::LoadedSession
         shadowPath = CreateShadow(originalPath);
         DLL_DIRECTORY_COOKIE cookie = AddDllDirectory(originalPath.parent_path().c_str());
         library = LoadLibraryExW(shadowPath.c_str(), nullptr,
-                                 LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS |
-                                 LOAD_LIBRARY_SEARCH_USER_DIRS);
+            LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_USER_DIRS);
         const DWORD loadError = GetLastError();
         if (cookie) RemoveDllDirectory(cookie);
         if (!library)
@@ -281,23 +236,6 @@ public:
     void Open(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host)
     {
         LoadAndInitialize(path, kind, host);
-    }
-
-    // --- [BACKEND] геттеры для двухпроходной загрузки и reload игры ---
-    uint32_t Kind() const noexcept { return moduleKind; }
-    const std::filesystem::path& OriginalPath() const noexcept { return originalPath; }
-    // Вычитывает EngineGameBackend из УЖЕ СОЗДАННОЙ игры (session жив после Open).
-    // GetProcAddress, НЕ dllimport: движок грузит Game.dll динамически.
-    bool TryGetGameBackend(EngineGameBackend& out) const
-    {
-        if (!library) return false;
-        using GetBackendFn = int (__cdecl*)(uint32_t, EngineGameBackend*);
-        const auto getBackend = reinterpret_cast<GetBackendFn>(GetProcAddress(library, "EngineGetGameBackend"));
-        if (!getBackend) return false;
-        EngineGameBackend candidate{};
-        if (getBackend(ENGINE_MODULE_GAME, &candidate) != 1 || !candidate.gameUser) return false;
-        out = candidate;
-        return true;
     }
 
     bool Reload()
@@ -523,171 +461,66 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
                     mount.physicalPath.generic_u8string().c_str());
     }
 
-    // --- [BACKEND] сброс на случай предыдущего Run в этом процессе ---
-    g_haveGame = false;
-    g_backend = {};
-
-    // gameSession — ЛОКАЛЬНА Play (не член BaseEngine): в Editor-режиме держит игру как
-    // backend-провайдера, в Game-режиме пуста. RAII-деструктор закроет её даже при
-    // исключении, прошедшем мимо catch (хотя catch ниже вызывает shutdownAll первым).
-    std::unique_ptr<LoadedSession> gameSession;
+    EngineModuleHost host{ENGINE_MODULE_VERSION, this, Log, Exit,
+        options.projectName.c_str(), options.projectFile.c_str(), options.contentRoot.c_str()};
+    if (options.mode == RuntimeMode::Editor && viewportFactory)
+    {
+        host.viewportAttach = [](void* user, void* hwnd, uint32_t w, uint32_t h) -> int {
+            auto& engine = *static_cast<BaseEngine*>(user);
+            try
+            {
+                if (!hwnd || !w || !h || w > INT_MAX || h > INT_MAX) return 0;
+                engine.viewportGame.reset();
+                auto scene = engine.viewportFactory();
+                if (!scene || !scene->InitializeViewport(static_cast<HWND>(hwnd), static_cast<int>(w), static_cast<int>(h)))
+                    return 0;
+                scene->SetVSync(false); // Host paces the editor, including when occluded.
+                engine.viewportGame = std::move(scene);
+                std::puts("ViewportReady");
+                return 1;
+            }
+            catch (const std::exception& error) { std::fprintf(stderr, "ViewportError: %s\n", error.what()); }
+            catch (...) { std::fputs("ViewportError: initialization failed\n", stderr); }
+            return 0;
+        };
+        host.viewportResize = [](void* user, uint32_t w, uint32_t h) -> int {
+            auto& scene = static_cast<BaseEngine*>(user)->viewportGame;
+            if (!scene || w > INT_MAX || h > INT_MAX) return 0;
+            scene->OnWindowResized(static_cast<int>(w), static_cast<int>(h), !w || !h);
+            return 1;
+        };
+        host.viewportCamera = [](void* user, float r, float u, float f, float y, float p, float z) {
+            auto& scene = static_cast<BaseEngine*>(user)->viewportGame;
+            if (scene && scene->GetPlayer()) {
+                scene->GetPlayer()->MoveEditorCamera(r, u, f, y, p, z);
+                if (std::getenv("ENGINE_VIEWPORT_INPUT_TRACE")) {
+                    const auto position = scene->GetPlayer()->GetPosition();
+                    std::printf("ViewportCamera movement=%.4f,%.4f,%.4f position=%.4f,%.4f,%.4f\n", r,u,f,position.x,position.y,position.z);
+                }
+            }
+        };
+        host.viewportDetach = [](void* user) -> int {
+            static_cast<BaseEngine*>(user)->viewportGame.reset();
+            std::puts("ViewportStopped");
+            return 1;
+        };
+    }
     activeSession = std::make_unique<LoadedSession>();
-
-    // Присваивание по именам: робастно к порядку/числу полей EngineModuleHost (v3).
-    // editor=false -> хост ИГРЫ (провайдер, viewport*/setPlayMode остаются nullptr);
-    // editor=true  -> хост РЕДАКТОРА с прокси в игру (или nullptr, если backend недоступен,
-    //                 и тогда редактор сам уходит в заглушку HasViewport()==false).
-    auto fillHost = [&](EngineModuleHost& h, bool editor)
-    {
-        h = {};
-        h.version = ENGINE_MODULE_VERSION;
-        h.user = &exitRequested;
-        h.log = Log;
-        h.requestExit = Exit;
-        h.projectName = options.projectName.c_str();
-        h.projectFile = options.projectFile.c_str();
-        h.contentRoot = options.contentRoot.c_str();
-        if (editor)
-        {
-            h.viewportAttach = g_haveGame ? Proxy_ViewportAttach : nullptr;
-            h.viewportResize = g_haveGame ? Proxy_ViewportResize : nullptr;
-            h.viewportDetach = g_haveGame ? Proxy_ViewportDetach : nullptr;
-            h.setPlayMode = g_haveGame ? Proxy_SetPlayMode : nullptr;
-        }
-    };
-
-    // Порядок закрытия: РЕДАКТОР ПЕРВЫМ (его Stop шлёт viewportDetach через прокси, и это
-    // должно произойти, пока игра жива и swap chain на HWND редактора валиден), затем ИГРА,
-    // затем обнуление backend (gameUser становится висячим, но редактор уже мёртв).
-    // Универсально по Kind(): в Game-режиме activeSession сама и есть игра.
-    auto shutdownAll = [&]() -> bool
-    {
-        bool ok = true;
-        if (activeSession && activeSession->Kind() != ENGINE_MODULE_GAME)
-        {
-            ok = activeSession->Close() && ok;
-            activeSession.reset();
-        }
-        if (gameSession)
-        {
-            ok = gameSession->Close() && ok;
-            gameSession.reset();
-        }
-        if (activeSession) // Game-режим: activeSession == игра
-        {
-            ok = activeSession->Close() && ok;
-            activeSession.reset();
-        }
-        g_haveGame = false;
-        g_backend = {};
-        return ok;
-    };
-
     try
     {
-        if (options.mode == RuntimeMode::Editor)
-        {
-            // --- проход 1: игра (headless, без окна/основного swap chain внутри Game.dll) ---
-            EngineModuleHost hostGame{};
-            fillHost(hostGame, false);
-            const std::filesystem::path projectDir =
-                options.projectFile.empty()
-                    ? std::filesystem::path()
-                    : std::filesystem::path(options.projectFile).parent_path();
-            const std::filesystem::path gamePath =
-                (projectDir.empty() ? options.module.parent_path() : projectDir) / L"Game.dll";
-            if (std::filesystem::exists(gamePath))
-            {
-                gameSession = std::make_unique<LoadedSession>();
-                try
-                {
-                    gameSession->Open(gamePath, ENGINE_MODULE_GAME, hostGame);
-                }
-                catch (const std::exception& error)
-                {
-                    std::fprintf(stderr, "GameModuleLoadFailed: %s\n", error.what());
-                    gameSession.reset();
-                }
-            }
-            else
-            {
-                std::fprintf(stderr, "GameModuleNotFound: %ls (editor will degrade to no-viewport)\n",
-                             gamePath.c_str());
-            }
-
-            // --- вычитываем backend У ЖИВОЙ игры (gameUser существует после Open/Create) ---
-            if (gameSession && gameSession->IsStarted() && gameSession->TryGetGameBackend(g_backend))
-            {
-                g_haveGame = true;
-                std::puts("GameBackendAcquired");
-            }
-            else
-            {
-                g_haveGame = false;
-                g_backend = {};
-                std::puts("GameBackendUnavailable (editor degrades: no viewport / no play-mode)");
-            }
-
-            // --- проход 2: редактор, хост с прокси (или nullptr при !g_haveGame) ---
-            EngineModuleHost hostEditor{};
-            fillHost(hostEditor, true);
-            activeSession->Open(options.module, ENGINE_MODULE_EDITOR, hostEditor);
-        }
-        else
-        {
-            // Game-режим: одна игровая сессия, backend не нужен (редактора нет, прокси некому дёргать).
-            EngineModuleHost hostGame{};
-            fillHost(hostGame, false);
-            activeSession->Open(options.module, ENGINE_MODULE_GAME, hostGame);
-        }
-
+        activeSession->Open(options.module, options.mode == RuntimeMode::Game ? ENGINE_MODULE_GAME : ENGINE_MODULE_EDITOR, host);
         state = State::Playing;
-        if (!options.frames)
-            std::puts(
-                "Interactive stub: Enter = frame, r = reload editor, rg = reload game, b = build, br = build+reload, ls, find, import, info, mkdir, rm/del, mv, cp, cat, q = exit.");
+        if (!options.frames && options.mode != RuntimeMode::Editor) std::puts("Interactive stub: Enter = frame, r = reload, b = build, br = build+reload, ls, find, import, info, mkdir, rm/del, mv, cp, cat, q = exit.");
         auto previous = std::chrono::steady_clock::now();
         for (uint64_t frame = 0; !exitRequested && (!options.frames || frame < options.frames); ++frame)
         {
-            if (!options.frames)
+            if (!options.frames && options.mode != RuntimeMode::Editor)
             {
                 std::string command;
                 if (!std::getline(std::cin, command) || command == "q") break;
                 if (command == "r")
                 {
                     ReloadActiveModule();
-                    continue;
-                }
-                // --- [BACKEND] reload игры: прокси смотрят в g_backend, поэтому редактор НЕ
-                // перезагружается — он прозрачно подхватит новый gameUser. ЛОКАЛЬНЫЙ лимит:
-                // у редактора нет обратного канала host->editor, поэтому после reload игры
-                // вьюпорт не переприсоединяется сам (залипнет до перезапуска редактора/движка).
-                // Симметрично 'r' для редактора работает полностью: его Start поднимает UI-поток
-                // заново, showEvent шлёт ViewportAttach, и attach проходит по свежему backend.
-                if (command == "rg")
-                {
-                    if (options.mode != RuntimeMode::Editor || !gameSession)
-                    {
-                        std::puts("rg: not available (editor mode with a loaded game required)");
-                        continue;
-                    }
-                    g_haveGame = false;
-                    g_backend = {}; // прокси обязаны видеть мёртвый backend на время reload
-                    const auto gp = gameSession->OriginalPath();
-                    EngineModuleHost hostGame{};
-                    fillHost(hostGame, false);
-                    gameSession->Close();
-                    try
-                    {
-                        gameSession->Open(gp, ENGINE_MODULE_GAME, hostGame);
-                        if (gameSession->TryGetGameBackend(g_backend)) g_haveGame = true;
-                        std::puts("GameReloadSuccess");
-                    }
-                    catch (const std::exception& error)
-                    {
-                        g_haveGame = false;
-                        g_backend = {};
-                        std::fprintf(stderr, "GameReloadError: %s\n", error.what());
-                    }
                     continue;
                 }
                 if (command == "b")
@@ -703,6 +536,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
                     }
                     continue;
                 }
+
                 auto tokens = SplitCommandLine(command);
                 if (tokens.empty())
                 {
@@ -716,9 +550,9 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
                     for (const auto& f : files)
                     {
                         std::printf("  [%-7s] %s (%llu bytes)\n",
-                                    AssetTypeToString(f.type),
-                                    f.virtualPath.c_str(),
-                                    static_cast<unsigned long long>(f.sizeBytes));
+                            AssetTypeToString(f.type),
+                            f.virtualPath.c_str(),
+                            static_cast<unsigned long long>(f.sizeBytes));
                     }
                     continue;
                 }
@@ -730,8 +564,9 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
                         continue;
                     }
                     const std::string path = tokens[1];
-                    auto filterType = AssetType::Unknown;
+                    AssetType filterType = AssetType::Unknown;
                     std::string pattern;
+
                     if (tokens.size() >= 3)
                     {
                         const std::string& arg = tokens[2];
@@ -749,14 +584,15 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
                             pattern = arg;
                         }
                     }
+
                     const auto results = Vfs.FindFiles(path, filterType, pattern, true);
                     std::printf("[VFS] Found %zu file(s) in '%s':\n", results.size(), path.c_str());
                     for (const auto& f : results)
                     {
                         std::printf("  [%-7s] %s (%llu bytes)\n",
-                                    AssetTypeToString(f.type),
-                                    f.virtualPath.c_str(),
-                                    static_cast<unsigned long long>(f.sizeBytes));
+                            AssetTypeToString(f.type),
+                            f.virtualPath.c_str(),
+                            static_cast<unsigned long long>(f.sizeBytes));
                     }
                     continue;
                 }
@@ -860,8 +696,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
                     }
                     else
                     {
-                        std::fprintf(stderr, "[VFS] Failed to move '%s' to '%s'\n", tokens[1].c_str(),
-                                     tokens[2].c_str());
+                        std::fprintf(stderr, "[VFS] Failed to move '%s' to '%s'\n", tokens[1].c_str(), tokens[2].c_str());
                     }
                     continue;
                 }
@@ -878,8 +713,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
                     }
                     else
                     {
-                        std::fprintf(stderr, "[VFS] Failed to copy '%s' to '%s'\n", tokens[1].c_str(),
-                                     tokens[2].c_str());
+                        std::fprintf(stderr, "[VFS] Failed to copy '%s' to '%s'\n", tokens[1].c_str(), tokens[2].c_str());
                     }
                     continue;
                 }
@@ -906,41 +740,44 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             const auto now = std::chrono::steady_clock::now();
             const double dt = options.frames ? 1.0 / 60.0 : std::chrono::duration<double>(now - previous).count();
             previous = now;
-
-            // --- [FRAME ORDER] ---
-            if (options.mode == RuntimeMode::Editor)
+            if (activeSession && activeSession->IsStarted())
             {
-                // 1) Редактор: Update -> DrainCommands дёргает прокси (attach/resize/playmode),
-                //    меняя состояние Game ДО шага.
-                if (activeSession && activeSession->IsStarted()) activeSession->Update(dt);
-                // 2) Игра: StepEditorFrame применяет resize на границе кадра, тикает логику
-                //    (только в RUNNING) и рисует в активный (редакторский) набор целей.
-                if (gameSession && gameSession->IsStarted()) gameSession->Update(dt);
-                // 3) Overlay редактора (no-op, пока Qt не immediate-mode).
-                if (activeSession && activeSession->IsStarted()) activeSession->Overlay();
-            }
-            else
-            {
-                if (activeSession && activeSession->IsStarted())
+                activeSession->Update(dt);
+                if (viewportGame)
                 {
-                    activeSession->Update(dt);
-                    std::puts("EngineUpdate (stub)");
-                    std::puts("EngineRender (stub)");
+                    if (!viewportGame->RenderViewportFrame(static_cast<float>(dt)))
+                        throw std::runtime_error("Viewport rendering failed");
+                    if (options.frames || frame == 0) std::puts("EngineRender (viewport)");
                 }
                 else
                 {
-                    std::puts("EngineWaitingForModule (stub)");
+                    if (options.frames || options.mode != RuntimeMode::Editor || frame == 0)
+                    {
+                        std::puts("EngineUpdate (stub)");
+                        std::puts("EngineRender (stub)");
+                    }
                 }
+                if (options.mode == RuntimeMode::Editor) activeSession->Overlay();
+                if (options.frames || options.mode != RuntimeMode::Editor)
+                    std::puts(viewportGame ? "EngineFrameEnd (viewport)" : "EngineFrameEnd (stub)");
             }
+            else
+            {
+                std::puts("EngineWaitingForModule (stub)");
+            }
+            if (options.mode == RuntimeMode::Editor)
+                std::this_thread::sleep_until(now + std::chrono::milliseconds(16));
         }
     }
     catch (...)
     {
-        shutdownAll();
+        if (activeSession) activeSession->Close();
+        activeSession.reset();
         state = State::Ready;
         throw;
     }
-    const bool closed = shutdownAll();
+    const bool closed = activeSession ? activeSession->Close() : true;
+    activeSession.reset();
     state = State::Ready;
     return closed ? 0 : 1;
 }
@@ -948,20 +785,14 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
 void BaseEngine::Stop() noexcept
 {
     // While a callback is on the stack only request exit, never tear it down.
-    if (state == State::Playing)
-    {
-        exitRequested = true;
-        return;
-    }
+    if (state == State::Playing) { exitRequested = true; return; }
     if (state == State::New || state == State::Stopped) return;
-    // Страховка: в нормальном и исключительном путях Play уже вызвал shutdownAll, поэтому
-    // activeSession здесь, как правило, пуст. game-сессия локальна Play и закрыта в нём же
-    // (shutdownAll или RAII), сюда не попадает — членом BaseEngine она не является.
     if (activeSession)
     {
         activeSession->Close();
         activeSession.reset();
     }
+    viewportGame.reset();
     Resources.DeInitialize();
     Resources.SetVFS(nullptr);
     Vfs.UnmountAll();

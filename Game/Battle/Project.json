@@ -1,0 +1,6 @@
+{
+  "name": "Battle",
+  "module": "Game.dll",
+  "content": "Content",
+  "preview": "Battle"
+}

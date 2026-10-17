@@ -353,7 +353,7 @@ void Game::DestroyResources()
     bEditorAttached = false;
     ReleaseSwapChainResources();
 
-    if (SwapChain)
+    if (SwapChain && !bEmbedded)
     {
         SwapChain->SetFullscreenState(FALSE, nullptr);
     }
@@ -374,6 +374,17 @@ void Game::DestroyResources()
 
 bool Game::Initialize()
 {
+    return InitializeInternal(nullptr, 0, 0);
+}
+
+bool Game::InitializeViewport(HWND window, int width, int height)
+{
+    if (!IsWindow(window) || width <= 0 || height <= 0) return false;
+    return InitializeInternal(window, width, height);
+}
+
+bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int requestedHeight)
+{
     if (bInitialized)
     {
         return true;
@@ -386,7 +397,9 @@ bool Game::Initialize()
         return false;
     };
 
-    DisplayPtr = std::make_unique<Display>();
+    bEmbedded = externalWindow != nullptr;
+    DisplayPtr = bEmbedded ? std::make_unique<Display>(externalWindow, requestedWidth, requestedHeight)
+                          : std::make_unique<Display>();
     if (!DisplayPtr->GetHwnd())
     {
         return fail("window creation");
@@ -395,13 +408,16 @@ bool Game::Initialize()
 
     FirstPlayer = std::make_unique<Player>();
     FirstPlayer->SetGamePointer(this);
-    InputDevicePtr = std::make_unique<InputDevice>(this);
+    if (!bEmbedded) InputDevicePtr = std::make_unique<InputDevice>(this);
 
     const HWND hWnd = DisplayPtr->GetHwnd();
-    ShowWindow(hWnd, SW_SHOW);
-    SetForegroundWindow(hWnd);
-    SetFocus(hWnd);
-    ShowCursor(true);
+    if (!bEmbedded)
+    {
+        ShowWindow(hWnd, SW_SHOW);
+        SetForegroundWindow(hWnd);
+        SetFocus(hWnd);
+        ShowCursor(true);
+    }
 
     const int width = std::max(DisplayPtr->GetWidth(), 1);
     const int height = std::max(DisplayPtr->GetHeight(), 1);
@@ -417,7 +433,7 @@ bool Game::Initialize()
     }
     if (GetFileAttributesW(ShaderPath().c_str()) == INVALID_FILE_ATTRIBUTES)
     {
-        MessageBox(hWnd, L"EngineContent/Shaders/RotatedFigure.hlsl was not found. Check the deployed engine content.",
+        if (!bEmbedded) MessageBox(hWnd, L"EngineContent/Shaders/RotatedFigure.hlsl was not found. Check the deployed engine content.",
                    L"Missing shader", MB_OK);
         return fail("shader files not found");
     }
@@ -2366,6 +2382,24 @@ void Game::Run()
         Context->ClearState();
         Context->Flush();
     }
+}
+
+bool Game::RenderViewportFrame(float deltaTime)
+{
+    if (!bEmbedded || !bInitialized || ExitCode != 0) return false;
+    bRunning = true;
+    ApplyPendingResize();
+    if (!bRunning) return false;
+    if (bMinimized) return true;
+    ++FrameIndex;
+    Stats.Reset();
+    UpdateFrame(std::clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds));
+    BeginGpuTimer();
+    RenderFrame();
+    EndGpuTimer();
+    EndFrame();
+    LastFrameStats = Stats;
+    return bRunning;
 }
 
 void Game::OnWindowResized(int clientWidth, int clientHeight, bool minimized)

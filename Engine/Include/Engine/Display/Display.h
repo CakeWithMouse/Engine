@@ -9,6 +9,8 @@ class Display
 public:
     /** ScreenW/ScreenH is the client area (the drawable size), not the outer window size. */
     Display(int ScreenW = 1000, int ScreenH = 500);
+    // Borrow a host-owned window. Never subclass, destroy, focus or modify its user data.
+    Display(HWND externalWindow, int width, int height);
     ~Display();
     Display(const Display&) = delete;
     Display& operator=(const Display&) = delete;
@@ -33,6 +35,7 @@ private:
     HINSTANCE hInstance = GetModuleHandle(nullptr);
 
     HWND hWnd = nullptr;
+    bool ownsWindow = true;
     WNDCLASSEX wc = {};
     RECT windowRect = {};
 

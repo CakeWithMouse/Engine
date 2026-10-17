@@ -1,5 +1,7 @@
-﻿#pragma once
+#pragma once
 #include <QWidget>
+#include <QSet>
+#include <QPointF>
 
 class EditorQtHost;
 
@@ -9,6 +11,10 @@ public:
     explicit ViewportWidget(EditorQtHost* host, QWidget* parent = nullptr);
 
 protected:
+    bool event(QEvent* event) override;
+    QSet<int> keys_;
+    QPointF lastMouse_;
+    bool looking_ = false;
     QPaintEngine* paintEngine() const override;
     void showEvent(QShowEvent* e) override;
     void hideEvent(QHideEvent* e) override;
