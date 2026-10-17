@@ -21,6 +21,8 @@
   - **Шаг 4 (коммит `4e47c36`):** `VfsShaderInclude` и `CompileFromFile` вынесены в `Engine/Source/Render/ShaderCompiler.cpp`. Публичный заголовок `ShaderCompiler.h` очищен от `<Windows.h>` и включений из `Source/`.
   - **Шаг 5 (коммит `df6ce7b`):** Проверка результата обоих вызовов `WideCharToMultiByte`; при ошибке выдаётся диагностический лог и возвращается `E_FAIL` вместо усечения wchar в char.
   - **Шаг 6 (коммит `5f86ab7`):** В `EngineTests.cpp` добавлены тесты вложенной цепочки `#include` (`a.hlsl -> sub/b.hlsli -> ../c.hlsli`) и проверка ошибки/лога при отсутствующем файле заголовка.
+- [x] **Мерж main (коммит `bb5203a merge: main into refactor/vfs-textures-shaders`)**
+  - Актуальный `main` влит в ветку без конфликтов; сохранена полная работоспособность всех подсистем и тестов.
 
 ---
 
@@ -82,9 +84,30 @@
 ### Объёмы файлов (`wc -l` <= ~500)
 - `Engine/Source/Render/TextureLoader.cpp`: 101 строка
 - `Engine/Include/Engine/Render/ShaderCompiler.h`: 32 строки
-- `Engine/Source/Render/ShaderCompiler.cpp`: 207 строк
-- `Engine/Source/Resources/VfsRead.h`: 16 строк
-- `Engine/Source/Resources/VfsRead.cpp`: 205 строк
-- `Engine/Include/Engine/Base/Base.h`: 56 строк
-- `Engine/Source/Base/Base.cpp`: 823 строки (модифицировано 6 строк в части VFS)
-- `Engine/tests/EngineTests.cpp`: 568 строк
+- `Engine/Source/Render/ShaderCompiler.cpp`: 206 строк
+- `Engine/Source/Resources/VfsRead.h`: 15 строк
+- `Engine/Source/Resources/VfsRead.cpp`: 204 строки
+- `Engine/Include/Engine/Base/Base.h`: 57 строк
+- `Engine/Source/Base/Base.cpp`: 841 строка (модифицировано 6 строк в части VFS)
+- `Engine/tests/EngineTests.cpp`: 573 строки
+
+---
+
+## 6. Мерж main (задача 034e)
+- **Хеш источника (main / origin/main):** `b864afcebe0cfb4ba19d46b023f4ed4e3df796c4`
+- **Список пришедших коммитов:**
+  - `b864afc Startup editor without runtime game` (автор: Mysar)
+- **Разрешённые конфликты:**
+  - Автоматическое 3-way слияние без конфликтов.
+  - В `Engine/Engine.vcxproj` объединены: `<ClInclude Include="Include\Engine\Runtime\ViewportSession.h" />` (из `main`) и `<ClCompile>` записи для `ShaderCompiler.cpp` и `VfsRead.cpp` (из ветки).
+  - В `Engine/Include/Engine/Base/Base.h` сохранены `class ViewportSession;`, `std::unique_ptr<ViewportSession> viewportSession;` (из `main`) и `VirtualFileSystem& Vfs;` (из ветки).
+  - В `Engine/Source/Base/Base.cpp` сохранён контроль жизненного цикла `viewportSession` (из `main`) и инициализация `Vfs(VfsRead::GetVFS())`, `#include "../Resources/VfsRead.h"`, `Vfs.UnmountAll()` (из ветки).
+  - В `Engine/tests/EngineTests.cpp` сохранены тесты `game.SetSimulationEnabled` в `ParticleComponentModes` (из `main`) и тест цепочки `#include` VFS в `VirtualFileSystemTests` (из ветки).
+- **Результаты проверок после мержа:**
+  - Сборка Debug: 0 ошибок, 0 новых warnings.
+  - Сборка Release: 0 ошибок, 0 новых warnings.
+  - `Engine\tests\run.ps1`: **10/10 PASS**.
+  - `Engine\tests\run-runtime.ps1`: **22/22 PASS**.
+  - `Game\tests\run-games.ps1 -Configuration Debug`: **ALL PASS**.
+  - `Game\tests\run-games.ps1 -Configuration Release`: **ALL PASS**.
+  - Проверка grep `imgui|Qt|QFile`: **0 совпадений**.
