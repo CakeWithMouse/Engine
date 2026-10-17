@@ -2,7 +2,10 @@
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
+#include <Engine/Render/MeshSimplifier.h>
+#include <Engine/Render/MeshValidation.h>
 #include <Engine/Render/ShaderCompiler.h>
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <functional>
@@ -269,6 +272,151 @@ void QuitMessage()
     CHECK(game.GetExitCode() == 17);
 }
 
+/** A sphere of quads: enough vertices to simplify, and every normal must point away from the centre. */
+MeshLodData MakeTestSphere(int segments, float radius)
+{
+    MeshLodData mesh;
+    for (int ring = 0; ring <= segments; ++ring)
+    {
+        const float v = static_cast<float>(ring) / static_cast<float>(segments);
+        const float phi = v * 3.14159265f;
+        for (int slice = 0; slice <= segments; ++slice)
+        {
+            const float u = static_cast<float>(slice) / static_cast<float>(segments);
+            const float theta = u * 6.2831853f;
+            const float x = std::sin(phi) * std::cos(theta);
+            const float y = std::cos(phi);
+            const float z = std::sin(phi) * std::sin(theta);
+            MeshVertex vertex;
+            vertex.Position = XMFLOAT4(x * radius, y * radius + radius, z * radius, 1.0f);
+            vertex.Normal = XMFLOAT4(x, y, z, 0.0f);
+            vertex.TexCoord = XMFLOAT4(u, v, 0.0f, 0.0f);
+            mesh.Vertices.push_back(vertex);
+        }
+    }
+    const uint32_t stride = static_cast<uint32_t>(segments + 1);
+    for (int ring = 0; ring < segments; ++ring)
+    {
+        for (int slice = 0; slice < segments; ++slice)
+        {
+            const uint32_t topLeft = static_cast<uint32_t>(ring) * stride + static_cast<uint32_t>(slice);
+            const uint32_t bottomLeft = topLeft + stride;
+            mesh.Indices.insert(mesh.Indices.end(),
+                                {topLeft, bottomLeft, topLeft + 1, topLeft + 1, bottomLeft, bottomLeft + 1});
+        }
+    }
+    return mesh;
+}
+
+void MeshSimplification()
+{
+    const MeshLodData source = MakeTestSphere(24, 2.0f);
+    const int sourceTriangles = static_cast<int>(source.Indices.size() / 3);
+
+    MeshSimplifySettings settings;
+    settings.TargetRatio = 0.2f;
+    settings.TargetError = 0.2f;
+    MeshSimplifyResult result;
+    const MeshLodData simplified = SimplifyMesh(source, settings, &result);
+
+    CHECK(!simplified.Indices.empty());
+    CHECK(simplified.Indices.size() % 3 == 0);
+    CHECK(result.SourceTriangles == sourceTriangles);
+    // Simplifying must actually remove triangles, and never add any.
+    CHECK(result.ResultTriangles < sourceTriangles / 2);
+    CHECK(result.ResultTriangles > 0);
+
+    for (uint32_t index : simplified.Indices)
+    {
+        CHECK(index < simplified.Vertices.size());
+    }
+
+    // The rebuilt normals must still point outwards: a sign error here turns a model black.
+    const MeshBounds bounds = ComputeMeshBounds(simplified);
+    int outward = 0;
+    for (const MeshVertex& vertex : simplified.Vertices)
+    {
+        const float dx = vertex.Position.x - bounds.Center.x;
+        const float dy = vertex.Position.y - bounds.Center.y;
+        const float dz = vertex.Position.z - bounds.Center.z;
+        const float length = std::sqrt(dx * dx + dy * dy + dz * dz);
+        CHECK(length > 0.0001f);
+        const float normalLength = std::sqrt(vertex.Normal.x * vertex.Normal.x +
+                                             vertex.Normal.y * vertex.Normal.y +
+                                             vertex.Normal.z * vertex.Normal.z);
+        Near(normalLength, 1.0f);
+        if ((vertex.Normal.x * dx + vertex.Normal.y * dy + vertex.Normal.z * dz) / length > 0.5f)
+        {
+            ++outward;
+        }
+    }
+    CHECK(outward > static_cast<int>(simplified.Vertices.size()) * 9 / 10);
+
+    // The engine draws with culling off, so nothing forces a model to wind every face the same
+    // way - the procedural vehicles do not. Normals must come out of the model's own normals,
+    // not out of the winding, or half the mesh ends up lit from the inside and renders black.
+    MeshLodData mixedWinding = source;
+    for (size_t triangle = 0; triangle * 3 + 2 < mixedWinding.Indices.size(); triangle += 2)
+    {
+        std::swap(mixedWinding.Indices[triangle * 3 + 1], mixedWinding.Indices[triangle * 3 + 2]);
+    }
+    const MeshLodData mixedResult = SimplifyMesh(mixedWinding, settings);
+    CHECK(!mixedResult.Vertices.empty());
+
+    const MeshBounds mixedBounds = ComputeMeshBounds(mixedResult);
+    int mixedOutward = 0;
+    for (const MeshVertex& vertex : mixedResult.Vertices)
+    {
+        const float dx = vertex.Position.x - mixedBounds.Center.x;
+        const float dy = vertex.Position.y - mixedBounds.Center.y;
+        const float dz = vertex.Position.z - mixedBounds.Center.z;
+        if (vertex.Normal.x * dx + vertex.Normal.y * dy + vertex.Normal.z * dz > 0.0f)
+        {
+            ++mixedOutward;
+        }
+    }
+    CHECK(mixedOutward > static_cast<int>(mixedResult.Vertices.size()) * 9 / 10);
+
+    // A mesh that cannot be simplified must come back empty rather than broken.
+    MeshLodData broken;
+    broken.Vertices.resize(3);
+    broken.Indices = {0, 1};
+    CHECK(SimplifyMesh(broken, settings).Indices.empty());
+}
+
+void MeshValidationRules()
+{
+    const MeshLodData good = MakeTestSphere(8, 1.6f);
+    const MeshValidationReport report = ValidateMesh(good);
+    CHECK(report.IsUsable());
+    CHECK(report.Triangles > 0);
+    CHECK(report.bHasTexCoords);
+    CHECK(!report.ToText("sphere").empty());
+
+    // A model exported in centimetres and left hanging above the ground.
+    MeshLodData wrongScale = good;
+    for (MeshVertex& vertex : wrongScale.Vertices)
+    {
+        vertex.Position.x *= 100.0f;
+        vertex.Position.y = vertex.Position.y * 100.0f + 50.0f;
+        vertex.Position.z *= 100.0f;
+    }
+    const MeshValidationReport scaleReport = ValidateMesh(wrongScale);
+    CHECK(!scaleReport.IsUsable());
+    CHECK(scaleReport.Problems.size() >= 2); // size and pivot
+
+    // Missing normals must be reported, not silently drawn black.
+    MeshLodData noNormals = good;
+    for (MeshVertex& vertex : noNormals.Vertices)
+    {
+        vertex.Normal = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+    }
+    CHECK(!ValidateMesh(noNormals).IsUsable());
+
+    MeshLodData empty;
+    CHECK(!ValidateMesh(empty).IsUsable());
+}
+
 int main()
 {
     const std::pair<const char*, std::function<void()>> tests[] = {
@@ -276,7 +424,8 @@ int main()
         {"transform hierarchy and cache", TransformHierarchy}, {"unregister hierarchy and instances", UnregisterHierarchyAndInstances},
         {"frame light snapshot", LightSnapshot}, {"forward/deferred shader variants", ShaderVariants},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
-        {"WM_QUIT exit code", QuitMessage}
+        {"WM_QUIT exit code", QuitMessage},
+        {"mesh simplification", MeshSimplification}, {"mesh validation rules", MeshValidationRules}
     };
     int failures = 0;
     for (const auto& test : tests)

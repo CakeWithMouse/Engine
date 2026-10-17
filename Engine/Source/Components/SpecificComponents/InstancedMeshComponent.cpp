@@ -5,6 +5,8 @@
 #include <cstring>
 #include <functional>
 #include <iostream>
+#include <Engine/Render/MeshSimplifier.h>
+#include <Engine/Render/MeshValidation.h>
 #include <Engine/Render/TextureLoader.h>
 #include <Engine/Resources/Paths.h>
 
@@ -18,6 +20,19 @@ namespace
         DirectX::XMFLOAT4 AtlasParams;
         DirectX::XMFLOAT4 ModelParams;
     };
+
+    /**
+     * A stable 0..1 value per instance. Stable matters: the unit keeps its place in the shadow
+     * fade from frame to frame, so the shadows thin out instead of flickering.
+     */
+    float StableUnitFraction(size_t index)
+    {
+        uint32_t hash = static_cast<uint32_t>(index) * 2654435761u;
+        hash ^= hash >> 15;
+        hash *= 2246822519u;
+        hash ^= hash >> 13;
+        return static_cast<float>(hash & 0xFFFFFFu) / 16777215.0f;
+    }
 
     const glm::vec4 LodDebugColors[InstancedMeshComponent::MaxLodCount] =
     {
@@ -90,6 +105,12 @@ bool InstancedMeshComponent::SetLod(int level, MeshLodData data)
         }
         MeshRadius = std::sqrt(maxRadiusSq);
         TotalIndexCount = static_cast<int>(Lods[0].Data.Indices.size());
+
+        if (bValidateAsset)
+        {
+            const MeshValidationReport report = ValidateMesh(Lods[0].Data);
+            std::cout << report.ToText(AssetName.empty() ? std::string("LOD0") : AssetName) << std::endl;
+        }
     }
 
     if (GamePtr && GamePtr->GetDevice())
@@ -165,7 +186,8 @@ void InstancedMeshComponent::BuildImpostorAtlas()
                                               minPitch, pitchStep);
     constants.ModelParams = DirectX::XMFLOAT4(Impostor.GetBounds().Radius,
                                               Impostor.GetBounds().Center.y,
-                                              Impostor.GetTileInset(), 0.0f);
+                                              static_cast<float>(settings.TileSize),
+                                              Impostor.GetMaxMipLevel());
 
     D3D11_BUFFER_DESC bufferDesc = {};
     bufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -300,12 +322,77 @@ void InstancedMeshComponent::CreateBuffers(ID3D11Device* Device)
         }
     }
 
+    BuildAutoLods();
+
     for (int level = 0; level < LodCount; ++level)
     {
         CreateLodBuffers(Device, Lods[level]);
     }
 
     BuildImpostorAtlas();
+}
+
+void InstancedMeshComponent::SetAutoLod(const std::vector<float>& triangleRatios)
+{
+    AutoLodRatios = triangleRatios;
+    bAutoLodBuilt = false;
+}
+
+void InstancedMeshComponent::SetAssetValidation(bool enabled, const std::string& modelName)
+{
+    bValidateAsset = enabled;
+    AssetName = modelName;
+}
+
+void InstancedMeshComponent::BuildAutoLods()
+{
+    if (bAutoLodBuilt || AutoLodRatios.empty() || LodCount == 0 || Lods[0].Data.Indices.empty())
+    {
+        return;
+    }
+    bAutoLodBuilt = true;
+
+    const std::string name = AssetName.empty() ? std::string("mesh") : AssetName;
+    for (size_t step = 0; step < AutoLodRatios.size(); ++step)
+    {
+        const int level = static_cast<int>(step) + 1;
+        if (level >= MaxLodCount)
+        {
+            break;
+        }
+        // A level the designer supplied is never replaced.
+        if (level < LodCount && !Lods[level].Data.Indices.empty())
+        {
+            continue;
+        }
+
+        MeshSimplifySettings settings;
+        settings.TargetRatio = AutoLodRatios[step];
+        // The last generated level only has to keep the silhouette, so it may lose topology.
+        settings.bAllowSloppy = step + 1 == AutoLodRatios.size();
+
+        MeshSimplifyResult result;
+        MeshLodData simplified = SimplifyMesh(Lods[0].Data, settings, &result);
+        if (simplified.Indices.empty())
+        {
+            std::cout << "auto-lod " << name << " LOD" << level << ": could not be built from LOD0." << std::endl;
+            break;
+        }
+
+        std::cout << "auto-lod " << name << " LOD" << level << ": " << result.SourceTriangles << " -> "
+                  << result.ResultTriangles << " triangles (target " << result.TargetTriangles
+                  << ", error " << result.Error << ", silhouette drift "
+                  << result.SilhouetteDrift * 100.0f << "%"
+                  << (result.bUsedSloppy ? ", sloppy" : "") << ")" << std::endl;
+        if (result.SilhouetteDrift > 0.1f)
+        {
+            std::cout << "  warning: the generated level lost a part of the silhouette. A thin feature "
+                         "(a gun, an antenna) does not survive simplification; supply this level by hand "
+                         "if it has to stay." << std::endl;
+        }
+
+        SetLod(level, std::move(simplified));
+    }
 }
 
 int InstancedMeshComponent::SelectLod(float distance, float screenHeightPixels) const
@@ -365,8 +452,12 @@ void InstancedMeshComponent::BuildVisibleSets()
     const float lightLength = glm::length(lightDirection);
     lightDirection = lightLength > 0.0001f ? lightDirection / lightLength : glm::vec3(0.0f, -1.0f, 0.0f);
 
-    for (const MeshInstance& instance : Instances)
+    const float shadowFadeStart = ShadowDistance * (1.0f - ShadowDistanceFade);
+    const float shadowFadeStartSq = shadowFadeStart * shadowFadeStart;
+
+    for (size_t instanceIndex = 0; instanceIndex < Instances.size(); ++instanceIndex)
     {
+        const MeshInstance& instance = Instances[instanceIndex];
         if (!instance.bVisible)
         {
             continue;
@@ -392,7 +483,21 @@ void InstancedMeshComponent::BuildVisibleSets()
             }
         }
 
-        const bool bWantsShadow = bCastsShadow && (shadowDistanceSq <= 0.0f || distanceSq <= shadowDistanceSq);
+        // Casters thin out towards the limit instead of stopping at it: a hard limit is a circle
+        // around the camera, and on a dense field it shows up as a ring of unshadowed ground.
+        bool bWantsShadow = bCastsShadow;
+        if (bWantsShadow && shadowDistanceSq > 0.0f)
+        {
+            if (distanceSq > shadowDistanceSq)
+            {
+                bWantsShadow = false;
+            }
+            else if (distanceSq > shadowFadeStartSq && ShadowDistance > shadowFadeStart)
+            {
+                const float keep = (ShadowDistance - std::sqrt(distanceSq)) / (ShadowDistance - shadowFadeStart);
+                bWantsShadow = StableUnitFraction(instanceIndex) < keep;
+            }
+        }
         if (!bInsideFrustum && !bWantsShadow)
         {
             ++CulledInstances;
@@ -433,21 +538,30 @@ void InstancedMeshComponent::BuildVisibleSets()
         InstData data;
         data.World = MakeInstanceMatrix(instance.Position, instance.Yaw, instance.Scale);
 
-        auto pushColor = [&](int targetLevel, float fade)
+        // The dither patterns are locked to the screen, and units stand on a regular grid: with one
+        // shared phase whole rows of the formation fall into the same cells of the pattern and
+        // drop out together, which reads as stripes across the field. Each unit gets its own phase.
+        const uint32_t ditherHash = static_cast<uint32_t>(StableUnitFraction(instanceIndex) * 16777215.0f);
+        const DirectX::XMFLOAT2 ditherPhase(static_cast<float>(ditherHash & 3u),
+                                            static_cast<float>((ditherHash >> 2) & 3u));
+
+        // The pair shares one dither pattern and splits it: the level that fades in takes the
+        // pixels the other one drops, so together they always cover the whole unit.
+        auto pushColor = [&](int targetLevel, float fade, bool bFadingIn)
         {
             const glm::vec4 color = bLodDebugColors ? LodDebugColors[std::min(targetLevel, MaxLodCount - 1)] : instance.Color;
             data.ObjectColor = DirectX::XMFLOAT4(color.x, color.y, color.z, color.w);
-            data.Params = DirectX::XMFLOAT4(fade, 0.0f, 0.0f, 0.0f);
+            data.Params = DirectX::XMFLOAT4(fade, bFadingIn ? 1.0f : 0.0f, ditherPhase.x, ditherPhase.y);
             LodLevel& bucket = targetLevel == impostorLevelIndex ? ImpostorLevel : Lods[targetLevel];
             bucket.ColorStaging.push_back(data);
         };
 
         if (bInsideFrustum)
         {
-            pushColor(level, levelFade);
+            pushColor(level, levelFade, false);
             if (fadePartner >= 0 && fadePartner != level)
             {
-                pushColor(fadePartner, partnerFade);
+                pushColor(fadePartner, partnerFade, true);
             }
             ++DrawnInstances;
         }
@@ -787,4 +901,13 @@ void InstancedMeshComponent::RenderShadow(ID3D11DeviceContext* context, const Sh
 
     ID3D11ShaderResourceView* nullSRV = nullptr;
     context->VSSetShaderResources(0, 1, &nullSRV);
+}
+
+bool InstancedMeshComponent::DumpImpostorAtlas(const std::string& pathPrefix)
+{
+    if (GamePtr == nullptr || !Impostor.IsValid())
+    {
+        return false;
+    }
+    return Impostor.Dump(*GamePtr, pathPrefix);
 }

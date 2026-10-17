@@ -42,16 +42,21 @@ int main(int argc, char** argv)
             if (argument == "--no-impostors") { settings.Impostors = false; continue; }
             if (argument == "--detail" && i + 1 < argc) { settings.Detail = ParseInt(argv[++i], "--detail"); continue; }
             if (argument == "--dump-shadows") { settings.DumpShadows = true; continue; }
+            if (argument == "--dump-impostors") { settings.DumpImpostors = true; continue; }
             if (argument == "--sun" && i + 1 < argc) { settings.SunElevation = static_cast<float>(ParseInt(argv[++i], "--sun")); continue; }
+            if (argument == "--shadow-distance" && i + 1 < argc) { settings.ShadowDistance = static_cast<float>(ParseInt(argv[++i], "--shadow-distance")); continue; }
             if (argument == "--scenery" && i + 1 < argc) { settings.SceneryCount = ParseInt(argv[++i], "--scenery"); continue; }
             if (argument == "--types" && i + 1 < argc) { settings.VehicleTypes = ParseInt(argv[++i], "--types"); continue; }
             if (argument == "--no-baked-shadows") { settings.BakedShadows = false; continue; }
             if (argument == "--sprite-px" && i + 1 < argc) { settings.SpritePixels = static_cast<float>(ParseInt(argv[++i], "--sprite-px")); continue; }
             if (argument == "--lod-debug") { settings.LodDebugColors = true; continue; }
+            if (argument == "--lock-camera") { settings.LockCamera = true; continue; }
+            if (argument == "--auto-lod") { settings.AutoLod = true; continue; }
+            if (argument == "--validate") { settings.ValidateAssets = true; continue; }
             throw std::runtime_error(
                 "Usage: Battle.exe [--units N] [--types N] [--spacing N] [--camera N] [--frames N] [--detail N]\n"
-                "        [--scenery N] [--sprite-px N] [--sun N] [--no-shadows] [--no-baked-shadows]\n"
-                "        [--no-impostors] [--forward] [--static] [--lod-debug] [--dump-shadows] [--smoke]");
+                "        [--scenery N] [--sprite-px N] [--sun N] [--shadow-distance N] [--no-shadows] [--no-baked-shadows]\n"
+                "        [--no-impostors] [--forward] [--static] [--lod-debug] [--lock-camera] [--auto-lod] [--validate] [--dump-shadows] [--dump-impostors] [--smoke]");
         }
         if (settings.UnitCount < 1) throw std::runtime_error("--units must be positive");
         if (smoke && frameLimit == 0) frameLimit = 30;

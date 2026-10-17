@@ -68,7 +68,9 @@ struct InstData
 {
     DirectX::XMFLOAT4X4 World;
     DirectX::XMFLOAT4 ObjectColor;
-    // x = fade of this instance in a LOD transition (1 = fully visible), yzw reserved.
+    // x = fade of this instance in a LOD transition (1 = fully visible),
+    // y = 1 on the level that fades in, so the pair splits one dither pattern,
+    // zw = this unit's own phase in the dither pattern, in pixels.
     DirectX::XMFLOAT4 Params{1.0f, 0.0f, 0.0f, 0.0f};
 };
 

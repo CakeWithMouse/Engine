@@ -40,6 +40,8 @@ foreach ($scene in @('triangles','cube')) {
 Invoke-CheckedProcess (Join-Path $output 'BasicExamples/BasicExamples.exe') '--smoke --scene unknown' 1
 # Mass units: a short measured run and rejection of an invalid unit count.
 Invoke-CheckedProcess (Join-Path $output 'Battle/Battle.exe') '--units 5000 --frames 60'
+# Detail levels built from LOD0 instead of supplied, with the asset report switched on.
+Invoke-CheckedProcess (Join-Path $output 'Battle/Battle.exe') '--units 2000 --auto-lod --validate --frames 40 --lock-camera'
 Invoke-CheckedProcess (Join-Path $output 'Battle/Battle.exe') '--units 0 --smoke' 1
 if (Test-Path -LiteralPath (Join-Path $output 'Katamari/Katamari.exe')) {
     Invoke-CheckedProcess (Join-Path $output 'Katamari/Katamari.exe') '--smoke'

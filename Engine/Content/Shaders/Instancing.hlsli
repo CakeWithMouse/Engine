@@ -7,7 +7,7 @@ struct InstData
 {
     float4x4 World;
     float4 Color;
-    float4 Params; // x = LOD transition fade, 1 = fully visible
+    float4 Params; // x = LOD transition fade, 1 = fully visible; y = 1 on the level that fades in
 };
 
 /** Ordered 4x4 dither threshold for the pixel. */
@@ -25,15 +25,33 @@ float DitherThreshold(float2 pixelPosition)
 }
 
 /**
+ * The same pattern read along the other axis. Two tests on one pixel (coverage and cross-fade)
+ * must not use the same ordering, or the pixels one keeps are the ones the other throws away.
+ */
+float DitherThresholdCrossed(float2 pixelPosition)
+{
+    return DitherThreshold(float2(pixelPosition.y, pixelPosition.x) + 2.0f);
+}
+
+/**
  * Cross-fade between two detail levels without alpha blending: both levels are drawn and each
  * pixel keeps only one of them. Opaque geometry stays opaque, so the G-buffer and depth stay valid.
+ *
+ * The two levels must split the pixels, not test the same threshold independently: with the same
+ * test each of them drops the pixels above its own fade, and in the middle of the band half the
+ * pixels are dropped twice. On a field of small units that shows up as a bright ring of ground at
+ * every switching distance. The level that fades in therefore takes exactly the pixels the other
+ * one gives up.
  */
-void ClipByFade(float fade, float2 pixelPosition)
+void ClipByFade(float fade, float fadeIn, float2 pixelPosition)
 {
-    if (fade < 0.999f)
+    if (fade >= 0.999f)
     {
-        clip(fade - DitherThreshold(pixelPosition));
+        return;
     }
+
+    const float threshold = DitherThreshold(pixelPosition);
+    clip(fadeIn > 0.5f ? threshold - (1.0f - fade) : fade - threshold);
 }
 
 #endif

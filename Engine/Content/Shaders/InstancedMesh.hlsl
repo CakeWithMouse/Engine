@@ -22,7 +22,8 @@ struct PS_IN
     float3 normal : NORMAL;
     float2 texCoord : TEXCOORD0;
     float3 worldPos : TEXCOORD1;
-    float fade : TEXCOORD2;
+    // xy transition weight and direction, zw this unit's own phase in the dither pattern.
+    float4 fade : TEXCOORD2;
     float4 color : COLOR;
 };
 
@@ -42,7 +43,7 @@ PS_IN VSMain(VS_IN input, uint instanceId : SV_InstanceID)
     output.normal = normalize(mul(input.normal, (float3x3)instance.World));
     output.texCoord = input.texCoord;
     output.color = ObjectColor * instance.Color;
-    output.fade = instance.Params.x;
+    output.fade = instance.Params;
     return output;
 }
 
@@ -54,7 +55,7 @@ float4 SampleBaseColor(PS_IN input)
 #if defined(DEFERRED_GBUFFER)
 GBufferOut PSMain(PS_IN input)
 {
-    ClipByFade(input.fade, input.pos.xy);
+    ClipByFade(input.fade.x, input.fade.y, input.pos.xy + input.fade.zw);
     float4 baseColor = SampleBaseColor(input);
     MaterialLighting material = MakeMaterialLighting(UnitSpecularWeight, UnitAmbientModel);
     return EncodeGBuffer(baseColor.rgb, input.normal, input.worldPos, material);
@@ -62,7 +63,7 @@ GBufferOut PSMain(PS_IN input)
 #else
 float4 PSMain(PS_IN input) : SV_Target
 {
-    ClipByFade(input.fade, input.pos.xy);
+    ClipByFade(input.fade.x, input.fade.y, input.pos.xy + input.fade.zw);
     float4 baseColor = SampleBaseColor(input);
     MaterialLighting material = MakeMaterialLighting(UnitSpecularWeight, UnitAmbientModel);
     float3 litColor = ComputeSceneLighting(baseColor.rgb, normalize(input.normal), input.worldPos, material);

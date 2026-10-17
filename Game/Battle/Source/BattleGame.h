@@ -19,7 +19,7 @@ public:
     struct Settings
     {
         int UnitCount = 30000;
-        float Spacing = 7.0f;
+        float Spacing = 8.0f;
         // Distance from the camera to the centre of the field; 0 picks it from the field size.
         float CameraRadius = 0.0f;
         // Camera pitch above the horizon, degrees.
@@ -41,8 +41,19 @@ public:
         bool BakedShadows = true;
         // Sun elevation above the horizon, degrees. Low sun makes shadows long and easy to check.
         float SunElevation = 56.0f;
+        // Past this distance from the camera a unit stops casting a shadow.
+        float ShadowDistance = 900.0f;
         // Diagnostics: writes the shadow maps to BMP files after a few frames.
         bool DumpShadows = false;
+        // Diagnostics: writes the baked sprite atlas to BMP files after a few frames.
+        bool DumpImpostors = false;
+        // Ignores the mouse and the keyboard, so two runs of the same scene frame it identically.
+        // Screenshots taken for comparison are only readable with this on.
+        bool LockCamera = false;
+        // Supply only LOD0 and let the engine build the coarser levels from it.
+        bool AutoLod = false;
+        // Check LOD0 against the model contract and print a report.
+        bool ValidateAssets = false;
     };
 
     void BuildScene(const Settings& settings);

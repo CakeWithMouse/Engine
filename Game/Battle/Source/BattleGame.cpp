@@ -38,7 +38,11 @@ namespace
 InstancedMeshComponent* BattleGame::CreateUnitBatch(UnitMesh::VehicleType type, const std::string& shaderPath)
 {
     auto units = std::make_unique<InstancedMeshComponent>();
-    for (int level = 0; level < 3; ++level)
+    units->SetAssetValidation(Config.ValidateAssets, UnitMesh::VehicleName(type));
+
+    // Either the designer hands over every level, or only LOD0 and the engine builds the rest.
+    const int suppliedLevels = Config.AutoLod ? 1 : 3;
+    for (int level = 0; level < suppliedLevels; ++level)
     {
         MeshLodData lod = UnitMesh::BuildVehicleLod(type, level, Config.Detail);
         std::cout << UnitMesh::VehicleName(type) << " LOD" << level << ": "
@@ -48,13 +52,18 @@ InstancedMeshComponent* BattleGame::CreateUnitBatch(UnitMesh::VehicleType type, 
             throw std::runtime_error(std::string("Cannot build LOD for ") + UnitMesh::VehicleName(type));
         }
     }
+    if (Config.AutoLod)
+    {
+        // Same ratios the hand-made levels have: LOD1 about a ninth of LOD0, LOD2 a silhouette.
+        units->SetAutoLod({0.12f, 0.025f});
+    }
 
     // Switching by on-screen size: independent of model size, window size and field of view.
     // Three mesh levels plus the generated sprite level, so three thresholds.
     units->SetLodScreenHeights({45.0f, 16.0f, Config.SpritePixels});
     units->SetLodFadeFraction(0.06f);
     units->SetDrawDistance(2500.0f);
-    units->SetShadowDistance(900.0f);
+    units->SetShadowDistance(Config.ShadowDistance);
     units->SetShadowLodBias(1);
     units->SetLodDebugColors(Config.LodDebugColors);
     if (Config.Impostors)
@@ -146,7 +155,14 @@ void BattleGame::BuildScene(const Settings& settings)
         UnitBatches.push_back(std::move(batch));
     }
 
-    std::uniform_real_distribution<float> jitter(-0.25f, 0.25f);
+    // A formation on an exact lattice does not read as an army: every vehicle is the same box at
+    // the same angle, so the rows merge into unbroken bars with the ground showing between them,
+    // and from a distance the field looks striped. Rows are offset by half a step against each
+    // other and every vehicle is turned a few degrees, which keeps the formation but breaks the
+    // lattice. Sideways there is room to spare between the rows, along the row there is not.
+    std::uniform_real_distribution<float> jitterAcross(-0.3f, 0.3f);
+    std::uniform_real_distribution<float> jitterAlong(-0.12f, 0.12f);
+    std::uniform_real_distribution<float> yawJitter(-0.14f, 0.14f);
     std::uniform_real_distribution<float> speed(4.0f, 9.0f);
     const glm::vec4 teamColors[2] = {glm::vec4(0.35f, 0.42f, 0.30f, 1.0f), glm::vec4(0.45f, 0.33f, 0.28f, 1.0f)};
 
@@ -157,14 +173,16 @@ void BattleGame::BuildScene(const Settings& settings)
         // Types alternate along the row, so every formation mixes vehicles.
         UnitBatch& batch = UnitBatches[static_cast<size_t>((row + column) % typeCount)];
 
+        const float rowStagger = (row % 2 == 0) ? 0.0f : 0.5f;
+
         MeshInstance instance;
         instance.Position = glm::vec3(
-            (column - unitsPerRow * 0.5f + jitter(rng)) * Config.Spacing,
+            (column - unitsPerRow * 0.5f + rowStagger + jitterAcross(rng)) * Config.Spacing,
             0.0f,
-            (row - unitsPerRow * 0.5f + jitter(rng)) * Config.Spacing);
+            (row - unitsPerRow * 0.5f + jitterAlong(rng)) * Config.Spacing);
         // Two armies facing each other across the middle of the field.
         const bool bSecondArmy = instance.Position.z > 0.0f;
-        instance.Yaw = bSecondArmy ? 3.14159f : 0.0f;
+        instance.Yaw = (bSecondArmy ? 3.14159f : 0.0f) + yawJitter(rng);
         instance.Scale = 1.0f;
         instance.Color = teamColors[bSecondArmy ? 1 : 0];
         batch.Component->AddInstance(instance);
@@ -179,8 +197,9 @@ void BattleGame::BuildScene(const Settings& settings)
     player->SetMinMaximalOrbitRadius(40.0f, std::max(600.0f, fieldSize * 1.5f));
     player->SetOrbitRadius(Config.CameraRadius > 0.0f ? Config.CameraRadius : std::max(180.0f, fieldSize * 0.37f));
     player->SetRotate(0.8f, glm::radians(std::max(10.0f, std::min(Config.CameraPitch, 85.0f))));
-    player->StopRotate(true, true);
-    player->EnableWASD(true);
+    // StopRotate enables the mouse control; a locked camera keeps the same framing between runs.
+    player->StopRotate(!Config.LockCamera, !Config.LockCamera);
+    player->EnableWASD(!Config.LockCamera);
 }
 
 void BattleGame::PreUpdate(float deltaTime)
@@ -207,6 +226,14 @@ void BattleGame::PreUpdate(float deltaTime)
     if (Config.DumpShadows && GetFrameIndex() == 20)
     {
         DumpShadowMaps("shadow");
+    }
+
+    if (Config.DumpImpostors && GetFrameIndex() == 20)
+    {
+        for (const UnitBatch& batch : UnitBatches)
+        {
+            batch.Component->DumpImpostorAtlas(std::string("impostor-") + UnitMesh::VehicleName(batch.Type));
+        }
     }
 
     if (FrameLimit > 0 && GetFrameIndex() >= FrameLimit)
