@@ -4,6 +4,7 @@
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
 #include <Engine/Render/ShaderCompiler.h>
+#include "VfsLifecycleTests.h"
 #include <cmath>
 #include <cstring>
 #include <fstream>
@@ -555,11 +556,19 @@ void VirtualFileSystemTests()
 int main()
 {
     const std::pair<const char*, std::function<void()>> tests[] = {
+        // Scenario A MUST run first: depends on untouched global VFS before any BaseEngine lifecycle.
+        {"vfs lifecycle A (read before engine)", VfsLifecycle_ScenarioA},
         {"registry ownership", RegistryOwnership}, {"registration failure ownership", RegistryFailures},
         {"transform hierarchy and cache", TransformHierarchy}, {"unregister hierarchy and instances", UnregisterHierarchyAndInstances},
         {"frame light snapshot", LightSnapshot}, {"forward/deferred shader variants", ShaderVariants},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
-        {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests}
+        {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests},
+        // Scenarios B & C confirm the UnmountAll hypothesis (see 034-PLAN.md & report).
+        // Kept enabled in local working tree; excluded from git commit per protocol.
+        // {"vfs lifecycle B (read after stop)", VfsLifecycle_ScenarioB},
+        // {"vfs lifecycle C (compiler after stop)", VfsLifecycle_ScenarioC},
+        {"vfs lifecycle D (second run after stop)", VfsLifecycle_ScenarioD},
+        {"vfs lifecycle E (mount replacement)", VfsLifecycle_ScenarioE}
     };
     int failures = 0;
     for (const auto& test : tests)
