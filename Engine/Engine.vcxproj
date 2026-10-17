@@ -55,6 +55,7 @@
     <ClCompile Include="Source\Render\TextureLoader.cpp" />
     <ClCompile Include="Source\Resources\Paths.cpp" />
     <ClCompile Include="Source\Resources\VirtualFileSystem.cpp" />
+    <ClCompile Include="Source\Resources\VfsRead.cpp" />
     <ClInclude Include="Include\Engine\Components\GameComponents.h" />
     <ClInclude Include="Include\Engine\Components\Light\CubeMap.h" />
     <ClInclude Include="Include\Engine\Components\Light\PointLightComponent.h" />
