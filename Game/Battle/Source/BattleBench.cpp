@@ -7,8 +7,6 @@
 #include <cstdlib>
 #include <d3d11.h>
 #include <dxgi.h>
-#include <filesystem>
-#include <fstream>
 #include <intrin.h>
 #include <iostream>
 #include <wrl/client.h>
@@ -149,111 +147,6 @@ std::string BattleBenchSession::GetGitCommit()
         free(envCommit);
         if (!res.empty()) return res;
     }
-
-    try
-    {
-        std::filesystem::path cur = std::filesystem::current_path();
-        for (int i = 0; i < 6; ++i)
-        {
-            const std::filesystem::path gitPath = cur / ".git";
-            if (std::filesystem::exists(gitPath))
-            {
-                if (std::filesystem::is_directory(gitPath))
-                {
-                    const std::filesystem::path headFile = gitPath / "HEAD";
-                    if (std::filesystem::exists(headFile))
-                    {
-                        std::ifstream is(headFile);
-                        std::string line;
-                        if (std::getline(is, line))
-                        {
-                            while (!line.empty() && (line.back() == '\r' || line.back() == '\n' || line.back() == ' '))
-                                line.pop_back();
-                            if (line.rfind("ref: ", 0) == 0)
-                            {
-                                const std::filesystem::path refPath = gitPath / line.substr(5);
-                                if (std::filesystem::exists(refPath))
-                                {
-                                    std::ifstream refIs(refPath);
-                                    std::string sha;
-                                    if (std::getline(refIs, sha))
-                                    {
-                                        while (!sha.empty() && (sha.back() == '\r' || sha.back() == '\n' || sha.back() == ' '))
-                                            sha.pop_back();
-                                        if (sha.size() >= 7) return sha.substr(0, 7);
-                                    }
-                                }
-                            }
-                            else if (line.size() >= 7)
-                            {
-                                return line.substr(0, 7);
-                            }
-                        }
-                    }
-                }
-                else if (std::filesystem::is_regular_file(gitPath))
-                {
-                    std::ifstream is(gitPath);
-                    std::string line;
-                    if (std::getline(is, line) && line.rfind("gitdir: ", 0) == 0)
-                    {
-                        std::string dir = line.substr(8);
-                        while (!dir.empty() && (dir.back() == '\r' || dir.back() == '\n' || dir.back() == ' '))
-                            dir.pop_back();
-                        std::filesystem::path worktreeGit(dir);
-                        std::filesystem::path headFile = worktreeGit / "HEAD";
-                        if (std::filesystem::exists(headFile))
-                        {
-                            std::ifstream headIs(headFile);
-                            std::string hline;
-                            if (std::getline(headIs, hline))
-                            {
-                                while (!hline.empty() && (hline.back() == '\r' || hline.back() == '\n' || hline.back() == ' '))
-                                    hline.pop_back();
-                                if (hline.rfind("ref: ", 0) == 0)
-                                {
-                                    std::filesystem::path refPath = worktreeGit / hline.substr(5);
-                                    if (!std::filesystem::exists(refPath))
-                                    {
-                                        std::filesystem::path commondirFile = worktreeGit / "commondir";
-                                        if (std::filesystem::exists(commondirFile))
-                                        {
-                                            std::ifstream cIs(commondirFile);
-                                            std::string cdir;
-                                            if (std::getline(cIs, cdir))
-                                            {
-                                                while (!cdir.empty() && (cdir.back() == '\r' || cdir.back() == '\n' || cdir.back() == ' '))
-                                                    cdir.pop_back();
-                                                refPath = worktreeGit / cdir / hline.substr(5);
-                                            }
-                                        }
-                                    }
-                                    if (std::filesystem::exists(refPath))
-                                    {
-                                        std::ifstream refIs(refPath);
-                                        std::string sha;
-                                        if (std::getline(refIs, sha))
-                                        {
-                                            while (!sha.empty() && (sha.back() == '\r' || sha.back() == '\n' || sha.back() == ' '))
-                                                sha.pop_back();
-                                            if (sha.size() >= 7) return sha.substr(0, 7);
-                                        }
-                                    }
-                                }
-                                else if (hline.size() >= 7)
-                                {
-                                    return hline.substr(0, 7);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (!cur.has_parent_path() || cur == cur.parent_path()) break;
-            cur = cur.parent_path();
-        }
-    }
-    catch (...) {}
 
     return "unknown";
 }
