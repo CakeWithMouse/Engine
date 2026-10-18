@@ -271,3 +271,47 @@ void VfsLifecycle_ContentRootReverted()
     std::filesystem::remove_all(tempProjectContent, ec);
     std::cout << "[VFS ContentRoot Reverted] Проектный contentRoot не остался в /Game после Stop().\n";
 }
+
+void VfsLifecycle_PreMountedGameReverted()
+{
+    const auto initialGamePath = (EnginePaths::ExecutableDirectory() / "InitialPreMountedGameContent").lexically_normal();
+    const auto tempProjectContent = (EnginePaths::ExecutableDirectory() / "TestProjectContent").lexically_normal();
+    std::error_code ec;
+    std::filesystem::create_directories(initialGamePath, ec);
+    std::filesystem::create_directories(tempProjectContent, ec);
+
+    // Pre-mount /Game explicitly via VfsRead::GetVFS()
+    VfsRead::GetVFS().Mount("/Game", initialGamePath);
+
+    const auto fixtureDll = FindFixtureDll();
+    RuntimeLaunchOptions options;
+    options.mode = RuntimeMode::Game;
+    options.frames = 1;
+    options.module = fixtureDll;
+    options.contentRoot = tempProjectContent.string();
+
+    {
+        BaseEngine engine;
+        const int exitCode = engine.Run(options);
+        CHECK(exitCode == 0);
+    }
+
+    // Verify /Game was reverted back to initialGamePath
+    bool bFoundGame = false;
+    for (const auto& m : VfsRead::GetVFS().GetMounts())
+    {
+        if (_stricmp(m.virtualRoot.c_str(), "/Game") == 0)
+        {
+            bFoundGame = true;
+            CHECK(m.physicalPath == initialGamePath);
+        }
+    }
+    CHECK(bFoundGame);
+
+    // Cleanup test /Game mount and temporary directories
+    VfsRead::GetVFS().Unmount("/Game");
+    std::filesystem::remove_all(initialGamePath, ec);
+    std::filesystem::remove_all(tempProjectContent, ec);
+    std::cout << "[VFS PreMounted Game Reverted] Предварительно смонтированный /Game восстановлен после Stop().\n";
+}
+

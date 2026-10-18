@@ -75,6 +75,12 @@
 4. **D3D11 GPU Timer Query Latency и безусловный сброс слота (`Game.cpp:2860`)**:
    - В `Game.cpp:2852-2860` опрос таймеров `Context->GetData(..., D3D11_ASYNC_GETDATA_DONOTFLUSH)` при неготовности запроса возвращает `S_FALSE`. Строка 2860 безусловно сбрасывает `GpuTimerIssued[slot] = false;` и немедленно начинает новый запрос `Context->Begin()`, затирая незавершённый запрос из кольцевого буфера (`latency=3`). На встроенном GPU (AMD Radeon 610M) из-за задержки драйвера и отсутствия `Context->Flush()` запросы перезаписываются до готовности, что приводит к потере сэмплов (`gpu_ready = 0`).
    - В старом коде `BattleGame` (`MeasuredFrames` / `BuildReport`) поле `LastGpuFrameMs` суммировалось в `GpuMsSum` каждый кадр независимо от возврата `GetData`, что приводило к повторному суммированию старых значений.
+5. **Утечка `/_ext_*` между тестами (`VfsRead.cpp:167-170`)**:
+   - При запросе путей вне стандартных точек монтирования `VfsRead::ToVirtualPath` динамически регистрирует точку `/_ext_<hash>` на глобальном экземпляре `s_vfs`. Точки `/_ext_*` не очищаются при остановке движка и накапливаются в VFS на протяжении всей жизни процесса.
+6. **`std::getenv` в `viewportCamera` (`Base.cpp:515`)**:
+   - В коллбэке `host.viewportCamera` прямой вызов `std::getenv("ENGINE_VIEWPORT_INPUT_TRACE")` приводит к предупреждению компилятора MSVC C4996 (`_CRT_SECURE_NO_WARNINGS`). Требуется переход на `_dupenv_s`.
+7. **`stderr` против `stdout` в `VfsRead`**:
+   - В `VfsRead.cpp:168, 193` диагностика и ошибки выводятся через `std::fprintf(stderr, ...)`. В то же время остальные подсистемы движка (`ShaderCompiler.cpp`, `Base.cpp`) пишут информацию в `stdout` (`std::cout`, `std::puts`). Требуется унификация каналов логирования.
 
 ---
 

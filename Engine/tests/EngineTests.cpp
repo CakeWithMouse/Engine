@@ -568,7 +568,8 @@ int main()
         {"second run exits cleanly", VfsLifecycle_ScenarioD},
         {"VirtualFileSystem::Mount replaces same root", VfsLifecycle_ScenarioE},
         {"vfs mounts preserved after stop", VfsLifecycle_PreserveMountSet},
-        {"vfs project content unmounted after stop", VfsLifecycle_ContentRootReverted}
+        {"vfs project content unmounted after stop", VfsLifecycle_ContentRootReverted},
+        {"vfs premounted game restored after stop", VfsLifecycle_PreMountedGameReverted}
     };
     int failures = 0;
     for (const auto& test : tests)

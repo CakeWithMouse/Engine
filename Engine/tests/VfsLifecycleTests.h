@@ -10,3 +10,4 @@ void VfsLifecycle_ScenarioD();
 void VfsLifecycle_ScenarioE();
 void VfsLifecycle_PreserveMountSet();
 void VfsLifecycle_ContentRootReverted();
+void VfsLifecycle_PreMountedGameReverted();
