@@ -8,3 +8,5 @@ void VfsLifecycle_ScenarioB();
 void VfsLifecycle_ScenarioC();
 void VfsLifecycle_ScenarioD();
 void VfsLifecycle_ScenarioE();
+void VfsLifecycle_PreserveMountSet();
+void VfsLifecycle_ContentRootReverted();

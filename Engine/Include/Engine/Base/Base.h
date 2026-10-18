@@ -7,6 +7,8 @@
 #include <memory>
 #include <string>
 #include <functional>
+#include <optional>
+#include <vector>
 
 class Game;
 class ViewportSession;
@@ -21,6 +23,15 @@ class BaseEngine final
     enum class State { New, Starting, Ready, Playing, Stopped };
     State state = State::New;
     bool exitRequested = false;
+
+    struct AppliedMount
+    {
+        std::string virtualRoot;
+        std::optional<std::filesystem::path> previousPath;
+    };
+    std::vector<AppliedMount> appliedMounts;
+
+    void ApplyMount(std::string_view virtualRoot, const std::filesystem::path& physicalPath);
 
     class LoadedSession;
     std::unique_ptr<LoadedSession> activeSession;

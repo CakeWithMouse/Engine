@@ -114,7 +114,7 @@ void VfsLifecycle_ScenarioC()
     const HRESULT hr = ShaderCompiler::CompileFromFile(
         shaderVirtualPath,
         nullptr,
-        "VS",
+        "VSMain",
         "vs_5_0",
         blob.GetAddressOf(),
         &compileError);
@@ -177,4 +177,97 @@ void VfsLifecycle_ScenarioE()
     CHECK(testVfs.GetMounts()[0].physicalPath == std::filesystem::path("C:/Explicit/GameContent").lexically_normal());
     std::cout << "[Scenario E] Проверено на уровне VFS: Mount(\"/Game\") обновляет путь без дубликатов (count="
               << countAfter << ").\n";
+}
+
+void VfsLifecycle_PreserveMountSet()
+{
+    const auto mountsBefore = VfsRead::GetVFS().GetMounts();
+    CHECK(!mountsBefore.empty());
+
+    const auto fixtureDll = FindFixtureDll();
+    RuntimeLaunchOptions options;
+    options.mode = RuntimeMode::Game;
+    options.frames = 1;
+    options.module = fixtureDll;
+
+    {
+        BaseEngine engine;
+        const int exitCode = engine.Run(options);
+        CHECK(exitCode == 0);
+    }
+
+    const auto mountsAfter = VfsRead::GetVFS().GetMounts();
+    CHECK(mountsBefore.size() == mountsAfter.size());
+
+    for (const auto& before : mountsBefore)
+    {
+        bool matched = false;
+        for (const auto& after : mountsAfter)
+        {
+            if (_stricmp(before.virtualRoot.c_str(), after.virtualRoot.c_str()) == 0 &&
+                before.physicalPath == after.physicalPath)
+            {
+                matched = true;
+                break;
+            }
+        }
+        CHECK(matched);
+    }
+
+    std::cout << "[VFS Mount Set] Все " << mountsBefore.size()
+              << " маунтов сохранены без изменений после Stop().\n";
+}
+
+void VfsLifecycle_ContentRootReverted()
+{
+    std::optional<std::filesystem::path> prevGamePath;
+    for (const auto& m : VfsRead::GetVFS().GetMounts())
+    {
+        if (_stricmp(m.virtualRoot.c_str(), "/Game") == 0)
+        {
+            prevGamePath = m.physicalPath;
+            break;
+        }
+    }
+
+    const auto tempProjectContent = (EnginePaths::ExecutableDirectory() / "TestProjectContent").lexically_normal();
+    std::error_code ec;
+    std::filesystem::create_directories(tempProjectContent, ec);
+
+    const auto fixtureDll = FindFixtureDll();
+    RuntimeLaunchOptions options;
+    options.mode = RuntimeMode::Game;
+    options.frames = 1;
+    options.module = fixtureDll;
+    options.contentRoot = tempProjectContent.string();
+
+    {
+        BaseEngine engine;
+        const int exitCode = engine.Run(options);
+        CHECK(exitCode == 0);
+    }
+
+    const auto mountsAfter = VfsRead::GetVFS().GetMounts();
+    for (const auto& m : mountsAfter)
+    {
+        if (_stricmp(m.virtualRoot.c_str(), "/Game") == 0)
+        {
+            CHECK(m.physicalPath != tempProjectContent);
+            if (prevGamePath.has_value())
+            {
+                CHECK(m.physicalPath == *prevGamePath);
+            }
+        }
+    }
+
+    if (!prevGamePath.has_value())
+    {
+        for (const auto& m : mountsAfter)
+        {
+            CHECK(_stricmp(m.virtualRoot.c_str(), "/Game") != 0);
+        }
+    }
+
+    std::filesystem::remove_all(tempProjectContent, ec);
+    std::cout << "[VFS ContentRoot Reverted] Проектный contentRoot не остался в /Game после Stop().\n";
 }

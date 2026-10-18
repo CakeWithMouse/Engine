@@ -563,12 +563,12 @@ int main()
         {"frame light snapshot", LightSnapshot}, {"forward/deferred shader variants", ShaderVariants},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
         {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests},
-        // Scenarios B & C confirm the UnmountAll hypothesis (see 034-PLAN.md & report).
-        // Kept enabled in local working tree; excluded from git commit per protocol.
-        // {"vfs lifecycle B (read after stop)", VfsLifecycle_ScenarioB},
-        // {"vfs lifecycle C (compiler after stop)", VfsLifecycle_ScenarioC},
-        {"vfs lifecycle D (second run after stop)", VfsLifecycle_ScenarioD},
-        {"vfs lifecycle E (mount replacement)", VfsLifecycle_ScenarioE}
+        {"vfs lifecycle B (read after stop)", VfsLifecycle_ScenarioB},
+        {"vfs lifecycle C (compiler after stop)", VfsLifecycle_ScenarioC},
+        {"second run exits cleanly", VfsLifecycle_ScenarioD},
+        {"VirtualFileSystem::Mount replaces same root", VfsLifecycle_ScenarioE},
+        {"vfs mounts preserved after stop", VfsLifecycle_PreserveMountSet},
+        {"vfs project content unmounted after stop", VfsLifecycle_ContentRootReverted}
     };
     int failures = 0;
     for (const auto& test : tests)
