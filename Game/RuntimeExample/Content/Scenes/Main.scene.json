@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "name": "Moving cube example",
+  "objects": [
+    {
+      "id": 1,
+      "type": "RuntimeExample::MovingCube",
+      "name": "Moving cube",
+      "parent": 0,
+      "inheritParentScale": true,
+      "transform": {
+        "position": [0, 0, 0],
+        "rotation": [0, 0, 0, 1],
+        "scale": [1, 1, 1]
+      }
+    }
+  ]
+}

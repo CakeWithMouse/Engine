@@ -11,7 +11,9 @@
 <Import Project="..\..\Engine\BuildSupport\Cpp.props" />
 <PropertyGroup><OutDir>$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/Runtime/Projects/RuntimeExample/</OutDir><TargetName>Game</TargetName></PropertyGroup>
 <ItemGroup><ClCompile Include="Source/Module.cpp" /></ItemGroup>
-<ItemGroup></ItemGroup>
+<ItemGroup><ProjectReference Include="..\..\Engine\Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project></ProjectReference></ItemGroup>
 <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets" />
-<Target Name="DeployRuntimeProject" AfterTargets="Build"><MakeDir Directories="$(OutDir)Content" /><Copy SourceFiles="$(MSBuildProjectDirectory)/Project.json" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" /><Copy SourceFiles="$(MSBuildProjectDirectory)/Content/README.md" DestinationFolder="$(OutDir)Content" SkipUnchangedFiles="true" /></Target>
+<Import Project="..\..\Engine\BuildSupport\ComponentGeneration.targets" />
+<ItemGroup><RuntimeContent Include="Content/**/*" /></ItemGroup>
+<Target Name="DeployRuntimeProject" AfterTargets="Build"><MakeDir Directories="$(OutDir)Content" /><Copy SourceFiles="$(MSBuildProjectDirectory)/Project.json" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" /><Copy SourceFiles="@(RuntimeContent)" DestinationFiles="@(RuntimeContent->'$(OutDir)Content/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" /></Target>
 </Project>

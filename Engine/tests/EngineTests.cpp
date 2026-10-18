@@ -484,9 +484,16 @@ void VirtualFileSystemTests()
     CHECK(!vfs.Resolve("/Engine/Shaders/RotatedFigure.hlsl").has_value());
 }
 
+void SceneOwnershipTests();
+void SceneHierarchyTests();
+void SceneDeferredTests();
+
 int main()
 {
     const std::pair<const char*, std::function<void()>> tests[] = {
+        {"scene ownership and IDs (no GPU)", SceneOwnershipTests},
+        {"scene hierarchy and snapshots (no GPU)", SceneHierarchyTests},
+        {"scene deferred mutations (no GPU)", SceneDeferredTests},
         {"registry ownership", RegistryOwnership}, {"registration failure ownership", RegistryFailures},
         {"transform hierarchy and cache", TransformHierarchy}, {"unregister hierarchy and instances", UnregisterHierarchyAndInstances},
         {"frame light snapshot", LightSnapshot}, {"forward/deferred shader variants", ShaderVariants},

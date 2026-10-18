@@ -13,6 +13,7 @@
 #include <glm/vec3.hpp>
 
 #include <Engine/Render/ShaderConstants.h>
+#include <Engine/Scene/Scene.h>
 #include <Engine/MainGame/Player.h>
 #include <Engine/Display/Display.h>
 #include <Engine/InputDevice/InputDevice.h>
@@ -44,7 +45,8 @@ enum class RegisterResult
     EmptyName,
     DuplicateName,
     DeviceNotReady,
-    AlreadyOwned
+    AlreadyOwned,
+    InvalidParent
 };
 
 const char* ToString(RegisterResult result);
@@ -127,9 +129,16 @@ public:
 
     /** Creates window, device and base resources. Returns false (and releases everything) on failure. */
     bool Initialize();
+    // Standalone window driven by a module host, without StartGame's nested loop.
+    bool InitializeRuntimeWindow(bool visible = true);
+    enum class RuntimeFrameResult { Running, Closed, Failed };
+    RuntimeFrameResult RunRuntimeFrame(float deltaTime);
+    bool IsRuntimeWindow() const { return bRuntimeWindow; }
+    void RequestWindowClose() { bWindowCloseRequested = true; }
     // Embedded preview: host owns HWND and drives frames/resizes on the render thread.
     // No Raw Input registration, window procedure replacement or nested message loop.
-    bool InitializeViewport(HWND window, int width, int height);
+    // preserveSceneOnFailure is for data-only edit scenes (no custom AfterInitialize).
+    bool InitializeViewport(HWND window, int width, int height, bool preserveSceneOnFailure = false);
     bool RenderViewportFrame(float deltaTime);
     // Transitional preview sessions share one device/swap chain, never scene objects.
     bool InitializePlayViewport(Game& editorScene);
@@ -164,12 +173,15 @@ public:
     /**
      * Adds a component to the scene. On Ok the scene takes ownership of the pointer.
      * On any other result nothing is changed and ownership stays with its current owner.
+     * During gameplay update, Ok reserves the component; Find sees it after the update boundary.
      */
     RegisterResult RegisterComponent(const std::string& Name, GameComponent* Component,
                                      const std::string& PShaderName = {}, const std::string& VShaderName = {});
-    /** Removes and destroys a component. Children lose their parent, lights leave the light list. */
+    /** Removes a component (deferred during gameplay update). Children lose their parent. */
     bool UnregisterComponent(const std::string& Name);
     GameComponent* FindComponent(const std::string& Name) const;
+    Scene& GetScene() noexcept { return scene; }
+    const Scene& GetScene() const noexcept { return scene; }
 
     bool CreateProceduralCubeMap(const std::string& cubeMapName, CubeMapPreset preset, int faceSize = 256);
     bool CreateCubeMapFromFiles(const std::string& cubeMapName, const std::vector<std::string>& facePaths);
@@ -247,7 +259,7 @@ public:
 
 protected:
     // Initialization
-    bool InitializeInternal(HWND externalWindow, int width, int height, Game* sharedViewport = nullptr);
+    bool InitializeInternal(HWND externalWindow, int width, int height, Game* sharedViewport = nullptr, bool preserveSceneOnFailure = false);
     void InitSwapChainDesc(int width, int height);
     bool CreateDeviceAndSwapChain();
     bool CreateSwapChainResources(int width, int height);
@@ -260,7 +272,7 @@ protected:
     bool InitStaticShadowResources();
     void RenderStaticShadowMap();
     bool InitDeferredResources();
-    void DestroyResources();
+    void DestroyResources(bool preserveScene = false);
 
     // Frame phases
     void Run();
@@ -269,6 +281,7 @@ protected:
     void UpdateFrame(float realDeltaTime);
     void UpdateSimulation(float deltaTime);
     void PrepareRenderFrame();
+    void SynchronizeSceneResources();
     /** Game logic that must run before the camera and the component ticks (scaled dt). */
     virtual void PreUpdate(float deltaTime) {}
     /** Advances components. Default: tick everything, Space pauses everything except the skybox. */
@@ -319,6 +332,7 @@ protected:
     bool bInitialized = false;
     bool bEmbedded = false;
     bool bSimulationEnabled = true; // Standalone games retain their existing behavior.
+    bool bRuntimeWindow = false, bRuntimeWindowVisible = true, bWindowCloseRequested = false;
     bool bRunning = false;
     int ExitCode = 0;
 
@@ -344,9 +358,10 @@ protected:
     std::unique_ptr<InputDevice> InputDevicePtr;
     std::unique_ptr<Player> FirstPlayer;
 
-    // Scene: the registry owns components, PointLights only observes them.
-    std::map<std::string, std::unique_ptr<GameComponent>> Components;
-    std::vector<PointLightComponent*> PointLights;
+    // Scene owns components. The read-only alias preserves legacy traversal/order.
+    Scene scene;
+    const Scene::ComponentMap& Components = scene.GetComponents();
+    uint64_t renderedSceneRevision = UINT64_MAX;
     std::map<std::string, std::unique_ptr<CubeMapResource>> cubeMapCache;
 
     // Shader cache, keys: file|stage|variant|policy

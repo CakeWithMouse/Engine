@@ -4,6 +4,8 @@
 #include "EditorPreview.h"
 #include "PreviewScenes.h"
 #include <Engine/Runtime/ViewportSession.h>
+#include <Engine/Components/SpecificComponents/CubeComponent.h>
+#include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Resources/Paths.h>
 #include <cstdint>
 #include <fstream>
@@ -124,6 +126,7 @@ int main(int argc, char** argv)
                 CHECK(session.TogglePlay());
                 auto* play = static_cast<PreviewTest*>(session.Active());
                 CHECK(play != edit && play->GetDevice() == edit->GetDevice());
+                CHECK(play->GetScene().GetId() != edit->GetScene().GetId());
                 for (int i = 0; i < 8; ++i) CHECK(play->RenderViewportFrame(1.0f / 60));
                 CHECK(play->simulationTicks == 8 && play->checksum != originalPixels);
                 session.TogglePause();
@@ -158,6 +161,41 @@ int main(int argc, char** argv)
             CHECK(edit->RenderViewportFrame(1.0f / 60));
             CHECK(edit->checksum == originalPixels);
             std::cout << "PASS: static Edit, isolated Play, Pause/Resume, Stop, resize, failed Play rollback\n";
+        }
+        {
+            PreviewTest game;
+            game.SetSimulationEnabled(false);
+            CHECK(game.InitializeViewport(window, 640, 480));
+            game.SetVSync(false);
+            CHECK(game.RenderViewportFrame(0.016f));
+            const auto originalPixels = game.checksum;
+            auto& scene = game.GetScene();
+            const auto original = scene.GetSnapshot().components.front();
+            auto moved = original.transform;
+            moved.position.y += 0.5f;
+            CHECK(scene.SetTransform(original.id, moved) == SceneResult::Ok);
+            CHECK(game.RenderViewportFrame(0.016f) && game.checksum != originalPixels);
+            CHECK(game.simulationTicks == 0);
+            CHECK(scene.SetTransform(original.id, original.transform) == SceneResult::Ok);
+            CHECK(game.RenderViewportFrame(0.016f) && game.checksum == originalPixels);
+
+            auto cube = std::make_unique<CubeComponent>();
+            cube->InitCube();
+            std::unique_ptr<GameComponent> component = std::move(cube);
+            auto* raw = component.get();
+            const auto added = scene.AddComponent("3", component);
+            CHECK(added.result == SceneResult::Ok && !raw->GetVertexBuffer());
+            CHECK(game.RenderViewportFrame(0.016f));
+            CHECK(raw->GetGame() == &game && raw->GetVertexBuffer());
+            CHECK(game.GetFrameStats().DrawCalls == 3);
+            CHECK(scene.RemoveComponent(added.id) == SceneResult::Ok);
+            CHECK(game.RenderViewportFrame(0.016f) && game.checksum == originalPixels);
+            std::unique_ptr<GameComponent> light = std::make_unique<PointLightComponent>(glm::vec3(0), glm::vec3(1));
+            const auto lightId = scene.AddComponent("Light", light).id;
+            CHECK(game.GetPointLights().size() == 1);
+            CHECK(scene.RemoveComponent(lightId) == SceneResult::Ok);
+            CHECK(game.GetPointLights().empty());
+            std::cout << "PASS: Scene transforms render without Tick, lazy GPU registration, light removal\n";
         }
         for (int pass = 0; pass < 2; ++pass)
         {

@@ -9,6 +9,9 @@
 #include <Engine/Base/Base.h>
 #include <Engine/Runtime/ModuleApi.h>
 #include <Engine/Runtime/ViewportSession.h>
+#include <Engine/Runtime/GameEditModule.h>
+#include <Engine/Runtime/GameSceneApi.h>
+#include <Engine/Runtime/GameWindowApi.h>
 #include <Engine/Resources/Paths.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/Player.h>
@@ -108,6 +111,9 @@ class BaseEngine::LoadedSession
 {
     HMODULE library = nullptr;
     EngineModuleApi api{};
+    EngineSceneApi sceneApi{};
+    EngineBindEditSessionFn bindEdit = nullptr;
+    std::function<void()> releaseEdit;
     void* session = nullptr;
     bool started = false;
 
@@ -115,6 +121,8 @@ class BaseEngine::LoadedSession
     std::filesystem::path shadowPath;
     uint32_t moduleKind = 0;
     EngineModuleHost moduleHost{};
+    std::filesystem::path startupScenePath;
+    bool continuousFrames = false;
 
     static void CleanStaleShadows(const std::filesystem::path& shadowDir, const std::wstring& stem)
     {
@@ -188,7 +196,8 @@ class BaseEngine::LoadedSession
         shadowPath.clear();
     }
 
-    void LoadAndInitialize(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host)
+    void LoadAndInitialize(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host,
+        const EngineEditSessionApi* editApi = nullptr)
     {
         originalPath = path;
         moduleKind = kind;
@@ -233,12 +242,58 @@ class BaseEngine::LoadedSession
             Close();
             throw std::runtime_error("Module session creation failed");
         }
+        if (editApi)
+        {
+            bindEdit = reinterpret_cast<EngineBindEditSessionFn>(GetProcAddress(library, "EngineBindEditSession"));
+            if (kind != ENGINE_MODULE_EDITOR || !bindEdit ||
+                !bindEdit(ENGINE_EDIT_API_VERSION, sizeof(*editApi), session, editApi))
+            {
+                Close();
+                throw std::runtime_error("Editor must support EngineBindEditSession for scene-api mode");
+            }
+        }
+        if (kind == ENGINE_MODULE_GAME && !startupScenePath.empty())
+        {
+            const auto get = reinterpret_cast<EngineGetGameSceneApiFn>(GetProcAddress(library, "EngineGetGameSceneApi"));
+            EngineGameSceneApi sceneLoader{};
+            if (!get || !get(ENGINE_GAME_SCENE_API_VERSION, sizeof(sceneLoader), session, &sceneLoader) ||
+                !IsCompleteGameSceneApi(sceneLoader))
+                throw std::runtime_error("startupScene requires compatible EngineGetGameSceneApi");
+            char error[1024]{};
+            const auto file = startupScenePath.u8string();
+            const auto result = sceneLoader.loadScene(sceneLoader.context, file.c_str(), error, sizeof(error));
+            error[sizeof(error) - 1] = 0;
+            if (result != EngineSceneOk)
+                throw std::runtime_error("Cannot load game startupScene '" + file + "' (status " +
+                    std::to_string(result) + "): " + error);
+        }
         if (!api.start(session))
         {
             Close();
             throw std::runtime_error("Module start failed");
         }
         started = true;
+        if (kind == ENGINE_MODULE_GAME)
+        {
+            const auto getWindowApi = reinterpret_cast<EngineGetGameWindowApiFn>(GetProcAddress(library, "EngineGetGameWindowApi"));
+            if (getWindowApi)
+            {
+                EngineGameWindowApi windowApi{};
+                if (!getWindowApi(ENGINE_GAME_WINDOW_API_VERSION, sizeof(windowApi), session, &windowApi) ||
+                    windowApi.version != ENGINE_GAME_WINDOW_API_VERSION || !windowApi.context || !windowApi.getWindow)
+                    throw std::runtime_error("Incompatible game window API");
+                auto window = static_cast<HWND>(windowApi.getWindow(windowApi.context));
+                if (window && !IsWindow(window)) throw std::runtime_error("Invalid game window");
+                continuousFrames = window != nullptr;
+            }
+            const auto getSceneApi = reinterpret_cast<EngineGetSceneApiFn>(GetProcAddress(library, "EngineGetSceneApi"));
+            if (getSceneApi && (!getSceneApi(ENGINE_SCENE_API_VERSION, sizeof(sceneApi), session, &sceneApi) ||
+                !IsCompleteSceneApi(sceneApi)))
+            {
+                Close();
+                throw std::runtime_error("Incompatible or incomplete scene module API");
+            }
+        }
     }
 public:
     LoadedSession() = default;
@@ -246,9 +301,13 @@ public:
     LoadedSession& operator=(const LoadedSession&) = delete;
     ~LoadedSession() { Close(); }
 
-    void Open(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host)
+    void Open(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host,
+        const EngineEditSessionApi* editApi = nullptr, std::function<void()> cleanup = {},
+        const std::filesystem::path& startupScene = {})
     {
-        LoadAndInitialize(path, kind, host);
+        startupScenePath = startupScene;
+        releaseEdit = std::move(cleanup);
+        LoadAndInitialize(path, kind, host, editApi);
     }
 
     bool Reload()
@@ -269,6 +328,7 @@ public:
         catch (const std::exception& error)
         {
             std::fprintf(stderr, "ModuleReloadError: %s\n", error.what());
+            Close(); // failed pre-start loading must release the candidate session too
             originalPath = path;
             moduleKind = kind;
             moduleHost = host;
@@ -277,6 +337,12 @@ public:
     }
 
     bool IsStarted() const noexcept { return started && session != nullptr; }
+    bool UsesContinuousFrames() const noexcept { return continuousFrames; }
+    bool GetSceneApi(EngineSceneApi& output) const noexcept
+    {
+        output = IsStarted() ? sceneApi : EngineSceneApi{};
+        return IsCompleteSceneApi(output);
+    }
 
     void Update(double dt)
     {
@@ -288,6 +354,11 @@ public:
     }
     bool Close() noexcept
     {
+        sceneApi = {}; // No callable pointers survive session destruction/unloading.
+        continuousFrames = false;
+        if (session && bindEdit) bindEdit(ENGINE_EDIT_API_VERSION, sizeof(EngineEditSessionApi), session, nullptr);
+        bindEdit = nullptr;
+        if (releaseEdit) { auto cleanup = std::move(releaseEdit); releaseEdit = {}; cleanup(); }
         if (session)
         {
             if (started) api.stop(session);
@@ -319,8 +390,19 @@ public:
 BaseEngine::BaseEngine() = default;
 BaseEngine::~BaseEngine() { Stop(); }
 
+bool BaseEngine::TryGetActiveSceneApi(EngineSceneApi& output) const noexcept
+{
+    output = {};
+    return activeSession && activeSession->GetSceneApi(output);
+}
+
 bool BaseEngine::ReloadActiveModule()
 {
+    if (!activeOptions.editModule.empty())
+    {
+        std::fputs("Close edit session before reloading: live edit data is not reloadable yet\n", stderr);
+        return false;
+    }
     if (state != State::Playing || !activeSession)
     {
         std::fputs("Cannot reload module: engine is not playing or has no active session\n", stderr);
@@ -482,7 +564,23 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
 
     EngineModuleHost host{ENGINE_MODULE_VERSION, this, Log, Exit,
         options.projectName.c_str(), options.projectFile.c_str(), options.contentRoot.c_str()};
-    if (options.mode == RuntimeMode::Editor && viewportFactory)
+    if (!options.editModule.empty())
+    {
+        if (options.mode != RuntimeMode::Editor) throw std::runtime_error("editModule requires editor mode");
+        editModule = std::make_unique<GameEditModule>(options.editModule, engineContent);
+        if (!options.startupScene.empty())
+        {
+            const auto& api = editModule->Api();
+            const auto path = options.startupScene.u8string();
+            char error[1024]{};
+            uint64_t sceneId = 0;
+            const auto result = api.loadScene(api.context, path.c_str(), &sceneId, error, sizeof(error));
+            if (result != EngineSceneOk)
+                throw std::runtime_error("Cannot load startupScene '" + path + "' (status " +
+                    std::to_string(result) + "): " + error);
+        }
+    }
+    if (options.mode == RuntimeMode::Editor && viewportFactory && !editModule)
     {
         host.viewportAttach = [](void* user, void* hwnd, uint32_t w, uint32_t h) -> int {
             auto& engine = *static_cast<BaseEngine*>(user);
@@ -543,13 +641,14 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
     activeSession = std::make_unique<LoadedSession>();
     try
     {
-        activeSession->Open(options.module, options.mode == RuntimeMode::Game ? ENGINE_MODULE_GAME : ENGINE_MODULE_EDITOR, host);
+        activeSession->Open(options.module, options.mode == RuntimeMode::Game ? ENGINE_MODULE_GAME : ENGINE_MODULE_EDITOR, host,
+            editModule ? &editModule->Api() : nullptr, [this] { editModule.reset(); }, options.startupScene);
         state = State::Playing;
         if (!options.frames && options.mode != RuntimeMode::Editor) std::puts("Interactive stub: Enter = frame, r = reload, b = build, br = build+reload, ls, find, import, info, mkdir, rm/del, mv, cp, cat, q = exit.");
         auto previous = std::chrono::steady_clock::now();
         for (uint64_t frame = 0; !exitRequested && (!options.frames || frame < options.frames); ++frame)
         {
-            if (!options.frames && options.mode != RuntimeMode::Editor)
+            if (!options.frames && options.mode != RuntimeMode::Editor && !activeSession->UsesContinuousFrames())
             {
                 std::string command;
                 if (!std::getline(std::cin, command) || command == "q") break;
@@ -778,11 +877,26 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             if (activeSession && activeSession->IsStarted())
             {
                 activeSession->Update(dt);
+                if (exitRequested) break;
+                if (editModule)
+                {
+                    const auto result = editModule->Api().frame(editModule->Api().context, std::clamp(dt, 0.0, 0.1));
+                    if (result == EngineSceneSimulationFailed) std::fputs("Play Tick failed; game copy paused, edit scene preserved\n", stderr);
+                    else if (result != EngineSceneOk) throw std::runtime_error("Edit scene frame failed");
+                }
                 if (viewportSession)
                 {
                     if (!viewportSession->Active()->RenderViewportFrame(static_cast<float>(dt)))
                         throw std::runtime_error("Viewport rendering failed");
                     if (options.frames || frame == 0) std::puts("EngineRender (viewport)");
+                }
+                else if (editModule)
+                {
+                    if (options.frames || frame == 0) std::puts("EngineFrame (edit scene API)");
+                }
+                else if (activeSession->UsesContinuousFrames())
+                {
+                    if (options.frames || frame == 0) std::puts("EngineFrame (game window)");
                 }
                 else
                 {
@@ -793,8 +907,8 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
                     }
                 }
                 if (options.mode == RuntimeMode::Editor) activeSession->Overlay();
-                if (options.frames || options.mode != RuntimeMode::Editor)
-                    std::puts(viewportSession ? "EngineFrameEnd (viewport)" : "EngineFrameEnd (stub)");
+                if (options.frames || (options.mode != RuntimeMode::Editor && !activeSession->UsesContinuousFrames()))
+                    std::puts(editModule ? "EngineFrameEnd (edit scene API)" : viewportSession ? "EngineFrameEnd (viewport)" : activeSession->UsesContinuousFrames() ? "EngineFrameEnd (game window)" : "EngineFrameEnd (stub)");
             }
             else
             {
@@ -828,6 +942,7 @@ void BaseEngine::Stop() noexcept
         activeSession.reset();
     }
     viewportSession.reset();
+    editModule.reset();
     Resources.DeInitialize();
     Resources.SetVFS(nullptr);
     Vfs.UnmountAll();

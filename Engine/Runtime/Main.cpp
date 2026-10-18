@@ -16,11 +16,13 @@ int wmain(int argc, wchar_t** argv)
         RuntimeLaunchOptions options;
         std::filesystem::path projectPath;
         std::set<std::wstring> seen;
+        bool sceneApi = false;
         for (int i = 1; i < argc; ++i)
         {
             const std::wstring key = argv[i];
             if (!seen.insert(key).second) throw std::runtime_error("Duplicate launch option");
             if (key == L"--test-fail-engine") { options.failEngineForTest = true; continue; }
+            if (key == L"--scene-api") { sceneApi = true; continue; }
             if (++i == argc) throw std::runtime_error("Missing launch option value");
             const std::wstring value = argv[i];
             if (key == L"--project") projectPath = value;
@@ -48,6 +50,13 @@ int wmain(int argc, wchar_t** argv)
         options.projectFile = project.file.u8string();
         options.contentRoot = project.content.u8string();
         options.module = options.mode == RuntimeMode::Game ? project.module : directory / "Editor.dll";
+        if (options.mode == RuntimeMode::Game) options.startupScene = project.startupScene;
+        if (sceneApi)
+        {
+            if (options.mode != RuntimeMode::Editor) throw std::runtime_error("--scene-api requires editor mode");
+            options.editModule = project.module;
+            options.startupScene = project.startupScene;
+        }
         EnginePaths::SetContentRoot(directory / "EngineContent");
         std::printf("Project: %s\nMode: %s\n", options.projectName.c_str(), options.mode == RuntimeMode::Game ? "game" : "editor");
         BaseEngine engine;

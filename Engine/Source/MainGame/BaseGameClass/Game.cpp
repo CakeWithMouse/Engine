@@ -260,6 +260,7 @@ const char* ToString(RegisterResult result)
     case RegisterResult::DuplicateName: return "DuplicateName";
     case RegisterResult::DeviceNotReady: return "DeviceNotReady";
     case RegisterResult::AlreadyOwned: return "AlreadyOwned";
+    case RegisterResult::InvalidParent: return "InvalidParent";
     default: return "Unknown";
     }
 }
@@ -275,7 +276,7 @@ Game::~Game()
     DestroyResources();
 }
 
-void Game::DestroyResources()
+void Game::DestroyResources(bool preserveScene)
 {
     if (Context)
     {
@@ -284,8 +285,7 @@ void Game::DestroyResources()
     }
 
     // Components first: they observe cube maps and shaders owned by the caches below.
-    PointLights.clear();
-    Components.clear();
+    if (!preserveScene) scene.Clear();
     cubeMapCache.clear();
 
     vertexShaderCache.clear();
@@ -369,10 +369,17 @@ bool Game::Initialize()
     return InitializeInternal(nullptr, 0, 0);
 }
 
-bool Game::InitializeViewport(HWND window, int width, int height)
+bool Game::InitializeRuntimeWindow(bool visible)
+{
+    bRuntimeWindow = true;
+    bRuntimeWindowVisible = visible;
+    return InitializeInternal(nullptr, 0, 0);
+}
+
+bool Game::InitializeViewport(HWND window, int width, int height, bool preserveSceneOnFailure)
 {
     if (!IsWindow(window) || width <= 0 || height <= 0) return false;
-    return InitializeInternal(window, width, height);
+    return InitializeInternal(window, width, height, nullptr, preserveSceneOnFailure);
 }
 
 bool Game::InitializePlayViewport(Game& editorScene)
@@ -398,17 +405,17 @@ bool Game::RestoreViewportTargets()
     return CreateSwapChainResources(DisplayPtr->GetWidth(), DisplayPtr->GetHeight());
 }
 
-bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int requestedHeight, Game* sharedViewport)
+bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int requestedHeight, Game* sharedViewport, bool preserveSceneOnFailure)
 {
     if (bInitialized)
     {
         return true;
     }
 
-    auto fail = [this](const char* reason) -> bool
+    auto fail = [this, preserveSceneOnFailure](const char* reason) -> bool
     {
         std::cout << "Initialization failed: " << reason << std::endl;
-        DestroyResources();
+        DestroyResources(preserveSceneOnFailure);
         return false;
     };
 
@@ -426,7 +433,7 @@ bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int reque
     if (!bEmbedded) InputDevicePtr = std::make_unique<InputDevice>(this);
 
     const HWND hWnd = DisplayPtr->GetHwnd();
-    if (!bEmbedded)
+    if (!bEmbedded && (!bRuntimeWindow || bRuntimeWindowVisible))
     {
         ShowWindow(hWnd, SW_SHOW);
         SetForegroundWindow(hWnd);
@@ -454,7 +461,7 @@ bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int reque
     }
     if (GetFileAttributesW(ShaderPath().c_str()) == INVALID_FILE_ATTRIBUTES)
     {
-        if (!bEmbedded) MessageBox(hWnd, L"EngineContent/Shaders/RotatedFigure.hlsl was not found. Check the deployed engine content.",
+        if (!bEmbedded && !bRuntimeWindow) MessageBox(hWnd, L"EngineContent/Shaders/RotatedFigure.hlsl was not found. Check the deployed engine content.",
                    L"Missing shader", MB_OK);
         return fail("shader files not found");
     }
@@ -810,9 +817,17 @@ RegisterResult Game::RegisterComponent(const std::string& Name, GameComponent* C
     {
         result = RegisterResult::DuplicateName;
     }
-    else if (Component->RegisteredOwner != nullptr)
+    else if (Component->RegisteredScene != nullptr)
     {
         result = RegisterResult::AlreadyOwned;
+    }
+    else if (scene.ValidateAddition(Name, Component) == SceneResult::InvalidParent)
+    {
+        result = RegisterResult::InvalidParent;
+    }
+    else if (scene.ValidateAddition(Name, Component) == SceneResult::DuplicateName)
+    {
+        result = RegisterResult::DuplicateName; // Includes names reserved during Tick.
     }
 
     if (result != RegisterResult::Ok)
@@ -831,32 +846,27 @@ RegisterResult Game::RegisterComponent(const std::string& Name, GameComponent* C
         BindComponentShaders(Component, ShaderCompileVariant::Default);
     }
 
-    Components.emplace(Name, std::unique_ptr<GameComponent>(Component));
-    Component->RegisteredOwner = this;
-    if (pointLight != nullptr)
+    std::unique_ptr<GameComponent> owner(Component);
+    try
     {
-        PointLights.push_back(pointLight);
+        const auto added = scene.AddComponent(Name, owner);
+        if (added.result != SceneResult::Ok && added.result != SceneResult::Deferred)
+        {
+            owner.release();
+            return added.result == SceneResult::DuplicateName ? RegisterResult::DuplicateName : RegisterResult::InvalidParent;
+        }
     }
+    catch (...) { owner.release(); throw; }
+    Component->RenderOwner = this;
     return RegisterResult::Ok;
 }
 
 bool Game::UnregisterComponent(const std::string& Name)
 {
-    auto it = Components.find(Name);
-    if (it == Components.end())
-    {
-        return false;
-    }
-
-    GameComponent* removed = it->second.get();
-    PointLights.erase(std::remove(PointLights.begin(), PointLights.end(), removed), PointLights.end());
-    for (auto& pair : Components)
-    {
-        pair.second->ClearParentReferences(removed);
-    }
-
-    Components.erase(it);
-    return true;
+    auto* component = scene.FindComponentByName(Name);
+    if (!component) return false;
+    const auto result = scene.RemoveComponent(component->GetComponentId());
+    return result == SceneResult::Ok || result == SceneResult::Deferred;
 }
 
 GameComponent* Game::FindComponent(const std::string& Name) const
@@ -868,10 +878,13 @@ GameComponent* Game::FindComponent(const std::string& Name) const
 std::vector<PointLightInfo> Game::GetPointLights(size_t maxLights) const
 {
     std::vector<PointLightInfo> result;
-    result.reserve(std::min(maxLights, PointLights.size()));
+    result.reserve(std::min(maxLights, Components.size()));
+    if (!maxLights) return result;
 
-    for (PointLightComponent* pointLight : PointLights)
+    // ID order preserves the old light registration order without dangling caches.
+    for (const auto& entry : scene.GetComponentsById())
     {
+        auto* pointLight = dynamic_cast<PointLightComponent*>(entry.second);
         if (!pointLight)
         {
             continue;
@@ -2284,6 +2297,27 @@ bool Game::RenderViewportFrame(float deltaTime)
     return bRunning;
 }
 
+Game::RuntimeFrameResult Game::RunRuntimeFrame(float deltaTime)
+{
+    if (!bRuntimeWindow || !bInitialized || !std::isfinite(deltaTime) || deltaTime < 0) return RuntimeFrameResult::Failed;
+    if (bWindowCloseRequested) return RuntimeFrameResult::Closed;
+    bRunning = true;
+    if (!PumpMessages() || bWindowCloseRequested) return RuntimeFrameResult::Closed;
+    ApplyPendingResize();
+    if (!bRunning) return RuntimeFrameResult::Failed;
+    if (bMinimized) { Sleep(10); return RuntimeFrameResult::Running; }
+    ++FrameIndex;
+    Stats.Reset();
+    UpdateFrame(std::min(deltaTime, MaxFrameDeltaSeconds));
+    BeginGpuTimer();
+    RenderFrame();
+    EndGpuTimer();
+    EndFrame();
+    if (InputDevicePtr) InputDevicePtr->EndFrame();
+    LastFrameStats = Stats;
+    return bRunning ? RuntimeFrameResult::Running : RuntimeFrameResult::Failed;
+}
+
 void Game::OnWindowResized(int clientWidth, int clientHeight, bool minimized)
 {
     bMinimized = minimized || clientWidth <= 0 || clientHeight <= 0;
@@ -2371,6 +2405,7 @@ void Game::ProcessHotkeys()
 
 void Game::UpdateFrame(float realDeltaTime)
 {
+    SynchronizeSceneResources();
     const float deltaTime = realDeltaTime * SimulationTimeScale;
     ProcessHotkeys();
     if (bSimulationEnabled) UpdateSimulation(deltaTime);
@@ -2380,6 +2415,7 @@ void Game::UpdateFrame(float realDeltaTime)
 
 void Game::UpdateSimulation(float deltaTime)
 {
+    auto sceneUpdate = scene.BeginUpdate(); // Covers custom PreUpdate/TickComponents too.
     TotalTime += deltaTime;
     PreUpdate(deltaTime);
     FirstPlayer->UpdateCamera(deltaTime);
@@ -2388,6 +2424,7 @@ void Game::UpdateSimulation(float deltaTime)
 
 void Game::PrepareRenderFrame()
 {
+    SynchronizeSceneResources(); // Includes additions committed after gameplay callbacks.
     if (bShadowsEnabled && !bShadowResourcesReady && !bShadowInitFailed)
     {
         bShadowResourcesReady = InitShadowResources();
@@ -2417,11 +2454,26 @@ void Game::PrepareRenderFrame()
 void Game::TickComponents(float deltaTime)
 {
     const bool bPaused = InputDevicePtr && InputDevicePtr->IsKeyDown(Keys::Space);
-    for (auto& pair : Components)
+    scene.Tick(deltaTime, bPaused);
+}
+
+void Game::SynchronizeSceneResources()
+{
+    if (renderedSceneRevision == scene.GetRevision()) return;
+    for (const auto& entry : Components)
     {
-        GameComponent* Component = pair.second.get();
-        Component->Tick(bPaused && !Component->IsSkybox() ? 0.0f : deltaTime);
+        auto* component = entry.second.get();
+        if (component->RenderOwner == this) continue;
+        component->SetGame(this);
+        if (!dynamic_cast<PointLightComponent*>(component))
+        {
+            component->CreateBuffers(Device.Get());
+            BindComponentShaders(component, ShaderCompileVariant::Default);
+        }
+        component->RenderOwner = this;
     }
+    InvalidateStaticShadow();
+    renderedSceneRevision = scene.GetRevision();
 }
 
 void Game::BuildFrameConstants()

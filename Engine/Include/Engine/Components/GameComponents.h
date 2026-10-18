@@ -1,4 +1,5 @@
 #pragma once
+#include <Engine/Components/ComponentAnnotations.h>
 #include <cstdint>
 #include <d3d11.h>
 #include <directxmath.h>
@@ -52,8 +53,10 @@ public:
 
     // Lifecycle
     virtual void CreateBuffers(ID3D11Device* Device);
-    void SetGame(Game* game) { GamePtr = game; }
+    void SetGame(Game* game);
     Game* GetGame() const { return GamePtr; }
+    Scene* GetScene() const noexcept { return RegisteredScene; }
+    ComponentId GetComponentId() const noexcept { return SceneComponentId; }
     /** Per-frame: world transform and object constants from the frame snapshot. No GPU calls. */
     void Update();
     virtual void Tick(float deltaTime);
@@ -210,8 +213,13 @@ protected:
 
 private:
     friend class Game;
+    friend class Scene;
     // Separate from GamePtr: components may be configured with a game before registration.
-    Game* RegisteredOwner = nullptr;
+    Scene* RegisteredScene = nullptr;
+    ComponentId SceneComponentId = 0;
+    std::string SceneName;
+    std::string SceneTypeName; // assigned by Scene on addition, independent of instance name
+    Game* RenderOwner = nullptr;
     std::string VertexShaderName;
     std::string PixelShaderName;
     ComponentShaderVariant ShaderVariants[2];

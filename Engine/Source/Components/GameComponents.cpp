@@ -50,6 +50,12 @@ GameComponent::GameComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm:
 
 GameComponent::~GameComponent() = default;
 
+void GameComponent::SetGame(Game* game)
+{
+    GamePtr = game;
+    for (auto& instance : InstanceArray) instance->SetGame(game);
+}
+
 GameComponent* GameComponent::CreateInstance(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm::vec4 Color)
 {
     std::unique_ptr<GameComponent> NewComponent = std::make_unique<GameComponent>(pos, rot, scale, Color);
@@ -222,6 +228,7 @@ void GameComponent::SetRotationQuat(const glm::quat& rotQuat)
 
 bool GameComponent::SetParent(GameComponent* parent)
 {
+    if (RegisteredScene && parent && parent->RegisteredScene != RegisteredScene) return false;
     for (GameComponent* ancestor = parent; ancestor != nullptr; ancestor = ancestor->Parent)
     {
         if (ancestor == this)

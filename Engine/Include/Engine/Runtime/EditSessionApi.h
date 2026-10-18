@@ -1,0 +1,46 @@
+#pragma once
+#include <Engine/Runtime/SceneModuleApi.h>
+
+#define ENGINE_EDIT_API_VERSION 2u
+enum EngineEditState : uint32_t { EngineEditing = 0, EnginePlaying = 1, EnginePaused = 2 };
+enum EngineEditControl : uint32_t { EnginePlay = 0, EngineStop = 1, EnginePause = 2, EngineResume = 3 };
+
+// Module-owned context. Same thread, no exceptions/reentry, callback strings copied
+// by caller. Invalid after factory.destroy, which MUST precede HWND destruction/unload.
+struct EngineEditSessionApi
+{
+    uint32_t version;
+    void* context;
+    EngineSceneApi scene; // ALWAYS the persistent edit scene; mutations locked in Play/Pause
+    uint32_t (ENGINE_MODULE_CALL *control)(void*, uint32_t command);
+    uint32_t (ENGINE_MODULE_CALL *getState)(void*, uint32_t* state);
+    uint32_t (ENGINE_MODULE_CALL *readActiveScene)(void*, EngineSceneInfo*, EngineSceneObjectVisitor, void*);
+    uint32_t (ENGINE_MODULE_CALL *setParent)(void*, uint64_t child, uint64_t parent, uint32_t inheritScale);
+    uint32_t (ENGINE_MODULE_CALL *attachViewport)(void*, void* hwnd, uint32_t width, uint32_t height);
+    uint32_t (ENGINE_MODULE_CALL *resizeViewport)(void*, uint32_t width, uint32_t height);
+    uint32_t (ENGINE_MODULE_CALL *camera)(void*, float right, float up, float forward, float yaw, float pitch, float zoom);
+    uint32_t (ENGINE_MODULE_CALL *frame)(void*, double dt); // ticks once only in Playing, then renders if attached
+    // Absolute UTF-8 paths. Optional caller-owned error buffer (capacity includes NUL).
+    uint32_t (ENGINE_MODULE_CALL *saveScene)(void*, const char* path, char* error, uint32_t capacity);
+    // Edit only; newSceneId is zero on failure. Success invalidates all previous object IDs.
+    uint32_t (ENGINE_MODULE_CALL *loadScene)(void*, const char* path, uint64_t* newSceneId, char* error, uint32_t capacity);
+};
+struct EngineEditModuleApi
+{
+    uint32_t version;
+    // engineContentRoot: absolute UTF-8 EngineContent path (shader root in this DLL).
+    // Does NOT call EngineModuleApi create/start/update. Failure leaves output unchanged.
+    int (ENGINE_MODULE_CALL *create)(const char* engineContentRoot, EngineEditSessionApi* output);
+    void (ENGINE_MODULE_CALL *destroy)(void* context);
+};
+typedef int (ENGINE_MODULE_CALL *EngineGetEditModuleApiFn)(uint32_t, uint32_t outputSize, EngineEditModuleApi*);
+// Optional Editor export, called between Editor.create and start. nullptr unbinds
+// before stop/destroy. Editor must copy table, route calls to engine thread, not destroy it.
+typedef int (ENGINE_MODULE_CALL *EngineBindEditSessionFn)(uint32_t, uint32_t, void* editorSession, const EngineEditSessionApi*);
+
+inline bool IsCompleteEditSessionApi(const EngineEditSessionApi& api) noexcept
+{
+    return api.version == ENGINE_EDIT_API_VERSION && api.context && IsCompleteSceneApi(api.scene) &&
+        api.control && api.getState && api.readActiveScene && api.setParent && api.attachViewport &&
+        api.resizeViewport && api.camera && api.frame && api.saveScene && api.loadScene;
+}

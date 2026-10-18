@@ -31,6 +31,20 @@
   <ItemDefinitionGroup><ClCompile><AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)ThirdParty\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories></ClCompile></ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Base\Base.cpp" />
+    <ClCompile Include="Source\Scene\Scene.cpp" />
+    <ClCompile Include="Source\Scene\SceneCommands.cpp" />
+    <ClCompile Include="Source\Scene\SceneDocument.cpp" />
+    <ClInclude Include="Include\Engine\Scene\SceneDocument.h" />
+    <ClCompile Include="Source\Runtime\SceneEditSession.cpp" />
+    <ClCompile Include="Source\Runtime\GameEditModule.cpp" />
+    <ClInclude Include="Include\Engine\Runtime\EditSessionApi.h" />
+    <ClInclude Include="Include\Engine\Runtime\GameSceneApi.h" />
+    <ClInclude Include="Include\Engine\Runtime\GameWindowApi.h" />
+    <ClInclude Include="Include\Engine\Runtime\SceneEditSession.h" />
+    <ClInclude Include="Include\Engine\Runtime\GameEditModule.h" />
+    <ClInclude Include="Include\Engine\Scene\SceneCommands.h" />
+    <ClInclude Include="Include\Engine\Runtime\SceneModuleApi.h" />
+    <ClInclude Include="Include\Engine\Scene\Scene.h" />
     <ClCompile Include="Source\Base\Config\BaseResources.cpp" />
     <ClCompile Include="Source\Base\Config\BaseGameConfig.cpp" />
     <ClInclude Include="Include\Engine\Base\Base.h" />
@@ -57,6 +71,8 @@
     <ClCompile Include="Source\Resources\Paths.cpp" />
     <ClCompile Include="Source\Resources\VirtualFileSystem.cpp" />
     <ClInclude Include="Include\Engine\Components\GameComponents.h" />
+    <ClInclude Include="Include\Engine\Components\ComponentAnnotations.h" />
+    <ClInclude Include="Include\Engine\Components\ComponentType.h" />
     <ClInclude Include="Include\Engine\Components\Light\CubeMap.h" />
     <ClInclude Include="Include\Engine\Components\Light\PointLightComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\CubeComponent.h" />
