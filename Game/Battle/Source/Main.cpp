@@ -23,7 +23,7 @@ int main(int argc, char** argv)
 {
     bool smoke = false;
     bool bench = false;
-    uint64_t benchFrames = 0;
+    uint64_t benchFrames = 600;
     uint64_t warmupFrames = 150;
     BattleGame::Settings settings;
     uint64_t frameLimit = 0;
@@ -34,7 +34,15 @@ int main(int argc, char** argv)
         {
             const std::string argument = argv[i];
             if (argument == "--smoke") { smoke = true; continue; }
-            if (argument == "--bench" && i + 1 < argc) { bench = true; benchFrames = static_cast<uint64_t>(ParseInt(argv[++i], "--bench")); continue; }
+            if (argument == "--bench")
+            {
+                bench = true;
+                if (i + 1 < argc && argv[i + 1][0] != '-')
+                {
+                    benchFrames = static_cast<uint64_t>(ParseInt(argv[++i], "--bench"));
+                }
+                continue;
+            }
             if (argument == "--warmup" && i + 1 < argc) { warmupFrames = static_cast<uint64_t>(ParseInt(argv[++i], "--warmup")); continue; }
             if (argument == "--units" && i + 1 < argc) { settings.UnitCount = ParseInt(argv[++i], "--units"); continue; }
             if (argument == "--spacing" && i + 1 < argc) { settings.Spacing = static_cast<float>(ParseInt(argv[++i], "--spacing")); continue; }

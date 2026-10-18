@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BattleBench.h"
 #include "UnitMesh.h"
 
 #include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
@@ -53,12 +54,9 @@ public:
 
     /** Enables robust benchmark mode with pre-allocated sample buffers. */
     void EnableBench(uint64_t benchFrames, uint64_t warmupFrames = 150);
-    bool IsBenchMode() const { return bBenchMode; }
+    bool IsBenchMode() const { return Bench.IsBenchActive(); }
     bool IsVSyncActive() const { return bVSync; }
 
-    std::string GetGpuName() const;
-    static std::string GetCpuName();
-    static std::string GetGitCommit();
     void PrintBenchHeader() const;
     std::string BuildBenchReport() const;
 
@@ -95,18 +93,7 @@ private:
     uint64_t InstancesSum = 0;
     double LastTimestampMs = 0.0;
 
-    // Benchmark mode with bounded, pre-allocated sample arrays
-    bool bBenchMode = false;
+    // Benchmark mode session
+    BattleBenchSession Bench;
     uint64_t WarmupFrames = 10;
-    uint64_t BenchTargetFrames = 0;
-    uint64_t GpuSamplesExpected = 0;
-    size_t SampleCapacity = 0;
-    size_t CpuSampleCount = 0;
-    size_t GpuSampleCount = 0;
-    std::vector<double> CpuFrameSamples;
-    std::vector<double> GpuFrameSamples;
-    bool bCpuOverflowWarned = false;
-    bool bGpuOverflowWarned = false;
-    uint64_t LastSeenGpuSamples = 0;
-    bool bVsyncViolation = false;
 };

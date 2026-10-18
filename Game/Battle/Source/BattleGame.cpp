@@ -7,10 +7,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <filesystem>
-#include <fstream>
 #include <glm/trigonometric.hpp>
-#include <intrin.h>
 #include <iostream>
 #include <memory>
 #include <random>
@@ -23,17 +20,6 @@ namespace
     {
         using Clock = std::chrono::steady_clock;
         return std::chrono::duration<double, std::milli>(Clock::now().time_since_epoch()).count();
-    }
-
-    double Percentile(const std::vector<double>& sorted, double p)
-    {
-        if (sorted.empty()) return 0.0;
-        if (sorted.size() == 1) return sorted.front();
-        const double rank = p * static_cast<double>(sorted.size() - 1);
-        const size_t lower = static_cast<size_t>(std::floor(rank));
-        const size_t upper = static_cast<size_t>(std::ceil(rank));
-        const double weight = rank - static_cast<double>(lower);
-        return sorted[lower] * (1.0 - weight) + sorted[upper] * weight;
     }
 
     template <class T>
@@ -199,20 +185,8 @@ void BattleGame::BuildScene(const Settings& settings)
 
 void BattleGame::EnableBench(uint64_t benchFrames, uint64_t warmupFrames)
 {
-    bBenchMode = true;
-    BenchTargetFrames = benchFrames;
+    Bench.Initialize(benchFrames, warmupFrames, GpuTimerLatency);
     WarmupFrames = warmupFrames;
-    GpuSamplesExpected = benchFrames;
-
-    SampleCapacity = static_cast<size_t>(benchFrames + 128);
-    CpuFrameSamples.assign(SampleCapacity, 0.0);
-    GpuFrameSamples.assign(SampleCapacity, 0.0);
-    CpuSampleCount = 0;
-    GpuSampleCount = 0;
-    bCpuOverflowWarned = false;
-    bGpuOverflowWarned = false;
-    LastSeenGpuSamples = 0;
-    bVsyncViolation = false;
 
     // Run warmup + bench + latency frames to retire in-flight GPU queries.
     SetFrameLimit(warmupFrames + benchFrames + static_cast<uint64_t>(GpuTimerLatency));
@@ -227,11 +201,10 @@ void BattleGame::PreUpdate(float deltaTime)
         UpdateUnits(deltaTime);
     }
 
-    if (bBenchMode)
+    if (Bench.IsBenchActive())
     {
         if (bVSync)
         {
-            bVsyncViolation = true;
             std::cerr << "Error: VSync is enabled during benchmark, measurement is invalid!" << std::endl;
             PostQuitMessage(1);
             return;
@@ -240,47 +213,17 @@ void BattleGame::PreUpdate(float deltaTime)
         const double now = NowMs();
         const uint64_t frameIdx = GetFrameIndex();
 
-        if (frameIdx <= WarmupFrames)
+        if (frameIdx <= Bench.GetWarmupFrames())
         {
-            LastSeenGpuSamples = GpuTimerSamplesReady;
+            Bench.OnWarmupFrame(GpuTimerSamplesReady);
         }
         else
         {
-            // Record CPU frame duration without allocations
-            if (LastTimestampMs > 0.0 && CpuSampleCount < BenchTargetFrames)
+            if (LastTimestampMs > 0.0)
             {
-                if (CpuSampleCount < SampleCapacity)
-                {
-                    CpuFrameSamples[CpuSampleCount++] = now - LastTimestampMs;
-                }
-                else if (!bCpuOverflowWarned)
-                {
-                    bCpuOverflowWarned = true;
-                    std::cerr << "Warning: CPU sample buffer overflow, stopping sample recording." << std::endl;
-                }
+                Bench.RecordCpuSample(now - LastTimestampMs);
             }
-
-            // Record GPU timer sample when a new query result has been retired
-            if (GpuTimerSamplesReady != LastSeenGpuSamples)
-            {
-                const uint64_t newSamples = GpuTimerSamplesReady - LastSeenGpuSamples;
-                LastSeenGpuSamples = GpuTimerSamplesReady;
-                for (uint64_t s = 0; s < newSamples; ++s)
-                {
-                    if (GpuSampleCount < BenchTargetFrames)
-                    {
-                        if (GpuSampleCount < SampleCapacity)
-                        {
-                            GpuFrameSamples[GpuSampleCount++] = static_cast<double>(LastGpuFrameMs);
-                        }
-                        else if (!bGpuOverflowWarned)
-                        {
-                            bGpuOverflowWarned = true;
-                            std::cerr << "Warning: GPU sample buffer overflow, stopping sample recording." << std::endl;
-                        }
-                    }
-                }
-            }
+            Bench.RecordGpuSamples(GpuTimerSamplesReady, LastGpuFrameMs);
 
             ++MeasuredFrames;
             FrameMsSum += (LastTimestampMs > 0.0 ? (now - LastTimestampMs) : 0.0);
@@ -364,241 +307,16 @@ uint32_t BattleGame::CountForLod(int level) const
     return total;
 }
 
-std::string BattleGame::GetGpuName() const
-{
-    ID3D11Device* device = GetDevice();
-    if (!device) return "unknown";
-
-    Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
-    if (FAILED(device->QueryInterface(__uuidof(IDXGIDevice), reinterpret_cast<void**>(dxgiDevice.GetAddressOf()))))
-    {
-        return "unknown";
-    }
-    Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
-    if (FAILED(dxgiDevice->GetAdapter(adapter.GetAddressOf())))
-    {
-        return "unknown";
-    }
-    DXGI_ADAPTER_DESC desc{};
-    if (FAILED(adapter->GetDesc(&desc)))
-    {
-        return "unknown";
-    }
-
-    char buffer[256] = {};
-    WideCharToMultiByte(CP_UTF8, 0, desc.Description, -1, buffer, sizeof(buffer), nullptr, nullptr);
-    return std::string(buffer);
-}
-
-std::string BattleGame::GetCpuName()
-{
-    int cpuInfo[4] = {};
-    __cpuid(cpuInfo, static_cast<int>(0x80000000));
-    const unsigned int maxExtendedId = static_cast<unsigned int>(cpuInfo[0]);
-    if (maxExtendedId < 0x80000004)
-    {
-        return "unknown";
-    }
-
-    char brand[49] = {};
-    __cpuid(reinterpret_cast<int*>(brand), static_cast<int>(0x80000002));
-    __cpuid(reinterpret_cast<int*>(brand + 16), static_cast<int>(0x80000003));
-    __cpuid(reinterpret_cast<int*>(brand + 32), static_cast<int>(0x80000004));
-    brand[48] = '\0';
-
-    const char* start = brand;
-    while (*start == ' ') ++start;
-    return std::string(start);
-}
-
-std::string BattleGame::GetGitCommit()
-{
-    char* envCommit = nullptr;
-    size_t envLen = 0;
-    if (_dupenv_s(&envCommit, &envLen, "GIT_COMMIT") == 0 && envCommit)
-    {
-        std::string res(envCommit);
-        free(envCommit);
-        if (!res.empty()) return res;
-    }
-    if (_dupenv_s(&envCommit, &envLen, "ENGINE_GIT_COMMIT") == 0 && envCommit)
-    {
-        std::string res(envCommit);
-        free(envCommit);
-        if (!res.empty()) return res;
-    }
-
-    try
-    {
-        std::filesystem::path cur = std::filesystem::current_path();
-        for (int i = 0; i < 6; ++i)
-        {
-            const std::filesystem::path gitPath = cur / ".git";
-            if (std::filesystem::exists(gitPath))
-            {
-                if (std::filesystem::is_directory(gitPath))
-                {
-                    const std::filesystem::path headFile = gitPath / "HEAD";
-                    if (std::filesystem::exists(headFile))
-                    {
-                        std::ifstream is(headFile);
-                        std::string line;
-                        if (std::getline(is, line))
-                        {
-                            while (!line.empty() && (line.back() == '\r' || line.back() == '\n' || line.back() == ' '))
-                                line.pop_back();
-                            if (line.rfind("ref: ", 0) == 0)
-                            {
-                                const std::filesystem::path refPath = gitPath / line.substr(5);
-                                if (std::filesystem::exists(refPath))
-                                {
-                                    std::ifstream refIs(refPath);
-                                    std::string sha;
-                                    if (std::getline(refIs, sha))
-                                    {
-                                        while (!sha.empty() && (sha.back() == '\r' || sha.back() == '\n' || sha.back() == ' '))
-                                            sha.pop_back();
-                                        if (sha.size() >= 7) return sha.substr(0, 7);
-                                    }
-                                }
-                            }
-                            else if (line.size() >= 7)
-                            {
-                                return line.substr(0, 7);
-                            }
-                        }
-                    }
-                }
-                else if (std::filesystem::is_regular_file(gitPath))
-                {
-                    std::ifstream is(gitPath);
-                    std::string line;
-                    if (std::getline(is, line) && line.rfind("gitdir: ", 0) == 0)
-                    {
-                        std::string dir = line.substr(8);
-                        while (!dir.empty() && (dir.back() == '\r' || dir.back() == '\n' || dir.back() == ' '))
-                            dir.pop_back();
-                        std::filesystem::path worktreeGit(dir);
-                        std::filesystem::path headFile = worktreeGit / "HEAD";
-                        if (std::filesystem::exists(headFile))
-                        {
-                            std::ifstream headIs(headFile);
-                            std::string hline;
-                            if (std::getline(headIs, hline))
-                            {
-                                while (!hline.empty() && (hline.back() == '\r' || hline.back() == '\n' || hline.back() == ' '))
-                                    hline.pop_back();
-                                if (hline.rfind("ref: ", 0) == 0)
-                                {
-                                    std::filesystem::path refPath = worktreeGit / hline.substr(5);
-                                    if (!std::filesystem::exists(refPath))
-                                    {
-                                        std::filesystem::path commondirFile = worktreeGit / "commondir";
-                                        if (std::filesystem::exists(commondirFile))
-                                        {
-                                            std::ifstream cIs(commondirFile);
-                                            std::string cdir;
-                                            if (std::getline(cIs, cdir))
-                                            {
-                                                while (!cdir.empty() && (cdir.back() == '\r' || cdir.back() == '\n' || cdir.back() == ' '))
-                                                    cdir.pop_back();
-                                                refPath = worktreeGit / cdir / hline.substr(5);
-                                            }
-                                        }
-                                    }
-                                    if (std::filesystem::exists(refPath))
-                                    {
-                                        std::ifstream refIs(refPath);
-                                        std::string sha;
-                                        if (std::getline(refIs, sha))
-                                        {
-                                            while (!sha.empty() && (sha.back() == '\r' || sha.back() == '\n' || sha.back() == ' '))
-                                                sha.pop_back();
-                                            if (sha.size() >= 7) return sha.substr(0, 7);
-                                        }
-                                    }
-                                }
-                                else if (hline.size() >= 7)
-                                {
-                                    return hline.substr(0, 7);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (!cur.has_parent_path() || cur == cur.parent_path()) break;
-            cur = cur.parent_path();
-        }
-    }
-    catch (...) {}
-
-    return "unknown";
-}
-
 void BattleGame::PrintBenchHeader() const
 {
     const int width = DisplayPtr ? DisplayPtr->GetWidth() : 0;
     const int height = DisplayPtr ? DisplayPtr->GetHeight() : 0;
-#ifdef _DEBUG
-    const char* config = "Debug";
-#else
-    const char* config = "Release";
-#endif
-
-    std::cout << "=== Battle Benchmark Header ===\n"
-              << "Git-Commit: " << GetGitCommit() << "\n"
-              << "Configuration: " << config << "\n"
-              << "CPU: " << GetCpuName() << "\n"
-              << "GPU: " << GetGpuName() << "\n"
-              << "Resolution: " << width << "x" << height << "\n"
-              << "VSync: " << (bVSync ? "enabled (INVALID)" : "disabled") << "\n"
-              << "Units: " << Config.UnitCount << "\n"
-              << "Warmup: " << WarmupFrames << " frames\n"
-              << "Bench-Frames: " << BenchTargetFrames << " frames\n"
-              << "Note: GPU timer queries lag behind CPU by GpuTimerLatency=" << GpuTimerLatency << " frames.\n"
-              << "===============================" << std::endl;
+    Bench.PrintHeader(width, height, bVSync, Config.UnitCount, GpuTimerLatency, GetDevice());
 }
 
 std::string BattleGame::BuildBenchReport() const
 {
-    std::vector<double> cpuSorted(CpuFrameSamples.begin(), CpuFrameSamples.begin() + CpuSampleCount);
-    std::sort(cpuSorted.begin(), cpuSorted.end());
-
-    std::vector<double> gpuSorted(GpuFrameSamples.begin(), GpuFrameSamples.begin() + GpuSampleCount);
-    std::sort(gpuSorted.begin(), gpuSorted.end());
-
-    const double cpuMedian = Percentile(cpuSorted, 0.50);
-    const double cpuP95 = Percentile(cpuSorted, 0.95);
-    const double cpuP99 = Percentile(cpuSorted, 0.99);
-
-    const double gpuMedian = Percentile(gpuSorted, 0.50);
-    const double gpuP95 = Percentile(gpuSorted, 0.95);
-    const double gpuP99 = Percentile(gpuSorted, 0.99);
-
-    const bool bGpuReliable = (GpuSamplesExpected > 0) && (GpuSampleCount * 100 >= GpuSamplesExpected * 90);
-    const char* gpuStatus = bGpuReliable ? "reliable" : "unreliable";
-
-#ifdef _DEBUG
-    const char* config = "Debug";
-#else
-    const char* config = "Release";
-#endif
-
-    char buffer[1024];
-    std::snprintf(buffer, sizeof(buffer),
-                  "battle-bench-result git=%s config=%s units=%d frames=%llu warmup=%llu cpu_median=%.2f cpu_p95=%.2f cpu_p99=%.2f gpu_median=%.2f gpu_p95=%.2f gpu_p99=%.2f gpu_ready=%zu gpu_expected=%llu gpu_status=%s",
-                  GetGitCommit().c_str(),
-                  config,
-                  Config.UnitCount,
-                  static_cast<unsigned long long>(CpuSampleCount),
-                  static_cast<unsigned long long>(WarmupFrames),
-                  cpuMedian, cpuP95, cpuP99,
-                  gpuMedian, gpuP95, gpuP99,
-                  GpuSampleCount,
-                  static_cast<unsigned long long>(GpuSamplesExpected),
-                  gpuStatus);
-    return buffer;
+    return Bench.BuildReport(Config.UnitCount, Bench.GetWarmupFrames());
 }
 
 std::string BattleGame::BuildReport() const
