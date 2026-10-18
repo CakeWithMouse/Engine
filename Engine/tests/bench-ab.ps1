@@ -11,8 +11,7 @@ param(
     [int]$Frames = 600,
     [int]$Warmup = 150,
     [switch]$NoBuild,
-    [string]$MainRef = 'main',
-    [switch]$CleanWorktree
+    [string]$MainRef = 'main'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -342,7 +341,7 @@ try {
         }
     }
 
-    if ($CleanWorktree -and (Test-Path $WorktreeDir)) {
+    if (Test-Path $WorktreeDir) {
         Write-Host "[Cleanup] Removing worktree..." -ForegroundColor Gray
         & git -C $RepoRoot worktree remove $WorktreeDir --force 2>$null
     }
