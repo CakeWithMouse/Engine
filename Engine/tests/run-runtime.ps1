@@ -59,7 +59,7 @@ foreach ($mode in @('game','editor')) {
     $log = Run $mode $runtime "--project `"$project`" --mode $mode --frames 3"
     Ordered $log @('EngineStarting','ResourcesReady','EngineReady','ModuleLoaded',"${prefix}Create","${prefix}Start")
     Ordered $log @("${prefix}Updates=3", "${prefix}Stop", "${prefix}Destroy", 'ModuleUnloaded', 'ResourcesStopped', 'EngineStopped')
-    $frameEvent = if ($mode -eq 'editor') { 'EngineFrameEnd (viewport)' } else { 'EngineFrameEnd (stub)' }
+    $frameEvent = if ($mode -eq 'editor') { 'EngineFrameEnd (viewport)' } else { 'EngineFrameEnd (game window)' }
     Require ((Count $log $frameEvent) -eq 3) 'Incorrect frame count'
     Require ((Count $log "${prefix}Destroy") -eq 1) 'Session must be destroyed exactly once'
     if ($mode -eq 'editor') {
@@ -67,11 +67,15 @@ foreach ($mode in @('game','editor')) {
         Ordered $log @('ViewportReady', 'EditorViewportAttach ok', 'EngineRender (viewport)', 'ViewportStopped', 'EditorStop')
         Require ((Count $log 'EngineRender (viewport)') -eq 3) 'Incorrect viewport frame count'
     } else {
-        Ordered $log @('GameUpdate', 'EngineUpdate', 'EngineRender')
+        Ordered $log @('GameUpdate', 'EngineFrame (game window)', 'EngineFrameEnd (game window)')
         Require ((Count $log 'GameUpdate') -eq 3) 'Incorrect update count'
     }
     Pass $mode
 }
+
+$windowLog = Run 'game-window' $runtime "--project `"$project`" --mode game --frames 3"
+Require ($windowLog.Contains('EngineFrame (game window)')) 'Game window frame not found in log'
+Pass 'game window'
 
 $log = Run 'engine-failure' $runtime "--project `"$project`" --mode game --frames 3 --test-fail-engine" 1
 Require ($log -notmatch 'ModuleLoaded|GameCreate|EngineReady') 'Module called after engine failure'
@@ -119,7 +123,8 @@ $log = Run 'editor-no-game' $runtime "--project `"$missing`" --mode editor --fra
 Require ($log -match 'EditorUpdates=1' -and $log -notmatch 'GameCreate') 'Editor requires game DLL'
 Pass 'editor without game DLL'
 
-$log = Run 'interactive-exit' $runtime "--project `"$project`" --mode game" 0 "`nq`n"
+$interactive = ProjectFile "$work/interactive" "$output/Runtime/Projects/RuntimeExample/Game.dll"
+$log = Run 'interactive-exit' $runtime "--project `"$interactive`" --mode game" 0 "`nq`n"
 Require ($log -match 'GameUpdates=1') 'Interactive Enter/q contract failed'
 Pass 'interactive exit'
 
