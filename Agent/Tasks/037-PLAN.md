@@ -79,10 +79,10 @@
 ---
 
 ## 4. Backlog
-1. `Game/Katamari/Katamari.vcxproj:43-44`: вложенный тег `<Target>` внутри `<Project>` (корневой коммит f9f4c97, есть в main; для исправления требуется правка `Game/`, нужно явное «да» архитектора).
+1. `Game/Katamari/Katamari.vcxproj:43-44`: [x] Исправлено в шаге 0.1 (коммит `9764f4b fix(katamari)`): тег `Target` вынесен в корень проекта, `build.ps1 -Target Katamari` даёт штатное сообщение об Assimp.
 2. Тестирование `Enter/q`: интерактивный выход не покрыт тестами для оконных игр.
-3. `run-runtime.ps1`: ветка 'game window' дублирует цикл game.
-4. `run-runtime.ps1`: регэксп `GameUpdates=1` ошибочно совпадает со строкой `GameUpdates=12`.
+3. `run-runtime.ps1`: [x] Исправлено в шаге 0.2 (коммит `b35891d test(runtime)`): проверка 'game window' использует лог `--frames 3` без повторного запуска процесса, проверяется ровно 3 кадра `EngineFrame (game window)` и 0 `(stub)`.
+4. `run-runtime.ps1`: [x] Исправлено в шаге 0.2 (коммит `b35891d test(runtime)`): регэксп переведён на `(?m)^GameUpdates=1\r?$`.
 5. Хеши путей VFS (вернуться при проектировании реестра ассетов или формата pak).
 6. Предупреждение компилятора C4996 (`getenv`) в `Engine/Source/Base/Base.cpp:636`: вынести чтение переменных окружения в кэшируемую инициализацию.
 7. Предупреждение `VCINSTALLDIR` при сборке `EditorModule.vcxproj` через `windeployqt`.
@@ -100,13 +100,15 @@
      `EngineTests.exe : [VfsRead] Dynamic mount '/_ext_7130158442022204148' -> 'C:/Users/Yuri/Documents/GitHub/temp-wt-a1/Engine/tests/ShaderIncludeFixture' (path 'C:/Users/Yuri/Documents/GitHub/temp-wt-a1/Engine/tests/ShaderIncludeFixture/a.hlsl' outside registered mounts)`
    - В `run.ps1` запуск выполняется напрямую оператором вызова: `& (Join-Path $PSScriptRoot "../build/x64/$Configuration/EngineTests.exe")`. Потоки stdout/stderr наследуются процессом. При перенаправлении `2>&1` PowerShell упаковывает строки `stderr` в записи ошибок `RemoteException / NativeCommandError`, которые успешно отфильтровываются `Select-String`.
    - Положительный контроль подтверждён: на родителе 1 совпадение, на текущем коммите `0ca354f` — 0 совпадений. Доказательство Фазы 1 полностью действительно.
-2. **A2. Аудит предупреждений сборки:**
-   - Выполнена полная пересборка Debug (`/t:Rebuild`) через `MSBuild.exe Engine\Engine.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v145 /m:1 /v:m`. Сборка завершилась с кодом 0.
-   - Список всех уникальных предупреждений:
-     - `Engine/Source/Base/Base.cpp(636,26): warning C4996: 'getenv'` (известно, бэклог #6).
-     - `Editor/EditorModule.vcxproj: warning : Cannot find any version of the dxcompiler.dll and dxil.dll` (предупреждение утилиты `windeployqt`).
-     - `Editor/EditorModule.vcxproj: warning : Cannot find Visual Studio installation directory, VCINSTALLDIR is not set` (известно, бэклог #7, вызов `windeployqt`).
-   - Новых предупреждений компилятора CL: **0**.
+2. **A2. Аудит предупреждений сборки (Шаг 0.3):**
+   - Выполнена полная пересборка Debug (`/t:Rebuild`) через `MSBuild.exe Engine\Engine.sln /p:Configuration=Debug /p:Platform=x64 /p:PlatformToolset=v145 /m:1 /v:m`.
+   - Полный лог сборки сохранён в файл: `Engine/build/rebuild-debug.log`. Сборка завершилась с кодом 0 (13 проектов, 0 ошибок).
+   - **ПОЛНЫЙ уникальный список всех предупреждений из файла лога:**
+     1. `Engine/Source/Base/Base.cpp(636,26): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [Engine/Engine.vcxproj]`
+     2. `EXEC : warning : Cannot find any version of the dxcompiler.dll and dxil.dll. [Editor/EditorModule.vcxproj]` (предупреждение утилиты `windeployqt`)
+     3. `EXEC : warning : Cannot find Visual Studio installation directory, VCINSTALLDIR is not set. [Editor/EditorModule.vcxproj]` (предупреждение утилиты `windeployqt`)
+   - Новых предупреждений компилятора CL: **0** (всего 1 предупреждение CL C4996 во всём решении).
+
 3. **A3. Реальные счётчики строк (`git grep -c "^"`):**
    - `Engine/tests/edit-session/SceneJsonTests.h`: **293** строки (< 500).
    - `Engine/tests/edit-session/EditSessionTests.cpp`: **209** строк (< 500).
