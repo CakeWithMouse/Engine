@@ -115,6 +115,7 @@ int wmain(int argc, wchar_t** argv)
         {
             SceneEditSession jsonSession({types, 1});
             ExerciseJson(jsonSession.GetApi(), "Probe", true);
+            ExerciseJsonLocale();
         }
         {
             GameEditModule jsonModule(module, content);

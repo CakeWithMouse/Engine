@@ -1,7 +1,9 @@
 // Included after the shared test helpers; uses the public API, no Editor.
 #include <Engine/Scene/SceneDocument.h>
 #include "../../ThirdParty/nlohmann/json.hpp"
+#include <clocale>
 #include <fstream>
+#include <iostream>
 
 static void ExerciseJson(const EngineEditSessionApi& api, const char* type, bool local = false,
     const std::filesystem::path& viewportContent = {})
@@ -101,4 +103,85 @@ static void ExerciseJson(const EngineEditSessionApi& api, const char* type, bool
     Check(api.loadScene(api.context, path.c_str(), &loaded, error, sizeof(error)) == EngineSceneOk && Read(api).rows.empty(), "load empty scene");
     std::filesystem::remove(file);
     Check(api.loadScene(api.context, path.c_str(), &loaded, error, sizeof(error)) == EngineSceneIoError && !loaded, "missing file");
+}
+
+struct LocaleGuard
+{
+    std::string saved;
+    LocaleGuard()
+    {
+        const char* cur = std::setlocale(LC_ALL, nullptr);
+        saved = cur ? cur : "C";
+    }
+    ~LocaleGuard()
+    {
+        std::setlocale(LC_ALL, saved.c_str());
+    }
+};
+
+static void ExerciseJsonLocale()
+{
+    LocaleGuard guard;
+
+    SceneSnapshot snapshot;
+    snapshot.name = "LocaleTestScene";
+    SceneComponentSnapshot comp;
+    comp.id = 1;
+    comp.name = "LocaleObject";
+    comp.typeName = "Probe";
+    comp.parentId = 0;
+    comp.inheritParentScale = true;
+    comp.transform.position = {0.5f, -1.25f, 1e-7f};
+    comp.transform.rotation = {1.0f, 0.0f, 0.0f, 0.0f};
+    comp.transform.scale = {123456.75f, 1.0f, 1.0f};
+    snapshot.components.push_back(comp);
+
+    // 1. Under "C" locale
+    std::setlocale(LC_ALL, "C");
+    const std::string cSerialized = SceneDocument::Serialize(snapshot);
+    const SceneSnapshot cParsed = SceneDocument::Parse(cSerialized);
+    Check(cParsed.components.size() == 1, "c-locale components size");
+    Check(cParsed.components[0].transform.position.x == 0.5f, "c-locale position.x");
+    Check(cParsed.components[0].transform.position.y == -1.25f, "c-locale position.y");
+    Check(cParsed.components[0].transform.position.z == 1e-7f, "c-locale position.z");
+    Check(cParsed.components[0].transform.scale.x == 123456.75f, "c-locale scale.x");
+
+    // 2. Under system default locale: setlocale(LC_ALL, "")
+    std::setlocale(LC_ALL, "");
+    const std::string sysSerialized = SceneDocument::Serialize(snapshot);
+    Check(sysSerialized == cSerialized, "system locale Serialize matches C locale byte-for-byte");
+    const SceneSnapshot sysParsed = SceneDocument::Parse(sysSerialized);
+    Check(sysParsed.components[0].transform.position.x == 0.5f, "sys-locale position.x");
+    Check(sysParsed.components[0].transform.position.y == -1.25f, "sys-locale position.y");
+    Check(sysParsed.components[0].transform.position.z == 1e-7f, "sys-locale position.z");
+    Check(sysParsed.components[0].transform.scale.x == 123456.75f, "sys-locale scale.x");
+
+    // 3. Under comma-decimal locale
+    const char* commaCandidates[] = {"ru-RU", "de-DE", "Russian_Russia.1251"};
+    const char* selectedLocale = nullptr;
+    for (const char* loc : commaCandidates)
+    {
+        if (std::setlocale(LC_ALL, loc) != nullptr)
+        {
+            selectedLocale = loc;
+            break;
+        }
+    }
+
+    if (!selectedLocale)
+    {
+        std::cout << "SKIP: no comma-decimal locale\n";
+    }
+    else
+    {
+        const std::string commaSerialized = SceneDocument::Serialize(snapshot);
+        Check(commaSerialized == cSerialized, "comma locale Serialize matches C locale byte-for-byte");
+        Check(commaSerialized.find("0.5") != std::string::npos, "serialized string has decimal point");
+        Check(commaSerialized.find("0,5") == std::string::npos, "serialized string has no comma in numbers");
+        const SceneSnapshot commaParsed = SceneDocument::Parse(commaSerialized);
+        Check(commaParsed.components[0].transform.position.x == 0.5f, "comma-locale position.x");
+        Check(commaParsed.components[0].transform.position.y == -1.25f, "comma-locale position.y");
+        Check(commaParsed.components[0].transform.position.z == 1e-7f, "comma-locale position.z");
+        Check(commaParsed.components[0].transform.scale.x == 123456.75f, "comma-locale scale.x");
+    }
 }
