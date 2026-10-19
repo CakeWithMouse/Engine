@@ -12,5 +12,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)../Pong/Source/Wall.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)../SunGame/Source/SunGame.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)../Battle/Source/BattleGame.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)../Battle/Source/BattleBench.cpp" />
   </ItemGroup>
 </Project>
