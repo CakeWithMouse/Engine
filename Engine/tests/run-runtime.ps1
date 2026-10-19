@@ -54,9 +54,11 @@ function ProjectFile([string]$Directory, [string]$Module) {
     return "$Directory/Project.json"
 }
 
+$gameLog = $null
 foreach ($mode in @('game','editor')) {
     $prefix = if ($mode -eq 'game') { 'Game' } else { 'Editor' }
     $log = Run $mode $runtime "--project `"$project`" --mode $mode --frames 3"
+    if ($mode -eq 'game') { $gameLog = $log }
     Ordered $log @('EngineStarting','ResourcesReady','EngineReady','ModuleLoaded',"${prefix}Create","${prefix}Start")
     Ordered $log @("${prefix}Updates=3", "${prefix}Stop", "${prefix}Destroy", 'ModuleUnloaded', 'ResourcesStopped', 'EngineStopped')
     $frameEvent = if ($mode -eq 'editor') { 'EngineFrameEnd (viewport)' } else { 'EngineFrameEnd (game window)' }
@@ -73,8 +75,8 @@ foreach ($mode in @('game','editor')) {
     Pass $mode
 }
 
-$windowLog = Run 'game-window' $runtime "--project `"$project`" --mode game --frames 3"
-Require ($windowLog.Contains('EngineFrame (game window)')) 'Game window frame not found in log'
+Require ((Count $gameLog 'EngineFrame (game window)') -eq 3) 'Incorrect game window frame count'
+Require ((Count $gameLog 'EngineFrameEnd (stub)') -eq 0) 'Stub frame found in game window log'
 Pass 'game window'
 
 $log = Run 'engine-failure' $runtime "--project `"$project`" --mode game --frames 3 --test-fail-engine" 1
@@ -125,8 +127,9 @@ Pass 'editor without game DLL'
 
 $interactive = ProjectFile "$work/interactive" "$output/Runtime/Projects/RuntimeExample/Game.dll"
 $log = Run 'interactive-exit' $runtime "--project `"$interactive`" --mode game" 0 "`nq`n"
-Require ($log -match 'GameUpdates=1') 'Interactive Enter/q contract failed'
+Require ($log -match '(?m)^GameUpdates=1\r?$') 'Interactive Enter/q contract failed'
 Pass 'interactive exit'
+
 
 $index = 0
 foreach ($arguments in @('--mode invalid --frames 3','--mode game --frames 0','--mode game --frames -1','--mode game --frames 3x','--mode game --frames 18446744073709551616','--mode game --mode editor','--mode game --unknown value')) {
