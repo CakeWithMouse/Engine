@@ -1,6 +1,12 @@
 #pragma once
-#include <d3dcompiler.h>
+
 #include <string>
+
+struct _D3D_SHADER_MACRO;
+typedef struct _D3D_SHADER_MACRO D3D_SHADER_MACRO;
+struct ID3D10Blob;
+typedef ID3D10Blob ID3DBlob;
+typedef long HRESULT;
 
 /**
  * Single HLSL compilation policy for the whole application.
@@ -9,61 +15,17 @@
  */
 namespace ShaderCompiler
 {
-    inline UINT GetCompileFlags()
-    {
-#ifdef _DEBUG
-        return D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#else
-        return D3DCOMPILE_OPTIMIZATION_LEVEL3;
-#endif
-    }
-
-    // Part of every shader cache key so blobs compiled under different policies never mix.
-    inline const char* GetPolicyTag()
-    {
-#ifdef _DEBUG
-        return "debug";
-#else
-        return "optimized";
-#endif
-    }
+    unsigned int GetCompileFlags();
+    const char* GetPolicyTag();
 
     /**
-     * Compiles an entry point from a file. #include "..." is resolved relative to the file.
+     * Compiles an entry point from a file via VFS. #include "..." is resolved via VFS relative to the file.
      * On failure returns the HRESULT and fills errorMessage (compiler output or a short reason).
      */
-    inline HRESULT CompileFromFile(const std::wstring& fileName,
-                                   const D3D_SHADER_MACRO* defines,
-                                   const char* entryPoint,
-                                   const char* target,
-                                   ID3DBlob** blob,
-                                   std::string* errorMessage = nullptr)
-    {
-        ID3DBlob* errors = nullptr;
-        const HRESULT hr = D3DCompileFromFile(fileName.c_str(),
-                                              defines,
-                                              D3D_COMPILE_STANDARD_FILE_INCLUDE,
-                                              entryPoint,
-                                              target,
-                                              GetCompileFlags(),
-                                              0,
-                                              blob,
-                                              &errors);
-        if (errorMessage)
-        {
-            if (errors)
-            {
-                *errorMessage = static_cast<const char*>(errors->GetBufferPointer());
-            }
-            else if (FAILED(hr))
-            {
-                *errorMessage = "shader file not found or unreadable";
-            }
-        }
-        if (errors)
-        {
-            errors->Release();
-        }
-        return hr;
-    }
+    HRESULT CompileFromFile(const std::wstring& fileName,
+                            const D3D_SHADER_MACRO* defines,
+                            const char* entryPoint,
+                            const char* target,
+                            ID3DBlob** blob,
+                            std::string* errorMessage = nullptr);
 }

@@ -4,11 +4,13 @@
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
 #include <Engine/Render/ShaderCompiler.h>
+#include "VfsLifecycleTests.h"
 #include <cmath>
 #include <cstring>
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 
 using Microsoft::WRL::ComPtr;
@@ -482,6 +484,73 @@ void VirtualFileSystemTests()
     CHECK(vfs.Unmount("/Engine"));
     CHECK(!vfs.Exists("/Engine/Shaders/RotatedFigure.hlsl"));
     CHECK(!vfs.Resolve("/Engine/Shaders/RotatedFigure.hlsl").has_value());
+
+    // Shader include chain via VFS: a.hlsl -> sub/b.hlsli -> ../c.hlsli
+    auto repoRoot = EnginePaths::ExecutableDirectory();
+    for (int i = 0; i < 8 && !repoRoot.empty(); ++i)
+    {
+        if (std::filesystem::exists(repoRoot / ".git") || std::filesystem::exists(repoRoot / "Engine" / "Engine.props"))
+            break;
+        repoRoot = repoRoot.parent_path();
+    }
+    const auto fixtureRoot = (repoRoot / "Engine" / "tests" / "ShaderIncludeFixture").lexically_normal();
+    std::filesystem::remove_all(fixtureRoot, ec);
+    std::filesystem::create_directories(fixtureRoot / "sub", ec);
+
+    const auto aHlsl = fixtureRoot / "a.hlsl";
+    const auto bHlsli = fixtureRoot / "sub" / "b.hlsli";
+    const auto cHlsli = fixtureRoot / "c.hlsli";
+    const auto badHlsl = fixtureRoot / "bad.hlsl";
+
+    {
+        std::ofstream out(cHlsli);
+        out << "#define VALUE_C 10.0f\n";
+    }
+    {
+        std::ofstream out(bHlsli);
+        out << "#include \"../c.hlsli\"\n#define VALUE_B (VALUE_C + 5.0f)\n";
+    }
+    {
+        std::ofstream out(aHlsl);
+        out << "#include \"sub/b.hlsli\"\n"
+            << "float4 main() : SV_Target\n"
+            << "{\n"
+            << "    return float4(VALUE_B, 0.0f, 0.0f, 1.0f);\n"
+            << "}\n";
+    }
+    {
+        std::ofstream out(badHlsl);
+        out << "#include \"missing.hlsli\"\n"
+            << "float4 main() : SV_Target\n"
+            << "{\n"
+            << "    return float4(1.0f, 0.0f, 0.0f, 1.0f);\n"
+            << "}\n";
+    }
+
+    // 1. Successful compilation of chain a.hlsl -> sub/b.hlsli -> ../c.hlsli
+    ComPtr<ID3DBlob> shaderBlob;
+    std::string compileError;
+    const HRESULT hr = ShaderCompiler::CompileFromFile(aHlsl.wstring(), nullptr, "main", "ps_5_0", shaderBlob.GetAddressOf(), &compileError);
+    CHECK(SUCCEEDED(hr));
+    CHECK(shaderBlob != nullptr);
+    CHECK(shaderBlob->GetBufferSize() > 0);
+    shaderBlob.Reset();
+
+    // 2. Missing include produces error and log
+    std::stringstream logCapture;
+    auto* prevCoutBuf = std::cout.rdbuf(logCapture.rdbuf());
+    const HRESULT badHr = ShaderCompiler::CompileFromFile(badHlsl.wstring(), nullptr, "main", "ps_5_0", shaderBlob.GetAddressOf(), &compileError);
+    std::cout.rdbuf(prevCoutBuf);
+
+    CHECK(FAILED(badHr));
+    CHECK(shaderBlob == nullptr);
+    CHECK(!compileError.empty());
+    const std::string capturedLog = logCapture.str();
+    CHECK(capturedLog.find("[ShaderCompiler] Include file not found in VFS") != std::string::npos);
+    CHECK(capturedLog.find("missing.hlsli") != std::string::npos);
+
+    // Clean up test fixture
+    std::filesystem::remove_all(fixtureRoot, ec);
 }
 
 void SceneOwnershipTests();
@@ -491,6 +560,8 @@ void SceneDeferredTests();
 int main()
 {
     const std::pair<const char*, std::function<void()>> tests[] = {
+        // Scenario A MUST run first: depends on untouched global VFS before any BaseEngine lifecycle.
+        {"vfs lifecycle A (read before engine)", VfsLifecycle_ScenarioA},
         {"scene ownership and IDs (no GPU)", SceneOwnershipTests},
         {"scene hierarchy and snapshots (no GPU)", SceneHierarchyTests},
         {"scene deferred mutations (no GPU)", SceneDeferredTests},
@@ -498,7 +569,14 @@ int main()
         {"transform hierarchy and cache", TransformHierarchy}, {"unregister hierarchy and instances", UnregisterHierarchyAndInstances},
         {"frame light snapshot", LightSnapshot}, {"forward/deferred shader variants", ShaderVariants},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
-        {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests}
+        {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests},
+        {"vfs lifecycle B (read after stop)", VfsLifecycle_ScenarioB},
+        {"vfs lifecycle C (compiler after stop)", VfsLifecycle_ScenarioC},
+        {"second run exits cleanly", VfsLifecycle_ScenarioD},
+        {"VirtualFileSystem::Mount replaces same root", VfsLifecycle_ScenarioE},
+        {"vfs mounts preserved after stop", VfsLifecycle_PreserveMountSet},
+        {"vfs project content unmounted after stop", VfsLifecycle_ContentRootReverted},
+        {"vfs premounted game restored after stop", VfsLifecycle_PreMountedGameReverted}
     };
     int failures = 0;
     for (const auto& test : tests)

@@ -1,6 +1,7 @@
 #include <Engine/Render/TextureLoader.h>
 
 #include <iostream>
+#include "../Resources/VfsRead.h"
 
 // UTF-8 file names are opened with _wfopen (paths may contain non-ASCII characters).
 #define STBI_WINDOWS_UTF8
@@ -24,11 +25,19 @@ namespace TextureLoader
             return false;
         }
 
+        const std::vector<uint8_t> fileBytes = VfsRead::ReadBytes(path);
+        const unsigned char* bufferData = fileBytes.empty() ? nullptr : fileBytes.data();
+        if (bufferData == nullptr)
+        {
+            std::cout << "Failed to load texture (VFS read failed): " << path << std::endl;
+            return false;
+        }
+
         int width = 0;
         int height = 0;
         int channels = 0;
         stbi_set_flip_vertically_on_load(flipVertically ? 1 : 0);
-        unsigned char* imageData = stbi_load(path.c_str(), &width, &height, &channels, 4);
+        unsigned char* imageData = stbi_load_from_memory(bufferData, static_cast<int>(fileBytes.size()), &width, &height, &channels, 4);
         if (!imageData)
         {
             std::cout << "Failed to load texture: " << path << std::endl;

@@ -13,6 +13,7 @@
 #include <Engine/Runtime/GameSceneApi.h>
 #include <Engine/Runtime/GameWindowApi.h>
 #include <Engine/Resources/Paths.h>
+#include "../Resources/VfsRead.h"
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/Player.h>
 #include <chrono>
@@ -387,7 +388,10 @@ public:
     }
 };
 
-BaseEngine::BaseEngine() = default;
+BaseEngine::BaseEngine()
+    : Vfs(VfsRead::GetVFS())
+{
+}
 BaseEngine::~BaseEngine() { Stop(); }
 
 bool BaseEngine::TryGetActiveSceneApi(EngineSceneApi& output) const noexcept
@@ -534,6 +538,25 @@ int BaseEngine::Run(const RuntimeLaunchOptions& options, const BaseGameConfig& c
     return result;
 }
 
+void BaseEngine::ApplyMount(std::string_view virtualRoot, const std::filesystem::path& physicalPath)
+{
+    const std::string normRoot = VirtualFileSystem::NormalizeVirtualPath(virtualRoot);
+    std::optional<std::filesystem::path> prev;
+    for (const auto& m : Vfs.GetMounts())
+    {
+        if (_stricmp(m.virtualRoot.c_str(), normRoot.c_str()) == 0)
+        {
+            prev = m.physicalPath;
+            break;
+        }
+    }
+
+    // Record rollback entry BEFORE calling Vfs.Mount so that if Mount throws,
+    // the previous mount state can still be restored during exception unwinding in Stop().
+    appliedMounts.push_back({ normRoot, prev });
+    Vfs.Mount(normRoot, physicalPath);
+}
+
 int BaseEngine::Play(const RuntimeLaunchOptions& options)
 {
     if (state != State::Ready) throw std::runtime_error("Engine is not ready");
@@ -549,10 +572,10 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             engineContent = repoRoot / "Engine" / "Content";
         }
     }
-    Vfs.Mount("/Engine", engineContent);
+    ApplyMount("/Engine", engineContent);
     if (!options.contentRoot.empty())
     {
-        Vfs.Mount("/Game", options.contentRoot);
+        ApplyMount("/Game", options.contentRoot);
     }
 
     for (const auto& mount : Vfs.GetMounts())
@@ -945,7 +968,34 @@ void BaseEngine::Stop() noexcept
     editModule.reset();
     Resources.DeInitialize();
     Resources.SetVFS(nullptr);
-    Vfs.UnmountAll();
+
+    // Revert mounts applied by this engine instance in reverse order
+    for (auto it = appliedMounts.rbegin(); it != appliedMounts.rend(); ++it)
+    {
+        try
+        {
+            if (it->previousPath.has_value())
+            {
+                Vfs.Mount(it->virtualRoot, *it->previousPath);
+            }
+            else
+            {
+                Vfs.Unmount(it->virtualRoot);
+            }
+        }
+        catch (const std::exception& error)
+        {
+            std::fprintf(stderr, "[BaseEngine] Failed to revert mount '%s': %s\n",
+                it->virtualRoot.c_str(), error.what());
+        }
+        catch (...)
+        {
+            std::fprintf(stderr, "[BaseEngine] Failed to revert mount '%s': unknown error\n",
+                it->virtualRoot.c_str());
+        }
+    }
+    appliedMounts.clear();
+
     state = State::Stopped;
     std::puts("EngineStopped");
 }
