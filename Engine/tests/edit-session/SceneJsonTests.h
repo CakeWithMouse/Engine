@@ -1,6 +1,8 @@
 // Included after the shared test helpers; uses the public API, no Editor.
 #include <Engine/Scene/SceneDocument.h>
 #include "../../ThirdParty/nlohmann/json.hpp"
+#include "../../Source/Resources/VfsRead.h"
+#include <chrono>
 #include <clocale>
 #include <fstream>
 #include <iostream>
@@ -185,3 +187,107 @@ static void ExerciseJsonLocale()
         Check(commaParsed.components[0].transform.scale.x == 123456.75f, "comma-locale scale.x");
     }
 }
+
+static void ExerciseJsonVfsWrite()
+{
+    const auto mountsBefore = VfsRead::GetVFS().GetMounts();
+
+    const auto tempDir = (std::filesystem::temp_directory_path() /
+        (L"engine-test-vfs-scenes-" + std::to_wstring(GetCurrentProcessId()) + L"-" +
+         std::to_wstring(std::chrono::steady_clock::now().time_since_epoch().count()))).lexically_normal();
+    std::error_code ec;
+    std::filesystem::create_directories(tempDir, ec);
+    Check(!ec, "create test scenes temp dir");
+
+    struct VfsScenesCleanup
+    {
+        std::filesystem::path dir;
+        ~VfsScenesCleanup()
+        {
+            VfsRead::GetVFS().Unmount("/TestScenes");
+            std::error_code ec;
+            std::filesystem::remove_all(dir, ec);
+        }
+    } cleanup{tempDir};
+
+    VfsRead::GetVFS().Mount("/TestScenes", tempDir);
+
+    const auto resolvedOpt = VfsRead::GetVFS().Resolve("/TestScenes/new.scene.json");
+    Check(resolvedOpt.has_value(), "Resolve non-existent file returns path");
+    const auto physicalPath = *resolvedOpt;
+    Check(!std::filesystem::exists(physicalPath, ec), "target file does not exist before Write");
+
+    SceneSnapshot snapshot;
+    snapshot.name = "VfsWriteTestScene";
+    SceneComponentSnapshot comp;
+    comp.id = 1;
+    comp.name = "TestObject";
+    comp.typeName = "Probe";
+    comp.parentId = 0;
+    comp.inheritParentScale = true;
+    comp.transform.position = {1.0f, 2.0f, 3.0f};
+    comp.transform.rotation = {1.0f, 0.0f, 0.0f, 0.0f};
+    comp.transform.scale = {1.0f, 1.0f, 1.0f};
+    snapshot.components.push_back(comp);
+
+    // 1. Initial write
+    SceneDocument::Write(physicalPath, snapshot);
+    Check(std::filesystem::exists(physicalPath, ec), "file exists after Write");
+    Check(VfsRead::GetVFS().Exists("/TestScenes/new.scene.json"), "VFS Exists returns true after Write");
+
+    const auto readSnapshot = SceneDocument::Read(physicalPath);
+    Check(SceneDocument::Serialize(readSnapshot) == SceneDocument::Serialize(snapshot), "Write and Read preserve Serialize");
+
+    // Check no *.tmp.* leftovers
+    for (const auto& entry : std::filesystem::directory_iterator(tempDir, ec))
+    {
+        const auto filename = entry.path().filename().wstring();
+        Check(filename.find(L".tmp.") == std::wstring::npos, "no leftover tmp file after initial write");
+    }
+
+    // 2. Repeat write replaces file
+    snapshot.name = "ReplacedVfsScene";
+    SceneDocument::Write(physicalPath, snapshot);
+    const auto replacedSnapshot = SceneDocument::Read(physicalPath);
+    Check(replacedSnapshot.name == "ReplacedVfsScene", "repeat write replaces file content");
+    Check(SceneDocument::Serialize(replacedSnapshot) == SceneDocument::Serialize(snapshot), "repeat write preserves Serialize");
+
+    for (const auto& entry : std::filesystem::directory_iterator(tempDir, ec))
+    {
+        const auto filename = entry.path().filename().wstring();
+        Check(filename.find(L".tmp.") == std::wstring::npos, "no leftover tmp file after repeat write");
+    }
+
+    // 3. Write into non-existent parent directory throws SceneDocumentError with EngineSceneIoError
+    const auto badResolvedOpt = VfsRead::GetVFS().Resolve("/TestScenes/missing_subdir/scene.json");
+    Check(badResolvedOpt.has_value(), "Resolve in missing subdir returns path");
+    const auto badPhysicalPath = *badResolvedOpt;
+    bool caughtIoError = false;
+    try
+    {
+        SceneDocument::Write(badPhysicalPath, snapshot);
+    }
+    catch (const SceneDocumentError& err)
+    {
+        if (err.status == EngineSceneIoError)
+        {
+            caughtIoError = true;
+        }
+    }
+    Check(caughtIoError, "write to non-existent parent throws SceneDocumentError with EngineSceneIoError");
+    Check(!std::filesystem::exists(badPhysicalPath, ec), "no bad file created");
+    Check(!std::filesystem::exists(tempDir / "missing_subdir", ec), "no trash directory created");
+
+    // 4. Verify unmount and cleanup, check GetMounts() matches before
+    VfsRead::GetVFS().Unmount("/TestScenes");
+    std::filesystem::remove_all(tempDir, ec);
+
+    const auto mountsAfter = VfsRead::GetVFS().GetMounts();
+    Check(mountsAfter.size() == mountsBefore.size(), "VFS mount count preserved after test");
+    for (size_t i = 0; i < mountsBefore.size(); ++i)
+    {
+        Check(mountsBefore[i].virtualRoot == mountsAfter[i].virtualRoot, "mount virtual root matches");
+        Check(mountsBefore[i].physicalPath == mountsAfter[i].physicalPath, "mount physical path matches");
+    }
+}
+
