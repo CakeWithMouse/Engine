@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BattleBench.h"
 #include "UnitMesh.h"
 
 #include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
@@ -51,6 +52,14 @@ public:
     /** One line per run: units, frame time, GPU time, draw calls, instances. */
     std::string BuildReport() const;
 
+    /** Enables robust benchmark mode with pre-allocated sample buffers. */
+    void EnableBench(uint64_t benchFrames, uint64_t warmupFrames = 150);
+    bool IsBenchMode() const { return Bench.IsBenchActive(); }
+    bool IsVSyncActive() const { return bVSync; }
+
+    void PrintBenchHeader() const;
+    std::string BuildBenchReport() const;
+
 protected:
     void PreUpdate(float deltaTime) override;
     std::array<float, 4> GetClearColor() const override { return {0.42f, 0.52f, 0.62f, 1.0f}; }
@@ -83,4 +92,8 @@ private:
     uint64_t DrawCallSum = 0;
     uint64_t InstancesSum = 0;
     double LastTimestampMs = 0.0;
+
+    // Benchmark mode session
+    BattleBenchSession Bench;
+    uint64_t WarmupFrames = 10;
 };

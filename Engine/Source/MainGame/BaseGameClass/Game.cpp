@@ -2855,6 +2855,7 @@ void Game::BeginGpuTimer()
             !disjoint.Disjoint && disjoint.Frequency > 0 && end >= begin)
         {
             LastGpuFrameMs = static_cast<float>(static_cast<double>(end - begin) * 1000.0 / static_cast<double>(disjoint.Frequency));
+            ++GpuTimerSamplesReady;
         }
         GpuTimerIssued[slot] = false;
     }

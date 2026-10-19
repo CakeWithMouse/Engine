@@ -442,6 +442,7 @@ protected:
     uint32_t TitleFrameCount = 0;
     double CpuFrameMsAccumulator = 0.0;
     float LastGpuFrameMs = 0.0f;
+    uint64_t GpuTimerSamplesReady = 0;
 
     static constexpr int GpuTimerLatency = 3;
     Microsoft::WRL::ComPtr<ID3D11Query> GpuTimerDisjoint[GpuTimerLatency];
