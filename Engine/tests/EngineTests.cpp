@@ -168,6 +168,86 @@ void ShaderVariants()
     CHECK(!game.BindComponentShaders(&component, ShaderCompileVariant::DeferredGBuffer));
 }
 
+struct TempShaderDir
+{
+    std::filesystem::path Root = std::filesystem::temp_directory_path() / "EngineTestsShaders";
+    TempShaderDir() { std::filesystem::remove_all(Root); std::filesystem::create_directories(Root / "Inc"); }
+    ~TempShaderDir() { std::error_code ec; std::filesystem::remove_all(Root, ec); }
+    std::string Write(const std::string& name, const std::string& text) const
+    {
+        const auto path = Root / name;
+        std::ofstream(path, std::ios::binary | std::ios::trunc) << text;
+        return path.generic_u8string();
+    }
+};
+
+void ShaderCompilerIncludes()
+{
+    TempShaderDir dir;
+    const std::string helper = dir.Write("Inc/Helper.hlsli", "float4 Helper() { return float4(1, 0, 0, 1); }\n");
+    const std::string surfaceA = dir.Write("SurfaceA.hlsl", "float4 Surface() { return Helper() * TINT; }\n");
+    const std::string main = dir.Write("Main.hlsl",
+        "#include \"Inc/Helper.hlsli\"\n#include \"MaterialSurface.hlsli\"\nfloat4 PSMain() : SV_Target { return Surface(); }\n");
+
+    ShaderCompiler::CompileOptions options;
+    options.Defines = {{"TINT", "0.5f"}};
+    options.IncludeOverrides["MaterialSurface.hlsli"] = surfaceA;
+    ShaderCompiler::CompileResult result = ShaderCompiler::Compile(main, "PSMain", "ps_5_0", options);
+    CHECK(result.Succeeded());
+    CHECK(result.Dependencies.size() == 3);
+    CHECK(result.Dependencies[0] == ShaderCompiler::NormalizePath(main));
+    CHECK(result.Dependencies[1] == ShaderCompiler::NormalizePath(helper));
+    CHECK(result.Dependencies[2] == ShaderCompiler::NormalizePath(surfaceA));
+
+    // Without the define the surface does not compile; the message names the overridden file.
+    options.Defines.clear();
+    result = ShaderCompiler::Compile(main, "PSMain", "ps_5_0", options);
+    CHECK(!result.Succeeded() && !result.Blob);
+    CHECK(result.Errors.find("SurfaceA.hlsl") != std::string::npos);
+
+    options.IncludeOverrides["MaterialSurface.hlsli"] = (dir.Root / "Missing.hlsl").generic_u8string();
+    CHECK(!ShaderCompiler::Compile(main, "PSMain", "ps_5_0", options).Succeeded());
+    CHECK(!ShaderCompiler::Compile((dir.Root / "Absent.hlsl").generic_u8string(), "PSMain", "ps_5_0").Succeeded());
+    CHECK(ShaderCompiler::NormalizePath(dir.Root.u8string() + "\\Inc\\..\\MAIN.hlsl") == ShaderCompiler::NormalizePath(main));
+}
+
+void ShaderInvalidation()
+{
+    TempShaderDir dir;
+    const std::string shared = dir.Write("Inc/Shared.hlsli", "float4 Shade() { return float4(0, 1, 0, 1); }\n");
+    const char* goodShader =
+        "#include \"Inc/Shared.hlsli\"\n"
+        "float4 VSMain(float4 pos : POSITION, float4 col : COLOR) : SV_Position { return pos; }\n"
+        "float4 PSMain() : SV_Target { return Shade(); }\n";
+    const std::string shader = dir.Write("Hot.hlsl", goodShader);
+
+    TestGame game;
+    // Registered: invalidation re-resolves only components the scene owns.
+    CHECK(game.RegisterComponent("hot", new GameComponent(), shader, shader) == RegisterResult::Ok);
+    GameComponent& component = *game.FindComponent("hot");
+    CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::Default));
+    CHECK(game.GetShaderErrors(shader).empty());
+    CHECK(!game.InvalidateShaderFile((dir.Root / "Unrelated.hlsl").generic_u8string()));
+
+    // Edits on disk are invisible until the file is invalidated.
+    dir.Write("Hot.hlsl", "float4 PSMain() : SV_Target { return undefinedValue; }\n");
+    CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::Default));
+    CHECK(game.InvalidateShaderFile(shader));
+    game.BindComponentShaders(&component, ShaderCompileVariant::Default);
+    const std::string errors = game.GetShaderErrors(shader);
+    CHECK(errors.find("undefinedValue") != std::string::npos);
+    CHECK(errors.find("Hot.hlsl") != std::string::npos);
+
+    // A failed compilation is retried after invalidation, and an include invalidates its users.
+    dir.Write("Hot.hlsl", goodShader);
+    CHECK(game.InvalidateShaderFile(shader));
+    CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::Default));
+    CHECK(game.GetShaderErrors(shader).empty());
+    CHECK(game.InvalidateShaderFile(shared));
+    CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::Default));
+    CHECK(game.GetShaderErrors(shader).empty());
+}
+
 ComPtr<ID3D11Buffer> Buffer(ID3D11Device* device, UINT bytes, UINT bind, const void* data = nullptr, UINT stride = 0)
 {
     D3D11_BUFFER_DESC desc{};
@@ -485,6 +565,7 @@ int main()
         {"registry ownership", RegistryOwnership}, {"registration failure ownership", RegistryFailures},
         {"transform hierarchy and cache", TransformHierarchy}, {"unregister hierarchy and instances", UnregisterHierarchyAndInstances},
         {"frame light snapshot", LightSnapshot}, {"forward/deferred shader variants", ShaderVariants},
+        {"shader includes, overrides and dependencies", ShaderCompilerIncludes}, {"shader invalidation and errors", ShaderInvalidation},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
         {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests}
     };

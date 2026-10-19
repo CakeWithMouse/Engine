@@ -1,6 +1,9 @@
 #pragma once
 #include <d3dcompiler.h>
+#include <map>
 #include <string>
+#include <vector>
+#include <wrl/client.h>
 
 /**
  * Single HLSL compilation policy for the whole application.
@@ -28,42 +31,41 @@ namespace ShaderCompiler
 #endif
     }
 
-    /**
-     * Compiles an entry point from a file. #include "..." is resolved relative to the file.
-     * On failure returns the HRESULT and fills errorMessage (compiler output or a short reason).
-     */
-    inline HRESULT CompileFromFile(const std::wstring& fileName,
-                                   const D3D_SHADER_MACRO* defines,
-                                   const char* entryPoint,
-                                   const char* target,
-                                   ID3DBlob** blob,
-                                   std::string* errorMessage = nullptr)
+    /** Absolute, lexically normal, generic-separator and lower-case: one spelling per file. */
+    std::string NormalizePath(const std::string& path);
+
+    /** Everything that selects one compiled blob besides the entry point and the target. */
+    struct CompileOptions
     {
-        ID3DBlob* errors = nullptr;
-        const HRESULT hr = D3DCompileFromFile(fileName.c_str(),
-                                              defines,
-                                              D3D_COMPILE_STANDARD_FILE_INCLUDE,
-                                              entryPoint,
-                                              target,
-                                              GetCompileFlags(),
-                                              0,
-                                              blob,
-                                              &errors);
-        if (errorMessage)
-        {
-            if (errors)
-            {
-                *errorMessage = static_cast<const char*>(errors->GetBufferPointer());
-            }
-            else if (FAILED(hr))
-            {
-                *errorMessage = "shader file not found or unreadable";
-            }
-        }
-        if (errors)
-        {
-            errors->Release();
-        }
-        return hr;
-    }
+        std::vector<std::pair<std::string, std::string>> Defines;
+        /**
+         * #include "name" -> file on disk. Lets a shared template include a file chosen at compile
+         * time (e.g. the surface of a material). Names are matched exactly as written in HLSL.
+         */
+        std::map<std::string, std::string> IncludeOverrides;
+    };
+
+    struct CompileResult
+    {
+        HRESULT Result = E_FAIL;
+        Microsoft::WRL::ComPtr<ID3DBlob> Blob;
+        std::string Errors;                    // compiler output
+        std::vector<std::string> Dependencies; // normalized: the main file and every included file
+        bool Succeeded() const { return SUCCEEDED(Result) && Blob; }
+    };
+
+    /**
+     * Compiles an entry point from a file (UTF-8 path). #include "..." is resolved relative to the
+     * including file unless the name is listed in options.IncludeOverrides.
+     */
+    CompileResult Compile(const std::string& fileName, const char* entryPoint, const char* target,
+                          const CompileOptions& options = {});
+
+    /** Legacy form: wide path, raw macro list. Fills errorMessage on failure. */
+    HRESULT CompileFromFile(const std::wstring& fileName,
+                            const D3D_SHADER_MACRO* defines,
+                            const char* entryPoint,
+                            const char* target,
+                            ID3DBlob** blob,
+                            std::string* errorMessage = nullptr);
 }

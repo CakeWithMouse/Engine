@@ -291,6 +291,8 @@ void Game::DestroyResources()
     vertexShaderCache.clear();
     pixelShaderCache.clear();
     pixelShaderTargetCount.clear();
+    shaderDependencies.clear();
+    shaderErrors.clear();
     shaderCache.clear();
     BaseVertexShader.Reset();
     BasePixelShader.Reset();
@@ -944,15 +946,25 @@ void Game::RegisterShaders(const std::string& ShaderName, const std::string& Add
 
     const LPCSTR entryPoint = isVertexShader ? "VSMain" : "PSMain";
     const LPCSTR target = isVertexShader ? "vs_5_0" : "ps_5_0";
-    const std::wstring wideShaderPath = ToWide(ShaderName);
-    Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;
-    const HRESULT res = CreateShader(DisplayPtr ? DisplayPtr->GetHwnd() : nullptr, GetVariantDefines(variant),
-                                     wideShaderPath.c_str(), entryPoint, target, shaderBlob.GetAddressOf());
-    if (FAILED(res))
+    ShaderCompiler::CompileOptions options;
+    for (const D3D_SHADER_MACRO* define = GetVariantDefines(variant); define && define->Name; ++define)
     {
-        std::cout << "Failed to compile shader: " << ShaderName << std::endl;
+        options.Defines.emplace_back(define->Name, define->Definition);
+    }
+    ShaderCompiler::CompileResult compiled = ShaderCompiler::Compile(ShaderName, entryPoint, target, options);
+    shaderDependencies[cacheKey] = std::move(compiled.Dependencies);
+    if (!compiled.Succeeded())
+    {
+        shaderErrors[cacheKey] = compiled.Errors;
+        std::cout << "Shader compilation failed: " << ShaderName << std::endl << compiled.Errors << std::endl;
+        const std::wstring wideShaderPath = ToWide(ShaderName);
+        if (GetFileAttributesW(wideShaderPath.c_str()) == INVALID_FILE_ATTRIBUTES)
+        {
+            MessageBox(DisplayPtr ? DisplayPtr->GetHwnd() : nullptr, wideShaderPath.c_str(), L"Missing Shader File", MB_OK);
+        }
         return;
     }
+    Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob = compiled.Blob;
 
     if (isVertexShader)
     {
@@ -960,6 +972,7 @@ void Game::RegisterShaders(const std::string& ShaderName, const std::string& Add
         if (FAILED(Device->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(),
                                               nullptr, vertexShader.GetAddressOf())))
         {
+            shaderErrors[cacheKey] = "CreateVertexShader failed";
             std::cout << "Failed to create vertex shader: " << ShaderName << std::endl;
             return;
         }
@@ -971,6 +984,7 @@ void Game::RegisterShaders(const std::string& ShaderName, const std::string& Add
         if (FAILED(Device->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(),
                                              nullptr, pixelShader.GetAddressOf())))
         {
+            shaderErrors[cacheKey] = "CreatePixelShader failed";
             std::cout << "Failed to create pixel shader: " << ShaderName << std::endl;
             return;
         }
@@ -1076,6 +1090,75 @@ bool Game::SupportsDeferredGeometry(GameComponent* Component)
         return false;
     }
     return ResolveComponentShaders(Component, ShaderCompileVariant::DeferredGBuffer).bWritesGBuffer;
+}
+
+bool Game::InvalidateShaderFile(const std::string& shaderFile)
+{
+    const std::string file = ShaderCompiler::NormalizePath(shaderFile);
+    std::vector<std::string> staleKeys;
+    for (const auto& entry : shaderDependencies)
+    {
+        if (std::find(entry.second.begin(), entry.second.end(), file) != entry.second.end())
+        {
+            staleKeys.push_back(entry.first);
+        }
+    }
+    if (staleKeys.empty())
+    {
+        return false;
+    }
+
+    for (const std::string& key : staleKeys)
+    {
+        shaderCache.erase(key);
+        vertexShaderCache.erase(key);
+        pixelShaderCache.erase(key);
+        pixelShaderTargetCount.erase(key);
+        shaderDependencies.erase(key);
+        shaderErrors.erase(key);
+    }
+
+    OnShadersInvalidated();
+    std::cout << "Invalidated " << staleKeys.size() << " shader(s) depending on " << shaderFile << std::endl;
+    return true;
+}
+
+void Game::OnShadersInvalidated()
+{
+    // Resolved slots point into the erased cache entries: every component resolves again.
+    for (auto& pair : Components)
+    {
+        GameComponent* component = pair.second.get();
+        for (ComponentShaderVariant& slot : component->ShaderVariants)
+        {
+            slot = ComponentShaderVariant{};
+        }
+        component->SetVertexShader(nullptr);
+        component->SetPixelShader(nullptr);
+    }
+
+    // The fallback pair keeps the old shaders alive until the new ones compile.
+    InitShaderBuffers();
+}
+
+std::string Game::GetShaderErrors(const std::string& shaderFile) const
+{
+    const std::string file = ShaderCompiler::NormalizePath(shaderFile);
+    std::string errors;
+    for (const auto& entry : shaderErrors)
+    {
+        const auto dependencies = shaderDependencies.find(entry.first);
+        if (dependencies == shaderDependencies.end() || dependencies->second.empty() || dependencies->second.front() != file)
+        {
+            continue;
+        }
+        if (!errors.empty())
+        {
+            errors += '\n';
+        }
+        errors += entry.second;
+    }
+    return errors;
 }
 
 // ---------------------------------------------------------------------------------------------

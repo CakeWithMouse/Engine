@@ -239,6 +239,16 @@ public:
     /** True if the component's material writes the full G-buffer (3 render targets). */
     bool SupportsDeferredGeometry(GameComponent* Component);
 
+    /**
+     * Drops every cached shader compiled from this file or including it, so the next request
+     * recompiles from disk (failed compilations are forgotten too). Components re-resolve their
+     * shaders on the next pass. Returns false if nothing cached depended on the file.
+     * Shadow depth shaders are compiled once at start-up and are not affected.
+     */
+    bool InvalidateShaderFile(const std::string& shaderFile);
+    /** Compiler output of every failed stage/variant of this shader file; empty if none failed. */
+    std::string GetShaderErrors(const std::string& shaderFile) const;
+
 protected:
     // Initialization
     bool InitializeInternal(HWND externalWindow, int width, int height);
@@ -291,6 +301,8 @@ protected:
     void FillFrameConstantBuffer(ConstantBufferData& data) const;
     bool IsVisible(GameComponent* Component);
     ComponentShaderVariant& ResolveComponentShaders(GameComponent* Component, ShaderCompileVariant variant);
+    /** After cache entries were erased: components resolve again, the fallback pair is rebuilt. */
+    void OnShadersInvalidated();
 
     static HRESULT CreateShader(HWND hWnd, const D3D_SHADER_MACRO* pDefines, LPCWSTR FileName, LPCSTR pEntrypoint,
                                 LPCSTR pTarget, ID3DBlob** Buffer);
@@ -345,6 +357,9 @@ protected:
     std::map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>> vertexShaderCache;
     std::map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>> pixelShaderCache;
     std::map<std::string, UINT> pixelShaderTargetCount;
+    // Same keys: normalized files each blob was built from (main file first), and failed output.
+    std::map<std::string, std::vector<std::string>> shaderDependencies;
+    std::map<std::string, std::string> shaderErrors;
 
     // Depth
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;          // opaque: test + write
