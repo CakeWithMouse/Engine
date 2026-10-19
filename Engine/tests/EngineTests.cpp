@@ -4,6 +4,7 @@
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
 #include <Engine/Render/ShaderCompiler.h>
+#include "../Source/Resources/VfsRead.h"
 #include "VfsLifecycleTests.h"
 #include <cmath>
 #include <cstring>
@@ -497,6 +498,21 @@ void VirtualFileSystemTests()
     std::filesystem::remove_all(fixtureRoot, ec);
     std::filesystem::create_directories(fixtureRoot / "sub", ec);
 
+    struct FixtureGuard
+    {
+        std::filesystem::path root;
+        FixtureGuard(const std::filesystem::path& r) : root(r)
+        {
+            VfsRead::GetVFS().Mount("/TestFixture", root);
+        }
+        ~FixtureGuard()
+        {
+            VfsRead::GetVFS().Unmount("/TestFixture");
+            std::error_code ec;
+            std::filesystem::remove_all(root, ec);
+        }
+    } fixtureGuard(fixtureRoot);
+
     const auto aHlsl = fixtureRoot / "a.hlsl";
     const auto bHlsli = fixtureRoot / "sub" / "b.hlsli";
     const auto cHlsli = fixtureRoot / "c.hlsli";
@@ -549,8 +565,7 @@ void VirtualFileSystemTests()
     CHECK(capturedLog.find("[ShaderCompiler] Include file not found in VFS") != std::string::npos);
     CHECK(capturedLog.find("missing.hlsli") != std::string::npos);
 
-    // Clean up test fixture
-    std::filesystem::remove_all(fixtureRoot, ec);
+    // fixtureGuard automatically unmounts /TestFixture and removes fixtureRoot on exit
 }
 
 void SceneOwnershipTests();
