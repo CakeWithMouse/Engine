@@ -64,6 +64,37 @@
 
 ---
 
-## 5. Не проверено в рантайме
+## 5. Не проверено в рантайме / известные падения
+
+### Базовая линия тестов (Фаза 1, Шаг 0)
+- **Debug:**
+  - `Engine\tests\run.ps1`: **21/21 PASS**
+  - `Engine\tests\run-runtime.ps1`: **23/23 PASS**
+  - `Game\tests\run-games.ps1`: **24/24 PASS** (1 пропуск: `Katamari` runtime не собран, требует Assimp)
+  - `Engine\tests\edit-session\run.ps1`: **575/575 PASS**
+  - `Engine\tests\scene-module\run.ps1`: **109/109 PASS**
+  - `Engine\tests\component-generation\run.ps1`: **PASS** (17 scanner + 4 contract rejections)
+  - `Engine\tests\run-viewport.ps1`: **6/6 PASS**
+- **Release:**
+  - `Engine\tests\run.ps1`: **21/21 PASS**
+  - `Engine\tests\run-runtime.ps1`: **23/23 PASS**
+  - `Game\tests\run-games.ps1`: **24/24 PASS** (1 пропуск: `Katamari`)
+  - `Engine\tests\edit-session\run.ps1`: **575/575 PASS**
+  - `Engine\tests\scene-module\run.ps1`: **109/109 PASS**
+
+### Интерактивный тест `run-editor-viewport.ps1`:
+- **Результат:** Падение в PowerShell-обвязке скрипта при получении кода возврата процесса:
+  ```text
+  Editor exited with 
+  At C:\Users\Yuri\Documents\GitHub\Engine\Engine\tests\run-editor-viewport.ps1:111 char:36
+  + ... s.ExitCode -ne 0) { throw "Editor exited with $($process.ExitCode)" }
+  ```
+- **Сырой лог выполнения (stdout):**
+  Процесс запустился, создал окно, привязал вьюпорт, отрендерил кадр, получил WM_CLOSE и корректно остановился:
+  `ViewportReady` -> `EditorViewportAttach ok` -> `EngineRender (viewport)` -> `EditorRequestExit` -> `ViewportStopped` -> `EditorUpdates=97` -> `EditorStop` -> `EditorDestroy` -> `ModuleUnloaded` -> `ResourcesStopped (stub)` -> `EngineStopped`.
+- **Причина отказа:** В `Start-Process ... -WindowStyle Hidden -PassThru` свойство `$process.ExitCode` в Windows PowerShell оказывается `$null` после `WaitForExit` без явного `Handle`. Сам движок и редактор отработали штатно без крашей.
+
+### Прочее не проверенное:
 - Поведение Qt FileBrowser при динамическом обновлении файлов вне процесса (отсутствие FileSystemWatcher на виртуальных корнях).
 - Атомарное сохранение на нестандартных томах (RAM-диски, сетевые шары SMB).
+
