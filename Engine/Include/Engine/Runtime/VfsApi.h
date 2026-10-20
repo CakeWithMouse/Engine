@@ -62,11 +62,17 @@ struct EngineVfsStat
 typedef void* (ENGINE_MODULE_CALL *EngineVfsAllocFn)(void* allocUser, uint64_t size);
 
 // Enumeration callback. Return 1 to continue iteration, 0 to abort early.
+// The 'name' parameter contains the full virtual path of the entry (e.g. "/Game/Textures/wood.png").
+// The 'type' parameter distinguishes file (ENGINE_VFS_TYPE_FILE) and directory (ENGINE_VFS_TYPE_DIRECTORY).
+// In Phase 2, only files are returned; directory entries will be added in Phase 5 without changing ABI.
 // Host collects/snapshots results beforehand and invokes callbacks without holding the internal VFS mutex.
 // Callbacks must not throw exceptions.
 typedef int (ENGINE_MODULE_CALL *EngineVfsEnumerateCallback)(void* user, const char* name, uint32_t type, uint64_t size);
 
 // Search callback. Return 1 to continue iteration, 0 to abort early.
+// The 'vpath' parameter contains the full virtual path of the entry.
+// The 'type' parameter distinguishes file (ENGINE_VFS_TYPE_FILE) and directory (ENGINE_VFS_TYPE_DIRECTORY).
+// In Phase 2, only files are returned; directory entries will be added in Phase 5 without changing ABI.
 // Host collects/snapshots results beforehand and invokes callbacks without holding the internal VFS mutex.
 // Callbacks must not throw exceptions.
 typedef int (ENGINE_MODULE_CALL *EngineVfsFindCallback)(void* user, const char* vpath, uint32_t type, uint64_t size);
@@ -106,10 +112,14 @@ struct EngineVfsApi
     uint32_t (ENGINE_MODULE_CALL *readFile)(void* ctx, const char* vpath, EngineVfsAllocFn allocFn, void* allocUser, uint64_t* outReadBytes);
 
     // Enumerates directory entries in vdir.
+    // 'name' in callback is full virtual path; 'type' is ENGINE_VFS_TYPE_FILE / ENGINE_VFS_TYPE_DIRECTORY.
+    // In Phase 2 only files are emitted; directory entries are added in Phase 5 without ABI change.
     // Host collects result beforehand and invokes callbacks without holding VFS mutex.
     uint32_t (ENGINE_MODULE_CALL *enumerate)(void* ctx, const char* vdir, int recursive, EngineVfsEnumerateCallback callback, void* user);
 
     // Searches directory entries matching glob/extension pattern.
+    // 'vpath' in callback is full virtual path; 'type' is ENGINE_VFS_TYPE_FILE / ENGINE_VFS_TYPE_DIRECTORY.
+    // In Phase 2 only files are emitted; directory entries are added in Phase 5 without ABI change.
     // Host collects result beforehand and invokes callbacks without holding VFS mutex.
     uint32_t (ENGINE_MODULE_CALL *find)(void* ctx, const char* vdir, uint32_t typeFilter, const char* pattern, int recursive, EngineVfsFindCallback callback, void* user);
 
