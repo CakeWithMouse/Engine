@@ -1,4 +1,6 @@
 #include "VfsRead.h"
+#include "HostVfsProxy.h"
+#include "LocalVfs.h"
 
 #include <Engine/Resources/Paths.h>
 #include <cstdio>
@@ -10,6 +12,17 @@ namespace VfsRead
 {
     static VirtualFileSystem s_vfs;
     static std::once_flag s_initOnce;
+
+    namespace
+    {
+    struct LocalVfsRegistrar
+    {
+        LocalVfsRegistrar()
+        {
+            HostVfsProxy::Instance().SetFallbackVfs(&LocalVfs::Instance());
+        }
+    } s_localVfsRegistrar;
+    } // namespace
 
     std::filesystem::path FindRepoRoot(const std::filesystem::path& start)
     {
@@ -177,28 +190,6 @@ namespace VfsRead
 
     std::vector<uint8_t> ReadBytes(std::string_view path, std::string* outVirtualPath)
     {
-        auto& vfs = GetVFS();
-        const std::string vPath = ToVirtualPath(vfs, path);
-        if (outVirtualPath)
-        {
-            *outVirtualPath = vPath;
-        }
-
-        try
-        {
-            return vfs.ReadBytes(vPath);
-        }
-        catch (const std::exception& ex)
-        {
-            std::fprintf(stderr, "[VfsRead] Failed to read bytes for path '%s' (virtual: '%s'): %s\n",
-                std::string(path).c_str(), vPath.c_str(), ex.what());
-            return {};
-        }
-        catch (...)
-        {
-            std::fprintf(stderr, "[VfsRead] Failed to read bytes for path '%s' (virtual: '%s'): unknown exception\n",
-                std::string(path).c_str(), vPath.c_str());
-            return {};
-        }
+        return Active().ReadBytes(path, outVirtualPath);
     }
 }

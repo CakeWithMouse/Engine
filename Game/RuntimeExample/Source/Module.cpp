@@ -1,4 +1,6 @@
 #include <Engine/Runtime/ModuleApi.h>
+#include <Engine/Runtime/VfsApi.h>
+#include "../../../Engine/Source/Resources/VfsRead.h"
 #include <Engine/Scene/SceneCommands.h>
 #include "GeneratedComponents.h"
 #include <Engine/Runtime/SceneEditSession.h>
@@ -28,6 +30,24 @@ void Log(Session* s, const char* text) { s->host.log(s->host.user, text); }
 void* __cdecl Create(const EngineModuleHost* host)
 {
     if (!host || host->version != ENGINE_MODULE_VERSION || !host->log || !host->requestExit) return nullptr;
+    if (host->getService)
+    {
+        const auto* vfsApi = static_cast<const EngineVfsApi*>(
+            host->getService(host->user, ENGINE_SERVICE_VFS, ENGINE_VFS_API_VERSION));
+        if (vfsApi)
+        {
+            VfsRead::Bind(vfsApi);
+        }
+        else
+        {
+            std::fprintf(stderr, "[RuntimeExample] Host getService returned null for VFS service, falling back to local VFS\n");
+        }
+    }
+    else
+    {
+        std::fprintf(stderr, "[RuntimeExample] Host getService is null, falling back to local VFS\n");
+    }
+
     Session* s = nullptr;
     try { s = new Session(*host); }
     catch (...) { return nullptr; }
@@ -85,6 +105,7 @@ void __cdecl Destroy(void* instance)
     auto* s = static_cast<Session*>(instance);
     Log(s, "GameDestroy");
     delete s;
+    VfsRead::Unbind();
 }
 }
 // Allocation and user Tick failures are caught inside the module.

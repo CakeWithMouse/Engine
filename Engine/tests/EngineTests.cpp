@@ -7,6 +7,7 @@
 #include "../Source/Resources/VfsRead.h"
 #include "VfsLifecycleTests.h"
 #include "VfsServiceTests.h"
+#include "VfsProxyLifecycleTests.h"
 #include <cmath>
 #include <cstring>
 #include <fstream>
@@ -598,7 +599,9 @@ int main()
         {"vfs service: readFile and allocator", VfsService_ReadFileAndAllocator},
         {"vfs service: enumerate and find", VfsService_EnumerateAndFind},
         {"vfs service: callback reentrancy without deadlock", VfsService_CallbackReentrancyAndNoDeadlock},
-        {"vfs service: mounts and unsupported stubs", VfsService_GetMountsAndStubs}
+        {"vfs service: mounts and unsupported stubs", VfsService_GetMountsAndStubs},
+        {"vfs proxy lifecycle: sessions and rejection", VfsProxyLifecycle_SessionsAndRejection},
+        {"vfs proxy lifecycle: read parity and allocator", VfsProxyLifecycle_ReadParityAndAllocator}
     };
     int failures = 0;
     for (const auto& test : tests)

@@ -65,7 +65,7 @@ namespace ShaderCompiler
                 }
             }
 
-            auto& vfs = VfsRead::GetVFS();
+            auto& vfs = VfsRead::Active();
             // Standard D3D include semantics:
             // 1. Search relative to the file containing the #include
             std::string targetVirtual = VirtualFileSystem::NormalizeVirtualPath(parentDir + "/" + pFileName);
@@ -161,7 +161,7 @@ namespace ShaderCompiler
         }
 
         std::string virtualPath;
-        const std::vector<uint8_t> shaderSource = VfsRead::ReadBytes(utf8Path, &virtualPath);
+        const std::vector<uint8_t> shaderSource = VfsRead::Active().ReadBytes(utf8Path, &virtualPath);
         if (shaderSource.empty())
         {
             if (errorMessage)

@@ -72,7 +72,13 @@
     <ClCompile Include="Source\Resources\Paths.cpp" />
     <ClCompile Include="Source\Resources\VirtualFileSystem.cpp" />
     <ClCompile Include="Source\Resources\VfsRead.cpp" />
+    <ClCompile Include="Source\Resources\LocalVfs.cpp" />
+    <ClCompile Include="Source\Resources\HostVfsProxy.cpp" />
     <ClCompile Include="Source\Runtime\VfsService.cpp" />
+    <ClInclude Include="Source\Resources\IVfs.h" />
+    <ClInclude Include="Source\Resources\LocalVfs.h" />
+    <ClInclude Include="Source\Resources\HostVfsProxy.h" />
+    <ClInclude Include="Source\Resources\VfsRead.h" />
     <ClInclude Include="Include\Engine\Components\GameComponents.h" />
     <ClInclude Include="Include\Engine\Components\ComponentAnnotations.h" />
     <ClInclude Include="Include\Engine\Components\ComponentType.h" />

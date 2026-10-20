@@ -25,7 +25,7 @@ namespace TextureLoader
             return false;
         }
 
-        const std::vector<uint8_t> fileBytes = VfsRead::ReadBytes(path);
+        const std::vector<uint8_t> fileBytes = VfsRead::Active().ReadBytes(path);
         const unsigned char* bufferData = fileBytes.empty() ? nullptr : fileBytes.data();
         if (bufferData == nullptr)
         {
