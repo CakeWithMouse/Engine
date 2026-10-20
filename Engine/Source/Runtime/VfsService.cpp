@@ -273,13 +273,6 @@ uint32_t ENGINE_MODULE_CALL ReadFileImpl(void* ctx, const char* vpath, EngineVfs
             return ENGINE_VFS_NOT_FOUND;
         }
 
-        static std::atomic<bool> s_firstReadLogged{false};
-        bool expected = false;
-        if (s_firstReadLogged.compare_exchange_strong(expected, true))
-        {
-            std::printf("[VfsService] first read via module: %s\n", vpath);
-        }
-
         std::vector<uint8_t> bytes;
         try
         {
@@ -304,6 +297,14 @@ uint32_t ENGINE_MODULE_CALL ReadFileImpl(void* ctx, const char* vpath, EngineVfs
         {
             std::memcpy(dest, bytes.data(), static_cast<size_t>(size));
         }
+
+        static std::atomic<bool> s_firstReadLogged{false};
+        bool expected = false;
+        if (s_firstReadLogged.compare_exchange_strong(expected, true))
+        {
+            std::printf("[VfsService] first read via module: %s\n", vpath);
+        }
+
         return ENGINE_VFS_OK;
     }
     catch (const std::exception& e)
