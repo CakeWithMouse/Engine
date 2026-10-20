@@ -6,6 +6,7 @@
 #include <Engine/Render/ShaderCompiler.h>
 #include "../Source/Resources/VfsRead.h"
 #include "VfsLifecycleTests.h"
+#include "VfsServiceTests.h"
 #include <cmath>
 #include <cstring>
 #include <fstream>
@@ -591,7 +592,13 @@ int main()
         {"VirtualFileSystem::Mount replaces same root", VfsLifecycle_ScenarioE},
         {"vfs mounts preserved after stop", VfsLifecycle_PreserveMountSet},
         {"vfs project content unmounted after stop", VfsLifecycle_ContentRootReverted},
-        {"vfs premounted game restored after stop", VfsLifecycle_PreMountedGameReverted}
+        {"vfs premounted game restored after stop", VfsLifecycle_PreMountedGameReverted},
+        {"vfs service: resolve and toVirtual", VfsService_ResolveAndToVirtual},
+        {"vfs service: exists and stat", VfsService_ExistsAndStat},
+        {"vfs service: readFile and allocator", VfsService_ReadFileAndAllocator},
+        {"vfs service: enumerate and find", VfsService_EnumerateAndFind},
+        {"vfs service: callback reentrancy without deadlock", VfsService_CallbackReentrancyAndNoDeadlock},
+        {"vfs service: mounts and unsupported stubs", VfsService_GetMountsAndStubs}
     };
     int failures = 0;
     for (const auto& test : tests)

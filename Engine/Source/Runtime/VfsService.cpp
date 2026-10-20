@@ -232,6 +232,11 @@ EngineVfsStatus EnumerateImpl(void* ctx, const char* vdir, int recursive, Engine
     if (!ctx || !vdir || !callback) return ENGINE_VFS_BAD_ARGUMENT;
     auto& vfs = *static_cast<VirtualFileSystem*>(ctx);
 
+    if (!vfs.Exists(vdir))
+    {
+        return ENGINE_VFS_NOT_FOUND;
+    }
+
     // Snapshot entries to avoid holding internal mutex during callbacks
     const std::vector<VirtualFileInfo> entries = vfs.EnumerateFiles(vdir, recursive != 0);
     for (const auto& entry : entries)
@@ -246,6 +251,11 @@ EngineVfsStatus FindImpl(void* ctx, const char* vdir, uint32_t typeFilter, const
 {
     if (!ctx || !vdir || !callback) return ENGINE_VFS_BAD_ARGUMENT;
     auto& vfs = *static_cast<VirtualFileSystem*>(ctx);
+
+    if (!vfs.Exists(vdir))
+    {
+        return ENGINE_VFS_NOT_FOUND;
+    }
 
     const std::string pat = pattern ? pattern : "";
     // Snapshot entries to avoid holding internal mutex during callbacks
