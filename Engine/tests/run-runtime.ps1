@@ -71,6 +71,8 @@ foreach ($mode in @('game','editor')) {
     } else {
         Ordered $log @('GameUpdate', 'EngineFrame (game window)', 'EngineFrameEnd (game window)')
         Require ((Count $log 'GameUpdate') -eq 3) 'Incorrect update count'
+        $firstReadMatches = [regex]::Matches($log, '(?m)^\[VfsService\] first read via module: (/Engine/Shaders/.+)$')
+        Require ($firstReadMatches.Count -eq 1) "Expected exactly 1 host VFS first read via module, got $($firstReadMatches.Count)"
     }
     Pass $mode
 }
@@ -129,6 +131,16 @@ $interactive = ProjectFile "$work/interactive" "$output/Runtime/Projects/Runtime
 $log = Run 'interactive-exit' $runtime "--project `"$interactive`" --mode game" 0 "`nq`n"
 Require ($log -match '(?m)^GameUpdates=1\r?$') 'Interactive Enter/q contract failed'
 Pass 'interactive exit'
+
+$reloadProj = ProjectFile "$work/reload" "$output/Runtime/Projects/RuntimeExample/Game.dll"
+$reloadLog = Run 'interactive-reload' $runtime "--project `"$reloadProj`" --mode game" 0 "`nr`nq`n"
+$bindCount = [regex]::Matches($reloadLog, '(?m)^\[VfsRead\] Bind host VFS service v\d+').Count
+$unbindCount = [regex]::Matches($reloadLog, '(?m)^\[VfsRead\] Unbind').Count
+Require ($bindCount -eq 2) "Expected 2 Bind host VFS service logs in hot-reload, got $bindCount"
+Require ($unbindCount -eq 2) "Expected 2 Unbind logs in hot-reload, got $unbindCount"
+Require ($reloadLog -notmatch 'ModuleReloadError') "Hot reload contained reload error:`n$reloadLog"
+Ordered $reloadLog @('GameCreate','GameStart','GameStop','GameDestroy','ModuleUnloaded','ModuleLoaded','GameCreate','GameStart','ModuleReloadSuccess','GameStop','GameDestroy','ModuleUnloaded')
+Pass 'hot reload'
 
 
 $index = 0

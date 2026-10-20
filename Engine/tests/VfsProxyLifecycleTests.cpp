@@ -74,6 +74,16 @@ void VfsProxyLifecycle_SessionsAndRejection()
     VfsRead::Unbind();
     CHECK(!VfsRead::IsBound());
     CHECK(&VfsRead::Active() == &LocalVfs::Instance());
+
+    // 4. Failed Create pattern: Bind -> error during Create -> Unbind -> Active() == LocalVfs
+    EngineVfsApi apiFail = CreateVfsService(testVfs);
+    CHECK(VfsRead::Bind(&apiFail));
+    CHECK(VfsRead::IsBound());
+    CHECK(&VfsRead::Active() == &HostVfsProxy::Instance());
+    // Simulate error during Create before returning to caller:
+    VfsRead::Unbind();
+    CHECK(!VfsRead::IsBound());
+    CHECK(&VfsRead::Active() == &LocalVfs::Instance());
 }
 
 void VfsProxyLifecycle_ReadParityAndAllocator()
@@ -141,6 +151,24 @@ void VfsProxyLifecycle_ReadParityAndAllocator()
 
     const std::vector<uint8_t> proxyMissing = VfsRead::Active().ReadBytes("/ProxyParity/missing.bin");
     CHECK(proxyMissing.empty());
+
+    // Check 3b: Bound proxy on host NOT_FOUND does not create dynamic mounts in local VFS
+    auto& localVfs = VfsRead::GetVFS();
+    const size_t mountsBefore = localVfs.GetMounts().size();
+
+    // 1) ReadBytes on non-existent file under valid mount returns empty
+    const auto missingBytes = VfsRead::Active().ReadBytes("/ProxyParity/definitely_not_existing.bin");
+    CHECK(missingBytes.empty());
+
+    // 2) ToVirtualPath and ReadBytes on unmounted path return empty
+    const auto physMissingVpath = VfsRead::Active().ToVirtualPath("C:/nonexistent_folder/missing.file");
+    CHECK(physMissingVpath.empty());
+
+    const auto physMissingBytes = VfsRead::Active().ReadBytes("C:/nonexistent_folder/missing.file");
+    CHECK(physMissingBytes.empty());
+
+    const size_t mountsAfter = localVfs.GetMounts().size();
+    CHECK(mountsBefore == mountsAfter);
 
     // Check 4: Simulated allocator failure gives empty result without exception escaping boundary
     HostVfsProxy::Instance().SetSimulateAllocFailureForTesting(true);
