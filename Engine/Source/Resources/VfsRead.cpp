@@ -13,17 +13,6 @@ namespace VfsRead
     static VirtualFileSystem s_vfs;
     static std::once_flag s_initOnce;
 
-    namespace
-    {
-    struct LocalVfsRegistrar
-    {
-        LocalVfsRegistrar()
-        {
-            HostVfsProxy::Instance().SetFallbackVfs(&LocalVfs::Instance());
-        }
-    } s_localVfsRegistrar;
-    } // namespace
-
     std::filesystem::path FindRepoRoot(const std::filesystem::path& start)
     {
         std::error_code ec;

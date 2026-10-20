@@ -79,6 +79,7 @@ public:
             return false;
         }
 
+        m_loggedStatusMask.store(0);
         m_api.store(api);
         std::printf("[VfsRead] Bind host VFS service v%u\n", api->header.version);
         return true;
@@ -87,6 +88,7 @@ public:
     void Unbind()
     {
         m_api.store(nullptr);
+        m_loggedStatusMask.store(0);
         std::printf("[VfsRead] Unbind\n");
     }
 
@@ -95,23 +97,12 @@ public:
         return m_api.load() != nullptr;
     }
 
-    void SetFallbackVfs(IVfs* fallback)
-    {
-        m_fallback.store(fallback);
-    }
-
-    IVfs* GetFallbackVfs() const
-    {
-        return m_fallback.load();
-    }
-
     bool Exists(std::string_view virtualPath) const override
     {
         const auto* api = m_api.load();
         if (!api || !api->exists)
         {
-            auto* fb = m_fallback.load();
-            return fb ? fb->Exists(virtualPath) : false;
+            return false;
         }
         std::string vpathStr(virtualPath);
         return api->exists(api->context, vpathStr.c_str()) != 0;
@@ -122,8 +113,7 @@ public:
         const auto* api = m_api.load();
         if (!api || !api->toVirtual)
         {
-            auto* fb = m_fallback.load();
-            return fb ? fb->ToVirtualPath(path) : std::string(path);
+            return std::string(path);
         }
 
         std::string pathStr(path);
@@ -144,8 +134,8 @@ public:
             }
         }
 
-        auto* fb = m_fallback.load();
-        return fb ? fb->ToVirtualPath(path) : std::string(path);
+        LogHostFailureOnce(status, pathStr);
+        return {};
     }
 
     std::vector<uint8_t> ReadBytes(std::string_view path, std::string* outVirtualPath = nullptr) const override
@@ -153,14 +143,17 @@ public:
         const auto* api = m_api.load();
         if (!api || !api->readFile)
         {
-            auto* fb = m_fallback.load();
-            return fb ? fb->ReadBytes(path, outVirtualPath) : std::vector<uint8_t>{};
+            return {};
         }
 
         const std::string vpath = ToVirtualPath(path);
         if (outVirtualPath)
         {
             *outVirtualPath = vpath;
+        }
+        if (vpath.empty())
+        {
+            return {};
         }
 
         std::vector<uint8_t> result;
@@ -172,18 +165,20 @@ public:
         const uint32_t status = api->readFile(api->context, vpath.c_str(), HostVfsDetail::ProxyAllocFn, &ctx, &bytesRead);
         if (status != ENGINE_VFS_OK)
         {
+            LogHostFailureOnce(status, vpath);
             return {};
         }
 
         return result;
     }
 
-    // Test hook for simulated allocator failure
+    // testing only
     void SetSimulateAllocFailureForTesting(bool simulate)
     {
         m_simulateAllocFailure.store(simulate);
     }
 
+    // testing only
     bool IsSimulateAllocFailureForTesting() const
     {
         return m_simulateAllocFailure.load();
@@ -192,7 +187,31 @@ public:
 private:
     HostVfsProxy() = default;
 
+    void LogHostFailureOnce(uint32_t status, std::string_view path) const
+    {
+        if (status < 32)
+        {
+            const uint32_t bit = (1u << status);
+            const uint32_t prev = m_loggedStatusMask.fetch_or(bit);
+            if (!(prev & bit))
+            {
+                std::fprintf(stderr, "[VfsRead] host service failed: %u for %.*s\n",
+                    status, static_cast<int>(path.size()), path.data());
+            }
+        }
+        else
+        {
+            static std::atomic<bool> s_otherLogged{false};
+            bool expected = false;
+            if (s_otherLogged.compare_exchange_strong(expected, true))
+            {
+                std::fprintf(stderr, "[VfsRead] host service failed: %u for %.*s\n",
+                    status, static_cast<int>(path.size()), path.data());
+            }
+        }
+    }
+
     std::atomic<const EngineVfsApi*> m_api{nullptr};
-    std::atomic<IVfs*> m_fallback{nullptr};
+    mutable std::atomic<uint32_t> m_loggedStatusMask{0};
     std::atomic<bool> m_simulateAllocFailure{false};
 };

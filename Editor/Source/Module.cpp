@@ -10,13 +10,14 @@ namespace
     void* __cdecl Create(const EngineModuleHost* host)
     {
         if (!host || host->version != ENGINE_MODULE_VERSION || !host->log || !host->requestExit) return nullptr;
+        bool boundVfs = false;
         if (host->getService)
         {
             const auto* vfsApi = static_cast<const EngineVfsApi*>(
                 host->getService(host->user, ENGINE_SERVICE_VFS, ENGINE_VFS_API_VERSION));
             if (vfsApi)
             {
-                VfsRead::Bind(vfsApi);
+                boundVfs = VfsRead::Bind(vfsApi);
             }
             else
             {
@@ -30,9 +31,18 @@ namespace
 
         try {
             auto* e = new (std::nothrow) EditorQtHost(*host);
-            if (e) e->Log("EditorCreate");
-            return e;
-        } catch (...) { return nullptr; }
+            if (e)
+            {
+                e->Log("EditorCreate");
+                return e;
+            }
+        } catch (...) {}
+
+        if (boundVfs)
+        {
+            VfsRead::Unbind();
+        }
+        return nullptr;
     }
     int __cdecl Start(void* i)   { auto* e = static_cast<EditorQtHost*>(i); if (!e) return 0; try { return e->Start() ? 1 : 0; } catch (...) { return 0; } }
     int __cdecl Update(void* i, double dt) { auto* e = static_cast<EditorQtHost*>(i); if (!e) return 0; try { e->Update(dt); return 1; } catch (...) { return 0; } }

@@ -29,14 +29,14 @@ struct Session
 void Log(Session* s, const char* text) { s->host.log(s->host.user, text); }
 void* __cdecl Create(const EngineModuleHost* host)
 {
-    if (!host || host->version != ENGINE_MODULE_VERSION || !host->log || !host->requestExit) return nullptr;
+    bool boundVfs = false;
     if (host->getService)
     {
         const auto* vfsApi = static_cast<const EngineVfsApi*>(
             host->getService(host->user, ENGINE_SERVICE_VFS, ENGINE_VFS_API_VERSION));
         if (vfsApi)
         {
-            VfsRead::Bind(vfsApi);
+            boundVfs = VfsRead::Bind(vfsApi);
         }
         else
         {
@@ -50,8 +50,17 @@ void* __cdecl Create(const EngineModuleHost* host)
 
     Session* s = nullptr;
     try { s = new Session(*host); }
-    catch (...) { return nullptr; }
-    if (s) Log(s, "GameCreate");
+    catch (...)
+    {
+        if (boundVfs) VfsRead::Unbind();
+        return nullptr;
+    }
+    if (!s)
+    {
+        if (boundVfs) VfsRead::Unbind();
+        return nullptr;
+    }
+    Log(s, "GameCreate");
     return s;
 }
 int __cdecl Start(void* instance)

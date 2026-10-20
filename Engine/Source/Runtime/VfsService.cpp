@@ -119,7 +119,6 @@ uint32_t ENGINE_MODULE_CALL ToVirtualImpl(void* ctx, const char* physical, char*
             const auto absPath = p.lexically_normal();
             std::string absGeneric = absPath.generic_u8string();
 
-            // Compare against existing mounts without modifying or creating any mounts
             for (const auto& mount : vfs.GetMounts())
             {
                 std::string mountGen = mount.physicalPath.generic_u8string();
@@ -138,6 +137,60 @@ uint32_t ENGINE_MODULE_CALL ToVirtualImpl(void* ctx, const char* physical, char*
                         vpath = VirtualFileSystem::NormalizeVirtualPath(mount.virtualRoot + "/" + absGeneric.substr(mLen + 1));
                         found = true;
                         break;
+                    }
+                }
+            }
+
+            if (!found)
+            {
+                // Check relative and standard content root markers if the candidate exists in VFS
+                if (VFS_SVC_STRNICMP(rawStr.c_str(), "Engine/", 7) == 0)
+                {
+                    const std::string candidate = VirtualFileSystem::NormalizeVirtualPath("/" + rawStr);
+                    if (vfs.Exists(candidate)) { vpath = candidate; found = true; }
+                }
+                else if (VFS_SVC_STRNICMP(rawStr.c_str(), "EngineContent/", 14) == 0)
+                {
+                    const std::string candidate = VirtualFileSystem::NormalizeVirtualPath("/Engine/" + rawStr.substr(14));
+                    if (vfs.Exists(candidate)) { vpath = candidate; found = true; }
+                }
+                else if (VFS_SVC_STRNICMP(rawStr.c_str(), "Game/", 5) == 0)
+                {
+                    const std::string candidate = VirtualFileSystem::NormalizeVirtualPath("/" + rawStr);
+                    if (vfs.Exists(candidate)) { vpath = candidate; found = true; }
+                }
+                else if (VFS_SVC_STRNICMP(rawStr.c_str(), "GameContent/", 12) == 0)
+                {
+                    const std::string candidate = VirtualFileSystem::NormalizeVirtualPath("/Game/" + rawStr.substr(12));
+                    if (vfs.Exists(candidate)) { vpath = candidate; found = true; }
+                }
+            }
+
+            if (!found)
+            {
+                // Check physical paths containing standard content markers if candidate exists in VFS
+                const auto ecPos = absGeneric.rfind("/EngineContent/");
+                if (ecPos != std::string::npos)
+                {
+                    const std::string candidate = VirtualFileSystem::NormalizeVirtualPath("/Engine/" + absGeneric.substr(ecPos + 15));
+                    if (vfs.Exists(candidate)) { vpath = candidate; found = true; }
+                }
+                if (!found)
+                {
+                    const auto cPos = absGeneric.rfind("/Engine/Content/");
+                    if (cPos != std::string::npos)
+                    {
+                        const std::string candidate = VirtualFileSystem::NormalizeVirtualPath("/Engine/" + absGeneric.substr(cPos + 16));
+                        if (vfs.Exists(candidate)) { vpath = candidate; found = true; }
+                    }
+                }
+                if (!found)
+                {
+                    const auto gcPos = absGeneric.rfind("/GameContent/");
+                    if (gcPos != std::string::npos)
+                    {
+                        const std::string candidate = VirtualFileSystem::NormalizeVirtualPath("/Game/" + absGeneric.substr(gcPos + 13));
+                        if (vfs.Exists(candidate)) { vpath = candidate; found = true; }
                     }
                 }
             }

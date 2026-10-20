@@ -1,25 +1,12 @@
 #include "LocalVfs.h"
-#include "HostVfsProxy.h"
 #include "VfsRead.h"
 #include <cstdio>
 #include <exception>
 #include <mutex>
 
-namespace
-{
-struct FallbackAutoRegistrar
-{
-    FallbackAutoRegistrar()
-    {
-        HostVfsProxy::Instance().SetFallbackVfs(&LocalVfs::Instance());
-    }
-} s_registrar;
-} // namespace
-
 LocalVfs& LocalVfs::Instance()
 {
     static LocalVfs s_instance;
-    HostVfsProxy::Instance().SetFallbackVfs(&s_instance);
     return s_instance;
 }
 
