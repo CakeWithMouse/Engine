@@ -3,6 +3,7 @@
 #include <Engine/Resources/VirtualFileSystem.h>
 #include "../Source/Runtime/VfsService.h"
 
+#include <cctype>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -57,7 +58,7 @@ void VfsService_ResolveAndToVirtual()
 
     // resolve: buffer sizing with capacity = 0
     uint64_t needed = 0;
-    EngineVfsStatus status = f.api.resolve(f.api.context, "/Test/hello.txt", nullptr, 0, &needed);
+    uint32_t status = f.api.resolve(f.api.context, "/Test/hello.txt", nullptr, 0, &needed);
     CHECK(status == ENGINE_VFS_BUFFER_TOO_SMALL);
     CHECK(needed > 0);
 
@@ -79,6 +80,11 @@ void VfsService_ResolveAndToVirtual()
     status = f.api.resolve(f.api.context, nullptr, buf.data(), buf.size(), nullptr);
     CHECK(status == ENGINE_VFS_BAD_ARGUMENT);
 
+    // resolve: invalid UTF-8
+    const char invalidUtf8[] = { '\xFF', '\xFE', '\xFD', '\0' };
+    status = f.api.resolve(f.api.context, invalidUtf8, buf.data(), buf.size(), &actualNeeded);
+    CHECK(status == ENGINE_VFS_BAD_ARGUMENT);
+
     // toVirtual: normal
     const std::string physicalStr = (f.root / "hello.txt").string();
     needed = 0;
@@ -91,13 +97,43 @@ void VfsService_ResolveAndToVirtual()
     CHECK(status == ENGINE_VFS_OK);
     CHECK(std::string(buf.data()) == "/Test/hello.txt");
 
-    // toVirtual: physical path outside mounts
+    // toVirtual: casing (c: vs C:) and backslashes
+    std::string lowerPath = physicalStr;
+    if (lowerPath.size() > 1 && lowerPath[1] == ':')
+    {
+        lowerPath[0] = static_cast<char>(std::tolower(static_cast<unsigned char>(lowerPath[0])));
+    }
+    for (char& c : lowerPath) { if (c == '/') c = '\\'; }
+
+    std::string upperPath = physicalStr;
+    if (upperPath.size() > 1 && upperPath[1] == ':')
+    {
+        upperPath[0] = static_cast<char>(std::toupper(static_cast<unsigned char>(upperPath[0])));
+    }
+    for (char& c : upperPath) { if (c == '\\') c = '/'; }
+
+    status = f.api.toVirtual(f.api.context, lowerPath.c_str(), buf.data(), buf.size(), &actualNeeded);
+    CHECK(status == ENGINE_VFS_OK);
+    CHECK(std::string(buf.data()) == "/Test/hello.txt");
+
+    status = f.api.toVirtual(f.api.context, upperPath.c_str(), buf.data(), buf.size(), &actualNeeded);
+    CHECK(status == ENGINE_VFS_OK);
+    CHECK(std::string(buf.data()) == "/Test/hello.txt");
+
+    // toVirtual: physical path outside mounts -> NOT_FOUND without adding dynamic mounts
+    const size_t mountsBefore = f.vfs.GetMounts().size();
     const auto outsidePath = (std::filesystem::temp_directory_path() / "OutsideVfs_Random_NonExistent.xyz").string();
     status = f.api.toVirtual(f.api.context, outsidePath.c_str(), buf.data(), buf.size(), &actualNeeded);
     CHECK(status == ENGINE_VFS_NOT_FOUND);
+    const size_t mountsAfter = f.vfs.GetMounts().size();
+    CHECK(mountsBefore == mountsAfter);
 
     // toVirtual: bad arguments
     status = f.api.toVirtual(f.api.context, nullptr, buf.data(), buf.size(), nullptr);
+    CHECK(status == ENGINE_VFS_BAD_ARGUMENT);
+
+    // toVirtual: invalid UTF-8
+    status = f.api.toVirtual(f.api.context, invalidUtf8, buf.data(), buf.size(), &actualNeeded);
     CHECK(status == ENGINE_VFS_BAD_ARGUMENT);
 }
 
@@ -114,9 +150,13 @@ void VfsService_ExistsAndStat()
     CHECK(f.api.exists(f.api.context, "/Test/missing.txt") == 0);
     CHECK(f.api.exists(f.api.context, nullptr) == 0);
 
+    // exists: invalid UTF-8
+    const char invalidUtf8[] = { '\xFF', '\xFE', '\xFD', '\0' };
+    CHECK(f.api.exists(f.api.context, invalidUtf8) == 0);
+
     // stat: file
     EngineVfsStat st{};
-    EngineVfsStatus status = f.api.stat(f.api.context, "/Test/hello.txt", &st);
+    uint32_t status = f.api.stat(f.api.context, "/Test/hello.txt", &st);
     CHECK(status == ENGINE_VFS_OK);
     CHECK(st.type == ENGINE_VFS_TYPE_FILE);
     CHECK(st.size == 12); // "Hello World!"
@@ -136,6 +176,10 @@ void VfsService_ExistsAndStat()
     status = f.api.stat(f.api.context, nullptr, &st);
     CHECK(status == ENGINE_VFS_BAD_ARGUMENT);
     status = f.api.stat(f.api.context, "/Test/hello.txt", nullptr);
+    CHECK(status == ENGINE_VFS_BAD_ARGUMENT);
+
+    // stat: invalid UTF-8
+    status = f.api.stat(f.api.context, invalidUtf8, &st);
     CHECK(status == ENGINE_VFS_BAD_ARGUMENT);
 }
 
@@ -161,7 +205,7 @@ void VfsService_ReadFileAndAllocator()
 
     // normal file read
     uint64_t bytesRead = 0;
-    EngineVfsStatus status = f.api.readFile(f.api.context, "/Test/hello.txt", allocFn, &allocCtx, &bytesRead);
+    uint32_t status = f.api.readFile(f.api.context, "/Test/hello.txt", allocFn, &allocCtx, &bytesRead);
     CHECK(status == ENGINE_VFS_OK);
     CHECK(allocCtx.allocCalled);
     CHECK(bytesRead == 12);
@@ -194,6 +238,11 @@ void VfsService_ReadFileAndAllocator()
     CHECK(status == ENGINE_VFS_BAD_ARGUMENT);
     status = f.api.readFile(f.api.context, "/Test/hello.txt", nullptr, &allocCtx, &bytesRead);
     CHECK(status == ENGINE_VFS_BAD_ARGUMENT);
+
+    // invalid UTF-8
+    const char invalidUtf8[] = { '\xFF', '\xFE', '\xFD', '\0' };
+    status = f.api.readFile(f.api.context, invalidUtf8, allocFn, &allocCtx, &bytesRead);
+    CHECK(status == ENGINE_VFS_BAD_ARGUMENT);
 }
 
 void VfsService_EnumerateAndFind()
@@ -216,7 +265,7 @@ void VfsService_EnumerateAndFind()
         return 1;
     };
 
-    EngineVfsStatus status = f.api.enumerate(f.api.context, "/Test", 0, enumCb, &enumRes);
+    uint32_t status = f.api.enumerate(f.api.context, "/Test", 0, enumCb, &enumRes);
     CHECK(status == ENGINE_VFS_OK);
     CHECK(!enumRes.names.empty());
 
@@ -241,6 +290,11 @@ void VfsService_EnumerateAndFind()
     // enumerate nonexistent directory
     status = f.api.enumerate(f.api.context, "/Test/nonexistent_folder", 0, enumCb, &enumRes);
     CHECK(status == ENGINE_VFS_NOT_FOUND);
+
+    // enumerate invalid UTF-8
+    const char invalidUtf8[] = { '\xFF', '\xFE', '\xFD', '\0' };
+    status = f.api.enumerate(f.api.context, invalidUtf8, 0, enumCb, &enumRes);
+    CHECK(status == ENGINE_VFS_BAD_ARGUMENT);
 
     // find recursive pattern "*.txt"
     struct FindResult
@@ -277,6 +331,12 @@ void VfsService_EnumerateAndFind()
     // find nonexistent directory
     status = f.api.find(f.api.context, "/Test/nonexistent_folder", 0, "*.txt", 1, findCb, &findRes);
     CHECK(status == ENGINE_VFS_NOT_FOUND);
+
+    // find invalid UTF-8
+    status = f.api.find(f.api.context, invalidUtf8, 0, "*.txt", 1, findCb, &findRes);
+    CHECK(status == ENGINE_VFS_BAD_ARGUMENT);
+    status = f.api.find(f.api.context, "/Test", 0, invalidUtf8, 1, findCb, &findRes);
+    CHECK(status == ENGINE_VFS_BAD_ARGUMENT);
 }
 
 void VfsService_CallbackReentrancyAndNoDeadlock()
@@ -338,7 +398,7 @@ void VfsService_CallbackReentrancyAndNoDeadlock()
         return 1; // continue iteration
     };
 
-    EngineVfsStatus status = f.api.enumerate(f.api.context, "/Test", 0, reentrantEnumCb, &reCtx);
+    uint32_t status = f.api.enumerate(f.api.context, "/Test", 0, reentrantEnumCb, &reCtx);
     CHECK(status == ENGINE_VFS_OK);
     CHECK(reCtx.callbackCount > 10);
     CHECK(reCtx.existsSuccessCount == reCtx.callbackCount);
@@ -404,7 +464,7 @@ void VfsService_GetMountsAndStubs()
         return 1;
     };
 
-    EngineVfsStatus status = f.api.getMounts(f.api.context, mountCb, &mRes);
+    uint32_t status = f.api.getMounts(f.api.context, mountCb, &mRes);
     CHECK(status == ENGINE_VFS_OK);
     bool foundTestMount = false;
     for (const auto& m : mRes.mounts)
