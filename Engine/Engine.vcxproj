@@ -72,6 +72,7 @@
     <ClCompile Include="Source\Resources\Paths.cpp" />
     <ClCompile Include="Source\Resources\VirtualFileSystem.cpp" />
     <ClCompile Include="Source\Resources\VfsRead.cpp" />
+    <ClCompile Include="Source\Runtime\VfsService.cpp" />
     <ClInclude Include="Include\Engine\Components\GameComponents.h" />
     <ClInclude Include="Include\Engine\Components\ComponentAnnotations.h" />
     <ClInclude Include="Include\Engine\Components\ComponentType.h" />
@@ -96,6 +97,8 @@
     <ClInclude Include="Include\Engine\Render\TextureLoader.h" />
     <ClInclude Include="Include\Engine\Resources\Paths.h" />
     <ClInclude Include="Include\Engine\Resources\VirtualFileSystem.h" />
+    <ClInclude Include="Include\Engine\Runtime\VfsApi.h" />
+    <ClInclude Include="Source\Runtime\VfsService.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />

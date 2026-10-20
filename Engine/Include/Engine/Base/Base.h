@@ -4,6 +4,7 @@
 #include <Engine/Resources/VirtualFileSystem.h>
 #include <Engine/Runtime/LaunchOptions.h>
 #include <Engine/Runtime/SceneModuleApi.h>
+#include <Engine/Runtime/VfsApi.h>
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -22,6 +23,7 @@ class BaseEngine final
     BaseResources Resources;
     BaseGameConfig Config;
     VirtualFileSystem& Vfs;
+    EngineVfsApi vfsServiceApi{};
     enum class State { New, Starting, Ready, Playing, Stopped };
     State state = State::New;
     bool exitRequested = false;

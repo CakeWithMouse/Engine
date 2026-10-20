@@ -136,7 +136,7 @@ void DllTests(const std::filesystem::path& path)
         auto getModule = reinterpret_cast<EngineGetModuleApiFn>(GetProcAddress(m.library, "EngineGetModuleApi"));
         auto getScene = reinterpret_cast<EngineGetSceneApiFn>(GetProcAddress(m.library, "EngineGetSceneApi"));
         Check(getModule && getScene, "module and optional scene exports");
-        Check(getModule(ENGINE_MODULE_VERSION, &m.module) && m.module.kind == ENGINE_MODULE_GAME, "module ABI v4 retained");
+        Check(getModule(ENGINE_MODULE_VERSION, &m.module) && m.module.kind == ENGINE_MODULE_GAME, "module ABI v5 retained");
         EngineModuleHost host{ENGINE_MODULE_VERSION, &logs, Log, Exit, "Test", "", ""};
         m.session = m.module.create(&host);
         Check(m.session != nullptr, "create session");

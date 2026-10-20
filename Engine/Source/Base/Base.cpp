@@ -14,6 +14,7 @@
 #include <Engine/Runtime/GameWindowApi.h>
 #include <Engine/Resources/Paths.h>
 #include "../Resources/VfsRead.h"
+#include "../Runtime/VfsService.h"
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/Player.h>
 #include <chrono>
@@ -389,7 +390,7 @@ public:
 };
 
 BaseEngine::BaseEngine()
-    : Vfs(VfsRead::GetVFS())
+    : Vfs(VfsRead::GetVFS()), vfsServiceApi(CreateVfsService(Vfs))
 {
 }
 BaseEngine::~BaseEngine() { Stop(); }
@@ -587,6 +588,12 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
 
     EngineModuleHost host{ENGINE_MODULE_VERSION, this, Log, Exit,
         options.projectName.c_str(), options.projectFile.c_str(), options.contentRoot.c_str()};
+    host.getService = [](void* user, uint32_t serviceId, uint32_t minVersion) -> const void* {
+        auto* engine = static_cast<BaseEngine*>(user);
+        if (serviceId == ENGINE_SERVICE_VFS && minVersion <= ENGINE_VFS_API_VERSION)
+            return &engine->vfsServiceApi;
+        return nullptr;
+    };
     if (!options.editModule.empty())
     {
         if (options.mode != RuntimeMode::Editor) throw std::runtime_error("editModule requires editor mode");

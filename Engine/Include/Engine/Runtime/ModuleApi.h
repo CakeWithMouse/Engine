@@ -1,12 +1,12 @@
 #pragma once
 #include <stdint.h>
 
-// ABI v4: Windows x64, C calling convention, no STL, exceptions or cross-DLL deletes.
+// ABI v5: Windows x64, C calling convention, no STL, exceptions or cross-DLL deletes.
 // All strings are UTF-8 and borrowed for the duration of the session.
 // Host and its user pointer remain valid until Destroy returns. Callbacks are
 // synchronous, on the host thread; modules must not keep work alive after Destroy.
 #define ENGINE_MODULE_CALL __cdecl
-#define ENGINE_MODULE_VERSION 4u
+#define ENGINE_MODULE_VERSION 5u
 #define ENGINE_MODULE_GAME 1u
 #define ENGINE_MODULE_EDITOR 2u
 
@@ -30,6 +30,9 @@ struct EngineModuleHost
     // v4: 0 toggles Play/Stop, 1 toggles Pause/Resume. Returns state: 0 Edit,
     // 1 Playing, 2 Paused; -1 on failure. No game callbacks run on the UI thread.
     int (*viewportControl)(void* user, uint32_t command);
+    // v5: service broker for host capabilities (e.g. ENGINE_SERVICE_VFS).
+    // Returns nullptr if service is unknown or version is less than minVersion.
+    const void* (*getService)(void* user, uint32_t serviceId, uint32_t minVersion);
 };
 
 struct EngineModuleApi
