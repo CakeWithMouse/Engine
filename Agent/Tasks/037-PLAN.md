@@ -2,51 +2,89 @@
 
 ## 1. Цели и контекст
 - **Цель:** Обеспечить строгую архитектуру виртуальной файловой системы (VFS), управляемой единым экземпляром `VirtualFileSystem` на стороне хоста (`EngineRuntime.exe`), пробросить доступ к ней в `Game.dll` и `Editor.dll` через C-ABI границы без разделения на независимые статические копии, избавиться от неконтролируемых динамических маунтов `/_ext_*`, перевести загрузку/сохранение сцен и файловый браузер редактора на VFS API.
+- **Статус подсистемы VFS:** **ЗАМОРОЖЕН.** Дальше VFS не развиваем. Шаг 3.6, Фазы 4 и 5 перенесены в Backlog по решению архитектора. Возвращение к VFS планируется после завершения импорта 3D-моделей и анимации.
 
 ---
 
 ## 2. Чек-лист реализации (Фазы 0–5)
 
-- [ ] **Фаза 0: Разведка (текущий этап)**
+- [x] **Фаза 0: Разведка (завершена)**
   - [x] Создание рабочей ветки `feature/vfs-hardening` от `integration/scene-vfs`.
   - [x] Создание документа плана `Agent/Tasks/037-PLAN.md` (коммит `docs(plan)`).
-  - [ ] Анализ текущего механизма получения VFS в `Game.dll` и проверка прохождения путей ресурсов (шейдеры/текстуры) через `/_ext_*`.
-  - [ ] Полный аудит точек вызова VFS во всех модулях движка и классификация по типам (`host`, `Game.dll`, `Editor.dll`, автономная игра).
-  - [ ] Исследование реализации `FileBrowser` в `Editor/` (Qt-классы, дублирование функционала VFS, модель поиска и пути проекта).
-  - [ ] Проектирование C-ABI интерфейса хоста для передачи VFS в подключаемые модули (`ModuleApi.h`, `EditSessionApi.h`).
-  - [ ] Анализ потокобезопасности `VirtualFileSystem`, семантики `Resolve` для новых путей (Save As), граничных случаев `EnumerateFiles` и механизма уведомлений (watcher).
-  - [ ] Анализ размера файлов редактора (`wc -l` по компонентам `FileBrowser`, выявление файлов > 500 строк).
-  - [ ] Оценка рисков удаления `/_ext_*` (зависимости в тестах и автономных играх).
+  - [x] Анализ текущего механизма получения VFS в `Game.dll` и проверка прохождения путей ресурсов (шейдеры/текстуры) через `/_ext_*`.
+  - [x] Полный аудит точек вызова VFS во всех модулях движка и классификация по типам (`host`, `Game.dll`, `Editor.dll`, автономная игра).
+  - [x] Исследование реализации `FileBrowser` в `Editor/` (Qt-классы, дублирование функционала VFS, модель поиска и пути проекта).
+  - [x] Проектирование C-ABI интерфейса хоста для передачи VFS в подключаемые модули (`ModuleApi.h`, `EditSessionApi.h`).
+  - [x] Анализ потокобезопасности `VirtualFileSystem`, семантики `Resolve` для новых путей (Save As), граничных случаев `EnumerateFiles` и механизма уведомлений (watcher).
+  - [x] Анализ размера файлов редактора (`wc -l` по компонентам `FileBrowser`, выявление файлов > 500 строк).
+  - [x] Оценка рисков удаления `/_ext_*` (зависимости в тестах и автономных играх).
 
-- [ ] **Фаза 1: C-ABI VFS мост (Host -> Game.dll, Editor.dll)**
-  - [ ] Проектирование структуры `EngineVfsApi` с чистым C-ABI (функции чтения, записи, проверки, перечисления, резолва).
-  - [ ] Передача указателя на `EngineVfsApi` через `EngineModuleHost` при вызове `create`.
-  - [ ] Переключение `VfsRead` внутри DLL на использование хостового VFS вместо локального статического `s_vfs`.
-  - [ ] Валидация синхронизации точек монтирования `/Engine` и `/Game` между хостом и загруженными модулями.
+- [x] **Фаза 1: C-ABI VFS мост (Host -> Game.dll, Editor.dll) (завершена)**
+  - [x] Проектирование структуры `EngineVfsApi` с чистым C-ABI (функции чтения, проверки, перечисления, поиска, резолва).
+  - [x] Передача сервиса через `EngineModuleHost::getService` (`ENGINE_MODULE_VERSION = 5`).
+  - [x] Реализация `HostVfsProxy` и моста `IVfs` внутри DLL, переключение `VfsRead::Active()`.
+  - [x] Валидация синхронизации точек монтирования `/Engine` и `/Game` между хостом и загруженными модулями.
 
-- [ ] **Фаза 2: Устранение `/_ext_*` и строгий аудит путей**
-  - [ ] Запрет неявного монтирования родительских каталогов в `VfsRead::ToVirtualPath`.
-  - [ ] Приведение путей загрузки шейдеров и текстур к каноническим виртуальным корням (`/Engine/...`, `/Game/...`).
-  - [ ] Исправление тестов, полагавшихся на неявный динамический маунт.
-  - [ ] Устранение утечки точек монтирования при перезапусках сессий движка.
+- [x] **Фаза 2: Устранение `/_ext_*` и строгий аудит путей (завершена)**
+  - [x] Удаление неявного динамического монтирования `/_ext_*` в `ToVirtualPath` и `VirtualFileSystem`.
+  - [x] Удаление всех эвристик по подстрокам из `ToVirtualImpl`, строгая привязка к `GetMounts()`.
+  - [x] Синхронизация `EnginePaths::SetContentRoot` из `vfsApi->resolve("/Engine")` в Game-модулях (`RuntimeExample::Create` / `Destroy`).
+  - [x] Исправление сброса `EnginePaths::SetContentRoot({})` для пустых путей в `Paths.cpp`.
+  - [x] Изоляция маунтов и тесты `NOT_FOUND` для путей вне зарегистрированных маунтов.
 
-- [ ] **Фаза 3: Перевод SceneDocument и SceneEditSession на VFS**
-  - [ ] Перевод `SceneDocument::Read` на чтение через VFS API.
-  - [ ] Реализация атомарной записи сцены с поддержкой виртуальных путей `/Game/...` (создание временного файла рядом с целевым на том же физическом томе).
-  - [ ] Адаптация `SceneEditSession.cpp` (`DocumentCall`) для поддержки виртуальных путей без требования `is_absolute()`.
-  - [ ] Обновление логики `startupScene` в `Project.cpp` и `Base.cpp` на использование канонических путей `/Game/...`.
+- [x] **Фаза 3: Модульный VFS-прокси и стабилизация сессий (Шаги 3.1–3.5 завершены, 3.6 в Backlog)**
+  - [x] Шаг 3.1: Абстракция `IVfs`, декомпозиция `LocalVfs` и `HostVfsProxy` в отдельные файлы Resources/ (до 500 строк).
+  - [x] Шаг 3.2: Атомарный указатель `s_activeVfs`, безопасное переключение в `VfsRead`.
+  - [x] Шаг 3.3: Протокол привязки хоста (`Bind`/`Unbind`), логирование fallback и host failures (однократно на статус).
+  - [x] Шаг 3.4: Модульные тесты `VfsProxyLifecycleTests.cpp` (последовательные сессии, отказ, горячая перезагрузка).
+  - [x] Шаг 3.5: Удаление эвристик `ToVirtualImpl`, валидация на 609 проверках `edit-session`.
+  - [ ] **Шаг 3.6: [ОТЛОЖЕНО В BACKLOG]** Перевод `startupScene` и `SceneDocument` на виртуальные пути `/Game/...`.
 
-- [ ] **Фаза 4: Перевод FileBrowser редактора на VFS**
+- [ ] **Фаза 4: [ОТЛОЖЕНО В BACKLOG] Перевод FileBrowser редактора на VFS**
   - [ ] Замена прямого использования `QFileSystemModel` / `QDir` на модель данных на базе VFS API (`EnumerateFiles`, `GetFileInfo`, `FindFiles`).
   - [ ] Реализация файловых операций редактора (создание папок, переименование, удаление, импорт) через VFS API.
   - [ ] Интеграция виртуального корня проекта (`/Game`) в дерево файлов редактора.
 
-- [ ] **Фаза 5: Тестирование и стабилизация**
-  - [ ] Метод VFS для листинга каталогов: добавить метод в `VirtualFileSystem` для перечисления директорий, чтобы `enumerate`/`find` сервиса отдавали `ENGINE_VFS_TYPE_DIRECTORY` без изменения ABI (в Фазе 2 отдаются только файлы).
+- [ ] **Фаза 5: [ОТЛОЖЕНО В BACKLOG] Расширение VFS и стабилизация**
+  - [ ] Метод VFS для листинга каталогов: добавить метод в `VirtualFileSystem` для перечисления директорий, чтобы `enumerate`/`find` сервиса отдавали `ENGINE_VFS_TYPE_DIRECTORY` без изменения ABI.
   - [ ] Добавление консольных тестов `SceneDocument` (чтение, запись, раундтрип, обработка ошибок) в `EngineTests.exe`.
-  - [ ] Прогон всех наборов: `run.ps1` (21+), `run-runtime.ps1`, `edit-session/run.ps1` (575), `scene-module/run.ps1` (109), `run-games.ps1`.
-  - [ ] Проверка компиляции Debug и Release: 0 ошибок, 0 новых предупреждений.
-  - [ ] Проверка отсутствия `imgui|Qt|QFile` в подсистемах ядра (`Engine/Include`, `Engine/Source/Render`, `Engine/Source/Resources`).
+  - [ ] Стабилизация и стресс-тесты VFS.
+
+---
+
+## Backlog (Отложено по решению архитектора)
+
+1. **Шаг 3.6 (Интеграция SceneDocument и SceneEditSession с VFS):**
+   - Перевод `SceneDocument::Read` на чтение через `VfsRead::Active()`.
+   - Поддержка виртуальных путей `/Game/...` в `SceneDocument::Write` (атомарная запись через `VfsRead::Active().Resolve()`).
+   - Поддержка относительных/виртуальных путей сцены в `SceneEditSession.cpp` (`DocumentCall`) без строгого требования физической абсолютности `file.is_absolute()`.
+   - Обновление логики `startupScene` в `Project.cpp` и `Base.cpp` на канонические виртуальные пути.
+
+2. **Фаза 4 (Перевод FileBrowser редактора на VFS):**
+   - Замена прямого использования `QFileSystemModel` / `QDir` на модель данных на базе VFS API (`EnumerateFiles`, `GetFileInfo`, `FindFiles`).
+   - Реализация файловых операций редактора (создание папок, переименование, удаление, импорт) через VFS API.
+   - Интеграция виртуального корня проекта (`/Game`) в дерево файлов редактора.
+
+3. **Фаза 5 (Расширение функционала VFS):**
+   - Метод VFS для явного листинга каталогов: расширение `VirtualFileSystem` методом перечисления директорий для передачи флага `ENGINE_VFS_TYPE_DIRECTORY` через `enumerate`/`find` C-ABI.
+   - Консольные тесты `SceneDocument` (чтение, запись, раундтрип, обработка ошибок) в `EngineTests.exe`.
+
+---
+
+## Хеши коммитов ветки feature/vfs-hardening
+
+- `90d7460` feat(vfs): host vfs service C-ABI and module host v5 broker
+- `f6af00b` test(vfs): unit tests for host vfs service C-ABI and reentrancy
+- `871362b` fix(abi): align VfsApi.h and VfsService with prompt G requirements
+- `5b2ae15` fix(vfs-service): ensure first read is logged strictly upon successful file read
+- `cb46811` test(vfs-service): split vfs service tests into modular suites under 450 lines
+- `abc0599` docs(abi): document enumerate/find full virtual path contract and Phase 5 directory listing
+- `b3b553c` feat(vfs): module-side host vfs proxy, IVfs abstraction, and lifecycle tests (Step 3.1-3.4)
+- `c5e12dd` fix(vfs-proxy): decouple proxy from fallback when bound, log host failure once per status, and unbind on failed Create
+- `8cf9686` test(vfs-proxy): add NOT_FOUND mount isolation and hot-reload verification
+- `08e4cb2` fix(vfs-proxy): remove ToVirtual heuristics, sync EnginePaths contentRoot via resolve, test unmounted paths
+
+---
 
 ---
 
