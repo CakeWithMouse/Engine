@@ -179,4 +179,45 @@ struct SkeletalModel
     {
         DirectX::XMStoreFloat4x4(&MeshToModel, DirectX::XMMatrixIdentity());
     }
+
+    void Flatten(std::vector<SkinnedVertex>& outVertices, std::vector<uint32_t>& outIndices) const
+    {
+        outVertices.clear();
+        outIndices.clear();
+        size_t totalV = 0, totalI = 0;
+        for (const auto& m : Meshes) { totalV += m.Vertices.size(); totalI += m.Indices.size(); }
+        outVertices.reserve(totalV);
+        outIndices.reserve(totalI);
+        for (const auto& mesh : Meshes)
+        {
+            const uint32_t baseVertex = static_cast<uint32_t>(outVertices.size());
+            outVertices.insert(outVertices.end(), mesh.Vertices.begin(), mesh.Vertices.end());
+            for (uint32_t idx : mesh.Indices)
+            {
+                outIndices.push_back(baseVertex + idx);
+            }
+        }
+    }
+
+    void FlattenCrowd(std::vector<CrowdSkinnedVertex>& outVertices, std::vector<uint32_t>& outIndices) const
+    {
+        outVertices.clear();
+        outIndices.clear();
+        size_t totalV = 0, totalI = 0;
+        for (const auto& m : Meshes) { totalV += m.Vertices.size(); totalI += m.Indices.size(); }
+        outVertices.reserve(totalV);
+        outIndices.reserve(totalI);
+        for (const auto& mesh : Meshes)
+        {
+            const uint32_t baseVertex = static_cast<uint32_t>(outVertices.size());
+            for (const auto& v : mesh.Vertices)
+            {
+                outVertices.push_back(ConvertToCrowdVertex(v));
+            }
+            for (uint32_t idx : mesh.Indices)
+            {
+                outIndices.push_back(baseVertex + idx);
+            }
+        }
+    }
 };

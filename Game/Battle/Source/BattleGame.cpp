@@ -143,54 +143,27 @@ void BattleGame::BuildScene(const Settings& settings)
 
     if (Config.Animated)
     {
-        // 1. Ensure /Game is mounted
-        const auto repoRoot = VfsRead::FindRepoRoot();
-        if (!repoRoot.empty())
-        {
-            VfsRead::GetVFS().Mount("/Game", repoRoot / "Game" / "RuntimeExample" / "Content");
-        }
-
-        // 2. Load CesiumMan model
+        // 1. Load CesiumMan model from standard game content
         SkeletalLoadResult loadResult = LoadSkeletalModelFromVfs("/Game/Models/CesiumMan.glb");
         if (!loadResult.Success || !loadResult.Model)
         {
             throw std::runtime_error("Failed to load CesiumMan for animated crowd: " + loadResult.ErrorMessage);
         }
-        const SkeletalModel& model = *loadResult.Model;
 
-        // 3. Bake animation into RGBA32F texture
-        const float fps = 30.0f;
-        SkeletalBakeResult bakeResult = BakeSkeletalModel(model, fps);
-        if (!bakeResult.Success)
-        {
-            throw std::runtime_error("Failed to bake CesiumMan animation: " + bakeResult.ErrorMessage);
-        }
-        BakedAnimClips = bakeResult.Texture.Clips;
-
-        // 4. Create GPU texture and SRV
-        if (!CreateBakedTextureResource(GetDevice(), bakeResult.Texture, BakedAnimTexture, BakedAnimSRV))
-        {
-            throw std::runtime_error("Failed to create baked animation texture resource on GPU");
-        }
-
-        // 5. Convert model vertices to CrowdSkinnedVertex (32B)
-        std::vector<CrowdSkinnedVertex> allCrowdVerts;
-        std::vector<uint32_t> allIndices;
-        for (const auto& mesh : model.Meshes)
-        {
-            const uint32_t baseVertex = static_cast<uint32_t>(allCrowdVerts.size());
-            allCrowdVerts.reserve(allCrowdVerts.size() + mesh.Vertices.size());
-            for (const auto& v : mesh.Vertices) allCrowdVerts.push_back(ConvertToCrowdVertex(v));
-            allIndices.reserve(allIndices.size() + mesh.Indices.size());
-            for (uint32_t idx : mesh.Indices) allIndices.push_back(baseVertex + idx);
-        }
-        UnitVertexCount = static_cast<int>(allCrowdVerts.size());
-
-        // 6. Create InstancedMeshComponent with skinned shaders
+        // 2. Create InstancedMeshComponent with baked animated model and skinned shaders
         const std::string skinnedShaderPath = EnginePaths::Shader("InstancedSkinnedMesh.hlsl").generic_u8string();
         auto units = std::make_unique<InstancedMeshComponent>();
-        units->SetSkinnedLod(0, allCrowdVerts, allIndices);
-        units->SetAnimationTexture(BakedAnimSRV.Get(), BakedAnimClips);
+        if (!units->SetAnimatedModel(GetDevice(), *loadResult.Model, 30.0f))
+        {
+            throw std::runtime_error("Failed to setup animated model on InstancedMeshComponent");
+        }
+
+        UnitVertexCount = 0;
+        for (const auto& mesh : loadResult.Model->Meshes)
+        {
+            UnitVertexCount += static_cast<int>(mesh.Vertices.size());
+        }
+
         units->SetDrawDistance(2500.0f);
         units->SetShadowDistance(900.0f);
         units->SetShadowLodBias(0);

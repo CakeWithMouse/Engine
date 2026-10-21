@@ -99,9 +99,5 @@ private:
     BattleBenchSession Bench;
     uint64_t WarmupFrames = 10;
 
-    // GPU VAT resources for animated crowd
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> BakedAnimTexture;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> BakedAnimSRV;
-    std::vector<BakedClipInfo> BakedAnimClips;
     int UnitVertexCount = 0;
 };

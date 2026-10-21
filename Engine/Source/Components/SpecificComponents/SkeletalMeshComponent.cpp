@@ -191,15 +191,7 @@ void SkeletalMeshComponent::CreateBuffers(ID3D11Device* device)
 
     std::vector<SkinnedVertex> allVertices;
     std::vector<uint32_t> allIndices;
-    for (const auto& mesh : skeletalModel->Meshes)
-    {
-        uint32_t baseVertex = static_cast<uint32_t>(allVertices.size());
-        allVertices.insert(allVertices.end(), mesh.Vertices.begin(), mesh.Vertices.end());
-        for (uint32_t idx : mesh.Indices)
-        {
-            allIndices.push_back(baseVertex + idx);
-        }
-    }
+    skeletalModel->Flatten(allVertices, allIndices);
 
     indexCount = static_cast<UINT>(allIndices.size());
     if (allVertices.empty() || allIndices.empty())

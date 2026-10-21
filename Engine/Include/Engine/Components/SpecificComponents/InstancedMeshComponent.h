@@ -52,6 +52,11 @@ public:
     void SetAnimationTexture(ID3D11ShaderResourceView* srv, const std::vector<BakedClipInfo>& clips = {});
     bool HasAnimationTexture() const { return AnimationTextureSRV != nullptr; }
     void SetAnimationLerp(bool enabled) { bAnimationLerp = enabled; }
+    /**
+     * Bakes all clips of a SkeletalModel into a VAT texture, creates D3D11 resources,
+     * flattens mesh into CrowdSkinnedVertex LOD0, and sets animation texture.
+     */
+    bool SetAnimatedModel(ID3D11Device* device, const SkeletalModel& model, float sampleFps = 30.0f);
 
     /**
      * Distance from the camera at which the next LOD starts, in world units and ascending.
@@ -195,6 +200,7 @@ private:
     float MeshRadius = 0.0f;   // local radius of LOD 0, unscaled
     int TotalIndexCount = 0;   // LOD 0, for diagnostics only
 
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> AnimationTexture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> AnimationTextureSRV;
     Microsoft::WRL::ComPtr<ID3D11Buffer> AnimClipConstantBuffer;
     std::vector<BakedClipInfo> AnimationClips;

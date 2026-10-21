@@ -9,9 +9,7 @@ cbuffer ShadowBuffer : register(b0)
 #endif
 
 #include "Instancing.hlsli"
-
-static const float UnitSpecularWeight = 0.35f;
-static const float UnitAmbientModel = 1.0f;
+#include "InstancingPixel.hlsli"
 
 StructuredBuffer<InstData> InstBuf : register(t0);
 Texture2D<float4> AnimTex : register(t1);
@@ -39,21 +37,6 @@ struct VS_SKINNED_IN
     uint4 boneIndices : BLENDINDICES;
     float4 boneWeights : BLENDWEIGHT;
 };
-
-struct PS_IN
-{
-    float4 pos : SV_POSITION;
-    float3 normal : NORMAL;
-    float2 texCoord : TEXCOORD0;
-    float3 worldPos : TEXCOORD1;
-    float fade : TEXCOORD2;
-    float4 color : COLOR;
-};
-
-#if !defined(SHADOW_PASS)
-Texture2D tex : register(t0);
-SamplerState samp : register(s0);
-#endif
 
 void SkinVertex(VS_SKINNED_IN input, InstData instance, out float3 outSkinnedPos, out float3 outSkinnedNormal)
 {
@@ -145,31 +128,6 @@ PS_IN VSMain(VS_SKINNED_IN input, uint instanceId : SV_InstanceID)
     output.fade = instance.Params.x;
     return output;
 }
-
-float4 SampleBaseColor(PS_IN input)
-{
-    return HasTexture > 0.5f ? tex.Sample(samp, input.texCoord) * input.color : input.color;
-}
-
-#if defined(DEFERRED_GBUFFER)
-GBufferOut PSMain(PS_IN input)
-{
-    ClipByFade(input.fade, input.pos.xy);
-    float4 baseColor = SampleBaseColor(input);
-    MaterialLighting material = MakeMaterialLighting(UnitSpecularWeight, UnitAmbientModel);
-    return EncodeGBuffer(baseColor.rgb, input.normal, input.worldPos, material);
-}
-#else
-float4 PSMain(PS_IN input) : SV_Target
-{
-    ClipByFade(input.fade, input.pos.xy);
-    float4 baseColor = SampleBaseColor(input);
-    MaterialLighting material = MakeMaterialLighting(UnitSpecularWeight, UnitAmbientModel);
-    float3 litColor = ComputeSceneLighting(baseColor.rgb, normalize(input.normal), input.worldPos, material);
-    return float4(saturate(litColor), baseColor.a);
-}
-#endif
-
 #else // SHADOW_PASS
 
 struct VS_SHADOW_OUT

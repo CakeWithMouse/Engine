@@ -7,6 +7,7 @@
 #include <functional>
 #include <iostream>
 #include <Engine/Render/ShaderCompiler.h>
+#include <Engine/Render/SkeletalBaker.h>
 #include <Engine/Render/TextureLoader.h>
 #include <Engine/Resources/Paths.h>
 #include <d3dcompiler.h>
@@ -225,6 +226,33 @@ void InstancedMeshComponent::SetAnimationTexture(Microsoft::WRL::ComPtr<ID3D11Sh
 void InstancedMeshComponent::SetAnimationTexture(ID3D11ShaderResourceView* srv, const std::vector<BakedClipInfo>& clips)
 {
     SetAnimationTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>(srv), clips);
+}
+
+bool InstancedMeshComponent::SetAnimatedModel(ID3D11Device* device, const SkeletalModel& model, float sampleFps)
+{
+    SkeletalBakeResult bakeResult = BakeSkeletalModel(model, sampleFps);
+    if (!bakeResult.Success)
+    {
+        std::cerr << "InstancedMeshComponent: failed to bake skeletal model: " << bakeResult.ErrorMessage << std::endl;
+        return false;
+    }
+
+    if (device != nullptr)
+    {
+        if (!CreateBakedTextureResource(device, bakeResult.Texture, AnimationTexture, AnimationTextureSRV))
+        {
+            std::cerr << "InstancedMeshComponent: failed to create GPU texture resource" << std::endl;
+            return false;
+        }
+    }
+
+    SetAnimationTexture(AnimationTextureSRV, bakeResult.Texture.Clips);
+
+    std::vector<CrowdSkinnedVertex> crowdVerts;
+    std::vector<uint32_t> indices;
+    model.FlattenCrowd(crowdVerts, indices);
+
+    return SetSkinnedLod(0, crowdVerts, indices);
 }
 
 void InstancedMeshComponent::SetLodDistances(const std::vector<float>& distances)
