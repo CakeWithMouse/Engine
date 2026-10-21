@@ -35,6 +35,7 @@
   <ItemGroup>
     <ClCompile Include="SkeletalTests.cpp" />
     <ClCompile Include="SkeletalOrientationTests.cpp" />
+    <ClCompile Include="SkeletalBakerTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Engine.vcxproj">

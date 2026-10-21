@@ -442,8 +442,23 @@ int main()
         ++failures;
     }
 
-    std::cout << "=== Skeletal Tests: " << (sizeof(testList)/sizeof(testList[0]) + 1 - failures) 
-              << "/" << (sizeof(testList)/sizeof(testList[0]) + 1) << " passed ===" << std::endl;
+    try
+    {
+        extern bool RunSkeletalBakerSuite();
+        if (!RunSkeletalBakerSuite())
+        {
+            ++failures;
+        }
+    }
+    catch (const std::exception& ex)
+    {
+        std::cerr << "FAIL: skeletal baker tests - " << ex.what() << std::endl;
+        ++failures;
+    }
+
+    constexpr size_t totalSuites = sizeof(testList)/sizeof(testList[0]) + 2;
+    std::cout << "=== Skeletal Tests: " << (totalSuites - failures) 
+              << "/" << totalSuites << " passed ===" << std::endl;
 
     return failures ? 1 : 0;
 }
