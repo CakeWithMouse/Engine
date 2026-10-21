@@ -59,7 +59,11 @@
     <ClCompile Include="Source\Components\SpecificComponents\CubeComponent.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\FBXComponent.cpp" Condition="'$(EngineEnableAssimp)'=='true'" />
     <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshComponent.cpp" />
+    <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshSkinned.cpp" />
+    <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshImpostor.cpp" />
+    <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshShadows.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\ParticleSystemComponent.cpp" />
+    <ClInclude Include="Source\Components\SpecificComponents\InstancedMeshInternal.h" />
     <ClCompile Include="Source\Components\SpecificComponents\SphereComponent.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\TriangleComponent.cpp" />
     <ClCompile Include="Source\Display\Display.cpp" />

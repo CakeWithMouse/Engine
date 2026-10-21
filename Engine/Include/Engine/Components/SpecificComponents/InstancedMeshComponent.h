@@ -103,13 +103,34 @@ public:
     void ReserveInstances(size_t count) { Instances.reserve(count); }
     size_t GetMeshInstanceCount() const { return Instances.size(); }
     const MeshInstance& GetMeshInstance(size_t index) const { return Instances[index]; }
-    void SetInstancePosition(size_t index, const glm::vec3& position);
-    void SetInstanceYaw(size_t index, float yaw);
-    void SetInstanceColor(size_t index, const glm::vec4& color);
-    void SetInstanceVisible(size_t index, bool visible);
-    void SetInstanceAnimationPhase(size_t index, float phase);
-    void SetInstancePositionAndPhase(size_t index, const glm::vec3& position, float phase);
-    void ClearInstances();
+    void SetInstancePosition(size_t index, const glm::vec3& position)
+    {
+        if (index < Instances.size()) { Instances[index].Position = position; PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true; }
+    }
+    void SetInstanceYaw(size_t index, float yaw)
+    {
+        if (index < Instances.size()) { Instances[index].Yaw = yaw; PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true; }
+    }
+    void SetInstanceColor(size_t index, const glm::vec4& color)
+    {
+        if (index < Instances.size()) { Instances[index].Color = color; PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true; }
+    }
+    void SetInstanceVisible(size_t index, bool visible)
+    {
+        if (index < Instances.size()) { Instances[index].bVisible = visible; PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true; }
+    }
+    void SetInstanceAnimationPhase(size_t index, float phase)
+    {
+        if (index < Instances.size()) { Instances[index].AnimationPhase = phase; PreparedFrame = UINT64_MAX; }
+    }
+    void SetInstancePositionAndPhase(size_t index, const glm::vec3& position, float phase)
+    {
+        if (index < Instances.size()) { Instances[index].Position = position; Instances[index].AnimationPhase = phase; PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true; }
+    }
+    void ClearInstances()
+    {
+        Instances.clear(); PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true;
+    }
 
     // Diagnostics for the last frame.
     uint32_t GetDrawnInstances() const { return DrawnInstances; }
@@ -159,6 +180,8 @@ private:
     /** Full set of instances for the baked shadow map, built once and reused between frames. */
     bool EnsureStaticShadowData(ID3D11DeviceContext* context);
     void RenderStaticShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass);
+    void CollectShadowCasters(const MeshInstance& instance, InstData data, int meshLevel, float radius,
+                              const glm::vec3& lightDirection, const DirectX::XMFLOAT4* cascadeSpheres, int cascadeLimit);
     void EnsureFrameData(ID3D11DeviceContext* context);
     bool UploadStream(ID3D11DeviceContext* context,
                       const std::vector<InstData>& staging,
@@ -166,6 +189,7 @@ private:
                       Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& srv,
                       size_t& capacity);
     bool CreateLodBuffers(ID3D11Device* device, LodLevel& lod);
+    bool CreateSkinnedLodBuffers(ID3D11Device* device, LodLevel& lod);
     int SelectLod(float distance, float screenHeightPixels) const;
     bool EnsureSkinnedShaders(ID3D11Device* device);
     void UpdateAnimClipConstantBuffer(ID3D11Device* device);
