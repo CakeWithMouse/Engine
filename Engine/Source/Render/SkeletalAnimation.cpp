@@ -123,15 +123,36 @@ bool EvaluateSkeletalAnimation(
 
             if (channel != nullptr)
             {
-                XMFLOAT3 translation = InterpolateVectorKey(channel->PositionKeys, animTime);
-                XMFLOAT4 rotation = InterpolateQuatKey(channel->RotationKeys, animTime);
-                XMFLOAT3 scale = channel->ScalingKeys.empty()
-                    ? XMFLOAT3{1.0f, 1.0f, 1.0f}
-                    : InterpolateVectorKey(channel->ScalingKeys, animTime);
+                XMVECTOR defScale, defRot, defTrans;
+                XMMatrixDecompose(&defScale, &defRot, &defTrans, XMLoadFloat4x4(&bone.LocalTransform));
 
-                XMMATRIX sMat = XMMatrixScaling(scale.x, scale.y, scale.z);
-                XMMATRIX rMat = XMMatrixRotationQuaternion(XMLoadFloat4(&rotation));
-                XMMATRIX tMat = XMMatrixTranslation(translation.x, translation.y, translation.z);
+                XMFLOAT3 keyPos;
+                XMVECTOR transVec = defTrans;
+                if (!channel->PositionKeys.empty())
+                {
+                    keyPos = InterpolateVectorKey(channel->PositionKeys, animTime);
+                    transVec = XMLoadFloat3(&keyPos);
+                }
+
+                XMFLOAT4 keyRot;
+                XMVECTOR rotQuat = defRot;
+                if (!channel->RotationKeys.empty())
+                {
+                    keyRot = InterpolateQuatKey(channel->RotationKeys, animTime);
+                    rotQuat = XMLoadFloat4(&keyRot);
+                }
+
+                XMFLOAT3 keyScale;
+                XMVECTOR scaleVec = defScale;
+                if (!channel->ScalingKeys.empty())
+                {
+                    keyScale = InterpolateVectorKey(channel->ScalingKeys, animTime);
+                    scaleVec = XMLoadFloat3(&keyScale);
+                }
+
+                XMMATRIX sMat = XMMatrixScalingFromVector(scaleVec);
+                XMMATRIX rMat = XMMatrixRotationQuaternion(rotQuat);
+                XMMATRIX tMat = XMMatrixTranslationFromVector(transVec);
 
                 // DirectXMath row-major concatenation: v * S * R * T
                 localMatrix = XMMatrixMultiply(XMMatrixMultiply(sMat, rMat), tMat);
