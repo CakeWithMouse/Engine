@@ -160,10 +160,53 @@ bool EvaluateSkeletalAnimation(
         }
         worldTransforms[i] = worldMatrix;
 
-        // Final skinning matrix: M_invBind * M_world
-        // Transforms from bind mesh-space to bone-space, then to current animated space
+        // Final skinning matrix: invBind * world * MeshToModel
+        // Transforms from bind mesh-space to bone-space, to animated skeleton-space, then to model-space
         XMMATRIX invBind = XMLoadFloat4x4(&bone.InverseBindPose);
-        XMMATRIX finalMatrix = XMMatrixMultiply(invBind, worldMatrix);
+        XMMATRIX meshToModel = XMLoadFloat4x4(&model.MeshToModel);
+        XMMATRIX finalMatrix = XMMatrixMultiply(XMMatrixMultiply(invBind, worldMatrix), meshToModel);
+
+        if (transposeForGpu)
+        {
+            finalMatrix = XMMatrixTranspose(finalMatrix);
+        }
+
+        XMStoreFloat4x4(&outPalette[i], finalMatrix);
+    }
+
+    return true;
+}
+
+bool EvaluateSkeletalBindPose(
+    const SkeletalModel& model,
+    std::vector<DirectX::XMFLOAT4X4>& outPalette,
+    bool transposeForGpu)
+{
+    const auto& skeleton = model.ModelSkeleton;
+    const size_t boneCount = skeleton.Bones.size();
+    if (boneCount == 0 || boneCount > MaxSkeletalBones)
+    {
+        return false;
+    }
+
+    outPalette.resize(boneCount);
+    std::vector<XMMATRIX> worldTransforms(boneCount);
+    XMMATRIX meshToModel = XMLoadFloat4x4(&model.MeshToModel);
+
+    for (size_t i = 0; i < boneCount; ++i)
+    {
+        const auto& bone = skeleton.Bones[i];
+        XMMATRIX localMatrix = XMLoadFloat4x4(&bone.LocalTransform);
+
+        XMMATRIX worldMatrix = localMatrix;
+        if (bone.ParentIndex >= 0 && bone.ParentIndex < static_cast<int32_t>(i))
+        {
+            worldMatrix = XMMatrixMultiply(localMatrix, worldTransforms[bone.ParentIndex]);
+        }
+        worldTransforms[i] = worldMatrix;
+
+        XMMATRIX invBind = XMLoadFloat4x4(&bone.InverseBindPose);
+        XMMATRIX finalMatrix = XMMatrixMultiply(XMMatrixMultiply(invBind, worldMatrix), meshToModel);
 
         if (transposeForGpu)
         {
@@ -181,37 +224,7 @@ bool EvaluateSkeletalBindPose(
     std::vector<DirectX::XMFLOAT4X4>& outPalette,
     bool transposeForGpu)
 {
-    const size_t boneCount = skeleton.Bones.size();
-    if (boneCount == 0 || boneCount > MaxSkeletalBones)
-    {
-        return false;
-    }
-
-    outPalette.resize(boneCount);
-    std::vector<XMMATRIX> worldTransforms(boneCount);
-
-    for (size_t i = 0; i < boneCount; ++i)
-    {
-        const auto& bone = skeleton.Bones[i];
-        XMMATRIX localMatrix = XMLoadFloat4x4(&bone.LocalTransform);
-
-        XMMATRIX worldMatrix = localMatrix;
-        if (bone.ParentIndex >= 0 && bone.ParentIndex < static_cast<int32_t>(i))
-        {
-            worldMatrix = XMMatrixMultiply(localMatrix, worldTransforms[bone.ParentIndex]);
-        }
-        worldTransforms[i] = worldMatrix;
-
-        XMMATRIX invBind = XMLoadFloat4x4(&bone.InverseBindPose);
-        XMMATRIX finalMatrix = XMMatrixMultiply(invBind, worldMatrix);
-
-        if (transposeForGpu)
-        {
-            finalMatrix = XMMatrixTranspose(finalMatrix);
-        }
-
-        XMStoreFloat4x4(&outPalette[i], finalMatrix);
-    }
-
-    return true;
+    SkeletalModel dummy;
+    dummy.ModelSkeleton = skeleton;
+    return EvaluateSkeletalBindPose(dummy, outPalette, transposeForGpu);
 }

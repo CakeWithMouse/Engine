@@ -93,4 +93,10 @@ struct SkeletalModel
     std::vector<AnimationClip> Clips;
     int TotalIndexCount = 0;
     float BoundingRadius = 0.0f;
+    DirectX::XMFLOAT4X4 MeshToModel;
+
+    SkeletalModel()
+    {
+        DirectX::XMStoreFloat4x4(&MeshToModel, DirectX::XMMatrixIdentity());
+    }
 };

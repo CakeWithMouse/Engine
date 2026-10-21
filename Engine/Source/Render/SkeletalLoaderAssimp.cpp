@@ -39,6 +39,26 @@ namespace
         }
         return nullptr;
     }
+
+    const aiNode* FindNodeForMesh(const aiNode* node, unsigned int meshIndex)
+    {
+        if (!node) return nullptr;
+        for (unsigned int i = 0; i < node->mNumMeshes; ++i)
+        {
+            if (node->mMeshes[i] == meshIndex)
+            {
+                return node;
+            }
+        }
+        for (unsigned int i = 0; i < node->mNumChildren; ++i)
+        {
+            if (const aiNode* found = FindNodeForMesh(node->mChildren[i], meshIndex))
+            {
+                return found;
+            }
+        }
+        return nullptr;
+    }
 }
 
 SkeletalLoadResult LoadSkeletalModelFromMemory(const void* data, size_t size, std::string_view hint)
@@ -69,6 +89,38 @@ SkeletalLoadResult LoadSkeletalModelFromMemory(const void* data, size_t size, st
         }
 
         auto model = std::make_shared<SkeletalModel>();
+
+        // Compute MeshToModel accumulated transform from root down to the mesh node
+        const aiNode* meshNode = nullptr;
+        for (unsigned int m = 0; m < scene->mNumMeshes; ++m)
+        {
+            const aiNode* node = FindNodeForMesh(scene->mRootNode, m);
+            if (node != nullptr)
+            {
+                if (meshNode == nullptr)
+                {
+                    meshNode = node;
+                }
+                else if (meshNode != node)
+                {
+                    result.ErrorMessage = "Multiple meshes found with different parent nodes in skeletal model";
+                    return result;
+                }
+            }
+        }
+
+        if (meshNode != nullptr)
+        {
+            DirectX::XMMATRIX acc = DirectX::XMMatrixIdentity();
+            for (const aiNode* curr = meshNode; curr != nullptr; curr = curr->mParent)
+            {
+                DirectX::XMFLOAT4X4 localFloat = ConvertAssimpMatrix(curr->mTransformation);
+                DirectX::XMMATRIX localMat = DirectX::XMLoadFloat4x4(&localFloat);
+                acc = DirectX::XMMatrixMultiply(acc, localMat);
+            }
+            DirectX::XMStoreFloat4x4(&model->MeshToModel, acc);
+        }
+
         std::unordered_map<std::string, int32_t> boneNameToIndex;
 
         // Pass 1: discover all bones across all meshes
