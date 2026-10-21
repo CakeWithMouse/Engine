@@ -148,6 +148,12 @@ bool SkeletalMeshComponent::CompileShaders(ID3D11Device* device)
         return false;
     }
 
+    auto& slot = GetShaderVariant(ShaderCompileVariant::Default);
+    slot.VertexShader = vertexShader.Get();
+    slot.PixelShader = pixelShader.Get();
+    slot.bResolved = true;
+    slot.bWritesGBuffer = false;
+
     return true;
 }
 

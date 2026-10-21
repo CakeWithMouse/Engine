@@ -1,9 +1,9 @@
 param([ValidateSet('Debug','Release')][string]$Configuration = 'Debug',
-    [string]$PlatformToolset = 'auto', [switch]$NoBuild)
+    [string]$PlatformToolset = 'auto', [switch]$NoBuild, [switch]$EnableAssimp)
 $ErrorActionPreference = 'Stop'
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 if (!$NoBuild) {
-    & "$repo/Engine/build.ps1" -Target EngineLauncher -Configuration $Configuration -PlatformToolset $PlatformToolset
+    & "$repo/Engine/build.ps1" -Target EngineLauncher -Configuration $Configuration -PlatformToolset $PlatformToolset -EnableAssimp:$EnableAssimp
     & "$repo/Engine/BuildSupport/Invoke-MSBuild.ps1" -Project "$PSScriptRoot/runtime/Fixtures.proj" -Configuration $Configuration -PlatformToolset $PlatformToolset
 }
 $output = "$repo/Game/build/x64/$Configuration"
@@ -80,6 +80,17 @@ foreach ($mode in @('game','editor')) {
 Require ((Count $gameLog 'EngineFrame (game window)') -eq 3) 'Incorrect game window frame count'
 Require ((Count $gameLog 'EngineFrameEnd (stub)') -eq 0) 'Stub frame found in game window log'
 Pass 'game window'
+
+if ($gameLog -match '\[RuntimeExample\] SkeletalMesh loaded: bones=\d+ clip=') {
+    Pass 'skeletal runtime check (loaded with Assimp)'
+} elseif ($gameLog -match '\[RuntimeExample\] SkeletalMesh skipped: Assimp not enabled') {
+    Pass 'skeletal runtime check (skipped without Assimp)'
+} else {
+    throw "Expected SkeletalMesh loaded or skipped log in game output"
+}
+if ($EnableAssimp) {
+    Require ($gameLog -match '\[RuntimeExample\] SkeletalMesh loaded: bones=\d+ clip=') "Expected SkeletalMesh loaded log when -EnableAssimp passed"
+}
 
 $log = Run 'engine-failure' $runtime "--project `"$project`" --mode game --frames 3 --test-fail-engine" 1
 Require ($log -notmatch 'ModuleLoaded|GameCreate|EngineReady') 'Module called after engine failure'

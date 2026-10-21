@@ -7,12 +7,27 @@
 <PropertyGroup Label="Globals"><ProjectGuid>{7A86EB5A-6C85-5FFA-8266-59398BABE19F}</ProjectGuid><WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion></PropertyGroup>
 <Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props" />
 <PropertyGroup Label="Configuration"><ConfigurationType>DynamicLibrary</ConfigurationType><PlatformToolset>v145</PlatformToolset><CharacterSet>Unicode</CharacterSet><UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries><UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries></PropertyGroup>
+<PropertyGroup>
+  <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VCPKG_ROOT)'!=''">$(VCPKG_ROOT)\</VcpkgRoot>
+  <VcpkgRoot Condition="'$(VcpkgRoot)'==''">C:\vcpkg\</VcpkgRoot>
+  <VcpkgEnableManifest>$(EngineEnableAssimp)</VcpkgEnableManifest>
+  <VcpkgEnabled>$(EngineEnableAssimp)</VcpkgEnabled>
+  <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\..\Engine\</VcpkgManifestRoot>
+  <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\..\Engine\vcpkg_installed\</VcpkgInstalledDir>
+</PropertyGroup>
+<Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
 <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props" />
 <Import Project="..\..\Engine\BuildSupport\Cpp.props" />
+<ItemDefinitionGroup Condition="'$(EngineEnableAssimp)'=='true'">
+  <ClCompile>
+    <PreprocessorDefinitions>ENGINE_ENABLE_ASSIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+  </ClCompile>
+</ItemDefinitionGroup>
 <PropertyGroup><OutDir>$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/Runtime/Projects/RuntimeExample/</OutDir><TargetName>Game</TargetName></PropertyGroup>
 <ItemGroup><ClCompile Include="Source/Module.cpp" /></ItemGroup>
 <ItemGroup><ProjectReference Include="..\..\Engine\Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project></ProjectReference></ItemGroup>
 <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets" />
+<Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
 <Import Project="..\..\Engine\BuildSupport\ComponentGeneration.targets" />
 <ItemGroup><RuntimeContent Include="Content/**/*" /></ItemGroup>
 <Target Name="DeployRuntimeProject" AfterTargets="Build"><MakeDir Directories="$(OutDir)Content" /><Copy SourceFiles="$(MSBuildProjectDirectory)/Project.json" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" /><Copy SourceFiles="@(RuntimeContent)" DestinationFiles="@(RuntimeContent->'$(OutDir)Content/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" /></Target>

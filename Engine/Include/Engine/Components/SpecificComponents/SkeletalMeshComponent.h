@@ -39,6 +39,9 @@ public:
     void SetModelYawDegrees(float yaw) { modelYawDegrees = yaw; }
     float GetModelYawDegrees() const { return modelYawDegrees; }
 
+    bool CastsShadow() const override { return false; }
+    bool SupportsFrustumCulling() const override { return false; }
+
 protected:
     virtual void CreateBuffers(ID3D11Device* device) override;
 

@@ -9,6 +9,7 @@
 #include <Engine/Scene/SceneDocument.h>
 #include <Engine/Runtime/GameWindowApi.h>
 #include <Engine/MainGame/Player.h>
+#include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
 #include <thread>
 #include <cstdio>
 #include <new>
@@ -92,6 +93,32 @@ int __cdecl Start(void* instance)
             s->game->SetSimulationTimeScale(1.0f);
             if (!s->game->InitializeRuntimeWindow()) { Log(s, "Game window initialization failed"); return 0; }
             s->game->GetPlayer()->SetPosition({0, 0, 5});
+
+#if defined(ENGINE_ENABLE_ASSIMP)
+            auto skeletal = std::make_unique<SkeletalMeshComponent>();
+            if (skeletal->LoadFromVfs("/Game/Models/CesiumMan.glb"))
+            {
+                // Walks towards camera along +Z
+                skeletal->SetModelYawDegrees(0.0f);
+                skeletal->SetPosition({0.0f, -1.0f, 0.0f});
+                std::printf("[RuntimeExample] SkeletalMesh loaded: bones=%zu clip=%.2fs\n",
+                            skeletal->GetModel()->ModelSkeleton.Bones.size(),
+                            skeletal->GetModel()->Clips.empty() ? 0.0f : skeletal->GetModel()->Clips[0].Duration);
+                const auto reg = s->game->RegisterComponent("CesiumMan", skeletal.get(), "SkinnedMesh.hlsl", "SkinnedMesh.hlsl");
+                if (reg == RegisterResult::Ok)
+                {
+                    skeletal.release();
+                }
+            }
+            else
+            {
+                std::fprintf(stderr, "[RuntimeExample] SkeletalMesh failed to load CesiumMan.glb\n");
+                std::fflush(stderr);
+            }
+#else
+            std::printf("[RuntimeExample] SkeletalMesh skipped: Assimp not enabled\n");
+            std::fflush(stdout);
+#endif
         }
     }
     catch (...) { Log(s, "Game start failed"); return 0; }
