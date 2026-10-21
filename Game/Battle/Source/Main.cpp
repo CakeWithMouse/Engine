@@ -61,10 +61,11 @@ int main(int argc, char** argv)
             if (argument == "--no-baked-shadows") { settings.BakedShadows = false; continue; }
             if (argument == "--sprite-px" && i + 1 < argc) { settings.SpritePixels = static_cast<float>(ParseInt(argv[++i], "--sprite-px")); continue; }
             if (argument == "--lod-debug") { settings.LodDebugColors = true; continue; }
+            if (argument == "--anim") { settings.Animated = true; continue; }
             throw std::runtime_error(
                 "Usage: Battle.exe [--bench N] [--warmup N] [--units N] [--types N] [--spacing N] [--camera N] [--frames N] [--detail N]\n"
                 "        [--scenery N] [--sprite-px N] [--sun N] [--no-shadows] [--no-baked-shadows]\n"
-                "        [--no-impostors] [--forward] [--static] [--lod-debug] [--dump-shadows] [--smoke]");
+                "        [--no-impostors] [--forward] [--static] [--lod-debug] [--dump-shadows] [--smoke] [--anim]");
         }
         if (settings.UnitCount < 1) throw std::runtime_error("--units must be positive");
         if (smoke && frameLimit == 0) frameLimit = 30;

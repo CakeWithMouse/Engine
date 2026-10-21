@@ -102,6 +102,8 @@ public:
     void SetInstanceYaw(size_t index, float yaw);
     void SetInstanceColor(size_t index, const glm::vec4& color);
     void SetInstanceVisible(size_t index, bool visible);
+    void SetInstanceAnimationPhase(size_t index, float phase);
+    void SetInstancePositionAndPhase(size_t index, const glm::vec3& position, float phase);
     void ClearInstances();
 
     // Diagnostics for the last frame.
@@ -123,6 +125,8 @@ private:
     struct LodLevel
     {
         MeshLodData Data;
+        std::vector<CrowdSkinnedVertex> CrowdVertices;
+        std::vector<SkinnedVertex> SkinnedVertices;
         Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
         Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer;
         UINT IndexCount = 0;

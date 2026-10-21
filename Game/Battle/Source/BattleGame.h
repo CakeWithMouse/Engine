@@ -44,6 +44,8 @@ public:
         float SunElevation = 56.0f;
         // Diagnostics: writes the shadow maps to BMP files after a few frames.
         bool DumpShadows = false;
+        // Animated crowd using GPU baked VAT (CesiumMan).
+        bool Animated = false;
     };
 
     void BuildScene(const Settings& settings);
@@ -96,4 +98,10 @@ private:
     // Benchmark mode session
     BattleBenchSession Bench;
     uint64_t WarmupFrames = 10;
+
+    // GPU VAT resources for animated crowd
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> BakedAnimTexture;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> BakedAnimSRV;
+    std::vector<BakedClipInfo> BakedAnimClips;
+    int UnitVertexCount = 0;
 };

@@ -134,6 +134,8 @@ bool InstancedMeshComponent::SetSkinnedLod(int level, const std::vector<CrowdSki
     bIsCrowdVertex = true;
 
     Lods[level].Data.Vertices.clear();
+    Lods[level].CrowdVertices = vertices;
+    Lods[level].SkinnedVertices.clear();
     Lods[level].Data.Indices = indices;
     Lods[level].VertexBuffer.Reset();
     Lods[level].IndexBuffer.Reset();
@@ -157,29 +159,7 @@ bool InstancedMeshComponent::SetSkinnedLod(int level, const std::vector<CrowdSki
 
     if (GamePtr && GamePtr->GetDevice())
     {
-        ID3D11Device* device = GamePtr->GetDevice();
-        D3D11_BUFFER_DESC vertexDesc = {};
-        vertexDesc.Usage = D3D11_USAGE_IMMUTABLE;
-        vertexDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-        vertexDesc.ByteWidth = static_cast<UINT>(sizeof(CrowdSkinnedVertex) * vertices.size());
-        D3D11_SUBRESOURCE_DATA vertexData = {};
-        vertexData.pSysMem = vertices.data();
-
-        D3D11_BUFFER_DESC indexDesc = {};
-        indexDesc.Usage = D3D11_USAGE_IMMUTABLE;
-        indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-        indexDesc.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * indices.size());
-        D3D11_SUBRESOURCE_DATA indexData = {};
-        indexData.pSysMem = indices.data();
-
-        if (FAILED(device->CreateBuffer(&vertexDesc, &vertexData, Lods[level].VertexBuffer.ReleaseAndGetAddressOf())) ||
-            FAILED(device->CreateBuffer(&indexDesc, &indexData, Lods[level].IndexBuffer.ReleaseAndGetAddressOf())))
-        {
-            std::cout << "InstancedMeshComponent: failed to create crowd skinned LOD buffers." << std::endl;
-            Lods[level].VertexBuffer.Reset();
-            Lods[level].IndexBuffer.Reset();
-            return false;
-        }
+        CreateLodBuffers(GamePtr->GetDevice(), Lods[level]);
     }
     return true;
 }
@@ -201,6 +181,8 @@ bool InstancedMeshComponent::SetSkinnedLod(int level, const std::vector<SkinnedV
     bIsCrowdVertex = false;
 
     Lods[level].Data.Vertices.clear();
+    Lods[level].CrowdVertices.clear();
+    Lods[level].SkinnedVertices = vertices;
     Lods[level].Data.Indices = indices;
     Lods[level].VertexBuffer.Reset();
     Lods[level].IndexBuffer.Reset();
@@ -224,29 +206,7 @@ bool InstancedMeshComponent::SetSkinnedLod(int level, const std::vector<SkinnedV
 
     if (GamePtr && GamePtr->GetDevice())
     {
-        ID3D11Device* device = GamePtr->GetDevice();
-        D3D11_BUFFER_DESC vertexDesc = {};
-        vertexDesc.Usage = D3D11_USAGE_IMMUTABLE;
-        vertexDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-        vertexDesc.ByteWidth = static_cast<UINT>(sizeof(SkinnedVertex) * vertices.size());
-        D3D11_SUBRESOURCE_DATA vertexData = {};
-        vertexData.pSysMem = vertices.data();
-
-        D3D11_BUFFER_DESC indexDesc = {};
-        indexDesc.Usage = D3D11_USAGE_IMMUTABLE;
-        indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-        indexDesc.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * indices.size());
-        D3D11_SUBRESOURCE_DATA indexData = {};
-        indexData.pSysMem = indices.data();
-
-        if (FAILED(device->CreateBuffer(&vertexDesc, &vertexData, Lods[level].VertexBuffer.ReleaseAndGetAddressOf())) ||
-            FAILED(device->CreateBuffer(&indexDesc, &indexData, Lods[level].IndexBuffer.ReleaseAndGetAddressOf())))
-        {
-            std::cout << "InstancedMeshComponent: failed to create skinned LOD buffers." << std::endl;
-            Lods[level].VertexBuffer.Reset();
-            Lods[level].IndexBuffer.Reset();
-            return false;
-        }
+        CreateLodBuffers(GamePtr->GetDevice(), Lods[level]);
     }
     return true;
 }
@@ -392,6 +352,20 @@ void InstancedMeshComponent::SetInstanceColor(size_t index, const glm::vec4& col
 void InstancedMeshComponent::SetInstanceVisible(size_t index, bool visible)
 {
     Instances[index].bVisible = visible;
+    PreparedFrame = UINT64_MAX;
+    bStaticShadowDataDirty = true;
+}
+
+void InstancedMeshComponent::SetInstanceAnimationPhase(size_t index, float phase)
+{
+    Instances[index].AnimationPhase = phase;
+    PreparedFrame = UINT64_MAX;
+}
+
+void InstancedMeshComponent::SetInstancePositionAndPhase(size_t index, const glm::vec3& position, float phase)
+{
+    Instances[index].Position = position;
+    Instances[index].AnimationPhase = phase;
     PreparedFrame = UINT64_MAX;
     bStaticShadowDataDirty = true;
 }
@@ -580,13 +554,63 @@ bool InstancedMeshComponent::EnsureSkinnedShaders(ID3D11Device* device)
 
 bool InstancedMeshComponent::CreateLodBuffers(ID3D11Device* device, LodLevel& lod)
 {
-    if (device == nullptr || lod.Data.Vertices.empty() || lod.Data.Indices.empty())
+    if (device == nullptr)
     {
         return false;
     }
     if (lod.VertexBuffer && lod.IndexBuffer)
     {
         return true;
+    }
+
+    if (bIsSkinned)
+    {
+        if (lod.Data.Indices.empty()) return false;
+        const void* vertexDataPtr = nullptr;
+        UINT vertexDataBytes = 0;
+        if (bIsCrowdVertex)
+        {
+            if (lod.CrowdVertices.empty()) return false;
+            lod.VertexStride = sizeof(CrowdSkinnedVertex);
+            vertexDataPtr = lod.CrowdVertices.data();
+            vertexDataBytes = static_cast<UINT>(sizeof(CrowdSkinnedVertex) * lod.CrowdVertices.size());
+        }
+        else
+        {
+            if (lod.SkinnedVertices.empty()) return false;
+            lod.VertexStride = sizeof(SkinnedVertex);
+            vertexDataPtr = lod.SkinnedVertices.data();
+            vertexDataBytes = static_cast<UINT>(sizeof(SkinnedVertex) * lod.SkinnedVertices.size());
+        }
+
+        D3D11_BUFFER_DESC vertexDesc = {};
+        vertexDesc.Usage = D3D11_USAGE_IMMUTABLE;
+        vertexDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        vertexDesc.ByteWidth = vertexDataBytes;
+        D3D11_SUBRESOURCE_DATA vertexData = {};
+        vertexData.pSysMem = vertexDataPtr;
+
+        D3D11_BUFFER_DESC indexDesc = {};
+        indexDesc.Usage = D3D11_USAGE_IMMUTABLE;
+        indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+        indexDesc.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * lod.Data.Indices.size());
+        D3D11_SUBRESOURCE_DATA indexData = {};
+        indexData.pSysMem = lod.Data.Indices.data();
+
+        if (FAILED(device->CreateBuffer(&vertexDesc, &vertexData, lod.VertexBuffer.ReleaseAndGetAddressOf())) ||
+            FAILED(device->CreateBuffer(&indexDesc, &indexData, lod.IndexBuffer.ReleaseAndGetAddressOf())))
+        {
+            std::cout << "InstancedMeshComponent: failed to create skinned LOD buffers." << std::endl;
+            lod.VertexBuffer.Reset();
+            lod.IndexBuffer.Reset();
+            return false;
+        }
+        return true;
+    }
+
+    if (lod.Data.Vertices.empty() || lod.Data.Indices.empty())
+    {
+        return false;
     }
 
     lod.VertexStride = sizeof(MeshVertex);
