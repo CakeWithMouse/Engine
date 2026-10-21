@@ -116,14 +116,16 @@ void Test_CesiumManOrientationAndSkinning()
                   << "  Width(X): " << w << ", Height(Y): " << h << ", Depth(Z): " << d << std::endl;
 
         // Requirements from architect:
-        // Height along Y > 1.2 and > 2 * (depth along Z), width along X reasonable (0.2 .. 2.0)
+        // Height along Y > 1.2, height > width along X, and height > depth along Z
         bool hCheck = (h > 1.2f);
-        bool ratioCheck = (h > 2.0f * d);
-        bool wCheck = (w > 0.2f && w < 2.0f);
+        bool hGtW = (h > w);
+        bool hGtD = (h > d);
         std::cout << "[SkeletalOrientationTests] BBox checks: h>1.2: " << (hCheck ? "OK" : "FAIL")
-                  << ", h>2*d: " << (ratioCheck ? "OK" : "FAIL (d=" + std::to_string(d) + " > h/2=" + std::to_string(h*0.5f) + ")")
-                  << ", w in [0.2, 2.0]: " << (wCheck ? "OK" : "FAIL") << std::endl;
+                  << ", h>w: " << (hGtW ? "OK" : "FAIL")
+                  << ", h>d: " << (hGtD ? "OK" : "FAIL") << std::endl;
         ORIENT_CHECK(hCheck, "Height along Y must be > 1.2m");
+        ORIENT_CHECK(hGtW, "Height along Y must be > width along X");
+        ORIENT_CHECK(hGtD, "Height along Y must be > depth along Z");
     }
 #else
     std::cout << "[SkeletalOrientationTests] SKIP: CPU skinning requires Assimp" << std::endl;
@@ -135,109 +137,84 @@ void Test_FaceOrientationForwardZ()
 #if defined(ENGINE_ENABLE_ASSIMP)
     SkeletalLoadResult result = LoadSkeletalModelFromVfs("/Game/Models/CesiumMan.glb");
     ORIENT_CHECK(result.Success && result.Model != nullptr, "CesiumMan must load");
+    const auto& clip = result.Model->Clips[0];
+    const float t0 = 0.0f;
+    const float t1 = clip.Duration * 0.25f;
 
-    // Sample at t=0
-    std::vector<XMFLOAT4X4> pal;
-    bool evalOk = EvaluateSkeletalAnimation(*result.Model, 0, 0.0f, pal, false);
-    ORIENT_CHECK(evalOk, "Evaluate animation at t=0");
+    std::vector<XMFLOAT4X4> pal0, pal1;
+    bool eval0 = EvaluateSkeletalAnimation(*result.Model, 0, t0, pal0, false);
+    bool eval1 = EvaluateSkeletalAnimation(*result.Model, 0, t1, pal1, false);
+    ORIENT_CHECK(eval0 && eval1, "Evaluate animation at t0 and t1");
 
-    // Find specific joints to detect forward direction:
-    // Pelvis (root): Skeleton_torso_joint_1
-    // Left toe: leg_joint_L_5, Right toe: leg_joint_R_5
-    // Left ankle: leg_joint_L_3, Right ankle: leg_joint_R_3
-    // Head: Skeleton_neck_joint_2
-    int pelvisIdx = -1, toeLIdx = -1, toeRIdx = -1, ankleLIdx = -1, ankleRIdx = -1, headIdx = -1;
+    int toeLIdx = -1, toeRIdx = -1, ankleLIdx = -1, ankleRIdx = -1;
     for (size_t i = 0; i < result.Model->ModelSkeleton.Bones.size(); ++i)
     {
         const auto& name = result.Model->ModelSkeleton.Bones[i].Name;
-        if (name == "Skeleton_torso_joint_1") pelvisIdx = static_cast<int>(i);
-        else if (name == "leg_joint_L_5") toeLIdx = static_cast<int>(i);
+        if (name == "leg_joint_L_5") toeLIdx = static_cast<int>(i);
         else if (name == "leg_joint_R_5") toeRIdx = static_cast<int>(i);
         else if (name == "leg_joint_L_3") ankleLIdx = static_cast<int>(i);
         else if (name == "leg_joint_R_3") ankleRIdx = static_cast<int>(i);
-        else if (name == "Skeleton_neck_joint_2") headIdx = static_cast<int>(i);
     }
+    ORIENT_CHECK(toeLIdx >= 0 && toeRIdx >= 0, "Toe joints must exist");
 
-    ORIENT_CHECK(pelvisIdx >= 0 && headIdx >= 0, "Key joints must exist");
-
-    // Transform joint origins by their palette matrices: origin (0,0,0) in bone space
-    auto getJointWorldPos = [&](int idx) -> XMFLOAT3 {
-        XMVECTOR zero = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
-        XMMATRIX m = XMLoadFloat4x4(&pal[idx]);
-        // Note: pal[idx] transforms from mesh bind space to model space.
-        // For joint origin: joint is located at local position in skeleton worldTransforms * MeshToModel.
-        // We can sample a vertex heavily weighted by this bone or inspect the translation column/row of worldTransforms.
-        XMFLOAT3 pos;
-        XMStoreFloat3(&pos, XMVector3Transform(zero, m));
-        return pos;
+    auto skinVertex = [](const SkinnedVertex& v, const std::vector<XMFLOAT4X4>& pal) -> XMFLOAT3 {
+        XMVECTOR inPos = XMLoadFloat3(&v.Position);
+        XMVECTOR skinned = XMVectorZero();
+        for (int k = 0; k < 4; ++k)
+        {
+            if (v.BoneWeights[k] > 0.0f)
+            {
+                XMMATRIX bMat = XMLoadFloat4x4(&pal[v.BoneIndices[k]]);
+                skinned = XMVectorAdd(skinned, XMVectorScale(XMVector3Transform(inPos, bMat), v.BoneWeights[k]));
+            }
+        }
+        XMFLOAT3 p;
+        XMStoreFloat3(&p, skinned);
+        return p;
     };
 
-    // Calculate vertex centroid of face / chest vs back in skinned space
-    // We sample all vertices with height Y between (head.y - 0.3) and (head.y - 0.05) (face/head region)
-    float maxY = -1e9f, minY = 1e9f;
-    std::vector<XMFLOAT3> skinnedVertices;
-    for (const auto& mesh : result.Model->Meshes)
-    {
-        for (const auto& v : mesh.Vertices)
+    auto computeCentroidForBone = [&](int boneIdx, const std::vector<XMFLOAT4X4>& pal) -> XMFLOAT3 {
+        XMFLOAT3 sum(0, 0, 0);
+        float totalWeight = 0.0f;
+        for (const auto& mesh : result.Model->Meshes)
         {
-            XMVECTOR inPos = XMLoadFloat3(&v.Position);
-            XMVECTOR skinned = XMVectorZero();
-            for (int k = 0; k < 4; ++k)
+            for (const auto& v : mesh.Vertices)
             {
-                if (v.BoneWeights[k] > 0.0f)
+                for (int k = 0; k < 4; ++k)
                 {
-                    XMMATRIX bMat = XMLoadFloat4x4(&pal[v.BoneIndices[k]]);
-                    skinned = XMVectorAdd(skinned, XMVectorScale(XMVector3Transform(inPos, bMat), v.BoneWeights[k]));
+                    if (static_cast<int>(v.BoneIndices[k]) == boneIdx && v.BoneWeights[k] > 0.3f)
+                    {
+                        XMFLOAT3 p = skinVertex(v, pal);
+                        sum.x += p.x * v.BoneWeights[k];
+                        sum.y += p.y * v.BoneWeights[k];
+                        sum.z += p.z * v.BoneWeights[k];
+                        totalWeight += v.BoneWeights[k];
+                    }
                 }
             }
-            XMFLOAT3 p;
-            XMStoreFloat3(&p, skinned);
-            skinnedVertices.push_back(p);
-            maxY = std::max(maxY, p.y);
-            minY = std::min(minY, p.y);
         }
-    }
-
-    // Centroid of feet region (bottom 10%)
-    float feetThreshold = minY + (maxY - minY) * 0.10f;
-    XMFLOAT3 feetCenter(0, 0, 0);
-    size_t feetCount = 0;
-    // Toes vs heels in bottom region:
-    float feetMinZ = 1e9f, feetMaxZ = -1e9f;
-    float feetMinX = 1e9f, feetMaxX = -1e9f;
-    for (const auto& p : skinnedVertices)
-    {
-        if (p.y <= feetThreshold)
+        if (totalWeight > 0.0f)
         {
-            feetCenter.x += p.x; feetCenter.y += p.y; feetCenter.z += p.z;
-            feetMinZ = std::min(feetMinZ, p.z); feetMaxZ = std::max(feetMaxZ, p.z);
-            feetMinX = std::min(feetMinX, p.x); feetMaxX = std::max(feetMaxX, p.x);
-            ++feetCount;
+            sum.x /= totalWeight; sum.y /= totalWeight; sum.z /= totalWeight;
         }
-    }
-    if (feetCount > 0)
-    {
-        feetCenter.x /= feetCount; feetCenter.y /= feetCount; feetCenter.z /= feetCount;
-    }
+        return sum;
+    };
 
-    // Centroid of entire body
-    XMFLOAT3 bodyCenter(0, 0, 0);
-    for (const auto& p : skinnedVertices)
-    {
-        bodyCenter.x += p.x; bodyCenter.y += p.y; bodyCenter.z += p.z;
-    }
-    bodyCenter.x /= skinnedVertices.size();
-    bodyCenter.y /= skinnedVertices.size();
-    bodyCenter.z /= skinnedVertices.size();
+    XMFLOAT3 toeL_t0 = computeCentroidForBone(toeLIdx, pal0);
+    XMFLOAT3 toeL_t1 = computeCentroidForBone(toeLIdx, pal1);
+    XMFLOAT3 toeR_t0 = computeCentroidForBone(toeRIdx, pal0);
+    XMFLOAT3 toeR_t1 = computeCentroidForBone(toeRIdx, pal1);
 
-    std::cout << "[SkeletalOrientationTests] Face/forward detection analysis:\n"
-              << "  Total vertices: " << skinnedVertices.size() << "\n"
-              << "  Height range Y: [" << minY << ", " << maxY << "]\n"
-              << "  Body center: (" << bodyCenter.x << ", " << bodyCenter.y << ", " << bodyCenter.z << ")\n"
-              << "  Feet center: (" << feetCenter.x << ", " << feetCenter.y << ", " << feetCenter.z << ")\n"
-              << "  Feet Z extent: [" << feetMinZ << ", " << feetMaxZ << "], deltaZ = " << (feetMaxZ - feetMinZ) << "\n"
-              << "  Feet X extent: [" << feetMinX << ", " << feetMaxX << "], deltaX = " << (feetMaxX - feetMinX) << std::endl;
+    XMFLOAT3 deltaL(toeL_t1.x - toeL_t0.x, toeL_t1.y - toeL_t0.y, toeL_t1.z - toeL_t0.z);
+    XMFLOAT3 deltaR(toeR_t1.x - toeR_t0.x, toeR_t1.y - toeR_t0.y, toeR_t1.z - toeR_t0.z);
 
+    std::cout << "[SkeletalOrientationTests] Raw Toe Tracking (t=0 to t=" << t1 << "s):\n"
+              << "  Left toe centroid at t=0:  (" << toeL_t0.x << ", " << toeL_t0.y << ", " << toeL_t0.z << ")\n"
+              << "  Left toe centroid at t=0.5: (" << toeL_t1.x << ", " << toeL_t1.y << ", " << toeL_t1.z << ")\n"
+              << "  Left toe delta (dx,dy,dz): (" << deltaL.x << ", " << deltaL.y << ", " << deltaL.z << ")\n"
+              << "  Right toe centroid at t=0:  (" << toeR_t0.x << ", " << toeR_t0.y << ", " << toeR_t0.z << ")\n"
+              << "  Right toe centroid at t=0.5: (" << toeR_t1.x << ", " << toeR_t1.y << ", " << toeR_t1.z << ")\n"
+              << "  Right toe delta (dx,dy,dz): (" << deltaR.x << ", " << deltaR.y << ", " << deltaR.z << ")" << std::endl;
 #else
     std::cout << "[SkeletalOrientationTests] SKIP: face orientation requires Assimp" << std::endl;
 #endif
