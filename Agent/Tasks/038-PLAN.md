@@ -79,6 +79,21 @@
   - [x] Коммит `feat(demo): skeletal mesh demo in runtime example`.
   - [x] **СТОП после Этапа 5**: ожидание ручной проверки в окне от пользователя.
 
+- [x] **Этап 6 (VAT Crowd Этап 1): SkeletalBaker, CrowdSkinnedVertex и юнит-тесты (завершён, коммиты `ccd2907` и `f5074a0`)**
+  - [x] `SkeletalBaker.{h,cpp}`: запекание анимационных матриц в RGBA32F текстуру, 3 строки на кость ($M^T$), высота = суммарное число кадров всех клипов, без фильтрации (`Load(int3)`). Лимит костей 64 и текстуры $4096 \times 4096$.
+  - [x] `CrowdSkinnedVertex`: компактный формат вершины 32 байта (float3 pos, half4 normal, half2 uv, uint8[4] boneIndices, unorm8[4] boneWeights) вместо 64 байт `SkinnedVertex` (экономия полосы пропускания 50.0%).
+  - [x] Юнит-тесты `SkeletalBakerTests.cpp` (квантование, сумма весов в 1.0, точность запечённых строк матрицы $\le 10^{-6}$, непрерывность циклов, многоклиповые смещения, трансформация нормалей).
+
+- [x] **Этап 7 (VAT Crowd Этап 2): Шейдер InstancedSkinnedMesh и InstancedMeshComponent (завершён, коммит `d4ba1f9`)**
+  - [x] `InstancedSkinnedMesh.hlsl`: Default, Deferred G-Buffer и ShadowDepth проходы, выборка матриц костей через `AnimTex.Load(int3(boneCol + row, frame, 0))` по фазе анимации из `Params.z`.
+  - [x] `InstancedMeshComponent`: поддержка `CrowdSkinnedVertex`, `SetAnimationTexture`, dirty-flag для динамического буфера инстансов, нулевые аллокации в кадровом цикле.
+  - [x] Регрессионный бенчмарк ABBA (на Battle без `--anim`): дельта +0.05 мс в пределах шума A/A (0.036 мс).
+
+- [x] **Этап 8 (VAT Crowd Этап 3): Battle --anim, замеры и матричный бенчмарк (завершён, коммит `fc6f77f`)**
+  - [x] Интеграция `--anim` в `Game/Battle` (`Main.cpp`, `BattleGame.h`, `BattleGame.cpp`), загрузка CesiumMan, запекание текстуры и генерация двух армий с независимыми скоростями и фазами.
+  - [x] Точные замеры через `BattleBenchSession`: юниты, видимые, draw calls, вершины, CPU/GPU медиана, p95, p99.
+  - [x] Полная матрица замеров на dGPU (RTX 5060) и iGPU (Radeon 610M) для $N \in \{100, 1000, 5000, 10000, 30000\}$ с тенями и без теней (по 2 прогона на точку).
+
 ---
 
 ## 3. Решения
