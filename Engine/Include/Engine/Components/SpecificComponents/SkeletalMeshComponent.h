@@ -21,6 +21,7 @@ public:
 
     bool LoadFromVfs(std::string_view vpath);
     bool SetModel(std::shared_ptr<SkeletalModel> model);
+    bool LoadTexture(const std::string& texturePath);
 
     void Tick(float deltaTime) override;
     void Render(ID3D11DeviceContext* context) override;
@@ -42,6 +43,8 @@ protected:
     virtual void CreateBuffers(ID3D11Device* device) override;
 
 private:
+    bool CompileShaders(ID3D11Device* device);
+
     std::string assetPath;
     std::shared_ptr<SkeletalModel> skeletalModel;
     std::vector<DirectX::XMFLOAT4X4> bonePalette;
@@ -52,9 +55,16 @@ private:
     bool isPlaying = true;
     float modelYawDegrees = 0.0f;
 
-    // GPU resources (initialized in CreateBuffers for Stage 4)
+    // GPU resources
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
     Microsoft::WRL::ComPtr<ID3D11Buffer> boneBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
     UINT indexCount = 0;
+
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+    std::string texturePath;
 };
