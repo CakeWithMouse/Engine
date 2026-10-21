@@ -15,41 +15,45 @@
 
 ## 2. Чек-лист этапов реализации
 
-- [ ] **Этап 1: Тестовая модель (CesiumMan.glb / RiggedSimple.glb)**
-  - [ ] Загрузка модели из Khronos glTF-Sample-Models (raw.githubusercontent.com).
-  - [ ] Создание/обновление `Content/Models/README.md` (лицензия, авторство, атрибуция).
-  - [ ] Размещение в `Game/RuntimeExample/Content/Models/`.
-  - [ ] Фиксация размера файла и коммит `chore(assets): add skeletal test model and license info`.
+- [x] **Этап 1: Тестовая модель (CesiumMan.glb / RiggedSimple.glb) (завершён, коммит `90c68d3`)**
+  - [x] Загрузка модели из Khronos glTF-Sample-Models (raw.githubusercontent.com).
+  - [x] Создание/обновление `Content/Models/README.md` (лицензия CC-BY 4.0, авторство Cesium / Analytical Graphics, Inc.).
+  - [x] Размещение в `Game/RuntimeExample/Content/Models/CesiumMan.glb` (490,956 байт).
+  - [x] Фиксация размера файла и коммит `chore(assets): add CesiumMan test model and license info`.
 
-- [ ] **Этап 2: Структуры данных и загрузка без GPU**
-  - [ ] Определение структур `SkinnedVertex` (pos, normal, uv, uint32/uint8 indices[4], float weights[4]).
-  - [ ] Определение структуры `Skeleton` (имена костей, иерархия/parent, inverseBind-матрицы).
-  - [ ] Определение структуры `AnimationClip` (каналы translation/rotation/scale с ключевыми кадрами, длительность, тики).
-  - [ ] Определение структуры `SkeletalModel`.
-  - [ ] Загрузка из памяти: `VfsRead::Active().ReadBytes` + `importer.ReadFileFromMemory(..., hint "glb")`.
-  - [ ] Флаги Assimp: `Triangulate`, `GenNormals`, `LimitBoneWeights`, `JoinIdenticalVertices`, БЕЗ `PreTransformVertices`.
-  - [ ] Конвертация системы координат под левостороннюю систему DirectX движка.
-  - [ ] Проверка лимита 64 костей (явная ошибка, без молчаливой обрезки).
-  - [ ] Обработка ошибок без проброса исключений.
-  - [ ] Коммит `feat(render): skeletal data structures and memory loader`.
+- [x] **Этап 2: Структуры данных и загрузка без GPU (завершён, коммит `2ad6290`)**
+  - [x] Определение структур `SkinnedVertex` (pos, normal, uv, uint32 BoneIndices[4], float BoneWeights[4], 64 байта).
+  - [x] Определение структуры `Skeleton` (имена костей, иерархия/ParentIndex, InverseBindPose, LocalTransform).
+  - [x] Определение структуры `AnimationClip` (каналы с ключевыми кадрами, длительность, тики).
+  - [x] Определение структуры `SkeletalModel`.
+  - [x] Загрузка из памяти: `VfsRead::Active().ReadBytes` + `importer.ReadFileFromMemory(..., hint "glb")`.
+  - [x] Флаги Assimp: `Triangulate`, `GenNormals`, `LimitBoneWeights`, `JoinIdenticalVertices`, `ConvertToLeftHanded`, БЕЗ `PreTransformVertices`.
+  - [x] Конвертация системы координат: `aiProcess_ConvertToLeftHanded` (инверсия Z, адаптация обхода треугольников).
+  - [x] Проверка лимита 64 костей (явная ошибка при превышении).
+  - [x] Обработка ошибок без проброса исключений через границы подсистем.
+  - [x] Заглушка `SkeletalLoaderStub.cpp` при выключенном Assimp (возврат `"Assimp not enabled"`).
+  - [x] Коммит `feat(render): skeletal data structures, CPU animation and GLB loader`.
 
-- [ ] **Этап 3: CPU анимация и юнит-тесты без GPU**
-  - [ ] Функция вычисления локальных TRS и матричной палитры костей:
+- [x] **Этап 3: CPU анимация и юнит-тесты без GPU (завершён, коммит `8a4d8f3`)**
+  - [x] Функция вычисления локальных TRS и матричной палитры костей:
     - lerp для translation/scale.
-    - slerp для rotation (кватернионы).
-    - зацикливание времени по длительности клипа.
-    - $M_{\text{final}} = M_{\text{world}} \times M_{\text{invBind}}$.
-  - [ ] Модульные тесты `Engine/tests/SkeletalTests.cpp` (< 500 строк):
-    - Число костей и вершин модели.
+    - slerp для rotation (нормализованные кватернионы).
+    - `XMMatrixDecompose` для извлечения дефолтных компонент при неполных каналах.
+    - зацикливание времени `std::fmod`.
+    - $M_{\text{final}} = M_{\text{invBind}} \times M_{\text{world}}$.
+  - [x] Модульные тесты `Engine/tests/skeletal/SkeletalTests.cpp` (309 строк < 500 строк):
+    - Число костей (3) и вершин (4) синтетической модели.
     - Длительность клипа > 0.
-    - Веса каждой вершины суммируются в 1.0 (с допуском epsilon).
+    - Веса каждой вершины суммируются в 1.0 (допуск $10^{-5}$).
     - Индексы костей строго < числа костей.
-    - Палитра в $t=0$ для bind-позы даёт единичные матрицы (с допуском).
-    - Палитра в разные $t$ различается и непрерывна (нет скачков на стыке зацикливания).
-    - Отклонение моделей с > 64 костями с явной ошибкой.
-  - [ ] Регистрация тестов в `EngineTests`.
-  - [ ] Коммит `test(render): cpu skeletal animation evaluation and unit tests`.
-  - [ ] **СТОП после Этапа 3**: демонстрация результатов, чисел, диффа.
+    - Палитра в $t=0$ для bind-позы даёт единичные матрицы $I_{4 \times 4}$ (допуск $10^{-4}$).
+    - Палитра в разные $t$ различается и непрерывна (нет скачков при зацикливании, шов $< 0.01$).
+    - Модель с > 64 костями отклоняется с ошибкой.
+    - Заглушка без Assimp возвращает ошибку `"Assimp not enabled"`.
+    - При отсутствии Assimp тест загрузки glb отдаёт `"SKIP: no Assimp"`.
+  - [x] Набор тестов с собственным раннером `Engine/tests/skeletal/run.ps1` по аналогии с `edit-session`.
+  - [x] Коммит `test(render): cpu skeletal animation evaluation and unit tests`.
+  - [x] **СТОП после Этапа 3**: демонстрация результатов, чисел, диффа.
 
 - [ ] **Этап 4: GPU ресурсы, HLSL шейдер и SkeletalMeshComponent**
   - [ ] `SkinnedMesh.hlsl`:
