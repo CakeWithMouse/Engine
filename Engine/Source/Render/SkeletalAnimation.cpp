@@ -123,30 +123,24 @@ bool EvaluateSkeletalAnimation(
 
             if (channel != nullptr)
             {
-                XMVECTOR defScale, defRot, defTrans;
-                XMMatrixDecompose(&defScale, &defRot, &defTrans, XMLoadFloat4x4(&bone.LocalTransform));
-
-                XMFLOAT3 keyPos;
-                XMVECTOR transVec = defTrans;
+                XMVECTOR transVec = XMLoadFloat3(&bone.RestTranslation);
                 if (!channel->PositionKeys.empty())
                 {
-                    keyPos = InterpolateVectorKey(channel->PositionKeys, animTime);
+                    XMFLOAT3 keyPos = InterpolateVectorKey(channel->PositionKeys, animTime);
                     transVec = XMLoadFloat3(&keyPos);
                 }
 
-                XMFLOAT4 keyRot;
-                XMVECTOR rotQuat = defRot;
+                XMVECTOR rotQuat = XMLoadFloat4(&bone.RestRotation);
                 if (!channel->RotationKeys.empty())
                 {
-                    keyRot = InterpolateQuatKey(channel->RotationKeys, animTime);
+                    XMFLOAT4 keyRot = InterpolateQuatKey(channel->RotationKeys, animTime);
                     rotQuat = XMLoadFloat4(&keyRot);
                 }
 
-                XMFLOAT3 keyScale;
-                XMVECTOR scaleVec = defScale;
+                XMVECTOR scaleVec = XMLoadFloat3(&bone.RestScale);
                 if (!channel->ScalingKeys.empty())
                 {
-                    keyScale = InterpolateVectorKey(channel->ScalingKeys, animTime);
+                    XMFLOAT3 keyScale = InterpolateVectorKey(channel->ScalingKeys, animTime);
                     scaleVec = XMLoadFloat3(&keyScale);
                 }
 
@@ -168,6 +162,46 @@ bool EvaluateSkeletalAnimation(
 
         // Final skinning matrix: M_invBind * M_world
         // Transforms from bind mesh-space to bone-space, then to current animated space
+        XMMATRIX invBind = XMLoadFloat4x4(&bone.InverseBindPose);
+        XMMATRIX finalMatrix = XMMatrixMultiply(invBind, worldMatrix);
+
+        if (transposeForGpu)
+        {
+            finalMatrix = XMMatrixTranspose(finalMatrix);
+        }
+
+        XMStoreFloat4x4(&outPalette[i], finalMatrix);
+    }
+
+    return true;
+}
+
+bool EvaluateSkeletalBindPose(
+    const Skeleton& skeleton,
+    std::vector<DirectX::XMFLOAT4X4>& outPalette,
+    bool transposeForGpu)
+{
+    const size_t boneCount = skeleton.Bones.size();
+    if (boneCount == 0 || boneCount > MaxSkeletalBones)
+    {
+        return false;
+    }
+
+    outPalette.resize(boneCount);
+    std::vector<XMMATRIX> worldTransforms(boneCount);
+
+    for (size_t i = 0; i < boneCount; ++i)
+    {
+        const auto& bone = skeleton.Bones[i];
+        XMMATRIX localMatrix = XMLoadFloat4x4(&bone.LocalTransform);
+
+        XMMATRIX worldMatrix = localMatrix;
+        if (bone.ParentIndex >= 0 && bone.ParentIndex < static_cast<int32_t>(i))
+        {
+            worldMatrix = XMMatrixMultiply(localMatrix, worldTransforms[bone.ParentIndex]);
+        }
+        worldTransforms[i] = worldMatrix;
+
         XMMATRIX invBind = XMLoadFloat4x4(&bone.InverseBindPose);
         XMMATRIX finalMatrix = XMMatrixMultiply(invBind, worldMatrix);
 

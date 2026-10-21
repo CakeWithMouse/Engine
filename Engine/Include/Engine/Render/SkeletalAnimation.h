@@ -34,3 +34,13 @@ bool EvaluateSkeletalAnimation(
     float timeInSeconds,
     std::vector<DirectX::XMFLOAT4X4>& outPalette,
     bool transposeForGpu = false);
+
+/**
+ * Evaluates the rest pose (bind pose) bone palette directly from bone LocalTransform hierarchy.
+ * In an ideal bind pose, all skin palette matrices equal the identity matrix (I_4x4).
+ */
+bool EvaluateSkeletalBindPose(
+    const Skeleton& skeleton,
+    std::vector<DirectX::XMFLOAT4X4>& outPalette,
+    bool transposeForGpu = false);
+

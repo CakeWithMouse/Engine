@@ -29,6 +29,9 @@ struct Bone
     int32_t ParentIndex = -1; // -1 for root bone
     DirectX::XMFLOAT4X4 InverseBindPose; // Transforms vertex from mesh space to local bone space
     DirectX::XMFLOAT4X4 LocalTransform;  // Default bind local TRS transform
+    DirectX::XMFLOAT3 RestTranslation{0.0f, 0.0f, 0.0f};
+    DirectX::XMFLOAT4 RestRotation{0.0f, 0.0f, 0.0f, 1.0f};
+    DirectX::XMFLOAT3 RestScale{1.0f, 1.0f, 1.0f};
 };
 
 struct Skeleton

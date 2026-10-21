@@ -19,10 +19,10 @@ namespace
     DirectX::XMFLOAT4X4 ConvertAssimpMatrix(const aiMatrix4x4& mat)
     {
         DirectX::XMFLOAT4X4 m;
-        m.m[0][0] = mat.a1; m.m[0][1] = mat.a2; m.m[0][2] = mat.a3; m.m[0][3] = mat.a4;
-        m.m[1][0] = mat.b1; m.m[1][1] = mat.b2; m.m[1][2] = mat.b3; m.m[1][3] = mat.b4;
-        m.m[2][0] = mat.c1; m.m[2][1] = mat.c2; m.m[2][2] = mat.c3; m.m[2][3] = mat.c4;
-        m.m[3][0] = mat.d1; m.m[3][1] = mat.d2; m.m[3][2] = mat.d3; m.m[3][3] = mat.d4;
+        m.m[0][0] = mat.a1; m.m[0][1] = mat.b1; m.m[0][2] = mat.c1; m.m[0][3] = mat.d1;
+        m.m[1][0] = mat.a2; m.m[1][1] = mat.b2; m.m[1][2] = mat.c2; m.m[1][3] = mat.d2;
+        m.m[2][0] = mat.a3; m.m[2][1] = mat.b3; m.m[2][2] = mat.c3; m.m[2][3] = mat.d3;
+        m.m[3][0] = mat.a4; m.m[3][1] = mat.b4; m.m[3][2] = mat.c4; m.m[3][3] = mat.d4;
         return m;
     }
 
@@ -106,6 +106,12 @@ SkeletalLoadResult LoadSkeletalModelFromMemory(const void* data, size_t size, st
             if (node)
             {
                 bone.LocalTransform = ConvertAssimpMatrix(node->mTransformation);
+                DirectX::XMVECTOR s, r, t;
+                DirectX::XMMatrixDecompose(&s, &r, &t, DirectX::XMLoadFloat4x4(&bone.LocalTransform));
+                DirectX::XMStoreFloat3(&bone.RestScale, s);
+                DirectX::XMStoreFloat4(&bone.RestRotation, r);
+                DirectX::XMStoreFloat3(&bone.RestTranslation, t);
+
                 const aiNode* parent = node->mParent;
                 while (parent != nullptr)
                 {
