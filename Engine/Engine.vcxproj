@@ -54,6 +54,7 @@
     <ClCompile Include="Source\MainGame\Player.cpp" />
     <ClCompile Include="Source\Render\ImpostorAtlas.cpp" />
     <ClCompile Include="Source\Render\Material.cpp" />
+    <ClCompile Include="Source\Render\MaterialAsset.cpp" />
     <ClCompile Include="Source\Render\MeshPrimitives.cpp" />
     <ClCompile Include="Source\Render\ShaderCompiler.cpp" />
     <ClCompile Include="Source\Render\TextureLoader.cpp" />
@@ -77,6 +78,7 @@
     <ClInclude Include="Include\Engine\MainGame\Player.h" />
     <ClInclude Include="Include\Engine\Render\ImpostorAtlas.h" />
     <ClInclude Include="Include\Engine\Render\Material.h" />
+    <ClInclude Include="Include\Engine\Render\MaterialAsset.h" />
     <ClInclude Include="Include\Engine\Render\MeshData.h" />
     <ClInclude Include="Include\Engine\Render\MeshPrimitives.h" />
     <ClInclude Include="Include\Engine\Render\ShaderCompiler.h" />

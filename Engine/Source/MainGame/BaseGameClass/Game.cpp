@@ -14,6 +14,8 @@
 #include <iostream>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
+#include <Engine/Render/Material.h>
+#include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/ShaderCompiler.h>
 #include "stb_image.h"
 
@@ -286,6 +288,8 @@ void Game::DestroyResources()
     // Components first: they observe cube maps and shaders owned by the caches below.
     PointLights.clear();
     Components.clear();
+    materialCache.clear();
+    defaultMaterial.reset();
     cubeMapCache.clear();
 
     vertexShaderCache.clear();
@@ -1095,6 +1099,32 @@ bool Game::SupportsDeferredGeometry(GameComponent* Component)
 bool Game::InvalidateShaderFile(const std::string& shaderFile)
 {
     const std::string file = ShaderCompiler::NormalizePath(shaderFile);
+
+    // Materials: the .mat file itself is re-read, a shader they include is recompiled.
+    size_t materialCount = 0;
+    for (auto& entry : materialCache)
+    {
+        if (entry.first == file)
+        {
+            ReloadMaterial(entry.second.Path);
+            ++materialCount;
+        }
+        else if (entry.second.Instance->DependsOn(file))
+        {
+            entry.second.Instance->Compile(Device.Get(), Context.Get());
+            ++materialCount;
+        }
+    }
+    if (defaultMaterial && defaultMaterial->DependsOn(file))
+    {
+        defaultMaterial->Compile(Device.Get(), Context.Get());
+        ++materialCount;
+    }
+    if (materialCount > 0)
+    {
+        std::cout << "Recompiled " << materialCount << " material(s) depending on " << shaderFile << std::endl;
+    }
+
     std::vector<std::string> staleKeys;
     for (const auto& entry : shaderDependencies)
     {
@@ -1105,7 +1135,7 @@ bool Game::InvalidateShaderFile(const std::string& shaderFile)
     }
     if (staleKeys.empty())
     {
-        return false;
+        return materialCount > 0;
     }
 
     for (const std::string& key : staleKeys)
@@ -1135,6 +1165,93 @@ void Game::InvalidateAllShaders()
 
     OnShadersInvalidated();
     std::cout << "Invalidated all " << count << " cached shader(s)" << std::endl;
+
+    for (auto& entry : materialCache)
+    {
+        ReloadMaterial(entry.second.Path);
+    }
+    if (defaultMaterial)
+    {
+        defaultMaterial->Compile(Device.Get(), Context.Get());
+    }
+    if (!materialCache.empty())
+    {
+        std::cout << "Reloaded " << materialCache.size() << " material(s)" << std::endl;
+    }
+}
+
+namespace
+{
+    /** A material from a parsed .mat: compiled, with the file's parameters and textures applied. */
+    std::shared_ptr<Material> BuildMaterial(const MaterialAsset& asset, const std::string& matPath,
+                                            ID3D11Device* device, ID3D11DeviceContext* context)
+    {
+        auto material = std::make_shared<Material>(MaterialAsset::ResolvePath(matPath, asset.Shader), asset.Render);
+        material->Compile(device, context);
+        std::vector<std::string> warnings;
+        asset.ApplyTo(*material, matPath, warnings);
+        for (const std::string& warning : warnings)
+        {
+            std::cout << "Material " << matPath << ": " << warning << std::endl;
+        }
+        return material;
+    }
+}
+
+std::shared_ptr<Material> Game::LoadMaterial(const std::string& matPath, std::string* error)
+{
+    const std::string key = ShaderCompiler::NormalizePath(matPath);
+    const auto cached = materialCache.find(key);
+    if (cached != materialCache.end())
+    {
+        return cached->second.Instance;
+    }
+
+    std::string message;
+    MaterialAsset asset;
+    if (!Device)
+    {
+        message = matPath + ": the device is not initialized";
+    }
+    else if (MaterialAsset::Load(matPath, asset, message))
+    {
+        std::shared_ptr<Material> material = BuildMaterial(asset, matPath, Device.Get(), Context.Get());
+        materialCache.emplace(key, CachedMaterial{matPath, material});
+        return material;
+    }
+    std::cout << "LoadMaterial failed: " << message << std::endl;
+    if (error) *error = message;
+    return nullptr;
+}
+
+bool Game::ReloadMaterial(const std::string& matPath, std::string* error)
+{
+    const auto cached = materialCache.find(ShaderCompiler::NormalizePath(matPath));
+    std::string message;
+    MaterialAsset asset;
+    if (cached == materialCache.end())
+    {
+        message = matPath + ": the material is not loaded";
+    }
+    else if (MaterialAsset::Load(matPath, asset, message))
+    {
+        // Same object: whoever holds the material sees the new state.
+        *cached->second.Instance = std::move(*BuildMaterial(asset, matPath, Device.Get(), Context.Get()));
+        return true;
+    }
+    std::cout << "ReloadMaterial failed: " << message << std::endl;
+    if (error) *error = message;
+    return false;
+}
+
+std::shared_ptr<Material> Game::GetDefaultMaterial()
+{
+    if (!defaultMaterial && Device)
+    {
+        defaultMaterial = std::make_shared<Material>(EnginePaths::Shader("Material/DefaultSurface.hlsl").generic_u8string());
+        defaultMaterial->Compile(Device.Get(), Context.Get());
+    }
+    return defaultMaterial;
 }
 
 void Game::OnShadersInvalidated()

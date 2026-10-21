@@ -2,6 +2,6 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- Public SDK include paths; consumers never need Engine/Source. -->
   <ItemDefinitionGroup><ClCompile>
-    <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)Include;$(MSBuildThisFileDirectory)ThirdParty\GLM-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)Include;$(MSBuildThisFileDirectory)ThirdParty\GLM-master;$(MSBuildThisFileDirectory)ThirdParty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
   </ClCompile></ItemDefinitionGroup>
 </Project>

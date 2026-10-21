@@ -5,6 +5,7 @@
 #include <Engine/Components/SpecificComponents/MeshComponent.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
 #include <Engine/Render/Material.h>
+#include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/MeshPrimitives.h>
 #include <Engine/Render/ShaderCompiler.h>
 #include <cmath>
@@ -636,6 +637,146 @@ void MaterialOffscreenRendering()
     CHECK(errorPixel == 0xffff00ffu || errorPixel == 0xff140014u);
 }
 
+std::string ReadAll(const std::string& path)
+{
+    std::ifstream input(std::filesystem::u8path(path), std::ios::binary);
+    return std::string(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
+}
+
+void MaterialAssetFormat()
+{
+    TempShaderDir dir;
+    const std::string mat = dir.Write("Gold.mat", R"({
+  "version": 1,
+  "shader": "Gold.hlsl",
+  "editor": { "previewMesh": "sphere" },
+  "render": { "blend": "masked", "alphaClip": 0.3, "lighting": "unlit", "twoSided": true, "castShadows": false, "sortBias": 2 },
+  "params": { "Tint": [1.0, 0.78, 0.34, 1.0], "Gloss": 0.8 },
+  "textures": { "BaseMap": "Textures/gold.tga", "MaskMap": null }
+})");
+    MaterialAsset asset;
+    std::string error;
+    CHECK(MaterialAsset::Load(mat, asset, error));
+    CHECK(asset.Shader == "Gold.hlsl");
+    CHECK(asset.Render.Blend == MaterialBlendMode::Masked && asset.Render.bUnlit && asset.Render.bTwoSided && !asset.Render.bCastShadows);
+    Near(asset.Render.AlphaClip, 0.3f);
+    CHECK(asset.Params.size() == 2 && asset.Params[0].first == "Tint" && asset.Params[1].first == "Gloss");
+    CHECK(asset.Params[0].second.size() == 4 && asset.Params[1].second == std::vector<float>{0.8f});
+    CHECK(asset.Textures.size() == 2 && asset.Textures[0].second == "Textures/gold.tga" && asset.Textures[1].second.empty());
+
+    MaterialAsset minimal;
+    CHECK(MaterialAsset::Load(dir.Write("Min.mat", "\xef\xbb\xbf{ \"shader\": \"A.hlsl\" }"), minimal, error)); // BOM is accepted
+    CHECK(minimal.Render == MaterialRenderState{} && minimal.Params.empty() && minimal.Textures.empty());
+
+    // Every rejected file gets a message naming the file and the field.
+    const std::pair<const char*, const char*> invalid[] = {
+        {"{ not json", "invalid JSON"},
+        {"[]", "root must be"},
+        {"{}", "\"shader\""},
+        {R"({"shader": "a", "version": 2})", "unsupported version"},
+        {R"({"shader": "a", "render": {"blend": "glass"}})", "render.blend"},
+        {R"({"shader": "a", "render": {"alphaClip": 2}})", "render.alphaClip"},
+        {R"({"shader": "a", "render": {"lighting": "dark"}})", "render.lighting"},
+        {R"({"shader": "a", "render": {"twoSided": "yes"}})", "render.twoSided"},
+        {R"({"shader": "a", "params": {"X": [1, 2, 3, 4, 5]}})", "params.X"},
+        {R"({"shader": "a", "params": {"X": [1, "2"]}})", "params.X"},
+        {R"({"shader": "a", "textures": {"T": 5}})", "textures.T"},
+    };
+    for (const auto& file : invalid)
+    {
+        MaterialAsset rejected;
+        error.clear();
+        CHECK(!MaterialAsset::Load(dir.Write("Bad.mat", file.first), rejected, error));
+        CHECK(error.find("Bad.mat") != std::string::npos && error.find(file.second) != std::string::npos);
+    }
+    CHECK(!MaterialAsset::Load((dir.Root / "Missing.mat").generic_u8string(), asset, error) && error.find("cannot read") != std::string::npos);
+
+    // Saving keeps unknown fields and their order, numbers stay short.
+    asset.Params[1].second = {0.3f};
+    asset.Textures[1].second = "Textures/mask.tga";
+    CHECK(asset.Save(mat, error));
+    const std::string saved = ReadAll(mat);
+    CHECK(saved.find("\"previewMesh\": \"sphere\"") != std::string::npos && saved.find("\"sortBias\": 2") != std::string::npos);
+    CHECK(saved.find("\"shader\"") < saved.find("\"editor\"") && saved.find("\"editor\"") < saved.find("\"render\""));
+    CHECK(saved.find("0.3") != std::string::npos && saved.find("0.300000") == std::string::npos);
+    CHECK(saved.find("0.78") != std::string::npos && saved.find("0.779999") == std::string::npos);
+    MaterialAsset reloaded;
+    CHECK(MaterialAsset::Load(mat, reloaded, error));
+    CHECK(reloaded.Render == asset.Render && reloaded.Params == asset.Params && reloaded.Textures == asset.Textures);
+
+    const std::string resolved = MaterialAsset::ResolvePath(mat, "Textures/gold.tga");
+    CHECK(resolved == (dir.Root / "Textures" / "gold.tga").generic_u8string());
+    CHECK(MaterialAsset::MakeRelativePath(mat, resolved) == "Textures/gold.tga");
+    CHECK(MaterialAsset::MakeRelativePath(mat, (dir.Root.parent_path() / "Shared.tga").generic_u8string()) == "../Shared.tga");
+    CHECK(MaterialAsset::ResolvePath(mat, resolved) == resolved);
+}
+
+void GameMaterialCache()
+{
+    TestGame game;
+    TempShaderDir dir;
+    std::filesystem::create_directories(dir.Root / "Textures");
+    const std::string surface = dir.Write("Params.hlsl", ParamsSurface);
+    WriteTga(dir, "Textures/Blue.tga", 0, 0, 255);
+    const char* matText = R"({
+  "shader": "Params.hlsl",
+  "params": { "Tint": [0, 1, 0, 1], "Gloss": 0.8, "Stale": 1 },
+  "textures": { "BaseMap": "Textures/Blue.tga" }
+})";
+    const std::string mat = dir.Write("Green.mat", matText);
+
+    std::shared_ptr<Material> material = game.LoadMaterial(mat);
+    CHECK(material && material->IsCompiled() && !material->HasErrors());
+    std::array<float, 4> value{};
+    CHECK(material->GetParameter("Gloss", value) && value[0] == 0.8f);
+    CHECK(material->GetParameter("Tint", value) && value[1] == 1.0f && value[0] == 0.0f);
+    CHECK(material->GetTextures()[0].Path == MaterialAsset::ResolvePath(mat, "Textures/Blue.tga") && material->GetTextures()[0].View);
+    std::string backslashes = mat;
+    std::replace(backslashes.begin(), backslashes.end(), '/', '\\');
+    CHECK(game.LoadMaterial(backslashes) == material); // one material per file
+
+    // Editing the .mat file and invalidating it updates the same object.
+    std::string edited = matText;
+    edited.replace(edited.find("0.8"), 3, "0.3");
+    dir.Write("Green.mat", edited);
+    CHECK(game.InvalidateShaderFile(mat));
+    CHECK(game.LoadMaterial(mat) == material);
+    CHECK(material->GetParameter("Gloss", value) && value[0] == 0.3f);
+
+    // Shader edits recompile materials that read the file; values survive a broken intermediate state.
+    dir.Write("Params.hlsl", "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = Tnt; }\n");
+    CHECK(game.InvalidateShaderFile(surface));
+    CHECK(material->HasErrors());
+    dir.Write("Params.hlsl", ParamsSurface);
+    CHECK(game.InvalidateShaderFile(surface) && !material->HasErrors());
+    CHECK(material->GetParameter("Gloss", value) && value[0] == 0.3f);
+
+    // A broken .mat keeps the previous state; an unusable file gives no material and a reason.
+    dir.Write("Green.mat", R"({ "shader": "Params.hlsl", "render": { "blend": "glass" } })");
+    std::string error;
+    CHECK(!game.ReloadMaterial(mat, &error) && error.find("render.blend") != std::string::npos);
+    CHECK(material->GetParameter("Gloss", value) && value[0] == 0.3f);
+    CHECK(game.LoadMaterial(dir.Write("Other.mat", "{}"), &error) == nullptr && error.find("\"shader\"") != std::string::npos);
+
+    std::shared_ptr<Material> fallback = game.GetDefaultMaterial();
+    CHECK(fallback && !fallback->HasErrors() && fallback->WritesGBuffer() && game.GetDefaultMaterial() == fallback);
+
+    // Saving the live material: its values, the author's paths and the parameter the shader dropped.
+    dir.Write("Green.mat", edited);
+    MaterialAsset base;
+    CHECK(MaterialAsset::Load(mat, base, error));
+    CHECK(material->SetParameter("Gloss", {0.5f, 0, 0, 0}));
+    CHECK(MaterialAsset::FromMaterial(*material, mat, base).Save(mat, error));
+    MaterialAsset saved;
+    CHECK(MaterialAsset::Load(mat, saved, error));
+    CHECK(saved.Shader == "Params.hlsl");
+    CHECK(saved.Textures.size() == 1 && saved.Textures[0].second == "Textures/Blue.tga");
+    const auto gloss = std::find_if(saved.Params.begin(), saved.Params.end(), [](const auto& p) { return p.first == "Gloss"; });
+    CHECK(gloss != saved.Params.end() && gloss->second == std::vector<float>{0.5f});
+    CHECK(std::any_of(saved.Params.begin(), saved.Params.end(), [](const auto& p) { return p.first == "Stale"; }));
+    CHECK(std::any_of(saved.Params.begin(), saved.Params.end(), [](const auto& p) { return p.first == "UVScale"; }));
+}
+
 ComPtr<ID3D11Buffer> Buffer(ID3D11Device* device, UINT bytes, UINT bind, const void* data = nullptr, UINT stride = 0)
 {
     D3D11_BUFFER_DESC desc{};
@@ -957,6 +1098,7 @@ int main()
         {"material template variants and reflection", MaterialTemplateVariants},
         {"mesh primitives: normals, uvs, winding", MeshPrimitivesGeometry}, {"mesh component offscreen rendering", MeshComponentRendering},
         {"material compilation, parameters, errors", MaterialCompilationAndParameters}, {"material offscreen rendering", MaterialOffscreenRendering},
+        {".mat format: load, validate, save", MaterialAssetFormat}, {"game material cache and reload", GameMaterialCache},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
         {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests}
     };

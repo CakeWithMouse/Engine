@@ -50,6 +50,7 @@ enum class RegisterResult
 const char* ToString(RegisterResult result);
 
 class GameComponent;
+class Material;
 class PointLightComponent;
 class FBXComponent;
 struct ComponentShaderVariant;
@@ -251,6 +252,18 @@ public:
     /** Compiler output of every failed stage/variant of this shader file; empty if none failed. */
     std::string GetShaderErrors(const std::string& shaderFile) const;
 
+    /**
+     * Loads a .mat file once and shares it. Null if the file cannot be used (error says why);
+     * a surface that does not compile still gives a material, drawn as the error surface.
+     * Invalidating the .mat file re-reads it, invalidating a shader file recompiles the
+     * materials that include it.
+     */
+    std::shared_ptr<Material> LoadMaterial(const std::string& matPath, std::string* error = nullptr);
+    /** Re-reads a loaded .mat into the same Material object; on failure the previous state stays. */
+    bool ReloadMaterial(const std::string& matPath, std::string* error = nullptr);
+    /** DefaultSurface, opaque and lit; compiled on first use. */
+    std::shared_ptr<Material> GetDefaultMaterial();
+
 protected:
     // Initialization
     bool InitializeInternal(HWND externalWindow, int width, int height);
@@ -364,6 +377,15 @@ protected:
     // Same keys: normalized files each blob was built from (main file first), and failed output.
     std::map<std::string, std::vector<std::string>> shaderDependencies;
     std::map<std::string, std::string> shaderErrors;
+
+    // Materials by normalized .mat path; they outlive every component that uses them.
+    struct CachedMaterial
+    {
+        std::string Path; // as first requested: relative paths in the file resolve against it
+        std::shared_ptr<Material> Instance;
+    };
+    std::map<std::string, CachedMaterial> materialCache;
+    std::shared_ptr<Material> defaultMaterial;
 
     // Depth
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;          // opaque: test + write
