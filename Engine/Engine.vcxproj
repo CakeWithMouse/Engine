@@ -71,6 +71,7 @@
     <ClCompile Include="Source\Render\TextureLoader.cpp" />
     <ClCompile Include="Source\Render\ShaderCompiler.cpp" />
     <ClCompile Include="Source\Render\SkeletalAnimation.cpp" />
+    <ClCompile Include="Source\Render\SkeletalBaker.cpp" />
     <ClCompile Include="Source\Render\SkeletalLoaderStub.cpp" Condition="'$(EngineEnableAssimp)'!='true'" />
     <ClCompile Include="Source\Render\SkeletalLoaderAssimp.cpp" Condition="'$(EngineEnableAssimp)'=='true'" />
     <ClCompile Include="Source\Components\SpecificComponents\SkeletalMeshComponent.cpp" />
@@ -108,6 +109,7 @@
     <ClInclude Include="Include\Engine\Render\ShaderConstants.h" />
     <ClInclude Include="Include\Engine\Render\SkeletalData.h" />
     <ClInclude Include="Include\Engine\Render\SkeletalAnimation.h" />
+    <ClInclude Include="Include\Engine\Render\SkeletalBaker.h" />
     <ClInclude Include="Include\Engine\Render\SkeletalLoader.h" />
     <ClInclude Include="Include\Engine\Render\TextureLoader.h" />
     <ClInclude Include="Include\Engine\Resources\Paths.h" />
