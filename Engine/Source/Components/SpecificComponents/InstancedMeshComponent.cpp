@@ -3,10 +3,13 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <filesystem>
 #include <functional>
 #include <iostream>
+#include <Engine/Render/ShaderCompiler.h>
 #include <Engine/Render/TextureLoader.h>
 #include <Engine/Resources/Paths.h>
+#include <d3dcompiler.h>
 
 namespace
 {
@@ -17,6 +20,21 @@ namespace
     {
         DirectX::XMFLOAT4 AtlasParams;
         DirectX::XMFLOAT4 ModelParams;
+    };
+
+    struct GpuClipInfo
+    {
+        uint32_t StartRow = 0;
+        uint32_t FrameCount = 0;
+        float Duration = 0.0f;
+        float Fps = 30.0f;
+    };
+
+    struct GpuAnimClipBufferData
+    {
+        GpuClipInfo Clips[16] = {};
+        uint32_t ClipCount = 0;
+        float Padding[3] = {};
     };
 
     const glm::vec4 LodDebugColors[InstancedMeshComponent::MaxLodCount] =
@@ -97,6 +115,156 @@ bool InstancedMeshComponent::SetLod(int level, MeshLodData data)
         CreateLodBuffers(GamePtr->GetDevice(), Lods[level]);
     }
     return true;
+}
+
+bool InstancedMeshComponent::SetSkinnedLod(int level, const std::vector<CrowdSkinnedVertex>& vertices, const std::vector<uint32_t>& indices)
+{
+    if (level < 0 || level >= MaxLodCount || vertices.empty() || indices.empty())
+    {
+        return false;
+    }
+    if (level > LodCount)
+    {
+        std::cout << "InstancedMeshComponent: LOD levels must be filled in order, got " << level
+                  << " while " << LodCount << " are set." << std::endl;
+        return false;
+    }
+
+    bIsSkinned = true;
+    bIsCrowdVertex = true;
+
+    Lods[level].Data.Vertices.clear();
+    Lods[level].Data.Indices = indices;
+    Lods[level].VertexBuffer.Reset();
+    Lods[level].IndexBuffer.Reset();
+    Lods[level].IndexCount = static_cast<UINT>(indices.size());
+    Lods[level].VertexStride = sizeof(CrowdSkinnedVertex);
+    LodCount = std::max(LodCount, level + 1);
+
+    if (level == 0)
+    {
+        float maxRadiusSq = 0.0f;
+        for (const CrowdSkinnedVertex& vertex : vertices)
+        {
+            const float radiusSq = vertex.Position.x * vertex.Position.x +
+                                   vertex.Position.y * vertex.Position.y +
+                                   vertex.Position.z * vertex.Position.z;
+            maxRadiusSq = std::max(maxRadiusSq, radiusSq);
+        }
+        MeshRadius = std::sqrt(maxRadiusSq);
+        TotalIndexCount = static_cast<int>(indices.size());
+    }
+
+    if (GamePtr && GamePtr->GetDevice())
+    {
+        ID3D11Device* device = GamePtr->GetDevice();
+        D3D11_BUFFER_DESC vertexDesc = {};
+        vertexDesc.Usage = D3D11_USAGE_IMMUTABLE;
+        vertexDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        vertexDesc.ByteWidth = static_cast<UINT>(sizeof(CrowdSkinnedVertex) * vertices.size());
+        D3D11_SUBRESOURCE_DATA vertexData = {};
+        vertexData.pSysMem = vertices.data();
+
+        D3D11_BUFFER_DESC indexDesc = {};
+        indexDesc.Usage = D3D11_USAGE_IMMUTABLE;
+        indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+        indexDesc.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * indices.size());
+        D3D11_SUBRESOURCE_DATA indexData = {};
+        indexData.pSysMem = indices.data();
+
+        if (FAILED(device->CreateBuffer(&vertexDesc, &vertexData, Lods[level].VertexBuffer.ReleaseAndGetAddressOf())) ||
+            FAILED(device->CreateBuffer(&indexDesc, &indexData, Lods[level].IndexBuffer.ReleaseAndGetAddressOf())))
+        {
+            std::cout << "InstancedMeshComponent: failed to create crowd skinned LOD buffers." << std::endl;
+            Lods[level].VertexBuffer.Reset();
+            Lods[level].IndexBuffer.Reset();
+            return false;
+        }
+    }
+    return true;
+}
+
+bool InstancedMeshComponent::SetSkinnedLod(int level, const std::vector<SkinnedVertex>& vertices, const std::vector<uint32_t>& indices)
+{
+    if (level < 0 || level >= MaxLodCount || vertices.empty() || indices.empty())
+    {
+        return false;
+    }
+    if (level > LodCount)
+    {
+        std::cout << "InstancedMeshComponent: LOD levels must be filled in order, got " << level
+                  << " while " << LodCount << " are set." << std::endl;
+        return false;
+    }
+
+    bIsSkinned = true;
+    bIsCrowdVertex = false;
+
+    Lods[level].Data.Vertices.clear();
+    Lods[level].Data.Indices = indices;
+    Lods[level].VertexBuffer.Reset();
+    Lods[level].IndexBuffer.Reset();
+    Lods[level].IndexCount = static_cast<UINT>(indices.size());
+    Lods[level].VertexStride = sizeof(SkinnedVertex);
+    LodCount = std::max(LodCount, level + 1);
+
+    if (level == 0)
+    {
+        float maxRadiusSq = 0.0f;
+        for (const SkinnedVertex& vertex : vertices)
+        {
+            const float radiusSq = vertex.Position.x * vertex.Position.x +
+                                   vertex.Position.y * vertex.Position.y +
+                                   vertex.Position.z * vertex.Position.z;
+            maxRadiusSq = std::max(maxRadiusSq, radiusSq);
+        }
+        MeshRadius = std::sqrt(maxRadiusSq);
+        TotalIndexCount = static_cast<int>(indices.size());
+    }
+
+    if (GamePtr && GamePtr->GetDevice())
+    {
+        ID3D11Device* device = GamePtr->GetDevice();
+        D3D11_BUFFER_DESC vertexDesc = {};
+        vertexDesc.Usage = D3D11_USAGE_IMMUTABLE;
+        vertexDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+        vertexDesc.ByteWidth = static_cast<UINT>(sizeof(SkinnedVertex) * vertices.size());
+        D3D11_SUBRESOURCE_DATA vertexData = {};
+        vertexData.pSysMem = vertices.data();
+
+        D3D11_BUFFER_DESC indexDesc = {};
+        indexDesc.Usage = D3D11_USAGE_IMMUTABLE;
+        indexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+        indexDesc.ByteWidth = static_cast<UINT>(sizeof(uint32_t) * indices.size());
+        D3D11_SUBRESOURCE_DATA indexData = {};
+        indexData.pSysMem = indices.data();
+
+        if (FAILED(device->CreateBuffer(&vertexDesc, &vertexData, Lods[level].VertexBuffer.ReleaseAndGetAddressOf())) ||
+            FAILED(device->CreateBuffer(&indexDesc, &indexData, Lods[level].IndexBuffer.ReleaseAndGetAddressOf())))
+        {
+            std::cout << "InstancedMeshComponent: failed to create skinned LOD buffers." << std::endl;
+            Lods[level].VertexBuffer.Reset();
+            Lods[level].IndexBuffer.Reset();
+            return false;
+        }
+    }
+    return true;
+}
+
+void InstancedMeshComponent::SetAnimationTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, const std::vector<BakedClipInfo>& clips)
+{
+    AnimationTextureSRV = srv;
+    AnimationClips = clips;
+    if (GamePtr && GamePtr->GetDevice() && AnimationTextureSRV)
+    {
+        UpdateAnimClipConstantBuffer(GamePtr->GetDevice());
+        EnsureSkinnedShaders(GamePtr->GetDevice());
+    }
+}
+
+void InstancedMeshComponent::SetAnimationTexture(ID3D11ShaderResourceView* srv, const std::vector<BakedClipInfo>& clips)
+{
+    SetAnimationTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>(srv), clips);
 }
 
 void InstancedMeshComponent::SetLodDistances(const std::vector<float>& distances)
@@ -244,6 +412,172 @@ uint32_t InstancedMeshComponent::GetDrawnInstancesForLod(int level) const
     return static_cast<uint32_t>(Lods[level].ColorStaging.size());
 }
 
+void InstancedMeshComponent::UpdateAnimClipConstantBuffer(ID3D11Device* device)
+{
+    if (device == nullptr) return;
+
+    GpuAnimClipBufferData bufferData = {};
+    const size_t count = std::min<size_t>(AnimationClips.size(), 16);
+    bufferData.ClipCount = static_cast<uint32_t>(count);
+    for (size_t i = 0; i < count; ++i)
+    {
+        bufferData.Clips[i].StartRow = AnimationClips[i].StartRow;
+        bufferData.Clips[i].FrameCount = AnimationClips[i].FrameCount;
+        bufferData.Clips[i].Duration = AnimationClips[i].Duration;
+        bufferData.Clips[i].Fps = AnimationClips[i].Fps;
+    }
+
+    if (!AnimClipConstantBuffer)
+    {
+        D3D11_BUFFER_DESC desc = {};
+        desc.Usage = D3D11_USAGE_DEFAULT;
+        desc.ByteWidth = sizeof(GpuAnimClipBufferData);
+        desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        D3D11_SUBRESOURCE_DATA initData = {};
+        initData.pSysMem = &bufferData;
+        if (FAILED(device->CreateBuffer(&desc, &initData, AnimClipConstantBuffer.ReleaseAndGetAddressOf())))
+        {
+            std::cerr << "InstancedMeshComponent: failed to create animation clip constant buffer" << std::endl;
+        }
+    }
+    else
+    {
+        Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
+        device->GetImmediateContext(context.GetAddressOf());
+        if (context)
+        {
+            context->UpdateSubresource(AnimClipConstantBuffer.Get(), 0, nullptr, &bufferData, 0, 0);
+        }
+    }
+}
+
+bool InstancedMeshComponent::EnsureSkinnedShaders(ID3D11Device* device)
+{
+    if (device == nullptr) return false;
+    if (SkinnedVertexShader && SkinnedPixelShader && SkinnedInputLayout &&
+        SkinnedShadowVertexShader && SkinnedShadowInputLayout)
+    {
+        return true;
+    }
+
+    const std::filesystem::path shaderPath = EnginePaths::Shader("InstancedSkinnedMesh.hlsl");
+    const std::wstring shaderWPath = shaderPath.wstring();
+
+    Microsoft::WRL::ComPtr<ID3DBlob> vsBlob;
+    std::string vsErrors;
+    const D3D_SHADER_MACRO vsDefines[] = {
+        {"ANIM_LERP", "1"},
+        {nullptr, nullptr}
+    };
+    HRESULT hr = ShaderCompiler::CompileFromFile(
+        shaderWPath,
+        bAnimationLerp ? vsDefines : nullptr,
+        "VSMain", "vs_5_0", vsBlob.ReleaseAndGetAddressOf(), &vsErrors);
+    if (FAILED(hr) || !vsBlob)
+    {
+        std::cerr << "InstancedMeshComponent: failed to compile skinned VSMain: " << vsErrors << std::endl;
+        return false;
+    }
+
+    hr = device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr,
+                                    SkinnedVertexShader.ReleaseAndGetAddressOf());
+    if (FAILED(hr)) return false;
+
+    if (bIsCrowdVertex)
+    {
+        D3D11_INPUT_ELEMENT_DESC crowdLayout[] = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, static_cast<UINT>(offsetof(CrowdSkinnedVertex, Position)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"NORMAL", 0, DXGI_FORMAT_R16G16B16A16_FLOAT, 0, static_cast<UINT>(offsetof(CrowdSkinnedVertex, Normal)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R16G16_FLOAT, 0, static_cast<UINT>(offsetof(CrowdSkinnedVertex, TexCoord)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"BLENDINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, static_cast<UINT>(offsetof(CrowdSkinnedVertex, BoneIndices)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"BLENDWEIGHT", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, static_cast<UINT>(offsetof(CrowdSkinnedVertex, BoneWeights)), D3D11_INPUT_PER_VERTEX_DATA, 0}
+        };
+        hr = device->CreateInputLayout(crowdLayout, 5, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
+                                       SkinnedInputLayout.ReleaseAndGetAddressOf());
+    }
+    else
+    {
+        D3D11_INPUT_ELEMENT_DESC standardLayout[] = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, static_cast<UINT>(offsetof(SkinnedVertex, Position)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, static_cast<UINT>(offsetof(SkinnedVertex, Normal)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, static_cast<UINT>(offsetof(SkinnedVertex, TexCoord)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, static_cast<UINT>(offsetof(SkinnedVertex, BoneIndices)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, static_cast<UINT>(offsetof(SkinnedVertex, BoneWeights)), D3D11_INPUT_PER_VERTEX_DATA, 0}
+        };
+        hr = device->CreateInputLayout(standardLayout, 5, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(),
+                                       SkinnedInputLayout.ReleaseAndGetAddressOf());
+    }
+    if (FAILED(hr)) return false;
+
+    Microsoft::WRL::ComPtr<ID3DBlob> psBlob;
+    std::string psErrors;
+    const bool bDeferred = GamePtr && (GamePtr->GetRenderingType() == RenderType::Deffered);
+    const D3D_SHADER_MACRO psDefines[] = {
+        {"DEFERRED_GBUFFER", "1"},
+        {nullptr, nullptr}
+    };
+    hr = ShaderCompiler::CompileFromFile(
+        shaderWPath,
+        bDeferred ? psDefines : nullptr,
+        "PSMain", "ps_5_0", psBlob.ReleaseAndGetAddressOf(), &psErrors);
+    if (FAILED(hr) || !psBlob)
+    {
+        std::cerr << "InstancedMeshComponent: failed to compile skinned PSMain: " << psErrors << std::endl;
+        return false;
+    }
+
+    hr = device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr,
+                                   SkinnedPixelShader.ReleaseAndGetAddressOf());
+    if (FAILED(hr)) return false;
+
+    Microsoft::WRL::ComPtr<ID3DBlob> shadowBlob;
+    std::string shadowErrors;
+    const D3D_SHADER_MACRO shadowDefines[] = {
+        {"SHADOW_PASS", "1"},
+        {"ANIM_LERP", bAnimationLerp ? "1" : "0"},
+        {nullptr, nullptr}
+    };
+    hr = ShaderCompiler::CompileFromFile(
+        shaderWPath,
+        shadowDefines,
+        "VSShadowMain", "vs_5_0", shadowBlob.ReleaseAndGetAddressOf(), &shadowErrors);
+    if (FAILED(hr) || !shadowBlob)
+    {
+        std::cerr << "InstancedMeshComponent: failed to compile skinned VSShadowMain: " << shadowErrors << std::endl;
+        return false;
+    }
+
+    hr = device->CreateVertexShader(shadowBlob->GetBufferPointer(), shadowBlob->GetBufferSize(), nullptr,
+                                    SkinnedShadowVertexShader.ReleaseAndGetAddressOf());
+    if (FAILED(hr)) return false;
+
+    if (bIsCrowdVertex)
+    {
+        D3D11_INPUT_ELEMENT_DESC crowdLayout[] = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, static_cast<UINT>(offsetof(CrowdSkinnedVertex, Position)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"NORMAL", 0, DXGI_FORMAT_R16G16B16A16_FLOAT, 0, static_cast<UINT>(offsetof(CrowdSkinnedVertex, Normal)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R16G16_FLOAT, 0, static_cast<UINT>(offsetof(CrowdSkinnedVertex, TexCoord)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"BLENDINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, static_cast<UINT>(offsetof(CrowdSkinnedVertex, BoneIndices)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"BLENDWEIGHT", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, static_cast<UINT>(offsetof(CrowdSkinnedVertex, BoneWeights)), D3D11_INPUT_PER_VERTEX_DATA, 0}
+        };
+        hr = device->CreateInputLayout(crowdLayout, 5, shadowBlob->GetBufferPointer(), shadowBlob->GetBufferSize(),
+                                       SkinnedShadowInputLayout.ReleaseAndGetAddressOf());
+    }
+    else
+    {
+        D3D11_INPUT_ELEMENT_DESC standardLayout[] = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, static_cast<UINT>(offsetof(SkinnedVertex, Position)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, static_cast<UINT>(offsetof(SkinnedVertex, Normal)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, static_cast<UINT>(offsetof(SkinnedVertex, TexCoord)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"BLENDINDICES", 0, DXGI_FORMAT_R32G32B32A32_UINT, 0, static_cast<UINT>(offsetof(SkinnedVertex, BoneIndices)), D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"BLENDWEIGHT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, static_cast<UINT>(offsetof(SkinnedVertex, BoneWeights)), D3D11_INPUT_PER_VERTEX_DATA, 0}
+        };
+        hr = device->CreateInputLayout(standardLayout, 5, shadowBlob->GetBufferPointer(), shadowBlob->GetBufferSize(),
+                                       SkinnedShadowInputLayout.ReleaseAndGetAddressOf());
+    }
+    return SUCCEEDED(hr);
+}
+
 bool InstancedMeshComponent::CreateLodBuffers(ID3D11Device* device, LodLevel& lod)
 {
     if (device == nullptr || lod.Data.Vertices.empty() || lod.Data.Indices.empty())
@@ -254,6 +588,8 @@ bool InstancedMeshComponent::CreateLodBuffers(ID3D11Device* device, LodLevel& lo
     {
         return true;
     }
+
+    lod.VertexStride = sizeof(MeshVertex);
 
     D3D11_BUFFER_DESC vertexDesc = {};
     vertexDesc.Usage = D3D11_USAGE_IMMUTABLE;
@@ -306,6 +642,12 @@ void InstancedMeshComponent::CreateBuffers(ID3D11Device* Device)
     }
 
     BuildImpostorAtlas();
+
+    if (AnimationTextureSRV)
+    {
+        UpdateAnimClipConstantBuffer(Device);
+        EnsureSkinnedShaders(Device);
+    }
 }
 
 int InstancedMeshComponent::SelectLod(float distance, float screenHeightPixels) const
@@ -364,6 +706,7 @@ void InstancedMeshComponent::BuildVisibleSets()
     glm::vec3 lightDirection(lightDirectionValue.x, lightDirectionValue.y, lightDirectionValue.z);
     const float lightLength = glm::length(lightDirection);
     lightDirection = lightLength > 0.0001f ? lightDirection / lightLength : glm::vec3(0.0f, -1.0f, 0.0f);
+    const bool bAnimated = (AnimationTextureSRV != nullptr);
 
     for (const MeshInstance& instance : Instances)
     {
@@ -437,7 +780,14 @@ void InstancedMeshComponent::BuildVisibleSets()
         {
             const glm::vec4 color = bLodDebugColors ? LodDebugColors[std::min(targetLevel, MaxLodCount - 1)] : instance.Color;
             data.ObjectColor = DirectX::XMFLOAT4(color.x, color.y, color.z, color.w);
-            data.Params = DirectX::XMFLOAT4(fade, 0.0f, 0.0f, 0.0f);
+            if (bAnimated)
+            {
+                data.Params = DirectX::XMFLOAT4(fade, static_cast<float>(instance.ClipId), instance.AnimationPhase, instance.Speed);
+            }
+            else
+            {
+                data.Params = DirectX::XMFLOAT4(fade, 0.0f, 0.0f, 0.0f);
+            }
             LodLevel& bucket = targetLevel == impostorLevelIndex ? ImpostorLevel : Lods[targetLevel];
             bucket.ColorStaging.push_back(data);
         };
@@ -461,7 +811,14 @@ void InstancedMeshComponent::BuildVisibleSets()
             // Off-screen units still cast shadows, so shadow sets are not camera-culled.
             // Sprites never cast: the depth pass always uses a mesh instead.
             data.ObjectColor = DirectX::XMFLOAT4(instance.Color.x, instance.Color.y, instance.Color.z, instance.Color.w);
-            data.Params = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
+            if (bAnimated)
+            {
+                data.Params = DirectX::XMFLOAT4(1.0f, static_cast<float>(instance.ClipId), instance.AnimationPhase, instance.Speed);
+            }
+            else
+            {
+                data.Params = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
+            }
             const int meshLevel = std::min(level, LodCount - 1);
 
             for (int cascade = 0; cascade < cascadeLimit; ++cascade)
@@ -582,23 +939,49 @@ void InstancedMeshComponent::EnsureFrameData(ID3D11DeviceContext* context)
 
 void InstancedMeshComponent::Render(ID3D11DeviceContext* context)
 {
-    if (context == nullptr || LodCount == 0 || !cb || vertexShader == nullptr || pixelShader == nullptr)
+    if (context == nullptr || LodCount == 0 || !cb)
     {
         return;
     }
 
     EnsureFrameData(context);
 
-    context->IASetInputLayout(GamePtr ? GamePtr->GetInputLayout(VertexFormat::Mesh) : nullptr);
+    ID3D11Device* device = nullptr;
+    context->GetDevice(&device);
+
+    const bool bUseSkinned = (AnimationTextureSRV != nullptr) && EnsureSkinnedShaders(device);
+
+    if (bUseSkinned)
+    {
+        context->IASetInputLayout(SkinnedInputLayout.Get());
+        context->VSSetShader(SkinnedVertexShader.Get(), nullptr, 0);
+        context->PSSetShader(SkinnedPixelShader.Get(), nullptr, 0);
+
+        ID3D11ShaderResourceView* animSRV = AnimationTextureSRV.Get();
+        context->VSSetShaderResources(1, 1, &animSRV);
+        if (AnimClipConstantBuffer)
+        {
+            ID3D11Buffer* clipCB = AnimClipConstantBuffer.Get();
+            context->VSSetConstantBuffers(1, 1, &clipCB);
+        }
+    }
+    else
+    {
+        if (vertexShader == nullptr || pixelShader == nullptr)
+        {
+            return;
+        }
+        context->IASetInputLayout(GamePtr ? GamePtr->GetInputLayout(VertexFormat::Mesh) : nullptr);
+        context->VSSetShader(vertexShader, nullptr, 0);
+        context->PSSetShader(pixelShader, nullptr, 0);
+    }
+
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    context->VSSetShader(vertexShader, nullptr, 0);
-    context->PSSetShader(pixelShader, nullptr, 0);
     BindMaterialResources(context);
     context->UpdateSubresource(cb.Get(), 0, nullptr, &ConstantPositionBuffer, 0, 0);
     context->VSSetConstantBuffers(0, 1, cb.GetAddressOf());
     context->PSSetConstantBuffers(0, 1, cb.GetAddressOf());
 
-    const UINT stride = MeshVertexStride;
     const UINT offset = 0;
     for (int level = 0; level < LodCount; ++level)
     {
@@ -611,6 +994,7 @@ void InstancedMeshComponent::Render(ID3D11DeviceContext* context)
 
         ID3D11Buffer* vertexBuffers[] = {lod.VertexBuffer.Get()};
         ID3D11ShaderResourceView* instanceSRV = lod.ColorSRV.Get();
+        const UINT stride = lod.VertexStride;
         context->IASetVertexBuffers(0, 1, vertexBuffers, &stride, &offset);
         context->IASetIndexBuffer(lod.IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
         context->VSSetShaderResources(0, 1, &instanceSRV);
@@ -620,8 +1004,8 @@ void InstancedMeshComponent::Render(ID3D11DeviceContext* context)
 
     DrawImpostors(context);
 
-    ID3D11ShaderResourceView* nullSRV = nullptr;
-    context->VSSetShaderResources(0, 1, &nullSRV);
+    ID3D11ShaderResourceView* nullSRVs[2] = {nullptr, nullptr};
+    context->VSSetShaderResources(0, 2, nullSRVs);
     UnbindMaterialResources(context);
 }
 
@@ -686,7 +1070,9 @@ bool InstancedMeshComponent::EnsureStaticShadowData(ID3D11DeviceContext* context
         InstData data;
         data.World = MakeInstanceMatrix(instance.Position, instance.Yaw, instance.Scale);
         data.ObjectColor = DirectX::XMFLOAT4(instance.Color.x, instance.Color.y, instance.Color.z, instance.Color.w);
-        data.Params = DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
+        data.Params = (AnimationTextureSRV != nullptr)
+            ? DirectX::XMFLOAT4(1.0f, static_cast<float>(instance.ClipId), instance.AnimationPhase, instance.Speed)
+            : DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 0.0f);
         StaticShadowStaging.push_back(data);
     }
 
@@ -709,20 +1095,40 @@ void InstancedMeshComponent::RenderStaticShadow(ID3D11DeviceContext* context, co
         return;
     }
 
+    ID3D11Device* device = nullptr;
+    context->GetDevice(&device);
+    const bool bUseSkinned = (AnimationTextureSRV != nullptr) && EnsureSkinnedShaders(device);
+
     ShadowPassBufferData shadowData = {};
     DirectX::XMStoreFloat4x4(&shadowData.worldMatrix, DirectX::XMMatrixIdentity());
     shadowData.lightViewProjection = shadowPass.LightViewProjection;
 
-    context->IASetInputLayout(shadowPass.MeshLayout);
+    if (bUseSkinned)
+    {
+        context->IASetInputLayout(SkinnedShadowInputLayout.Get());
+        context->VSSetShader(SkinnedShadowVertexShader.Get(), nullptr, 0);
+        ID3D11ShaderResourceView* animSRV = AnimationTextureSRV.Get();
+        context->VSSetShaderResources(1, 1, &animSRV);
+        if (AnimClipConstantBuffer)
+        {
+            ID3D11Buffer* clipCB = AnimClipConstantBuffer.Get();
+            context->VSSetConstantBuffers(1, 1, &clipCB);
+        }
+    }
+    else
+    {
+        context->IASetInputLayout(shadowPass.MeshLayout);
+        context->VSSetShader(shadowPass.InstancedVertexShader, nullptr, 0);
+    }
+
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    context->VSSetShader(shadowPass.InstancedVertexShader, nullptr, 0);
     context->PSSetShader(nullptr, nullptr, 0);
     context->UpdateSubresource(shadowPass.ConstantBuffer, 0, nullptr, &shadowData, 0, 0);
     context->VSSetConstantBuffers(0, 1, &shadowPass.ConstantBuffer);
 
     ID3D11Buffer* vertexBuffers[] = {lod.VertexBuffer.Get()};
     ID3D11ShaderResourceView* instanceSRV = StaticShadowSRV.Get();
-    const UINT stride = MeshVertexStride;
+    const UINT stride = lod.VertexStride;
     const UINT offset = 0;
     const UINT instanceCount = static_cast<UINT>(StaticShadowStaging.size());
     context->IASetVertexBuffers(0, 1, vertexBuffers, &stride, &offset);
@@ -731,15 +1137,14 @@ void InstancedMeshComponent::RenderStaticShadow(ID3D11DeviceContext* context, co
     context->DrawIndexedInstanced(lod.IndexCount, instanceCount, 0, 0, 0);
     if (GamePtr) GamePtr->CountDraw(lod.IndexCount, instanceCount);
 
-    ID3D11ShaderResourceView* nullSRV = nullptr;
-    context->VSSetShaderResources(0, 1, &nullSRV);
+    ID3D11ShaderResourceView* nullSRVs[2] = {nullptr, nullptr};
+    context->VSSetShaderResources(0, 2, nullSRVs);
 }
 
 void InstancedMeshComponent::RenderShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass)
 {
     if (context == nullptr || LodCount == 0 || !CastsShadow() ||
-        shadowPass.InstancedVertexShader == nullptr || shadowPass.ConstantBuffer == nullptr ||
-        shadowPass.MeshLayout == nullptr)
+        shadowPass.ConstantBuffer == nullptr)
     {
         return;
     }
@@ -752,19 +1157,43 @@ void InstancedMeshComponent::RenderShadow(ID3D11DeviceContext* context, const Sh
 
     EnsureFrameData(context);
 
+    ID3D11Device* device = nullptr;
+    context->GetDevice(&device);
+    const bool bUseSkinned = (AnimationTextureSRV != nullptr) && EnsureSkinnedShaders(device);
+
+    if (!bUseSkinned && (shadowPass.InstancedVertexShader == nullptr || shadowPass.MeshLayout == nullptr))
+    {
+        return;
+    }
+
     ShadowPassBufferData shadowData = {};
     DirectX::XMStoreFloat4x4(&shadowData.worldMatrix, DirectX::XMMatrixIdentity());
     shadowData.lightViewProjection = shadowPass.LightViewProjection;
 
-    context->IASetInputLayout(shadowPass.MeshLayout);
+    if (bUseSkinned)
+    {
+        context->IASetInputLayout(SkinnedShadowInputLayout.Get());
+        context->VSSetShader(SkinnedShadowVertexShader.Get(), nullptr, 0);
+        ID3D11ShaderResourceView* animSRV = AnimationTextureSRV.Get();
+        context->VSSetShaderResources(1, 1, &animSRV);
+        if (AnimClipConstantBuffer)
+        {
+            ID3D11Buffer* clipCB = AnimClipConstantBuffer.Get();
+            context->VSSetConstantBuffers(1, 1, &clipCB);
+        }
+    }
+    else
+    {
+        context->IASetInputLayout(shadowPass.MeshLayout);
+        context->VSSetShader(shadowPass.InstancedVertexShader, nullptr, 0);
+    }
+
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    context->VSSetShader(shadowPass.InstancedVertexShader, nullptr, 0);
     context->PSSetShader(nullptr, nullptr, 0);
     context->UpdateSubresource(shadowPass.ConstantBuffer, 0, nullptr, &shadowData, 0, 0);
     context->VSSetConstantBuffers(0, 1, &shadowPass.ConstantBuffer);
 
     const int cascade = std::max(0, std::min(shadowPass.CascadeIndex, MaxShadowCascades - 1));
-    const UINT stride = MeshVertexStride;
     const UINT offset = 0;
     for (int level = 0; level < LodCount; ++level)
     {
@@ -778,6 +1207,7 @@ void InstancedMeshComponent::RenderShadow(ID3D11DeviceContext* context, const Sh
 
         ID3D11Buffer* vertexBuffers[] = {lod.VertexBuffer.Get()};
         ID3D11ShaderResourceView* instanceSRV = lod.ShadowSRV[cascade].Get();
+        const UINT stride = lod.VertexStride;
         context->IASetVertexBuffers(0, 1, vertexBuffers, &stride, &offset);
         context->IASetIndexBuffer(lod.IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
         context->VSSetShaderResources(0, 1, &instanceSRV);
@@ -785,6 +1215,6 @@ void InstancedMeshComponent::RenderShadow(ID3D11DeviceContext* context, const Sh
         if (GamePtr) GamePtr->CountDraw(lod.IndexCount, instanceCount);
     }
 
-    ID3D11ShaderResourceView* nullSRV = nullptr;
-    context->VSSetShaderResources(0, 1, &nullSRV);
+    ID3D11ShaderResourceView* nullSRVs[2] = {nullptr, nullptr};
+    context->VSSetShaderResources(0, 2, nullSRVs);
 }
