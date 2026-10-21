@@ -55,27 +55,29 @@
   - [x] Коммит `test(render): cpu skeletal animation evaluation and unit tests`.
   - [x] **СТОП после Этапа 3**: демонстрация результатов, чисел, диффа.
 
-- [ ] **Этап 4: GPU ресурсы, HLSL шейдер и SkeletalMeshComponent**
-  - [ ] `SkinnedMesh.hlsl`:
+- [x] **Этап 4: GPU ресурсы, HLSL шейдер и SkeletalMeshComponent (завершён, коммит `0513059`)**
+  - [x] `SkinnedMesh.hlsl`:
     - Constant buffer `cbuffer BoneBuffer : register(b1) { float4x4 gBones[64]; };`
     - Скининг позиций и нормалей через взвешенную сумму матриц костей.
-  - [ ] Input layout для `SkinnedVertex` (`POSITION`, `NORMAL`, `TEXCOORD`, `BLENDINDICES`, `BLENDWEIGHT`).
-  - [ ] Вершинный и индексный буферы Direct3D 11.
-  - [ ] Константный буфер палитры костей с обновлением через `UpdateSubresource` или `Map(WRITE_DISCARD)` без покадровых аллокаций.
-  - [ ] `SkeletalMeshComponent`:
+  - [x] Input layout для `SkinnedVertex` (`POSITION`, `NORMAL`, `TEXCOORD`, `BLENDINDICES`, `BLENDWEIGHT`).
+  - [x] Вершинный и индексный буферы Direct3D 11.
+  - [x] Константный буфер палитры костей с обновлением через `UpdateSubresource` или `Map(WRITE_DISCARD)` без покадровых аллокаций.
+  - [x] `SkeletalMeshComponent`:
     - `LoadFromVfs(path)`.
     - `Tick(dt)`.
-    - `Draw(...)` по паттерну `FBXComponent` (forward без теней, без deferred).
-  - [ ] Добавление файлов в `Engine.vcxproj`.
-  - [ ] Коммит `feat(render): gpu skinned mesh rendering and skeletal component`.
+    - `Draw(...)` / `Render(...)` по паттерну `FBXComponent` (forward без теней, без deferred).
+  - [x] Добавление файлов в `Engine.vcxproj`.
+  - [x] Коммит `feat(render): gpu skinned mesh rendering and skeletal component`.
 
-- [ ] **Этап 5: Демо в RuntimeExample и валидация**
-  - [ ] Интеграция скелетной модели в сцену `RuntimeExample` с автоматическим проигрыванием клипа.
-  - [ ] Проверка `run-runtime.ps1` без регрессий.
-  - [ ] Новая автопроверка (headless / `--frames 3`, проверка лога `"SkeletalModel loaded: bones=N clip=...s"`).
-  - [ ] Скриншот через существующий механизм viewport-теста при наличии.
-  - [ ] Коммит `feat(demo): skeletal mesh demo in runtime example`.
-  - [ ] **СТОП после Этапа 5**: ожидание ручной проверки в окне от пользователя.
+- [x] **Этап 5: Демо в RuntimeExample и валидация (завершён, коммиты `65a2ef2` и `feat(render)`)**
+  - [x] Интеграция скелетной модели в сцену `RuntimeExample` с автоматическим проигрыванием клипа.
+  - [x] Проверка `run-runtime.ps1` без регрессий (25/25 в обоих режимах).
+  - [x] Новая автопроверка в `run-runtime.ps1`:
+    - при Assimp: `[RuntimeExample] SkeletalMesh loaded: bones=19 clip=3.00s`.
+    - без Assimp: `[RuntimeExample] SkeletalMesh skipped: Assimp not enabled`.
+  - [x] Определение ориентации: `ModelYawDegrees = 0.0f` (персонаж идёт к камере по $+Z$).
+  - [x] Коммит `feat(demo): skeletal mesh demo in runtime example`.
+  - [x] **СТОП после Этапа 5**: ожидание ручной проверки в окне от пользователя.
 
 ---
 
