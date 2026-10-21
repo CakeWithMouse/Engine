@@ -254,21 +254,123 @@ void Test_StubLoaderWithoutAssimp()
 void Test_GlbImport()
 {
 #if defined(ENGINE_ENABLE_ASSIMP)
-    VirtualFileSystem vfs;
-    const std::filesystem::path contentRoot = EnginePaths::GetProjectContentRoot();
-    vfs.Mount("/Game", contentRoot);
+    std::filesystem::path exeDir = EnginePaths::ExecutableDirectory();
+    std::filesystem::path repo = exeDir.parent_path().parent_path().parent_path().parent_path();
+    std::filesystem::path gameContent = repo / "Game" / "RuntimeExample" / "Content";
+    if (!std::filesystem::exists(gameContent / "Models" / "CesiumMan.glb"))
+    {
+        // Try fallback search upwards
+        std::filesystem::path p = exeDir;
+        for (int i = 0; i < 6; ++i)
+        {
+            if (std::filesystem::exists(p / "Game" / "RuntimeExample" / "Content" / "Models" / "CesiumMan.glb"))
+            {
+                gameContent = p / "Game" / "RuntimeExample" / "Content";
+                break;
+            }
+            p = p.parent_path();
+        }
+    }
+
+    VfsRead::GetVFS().Mount("/Game", gameContent);
 
     SkeletalLoadResult result = LoadSkeletalModelFromVfs("/Game/Models/CesiumMan.glb");
-    TEST_CHECK(result.Success, "CesiumMan.glb import must succeed with Assimp enabled");
+    TEST_CHECK(result.Success, ("CesiumMan.glb import failed: " + result.ErrorMessage).c_str());
     TEST_CHECK(result.Model != nullptr, "Imported model must not be null");
-    TEST_CHECK(result.Model->ModelSkeleton.Bones.size() > 0, "CesiumMan must contain bones");
-    TEST_CHECK(result.Model->ModelSkeleton.Bones.size() <= MaxSkeletalBones, "CesiumMan bones must be <= 64");
-    TEST_CHECK(result.Model->Meshes.size() > 0, "CesiumMan must contain meshes");
-    TEST_CHECK(result.Model->Clips.size() > 0, "CesiumMan must contain animation clips");
-    TEST_CHECK(result.Model->Clips[0].Duration > 0.0f, "CesiumMan animation clip duration must be > 0");
-    std::cout << "[SkeletalTests] CesiumMan loaded successfully: bones=" 
-              << result.Model->ModelSkeleton.Bones.size() << " clip=" 
-              << result.Model->Clips[0].Duration << "s" << std::endl;
+
+    const size_t boneCount = result.Model->ModelSkeleton.Bones.size();
+    TEST_CHECK(boneCount > 0, "CesiumMan must contain bones");
+    TEST_CHECK(boneCount <= MaxSkeletalBones, "CesiumMan bones must be <= 64");
+
+    size_t totalVertices = 0;
+    for (const auto& mesh : result.Model->Meshes)
+    {
+        totalVertices += mesh.Vertices.size();
+        for (const auto& vert : mesh.Vertices)
+        {
+            float sumWeights = 0.0f;
+            for (int k = 0; k < 4; ++k)
+            {
+                sumWeights += vert.BoneWeights[k];
+                if (vert.BoneWeights[k] > 0.0f)
+                {
+                    TEST_CHECK(vert.BoneIndices[k] < boneCount, "Bone index must be < bone count");
+                }
+            }
+            TEST_CHECK(std::abs(sumWeights - 1.0f) < 1e-4f, "Vertex weights must sum to 1.0");
+        }
+    }
+    TEST_CHECK(totalVertices > 0, "CesiumMan must contain vertices");
+
+    TEST_CHECK(!result.Model->Clips.empty(), "CesiumMan must contain animation clips");
+    const auto& clip = result.Model->Clips[0];
+    TEST_CHECK(clip.Duration > 0.0f, "CesiumMan clip duration must be > 0");
+
+    // Sample palettes at t=0, t=0.25*dur, t=0.5*dur
+    std::vector<XMFLOAT4X4> pal0, pal25, pal50, palEnd, palSeam;
+    bool ev0 = EvaluateSkeletalAnimation(*result.Model, 0, 0.0f, pal0, false);
+    bool ev25 = EvaluateSkeletalAnimation(*result.Model, 0, clip.Duration * 0.25f, pal25, false);
+    bool ev50 = EvaluateSkeletalAnimation(*result.Model, 0, clip.Duration * 0.5f, pal50, false);
+    TEST_CHECK(ev0 && ev25 && ev50, "Evaluation at 0, 0.25, 0.5 duration must succeed");
+
+    float maxDevFromIdentity = 0.0f;
+    for (size_t i = 0; i < boneCount; ++i)
+    {
+        for (int r = 0; r < 4; ++r)
+        {
+            for (int c = 0; c < 4; ++c)
+            {
+                float expected = (r == c) ? 1.0f : 0.0f;
+                maxDevFromIdentity = std::max(maxDevFromIdentity, std::abs(pal0[i].m[r][c] - expected));
+            }
+        }
+    }
+
+    float diff0_25 = 0.0f;
+    float diff25_50 = 0.0f;
+    for (size_t i = 0; i < boneCount; ++i)
+    {
+        diff0_25 = std::max(diff0_25, MatrixMaxDiff(pal0[i], pal25[i]));
+        diff25_50 = std::max(diff25_50, MatrixMaxDiff(pal25[i], pal50[i]));
+    }
+    TEST_CHECK(diff0_25 > 0.01f, "Palette at t=0 and t=0.25*dur must differ");
+    TEST_CHECK(diff25_50 > 0.01f, "Palette at t=0.25*dur and t=0.5*dur must differ");
+
+    // Loop continuity check
+    EvaluateSkeletalAnimation(*result.Model, 0, clip.Duration - 0.001f, palEnd, false);
+    EvaluateSkeletalAnimation(*result.Model, 0, 0.001f, palSeam, false);
+    float seamDiff = 0.0f;
+    int seamMaxBone = -1;
+    for (size_t i = 0; i < boneCount; ++i)
+    {
+        float d = MatrixMaxDiff(palEnd[i], palSeam[i]);
+        if (d > seamDiff)
+        {
+            seamDiff = d;
+            seamMaxBone = static_cast<int>(i);
+        }
+    }
+
+    std::cout << "[SkeletalTests] CesiumMan loaded successfully:\n"
+              << "  Bones: " << boneCount << " (<= 64)\n"
+              << "  Vertices: " << totalVertices << "\n"
+              << "  Clip name: '" << clip.Name << "', duration: " << clip.Duration << "s\n"
+              << "  Bind pose max deviation from identity: " << maxDevFromIdentity << "\n"
+              << "  Palette diff(0, 0.25*dur): " << diff0_25 << "\n"
+              << "  Palette diff(0.25, 0.5*dur): " << diff25_50 << "\n"
+              << "  Seam diff: " << seamDiff << " (bone: " 
+              << (seamMaxBone >= 0 ? result.Model->ModelSkeleton.Bones[seamMaxBone].Name : "none") 
+              << ")" << std::endl;
+
+    TEST_CHECK(diff0_25 > 0.01f, "Palette at t=0 and t=0.25*dur must differ");
+    TEST_CHECK(diff25_50 > 0.01f, "Palette at t=0.25*dur and t=0.5*dur must differ");
+    // Print details if seamDiff is noticeable
+    if (seamDiff >= 0.05f)
+    {
+        std::cout << "  Note on seamDiff: bone " << result.Model->ModelSkeleton.Bones[seamMaxBone].Name
+                  << " has seam difference " << seamDiff << " (likely root motion or non-looping walk cycle)" << std::endl;
+    }
+    TEST_CHECK(seamDiff < 0.2f, "Loop seam must not have catastrophic discontinuity");
 #else
     std::cout << "[SkeletalTests] SKIP: no Assimp" << std::endl;
 #endif

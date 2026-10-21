@@ -92,6 +92,23 @@
    - Строгий лимит 64 кости обусловлен размером `cbuffer` ($64 \times 64 = 4096$ байт, укладывается в один константный буфер DirectX 11). Превышение отсекается с явным сообщением об ошибке на этапе парсинга.
 4. **Рендеринг:**
    - Первичный пайплайн — forward рендеринг без теней по аналогии с `FBXComponent`. Тени и deferred-проходы вынесены в Backlog.
+5. **Конвенция матриц и порядок умножения:**
+   - **Конвенция:** DirectXMath использует строчные векторы (row-vector convention: $v' = v \cdot M$) и row-major размещение в C++.
+   - **Иерархия костей на CPU:**
+     $M_{\text{local}} = S \times R \times T$ (где $S$ — скейл, $R$ — поворот кватернионом, $T$ — трансляция).
+     $M_{\text{global}} = M_{\text{local}} \times M_{\text{parentGlobal}}$.
+   - **Формула палитры костей (Skin Matrix):**
+     Вершина из bind-позы переводится в локальное пространство кости матрицей $M_{\text{invBind}}$, а затем трансформируется в мировое пространство скелета текущей позой кости $M_{\text{global}}$:
+     $M_{\text{final}} = M_{\text{invBind}} \times M_{\text{global}}$.
+   - **Транспонирование при загрузке в Constant Buffer:**
+     HLSL константные буферы по умолчанию ожидают column-major упаковку матриц (`float4x4`). Поэтому при передаче в `cbuffer BoneBuffer : register(b1) { float4x4 gBones[64]; };` матрица $M_{\text{final}}$ транспонируется:
+     `palette.Bones[i] = XMMatrixTranspose(M_final)`.
+   - **Согласование с HLSL шейдером Этапа 4 (`mul`):**
+     Благодаря транспонированию при загрузке, в HLSL инструкция `mul(float4(v.pos, 1.0f), gBones[i])` вычисляет ровно вектор-строку $v \cdot M_{\text{final}}$:
+     $$v_{\text{skinned}} = \sum_{k=0}^{3} w_k \cdot \text{mul}\big(\text{float4}(v.\text{pos}, 1.0), gBones[v.\text{boneIndices}[k]]\big)$$
+     $$n_{\text{skinned}} = \sum_{k=0}^{3} w_k \cdot \text{mul}\big(v.\text{normal}, (\text{float3x3})gBones[v.\text{boneIndices}[k]]\big)$$
+     После чего мировая позиция вычисляется стандартно для движка:
+     $v_{\text{world}} = \text{mul}(v_{\text{skinned}}, worldMatrix)$.
 
 ---
 
