@@ -4,6 +4,7 @@
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/SpecificComponents/MeshComponent.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
+#include <Engine/Render/Material.h>
 #include <Engine/Render/MeshPrimitives.h>
 #include <Engine/Render/ShaderCompiler.h>
 #include <cmath>
@@ -411,7 +412,9 @@ void MeshPrimitivesGeometry()
 }
 
 // Draws one registered component into a 64x64 target with the given culling; returns RGBA8 pixels.
-std::vector<uint32_t> RenderOffscreen(TestGame& game, GameComponent& component, D3D11_CULL_MODE cull)
+// prepare (optional) binds shaders instead of the component's own pair.
+std::vector<uint32_t> RenderOffscreen(TestGame& game, GameComponent& component, D3D11_CULL_MODE cull,
+                                      const std::function<void(ID3D11DeviceContext*)>& prepare = {})
 {
     constexpr UINT Size = 64;
     ID3D11Device* device = game.GetDevice();
@@ -438,7 +441,14 @@ std::vector<uint32_t> RenderOffscreen(TestGame& game, GameComponent& component, 
     D3D11_VIEWPORT viewport{0.0f, 0.0f, static_cast<float>(Size), static_cast<float>(Size), 0.0f, 1.0f};
     context->RSSetViewports(1, &viewport);
     context->RSSetState(raster.Get());
-    CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::Default));
+    if (prepare)
+    {
+        prepare(context);
+    }
+    else
+    {
+        CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::Default));
+    }
     component.Update();
     component.Render(context);
 
@@ -481,6 +491,149 @@ void MeshComponentRendering()
     pixels = RenderOffscreen(game, *plane, D3D11_CULL_BACK);
     CHECK(pixels[32 * 64 + 32] != 0 && pixels[32 * 64 + 2] == 0);
     Near(plane->GetLocalBoundingRadius(), 0.5f);
+}
+
+const char* const ParamsSurface =
+    "cbuffer MaterialParams : register(b1)\n"
+    "{\n"
+    "    float4 Tint = float4(1, 0, 0, 1);\n"
+    "    float Gloss = 0.5f;\n"
+    "    float2 UVScale = float2(2, 2);\n"
+    "    float4x4 Transform;\n"
+    "};\n"
+    "Texture2D BaseMap : register(t6);\n"
+    "void Surface(MaterialInput i, inout MaterialOutput o)\n"
+    "{\n"
+    "    float2 uv = mul(float4(i.UV * UVScale, 0, 1), Transform).xy;\n"
+    "    o.Albedo = BaseMap.Sample(MaterialSampler, uv).rgb * Tint.rgb;\n"
+    "    o.SpecularWeight = Gloss;\n"
+    "}\n";
+
+void MaterialCompilationAndParameters()
+{
+    TestGame game;
+    TempShaderDir dir;
+    const std::string surface = dir.Write("Params.hlsl", ParamsSurface);
+    Material material(surface);
+    CHECK(material.NeedsCompile() && !material.IsCompiled());
+    CHECK(material.Compile(game.GetDevice(), game.GetContext()));
+    CHECK(!material.HasErrors() && material.IsCompiled() && material.WritesGBuffer() && !material.NeedsCompile());
+    CHECK(material.DependsOn(surface));
+    CHECK(material.DependsOn(EnginePaths::Shader("Common.hlsli").generic_u8string()));
+
+    // Reflection: names, types, offsets and HLSL initializers.
+    CHECK(material.GetParameters().size() == 4);
+    const MaterialParameter* tint = material.FindParameter("Tint");
+    CHECK(tint && tint->Type == MaterialParameterType::Float4 && tint->Offset == 0);
+    CHECK(tint->Default == (std::array<float, 4>{1.0f, 0.0f, 0.0f, 1.0f}));
+    const MaterialParameter* gloss = material.FindParameter("Gloss");
+    CHECK(gloss && gloss->Type == MaterialParameterType::Float && gloss->Offset == 16);
+    Near(gloss->Default[0], 0.5f);
+    CHECK(material.FindParameter("UVScale")->Type == MaterialParameterType::Float2);
+    CHECK(material.FindParameter("Transform")->Type == MaterialParameterType::Unsupported);
+    CHECK(!material.SetParameter("Transform", {}) && !material.SetParameter("Missing", {}));
+    CHECK(material.GetTextures().size() == 1 && material.GetTextures()[0].Name == "BaseMap" && material.GetTextures()[0].Slot == 6);
+
+    std::array<float, 4> value{};
+    CHECK(material.GetParameter("UVScale", value) && value[0] == 2.0f && value[1] == 2.0f);
+    CHECK(material.SetParameter("Tint", {0.0f, 1.0f, 0.0f, 1.0f}));
+    CHECK(material.SetParameter("Gloss", {0.9f, 7.0f, 7.0f, 7.0f})); // extra components are ignored
+    CHECK(material.GetParameter("Gloss", value) && value[0] == 0.9f && value[1] == 0.0f);
+
+    // An edit keeps values whose name and type survived; a changed type falls back to its default.
+    std::string edited = ParamsSurface;
+    edited.replace(edited.find("float Gloss = 0.5f;"), 19, "float2 Gloss = float2(0.25f, 0.75f); float Extra = 3;");
+    edited.replace(edited.find("o.SpecularWeight = Gloss;"), 25, "o.SpecularWeight = Gloss.x * Extra;");
+    dir.Write("Params.hlsl", edited);
+    CHECK(material.Compile(game.GetDevice(), game.GetContext()));
+    CHECK(material.GetParameters().size() == 5);
+    CHECK(material.GetParameter("Tint", value) && value == (std::array<float, 4>{0.0f, 1.0f, 0.0f, 1.0f}));
+    CHECK(material.GetParameter("Gloss", value) && value[0] == 0.25f && value[1] == 0.75f);
+    CHECK(material.GetParameter("Extra", value) && value[0] == 3.0f);
+
+    // A broken edit: error text names the surface, the error surface is drawn, parameters stay.
+    dir.Write("Params.hlsl", "void Surface(MaterialInput i, inout MaterialOutput o)\n{\n    o.Albedo = Tnt.rgb;\n}\n");
+    CHECK(!material.Compile(game.GetDevice(), game.GetContext()));
+    CHECK(material.HasErrors() && material.GetErrors().find("Params.hlsl(3,") != std::string::npos);
+    CHECK(material.IsCompiled() && !material.WritesGBuffer());
+    CHECK(material.DependsOn(surface));
+    CHECK(material.GetParameter("Tint", value) && value[1] == 1.0f);
+
+    dir.Write("Params.hlsl", edited);
+    CHECK(material.Compile(game.GetDevice(), game.GetContext()) && !material.HasErrors() && material.WritesGBuffer());
+    CHECK(material.GetParameter("Tint", value) && value[1] == 1.0f);
+
+    // Render state: compile-time options require a recompile, shadow casting does not.
+    MaterialRenderState state = material.GetRenderState();
+    state.bCastShadows = false;
+    material.SetRenderState(state);
+    CHECK(!material.NeedsCompile());
+    state.Blend = MaterialBlendMode::Translucent;
+    material.SetRenderState(state);
+    CHECK(material.NeedsCompile());
+    CHECK(material.Compile(game.GetDevice(), game.GetContext()) && !material.WritesGBuffer());
+
+    // The parameter buffer must use the slot the engine binds.
+    const std::string wrongSlot = dir.Write("WrongSlot.hlsl",
+        "cbuffer MaterialParams : register(b3) { float4 Tint; };\n"
+        "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = Tint.rgb; }\n");
+    Material misplaced(wrongSlot);
+    CHECK(!misplaced.Compile(game.GetDevice(), game.GetContext()));
+    CHECK(misplaced.GetErrors().find("register(b1)") != std::string::npos);
+}
+
+// 1x1 uncompressed 32-bit TGA, top-left origin.
+std::string WriteTga(const TempShaderDir& dir, const std::string& name, uint8_t r, uint8_t g, uint8_t b)
+{
+    const uint8_t header[18] = {0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 32, 0x28};
+    const uint8_t pixel[4] = {b, g, r, 255};
+    std::string bytes(reinterpret_cast<const char*>(header), sizeof(header));
+    bytes.append(reinterpret_cast<const char*>(pixel), sizeof(pixel));
+    return dir.Write(name, bytes);
+}
+
+void MaterialOffscreenRendering()
+{
+    TestGame game;
+    CHECK(game.CreateInputLayouts());
+    game.SetCamera({0.0f, 3.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f});
+    auto* plane = new MeshComponent(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec4(1.0f));
+    plane->SetMesh(MeshPrimitives::Plane(2.0f, 2.0f));
+    CHECK(game.RegisterComponent("plane", plane) == RegisterResult::Ok);
+
+    TempShaderDir dir;
+    MaterialRenderState unlit;
+    unlit.bUnlit = true; // exact colours: no lights involved
+    Material material(dir.Write("Params.hlsl", ParamsSurface), unlit);
+    CHECK(material.Compile(game.GetDevice(), game.GetContext()));
+    CHECK(material.SetParameter("Transform", {}) == false);
+
+    auto draw = [&](Material& m)
+    {
+        return RenderOffscreen(game, *plane, D3D11_CULL_BACK, [&](ID3D11DeviceContext* context)
+        {
+            plane->SetVertexShader(m.GetVertexShader());
+            plane->SetPixelShader(m.GetPixelShader(false));
+            m.Bind(context);
+        })[32 * 64 + 32];
+    };
+
+    // The unused matrix is zero: every uv maps to (0, 0) of a 1x1 texture anyway.
+    CHECK(draw(material) == 0xff0000ffu);  // default Tint red x white texture (RGBA8 little endian)
+    CHECK(material.SetParameter("Tint", {0.0f, 1.0f, 0.0f, 1.0f}));
+    CHECK(draw(material) == 0xff00ff00u);  // updated parameter reaches the GPU
+    CHECK(material.SetParameter("Tint", {1.0f, 1.0f, 1.0f, 1.0f}));
+    CHECK(material.SetTexture("BaseMap", WriteTga(dir, "Blue.tga", 0, 0, 255)));
+    CHECK(draw(material) == 0xffff0000u);  // texture at t6 through the material sampler
+    CHECK(!material.SetTexture("BaseMap", (dir.Root / "Missing.tga").generic_u8string()));
+    CHECK(material.SetTexture("BaseMap", ""));
+    CHECK(draw(material) == 0xffffffffu);  // back to white
+
+    // A broken material draws the unlit magenta/black checker.
+    Material broken(dir.Write("Broken.hlsl", "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = Tnt; }\n"));
+    CHECK(!broken.Compile(game.GetDevice(), game.GetContext()));
+    const uint32_t errorPixel = draw(broken);
+    CHECK(errorPixel == 0xffff00ffu || errorPixel == 0xff140014u);
 }
 
 ComPtr<ID3D11Buffer> Buffer(ID3D11Device* device, UINT bytes, UINT bind, const void* data = nullptr, UINT stride = 0)
@@ -803,6 +956,7 @@ int main()
         {"shader includes, overrides and dependencies", ShaderCompilerIncludes}, {"shader invalidation and errors", ShaderInvalidation},
         {"material template variants and reflection", MaterialTemplateVariants},
         {"mesh primitives: normals, uvs, winding", MeshPrimitivesGeometry}, {"mesh component offscreen rendering", MeshComponentRendering},
+        {"material compilation, parameters, errors", MaterialCompilationAndParameters}, {"material offscreen rendering", MaterialOffscreenRendering},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
         {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests}
     };
