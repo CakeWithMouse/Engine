@@ -87,6 +87,12 @@ void VfsService_ResolveAndToVirtual()
     const size_t mountsAfter = f.vfs.GetMounts().size();
     CHECK(mountsBefore == mountsAfter);
 
+    // toVirtual: path containing standard marker substring outside mounts -> NOT_FOUND (no heuristics)
+    const auto markerPath = (std::filesystem::temp_directory_path() / "EngineContent" / "Shaders" / "RotatedFigure.hlsl").string();
+    status = f.api.toVirtual(f.api.context, markerPath.c_str(), buf.data(), buf.size(), &actualNeeded);
+    CHECK(status == ENGINE_VFS_NOT_FOUND);
+    CHECK(mountsBefore == f.vfs.GetMounts().size());
+
     // toVirtual: bad arguments
     status = f.api.toVirtual(f.api.context, nullptr, buf.data(), buf.size(), nullptr);
     CHECK(status == ENGINE_VFS_BAD_ARGUMENT);

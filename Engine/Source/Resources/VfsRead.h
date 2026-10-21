@@ -29,6 +29,11 @@ namespace VfsRead
         return HostVfsProxy::Instance().IsBound();
     }
 
+    inline std::string Resolve(std::string_view vpath)
+    {
+        return HostVfsProxy::Instance().Resolve(vpath);
+    }
+
     inline IVfs& Active()
     {
         if (HostVfsProxy::Instance().IsBound())

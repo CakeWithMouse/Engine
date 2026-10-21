@@ -37,6 +37,14 @@ void* __cdecl Create(const EngineModuleHost* host)
         if (vfsApi)
         {
             boundVfs = VfsRead::Bind(vfsApi);
+            if (boundVfs)
+            {
+                const std::string engineRoot = VfsRead::Resolve("/Engine");
+                if (!engineRoot.empty())
+                {
+                    EnginePaths::SetContentRoot(engineRoot);
+                }
+            }
         }
         else
         {
@@ -52,12 +60,20 @@ void* __cdecl Create(const EngineModuleHost* host)
     try { s = new Session(*host); }
     catch (...)
     {
-        if (boundVfs) VfsRead::Unbind();
+        if (boundVfs)
+        {
+            VfsRead::Unbind();
+            EnginePaths::SetContentRoot({});
+        }
         return nullptr;
     }
     if (!s)
     {
-        if (boundVfs) VfsRead::Unbind();
+        if (boundVfs)
+        {
+            VfsRead::Unbind();
+            EnginePaths::SetContentRoot({});
+        }
         return nullptr;
     }
     Log(s, "GameCreate");
@@ -115,6 +131,7 @@ void __cdecl Destroy(void* instance)
     Log(s, "GameDestroy");
     delete s;
     VfsRead::Unbind();
+    EnginePaths::SetContentRoot({});
 }
 }
 // Allocation and user Tick failures are caught inside the module.

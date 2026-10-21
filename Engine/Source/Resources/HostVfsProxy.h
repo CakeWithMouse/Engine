@@ -108,6 +108,36 @@ public:
         return api->exists(api->context, vpathStr.c_str()) != 0;
     }
 
+    std::string Resolve(std::string_view vpath) const
+    {
+        const auto* api = m_api.load();
+        if (!api || !api->resolve)
+        {
+            return {};
+        }
+
+        std::string vpathStr(vpath);
+        char stackBuf[512];
+        uint64_t needed = 0;
+        uint32_t status = api->resolve(api->context, vpathStr.c_str(), stackBuf, sizeof(stackBuf), &needed);
+        if (status == ENGINE_VFS_OK)
+        {
+            return std::string(stackBuf);
+        }
+
+        if (status == ENGINE_VFS_BUFFER_TOO_SMALL && needed > 0)
+        {
+            std::vector<char> dynBuf(static_cast<size_t>(needed));
+            status = api->resolve(api->context, vpathStr.c_str(), dynBuf.data(), dynBuf.size(), &needed);
+            if (status == ENGINE_VFS_OK)
+            {
+                return std::string(dynBuf.data());
+            }
+        }
+
+        return {};
+    }
+
     std::string ToVirtualPath(std::string_view path) const override
     {
         const auto* api = m_api.load();
