@@ -43,6 +43,7 @@
     <ClCompile Include="Source\Components\SpecificComponents\CubeComponent.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\FBXComponent.cpp" Condition="'$(EngineEnableAssimp)'=='true'" />
     <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshComponent.cpp" />
+    <ClCompile Include="Source\Components\SpecificComponents\MeshComponent.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\ParticleSystemComponent.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\SphereComponent.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\TriangleComponent.cpp" />
@@ -52,6 +53,7 @@
     <ClCompile Include="Source\MainGame\BaseGameClass\Game.cpp" />
     <ClCompile Include="Source\MainGame\Player.cpp" />
     <ClCompile Include="Source\Render\ImpostorAtlas.cpp" />
+    <ClCompile Include="Source\Render\MeshPrimitives.cpp" />
     <ClCompile Include="Source\Render\ShaderCompiler.cpp" />
     <ClCompile Include="Source\Render\TextureLoader.cpp" />
     <ClCompile Include="Source\Resources\Paths.cpp" />
@@ -62,6 +64,7 @@
     <ClInclude Include="Include\Engine\Components\SpecificComponents\CubeComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\FBXComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\InstancedMeshComponent.h" />
+    <ClInclude Include="Include\Engine\Components\SpecificComponents\MeshComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\ParticleSystemComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\SphereComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\TriangleComponent.h" />
@@ -73,6 +76,7 @@
     <ClInclude Include="Include\Engine\MainGame\Player.h" />
     <ClInclude Include="Include\Engine\Render\ImpostorAtlas.h" />
     <ClInclude Include="Include\Engine\Render\MeshData.h" />
+    <ClInclude Include="Include\Engine\Render\MeshPrimitives.h" />
     <ClInclude Include="Include\Engine\Render\ShaderCompiler.h" />
     <ClInclude Include="Include\Engine\Render\ShaderConstants.h" />
     <ClInclude Include="Include\Engine\Render\TextureLoader.h" />

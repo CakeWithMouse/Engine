@@ -2,7 +2,9 @@
 #include <Engine/Resources/VirtualFileSystem.h>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
+#include <Engine/Components/SpecificComponents/MeshComponent.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
+#include <Engine/Render/MeshPrimitives.h>
 #include <Engine/Render/ShaderCompiler.h>
 #include <cmath>
 #include <cstring>
@@ -31,7 +33,16 @@ public:
         BuildFrameConstants();
     }
     using Game::BuildFrameConstants;
+    using Game::CreateInputLayouts;
     using Game::PumpMessages;
+    void SetCamera(const XMFLOAT3& eye, const XMFLOAT3& at, const XMFLOAT3& up)
+    {
+        const XMMATRIX view = XMMatrixLookAtLH(XMLoadFloat3(&eye), XMLoadFloat3(&at), XMLoadFloat3(&up));
+        const XMMATRIX projection = XMMatrixPerspectiveFovLH(XMConvertToRadians(60.0f), 1.0f, 0.1f, 100.0f);
+        XMStoreFloat4x4(&CurrentFrame.viewMatrix, XMMatrixTranspose(view));
+        XMStoreFloat4x4(&CurrentFrame.projectionMatrix, XMMatrixTranspose(projection));
+        CurrentFrame.CameraPosition = XMFLOAT4(eye.x, eye.y, eye.z, 1.0f);
+    }
     bool PumpQuit() { bRunning = true; return PumpMessages(); }
     int GetExitCode() const { return ExitCode; }
 };
@@ -350,6 +361,126 @@ void MaterialTemplateVariants()
     CHECK(!compiled.Succeeded());
     CHECK(compiled.Errors.find("Broken.hlsl(3,") != std::string::npos);
     CHECK(compiled.Errors.find("Tnt") != std::string::npos);
+}
+
+void CheckMesh(const MeshLodData& mesh)
+{
+    CHECK(!mesh.Vertices.empty() && !mesh.Indices.empty() && mesh.Indices.size() % 3 == 0);
+    for (const MeshVertex& vertex : mesh.Vertices)
+    {
+        Near(XMVectorGetX(XMVector3Length(XMLoadFloat4(&vertex.Normal))), 1.0f);
+        CHECK(vertex.Position.w == 1.0f && vertex.Normal.w == 0.0f);
+        CHECK(vertex.TexCoord.x >= 0.0f && vertex.TexCoord.x <= 1.0f && vertex.TexCoord.y >= 0.0f && vertex.TexCoord.y <= 1.0f);
+    }
+    for (size_t i = 0; i < mesh.Indices.size(); i += 3)
+    {
+        const uint32_t a = mesh.Indices[i], b = mesh.Indices[i + 1], c = mesh.Indices[i + 2];
+        CHECK(a < mesh.Vertices.size() && b < mesh.Vertices.size() && c < mesh.Vertices.size());
+        const XMVECTOR pa = XMLoadFloat4(&mesh.Vertices[a].Position);
+        const XMVECTOR cross = XMVector3Cross(XMVectorSubtract(XMLoadFloat4(&mesh.Vertices[b].Position), pa),
+                                              XMVectorSubtract(XMLoadFloat4(&mesh.Vertices[c].Position), pa));
+        const XMVECTOR normal = XMVectorAdd(XMVectorAdd(XMLoadFloat4(&mesh.Vertices[a].Normal), XMLoadFloat4(&mesh.Vertices[b].Normal)),
+                                            XMLoadFloat4(&mesh.Vertices[c].Normal));
+        // Clockwise from the front in the left-handed engine: the cross product points along the normal.
+        CHECK(XMVectorGetX(XMVector3Dot(cross, normal)) > 0.0f);
+    }
+}
+
+void MeshPrimitivesGeometry()
+{
+    const MeshLodData sphere = MeshPrimitives::Sphere(2.0f, 16, 8);
+    CheckMesh(sphere);
+    CHECK(sphere.Vertices.size() == 17u * 9u);
+    CHECK(sphere.Indices.size() == (16u * 8u * 2u - 2u * 16u) * 3u); // pole quads are single triangles
+    for (const MeshVertex& vertex : sphere.Vertices)
+    {
+        Near(XMVectorGetX(XMVector3Length(XMLoadFloat4(&vertex.Position))), 2.0f);
+    }
+
+    const MeshLodData cube = MeshPrimitives::Cube(2.0f);
+    CheckMesh(cube);
+    CHECK(cube.Vertices.size() == 24 && cube.Indices.size() == 36);
+    const MeshBounds cubeBounds = ComputeMeshBounds(cube);
+    Near(cubeBounds.Min.x, -1.0f); Near(cubeBounds.Max.y, 1.0f); Near(cubeBounds.Max.z, 1.0f);
+
+    const MeshLodData plane = MeshPrimitives::Plane(4.0f, 2.0f, 3);
+    CheckMesh(plane);
+    CHECK(plane.Vertices.size() == 16 && plane.Indices.size() == 3u * 3u * 6u);
+    const MeshBounds planeBounds = ComputeMeshBounds(plane);
+    Near(planeBounds.Max.x, 2.0f); Near(planeBounds.Max.z, 1.0f); Near(planeBounds.Max.y, 0.0f);
+}
+
+// Draws one registered component into a 64x64 target with the given culling; returns RGBA8 pixels.
+std::vector<uint32_t> RenderOffscreen(TestGame& game, GameComponent& component, D3D11_CULL_MODE cull)
+{
+    constexpr UINT Size = 64;
+    ID3D11Device* device = game.GetDevice();
+    ID3D11DeviceContext* context = game.GetContext();
+
+    D3D11_TEXTURE2D_DESC desc{};
+    desc.Width = desc.Height = Size; desc.MipLevels = desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT; desc.BindFlags = D3D11_BIND_RENDER_TARGET;
+    ComPtr<ID3D11Texture2D> target;
+    ComPtr<ID3D11RenderTargetView> rtv;
+    CheckHR(device->CreateTexture2D(&desc, nullptr, target.GetAddressOf()));
+    CheckHR(device->CreateRenderTargetView(target.Get(), nullptr, rtv.GetAddressOf()));
+
+    D3D11_RASTERIZER_DESC rasterDesc{};
+    rasterDesc.FillMode = D3D11_FILL_SOLID; rasterDesc.CullMode = cull; rasterDesc.DepthClipEnable = TRUE;
+    ComPtr<ID3D11RasterizerState> raster;
+    CheckHR(device->CreateRasterizerState(&rasterDesc, raster.GetAddressOf()));
+
+    const float clear[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    context->ClearState();
+    context->ClearRenderTargetView(rtv.Get(), clear);
+    context->OMSetRenderTargets(1, rtv.GetAddressOf(), nullptr);
+    D3D11_VIEWPORT viewport{0.0f, 0.0f, static_cast<float>(Size), static_cast<float>(Size), 0.0f, 1.0f};
+    context->RSSetViewports(1, &viewport);
+    context->RSSetState(raster.Get());
+    CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::Default));
+    component.Update();
+    component.Render(context);
+
+    desc.Usage = D3D11_USAGE_STAGING; desc.BindFlags = 0; desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    ComPtr<ID3D11Texture2D> staging;
+    CheckHR(device->CreateTexture2D(&desc, nullptr, staging.GetAddressOf()));
+    context->CopyResource(staging.Get(), target.Get());
+    D3D11_MAPPED_SUBRESOURCE mapped{};
+    CheckHR(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped));
+    std::vector<uint32_t> pixels(Size * Size);
+    for (UINT y = 0; y < Size; ++y)
+    {
+        std::memcpy(&pixels[y * Size], static_cast<const uint8_t*>(mapped.pData) + y * mapped.RowPitch, Size * sizeof(uint32_t));
+    }
+    context->Unmap(staging.Get(), 0);
+    return pixels;
+}
+
+void MeshComponentRendering()
+{
+    TestGame game;
+    CHECK(game.CreateInputLayouts());
+    const std::string shader = EnginePaths::Shader("BaseFBX.hlsl").generic_u8string(); // a Mesh-format material
+    game.SetCamera({0.0f, 3.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f});
+
+    auto* plane = new MeshComponent(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec4(1.0f));
+    plane->SetMesh(MeshPrimitives::Plane(2.0f, 2.0f));
+    CHECK(game.RegisterComponent("plane", plane, shader, shader) == RegisterResult::Ok);
+    Near(plane->GetLocalBoundingRadius(), std::sqrt(2.0f));
+
+    // Seen from above the plane covers the centre but not the corners, and only its front faces exist.
+    std::vector<uint32_t> pixels = RenderOffscreen(game, *plane, D3D11_CULL_BACK);
+    CHECK(pixels[32 * 64 + 32] != 0 && pixels[0] == 0);
+    CHECK(game.GetFrameStats().DrawCalls == 1);
+    pixels = RenderOffscreen(game, *plane, D3D11_CULL_FRONT);
+    CHECK(pixels[32 * 64 + 32] == 0);
+
+    // Geometry can be replaced after registration.
+    plane->SetMesh(MeshPrimitives::Sphere(0.5f));
+    pixels = RenderOffscreen(game, *plane, D3D11_CULL_BACK);
+    CHECK(pixels[32 * 64 + 32] != 0 && pixels[32 * 64 + 2] == 0);
+    Near(plane->GetLocalBoundingRadius(), 0.5f);
 }
 
 ComPtr<ID3D11Buffer> Buffer(ID3D11Device* device, UINT bytes, UINT bind, const void* data = nullptr, UINT stride = 0)
@@ -671,6 +802,7 @@ int main()
         {"frame light snapshot", LightSnapshot}, {"forward/deferred shader variants", ShaderVariants},
         {"shader includes, overrides and dependencies", ShaderCompilerIncludes}, {"shader invalidation and errors", ShaderInvalidation},
         {"material template variants and reflection", MaterialTemplateVariants},
+        {"mesh primitives: normals, uvs, winding", MeshPrimitivesGeometry}, {"mesh component offscreen rendering", MeshComponentRendering},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
         {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests}
     };
