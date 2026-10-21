@@ -35,6 +35,9 @@ public:
     float GetAnimationTime() const { return animationTime; }
     void SetAnimationTime(float time) { animationTime = time; }
 
+    void SetModelYawDegrees(float yaw) { modelYawDegrees = yaw; }
+    float GetModelYawDegrees() const { return modelYawDegrees; }
+
 protected:
     virtual void CreateBuffers(ID3D11Device* device) override;
 
@@ -47,6 +50,7 @@ private:
     float animationTime = 0.0f;
     float playbackSpeed = 1.0f;
     bool isPlaying = true;
+    float modelYawDegrees = 0.0f;
 
     // GPU resources (initialized in CreateBuffers for Stage 4)
     Microsoft::WRL::ComPtr<ID3D11Buffer> boneBuffer;
