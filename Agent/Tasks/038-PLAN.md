@@ -94,6 +94,40 @@
   - [x] Точные замеры через `BattleBenchSession`: юниты, видимые, draw calls, вершины, CPU/GPU медиана, p95, p99.
   - [x] Полная матрица замеров на dGPU (RTX 5060) и iGPU (Radeon 610M) для $N \in \{100, 1000, 5000, 10000, 30000\}$ с тенями и без теней (по 2 прогона на точку).
 
+- [x] **Этап 9: Устранение дублирования кода и автономность VFS (завершён, коммит `b347e16`)**
+  - [x] Единый источник правды для склейки сабмешей: `SkeletalModel::Flatten` и `SkeletalModel::FlattenCrowd` в `SkeletalData.h`.
+  - [x] Инкапсуляция запекания VAT и текстурных ресурсов в `InstancedMeshComponent::SetAnimatedModel`.
+  - [x] Вынос общего пиксельного шейдера инстансинга в `Engine/Content/Shaders/InstancingPixel.hlsli`.
+  - [x] Устранение `FindRepoRoot()` в `BattleGame.cpp`, размещение `CesiumMan.glb` в штатном `Game/Battle/Content/Models/CesiumMan.glb` с монтированием через стандартный VFS.
+
+- [x] **Этап 10: Модульное разбиение InstancedMeshComponent (< 500 строк) (завершён, коммит `10facd4`)**
+  - [x] Разделение `InstancedMeshComponent.cpp` (ранее 1 245 строк) на 4 трансляционных юнита строго < 500 строк:
+    - `InstancedMeshComponent.cpp` (491 строка) — базовый инстансинг, буферы, куллинг, проход отрисовки.
+    - `InstancedMeshSkinned.cpp` (379 строк) — скелетная толпа, `SetAnimatedModel`, шейдеры VAT.
+    - `InstancedMeshShadows.cpp` (214 строк) — статические и каскадные тени.
+    - `InstancedMeshImpostor.cpp` (124 строки) — 2D-импостеры и атлас.
+    - `InstancedMeshInternal.h` (67 строк) — общий внутренний заголовок.
+  - [x] Регистрация всех модулей в `Engine.vcxproj`.
+
+- [x] **Этап 11: Пресет толпы в EngineLauncher и сборка с Assimp в 1 клик (завершён, коммит `641ef6b`)**
+  - [x] Добавление пункта `Battle (Animated Crowd)` в `Catalog.h` (`directory = L"Battle"`, `requiresAssimp = true`, `extraArgs`).
+  - [x] Проброс `entry.extraArgs` в `Main.cpp` лаунчера при обычном запуске и при `--smoke`.
+  - [x] Автоопределение `VCPKG_ROOT` через `vswhere.exe` (`VC\vcpkg` / стандартные пути) в `Invoke-MSBuild.ps1` и `build.ps1`.
+  - [x] Сборка с включённым Assimp (`-EnableAssimp`) по умолчанию в `build.ps1` и `Start-Launcher.ps1` для всех проектов (включая `EngineRuntime` и `Katamari`).
+
+- [x] **Этап 12: Выбор дискретной GPU (RTX 5060) и скелетные LOD (завершён, коммиты `605cef2`, `0cd786b`, `3bb75be`, `eefcfec`)**
+  - [x] Выбор высокопроизводительного дискретного адаптера по `DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE` и максимальной `DedicatedVideoMemory` (RTX 5060 Laptop 8GB вместо встроенной Radeon 610M 512MB).
+  - [x] Экспорты `NvOptimusEnablement = 0x1` и `AmdPowerXpressRequestHighPerformance = 1` в `Game.cpp`.
+  - [x] Генерация скелетных LOD `GenerateCrowdSkinnedLod` (кластеризация по сетке с ограничением по `dominantBone` без разрывов конечностей):
+    - `LOD0`: 4 672 tris (2 612 verts, 100%)
+    - `LOD1`: 2 118 tris (1 085 verts, 45.3%)
+    - `LOD2`: 828 tris (371 verts, 17.7%)
+  - [x] Интеграция LOD1/LOD2 в `InstancedMeshComponent::SetAnimatedModel`.
+  - [x] Оптимизация теней в `InstancedMeshShadows.cpp`: дальние каскады (`cascade >= 2`) и дальние инстансы используют `LOD2`.
+  - [x] Юнит-тест `TestCrowdSkinnedLodGeneration()` в `SkeletalBakerTests.cpp`.
+  - [x] Настройка пресета лаунчера: `--anim --units 10000` (76+ FPS в Debug, 393 FPS в Release, GPU 4.28 ms).
+
+
 ---
 
 ## 3. Решения
