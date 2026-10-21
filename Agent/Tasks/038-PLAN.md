@@ -109,6 +109,13 @@
      $$n_{\text{skinned}} = \sum_{k=0}^{3} w_k \cdot \text{mul}\big(v.\text{normal}, (\text{float3x3})gBones[v.\text{boneIndices}[k]]\big)$$
      После чего мировая позиция вычисляется стандартно для движка:
      $v_{\text{world}} = \text{mul}(v_{\text{skinned}}, worldMatrix)$.
+6. **Ориентация меша и узлы-предки сцены (`MeshToModel`):**
+   - Для моделей glTF, где геометрия скин-меша и корневая кость находятся под нескелетными узлами сцены (например, `node 0: Z_UP -> node 1: Armature` в `CesiumMan.glb`), геометрия вершин и `invBind` не переписываются.
+   - В структуру `SkeletalModel` включена матрица `MeshToModel` ($I_4$ по умолчанию), накапливающая трансформацию от узла скин-меша до `scene->mRootNode` в row-vector конвенции:
+     $$M_{\text{MeshToModel}} = M_{\text{mesh\_local}} \times M_{\text{parent1\_local}} \times \dots \times M_{\text{root\_local}}$$
+   - Финальная формула палитры костей в CPU-пайплайне:
+     $$M_{\text{final}} = M_{\text{invBind}} \times M_{\text{global}} \times M_{\text{MeshToModel}}$$
+   - В rest-позе $M_{\text{invBind}} \times M_{\text{global}} = I$, поэтому палитра костей в rest-позе равна $M_{\text{MeshToModel}}$ (для синтетики остаётся $I$).
 
 ---
 
