@@ -525,48 +525,48 @@ bool Game::CreateDeviceAndSwapChain()
     Microsoft::WRL::ComPtr<IDXGIFactory6> dxgiFactory6;
     Microsoft::WRL::ComPtr<IDXGIAdapter1> selectedAdapter;
     DXGI_ADAPTER_DESC1 selectedDesc = {};
+    SIZE_T maxDedicatedVram = 0;
+
+    auto considerAdapter = [&](Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter)
+    {
+        if (!adapter) return;
+        DXGI_ADAPTER_DESC1 desc = {};
+        adapter->GetDesc1(&desc);
+        if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) return;
+        if (!selectedAdapter || desc.DedicatedVideoMemory > maxDedicatedVram)
+        {
+            maxDedicatedVram = desc.DedicatedVideoMemory;
+            selectedAdapter = adapter;
+            selectedDesc = desc;
+        }
+    };
 
     if (SUCCEEDED(hrFactory))
     {
         if (SUCCEEDED(dxgiFactory1.As(&dxgiFactory6)))
         {
+            Microsoft::WRL::ComPtr<IDXGIAdapter1> prefAdapter;
             for (UINT i = 0;
                  dxgiFactory6->EnumAdapterByGpuPreference(
                      i,
                      DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
-                     IID_PPV_ARGS(&selectedAdapter)) != DXGI_ERROR_NOT_FOUND;
+                     IID_PPV_ARGS(&prefAdapter)) == S_OK;
                  ++i)
             {
-                DXGI_ADAPTER_DESC1 desc = {};
-                selectedAdapter->GetDesc1(&desc);
-                if (!(desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE))
-                {
-                    selectedDesc = desc;
-                    break;
-                }
-                selectedAdapter.Reset();
+                considerAdapter(prefAdapter);
+                prefAdapter.Reset();
             }
         }
 
-        if (!selectedAdapter)
+        UINT i = 0;
+        Microsoft::WRL::ComPtr<IDXGIAdapter1> cur;
+        while (dxgiFactory1->EnumAdapters1(i++, &cur) != DXGI_ERROR_NOT_FOUND)
         {
-            UINT i = 0;
-            Microsoft::WRL::ComPtr<IDXGIAdapter1> cur;
-            SIZE_T maxVram = 0;
-            while (dxgiFactory1->EnumAdapters1(i++, &cur) != DXGI_ERROR_NOT_FOUND)
-            {
-                DXGI_ADAPTER_DESC1 desc = {};
-                cur->GetDesc1(&desc);
-                if (!(desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) && (desc.DedicatedVideoMemory >= maxVram))
-                {
-                    maxVram = desc.DedicatedVideoMemory;
-                    selectedAdapter = cur;
-                    selectedDesc = desc;
-                }
-                cur.Reset();
-            }
+            considerAdapter(cur);
+            cur.Reset();
         }
     }
+
 
     if (selectedAdapter)
     {
