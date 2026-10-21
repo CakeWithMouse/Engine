@@ -371,14 +371,14 @@ void Test_GlbImport()
     }
 
     std::vector<XMFLOAT4X4> cesiumBind;
-    bool bOk = EvaluateSkeletalBindPose(result.Model->ModelSkeleton, cesiumBind, false);
+    bool bOk = EvaluateSkeletalBindPose(*result.Model, cesiumBind, false);
     TEST_CHECK(bOk, "EvaluateSkeletalBindPose on CesiumMan must succeed");
     float maxBindDev = 0.0f;
     for (size_t i = 0; i < boneCount; ++i)
     {
         for (int r = 0; r < 4; ++r)
             for (int c = 0; c < 4; ++c)
-                maxBindDev = std::max(maxBindDev, std::abs(cesiumBind[i].m[r][c] - (r == c ? 1.0f : 0.0f)));
+                maxBindDev = std::max(maxBindDev, std::abs(cesiumBind[i].m[r][c] - result.Model->MeshToModel.m[r][c]));
     }
 
     std::cout << "[SkeletalTests] CesiumMan loaded successfully:\n"
@@ -386,7 +386,7 @@ void Test_GlbImport()
               << "  Vertices: " << totalVertices << "\n"
               << "  Clip name: '" << clip.Name << "', duration: " << clip.Duration << "s\n"
               << "  Bind pose (anim t=0) max dev: " << maxDevFromIdentity << "\n"
-              << "  Rest pose (LocalTransform) max dev: " << maxBindDev << "\n"
+              << "  Rest pose vs MeshToModel max dev: " << maxBindDev << "\n"
               << "  Palette diff(0, 0.25*dur): " << diff0_25 << "\n"
               << "  Palette diff(0.25, 0.5*dur): " << diff25_50 << "\n"
               << "  Seam diff: " << seamDiff << " (bone: " 
@@ -401,59 +401,7 @@ void Test_GlbImport()
 #endif
 }
 
-void Test_CpuSkinningBounds()
-{
-#if defined(ENGINE_ENABLE_ASSIMP)
-    SkeletalLoadResult result = LoadSkeletalModelFromVfs("/Game/Models/CesiumMan.glb");
-    TEST_CHECK(result.Success && result.Model != nullptr, "CesiumMan must load");
-    const auto& clip = result.Model->Clips[0];
-
-    const float sampleTimes[2] = { 0.0f, clip.Duration * 0.25f };
-    for (float t : sampleTimes)
-    {
-        std::vector<XMFLOAT4X4> pal;
-        bool evalOk = EvaluateSkeletalAnimation(*result.Model, 0, t, pal, false);
-        TEST_CHECK(evalOk, "Evaluate animation at time t");
-
-        XMFLOAT3 bmin(1e9f, 1e9f, 1e9f), bmax(-1e9f, -1e9f, -1e9f);
-        size_t vertCount = 0;
-        for (const auto& mesh : result.Model->Meshes)
-        {
-            for (const auto& v : mesh.Vertices)
-            {
-                XMVECTOR inPos = XMLoadFloat3(&v.Position);
-                XMVECTOR skinned = XMVectorZero();
-                for (int k = 0; k < 4; ++k)
-                {
-                    if (v.BoneWeights[k] > 0.0f)
-                    {
-                        XMMATRIX bMat = XMLoadFloat4x4(&pal[v.BoneIndices[k]]);
-                        skinned = XMVectorAdd(skinned, XMVectorScale(XMVector3Transform(inPos, bMat), v.BoneWeights[k]));
-                    }
-                }
-                XMFLOAT3 p;
-                XMStoreFloat3(&p, skinned);
-                TEST_CHECK(!std::isnan(p.x) && !std::isnan(p.y) && !std::isnan(p.z), "No NaN in skinned pos");
-                TEST_CHECK(!std::isinf(p.x) && !std::isinf(p.y) && !std::isinf(p.z), "No Inf in skinned pos");
-                bmin.x = std::min(bmin.x, p.x); bmin.y = std::min(bmin.y, p.y); bmin.z = std::min(bmin.z, p.z);
-                bmax.x = std::max(bmax.x, p.x); bmax.y = std::max(bmax.y, p.y); bmax.z = std::max(bmax.z, p.z);
-                ++vertCount;
-            }
-        }
-        float w = bmax.x - bmin.x;
-        float h = bmax.y - bmin.y;
-        float d = bmax.z - bmin.z;
-        std::cout << "[SkeletalTests] CPU Skinning at t=" << t << "s (" << vertCount << " verts):\n"
-                  << "  Bounds Min: (" << bmin.x << ", " << bmin.y << ", " << bmin.z << ")\n"
-                  << "  Bounds Max: (" << bmax.x << ", " << bmax.y << ", " << bmax.z << ")\n"
-                  << "  Width(X): " << w << ", Height(Y): " << h << ", Depth(Z): " << d << std::endl;
-
-        TEST_CHECK(w > 0.1f && h > 0.1f && d > 0.1f, "Mesh has non-degenerate 3D bounds");
-    }
-#else
-    std::cout << "[SkeletalTests] SKIP: CPU skinning requires Assimp" << std::endl;
-#endif
-}
+void RunSkeletalOrientationTests();
 
 int main()
 {
@@ -466,8 +414,7 @@ int main()
         {"animation interpolation and looping continuity", Test_AnimationInterpolationAndContinuity},
         {"bone limit 64 rejection", Test_BoneLimit64},
         {"stub loader contract without Assimp", Test_StubLoaderWithoutAssimp},
-        {"glb import (CesiumMan)", Test_GlbImport},
-        {"cpu skinning bounds (CesiumMan)", Test_CpuSkinningBounds}
+        {"glb import (CesiumMan)", Test_GlbImport}
     };
 
     for (const auto& t : testList)
@@ -484,8 +431,19 @@ int main()
         }
     }
 
-    std::cout << "=== Skeletal Tests: " << (sizeof(testList)/sizeof(testList[0]) - failures) 
-              << "/" << (sizeof(testList)/sizeof(testList[0])) << " passed ===" << std::endl;
+    try
+    {
+        RunSkeletalOrientationTests();
+        std::cout << "PASS: skeletal orientation and bounds tests" << std::endl;
+    }
+    catch (const std::exception& ex)
+    {
+        std::cerr << "FAIL: skeletal orientation and bounds tests - " << ex.what() << std::endl;
+        ++failures;
+    }
+
+    std::cout << "=== Skeletal Tests: " << (sizeof(testList)/sizeof(testList[0]) + 1 - failures) 
+              << "/" << (sizeof(testList)/sizeof(testList[0]) + 1) << " passed ===" << std::endl;
 
     return failures ? 1 : 0;
 }
