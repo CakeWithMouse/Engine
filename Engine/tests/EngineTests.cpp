@@ -254,6 +254,104 @@ void ShaderInvalidation()
     CHECK(game.GetShaderErrors(shader).find("missingAfterReload") != std::string::npos);
 }
 
+ComPtr<ID3D11ShaderReflection> Reflect(ID3DBlob* blob)
+{
+    ComPtr<ID3D11ShaderReflection> reflection;
+    CheckHR(D3DReflect(blob->GetBufferPointer(), blob->GetBufferSize(), IID_ID3D11ShaderReflection,
+                       reinterpret_cast<void**>(reflection.GetAddressOf())));
+    return reflection;
+}
+
+UINT RenderTargetCount(ID3DBlob* pixelShader)
+{
+    ComPtr<ID3D11ShaderReflection> reflection = Reflect(pixelShader);
+    D3D11_SHADER_DESC desc{};
+    reflection->GetDesc(&desc);
+    UINT targets = 0;
+    for (UINT i = 0; i < desc.OutputParameters; ++i)
+    {
+        D3D11_SIGNATURE_PARAMETER_DESC parameter{};
+        reflection->GetOutputParameterDesc(i, &parameter);
+        targets += parameter.SystemValueType == D3D_NAME_TARGET ? 1 : 0;
+    }
+    return targets;
+}
+
+ShaderCompiler::CompileResult CompileMaterial(const std::string& surface, const char* entry, const char* target,
+                                              std::vector<std::pair<std::string, std::string>> defines = {})
+{
+    ShaderCompiler::CompileOptions options;
+    options.Defines = std::move(defines);
+    options.IncludeOverrides["MaterialSurface.hlsli"] = surface;
+    return ShaderCompiler::Compile(EnginePaths::Shader("Material/MaterialTemplate.hlsl").generic_u8string(),
+                                   entry, target, options);
+}
+
+void MaterialTemplateVariants()
+{
+    const std::string defaultSurface = EnginePaths::Shader("Material/DefaultSurface.hlsl").generic_u8string();
+    const std::string errorSurface = EnginePaths::Shader("Material/ErrorSurface.hlsl").generic_u8string();
+    const std::pair<std::string, std::string> gbuffer{"DEFERRED_GBUFFER", "1"};
+
+    CHECK(CompileMaterial(defaultSurface, "VSMain", "vs_5_0").Succeeded());
+    auto expectTargets = [&](const std::string& surface, std::vector<std::pair<std::string, std::string>> defines, UINT forward, UINT deferred)
+    {
+        auto plain = CompileMaterial(surface, "PSMain", "ps_5_0", defines);
+        defines.push_back(gbuffer);
+        auto geometry = CompileMaterial(surface, "PSMain", "ps_5_0", defines);
+        if (!plain.Succeeded() || !geometry.Succeeded()) std::cerr << plain.Errors << geometry.Errors;
+        CHECK(plain.Succeeded() && geometry.Succeeded());
+        CHECK(RenderTargetCount(plain.Blob.Get()) == forward);
+        CHECK(RenderTargetCount(geometry.Blob.Get()) == deferred);
+    };
+
+    // Lit opaque/masked materials write the G-buffer; everything else stays forward-only.
+    expectTargets(defaultSurface, {}, 1, 3);
+    expectTargets(defaultSurface, {{"MATERIAL_BLEND", "1"}, {"MATERIAL_ALPHA_CLIP", "0.3f"}, {"MATERIAL_TWO_SIDED", "1"}}, 1, 3);
+    expectTargets(defaultSurface, {{"MATERIAL_BLEND", "2"}}, 1, 1);
+    expectTargets(defaultSurface, {{"MATERIAL_BLEND", "3"}}, 1, 1);
+    expectTargets(defaultSurface, {{"MATERIAL_UNLIT", "1"}}, 1, 1);
+    expectTargets(errorSurface, {}, 1, 1); // declares MATERIAL_UNLIT itself
+
+    TempShaderDir dir;
+    const std::string emissive = dir.Write("Emissive.hlsl",
+        "#define MATERIAL_EMISSIVE\n"
+        "void Surface(MaterialInput i, inout MaterialOutput o) { o.Emissive = float3(1, 0.5f, 0) * (sin(i.Time) * 0.5f + 0.5f); }\n");
+    expectTargets(emissive, {}, 1, 1);
+
+    // Parameters and textures of a surface are visible to reflection under their own names.
+    const std::string parameters = dir.Write("Params.hlsl",
+        "cbuffer MaterialParams : register(b1) { float4 Tint; float Gloss; float2 UVScale; };\n"
+        "Texture2D BaseMap : register(t6);\n"
+        "void Surface(MaterialInput i, inout MaterialOutput o)\n"
+        "{\n"
+        "    o.Albedo = BaseMap.Sample(MaterialSampler, i.UV * UVScale).rgb * Tint.rgb;\n"
+        "    o.SpecularWeight = Gloss;\n"
+        "}\n");
+    auto compiled = CompileMaterial(parameters, "PSMain", "ps_5_0");
+    CHECK(compiled.Succeeded());
+    ComPtr<ID3D11ShaderReflection> reflection = Reflect(compiled.Blob.Get());
+    D3D11_SHADER_INPUT_BIND_DESC binding{};
+    CheckHR(reflection->GetResourceBindingDescByName("MaterialParams", &binding));
+    CHECK(binding.Type == D3D_SIT_CBUFFER && binding.BindPoint == 1);
+    CheckHR(reflection->GetResourceBindingDescByName("BaseMap", &binding));
+    CHECK(binding.Type == D3D_SIT_TEXTURE && binding.BindPoint == 6);
+    ID3D11ShaderReflectionConstantBuffer* params = reflection->GetConstantBufferByName("MaterialParams");
+    D3D11_SHADER_VARIABLE_DESC variable{};
+    CheckHR(params->GetVariableByName("Gloss")->GetDesc(&variable));
+    CHECK(variable.StartOffset == 16 && variable.Size == 4);
+    CheckHR(params->GetVariableByName("UVScale")->GetDesc(&variable));
+    CHECK(variable.StartOffset == 20 && variable.Size == 8);
+
+    // Errors of the author point at the surface file, not at the template.
+    const std::string broken = dir.Write("Broken.hlsl",
+        "void Surface(MaterialInput i, inout MaterialOutput o)\n{\n    o.Albedo = Tnt.rgb;\n}\n");
+    compiled = CompileMaterial(broken, "PSMain", "ps_5_0");
+    CHECK(!compiled.Succeeded());
+    CHECK(compiled.Errors.find("Broken.hlsl(3,") != std::string::npos);
+    CHECK(compiled.Errors.find("Tnt") != std::string::npos);
+}
+
 ComPtr<ID3D11Buffer> Buffer(ID3D11Device* device, UINT bytes, UINT bind, const void* data = nullptr, UINT stride = 0)
 {
     D3D11_BUFFER_DESC desc{};
@@ -572,6 +670,7 @@ int main()
         {"transform hierarchy and cache", TransformHierarchy}, {"unregister hierarchy and instances", UnregisterHierarchyAndInstances},
         {"frame light snapshot", LightSnapshot}, {"forward/deferred shader variants", ShaderVariants},
         {"shader includes, overrides and dependencies", ShaderCompilerIncludes}, {"shader invalidation and errors", ShaderInvalidation},
+        {"material template variants and reflection", MaterialTemplateVariants},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
         {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests}
     };

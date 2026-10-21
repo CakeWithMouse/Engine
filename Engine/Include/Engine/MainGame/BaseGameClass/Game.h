@@ -319,7 +319,9 @@ protected:
 protected:
     RenderType RenderingType = Forward;
 
-    float TotalTime = 0.0f;
+    float TotalTime = 0.0f;        // scene time (scaled)
+    float RealTime = 0.0f;         // seconds of updated frames, unscaled (materials animate with it)
+    float LastRealDeltaTime = 0.0f;
     float SimulationTimeScale = 0.13f * 60.0f;
     uint64_t FrameIndex = 0;
     bool bInitialized = false;

@@ -188,6 +188,7 @@ void GameComponent::UpdateObjectConstants()
     {
         ApplyFrameConstants(ConstantPositionBuffer, GamePtr->GetFrameConstants());
         ApplyStaticShadowConstants(ConstantPositionBuffer, GamePtr->GetFrameConstants());
+        ApplyTimeConstants(ConstantPositionBuffer, GamePtr->GetFrameConstants());
     }
 }
 

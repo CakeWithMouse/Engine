@@ -2449,6 +2449,8 @@ void Game::UpdateFrame(float realDeltaTime)
 {
     const float deltaTime = realDeltaTime * SimulationTimeScale;
     TotalTime += deltaTime;
+    RealTime += realDeltaTime;
+    LastRealDeltaTime = realDeltaTime;
 
     ProcessHotkeys();
 
@@ -2508,6 +2510,7 @@ void Game::BuildFrameConstants()
 
     const glm::vec3 cameraPosition = FirstPlayer->GetPosition();
     frame.CameraPosition = XMFLOAT4(cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f);
+    frame.TimeParams = XMFLOAT4(RealTime, LastRealDeltaTime, TotalTime, 0.0f);
 
     for (int i = 0; i < MaxPointLights; ++i)
     {
