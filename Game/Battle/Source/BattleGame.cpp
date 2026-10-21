@@ -164,10 +164,14 @@ void BattleGame::BuildScene(const Settings& settings)
             UnitVertexCount += static_cast<int>(mesh.Vertices.size());
         }
 
+        units->SetLodScreenHeights({16.0f, 7.0f});
+
+        units->SetLodFadeFraction(0.06f);
         units->SetDrawDistance(2500.0f);
         units->SetShadowDistance(900.0f);
-        units->SetShadowLodBias(0);
+        units->SetShadowLodBias(1);
         units->SetLodDebugColors(Config.LodDebugColors);
+
 
         InstancedMeshComponent* registered = Register(*this, "Units_CesiumMan", std::move(units),
                                                       skinnedShaderPath, skinnedShaderPath);

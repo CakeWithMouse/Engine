@@ -1,7 +1,12 @@
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+
 #include <Engine/Render/SkeletalBaker.h>
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <unordered_map>
 
 using namespace DirectX;
 
@@ -194,3 +199,202 @@ bool CreateBakedTextureResource(
 
     return true;
 }
+
+bool GenerateCrowdSkinnedLod(
+    const std::vector<CrowdSkinnedVertex>& inVertices,
+    const std::vector<uint32_t>& inIndices,
+    float targetRatio,
+    std::vector<CrowdSkinnedVertex>& outVertices,
+    std::vector<uint32_t>& outIndices)
+{
+    outVertices.clear();
+    outIndices.clear();
+
+    if (inVertices.empty() || inIndices.size() < 3 || targetRatio <= 0.0f)
+    {
+        return false;
+    }
+
+    if (targetRatio >= 1.0f)
+    {
+        outVertices = inVertices;
+        outIndices = inIndices;
+        return true;
+    }
+
+    // 1. Calculate bounding box
+    DirectX::XMFLOAT3 minPos = inVertices[0].Position;
+    DirectX::XMFLOAT3 maxPos = inVertices[0].Position;
+    for (const auto& v : inVertices)
+    {
+        minPos.x = (std::min)(minPos.x, v.Position.x);
+        minPos.y = (std::min)(minPos.y, v.Position.y);
+        minPos.z = (std::min)(minPos.z, v.Position.z);
+        maxPos.x = (std::max)(maxPos.x, v.Position.x);
+        maxPos.y = (std::max)(maxPos.y, v.Position.y);
+        maxPos.z = (std::max)(maxPos.z, v.Position.z);
+    }
+
+    const float extentX = maxPos.x - minPos.x;
+    const float extentY = maxPos.y - minPos.y;
+    const float extentZ = maxPos.z - minPos.z;
+    const float bboxSize = (std::max)((std::max)(extentX, extentY), extentZ);
+
+    if (bboxSize <= 1e-6f)
+    {
+        outVertices = inVertices;
+        outIndices = inIndices;
+        return true;
+    }
+
+    // 2. Compute dominant bone for each vertex
+    std::vector<uint8_t> dominantBones(inVertices.size());
+    for (size_t i = 0; i < inVertices.size(); ++i)
+    {
+        const auto& v = inVertices[i];
+        uint8_t bestWeight = 0;
+        uint8_t bestBone = v.BoneIndices[0];
+        for (int k = 0; k < 4; ++k)
+        {
+            if (v.BoneWeights[k] > bestWeight)
+            {
+                bestWeight = v.BoneWeights[k];
+                bestBone = v.BoneIndices[k];
+            }
+        }
+        dominantBones[i] = bestBone;
+    }
+
+    const size_t baseTriangles = inIndices.size() / 3;
+    const size_t targetTriangles = (std::max<size_t>)(1, static_cast<size_t>(baseTriangles * targetRatio));
+
+
+    auto clusterAtRes = [&](int gridRes, std::vector<uint32_t>& vertexMap) -> size_t
+    {
+        const float cellSize = bboxSize / static_cast<float>(gridRes);
+        vertexMap.resize(inVertices.size());
+
+        // Fast 64-bit key: gx(14b) | gy(14b) | gz(14b) | bone(8b)
+        std::unordered_map<uint64_t, uint32_t> clusters;
+        clusters.reserve(inVertices.size());
+
+        for (size_t i = 0; i < inVertices.size(); ++i)
+        {
+            const auto& p = inVertices[i].Position;
+            const uint32_t gx = static_cast<uint32_t>((std::max)(0, static_cast<int>((p.x - minPos.x) / cellSize))) & 0x3FFF;
+            const uint32_t gy = static_cast<uint32_t>((std::max)(0, static_cast<int>((p.y - minPos.y) / cellSize))) & 0x3FFF;
+            const uint32_t gz = static_cast<uint32_t>((std::max)(0, static_cast<int>((p.z - minPos.z) / cellSize))) & 0x3FFF;
+            const uint64_t key = (static_cast<uint64_t>(gx) << 42) |
+                                 (static_cast<uint64_t>(gy) << 28) |
+                                 (static_cast<uint64_t>(gz) << 14) |
+                                 static_cast<uint64_t>(dominantBones[i]);
+
+            auto it = clusters.find(key);
+            if (it == clusters.end())
+            {
+                clusters[key] = static_cast<uint32_t>(i);
+                vertexMap[i] = static_cast<uint32_t>(i);
+            }
+            else
+            {
+                vertexMap[i] = it->second;
+            }
+        }
+
+        size_t validCount = 0;
+        for (size_t t = 0; t < baseTriangles; ++t)
+        {
+            const uint32_t i0 = vertexMap[inIndices[t * 3 + 0]];
+            const uint32_t i1 = vertexMap[inIndices[t * 3 + 1]];
+            const uint32_t i2 = vertexMap[inIndices[t * 3 + 2]];
+            if (i0 != i1 && i1 != i2 && i2 != i0)
+            {
+                ++validCount;
+            }
+        }
+        return validCount;
+    };
+
+    // 3. Binary search for grid resolution
+    int low = 6;
+    int high = 100;
+    int bestRes = 25;
+    size_t bestDiff = static_cast<size_t>(-1);
+    std::vector<uint32_t> dummyMap;
+
+    for (int iter = 0; iter < 7; ++iter)
+    {
+        const int mid = (low + high) / 2;
+        const size_t triCount = clusterAtRes(mid, dummyMap);
+        const size_t diff = (triCount >= targetTriangles) ? (triCount - targetTriangles) : (targetTriangles - triCount);
+        if (diff < bestDiff)
+        {
+            bestDiff = diff;
+            bestRes = mid;
+        }
+
+        if (triCount < targetTriangles)
+        {
+            low = mid + 1;
+        }
+        else
+        {
+            high = mid - 1;
+        }
+    }
+
+    // 4. Build final decimated geometry using bestRes
+    std::vector<uint32_t> finalVertexMap;
+    clusterAtRes(bestRes, finalVertexMap);
+
+    std::unordered_map<uint64_t, bool> seenTriangles;
+    seenTriangles.reserve(baseTriangles);
+
+    std::unordered_map<uint32_t, uint32_t> oldToNew;
+    oldToNew.reserve(inVertices.size());
+
+    for (size_t t = 0; t < baseTriangles; ++t)
+    {
+        const uint32_t i0 = finalVertexMap[inIndices[t * 3 + 0]];
+        const uint32_t i1 = finalVertexMap[inIndices[t * 3 + 1]];
+        const uint32_t i2 = finalVertexMap[inIndices[t * 3 + 2]];
+
+        if (i0 == i1 || i1 == i2 || i2 == i0)
+        {
+            continue; // Degenerate triangle
+        }
+
+        // Canonical hash for deduplication
+        uint32_t a = i0, b = i1, c = i2;
+        if (a > b) std::swap(a, b);
+        if (b > c) std::swap(b, c);
+        if (a > b) std::swap(a, b);
+        const uint64_t triKey = (static_cast<uint64_t>(a) << 40) ^ (static_cast<uint64_t>(b) << 20) ^ static_cast<uint64_t>(c);
+
+        if (seenTriangles.find(triKey) != seenTriangles.end())
+        {
+            continue;
+        }
+        seenTriangles[triKey] = true;
+
+        auto getRemapped = [&](uint32_t origIdx) -> uint32_t
+        {
+            auto it = oldToNew.find(origIdx);
+            if (it != oldToNew.end())
+            {
+                return it->second;
+            }
+            const uint32_t newIdx = static_cast<uint32_t>(outVertices.size());
+            outVertices.push_back(inVertices[origIdx]);
+            oldToNew[origIdx] = newIdx;
+            return newIdx;
+        };
+
+        outIndices.push_back(getRemapped(i0));
+        outIndices.push_back(getRemapped(i1));
+        outIndices.push_back(getRemapped(i2));
+    }
+
+    return !outVertices.empty() && !outIndices.empty();
+}
+

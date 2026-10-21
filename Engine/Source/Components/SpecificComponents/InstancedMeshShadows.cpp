@@ -66,8 +66,13 @@ void InstancedMeshComponent::CollectShadowCasters(
             continue;
         }
 
-        const int shadowLevel = std::min(meshLevel + ShadowLodBias + cascade, LodCount - 1);
+        int shadowLevel = std::min(meshLevel + ShadowLodBias + cascade, LodCount - 1);
+        if ((cascade >= 2 || meshLevel >= 2) && LodCount > 1)
+        {
+            shadowLevel = LodCount - 1;
+        }
         Lods[shadowLevel].ShadowStaging[cascade].push_back(data);
+
     }
 }
 

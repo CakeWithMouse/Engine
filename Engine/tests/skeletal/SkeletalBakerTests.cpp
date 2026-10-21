@@ -327,12 +327,77 @@ bool TestSkeletalBakerCesiumMan()
 #endif
 }
 
+bool TestCrowdSkinnedLodGeneration()
+{
+#if !ENGINE_ENABLE_ASSIMP
+    std::cout << "[SkeletalBakerTests] SKIP: CrowdSkinnedLod CesiumMan requires Assimp" << std::endl;
+    return true;
+#else
+    SkeletalLoadResult loadResult = LoadSkeletalModelFromVfs("/Game/Models/CesiumMan.glb");
+    TEST_CHECK(loadResult.Success && loadResult.Model, "CesiumMan load must succeed for LOD test");
+
+    std::vector<CrowdSkinnedVertex> v0;
+    std::vector<uint32_t> i0;
+    loadResult.Model->FlattenCrowd(v0, i0);
+
+    TEST_CHECK(!v0.empty() && !i0.empty(), "FlattenCrowd LOD0 must have vertices and indices");
+    const size_t t0 = i0.size() / 3;
+
+    // Generate LOD1 (~45%)
+    std::vector<CrowdSkinnedVertex> v1;
+    std::vector<uint32_t> i1;
+    bool ok1 = GenerateCrowdSkinnedLod(v0, i0, 0.45f, v1, i1);
+    TEST_CHECK(ok1, "GenerateCrowdSkinnedLod LOD1 must succeed");
+    const size_t t1 = i1.size() / 3;
+    const float ratio1 = static_cast<float>(t1) / static_cast<float>(t0);
+    TEST_CHECK(ratio1 >= 0.35f && ratio1 <= 0.55f, "LOD1 triangle ratio must be ~40-50%");
+
+    // Generate LOD2 (~18%)
+    std::vector<CrowdSkinnedVertex> v2;
+    std::vector<uint32_t> i2;
+    bool ok2 = GenerateCrowdSkinnedLod(v0, i0, 0.18f, v2, i2);
+    TEST_CHECK(ok2, "GenerateCrowdSkinnedLod LOD2 must succeed");
+    const size_t t2 = i2.size() / 3;
+    const float ratio2 = static_cast<float>(t2) / static_cast<float>(t0);
+    TEST_CHECK(ratio2 >= 0.12f && ratio2 <= 0.25f, "LOD2 triangle ratio must be ~15-20%");
+
+    // Validate index boundaries and bone weight normalization
+    for (uint32_t idx : i1)
+    {
+        TEST_CHECK(idx < v1.size(), "LOD1 index out of bounds");
+    }
+    for (const auto& vert : v1)
+    {
+        uint32_t sum = vert.BoneWeights[0] + vert.BoneWeights[1] + vert.BoneWeights[2] + vert.BoneWeights[3];
+        TEST_CHECK(sum == 255 || sum == 254, "LOD1 bone weights must be normalized to ~255");
+    }
+
+    for (uint32_t idx : i2)
+    {
+        TEST_CHECK(idx < v2.size(), "LOD2 index out of bounds");
+    }
+    for (const auto& vert : v2)
+    {
+        uint32_t sum = vert.BoneWeights[0] + vert.BoneWeights[1] + vert.BoneWeights[2] + vert.BoneWeights[3];
+        TEST_CHECK(sum == 255 || sum == 254, "LOD2 bone weights must be normalized to ~255");
+    }
+
+    std::cout << "[CrowdSkinnedLod] CesiumMan LOD0: " << t0 << " tris (" << v0.size() << " verts), "
+              << "LOD1: " << t1 << " tris (" << (ratio1 * 100.0f) << "%), "
+              << "LOD2: " << t2 << " tris (" << (ratio2 * 100.0f) << "%)" << std::endl;
+    std::cout << "PASS: crowd skinned LOD generation" << std::endl;
+    return true;
+#endif
+}
+
 bool RunSkeletalBakerSuite()
 {
     std::cout << "--- Running Skeletal Baker and Crowd Vertex Tests ---" << std::endl;
     if (!TestCrowdSkinnedVertex()) return false;
     if (!TestSkeletalBakerSynthetic()) return false;
     if (!TestSkeletalBakerCesiumMan()) return false;
+    if (!TestCrowdSkinnedLodGeneration()) return false;
     std::cout << "PASS: all skeletal baker tests passed" << std::endl;
     return true;
 }
+

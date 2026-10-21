@@ -136,6 +136,22 @@ bool InstancedMeshComponent::SetAnimatedModel(ID3D11Device* device, const Skelet
         return false;
     }
 
+    // Generate simplified LOD levels for crowd instances
+    std::vector<CrowdSkinnedVertex> lod1Vertices;
+    std::vector<uint32_t> lod1Indices;
+    if (GenerateCrowdSkinnedLod(crowdVertices, crowdIndices, 0.45f, lod1Vertices, lod1Indices))
+    {
+        SetSkinnedLod(1, lod1Vertices, lod1Indices);
+    }
+
+    std::vector<CrowdSkinnedVertex> lod2Vertices;
+    std::vector<uint32_t> lod2Indices;
+    if (GenerateCrowdSkinnedLod(crowdVertices, crowdIndices, 0.18f, lod2Vertices, lod2Indices))
+    {
+        SetSkinnedLod(2, lod2Vertices, lod2Indices);
+    }
+
+
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
     if (!CreateBakedTextureResource(device, bakeResult.Texture, AnimationTexture, srv))
     {

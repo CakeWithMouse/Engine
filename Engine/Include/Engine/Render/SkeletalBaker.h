@@ -80,3 +80,16 @@ bool CreateBakedTextureResource(
     const BakedAnimationTexture& baked,
     Microsoft::WRL::ComPtr<ID3D11Texture2D>& outTexture,
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& outSRV);
+
+/**
+ * Generates a simplified LOD level for CrowdSkinnedVertex geometry using spatial clustering
+ * constrained by dominant bone index (preventing tearing across limbs/joints).
+ * targetRatio: target fraction of triangles (e.g. 0.45f for LOD1, 0.18f for LOD2).
+ */
+bool GenerateCrowdSkinnedLod(
+    const std::vector<CrowdSkinnedVertex>& inVertices,
+    const std::vector<uint32_t>& inIndices,
+    float targetRatio,
+    std::vector<CrowdSkinnedVertex>& outVertices,
+    std::vector<uint32_t>& outIndices);
+
