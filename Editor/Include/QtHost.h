@@ -1,5 +1,6 @@
 #pragma once
 #include <Engine/Runtime/ModuleApi.h>
+#include <Engine/Runtime/EditSessionApi.h>
 #include <atomic>
 #include <cstdint>
 #include <deque>
@@ -35,6 +36,13 @@ public:
     EditorQtHost(const EditorQtHost&) = delete;
     EditorQtHost& operator=(const EditorQtHost&) = delete;
 
+    enum EditorState:int
+    {
+        Edit = 0,
+        Play = 1,
+        Pause = 2
+    };
+
     bool Start(); // поток движка
     void Update(double dt); // поток движка
     void Overlay()
@@ -47,16 +55,20 @@ public:
     double LastDt() const { return lastDt_.load(); }
     uint64_t UpdateCount() const { return updates_.load(); }
     const EngineModuleHost& host() const { return host_; }
+    const EngineEditSessionApi& scene() const { return scene_; }
 
     bool HasViewport() const { return host_.viewportAttach != nullptr; }
     bool ViewportActive() const { return viewportActive_.load(); }
-    int PlayState() const { return playState_.load(); }
+    EditorState PlayState() const { return playState_.load(); }
+
+    void SetModuleApi(const EngineEditSessionApi& scene) { scene_ = scene; }
 
 private:
     void UiThreadMain();
     void DrainCommands();
 
     EngineModuleHost host_;
+    EngineEditSessionApi scene_;
     std::mutex logMutex_;
     std::thread uiThread_;
     std::atomic<bool> uiReady_{false};
@@ -67,5 +79,5 @@ private:
     std::atomic<double> lastDt_{0.0};
     std::atomic<uint64_t> updates_{0};
     std::atomic<bool> viewportActive_{false};
-    std::atomic<int> playState_{0};
+    std::atomic<EditorState> playState_{Edit};
 };

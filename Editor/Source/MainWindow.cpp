@@ -16,6 +16,7 @@
 #include <QVBoxLayout>
 #include <QToolBar>
 #include <QProcess>
+#include <QPoint>
 
 EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     : QMainWindow(parent), host_(host)
@@ -32,7 +33,20 @@ void EditorMainWindow::BuildUi()
     resize(1280, 720);
 
     viewport_ = new ViewportWidget(host_, this);
-    setCentralWidget(viewport_);
+
+    viewportDock_ = new QDockWidget(QStringLiteral("Viewport"), this);
+    viewportDock_->setObjectName(QStringLiteral("ViewportDock"));
+    viewportDock_->setWidget(viewport_);
+    viewportDock_->setFocusProxy(viewport_);
+    viewportDock_->setAllowedAreas(Qt::AllDockWidgetAreas);
+    viewportDock_->setFeatures(
+        QDockWidget::DockWidgetMovable |
+        QDockWidget::DockWidgetFloatable |
+        QDockWidget::DockWidgetClosable
+    );
+
+    addDockWidget(Qt::TopDockWidgetArea, viewportDock_);
+    setCentralWidget(nullptr);
 
     console_ = new QPlainTextEdit(this);
     console_->setReadOnly(true);
@@ -43,10 +57,22 @@ void EditorMainWindow::BuildUi()
     addDockWidget(Qt::BottomDockWidgetArea, consoleDock_);
 
     // Файл-менеджер: вторая нижняя панель справа от консоли.
-    // Хотите вкладки вместо бок-о-бок: tabifyDockWidget(consoleDock_, fileDock_);
     fileDock_ = new FileBrowserDock(host_, this);
     addDockWidget(Qt::BottomDockWidgetArea, fileDock_);
-    resizeDocks({consoleDock_, fileDock_}, {420, 420}, Qt::Horizontal);
+    tabifyDockWidget(consoleDock_, fileDock_);
+    // resizeDocks({consoleDock_, fileDock_}, {420, 420}, Qt::Horizontal);
+    resizeDocks({viewportDock_, consoleDock_}, {520, 200}, Qt::Vertical);
+
+    QMenu* viewMenu = menuBar()->addMenu(QStringLiteral("&View"));
+
+    if (viewportDock_)
+        viewMenu->addAction(viewportDock_->toggleViewAction());
+
+    if (consoleDock_)
+        viewMenu->addAction(consoleDock_->toggleViewAction());
+
+    if (fileDock_)
+        viewMenu->addAction(fileDock_->toggleViewAction());
 
     statsLabel_ = new QLabel(this);
     statusBar()->addPermanentWidget(statsLabel_);
@@ -68,6 +94,10 @@ void EditorMainWindow::BuildUi()
     file->addAction(QStringLiteral("Close editor"), this, [this] { close(); });
 
     BuildToolBar();
+
+    connect(viewport_, &ViewportWidget::contextMenuRequested,
+            this, &EditorMainWindow::ShowViewportContextMenu);
+
     playStateLabel_ = new QLabel(QStringLiteral("EDIT"), this);
     statusBar()->addPermanentWidget(playStateLabel_);
     UpdatePlayButtons();
@@ -105,8 +135,8 @@ void EditorMainWindow::BuildToolBar()
     connect(actPlay_, &QAction::triggered, this, [this]
     {
         EditorCommand c;
-        const int m = host_->PlayState();
-        c.type = m == 0 ? EditorCommand::TogglePlay : EditorCommand::TogglePause;
+        EditorQtHost::EditorState m = host_->PlayState();
+        c.type = m == EditorQtHost::EditorState::Edit ? EditorCommand::TogglePlay : EditorCommand::TogglePause;
         host_->PostCommand(c);
     });
     connect(actPause_, &QAction::triggered, this, [this]
@@ -133,10 +163,10 @@ void EditorMainWindow::BuildToolBar()
 
 void EditorMainWindow::UpdatePlayButtons()
 {
-    const int m = host_->PlayState();
-    actPlay_->setEnabled(m == 0 || m != 1);
-    actPause_->setEnabled(m == 1);
-    actStop_->setEnabled(m != 0);
+    const EditorQtHost::EditorState m = host_->PlayState();
+    actPlay_->setEnabled(m == EditorQtHost::EditorState::Edit || m == EditorQtHost::EditorState::Pause);
+    actPause_->setEnabled(m == EditorQtHost::EditorState::Play);
+    actStop_->setEnabled(m != EditorQtHost::EditorState::Edit);
 }
 
 void EditorMainWindow::StartExternalGame()
@@ -219,4 +249,38 @@ void EditorMainWindow::RefreshStats()
                                   : host_->PlayState() == 1
                                   ? QStringLiteral("Play")
                                   : QStringLiteral("Pause")));
+}
+
+void EditorMainWindow::ShowViewportContextMenu(const QPoint& globalPos)
+{
+    UpdatePlayButtons();
+
+    QMenu menu(this);
+
+    if (actPlay_)
+        menu.addAction(actPlay_);
+
+    if (actPause_)
+        menu.addAction(actPause_);
+
+    if (actStop_)
+        menu.addAction(actStop_);
+
+    menu.addSeparator();
+
+    if (actExternal_)
+        menu.addAction(actExternal_);
+
+    menu.addSeparator();
+
+    if (viewportDock_)
+        menu.addAction(viewportDock_->toggleViewAction());
+
+    if (consoleDock_)
+        menu.addAction(consoleDock_->toggleViewAction());
+
+    if (fileDock_)
+        menu.addAction(fileDock_->toggleViewAction());
+
+    menu.exec(globalPos);
 }

@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <ItemGroup Label="ProjectConfigurations">
-        <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
-        <ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
-        <ProjectConfiguration Include="RelWithDebInfo|x64"><Configuration>RelWithDebInfo</Configuration><Platform>x64</Platform></ProjectConfiguration>
+        <ProjectConfiguration Include="Debug|x64">
+            <Configuration>Debug</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+        <ProjectConfiguration Include="Release|x64">
+            <Configuration>Release</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+        <ProjectConfiguration Include="RelWithDebInfo|x64">
+            <Configuration>RelWithDebInfo</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
     </ItemGroup>
 
     <PropertyGroup Label="Globals">
@@ -11,7 +20,7 @@
         <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     </PropertyGroup>
 
-    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props" />
+    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props"/>
 
     <PropertyGroup Label="Configuration">
         <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -23,8 +32,8 @@
         <WholeProgramOptimization Condition="'$(Configuration)'!='Release'">false</WholeProgramOptimization>
     </PropertyGroup>
 
-    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props" />
-    <Import Project="..\Engine\BuildSupport\Cpp.props" />
+    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props"/>
+    <Import Project="..\Engine\BuildSupport\Cpp.props"/>
 
     <!-- ===== Выходные пути, как у вас ===== -->
     <PropertyGroup>
@@ -49,7 +58,8 @@
     <ItemDefinitionGroup>
         <ClCompile>
             <!-- %(AdditionalIncludeDirectories) берёт include-пути из Cpp.props, сверху кладём Qt -->
-            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtWidgets;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtCore;$(IntDir)moc;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>            <PreprocessorDefinitions>QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtWidgets;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtCore;$(IntDir)moc;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <PreprocessorDefinitions>QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
             <LanguageStandard>stdcpp17</LanguageStandard>
             <ExceptionHandling>Sync</ExceptionHandling>
             <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -114,18 +124,18 @@
 
     <!-- ===== Исходники в Source/ (как у вас было Source/Module.cpp) ===== -->
     <ItemGroup>
-        <ClCompile Include="Source/Module.cpp" />
-        <ClCompile Include="Source/QtHost.cpp" />
-        <ClCompile Include="Source/MainWindow.cpp" />
-        <ClCompile Include="Source/FileBrowser.cpp" />
-        <ClCompile Include="Source/ViewportWidget.cpp" />
-        <ClCompile Include="$(IntDir)moc/moc_MainWindow.cpp" />
+        <ClCompile Include="Source/Module.cpp"/>
+        <ClCompile Include="Source/QtHost.cpp"/>
+        <ClCompile Include="Source/MainWindow.cpp"/>
+        <ClCompile Include="Source/FileBrowser.cpp"/>
+        <ClCompile Include="Source/ViewportWidget.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_MainWindow.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_ViewportWidget.cpp"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ClInclude Include="Include/QtHost.h" />
-        <ClInclude Include="Include/ViewportWidget.h" />
-        <ClInclude Include="Include/FileBrowser.h" />
+        <ClInclude Include="Include/QtHost.h"/>
+        <ClInclude Include="Include/FileBrowser.h"/>
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->
         <CustomBuild Include="Include/MainWindow.h">
             <FileType>Document</FileType>
@@ -137,8 +147,18 @@
             <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
             <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
         </CustomBuild>
+        <CustomBuild Include="Include/ViewportWidget.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
     </ItemGroup>
 
-    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets" />
-    <ImportGroup Label="ExtensionTargets" />
+    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets"/>
+    <ImportGroup Label="ExtensionTargets"/>
 </Project>

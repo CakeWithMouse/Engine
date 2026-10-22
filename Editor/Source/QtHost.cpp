@@ -10,13 +10,16 @@
 
 namespace
 {
-// argc/argv должны жить не меньше QApplication — статического хранения достаточно.
-int g_argc = 1;
-char g_arg0[] = "Editor.dll";
-char* g_argv[] = {g_arg0, nullptr};
+    // argc/argv должны жить не меньше QApplication — статического хранения достаточно.
+    int g_argc = 1;
+    char g_arg0[] = "Editor.dll";
+    char* g_argv[] = {g_arg0, nullptr};
 }
 
-EditorQtHost::EditorQtHost(const EngineModuleHost& host) : host_(host) {}
+EditorQtHost::EditorQtHost(const EngineModuleHost& host) : host_(host)
+{
+}
+
 EditorQtHost::~EditorQtHost() { Stop(); }
 
 bool EditorQtHost::Start()
@@ -26,7 +29,11 @@ bool EditorQtHost::Start()
     uiThread_ = std::thread([this] { UiThreadMain(); });
     for (int i = 0; i < 200 && !uiReady_.load(); ++i)
         std::this_thread::sleep_for(std::chrono::milliseconds(25));
-    if (!uiReady_.load()) { Stop(); return false; }
+    if (!uiReady_.load())
+    {
+        Stop();
+        return false;
+    }
     Log("EditorStart");
     Log(host_.projectName ? host_.projectName : "(no project)");
     Log(host_.projectFile ? host_.projectFile : "(no project file)");
@@ -44,11 +51,12 @@ void EditorQtHost::Stop()
 {
     if (!uiThread_.joinable()) return;
     if (viewportActive_.exchange(false) && host_.viewportDetach)
-        host_.viewportDetach(host_.user);      // поток движка, до уничтожения виджетов
+        host_.viewportDetach(host_.user); // поток движка, до уничтожения виджетов
     if (uiReady_.load())
         // quit() asks windows to close and can be vetoed by our closeEvent guard.
         // GPU resources are gone now: exit the UI loop directly, on its own thread.
-        QMetaObject::invokeMethod(QCoreApplication::instance(), [] { QCoreApplication::exit(0); }, Qt::QueuedConnection);
+        QMetaObject::invokeMethod(QCoreApplication::instance(), [] { QCoreApplication::exit(0); },
+                                  Qt::QueuedConnection);
     uiThread_.join();
     char buf[96];
     std::snprintf(buf, sizeof(buf), "EditorUpdates=%llu", static_cast<unsigned long long>(updates_.load()));
@@ -64,13 +72,19 @@ void EditorQtHost::UiThreadMain()
     QApplication::setStyle(QStringLiteral("Fusion"));
 
     EditorMainWindow window(this);
-    { std::lock_guard lk(windowMutex_); window_ = &window; }
+    {
+        std::lock_guard lk(windowMutex_);
+        window_ = &window;
+    }
     window.show();
     uiReady_.store(true);
 
     app.exec();
 
-    { std::lock_guard lk(windowMutex_); window_ = nullptr; }
+    {
+        std::lock_guard lk(windowMutex_);
+        window_ = nullptr;
+    }
 }
 
 void EditorQtHost::Log(const char* text)
@@ -103,17 +117,21 @@ void EditorQtHost::DrainCommands()
         std::lock_guard lk(commandMutex_);
         pending.swap(commands_);
     }
-    
+
     int lastResize = -1;
-    for (int i = (int)pending.size() - 1; i >= 0; --i)
-        if (pending[i].type == EditorCommand::ViewportResize) { lastResize = i; break; }
+    for (int i = static_cast<int>(pending.size()) - 1; i >= 0; --i)
+        if (pending[i].type == EditorCommand::ViewportResize)
+        {
+            lastResize = i;
+            break;
+        }
 
 
     for (size_t i = 0; i < pending.size(); ++i)
     {
         const EditorCommand& cmd = pending[i];
-        if (cmd.type == EditorCommand::ViewportResize && (int)i != lastResize)
-            continue; 
+        if (cmd.type == EditorCommand::ViewportResize && static_cast<int>(i) != lastResize)
+            continue;
         switch (cmd.type)
         {
         case EditorCommand::TogglePlay:
@@ -121,7 +139,7 @@ void EditorQtHost::DrainCommands()
             if (viewportActive_.load() && host_.viewportControl)
             {
                 const int state = host_.viewportControl(host_.user, cmd.type == EditorCommand::TogglePlay ? 0 : 1);
-                if (state >= 0) playState_.store(state);
+                if (state >= 0) playState_.store(static_cast<EditorState>(state));
                 else Log("Play control failed; see engine log");
             }
             break;
@@ -142,7 +160,11 @@ void EditorQtHost::DrainCommands()
             }
         case EditorCommand::ViewportAttach:
             if (host_.viewportAttach && host_.viewportAttach(host_.user, cmd.hwnd, cmd.w, cmd.h))
-            { viewportActive_.store(true); playState_.store(0); Log("EditorViewportAttach ok"); }
+            {
+                viewportActive_.store(true);
+                playState_.store(Edit);
+                Log("EditorViewportAttach ok");
+            }
             else
             {
                 Log("EditorViewportAttach failed");
@@ -158,7 +180,7 @@ void EditorQtHost::DrainCommands()
                 host_.viewportCamera(host_.user, cmd.right, cmd.up, cmd.forward, cmd.yaw, cmd.pitch, cmd.zoom);
             break;
         case EditorCommand::ViewportDetach:
-            playState_.store(0);
+            playState_.store(Edit);
             if (viewportActive_.exchange(false) && host_.viewportDetach)
                 host_.viewportDetach(host_.user);
             Log("EditorViewportDetach");
