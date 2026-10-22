@@ -26,21 +26,41 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
         setAttribute(Qt::WA_NoSystemBackground, true);
     }
     setFocusPolicy(Qt::StrongFocus);
-    setToolTip("Space: Play/Stop | P: Pause/Resume | RMB: look | WASD: move | Q/E: down/up | Wheel: zoom");
+    setToolTip(
+        "Space: Play/Stop | P: Pause | RMB: look | WASD: move | Tab: select object | Arrows/PgUp/PgDn: move object");
+
     auto* timer = new QTimer(this);
     auto elapsed = std::make_shared<QElapsedTimer>();
     elapsed->start();
+
     connect(timer, &QTimer::timeout, this, [this, elapsed]
     {
         const float dt = std::min(0.05f, static_cast<float>(elapsed->restart()) / 1000.0f);
         if (!attached_ || !hasFocus() || !isActiveWindow()) return;
-        EditorCommand c;
-        c.type = EditorCommand::ViewportCamera;
+
         const float speed = dt * (keys_.contains(Qt::Key_Shift) ? 4.0f : 1.0f);
-        c.right = static_cast<float>(keys_.contains(Qt::Key_D) - keys_.contains(Qt::Key_A)) * speed;
-        c.up = static_cast<float>(keys_.contains(Qt::Key_E) - keys_.contains(Qt::Key_Q)) * speed;
-        c.forward = static_cast<float>(keys_.contains(Qt::Key_W) - keys_.contains(Qt::Key_S)) * speed;
-        if (c.right || c.up || c.forward) host_->PostCommand(c);
+
+        // Если есть выделенный объект, управляем им, иначе камерой
+        if (host_->HasSelection())
+        {
+            float right = static_cast<float>(keys_.contains(Qt::Key_Right) - keys_.contains(Qt::Key_Left)) * speed;
+            float up = static_cast<float>(keys_.contains(Qt::Key_PageUp) - keys_.contains(Qt::Key_PageDown)) * speed;
+            float forward = static_cast<float>(keys_.contains(Qt::Key_Up) - keys_.contains(Qt::Key_Down)) * speed;
+
+            if (right != 0.0f || up != 0.0f || forward != 0.0f)
+            {
+                host_->MoveSelectedObject(right, up, forward);
+            }
+        }
+        else
+        {
+            EditorCommand c;
+            c.type = EditorCommand::ViewportCamera;
+            c.right = static_cast<float>(keys_.contains(Qt::Key_D) - keys_.contains(Qt::Key_A)) * speed;
+            c.up = static_cast<float>(keys_.contains(Qt::Key_E) - keys_.contains(Qt::Key_Q)) * speed;
+            c.forward = static_cast<float>(keys_.contains(Qt::Key_W) - keys_.contains(Qt::Key_S)) * speed;
+            if (c.right || c.up || c.forward) host_->PostCommand(c);
+        }
     });
     timer->start(16);
     setMinimumSize(320, 200);
@@ -142,8 +162,8 @@ bool ViewportWidget::event(QEvent* e)
 
         if (qEnvironmentVariableIsSet("ENGINE_VIEWPORT_INPUT_TRACE"))
             host_->Log(qPrintable(
-                QString("InputFocus focus=%1 active=%2 policy=%3").arg(hasFocus()).arg(isActiveWindow()).arg(static_cast
-                    <int>(focusPolicy()))));
+                QString("InputFocus focus=%1 active=%2 policy=%3").arg(hasFocus()).arg(isActiveWindow()).arg(focusPolicy
+                    ())));
 
         if (mouse->button() == Qt::RightButton)
         {
@@ -225,6 +245,13 @@ bool ViewportWidget::event(QEvent* e)
 
         if (!key->isAutoRepeat())
         {
+            // Обработка Tab для циклического выбора объектов
+            if (e->type() == QEvent::KeyPress && key->key() == Qt::Key_Tab)
+            {
+                host_->FetchSceneAndSelectNext();
+                return true;
+            }
+            
             const int navigationKey = CameraNavigationKey(key->nativeScanCode(), key->key());
 
             if ((navigationKey == Qt::Key_Space || navigationKey == Qt::Key_P) && isActiveWindow())
