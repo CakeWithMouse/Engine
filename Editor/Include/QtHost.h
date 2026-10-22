@@ -17,6 +17,7 @@ struct EditorCommand
         None = 0, RequestExit, ReloadProject, LoadAsset,
         ViewportAttach, ViewportResize, ViewportDetach, ViewportCamera,
         TogglePlay, TogglePause,
+        FetchScene, UpdateObjectTransform // Новые команды
     };
 
     Type type = None;
@@ -24,10 +25,12 @@ struct EditorCommand
     QString path;
     void* hwnd = nullptr;
     uint32_t w = 0, h = 0;
+
+    // Поля для манипуляций с объектами
+    uint64_t objectId = 0;
+    EngineSceneTransform transform;
 };
 
-// Qt-часть редактора: отдельный поток со своим QApplication.
-// Движок -> UI: queued-слоты/атомики. UI -> движок: очередь команд (дрейнится в Update).
 class EditorQtHost
 {
 public:
@@ -63,9 +66,25 @@ public:
 
     void SetModuleApi(const EngineEditSessionApi& scene) { scene_ = scene; }
 
+    // --- Методы для работы с объектами сцены ---
+    void FetchSceneAndSelectNext();
+    void MoveSelectedObject(float right, float up, float forward);
+    bool HasSelection() const { return hasSelection_.load(); }
+    std::string GetSelectedObjectName();
+
 private:
     void UiThreadMain();
     void DrainCommands();
+
+    // Визитор для C-API (статический метод для совместимости с calling convention)
+    struct SceneObject
+    {
+        uint64_t id;
+        std::string name;
+        EngineSceneTransform transform;
+    };
+
+    static void ENGINE_MODULE_CALL SceneVisitor(void* ctx, const EngineSceneObjectInfo* info);
 
     EngineModuleHost host_;
     EngineEditSessionApi scene_;
@@ -80,4 +99,10 @@ private:
     std::atomic<uint64_t> updates_{0};
     std::atomic<bool> viewportActive_{false};
     std::atomic<EditorState> playState_{Edit};
+
+    // Состояние сцены
+    std::vector<SceneObject> sceneObjects_;
+    int selectedObjectIndex_ = -1;
+    std::atomic<bool> hasSelection_{false};
+    std::mutex sceneMutex_;
 };

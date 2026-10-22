@@ -185,8 +185,80 @@ void EditorQtHost::DrainCommands()
                 host_.viewportDetach(host_.user);
             Log("EditorViewportDetach");
             break;
+        case EditorCommand::FetchScene:
+            if (scene_.readActiveScene)
+            {
+                std::lock_guard<std::mutex> lk(sceneMutex_);
+                sceneObjects_.clear();
+                EngineSceneInfo info;
+                scene_.readActiveScene(scene_.context, &info, &EditorQtHost::SceneVisitor, this);
+
+                if (!sceneObjects_.empty())
+                {
+                    selectedObjectIndex_ = (selectedObjectIndex_ + 1) % sceneObjects_.size();
+                    hasSelection_.store(true);
+                    Log(("Selected: " + sceneObjects_[selectedObjectIndex_].name).c_str());
+                }
+                else
+                {
+                    hasSelection_.store(false);
+                    Log("Scene is empty");
+                }
+            }
+            break;
+
+        case EditorCommand::UpdateObjectTransform:
+            if (scene_.scene.setTransform)
+            {
+                scene_.scene.setTransform(scene_.scene.context, cmd.objectId, &cmd.transform);
+            }
+            break;
         default:
             break;
         }
     }
+}
+
+void EditorQtHost::FetchSceneAndSelectNext()
+{
+    EditorCommand c;
+    c.type = EditorCommand::FetchScene;
+    PostCommand(c);
+}
+
+void EditorQtHost::MoveSelectedObject(float right, float up, float forward)
+{
+    std::lock_guard<std::mutex> lk(sceneMutex_);
+    if (selectedObjectIndex_ >= 0 && selectedObjectIndex_ < sceneObjects_.size())
+    {
+        auto& obj = sceneObjects_[selectedObjectIndex_];
+        // Обновляем локальную позицию
+        obj.transform.position[0] += right;
+        obj.transform.position[1] += up;
+        obj.transform.position[2] += forward;
+
+        EditorCommand c;
+        c.type = EditorCommand::UpdateObjectTransform;
+        c.objectId = obj.id;
+        c.transform = obj.transform;
+        PostCommand(c);
+    }
+}
+
+std::string EditorQtHost::GetSelectedObjectName()
+{
+    std::lock_guard<std::mutex> lk(sceneMutex_);
+    if (selectedObjectIndex_ >= 0 && selectedObjectIndex_ < sceneObjects_.size())
+        return sceneObjects_[selectedObjectIndex_].name;
+    return "";
+}
+
+void ENGINE_MODULE_CALL EditorQtHost::SceneVisitor(void* ctx, const EngineSceneObjectInfo* info)
+{
+    auto* self = static_cast<EditorQtHost*>(ctx);
+    SceneObject obj;
+    obj.id = info->id;
+    obj.name = info->name ? info->name : "Unnamed";
+    obj.transform = info->transform;
+    self->sceneObjects_.push_back(obj);
 }
