@@ -138,6 +138,11 @@ bool ViewportWidget::event(QEvent* e)
         looking_ = false;
         rmbPressed_ = false;
         rmbMoved_ = false;
+
+        lmbPressed_ = false;
+        lmbMoved_ = false;
+        draggingSelectedObject_ = false;
+
         keys_.clear();
     }
 
@@ -166,10 +171,20 @@ bool ViewportWidget::event(QEvent* e)
 
         if (mouse->button() == Qt::LeftButton && attached_ && host_->HasScene())
         {
-            EditorCommand c; c.type = EditorCommand::PickObject;
+            lmbPressed_ = true;
+            lmbMoved_ = false;
+            draggingSelectedObject_ = false;
+
+            lmbPressPos_ = mouse->position().toPoint();
+            lastDragPos_ = mouse->position();
+
+            EditorCommand c;
+            c.type = EditorCommand::PickObject;
             c.right = static_cast<float>(2.0 * mouse->position().x() / width() - 1.0);
             c.up = static_cast<float>(1.0 - 2.0 * mouse->position().y() / height());
-            host_->PostCommand(c); return true;
+            host_->PostCommand(c);
+
+            return true;
         }
         if (mouse->button() == Qt::RightButton)
         {
@@ -185,6 +200,7 @@ bool ViewportWidget::event(QEvent* e)
     {
         auto* mouse = static_cast<QMouseEvent*>(e);
 
+        // Существующая логика ПКМ: сначала проверяем, был ли это действительно drag камеры.
         if (rmbPressed_ && !rmbMoved_)
         {
             const QPoint delta = mouse->position().toPoint() - rmbPressPos_;
@@ -212,11 +228,74 @@ bool ViewportWidget::event(QEvent* e)
 
             return true;
         }
+
+        // Начало перетаскивания объекта ЛКМ.
+        // Небольшой порог движения нужен, чтобы обычный клик не превращался в drag.
+        if (lmbPressed_ && !draggingSelectedObject_)
+        {
+            const QPoint delta = mouse->position().toPoint() - lmbPressPos_;
+
+            if (!lmbMoved_ && delta.manhattanLength() > 6)
+            {
+                lmbMoved_ = true;
+            }
+
+            // Если к этому моменту уже есть выделенный объект, начинаем его тащить.
+            // Если PickObject обрабатывается асинхронно, объект может начать тащиться
+            // чуть позже, когда движок подтвердит выбор.
+            if (lmbMoved_ && host_->HasSelection())
+            {
+                draggingSelectedObject_ = true;
+                lastDragPos_ = mouse->position();
+            }
+        }
+
+        // Само перетаскивание выбранного объекта.
+        if (draggingSelectedObject_)
+        {
+            const QPointF delta = mouse->position() - lastDragPos_;
+            lastDragPos_ = mouse->position();
+
+            float right = 0.0f;
+            float up = 0.0f;
+            float forward = 0.0f;
+
+            if (mouse->modifiers() & Qt::ShiftModifier)
+            {
+                // Shift: движение вдоль взгляда камеры.
+                // Двигаем объект вперёд/назад по вертикали мыши.
+                forward = static_cast<float>(-delta.y()) * dragSensitivity_;
+            }
+            else
+            {
+                // Обычный drag: движение в плоскости камеры.
+                // X мыши -> right камеры.
+                // Y мыши -> up камеры, но экранный Y растёт вниз, поэтому инвертируем.
+                right = static_cast<float>(delta.x()) * dragSensitivity_;
+                up = static_cast<float>(-delta.y()) * dragSensitivity_;
+            }
+
+            if (right != 0.0f || up != 0.0f || forward != 0.0f)
+            {
+                host_->MoveSelectedObject(right, up, forward);
+            }
+
+            return true;
+        }
     }
 
     if (e->type() == QEvent::MouseButtonRelease)
     {
         auto* mouse = static_cast<QMouseEvent*>(e);
+
+        if (mouse->button() == Qt::LeftButton && (lmbPressed_ || draggingSelectedObject_))
+        {
+            lmbPressed_ = false;
+            lmbMoved_ = false;
+            draggingSelectedObject_ = false;
+
+            return true;
+        }
 
         if (mouse->button() == Qt::RightButton)
         {
@@ -224,7 +303,9 @@ bool ViewportWidget::event(QEvent* e)
 
             // Если не было движения мышью — показываем меню.
             if (rmbPressed_ && !rmbMoved_)
+            {
                 emit contextMenuRequested(mapToGlobal(mouse->position().toPoint()));
+            }
 
             rmbPressed_ = false;
             rmbMoved_ = false;
@@ -258,9 +339,14 @@ bool ViewportWidget::event(QEvent* e)
                 host_->FetchSceneAndSelectNext();
                 return true;
             }
-            
+
             if (e->type() == QEvent::KeyPress && key->key() == Qt::Key_F && host_->HasScene())
-            { EditorCommand c; c.type = EditorCommand::FocusObject; host_->PostCommand(c); return true; }
+            {
+                EditorCommand c;
+                c.type = EditorCommand::FocusObject;
+                host_->PostCommand(c);
+                return true;
+            }
             const int navigationKey = CameraNavigationKey(key->nativeScanCode(), key->key());
 
             if ((navigationKey == Qt::Key_Space || navigationKey == Qt::Key_P) && isActiveWindow())

@@ -17,6 +17,8 @@ class FileBrowserDock;
 class ViewportWidget;
 class QDockWidget;
 class QPoint;
+class QPushButton;
+class QAction;
 
 class EditorMainWindow : public QMainWindow
 {
@@ -50,6 +52,8 @@ private:
     void UpdatePlayButtons();
     void StartExternalGame();
     void StopExternalGame();
+    void BuildSceneDocks();
+    void ConnectSceneTools();
 
     QTreeWidget* hierarchy_ = nullptr;
     QWidget* inspector_ = nullptr;
@@ -88,4 +92,13 @@ private:
     FileBrowserDock* fileDock_ = nullptr;
     ViewportWidget* viewport_ = nullptr;
     QDockWidget* viewportDock_ = nullptr;
+
+    QDockWidget* sceneToolsDock_ = nullptr;
+    QDockWidget* inspectorDock_ = nullptr;
+
+    QPushButton* addPrimitiveButton_ = nullptr;
+    QPushButton* duplicateObjectButton_ = nullptr;
+    QPushButton* removeObjectButton_ = nullptr;
+
+    QAction* removeShortcut_ = nullptr;
 };

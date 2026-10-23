@@ -42,4 +42,15 @@ private:
     bool rmbPressed_ = false;
     bool rmbMoved_ = false;
     QPoint rmbPressPos_;
+
+    bool lmbPressed_ = false;
+    bool lmbMoved_ = false;
+    bool draggingSelectedObject_ = false;
+
+    QPoint lmbPressPos_;
+    QPointF lastDragPos_;
+
+    // Подбери под масштаб сцены.
+    // Лучше заменить на camera-based scale, см. ниже.
+    float dragSensitivity_ = 0.002f;
 };
