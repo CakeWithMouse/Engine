@@ -1,5 +1,6 @@
 ﻿#include "FileBrowser.h"
 #include "QtHost.h"
+#include "MainWindow.h"
 
 #include <QClipboard>
 #include <QComboBox>
@@ -101,6 +102,11 @@ void FileBrowserDock::OnDoubleClicked(const QModelIndex& index)
         return;                             // каталоги раскрываются штатно
 
     const QString path = model_->filePath(index);
+    if (path.endsWith(QStringLiteral(".scene.json"), Qt::CaseInsensitive))
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenScene(path);
+        return;
+    }
     const QByteArray utf8 = path.toUtf8();  // именованный QByteArray: переживает вызов Log
     const std::string msg = "EditorOpenAsset: " + std::string(utf8.constData(), utf8.size());
     host_->Log(msg.c_str());                // аудит: лог движка + консоль редактора

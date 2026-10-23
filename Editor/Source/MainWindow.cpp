@@ -17,6 +17,8 @@
 #include <QToolBar>
 #include <QProcess>
 #include <QPoint>
+#include <QFileInfo>
+#include <QMessageBox>
 
 EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     : QMainWindow(parent), host_(host)
@@ -78,22 +80,11 @@ void EditorMainWindow::BuildUi()
     statusBar()->addPermanentWidget(statsLabel_);
 
     QMenu* file = menuBar()->addMenu(QStringLiteral("&File"));
-    file->addAction(QStringLiteral("Request engine exit"), this, [this]
-    {
-        EditorCommand cmd;
-        cmd.type = EditorCommand::RequestExit;
-        host_->PostCommand(cmd);
-    });
-    file->addAction(QStringLiteral("Reload project (stub)"), this, [this]
-    {
-        EditorCommand cmd;
-        cmd.type = EditorCommand::ReloadProject;
-        host_->PostCommand(cmd);
-    });
     file->addSeparator();
     file->addAction(QStringLiteral("Close editor"), this, [this] { close(); });
 
     BuildToolBar();
+    BuildSceneTools();
 
     connect(viewport_, &ViewportWidget::contextMenuRequested,
             this, &EditorMainWindow::ShowViewportContextMenu);
@@ -113,12 +104,16 @@ void EditorMainWindow::AppendLine(const QString& line) { console_->appendPlainTe
 
 void EditorMainWindow::closeEvent(QCloseEvent* event)
 {
-    // Keep the HWND alive and Qt pumping messages until the render thread releases DXGI.
-    // Stop() then quits Qt and destroys the window. Never join the render thread from here.
     event->ignore();
-    EditorCommand command;
-    command.type = EditorCommand::RequestExit;
-    host_->PostCommand(command);
+    if (closing_ || sceneBusy_ || checkingChanges_) return;
+    closing_ = true;
+    // Queue a barrier after viewport edits, then inspect the authoritative dirty state.
+    if (host_->HasScene())
+    {
+        EditorCommand c; c.type = EditorCommand::RefreshScene; c.name = QStringLiteral("close"); host_->PostCommand(c);
+    }
+    else { EditorCommand c; c.type = EditorCommand::RequestExit; host_->PostCommand(c); }
+
 }
 
 void EditorMainWindow::BuildToolBar()
@@ -152,7 +147,11 @@ void EditorMainWindow::BuildToolBar()
         c.type = EditorCommand::TogglePlay;
         host_->PostCommand(c);
     });
-    connect(actExternal_, &QAction::triggered, this, &EditorMainWindow::StartExternalGame);
+    connect(actExternal_, &QAction::triggered, this, [this] {
+        if (gameProc_ && gameProc_->state() != QProcess::NotRunning) { StopExternalGame(); return; }
+        if (host_->HasScene()) SaveScene(false, [this] { StartExternalGame(); });
+        else StartExternalGame();
+    });
 
     // режимы доступны только если движок поддерживает setPlayMode
     const bool canPlay = host_->PlayState() == 1;
@@ -164,7 +163,8 @@ void EditorMainWindow::BuildToolBar()
 void EditorMainWindow::UpdatePlayButtons()
 {
     const EditorQtHost::EditorState m = host_->PlayState();
-    actPlay_->setEnabled(m == EditorQtHost::EditorState::Edit || m == EditorQtHost::EditorState::Pause);
+    actExternal_->setEnabled(!sceneBusy_);
+    actPlay_->setEnabled(!sceneBusy_ && (m == EditorQtHost::EditorState::Edit || m == EditorQtHost::EditorState::Pause));
     actPause_->setEnabled(m == EditorQtHost::EditorState::Play);
     actStop_->setEnabled(m != EditorQtHost::EditorState::Edit);
 }
@@ -238,6 +238,7 @@ void EditorMainWindow::StopExternalGame()
 
 void EditorMainWindow::RefreshStats()
 {
+    RefreshSceneTools();
     const double dt = host_->LastDt();
     UpdatePlayButtons();
     statsLabel_->setText(QStringLiteral("%4 | Space: Play/Stop | P: Pause/Resume | updates: %1 | fps: %2 | vp: %3")
@@ -267,6 +268,9 @@ void EditorMainWindow::ShowViewportContextMenu(const QPoint& globalPos)
         menu.addAction(actStop_);
 
     menu.addSeparator();
+    if (duplicateAction_) menu.addAction(duplicateAction_);
+    if (deleteAction_) menu.addAction(deleteAction_);
+    if (saveAction_) menu.addAction(saveAction_);
 
     if (actExternal_)
         menu.addAction(actExternal_);

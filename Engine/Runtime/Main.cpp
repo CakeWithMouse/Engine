@@ -51,7 +51,7 @@ int wmain(int argc, wchar_t** argv)
         options.contentRoot = project.content.u8string();
         options.module = options.mode == RuntimeMode::Game ? project.module : directory / "Editor.dll";
         if (options.mode == RuntimeMode::Game) options.startupScene = project.startupScene;
-        if (sceneApi)
+        if (sceneApi || (options.mode == RuntimeMode::Editor && !project.startupScene.empty() && project.preview.empty()))
         {
             if (options.mode != RuntimeMode::Editor) throw std::runtime_error("--scene-api requires editor mode");
             options.editModule = project.module;

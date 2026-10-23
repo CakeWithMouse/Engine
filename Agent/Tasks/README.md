@@ -57,3 +57,5 @@
 | 042 | Ядро/runtime | [startupScene и загрузка при --scene-api — выполнено](042-startup-scene.md) |
 | 043 | Ядро/runtime | [startupScene в game mode — выполнено](043-game-startup-scene.md) |
 | 044 | Ядро/runtime | [Отображение startupScene в Game — выполнено](044-game-scene-rendering.md) |
+
+- [045 — Пользовательские проекты и инструменты сцены](045-user-projects.md) — реализовано, Debug проверен.

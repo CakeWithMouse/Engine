@@ -24,6 +24,7 @@
 
     <PropertyGroup Label="Configuration">
         <ConfigurationType>DynamicLibrary</ConfigurationType>
+        <ConfigurationType Condition="'$(EditorUiTest)'=='true'">Application</ConfigurationType>
         <PlatformToolset>v145</PlatformToolset>
         <CharacterSet>Unicode</CharacterSet>
         <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
@@ -43,6 +44,8 @@
         <!-- obj/moc оставляем раздельными по конфигурациям редактора -->
         <IntDir>$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/obj/Editor/</IntDir>
         <TargetName>Editor</TargetName>
+        <TargetName Condition="'$(EditorUiTest)'=='true'">EditorUiTests</TargetName>
+        <IntDir Condition="'$(EditorUiTest)'=='true'">$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/obj/EditorUiTests/</IntDir>
     </PropertyGroup>
 
     <!-- ===== Qt: подставьте свою версию/путь ===== -->
@@ -124,9 +127,11 @@
 
     <!-- ===== Исходники в Source/ (как у вас было Source/Module.cpp) ===== -->
     <ItemGroup>
+        <ClCompile Include="tests/EditorUiTests.cpp" Condition="'$(EditorUiTest)'=='true'"/>
         <ClCompile Include="Source/Module.cpp"/>
         <ClCompile Include="Source/QtHost.cpp"/>
         <ClCompile Include="Source/MainWindow.cpp"/>
+        <ClCompile Include="Source/SceneTools.cpp"/>
         <ClCompile Include="Source/FileBrowser.cpp"/>
         <ClCompile Include="Source/ViewportWidget.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_MainWindow.cpp"/>

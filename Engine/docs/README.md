@@ -33,3 +33,7 @@
 - [GAME-STARTUP-SCENE.md](GAME-STARTUP-SCENE.md) — загрузка перед start, GameSceneApi и lifecycle для автора игры.
 
 - [GAME-SCENE-RENDERING.md](GAME-SCENE-RENDERING.md) — окно Game, рендер startupScene, lifecycle кадра и видимый пример.
+
+## Собственный проект
+
+[Создание проекта, примитивы, сохранение сцен и запуск](USER-PROJECTS.md).

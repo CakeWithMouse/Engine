@@ -4,6 +4,7 @@
 #include <cstring>
 #include <cmath>
 #include <climits>
+#include <limits>
 #include <map>
 #include <stdexcept>
 
@@ -201,6 +202,40 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                     s.edit_.swap(candidate); // noexcept commit; old scene dies inside this call
                     *newId = s.edit_->GetScene().GetId();
                 });
+            });
+        },
+        [](void* p, float x, float y, uint64_t* id) -> uint32_t {
+            if (!id) return EngineSceneInvalidArgument;
+            *id = 0;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (!s.attached_ || !s.width_ || !s.height_ || !std::isfinite(x) || !std::isfinite(y) ||
+                    std::abs(x) > 1 || std::abs(y) > 1) return EngineSceneInvalidArgument;
+                using namespace DirectX;
+                auto* player = s.Active().GetPlayer();
+                const auto view = XMMatrixTranspose(XMLoadFloat4x4(&player->GetViewMatrix()));
+                const auto projection = XMMatrixTranspose(XMLoadFloat4x4(&player->GetProjectionMatrix()));
+                const auto inverse = XMMatrixInverse(nullptr, view * projection);
+                XMFLOAT3 nearPoint, farPoint;
+                XMStoreFloat3(&nearPoint, XMVector3TransformCoord(XMVectorSet(x,y,0,1), inverse));
+                XMStoreFloat3(&farPoint, XMVector3TransformCoord(XMVectorSet(x,y,1,1), inverse));
+                const glm::vec3 origin(nearPoint.x, nearPoint.y, nearPoint.z);
+                const auto direction = glm::normalize(glm::vec3(farPoint.x, farPoint.y, farPoint.z) - origin);
+                float distance = std::numeric_limits<float>::max();
+                for (const auto& entry : s.Active().GetScene().GetComponents())
+                    if (entry.second->RaycastPrimitive(origin, direction, distance)) *id = entry.second->GetComponentId();
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, uint64_t id) -> uint32_t {
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (!s.attached_) return EngineSceneInvalidArgument;
+                auto* scene = &s.Active().GetScene();
+                auto* object = scene->FindComponent(id);
+                if (!object) return EngineSceneNotFound;
+                auto* player = s.Active().GetPlayer();
+                player->SetPosition(object->GetCenter() - player->GetForward() * (std::max)(2.0f, object->GetWorldBoundingRadius() * 3.0f));
+                player->MoveEditorCamera(0,0,0,0,0,0);
+                return EngineSceneOk;
             });
         }};
 }

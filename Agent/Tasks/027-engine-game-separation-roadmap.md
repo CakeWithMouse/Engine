@@ -147,3 +147,8 @@ Debug: 13/13 тестов ядра, 22/22 runtime, viewport и Qt Play/Pause/Sto
 2026-10-18: [043](043-game-startup-scene.md) — startupScene в game mode, отдельный GameSceneApi, create/load/start, без двойного Tick. Debug v143: 548 проверок + 109 Scene API; CLI компилируется без Editor.
 
 2026-10-18: [044](044-game-scene-rendering.md) — Game renderer отображает startupScene, непрерывный кадр и MovingCube. Debug: 575 + 109 проверок, 13/13 ядра; без Editor.
+
+### Пользовательские проекты и редактор примитивов
+
+- [x] [045 — Создание проекта, редактирование и запуск](045-user-projects.md): готовый scene-модуль, отдельные пользовательские ресурсы, UI сцены, JSON, Undo/Redo, picking/focus, Play и standalone.
+- Проверено x64: Debug/Release project-workflow (по 59 проверок) + launcher game/editor smoke; Debug edit-session regression (575), Debug/Release Qt UI workflow.

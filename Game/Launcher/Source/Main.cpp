@@ -4,6 +4,10 @@
 #include "Catalog.h"
 #include "../../Common/Deployment.h"
 #include <iostream>
+#include <shobjidl.h>
+#include <shlobj.h>
+#include <wrl/client.h>
+#include "ProjectLibrary.h"
 
 namespace
 {
@@ -13,6 +17,119 @@ HWND editButton = nullptr;
 constexpr INT_PTR ListId = 100;
 constexpr INT_PTR LaunchId = 101;
 constexpr INT_PTR EditId = 102;
+constexpr INT_PTR CreateId = 103, OpenId = 104;
+std::vector<std::filesystem::path> userProjects;
+
+std::filesystem::path Pick(HWND owner, bool folder)
+{
+    Microsoft::WRL::ComPtr<IFileOpenDialog> dialog;
+    if (FAILED(CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&dialog))))
+        throw std::runtime_error("Cannot open file chooser");
+    DWORD options = 0; dialog->GetOptions(&options);
+    dialog->SetOptions(options | FOS_FORCEFILESYSTEM | (folder ? FOS_PICKFOLDERS : FOS_FILEMUSTEXIST));
+    if (!folder) { const COMDLG_FILTERSPEC filters[] = {{L"Engine project (Project.json)", L"Project.json"}}; dialog->SetFileTypes(1, filters); }
+    if (dialog->Show(owner) == HRESULT_FROM_WIN32(ERROR_CANCELLED)) return {};
+    Microsoft::WRL::ComPtr<IShellItem> item;
+    if (FAILED(dialog->GetResult(&item))) throw std::runtime_error("Cannot read selected path");
+    PWSTR path = nullptr;
+    if (FAILED(item->GetDisplayName(SIGDN_FILESYSPATH, &path))) throw std::runtime_error("Not a filesystem path");
+    std::filesystem::path result(path); CoTaskMemFree(path); return result;
+}
+std::wstring Text(HWND window, int id)
+{
+    const auto control = GetDlgItem(window, id);
+    std::wstring text(GetWindowTextLengthW(control) + 1, L'\0');
+    text.resize(GetWindowTextW(control, text.data(), static_cast<int>(text.size())));
+    return text;
+}
+std::string Utf8(const std::wstring& text)
+{
+    if (text.empty()) return {};
+    const int size = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, text.data(), static_cast<int>(text.size()), nullptr, 0, nullptr, nullptr);
+    if (!size) throw std::runtime_error("Invalid project name");
+    std::string result(size, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, text.data(), static_cast<int>(text.size()), result.data(), size, nullptr, nullptr);
+    return result;
+}
+INT_PTR CALLBACK CreateDialogProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    if (message == WM_INITDIALOG)
+    {
+        SetWindowLongPtrW(window, DWLP_USER, lParam);
+        SetDlgItemTextW(window, 201, L"Мой проект");
+        PWSTR documents = nullptr;
+        if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &documents)))
+        {
+            const auto path = std::filesystem::path(documents) / L"Мой проект";
+            SetDlgItemTextW(window, 202, path.c_str()); CoTaskMemFree(documents);
+        }
+        return TRUE;
+    }
+    if (message != WM_COMMAND) return FALSE;
+    try
+    {
+        if (LOWORD(wParam) == IDCANCEL) { EndDialog(window, IDCANCEL); return TRUE; }
+        if (LOWORD(wParam) == 203)
+        {
+            const auto parent = Pick(window, true);
+            if (!parent.empty())
+            {
+                auto leaf = Text(window, 201);
+                if (leaf.empty() || leaf == L"." || leaf == L".." || leaf.find_first_of(L"<>:\"/\\|?*") != std::wstring::npos) leaf = L"NewProject";
+                SetDlgItemTextW(window, 202, (parent / leaf).c_str());
+            }
+            return TRUE;
+        }
+        if (LOWORD(wParam) == IDOK)
+        {
+            const auto path = Text(window, 202);
+            if (path.empty() || !std::filesystem::path(path).is_absolute()) throw std::runtime_error("Choose an absolute path for the new project folder");
+            auto* output = reinterpret_cast<std::filesystem::path*>(GetWindowLongPtrW(window, DWLP_USER));
+            *output = ProjectLibrary::Create(path, Utf8(Text(window, 201)), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll");
+            EndDialog(window, IDOK); return TRUE;
+        }
+    }
+    catch (const std::exception& error) { MessageBoxW(window, ExampleDeployment::Wide(error.what()).c_str(), L"Проект не создан", MB_OK | MB_ICONERROR); }
+    return FALSE;
+}
+std::filesystem::path SelectedProject()
+{
+    const auto index = SendMessageW(list, LB_GETCURSEL, 0, 0);
+    return index >= static_cast<LRESULT>(Games.size()) ? userProjects.at(index - Games.size()) : std::filesystem::path{};
+}
+void ReloadProjects(const std::filesystem::path& selected = {})
+{
+    userProjects = ProjectLibrary::ReadRegistry();
+    SendMessageW(list, LB_RESETCONTENT, 0, 0);
+    for (const auto& game : Games) SendMessageW(list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(game.title));
+    int selection = 0;
+    for (size_t i = 0; i < userProjects.size(); ++i)
+    {
+        std::wstring title;
+        try { title = L"Проект: " + ExampleDeployment::Wide(ReadRuntimeProject(userProjects[i]).name.c_str()); }
+        catch (...) { title = L"Недоступен: " + userProjects[i].wstring(); }
+        SendMessageW(list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(title.c_str()));
+        if (userProjects[i] == selected) selection = static_cast<int>(Games.size() + i);
+    }
+    SendMessageW(list, LB_SETCURSEL, selection, 0);
+}
+int LaunchProject(const std::filesystem::path& file, bool editor, bool smoke = false)
+{
+    ProjectLibrary::Validate(file);
+    const auto runtime = ExampleDeployment::ExecutableDirectory() / "Runtime/EngineRuntime.exe";
+    if (!std::filesystem::is_regular_file(runtime)) throw std::runtime_error("EngineRuntime.exe is missing");
+    const auto project = std::filesystem::absolute(file);
+    std::wstring command = L"\"" + runtime.wstring() + L"\" --project \"" + project.wstring() + L"\" --mode " + (editor ? L"editor --scene-api" : L"game");
+    if (smoke) command += L" --frames 3";
+    STARTUPINFOW startup{}; startup.cb = sizeof(startup); PROCESS_INFORMATION process{};
+    if (!CreateProcessW(runtime.c_str(), command.data(), nullptr, nullptr, FALSE, smoke ? CREATE_NO_WINDOW : CREATE_NEW_CONSOLE,
+        nullptr, runtime.parent_path().c_str(), &startup, &process)) throw std::runtime_error("Cannot start project, Windows error " + std::to_string(GetLastError()));
+    CloseHandle(process.hThread);
+    if (!smoke) { CloseHandle(process.hProcess); return 0; }
+    if (WaitForSingleObject(process.hProcess, 60000) != WAIT_OBJECT_0)
+    { TerminateProcess(process.hProcess, 124); CloseHandle(process.hProcess); throw std::runtime_error("Project smoke timed out"); }
+    DWORD code = 1; GetExitCodeProcess(process.hProcess, &code); CloseHandle(process.hProcess); return static_cast<int>(code);
+}
 
 std::filesystem::path GameDirectory(const GameEntry& entry)
 {
@@ -81,6 +198,18 @@ const GameEntry& Selected()
 
 void UpdateStatus()
 {
+    const auto projectFile = SelectedProject();
+    if (!projectFile.empty())
+    {
+        try
+        {
+            const auto project = ProjectLibrary::Validate(projectFile);
+            SetWindowTextW(status, (L"Готов к редактированию и запуску.\r\n" + projectFile.wstring() + L"\r\nРедактор: примитивы → свойства → Ctrl+S → Play или запуск из лаунчера.").c_str());
+            EnableWindow(editButton, TRUE);
+        }
+        catch (const std::exception& error) { SetWindowTextW(status, ExampleDeployment::Wide(error.what()).c_str()); EnableWindow(editButton, FALSE); }
+        return;
+    }
     const auto& entry = Selected();
     std::wstring message;
     try
@@ -111,39 +240,62 @@ void UpdateStatus()
     SetWindowTextW(status, message.c_str());
 }
 
-LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT WindowProcImpl(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
     {
     case WM_CREATE:
-        CreateWindowW(L"STATIC", L"Выберите игру", WS_CHILD | WS_VISIBLE, 18, 15, 600, 24, window, nullptr, nullptr, nullptr);
+        CreateWindowW(L"STATIC", L"Примеры и ваши проекты", WS_CHILD | WS_VISIBLE, 18, 15, 600, 24, window, nullptr, nullptr, nullptr);
         list = CreateWindowExW(WS_EX_CLIENTEDGE, L"LISTBOX", L"", WS_CHILD | WS_VISIBLE | WS_TABSTOP | LBS_NOTIFY | WS_VSCROLL,
-            18, 45, 670, 145, window, reinterpret_cast<HMENU>(ListId), nullptr, nullptr);
-        for (const auto& game : Games) SendMessageW(list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(game.title));
-        SendMessageW(list, LB_SETCURSEL, 0, 0);
+            18, 45, 670, 220, window, reinterpret_cast<HMENU>(ListId), nullptr, nullptr);
+        ReloadProjects();
         CreateWindowW(L"BUTTON", L"Играть", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_DEFPUSHBUTTON,
-            18, 205, 155, 35, window, reinterpret_cast<HMENU>(LaunchId), nullptr, nullptr);
+            18, 280, 130, 35, window, reinterpret_cast<HMENU>(LaunchId), nullptr, nullptr);
         editButton = CreateWindowW(L"BUTTON", L"Редактировать", WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-            190, 205, 180, 35, window, reinterpret_cast<HMENU>(EditId), nullptr, nullptr);
+            160, 280, 160, 35, window, reinterpret_cast<HMENU>(EditId), nullptr, nullptr);
+        CreateWindowW(L"BUTTON", L"Создать проект", WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+            332, 280, 170, 35, window, reinterpret_cast<HMENU>(CreateId), nullptr, nullptr);
+        CreateWindowW(L"BUTTON", L"Открыть проект…", WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+            514, 280, 174, 35, window, reinterpret_cast<HMENU>(OpenId), nullptr, nullptr);
         status = CreateWindowW(L"STATIC", L"", WS_CHILD | WS_VISIBLE | SS_LEFT,
-            18, 255, 670, 120, window, nullptr, nullptr, nullptr);
+            18, 335, 670, 120, window, nullptr, nullptr, nullptr);
         UpdateStatus();
         return 0;
     case WM_ACTIVATE:
         if (list && LOWORD(wParam) != WA_INACTIVE) UpdateStatus();
         return 0;
     case WM_COMMAND:
+        if (LOWORD(wParam) == CreateId || LOWORD(wParam) == OpenId)
+        {
+            try
+            {
+                std::filesystem::path project;
+                if (LOWORD(wParam) == CreateId)
+                {
+                    if (DialogBoxParamW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(200), window, CreateDialogProc, reinterpret_cast<LPARAM>(&project)) != IDOK) return 0;
+                }
+                else project = Pick(window, false);
+                if (project.empty()) return 0;
+                ProjectLibrary::Validate(project);
+                ProjectLibrary::Remember(project); ReloadProjects(project); UpdateStatus();
+                LaunchProject(project, true);
+            }
+            catch (const std::exception& error) { MessageBoxW(window, ExampleDeployment::Wide(error.what()).c_str(), L"Ошибка проекта", MB_OK | MB_ICONERROR); }
+            return 0;
+        }
         if (LOWORD(wParam) == ListId && HIWORD(wParam) == LBN_SELCHANGE) { UpdateStatus(); return 0; }
         if (LOWORD(wParam) == LaunchId || LOWORD(wParam) == EditId || (LOWORD(wParam) == ListId && HIWORD(wParam) == LBN_DBLCLK))
         {
             try
             {
-                Launch(Selected(), false, LOWORD(wParam) == EditId);
+                const auto project = SelectedProject();
+                if (project.empty()) Launch(Selected(), false, LOWORD(wParam) == EditId);
+                else LaunchProject(project, LOWORD(wParam) != LaunchId);
                 SetWindowTextW(status, L"Приложение запущено. Лаунчер можно закрыть.");
             }
             catch (const std::exception& error)
             {
-                const auto text = ExampleDeployment::Wide(error.what()) + L"\r\n" + Selected().buildHint;
+                const auto text = ExampleDeployment::Wide(error.what()) + (SelectedProject().empty() ? L"\r\n" + std::wstring(Selected().buildHint) : L"");
                 MessageBoxW(window, text.c_str(), L"Не удалось запустить игру", MB_OK | MB_ICONERROR);
             }
             return 0;
@@ -153,10 +305,21 @@ LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lPa
     }
     return DefWindowProcW(window, message, wParam, lParam);
 }
+LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    try { return WindowProcImpl(window, message, wParam, lParam); }
+    catch (const std::exception& error)
+    {
+        MessageBoxW(window, ExampleDeployment::Wide(error.what()).c_str(), L"Engine Launcher", MB_OK | MB_ICONERROR);
+        return message == WM_CREATE ? -1 : 0;
+    }
+}
 }
 
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
 {
+    CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    struct ComGuard { ~ComGuard() { CoUninitialize(); } } comGuard;
     int argc = 0;
     LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
     if (!argv) return 2;
@@ -165,6 +328,18 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
     {
         if (diagnostic)
         {
+            const std::wstring option = argv[1];
+            if (option == L"--create-project" && argc == 4)
+            {
+                ProjectLibrary::Create(argv[2], Utf8(argv[3]), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll");
+                LocalFree(argv); return 0;
+            }
+            if (argc == 3 && (option == L"--check-project" || option == L"--smoke-project" || option == L"--smoke-project-editor"))
+            {
+                const std::filesystem::path file = argv[2]; LocalFree(argv); argv = nullptr;
+                ProjectLibrary::Validate(file);
+                return option == L"--check-project" ? 0 : LaunchProject(file, option == L"--smoke-project-editor", true);
+            }
             if (argc != 3 || (std::wstring(argv[1]) != L"--check" && std::wstring(argv[1]) != L"--smoke" &&
                 std::wstring(argv[1]) != L"--check-editor" && std::wstring(argv[1]) != L"--smoke-editor"))
             { LocalFree(argv); return 2; }
@@ -185,7 +360,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
         wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
         if (!RegisterClassW(&wc)) throw std::runtime_error("Cannot register launcher window");
         HWND window = CreateWindowW(wc.lpszClassName, L"Engine Launcher", WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
-            CW_USEDEFAULT, CW_USEDEFAULT, 730, 430, nullptr, nullptr, instance, nullptr);
+            CW_USEDEFAULT, CW_USEDEFAULT, 730, 510, nullptr, nullptr, instance, nullptr);
         if (!window) throw std::runtime_error("Cannot create launcher window");
         ShowWindow(window, show);
         MSG msg{};

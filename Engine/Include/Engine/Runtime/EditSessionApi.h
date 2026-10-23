@@ -1,7 +1,7 @@
 #pragma once
 #include <Engine/Runtime/SceneModuleApi.h>
 
-#define ENGINE_EDIT_API_VERSION 2u
+#define ENGINE_EDIT_API_VERSION 3u
 enum EngineEditState : uint32_t { EngineEditing = 0, EnginePlaying = 1, EnginePaused = 2 };
 enum EngineEditControl : uint32_t { EnginePlay = 0, EngineStop = 1, EnginePause = 2, EngineResume = 3 };
 
@@ -24,6 +24,9 @@ struct EngineEditSessionApi
     uint32_t (ENGINE_MODULE_CALL *saveScene)(void*, const char* path, char* error, uint32_t capacity);
     // Edit only; newSceneId is zero on failure. Success invalidates all previous object IDs.
     uint32_t (ENGINE_MODULE_CALL *loadScene)(void*, const char* path, uint64_t* newSceneId, char* error, uint32_t capacity);
+    // Viewport NDC coordinates [-1,1], Y upwards. Successful miss returns ID zero.
+    uint32_t (ENGINE_MODULE_CALL *pickObject)(void*, float x, float y, uint64_t* id);
+    uint32_t (ENGINE_MODULE_CALL *focusObject)(void*, uint64_t id);
 };
 struct EngineEditModuleApi
 {
@@ -42,5 +45,5 @@ inline bool IsCompleteEditSessionApi(const EngineEditSessionApi& api) noexcept
 {
     return api.version == ENGINE_EDIT_API_VERSION && api.context && IsCompleteSceneApi(api.scene) &&
         api.control && api.getState && api.readActiveScene && api.setParent && api.attachViewport &&
-        api.resizeViewport && api.camera && api.frame && api.saveScene && api.loadScene;
+        api.resizeViewport && api.camera && api.frame && api.saveScene && api.loadScene && api.pickObject && api.focusObject;
 }

@@ -50,6 +50,34 @@ GameComponent::GameComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm:
 
 GameComponent::~GameComponent() = default;
 
+bool GameComponent::RaycastPrimitive(const glm::vec3& origin, const glm::vec3& direction, float& distance)
+{
+    using namespace DirectX;
+    const auto world = GetWorldMatrix();
+    const auto inverse = XMMatrixInverse(nullptr, XMLoadFloat4x4(&world));
+    XMFLOAT3 localOrigin, localDirection;
+    XMStoreFloat3(&localOrigin, XMVector3TransformCoord(XMVectorSet(origin.x, origin.y, origin.z, 1), inverse));
+    XMStoreFloat3(&localDirection, XMVector3TransformNormal(XMVectorSet(direction.x, direction.y, direction.z, 0), inverse));
+    const glm::vec3 o(localOrigin.x, localOrigin.y, localOrigin.z), d(localDirection.x, localDirection.y, localDirection.z);
+    bool hit = false;
+    auto vertex = [&](int index) { const auto& v = points[static_cast<size_t>(index) * 2]; return glm::vec3(v.x, v.y, v.z); };
+    for (size_t i = 0; i + 2 < indices.size(); i += 3)
+    {
+        const int a = indices[i], b = indices[i+1], c = indices[i+2];
+        if (a < 0 || b < 0 || c < 0 || static_cast<size_t>((std::max)({a,b,c})) >= points.size() / 2) continue;
+        const auto v = vertex(a), e1 = vertex(b) - v, e2 = vertex(c) - v;
+        const auto p = glm::cross(d, e2); const float det = glm::dot(e1, p);
+        if (std::abs(det) < 1e-8f) continue;
+        const auto t = o - v; const float u = glm::dot(t, p) / det;
+        if (u < 0 || u > 1) continue;
+        const auto q = glm::cross(t, e1); const float w = glm::dot(d, q) / det;
+        if (w < 0 || u + w > 1) continue;
+        const float candidate = glm::dot(e2, q) / det;
+        if (candidate >= 0 && candidate < distance) { distance = candidate; hit = true; }
+    }
+    return hit;
+}
+
 void GameComponent::SetGame(Game* game)
 {
     GamePtr = game;

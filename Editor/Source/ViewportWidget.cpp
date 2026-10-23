@@ -52,7 +52,6 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
                 host_->MoveSelectedObject(right, up, forward);
             }
         }
-        else
         {
             EditorCommand c;
             c.type = EditorCommand::ViewportCamera;
@@ -165,6 +164,13 @@ bool ViewportWidget::event(QEvent* e)
                 QString("InputFocus focus=%1 active=%2 policy=%3").arg(hasFocus()).arg(isActiveWindow()).arg(focusPolicy
                     ())));
 
+        if (mouse->button() == Qt::LeftButton && attached_ && host_->HasScene())
+        {
+            EditorCommand c; c.type = EditorCommand::PickObject;
+            c.right = static_cast<float>(2.0 * mouse->position().x() / width() - 1.0);
+            c.up = static_cast<float>(1.0 - 2.0 * mouse->position().y() / height());
+            host_->PostCommand(c); return true;
+        }
         if (mouse->button() == Qt::RightButton)
         {
             rmbPressed_ = true;
@@ -242,6 +248,7 @@ bool ViewportWidget::event(QEvent* e)
     if ((e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease) && hasFocus())
     {
         auto* key = static_cast<QKeyEvent*>(e);
+        if (key->modifiers() & Qt::ControlModifier) return QWidget::event(e);
 
         if (!key->isAutoRepeat())
         {
@@ -252,6 +259,8 @@ bool ViewportWidget::event(QEvent* e)
                 return true;
             }
             
+            if (e->type() == QEvent::KeyPress && key->key() == Qt::Key_F && host_->HasScene())
+            { EditorCommand c; c.type = EditorCommand::FocusObject; host_->PostCommand(c); return true; }
             const int navigationKey = CameraNavigationKey(key->nativeScanCode(), key->key());
 
             if ((navigationKey == Qt::Key_Space || navigationKey == Qt::Key_P) && isActiveWindow())

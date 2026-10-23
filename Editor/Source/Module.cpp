@@ -81,9 +81,9 @@ extern "C" __declspec(dllexport) int __cdecl EngineBindEditSession(uint32_t vers
                                                                    uint32_t size, void* editorSession,
                                                                    const EngineEditSessionApi* sessionApi)
 {
-    if (version != ENGINE_EDIT_API_VERSION || size != sizeof(EngineEditSessionApi) || !editorSession || !sessionApi)
+    if (version != ENGINE_EDIT_API_VERSION || size != sizeof(EngineEditSessionApi) || !editorSession)
         return 0;
     auto* e = static_cast<EditorQtHost*>(editorSession);
-    e->SetModuleApi(*sessionApi);
+    e->SetModuleApi(sessionApi ? *sessionApi : EngineEditSessionApi{});
     return 1;
 }

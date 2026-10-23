@@ -7,6 +7,10 @@
 #include <mutex>
 #include <QString>
 #include <thread>
+#include <vector>
+#include <memory>
+#include <chrono>
+class QTemporaryDir;
 
 class EditorMainWindow;
 
@@ -17,7 +21,8 @@ struct EditorCommand
         None = 0, RequestExit, ReloadProject, LoadAsset,
         ViewportAttach, ViewportResize, ViewportDetach, ViewportCamera,
         TogglePlay, TogglePause,
-        FetchScene, UpdateObjectTransform // Новые команды
+        FetchScene, UpdateObjectTransform, RefreshScene, SelectObject, CreateObject, RemoveObject,
+        RenameObject, DuplicateObject, SaveScene, LoadScene, NewScene, Undo, Redo, PickObject, FocusObject
     };
 
     Type type = None;
@@ -28,7 +33,8 @@ struct EditorCommand
 
     // Поля для манипуляций с объектами
     uint64_t objectId = 0;
-    EngineSceneTransform transform;
+    EngineSceneTransform transform{{0,0,0},{0,0,0,1},{1,1,1}};
+    QString name;
 };
 
 class EditorQtHost
@@ -60,11 +66,28 @@ public:
     const EngineModuleHost& host() const { return host_; }
     const EngineEditSessionApi& scene() const { return scene_; }
 
-    bool HasViewport() const { return host_.viewportAttach != nullptr; }
+    bool HasViewport() const { return HasScene() || host_.viewportAttach != nullptr; }
     bool ViewportActive() const { return viewportActive_.load(); }
     EditorState PlayState() const { return playState_.load(); }
 
-    void SetModuleApi(const EngineEditSessionApi& scene) { scene_ = scene; }
+    void SetModuleApi(const EngineEditSessionApi& scene) { scene_ = scene; sceneAvailable_.store(scene.context != nullptr); }
+    bool HasScene() const { return sceneAvailable_.load(); }
+    struct SceneObject
+    {
+        uint64_t id = 0, parent = 0;
+        bool inheritScale = true;
+        std::string name, type;
+        EngineSceneTransform transform{};
+    };
+    struct SceneType { std::string name, label; };
+    struct Snapshot
+    {
+        std::vector<SceneObject> objects;
+        std::vector<SceneType> types;
+        uint64_t selected = 0, serial = 0;
+        bool dirty = false, canUndo = false, canRedo = false;
+    };
+    Snapshot ReadSnapshot();
 
     // --- Методы для работы с объектами сцены ---
     void FetchSceneAndSelectNext();
@@ -76,18 +99,15 @@ private:
     void UiThreadMain();
     void DrainCommands();
 
-    // Визитор для C-API (статический метод для совместимости с calling convention)
-    struct SceneObject
-    {
-        uint64_t id;
-        std::string name;
-        EngineSceneTransform transform;
-    };
-
+    void PublishScene();
+    void Complete(const EditorCommand& command, uint32_t status, const QString& error = {});
+    QString Checkpoint();
+    void RecordChange(const QString& checkpoint);
     static void ENGINE_MODULE_CALL SceneVisitor(void* ctx, const EngineSceneObjectInfo* info);
 
     EngineModuleHost host_;
-    EngineEditSessionApi scene_;
+    EngineEditSessionApi scene_{};
+    std::atomic<bool> sceneAvailable_{false};
     std::mutex logMutex_;
     std::thread uiThread_;
     std::atomic<bool> uiReady_{false};
@@ -100,9 +120,13 @@ private:
     std::atomic<bool> viewportActive_{false};
     std::atomic<EditorState> playState_{Edit};
 
-    // Состояние сцены
-    std::vector<SceneObject> sceneObjects_;
-    int selectedObjectIndex_ = -1;
+    Snapshot snapshot_;
+    uint64_t selectedId_ = 0;
+    bool dirty_ = false, sceneViewportAttached_ = false;
+    std::unique_ptr<QTemporaryDir> historyDirectory_;
+    uint64_t historySerial_ = 0, lastTransformId_ = 0;
+    std::chrono::steady_clock::time_point lastTransformTime_{};
+    std::vector<QString> undo_, redo_;
     std::atomic<bool> hasSelection_{false};
     std::mutex sceneMutex_;
 };

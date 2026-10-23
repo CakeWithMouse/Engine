@@ -128,6 +128,8 @@ public:
     virtual float GetBoundingRadius() const;
     /** Radius of the geometry around the local origin, without any scale. */
     virtual float GetLocalBoundingRadius() const { return LocalBoundingRadius; }
+    // CPU triangle picking for InitPoints primitives; distance uses the supplied world ray.
+    bool RaycastPrimitive(const glm::vec3& origin, const glm::vec3& direction, float& distance);
     /** Conservative world-space radius around GetWorldPosition(). */
     float GetWorldBoundingRadius();
 
