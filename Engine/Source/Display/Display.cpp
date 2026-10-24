@@ -26,6 +26,12 @@ Display::Display(int ScreenW, int ScreenH)
     InitHwndClass();
 }
 
+Display::Display(HWND externalWindow, int width, int height)
+    : hWnd(externalWindow), ownsWindow(false), ScreenW(width), ScreenH(height)
+{
+    SetClientSize(width, height);
+}
+
 void Display::InitWinClass()
 {
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
@@ -187,7 +193,7 @@ LRESULT Display::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 Display::~Display()
 {
-    if (hWnd && IsWindow(hWnd))
+    if (ownsWindow && hWnd && IsWindow(hWnd))
     {
         SetWindowLongPtr(hWnd, GWLP_USERDATA, 0);
         DestroyWindow(hWnd);
@@ -198,7 +204,7 @@ Display::~Display()
 void Display::SetGamePointer(Game* gamePtr)
 {
     GamePointer = gamePtr;
-    if (hWnd)
+    if (ownsWindow && hWnd)
     {
         SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(gamePtr));
     }

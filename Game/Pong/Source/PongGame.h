@@ -7,6 +7,7 @@ class PongGame : public Game
 public:
     PongGame() : Game() { RenderingType = Custom; }
     void AddScore(glm::vec2 ScoreAdded);
+    void BuildScene();
 
 protected:
     void TickComponents(float deltaTime) override;

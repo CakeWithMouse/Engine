@@ -1,6 +1,11 @@
 # Учебный движок
 
-Новый [каркас EngineRuntime](docs/RUNTIME-QUICKSTART.md): в лаунчере выберите Runtime Example и «Играть» / «Редактировать». Один exe загружает Game.dll или Editor.dll после подготовки Engine. Пока без графики: Enter — кадр, q — выход. Старые игры ниже сохранены. Скрипты автоматически выбирают установленный v145 или v143; поддержан Visual Studio 2022 с C++ tools и SDK.
+**Редактор:** Qt-окно показывает сцены BasicExamples, Pong, SunGame и Battle
+во встроенном D3D11 viewport. Выберите игру в лаунчере → «Редактировать».
+Нужен Qt SDK в `Editor/ThirdParty/Qt6.7` или `QTDIR`.
+Подробности и проверки — [Qt viewport](docs/RUNTIME-QUICKSTART.md#qt-редактор-и-preview-проектов).
+
+В [EngineRuntime](docs/RUNTIME-QUICKSTART.md) один exe загружает Game.dll или Editor.dll после подготовки Engine. Редактор работает непрерывно и показывает тестовую сцену; режим «Играть» у Runtime Example пока консольный: Enter — кадр, q — выход. Старые игры ниже сохранены. Скрипты автоматически выбирают установленный v145 или v143; поддержан Visual Studio 2022 с C++ tools и SDK.
 
 [Документ для новых разработчиков](docs/DEVELOPER-HANDOFF.md): текущая структура, порядок запуска и вызовов, пересборка и точки подключения редактора.
 
@@ -10,9 +15,9 @@ C++17, Windows, Direct3D 11. Общие механизмы находятся в
 
 Дважды щёлкните **Start.cmd** в папке Game: после успешной Debug-сборки откроется EngineLauncher. Выберите проект и нажмите «Запустить». В BasicExamples затем выберите сцену «Квадраты» или «Куб». Нужны Visual Studio с C++ toolset v145 или v143 и Windows SDK 10. Скрипт ничего не устанавливает. При ошибке сборки старые бинарники не запускаются.
 
-Доступные без импортёра игры: **BasicExamples, Pong, SunGame, Battle**. Сцена Battle показывает отрисовку 30000 единиц техники: [инстансинг, LOD, спрайты и тени](docs/UNIT-RENDERING.md). **Katamari** требует vcpkg/Assimp; после настройки VCPKG_ROOT используйте **Game/Start-With-Assimp.cmd**. Её полная сцена сохранена, а проект исключён из обычной сборки до подключения зависимости.
+Доступные без импортёра игры: **BasicExamples, Pong, SunGame, Battle**. Сцена Battle показывает отрисовку 30000 единиц техники: [инстансинг, LOD, спрайты и тени](docs/UNIT-RENDERING.md); общий обзор графики — [техники рендера](docs/RENDERING.md). **Katamari** требует vcpkg/Assimp; после настройки VCPKG_ROOT используйте **Game/Start-With-Assimp.cmd**. Её полная сцена сохранена, а проект исключён из обычной сборки до подключения зависимости.
 
-Лаунчер запускает отдельные процессы. Старые примеры используют игровые exe; Runtime Example — общий EngineRuntime.exe с Game.dll или Editor.dll. Engine.lib остаётся библиотекой. Hot reload и графический редактор пока отсутствуют.
+Лаунчер запускает отдельные процессы. Старые примеры используют игровые exe; Runtime Example — общий EngineRuntime.exe с Game.dll или Editor.dll. Engine.lib остаётся библиотекой. Editor.dll содержит Qt-интерфейс и подключает viewport к рендеру host; редактирование объектов сцены пока не реализовано.
 
 ## Структура
 

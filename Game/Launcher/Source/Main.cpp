@@ -21,8 +21,8 @@ std::filesystem::path GameDirectory(const GameEntry& entry)
 
 std::filesystem::path Validate(const GameEntry& entry, bool editor = false)
 {
-    if (editor && !entry.runtime) throw std::runtime_error("Editing is not supported for legacy games");
-    if (entry.runtime)
+    if (editor && !entry.preview) throw std::runtime_error("Preview is unavailable for this project (Katamari requires Assimp and a scene adapter)");
+    if (entry.runtime || editor)
     {
         const auto runtime = ExampleDeployment::ExecutableDirectory() / "Runtime";
         const auto project = runtime / "Projects" / entry.directory;
@@ -43,7 +43,7 @@ int Launch(const GameEntry& entry, bool smoke, bool editor = false)
 {
     const auto executable = Validate(entry, editor);
     std::wstring command = L"\"" + executable.wstring() + L"\"";
-    if (entry.runtime)
+    if (entry.runtime || editor)
     {
         const auto project = executable.parent_path() / "Projects" / entry.directory / "Project.json";
         command += L" --project \"" + project.wstring() + L"\" --mode " + (editor ? L"editor" : L"game");
@@ -55,7 +55,7 @@ int Launch(const GameEntry& entry, bool smoke, bool editor = false)
     PROCESS_INFORMATION process{};
     // Inherit the caller's CWD: games must locate content independently of it.
     if (!CreateProcessW(executable.c_str(), command.data(), nullptr, nullptr, FALSE,
-                        entry.runtime && !smoke ? CREATE_NEW_CONSOLE : 0, nullptr, nullptr, &startup, &process))
+                        (entry.runtime || editor) && !smoke ? CREATE_NEW_CONSOLE : 0, nullptr, nullptr, &startup, &process))
         throw std::runtime_error("CreateProcess failed, Windows error " + std::to_string(GetLastError()));
     CloseHandle(process.hThread);
     if (!smoke) { CloseHandle(process.hProcess); return 0; }
@@ -82,18 +82,33 @@ const GameEntry& Selected()
 void UpdateStatus()
 {
     const auto& entry = Selected();
-    EnableWindow(editButton, entry.runtime);
+    std::wstring message;
     try
     {
         Validate(entry);
-        SetWindowTextW(status, entry.runtime ? L"Один EngineRuntime: игра или редактор. Пока консольные заглушки. Enter — кадр, q — выход." :
-            L"Готово к запуску. Старый игровой exe; редактирование пока недоступно.");
+        message = L"Игра готова к запуску.";
     }
     catch (const std::exception& error)
     {
-        const auto message = ExampleDeployment::Wide(error.what()) + L"\r\n" + entry.buildHint;
-        SetWindowTextW(status, message.c_str());
+        message = ExampleDeployment::Wide(error.what()) + L" " + entry.buildHint;
     }
+    bool previewReady = false;
+    if (entry.preview)
+    {
+        try
+        {
+            Validate(entry, true);
+            previewReady = true;
+            message += L"\r\nРедактировать: preview сцены в Qt. Изменение объектов пока недоступно.";
+        }
+        catch (const std::exception& error)
+        {
+            message += L"\r\nPreview: " + ExampleDeployment::Wide(error.what());
+        }
+    }
+    else message += L"\r\nPreview Katamari пока не подключён: требуется Assimp и адаптер сцены.";
+    EnableWindow(editButton, previewReady);
+    SetWindowTextW(status, message.c_str());
 }
 
 LRESULT CALLBACK WindowProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)

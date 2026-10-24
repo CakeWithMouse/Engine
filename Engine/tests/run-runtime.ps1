@@ -57,15 +57,18 @@ function ProjectFile([string]$Directory, [string]$Module) {
 foreach ($mode in @('game','editor')) {
     $prefix = if ($mode -eq 'game') { 'Game' } else { 'Editor' }
     $log = Run $mode $runtime "--project `"$project`" --mode $mode --frames 3"
-    Ordered $log @('EngineStarting','ResourcesReady','EngineReady','ModuleLoaded',"${prefix}Create","${prefix}Start", "${prefix}Update", 'EngineUpdate', 'EngineRender')
+    Ordered $log @('EngineStarting','ResourcesReady','EngineReady','ModuleLoaded',"${prefix}Create","${prefix}Start")
     Ordered $log @("${prefix}Updates=3", "${prefix}Stop", "${prefix}Destroy", 'ModuleUnloaded', 'ResourcesStopped', 'EngineStopped')
-    Require ((Count $log "${prefix}Update") -eq 3) 'Incorrect update count'
-    Require ((Count $log 'EngineFrameEnd (stub)') -eq 3) 'Incorrect frame count'
+    $frameEvent = if ($mode -eq 'editor') { 'EngineFrameEnd (viewport)' } else { 'EngineFrameEnd (stub)' }
+    Require ((Count $log $frameEvent) -eq 3) 'Incorrect frame count'
     Require ((Count $log "${prefix}Destroy") -eq 1) 'Session must be destroyed exactly once'
     if ($mode -eq 'editor') {
         Require ($log -notmatch 'Game(Create|Start|Update)') 'Editor started gameplay'
-        Ordered $log @('EngineRender', 'EditorOverlay', 'EngineFrameEnd')
-        Require ((Count $log 'EditorOverlay (stub)') -eq 3) 'Incorrect overlay count'
+        Ordered $log @('ViewportReady', 'EditorViewportAttach ok', 'EngineRender (viewport)', 'ViewportStopped', 'EditorStop')
+        Require ((Count $log 'EngineRender (viewport)') -eq 3) 'Incorrect viewport frame count'
+    } else {
+        Ordered $log @('GameUpdate', 'EngineUpdate', 'EngineRender')
+        Require ((Count $log 'GameUpdate') -eq 3) 'Incorrect update count'
     }
     Pass $mode
 }
@@ -151,6 +154,19 @@ Pass 'spaces and unrelated cwd'
 foreach ($option in @('--check','--check-editor','--smoke','--smoke-editor')) {
     $null = Run "launcher-$($option.TrimStart('-'))" "$spaced/EngineLauncher.exe" "$option RuntimeExample"
 }
-$null = Run 'legacy-editor-disabled' "$output/EngineLauncher.exe" '--check-editor Pong' 1
-Pass 'launcher both modes and legacy editing rejection'
+$null = Run 'katamari-editor-disabled' "$output/EngineLauncher.exe" '--check-editor Katamari' 1
+Pass 'launcher both modes and unsupported editing rejection'
+foreach ($scene in @('BasicExamples','Pong','SunGame','Battle')) {
+    $null = Run "launcher-preview-$scene" "$output/EngineLauncher.exe" "--smoke-editor $scene"
+    $sceneLog = Run "preview-$scene" $runtime "--project Projects/$scene/Project.json --mode editor --frames 3"
+    Require ($sceneLog.Contains("PreviewScene: $scene")) 'Launcher selected the wrong preview'
+    Ordered $sceneLog @('ViewportReady','EngineRender (viewport)','ViewportStopped','EngineStopped')
+    Require ((Count $sceneLog 'EngineRender (viewport)') -eq 3) 'Preview did not render three frames'
+    Pass "preview $scene"
+}
+$unknownPreview = ProjectFile "$work/unknown-preview" 'missing.dll'
+@{name='Unknown preview';module='missing.dll';content='Content';preview='UnknownScene'} | ConvertTo-Json | Set-Content -LiteralPath $unknownPreview -Encoding UTF8
+$log = Run 'unknown-preview' $runtime "--project `"$unknownPreview`" --mode editor --frames 1" 1
+Require ($log.Contains('Unsupported preview scene')) 'Unknown preview silently opened another scene'
+Pass 'unknown preview rejected'
 Write-Host "$script:passed runtime checks passed. Logs: $work"

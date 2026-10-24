@@ -65,6 +65,7 @@ public:
     void ProcessInput(float deltaTime);
     void Rotate(float yaw, float pitch);
     void Zoom(float delta);
+    void MoveEditorCamera(float right, float up, float forward, float yaw, float pitch, float zoom);
 
     Game* GamePtr = nullptr;
 

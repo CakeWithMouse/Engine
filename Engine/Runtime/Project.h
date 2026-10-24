@@ -6,7 +6,8 @@ struct RuntimeProject
 {
     std::string name;
     std::filesystem::path file, module, content;
+    std::string preview;
 };
 
-// Deliberately narrow schema: JSON object with three required string fields.
+// Three required string fields, plus an optional built-in preview scene identifier.
 RuntimeProject ReadRuntimeProject(const std::filesystem::path& file);
