@@ -2,6 +2,7 @@
 #include "QtHost.h"
 #include "CameraKeys.h"
 
+#include <type_traits>
 #include <QPainter>
 #include <QShowEvent>
 #include <QHideEvent>
@@ -15,6 +16,87 @@
 #include <QTimer>
 #include <QElapsedTimer>
 
+namespace
+{
+    QString GizmoModeName(EditorGizmoMode mode)
+    {
+        switch (mode)
+        {
+        case EditorGizmoTranslate:
+            return QStringLiteral("Move");
+        case EditorGizmoRotate:
+            return QStringLiteral("Rotate");
+        case EditorGizmoScale:
+            return QStringLiteral("Scale");
+        default:
+            return QStringLiteral("Unknown");
+        }
+    }
+
+    void NormalizeQuat(double q[4])
+    {
+        const double len = std::sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3]);
+
+        if (len < 1e-6)
+        {
+            q[0] = 0.0;
+            q[1] = 0.0;
+            q[2] = 0.0;
+            q[3] = 1.0;
+            return;
+        }
+
+        const double inv = 1.0 / len;
+        q[0] *= inv;
+        q[1] *= inv;
+        q[2] *= inv;
+        q[3] *= inv;
+    }
+
+    void MulQuat(const double a[4], const double b[4], double out[4])
+    {
+        const double x =
+            a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1];
+
+        const double y =
+            a[3] * b[1] - a[0] * b[2] + a[1] * b[3] + a[2] * b[0];
+
+        const double z =
+            a[3] * b[2] + a[0] * b[1] - a[1] * b[0] + a[2] * b[3];
+
+        const double w =
+            a[3] * b[3] - a[0] * b[0] - a[1] * b[1] - a[2] * b[2];
+
+        out[0] = x;
+        out[1] = y;
+        out[2] = z;
+        out[3] = w;
+    }
+
+    void AxisAngleQuat(double x, double y, double z, double angle, double out[4])
+    {
+        const double len = std::sqrt(x * x + y * y + z * z);
+
+        if (len < 1e-6)
+        {
+            out[0] = 0.0;
+            out[1] = 0.0;
+            out[2] = 0.0;
+            out[3] = 1.0;
+            return;
+        }
+
+        const double inv = 1.0 / len;
+        const double half = angle * 0.5;
+        const double s = std::sin(half);
+
+        out[0] = x * inv * s;
+        out[1] = y * inv * s;
+        out[2] = z * inv * s;
+        out[3] = std::cos(half);
+    }
+}
+
 ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
     : QWidget(parent), host_(host)
 {
@@ -26,8 +108,7 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
         setAttribute(Qt::WA_NoSystemBackground, true);
     }
     setFocusPolicy(Qt::StrongFocus);
-    setToolTip(
-        "Space: Play/Stop | P: Pause | RMB: look | WASD: move | Tab: select object | Arrows/PgUp/PgDn: move object");
+    updateGizmoToolTip();
 
     auto* timer = new QTimer(this);
     auto elapsed = std::make_shared<QElapsedTimer>();
@@ -139,9 +220,7 @@ bool ViewportWidget::event(QEvent* e)
         rmbPressed_ = false;
         rmbMoved_ = false;
 
-        lmbPressed_ = false;
-        lmbMoved_ = false;
-        draggingSelectedObject_ = false;
+        EndObjectDrag();
 
         keys_.clear();
     }
@@ -200,13 +279,10 @@ bool ViewportWidget::event(QEvent* e)
     {
         auto* mouse = static_cast<QMouseEvent*>(e);
 
-        // Существующая логика ПКМ: сначала проверяем, был ли это действительно drag камеры.
         if (rmbPressed_ && !rmbMoved_)
         {
             const QPoint delta = mouse->position().toPoint() - rmbPressPos_;
 
-            // Пока движение маленькое — считаем это обычным кликом ПКМ.
-            // Если движение началось — включаем режим камеры.
             if (delta.manhattanLength() > 6)
             {
                 rmbMoved_ = true;
@@ -224,60 +300,53 @@ bool ViewportWidget::event(QEvent* e)
             c.type = EditorCommand::ViewportCamera;
             c.yaw = static_cast<float>(delta.x()) * 0.005f;
             c.pitch = static_cast<float>(delta.y()) * 0.005f;
-            host_->PostCommand(c);
 
+            host_->PostCommand(c);
             return true;
         }
 
-        // Начало перетаскивания объекта ЛКМ.
-        // Небольшой порог движения нужен, чтобы обычный клик не превращался в drag.
         if (lmbPressed_ && !draggingSelectedObject_)
         {
             const QPoint delta = mouse->position().toPoint() - lmbPressPos_;
 
             if (!lmbMoved_ && delta.manhattanLength() > 6)
-            {
                 lmbMoved_ = true;
-            }
 
-            // Если к этому моменту уже есть выделенный объект, начинаем его тащить.
-            // Если PickObject обрабатывается асинхронно, объект может начать тащиться
-            // чуть позже, когда движок подтвердит выбор.
             if (lmbMoved_ && host_->HasSelection())
             {
-                draggingSelectedObject_ = true;
-                lastDragPos_ = mouse->position();
+                if (BeginObjectDrag(mouse->position()))
+                    return true;
             }
         }
 
-        // Само перетаскивание выбранного объекта.
         if (draggingSelectedObject_)
         {
-            const QPointF delta = mouse->position() - lastDragPos_;
-            lastDragPos_ = mouse->position();
-
-            float right = 0.0f;
-            float up = 0.0f;
-            float forward = 0.0f;
-
-            if (mouse->modifiers() & Qt::ShiftModifier)
+            if (gizmoMode_ == EditorGizmoTranslate)
             {
-                // Shift: движение вдоль взгляда камеры.
-                // Двигаем объект вперёд/назад по вертикали мыши.
-                forward = static_cast<float>(-delta.y()) * dragSensitivity_;
+                const QPointF delta = mouse->position() - lastDragPos_;
+                lastDragPos_ = mouse->position();
+
+                float right = 0.0f;
+                float up = 0.0f;
+                float forward = 0.0f;
+
+                if (mouse->modifiers() & Qt::ShiftModifier)
+                {
+                    forward = static_cast<float>(-delta.y()) * dragSensitivity_;
+                }
+                else
+                {
+                    right = static_cast<float>(delta.x()) * dragSensitivity_;
+                    up = static_cast<float>(-delta.y()) * dragSensitivity_;
+                }
+
+                if (right != 0.0f || up != 0.0f || forward != 0.0f)
+                    host_->MoveSelectedObject(right, up, forward);
             }
             else
             {
-                // Обычный drag: движение в плоскости камеры.
-                // X мыши -> right камеры.
-                // Y мыши -> up камеры, но экранный Y растёт вниз, поэтому инвертируем.
-                right = static_cast<float>(delta.x()) * dragSensitivity_;
-                up = static_cast<float>(-delta.y()) * dragSensitivity_;
-            }
-
-            if (right != 0.0f || up != 0.0f || forward != 0.0f)
-            {
-                host_->MoveSelectedObject(right, up, forward);
+                ApplyRotateScaleGizmo(mouse->position());
+                lastDragPos_ = mouse->position();
             }
 
             return true;
@@ -290,10 +359,7 @@ bool ViewportWidget::event(QEvent* e)
 
         if (mouse->button() == Qt::LeftButton && (lmbPressed_ || draggingSelectedObject_))
         {
-            lmbPressed_ = false;
-            lmbMoved_ = false;
-            draggingSelectedObject_ = false;
-
+            EndObjectDrag();
             return true;
         }
 
@@ -329,11 +395,12 @@ bool ViewportWidget::event(QEvent* e)
     if ((e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease) && hasFocus())
     {
         auto* key = static_cast<QKeyEvent*>(e);
-        if (key->modifiers() & Qt::ControlModifier) return QWidget::event(e);
+
+        if (key->modifiers() & Qt::ControlModifier)
+            return QWidget::event(e);
 
         if (!key->isAutoRepeat())
         {
-            // Обработка Tab для циклического выбора объектов
             if (e->type() == QEvent::KeyPress && key->key() == Qt::Key_Tab)
             {
                 host_->FetchSceneAndSelectNext();
@@ -347,6 +414,28 @@ bool ViewportWidget::event(QEvent* e)
                 host_->PostCommand(c);
                 return true;
             }
+
+            if (e->type() == QEvent::KeyPress)
+            {
+                switch (key->key())
+                {
+                case Qt::Key_1:
+                    setGizmoMode(EditorGizmoTranslate);
+                    return true;
+
+                case Qt::Key_2:
+                    setGizmoMode(EditorGizmoRotate);
+                    return true;
+
+                case Qt::Key_3:
+                    setGizmoMode(EditorGizmoScale);
+                    return true;
+
+                default:
+                    break;
+                }
+            }
+
             const int navigationKey = CameraNavigationKey(key->nativeScanCode(), key->key());
 
             if ((navigationKey == Qt::Key_Space || navigationKey == Qt::Key_P) && isActiveWindow())
@@ -371,4 +460,184 @@ bool ViewportWidget::event(QEvent* e)
     }
 
     return QWidget::event(e);
+}
+
+void ViewportWidget::setGizmoMode(EditorGizmoMode mode)
+{
+    if (gizmoMode_ == mode)
+        return;
+
+    if (draggingSelectedObject_)
+        return;
+
+    gizmoMode_ = mode;
+
+    host_->SetGizmoMode(mode);
+
+    updateGizmoToolTip();
+    emit gizmoModeChanged(mode);
+}
+
+void ViewportWidget::updateGizmoToolTip()
+{
+    const QString modeName = GizmoModeName(gizmoMode_);
+
+    setToolTip(
+        QStringLiteral("Gizmo: %1 | Keys: 1 Move, 2 Rotate, 3 Scale\n"
+            "Space: Play/Stop | P: Pause | RMB: look | WASD: move | Tab: select object | Arrows/PgUp/PgDn: move object")
+        .arg(modeName));
+}
+
+bool ViewportWidget::SelectedTransform(uint64_t& id, EngineSceneTransform& transform)
+{
+    const auto view = host_->ReadSnapshot();
+
+    if (!view.selected)
+        return false;
+
+    auto found = std::find_if(
+        view.objects.begin(),
+        view.objects.end(),
+        [&](const auto& o)
+        {
+            return o.id == view.selected;
+        });
+
+    if (found == view.objects.end())
+        return false;
+
+    id = found->id;
+    transform = found->transform;
+    return true;
+}
+
+bool ViewportWidget::BeginObjectDrag(const QPointF& pos)
+{
+    if (draggingSelectedObject_)
+        return true;
+
+    if (!attached_ || !host_->HasScene())
+        return false;
+
+    if (host_->PlayState() != EditorQtHost::Edit)
+        return false;
+
+    uint64_t id = 0;
+    EngineSceneTransform transform{};
+
+    if (!SelectedTransform(id, transform))
+        return false;
+
+    draggingSelectedObject_ = true;
+    dragObjectId_ = id;
+    dragStartTransform_ = transform;
+    dragStartPos_ = pos;
+    lastDragPos_ = pos;
+
+    if (gizmoMode_ != EditorGizmoTranslate)
+    {
+        EditorCommand c;
+        c.type = EditorCommand::BeginGizmoDrag;
+        c.objectId = id;
+        host_->PostCommand(c);
+
+        gizmoDragSession_ = true;
+    }
+
+    return true;
+}
+
+void ViewportWidget::EndObjectDrag()
+{
+    if (gizmoDragSession_)
+    {
+        EditorCommand c;
+        c.type = EditorCommand::EndGizmoDrag;
+        c.objectId = dragObjectId_;
+        host_->PostCommand(c);
+
+        gizmoDragSession_ = false;
+    }
+
+    draggingSelectedObject_ = false;
+    dragObjectId_ = 0;
+    lmbPressed_ = false;
+    lmbMoved_ = false;
+}
+
+void ViewportWidget::PostSelectedTransform(const EngineSceneTransform& transform)
+{
+    if (!dragObjectId_)
+        return;
+
+    EditorCommand c;
+    c.type = EditorCommand::UpdateObjectTransform;
+    c.objectId = dragObjectId_;
+    c.transform = transform;
+    c.path = QStringLiteral("gizmo");
+
+    host_->PostCommand(c);
+}
+
+void ViewportWidget::ApplyRotateScaleGizmo(const QPointF& pos)
+{
+    if (!draggingSelectedObject_)
+        return;
+
+    if (gizmoMode_ == EditorGizmoTranslate)
+        return;
+
+    const QPointF total = pos - dragStartPos_;
+
+    if (std::fabs(total.x()) < 1e-3 && std::fabs(total.y()) < 1e-3)
+        return;
+
+    EngineSceneTransform t = dragStartTransform_;
+
+    if (gizmoMode_ == EditorGizmoRotate)
+    {
+        const double yaw = total.x() * static_cast<double>(rotateSensitivity_);
+        const double pitch = -total.y() * static_cast<double>(rotateSensitivity_);
+
+        double startRot[4] = {
+            static_cast<double>(dragStartTransform_.rotation[0]),
+            static_cast<double>(dragStartTransform_.rotation[1]),
+            static_cast<double>(dragStartTransform_.rotation[2]),
+            static_cast<double>(dragStartTransform_.rotation[3])
+        };
+
+        NormalizeQuat(startRot);
+
+        double qYaw[4];
+        double qPitch[4];
+        double qTmp[4];
+        double qNew[4];
+
+        AxisAngleQuat(0.0, 1.0, 0.0, yaw, qYaw);
+        AxisAngleQuat(1.0, 0.0, 0.0, pitch, qPitch);
+
+        MulQuat(qYaw, qPitch, qTmp);
+        MulQuat(qTmp, startRot, qNew);
+        NormalizeQuat(qNew);
+
+        using RotT = std::remove_reference_t<decltype(t.rotation[0])>;
+
+        for (int i = 0; i < 4; ++i)
+            t.rotation[i] = static_cast<RotT>(qNew[i]);
+    }
+    else if (gizmoMode_ == EditorGizmoScale)
+    {
+        double factor = std::exp((total.x() - total.y()) * static_cast<double>(scaleSensitivity_));
+        factor = std::max(0.01, std::min(100.0, factor));
+
+        using ScaleT = std::remove_reference_t<decltype(t.scale[0])>;
+
+        for (int i = 0; i < 3; ++i)
+        {
+            const double base = dragStartTransform_.scale[i];
+            t.scale[i] = static_cast<ScaleT>(base * factor);
+        }
+    }
+
+    PostSelectedTransform(t);
 }
