@@ -2,6 +2,8 @@
 #include "QtHost.h"
 #include "FileBrowser.h"
 #include "ViewportWidget.h"
+#include "SceneObjectsPanel.h"
+#include "ObjectInspectorPanel.h"
 
 #include <QDockWidget>
 #include <QCloseEvent>
@@ -21,11 +23,17 @@
 #include <QMessageBox>
 #include <QComboBox>
 #include <QDoubleSpinBox>
+#include <QFileDialog>
 #include <QLineEdit>
 #include <QTreeWidget>
 #include <QPushButton>
 #include <QFormLayout>
 #include <QHBoxLayout>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QQuaternion>
+#include <QSaveFile>
+#include <QColorDialog>
 
 EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     : QMainWindow(parent), host_(host)
@@ -43,14 +51,10 @@ void EditorMainWindow::BuildUi()
 
     resize(1280, 720);
 
-    // Чтобы доки могли нормально вкладываться и располагаться рядом
     setDockNestingEnabled(true);
 
-    // Желательно для устойчивого расположения слева/справа
     setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
     setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
-    // setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
-    // setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
 
     viewport_ = new ViewportWidget(host_, this);
 
@@ -78,16 +82,14 @@ void EditorMainWindow::BuildUi()
 
     fileDock_ = new FileBrowserDock(host_, this);
     addDockWidget(Qt::BottomDockWidgetArea, fileDock_);
+
     tabifyDockWidget(consoleDock_, fileDock_);
 
     resizeDocks({viewportDock_, consoleDock_}, {620, 100}, Qt::Vertical);
 
     BuildToolBar();
 
-    // Создаём пустые доки "Сцена / примитивы" и "Свойства объекта"
     BuildSceneDocks();
-
-    resizeDocks({viewportDock_, consoleDock_}, {620, 100}, Qt::Vertical);
 
     QMenu* viewMenu = menuBar()->addMenu(QStringLiteral("&View"));
 
@@ -100,8 +102,8 @@ void EditorMainWindow::BuildUi()
     if (fileDock_)
         viewMenu->addAction(fileDock_->toggleViewAction());
 
-    if (sceneToolsDock_)
-        viewMenu->addAction(sceneToolsDock_->toggleViewAction());
+    if (sceneObjectsDock_)
+        viewMenu->addAction(sceneObjectsDock_->toggleViewAction());
 
     if (inspectorDock_)
         viewMenu->addAction(inspectorDock_->toggleViewAction());
@@ -111,13 +113,12 @@ void EditorMainWindow::BuildUi()
 
     QMenu* file = menuBar()->addMenu(QStringLiteral("&File"));
     file->addSeparator();
-    file->addAction(QStringLiteral("Close editor"), this, [this] { close(); });
+    file->addAction(QStringLiteral("Close editor"), this, [this]
+    {
+        close();
+    });
 
-    // Создаёт меню "Сцена", читает startupScene, создаёт содержимое панелей
-    BuildSceneTools();
-
-    // Подключаем сигналы уже в MainWindow.cpp
-    ConnectSceneTools();
+    BuildSceneMenu();
 
     connect(viewport_, &ViewportWidget::contextMenuRequested,
             this, &EditorMainWindow::ShowViewportContextMenu);
@@ -132,10 +133,13 @@ void EditorMainWindow::BuildUi()
     statusBar()->addWidget(new QLabel(
         QStringLiteral("%1 | %2").arg(
             QString::fromUtf8(h.projectName ? h.projectName : "-"),
-            QString::fromUtf8(h.projectFile ? h.projectFile : "-")), this));
+            QString::fromUtf8(h.projectFile ? h.projectFile : "-")
+        ),
+        this
+    ));
 
     if (host_->HasScene())
-        RefreshSceneTools();
+        RefreshSceneUi();
 }
 
 void EditorMainWindow::AppendLine(const QString& line) { console_->appendPlainText(line); }
@@ -159,6 +163,83 @@ void EditorMainWindow::closeEvent(QCloseEvent* event)
         c.type = EditorCommand::RequestExit;
         host_->PostCommand(c);
     }
+}
+
+void EditorMainWindow::BuildSceneMenu()
+{
+    auto* menu = menuBar()->addMenu(QStringLiteral("Сцена"));
+
+    const bool available = host_->HasScene();
+    menu->setEnabled(available);
+
+    menu->addAction(QStringLiteral("Новая сцена"), this, [this]
+    {
+        if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+            return;
+
+        MaybeSave([this]
+        {
+            sceneBusy_ = true;
+
+            EditorCommand c;
+            c.type = EditorCommand::NewScene;
+            host_->PostCommand(c);
+        });
+    }, QKeySequence::New);
+
+    menu->addAction(QStringLiteral("Открыть сцену…"), this, [this]
+    {
+        OpenScene();
+    }, QKeySequence::Open);
+
+    saveAction_ = menu->addAction(QStringLiteral("Сохранить и сделать стартовой"), this, [this]
+    {
+        SaveScene();
+    }, QKeySequence::Save);
+
+    menu->addAction(QStringLiteral("Сохранить как…"), this, [this]
+    {
+        SaveScene(true);
+    }, QKeySequence::SaveAs);
+
+    menu->addSeparator();
+
+    menu->addAction(QStringLiteral("Добавить модель…"), this, [this]
+    {
+        AddModel();
+    });
+
+    menu->addAction(QStringLiteral("Импорт модели…"), this, [this]
+    {
+        ImportAsset(false);
+    });
+
+    menu->addAction(QStringLiteral("Импорт текстуры…"), this, [this]
+    {
+        ImportAsset(true);
+    });
+
+    menu->addSeparator();
+
+    undoAction_ = menu->addAction(QStringLiteral("Отменить"), this, [this]
+    {
+        SubmitObjectCommand(EditorCommand::Undo);
+    }, QKeySequence::Undo);
+
+    redoAction_ = menu->addAction(QStringLiteral("Повторить"), this, [this]
+    {
+        SubmitObjectCommand(EditorCommand::Redo);
+    }, QKeySequence::Redo);
+
+    duplicateAction_ = menu->addAction(QStringLiteral("Дублировать объект"), this, [this]
+    {
+        SubmitObjectCommand(EditorCommand::DuplicateObject);
+    }, QKeySequence(QStringLiteral("Ctrl+D")));
+
+    deleteAction_ = menu->addAction(QStringLiteral("Удалить объект"), this, [this]
+    {
+        SubmitObjectCommand(EditorCommand::RemoveObject);
+    });
 }
 
 void EditorMainWindow::BuildToolBar()
@@ -288,9 +369,12 @@ void EditorMainWindow::StopExternalGame()
 
 void EditorMainWindow::RefreshStats()
 {
-    RefreshSceneTools();
+    RefreshSceneUi();
+
     const double dt = host_->LastDt();
+
     UpdatePlayButtons();
+
     statsLabel_->setText(QStringLiteral("%4 | Space: Play/Stop | P: Pause/Resume | updates: %1 | fps: %2 | vp: %3")
                          .arg(host_->UpdateCount())
                          .arg(dt > 0.0 ? 1.0 / dt : 0.0, 0, 'f', 1)
@@ -299,7 +383,8 @@ void EditorMainWindow::RefreshStats()
                                   ? QStringLiteral("Edit")
                                   : host_->PlayState() == 1
                                   ? QStringLiteral("Play")
-                                  : QStringLiteral("Pause")));
+                                  : QStringLiteral("Pause"))
+    );
 }
 
 void EditorMainWindow::ShowViewportContextMenu(const QPoint& globalPos)
@@ -342,8 +427,8 @@ void EditorMainWindow::ShowViewportContextMenu(const QPoint& globalPos)
     if (fileDock_)
         menu.addAction(fileDock_->toggleViewAction());
 
-    if (sceneToolsDock_)
-        menu.addAction(sceneToolsDock_->toggleViewAction());
+    if (sceneObjectsDock_)
+        menu.addAction(sceneObjectsDock_->toggleViewAction());
 
     if (inspectorDock_)
         menu.addAction(inspectorDock_->toggleViewAction());
@@ -353,10 +438,10 @@ void EditorMainWindow::ShowViewportContextMenu(const QPoint& globalPos)
 
 void EditorMainWindow::BuildSceneDocks()
 {
-    sceneToolsDock_ = new QDockWidget(QStringLiteral("Сцена / примитивы"), this);
-    sceneToolsDock_->setObjectName(QStringLiteral("SceneToolsDock"));
-    sceneToolsDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    sceneToolsDock_->setFeatures(
+    sceneObjectsDock_ = new QDockWidget(QStringLiteral("Сцена / объекты"), this);
+    sceneObjectsDock_->setObjectName(QStringLiteral("SceneObjectsDock"));
+    sceneObjectsDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    sceneObjectsDock_->setFeatures(
         QDockWidget::DockWidgetMovable |
         QDockWidget::DockWidgetFloatable |
         QDockWidget::DockWidgetClosable
@@ -371,19 +456,46 @@ void EditorMainWindow::BuildSceneDocks()
         QDockWidget::DockWidgetClosable
     );
 
-    addDockWidget(Qt::LeftDockWidgetArea, sceneToolsDock_);
+    addDockWidget(Qt::LeftDockWidgetArea, sceneObjectsDock_);
     addDockWidget(Qt::RightDockWidgetArea, inspectorDock_);
 
-    // Если нужно явно разложить их по горизонтали рядом с вьюпортом:
+    if (!host_->HasScene())
+    {
+        AppendLine(QStringLiteral(
+            "Preview проекта. Создайте свой проект в лаунчере для редактирования сцены."
+        ));
+
+        sceneObjectsDock_->hide();
+        inspectorDock_->hide();
+        return;
+    }
+
+    QFile manifest(QString::fromUtf8(host_->host().projectFile));
+
+    if (manifest.open(QIODevice::ReadOnly))
+    {
+        const auto json = QJsonDocument::fromJson(manifest.readAll()).object();
+        const auto relative = json.value(QStringLiteral("startupScene")).toString();
+
+        if (!relative.isEmpty())
+            scenePath_ = QFileInfo(manifest).dir().absoluteFilePath(relative);
+    }
+
+    sceneObjectsPanel_ = new SceneObjectsPanel(sceneObjectsDock_);
+    objectInspectorPanel_ = new ObjectInspectorPanel(inspectorDock_);
+
+    sceneObjectsDock_->setWidget(sceneObjectsPanel_);
+    inspectorDock_->setWidget(objectInspectorPanel_);
+
+    ConnectPanels();
+
     if (viewportDock_)
     {
-        // sceneToolsDock_ слева, viewportDock_ по центру/сверху,
-        // inspectorDock_ справа.
-        splitDockWidget(sceneToolsDock_, viewportDock_, Qt::Horizontal);
+        splitDockWidget(sceneObjectsDock_, viewportDock_, Qt::Horizontal);
         splitDockWidget(viewportDock_, inspectorDock_, Qt::Horizontal);
 
         resizeDocks(
-            {sceneToolsDock_, viewportDock_, inspectorDock_},
+            {sceneObjectsDock_, viewportDock_, inspectorDock_},
             {200, 880, 200},
             Qt::Horizontal
         );
@@ -391,127 +503,650 @@ void EditorMainWindow::BuildSceneDocks()
     else
     {
         resizeDocks(
-            {sceneToolsDock_, inspectorDock_},
+            {sceneObjectsDock_, inspectorDock_},
             {280, 300},
             Qt::Horizontal
         );
     }
 }
 
-void EditorMainWindow::ConnectSceneTools()
+void EditorMainWindow::ConnectPanels()
 {
-    if (!scenePanel_ || !inspector_)
+    if (!sceneObjectsPanel_ || !objectInspectorPanel_)
         return;
 
-    if (addPrimitiveButton_ && primitive_)
-    {
-        connect(addPrimitiveButton_, &QPushButton::clicked, this, [this]
-        {
-            if (sceneBusy_ ||
-                host_->PlayState() != EditorQtHost::EditorState::Edit ||
-                primitive_->currentIndex() < 0)
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::AddPrimitiveRequested, this,
+            [this](const QString& typeName, const QString& typeLabel, const std::array<double, 3>& position)
             {
-                return;
-            }
-
-            EditorCommand c;
-            c.type = EditorCommand::CreateObject;
-            c.path = primitive_->currentData().toString();
-            c.name = primitive_->currentText();
-
-            for (int i = 0; i < 3; ++i)
-                c.transform.position[i] = static_cast<float>(spawn_[i]->value());
-
-            host_->PostCommand(c);
-        });
-    }
-
-    if (hierarchy_)
-    {
-        connect(hierarchy_, &QTreeWidget::itemSelectionChanged, this, [this]
-        {
-            if (refreshing_)
-                return;
-
-            const auto items = hierarchy_->selectedItems();
-
-            EditorCommand c;
-            c.type = EditorCommand::SelectObject;
-            c.objectId = items.isEmpty()
-                             ? 0
-                             : items.front()->data(0, Qt::UserRole).toULongLong();
-
-            host_->PostCommand(c);
-        });
-
-        connect(hierarchy_, &QTreeWidget::itemDoubleClicked, this,
-                [this](QTreeWidgetItem*, int)
-                {
-                    EditorCommand c;
-                    c.type = EditorCommand::FocusObject;
-                    host_->PostCommand(c);
-                });
-    }
-
-    if (duplicateObjectButton_)
-    {
-        connect(duplicateObjectButton_, &QPushButton::clicked, this, [this]
-        {
-            SubmitObjectCommand(EditorCommand::DuplicateObject);
-        });
-    }
-
-    if (removeObjectButton_)
-    {
-        connect(removeObjectButton_, &QPushButton::clicked, this, [this]
-        {
-            SubmitObjectCommand(EditorCommand::RemoveObject);
-        });
-    }
-
-    if (removeShortcut_)
-    {
-        connect(removeShortcut_, &QAction::triggered, this, [this]
-        {
-            SubmitObjectCommand(EditorCommand::RemoveObject);
-        });
-    }
-
-    if (objectName_)
-    {
-        connect(objectName_, &QLineEdit::editingFinished, this, [this]
-        {
-            if (refreshing_ ||
-                !selectedId_ ||
-                sceneBusy_ ||
-                host_->PlayState() != EditorQtHost::EditorState::Edit)
-            {
-                return;
-            }
-
-            const auto name = objectName_->text().trimmed();
-
-            for (const auto& o : host_->ReadSnapshot().objects)
-            {
-                if (o.id == selectedId_ && name == QString::fromStdString(o.name))
+                if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
                     return;
-            }
 
-            EditorCommand c;
-            c.type = EditorCommand::RenameObject;
-            c.objectId = selectedId_;
-            c.name = name;
+                EditorCommand c;
+                c.type = EditorCommand::CreateObject;
+                c.path = typeName;
+                c.name = typeLabel;
 
-            host_->PostCommand(c);
-        });
+                for (int i = 0; i < 3; ++i)
+                    c.transform.position[i] = static_cast<float>(position[i]);
+
+                host_->PostCommand(c);
+            });
+
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::AddModelRequested, this, [this]
+    {
+        AddModel();
+    });
+
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::ImportModelRequested, this, [this]
+    {
+        ImportAsset(false);
+    });
+
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::DuplicateRequested, this, [this]
+    {
+        SubmitObjectCommand(EditorCommand::DuplicateObject);
+    });
+
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::RemoveRequested, this, [this]
+    {
+        SubmitObjectCommand(EditorCommand::RemoveObject);
+    });
+
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::SelectionChanged, this, [this](quint64 objectId)
+    {
+        if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+            return;
+
+        EditorCommand c;
+        c.type = EditorCommand::SelectObject;
+        c.objectId = objectId;
+        host_->PostCommand(c);
+    });
+
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::FocusRequested, this, [this]
+    {
+        if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+            return;
+
+        EditorCommand c;
+        c.type = EditorCommand::FocusObject;
+        host_->PostCommand(c);
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::NameEditingFinished, this,
+            [this](quint64 objectId, const QString& name)
+            {
+                if (!objectId || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+                    return;
+
+                const QString trimmed = name.trimmed();
+
+                for (const auto& object : host_->ReadSnapshot().objects)
+                {
+                    if (object.id == objectId && trimmed == QString::fromStdString(object.name))
+                        return;
+                }
+
+                EditorCommand c;
+                c.type = EditorCommand::RenameObject;
+                c.objectId = objectId;
+                c.name = trimmed;
+
+                host_->PostCommand(c);
+            });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseTextureRequested, this, [this]
+    {
+        if (!host_->HasScene() ||
+            sceneBusy_ ||
+            host_->PlayState() != EditorQtHost::EditorState::Edit)
+        {
+            return;
+        }
+
+        const QString path = QFileDialog::getOpenFileName(
+            this,
+            QStringLiteral("Текстура из проекта"),
+            QString::fromUtf8(host_->host().contentRoot),
+            QStringLiteral("Текстуры (*.png *.jpg *.jpeg *.bmp *.tga)")
+        );
+
+        if (!path.isEmpty())
+            UseAsset(path);
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearTextureRequested, this, [this]
+    {
+        if (!selectedId_ ||
+            sceneBusy_ ||
+            host_->PlayState() != EditorQtHost::EditorState::Edit)
+        {
+            return;
+        }
+
+        EditorCommand c;
+        c.type = EditorCommand::SetTexture;
+        c.objectId = selectedId_;
+
+        host_->PostCommand(c);
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::TransformEditingFinished,
+            this, &EditorMainWindow::OnTransformEdited);
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::PointLightEditingFinished,
+            this, &EditorMainWindow::OnPointLightEdited);
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::LightColorRequested,
+            this, &EditorMainWindow::OnLightColorRequested);
+}
+
+void EditorMainWindow::RefreshSceneUi()
+{
+    if (!host_->HasScene())
+        return;
+
+    const auto view = host_->ReadSnapshot();
+
+    const bool edit =
+        host_->PlayState() == EditorQtHost::EditorState::Edit &&
+        !sceneBusy_;
+
+    if (sceneObjectsPanel_)
+    {
+        QVector<std::pair<QString, QString>> primitiveTypes;
+        primitiveTypes.reserve(static_cast<int>(view.types.size()));
+
+        for (const auto& type : view.types)
+        {
+            primitiveTypes.push_back({
+                QString::fromStdString(type.label),
+                QString::fromStdString(type.name)
+            });
+        }
+
+        sceneObjectsPanel_->SetPrimitiveTypes(primitiveTypes);
+        sceneObjectsPanel_->SetEnabled(edit);
+        sceneObjectsPanel_->RefreshHierarchy(view);
     }
 
-    for (int i = 0; i < 9; ++i)
+    if (undoAction_)
+        undoAction_->setEnabled(edit && view.canUndo);
+
+    if (redoAction_)
+        redoAction_->setEnabled(edit && view.canRedo);
+
+    if (duplicateAction_)
+        duplicateAction_->setEnabled(edit && view.selected);
+
+    if (deleteAction_)
+        deleteAction_->setEnabled(edit && view.selected);
+
+    if (saveAction_)
+        saveAction_->setEnabled(!sceneBusy_);
+
+    setWindowTitle(QStringLiteral("%1%2 — %3 — Engine Editor")
+        .arg(
+            view.dirty ? QStringLiteral("* ") : QString(),
+            scenePath_.isEmpty()
+                ? QStringLiteral("Новая сцена")
+                : QFileInfo(scenePath_).fileName(),
+            QString::fromUtf8(host_->host().projectName)
+        )
+    );
+
+    const bool selectionChanged = selectedId_ != view.selected;
+    selectedId_ = view.selected;
+
+    if (objectInspectorPanel_)
     {
-        if (transform_[i])
+        objectInspectorPanel_->SetEnabled(edit && selectedId_);
+        objectInspectorPanel_->Refresh(view, selectedId_, selectionChanged);
+    }
+
+    EditorCommand c;
+    c.type = EditorCommand::RefreshScene;
+    host_->PostCommand(c);
+}
+
+void EditorMainWindow::MaybeSave(std::function<void()> after)
+{
+    if (checkingChanges_)
+        return;
+
+    if (objectInspectorPanel_)
+        objectInspectorPanel_->ClearFocusIfInside();
+
+    checkingChanges_ = true;
+    afterCheck_ = std::move(after);
+
+    EditorCommand c;
+    c.type = EditorCommand::RefreshScene;
+    c.name = QStringLiteral("confirm");
+
+    host_->PostCommand(c);
+}
+
+void EditorMainWindow::SaveScene(bool saveAs, std::function<void()> after)
+{
+    if (!host_->HasScene() || sceneBusy_)
+        return;
+
+    if (objectInspectorPanel_)
+        objectInspectorPanel_->ClearFocusIfInside();
+
+    QString path = scenePath_;
+
+    if (saveAs || path.isEmpty())
+    {
+        path = QFileDialog::getSaveFileName(
+            this,
+            QStringLiteral("Сохранить стартовую сцену"),
+            path.isEmpty()
+                ? QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(
+                    QStringLiteral("Scenes/New.scene.json"))
+                : path,
+            QStringLiteral("Scene (*.scene.json)")
+        );
+
+        if (path.isEmpty())
+            return;
+
+        if (!path.endsWith(QStringLiteral(".scene.json"), Qt::CaseInsensitive))
         {
-            connect(transform_[i], &QDoubleSpinBox::editingFinished,
-                    this, &EditorMainWindow::ApplyTransform);
+            path += QStringLiteral(".scene.json");
+
+            if (QFileInfo::exists(path) &&
+                QMessageBox::question(
+                    this,
+                    QStringLiteral("Заменить файл?"),
+                    path,
+                    QMessageBox::Yes | QMessageBox::No,
+                    QMessageBox::No
+                ) != QMessageBox::Yes)
+            {
+                return;
+            }
         }
     }
+
+    sceneBusy_ = true;
+    afterSave_ = std::move(after);
+
+    EditorCommand c;
+    c.type = EditorCommand::SaveScene;
+    c.path = QFileInfo(path).absoluteFilePath();
+
+    host_->PostCommand(c);
+}
+
+void EditorMainWindow::OnTransformEdited(
+    quint64 objectId,
+    const InspectorTransformValue& value
+)
+{
+    if (!objectId || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+        return;
+
+    EditorCommand c;
+    c.type = EditorCommand::UpdateObjectTransform;
+    c.objectId = objectId;
+
+    for (int i = 0; i < 3; ++i)
+    {
+        c.transform.position[i] = static_cast<float>(value.position[i]);
+        c.transform.scale[i] = static_cast<float>(value.scale[i]);
+    }
+
+    const auto q = QQuaternion::fromEulerAngles(
+        static_cast<float>(value.euler[0]),
+        static_cast<float>(value.euler[1]),
+        static_cast<float>(value.euler[2])
+    );
+
+    c.transform.rotation[0] = q.x();
+    c.transform.rotation[1] = q.y();
+    c.transform.rotation[2] = q.z();
+    c.transform.rotation[3] = q.scalar();
+
+    bool found = false;
+
+    for (const auto& object : host_->ReadSnapshot().objects)
+    {
+        if (object.id != objectId)
+            continue;
+
+        found = true;
+
+        bool changed = false;
+
+        for (int i = 0; i < 3; ++i)
+        {
+            changed |= std::abs(c.transform.position[i] - object.transform.position[i]) > 0.0006f;
+            changed |= std::abs(c.transform.scale[i] - object.transform.scale[i]) > 0.0006f;
+        }
+
+        const auto& r = object.transform.rotation;
+
+        changed |= std::abs(QQuaternion::dotProduct(
+            q,
+            QQuaternion(r[3], r[0], r[1], r[2]).normalized()
+        )) < 0.999999f;
+
+        if (!changed)
+            return;
+
+        break;
+    }
+
+    if (!found)
+        return;
+
+    host_->PostCommand(c);
+}
+
+void EditorMainWindow::OnPointLightEdited(
+    quint64 objectId,
+    const InspectorPointLightValue& value
+)
+{
+    if (!objectId || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+        return;
+
+    for (const auto& object : host_->ReadSnapshot().objects)
+    {
+        if (object.id != objectId || !object.hasPointLight)
+            continue;
+
+        EditorCommand c;
+        c.type = EditorCommand::SetPointLight;
+        c.objectId = objectId;
+        c.pointLight = object.pointLight;
+
+        bool changed = false;
+
+        for (int i = 0; i < 3; ++i)
+        {
+            c.pointLight.color[i] = static_cast<float>(value.color[i]);
+            changed |= std::abs(c.pointLight.color[i] - object.pointLight.color[i]) > 0.0006f;
+        }
+
+        c.pointLight.intensity = static_cast<float>(value.intensity);
+        c.pointLight.radius = static_cast<float>(value.radius);
+        c.pointLight.enabled = value.enabled ? 1u : 0u;
+
+        changed |=
+            std::abs(c.pointLight.intensity - object.pointLight.intensity) > 0.0006f ||
+            std::abs(c.pointLight.radius - object.pointLight.radius) > 0.0006f ||
+            c.pointLight.enabled != object.pointLight.enabled;
+
+        if (changed)
+            host_->PostCommand(c);
+
+        return;
+    }
+}
+
+void EditorMainWindow::OnLightColorRequested(quint64 objectId, const QColor& current)
+{
+    if (!objectId || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+        return;
+
+    auto* dialog = new QColorDialog(current, this);
+    dialog->setWindowTitle(QStringLiteral("Цвет источника света"));
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setOption(QColorDialog::DontUseNativeDialog);
+
+    connect(dialog, &QColorDialog::colorSelected, this, [this, objectId](const QColor& selected)
+    {
+        if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+            return;
+
+        for (const auto& object : host_->ReadSnapshot().objects)
+        {
+            if (object.id != objectId || !object.hasPointLight)
+                continue;
+
+            EditorCommand c;
+            c.type = EditorCommand::SetPointLight;
+            c.objectId = objectId;
+            c.pointLight = object.pointLight;
+
+            c.pointLight.color[0] = selected.redF();
+            c.pointLight.color[1] = selected.greenF();
+            c.pointLight.color[2] = selected.blueF();
+
+            host_->PostCommand(c);
+            break;
+        }
+    });
+
+    dialog->open();
+}
+
+void EditorMainWindow::CommandFinished(
+    const EditorCommand& command,
+    uint32_t status,
+    const QString& error
+)
+{
+    if (command.type == EditorCommand::RefreshScene &&
+        command.name == QStringLiteral("confirm"))
+    {
+        auto continuation = std::move(afterCheck_);
+        afterCheck_ = {};
+        checkingChanges_ = false;
+
+        if (!continuation)
+            return;
+
+        if (!host_->ReadSnapshot().dirty)
+        {
+            continuation();
+            return;
+        }
+
+        const auto choice = QMessageBox::question(
+            this,
+            QStringLiteral("Несохранённая сцена"),
+            QStringLiteral("Сохранить изменения сцены?"),
+            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,
+            QMessageBox::Save
+        );
+
+        if (choice == QMessageBox::Save)
+            SaveScene(false, std::move(continuation));
+        else if (choice == QMessageBox::Discard)
+            continuation();
+
+        return;
+    }
+
+    if (command.type == EditorCommand::RefreshScene &&
+        command.name == QStringLiteral("close"))
+    {
+        closing_ = false;
+
+        MaybeSave([this]
+        {
+            closing_ = true;
+
+            EditorCommand c;
+            c.type = EditorCommand::RequestExit;
+            host_->PostCommand(c);
+        });
+
+        return;
+    }
+
+    if (command.type == EditorCommand::SaveScene ||
+        command.type == EditorCommand::LoadScene ||
+        command.type == EditorCommand::NewScene)
+    {
+        sceneBusy_ = false;
+    }
+
+    if (status != EngineSceneOk)
+    {
+        afterSave_ = {};
+        closing_ = false;
+
+        const QString message = error.isEmpty()
+                                    ? QStringLiteral(
+                                        "Операция не выполнена (код %1). Проверьте имя объекта, остановите Play и повторите."
+                                    ).arg(status)
+                                    : error;
+
+        AppendLine(message);
+
+        QMessageBox::warning(
+            this,
+            QStringLiteral("Ошибка сцены"),
+            message
+        );
+
+        return;
+    }
+
+    if (command.type == EditorCommand::ImportModel ||
+        command.type == EditorCommand::ImportTexture)
+    {
+        AppendLine(QStringLiteral(
+            "Импортировано: %1. Двойной щелчок в Files: добавить модель или назначить текстуру выбранному объекту."
+        ).arg(command.path));
+
+        statusBar()->showMessage(
+            QStringLiteral("Импортировано: %1").arg(command.path),
+            8000
+        );
+    }
+    else if (command.type == EditorCommand::SaveScene)
+    {
+        scenePath_ = command.path;
+
+        QFile file(QString::fromUtf8(host_->host().projectFile));
+        bool committed = false;
+
+        if (file.open(QIODevice::ReadOnly))
+        {
+            QJsonParseError parse{};
+            auto document = QJsonDocument::fromJson(file.readAll(), &parse);
+            file.close();
+
+            if (parse.error == QJsonParseError::NoError && document.isObject())
+            {
+                auto json = document.object();
+
+                const auto relative = QFileInfo(file).dir().relativeFilePath(scenePath_);
+
+                if (QDir::isRelativePath(relative))
+                {
+                    json.insert(QStringLiteral("startupScene"), relative);
+
+                    QSaveFile output(file.fileName());
+                    const auto bytes = QJsonDocument(json).toJson();
+
+                    committed =
+                        output.open(QIODevice::WriteOnly) &&
+                        output.write(bytes) == bytes.size() &&
+                        output.commit();
+                }
+            }
+        }
+
+        if (!committed)
+        {
+            afterSave_ = {};
+            closing_ = false;
+
+            QMessageBox::warning(
+                this,
+                QStringLiteral("Стартовая сцена не изменена"),
+                QStringLiteral(
+                    "Сцена сохранена, но Project.json не обновлён. Проверьте права записи и сохраните сцену на том же диске, что и проект. Запуск отменён."
+                )
+            );
+
+            return;
+        }
+
+        statusBar()->showMessage(
+            QStringLiteral("Сохранено: %1").arg(scenePath_),
+            5000
+        );
+
+        auto continuation = std::move(afterSave_);
+        afterSave_ = {};
+
+        if (continuation)
+            continuation();
+    }
+    else if (command.type == EditorCommand::LoadScene)
+    {
+        scenePath_ = command.path;
+    }
+    else if (command.type == EditorCommand::NewScene)
+    {
+        scenePath_.clear();
+    }
+
+    RefreshSceneUi();
+}
+
+void EditorMainWindow::SubmitObjectCommand(int type)
+{
+    if (!host_ ||
+        !host_->HasScene() ||
+        sceneBusy_ ||
+        host_->PlayState() != EditorQtHost::EditorState::Edit)
+    {
+        return;
+    }
+
+    EditorCommand c;
+    c.type = static_cast<EditorCommand::Type>(type);
+    c.objectId = selectedId_;
+
+    if (!c.objectId &&
+        (c.type == EditorCommand::DuplicateObject ||
+            c.type == EditorCommand::RemoveObject))
+    {
+        return;
+    }
+
+    host_->PostCommand(c);
+}
+
+void EditorMainWindow::OpenScene(const QString& supplied)
+{
+    if (!host_ ||
+        !host_->HasScene() ||
+        sceneBusy_ ||
+        host_->PlayState() != EditorQtHost::EditorState::Edit)
+    {
+        return;
+    }
+
+    MaybeSave([this, supplied]
+    {
+        const QString path = supplied.isEmpty()
+                                 ? QFileDialog::getOpenFileName(
+                                     this,
+                                     QStringLiteral("Открыть сцену"),
+                                     QString::fromUtf8(host_->host().contentRoot),
+                                     QStringLiteral("Scene (*.scene.json)")
+                                 )
+                                 : supplied;
+
+        if (path.isEmpty())
+            return;
+
+        sceneBusy_ = true;
+
+        EditorCommand c;
+        c.type = EditorCommand::LoadScene;
+        c.path = path;
+
+        host_->PostCommand(c);
+    });
 }

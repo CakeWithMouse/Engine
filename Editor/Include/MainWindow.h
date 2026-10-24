@@ -3,12 +3,15 @@
 #include <QMainWindow>
 #include <functional>
 #include <cstdint>
+
+#include "ObjectInspectorPanel.h"
+
 struct EditorCommand;
+
 class QTreeWidget;
 class QLineEdit;
 class QDoubleSpinBox;
 class QComboBox;
-
 class QProcess;
 class QLabel;
 class QPlainTextEdit;
@@ -19,6 +22,7 @@ class QDockWidget;
 class QPoint;
 class QPushButton;
 class QAction;
+class SceneObjectsPanel;
 
 class EditorMainWindow : public QMainWindow
 {
@@ -28,6 +32,7 @@ public:
     explicit EditorMainWindow(EditorQtHost* host, QWidget* parent = nullptr);
 
     void CommandFinished(const EditorCommand& command, uint32_t status, const QString& error);
+
     void OpenScene(const QString& path = {});
     void ImportAsset(bool texture, const QString& source = {});
     void AddModel(const QString& path = {});
@@ -44,72 +49,69 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
-    void BuildSceneTools();
-    void RefreshSceneTools();
-    void ApplyTransform();
-    void ApplyPointLight();
-    void SaveScene(bool saveAs = false, std::function<void()> after = {});
-    void MaybeSave(std::function<void()> after);
-    void SubmitObjectCommand(int type);
     void BuildUi();
     void BuildToolBar();
     void UpdatePlayButtons();
+
     void StartExternalGame();
     void StopExternalGame();
-    void BuildSceneDocks();
-    void ConnectSceneTools();
 
-    QTreeWidget* hierarchy_ = nullptr;
-    QWidget* inspector_ = nullptr;
-    QWidget* scenePanel_ = nullptr;
-    QLineEdit* objectName_ = nullptr;
-    QLineEdit* modelAsset_ = nullptr;
-    QLineEdit* textureAsset_ = nullptr;
-    void BuildAssetInspector(class QFormLayout* form);
-    QComboBox* primitive_ = nullptr;
-    QDoubleSpinBox* transform_[9]{};
-    QDoubleSpinBox* spawn_[3]{};
-    QWidget* lightInspector_ = nullptr;
-    QDoubleSpinBox* lightValues_[5]{}; // RGB, intensity, radius
-    class QCheckBox* lightEnabled_ = nullptr;
-    QPushButton* lightColor_ = nullptr;
-    QAction* saveAction_ = nullptr;
-    QAction* undoAction_ = nullptr;
-    QAction* redoAction_ = nullptr;
-    QAction* duplicateAction_ = nullptr;
-    QAction* deleteAction_ = nullptr;
-    QString scenePath_, hierarchyKey_;
-    uint64_t selectedId_ = 0;
-    bool sceneBusy_ = false, refreshing_ = false, closing_ = false;
-    bool checkingChanges_ = false;
-    std::function<void()> afterSave_;
-    std::function<void()> afterCheck_;
+    void BuildSceneDocks();
+    void BuildSceneMenu();
+    void ConnectPanels();
+
+    void RefreshSceneUi();
+
+    void SaveScene(bool saveAs = false, std::function<void()> after = {});
+    void MaybeSave(std::function<void()> after);
+    void SubmitObjectCommand(int type);
+
+    void OnTransformEdited(quint64 objectId, const InspectorTransformValue& value);
+    void OnPointLightEdited(quint64 objectId, const InspectorPointLightValue& value);
+    void OnLightColorRequested(quint64 objectId, const QColor& current);
+
+    EditorQtHost* host_ = nullptr;
+
+    ViewportWidget* viewport_ = nullptr;
+    QDockWidget* viewportDock_ = nullptr;
+
+    QPlainTextEdit* console_ = nullptr;
+    QDockWidget* consoleDock_ = nullptr;
+
+    FileBrowserDock* fileDock_ = nullptr;
+
+    QDockWidget* sceneObjectsDock_ = nullptr;
+    QDockWidget* inspectorDock_ = nullptr;
+
+    SceneObjectsPanel* sceneObjectsPanel_ = nullptr;
+    ObjectInspectorPanel* objectInspectorPanel_ = nullptr;
 
     QToolBar* toolBar_ = nullptr;
+
     QAction* actPlay_ = nullptr;
     QAction* actPause_ = nullptr;
     QAction* actStop_ = nullptr;
     QAction* actExternal_ = nullptr;
 
+    QAction* saveAction_ = nullptr;
+    QAction* undoAction_ = nullptr;
+    QAction* redoAction_ = nullptr;
+    QAction* duplicateAction_ = nullptr;
+    QAction* deleteAction_ = nullptr;
+
     QProcess* gameProc_ = nullptr;
 
     QLabel* playStateLabel_ = nullptr;
-    EditorQtHost* host_ = nullptr;
-
-    QPlainTextEdit* console_ = nullptr;
     QLabel* statsLabel_ = nullptr;
 
-    QDockWidget* consoleDock_ = nullptr;
-    FileBrowserDock* fileDock_ = nullptr;
-    ViewportWidget* viewport_ = nullptr;
-    QDockWidget* viewportDock_ = nullptr;
+    QString scenePath_;
 
-    QDockWidget* sceneToolsDock_ = nullptr;
-    QDockWidget* inspectorDock_ = nullptr;
+    uint64_t selectedId_ = 0;
 
-    QPushButton* addPrimitiveButton_ = nullptr;
-    QPushButton* duplicateObjectButton_ = nullptr;
-    QPushButton* removeObjectButton_ = nullptr;
+    bool sceneBusy_ = false;
+    bool closing_ = false;
+    bool checkingChanges_ = false;
 
-    QAction* removeShortcut_ = nullptr;
+    std::function<void()> afterSave_;
+    std::function<void()> afterCheck_;
 };
