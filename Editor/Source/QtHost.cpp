@@ -242,6 +242,7 @@ void EditorQtHost::DrainCommands()
         case EditorCommand::CreateObject:
         case EditorCommand::CreateModel:
         case EditorCommand::SetTexture:
+        case EditorCommand::SetPointLight:
         case EditorCommand::RemoveObject:
         case EditorCommand::RenameObject:
         case EditorCommand::DuplicateObject:
@@ -258,7 +259,7 @@ void EditorQtHost::DrainCommands()
             QString checkpoint;
             const bool mutation = cmd.type == EditorCommand::UpdateObjectTransform || cmd.type == EditorCommand::CreateObject ||
                 cmd.type == EditorCommand::RemoveObject || cmd.type == EditorCommand::RenameObject || cmd.type == EditorCommand::DuplicateObject ||
-                cmd.type == EditorCommand::CreateModel || cmd.type == EditorCommand::SetTexture;
+                cmd.type == EditorCommand::CreateModel || cmd.type == EditorCommand::SetTexture || cmd.type == EditorCommand::SetPointLight;
             if ((mutation || cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene ||
                 cmd.type == EditorCommand::Undo || cmd.type == EditorCommand::Redo) && PlayState() != Edit)
             { Complete(cmd, EngineSceneReadOnly, QStringLiteral("Остановите Play перед редактированием.")); break; }
@@ -291,6 +292,8 @@ void EditorQtHost::DrainCommands()
                     result = api.renameObject(api.context, cmd.objectId, cmd.name.toUtf8().constData());
                 else if (cmd.type == EditorCommand::SetTexture)
                     result = scene_.setTexture(scene_.context, cmd.objectId, cmd.path.toUtf8().constData(), error, sizeof(error));
+                else if (cmd.type == EditorCommand::SetPointLight)
+                    result = api.setPointLight(api.context, cmd.objectId, &cmd.pointLight);
                 else if (cmd.type == EditorCommand::CreateObject || cmd.type == EditorCommand::DuplicateObject || cmd.type == EditorCommand::CreateModel)
                 {
                     auto view = ReadSnapshot();
@@ -298,6 +301,7 @@ void EditorQtHost::DrainCommands()
                     QString model = cmd.type == EditorCommand::CreateModel ? cmd.path : QString(), texture;
                     EngineSceneTransform transform = cmd.transform;
                     uint64_t parent = 0; bool inherit = true;
+                    bool hasLight = false; EngineScenePointLight light{};
                     if (cmd.type == EditorCommand::DuplicateObject)
                     {
                         auto found = std::find_if(view.objects.begin(), view.objects.end(), [&](const auto& o) { return o.id == cmd.objectId; });
@@ -306,6 +310,7 @@ void EditorQtHost::DrainCommands()
                         transform = found->transform; transform.position[0] += 1;
                         parent = found->parent; inherit = found->inheritScale;
                         model = QString::fromStdString(found->modelAsset); texture = QString::fromStdString(found->textureAsset);
+                        hasLight = found->hasPointLight; light = found->pointLight;
                     }
                     QString name = base; int suffix = 1;
                     while (std::any_of(view.objects.begin(), view.objects.end(), [&](const auto& o) { return o.name == name.toStdString(); }))
@@ -318,6 +323,7 @@ void EditorQtHost::DrainCommands()
                         if (parent) result = scene_.setParent(scene_.context, id, parent, inherit);
                         if (result == EngineSceneOk && !texture.isEmpty())
                             result = scene_.setTexture(scene_.context, id, texture.toUtf8().constData(), error, sizeof(error));
+                        if (result == EngineSceneOk && hasLight) result = api.setPointLight(api.context, id, &light);
                         if (result == EngineSceneOk) selectedId_ = id;
                         else api.removeObject(api.context, id);
                     }
@@ -414,7 +420,8 @@ void ENGINE_MODULE_CALL EditorQtHost::SceneVisitor(void* context, const EngineSc
 {
     auto& view = *static_cast<Snapshot*>(context);
     view.objects.push_back({info->id, info->parentId, info->inheritParentScale != 0, info->name, info->typeName, info->transform,
-        info->modelAsset ? info->modelAsset : "", info->textureAsset ? info->textureAsset : ""});
+        info->modelAsset ? info->modelAsset : "", info->textureAsset ? info->textureAsset : "",
+        info->hasPointLight != 0, info->pointLight});
 }
 void EditorQtHost::PublishScene()
 {

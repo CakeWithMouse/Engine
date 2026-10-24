@@ -3,6 +3,9 @@
 #include <QAction>
 #include <QApplication>
 #include <QComboBox>
+#include <QCheckBox>
+#include <QColorDialog>
+#include <QGroupBox>
 #include <QDockWidget>
 #include <QDoubleSpinBox>
 #include <QFile>
@@ -157,7 +160,7 @@ void EditorMainWindow::BuildSceneTools()
 
     layout->addLayout(spawnRow);
 
-    addPrimitiveButton_ = new QPushButton(QStringLiteral("+ Добавить примитив"), scenePanel_);
+    addPrimitiveButton_ = new QPushButton(QStringLiteral("+ Добавить объект"), scenePanel_);
     addPrimitiveButton_->setObjectName(QStringLiteral("AddPrimitive"));
     layout->addWidget(addPrimitiveButton_);
 
@@ -240,6 +243,51 @@ void EditorMainWindow::BuildSceneTools()
         form->addRow(labels[i], spin);
     }
 
+    auto* lightGroup = new QGroupBox(QStringLiteral("Точечный свет"), inspector_);
+    lightInspector_ = lightGroup;
+    auto* lightForm = new QFormLayout(lightGroup);
+    lightColor_ = new QPushButton(QStringLiteral("Выбрать цвет…"), lightGroup);
+    lightColor_->setObjectName(QStringLiteral("LightColor"));
+    lightForm->addRow(lightColor_);
+    const QString lightLabels[] = {QStringLiteral("Красный"), QStringLiteral("Зелёный"),
+        QStringLiteral("Синий"), QStringLiteral("Интенсивность"), QStringLiteral("Радиус")};
+    for (int i = 0; i < 5; ++i)
+    {
+        auto* spin = lightValues_[i] = new QDoubleSpinBox(lightGroup);
+        spin->setObjectName(QStringLiteral("LightValue%1").arg(i));
+        spin->setRange(i == 4 ? 0.01 : 0, i < 3 ? 1 : 10000);
+        spin->setDecimals(3);
+        spin->setSingleStep(i < 3 ? 0.05 : 0.5);
+        spin->setKeyboardTracking(false);
+        lightForm->addRow(lightLabels[i], spin);
+        connect(spin, &QDoubleSpinBox::editingFinished, this, &EditorMainWindow::ApplyPointLight);
+    }
+    lightEnabled_ = new QCheckBox(QStringLiteral("Включён"), lightGroup);
+    lightEnabled_->setObjectName(QStringLiteral("LightEnabled"));
+    lightForm->addRow(lightEnabled_);
+    connect(lightEnabled_, &QCheckBox::clicked, this, &EditorMainWindow::ApplyPointLight);
+    connect(lightColor_, &QPushButton::clicked, this, [this] {
+        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        const auto id = selectedId_;
+        const auto color = QColor::fromRgbF(lightValues_[0]->value(), lightValues_[1]->value(), lightValues_[2]->value());
+        auto* dialog = new QColorDialog(color, this);
+        dialog->setWindowTitle(QStringLiteral("Цвет источника света"));
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        dialog->setOption(QColorDialog::DontUseNativeDialog);
+        connect(dialog, &QColorDialog::colorSelected, this, [this, id](const QColor& selected) {
+            if (sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+            for (const auto& object : host_->ReadSnapshot().objects) if (object.id == id && object.hasPointLight)
+            {
+                EditorCommand c; c.type = EditorCommand::SetPointLight; c.objectId = id; c.pointLight = object.pointLight;
+                c.pointLight.color[0] = selected.redF(); c.pointLight.color[1] = selected.greenF(); c.pointLight.color[2] = selected.blueF();
+                host_->PostCommand(c);
+                break;
+            }
+        });
+        dialog->open();
+    });
+    form->addRow(lightGroup);
+    lightGroup->hide();
     BuildAssetInspector(form);
     inspectorDock_->setWidget(inspector_);
 }
@@ -329,14 +377,28 @@ void EditorMainWindow::RefreshSceneTools()
         (*it)->data(0, Qt::UserRole).toULongLong() == view.selected);
     const bool selectionChanged = selectedId_ != view.selected;
     selectedId_ = view.selected;
+    const auto* focus = QApplication::focusWidget();
     inspector_->setEnabled(edit && selectedId_);
     modelAsset_->clear(); textureAsset_->clear();
+    bool selectedLight = false;
     for (const auto& o : view.objects) if (o.id == selectedId_)
     {
+        selectedLight = o.hasPointLight;
+        if (o.hasPointLight)
+        {
+            for (int i = 0; i < 5; ++i)
+                if (selectionChanged || !focus || (focus != lightValues_[i] && !lightValues_[i]->isAncestorOf(focus)))
+                    lightValues_[i]->setValue(i < 3 ? o.pointLight.color[i] : i == 3 ? o.pointLight.intensity : o.pointLight.radius);
+            lightEnabled_->setChecked(o.pointLight.enabled != 0);
+            const auto& color = o.pointLight.color;
+            lightColor_->setStyleSheet(QStringLiteral("background-color: %1; color: %2;")
+                .arg(QColor::fromRgbF(color[0], color[1], color[2]).name())
+                .arg(color[0] * 0.299 + color[1] * 0.587 + color[2] * 0.114 > 0.5 ? "black" : "white"));
+        }
         modelAsset_->setText(QString::fromStdString(o.modelAsset));
         textureAsset_->setText(QString::fromStdString(o.textureAsset));
     }
-    const auto* focus = QApplication::focusWidget();
+    lightInspector_->setVisible(selectedLight);
     if (selectionChanged || !focus || !inspector_->isAncestorOf(focus))
     {
         for (const auto& o : view.objects)
@@ -358,6 +420,28 @@ void EditorMainWindow::RefreshSceneTools()
     EditorCommand c;
     c.type = EditorCommand::RefreshScene;
     host_->PostCommand(c);
+}
+
+void EditorMainWindow::ApplyPointLight()
+{
+    if (refreshing_ || !selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+    for (const auto& o : host_->ReadSnapshot().objects) if (o.id == selectedId_ && o.hasPointLight)
+    {
+        EditorCommand c; c.type = EditorCommand::SetPointLight; c.objectId = selectedId_; c.pointLight = o.pointLight;
+        bool changed = false;
+        for (int i = 0; i < 3; ++i)
+        {
+            c.pointLight.color[i] = static_cast<float>(lightValues_[i]->value());
+            changed |= std::abs(c.pointLight.color[i] - o.pointLight.color[i]) > 0.0006f;
+        }
+        c.pointLight.intensity = static_cast<float>(lightValues_[3]->value());
+        c.pointLight.radius = static_cast<float>(lightValues_[4]->value());
+        c.pointLight.enabled = lightEnabled_->isChecked() ? 1u : 0u;
+        changed |= std::abs(c.pointLight.intensity - o.pointLight.intensity) > 0.0006f ||
+            std::abs(c.pointLight.radius - o.pointLight.radius) > 0.0006f || c.pointLight.enabled != o.pointLight.enabled;
+        if (changed) host_->PostCommand(c);
+        return;
+    }
 }
 
 void EditorMainWindow::MaybeSave(std::function<void()> after)

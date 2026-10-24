@@ -45,4 +45,5 @@ private:
     static uint32_t ENGINE_MODULE_CALL RemoveObject(void*, uint64_t) noexcept;
     static uint32_t ENGINE_MODULE_CALL RenameObject(void*, uint64_t, const char*) noexcept;
     static uint32_t ENGINE_MODULE_CALL SetTransform(void*, uint64_t, const EngineSceneTransform*) noexcept;
+    static uint32_t ENGINE_MODULE_CALL SetPointLight(void*, uint64_t, const EngineScenePointLight*) noexcept;
 };

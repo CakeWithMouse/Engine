@@ -1,7 +1,7 @@
 #pragma once
 #include <Engine/Runtime/SceneModuleApi.h>
 
-#define ENGINE_EDIT_API_VERSION 4u
+#define ENGINE_EDIT_API_VERSION 5u
 enum EngineEditState : uint32_t { EngineEditing = 0, EnginePlaying = 1, EnginePaused = 2 };
 enum EngineEditControl : uint32_t { EnginePlay = 0, EngineStop = 1, EnginePause = 2, EngineResume = 3 };
 

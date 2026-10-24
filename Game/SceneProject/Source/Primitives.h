@@ -1,11 +1,17 @@
 #pragma once
 #include <Engine/Components/ComponentType.h>
+#include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
 #include <Engine/Components/SpecificComponents/SphereComponent.h>
 
 // CPU geometry only. Scene/Game creates GPU resources when a viewport is attached.
 namespace SceneProject
 {
+class PointLight final : public PointLightComponent
+{
+public:
+    PointLight() : PointLightComponent(glm::vec3(0), glm::vec3(1), 2.0f, 10.0f) {}
+};
 class Cube final : public CubeComponent
 {
 public:
@@ -98,7 +104,8 @@ inline ComponentTypeCatalog GetComponentTypes()
         {"Primitive.Plane", "Плоскость", EngineComponentDetail::Create<Plane>},
         {"Primitive.Cylinder", "Цилиндр", EngineComponentDetail::Create<Cylinder>},
         {"Primitive.Cone", "Конус", EngineComponentDetail::Create<Cone>},
-        {"Primitive.Pyramid", "Пирамида", EngineComponentDetail::Create<Pyramid>}
+        {"Primitive.Pyramid", "Пирамида", EngineComponentDetail::Create<Pyramid>},
+        {"Light.Point", "Точечный свет", EngineComponentDetail::Create<PointLight>}
     };
     return {types, sizeof(types) / sizeof(types[0])};
 }

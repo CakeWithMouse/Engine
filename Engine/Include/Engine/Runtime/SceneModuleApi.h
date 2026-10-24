@@ -3,7 +3,7 @@
 
 // Optional, separately versioned extension of ModuleApi v4. Windows x64/default
 // packing. No STL, cross-DLL allocation ownership or exceptions. See SCENE-MODULE-API.md.
-#define ENGINE_SCENE_API_VERSION 2u
+#define ENGINE_SCENE_API_VERSION 3u
 enum EngineSceneStatus : uint32_t
 {
     EngineSceneOk = 0, EngineSceneInvalidArgument = 1, EngineSceneUnknownType = 2,
@@ -26,6 +26,13 @@ struct EngineSceneTypeInfo
     const char* geometryAsset;
     const char* materialAsset;
 };
+struct EngineScenePointLight
+{
+    float color[3]; // linear RGB in [0,1]
+    float intensity; // finite, >= 0
+    float radius; // finite, > 0, world units
+    uint32_t enabled; // 0 or 1
+};
 struct EngineSceneObjectInfo
 {
     uint64_t id;
@@ -36,6 +43,8 @@ struct EngineSceneObjectInfo
     EngineSceneTransform transform;
     const char* modelAsset;
     const char* textureAsset;
+    uint32_t hasPointLight;
+    EngineScenePointLight pointLight;
 };
 struct EngineSceneInfo
 {
@@ -58,6 +67,7 @@ struct EngineSceneApi
     uint32_t (ENGINE_MODULE_CALL *removeObject)(void*, uint64_t id);
     uint32_t (ENGINE_MODULE_CALL *renameObject)(void*, uint64_t id, const char* name);
     uint32_t (ENGINE_MODULE_CALL *setTransform)(void*, uint64_t id, const EngineSceneTransform*);
+    uint32_t (ENGINE_MODULE_CALL *setPointLight)(void*, uint64_t id, const EngineScenePointLight*);
 };
 
 // Optional export EngineGetSceneApi. Query only after successful module start.
@@ -71,5 +81,5 @@ typedef int (ENGINE_MODULE_CALL *EngineGetSceneApiFn)(uint32_t version, uint32_t
 inline bool IsCompleteSceneApi(const EngineSceneApi& api) noexcept
 {
     return api.version == ENGINE_SCENE_API_VERSION && api.context && api.listTypes &&
-        api.readScene && api.createObject && api.removeObject && api.renameObject && api.setTransform;
+        api.readScene && api.createObject && api.removeObject && api.renameObject && api.setTransform && api.setPointLight;
 }

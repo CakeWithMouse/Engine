@@ -53,9 +53,16 @@ inline std::filesystem::path Create(const std::filesystem::path& directory, cons
             return Json{{"id",id},{"type",type},{"name",label},{"parent",0},{"inheritParentScale",true},
                 {"transform",{{"position",position},{"rotation",{0,0,0,1}},{"scale",scale}}}};
         };
+        auto light = [&](uint64_t id, const char* label, Json position, Json color) {
+            auto value = object(id, "Light.Point", label, position, {1,1,1});
+            value["pointLight"] = {{"color",color},{"intensity",2.0},{"radius",10.0},{"enabled",true}};
+            return value;
+        };
         Write(root / "Content/Scenes/Main.scene.json", {{"version",1},{"name","Main"},{"objects",Json::array({
             object(1,"Primitive.Plane","Ground",{0,-0.5,0},{20,1,20}),
-            object(2,"Primitive.Cube","Cube",{0,0,0},{1,1,1})})}});
+            object(2,"Primitive.Cube","Cube",{0,0,0},{1,1,1}),
+            light(3,"Warm Light",{2,3,2},{1.0,0.65,0.35}),
+            light(4,"Cool Light",{-3,2,1},{0.3,0.55,1.0})})}});
         Write(root / "Project.json", {{"name",name},{"module","Game.dll"},{"content","Content"},
             {"startupScene","Content/Scenes/Main.scene.json"}});
         Validate(root / "Project.json");

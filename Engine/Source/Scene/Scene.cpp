@@ -1,5 +1,6 @@
 #include <Engine/Scene/Scene.h>
 #include <Engine/Components/GameComponents.h>
+#include <Engine/Components/Light/PointLightComponent.h>
 #include <atomic>
 #include <cmath>
 #include <stdexcept>
@@ -172,8 +173,32 @@ SceneSnapshot Scene::GetSnapshot() const
             {c.GetLocalPosition(), c.bUseQuaternionRotation ? c.LocalRotationQuaternion :
                 glm::quat(glm::radians(c.ComponentRotation)), c.GetScale()}, c.SceneTypeName,
                 c.GetModelAsset(), c.GetTexturePath()});
+        if (const auto* light = dynamic_cast<const PointLightComponent*>(&c))
+            result.components.back().pointLight = {light->GetLightColor(), light->GetIntensity(), light->GetRadius(), light->IsEnabled()};
     }
     return result;
+}
+
+bool SceneComponentSnapshot::PointLight::IsValid() const noexcept
+{
+    return Finite(color) && color.x >= 0 && color.x <= 1 && color.y >= 0 && color.y <= 1 &&
+        color.z >= 0 && color.z <= 1 && std::isfinite(intensity) && intensity >= 0 &&
+        std::isfinite(radius) && radius > 0;
+}
+
+SceneResult Scene::SetPointLight(ComponentId id, const SceneComponentSnapshot::PointLight& light)
+{
+    if (IsUpdating()) return SceneResult::Busy;
+    auto* object = FindComponent(id);
+    if (!object) return SceneResult::NotFound;
+    auto* component = dynamic_cast<PointLightComponent*>(object);
+    if (!component || !light.IsValid()) return SceneResult::InvalidTransform;
+    component->SetLightColor(light.color);
+    component->SetIntensity(light.intensity);
+    component->SetRadius(light.radius);
+    component->SetEnabled(light.enabled);
+    ++revision_;
+    return SceneResult::Ok;
 }
 
 SceneResult Scene::SetTextureAsset(ComponentId id, const std::string& path)
