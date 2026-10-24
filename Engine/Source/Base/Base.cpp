@@ -8,7 +8,9 @@
 
 #include <Engine/Base/Base.h>
 #include <Engine/Runtime/ModuleApi.h>
+#include <Engine/Runtime/ViewportSession.h>
 #include <Engine/Resources/Paths.h>
+#include "../Resources/VfsRead.h"
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/Player.h>
 #include <chrono>
@@ -315,7 +317,10 @@ public:
     }
 };
 
-BaseEngine::BaseEngine() = default;
+BaseEngine::BaseEngine()
+    : Vfs(VfsRead::GetVFS())
+{
+}
 BaseEngine::~BaseEngine() { Stop(); }
 
 bool BaseEngine::ReloadActiveModule()
@@ -451,6 +456,25 @@ int BaseEngine::Run(const RuntimeLaunchOptions& options, const BaseGameConfig& c
     return result;
 }
 
+void BaseEngine::ApplyMount(std::string_view virtualRoot, const std::filesystem::path& physicalPath)
+{
+    const std::string normRoot = VirtualFileSystem::NormalizeVirtualPath(virtualRoot);
+    std::optional<std::filesystem::path> prev;
+    for (const auto& m : Vfs.GetMounts())
+    {
+        if (_stricmp(m.virtualRoot.c_str(), normRoot.c_str()) == 0)
+        {
+            prev = m.physicalPath;
+            break;
+        }
+    }
+
+    // Record rollback entry BEFORE calling Vfs.Mount so that if Mount throws,
+    // the previous mount state can still be restored during exception unwinding in Stop().
+    appliedMounts.push_back({ normRoot, prev });
+    Vfs.Mount(normRoot, physicalPath);
+}
+
 int BaseEngine::Play(const RuntimeLaunchOptions& options)
 {
     if (state != State::Ready) throw std::runtime_error("Engine is not ready");
@@ -466,10 +490,10 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             engineContent = repoRoot / "Engine" / "Content";
         }
     }
-    Vfs.Mount("/Engine", engineContent);
+    ApplyMount("/Engine", engineContent);
     if (!options.contentRoot.empty())
     {
-        Vfs.Mount("/Game", options.contentRoot);
+        ApplyMount("/Game", options.contentRoot);
     }
 
     for (const auto& mount : Vfs.GetMounts())
@@ -488,12 +512,11 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             try
             {
                 if (!hwnd || !w || !h || w > INT_MAX || h > INT_MAX) return 0;
-                engine.viewportGame.reset();
-                auto scene = engine.viewportFactory();
-                if (!scene || !scene->InitializeViewport(static_cast<HWND>(hwnd), static_cast<int>(w), static_cast<int>(h)))
+                engine.viewportSession.reset();
+                auto scene = std::make_unique<ViewportSession>(engine.viewportFactory);
+                if (!scene->Attach(static_cast<HWND>(hwnd), static_cast<int>(w), static_cast<int>(h)))
                     return 0;
-                scene->SetVSync(false); // Host paces the editor, including when occluded.
-                engine.viewportGame = std::move(scene);
+                engine.viewportSession = std::move(scene);
                 std::puts("ViewportReady");
                 return 1;
             }
@@ -502,13 +525,14 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             return 0;
         };
         host.viewportResize = [](void* user, uint32_t w, uint32_t h) -> int {
-            auto& scene = static_cast<BaseEngine*>(user)->viewportGame;
+            auto& scene = static_cast<BaseEngine*>(user)->viewportSession;
             if (!scene || w > INT_MAX || h > INT_MAX) return 0;
-            scene->OnWindowResized(static_cast<int>(w), static_cast<int>(h), !w || !h);
+            scene->Resize(static_cast<int>(w), static_cast<int>(h));
             return 1;
         };
         host.viewportCamera = [](void* user, float r, float u, float f, float y, float p, float z) {
-            auto& scene = static_cast<BaseEngine*>(user)->viewportGame;
+            auto& session = static_cast<BaseEngine*>(user)->viewportSession;
+            auto* scene = session ? session->Active() : nullptr;
             if (scene && scene->GetPlayer()) {
                 scene->GetPlayer()->MoveEditorCamera(r, u, f, y, p, z);
                 if (std::getenv("ENGINE_VIEWPORT_INPUT_TRACE")) {
@@ -518,9 +542,25 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             }
         };
         host.viewportDetach = [](void* user) -> int {
-            static_cast<BaseEngine*>(user)->viewportGame.reset();
+            static_cast<BaseEngine*>(user)->viewportSession.reset();
             std::puts("ViewportStopped");
             return 1;
+        };
+        host.viewportControl = [](void* user, uint32_t command) -> int {
+            auto& session = static_cast<BaseEngine*>(user)->viewportSession;
+            if (!session) return -1;
+            try
+            {
+                if (command == 0) { if (!session->TogglePlay()) return -1; }
+                else if (command == 1) session->TogglePause();
+                else return -1;
+                const int state = static_cast<int>(session->GetState());
+                std::printf("ViewportState=%s\n", state == 0 ? "Edit" : state == 1 ? "Play" : "Pause");
+                return state;
+            }
+            catch (const std::exception& error) { std::fprintf(stderr, "ViewportControlError: %s\n", error.what()); }
+            catch (...) { std::fputs("ViewportControlError: unknown failure\n", stderr); }
+            return -1;
         };
     }
     activeSession = std::make_unique<LoadedSession>();
@@ -761,9 +801,9 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             if (activeSession && activeSession->IsStarted())
             {
                 activeSession->Update(dt);
-                if (viewportGame)
+                if (viewportSession)
                 {
-                    if (!viewportGame->RenderViewportFrame(static_cast<float>(dt)))
+                    if (!viewportSession->Active()->RenderViewportFrame(static_cast<float>(dt)))
                         throw std::runtime_error("Viewport rendering failed");
                     if (options.frames || frame == 0) std::puts("EngineRender (viewport)");
                 }
@@ -777,7 +817,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
                 }
                 if (options.mode == RuntimeMode::Editor) activeSession->Overlay();
                 if (options.frames || options.mode != RuntimeMode::Editor)
-                    std::puts(viewportGame ? "EngineFrameEnd (viewport)" : "EngineFrameEnd (stub)");
+                    std::puts(viewportSession ? "EngineFrameEnd (viewport)" : "EngineFrameEnd (stub)");
             }
             else
             {
@@ -810,10 +850,37 @@ void BaseEngine::Stop() noexcept
         activeSession->Close();
         activeSession.reset();
     }
-    viewportGame.reset();
+    viewportSession.reset();
     Resources.DeInitialize();
     Resources.SetVFS(nullptr);
-    Vfs.UnmountAll();
+
+    // Revert mounts applied by this engine instance in reverse order
+    for (auto it = appliedMounts.rbegin(); it != appliedMounts.rend(); ++it)
+    {
+        try
+        {
+            if (it->previousPath.has_value())
+            {
+                Vfs.Mount(it->virtualRoot, *it->previousPath);
+            }
+            else
+            {
+                Vfs.Unmount(it->virtualRoot);
+            }
+        }
+        catch (const std::exception& error)
+        {
+            std::fprintf(stderr, "[BaseEngine] Failed to revert mount '%s': %s\n",
+                it->virtualRoot.c_str(), error.what());
+        }
+        catch (...)
+        {
+            std::fprintf(stderr, "[BaseEngine] Failed to revert mount '%s': unknown error\n",
+                it->virtualRoot.c_str());
+        }
+    }
+    appliedMounts.clear();
+
     state = State::Stopped;
     std::puts("EngineStopped");
 }

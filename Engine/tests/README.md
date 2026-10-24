@@ -1,5 +1,13 @@
 # Проверки движка
 
+Отдельные проверки встроенного viewport: `./Engine/tests/run-viewport.ps1` (D3D11,
+пиксели, анимация, resize, владение HWND) и после сборки Runtime
+`./Engine/tests/run-editor-viewport.ps1` (настоящий Qt-интерфейс, обновление без stdin,
+resize и закрытие). Обе поддерживают `-Configuration Release`.
+`run-viewport.ps1` также проверяет Edit/Play/Pause, возврат исходной сцены и ошибку Play.
+Для проверки клавиш в настоящем Qt-окне: `./Engine/tests/run-editor-viewport.ps1 -Project BasicExamples -TestPlayControls`.
+Обычный набор WARP ниже остаётся безоконным. См. [инструкцию](../docs/RUNTIME-QUICKSTART.md).
+
 Из корня репозитория:
 
 ```powershell

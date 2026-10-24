@@ -7,8 +7,11 @@
 #include <memory>
 #include <string>
 #include <functional>
+#include <optional>
+#include <vector>
 
 class Game;
+class ViewportSession;
 
 // Host owns this object; game/editor modules see only ModuleApi.h.
 // One run per instance. Legacy Game still owns its independent old launch path.
@@ -16,15 +19,24 @@ class BaseEngine final
 {
     BaseResources Resources;
     BaseGameConfig Config;
-    VirtualFileSystem Vfs;
+    VirtualFileSystem& Vfs;
     enum class State { New, Starting, Ready, Playing, Stopped };
     State state = State::New;
     bool exitRequested = false;
 
+    struct AppliedMount
+    {
+        std::string virtualRoot;
+        std::optional<std::filesystem::path> previousPath;
+    };
+    std::vector<AppliedMount> appliedMounts;
+
+    void ApplyMount(std::string_view virtualRoot, const std::filesystem::path& physicalPath);
+
     class LoadedSession;
     std::unique_ptr<LoadedSession> activeSession;
     RuntimeLaunchOptions activeOptions;
-    std::unique_ptr<Game> viewportGame;
+    std::unique_ptr<ViewportSession> viewportSession;
     std::function<std::unique_ptr<Game>()> viewportFactory;
 
     bool Initialize(const BaseGameConfig& config, bool failForTest);

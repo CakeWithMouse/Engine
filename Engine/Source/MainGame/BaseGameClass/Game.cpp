@@ -375,7 +375,30 @@ bool Game::InitializeViewport(HWND window, int width, int height)
     return InitializeInternal(window, width, height);
 }
 
-bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int requestedHeight)
+bool Game::InitializePlayViewport(Game& editorScene)
+{
+    if (bInitialized || !editorScene.bEmbedded || !editorScene.bInitialized) return false;
+    return InitializeInternal(editorScene.DisplayPtr->GetHwnd(),
+        editorScene.DisplayPtr->GetWidth(), editorScene.DisplayPtr->GetHeight(), &editorScene);
+}
+
+void Game::SuspendViewportTargets()
+{
+    ApplyPendingResize();
+    Context->ClearState();
+    ReleaseSwapChainResources();
+    Context->Flush();
+}
+
+bool Game::RestoreViewportTargets()
+{
+    DXGI_SWAP_CHAIN_DESC desc{};
+    if (!SwapChain || FAILED(SwapChain->GetDesc(&desc))) return false;
+    DisplayPtr->SetClientSize(static_cast<int>(desc.BufferDesc.Width), static_cast<int>(desc.BufferDesc.Height));
+    return CreateSwapChainResources(DisplayPtr->GetWidth(), DisplayPtr->GetHeight());
+}
+
+bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int requestedHeight, Game* sharedViewport)
 {
     if (bInitialized)
     {
@@ -415,7 +438,13 @@ bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int reque
     const int height = std::max(DisplayPtr->GetHeight(), 1);
     InitSwapChainDesc(width, height);
 
-    if (!CreateDeviceAndSwapChain())
+    if (sharedViewport)
+    {
+        Device = sharedViewport->Device;
+        Context = sharedViewport->Context;
+        SwapChain = sharedViewport->SwapChain;
+    }
+    else if (!CreateDeviceAndSwapChain())
     {
         return fail("Direct3D 11 device (feature level 11_0 is required)");
     }
@@ -2343,15 +2372,22 @@ void Game::ProcessHotkeys()
 void Game::UpdateFrame(float realDeltaTime)
 {
     const float deltaTime = realDeltaTime * SimulationTimeScale;
-    TotalTime += deltaTime;
-
     ProcessHotkeys();
+    if (bSimulationEnabled) UpdateSimulation(deltaTime);
+    else FirstPlayer->UpdateCamera(0.0f);
+    PrepareRenderFrame();
+}
 
-    // camera -> world transforms -> lights/cascades -> frame constants -> object constants
+void Game::UpdateSimulation(float deltaTime)
+{
+    TotalTime += deltaTime;
     PreUpdate(deltaTime);
     FirstPlayer->UpdateCamera(deltaTime);
     TickComponents(deltaTime);
+}
 
+void Game::PrepareRenderFrame()
+{
     if (bShadowsEnabled && !bShadowResourcesReady && !bShadowInitFailed)
     {
         bShadowResourcesReady = InitShadowResources();
@@ -2819,6 +2855,7 @@ void Game::BeginGpuTimer()
             !disjoint.Disjoint && disjoint.Frequency > 0 && end >= begin)
         {
             LastGpuFrameMs = static_cast<float>(static_cast<double>(end - begin) * 1000.0 / static_cast<double>(disjoint.Frequency));
+            ++GpuTimerSamplesReady;
         }
         GpuTimerIssued[slot] = false;
     }

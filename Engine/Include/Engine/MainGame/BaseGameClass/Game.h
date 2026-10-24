@@ -131,6 +131,12 @@ public:
     // No Raw Input registration, window procedure replacement or nested message loop.
     bool InitializeViewport(HWND window, int width, int height);
     bool RenderViewportFrame(float deltaTime);
+    // Transitional preview sessions share one device/swap chain, never scene objects.
+    bool InitializePlayViewport(Game& editorScene);
+    void SuspendViewportTargets();
+    bool RestoreViewportTargets();
+    void SetSimulationEnabled(bool enabled) { bSimulationEnabled = enabled; }
+    bool IsSimulationEnabled() const { return bSimulationEnabled; }
     /** Runs the frame loop until quit. Returns the process exit code. */
     int StartGame();
 
@@ -241,7 +247,7 @@ public:
 
 protected:
     // Initialization
-    bool InitializeInternal(HWND externalWindow, int width, int height);
+    bool InitializeInternal(HWND externalWindow, int width, int height, Game* sharedViewport = nullptr);
     void InitSwapChainDesc(int width, int height);
     bool CreateDeviceAndSwapChain();
     bool CreateSwapChainResources(int width, int height);
@@ -261,6 +267,8 @@ protected:
     bool PumpMessages();
     void ApplyPendingResize();
     void UpdateFrame(float realDeltaTime);
+    void UpdateSimulation(float deltaTime);
+    void PrepareRenderFrame();
     /** Game logic that must run before the camera and the component ticks (scaled dt). */
     virtual void PreUpdate(float deltaTime) {}
     /** Advances components. Default: tick everything, Space pauses everything except the skybox. */
@@ -310,6 +318,7 @@ protected:
     uint64_t FrameIndex = 0;
     bool bInitialized = false;
     bool bEmbedded = false;
+    bool bSimulationEnabled = true; // Standalone games retain their existing behavior.
     bool bRunning = false;
     int ExitCode = 0;
 
@@ -433,6 +442,7 @@ protected:
     uint32_t TitleFrameCount = 0;
     double CpuFrameMsAccumulator = 0.0;
     float LastGpuFrameMs = 0.0f;
+    uint64_t GpuTimerSamplesReady = 0;
 
     static constexpr int GpuTimerLatency = 3;
     Microsoft::WRL::ComPtr<ID3D11Query> GpuTimerDisjoint[GpuTimerLatency];

@@ -2,9 +2,11 @@
 
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
 #include <Engine/Resources/Paths.h>
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <glm/trigonometric.hpp>
 #include <iostream>
 #include <memory>
@@ -14,8 +16,6 @@
 
 namespace
 {
-    constexpr int WarmupFrames = 10;
-
     double NowMs()
     {
         using Clock = std::chrono::steady_clock;
@@ -202,6 +202,15 @@ void BattleGame::BuildScene(const Settings& settings)
     player->EnableWASD(!Config.LockCamera);
 }
 
+void BattleGame::EnableBench(uint64_t benchFrames, uint64_t warmupFrames)
+{
+    Bench.Initialize(benchFrames, warmupFrames, GpuTimerLatency);
+    WarmupFrames = warmupFrames;
+
+    // Run warmup + bench + latency frames to retire in-flight GPU queries.
+    SetFrameLimit(warmupFrames + benchFrames + static_cast<uint64_t>(GpuTimerLatency));
+}
+
 void BattleGame::PreUpdate(float deltaTime)
 {
     Game::PreUpdate(deltaTime);
@@ -211,17 +220,51 @@ void BattleGame::PreUpdate(float deltaTime)
         UpdateUnits(deltaTime);
     }
 
-    // Frame timing of this process, so a run can be compared without a profiler.
-    const double now = NowMs();
-    if (LastTimestampMs > 0.0 && GetFrameIndex() > WarmupFrames)
+    if (Bench.IsBenchActive())
     {
-        ++MeasuredFrames;
-        FrameMsSum += now - LastTimestampMs;
-        GpuMsSum += LastGpuFrameMs;
-        DrawCallSum += LastFrameStats.DrawCalls;
-        InstancesSum += LastFrameStats.InstancesDrawn;
+        if (bVSync)
+        {
+            std::cerr << "Error: VSync is enabled during benchmark, measurement is invalid!" << std::endl;
+            PostQuitMessage(1);
+            return;
+        }
+
+        const double now = NowMs();
+        const uint64_t frameIdx = GetFrameIndex();
+
+        if (frameIdx <= Bench.GetWarmupFrames())
+        {
+            Bench.OnWarmupFrame(GpuTimerSamplesReady);
+        }
+        else
+        {
+            if (LastTimestampMs > 0.0)
+            {
+                Bench.RecordCpuSample(now - LastTimestampMs);
+            }
+            Bench.RecordGpuSamples(GpuTimerSamplesReady, LastGpuFrameMs);
+
+            ++MeasuredFrames;
+            FrameMsSum += (LastTimestampMs > 0.0 ? (now - LastTimestampMs) : 0.0);
+            GpuMsSum += LastGpuFrameMs;
+            DrawCallSum += LastFrameStats.DrawCalls;
+            InstancesSum += LastFrameStats.InstancesDrawn;
+        }
+        LastTimestampMs = now;
     }
-    LastTimestampMs = now;
+    else
+    {
+        const double now = NowMs();
+        if (LastTimestampMs > 0.0 && GetFrameIndex() > WarmupFrames)
+        {
+            ++MeasuredFrames;
+            FrameMsSum += now - LastTimestampMs;
+            GpuMsSum += LastGpuFrameMs;
+            DrawCallSum += LastFrameStats.DrawCalls;
+            InstancesSum += LastFrameStats.InstancesDrawn;
+        }
+        LastTimestampMs = now;
+    }
 
     if (Config.DumpShadows && GetFrameIndex() == 20)
     {
@@ -289,6 +332,18 @@ uint32_t BattleGame::CountForLod(int level) const
         total += batch.Component->GetDrawnInstancesForLod(level);
     }
     return total;
+}
+
+void BattleGame::PrintBenchHeader() const
+{
+    const int width = DisplayPtr ? DisplayPtr->GetWidth() : 0;
+    const int height = DisplayPtr ? DisplayPtr->GetHeight() : 0;
+    Bench.PrintHeader(width, height, bVSync, Config.UnitCount, GpuTimerLatency, GetDevice());
+}
+
+std::string BattleGame::BuildBenchReport() const
+{
+    return Bench.BuildReport(Config.UnitCount, Bench.GetWarmupFrames());
 }
 
 std::string BattleGame::BuildReport() const

@@ -22,6 +22,9 @@ int ParseInt(const std::string& value, const char* option)
 int main(int argc, char** argv)
 {
     bool smoke = false;
+    bool bench = false;
+    uint64_t benchFrames = 600;
+    uint64_t warmupFrames = 150;
     BattleGame::Settings settings;
     uint64_t frameLimit = 0;
 
@@ -31,6 +34,16 @@ int main(int argc, char** argv)
         {
             const std::string argument = argv[i];
             if (argument == "--smoke") { smoke = true; continue; }
+            if (argument == "--bench")
+            {
+                bench = true;
+                if (i + 1 < argc && argv[i + 1][0] != '-')
+                {
+                    benchFrames = static_cast<uint64_t>(ParseInt(argv[++i], "--bench"));
+                }
+                continue;
+            }
+            if (argument == "--warmup" && i + 1 < argc) { warmupFrames = static_cast<uint64_t>(ParseInt(argv[++i], "--warmup")); continue; }
             if (argument == "--units" && i + 1 < argc) { settings.UnitCount = ParseInt(argv[++i], "--units"); continue; }
             if (argument == "--spacing" && i + 1 < argc) { settings.Spacing = static_cast<float>(ParseInt(argv[++i], "--spacing")); continue; }
             if (argument == "--camera" && i + 1 < argc) { settings.CameraRadius = static_cast<float>(ParseInt(argv[++i], "--camera")); continue; }
@@ -54,9 +67,10 @@ int main(int argc, char** argv)
             if (argument == "--auto-lod") { settings.AutoLod = true; continue; }
             if (argument == "--validate") { settings.ValidateAssets = true; continue; }
             throw std::runtime_error(
-                "Usage: Battle.exe [--units N] [--types N] [--spacing N] [--camera N] [--frames N] [--detail N]\n"
-                "        [--scenery N] [--sprite-px N] [--sun N] [--shadow-distance N] [--no-shadows] [--no-baked-shadows]\n"
-                "        [--no-impostors] [--forward] [--static] [--lod-debug] [--lock-camera] [--auto-lod] [--validate] [--dump-shadows] [--dump-impostors] [--smoke]");
+                "Usage: Battle.exe [--bench N] [--warmup N] [--units N] [--types N] [--spacing N] [--camera N]\n"
+                "        [--frames N] [--detail N] [--scenery N] [--sprite-px N] [--sun N] [--shadow-distance N]\n"
+                "        [--no-shadows] [--no-baked-shadows] [--no-impostors] [--forward] [--static] [--lod-debug]\n"
+                "        [--lock-camera] [--auto-lod] [--validate] [--dump-shadows] [--dump-impostors] [--smoke]");
         }
         if (settings.UnitCount < 1) throw std::runtime_error("--units must be positive");
         if (smoke && frameLimit == 0) frameLimit = 30;
@@ -64,13 +78,46 @@ int main(int argc, char** argv)
         ExampleStartup::PrepareContent();
         BattleGame game;
         if (!game.Initialize()) throw std::runtime_error("Battle initialization failed");
-        game.SetFrameLimit(frameLimit);
-        // Unattended runs measure the renderer, not the display refresh rate.
-        if (frameLimit > 0) game.SetVSync(false);
+
+        if (bench)
+        {
+            game.SetVSync(false);
+            if (game.IsVSyncActive())
+            {
+                std::cerr << "Error: VSync is enabled, benchmark invalid" << std::endl;
+                return 1;
+            }
+            game.EnableBench(benchFrames, warmupFrames);
+        }
+        else
+        {
+            game.SetFrameLimit(frameLimit);
+            // Unattended runs measure the renderer, not the display refresh rate.
+            if (frameLimit > 0) game.SetVSync(false);
+        }
+
         game.BuildScene(settings);
+
+        if (bench)
+        {
+            game.PrintBenchHeader();
+        }
+
         const int result = game.StartGame();
-        // One result line per run, so several runs can be compared directly.
-        std::cout << "battle-measurement " << game.BuildReport() << std::endl;
+        if (result != 0)
+        {
+            return result;
+        }
+
+        if (bench)
+        {
+            std::cout << game.BuildBenchReport() << std::endl;
+        }
+        else
+        {
+            // One result line per run, so several runs can be compared directly.
+            std::cout << "battle-measurement " << game.BuildReport() << std::endl;
+        }
         return result;
     }
     catch (const std::exception& error)

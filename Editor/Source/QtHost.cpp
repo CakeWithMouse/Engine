@@ -116,6 +116,15 @@ void EditorQtHost::DrainCommands()
             continue; 
         switch (cmd.type)
         {
+        case EditorCommand::TogglePlay:
+        case EditorCommand::TogglePause:
+            if (viewportActive_.load() && host_.viewportControl)
+            {
+                const int state = host_.viewportControl(host_.user, cmd.type == EditorCommand::TogglePlay ? 0 : 1);
+                if (state >= 0) playState_.store(state);
+                else Log("Play control failed; see engine log");
+            }
+            break;
         case EditorCommand::RequestExit:
             Log("EditorRequestExit");
             if (host_.requestExit) host_.requestExit(host_.user);
@@ -133,7 +142,7 @@ void EditorQtHost::DrainCommands()
             }
         case EditorCommand::ViewportAttach:
             if (host_.viewportAttach && host_.viewportAttach(host_.user, cmd.hwnd, cmd.w, cmd.h))
-            { viewportActive_.store(true); Log("EditorViewportAttach ok"); }
+            { viewportActive_.store(true); playState_.store(0); Log("EditorViewportAttach ok"); }
             else
             {
                 Log("EditorViewportAttach failed");
@@ -149,6 +158,7 @@ void EditorQtHost::DrainCommands()
                 host_.viewportCamera(host_.user, cmd.right, cmd.up, cmd.forward, cmd.yaw, cmd.pitch, cmd.zoom);
             break;
         case EditorCommand::ViewportDetach:
+            playState_.store(0);
             if (viewportActive_.exchange(false) && host_.viewportDetach)
                 host_.viewportDetach(host_.user);
             Log("EditorViewportDetach");
