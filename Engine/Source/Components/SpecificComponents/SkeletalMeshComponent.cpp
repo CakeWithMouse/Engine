@@ -11,6 +11,7 @@
 SkeletalMeshComponent::SkeletalMeshComponent()
     : GameComponent()
 {
+    SetColor({1, 1, 1, 1});
 }
 
 SkeletalMeshComponent::SkeletalMeshComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale)
@@ -22,7 +23,7 @@ SkeletalMeshComponent::~SkeletalMeshComponent() = default;
 
 bool SkeletalMeshComponent::LoadFromVfs(std::string_view vpath)
 {
-    assetPath = std::string(vpath);
+
     SkeletalLoadResult loadResult = LoadSkeletalModelFromVfs(vpath);
     if (!loadResult.Success || !loadResult.Model)
     {
@@ -30,12 +31,19 @@ bool SkeletalMeshComponent::LoadFromVfs(std::string_view vpath)
         return false;
     }
 
-    return SetModel(loadResult.Model);
+    return SetAssetModel(std::string(vpath), std::move(loadResult.Model));
+}
+
+bool SkeletalMeshComponent::SetAssetModel(std::string path, std::shared_ptr<SkeletalModel> model)
+{
+    if (!SetModel(std::move(model))) return false;
+    assetPath = std::move(path);
+    return true;
 }
 
 bool SkeletalMeshComponent::SetModel(std::shared_ptr<SkeletalModel> model)
 {
-    if (!model)
+    if (!model || model->ModelSkeleton.Bones.size() > MaxSkeletalBones)
     {
         return false;
     }
@@ -51,6 +59,30 @@ bool SkeletalMeshComponent::SetModel(std::shared_ptr<SkeletalModel> model)
         EvaluateSkeletalAnimation(*skeletalModel, currentClipIndex, animationTime, bonePalette, false);
     }
 
+    // CPU geometry for editor picking and focus, in the initial animated pose.
+    std::vector<SkinnedVertex> vertices;
+    std::vector<uint32_t> triangles;
+    skeletalModel->Flatten(vertices, triangles);
+    std::vector<DirectX::XMFLOAT4> pickPoints;
+    pickPoints.reserve(vertices.size() * 2);
+    for (const auto& vertex : vertices)
+    {
+        using namespace DirectX;
+        auto position = XMLoadFloat3(&vertex.Position);
+        XMVECTOR skinned = XMVectorZero(); float weight = 0;
+        for (int i = 0; i < 4; ++i)
+            if (vertex.BoneWeights[i] > 0 && vertex.BoneIndices[i] < bonePalette.size())
+            {
+                skinned += XMVector3TransformCoord(position, XMLoadFloat4x4(&bonePalette[vertex.BoneIndices[i]])) * vertex.BoneWeights[i];
+                weight += vertex.BoneWeights[i];
+            }
+        XMFLOAT4 point; XMStoreFloat4(&point, weight > 0 ? skinned : position); point.w = 1;
+        pickPoints.push_back(point); pickPoints.emplace_back(1, 1, 1, 1);
+    }
+    std::vector<int> pickIndices(triangles.begin(), triangles.end());
+    if (!pickPoints.empty() && !pickIndices.empty())
+        InitPoints(pickPoints.data(), static_cast<int>(pickPoints.size()), pickIndices.data(), static_cast<int>(pickIndices.size()));
+
     if (GamePtr && GamePtr->GetDevice())
     {
         CreateBuffers(GamePtr->GetDevice());
@@ -61,26 +93,7 @@ bool SkeletalMeshComponent::SetModel(std::shared_ptr<SkeletalModel> model)
 
 bool SkeletalMeshComponent::LoadTexture(const std::string& path)
 {
-    texturePath = path;
-    ID3D11Device* device = GamePtr ? GamePtr->GetDevice() : nullptr;
-    ID3D11DeviceContext* context = GamePtr ? GamePtr->GetContext() : nullptr;
-    if (!device || !context)
-    {
-        return false;
-    }
-
-    if (!TextureLoader::LoadTexture2D(device, context, path, true, textureSRV))
-    {
-        std::cout << "[SkeletalMeshComponent] Texture not found or missing: " << path << ", using default color" << std::endl;
-        textureSRV.Reset();
-        return false;
-    }
-
-    if (!samplerState)
-    {
-        TextureLoader::CreateLinearSampler(device, D3D11_TEXTURE_ADDRESS_WRAP, samplerState);
-    }
-    return true;
+    return TrySetTexture(path);
 }
 
 void SkeletalMeshComponent::Tick(float deltaTime)
@@ -160,6 +173,7 @@ bool SkeletalMeshComponent::CompileShaders(ID3D11Device* device)
 void SkeletalMeshComponent::CreateBuffers(ID3D11Device* device)
 {
     if (!device) return;
+    LoadPendingTexture();
 
     if (!cb)
     {

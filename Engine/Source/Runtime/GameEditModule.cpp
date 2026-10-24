@@ -3,7 +3,8 @@
 #include <Engine/Runtime/GameEditModule.h>
 #include <stdexcept>
 
-GameEditModule::GameEditModule(const std::filesystem::path& module, const std::filesystem::path& content)
+GameEditModule::GameEditModule(const std::filesystem::path& module, const std::filesystem::path& content,
+    const std::filesystem::path& projectContent)
 {
     if (!module.is_absolute() || !content.is_absolute()) throw std::invalid_argument("Edit module/content paths must be absolute");
     library_ = LoadLibraryExW(module.c_str(), nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
@@ -16,6 +17,12 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
             throw std::runtime_error("Missing/incompatible edit-safe module API");
         if (!factory_.create(content.u8string().c_str(), &api_) || !IsCompleteEditSessionApi(api_))
             throw std::runtime_error("Cannot create edit game session");
+        if (!projectContent.empty())
+        {
+            char error[1024]{};
+            if (api_.setContentRoot(api_.context, projectContent.u8string().c_str(), error, sizeof(error)) != EngineSceneOk)
+                throw std::runtime_error(std::string("Cannot configure project assets: ") + error);
+        }
     }
     catch (...)
     {

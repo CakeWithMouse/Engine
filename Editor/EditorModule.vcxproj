@@ -51,6 +51,7 @@
     <!-- ===== Qt: подставьте свою версию/путь ===== -->
     <PropertyGroup>
         <QtInstallDir Condition="'$(QtInstallDir)'=='' AND '$(QTDIR)'!=''">$(QTDIR)</QtInstallDir>
+        <QtInstallDir Condition="'$(QtInstallDir)'=='' AND Exists('$(MSBuildThisFileDirectory)ThirdParty/Qt/6.7.3/msvc2019_64/bin/moc.exe')">$(MSBuildThisFileDirectory)ThirdParty/Qt/6.7.3/msvc2019_64</QtInstallDir>
         <QtInstallDir Condition="'$(QtInstallDir)'==''">$(MSBuildThisFileDirectory)ThirdParty\Qt6.7</QtInstallDir>
         <QtUseDebugLibraries Condition="'$(Configuration)'=='Debug' AND Exists('$(QtInstallDir)/lib/Qt6Widgetsd.lib')">true</QtUseDebugLibraries>
         <QtLibSuffix Condition="'$(QtUseDebugLibraries)'=='true'">d</QtLibSuffix>
@@ -132,6 +133,7 @@
         <ClCompile Include="Source/QtHost.cpp"/>
         <ClCompile Include="Source/MainWindow.cpp"/>
         <ClCompile Include="Source/SceneTools.cpp"/>
+        <ClCompile Include="Source/AssetTools.cpp"/>
         <ClCompile Include="Source/FileBrowser.cpp"/>
         <ClCompile Include="Source/ViewportWidget.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_MainWindow.cpp"/>

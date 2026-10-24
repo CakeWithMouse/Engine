@@ -567,7 +567,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
     auto engineContent = EnginePaths::ContentRoot();
     if (!std::filesystem::exists(engineContent))
     {
-        const auto repoRoot = FindRepositoryRoot(options.projectFile.empty() ? std::filesystem::path{} : std::filesystem::path(options.projectFile).parent_path());
+        const auto repoRoot = FindRepositoryRoot(options.projectFile.empty() ? std::filesystem::path{} : std::filesystem::u8path(options.projectFile).parent_path());
         if (!repoRoot.empty() && std::filesystem::exists(repoRoot / "Engine" / "Content"))
         {
             engineContent = repoRoot / "Engine" / "Content";
@@ -576,7 +576,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
     ApplyMount("/Engine", engineContent);
     if (!options.contentRoot.empty())
     {
-        ApplyMount("/Game", options.contentRoot);
+        ApplyMount("/Game", std::filesystem::u8path(options.contentRoot));
     }
 
     for (const auto& mount : Vfs.GetMounts())
@@ -597,7 +597,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
     if (!options.editModule.empty())
     {
         if (options.mode != RuntimeMode::Editor) throw std::runtime_error("editModule requires editor mode");
-        editModule = std::make_unique<GameEditModule>(options.editModule, engineContent);
+        editModule = std::make_unique<GameEditModule>(options.editModule, engineContent, std::filesystem::u8path(options.contentRoot));
         if (!options.startupScene.empty())
         {
             const auto& api = editModule->Api();

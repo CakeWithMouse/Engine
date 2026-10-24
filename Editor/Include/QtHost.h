@@ -22,7 +22,8 @@ struct EditorCommand
         ViewportAttach, ViewportResize, ViewportDetach, ViewportCamera,
         TogglePlay, TogglePause,
         FetchScene, UpdateObjectTransform, RefreshScene, SelectObject, CreateObject, RemoveObject,
-        RenameObject, DuplicateObject, SaveScene, LoadScene, NewScene, Undo, Redo, PickObject, FocusObject
+        RenameObject, DuplicateObject, SaveScene, LoadScene, NewScene, Undo, Redo, PickObject, FocusObject,
+        ImportModel, ImportTexture, CreateModel, SetTexture
     };
 
     Type type = None;
@@ -78,6 +79,7 @@ public:
         bool inheritScale = true;
         std::string name, type;
         EngineSceneTransform transform{};
+        std::string modelAsset, textureAsset;
     };
     struct SceneType { std::string name, label; };
     struct Snapshot

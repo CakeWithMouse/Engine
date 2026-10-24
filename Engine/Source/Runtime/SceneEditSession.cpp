@@ -94,7 +94,7 @@ uint32_t SceneEditSession::Control(uint32_t command)
 }
 EngineEditSessionApi SceneEditSession::GetApi() noexcept
 {
-    return {ENGINE_EDIT_API_VERSION, this, commands_.GetApi(),
+    EngineEditSessionApi api{ENGINE_EDIT_API_VERSION, this, commands_.GetApi(),
         [](void* p, uint32_t command) -> uint32_t {
             return Invoke(p, [&](SceneEditSession& s) { return s.Control(command); });
         },
@@ -238,4 +238,6 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                 return EngineSceneOk;
             });
         }};
+    AddAssetApi(api);
+    return api;
 }

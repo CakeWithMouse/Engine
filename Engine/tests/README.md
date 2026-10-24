@@ -1,5 +1,12 @@
 # Проверки движка
 
+Импорт ресурсов и сцены: `./Engine/tests/assets/run.ps1 -EnableAssimp`.
+Проверяет настоящий игровой DLL, импорт glTF с внешними ресурсами/GLB/OBJ,
+назначение текстур, ошибки и откат, Unicode, сохранение и перенос проекта,
+Play/standalone и пиксели D3D. Без `-EnableAssimp` проверяет текстуры и
+корректный отказ импорта моделей. Qt-сценарий с Undo/Redo и дублированием:
+`./Editor/tests/run.ps1 -EnableAssimp`. Подробнее: [PROJECT-ASSETS.md](../docs/PROJECT-ASSETS.md).
+
 Edit/Play API: `./Engine/tests/edit-session/run.ps1 -PlatformToolset auto`.
 129 проверок без Editor/Qt, включая отдельное Win32-окно/D3D11, настоящий игровой DLL
 и ABI-only consumer. Инструкция: [EDIT-SESSION-API.md](../docs/EDIT-SESSION-API.md).

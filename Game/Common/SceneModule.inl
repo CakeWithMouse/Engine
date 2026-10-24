@@ -44,7 +44,7 @@ void* __cdecl Create(const EngineModuleHost* host)
                 const std::string engineRoot = VfsRead::Resolve("/Engine");
                 if (!engineRoot.empty())
                 {
-                    EnginePaths::SetContentRoot(engineRoot);
+                    EnginePaths::SetContentRoot(std::filesystem::u8path(engineRoot));
                 }
             }
         }

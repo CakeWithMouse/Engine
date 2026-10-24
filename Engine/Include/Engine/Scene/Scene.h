@@ -39,6 +39,7 @@ struct SceneComponentSnapshot
     bool inheritParentScale = true;
     SceneTransform transform;
     std::string typeName; // copied qualified catalog key; empty for legacy additions
+    std::string modelAsset, textureAsset;
 };
 struct SceneSnapshot
 {
@@ -78,6 +79,7 @@ public:
     SceneResult SetTransform(ComponentId id, const SceneTransform& transform);
     SceneResult SetParent(ComponentId child, ComponentId parent, bool inheritScale = true);
     SceneResult ClearParent(ComponentId child);
+    SceneResult SetTextureAsset(ComponentId id, const std::string& path);
     SceneSnapshot GetSnapshot() const;
 
     // Covers custom game update order too. The outermost scope commits pending edits,

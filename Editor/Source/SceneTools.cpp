@@ -66,6 +66,11 @@ void EditorMainWindow::BuildSceneTools()
 
     menu->addSeparator();
 
+    menu->addAction(QStringLiteral("Добавить модель…"), this, [this] { AddModel(); });
+    menu->addAction(QStringLiteral("Импорт модели…"), this, [this] { ImportAsset(false); });
+    menu->addAction(QStringLiteral("Импорт текстуры…"), this, [this] { ImportAsset(true); });
+    menu->addSeparator();
+
     undoAction_ = menu->addAction(QStringLiteral("Отменить"), this, [this]
     {
         SubmitObjectCommand(EditorCommand::Undo);
@@ -156,6 +161,17 @@ void EditorMainWindow::BuildSceneTools()
     addPrimitiveButton_->setObjectName(QStringLiteral("AddPrimitive"));
     layout->addWidget(addPrimitiveButton_);
 
+    auto* addModel = new QPushButton(QStringLiteral("+ Добавить модель…"), scenePanel_);
+    addModel->setObjectName(QStringLiteral("AddModel"));
+    addModel->setToolTip(QStringLiteral("Выбрать модель из Content/Models и разместить в точке добавления X/Y/Z."));
+    connect(addModel, &QPushButton::clicked, this, [this] { AddModel(); });
+    layout->addWidget(addModel);
+    auto* importModel = new QPushButton(QStringLiteral("Импорт модели в проект…"), scenePanel_);
+    importModel->setObjectName(QStringLiteral("SceneImportModel"));
+    importModel->setToolTip(QStringLiteral("Скопировать внешний файл в проект. Затем нажмите «Добавить модель…»."));
+    connect(importModel, &QPushButton::clicked, this, [this] { ImportAsset(false); });
+    layout->addWidget(importModel);
+
     hierarchy_ = new QTreeWidget(scenePanel_);
     hierarchy_->setHeaderLabels({QStringLiteral("Объект"), QStringLiteral("Тип")});
     hierarchy_->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -224,6 +240,7 @@ void EditorMainWindow::BuildSceneTools()
         form->addRow(labels[i], spin);
     }
 
+    BuildAssetInspector(form);
     inspectorDock_->setWidget(inspector_);
 }
 
@@ -313,6 +330,12 @@ void EditorMainWindow::RefreshSceneTools()
     const bool selectionChanged = selectedId_ != view.selected;
     selectedId_ = view.selected;
     inspector_->setEnabled(edit && selectedId_);
+    modelAsset_->clear(); textureAsset_->clear();
+    for (const auto& o : view.objects) if (o.id == selectedId_)
+    {
+        modelAsset_->setText(QString::fromStdString(o.modelAsset));
+        textureAsset_->setText(QString::fromStdString(o.textureAsset));
+    }
     const auto* focus = QApplication::focusWidget();
     if (selectionChanged || !focus || !inspector_->isAncestorOf(focus))
     {
@@ -450,7 +473,12 @@ void EditorMainWindow::CommandFinished(const EditorCommand& command, uint32_t st
         QMessageBox::warning(this, QStringLiteral("Ошибка сцены"), message);
         return;
     }
-    if (command.type == EditorCommand::SaveScene)
+    if (command.type == EditorCommand::ImportModel || command.type == EditorCommand::ImportTexture)
+    {
+        AppendLine(QStringLiteral("Импортировано: %1. Двойной щелчок в Files: добавить модель или назначить текстуру выбранному объекту.").arg(command.path));
+        statusBar()->showMessage(QStringLiteral("Импортировано: %1").arg(command.path), 8000);
+    }
+    else if (command.type == EditorCommand::SaveScene)
     {
         scenePath_ = command.path;
         // Commit startupScene only after the scene itself was successfully written.

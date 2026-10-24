@@ -5,6 +5,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include "AssimpVfsIO.h"
+#include <functional>
 #include "../Resources/VfsRead.h"
 
 #include <algorithm>
@@ -61,15 +63,9 @@ namespace
     }
 }
 
-SkeletalLoadResult LoadSkeletalModelFromMemory(const void* data, size_t size, std::string_view hint)
+static SkeletalLoadResult LoadModel(const std::function<const aiScene*(Assimp::Importer&, unsigned)>& read)
 {
     SkeletalLoadResult result;
-    if (data == nullptr || size == 0)
-    {
-        result.ErrorMessage = "Empty input data for skeletal model";
-        return result;
-    }
-
     try
     {
         Assimp::Importer importer;
@@ -80,14 +76,20 @@ SkeletalLoadResult LoadSkeletalModelFromMemory(const void* data, size_t size, st
             aiProcess_JoinIdenticalVertices |
             aiProcess_ConvertToLeftHanded;
 
-        const std::string hintStr(hint);
-        const aiScene* scene = importer.ReadFileFromMemory(data, size, flags, hintStr.c_str());
+        const aiScene* scene = read(importer, flags);
         if (!scene || (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !scene->mRootNode)
         {
             result.ErrorMessage = importer.GetErrorString();
             return result;
         }
 
+        bool skinned = false;
+        for (unsigned m = 0; m < scene->mNumMeshes; ++m) skinned |= scene->mMeshes[m]->HasBones();
+        if (!skinned)
+        {
+            scene = importer.ApplyPostProcessing(aiProcess_PreTransformVertices);
+            if (!scene) { result.ErrorMessage = importer.GetErrorString(); return result; }
+        }
         auto model = std::make_shared<SkeletalModel>();
 
         // Compute MeshToModel accumulated transform from root down to the mesh node
@@ -101,7 +103,7 @@ SkeletalLoadResult LoadSkeletalModelFromMemory(const void* data, size_t size, st
                 {
                     meshNode = node;
                 }
-                else if (meshNode != node)
+                else if (skinned && meshNode != node)
                 {
                     result.ErrorMessage = "Multiple meshes found with different parent nodes in skeletal model";
                     return result;
@@ -109,7 +111,7 @@ SkeletalLoadResult LoadSkeletalModelFromMemory(const void* data, size_t size, st
             }
         }
 
-        if (meshNode != nullptr)
+        if (skinned && meshNode != nullptr)
         {
             DirectX::XMMATRIX acc = DirectX::XMMatrixIdentity();
             for (const aiNode* curr = meshNode; curr != nullptr; curr = curr->mParent)
@@ -301,6 +303,7 @@ SkeletalLoadResult LoadSkeletalModelFromMemory(const void* data, size_t size, st
             model->Clips.push_back(std::move(clip));
         }
 
+        if (model->TotalIndexCount == 0) { result.ErrorMessage = "Model contains no triangles"; return result; }
         result.Success = true;
         result.Model = model;
     }
@@ -318,18 +321,18 @@ SkeletalLoadResult LoadSkeletalModelFromMemory(const void* data, size_t size, st
     return result;
 }
 
+SkeletalLoadResult LoadSkeletalModelFromMemory(const void* data, size_t size, std::string_view hint)
+{
+    if (!data || !size) return {false, "Empty input data for model", {}};
+    return LoadModel([&](Assimp::Importer& importer, unsigned flags) {
+        return importer.ReadFileFromMemory(data, size, flags, std::string(hint).c_str());
+    });
+}
 SkeletalLoadResult LoadSkeletalModelFromVfs(std::string_view vpath)
 {
-    SkeletalLoadResult result;
-    const std::vector<uint8_t> bytes = VfsRead::Active().ReadBytes(vpath);
-    if (bytes.empty())
-    {
-        result.Success = false;
-        result.ErrorMessage = "Failed to read file from VFS: " + std::string(vpath);
-        return result;
-    }
-
-    return LoadSkeletalModelFromMemory(bytes.data(), bytes.size(), "glb");
+    return LoadModel([&](Assimp::Importer& importer, unsigned flags) {
+        importer.SetIOHandler(new AssimpVfsIO(vpath));
+        return importer.ReadFile(std::string(vpath), flags);
+    });
 }
-
 #endif

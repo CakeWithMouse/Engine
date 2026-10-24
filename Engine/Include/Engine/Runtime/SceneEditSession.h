@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 #include <Engine/Runtime/EditSessionApi.h>
 #include <Engine/Scene/SceneCommands.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
@@ -9,6 +10,7 @@ class SceneEditSession final
 {
 public:
     explicit SceneEditSession(ComponentTypeCatalog catalog);
+    ~SceneEditSession();
     EngineEditSessionApi GetApi() noexcept;
     SceneEditSession(const SceneEditSession&) = delete;
     SceneEditSession& operator=(const SceneEditSession&) = delete;
@@ -25,6 +27,9 @@ private:
     Game& Active() { return play_ ? *play_ : *edit_; }
     std::unique_ptr<Game> CopyForPlay();
     uint32_t Control(uint32_t command);
+    std::filesystem::path contentRoot_, previousGameRoot_;
+    bool ownsGameMount_ = false;
+    void AddAssetApi(EngineEditSessionApi& api) noexcept;
     template<class F> static uint32_t Invoke(void* context, F&& action) noexcept
     {
         if (!context) return EngineSceneInvalidArgument;

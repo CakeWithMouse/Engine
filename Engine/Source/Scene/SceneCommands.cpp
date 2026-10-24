@@ -77,7 +77,8 @@ uint32_t SceneCommands::ReadScene(void* context, EngineSceneInfo* info, EngineSc
         for (const auto& object : snapshot.components)
         {
             const EngineSceneObjectInfo value{object.id, object.name.c_str(), object.typeName.c_str(),
-                object.parentId, object.inheritParentScale ? 1u : 0u, Encode(object.transform)};
+                object.parentId, object.inheritParentScale ? 1u : 0u, Encode(object.transform),
+                object.modelAsset.c_str(), object.textureAsset.c_str()};
             visit(user, &value);
         }
         return EngineSceneOk;

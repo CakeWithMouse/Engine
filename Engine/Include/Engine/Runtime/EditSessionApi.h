@@ -1,7 +1,7 @@
 #pragma once
 #include <Engine/Runtime/SceneModuleApi.h>
 
-#define ENGINE_EDIT_API_VERSION 3u
+#define ENGINE_EDIT_API_VERSION 4u
 enum EngineEditState : uint32_t { EngineEditing = 0, EnginePlaying = 1, EnginePaused = 2 };
 enum EngineEditControl : uint32_t { EnginePlay = 0, EngineStop = 1, EnginePause = 2, EngineResume = 3 };
 
@@ -27,6 +27,15 @@ struct EngineEditSessionApi
     // Viewport NDC coordinates [-1,1], Y upwards. Successful miss returns ID zero.
     uint32_t (ENGINE_MODULE_CALL *pickObject)(void*, float x, float y, uint64_t* id);
     uint32_t (ENGINE_MODULE_CALL *focusObject)(void*, uint64_t id);
+    // Absolute project Content directory; configure before loading a scene with assets.
+    uint32_t (ENGINE_MODULE_CALL *setContentRoot)(void*, const char*, char*, uint32_t);
+    // kind: 0 model, 1 texture. Output buffer must have at least 4096 bytes.
+    uint32_t (ENGINE_MODULE_CALL *importAsset)(void*, const char* source, uint32_t kind,
+        char* virtualPath, uint32_t pathCapacity, char* error, uint32_t errorCapacity);
+    uint32_t (ENGINE_MODULE_CALL *createModel)(void*, const char* virtualPath, const char* name,
+        const EngineSceneTransform*, uint64_t* id, char* error, uint32_t capacity);
+    // Empty texture path clears the override. All mutations are edit-only.
+    uint32_t (ENGINE_MODULE_CALL *setTexture)(void*, uint64_t id, const char* virtualPath, char* error, uint32_t capacity);
 };
 struct EngineEditModuleApi
 {
@@ -45,5 +54,6 @@ inline bool IsCompleteEditSessionApi(const EngineEditSessionApi& api) noexcept
 {
     return api.version == ENGINE_EDIT_API_VERSION && api.context && IsCompleteSceneApi(api.scene) &&
         api.control && api.getState && api.readActiveScene && api.setParent && api.attachViewport &&
-        api.resizeViewport && api.camera && api.frame && api.saveScene && api.loadScene && api.pickObject && api.focusObject;
+        api.resizeViewport && api.camera && api.frame && api.saveScene && api.loadScene && api.pickObject && api.focusObject &&
+        api.setContentRoot && api.importAsset && api.createModel && api.setTexture;
 }

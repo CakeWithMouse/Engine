@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <Engine/Scene/SceneDocument.h>
 #include <Engine/Components/GameComponents.h>
+#include <Engine/Scene/SceneAssets.h>
 #include "../../ThirdParty/nlohmann/json.hpp"
 #include <atomic>
 #include <cmath>
@@ -51,6 +52,10 @@ void Structure(const SceneSnapshot& data)
     std::set<std::string> names;
     for (const auto& item : data.components)
     {
+        if (!SceneAssets::ValidPath(item.modelAsset) || !SceneAssets::ValidPath(item.textureAsset))
+            Invalid("Assets must be canonical /Game paths without traversal");
+        if ((item.typeName == SceneAssets::ModelType) != !item.modelAsset.empty())
+            Invalid("Engine.Model requires a model asset; other types cannot specify a model");
         if (!item.id || !parents.emplace(item.id, item.parentId).second) Invalid("Duplicate or zero object ID");
         if (!validText(item.name) || !validText(item.typeName) || !names.insert(item.name).second)
             Invalid("Invalid type/name or duplicate object name");
@@ -99,8 +104,16 @@ SceneSnapshot SceneDocument::Parse(const std::string& text)
         if (!objects.is_array() || objects.size() > 100000) Invalid("Invalid objects array");
         for (const auto& o : objects)
         {
-            RequireFields(o, {"id", "type", "name", "parent", "inheritParentScale", "transform"});
+            if (o.contains("assets")) RequireFields(o, {"id", "type", "name", "parent", "inheritParentScale", "transform", "assets"});
+            else RequireFields(o, {"id", "type", "name", "parent", "inheritParentScale", "transform"});
             SceneComponentSnapshot item;
+            if (o.contains("assets"))
+            {
+                const auto& a = o.at("assets"); RequireFields(a, {"model", "texture"});
+                if (!a.at("model").is_string() || !a.at("texture").is_string()) Invalid("Invalid asset reference");
+                item.modelAsset = a.at("model").get<std::string>();
+                item.textureAsset = a.at("texture").get<std::string>();
+            }
             item.id = Id(o.at("id")); item.parentId = Id(o.at("parent"));
             item.name = Text(o.at("name")); item.typeName = Text(o.at("type"));
             if (!o.at("inheritParentScale").is_boolean()) Invalid("Expected inheritParentScale boolean");
@@ -129,6 +142,8 @@ std::string SceneDocument::Serialize(const SceneSnapshot& data)
             {"transform", {{"position", {t.position.x,t.position.y,t.position.z}},
                 {"rotation", {t.rotation.x,t.rotation.y,t.rotation.z,t.rotation.w}},
                 {"scale", {t.scale.x,t.scale.y,t.scale.z}}}}});
+        if (!o.modelAsset.empty() || !o.textureAsset.empty())
+            json["objects"].back()["assets"] = {{"model", o.modelAsset}, {"texture", o.textureAsset}};
     }
     auto text = json.dump(2) + "\n";
     if (text.size() > MaxBytes) Invalid("Scene exceeds 16 MiB");
@@ -138,7 +153,8 @@ void SceneDocument::Validate(const SceneSnapshot& data, ComponentTypeCatalog cat
 {
     Structure(data);
     for (const auto& o : data.components)
-        if (!catalog.Find(o.typeName)) throw SceneDocumentError(EngineSceneUnknownType, "Unknown component type: " + o.typeName);
+        if (o.typeName != SceneAssets::ModelType && !catalog.Find(o.typeName))
+            throw SceneDocumentError(EngineSceneUnknownType, "Unknown component type: " + o.typeName);
 }
 void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog catalog, Scene& target)
 {
@@ -148,7 +164,9 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
     std::map<ComponentId, ComponentId> ids;
     for (const auto& o : data.components)
     {
-        auto object = catalog.Find(o.typeName)->create();
+        auto object = o.typeName == SceneAssets::ModelType ? SceneAssets::CreateModel(o.modelAsset) : catalog.Find(o.typeName)->create();
+        if (!object) throw std::runtime_error("Component factory returned null");
+        SceneAssets::Apply(*object, o.modelAsset, o.textureAsset);
         auto added = target.AddComponent(o.name, object, o.typeName);
         if (added.result != SceneResult::Ok || target.SetTransform(added.id, o.transform) != SceneResult::Ok)
             throw std::runtime_error("Cannot restore object: " + o.name);

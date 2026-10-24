@@ -35,6 +35,8 @@
     <ClCompile Include="Source\Scene\Scene.cpp" />
     <ClCompile Include="Source\Scene\SceneCommands.cpp" />
     <ClCompile Include="Source\Scene\SceneDocument.cpp" />
+    <ClCompile Include="Source\Scene\SceneAssets.cpp" />
+    <ClCompile Include="Source\Runtime\SceneEditAssets.cpp" />
     <ClInclude Include="Include\Engine\Scene\SceneDocument.h" />
     <ClCompile Include="Source\Runtime\SceneEditSession.cpp" />
     <ClCompile Include="Source\Runtime\GameEditModule.cpp" />

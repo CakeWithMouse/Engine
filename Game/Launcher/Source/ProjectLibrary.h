@@ -45,6 +45,10 @@ inline std::filesystem::path Create(const std::filesystem::path& directory, cons
     {
         std::filesystem::create_directories(root / "Content" / "Scenes");
         std::filesystem::copy_file(templateModule, root / "Game.dll");
+        // Assimp and its runtime dependencies live beside the template DLL.
+        for (const auto& entry : std::filesystem::directory_iterator(templateModule.parent_path()))
+            if (entry.is_regular_file() && entry.path().extension() == L".dll" && entry.path().filename() != templateModule.filename())
+                std::filesystem::copy_file(entry.path(), root / entry.path().filename());
         auto object = [](uint64_t id, const char* type, const char* label, Json position, Json scale) {
             return Json{{"id",id},{"type",type},{"name",label},{"parent",0},{"inheritParentScale",true},
                 {"transform",{{"position",position},{"rotation",{0,0,0,1}},{"scale",scale}}}};

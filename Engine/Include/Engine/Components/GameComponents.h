@@ -45,6 +45,10 @@ public:
 
     // Material
     virtual void SetTexture(const std::string& texturePath);
+    const std::string& GetTexturePath() const { return texturePath; }
+    virtual std::string GetModelAsset() const { return {}; }
+    // Transactional texture assignment; also works before device creation.
+    bool TrySetTexture(const std::string& path);
     void SetCubeMap(CubeMapResource* cubeMap);
     void SetReflectionSettings(float strength, float fresnelPower = 5.0f);
     ID3D11ShaderResourceView* GetTexture() const { return textureSRV.Get(); }
@@ -145,6 +149,7 @@ protected:
     void BindMaterialResources(ID3D11DeviceContext* context);
     void UnbindMaterialResources(ID3D11DeviceContext* context);
     void CreateSamplerState();
+    void LoadPendingTexture();
 
     std::vector<std::unique_ptr<GameComponent>> InstanceArray;
 

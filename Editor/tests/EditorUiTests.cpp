@@ -13,6 +13,9 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QTreeWidget>
+#include <QImage>
+#include <QPixmap>
+#include <QDockWidget>
 #include <chrono>
 #include <filesystem>
 #include <cstdio>
@@ -53,7 +56,7 @@ int wmain(int argc, wchar_t** argv)
 {
     try
     {
-        Check(argc == 3, "usage: EditorUiTests <project directory> <EngineContent>");
+        Check(argc == 3 || argc == 4, "usage: EditorUiTests <project directory> <EngineContent> [model]");
         const auto root = std::filesystem::absolute(argv[1]);
         const auto manifest = (root / "Project.json").u8string(), content = (root / "Content").u8string();
         const auto engineContent = std::filesystem::absolute(argv[2]).u8string();
@@ -65,6 +68,7 @@ int wmain(int argc, wchar_t** argv)
         Check(get && get(ENGINE_EDIT_API_VERSION, sizeof(factory), &factory) && factory.create(engineContent.c_str(), &api), "create edit session");
         struct SessionGuard { EngineEditModuleApi factory; void* context; ~SessionGuard() { if (context) factory.destroy(context); } } sessionGuard{factory, api.context};
         char error[1024]{}; uint64_t scene = 0;
+        Check(api.setContentRoot(api.context, content.c_str(), error, sizeof(error)) == EngineSceneOk, "configure UI project content");
         const auto sceneFile = root / "Content/Scenes/Main.scene.json";
         Check(api.loadScene(api.context, sceneFile.u8string().c_str(), &scene, error, sizeof(error)) == EngineSceneOk, "load UI fixture");
         bool exit = false;
@@ -79,9 +83,20 @@ int wmain(int argc, wchar_t** argv)
         } hostCleanup{host, factory, sessionGuard.context};
         Check(host.Start(), "start Qt editor");
         auto pump = [&] { host.Update(0.016); Check(api.frame(api.context, 0.016) == EngineSceneOk, "editor render frame"); Sleep(10); };
+        int waitIndex = 0;
         auto until = [&](const std::function<bool()>& predicate) {
+            const int step = ++waitIndex;
             const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(8);
-            while (!predicate()) { if (std::chrono::steady_clock::now() > deadline) throw std::runtime_error("UI condition timed out"); pump(); }
+            while (!predicate())
+            {
+                if (std::chrono::steady_clock::now() > deadline)
+                {
+                    QString modal;
+                    Ui([&](auto*) { if (auto* box = qobject_cast<QMessageBox*>(QApplication::activeModalWidget())) modal = box->text(); });
+                    throw std::runtime_error("UI condition timed out at step " + std::to_string(step) + ": " + modal.toStdString());
+                }
+                pump();
+            }
             // Allow the queued completion and the UI refresh timer to catch up.
             for (int i = 0; i < 30; ++i) pump();
         };
@@ -90,6 +105,50 @@ int wmain(int argc, wchar_t** argv)
         until([&] { return host.ReadSnapshot().objects.size() == 3; });
         Ui([](auto* w) { Add(w, 1); });
         until([&] { return host.ReadSnapshot().objects.size() == 4; });
+        const auto imagePath = QString::fromStdWString((root / L"outside.bmp").wstring());
+        Ui([&](auto* w) {
+            Check(w->findChild<QPushButton*>(QStringLiteral("ImportModel")) && w->findChild<QPushButton*>(QStringLiteral("ImportTexture")), "asset import buttons");
+            Check(w->findChild<QPushButton*>(QStringLiteral("AddModel")) && w->findChild<QPushButton*>(QStringLiteral("SceneImportModel")), "model actions visible in scene panel");
+            QImage image(4,4,QImage::Format_RGB32); image.fill(Qt::green); Check(image.save(imagePath), "write UI texture fixture");
+            w->ImportAsset(true, imagePath);
+        });
+        const auto importedImage = root / "Content/Textures/outside.bmp";
+        until([&] { return std::filesystem::exists(importedImage); });
+        Ui([&](auto* w) { w->UseAsset(QString::fromStdWString(importedImage.wstring())); });
+        until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.textureAsset.empty()) return true; return false; });
+        Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
+        until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.textureAsset.empty()) return false; return true; });
+        Ui([](auto* w) { Action(w, QStringLiteral("Повторить"))->trigger(); });
+        until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.textureAsset.empty()) return true; return false; });
+        if (argc == 4)
+        {
+            const auto modelSource = std::filesystem::absolute(argv[3]);
+            Ui([&](auto* w) { w->ImportAsset(false, QString::fromStdWString(modelSource.wstring())); });
+            const auto importedModel = root / "Content/Models" / modelSource.stem() / modelSource.filename();
+            until([&] { return std::filesystem::exists(importedModel); });
+            Ui([&](auto* w) { w->AddModel(QString::fromStdWString(importedModel.wstring())); });
+            until([&] { return host.ReadSnapshot().objects.size() == 5; });
+            Ui([&](auto* w) { w->UseAsset(QString::fromStdWString(importedImage.wstring())); });
+            until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.modelAsset.empty() && !o.textureAsset.empty()) return true; return false; });
+            Ui([&](auto* w) {
+                for (auto* dock : w->template findChildren<QDockWidget*>()) if (dock->windowTitle() == QStringLiteral("Files")) dock->raise();
+                Check(w->grab().save(QString::fromStdWString((root / "editor-assets.png").wstring())), "save editor asset UI preview");
+            });
+            Ui([](auto* w) { Action(w, QStringLiteral("Дублировать объект"))->trigger(); });
+            until([&] { return host.ReadSnapshot().objects.size() == 6; });
+            for (const auto& o : host.ReadSnapshot().objects) if (!o.modelAsset.empty()) Check(!o.textureAsset.empty(), "duplicate preserves model texture");
+            Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
+            until([&] { return host.ReadSnapshot().objects.size() == 5; });
+            Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
+            until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.modelAsset.empty() && !o.textureAsset.empty()) return false; return true; });
+            Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
+            until([&] { return host.ReadSnapshot().objects.size() == 4; });
+        }
+        Ui([](auto* w) {
+            auto* tree = w->findChild<QTreeWidget*>();
+            for (int i = 0; i < tree->topLevelItemCount(); ++i) if (tree->topLevelItem(i)->text(1) == QStringLiteral("Primitive.Sphere")) tree->setCurrentItem(tree->topLevelItem(i));
+        });
+        until([&] { return host.ReadSnapshot().selected != 0; });
         auto selectedX = [&] { const auto view = host.ReadSnapshot(); for (const auto& o : view.objects) if (o.id == view.selected) return o.transform.position[0]; return -999.0f; };
         const float originalX = selectedX();
         Ui([](auto* w) { auto* x = w->findChild<QDoubleSpinBox*>(QStringLiteral("Transform0")); Check(x && x->isEnabled(), "inspector enabled"); x->setValue(3.25); QMetaObject::invokeMethod(x, "editingFinished", Qt::DirectConnection); });

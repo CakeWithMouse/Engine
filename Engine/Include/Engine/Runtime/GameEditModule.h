@@ -7,7 +7,8 @@
 class GameEditModule final
 {
 public:
-    GameEditModule(const std::filesystem::path& module, const std::filesystem::path& engineContent);
+    GameEditModule(const std::filesystem::path& module, const std::filesystem::path& engineContent,
+        const std::filesystem::path& projectContent = {});
     ~GameEditModule();
     GameEditModule(const GameEditModule&) = delete;
     GameEditModule& operator=(const GameEditModule&) = delete;

@@ -31,6 +31,11 @@ PS_INPUT VSMain(VS_INPUT input)
 
     float3 skinnedPos = float3(0.0f, 0.0f, 0.0f);
     float3 skinnedNormal = float3(0.0f, 0.0f, 0.0f);
+    if (dot(input.BoneWeights, float4(1, 1, 1, 1)) <= 0.0f)
+    {
+        skinnedPos = input.Position;
+        skinnedNormal = input.Normal;
+    }
 
     [unroll]
     for (int i = 0; i < 4; ++i)

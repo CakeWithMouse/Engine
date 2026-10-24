@@ -21,7 +21,9 @@ public:
 
     bool LoadFromVfs(std::string_view vpath);
     bool SetModel(std::shared_ptr<SkeletalModel> model);
+    bool SetAssetModel(std::string path, std::shared_ptr<SkeletalModel> model);
     bool LoadTexture(const std::string& texturePath);
+    std::string GetModelAsset() const override { return assetPath; }
 
     void Tick(float deltaTime) override;
     void Render(ID3D11DeviceContext* context) override;
@@ -67,7 +69,4 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
     UINT indexCount = 0;
 
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
-    std::string texturePath;
 };

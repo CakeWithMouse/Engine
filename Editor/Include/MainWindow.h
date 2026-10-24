@@ -29,6 +29,9 @@ public:
 
     void CommandFinished(const EditorCommand& command, uint32_t status, const QString& error);
     void OpenScene(const QString& path = {});
+    void ImportAsset(bool texture, const QString& source = {});
+    void AddModel(const QString& path = {});
+    void UseAsset(const QString& path);
 
 public slots:
     void AppendLine(const QString& line);
@@ -59,6 +62,9 @@ private:
     QWidget* inspector_ = nullptr;
     QWidget* scenePanel_ = nullptr;
     QLineEdit* objectName_ = nullptr;
+    QLineEdit* modelAsset_ = nullptr;
+    QLineEdit* textureAsset_ = nullptr;
+    void BuildAssetInspector(class QFormLayout* form);
     QComboBox* primitive_ = nullptr;
     QDoubleSpinBox* transform_[9]{};
     QDoubleSpinBox* spawn_[3]{};

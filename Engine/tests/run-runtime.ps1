@@ -126,6 +126,9 @@ foreach ($case in @('BadVersion','WrongKind','MissingExport','FailGameStart','Re
 $isolated = "$work/editor failure"
 New-Item -ItemType Directory -Path $isolated -Force | Out-Null
 Copy-Item -LiteralPath $runtime -Destination "$isolated/EngineRuntime.exe"
+# The Assimp-enabled runtime also needs the deployment's adjacent DLLs.
+Get-ChildItem -LiteralPath (Split-Path $runtime) -Filter '*.dll' | Where-Object Name -ne 'Editor.dll' |
+    Copy-Item -Destination $isolated
 Copy-Item -LiteralPath "$fixtures/FailEditorStart.dll" -Destination "$isolated/Editor.dll"
 $log = Run 'editor-start-failure' "$isolated/EngineRuntime.exe" "--project `"$project`" --mode editor --frames 3" 1
 Ordered $log @('EngineReady','FixtureCreate','FixtureStart','FixtureDestroy','ModuleUnloaded','ResourcesStopped','EngineStopped')

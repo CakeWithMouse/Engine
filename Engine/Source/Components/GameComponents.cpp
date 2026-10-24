@@ -112,6 +112,7 @@ void GameComponent::InitPoints(DirectX::XMFLOAT4* NewPoints, int pointCount, int
 
 void GameComponent::CreateBuffers(ID3D11Device* Device)
 {
+    LoadPendingTexture();
     if (Device == nullptr || points.empty() || indices.empty())
     {
         return;
@@ -430,15 +431,27 @@ DirectX::XMMATRIX GameComponent::GetLocalMatrix() const
 
 void GameComponent::SetTexture(const std::string& path)
 {
+    TrySetTexture(path);
+}
+
+bool GameComponent::TrySetTexture(const std::string& path)
+{
+    if (path.empty()) { texturePath.clear(); textureSRV.Reset(); return true; }
     ID3D11Device* device = GamePtr ? GamePtr->GetDevice() : nullptr;
     ID3D11DeviceContext* context = GamePtr ? GamePtr->GetContext() : nullptr;
-    if (!TextureLoader::LoadTexture2D(device, context, path, true, textureSRV))
-    {
-        return;
-    }
-
+    if (!device || !context) { texturePath = path; return true; }
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> candidate;
+    if (!TextureLoader::LoadTexture2D(device, context, path, true, candidate)) return false;
     texturePath = path;
+    textureSRV = std::move(candidate);
     CreateSamplerState();
+    return true;
+}
+
+void GameComponent::LoadPendingTexture()
+{
+    if (!texturePath.empty() && !textureSRV && !TrySetTexture(texturePath))
+        throw std::runtime_error("Cannot load texture: " + texturePath);
 }
 
 void GameComponent::SetCubeMap(CubeMapResource* cubeMap)

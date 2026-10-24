@@ -3,7 +3,7 @@
 
 // Optional, separately versioned extension of ModuleApi v4. Windows x64/default
 // packing. No STL, cross-DLL allocation ownership or exceptions. See SCENE-MODULE-API.md.
-#define ENGINE_SCENE_API_VERSION 1u
+#define ENGINE_SCENE_API_VERSION 2u
 enum EngineSceneStatus : uint32_t
 {
     EngineSceneOk = 0, EngineSceneInvalidArgument = 1, EngineSceneUnknownType = 2,
@@ -34,6 +34,8 @@ struct EngineSceneObjectInfo
     uint64_t parentId;
     uint32_t inheritParentScale;
     EngineSceneTransform transform;
+    const char* modelAsset;
+    const char* textureAsset;
 };
 struct EngineSceneInfo
 {

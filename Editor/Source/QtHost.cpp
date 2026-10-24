@@ -30,6 +30,12 @@ bool EditorQtHost::Start()
 {
     if (uiThread_.joinable()) return false;
     historyDirectory_ = std::make_unique<QTemporaryDir>();
+    if (HasScene() && host_.contentRoot && *host_.contentRoot)
+    {
+        char error[1024]{};
+        if (scene_.setContentRoot(scene_.context, host_.contentRoot, error, sizeof(error)) != EngineSceneOk)
+        { Log(error); return false; }
+    }
     if (HasScene()) PublishScene();
     uiReady_.store(false);
     uiThread_ = std::thread([this] { UiThreadMain(); });
@@ -168,12 +174,16 @@ void EditorQtHost::DrainCommands()
             if (host_.requestExit) host_.requestExit(host_.user);
             break;
 
-        case EditorCommand::LoadAsset:
+        case EditorCommand::ImportModel:
+        case EditorCommand::ImportTexture:
             {
-                // QString -> UTF-8 уже здесь, на потоке движка; в host.* wchar_t не уходит
-                const QByteArray utf8 = cmd.path.toUtf8();
-                const std::string msg = "EditorLoadAsset (stub): " + std::string(utf8.constData(), utf8.size());
-                Log(msg.c_str());
+                if (!HasScene()) { Complete(cmd, EngineSceneReadOnly); break; }
+                char path[4096]{}, error[1024]{};
+                const auto result = scene_.importAsset(scene_.context, cmd.path.toUtf8().constData(),
+                    cmd.type == EditorCommand::ImportTexture ? 1 : 0, path, sizeof(path), error, sizeof(error));
+                auto completed = cmd;
+                if (result == EngineSceneOk) completed.path = QString::fromUtf8(path);
+                Complete(completed, result, QString::fromUtf8(error));
                 break;
             }
         case EditorCommand::ViewportAttach:
@@ -230,6 +240,8 @@ void EditorQtHost::DrainCommands()
         case EditorCommand::RefreshScene:
         case EditorCommand::UpdateObjectTransform:
         case EditorCommand::CreateObject:
+        case EditorCommand::CreateModel:
+        case EditorCommand::SetTexture:
         case EditorCommand::RemoveObject:
         case EditorCommand::RenameObject:
         case EditorCommand::DuplicateObject:
@@ -245,7 +257,8 @@ void EditorQtHost::DrainCommands()
             char error[1024]{};
             QString checkpoint;
             const bool mutation = cmd.type == EditorCommand::UpdateObjectTransform || cmd.type == EditorCommand::CreateObject ||
-                cmd.type == EditorCommand::RemoveObject || cmd.type == EditorCommand::RenameObject || cmd.type == EditorCommand::DuplicateObject;
+                cmd.type == EditorCommand::RemoveObject || cmd.type == EditorCommand::RenameObject || cmd.type == EditorCommand::DuplicateObject ||
+                cmd.type == EditorCommand::CreateModel || cmd.type == EditorCommand::SetTexture;
             if ((mutation || cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene ||
                 cmd.type == EditorCommand::Undo || cmd.type == EditorCommand::Redo) && PlayState() != Edit)
             { Complete(cmd, EngineSceneReadOnly, QStringLiteral("Остановите Play перед редактированием.")); break; }
@@ -276,10 +289,13 @@ void EditorQtHost::DrainCommands()
                     result = api.removeObject(api.context, cmd.objectId);
                 else if (cmd.type == EditorCommand::RenameObject)
                     result = api.renameObject(api.context, cmd.objectId, cmd.name.toUtf8().constData());
-                else if (cmd.type == EditorCommand::CreateObject || cmd.type == EditorCommand::DuplicateObject)
+                else if (cmd.type == EditorCommand::SetTexture)
+                    result = scene_.setTexture(scene_.context, cmd.objectId, cmd.path.toUtf8().constData(), error, sizeof(error));
+                else if (cmd.type == EditorCommand::CreateObject || cmd.type == EditorCommand::DuplicateObject || cmd.type == EditorCommand::CreateModel)
                 {
                     auto view = ReadSnapshot();
                     QString type = cmd.path, base = cmd.name;
+                    QString model = cmd.type == EditorCommand::CreateModel ? cmd.path : QString(), texture;
                     EngineSceneTransform transform = cmd.transform;
                     uint64_t parent = 0; bool inherit = true;
                     if (cmd.type == EditorCommand::DuplicateObject)
@@ -289,15 +305,19 @@ void EditorQtHost::DrainCommands()
                         type = QString::fromStdString(found->type); base = QString::fromStdString(found->name);
                         transform = found->transform; transform.position[0] += 1;
                         parent = found->parent; inherit = found->inheritScale;
+                        model = QString::fromStdString(found->modelAsset); texture = QString::fromStdString(found->textureAsset);
                     }
                     QString name = base; int suffix = 1;
                     while (std::any_of(view.objects.begin(), view.objects.end(), [&](const auto& o) { return o.name == name.toStdString(); }))
                         name = base + QStringLiteral(" %1").arg(++suffix);
                     uint64_t id = 0;
-                    result = api.createObject(api.context, type.toUtf8().constData(), name.toUtf8().constData(), &transform, &id);
+                    result = model.isEmpty() ? api.createObject(api.context, type.toUtf8().constData(), name.toUtf8().constData(), &transform, &id) :
+                        scene_.createModel(scene_.context, model.toUtf8().constData(), name.toUtf8().constData(), &transform, &id, error, sizeof(error));
                     if (result == EngineSceneOk)
                     {
                         if (parent) result = scene_.setParent(scene_.context, id, parent, inherit);
+                        if (result == EngineSceneOk && !texture.isEmpty())
+                            result = scene_.setTexture(scene_.context, id, texture.toUtf8().constData(), error, sizeof(error));
                         if (result == EngineSceneOk) selectedId_ = id;
                         else api.removeObject(api.context, id);
                     }
@@ -393,7 +413,8 @@ EditorQtHost::Snapshot EditorQtHost::ReadSnapshot()
 void ENGINE_MODULE_CALL EditorQtHost::SceneVisitor(void* context, const EngineSceneObjectInfo* info)
 {
     auto& view = *static_cast<Snapshot*>(context);
-    view.objects.push_back({info->id, info->parentId, info->inheritParentScale != 0, info->name, info->typeName, info->transform});
+    view.objects.push_back({info->id, info->parentId, info->inheritParentScale != 0, info->name, info->typeName, info->transform,
+        info->modelAsset ? info->modelAsset : "", info->textureAsset ? info->textureAsset : ""});
 }
 void EditorQtHost::PublishScene()
 {
