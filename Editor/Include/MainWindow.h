@@ -47,6 +47,7 @@ private:
     void BuildSceneTools();
     void RefreshSceneTools();
     void ApplyTransform();
+    void ApplyPointLight();
     void SaveScene(bool saveAs = false, std::function<void()> after = {});
     void MaybeSave(std::function<void()> after);
     void SubmitObjectCommand(int type);
@@ -68,6 +69,10 @@ private:
     QComboBox* primitive_ = nullptr;
     QDoubleSpinBox* transform_[9]{};
     QDoubleSpinBox* spawn_[3]{};
+    QWidget* lightInspector_ = nullptr;
+    QDoubleSpinBox* lightValues_[5]{}; // RGB, intensity, radius
+    class QCheckBox* lightEnabled_ = nullptr;
+    QPushButton* lightColor_ = nullptr;
     QAction* saveAction_ = nullptr;
     QAction* undoAction_ = nullptr;
     QAction* redoAction_ = nullptr;

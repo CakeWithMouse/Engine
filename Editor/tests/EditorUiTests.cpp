@@ -5,6 +5,8 @@
 #include <QApplication>
 #include <QAction>
 #include <QComboBox>
+#include <QColorDialog>
+#include <QCheckBox>
 #include <QDoubleSpinBox>
 #include <QFile>
 #include <QJsonDocument>
@@ -47,7 +49,7 @@ QAction* Action(EditorMainWindow* window, const QString& label)
 void Add(EditorMainWindow* window, int index)
 {
     auto* combo = window->findChild<QComboBox*>(QStringLiteral("PrimitiveType"));
-    Check(combo && combo->count() == 6, "primitive palette"); combo->setCurrentIndex(index);
+    Check(combo && combo->count() == 7, "primitive palette"); combo->setCurrentIndex(index);
     auto* button = window->findChild<QPushButton*>(QStringLiteral("AddPrimitive"));
     Check(button && button->isEnabled(), "add button enabled"); button->click();
 }
@@ -101,10 +103,10 @@ int wmain(int argc, wchar_t** argv)
             for (int i = 0; i < 30; ++i) pump();
         };
         until([&] { return host.ViewportActive(); });
-        Ui([](auto* w) { Check(w->findChild<QTreeWidget*>()->topLevelItemCount() == 2, "starter hierarchy"); Add(w, 0); });
-        until([&] { return host.ReadSnapshot().objects.size() == 3; });
+        Ui([](auto* w) { Check(w->findChild<QTreeWidget*>()->topLevelItemCount() == 4, "starter hierarchy"); Add(w, 0); });
+        until([&] { return host.ReadSnapshot().objects.size() == 5; });
         Ui([](auto* w) { Add(w, 1); });
-        until([&] { return host.ReadSnapshot().objects.size() == 4; });
+        until([&] { return host.ReadSnapshot().objects.size() == 6; });
         const auto imagePath = QString::fromStdWString((root / L"outside.bmp").wstring());
         Ui([&](auto* w) {
             Check(w->findChild<QPushButton*>(QStringLiteral("ImportModel")) && w->findChild<QPushButton*>(QStringLiteral("ImportTexture")), "asset import buttons");
@@ -127,7 +129,7 @@ int wmain(int argc, wchar_t** argv)
             const auto importedModel = root / "Content/Models" / modelSource.stem() / modelSource.filename();
             until([&] { return std::filesystem::exists(importedModel); });
             Ui([&](auto* w) { w->AddModel(QString::fromStdWString(importedModel.wstring())); });
-            until([&] { return host.ReadSnapshot().objects.size() == 5; });
+            until([&] { return host.ReadSnapshot().objects.size() == 7; });
             Ui([&](auto* w) { w->UseAsset(QString::fromStdWString(importedImage.wstring())); });
             until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.modelAsset.empty() && !o.textureAsset.empty()) return true; return false; });
             Ui([&](auto* w) {
@@ -135,14 +137,14 @@ int wmain(int argc, wchar_t** argv)
                 Check(w->grab().save(QString::fromStdWString((root / "editor-assets.png").wstring())), "save editor asset UI preview");
             });
             Ui([](auto* w) { Action(w, QStringLiteral("Дублировать объект"))->trigger(); });
-            until([&] { return host.ReadSnapshot().objects.size() == 6; });
+            until([&] { return host.ReadSnapshot().objects.size() == 8; });
             for (const auto& o : host.ReadSnapshot().objects) if (!o.modelAsset.empty()) Check(!o.textureAsset.empty(), "duplicate preserves model texture");
             Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
-            until([&] { return host.ReadSnapshot().objects.size() == 5; });
+            until([&] { return host.ReadSnapshot().objects.size() == 7; });
             Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
             until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.modelAsset.empty() && !o.textureAsset.empty()) return false; return true; });
             Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
-            until([&] { return host.ReadSnapshot().objects.size() == 4; });
+            until([&] { return host.ReadSnapshot().objects.size() == 6; });
         }
         Ui([](auto* w) {
             auto* tree = w->findChild<QTreeWidget*>();
@@ -168,17 +170,77 @@ int wmain(int argc, wchar_t** argv)
         Ui([](auto* w) { auto* x = w->findChild<QDoubleSpinBox*>(QStringLiteral("Transform0")); x->setFocus(); x->setValue(4.5); Action(w, QStringLiteral("Сохранить и сделать стартовой"))->trigger(); });
         until([&] { return selectedX() == 4.5f && !host.ReadSnapshot().dirty; });
         QFile file(QString::fromStdWString(sceneFile.wstring())); Check(file.open(QIODevice::ReadOnly), "saved scene readable");
-        Check(QJsonDocument::fromJson(file.readAll()).object().value(QStringLiteral("objects")).toArray().size() == 4, "UI save persists all objects"); file.close();
+        Check(QJsonDocument::fromJson(file.readAll()).object().value(QStringLiteral("objects")).toArray().size() == 6, "UI save persists all objects"); file.close();
+        Ui([](auto* w) { Add(w, 6); });
+        until([&] { return host.ReadSnapshot().objects.size() == 7; });
+        auto selectedLight = [&] {
+            const auto view = host.ReadSnapshot();
+            for (const auto& o : view.objects) if (o.id == view.selected && o.hasPointLight) return o;
+            return EditorQtHost::SceneObject{};
+        };
+        Check(selectedLight().hasPointLight, "new light selected");
+        Ui([](auto* w) {
+            auto* button = w->findChild<QPushButton*>(QStringLiteral("LightColor"));
+            Check(button && button->isVisible(), "light color button visible"); button->click();
+            auto* dialog = w->findChild<QColorDialog*>(); Check(dialog != nullptr, "color picker opens");
+            dialog->setCurrentColor(QColor::fromRgbF(0.2f,0.8f,0.4f)); dialog->accept();
+        });
+        until([&] { return std::abs(selectedLight().pointLight.color[1] - 0.8f) < 0.001f; });
+        Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
+        until([&] { return !host.ReadSnapshot().selected; });
+        bool whiteRestored = false;
+        for (const auto& o : host.ReadSnapshot().objects) if (o.name == "Точечный свет") whiteRestored = o.pointLight.color[0] == 1;
+        Check(whiteRestored, "undo restores previous light color");
+        Ui([](auto* w) { Action(w, QStringLiteral("Повторить"))->trigger(); });
+        until([&] {
+            for (const auto& o : host.ReadSnapshot().objects) if (o.name == "Точечный свет") return std::abs(o.pointLight.color[1] - 0.8f) < 0.001f;
+            return false;
+        });
+        Ui([](auto* w) {
+            auto* tree = w->findChild<QTreeWidget*>();
+            for (int i = 0; i < tree->topLevelItemCount(); ++i) if (tree->topLevelItem(i)->text(0) == QStringLiteral("Точечный свет")) tree->setCurrentItem(tree->topLevelItem(i));
+        });
+        until([&] { return selectedLight().id != 0; });
+        Ui([](auto* w) {
+            auto* intensity = w->findChild<QDoubleSpinBox*>(QStringLiteral("LightValue3"));
+            intensity->setValue(4); QMetaObject::invokeMethod(intensity, "editingFinished", Qt::DirectConnection);
+        });
+        until([&] { return selectedLight().pointLight.intensity == 4; });
+        Ui([](auto* w) { w->findChild<QCheckBox*>(QStringLiteral("LightEnabled"))->click(); });
+        until([&] { return !selectedLight().pointLight.enabled; });
+        Ui([](auto* w) { w->findChild<QCheckBox*>(QStringLiteral("LightEnabled"))->click(); });
+        until([&] { return selectedLight().pointLight.enabled; });
+        Ui([](auto* w) {
+            auto* x = w->findChild<QDoubleSpinBox*>(QStringLiteral("Transform0"));
+            x->setValue(-3); QMetaObject::invokeMethod(x, "editingFinished", Qt::DirectConnection);
+        });
+        until([&] { return selectedLight().transform.position[0] == -3; });
+        Ui([&](auto* w) { Check(w->grab().save(QString::fromStdWString((root / "editor-light.png").wstring())), "save light inspector preview"); });
+        Ui([](auto* w) { Action(w, QStringLiteral("Дублировать объект"))->trigger(); });
+        until([&] { return host.ReadSnapshot().objects.size() == 8; });
+        Check(selectedLight().pointLight.intensity == 4 && std::abs(selectedLight().pointLight.color[1] - 0.8f) < 0.001f &&
+            selectedLight().transform.position[0] == -2, "duplicate preserves light properties and offsets position");
+        Ui([](auto* w) { Action(w, QStringLiteral("Удалить объект"))->trigger(); });
+        until([&] { return host.ReadSnapshot().objects.size() == 7; });
+        Ui([](auto* w) { Action(w, QStringLiteral("Сохранить и сделать стартовой"))->trigger(); });
+        until([&] { return !host.ReadSnapshot().dirty; });
         Ui([](auto* w) { Action(w, QStringLiteral("▶ Play"))->trigger(); });
         until([&] { return host.PlayState() == EditorQtHost::Play; });
         Ui([](auto* w) { Check(!w->findChild<QPushButton*>(QStringLiteral("AddPrimitive"))->isEnabled(), "editing disabled during Play"); Action(w, QStringLiteral("⏹ Stop"))->trigger(); });
         until([&] { return host.PlayState() == EditorQtHost::Edit; });
+        Ui([](auto* w) {
+            auto* tree = w->findChild<QTreeWidget*>();
+            for (int i = 0; i < tree->topLevelItemCount(); ++i) if (tree->topLevelItem(i)->text(0) == QStringLiteral("Точечный свет")) tree->setCurrentItem(tree->topLevelItem(i));
+        });
+        until([&] { return selectedLight().id != 0; });
+        Ui([](auto* w) { Action(w, QStringLiteral("Удалить объект"))->trigger(); });
+        until([&] { return host.ReadSnapshot().objects.size() == 6; });
         Ui([](auto* w) { Add(w, 4); Action(w, QStringLiteral("Новая сцена"))->trigger(); });
         until([&] { bool modal = false; Ui([&](auto*) { modal = qobject_cast<QMessageBox*>(QApplication::activeModalWidget()) != nullptr; }); return modal; });
-        Check(host.ReadSnapshot().objects.size() == 5, "queued addition preserved before New scene prompt");
+        Check(host.ReadSnapshot().objects.size() == 7, "queued addition preserved before New scene prompt");
         Ui([](auto*) { qobject_cast<QMessageBox*>(QApplication::activeModalWidget())->done(QMessageBox::Cancel); });
         for (int i = 0; i < 30; ++i) pump();
-        Check(host.ReadSnapshot().objects.size() == 5 && host.ReadSnapshot().dirty, "cancel New keeps scene");
+        Check(host.ReadSnapshot().objects.size() == 7 && host.ReadSnapshot().dirty, "cancel New keeps scene");
         Ui([](auto* w) { w->close(); });
         until([&] { bool modal = false; Ui([&](auto*) { modal = qobject_cast<QMessageBox*>(QApplication::activeModalWidget()) != nullptr; }); return modal; });
         Check(!exit, "unsaved close waits for a decision");

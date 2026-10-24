@@ -52,6 +52,7 @@ void Structure(const SceneSnapshot& data)
     std::set<std::string> names;
     for (const auto& item : data.components)
     {
+        if (item.pointLight && !item.pointLight->IsValid()) Invalid("Invalid point light parameters");
         if (!SceneAssets::ValidPath(item.modelAsset) || !SceneAssets::ValidPath(item.textureAsset))
             Invalid("Assets must be canonical /Game paths without traversal");
         if ((item.typeName == SceneAssets::ModelType) != !item.modelAsset.empty())
@@ -104,9 +105,23 @@ SceneSnapshot SceneDocument::Parse(const std::string& text)
         if (!objects.is_array() || objects.size() > 100000) Invalid("Invalid objects array");
         for (const auto& o : objects)
         {
-            if (o.contains("assets")) RequireFields(o, {"id", "type", "name", "parent", "inheritParentScale", "transform", "assets"});
-            else RequireFields(o, {"id", "type", "name", "parent", "inheritParentScale", "transform"});
+            auto core = o;
+            core.erase("assets"); core.erase("pointLight");
+            RequireFields(core, {"id", "type", "name", "parent", "inheritParentScale", "transform"});
             SceneComponentSnapshot item;
+            if (o.contains("pointLight"))
+            {
+                const auto& light = o.at("pointLight");
+                RequireFields(light, {"color", "intensity", "radius", "enabled"});
+                SceneComponentSnapshot::PointLight value;
+                Vector(light.at("color"), &value.color.x, 3);
+                if (!light.at("intensity").is_number() || !light.at("radius").is_number() ||
+                    !light.at("enabled").is_boolean()) Invalid("Invalid point light fields");
+                value.intensity = light.at("intensity").get<float>();
+                value.radius = light.at("radius").get<float>();
+                value.enabled = light.at("enabled").get<bool>();
+                item.pointLight = value;
+            }
             if (o.contains("assets"))
             {
                 const auto& a = o.at("assets"); RequireFields(a, {"model", "texture"});
@@ -144,6 +159,12 @@ std::string SceneDocument::Serialize(const SceneSnapshot& data)
                 {"scale", {t.scale.x,t.scale.y,t.scale.z}}}}});
         if (!o.modelAsset.empty() || !o.textureAsset.empty())
             json["objects"].back()["assets"] = {{"model", o.modelAsset}, {"texture", o.textureAsset}};
+        if (o.pointLight)
+        {
+            const auto& light = *o.pointLight;
+            json["objects"].back()["pointLight"] = {{"color", {light.color.x, light.color.y, light.color.z}},
+                {"intensity", light.intensity}, {"radius", light.radius}, {"enabled", light.enabled}};
+        }
     }
     auto text = json.dump(2) + "\n";
     if (text.size() > MaxBytes) Invalid("Scene exceeds 16 MiB");
@@ -170,6 +191,8 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
         auto added = target.AddComponent(o.name, object, o.typeName);
         if (added.result != SceneResult::Ok || target.SetTransform(added.id, o.transform) != SceneResult::Ok)
             throw std::runtime_error("Cannot restore object: " + o.name);
+        if (o.pointLight && target.SetPointLight(added.id, *o.pointLight) != SceneResult::Ok)
+            Invalid("Point light properties require a point light component: " + o.name);
         ids.emplace(o.id, added.id);
         if (!o.parentId && !o.inheritParentScale) target.FindComponent(added.id)->SetParentWithoutScale(nullptr);
     }

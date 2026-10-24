@@ -52,7 +52,7 @@ SceneCommands::SceneCommands(Scene& scene, ComponentTypeCatalog catalog, bool* s
 EngineSceneApi SceneCommands::GetApi() noexcept
 {
     return {ENGINE_SCENE_API_VERSION, this, ListTypes, ReadScene, CreateObject,
-        RemoveObject, RenameObject, SetTransform};
+        RemoveObject, RenameObject, SetTransform, SetPointLight};
 }
 uint32_t SceneCommands::ListTypes(void* context, EngineSceneTypeVisitor visit, void* user) noexcept
 {
@@ -76,9 +76,15 @@ uint32_t SceneCommands::ReadScene(void* context, EngineSceneInfo* info, EngineSc
         *info = {snapshot.id, snapshot.revision, snapshot.components.size()};
         for (const auto& object : snapshot.components)
         {
-            const EngineSceneObjectInfo value{object.id, object.name.c_str(), object.typeName.c_str(),
+            EngineSceneObjectInfo value{object.id, object.name.c_str(), object.typeName.c_str(),
                 object.parentId, object.inheritParentScale ? 1u : 0u, Encode(object.transform),
                 object.modelAsset.c_str(), object.textureAsset.c_str()};
+            if (object.pointLight)
+            {
+                const auto& light = *object.pointLight;
+                value.hasPointLight = 1;
+                value.pointLight = {{light.color.x, light.color.y, light.color.z}, light.intensity, light.radius, light.enabled ? 1u : 0u};
+            }
             visit(user, &value);
         }
         return EngineSceneOk;
@@ -123,4 +129,12 @@ uint32_t SceneCommands::SetTransform(void* context, uint64_t id, const EngineSce
 {
     if (!transform) return EngineSceneInvalidArgument;
     return Invoke(context, [&](SceneCommands& self) { return self.readOnly_ ? EngineSceneReadOnly : Status(self.scene_->SetTransform(id, Decode(*transform))); });
+}
+uint32_t SceneCommands::SetPointLight(void* context, uint64_t id, const EngineScenePointLight* light) noexcept
+{
+    if (!light || light->enabled > 1) return EngineSceneInvalidArgument;
+    return Invoke(context, [&](SceneCommands& self) {
+        return self.readOnly_ ? EngineSceneReadOnly : Status(self.scene_->SetPointLight(id,
+            {{light->color[0], light->color[1], light->color[2]}, light->intensity, light->radius, light->enabled != 0}));
+    });
 }

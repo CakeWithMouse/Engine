@@ -14,6 +14,14 @@ JSON — начальные данные сцены. В него входят и
 Геометрия/материал пока остаются теми, которые создаёт конструктор класса.
 Каталожные visualDefaults остаются прежней заготовкой.
 
+Точечные источники дополнительно сохраняют необязательный объект `pointLight`:
+`{"color":[1,0.65,0.35],"intensity":2,"radius":10,"enabled":true}`.
+Все четыре поля внутри него обязательны: RGB — конечные числа 0–1,
+интенсивность — конечное число >= 0, радиус — конечное число > 0, enabled — boolean.
+Положение хранится в обычном transform. Поле допустимо только для компонентов,
+наследующих PointLightComponent; несовместимый тип отклоняется при восстановлении.
+Без поля используются значения конструктора. Старые сцены без света остаются совместимы.
+
 ## Формат версии 1
 
 Рекомендуемое расширение `.scene.json`; API не ограничивает расширение.
@@ -84,11 +92,12 @@ type key: миграция старых файлов пока выполняет
 ## ABI и совместимость
 
 Публичные заголовки: `Engine/Runtime/EditSessionApi.h`,
-`Engine/Runtime/SceneModuleApi.h`. **ENGINE_EDIT_API_VERSION теперь 2**:
-в конец EngineEditSessionApi добавлены saveScene/loadScene. Игровой DLL, runtime
-и потребителя edit API нужно пересобрать вместе. Версия 1 не поддерживается новым
-edit export; проверка version/size отклоняет несовместимую таблицу до create/bind.
-Основной ModuleApi остаётся v4; layout SceneModuleApi остаётся v1.
+`Engine/Runtime/SceneModuleApi.h`. Текущие версии: **ENGINE_EDIT_API_VERSION = 5**,
+**ENGINE_SCENE_API_VERSION = 3**. Параметры света расширяют снимок объекта,
+а setPointLight добавлен в таблицу Scene API, вложенную в Edit API.
+Игровой DLL, runtime и потребителя edit API нужно пересобрать вместе.
+Проверка version/size отклоняет несовместимую таблицу до create/bind.
+Основной ModuleApi остаётся v4; формат JSON остаётся v1.
 
 ```cpp
 uint32_t saveScene(void* context, const char* absolutePathUtf8,

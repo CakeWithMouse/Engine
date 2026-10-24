@@ -1,5 +1,12 @@
 # Каталог и команды Scene через игровой модуль
 
+Обновление 24.10.2026: Scene API v3 добавляет `hasPointLight` и `pointLight`
+в снимок объекта и `setPointLight(context, id, const EngineScenePointLight*)` в таблицу.
+Команда принимает линейный RGB 0–1, конечную интенсивность >= 0, конечный радиус > 0
+и enabled 0/1. Не-свет возвращает InvalidArgument, неизвестный ID — NotFound;
+действуют обычные проверки потока, занятости и ReadOnly. Изменение увеличивает revision.
+Вложенная таблица изменяет ABI edit-сессии до v5. Все модули нужно пересобрать вместе.
+
 Продолжение 040: [edit-safe сессия, тот же Scene во viewport и Play из копии](EDIT-SESSION-API.md).
 Ниже описан прежний API обычной игровой сессии; edit-сессия имеет отдельный lifecycle.
 

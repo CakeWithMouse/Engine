@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 #include <string_view>
@@ -40,6 +41,14 @@ struct SceneComponentSnapshot
     SceneTransform transform;
     std::string typeName; // copied qualified catalog key; empty for legacy additions
     std::string modelAsset, textureAsset;
+    struct PointLight
+    {
+        glm::vec3 color{1.0f};
+        float intensity = 1.0f, radius = 10.0f;
+        bool enabled = true;
+        bool IsValid() const noexcept;
+    };
+    std::optional<PointLight> pointLight;
 };
 struct SceneSnapshot
 {
@@ -80,6 +89,7 @@ public:
     SceneResult SetParent(ComponentId child, ComponentId parent, bool inheritScale = true);
     SceneResult ClearParent(ComponentId child);
     SceneResult SetTextureAsset(ComponentId id, const std::string& path);
+    SceneResult SetPointLight(ComponentId id, const SceneComponentSnapshot::PointLight& light);
     SceneSnapshot GetSnapshot() const;
 
     // Covers custom game update order too. The outermost scope commits pending edits,
