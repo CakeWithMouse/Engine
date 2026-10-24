@@ -1,51 +1,41 @@
-#include <Engine/Runtime/ModuleApi.h>
+#include "GeneratedComponents.h"
+#include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
 #include <cstdio>
-#include <new>
+#include <memory>
 
-namespace
+static ComponentTypeCatalog ProjectComponentTypes() { return EngineGenerated::RuntimeExample::GetComponentTypes(); }
+
+static void StartSkeletalDemo(Game& game)
 {
-struct Session { EngineModuleHost host; uint64_t updates = 0; };
-void Log(Session* s, const char* text) { s->host.log(s->host.user, text); }
-void* __cdecl Create(const EngineModuleHost* host)
-{
-    if (!host || host->version != ENGINE_MODULE_VERSION || !host->log || !host->requestExit) return nullptr;
-    auto* s = new (std::nothrow) Session{*host};
-    if (s) Log(s, "GameCreate");
-    return s;
+#if defined(ENGINE_ENABLE_ASSIMP)
+    auto skeletal = std::make_unique<SkeletalMeshComponent>();
+    if (skeletal->LoadFromVfs("/Game/Models/CesiumMan.glb"))
+    {
+        // Walks towards camera along +Z
+        skeletal->SetModelYawDegrees(0.0f);
+        skeletal->SetPosition({0.0f, -1.0f, 0.0f});
+        std::printf("[RuntimeExample] SkeletalMesh loaded: bones=%zu clip=%.2fs\n",
+                    skeletal->GetModel()->ModelSkeleton.Bones.size(),
+                    skeletal->GetModel()->Clips.empty() ? 0.0f : skeletal->GetModel()->Clips[0].Duration);
+        const auto reg = game.RegisterComponent("CesiumMan", skeletal.get(), "SkinnedMesh.hlsl", "SkinnedMesh.hlsl");
+        if (reg == RegisterResult::Ok)
+        {
+            skeletal.release();
+        }
+    }
+    else
+    {
+        std::fprintf(stderr, "[RuntimeExample] SkeletalMesh failed to load CesiumMan.glb\n");
+        std::fflush(stderr);
+    }
+#else
+    (void)game;
+    std::printf("[RuntimeExample] SkeletalMesh skipped: Assimp not enabled\n");
+    std::fflush(stdout);
+#endif
 }
-int __cdecl Start(void* instance)
-{
-    auto* s = static_cast<Session*>(instance);
-    Log(s, "GameStart");
-    Log(s, s->host.projectName);
-    return 1;
-}
-int __cdecl Update(void* instance, double)
-{
-    auto* s = static_cast<Session*>(instance);
-    ++s->updates;
-    Log(s, "GameUpdate");
-    return 1;
-}
-void __cdecl Stop(void* instance)
-{
-    auto* s = static_cast<Session*>(instance);
-    char count[96];
-    std::snprintf(count, sizeof(count), "GameUpdates=%llu", static_cast<unsigned long long>(s->updates));
-    Log(s, count);
-    Log(s, "GameStop");
-}
-void __cdecl Destroy(void* instance)
-{
-    auto* s = static_cast<Session*>(instance);
-    Log(s, "GameDestroy");
-    delete s;
-}
-}
-// All operations are allocation-free except nothrow Create; no exceptions cross ABI.
-extern "C" __declspec(dllexport) int __cdecl EngineGetModuleApi(uint32_t version, EngineModuleApi* api)
-{
-    if (!api || version != ENGINE_MODULE_VERSION) return 0;
-    *api = {ENGINE_MODULE_VERSION, ENGINE_MODULE_GAME, Create, Start, Update, nullptr, Stop, Destroy};
-    return 1;
-}
+
+#define SCENE_MODULE_START_SCENE StartSkeletalDemo
+#include "../../Common/SceneModule.inl"
+#undef SCENE_MODULE_START_SCENE

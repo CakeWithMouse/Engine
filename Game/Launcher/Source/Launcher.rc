@@ -1,0 +1,15 @@
+#include <windows.h>
+200 DIALOGEX 0, 0, 350, 145
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Создать проект"
+FONT 9, "Segoe UI"
+BEGIN
+    LTEXT "Название проекта", -1, 12, 12, 320, 12
+    EDITTEXT 201, 12, 27, 325, 15, ES_AUTOHSCROLL
+    LTEXT "Новая папка проекта (будет создана внутри выбранной папки)", -1, 12, 49, 325, 12
+    EDITTEXT 202, 12, 65, 267, 15, ES_AUTOHSCROLL
+    PUSHBUTTON "Обзор…", 203, 284, 64, 53, 17
+    LTEXT "Готовая сцена: земля и куб. Примитивы, сохранение и Play доступны сразу.", -1, 12, 89, 325, 24
+    DEFPUSHBUTTON "Создать", IDOK, 223, 120, 55, 17
+    PUSHBUTTON "Отмена", IDCANCEL, 283, 120, 54, 17
+END

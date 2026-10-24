@@ -4,7 +4,10 @@
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
 #include <Engine/Render/ShaderCompiler.h>
+#include "../Source/Resources/VfsRead.h"
 #include "VfsLifecycleTests.h"
+#include "VfsServiceTests.h"
+#include "VfsProxyLifecycleTests.h"
 #include <cmath>
 #include <cstring>
 #include <fstream>
@@ -497,6 +500,21 @@ void VirtualFileSystemTests()
     std::filesystem::remove_all(fixtureRoot, ec);
     std::filesystem::create_directories(fixtureRoot / "sub", ec);
 
+    struct FixtureGuard
+    {
+        std::filesystem::path root;
+        FixtureGuard(const std::filesystem::path& r) : root(r)
+        {
+            VfsRead::GetVFS().Mount("/TestFixture", root);
+        }
+        ~FixtureGuard()
+        {
+            VfsRead::GetVFS().Unmount("/TestFixture");
+            std::error_code ec;
+            std::filesystem::remove_all(root, ec);
+        }
+    } fixtureGuard(fixtureRoot);
+
     const auto aHlsl = fixtureRoot / "a.hlsl";
     const auto bHlsli = fixtureRoot / "sub" / "b.hlsli";
     const auto cHlsli = fixtureRoot / "c.hlsli";
@@ -549,15 +567,21 @@ void VirtualFileSystemTests()
     CHECK(capturedLog.find("[ShaderCompiler] Include file not found in VFS") != std::string::npos);
     CHECK(capturedLog.find("missing.hlsli") != std::string::npos);
 
-    // Clean up test fixture
-    std::filesystem::remove_all(fixtureRoot, ec);
+    // fixtureGuard automatically unmounts /TestFixture and removes fixtureRoot on exit
 }
+
+void SceneOwnershipTests();
+void SceneHierarchyTests();
+void SceneDeferredTests();
 
 int main()
 {
     const std::pair<const char*, std::function<void()>> tests[] = {
         // Scenario A MUST run first: depends on untouched global VFS before any BaseEngine lifecycle.
         {"vfs lifecycle A (read before engine)", VfsLifecycle_ScenarioA},
+        {"scene ownership and IDs (no GPU)", SceneOwnershipTests},
+        {"scene hierarchy and snapshots (no GPU)", SceneHierarchyTests},
+        {"scene deferred mutations (no GPU)", SceneDeferredTests},
         {"registry ownership", RegistryOwnership}, {"registration failure ownership", RegistryFailures},
         {"transform hierarchy and cache", TransformHierarchy}, {"unregister hierarchy and instances", UnregisterHierarchyAndInstances},
         {"frame light snapshot", LightSnapshot}, {"forward/deferred shader variants", ShaderVariants},
@@ -569,7 +593,15 @@ int main()
         {"VirtualFileSystem::Mount replaces same root", VfsLifecycle_ScenarioE},
         {"vfs mounts preserved after stop", VfsLifecycle_PreserveMountSet},
         {"vfs project content unmounted after stop", VfsLifecycle_ContentRootReverted},
-        {"vfs premounted game restored after stop", VfsLifecycle_PreMountedGameReverted}
+        {"vfs premounted game restored after stop", VfsLifecycle_PreMountedGameReverted},
+        {"vfs service: resolve and toVirtual", VfsService_ResolveAndToVirtual},
+        {"vfs service: exists and stat", VfsService_ExistsAndStat},
+        {"vfs service: readFile and allocator", VfsService_ReadFileAndAllocator},
+        {"vfs service: enumerate and find", VfsService_EnumerateAndFind},
+        {"vfs service: callback reentrancy without deadlock", VfsService_CallbackReentrancyAndNoDeadlock},
+        {"vfs service: mounts and unsupported stubs", VfsService_GetMountsAndStubs},
+        {"vfs proxy lifecycle: sessions and rejection", VfsProxyLifecycle_SessionsAndRejection},
+        {"vfs proxy lifecycle: read parity and allocator", VfsProxyLifecycle_ReadParityAndAllocator}
     };
     int failures = 0;
     for (const auto& test : tests)

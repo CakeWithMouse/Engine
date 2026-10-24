@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Import after Microsoft.Cpp.targets. Cpp.props supplies RepositoryRoot/IntDir. -->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <EngineComponentCatalog Condition="'$(EngineComponentCatalog)'==''">$(MSBuildProjectName)</EngineComponentCatalog>
+    <EngineComponentGeneratedDir>$(IntDir)Generated\Components\</EngineComponentGeneratedDir>
+    <EngineComponentGeneratorProject>$(MSBuildThisFileDirectory)..\Tools\ComponentGenerator\ComponentGenerator.vcxproj</EngineComponentGeneratorProject>
+    <EngineComponentGeneratorExe>$(RepositoryRoot)Engine\build\$(Platform)\$(Configuration)\ComponentGenerator.exe</EngineComponentGeneratorExe>
+  </PropertyGroup>
+  <ItemGroup>
+    <EngineComponentRoot Include="$(MSBuildProjectDirectory)\Source" Condition="'@(EngineComponentRoot)'==''" />
+    <ClCompile Include="$(EngineComponentGeneratedDir)GeneratedComponents.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <ClInclude Include="$(EngineComponentGeneratedDir)GeneratedComponents.h" />
+  </ItemGroup>
+  <ItemDefinitionGroup>
+    <ClCompile><AdditionalIncludeDirectories>$(EngineComponentGeneratedDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories></ClCompile>
+  </ItemDefinitionGroup>
+  <!-- Run each build so newly added/deleted headers are discovered. The generator
+       preserves unchanged output timestamps, so compilation stays incremental. -->
+  <Target Name="GenerateEngineComponents" BeforeTargets="ClCompile" Condition="'$(DesignTimeBuild)'!='true'">
+    <MSBuild Projects="$(EngineComponentGeneratorProject)" Targets="Build"
+             Properties="Configuration=$(Configuration);Platform=$(Platform);PlatformToolset=$(PlatformToolset)" />
+    <MakeDir Directories="$(EngineComponentGeneratedDir)" />
+    <WriteLinesToFile File="$(EngineComponentGeneratedDir)roots.txt" Lines="@(EngineComponentRoot->'%(FullPath)')" Overwrite="true" Encoding="UTF-8" WriteOnlyWhenDifferent="true" />
+    <Exec Command="&quot;$(EngineComponentGeneratorExe)&quot; &quot;$(EngineComponentGeneratedDir)roots.txt&quot; &quot;$(EngineComponentGeneratedDir).&quot; &quot;$(EngineComponentCatalog)&quot;" />
+    <ItemGroup><FileWrites Include="$(EngineComponentGeneratedDir)GeneratedComponents.cpp;$(EngineComponentGeneratedDir)GeneratedComponents.h;$(EngineComponentGeneratedDir)roots.txt" /></ItemGroup>
+  </Target>
+</Project>

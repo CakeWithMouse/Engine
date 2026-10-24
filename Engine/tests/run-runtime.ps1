@@ -1,9 +1,9 @@
 param([ValidateSet('Debug','Release')][string]$Configuration = 'Debug',
-    [string]$PlatformToolset = 'auto', [switch]$NoBuild)
+    [string]$PlatformToolset = 'auto', [switch]$NoBuild, [switch]$EnableAssimp)
 $ErrorActionPreference = 'Stop'
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 if (!$NoBuild) {
-    & "$repo/Engine/build.ps1" -Target EngineLauncher -Configuration $Configuration -PlatformToolset $PlatformToolset
+    & "$repo/Engine/build.ps1" -Target EngineLauncher -Configuration $Configuration -PlatformToolset $PlatformToolset -EnableAssimp:$EnableAssimp
     & "$repo/Engine/BuildSupport/Invoke-MSBuild.ps1" -Project "$PSScriptRoot/runtime/Fixtures.proj" -Configuration $Configuration -PlatformToolset $PlatformToolset
 }
 $output = "$repo/Game/build/x64/$Configuration"
@@ -54,12 +54,14 @@ function ProjectFile([string]$Directory, [string]$Module) {
     return "$Directory/Project.json"
 }
 
+$gameLog = $null
 foreach ($mode in @('game','editor')) {
     $prefix = if ($mode -eq 'game') { 'Game' } else { 'Editor' }
     $log = Run $mode $runtime "--project `"$project`" --mode $mode --frames 3"
+    if ($mode -eq 'game') { $gameLog = $log }
     Ordered $log @('EngineStarting','ResourcesReady','EngineReady','ModuleLoaded',"${prefix}Create","${prefix}Start")
     Ordered $log @("${prefix}Updates=3", "${prefix}Stop", "${prefix}Destroy", 'ModuleUnloaded', 'ResourcesStopped', 'EngineStopped')
-    $frameEvent = if ($mode -eq 'editor') { 'EngineFrameEnd (viewport)' } else { 'EngineFrameEnd (stub)' }
+    $frameEvent = if ($mode -eq 'editor') { 'EngineFrameEnd (viewport)' } else { 'EngineFrameEnd (game window)' }
     Require ((Count $log $frameEvent) -eq 3) 'Incorrect frame count'
     Require ((Count $log "${prefix}Destroy") -eq 1) 'Session must be destroyed exactly once'
     if ($mode -eq 'editor') {
@@ -67,10 +69,27 @@ foreach ($mode in @('game','editor')) {
         Ordered $log @('ViewportReady', 'EditorViewportAttach ok', 'EngineRender (viewport)', 'ViewportStopped', 'EditorStop')
         Require ((Count $log 'EngineRender (viewport)') -eq 3) 'Incorrect viewport frame count'
     } else {
-        Ordered $log @('GameUpdate', 'EngineUpdate', 'EngineRender')
+        Ordered $log @('GameUpdate', 'EngineFrame (game window)', 'EngineFrameEnd (game window)')
         Require ((Count $log 'GameUpdate') -eq 3) 'Incorrect update count'
+        $firstReadMatches = [regex]::Matches($log, '(?m)^\[VfsService\] first read via module: (/Engine/Shaders/.+)$')
+        Require ($firstReadMatches.Count -eq 1) "Expected exactly 1 host VFS first read via module, got $($firstReadMatches.Count)"
     }
     Pass $mode
+}
+
+Require ((Count $gameLog 'EngineFrame (game window)') -eq 3) 'Incorrect game window frame count'
+Require ((Count $gameLog 'EngineFrameEnd (stub)') -eq 0) 'Stub frame found in game window log'
+Pass 'game window'
+
+if ($gameLog -match '\[RuntimeExample\] SkeletalMesh loaded: bones=\d+ clip=') {
+    Pass 'skeletal runtime check (loaded with Assimp)'
+} elseif ($gameLog -match '\[RuntimeExample\] SkeletalMesh skipped: Assimp not enabled') {
+    Pass 'skeletal runtime check (skipped without Assimp)'
+} else {
+    throw "Expected SkeletalMesh loaded or skipped log in game output"
+}
+if ($EnableAssimp) {
+    Require ($gameLog -match '\[RuntimeExample\] SkeletalMesh loaded: bones=\d+ clip=') "Expected SkeletalMesh loaded log when -EnableAssimp passed"
 }
 
 $log = Run 'engine-failure' $runtime "--project `"$project`" --mode game --frames 3 --test-fail-engine" 1
@@ -107,6 +126,9 @@ foreach ($case in @('BadVersion','WrongKind','MissingExport','FailGameStart','Re
 $isolated = "$work/editor failure"
 New-Item -ItemType Directory -Path $isolated -Force | Out-Null
 Copy-Item -LiteralPath $runtime -Destination "$isolated/EngineRuntime.exe"
+# The Assimp-enabled runtime also needs the deployment's adjacent DLLs.
+Get-ChildItem -LiteralPath (Split-Path $runtime) -Filter '*.dll' | Where-Object Name -ne 'Editor.dll' |
+    Copy-Item -Destination $isolated
 Copy-Item -LiteralPath "$fixtures/FailEditorStart.dll" -Destination "$isolated/Editor.dll"
 $log = Run 'editor-start-failure' "$isolated/EngineRuntime.exe" "--project `"$project`" --mode editor --frames 3" 1
 Ordered $log @('EngineReady','FixtureCreate','FixtureStart','FixtureDestroy','ModuleUnloaded','ResourcesStopped','EngineStopped')
@@ -119,9 +141,21 @@ $log = Run 'editor-no-game' $runtime "--project `"$missing`" --mode editor --fra
 Require ($log -match 'EditorUpdates=1' -and $log -notmatch 'GameCreate') 'Editor requires game DLL'
 Pass 'editor without game DLL'
 
-$log = Run 'interactive-exit' $runtime "--project `"$project`" --mode game" 0 "`nq`n"
-Require ($log -match 'GameUpdates=1') 'Interactive Enter/q contract failed'
+$interactive = ProjectFile "$work/interactive" "$output/Runtime/Projects/RuntimeExample/Game.dll"
+$log = Run 'interactive-exit' $runtime "--project `"$interactive`" --mode game" 0 "`nq`n"
+Require ($log -match '(?m)^GameUpdates=1\r?$') 'Interactive Enter/q contract failed'
 Pass 'interactive exit'
+
+$reloadProj = ProjectFile "$work/reload" "$output/Runtime/Projects/RuntimeExample/Game.dll"
+$reloadLog = Run 'interactive-reload' $runtime "--project `"$reloadProj`" --mode game" 0 "`nr`nq`n"
+$bindCount = [regex]::Matches($reloadLog, '(?m)^\[VfsRead\] Bind host VFS service v\d+').Count
+$unbindCount = [regex]::Matches($reloadLog, '(?m)^\[VfsRead\] Unbind').Count
+Require ($bindCount -eq 2) "Expected 2 Bind host VFS service logs in hot-reload, got $bindCount"
+Require ($unbindCount -eq 2) "Expected 2 Unbind logs in hot-reload, got $unbindCount"
+Require ($reloadLog -notmatch 'ModuleReloadError') "Hot reload contained reload error:`n$reloadLog"
+Ordered $reloadLog @('GameCreate','GameStart','GameStop','GameDestroy','ModuleUnloaded','ModuleLoaded','GameCreate','GameStart','ModuleReloadSuccess','GameStop','GameDestroy','ModuleUnloaded')
+Pass 'hot reload'
+
 
 $index = 0
 foreach ($arguments in @('--mode invalid --frames 3','--mode game --frames 0','--mode game --frames -1','--mode game --frames 3x','--mode game --frames 18446744073709551616','--mode game --mode editor','--mode game --unknown value')) {

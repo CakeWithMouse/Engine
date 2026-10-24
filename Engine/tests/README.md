@@ -1,5 +1,30 @@
 # Проверки движка
 
+Импорт ресурсов и сцены: `./Engine/tests/assets/run.ps1 -EnableAssimp`.
+Проверяет настоящий игровой DLL, импорт glTF с внешними ресурсами/GLB/OBJ,
+назначение текстур, ошибки и откат, Unicode, сохранение и перенос проекта,
+Play/standalone и пиксели D3D. Без `-EnableAssimp` проверяет текстуры и
+корректный отказ импорта моделей. Qt-сценарий с Undo/Redo и дублированием:
+`./Editor/tests/run.ps1 -EnableAssimp`. Подробнее: [PROJECT-ASSETS.md](../docs/PROJECT-ASSETS.md).
+
+Edit/Play API: `./Engine/tests/edit-session/run.ps1 -PlatformToolset auto`.
+129 проверок без Editor/Qt, включая отдельное Win32-окно/D3D11, настоящий игровой DLL
+и ABI-only consumer. Инструкция: [EDIT-SESSION-API.md](../docs/EDIT-SESSION-API.md).
+
+Игровой DLL и команды Scene: `./Engine/tests/scene-module/run.ps1 -PlatformToolset auto`.
+109 проверок с настоящим DLL и загрузчиком runtime; без редактора, окна и GPU.
+Контракт: [SCENE-MODULE-API.md](../docs/SCENE-MODULE-API.md).
+
+Генератор компонентов и его C++ API: `./Engine/tests/component-generation/run.ps1`
+(`-Configuration Debug -PlatformToolset auto`). Проверяет сканер, генерацию, ошибки
+компилятора, создание реального класса и Scene.Tick. Без редактора, окна и GPU.
+Контракт и ограничения — [COMPONENT-GENERATION.md](../docs/COMPONENT-GENERATION.md).
+
+`SceneTests.cpp` проверяет владение/ID, иерархию/snapshot и отложенные изменения Scene
+без создания Game, окна или GPU. Эти группы входят в общий EngineTests.
+ViewportTests дополнительно проверяет отображение правок Scene без Tick и создание
+GPU-ресурсов для напрямую добавленного компонента.
+
 Отдельные проверки встроенного viewport: `./Engine/tests/run-viewport.ps1` (D3D11,
 пиксели, анимация, resize, владение HWND) и после сборки Runtime
 `./Engine/tests/run-editor-viewport.ps1` (настоящий Qt-интерфейс, обновление без stdin,
@@ -53,3 +78,11 @@ vcpkg, моделей или текстур. GPU-проверки использ
 # Проверки нового Runtime
 
 `./Engine/tests/run-runtime.ps1` собирает host, обе DLL, лаунчер и тестовые DLL, затем проверяет жизненный цикл и ошибки. Для Release добавьте `-Configuration Release`; toolset выбирается автоматически или через `-PlatformToolset v143`. Это отдельные проверки каркаса, не замена тестов старого ядра ниже. См. [инструкцию Runtime](../docs/RUNTIME-QUICKSTART.md).
+
+JSON сцен входит в edit-session/run.ps1: 478 проверок API/JSON/viewport без Editor. Формат и контракт — ../docs/SCENE-JSON.md.
+
+StartupSceneTests.h в edit-session проверяет Project.json и запуск до bind/start без Editor. Текущий набор — 508 проверок Debug v143.
+
+GameStartupTests.h проверяет game lifecycle и одиночный Tick; текущий edit-session набор — 548 проверок, включая startup обоих режимов.
+
+RuntimeRenderTests.h: JSON Scene в Game, draw calls, одиночный Tick, resize/close/failure. Общий набор edit-session: 575 проверок.
