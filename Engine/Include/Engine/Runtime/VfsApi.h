@@ -1,0 +1,146 @@
+#pragma once
+#include <stdint.h>
+
+#ifndef ENGINE_MODULE_CALL
+#define ENGINE_MODULE_CALL __cdecl
+#endif
+
+// ============================================================================
+// Engine VFS Service C-ABI Interface
+// Windows x64, C calling convention, UTF-8 strings, no STL, no C++ exceptions.
+// All buffer sizes and offsets use uint64_t.
+// ============================================================================
+
+// Service ID: 'V', 'F', 'S', 0x01 ('VFS\1' in 4-byte little-endian: 0x01534656u).
+#define ENGINE_SERVICE_VFS        0x01534656u
+#define ENGINE_VFS_API_VERSION    1u
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+enum EngineVfsStatusConstants
+{
+    ENGINE_VFS_OK               = 0,
+    ENGINE_VFS_NOT_FOUND        = 1,
+    ENGINE_VFS_IO_ERROR         = 2,
+    ENGINE_VFS_ALLOC_FAILED     = 3,
+    ENGINE_VFS_BAD_ARGUMENT     = 4,
+    ENGINE_VFS_NOT_SUPPORTED    = 5,
+    ENGINE_VFS_BUFFER_TOO_SMALL = 6
+};
+typedef uint32_t EngineVfsStatus;
+
+enum EngineVfsEntryTypeConstants
+{
+    ENGINE_VFS_TYPE_FILE      = 1,
+    ENGINE_VFS_TYPE_DIRECTORY = 2,
+    ENGINE_VFS_TYPE_UNKNOWN   = 3
+};
+typedef uint32_t EngineVfsEntryType;
+
+struct EngineServiceHeader
+{
+    uint32_t version;
+    uint32_t size;
+};
+
+struct EngineVfsStat
+{
+    uint32_t type;       // EngineVfsEntryType
+    uint32_t reserved;   // 64-bit alignment padding
+    uint64_t size;       // File size in bytes
+    uint64_t mtime;      // Last modification time (UTC Unix epoch seconds)
+};
+
+// Allocator callback for file reading.
+// Invoked synchronously by the host on the calling thread.
+// Caller allocates memory of at least 'size' bytes and returns a pointer.
+// Returning nullptr is valid ONLY when size == 0.
+// When size > 0, returning nullptr causes readFile to abort and return ENGINE_VFS_ALLOC_FAILED.
+// Host NEVER stores, reallocates, or frees this pointer.
+typedef void* (ENGINE_MODULE_CALL *EngineVfsAllocFn)(void* allocUser, uint64_t size);
+
+// Enumeration callback. Return 1 to continue iteration, 0 to abort early.
+// The 'name' parameter contains the full virtual path of the entry (e.g. "/Game/Textures/wood.png").
+// The 'type' parameter distinguishes file (ENGINE_VFS_TYPE_FILE) and directory (ENGINE_VFS_TYPE_DIRECTORY).
+// In Phase 2, only files are returned; directory entries will be added in Phase 5 without changing ABI.
+// Host collects/snapshots results beforehand and invokes callbacks without holding the internal VFS mutex.
+// Callbacks must not throw exceptions.
+typedef int (ENGINE_MODULE_CALL *EngineVfsEnumerateCallback)(void* user, const char* name, uint32_t type, uint64_t size);
+
+// Search callback. Return 1 to continue iteration, 0 to abort early.
+// The 'vpath' parameter contains the full virtual path of the entry.
+// The 'type' parameter distinguishes file (ENGINE_VFS_TYPE_FILE) and directory (ENGINE_VFS_TYPE_DIRECTORY).
+// In Phase 2, only files are returned; directory entries will be added in Phase 5 without changing ABI.
+// Host collects/snapshots results beforehand and invokes callbacks without holding the internal VFS mutex.
+// Callbacks must not throw exceptions.
+typedef int (ENGINE_MODULE_CALL *EngineVfsFindCallback)(void* user, const char* vpath, uint32_t type, uint64_t size);
+
+// Mount point enumeration callback. Return 1 to continue, 0 to abort.
+// Host collects/snapshots results beforehand and invokes callbacks without holding the internal VFS mutex.
+// Callbacks must not throw exceptions.
+typedef int (ENGINE_MODULE_CALL *EngineVfsMountCallback)(void* user, const char* vroot, const char* physicalPath);
+
+// File change notification callback (Phase 4).
+typedef void (ENGINE_MODULE_CALL *EngineVfsChangeCallback)(void* user, const char* vpath, uint32_t changeType);
+
+struct EngineVfsApi
+{
+    // Service header: version must be >= ENGINE_VFS_API_VERSION, size filled with sizeof(EngineVfsApi)
+    struct EngineServiceHeader header;
+    void* context;
+
+    // --- Core Read & Inspection Operations (Phase 2) ---
+
+    // Resolves a virtual path to a physical filesystem path.
+    // Returns ENGINE_VFS_OK, ENGINE_VFS_NOT_FOUND, or ENGINE_VFS_BUFFER_TOO_SMALL.
+    // If capacity is insufficient, *needed contains the required byte count including null terminator.
+    uint32_t (ENGINE_MODULE_CALL *resolve)(void* ctx, const char* vpath, char* outPhysical, uint64_t capacity, uint64_t* needed);
+
+    // Translates a physical path or relative path to a canonical virtual path.
+    uint32_t (ENGINE_MODULE_CALL *toVirtual)(void* ctx, const char* physical, char* outVpath, uint64_t capacity, uint64_t* needed);
+
+    // Checks if a virtual path exists. Returns 1 if exists, 0 if not or on invalid argument.
+    uint32_t (ENGINE_MODULE_CALL *exists)(void* ctx, const char* vpath);
+
+    // Queries file/directory metadata.
+    uint32_t (ENGINE_MODULE_CALL *stat)(void* ctx, const char* vpath, struct EngineVfsStat* outStat);
+
+    // Synchronously reads file bytes using the caller's allocator callback.
+    // If outReadBytes is not null, receives the exact count of bytes read.
+    uint32_t (ENGINE_MODULE_CALL *readFile)(void* ctx, const char* vpath, EngineVfsAllocFn allocFn, void* allocUser, uint64_t* outReadBytes);
+
+    // Enumerates directory entries in vdir.
+    // 'name' in callback is full virtual path; 'type' is ENGINE_VFS_TYPE_FILE / ENGINE_VFS_TYPE_DIRECTORY.
+    // In Phase 2 only files are emitted; directory entries are added in Phase 5 without ABI change.
+    // Host collects result beforehand and invokes callbacks without holding VFS mutex.
+    uint32_t (ENGINE_MODULE_CALL *enumerate)(void* ctx, const char* vdir, int recursive, EngineVfsEnumerateCallback callback, void* user);
+
+    // Searches directory entries matching glob/extension pattern.
+    // 'vpath' in callback is full virtual path; 'type' is ENGINE_VFS_TYPE_FILE / ENGINE_VFS_TYPE_DIRECTORY.
+    // In Phase 2 only files are emitted; directory entries are added in Phase 5 without ABI change.
+    // Host collects result beforehand and invokes callbacks without holding VFS mutex.
+    uint32_t (ENGINE_MODULE_CALL *find)(void* ctx, const char* vdir, uint32_t typeFilter, const char* pattern, int recursive, EngineVfsFindCallback callback, void* user);
+
+    // Enumerates active mount points.
+    // Host collects result beforehand and invokes callbacks without holding VFS mutex.
+    uint32_t (ENGINE_MODULE_CALL *getMounts)(void* ctx, EngineVfsMountCallback callback, void* user);
+
+    // --- Mutating Operations (Reserved for Phase 4; return ENGINE_VFS_NOT_SUPPORTED until implemented) ---
+
+    uint32_t (ENGINE_MODULE_CALL *writeFile)(void* ctx, const char* vpath, const void* data, uint64_t size, int atomic);
+    uint32_t (ENGINE_MODULE_CALL *createDir)(void* ctx, const char* vdir, int recursive);
+    uint32_t (ENGINE_MODULE_CALL *moveFile)(void* ctx, const char* oldVpath, const char* newVpath);
+    uint32_t (ENGINE_MODULE_CALL *copyFile)(void* ctx, const char* srcVpath, const char* dstVpath);
+    uint32_t (ENGINE_MODULE_CALL *deleteFile)(void* ctx, const char* vpath);
+
+    // --- Change Notification Subscriptions (Reserved for Phase 4; return ENGINE_VFS_NOT_SUPPORTED) ---
+
+    uint32_t (ENGINE_MODULE_CALL *subscribe)(void* ctx, const char* vdirPrefix, EngineVfsChangeCallback callback, void* user, uint64_t* outToken);
+    uint32_t (ENGINE_MODULE_CALL *unsubscribe)(void* ctx, uint64_t token);
+};
+
+#ifdef __cplusplus
+}
+#endif

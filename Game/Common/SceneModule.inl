@@ -1,5 +1,8 @@
 // Shared scene-only module lifecycle. The including project supplies ProjectComponentTypes().
+// Optional SCENE_MODULE_START_SCENE(Game&) runs after a loaded scene's window is initialized.
 #include <Engine/Runtime/ModuleApi.h>
+#include <Engine/Runtime/VfsApi.h>
+#include "../../Engine/Source/Resources/VfsRead.h"
 #include <Engine/Scene/SceneCommands.h>
 #include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/Resources/Paths.h>
@@ -28,10 +31,54 @@ void Log(Session* s, const char* text) { s->host.log(s->host.user, text); }
 void* __cdecl Create(const EngineModuleHost* host)
 {
     if (!host || host->version != ENGINE_MODULE_VERSION || !host->log || !host->requestExit) return nullptr;
+    bool boundVfs = false;
+    if (host->getService)
+    {
+        const auto* vfsApi = static_cast<const EngineVfsApi*>(
+            host->getService(host->user, ENGINE_SERVICE_VFS, ENGINE_VFS_API_VERSION));
+        if (vfsApi)
+        {
+            boundVfs = VfsRead::Bind(vfsApi);
+            if (boundVfs)
+            {
+                const std::string engineRoot = VfsRead::Resolve("/Engine");
+                if (!engineRoot.empty())
+                {
+                    EnginePaths::SetContentRoot(engineRoot);
+                }
+            }
+        }
+        else
+        {
+            std::fprintf(stderr, "[SceneModule] Host getService returned null for VFS service, falling back to local VFS\n");
+        }
+    }
+    else
+    {
+        std::fprintf(stderr, "[SceneModule] Host getService is null, falling back to local VFS\n");
+    }
+
     Session* s = nullptr;
     try { s = new Session(*host); }
-    catch (...) { return nullptr; }
-    if (s) Log(s, "GameCreate");
+    catch (...)
+    {
+        if (boundVfs)
+        {
+            VfsRead::Unbind();
+            EnginePaths::SetContentRoot({});
+        }
+        return nullptr;
+    }
+    if (!s)
+    {
+        if (boundVfs)
+        {
+            VfsRead::Unbind();
+            EnginePaths::SetContentRoot({});
+        }
+        return nullptr;
+    }
+    Log(s, "GameCreate");
     return s;
 }
 int __cdecl Start(void* instance)
@@ -47,6 +94,9 @@ int __cdecl Start(void* instance)
             s->game->SetSimulationTimeScale(1.0f);
             if (!s->game->InitializeRuntimeWindow()) { Log(s, "Game window initialization failed"); return 0; }
             s->game->GetPlayer()->SetPosition({0, 0, 5});
+#if defined(SCENE_MODULE_START_SCENE)
+            SCENE_MODULE_START_SCENE(*s->game);
+#endif
         }
     }
     catch (...) { Log(s, "Game start failed"); return 0; }
@@ -85,6 +135,8 @@ void __cdecl Destroy(void* instance)
     auto* s = static_cast<Session*>(instance);
     Log(s, "GameDestroy");
     delete s;
+    VfsRead::Unbind();
+    EnginePaths::SetContentRoot({});
 }
 }
 // Allocation and user Tick failures are caught inside the module.

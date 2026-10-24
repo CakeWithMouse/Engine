@@ -1,7 +1,11 @@
 // Included after the shared test helpers; uses the public API, no Editor.
 #include <Engine/Scene/SceneDocument.h>
 #include "../../ThirdParty/nlohmann/json.hpp"
+#include "../../Source/Resources/VfsRead.h"
+#include <chrono>
+#include <clocale>
 #include <fstream>
+#include <iostream>
 
 static void ExerciseJson(const EngineEditSessionApi& api, const char* type, bool local = false,
     const std::filesystem::path& viewportContent = {})
@@ -102,3 +106,188 @@ static void ExerciseJson(const EngineEditSessionApi& api, const char* type, bool
     std::filesystem::remove(file);
     Check(api.loadScene(api.context, path.c_str(), &loaded, error, sizeof(error)) == EngineSceneIoError && !loaded, "missing file");
 }
+
+struct LocaleGuard
+{
+    std::string saved;
+    LocaleGuard()
+    {
+        const char* cur = std::setlocale(LC_ALL, nullptr);
+        saved = cur ? cur : "C";
+    }
+    ~LocaleGuard()
+    {
+        std::setlocale(LC_ALL, saved.c_str());
+    }
+};
+
+static void ExerciseJsonLocale()
+{
+    LocaleGuard guard;
+
+    SceneSnapshot snapshot;
+    snapshot.name = "LocaleTestScene";
+    SceneComponentSnapshot comp;
+    comp.id = 1;
+    comp.name = "LocaleObject";
+    comp.typeName = "Probe";
+    comp.parentId = 0;
+    comp.inheritParentScale = true;
+    comp.transform.position = {0.5f, -1.25f, 1e-7f};
+    comp.transform.rotation = {1.0f, 0.0f, 0.0f, 0.0f};
+    comp.transform.scale = {123456.75f, 1.0f, 1.0f};
+    snapshot.components.push_back(comp);
+
+    // 1. Under "C" locale
+    std::setlocale(LC_ALL, "C");
+    const std::string cSerialized = SceneDocument::Serialize(snapshot);
+    const SceneSnapshot cParsed = SceneDocument::Parse(cSerialized);
+    Check(cParsed.components.size() == 1, "c-locale components size");
+    Check(cParsed.components[0].transform.position.x == 0.5f, "c-locale position.x");
+    Check(cParsed.components[0].transform.position.y == -1.25f, "c-locale position.y");
+    Check(cParsed.components[0].transform.position.z == 1e-7f, "c-locale position.z");
+    Check(cParsed.components[0].transform.scale.x == 123456.75f, "c-locale scale.x");
+
+    // 2. Under system default locale: setlocale(LC_ALL, "")
+    std::setlocale(LC_ALL, "");
+    const std::string sysSerialized = SceneDocument::Serialize(snapshot);
+    Check(sysSerialized == cSerialized, "system locale Serialize matches C locale byte-for-byte");
+    const SceneSnapshot sysParsed = SceneDocument::Parse(sysSerialized);
+    Check(sysParsed.components[0].transform.position.x == 0.5f, "sys-locale position.x");
+    Check(sysParsed.components[0].transform.position.y == -1.25f, "sys-locale position.y");
+    Check(sysParsed.components[0].transform.position.z == 1e-7f, "sys-locale position.z");
+    Check(sysParsed.components[0].transform.scale.x == 123456.75f, "sys-locale scale.x");
+
+    // 3. Under comma-decimal locale
+    const char* commaCandidates[] = {"ru-RU", "de-DE", "Russian_Russia.1251"};
+    const char* selectedLocale = nullptr;
+    for (const char* loc : commaCandidates)
+    {
+        if (std::setlocale(LC_ALL, loc) != nullptr)
+        {
+            selectedLocale = loc;
+            break;
+        }
+    }
+
+    if (!selectedLocale)
+    {
+        std::cout << "SKIP: no comma-decimal locale\n";
+    }
+    else
+    {
+        const std::string commaSerialized = SceneDocument::Serialize(snapshot);
+        Check(commaSerialized == cSerialized, "comma locale Serialize matches C locale byte-for-byte");
+        Check(commaSerialized.find("0.5") != std::string::npos, "serialized string has decimal point");
+        Check(commaSerialized.find("0,5") == std::string::npos, "serialized string has no comma in numbers");
+        const SceneSnapshot commaParsed = SceneDocument::Parse(commaSerialized);
+        Check(commaParsed.components[0].transform.position.x == 0.5f, "comma-locale position.x");
+        Check(commaParsed.components[0].transform.position.y == -1.25f, "comma-locale position.y");
+        Check(commaParsed.components[0].transform.position.z == 1e-7f, "comma-locale position.z");
+        Check(commaParsed.components[0].transform.scale.x == 123456.75f, "comma-locale scale.x");
+    }
+}
+
+static void ExerciseJsonVfsWrite()
+{
+    const auto mountsBefore = VfsRead::GetVFS().GetMounts();
+
+    const auto tempDir = (std::filesystem::temp_directory_path() /
+        (L"engine-test-vfs-scenes-" + std::to_wstring(GetCurrentProcessId()) + L"-" +
+         std::to_wstring(std::chrono::steady_clock::now().time_since_epoch().count()))).lexically_normal();
+    std::error_code ec;
+    std::filesystem::create_directories(tempDir, ec);
+    Check(!ec, "create test scenes temp dir");
+
+    struct VfsScenesCleanup
+    {
+        std::filesystem::path dir;
+        ~VfsScenesCleanup()
+        {
+            VfsRead::GetVFS().Unmount("/TestScenes");
+            std::error_code ec;
+            std::filesystem::remove_all(dir, ec);
+        }
+    } cleanup{tempDir};
+
+    VfsRead::GetVFS().Mount("/TestScenes", tempDir);
+
+    const auto resolvedOpt = VfsRead::GetVFS().Resolve("/TestScenes/new.scene.json");
+    Check(resolvedOpt.has_value(), "Resolve non-existent file returns path");
+    const auto physicalPath = *resolvedOpt;
+    Check(!std::filesystem::exists(physicalPath, ec), "target file does not exist before Write");
+
+    SceneSnapshot snapshot;
+    snapshot.name = "VfsWriteTestScene";
+    SceneComponentSnapshot comp;
+    comp.id = 1;
+    comp.name = "TestObject";
+    comp.typeName = "Probe";
+    comp.parentId = 0;
+    comp.inheritParentScale = true;
+    comp.transform.position = {1.0f, 2.0f, 3.0f};
+    comp.transform.rotation = {1.0f, 0.0f, 0.0f, 0.0f};
+    comp.transform.scale = {1.0f, 1.0f, 1.0f};
+    snapshot.components.push_back(comp);
+
+    // 1. Initial write
+    SceneDocument::Write(physicalPath, snapshot);
+    Check(std::filesystem::exists(physicalPath, ec), "file exists after Write");
+    Check(VfsRead::GetVFS().Exists("/TestScenes/new.scene.json"), "VFS Exists returns true after Write");
+
+    const auto readSnapshot = SceneDocument::Read(physicalPath);
+    Check(SceneDocument::Serialize(readSnapshot) == SceneDocument::Serialize(snapshot), "Write and Read preserve Serialize");
+
+    // Check no *.tmp.* leftovers
+    for (const auto& entry : std::filesystem::directory_iterator(tempDir, ec))
+    {
+        const auto filename = entry.path().filename().wstring();
+        Check(filename.find(L".tmp.") == std::wstring::npos, "no leftover tmp file after initial write");
+    }
+
+    // 2. Repeat write replaces file
+    snapshot.name = "ReplacedVfsScene";
+    SceneDocument::Write(physicalPath, snapshot);
+    const auto replacedSnapshot = SceneDocument::Read(physicalPath);
+    Check(replacedSnapshot.name == "ReplacedVfsScene", "repeat write replaces file content");
+    Check(SceneDocument::Serialize(replacedSnapshot) == SceneDocument::Serialize(snapshot), "repeat write preserves Serialize");
+
+    for (const auto& entry : std::filesystem::directory_iterator(tempDir, ec))
+    {
+        const auto filename = entry.path().filename().wstring();
+        Check(filename.find(L".tmp.") == std::wstring::npos, "no leftover tmp file after repeat write");
+    }
+
+    // 3. Write into non-existent parent directory throws SceneDocumentError with EngineSceneIoError
+    const auto badResolvedOpt = VfsRead::GetVFS().Resolve("/TestScenes/missing_subdir/scene.json");
+    Check(badResolvedOpt.has_value(), "Resolve in missing subdir returns path");
+    const auto badPhysicalPath = *badResolvedOpt;
+    bool caughtIoError = false;
+    try
+    {
+        SceneDocument::Write(badPhysicalPath, snapshot);
+    }
+    catch (const SceneDocumentError& err)
+    {
+        if (err.status == EngineSceneIoError)
+        {
+            caughtIoError = true;
+        }
+    }
+    Check(caughtIoError, "write to non-existent parent throws SceneDocumentError with EngineSceneIoError");
+    Check(!std::filesystem::exists(badPhysicalPath, ec), "no bad file created");
+    Check(!std::filesystem::exists(tempDir / "missing_subdir", ec), "no trash directory created");
+
+    // 4. Verify unmount and cleanup, check GetMounts() matches before
+    VfsRead::GetVFS().Unmount("/TestScenes");
+    std::filesystem::remove_all(tempDir, ec);
+
+    const auto mountsAfter = VfsRead::GetVFS().GetMounts();
+    Check(mountsAfter.size() == mountsBefore.size(), "VFS mount count preserved after test");
+    for (size_t i = 0; i < mountsBefore.size(); ++i)
+    {
+        Check(mountsBefore[i].virtualRoot == mountsAfter[i].virtualRoot, "mount virtual root matches");
+        Check(mountsBefore[i].physicalPath == mountsAfter[i].physicalPath, "mount physical path matches");
+    }
+}
+

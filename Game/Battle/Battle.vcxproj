@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
@@ -33,7 +33,9 @@
   <ItemGroup>
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\BattleGame.cpp" />
+    <ClCompile Include="Source\BattleBench.cpp" />
     <ClInclude Include="Source\BattleGame.h" />
+    <ClInclude Include="Source\BattleBench.h" />
     <ClInclude Include="Source\UnitMesh.h" />
     <GameContent Include="Content\**\*" />
   </ItemGroup>

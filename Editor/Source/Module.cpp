@@ -1,5 +1,7 @@
 #include <Engine/Runtime/ModuleApi.h>
 #include <Engine/Runtime/EditSessionApi.h>
+#include <Engine/Runtime/VfsApi.h>
+#include "../../Engine/Source/Resources/VfsRead.h"
 #include "QtHost.h"
 #include <cstdio>
 #include <new>
@@ -11,13 +13,36 @@ namespace
     void* __cdecl Create(const EngineModuleHost* host)
     {
         if (!host || host->version != ENGINE_MODULE_VERSION || !host->log || !host->requestExit) return nullptr;
+        bool boundVfs = false;
+        if (host->getService)
+        {
+            const auto* vfsApi = static_cast<const EngineVfsApi*>(
+                host->getService(host->user, ENGINE_SERVICE_VFS, ENGINE_VFS_API_VERSION));
+            if (vfsApi)
+            {
+                boundVfs = VfsRead::Bind(vfsApi);
+            }
+            else
+            {
+                std::fprintf(stderr, "[Editor] Host getService returned null for VFS service, falling back to local VFS\n");
+            }
+        }
+        else
+        {
+            std::fprintf(stderr, "[Editor] Host getService is null, falling back to local VFS\n");
+        }
         try
         {
             auto* e = new(std::nothrow) EditorQtHost(*host);
-            if (e) e->Log("EditorCreate");
-            return e;
+            if (e)
+            {
+                e->Log("EditorCreate");
+                return e;
+            }
         }
-        catch (...) { return nullptr; }
+        catch (...) {}
+        if (boundVfs) VfsRead::Unbind();
+        return nullptr;
     }
 
     int __cdecl Start(void* i)
@@ -67,6 +92,7 @@ namespace
         catch (...)
         {
         }
+        VfsRead::Unbind();
     }
 }
 

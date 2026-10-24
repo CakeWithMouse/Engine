@@ -167,6 +167,11 @@ int Launch(const GameEntry& entry, bool smoke, bool editor = false)
         if (smoke) command += L" --frames 3";
     }
     else if (smoke) command += L" --smoke";
+    if (entry.extraArgs && *entry.extraArgs)
+    {
+        command += L" ";
+        command += entry.extraArgs;
+    }
     STARTUPINFOW startup{};
     startup.cb = sizeof(startup);
     PROCESS_INFORMATION process{};
@@ -235,7 +240,7 @@ void UpdateStatus()
             message += L"\r\nPreview: " + ExampleDeployment::Wide(error.what());
         }
     }
-    else message += L"\r\nPreview Katamari пока не подключён: требуется Assimp и адаптер сцены.";
+    else message += L"\r\nPreview для этого режима пока не подключён.";
     EnableWindow(editButton, previewReady);
     SetWindowTextW(status, message.c_str());
 }
@@ -348,7 +353,16 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
             const std::wstring name = argv[2];
             LocalFree(argv); argv = nullptr;
             for (const auto& entry : Games)
-                if (name == entry.directory) { Validate(entry, editor); return smoke ? Launch(entry, true, editor) : 0; }
+            {
+                const bool hasExtra = (entry.extraArgs && *entry.extraArgs);
+                if (name == entry.title ||
+                    (hasExtra && (name == L"BattleAnim" || name == L"Battle-Anim" || name == L"Battle (Animated Crowd)" || name == (std::wstring(entry.directory) + L" " + entry.extraArgs))) ||
+                    (!hasExtra && name == entry.directory))
+                {
+                    Validate(entry, editor);
+                    return smoke ? Launch(entry, true, editor) : 0;
+                }
+            }
             return 2;
         }
         LocalFree(argv); argv = nullptr;

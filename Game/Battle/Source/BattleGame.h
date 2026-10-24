@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BattleBench.h"
 #include "UnitMesh.h"
 
 #include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
@@ -43,6 +44,8 @@ public:
         float SunElevation = 56.0f;
         // Diagnostics: writes the shadow maps to BMP files after a few frames.
         bool DumpShadows = false;
+        // Animated crowd using GPU baked VAT (CesiumMan).
+        bool Animated = false;
     };
 
     void BuildScene(const Settings& settings);
@@ -50,6 +53,14 @@ public:
     void SetFrameLimit(uint64_t frames) { FrameLimit = frames; }
     /** One line per run: units, frame time, GPU time, draw calls, instances. */
     std::string BuildReport() const;
+
+    /** Enables robust benchmark mode with pre-allocated sample buffers. */
+    void EnableBench(uint64_t benchFrames, uint64_t warmupFrames = 150);
+    bool IsBenchMode() const { return Bench.IsBenchActive(); }
+    bool IsVSyncActive() const { return bVSync; }
+
+    void PrintBenchHeader() const;
+    std::string BuildBenchReport() const;
 
 protected:
     void PreUpdate(float deltaTime) override;
@@ -83,4 +94,10 @@ private:
     uint64_t DrawCallSum = 0;
     uint64_t InstancesSum = 0;
     double LastTimestampMs = 0.0;
+
+    // Benchmark mode session
+    BattleBenchSession Bench;
+    uint64_t WarmupFrames = 10;
+
+    int UnitVertexCount = 0;
 };

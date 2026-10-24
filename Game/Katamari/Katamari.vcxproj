@@ -40,8 +40,14 @@
     <ClCompile Include="Source\Main.cpp" />
     <GameContent Include="Content\**\*" />
   </ItemGroup>
-  <ItemGroup><ProjectReference Include="..\..\Engine\Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}  <Target Name="RequireKatamariImporter" BeforeTargets="PrepareForBuild"><Error Condition="'$(EngineEnableAssimp)'!='true'" Text="Katamari requires Assimp. Install vcpkg, set VCPKG_ROOT, then build with -EnableAssimp. No substitute scene is provided." /></Target>
-</Project></ProjectReference></ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Engine\Engine.vcxproj">
+      <Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Target Name="RequireKatamariImporter" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(EngineEnableAssimp)'!='true'" Text="Katamari requires Assimp. Install vcpkg, set VCPKG_ROOT, then build with -EnableAssimp. No substitute scene is provided." />
+  </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
   <Target Name="RequireAssimpDependencies" BeforeTargets="PrepareForBuild" Condition="'$(EngineEnableAssimp)'=='true'">

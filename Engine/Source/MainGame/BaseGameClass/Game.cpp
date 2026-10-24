@@ -15,12 +15,22 @@
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Render/ShaderCompiler.h>
+#include <dxgi1_6.h>
 #include "stb_image.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "dxguid.lib")
+
+// Export high-performance GPU preferences for NVIDIA Optimus and AMD PowerXpress
+extern "C"
+{
+    __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+#pragma comment(linker, "/include:NvOptimusEnablement")
+#pragma comment(linker, "/include:AmdPowerXpressRequestHighPerformance")
 
 namespace
 {
@@ -509,6 +519,65 @@ void Game::InitSwapChainDesc(int width, int height)
 
 bool Game::CreateDeviceAndSwapChain()
 {
+    // 1. Select high-performance discrete DXGI adapter
+    Microsoft::WRL::ComPtr<IDXGIFactory1> dxgiFactory1;
+    HRESULT hrFactory = CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory1));
+    Microsoft::WRL::ComPtr<IDXGIFactory6> dxgiFactory6;
+    Microsoft::WRL::ComPtr<IDXGIAdapter1> selectedAdapter;
+    DXGI_ADAPTER_DESC1 selectedDesc = {};
+    SIZE_T maxDedicatedVram = 0;
+
+    auto considerAdapter = [&](Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter)
+    {
+        if (!adapter) return;
+        DXGI_ADAPTER_DESC1 desc = {};
+        adapter->GetDesc1(&desc);
+        if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) return;
+        if (!selectedAdapter || desc.DedicatedVideoMemory > maxDedicatedVram)
+        {
+            maxDedicatedVram = desc.DedicatedVideoMemory;
+            selectedAdapter = adapter;
+            selectedDesc = desc;
+        }
+    };
+
+    if (SUCCEEDED(hrFactory))
+    {
+        if (SUCCEEDED(dxgiFactory1.As(&dxgiFactory6)))
+        {
+            Microsoft::WRL::ComPtr<IDXGIAdapter1> prefAdapter;
+            for (UINT i = 0;
+                 dxgiFactory6->EnumAdapterByGpuPreference(
+                     i,
+                     DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+                     IID_PPV_ARGS(&prefAdapter)) == S_OK;
+                 ++i)
+            {
+                considerAdapter(prefAdapter);
+                prefAdapter.Reset();
+            }
+        }
+
+        UINT i = 0;
+        Microsoft::WRL::ComPtr<IDXGIAdapter1> cur;
+        while (dxgiFactory1->EnumAdapters1(i++, &cur) != DXGI_ERROR_NOT_FOUND)
+        {
+            considerAdapter(cur);
+            cur.Reset();
+        }
+    }
+
+
+    if (selectedAdapter)
+    {
+        std::wcout << L"[DirectX] Selected GPU: " << selectedDesc.Description
+                   << L" (VRAM: " << (selectedDesc.DedicatedVideoMemory / (1024 * 1024)) << L" MB)\n";
+    }
+    else
+    {
+        std::cout << "[DirectX] No discrete adapter found, using default hardware device.\n";
+    }
+
     // The renderer needs SM5 and compute shaders, so lower feature levels are not accepted.
     const D3D_FEATURE_LEVEL FeatureLevels[] = {
         D3D_FEATURE_LEVEL_11_1,
@@ -521,9 +590,10 @@ bool Game::CreateDeviceAndSwapChain()
         SwapChain.Reset();
         Context.Reset();
         Device.Reset();
+        const D3D_DRIVER_TYPE driverType = selectedAdapter ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_HARDWARE;
         return D3D11CreateDeviceAndSwapChain(
-            nullptr,
-            D3D_DRIVER_TYPE_HARDWARE,
+            selectedAdapter ? selectedAdapter.Get() : nullptr,
+            driverType,
             nullptr,
             flags,
             levels,
@@ -546,6 +616,17 @@ bool Game::CreateDeviceAndSwapChain()
     {
         // Runtimes without 11.1 reject the whole array; retry with 11.0 only.
         hr = tryCreate(createDeviceFlags, &FeatureLevels[1], 1);
+    }
+    if (FAILED(hr) && selectedAdapter)
+    {
+        std::cout << "[DirectX] Creation with explicit adapter failed (0x" << std::hex << hr << std::dec
+                  << "), falling back to default hardware driver.\n";
+        selectedAdapter.Reset();
+        hr = tryCreate(createDeviceFlags, FeatureLevels, ARRAYSIZE(FeatureLevels));
+        if (hr == E_INVALIDARG)
+        {
+            hr = tryCreate(createDeviceFlags, &FeatureLevels[1], 1);
+        }
     }
     if (FAILED(hr) && (createDeviceFlags & D3D11_CREATE_DEVICE_DEBUG))
     {
@@ -570,6 +651,7 @@ bool Game::CreateDeviceAndSwapChain()
               << (selectedFeatureLevel == D3D_FEATURE_LEVEL_11_1 ? "11.1" : "11.0") << std::endl;
     return true;
 }
+
 
 bool Game::CreateSwapChainResources(int width, int height)
 {
@@ -2907,6 +2989,7 @@ void Game::BeginGpuTimer()
             !disjoint.Disjoint && disjoint.Frequency > 0 && end >= begin)
         {
             LastGpuFrameMs = static_cast<float>(static_cast<double>(end - begin) * 1000.0 / static_cast<double>(disjoint.Frequency));
+            ++GpuTimerSamplesReady;
         }
         GpuTimerIssued[slot] = false;
     }
