@@ -1,6 +1,8 @@
 // Shared scene-only module lifecycle. The including project supplies ProjectComponentTypes().
 // Optional SCENE_MODULE_START_SCENE(Game&) runs after a loaded scene's window is initialized.
 #include <Engine/Runtime/ModuleApi.h>
+#include <Engine/Runtime/EditExtensions.h>
+#include <cstring>
 #include <Engine/Runtime/VfsApi.h>
 #include "../../Engine/Source/Resources/VfsRead.h"
 #include <Engine/Scene/SceneCommands.h>
@@ -211,6 +213,21 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetGameWindowApi(uint32_t ver
 }
 
 // Independent, edit-safe lifecycle. No ordinary game Create/Start/Update calls.
+extern "C" __declspec(dllexport) int __cdecl EngineGetEditExtension(void* context,
+    const char* name, uint32_t version, uint32_t size, void* output)
+{
+    if (!context || !name || !output || version != 1) return 0;
+    if (std::strcmp(name, EngineDocumentExtension) == 0 && size == sizeof(EngineDocumentCapabilities))
+    {
+        *static_cast<EngineDocumentCapabilities*>(output) = {1,1,2,2};
+        return 1;
+    }
+    if (std::strcmp(name, EnginePointLightExtension) != 0 || size != sizeof(EnginePointLightApi)) return 0;
+    const auto scene = static_cast<SceneEditSession*>(context)->GetApi().scene;
+    *static_cast<EnginePointLightApi*>(output) = {1, scene.context, scene.setPointLight};
+    return 1;
+}
+
 extern "C" __declspec(dllexport) int __cdecl EngineGetEditModuleApi(uint32_t version,
     uint32_t size, EngineEditModuleApi* output)
 {

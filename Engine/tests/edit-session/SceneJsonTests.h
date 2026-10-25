@@ -44,7 +44,7 @@ static void ExerciseJson(const EngineEditSessionApi& api, const char* type, bool
     reject("{", EngineSceneInvalidDocument);
     reject("{\"version\":1,\"name\":\"\xff\",\"objects\":[]}", EngineSceneInvalidDocument);
     reject("{\"version\":1,\"version\":1,\"name\":\"x\",\"objects\":[]}", EngineSceneInvalidDocument);
-    bad = json; bad["version"] = 2; reject(bad.dump(), EngineSceneUnsupportedVersion);
+    bad = json; bad["version"] = 99; reject(bad.dump(), EngineSceneUnsupportedVersion);
     bad = json; bad["extra"] = 1; reject(bad.dump(), EngineSceneInvalidDocument);
     bad = json; bad["objects"][1]["id"] = bad["objects"][0]["id"]; reject(bad.dump(), EngineSceneInvalidDocument);
     bad = json; bad["objects"][0]["parent"] = 999999; reject(bad.dump(), EngineSceneInvalidDocument);

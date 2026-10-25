@@ -2,6 +2,7 @@
 #include <Engine/Base/Base.h>
 #include <Engine/Resources/Paths.h>
 #include "Project.h"
+#include "ProjectUpgrade.h"
 #include "PreviewScenes.h"
 #include <cstdio>
 #include <set>
@@ -13,6 +14,12 @@ int wmain(int argc, wchar_t** argv)
     std::setvbuf(stdout, nullptr, _IONBF, 0);
     try
     {
+        if (argc == 5 && std::wstring(argv[1]) == L"--upgrade-project" && std::wstring(argv[3]) == L"--destination")
+        {
+            ProjectUpgrade::Copy(argv[2],argv[4],EnginePaths::ExecutableDirectory());
+            std::puts("Project upgraded into a new copy. Original preserved.");
+            return 0;
+        }
         RuntimeLaunchOptions options;
         std::filesystem::path projectPath;
         std::set<std::wstring> seen;
@@ -46,6 +53,12 @@ int wmain(int argc, wchar_t** argv)
         // Explicit relative project paths are relative to the host, never caller CWD.
         if (projectPath.is_relative()) projectPath = directory / projectPath;
         const auto project = ReadRuntimeProject(projectPath);
+        if (!project.engineVersion.empty())
+        {
+            const auto release = ReadEngineRelease(directory);
+            if (project.engineVersion != release.version || project.engineConfiguration != release.configuration)
+                throw std::runtime_error("Project is pinned to another engine release. Open it through EngineLauncher.");
+        }
         options.projectName = project.name;
         options.projectFile = project.file.u8string();
         options.contentRoot = project.content.u8string();

@@ -1,0 +1,3 @@
+# Local inspection copies; regression tests extract the checked-in ZIPs elsewhere.
+/pre-lights/
+/lights/

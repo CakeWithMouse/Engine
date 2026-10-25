@@ -56,6 +56,7 @@ struct SceneSnapshot
     std::string name;
     uint64_t revision = 0;
     std::vector<SceneComponentSnapshot> components;
+    uint32_t documentVersion = 1;
 };
 
 // Engine-thread API. No window/device is needed for storage and editing.
@@ -91,6 +92,7 @@ public:
     SceneResult SetTextureAsset(ComponentId id, const std::string& path);
     SceneResult SetPointLight(ComponentId id, const SceneComponentSnapshot::PointLight& light);
     SceneSnapshot GetSnapshot() const;
+    void SetDocumentVersion(uint32_t version);
 
     // Covers custom game update order too. The outermost scope commits pending edits,
     // including when unwinding an exception. Scopes must not outlive their Scene.
@@ -122,6 +124,7 @@ private:
     SceneId id_;
     std::string name_;
     uint64_t revision_ = 0;
+    uint32_t documentVersion_ = 1;
     ComponentId nextId_ = 1;
     ComponentMap components_, pendingAdds_;
     std::map<ComponentId, GameComponent*> byId_, pendingIds_;

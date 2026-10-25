@@ -16,6 +16,8 @@ namespace SceneDocument
 {
     SceneSnapshot Parse(const std::string& json);
     std::string Serialize(const SceneSnapshot& data);
+    // Pure migration; callers choose a new project copy before writing.
+    SceneSnapshot Migrate(const SceneSnapshot& data, uint32_t targetVersion);
     void Validate(const SceneSnapshot& data, ComponentTypeCatalog catalog);
     // Target must be empty and disposable: failures can leave a partially populated target.
     void Restore(const SceneSnapshot& data, ComponentTypeCatalog catalog, Scene& target);

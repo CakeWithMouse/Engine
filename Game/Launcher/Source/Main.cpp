@@ -18,6 +18,7 @@ constexpr INT_PTR ListId = 100;
 constexpr INT_PTR LaunchId = 101;
 constexpr INT_PTR EditId = 102;
 constexpr INT_PTR CreateId = 103, OpenId = 104;
+constexpr INT_PTR InstallEngineId = 105, UpgradeId = 106, PinEngineId = 107;
 std::vector<std::filesystem::path> userProjects;
 
 std::filesystem::path Pick(HWND owner, bool folder)
@@ -115,8 +116,8 @@ void ReloadProjects(const std::filesystem::path& selected = {})
 }
 int LaunchProject(const std::filesystem::path& file, bool editor, bool smoke = false)
 {
-    ProjectLibrary::Validate(file);
-    const auto runtime = ExampleDeployment::ExecutableDirectory() / "Runtime/EngineRuntime.exe";
+    const auto settings = ProjectLibrary::Validate(file);
+    const auto runtime = ResolveEngineRelease(settings, ExampleDeployment::ExecutableDirectory() / "Runtime").runtime / "EngineRuntime.exe";
     if (!std::filesystem::is_regular_file(runtime)) throw std::runtime_error("EngineRuntime.exe is missing");
     const auto project = std::filesystem::absolute(file);
     std::wstring command = L"\"" + runtime.wstring() + L"\" --project \"" + project.wstring() + L"\" --mode " + (editor ? L"editor --scene-api" : L"game");
@@ -129,6 +130,19 @@ int LaunchProject(const std::filesystem::path& file, bool editor, bool smoke = f
     if (WaitForSingleObject(process.hProcess, 60000) != WAIT_OBJECT_0)
     { TerminateProcess(process.hProcess, 124); CloseHandle(process.hProcess); throw std::runtime_error("Project smoke timed out"); }
     DWORD code = 1; GetExitCodeProcess(process.hProcess, &code); CloseHandle(process.hProcess); return static_cast<int>(code);
+}
+
+void UpgradeProject(const std::filesystem::path& file, const std::filesystem::path& destination)
+{
+    const auto runtime = ExampleDeployment::ExecutableDirectory() / "Runtime/EngineRuntime.exe";
+    std::wstring command = L"\"" + runtime.wstring() + L"\" --upgrade-project \"" + file.wstring() + L"\" --destination \"" + destination.wstring() + L"\"";
+    STARTUPINFOW startup{}; startup.cb = sizeof(startup); PROCESS_INFORMATION process{};
+    if (!CreateProcessW(runtime.c_str(),command.data(),nullptr,nullptr,FALSE,CREATE_NO_WINDOW,nullptr,runtime.parent_path().c_str(),&startup,&process))
+        throw std::runtime_error("Cannot start project upgrade");
+    CloseHandle(process.hThread);
+    WaitForSingleObject(process.hProcess,INFINITE);
+    DWORD code = 1; GetExitCodeProcess(process.hProcess,&code); CloseHandle(process.hProcess);
+    if (code) throw std::runtime_error("Project copy could not be upgraded. Original preserved. Check unknown components, missing assets or custom DLL compatibility. Run EngineRuntime --upgrade-project for detailed diagnostics.");
 }
 
 std::filesystem::path GameDirectory(const GameEntry& entry)
@@ -209,7 +223,9 @@ void UpdateStatus()
         try
         {
             const auto project = ProjectLibrary::Validate(projectFile);
-            SetWindowTextW(status, (L"Готов к редактированию и запуску.\r\n" + projectFile.wstring() + L"\r\nРедактор: примитивы → свойства → Ctrl+S → Play или запуск из лаунчера.").c_str());
+            const auto release = ResolveEngineRelease(project, ExampleDeployment::ExecutableDirectory() / "Runtime");
+            SetWindowTextW(status, (L"Движок: " + ExampleDeployment::Wide(release.version) + L" " + ExampleDeployment::Wide(release.configuration) +
+                (project.engineVersion.empty() ? L" (старый проект, режим совместимости)" : L" (закреплён)") + L"\r\n" + projectFile.wstring()).c_str());
             EnableWindow(editButton, TRUE);
         }
         catch (const std::exception& error) { SetWindowTextW(status, ExampleDeployment::Wide(error.what()).c_str()); EnableWindow(editButton, FALSE); }
@@ -262,14 +278,56 @@ LRESULT WindowProcImpl(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
             332, 280, 170, 35, window, reinterpret_cast<HMENU>(CreateId), nullptr, nullptr);
         CreateWindowW(L"BUTTON", L"Открыть проект…", WS_CHILD | WS_VISIBLE | WS_TABSTOP,
             514, 280, 174, 35, window, reinterpret_cast<HMENU>(OpenId), nullptr, nullptr);
+        CreateWindowW(L"BUTTON", L"Добавить версию…", WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+            18, 325, 210, 30, window, reinterpret_cast<HMENU>(InstallEngineId), nullptr, nullptr);
+        CreateWindowW(L"BUTTON", L"Закрепить версию…", WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+            240, 325, 210, 30, window, reinterpret_cast<HMENU>(PinEngineId), nullptr, nullptr);
+        CreateWindowW(L"BUTTON", L"Обновить копию…", WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+            462, 325, 226, 30, window, reinterpret_cast<HMENU>(UpgradeId), nullptr, nullptr);
         status = CreateWindowW(L"STATIC", L"", WS_CHILD | WS_VISIBLE | SS_LEFT,
-            18, 335, 670, 120, window, nullptr, nullptr, nullptr);
+            18, 365, 670, 90, window, nullptr, nullptr, nullptr);
         UpdateStatus();
         return 0;
     case WM_ACTIVATE:
         if (list && LOWORD(wParam) != WA_INACTIVE) UpdateStatus();
         return 0;
     case WM_COMMAND:
+        if (LOWORD(wParam) == InstallEngineId || LOWORD(wParam) == PinEngineId || LOWORD(wParam) == UpgradeId)
+        {
+            try
+            {
+                const auto project = SelectedProject();
+                if (LOWORD(wParam) != InstallEngineId && project.empty()) throw std::runtime_error("Select your project first");
+                if (LOWORD(wParam) == UpgradeId)
+                {
+                    const auto parent = Pick(window,true);
+                    if (parent.empty()) return 0;
+                    const auto release = ReadEngineRelease(ExampleDeployment::ExecutableDirectory() / "Runtime");
+                    auto destination = parent / (project.parent_path().filename().wstring() + L"-" + ExampleDeployment::Wide(release.version));
+                    InstallEngineRelease(release.runtime);
+                    UpgradeProject(project,destination);
+                    const auto copy = destination / project.filename();
+                    ProjectLibrary::Remember(copy); ReloadProjects(copy);
+                }
+                else
+                {
+                    auto folder = Pick(window,true);
+                    if (folder.empty()) return 0;
+                    if (std::filesystem::exists(folder / "Runtime/EngineRuntime.exe")) folder /= "Runtime";
+                    const auto release = InstallEngineRelease(folder);
+                    if (LOWORD(wParam) == PinEngineId)
+                    {
+                        const auto lock = project.parent_path() / "Engine.lock.json";
+                        if (std::filesystem::exists(lock))
+                            std::filesystem::copy_file(lock,lock.wstring() + L".backup-" + std::to_wstring(GetTickCount64()),std::filesystem::copy_options::none);
+                        ProjectLibrary::Write(lock,{{"format",1},{"engineVersion",release.version},{"engineConfiguration",release.configuration}});
+                    }
+                }
+                UpdateStatus();
+            }
+            catch (const std::exception& error) { MessageBoxW(window,ExampleDeployment::Wide(error.what()).c_str(),L"Версии движка",MB_OK | MB_ICONERROR); }
+            return 0;
+        }
         if (LOWORD(wParam) == CreateId || LOWORD(wParam) == OpenId)
         {
             try
@@ -334,6 +392,17 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
         if (diagnostic)
         {
             const std::wstring option = argv[1];
+            if (option == L"--install-engine" && argc == 3)
+            {
+                auto folder = std::filesystem::absolute(argv[2]);
+                if (std::filesystem::exists(folder / "Runtime/EngineRuntime.exe")) folder /= "Runtime";
+                InstallEngineRelease(folder); LocalFree(argv); return 0;
+            }
+            if (option == L"--upgrade-project" && argc == 4)
+            {
+                UpgradeProject(std::filesystem::absolute(argv[2]),std::filesystem::absolute(argv[3]));
+                LocalFree(argv); return 0;
+            }
             if (option == L"--create-project" && argc == 4)
             {
                 ProjectLibrary::Create(argv[2], Utf8(argv[3]), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll");
@@ -366,6 +435,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
             return 2;
         }
         LocalFree(argv); argv = nullptr;
+        InstallEngineRelease(ExampleDeployment::ExecutableDirectory() / "Runtime");
         WNDCLASSW wc{};
         wc.lpfnWndProc = WindowProc;
         wc.hInstance = instance;

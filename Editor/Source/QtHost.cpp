@@ -293,7 +293,7 @@ void EditorQtHost::DrainCommands()
                 else if (cmd.type == EditorCommand::SetTexture)
                     result = scene_.setTexture(scene_.context, cmd.objectId, cmd.path.toUtf8().constData(), error, sizeof(error));
                 else if (cmd.type == EditorCommand::SetPointLight)
-                    result = api.setPointLight(api.context, cmd.objectId, &cmd.pointLight);
+                    result = api.setPointLight ? api.setPointLight(api.context, cmd.objectId, &cmd.pointLight) : EngineSceneReadOnly;
                 else if (cmd.type == EditorCommand::CreateObject || cmd.type == EditorCommand::DuplicateObject || cmd.type == EditorCommand::CreateModel)
                 {
                     auto view = ReadSnapshot();
@@ -323,7 +323,7 @@ void EditorQtHost::DrainCommands()
                         if (parent) result = scene_.setParent(scene_.context, id, parent, inherit);
                         if (result == EngineSceneOk && !texture.isEmpty())
                             result = scene_.setTexture(scene_.context, id, texture.toUtf8().constData(), error, sizeof(error));
-                        if (result == EngineSceneOk && hasLight) result = api.setPointLight(api.context, id, &light);
+                        if (result == EngineSceneOk && hasLight) result = api.setPointLight ? api.setPointLight(api.context, id, &light) : EngineSceneReadOnly;
                         if (result == EngineSceneOk) selectedId_ = id;
                         else api.removeObject(api.context, id);
                     }

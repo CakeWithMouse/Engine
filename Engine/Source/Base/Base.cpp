@@ -114,6 +114,7 @@ class BaseEngine::LoadedSession
     HMODULE library = nullptr;
     EngineModuleApi api{};
     EngineSceneApi sceneApi{};
+    EngineLegacyV4::SceneApi legacyScene{};
     EngineBindEditSessionFn bindEdit = nullptr;
     std::function<void()> releaseEdit;
     void* session = nullptr;
@@ -289,8 +290,13 @@ class BaseEngine::LoadedSession
                 continuousFrames = window != nullptr;
             }
             const auto getSceneApi = reinterpret_cast<EngineGetSceneApiFn>(GetProcAddress(library, "EngineGetSceneApi"));
-            if (getSceneApi && (!getSceneApi(ENGINE_SCENE_API_VERSION, sizeof(sceneApi), session, &sceneApi) ||
-                !IsCompleteSceneApi(sceneApi)))
+            if (getSceneApi && !getSceneApi(ENGINE_SCENE_API_VERSION, sizeof(sceneApi), session, &sceneApi))
+            {
+                const auto oldGet = reinterpret_cast<EngineLegacyV4::GetScene>(getSceneApi);
+                if (oldGet(2, sizeof(legacyScene), session, &legacyScene) && EngineLegacyV4::Complete(legacyScene))
+                    sceneApi = EngineLegacyV4::Adapt(legacyScene);
+            }
+            if (getSceneApi && !IsCompleteSceneApi(sceneApi))
             {
                 Close();
                 throw std::runtime_error("Incompatible or incomplete scene module API");
@@ -357,6 +363,7 @@ public:
     bool Close() noexcept
     {
         sceneApi = {}; // No callable pointers survive session destruction/unloading.
+        legacyScene = {};
         continuousFrames = false;
         if (session && bindEdit) bindEdit(ENGINE_EDIT_API_VERSION, sizeof(EngineEditSessionApi), session, nullptr);
         bindEdit = nullptr;

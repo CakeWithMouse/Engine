@@ -167,5 +167,13 @@
     </ItemGroup>
 
     <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets"/>
+    <Target Name="DeployRedistributableD3DCompiler" AfterTargets="Build">
+        <!-- windeployqt can select the OS copy, which requires newer Windows private APIs. -->
+        <PropertyGroup>
+            <RedistributableD3DCompiler>$(WindowsSdkDir)Redist/D3D/x64/d3dcompiler_47.dll</RedistributableD3DCompiler>
+        </PropertyGroup>
+        <Error Condition="!Exists('$(RedistributableD3DCompiler)')" Text="Windows SDK x64 D3D redistributable is missing; never substitute the System32 DLL."/>
+        <Copy SourceFiles="$(RedistributableD3DCompiler)" DestinationFiles="$(OutDir)D3Dcompiler_47.dll" SkipUnchangedFiles="true"/>
+    </Target>
     <ImportGroup Label="ExtensionTargets"/>
 </Project>

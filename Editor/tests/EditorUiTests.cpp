@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include "QtHost.h"
 #include "MainWindow.h"
+#include <Engine/Runtime/LegacyEditApi.h>
 #include <QApplication>
 #include <QAction>
 #include <QComboBox>
@@ -67,8 +68,17 @@ int wmain(int argc, wchar_t** argv)
         struct LibraryGuard { HMODULE module; ~LibraryGuard() { FreeLibrary(module); } } libraryGuard{library};
         auto get = reinterpret_cast<EngineGetEditModuleApiFn>(GetProcAddress(library, "EngineGetEditModuleApi"));
         EngineEditModuleApi factory{}; EngineEditSessionApi api{};
-        Check(get && get(ENGINE_EDIT_API_VERSION, sizeof(factory), &factory) && factory.create(engineContent.c_str(), &api), "create edit session");
-        struct SessionGuard { EngineEditModuleApi factory; void* context; ~SessionGuard() { if (context) factory.destroy(context); } } sessionGuard{factory, api.context};
+        const bool legacy = argc == 4 && std::wstring(argv[3]) == L"--legacy";
+        EngineLegacyV4::Factory oldFactory{}; EngineLegacyV4::EditApi oldSession{};
+        if (legacy)
+        {
+            auto oldGet = reinterpret_cast<EngineLegacyV4::GetFactory>(get);
+            Check(oldGet && oldGet(4,sizeof(oldFactory),&oldFactory) && oldFactory.create(engineContent.c_str(),&oldSession) &&
+                EngineLegacyV4::Complete(oldSession),"create frozen v4 UI session");
+            api = EngineLegacyV4::Adapt(oldSession); factory.destroy = oldFactory.destroy;
+        }
+        else Check(get && get(ENGINE_EDIT_API_VERSION, sizeof(factory), &factory) && factory.create(engineContent.c_str(), &api), "create edit session");
+        struct SessionGuard { EngineEditModuleApi factory; void* context; ~SessionGuard() { if (context) factory.destroy(context); } } sessionGuard{factory, legacy ? oldSession.context : api.context};
         char error[1024]{}; uint64_t scene = 0;
         Check(api.setContentRoot(api.context, content.c_str(), error, sizeof(error)) == EngineSceneOk, "configure UI project content");
         const auto sceneFile = root / "Content/Scenes/Main.scene.json";
@@ -103,6 +113,40 @@ int wmain(int argc, wchar_t** argv)
             for (int i = 0; i < 30; ++i) pump();
         };
         until([&] { return host.ViewportActive(); });
+        if (legacy)
+        {
+            const auto originalCount = host.ReadSnapshot().objects.size();
+            Ui([](auto* w) {
+                auto* combo = w->findChild<QComboBox*>(QStringLiteral("PrimitiveType"));
+                Check(combo && combo->count() == 6,"legacy palette excludes unavailable lights");
+                combo->setCurrentIndex(0); w->findChild<QPushButton*>(QStringLiteral("AddPrimitive"))->click();
+            });
+            until([&] { return host.ReadSnapshot().objects.size() == originalCount + 1; });
+            auto selectedX = [&] { const auto view = host.ReadSnapshot(); for (const auto& o : view.objects) if (o.id == view.selected) return o.transform.position[0]; return -999.0f; };
+            Ui([](auto* w) {
+                Check(!w->findChild<QPushButton*>(QStringLiteral("LightColor"))->isVisible(),"legacy light inspector hidden");
+                auto* x = w->findChild<QDoubleSpinBox*>(QStringLiteral("Transform0"));
+                x->setValue(3.5); QMetaObject::invokeMethod(x,"editingFinished",Qt::DirectConnection);
+            });
+            until([&] { return selectedX() == 3.5f; });
+            Ui([](auto* w) { Action(w,QStringLiteral("Отменить"))->trigger(); });
+            until([&] { return !host.ReadSnapshot().selected; });
+            Ui([](auto* w) { Action(w,QStringLiteral("Повторить"))->trigger(); });
+            until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.transform.position[0] == 3.5f) return true; return false; });
+            Ui([](auto* w) { Action(w,QStringLiteral("Сохранить и сделать стартовой"))->trigger(); });
+            until([&] { return !host.ReadSnapshot().dirty; });
+            Ui([](auto* w) { Action(w,QStringLiteral("▶ Play"))->trigger(); });
+            until([&] { return host.PlayState() == EditorQtHost::Play; });
+            Ui([](auto* w) { Action(w,QStringLiteral("⏹ Stop"))->trigger(); });
+            until([&] { return host.PlayState() == EditorQtHost::Edit; });
+            Ui([&](auto* w) { w->OpenScene(QString::fromStdWString(sceneFile.wstring())); });
+            for (int i = 0; i < 60; ++i) pump();
+            Check(host.ReadSnapshot().objects.size() == originalCount + 1,"legacy reopen preserves objects");
+            Ui([](auto* w) { w->close(); }); until([&] { return exit; });
+            host.SetModuleApi({}); factory.destroy(sessionGuard.context); sessionGuard.context = nullptr; host.Stop();
+            std::printf("Legacy EditorUiTests: %d checks passed\n",checks);
+            return 0;
+        }
         Ui([](auto* w) { Check(w->findChild<QTreeWidget*>()->topLevelItemCount() == 4, "starter hierarchy"); Add(w, 0); });
         until([&] { return host.ReadSnapshot().objects.size() == 5; });
         Ui([](auto* w) { Add(w, 1); });
