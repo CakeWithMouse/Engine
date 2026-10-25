@@ -45,10 +45,12 @@ inline void AppendBox(MeshLodData& mesh, const Box& box, int segments)
         DirectX::XMFLOAT3(-1.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f),
         DirectX::XMFLOAT3(0.0f, -1.0f, 0.0f), DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f)
     };
+    // cross(up, right) == normal on every face: triangles are clockwise seen from outside, the front
+    // face of the rasterizer, so the boxes also work with back-face culling (one-sided materials).
     const std::array<DirectX::XMFLOAT3, 6> rightAxis = {
         DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(-1.0f, 0.0f, 0.0f),
-        DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f),
-        DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(1.0f, 0.0f, 0.0f)
+        DirectX::XMFLOAT3(0.0f, 0.0f, -1.0f), DirectX::XMFLOAT3(0.0f, 0.0f, 1.0f),
+        DirectX::XMFLOAT3(-1.0f, 0.0f, 0.0f), DirectX::XMFLOAT3(-1.0f, 0.0f, 0.0f)
     };
     const std::array<DirectX::XMFLOAT3, 6> upAxis = {
         DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f), DirectX::XMFLOAT3(0.0f, 1.0f, 0.0f),
