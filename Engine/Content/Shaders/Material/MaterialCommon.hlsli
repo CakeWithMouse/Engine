@@ -25,6 +25,8 @@
 //     MATERIAL_ALPHA_CLIP  alpha threshold of a masked material
 //     MATERIAL_UNLIT       albedo + emissive are output as is, lights and shadows are ignored
 //     MATERIAL_TWO_SIDED   back faces get the flipped normal
+// Pass variants (shadow map and others) are listed in MaterialTemplate.hlsl; a surface does not
+// need to know about them.
 
 #define MATERIAL_BLEND_OPAQUE      0
 #define MATERIAL_BLEND_MASKED      1 // opaque, pixels with alpha below the threshold are discarded

@@ -6,6 +6,9 @@
 // shaders around the Surface function. The G-buffer variant exists only for lit opaque/masked
 // materials without emissive; for the others DEFERRED_GBUFFER compiles the forward shader
 // (one render target), and the renderer draws them in its forward-only pass.
+//
+// Pass variants (set by the engine):
+//     MATERIAL_SHADOW          depth of a masked material for a shadow map (clip applied)
 
 #if !defined(MATERIAL_UNLIT) && !defined(MATERIAL_EMISSIVE) && MATERIAL_BLEND <= MATERIAL_BLEND_MASKED
 #define MATERIAL_DEFERRED 1
@@ -13,6 +16,15 @@
 
 static const float MaterialDefaultSpecularWeight = 0.25f;
 static const float MaterialDefaultAmbientModel = 1.0f;
+
+#if defined(MATERIAL_SHADOW)
+// Object constants stay in b0 so Surface sees the usual inputs; the camera of the pass
+// (light of a shadow cascade) comes separately.
+cbuffer MaterialPassTransform : register(b2)
+{
+    float4x4 PassViewProjection;
+};
+#endif
 
 struct VS_IN
 {
@@ -33,7 +45,11 @@ PS_IN VSMain(VS_IN input)
 {
     PS_IN output = (PS_IN)0;
     float4 worldPos = mul(input.pos, worldMatrix);
+#if defined(MATERIAL_SHADOW)
+    output.pos = mul(worldPos, PassViewProjection);
+#else
     output.pos = mul(mul(worldPos, viewMatrix), projectionMatrix);
+#endif
     output.worldPos = worldPos.xyz;
     // Inverse-transpose keeps normals perpendicular under non-uniform scale.
     output.normal = mul(input.normal, (float3x3)normalMatrix);
@@ -93,7 +109,13 @@ float4 ShadeForward(MaterialOutput o, float3 worldPos)
 #endif
 }
 
-#if defined(DEFERRED_GBUFFER) && defined(MATERIAL_DEFERRED)
+#if defined(MATERIAL_SHADOW)
+// Depth only: the pixel survives unless the surface clips it (masked materials).
+void PSMain(PS_IN input, bool frontFace : SV_IsFrontFace)
+{
+    EvaluateMaterial(input, frontFace);
+}
+#elif defined(DEFERRED_GBUFFER) && defined(MATERIAL_DEFERRED)
 GBufferOut PSMain(PS_IN input, bool frontFace : SV_IsFrontFace)
 {
     MaterialOutput o = EvaluateMaterial(input, frontFace);

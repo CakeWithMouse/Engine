@@ -1,4 +1,5 @@
 #include <Engine/Components/SpecificComponents/MeshComponent.h>
+#include <Engine/Render/Material.h>
 
 #include <algorithm>
 #include <cmath>
@@ -150,6 +151,26 @@ void MeshComponent::RenderShadow(ID3D11DeviceContext* context, const ShadowPassC
     if (context == nullptr || !CastsShadow() || !vb || !ib || indexCount <= 0 ||
         shadowPass.VertexShader == nullptr || shadowPass.ConstantBuffer == nullptr || shadowPass.MeshLayout == nullptr)
     {
+        return;
+    }
+
+    // A masked material clips its own silhouette: its shaders read the full object constants.
+    // Shadows are drawn before the colour passes, so a changed material is compiled here.
+    Material* material = GamePtr ? GamePtr->PrepareMaterial(this) : nullptr;
+    if (material && material->HasShadowShaders() && cb)
+    {
+        // Not shadowPass.MeshLayout: it was built for the position-only depth shader, and drivers may
+        // skip attributes absent from that signature (the surface would get zero UVs and normals).
+        BindGeometry(context, GamePtr->GetInputLayout(VertexFormat::Mesh));
+        context->VSSetShader(material->GetShadowVertexShader(), nullptr, 0);
+        context->PSSetShader(material->GetShadowPixelShader(), nullptr, 0);
+        context->UpdateSubresource(cb.Get(), 0, nullptr, &ConstantPositionBuffer, 0, 0);
+        context->VSSetConstantBuffers(0, 1, cb.GetAddressOf());
+        context->PSSetConstantBuffers(0, 1, cb.GetAddressOf());
+        material->BindPassTransform(context, shadowPass.LightViewProjection);
+        DrawGeometry(context);
+        material->Unbind(context);
+        context->PSSetShader(nullptr, nullptr, 0);
         return;
     }
 

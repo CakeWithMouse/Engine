@@ -828,6 +828,115 @@ void MaterialComponentIntegration()
     CHECK(legacyShader != nullptr && legacyShader != material->GetPixelShader(false));
 }
 
+// Shadow pass of one component into a 64x64 depth map seen from above; returns the depth values.
+std::vector<float> RenderShadowDepth(TestGame& game, GameComponent& component)
+{
+    constexpr UINT Size = 64;
+    ID3D11Device* device = game.GetDevice();
+    ID3D11DeviceContext* context = game.GetContext();
+
+    D3D11_TEXTURE2D_DESC desc{};
+    desc.Width = desc.Height = Size; desc.MipLevels = desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_D32_FLOAT; desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT; desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    ComPtr<ID3D11Texture2D> depth;
+    ComPtr<ID3D11DepthStencilView> dsv;
+    CheckHR(device->CreateTexture2D(&desc, nullptr, depth.GetAddressOf()));
+    CheckHR(device->CreateDepthStencilView(depth.Get(), nullptr, dsv.GetAddressOf()));
+
+    D3D11_RASTERIZER_DESC rasterDesc{};
+    rasterDesc.FillMode = D3D11_FILL_SOLID; rasterDesc.CullMode = D3D11_CULL_NONE; rasterDesc.DepthClipEnable = TRUE;
+    ComPtr<ID3D11RasterizerState> raster;
+    CheckHR(device->CreateRasterizerState(&rasterDesc, raster.GetAddressOf()));
+
+    context->ClearState();
+    context->ClearDepthStencilView(dsv.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0);
+    context->OMSetRenderTargets(0, nullptr, dsv.Get());
+    D3D11_VIEWPORT viewport{0.0f, 0.0f, static_cast<float>(Size), static_cast<float>(Size), 0.0f, 1.0f};
+    context->RSSetViewports(1, &viewport);
+    context->RSSetState(raster.Get());
+
+    const XMMATRIX view = XMMatrixLookAtLH(XMVectorSet(0, 3, 0, 1), XMVectorSet(0, 0, 0, 1), XMVectorSet(0, 0, 1, 0));
+    const XMMATRIX projection = XMMatrixOrthographicLH(3.0f, 3.0f, 0.1f, 10.0f);
+    ShadowPassContext pass;
+    XMStoreFloat4x4(&pass.LightViewProjection, XMMatrixTranspose(view * projection));
+    pass.VertexShader = game.GetVertexShader(EnginePaths::Shader("ShadowDepth.hlsl").generic_u8string());
+    // As in Game::InitShadowResources: the mesh layout of the shadow pass is built against the
+    // position-only signature of the depth shader.
+    const D3D11_INPUT_ELEMENT_DESC meshElements[] = {
+        {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0}};
+    ShaderCompiler::CompileResult depthShader = ShaderCompiler::Compile(
+        EnginePaths::Shader("ShadowDepth.hlsl").generic_u8string(), "VSMain", "vs_5_0");
+    CHECK(depthShader.Succeeded());
+    ComPtr<ID3D11InputLayout> shadowLayout;
+    CheckHR(device->CreateInputLayout(meshElements, 3, depthShader.Blob->GetBufferPointer(), depthShader.Blob->GetBufferSize(),
+                                      shadowLayout.GetAddressOf()));
+    pass.MeshLayout = shadowLayout.Get();
+    D3D11_BUFFER_DESC bufferDesc{};
+    bufferDesc.ByteWidth = sizeof(ShadowPassBufferData);
+    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+    bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    ComPtr<ID3D11Buffer> shadowBuffer;
+    CheckHR(device->CreateBuffer(&bufferDesc, nullptr, shadowBuffer.GetAddressOf()));
+    pass.ConstantBuffer = shadowBuffer.Get();
+    component.Update();
+    component.RenderShadow(context, pass);
+
+    desc.Usage = D3D11_USAGE_STAGING; desc.BindFlags = 0; desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    ComPtr<ID3D11Texture2D> staging;
+    CheckHR(device->CreateTexture2D(&desc, nullptr, staging.GetAddressOf()));
+    context->CopyResource(staging.Get(), depth.Get());
+    D3D11_MAPPED_SUBRESOURCE mapped{};
+    CheckHR(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped));
+    std::vector<float> values(Size * Size);
+    for (UINT y = 0; y < Size; ++y)
+    {
+        std::memcpy(&values[y * Size], static_cast<const uint8_t*>(mapped.pData) + y * mapped.RowPitch, Size * sizeof(float));
+    }
+    context->Unmap(staging.Get(), 0);
+    return values;
+}
+
+void MaskedMaterialShadows()
+{
+    TestGame game;
+    CHECK(game.CreateInputLayouts());
+    TempShaderDir dir;
+    // Only the left half (u < 0.5, -X) is solid.
+    auto material = std::make_shared<Material>(dir.Write("HalfMask.hlsl",
+        "void Surface(MaterialInput i, inout MaterialOutput o) { o.Alpha = i.UV.x < 0.5f ? 1.0f : 0.0f; }\n"));
+    auto* plane = new MeshComponent(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec4(1.0f));
+    plane->SetMesh(MeshPrimitives::Plane(2.0f, 2.0f));
+    CHECK(game.RegisterComponent("plane", plane) == RegisterResult::Ok);
+    CHECK(plane->SetMaterial(material));
+
+    // Opaque: the engine's depth shader, the whole plane casts.
+    CHECK(material->Compile(game.GetDevice(), game.GetContext()) && !material->HasShadowShaders());
+    std::vector<float> depth = RenderShadowDepth(game, *plane);
+    const size_t left = 32 * 64 + 16, right = 32 * 64 + 48, outside = 32 * 64 + 1;
+    CHECK(depth[left] < 1.0f && depth[right] < 1.0f && depth[outside] == 1.0f);
+
+    // Masked: the material's own shadow shaders, compiled on the first shadow pass, clip the right half.
+    MaterialRenderState state;
+    state.Blend = MaterialBlendMode::Masked;
+    material->SetRenderState(state);
+    depth = RenderShadowDepth(game, *plane);
+    CHECK(material->HasShadowShaders());
+    CHECK(depth[left] < 1.0f && depth[right] == 1.0f);
+    Near(depth[left], RenderShadowDepth(game, *plane)[left]); // same depth as the opaque path
+
+    // The threshold of the material is used: clip discards alpha below it, so alpha 1 survives a threshold of 1.
+    state.AlphaClip = 1.0f;
+    material->SetRenderState(state);
+    CHECK(RenderShadowDepth(game, *plane)[left] < 1.0f);
+    // Back to opaque: the shared depth shader again, the whole plane casts.
+    state.Blend = MaterialBlendMode::Opaque;
+    material->SetRenderState(state);
+    CHECK(RenderShadowDepth(game, *plane)[right] < 1.0f && !material->HasShadowShaders());
+}
+
 ComPtr<ID3D11Buffer> Buffer(ID3D11Device* device, UINT bytes, UINT bind, const void* data = nullptr, UINT stride = 0)
 {
     D3D11_BUFFER_DESC desc{};
@@ -1151,6 +1260,7 @@ int main()
         {"material compilation, parameters, errors", MaterialCompilationAndParameters}, {"material offscreen rendering", MaterialOffscreenRendering},
         {".mat format: load, validate, save", MaterialAssetFormat}, {"game material cache and reload", GameMaterialCache},
         {"materials on components and passes", MaterialComponentIntegration},
+        {"masked material shadows", MaskedMaterialShadows},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
         {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests}
     };

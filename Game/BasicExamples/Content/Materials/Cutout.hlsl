@@ -1,4 +1,5 @@
-// Masked: a grid of round holes; two-sided, so the inner walls show through the holes.
+// Masked: a grid of round holes; two-sided, so the inner walls show through. The holes of opposite
+// faces line up, so light passes through the cube and the shadow is perforated too.
 cbuffer MaterialParams : register(b1)
 {
     float4 Tint = float4(0.30f, 0.85f, 0.40f, 1.0f);

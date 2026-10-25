@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdint>
 #include <d3d11.h>
+#include <directxmath.h>
 #include <string>
 #include <vector>
 #include <wrl/client.h>
@@ -78,7 +79,10 @@ public:
     /** Drawn by the transparent pass (sorted, no depth write). */
     bool IsTransparent() const { return State.Blend == MaterialBlendMode::Translucent || State.Blend == MaterialBlendMode::Additive; }
 
-    /** Compiles VS and both pixel variants from disk. False if the surface failed (fallback active). */
+    /**
+     * Compiles the shaders from disk: VS and both pixel variants, and the shadow pair of a masked
+     * material. False if the surface failed (fallback active).
+     */
     bool Compile(ID3D11Device* device, ID3D11DeviceContext* context);
     bool IsCompiled() const { return Standard.VertexShader != nullptr; }
     /** True while the error surface is drawn instead of this material. */
@@ -102,6 +106,19 @@ public:
     ID3D11PixelShader* GetPixelShader(bool deferredGBuffer) const;
     bool WritesGBuffer() const { return Standard.GBufferPixelShader != nullptr; }
 
+    /**
+     * Masked materials draw their own shadow (the clip leaves holes); every other material uses
+     * the engine's depth shader. Valid while HasShadowShaders().
+     */
+    bool HasShadowShaders() const { return Standard.ShadowPixelShader != nullptr; }
+    ID3D11VertexShader* GetShadowVertexShader() const { return Standard.ShadowVertexShader.Get(); }
+    ID3D11PixelShader* GetShadowPixelShader() const { return Standard.ShadowPixelShader.Get(); }
+    /**
+     * Camera of a pass that is not the main view (b2, HLSL layout), e.g. the light of a shadow
+     * map. Also binds everything Bind sets.
+     */
+    void BindPassTransform(ID3D11DeviceContext* context, const DirectX::XMFLOAT4X4& viewProjection);
+
     /** Parameters (b1, VS and PS), textures (t6+) and the material sampler (s2). */
     void Bind(ID3D11DeviceContext* context);
     void Unbind(ID3D11DeviceContext* context) const;
@@ -112,6 +129,8 @@ private:
         Microsoft::WRL::ComPtr<ID3D11VertexShader> VertexShader;
         Microsoft::WRL::ComPtr<ID3D11PixelShader> ForwardPixelShader;
         Microsoft::WRL::ComPtr<ID3D11PixelShader> GBufferPixelShader; // null: forward-only
+        Microsoft::WRL::ComPtr<ID3D11VertexShader> ShadowVertexShader; // masked only
+        Microsoft::WRL::ComPtr<ID3D11PixelShader> ShadowPixelShader;
     };
     /** forwardBlob/dependencies are filled for the reflection and the reload tracking. */
     bool CompileSet(const std::string& surface, ShaderSet& output, std::string& errors,
@@ -129,6 +148,7 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Device> Device;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> Context;
     ShaderSet Standard;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> PassTransformBuffer;
 
     std::vector<MaterialParameter> Parameters;
     std::vector<uint8_t> ParameterData;

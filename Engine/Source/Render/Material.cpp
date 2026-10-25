@@ -16,6 +16,7 @@
 namespace
 {
     constexpr uint32_t ParameterBufferSlot = 1;
+    constexpr uint32_t PassTransformSlot = 2;
     constexpr uint32_t FirstTextureSlot = 6;
     constexpr uint32_t SamplerSlot = 2;
     const char* const ParameterBufferName = "MaterialParams";
@@ -125,6 +126,8 @@ bool Material::CompileSet(const std::string& surface, ShaderSet& output, std::st
     const MaterialRenderState state = surface == SurfacePath ? State : MaterialRenderState{};
     options.Defines = MakeDefines(state);
     options.IncludeOverrides[SurfaceIncludeName] = surface;
+    ShaderCompiler::CompileOptions shadowOptions = options;
+    shadowOptions.Defines.emplace_back("MATERIAL_SHADOW", "1");
 
     const std::string templatePath = TemplatePath();
     ShaderCompiler::CompileResult forward = ShaderCompiler::Compile(templatePath, "PSMain", "ps_5_0", options);
@@ -171,6 +174,26 @@ bool Material::CompileSet(const std::string& surface, ShaderSet& output, std::st
         return false;
     }
 
+    // Only a clip changes the silhouette seen by the light; other materials share the engine's depth shader.
+    if (state.Blend == MaterialBlendMode::Masked)
+    {
+        ShaderCompiler::CompileResult shadowVertex = ShaderCompiler::Compile(templatePath, "VSMain", "vs_5_0", shadowOptions);
+        ShaderCompiler::CompileResult shadowPixel = ShaderCompiler::Compile(templatePath, "PSMain", "ps_5_0", shadowOptions);
+        if (!shadowVertex.Succeeded() || !shadowPixel.Succeeded())
+        {
+            errors = shadowVertex.Succeeded() ? shadowPixel.Errors : shadowVertex.Errors;
+            return false;
+        }
+        if (FAILED(Device->CreateVertexShader(shadowVertex.Blob->GetBufferPointer(), shadowVertex.Blob->GetBufferSize(), nullptr,
+                                              output.ShadowVertexShader.GetAddressOf())) ||
+            FAILED(Device->CreatePixelShader(shadowPixel.Blob->GetBufferPointer(), shadowPixel.Blob->GetBufferSize(), nullptr,
+                                             output.ShadowPixelShader.GetAddressOf())))
+        {
+            errors = "Failed to create the shadow material shaders on the device";
+            return false;
+        }
+    }
+
     if (forwardBlob)
     {
         *forwardBlob = forward.Blob;
@@ -207,7 +230,7 @@ bool Material::Compile(ID3D11Device* device, ID3D11DeviceContext* context)
         std::cout << "Material '" << SurfacePath << "' failed to compile:" << std::endl << Errors << std::endl;
 
         // Parameters and textures stay as they are; only the shaders change to the error surface
-        // (unlit, so it has no G-buffer shader).
+        // (unlit and opaque: no G-buffer or shadow shaders).
         ShaderSet fallback;
         std::string fallbackErrors;
         if (!CompileSet(ErrorSurfacePath(), fallback, fallbackErrors))
@@ -453,6 +476,28 @@ void Material::Bind(ID3D11DeviceContext* context)
     }
 }
 
+void Material::BindPassTransform(ID3D11DeviceContext* context, const DirectX::XMFLOAT4X4& viewProjection)
+{
+    if (context == nullptr || !Device)
+    {
+        return;
+    }
+    if (!PassTransformBuffer)
+    {
+        D3D11_BUFFER_DESC desc = {};
+        desc.Usage = D3D11_USAGE_DEFAULT;
+        desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        desc.ByteWidth = sizeof(DirectX::XMFLOAT4X4);
+        if (FAILED(Device->CreateBuffer(&desc, nullptr, PassTransformBuffer.GetAddressOf())))
+        {
+            return;
+        }
+    }
+    context->UpdateSubresource(PassTransformBuffer.Get(), 0, nullptr, &viewProjection, 0, 0);
+    context->VSSetConstantBuffers(PassTransformSlot, 1, PassTransformBuffer.GetAddressOf());
+    Bind(context);
+}
+
 void Material::Unbind(ID3D11DeviceContext* context) const
 {
     if (context == nullptr)
@@ -468,4 +513,5 @@ void Material::Unbind(ID3D11DeviceContext* context) const
     ID3D11Buffer* nullBuffer = nullptr;
     context->VSSetConstantBuffers(ParameterBufferSlot, 1, &nullBuffer);
     context->PSSetConstantBuffers(ParameterBufferSlot, 1, &nullBuffer);
+    context->VSSetConstantBuffers(PassTransformSlot, 1, &nullBuffer);
 }
