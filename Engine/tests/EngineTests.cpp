@@ -777,6 +777,57 @@ void GameMaterialCache()
     CHECK(std::any_of(saved.Params.begin(), saved.Params.end(), [](const auto& p) { return p.first == "UVScale"; }));
 }
 
+void MaterialComponentIntegration()
+{
+    TestGame game;
+    CHECK(game.CreateInputLayouts());
+    game.SetCamera({0.0f, 3.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f});
+    TempShaderDir dir;
+    auto material = std::make_shared<Material>(dir.Write("Params.hlsl", ParamsSurface));
+
+    // Only Mesh-format components accept a material.
+    GameComponent primitive;
+    CHECK(!primitive.SetMaterial(material) && primitive.GetMaterial() == nullptr);
+
+    auto* plane = new MeshComponent(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec4(1.0f));
+    plane->SetMesh(MeshPrimitives::Plane(2.0f, 2.0f));
+    CHECK(game.RegisterComponent("plane", plane) == RegisterResult::Ok);
+    CHECK(game.BindComponentShaders(plane, ShaderCompileVariant::Default));
+    ID3D11PixelShader* legacyShader = game.GetPixelShader(EnginePaths::Shader("RotatedFigure.hlsl").generic_u8string());
+    CHECK(plane->SetMaterial(material));
+
+    // Opaque lit: compiled on first use, drawn by the G-buffer pass, casts shadows.
+    CHECK(material->NeedsCompile());
+    CHECK(game.SupportsDeferredGeometry(plane) && !material->NeedsCompile());
+    CHECK(game.BindComponentShaders(plane, ShaderCompileVariant::DeferredGBuffer));
+    CHECK(!plane->HasOpacity() && plane->CastsShadow());
+
+    // Render state changes reach the passes without any call on the component.
+    MaterialRenderState state;
+    state.bCastShadows = false;
+    material->SetRenderState(state);
+    CHECK(!plane->CastsShadow() && !plane->HasOpacity());
+    state.Blend = MaterialBlendMode::Translucent;
+    material->SetRenderState(state);
+    CHECK(plane->HasOpacity() && !game.SupportsDeferredGeometry(plane));
+    state = MaterialRenderState{};
+    state.bUnlit = true;
+    material->SetRenderState(state);
+    CHECK(!game.BindComponentShaders(plane, ShaderCompileVariant::DeferredGBuffer)); // forward-only
+    CHECK(game.BindComponentShaders(plane, ShaderCompileVariant::Default));
+    CHECK(!game.SupportsDeferredGeometry(plane) && !plane->HasOpacity() && plane->CastsShadow());
+
+    // Drawing through the regular path binds the material's parameters.
+    CHECK(material->SetParameter("Tint", {0.0f, 0.0f, 1.0f, 1.0f}));
+    CHECK(RenderOffscreen(game, *plane, D3D11_CULL_BACK)[32 * 64 + 32] == 0xffff0000u);
+
+    // Without the material the shader pair is used again.
+    CHECK(plane->SetMaterial(nullptr));
+    CHECK(game.BindComponentShaders(plane, ShaderCompileVariant::Default));
+    CHECK(game.SupportsDeferredGeometry(plane));
+    CHECK(legacyShader != nullptr && legacyShader != material->GetPixelShader(false));
+}
+
 ComPtr<ID3D11Buffer> Buffer(ID3D11Device* device, UINT bytes, UINT bind, const void* data = nullptr, UINT stride = 0)
 {
     D3D11_BUFFER_DESC desc{};
@@ -1099,6 +1150,7 @@ int main()
         {"mesh primitives: normals, uvs, winding", MeshPrimitivesGeometry}, {"mesh component offscreen rendering", MeshComponentRendering},
         {"material compilation, parameters, errors", MaterialCompilationAndParameters}, {"material offscreen rendering", MaterialOffscreenRendering},
         {".mat format: load, validate, save", MaterialAssetFormat}, {"game material cache and reload", GameMaterialCache},
+        {"materials on components and passes", MaterialComponentIntegration},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
         {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests}
     };

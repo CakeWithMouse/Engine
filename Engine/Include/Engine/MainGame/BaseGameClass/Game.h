@@ -263,6 +263,8 @@ public:
     bool ReloadMaterial(const std::string& matPath, std::string* error = nullptr);
     /** DefaultSurface, opaque and lit; compiled on first use. */
     std::shared_ptr<Material> GetDefaultMaterial();
+    /** The component's material, compiled if its render state changed; null without one. */
+    Material* PrepareMaterial(GameComponent* Component);
 
 protected:
     // Initialization
@@ -318,6 +320,8 @@ protected:
     ComponentShaderVariant& ResolveComponentShaders(GameComponent* Component, ShaderCompileVariant variant);
     /** After cache entries were erased: components resolve again, the fallback pair is rebuilt. */
     void OnShadersInvalidated();
+    /** Culling of the component's material and, in the transparent pass, its blend mode. */
+    void ApplyComponentPipelineState(GameComponent* Component, bool bTransparentPass);
 
     static HRESULT CreateShader(HWND hWnd, const D3D_SHADER_MACRO* pDefines, LPCWSTR FileName, LPCSTR pEntrypoint,
                                 LPCSTR pTarget, ID3DBlob** Buffer);
@@ -359,6 +363,7 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11InputLayout> layout;      // VertexFormat::Primitive
     Microsoft::WRL::ComPtr<ID3D11InputLayout> meshLayout;  // VertexFormat::Mesh
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> DefaultRasterState;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> CullBackRasterState; // one-sided materials
 
     std::unique_ptr<Display> DisplayPtr;
     std::unique_ptr<InputDevice> InputDevicePtr;
@@ -458,6 +463,7 @@ protected:
     bool bStaticShadowFailed = false;
 
     Microsoft::WRL::ComPtr<ID3D11BlendState> transparentBlendState;
+    Microsoft::WRL::ComPtr<ID3D11BlendState> additiveBlendState; // ONE + ONE
     Microsoft::WRL::ComPtr<ID3D11BlendState> opaqueBlendState;
 
     // Frame data and diagnostics

@@ -75,6 +75,8 @@ public:
     /** Takes effect on the next Compile: blend, clip, lighting and sides are compile-time options. */
     void SetRenderState(const MaterialRenderState& state);
     bool NeedsCompile() const { return bNeedsCompile; }
+    /** Drawn by the transparent pass (sorted, no depth write). */
+    bool IsTransparent() const { return State.Blend == MaterialBlendMode::Translucent || State.Blend == MaterialBlendMode::Additive; }
 
     /** Compiles VS and both pixel variants from disk. False if the surface failed (fallback active). */
     bool Compile(ID3D11Device* device, ID3D11DeviceContext* context);

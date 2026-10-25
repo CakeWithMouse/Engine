@@ -6,6 +6,7 @@
 #include <directxmath.h>
 #include <iostream>
 #include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/Render/Material.h>
 #include <Engine/Render/TextureLoader.h>
 #include <glm/gtx/matrix_decompose.hpp>
 
@@ -539,6 +540,11 @@ void GameComponent::BindMaterialResources(ID3D11DeviceContext* context)
         ID3D11ShaderResourceView* staticShadowSRV = GamePtr->IsStaticShadowReady() ? GamePtr->GetStaticShadowSRV() : nullptr;
         context->PSSetShaderResources(5, 1, &staticShadowSRV);
     }
+
+    if (MaterialPtr)
+    {
+        MaterialPtr->Bind(context);
+    }
 }
 
 void GameComponent::UnbindMaterialResources(ID3D11DeviceContext* context)
@@ -548,6 +554,40 @@ void GameComponent::UnbindMaterialResources(ID3D11DeviceContext* context)
     context->PSSetShaderResources(1, 1, &nullSRV);
     context->PSSetShaderResources(4, 1, &nullSRV);
     context->PSSetShaderResources(5, 1, &nullSRV);
+    if (MaterialPtr)
+    {
+        MaterialPtr->Unbind(context);
+    }
+}
+
+bool GameComponent::SetMaterial(std::shared_ptr<Material> material)
+{
+    if (material && !SupportsMaterials())
+    {
+        std::cout << "SetMaterial: this component type is not drawn in the Mesh vertex format, material ignored." << std::endl;
+        return false;
+    }
+    MaterialPtr = std::move(material);
+    // The resolved shader pair belongs to the previous material (or none).
+    for (ComponentShaderVariant& slot : ShaderVariants)
+    {
+        slot = ComponentShaderVariant{};
+    }
+    return true;
+}
+
+bool GameComponent::HasOpacity() const
+{
+    return bHasOpacity || (MaterialPtr && MaterialPtr->IsTransparent());
+}
+
+bool GameComponent::CastsShadow() const
+{
+    if (MaterialPtr && !MaterialPtr->GetRenderState().bCastShadows)
+    {
+        return false;
+    }
+    return !HasOpacity() && !bIsSkybox;
 }
 
 void GameComponent::Render(ID3D11DeviceContext* Context)

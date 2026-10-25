@@ -1,4 +1,5 @@
 #include "ExampleStartup.h"
+#include "MaterialsScene.h"
 #include "OrderedSceneGame.h"
 #include "Scenes.h"
 #include <CommCtrl.h>
@@ -8,17 +9,22 @@
 
 namespace
 {
-enum class Scene { Choose, Triangles, Cube };
+enum class Scene { Choose, Triangles, Cube, Materials };
+
+const char* SceneName(Scene scene)
+{
+    return scene == Scene::Triangles ? "triangles" : scene == Scene::Cube ? "cube" : "materials";
+}
 
 Scene ChooseScene()
 {
-    const TASKDIALOG_BUTTON buttons[] = {{100, L"Квадраты"}, {101, L"Куб"}};
+    const TASKDIALOG_BUTTON buttons[] = {{100, L"Квадраты"}, {101, L"Куб"}, {102, L"Материалы"}};
     TASKDIALOGCONFIG dialog{};
     dialog.cbSize = sizeof(dialog);
     dialog.pszWindowTitle = L"BasicExamples";
     dialog.pszMainInstruction = L"Выберите сцену первой лабораторной";
     dialog.dwCommonButtons = TDCBF_CANCEL_BUTTON;
-    dialog.cButtons = 2;
+    dialog.cButtons = 3;
     dialog.pButtons = buttons;
     dialog.nDefaultButton = 100;
     int button = IDCANCEL;
@@ -26,6 +32,7 @@ Scene ChooseScene()
         throw std::runtime_error("Cannot open scene selector");
     if (button == 100) return Scene::Triangles;
     if (button == 101) return Scene::Cube;
+    if (button == 102) return Scene::Materials;
     return Scene::Choose; // Cancel closes the application without creating a game.
 }
 }
@@ -47,19 +54,31 @@ int main(int argc, char** argv)
                 const std::string name = argv[++i];
                 if (name == "triangles") { scene = Scene::Triangles; continue; }
                 if (name == "cube") { scene = Scene::Cube; continue; }
+                if (name == "materials") { scene = Scene::Materials; continue; }
             }
-            throw std::runtime_error("Usage: BasicExamples.exe [--scene triangles|cube] [--smoke]");
+            throw std::runtime_error("Usage: BasicExamples.exe [--scene triangles|cube|materials] [--smoke]");
         }
         if (scene == Scene::Choose) scene = smoke ? Scene::Triangles : ChooseScene();
         if (scene == Scene::Choose) return 0;
-        ExampleStartup::PrepareContent();
-        ExampleStartup::SmokeGame<OrderedSceneGame> game(smoke);
-        if (!game.Initialize()) throw std::runtime_error("BasicExamples initialization failed");
-        if (scene == Scene::Triangles) BuildTriangles(game);
-        else BuildCube(game);
-        const int result = game.StartGame();
+        const std::filesystem::path gameContent = ExampleStartup::PrepareContent();
+        int result = 0;
+        if (scene == Scene::Materials)
+        {
+            ExampleStartup::SmokeGame<MaterialsGame> game(smoke);
+            if (!game.Initialize()) throw std::runtime_error("BasicExamples initialization failed");
+            game.BuildScene(gameContent);
+            result = game.StartGame();
+        }
+        else
+        {
+            ExampleStartup::SmokeGame<OrderedSceneGame> game(smoke);
+            if (!game.Initialize()) throw std::runtime_error("BasicExamples initialization failed");
+            if (scene == Scene::Triangles) BuildTriangles(game);
+            else BuildCube(game);
+            result = game.StartGame();
+        }
         if (smoke && result == 0)
-            std::cout << "BasicExamples/" << (scene == Scene::Triangles ? "triangles" : "cube") << ": 30 frames, normal shutdown\n";
+            std::cout << "BasicExamples/" << SceneName(scene) << ": 30 frames, normal shutdown\n";
         return result;
     }
     catch (const std::exception& error) { return ExampleStartup::ReportError(error, smoke); }

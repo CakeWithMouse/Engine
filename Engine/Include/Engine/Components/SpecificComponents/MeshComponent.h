@@ -22,6 +22,7 @@ public:
     void Render(ID3D11DeviceContext* Context) override;
     void RenderShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass) override;
     float GetBoundingRadius() const override;
+    bool SupportsMaterials() const override { return true; }
 
 private:
     void BindGeometry(ID3D11DeviceContext* context, ID3D11InputLayout* layout);

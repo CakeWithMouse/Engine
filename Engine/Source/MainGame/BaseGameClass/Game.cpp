@@ -344,11 +344,13 @@ void Game::DestroyResources()
     }
 
     transparentBlendState.Reset();
+    additiveBlendState.Reset();
     opaqueBlendState.Reset();
     depthStencilState.Reset();
     depthStencilStateReadOnly.Reset();
     depthStencilStateSkybox.Reset();
     DefaultRasterState.Reset();
+    CullBackRasterState.Reset();
     ReleaseSwapChainResources();
 
     if (SwapChain && !bEmbedded)
@@ -642,7 +644,11 @@ bool Game::CreateRenderStates()
     rastDesc.FillMode = D3D11_FILL_SOLID;
     rastDesc.FrontCounterClockwise = FALSE;
     rastDesc.DepthClipEnable = TRUE;
-    if (FAILED(Device->CreateRasterizerState(&rastDesc, DefaultRasterState.ReleaseAndGetAddressOf())))
+    // Material meshes have a consistent clockwise winding, so one-sided materials cull back faces.
+    CD3D11_RASTERIZER_DESC cullBackDesc = rastDesc;
+    cullBackDesc.CullMode = D3D11_CULL_BACK;
+    if (FAILED(Device->CreateRasterizerState(&rastDesc, DefaultRasterState.ReleaseAndGetAddressOf())) ||
+        FAILED(Device->CreateRasterizerState(&cullBackDesc, CullBackRasterState.ReleaseAndGetAddressOf())))
     {
         std::cout << "Failed to create rasterizer state." << std::endl;
         return false;
@@ -662,7 +668,14 @@ bool Game::CreateRenderStates()
     opaqueDesc.RenderTarget[0].BlendEnable = FALSE;
     opaqueDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
+    D3D11_BLEND_DESC additiveDesc = transparentDesc;
+    additiveDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE; // the shader already multiplied by alpha
+    additiveDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+    additiveDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+    additiveDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+
     if (FAILED(Device->CreateBlendState(&transparentDesc, transparentBlendState.ReleaseAndGetAddressOf())) ||
+        FAILED(Device->CreateBlendState(&additiveDesc, additiveBlendState.ReleaseAndGetAddressOf())) ||
         FAILED(Device->CreateBlendState(&opaqueDesc, opaqueBlendState.ReleaseAndGetAddressOf())))
     {
         std::cout << "Failed to create blend states." << std::endl;
@@ -1071,6 +1084,21 @@ bool Game::BindComponentShaders(GameComponent* Component, ShaderCompileVariant v
         variant = ShaderCompileVariant::Default;
     }
 
+    // A material owns its shaders; null pixel shader: it cannot draw in this pass.
+    if (Material* material = PrepareMaterial(Component))
+    {
+        ID3D11VertexShader* vertexShader = material->GetVertexShader();
+        ID3D11PixelShader* pixelShader = material->GetPixelShader(variant == ShaderCompileVariant::DeferredGBuffer);
+        if (vertexShader == nullptr || pixelShader == nullptr)
+        {
+            return false;
+        }
+        Component->SetVertexShader(vertexShader);
+        Component->SetPixelShader(pixelShader);
+        CurrentPassVariant = variant;
+        return true;
+    }
+
     ComponentShaderVariant& slot = ResolveComponentShaders(Component, variant);
     if (variant == ShaderCompileVariant::DeferredGBuffer && !slot.bWritesGBuffer)
     {
@@ -1093,7 +1121,37 @@ bool Game::SupportsDeferredGeometry(GameComponent* Component)
     {
         return false;
     }
+    if (Material* material = PrepareMaterial(Component))
+    {
+        return material->WritesGBuffer();
+    }
     return ResolveComponentShaders(Component, ShaderCompileVariant::DeferredGBuffer).bWritesGBuffer;
+}
+
+Material* Game::PrepareMaterial(GameComponent* Component)
+{
+    Material* material = Component->GetMaterial();
+    if (material && material->NeedsCompile())
+    {
+        material->Compile(Device.Get(), Context.Get());
+    }
+    return material;
+}
+
+void Game::ApplyComponentPipelineState(GameComponent* Component, bool bTransparentPass)
+{
+    const Material* material = Component->GetMaterial();
+    // Materials are culled unless two-sided; legacy components keep the engine-wide no-culling state.
+    ID3D11RasterizerState* raster = material && !material->GetRenderState().bTwoSided && CullBackRasterState
+                                        ? CullBackRasterState.Get()
+                                        : DefaultRasterState.Get();
+    Context->RSSetState(raster);
+    if (bTransparentPass)
+    {
+        const bool bAdditive = material && material->GetRenderState().Blend == MaterialBlendMode::Additive;
+        const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+        Context->OMSetBlendState(bAdditive ? additiveBlendState.Get() : transparentBlendState.Get(), blendFactor, 0xffffffff);
+    }
 }
 
 bool Game::InvalidateShaderFile(const std::string& shaderFile)
@@ -2922,8 +2980,10 @@ void Game::RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant)
         {
             continue;
         }
+        ApplyComponentPipelineState(Component, false);
         Component->Render(Context.Get());
     }
+    Context->RSSetState(DefaultRasterState.Get());
 }
 
 void Game::RenderSkybox()
@@ -2989,10 +3049,12 @@ void Game::RenderTransparent()
     {
         if (BindComponentShaders(draw.Component, ShaderCompileVariant::Default))
         {
+            ApplyComponentPipelineState(draw.Component, true);
             draw.Component->Render(Context.Get());
         }
     }
 
+    Context->RSSetState(DefaultRasterState.Get());
     Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
     Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
 }

@@ -67,6 +67,7 @@ public:
     int GetIndexCount() override { return totalIndexCount; }
     float GetBoundingRadius() const override;
     float GetLocalBoundingRadius() const override { return baseBoundingRadius; }
+    bool SupportsMaterials() const override { return true; }
 
 protected:
     virtual void CreateBuffers(ID3D11Device* Device) override;

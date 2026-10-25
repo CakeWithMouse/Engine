@@ -22,6 +22,7 @@ namespace GameComponentNames
 }
 
 class Game;
+class Material;
 
 /** Shader pair of one pass variant, resolved lazily by Game::BindComponentShaders. */
 struct ComponentShaderVariant
@@ -50,6 +51,15 @@ public:
     bool HasTexture() const { return textureSRV != nullptr; }
     bool HasCubeMap() const { return cubeMapSRV != nullptr; }
 
+    /**
+     * Draws with a material asset instead of the shader pair: its shaders, parameters, blend
+     * mode, culling and shadow casting. Only components drawn in VertexFormat::Mesh support
+     * materials (false otherwise, nothing changes). Null returns to the shader pair.
+     */
+    bool SetMaterial(std::shared_ptr<Material> material);
+    Material* GetMaterial() const { return MaterialPtr.get(); }
+    virtual bool SupportsMaterials() const { return false; }
+
     // Lifecycle
     virtual void CreateBuffers(ID3D11Device* Device);
     void SetGame(Game* game) { GamePtr = game; }
@@ -62,7 +72,7 @@ public:
     /** GPU work that must run once per frame independently of drawing (e.g. particle simulation). */
     virtual void DispatchCompute(ID3D11DeviceContext* context) {}
     virtual bool IsRenderable() const { return true; }
-    virtual bool CastsShadow() const { return !bHasOpacity && !bIsSkybox; }
+    virtual bool CastsShadow() const;
     /**
      * Objects that never move (terrain, buildings): their shadow is baked once into the static
      * shadow map instead of being redrawn into every cascade each frame.
@@ -106,7 +116,8 @@ public:
     uint64_t GetWorldVersion() const { return WorldVersion; }
 
     bool HasCollison() const { return bHasCollision; }
-    bool HasOpacity() const { return bHasOpacity; }
+    /** Drawn by the transparent pass: legacy opacity flag or a translucent/additive material. */
+    bool HasOpacity() const;
     bool IsSkybox() const { return bIsSkybox; }
     virtual bool DoSmthWithCollision(GameComponent* AnotherComponent) { return false; }
 
@@ -145,6 +156,7 @@ protected:
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+    std::shared_ptr<Material> MaterialPtr;
     // Cube map resources are owned by Game::cubeMapCache, the component only observes them.
     ID3D11ShaderResourceView* cubeMapSRV = nullptr;
     ID3D11SamplerState* cubeMapSamplerState = nullptr;

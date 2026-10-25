@@ -464,4 +464,8 @@ void Material::Unbind(ID3D11DeviceContext* context) const
     {
         context->PSSetShaderResources(texture.Slot, 1, &nullView);
     }
+    // Legacy shaders never see the parameters of the previous draw.
+    ID3D11Buffer* nullBuffer = nullptr;
+    context->VSSetConstantBuffers(ParameterBufferSlot, 1, &nullBuffer);
+    context->PSSetConstantBuffers(ParameterBufferSlot, 1, &nullBuffer);
 }
