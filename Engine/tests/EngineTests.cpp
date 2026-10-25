@@ -246,6 +246,12 @@ void ShaderInvalidation()
     CHECK(game.InvalidateShaderFile(shared));
     CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::Default));
     CHECK(game.GetShaderErrors(shader).empty());
+
+    // Full reload (F6): an edit becomes visible without naming the file.
+    dir.Write("Hot.hlsl", "float4 PSMain() : SV_Target { return missingAfterReload; }\n");
+    game.InvalidateAllShaders();
+    game.BindComponentShaders(&component, ShaderCompileVariant::Default);
+    CHECK(game.GetShaderErrors(shader).find("missingAfterReload") != std::string::npos);
 }
 
 ComPtr<ID3D11Buffer> Buffer(ID3D11Device* device, UINT bytes, UINT bind, const void* data = nullptr, UINT stride = 0)

@@ -1123,6 +1123,20 @@ bool Game::InvalidateShaderFile(const std::string& shaderFile)
     return true;
 }
 
+void Game::InvalidateAllShaders()
+{
+    const size_t count = shaderCache.size();
+    shaderCache.clear();
+    vertexShaderCache.clear();
+    pixelShaderCache.clear();
+    pixelShaderTargetCount.clear();
+    shaderDependencies.clear();
+    shaderErrors.clear();
+
+    OnShadersInvalidated();
+    std::cout << "Invalidated all " << count << " cached shader(s)" << std::endl;
+}
+
 void Game::OnShadersInvalidated()
 {
     // Resolved slots point into the erased cache entries: every component resolves again.
@@ -2400,7 +2414,7 @@ void Game::ProcessHotkeys()
         return;
     }
 
-    // F3: deferred debug overlay, F4: VSync, F5: forward <-> deferred.
+    // F3: deferred debug overlay, F4: VSync, F5: forward <-> deferred, F6: recompile shaders from disk.
     const bool overlayDown = InputDevicePtr->IsKeyDown(Keys::F3);
     if (overlayDown && !bOverlayKeyWasDown)
     {
@@ -2421,6 +2435,14 @@ void Game::ProcessHotkeys()
         RenderingType = RenderingType == Forward ? Deffered : Forward;
     }
     bRenderTypeKeyWasDown = renderTypeDown;
+
+    // Component shaders recompile lazily on the next pass; failures are printed by RegisterShaders.
+    const bool shaderReloadDown = InputDevicePtr->IsKeyDown(Keys::F6);
+    if (shaderReloadDown && !bShaderReloadKeyWasDown)
+    {
+        InvalidateAllShaders();
+    }
+    bShaderReloadKeyWasDown = shaderReloadDown;
 }
 
 void Game::UpdateFrame(float realDeltaTime)
