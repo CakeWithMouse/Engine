@@ -1,4 +1,5 @@
 #include <Engine/Runtime/ModuleApi.h>
+#include <Engine/Runtime/SceneModuleApi.h>
 #include <new>
 
 // Separate test DLL binaries, never switches in the shipped game/editor module.
@@ -6,6 +7,15 @@
 // 6 request exit after first update, 7 failed update.
 #ifndef FIXTURE_CASE
 #error FIXTURE_CASE must be set by the fixture project
+#endif
+
+#if FIXTURE_CASE == 8 || FIXTURE_CASE == 9
+extern "C" __declspec(dllexport) int __cdecl EngineGetSceneApi(uint32_t, uint32_t, void*, EngineSceneApi* api)
+{
+    if (FIXTURE_CASE == 8) return 0; // unsupported extension version
+    *api = {}; // claims success but leaves required functions absent
+    return 1;
+}
 #endif
 namespace
 {

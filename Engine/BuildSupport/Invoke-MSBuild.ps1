@@ -1,7 +1,8 @@
 param([Parameter(Mandatory=$true)][string]$Project,
     [ValidateSet('Debug','Release')][string]$Configuration = 'Debug',
     [string]$PlatformToolset = 'auto',
-    [switch]$EnableAssimp)
+    [switch]$EnableAssimp,
+    [switch]$EditorUiTest)
 $ErrorActionPreference = 'Stop'
 $vswhere = Join-Path ([Environment]::GetEnvironmentVariable('ProgramFiles(x86)')) 'Microsoft Visual Studio\Installer\vswhere.exe'
 if (!(Test-Path -LiteralPath $vswhere)) { throw 'Visual Studio with C++ tools and Windows SDK is required (vswhere.exe not found).' }
@@ -24,6 +25,31 @@ foreach ($group in $duplicateNames) {
     foreach ($name in $group.Group) { [Environment]::SetEnvironmentVariable($name, $null, 'Process') }
     [Environment]::SetEnvironmentVariable($group.Name, $value, 'Process')
 }
+
+# Auto-detect VCPKG_ROOT if not already set in environment
+if (!$env:VCPKG_ROOT) {
+    $installations = & $vswhere -products '*' -property installationPath
+    foreach ($inst in $installations) {
+        $candidate = Join-Path $inst 'VC\vcpkg'
+        if (Test-Path -LiteralPath (Join-Path $candidate 'scripts\buildsystems\msbuild\vcpkg.props')) {
+            $env:VCPKG_ROOT = $candidate
+            break
+        }
+    }
+    if (!$env:VCPKG_ROOT) {
+        $candidates = @('C:\vcpkg', 'D:\vcpkg', (Join-Path $env:USERPROFILE 'vcpkg'))
+        foreach ($c in $candidates) {
+            if ($c -and (Test-Path -LiteralPath (Join-Path $c 'scripts\buildsystems\msbuild\vcpkg.props'))) {
+                $env:VCPKG_ROOT = $c
+                break
+            }
+        }
+    }
+}
+if ($env:VCPKG_ROOT) {
+    [Environment]::SetEnvironmentVariable('VCPKG_ROOT', $env:VCPKG_ROOT, 'Process')
+}
+
 $start = [Diagnostics.ProcessStartInfo]::new()
 $start.FileName = $msbuild
 $start.UseShellExecute = $false
@@ -35,7 +61,10 @@ foreach ($entry in [Environment]::GetEnvironmentVariables().GetEnumerator()) {
     $start.EnvironmentVariables[$entry.Key.ToUpperInvariant()] = $entry.Value
 }
 $assimp = $EnableAssimp.IsPresent.ToString().ToLowerInvariant()
-$start.Arguments = '"' + $Project + '" /nologo /verbosity:minimal /m:1 /nr:false /p:UseStructuredOutput=false /p:PreferredToolArchitecture=x64 /p:Platform=x64 /p:Configuration=' + $Configuration + ' /p:PlatformToolset=' + $PlatformToolset + ' /p:EngineEnableAssimp=' + $assimp
+$vcpkgClean = if ($env:VCPKG_ROOT) { $env:VCPKG_ROOT.TrimEnd('\') } else { $null }
+$vcpkgParam = if ($vcpkgClean) { ' "/p:VcpkgRoot=' + $vcpkgClean + '\\"' } else { '' }
+$start.Arguments = '"' + $Project + '" /nologo /verbosity:minimal /m:1 /nr:false /p:UseStructuredOutput=false /p:PreferredToolArchitecture=x64 /p:Platform=x64 /p:Configuration=' + $Configuration + ' /p:PlatformToolset=' + $PlatformToolset + ' /p:EngineEnableAssimp=' + $assimp + $vcpkgParam
+if ($EditorUiTest) { $start.Arguments += ' /p:EditorUiTest=true' }
 $process = [Diagnostics.Process]::Start($start)
 $output = $process.StandardOutput.ReadToEndAsync()
 $errors = $process.StandardError.ReadToEndAsync()

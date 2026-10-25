@@ -2,9 +2,12 @@
 #include <d3d11.h>
 #include <string>
 #include <wrl/client.h>
+#include <vector>
+#include <cstdint>
 
 namespace TextureLoader
 {
+    bool ValidateImage(const std::vector<uint8_t>& bytes);
     /**
      * Loads an image as RGBA8 (UNORM, colour values are used as stored) and builds the full mip
      * chain on the GPU. Returns false and leaves outSRV empty on failure.

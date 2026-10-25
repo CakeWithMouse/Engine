@@ -52,6 +52,7 @@ struct PS_IN
     float4 col : COLOR;
     float3 worldPos : TEXCOORD0;
     float3 normal : TEXCOORD1;
+    float3 localPos : TEXCOORD2;
 };
 
 PS_IN VSMain(VS_IN input)
@@ -64,6 +65,7 @@ PS_IN VSMain(VS_IN input)
 
     output.col = ObjectColor;
     output.worldPos = worldPos.xyz;
+    output.localPos = input.pos.xyz;
     output.normal = float3(0.0f, 1.0f, 0.0f);
     return output;
 }
@@ -73,6 +75,17 @@ float3 FacetNormal(float3 worldPos)
     float3 viewDir = normalize(CameraPosition.xyz - worldPos);
     float3 normal = normalize(cross(ddx(worldPos), ddy(worldPos)));
     return dot(normal, viewDir) < 0.0f ? -normal : normal;
+}
+Texture2D primitiveTexture : register(t0);
+SamplerState primitiveSampler : register(s0);
+float3 PrimitiveAlbedo(PS_IN input)
+{
+    if (HasTexture < 0.5f) return input.col.rgb;
+    // Local planar projection keeps primitive textures attached while moving/rotating.
+    float3 n = abs(normalize(cross(ddx(input.localPos), ddy(input.localPos))));
+    float2 uv = n.y >= n.x && n.y >= n.z ? input.localPos.xz :
+        (n.x >= n.z ? input.localPos.zy : input.localPos.xy);
+    return primitiveTexture.Sample(primitiveSampler, uv + 0.5f).rgb;
 }
 #endif
 
@@ -160,13 +173,13 @@ float4 PSMain(VS_OUT input) : SV_Target
 GBufferOut PSMain(PS_IN input)
 {
     MaterialLighting material = MakeMaterialLighting(RotatedSpecularWeight, RotatedAmbientModel);
-    return EncodeGBuffer(input.col.rgb, FacetNormal(input.worldPos), input.worldPos, material);
+    return EncodeGBuffer(PrimitiveAlbedo(input), FacetNormal(input.worldPos), input.worldPos, material);
 }
 #else
 float4 PSMain(PS_IN input) : SV_Target
 {
     MaterialLighting material = MakeMaterialLighting(RotatedSpecularWeight, RotatedAmbientModel);
-    float3 litColor = ComputeSceneLighting(input.col.rgb, FacetNormal(input.worldPos), input.worldPos, material);
+    float3 litColor = ComputeSceneLighting(PrimitiveAlbedo(input), FacetNormal(input.worldPos), input.worldPos, material);
     return float4(saturate(litColor), input.col.a);
 }
 #endif

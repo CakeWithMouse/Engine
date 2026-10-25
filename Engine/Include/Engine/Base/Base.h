@@ -3,28 +3,45 @@
 #include <Engine/Base/Config/BaseGameConfig.h>
 #include <Engine/Resources/VirtualFileSystem.h>
 #include <Engine/Runtime/LaunchOptions.h>
+#include <Engine/Runtime/SceneModuleApi.h>
+#include <Engine/Runtime/VfsApi.h>
 #include <filesystem>
 #include <memory>
 #include <string>
 #include <functional>
+#include <optional>
+#include <vector>
 
 class Game;
+class ViewportSession;
+class GameEditModule;
 
-// Host owns this object; game/editor modules see only ModuleApi.h.
+// Host owns this object; module boundaries use ModuleApi/SceneModuleApi only.
 // One run per instance. Legacy Game still owns its independent old launch path.
 class BaseEngine final
 {
     BaseResources Resources;
     BaseGameConfig Config;
-    VirtualFileSystem Vfs;
+    VirtualFileSystem& Vfs;
+    EngineVfsApi vfsServiceApi{};
     enum class State { New, Starting, Ready, Playing, Stopped };
     State state = State::New;
     bool exitRequested = false;
 
+    struct AppliedMount
+    {
+        std::string virtualRoot;
+        std::optional<std::filesystem::path> previousPath;
+    };
+    std::vector<AppliedMount> appliedMounts;
+
+    void ApplyMount(std::string_view virtualRoot, const std::filesystem::path& physicalPath);
+
     class LoadedSession;
     std::unique_ptr<LoadedSession> activeSession;
     RuntimeLaunchOptions activeOptions;
-    std::unique_ptr<Game> viewportGame;
+    std::unique_ptr<ViewportSession> viewportSession;
+    std::unique_ptr<GameEditModule> editModule;
     std::function<std::unique_ptr<Game>()> viewportFactory;
 
     bool Initialize(const BaseGameConfig& config, bool failForTest);
@@ -47,6 +64,9 @@ public:
 
     // Hot-Reload & Compilation Trigger
     bool ReloadActiveModule();
+    // Host-thread only, between updates. Borrowed table invalid at Stop/reload.
+    // false means no active game scene extension; output is cleared.
+    bool TryGetActiveSceneApi(EngineSceneApi& output) const noexcept;
     static bool TriggerBuild(const std::filesystem::path& repositoryRoot,
                             const std::string& target = "",
                             const std::string& configuration = "Debug",

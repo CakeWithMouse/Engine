@@ -118,7 +118,7 @@ void ParticleSystemComponent::DispatchCompute(ID3D11DeviceContext* context)
         return;
     }
 
-    DispatchSimulation(context);
+    if (GamePtr && GamePtr->IsSimulationEnabled()) DispatchSimulation(context);
     if (bSortingEnabled)
     {
         DispatchSort(context);

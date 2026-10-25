@@ -1,5 +1,6 @@
 ﻿#include "FileBrowser.h"
 #include "QtHost.h"
+#include "MainWindow.h"
 
 #include <QClipboard>
 #include <QComboBox>
@@ -17,6 +18,7 @@
 #include <QTreeView>
 #include <QUrl>
 #include <QVBoxLayout>
+#include <QPushButton>
 
 #include <string>
 
@@ -40,6 +42,18 @@ void FileBrowserDock::BuildUi()
     auto* panel = new QWidget(this);
     auto* layout = new QVBoxLayout(panel);
     layout->setContentsMargins(2, 2, 2, 2);
+    auto* imports = new QHBoxLayout;
+    for (bool texture : {false, true})
+    {
+        auto* button = new QPushButton(texture ? QStringLiteral("Импорт текстуры…") : QStringLiteral("Импорт модели…"), panel);
+        button->setObjectName(texture ? QStringLiteral("ImportTexture") : QStringLiteral("ImportModel"));
+        button->setEnabled(host_->HasScene());
+        connect(button, &QPushButton::clicked, this, [this, texture] {
+            if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(texture);
+        });
+        imports->addWidget(button);
+    }
+    layout->addLayout(imports);
 
     // --- верхняя панель: фильтр + выбор корня ---
     auto* topBar = new QHBoxLayout;
@@ -101,14 +115,16 @@ void FileBrowserDock::OnDoubleClicked(const QModelIndex& index)
         return;                             // каталоги раскрываются штатно
 
     const QString path = model_->filePath(index);
+    if (path.endsWith(QStringLiteral(".scene.json"), Qt::CaseInsensitive))
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenScene(path);
+        return;
+    }
     const QByteArray utf8 = path.toUtf8();  // именованный QByteArray: переживает вызов Log
     const std::string msg = "EditorOpenAsset: " + std::string(utf8.constData(), utf8.size());
     host_->Log(msg.c_str());                // аудит: лог движка + консоль редактора
 
-    EditorCommand cmd;
-    cmd.type = EditorCommand::LoadAsset;
-    cmd.path = path;
-    host_->PostCommand(cmd);                // движок получит в Update (пока stub)
+    if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->UseAsset(path);
 }
 
 void FileBrowserDock::OnContextMenu(const QPoint& pos)
@@ -118,6 +134,7 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     const QString path = hasFile ? model_->filePath(index) : QString();
 
     QMenu menu(this);
+    QAction* use = hasFile && !model_->isDir(index) ? menu.addAction(QStringLiteral("Добавить модель / назначить текстуру")) : nullptr;
     QAction* open = hasFile ? menu.addAction(QStringLiteral("Open externally")) : nullptr;
     QAction* reveal = hasFile ? menu.addAction(QStringLiteral("Show in Explorer")) : nullptr;
     QAction* copy = hasFile ? menu.addAction(QStringLiteral("Copy path")) : nullptr;
@@ -127,7 +144,11 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     if (!picked)
         return;
 
-    if (picked == open)
+    if (picked == use)
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->UseAsset(path);
+    }
+    else if (picked == open)
         QDesktopServices::openUrl(QUrl::fromLocalFile(path));
     else if (picked == reveal)
         // запятая после /select — обязательная часть синтаксиса explorer.exe

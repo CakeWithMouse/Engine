@@ -8,7 +8,13 @@
 
 #include <Engine/Base/Base.h>
 #include <Engine/Runtime/ModuleApi.h>
+#include <Engine/Runtime/ViewportSession.h>
+#include <Engine/Runtime/GameEditModule.h>
+#include <Engine/Runtime/GameSceneApi.h>
+#include <Engine/Runtime/GameWindowApi.h>
 #include <Engine/Resources/Paths.h>
+#include "../Resources/VfsRead.h"
+#include "../Runtime/VfsService.h"
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/Player.h>
 #include <chrono>
@@ -107,6 +113,9 @@ class BaseEngine::LoadedSession
 {
     HMODULE library = nullptr;
     EngineModuleApi api{};
+    EngineSceneApi sceneApi{};
+    EngineBindEditSessionFn bindEdit = nullptr;
+    std::function<void()> releaseEdit;
     void* session = nullptr;
     bool started = false;
 
@@ -114,6 +123,8 @@ class BaseEngine::LoadedSession
     std::filesystem::path shadowPath;
     uint32_t moduleKind = 0;
     EngineModuleHost moduleHost{};
+    std::filesystem::path startupScenePath;
+    bool continuousFrames = false;
 
     static void CleanStaleShadows(const std::filesystem::path& shadowDir, const std::wstring& stem)
     {
@@ -187,7 +198,8 @@ class BaseEngine::LoadedSession
         shadowPath.clear();
     }
 
-    void LoadAndInitialize(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host)
+    void LoadAndInitialize(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host,
+        const EngineEditSessionApi* editApi = nullptr)
     {
         originalPath = path;
         moduleKind = kind;
@@ -232,12 +244,58 @@ class BaseEngine::LoadedSession
             Close();
             throw std::runtime_error("Module session creation failed");
         }
+        if (editApi)
+        {
+            bindEdit = reinterpret_cast<EngineBindEditSessionFn>(GetProcAddress(library, "EngineBindEditSession"));
+            if (kind != ENGINE_MODULE_EDITOR || !bindEdit ||
+                !bindEdit(ENGINE_EDIT_API_VERSION, sizeof(*editApi), session, editApi))
+            {
+                Close();
+                throw std::runtime_error("Editor must support EngineBindEditSession for scene-api mode");
+            }
+        }
+        if (kind == ENGINE_MODULE_GAME && !startupScenePath.empty())
+        {
+            const auto get = reinterpret_cast<EngineGetGameSceneApiFn>(GetProcAddress(library, "EngineGetGameSceneApi"));
+            EngineGameSceneApi sceneLoader{};
+            if (!get || !get(ENGINE_GAME_SCENE_API_VERSION, sizeof(sceneLoader), session, &sceneLoader) ||
+                !IsCompleteGameSceneApi(sceneLoader))
+                throw std::runtime_error("startupScene requires compatible EngineGetGameSceneApi");
+            char error[1024]{};
+            const auto file = startupScenePath.u8string();
+            const auto result = sceneLoader.loadScene(sceneLoader.context, file.c_str(), error, sizeof(error));
+            error[sizeof(error) - 1] = 0;
+            if (result != EngineSceneOk)
+                throw std::runtime_error("Cannot load game startupScene '" + file + "' (status " +
+                    std::to_string(result) + "): " + error);
+        }
         if (!api.start(session))
         {
             Close();
             throw std::runtime_error("Module start failed");
         }
         started = true;
+        if (kind == ENGINE_MODULE_GAME)
+        {
+            const auto getWindowApi = reinterpret_cast<EngineGetGameWindowApiFn>(GetProcAddress(library, "EngineGetGameWindowApi"));
+            if (getWindowApi)
+            {
+                EngineGameWindowApi windowApi{};
+                if (!getWindowApi(ENGINE_GAME_WINDOW_API_VERSION, sizeof(windowApi), session, &windowApi) ||
+                    windowApi.version != ENGINE_GAME_WINDOW_API_VERSION || !windowApi.context || !windowApi.getWindow)
+                    throw std::runtime_error("Incompatible game window API");
+                auto window = static_cast<HWND>(windowApi.getWindow(windowApi.context));
+                if (window && !IsWindow(window)) throw std::runtime_error("Invalid game window");
+                continuousFrames = window != nullptr;
+            }
+            const auto getSceneApi = reinterpret_cast<EngineGetSceneApiFn>(GetProcAddress(library, "EngineGetSceneApi"));
+            if (getSceneApi && (!getSceneApi(ENGINE_SCENE_API_VERSION, sizeof(sceneApi), session, &sceneApi) ||
+                !IsCompleteSceneApi(sceneApi)))
+            {
+                Close();
+                throw std::runtime_error("Incompatible or incomplete scene module API");
+            }
+        }
     }
 public:
     LoadedSession() = default;
@@ -245,9 +303,13 @@ public:
     LoadedSession& operator=(const LoadedSession&) = delete;
     ~LoadedSession() { Close(); }
 
-    void Open(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host)
+    void Open(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host,
+        const EngineEditSessionApi* editApi = nullptr, std::function<void()> cleanup = {},
+        const std::filesystem::path& startupScene = {})
     {
-        LoadAndInitialize(path, kind, host);
+        startupScenePath = startupScene;
+        releaseEdit = std::move(cleanup);
+        LoadAndInitialize(path, kind, host, editApi);
     }
 
     bool Reload()
@@ -268,6 +330,7 @@ public:
         catch (const std::exception& error)
         {
             std::fprintf(stderr, "ModuleReloadError: %s\n", error.what());
+            Close(); // failed pre-start loading must release the candidate session too
             originalPath = path;
             moduleKind = kind;
             moduleHost = host;
@@ -276,6 +339,12 @@ public:
     }
 
     bool IsStarted() const noexcept { return started && session != nullptr; }
+    bool UsesContinuousFrames() const noexcept { return continuousFrames; }
+    bool GetSceneApi(EngineSceneApi& output) const noexcept
+    {
+        output = IsStarted() ? sceneApi : EngineSceneApi{};
+        return IsCompleteSceneApi(output);
+    }
 
     void Update(double dt)
     {
@@ -287,6 +356,11 @@ public:
     }
     bool Close() noexcept
     {
+        sceneApi = {}; // No callable pointers survive session destruction/unloading.
+        continuousFrames = false;
+        if (session && bindEdit) bindEdit(ENGINE_EDIT_API_VERSION, sizeof(EngineEditSessionApi), session, nullptr);
+        bindEdit = nullptr;
+        if (releaseEdit) { auto cleanup = std::move(releaseEdit); releaseEdit = {}; cleanup(); }
         if (session)
         {
             if (started) api.stop(session);
@@ -315,11 +389,25 @@ public:
     }
 };
 
-BaseEngine::BaseEngine() = default;
+BaseEngine::BaseEngine()
+    : Vfs(VfsRead::GetVFS()), vfsServiceApi(CreateVfsService(Vfs))
+{
+}
 BaseEngine::~BaseEngine() { Stop(); }
+
+bool BaseEngine::TryGetActiveSceneApi(EngineSceneApi& output) const noexcept
+{
+    output = {};
+    return activeSession && activeSession->GetSceneApi(output);
+}
 
 bool BaseEngine::ReloadActiveModule()
 {
+    if (!activeOptions.editModule.empty())
+    {
+        std::fputs("Close edit session before reloading: live edit data is not reloadable yet\n", stderr);
+        return false;
+    }
     if (state != State::Playing || !activeSession)
     {
         std::fputs("Cannot reload module: engine is not playing or has no active session\n", stderr);
@@ -451,6 +539,25 @@ int BaseEngine::Run(const RuntimeLaunchOptions& options, const BaseGameConfig& c
     return result;
 }
 
+void BaseEngine::ApplyMount(std::string_view virtualRoot, const std::filesystem::path& physicalPath)
+{
+    const std::string normRoot = VirtualFileSystem::NormalizeVirtualPath(virtualRoot);
+    std::optional<std::filesystem::path> prev;
+    for (const auto& m : Vfs.GetMounts())
+    {
+        if (_stricmp(m.virtualRoot.c_str(), normRoot.c_str()) == 0)
+        {
+            prev = m.physicalPath;
+            break;
+        }
+    }
+
+    // Record rollback entry BEFORE calling Vfs.Mount so that if Mount throws,
+    // the previous mount state can still be restored during exception unwinding in Stop().
+    appliedMounts.push_back({ normRoot, prev });
+    Vfs.Mount(normRoot, physicalPath);
+}
+
 int BaseEngine::Play(const RuntimeLaunchOptions& options)
 {
     if (state != State::Ready) throw std::runtime_error("Engine is not ready");
@@ -460,16 +567,16 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
     auto engineContent = EnginePaths::ContentRoot();
     if (!std::filesystem::exists(engineContent))
     {
-        const auto repoRoot = FindRepositoryRoot(options.projectFile.empty() ? std::filesystem::path{} : std::filesystem::path(options.projectFile).parent_path());
+        const auto repoRoot = FindRepositoryRoot(options.projectFile.empty() ? std::filesystem::path{} : std::filesystem::u8path(options.projectFile).parent_path());
         if (!repoRoot.empty() && std::filesystem::exists(repoRoot / "Engine" / "Content"))
         {
             engineContent = repoRoot / "Engine" / "Content";
         }
     }
-    Vfs.Mount("/Engine", engineContent);
+    ApplyMount("/Engine", engineContent);
     if (!options.contentRoot.empty())
     {
-        Vfs.Mount("/Game", options.contentRoot);
+        ApplyMount("/Game", std::filesystem::u8path(options.contentRoot));
     }
 
     for (const auto& mount : Vfs.GetMounts())
@@ -481,19 +588,40 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
 
     EngineModuleHost host{ENGINE_MODULE_VERSION, this, Log, Exit,
         options.projectName.c_str(), options.projectFile.c_str(), options.contentRoot.c_str()};
-    if (options.mode == RuntimeMode::Editor && viewportFactory)
+    host.getService = [](void* user, uint32_t serviceId, uint32_t minVersion) -> const void* {
+        auto* engine = static_cast<BaseEngine*>(user);
+        if (serviceId == ENGINE_SERVICE_VFS && minVersion <= ENGINE_VFS_API_VERSION)
+            return &engine->vfsServiceApi;
+        return nullptr;
+    };
+    if (!options.editModule.empty())
+    {
+        if (options.mode != RuntimeMode::Editor) throw std::runtime_error("editModule requires editor mode");
+        editModule = std::make_unique<GameEditModule>(options.editModule, engineContent, std::filesystem::u8path(options.contentRoot));
+        if (!options.startupScene.empty())
+        {
+            const auto& api = editModule->Api();
+            const auto path = options.startupScene.u8string();
+            char error[1024]{};
+            uint64_t sceneId = 0;
+            const auto result = api.loadScene(api.context, path.c_str(), &sceneId, error, sizeof(error));
+            if (result != EngineSceneOk)
+                throw std::runtime_error("Cannot load startupScene '" + path + "' (status " +
+                    std::to_string(result) + "): " + error);
+        }
+    }
+    if (options.mode == RuntimeMode::Editor && viewportFactory && !editModule)
     {
         host.viewportAttach = [](void* user, void* hwnd, uint32_t w, uint32_t h) -> int {
             auto& engine = *static_cast<BaseEngine*>(user);
             try
             {
                 if (!hwnd || !w || !h || w > INT_MAX || h > INT_MAX) return 0;
-                engine.viewportGame.reset();
-                auto scene = engine.viewportFactory();
-                if (!scene || !scene->InitializeViewport(static_cast<HWND>(hwnd), static_cast<int>(w), static_cast<int>(h)))
+                engine.viewportSession.reset();
+                auto scene = std::make_unique<ViewportSession>(engine.viewportFactory);
+                if (!scene->Attach(static_cast<HWND>(hwnd), static_cast<int>(w), static_cast<int>(h)))
                     return 0;
-                scene->SetVSync(false); // Host paces the editor, including when occluded.
-                engine.viewportGame = std::move(scene);
+                engine.viewportSession = std::move(scene);
                 std::puts("ViewportReady");
                 return 1;
             }
@@ -502,13 +630,14 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             return 0;
         };
         host.viewportResize = [](void* user, uint32_t w, uint32_t h) -> int {
-            auto& scene = static_cast<BaseEngine*>(user)->viewportGame;
+            auto& scene = static_cast<BaseEngine*>(user)->viewportSession;
             if (!scene || w > INT_MAX || h > INT_MAX) return 0;
-            scene->OnWindowResized(static_cast<int>(w), static_cast<int>(h), !w || !h);
+            scene->Resize(static_cast<int>(w), static_cast<int>(h));
             return 1;
         };
         host.viewportCamera = [](void* user, float r, float u, float f, float y, float p, float z) {
-            auto& scene = static_cast<BaseEngine*>(user)->viewportGame;
+            auto& session = static_cast<BaseEngine*>(user)->viewportSession;
+            auto* scene = session ? session->Active() : nullptr;
             if (scene && scene->GetPlayer()) {
                 scene->GetPlayer()->MoveEditorCamera(r, u, f, y, p, z);
                 if (std::getenv("ENGINE_VIEWPORT_INPUT_TRACE")) {
@@ -518,21 +647,38 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             }
         };
         host.viewportDetach = [](void* user) -> int {
-            static_cast<BaseEngine*>(user)->viewportGame.reset();
+            static_cast<BaseEngine*>(user)->viewportSession.reset();
             std::puts("ViewportStopped");
             return 1;
+        };
+        host.viewportControl = [](void* user, uint32_t command) -> int {
+            auto& session = static_cast<BaseEngine*>(user)->viewportSession;
+            if (!session) return -1;
+            try
+            {
+                if (command == 0) { if (!session->TogglePlay()) return -1; }
+                else if (command == 1) session->TogglePause();
+                else return -1;
+                const int state = static_cast<int>(session->GetState());
+                std::printf("ViewportState=%s\n", state == 0 ? "Edit" : state == 1 ? "Play" : "Pause");
+                return state;
+            }
+            catch (const std::exception& error) { std::fprintf(stderr, "ViewportControlError: %s\n", error.what()); }
+            catch (...) { std::fputs("ViewportControlError: unknown failure\n", stderr); }
+            return -1;
         };
     }
     activeSession = std::make_unique<LoadedSession>();
     try
     {
-        activeSession->Open(options.module, options.mode == RuntimeMode::Game ? ENGINE_MODULE_GAME : ENGINE_MODULE_EDITOR, host);
+        activeSession->Open(options.module, options.mode == RuntimeMode::Game ? ENGINE_MODULE_GAME : ENGINE_MODULE_EDITOR, host,
+            editModule ? &editModule->Api() : nullptr, [this] { editModule.reset(); }, options.startupScene);
         state = State::Playing;
         if (!options.frames && options.mode != RuntimeMode::Editor) std::puts("Interactive stub: Enter = frame, r = reload, b = build, br = build+reload, ls, find, import, info, mkdir, rm/del, mv, cp, cat, q = exit.");
         auto previous = std::chrono::steady_clock::now();
         for (uint64_t frame = 0; !exitRequested && (!options.frames || frame < options.frames); ++frame)
         {
-            if (!options.frames && options.mode != RuntimeMode::Editor)
+            if (!options.frames && options.mode != RuntimeMode::Editor && !activeSession->UsesContinuousFrames())
             {
                 std::string command;
                 if (!std::getline(std::cin, command) || command == "q") break;
@@ -761,11 +907,26 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             if (activeSession && activeSession->IsStarted())
             {
                 activeSession->Update(dt);
-                if (viewportGame)
+                if (exitRequested) break;
+                if (editModule)
                 {
-                    if (!viewportGame->RenderViewportFrame(static_cast<float>(dt)))
+                    const auto result = editModule->Api().frame(editModule->Api().context, std::clamp(dt, 0.0, 0.1));
+                    if (result == EngineSceneSimulationFailed) std::fputs("Play Tick failed; game copy paused, edit scene preserved\n", stderr);
+                    else if (result != EngineSceneOk) throw std::runtime_error("Edit scene frame failed");
+                }
+                if (viewportSession)
+                {
+                    if (!viewportSession->Active()->RenderViewportFrame(static_cast<float>(dt)))
                         throw std::runtime_error("Viewport rendering failed");
                     if (options.frames || frame == 0) std::puts("EngineRender (viewport)");
+                }
+                else if (editModule)
+                {
+                    if (options.frames || frame == 0) std::puts("EngineFrame (edit scene API)");
+                }
+                else if (activeSession->UsesContinuousFrames())
+                {
+                    if (options.frames || frame == 0) std::puts("EngineFrame (game window)");
                 }
                 else
                 {
@@ -776,8 +937,8 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
                     }
                 }
                 if (options.mode == RuntimeMode::Editor) activeSession->Overlay();
-                if (options.frames || options.mode != RuntimeMode::Editor)
-                    std::puts(viewportGame ? "EngineFrameEnd (viewport)" : "EngineFrameEnd (stub)");
+                if (options.frames || (options.mode != RuntimeMode::Editor && !activeSession->UsesContinuousFrames()))
+                    std::puts(editModule ? "EngineFrameEnd (edit scene API)" : viewportSession ? "EngineFrameEnd (viewport)" : activeSession->UsesContinuousFrames() ? "EngineFrameEnd (game window)" : "EngineFrameEnd (stub)");
             }
             else
             {
@@ -810,10 +971,38 @@ void BaseEngine::Stop() noexcept
         activeSession->Close();
         activeSession.reset();
     }
-    viewportGame.reset();
+    viewportSession.reset();
+    editModule.reset();
     Resources.DeInitialize();
     Resources.SetVFS(nullptr);
-    Vfs.UnmountAll();
+
+    // Revert mounts applied by this engine instance in reverse order
+    for (auto it = appliedMounts.rbegin(); it != appliedMounts.rend(); ++it)
+    {
+        try
+        {
+            if (it->previousPath.has_value())
+            {
+                Vfs.Mount(it->virtualRoot, *it->previousPath);
+            }
+            else
+            {
+                Vfs.Unmount(it->virtualRoot);
+            }
+        }
+        catch (const std::exception& error)
+        {
+            std::fprintf(stderr, "[BaseEngine] Failed to revert mount '%s': %s\n",
+                it->virtualRoot.c_str(), error.what());
+        }
+        catch (...)
+        {
+            std::fprintf(stderr, "[BaseEngine] Failed to revert mount '%s': unknown error\n",
+                it->virtualRoot.c_str());
+        }
+    }
+    appliedMounts.clear();
+
     state = State::Stopped;
     std::puts("EngineStopped");
 }

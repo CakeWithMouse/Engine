@@ -1,5 +1,6 @@
 #pragma once
-#include <d3dcompiler.h>
+
+#include <d3dcommon.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -12,24 +13,8 @@
  */
 namespace ShaderCompiler
 {
-    inline UINT GetCompileFlags()
-    {
-#ifdef _DEBUG
-        return D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#else
-        return D3DCOMPILE_OPTIMIZATION_LEVEL3;
-#endif
-    }
-
-    // Part of every shader cache key so blobs compiled under different policies never mix.
-    inline const char* GetPolicyTag()
-    {
-#ifdef _DEBUG
-        return "debug";
-#else
-        return "optimized";
-#endif
-    }
+    unsigned int GetCompileFlags();
+    const char* GetPolicyTag();
 
     /** Absolute, lexically normal, generic-separator and lower-case: one spelling per file. */
     std::string NormalizePath(const std::string& path);
@@ -55,8 +40,8 @@ namespace ShaderCompiler
     };
 
     /**
-     * Compiles an entry point from a file (UTF-8 path). #include "..." is resolved relative to the
-     * including file unless the name is listed in options.IncludeOverrides.
+     * Compiles an entry point from a file (UTF-8 path) via VFS. #include "..." is resolved via VFS
+     * relative to the including file unless the name is listed in options.IncludeOverrides.
      */
     CompileResult Compile(const std::string& fileName, const char* entryPoint, const char* target,
                           const CompileOptions& options = {});

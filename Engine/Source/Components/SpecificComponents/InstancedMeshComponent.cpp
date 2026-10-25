@@ -1,50 +1,6 @@
-#include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
+#include "InstancedMeshInternal.h"
 
-#include <algorithm>
-#include <cmath>
-#include <cstring>
-#include <functional>
-#include <iostream>
-#include <Engine/Render/Material.h>
-#include <Engine/Render/TextureLoader.h>
-#include <Engine/Resources/Paths.h>
-
-namespace
-{
-    constexpr UINT MeshVertexStride = sizeof(MeshVertex);
-
-    /** Layout of cbuffer ImpostorBuffer (b1) in Shaders/Impostor.hlsl. */
-    struct ImpostorConstants
-    {
-        DirectX::XMFLOAT4 AtlasParams;
-        DirectX::XMFLOAT4 ModelParams;
-    };
-
-    const glm::vec4 LodDebugColors[InstancedMeshComponent::MaxLodCount] =
-    {
-        glm::vec4(0.25f, 1.0f, 0.35f, 1.0f),
-        glm::vec4(1.0f, 0.85f, 0.2f, 1.0f),
-        glm::vec4(1.0f, 0.4f, 0.2f, 1.0f),
-        glm::vec4(0.6f, 0.4f, 1.0f, 1.0f)
-    };
-
-    /**
-     * World matrix of one instance, already transposed for HLSL.
-     * Translation, yaw and uniform scale only; this keeps per-instance CPU work small and lets
-     * the shader transform normals with the same matrix.
-     */
-    DirectX::XMFLOAT4X4 MakeInstanceMatrix(const glm::vec3& position, float yaw, float scale)
-    {
-        const float c = std::cos(yaw) * scale;
-        const float s = std::sin(yaw) * scale;
-        return DirectX::XMFLOAT4X4(
-            c, 0.0f, s, position.x,
-            0.0f, scale, 0.0f, position.y,
-            -s, 0.0f, c, position.z,
-            0.0f, 0.0f, 0.0f, 1.0f
-        );
-    }
-}
+using namespace InstancedMeshDetail;
 
 InstancedMeshComponent::InstancedMeshComponent()
 {
@@ -109,109 +65,8 @@ void InstancedMeshComponent::SetLodDistances(const std::vector<float>& distances
 void InstancedMeshComponent::SetLodScreenHeights(const std::vector<float>& pixels)
 {
     LodScreenHeights = pixels;
-    // Descending: the first threshold is the largest on-screen size.
+    // Screen-height thresholds run from closest (largest) to farthest (smallest).
     std::sort(LodScreenHeights.begin(), LodScreenHeights.end(), std::greater<float>());
-}
-
-void InstancedMeshComponent::SetImpostorEnabled(bool enabled, const ImpostorAtlasSettings& settings)
-{
-    bImpostorEnabled = enabled;
-    ImpostorSettings = settings;
-    bImpostorBuildFailed = false;
-    if (enabled && GamePtr && GamePtr->GetDevice())
-    {
-        BuildImpostorAtlas();
-    }
-}
-
-int InstancedMeshComponent::GetImpostorLevelIndex() const
-{
-    return HasImpostor() ? LodCount : -1;
-}
-
-int InstancedMeshComponent::GetLevelCount() const
-{
-    return LodCount + (HasImpostor() ? 1 : 0);
-}
-
-void InstancedMeshComponent::Tick(float deltaTime)
-{
-    GameComponent::Tick(deltaTime);
-
-    const Material* material = GetMaterial();
-    const bool bStale = material != BakedMaterial || (material && material->GetRevision() != BakedMaterialRevision);
-    if (bImpostorEnabled && LodCount > 0 && bStale && (Impostor.IsValid() || bImpostorBuildFailed))
-    {
-        Impostor = ImpostorAtlas{};
-        bImpostorBuildFailed = false;
-        BuildImpostorAtlas();
-    }
-}
-
-void InstancedMeshComponent::BuildImpostorAtlas()
-{
-    if (!bImpostorEnabled || bImpostorBuildFailed || Impostor.IsValid() || LodCount == 0 || GamePtr == nullptr)
-    {
-        return;
-    }
-
-    ID3D11Device* device = GamePtr->GetDevice();
-    if (device == nullptr)
-    {
-        return;
-    }
-
-    // The most detailed level is the source of the sprite, so designers author only that model.
-    // The material is compiled with its instanced set now: a later compile would trigger a rebake.
-    Material* material = GamePtr->PrepareMaterial(this);
-    BakedMaterial = material;
-    BakedMaterialRevision = material ? material->GetRevision() : 0;
-    if (!Impostor.Build(*GamePtr, Lods[0].Data, textureSRV.Get(), Color, ImpostorSettings, material))
-    {
-        std::cout << "InstancedMeshComponent: impostor atlas was not built, sprite level disabled." << std::endl;
-        bImpostorBuildFailed = true;
-        return;
-    }
-
-    const ImpostorAtlasSettings& settings = Impostor.GetSettings();
-    const float minPitch = DirectX::XMConvertToRadians(settings.MinPitchDegrees);
-    const float maxPitch = DirectX::XMConvertToRadians(settings.MaxPitchDegrees);
-    const float pitchStep = settings.PitchCount > 1 ? (maxPitch - minPitch) / (settings.PitchCount - 1) : 1.0f;
-
-    ImpostorConstants constants = {};
-    constants.AtlasParams = DirectX::XMFLOAT4(static_cast<float>(settings.YawCount),
-                                              static_cast<float>(settings.PitchCount),
-                                              minPitch, pitchStep);
-    constants.ModelParams = DirectX::XMFLOAT4(Impostor.GetBounds().Radius,
-                                              Impostor.GetBounds().Center.y,
-                                              Impostor.GetTileInset(), 0.0f);
-
-    D3D11_BUFFER_DESC bufferDesc = {};
-    bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    bufferDesc.ByteWidth = sizeof(ImpostorConstants);
-    bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    D3D11_SUBRESOURCE_DATA initial = {};
-    initial.pSysMem = &constants;
-    CD3D11_RASTERIZER_DESC rasterDesc(D3D11_DEFAULT);
-    rasterDesc.CullMode = D3D11_CULL_NONE;
-    if (FAILED(device->CreateBuffer(&bufferDesc, &initial, ImpostorConstantBuffer.ReleaseAndGetAddressOf())) ||
-        !TextureLoader::CreateLinearSampler(device, D3D11_TEXTURE_ADDRESS_CLAMP, ImpostorSampler) ||
-        FAILED(device->CreateRasterizerState(&rasterDesc, ImpostorRasterState.ReleaseAndGetAddressOf())))
-    {
-        std::cout << "InstancedMeshComponent: failed to create impostor resources." << std::endl;
-        bImpostorBuildFailed = true;
-    }
-}
-
-float InstancedMeshComponent::ComputeScreenFactor() const
-{
-    if (GamePtr == nullptr || GamePtr->GetDisplay() == nullptr || GamePtr->GetPlayer() == nullptr)
-    {
-        return 0.0f;
-    }
-    const float windowHeight = static_cast<float>(GamePtr->GetDisplay()->GetHeight());
-    const float tanHalfFov = std::tan(GamePtr->GetPlayer()->GetFovY() * 0.5f);
-    return tanHalfFov > 0.0001f ? windowHeight / tanHalfFov : 0.0f;
 }
 
 size_t InstancedMeshComponent::AddInstance(const MeshInstance& instance)
@@ -220,48 +75,6 @@ size_t InstancedMeshComponent::AddInstance(const MeshInstance& instance)
     PreparedFrame = UINT64_MAX;
     bStaticShadowDataDirty = true;
     return Instances.size() - 1;
-}
-
-void InstancedMeshComponent::SetInstancePosition(size_t index, const glm::vec3& position)
-{
-    Instances[index].Position = position;
-    PreparedFrame = UINT64_MAX;
-    bStaticShadowDataDirty = true;
-}
-
-void InstancedMeshComponent::SetInstanceYaw(size_t index, float yaw)
-{
-    Instances[index].Yaw = yaw;
-    PreparedFrame = UINT64_MAX;
-    bStaticShadowDataDirty = true;
-}
-
-void InstancedMeshComponent::SetInstanceColor(size_t index, const glm::vec4& color)
-{
-    Instances[index].Color = color;
-    PreparedFrame = UINT64_MAX;
-    bStaticShadowDataDirty = true;
-}
-
-void InstancedMeshComponent::SetInstanceCustomData(size_t index, const glm::vec3& data)
-{
-    Instances[index].CustomData = data;
-    PreparedFrame = UINT64_MAX;
-    bStaticShadowDataDirty = true;
-}
-
-void InstancedMeshComponent::SetInstanceVisible(size_t index, bool visible)
-{
-    Instances[index].bVisible = visible;
-    PreparedFrame = UINT64_MAX;
-    bStaticShadowDataDirty = true;
-}
-
-void InstancedMeshComponent::ClearInstances()
-{
-    Instances.clear();
-    PreparedFrame = UINT64_MAX;
-    bStaticShadowDataDirty = true;
 }
 
 uint32_t InstancedMeshComponent::GetDrawnInstancesForLod(int level) const
@@ -275,7 +88,7 @@ uint32_t InstancedMeshComponent::GetDrawnInstancesForLod(int level) const
 
 bool InstancedMeshComponent::CreateLodBuffers(ID3D11Device* device, LodLevel& lod)
 {
-    if (device == nullptr || lod.Data.Vertices.empty() || lod.Data.Indices.empty())
+    if (device == nullptr)
     {
         return false;
     }
@@ -283,6 +96,16 @@ bool InstancedMeshComponent::CreateLodBuffers(ID3D11Device* device, LodLevel& lo
     {
         return true;
     }
+    if (bIsSkinned)
+    {
+        return CreateSkinnedLodBuffers(device, lod);
+    }
+    if (lod.Data.Vertices.empty() || lod.Data.Indices.empty())
+    {
+        return false;
+    }
+
+    lod.VertexStride = sizeof(MeshVertex);
 
     D3D11_BUFFER_DESC vertexDesc = {};
     vertexDesc.Usage = D3D11_USAGE_IMMUTABLE;
@@ -335,6 +158,12 @@ void InstancedMeshComponent::CreateBuffers(ID3D11Device* Device)
     }
 
     BuildImpostorAtlas();
+
+    if (AnimationTextureSRV)
+    {
+        UpdateAnimClipConstantBuffer(Device);
+        EnsureSkinnedShaders(Device);
+    }
 }
 
 int InstancedMeshComponent::SelectLod(float distance, float screenHeightPixels) const
@@ -393,6 +222,7 @@ void InstancedMeshComponent::BuildVisibleSets()
     glm::vec3 lightDirection(lightDirectionValue.x, lightDirectionValue.y, lightDirectionValue.z);
     const float lightLength = glm::length(lightDirection);
     lightDirection = lightLength > 0.0001f ? lightDirection / lightLength : glm::vec3(0.0f, -1.0f, 0.0f);
+    const bool bAnimated = (AnimationTextureSRV != nullptr);
 
     for (const MeshInstance& instance : Instances)
     {
@@ -466,7 +296,14 @@ void InstancedMeshComponent::BuildVisibleSets()
         {
             const glm::vec4 color = bLodDebugColors ? LodDebugColors[std::min(targetLevel, MaxLodCount - 1)] : instance.Color;
             data.ObjectColor = DirectX::XMFLOAT4(color.x, color.y, color.z, color.w);
-            data.Params = DirectX::XMFLOAT4(fade, instance.CustomData.x, instance.CustomData.y, instance.CustomData.z);
+            if (bAnimated)
+            {
+                data.Params = DirectX::XMFLOAT4(fade, static_cast<float>(instance.ClipId), instance.AnimationPhase, instance.Speed);
+            }
+            else
+            {
+                data.Params = DirectX::XMFLOAT4(fade, instance.CustomData.x, instance.CustomData.y, instance.CustomData.z);
+            }
             LodLevel& bucket = targetLevel == impostorLevelIndex ? ImpostorLevel : Lods[targetLevel];
             bucket.ColorStaging.push_back(data);
         };
@@ -487,36 +324,8 @@ void InstancedMeshComponent::BuildVisibleSets()
 
         if (bWantsShadow)
         {
-            // Off-screen units still cast shadows, so shadow sets are not camera-culled.
-            // Sprites never cast: the depth pass always uses a mesh instead.
-            data.ObjectColor = DirectX::XMFLOAT4(instance.Color.x, instance.Color.y, instance.Color.z, instance.Color.w);
-            data.Params = DirectX::XMFLOAT4(1.0f, instance.CustomData.x, instance.CustomData.y, instance.CustomData.z);
             const int meshLevel = std::min(level, LodCount - 1);
-
-            for (int cascade = 0; cascade < cascadeLimit; ++cascade)
-            {
-                const DirectX::XMFLOAT4& sphere = cascadeSpheres[cascade];
-                if (sphere.w <= 0.0f)
-                {
-                    continue;
-                }
-
-                // A caster matters for this cascade if it is inside the sphere the cascade covers
-                // or above it on the way from the light.
-                const glm::vec3 toInstance = instance.Position - glm::vec3(sphere.x, sphere.y, sphere.z);
-                const float along = std::max(0.0f, std::min(glm::dot(toInstance, -lightDirection), ShadowCasterExtrusion));
-                const glm::vec3 closest = -lightDirection * along;
-                const glm::vec3 offset = toInstance - closest;
-                const float reach = sphere.w + radius;
-                if (glm::dot(offset, offset) > reach * reach)
-                {
-                    continue;
-                }
-
-                // Farther cascades cover more world per texel, so they can use coarser geometry.
-                const int shadowLevel = std::min(meshLevel + ShadowLodBias + cascade, LodCount - 1);
-                Lods[shadowLevel].ShadowStaging[cascade].push_back(data);
-            }
+            CollectShadowCasters(instance, data, meshLevel, radius, lightDirection, cascadeSpheres, cascadeLimit);
         }
     }
 
@@ -611,23 +420,49 @@ void InstancedMeshComponent::EnsureFrameData(ID3D11DeviceContext* context)
 
 void InstancedMeshComponent::Render(ID3D11DeviceContext* context)
 {
-    if (context == nullptr || LodCount == 0 || !cb || vertexShader == nullptr || pixelShader == nullptr)
+    if (context == nullptr || LodCount == 0 || !cb)
     {
         return;
     }
 
     EnsureFrameData(context);
 
-    context->IASetInputLayout(GamePtr ? GamePtr->GetInputLayout(VertexFormat::Mesh) : nullptr);
+    ID3D11Device* device = nullptr;
+    context->GetDevice(&device);
+
+    const bool bUseSkinned = (AnimationTextureSRV != nullptr) && EnsureSkinnedShaders(device);
+
+    if (bUseSkinned)
+    {
+        context->IASetInputLayout(SkinnedInputLayout.Get());
+        context->VSSetShader(SkinnedVertexShader.Get(), nullptr, 0);
+        context->PSSetShader(SkinnedPixelShader.Get(), nullptr, 0);
+
+        ID3D11ShaderResourceView* animSRV = AnimationTextureSRV.Get();
+        context->VSSetShaderResources(1, 1, &animSRV);
+        if (AnimClipConstantBuffer)
+        {
+            ID3D11Buffer* clipCB = AnimClipConstantBuffer.Get();
+            context->VSSetConstantBuffers(1, 1, &clipCB);
+        }
+    }
+    else
+    {
+        if (vertexShader == nullptr || pixelShader == nullptr)
+        {
+            return;
+        }
+        context->IASetInputLayout(GamePtr ? GamePtr->GetInputLayout(VertexFormat::Mesh) : nullptr);
+        context->VSSetShader(vertexShader, nullptr, 0);
+        context->PSSetShader(pixelShader, nullptr, 0);
+    }
+
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    context->VSSetShader(vertexShader, nullptr, 0);
-    context->PSSetShader(pixelShader, nullptr, 0);
     BindMaterialResources(context);
     context->UpdateSubresource(cb.Get(), 0, nullptr, &ConstantPositionBuffer, 0, 0);
     context->VSSetConstantBuffers(0, 1, cb.GetAddressOf());
     context->PSSetConstantBuffers(0, 1, cb.GetAddressOf());
 
-    const UINT stride = MeshVertexStride;
     const UINT offset = 0;
     for (int level = 0; level < LodCount; ++level)
     {
@@ -640,6 +475,7 @@ void InstancedMeshComponent::Render(ID3D11DeviceContext* context)
 
         ID3D11Buffer* vertexBuffers[] = {lod.VertexBuffer.Get()};
         ID3D11ShaderResourceView* instanceSRV = lod.ColorSRV.Get();
+        const UINT stride = lod.VertexStride;
         context->IASetVertexBuffers(0, 1, vertexBuffers, &stride, &offset);
         context->IASetIndexBuffer(lod.IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
         context->VSSetShaderResources(0, 1, &instanceSRV);
@@ -649,200 +485,7 @@ void InstancedMeshComponent::Render(ID3D11DeviceContext* context)
 
     DrawImpostors(context);
 
-    ID3D11ShaderResourceView* nullSRV = nullptr;
-    context->VSSetShaderResources(0, 1, &nullSRV);
-    UnbindMaterialResources(context);
-}
-
-void InstancedMeshComponent::DrawImpostors(ID3D11DeviceContext* context)
-{
-    const UINT instanceCount = static_cast<UINT>(ImpostorLevel.ColorStaging.size());
-    if (!HasImpostor() || instanceCount == 0 || !ImpostorLevel.ColorSRV || !ImpostorConstantBuffer || GamePtr == nullptr)
-    {
-        return;
-    }
-
-    // The sprite level has its own material, resolved for the pass that is currently drawing.
-    const std::string impostorShader = EnginePaths::Shader("Impostor.hlsl").generic_u8string();
-    const ShaderCompileVariant variant = GamePtr->GetCurrentPassVariant();
-    ID3D11VertexShader* impostorVS = GamePtr->GetVertexShader(impostorShader, variant);
-    ID3D11PixelShader* impostorPS = GamePtr->GetPixelShader(impostorShader, variant);
-    if (impostorVS == nullptr || impostorPS == nullptr)
-    {
-        return;
-    }
-
-    context->IASetInputLayout(nullptr);
-    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-    context->VSSetShader(impostorVS, nullptr, 0);
-    context->PSSetShader(impostorPS, nullptr, 0);
-    context->VSSetConstantBuffers(0, 1, cb.GetAddressOf());
-    context->PSSetConstantBuffers(0, 1, cb.GetAddressOf());
-    context->VSSetConstantBuffers(1, 1, ImpostorConstantBuffer.GetAddressOf());
-    context->PSSetConstantBuffers(1, 1, ImpostorConstantBuffer.GetAddressOf());
-
-    ID3D11ShaderResourceView* instanceSRV = ImpostorLevel.ColorSRV.Get();
-    context->VSSetShaderResources(0, 1, &instanceSRV);
-    ID3D11ShaderResourceView* atlas[2] = {Impostor.GetAlbedoSRV(), Impostor.GetNormalSRV()};
-    context->PSSetShaderResources(0, 2, atlas);
-    context->PSSetSamplers(0, 1, ImpostorSampler.GetAddressOf());
-    // The pass may cull back faces for the meshes of a one-sided material; quads keep both sides.
-    Microsoft::WRL::ComPtr<ID3D11RasterizerState> passRasterState;
-    context->RSGetState(passRasterState.GetAddressOf());
-    context->RSSetState(ImpostorRasterState.Get());
-
-    context->DrawInstanced(4, instanceCount, 0, 0);
-    GamePtr->CountDraw(4, instanceCount);
-
-    context->RSSetState(passRasterState.Get());
     ID3D11ShaderResourceView* nullSRVs[2] = {nullptr, nullptr};
-    context->PSSetShaderResources(0, 2, nullSRVs);
-    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-}
-
-bool InstancedMeshComponent::EnsureStaticShadowData(ID3D11DeviceContext* context)
-{
-    if (!bStaticShadowDataDirty && StaticShadowSRV && StaticShadowStaging.size() == Instances.size())
-    {
-        return !StaticShadowStaging.empty();
-    }
-
-    // Baked casters are not culled by the camera and keep one detail level for the whole map.
-    StaticShadowLevel = std::min(std::max(ShadowLodBias, 0), LodCount - 1);
-    StaticShadowStaging.clear();
-    StaticShadowStaging.reserve(Instances.size());
-    for (const MeshInstance& instance : Instances)
-    {
-        if (!instance.bVisible)
-        {
-            continue;
-        }
-        InstData data;
-        data.World = MakeInstanceMatrix(instance.Position, instance.Yaw, instance.Scale);
-        data.ObjectColor = DirectX::XMFLOAT4(instance.Color.x, instance.Color.y, instance.Color.z, instance.Color.w);
-        data.Params = DirectX::XMFLOAT4(1.0f, instance.CustomData.x, instance.CustomData.y, instance.CustomData.z);
-        StaticShadowStaging.push_back(data);
-    }
-
-    const bool uploaded = UploadStream(context, StaticShadowStaging, StaticShadowBuffer,
-                                       StaticShadowSRV, StaticShadowCapacity);
-    bStaticShadowDataDirty = false;
-    return uploaded;
-}
-
-bool InstancedMeshComponent::BeginShadowPass(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass)
-{
-    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    // A masked material clips its silhouette; its shaders read the object constants (b0) and the light (b2).
-    // Shadows are drawn before the colour passes, so a changed material is compiled here.
-    Material* material = GamePtr ? GamePtr->PrepareMaterial(this) : nullptr;
-    if (material && material->HasShadowShaders() && cb)
-    {
-        // The full Mesh layout: the shadow pass layout only feeds positions.
-        context->IASetInputLayout(GamePtr->GetInputLayout(VertexFormat::Mesh));
-        context->VSSetShader(material->GetShadowVertexShader(true), nullptr, 0);
-        context->PSSetShader(material->GetShadowPixelShader(true), nullptr, 0);
-        context->UpdateSubresource(cb.Get(), 0, nullptr, &ConstantPositionBuffer, 0, 0);
-        context->VSSetConstantBuffers(0, 1, cb.GetAddressOf());
-        context->PSSetConstantBuffers(0, 1, cb.GetAddressOf());
-        material->BindPassTransform(context, shadowPass.LightViewProjection);
-        return true;
-    }
-
-    ShadowPassBufferData shadowData = {};
-    DirectX::XMStoreFloat4x4(&shadowData.worldMatrix, DirectX::XMMatrixIdentity());
-    shadowData.lightViewProjection = shadowPass.LightViewProjection;
-    context->IASetInputLayout(shadowPass.MeshLayout);
-    context->VSSetShader(shadowPass.InstancedVertexShader, nullptr, 0);
-    context->PSSetShader(nullptr, nullptr, 0);
-    context->UpdateSubresource(shadowPass.ConstantBuffer, 0, nullptr, &shadowData, 0, 0);
-    context->VSSetConstantBuffers(0, 1, &shadowPass.ConstantBuffer);
-    return false;
-}
-
-void InstancedMeshComponent::EndShadowPass(ID3D11DeviceContext* context, bool bMaterialShadow)
-{
-    if (bMaterialShadow)
-    {
-        GetMaterial()->Unbind(context);
-        context->PSSetShader(nullptr, nullptr, 0);
-    }
-}
-
-void InstancedMeshComponent::RenderStaticShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass)
-{
-    if (!EnsureStaticShadowData(context) || StaticShadowLevel >= LodCount)
-    {
-        return;
-    }
-
-    LodLevel& lod = Lods[StaticShadowLevel];
-    if (!lod.VertexBuffer || !lod.IndexBuffer || !StaticShadowSRV)
-    {
-        return;
-    }
-
-    const bool bMaterialShadow = BeginShadowPass(context, shadowPass);
-
-    ID3D11Buffer* vertexBuffers[] = {lod.VertexBuffer.Get()};
-    ID3D11ShaderResourceView* instanceSRV = StaticShadowSRV.Get();
-    const UINT stride = MeshVertexStride;
-    const UINT offset = 0;
-    const UINT instanceCount = static_cast<UINT>(StaticShadowStaging.size());
-    context->IASetVertexBuffers(0, 1, vertexBuffers, &stride, &offset);
-    context->IASetIndexBuffer(lod.IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-    context->VSSetShaderResources(0, 1, &instanceSRV);
-    context->DrawIndexedInstanced(lod.IndexCount, instanceCount, 0, 0, 0);
-    if (GamePtr) GamePtr->CountDraw(lod.IndexCount, instanceCount);
-
-    ID3D11ShaderResourceView* nullSRV = nullptr;
-    context->VSSetShaderResources(0, 1, &nullSRV);
-    EndShadowPass(context, bMaterialShadow);
-}
-
-void InstancedMeshComponent::RenderShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass)
-{
-    if (context == nullptr || LodCount == 0 || !CastsShadow() ||
-        shadowPass.InstancedVertexShader == nullptr || shadowPass.ConstantBuffer == nullptr ||
-        shadowPass.MeshLayout == nullptr)
-    {
-        return;
-    }
-
-    if (shadowPass.CascadeIndex < 0)
-    {
-        RenderStaticShadow(context, shadowPass);
-        return;
-    }
-
-    EnsureFrameData(context);
-
-    const bool bMaterialShadow = BeginShadowPass(context, shadowPass);
-
-    const int cascade = std::max(0, std::min(shadowPass.CascadeIndex, MaxShadowCascades - 1));
-    const UINT stride = MeshVertexStride;
-    const UINT offset = 0;
-    for (int level = 0; level < LodCount; ++level)
-    {
-        LodLevel& lod = Lods[level];
-        // Only the casters this cascade needs, at the detail chosen for it.
-        const UINT instanceCount = static_cast<UINT>(lod.ShadowStaging[cascade].size());
-        if (instanceCount == 0 || !lod.VertexBuffer || !lod.IndexBuffer || !lod.ShadowSRV[cascade])
-        {
-            continue;
-        }
-
-        ID3D11Buffer* vertexBuffers[] = {lod.VertexBuffer.Get()};
-        ID3D11ShaderResourceView* instanceSRV = lod.ShadowSRV[cascade].Get();
-        context->IASetVertexBuffers(0, 1, vertexBuffers, &stride, &offset);
-        context->IASetIndexBuffer(lod.IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-        context->VSSetShaderResources(0, 1, &instanceSRV);
-        context->DrawIndexedInstanced(lod.IndexCount, instanceCount, 0, 0, 0);
-        if (GamePtr) GamePtr->CountDraw(lod.IndexCount, instanceCount);
-    }
-
-    ID3D11ShaderResourceView* nullSRV = nullptr;
-    context->VSSetShaderResources(0, 1, &nullSRV);
-    EndShadowPass(context, bMaterialShadow);
+    context->VSSetShaderResources(0, 2, nullSRVs);
+    UnbindMaterialResources(context);
 }

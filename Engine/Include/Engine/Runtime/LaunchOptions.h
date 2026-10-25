@@ -10,6 +10,10 @@ struct RuntimeLaunchOptions
 {
     RuntimeMode mode = RuntimeMode::Game;
     std::filesystem::path module;
+    // Opt-in editor integration; requires Editor EngineBindEditSession export.
+    std::filesystem::path editModule;
+    // Optional absolute path; game mode or editModule (CLI --scene-api).
+    std::filesystem::path startupScene;
     std::string projectName;
     std::string projectFile;
     std::string contentRoot;

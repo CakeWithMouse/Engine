@@ -17,12 +17,22 @@
 #include <Engine/Render/Material.h>
 #include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/ShaderCompiler.h>
+#include <dxgi1_6.h>
 #include "stb_image.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "dxguid.lib")
+
+// Export high-performance GPU preferences for NVIDIA Optimus and AMD PowerXpress
+extern "C"
+{
+    __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+#pragma comment(linker, "/include:NvOptimusEnablement")
+#pragma comment(linker, "/include:AmdPowerXpressRequestHighPerformance")
 
 namespace
 {
@@ -262,6 +272,7 @@ const char* ToString(RegisterResult result)
     case RegisterResult::DuplicateName: return "DuplicateName";
     case RegisterResult::DeviceNotReady: return "DeviceNotReady";
     case RegisterResult::AlreadyOwned: return "AlreadyOwned";
+    case RegisterResult::InvalidParent: return "InvalidParent";
     default: return "Unknown";
     }
 }
@@ -277,7 +288,7 @@ Game::~Game()
     DestroyResources();
 }
 
-void Game::DestroyResources()
+void Game::DestroyResources(bool preserveScene)
 {
     if (Context)
     {
@@ -286,8 +297,7 @@ void Game::DestroyResources()
     }
 
     // Components first: they observe cube maps and shaders owned by the caches below.
-    PointLights.clear();
-    Components.clear();
+    if (!preserveScene) scene.Clear();
     materialCache.clear();
     defaultMaterial.reset();
     cubeMapCache.clear();
@@ -377,23 +387,53 @@ bool Game::Initialize()
     return InitializeInternal(nullptr, 0, 0);
 }
 
-bool Game::InitializeViewport(HWND window, int width, int height)
+bool Game::InitializeRuntimeWindow(bool visible)
 {
-    if (!IsWindow(window) || width <= 0 || height <= 0) return false;
-    return InitializeInternal(window, width, height);
+    bRuntimeWindow = true;
+    bRuntimeWindowVisible = visible;
+    return InitializeInternal(nullptr, 0, 0);
 }
 
-bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int requestedHeight)
+bool Game::InitializeViewport(HWND window, int width, int height, bool preserveSceneOnFailure)
+{
+    if (!IsWindow(window) || width <= 0 || height <= 0) return false;
+    return InitializeInternal(window, width, height, nullptr, preserveSceneOnFailure);
+}
+
+bool Game::InitializePlayViewport(Game& editorScene)
+{
+    if (bInitialized || !editorScene.bEmbedded || !editorScene.bInitialized) return false;
+    return InitializeInternal(editorScene.DisplayPtr->GetHwnd(),
+        editorScene.DisplayPtr->GetWidth(), editorScene.DisplayPtr->GetHeight(), &editorScene);
+}
+
+void Game::SuspendViewportTargets()
+{
+    ApplyPendingResize();
+    Context->ClearState();
+    ReleaseSwapChainResources();
+    Context->Flush();
+}
+
+bool Game::RestoreViewportTargets()
+{
+    DXGI_SWAP_CHAIN_DESC desc{};
+    if (!SwapChain || FAILED(SwapChain->GetDesc(&desc))) return false;
+    DisplayPtr->SetClientSize(static_cast<int>(desc.BufferDesc.Width), static_cast<int>(desc.BufferDesc.Height));
+    return CreateSwapChainResources(DisplayPtr->GetWidth(), DisplayPtr->GetHeight());
+}
+
+bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int requestedHeight, Game* sharedViewport, bool preserveSceneOnFailure)
 {
     if (bInitialized)
     {
         return true;
     }
 
-    auto fail = [this](const char* reason) -> bool
+    auto fail = [this, preserveSceneOnFailure](const char* reason) -> bool
     {
         std::cout << "Initialization failed: " << reason << std::endl;
-        DestroyResources();
+        DestroyResources(preserveSceneOnFailure);
         return false;
     };
 
@@ -411,7 +451,7 @@ bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int reque
     if (!bEmbedded) InputDevicePtr = std::make_unique<InputDevice>(this);
 
     const HWND hWnd = DisplayPtr->GetHwnd();
-    if (!bEmbedded)
+    if (!bEmbedded && (!bRuntimeWindow || bRuntimeWindowVisible))
     {
         ShowWindow(hWnd, SW_SHOW);
         SetForegroundWindow(hWnd);
@@ -423,7 +463,13 @@ bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int reque
     const int height = std::max(DisplayPtr->GetHeight(), 1);
     InitSwapChainDesc(width, height);
 
-    if (!CreateDeviceAndSwapChain())
+    if (sharedViewport)
+    {
+        Device = sharedViewport->Device;
+        Context = sharedViewport->Context;
+        SwapChain = sharedViewport->SwapChain;
+    }
+    else if (!CreateDeviceAndSwapChain())
     {
         return fail("Direct3D 11 device (feature level 11_0 is required)");
     }
@@ -433,7 +479,7 @@ bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int reque
     }
     if (GetFileAttributesW(ShaderPath().c_str()) == INVALID_FILE_ATTRIBUTES)
     {
-        if (!bEmbedded) MessageBox(hWnd, L"EngineContent/Shaders/RotatedFigure.hlsl was not found. Check the deployed engine content.",
+        if (!bEmbedded && !bRuntimeWindow) MessageBox(hWnd, L"EngineContent/Shaders/RotatedFigure.hlsl was not found. Check the deployed engine content.",
                    L"Missing shader", MB_OK);
         return fail("shader files not found");
     }
@@ -481,6 +527,65 @@ void Game::InitSwapChainDesc(int width, int height)
 
 bool Game::CreateDeviceAndSwapChain()
 {
+    // 1. Select high-performance discrete DXGI adapter
+    Microsoft::WRL::ComPtr<IDXGIFactory1> dxgiFactory1;
+    HRESULT hrFactory = CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory1));
+    Microsoft::WRL::ComPtr<IDXGIFactory6> dxgiFactory6;
+    Microsoft::WRL::ComPtr<IDXGIAdapter1> selectedAdapter;
+    DXGI_ADAPTER_DESC1 selectedDesc = {};
+    SIZE_T maxDedicatedVram = 0;
+
+    auto considerAdapter = [&](Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter)
+    {
+        if (!adapter) return;
+        DXGI_ADAPTER_DESC1 desc = {};
+        adapter->GetDesc1(&desc);
+        if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) return;
+        if (!selectedAdapter || desc.DedicatedVideoMemory > maxDedicatedVram)
+        {
+            maxDedicatedVram = desc.DedicatedVideoMemory;
+            selectedAdapter = adapter;
+            selectedDesc = desc;
+        }
+    };
+
+    if (SUCCEEDED(hrFactory))
+    {
+        if (SUCCEEDED(dxgiFactory1.As(&dxgiFactory6)))
+        {
+            Microsoft::WRL::ComPtr<IDXGIAdapter1> prefAdapter;
+            for (UINT i = 0;
+                 dxgiFactory6->EnumAdapterByGpuPreference(
+                     i,
+                     DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+                     IID_PPV_ARGS(&prefAdapter)) == S_OK;
+                 ++i)
+            {
+                considerAdapter(prefAdapter);
+                prefAdapter.Reset();
+            }
+        }
+
+        UINT i = 0;
+        Microsoft::WRL::ComPtr<IDXGIAdapter1> cur;
+        while (dxgiFactory1->EnumAdapters1(i++, &cur) != DXGI_ERROR_NOT_FOUND)
+        {
+            considerAdapter(cur);
+            cur.Reset();
+        }
+    }
+
+
+    if (selectedAdapter)
+    {
+        std::wcout << L"[DirectX] Selected GPU: " << selectedDesc.Description
+                   << L" (VRAM: " << (selectedDesc.DedicatedVideoMemory / (1024 * 1024)) << L" MB)\n";
+    }
+    else
+    {
+        std::cout << "[DirectX] No discrete adapter found, using default hardware device.\n";
+    }
+
     // The renderer needs SM5 and compute shaders, so lower feature levels are not accepted.
     const D3D_FEATURE_LEVEL FeatureLevels[] = {
         D3D_FEATURE_LEVEL_11_1,
@@ -493,9 +598,10 @@ bool Game::CreateDeviceAndSwapChain()
         SwapChain.Reset();
         Context.Reset();
         Device.Reset();
+        const D3D_DRIVER_TYPE driverType = selectedAdapter ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_HARDWARE;
         return D3D11CreateDeviceAndSwapChain(
-            nullptr,
-            D3D_DRIVER_TYPE_HARDWARE,
+            selectedAdapter ? selectedAdapter.Get() : nullptr,
+            driverType,
             nullptr,
             flags,
             levels,
@@ -518,6 +624,17 @@ bool Game::CreateDeviceAndSwapChain()
     {
         // Runtimes without 11.1 reject the whole array; retry with 11.0 only.
         hr = tryCreate(createDeviceFlags, &FeatureLevels[1], 1);
+    }
+    if (FAILED(hr) && selectedAdapter)
+    {
+        std::cout << "[DirectX] Creation with explicit adapter failed (0x" << std::hex << hr << std::dec
+                  << "), falling back to default hardware driver.\n";
+        selectedAdapter.Reset();
+        hr = tryCreate(createDeviceFlags, FeatureLevels, ARRAYSIZE(FeatureLevels));
+        if (hr == E_INVALIDARG)
+        {
+            hr = tryCreate(createDeviceFlags, &FeatureLevels[1], 1);
+        }
     }
     if (FAILED(hr) && (createDeviceFlags & D3D11_CREATE_DEVICE_DEBUG))
     {
@@ -542,6 +659,7 @@ bool Game::CreateDeviceAndSwapChain()
               << (selectedFeatureLevel == D3D_FEATURE_LEVEL_11_1 ? "11.1" : "11.0") << std::endl;
     return true;
 }
+
 
 bool Game::CreateSwapChainResources(int width, int height)
 {
@@ -800,9 +918,17 @@ RegisterResult Game::RegisterComponent(const std::string& Name, GameComponent* C
     {
         result = RegisterResult::DuplicateName;
     }
-    else if (Component->RegisteredOwner != nullptr)
+    else if (Component->RegisteredScene != nullptr)
     {
         result = RegisterResult::AlreadyOwned;
+    }
+    else if (scene.ValidateAddition(Name, Component) == SceneResult::InvalidParent)
+    {
+        result = RegisterResult::InvalidParent;
+    }
+    else if (scene.ValidateAddition(Name, Component) == SceneResult::DuplicateName)
+    {
+        result = RegisterResult::DuplicateName; // Includes names reserved during Tick.
     }
 
     if (result != RegisterResult::Ok)
@@ -821,32 +947,27 @@ RegisterResult Game::RegisterComponent(const std::string& Name, GameComponent* C
         BindComponentShaders(Component, ShaderCompileVariant::Default);
     }
 
-    Components.emplace(Name, std::unique_ptr<GameComponent>(Component));
-    Component->RegisteredOwner = this;
-    if (pointLight != nullptr)
+    std::unique_ptr<GameComponent> owner(Component);
+    try
     {
-        PointLights.push_back(pointLight);
+        const auto added = scene.AddComponent(Name, owner);
+        if (added.result != SceneResult::Ok && added.result != SceneResult::Deferred)
+        {
+            owner.release();
+            return added.result == SceneResult::DuplicateName ? RegisterResult::DuplicateName : RegisterResult::InvalidParent;
+        }
     }
+    catch (...) { owner.release(); throw; }
+    Component->RenderOwner = this;
     return RegisterResult::Ok;
 }
 
 bool Game::UnregisterComponent(const std::string& Name)
 {
-    auto it = Components.find(Name);
-    if (it == Components.end())
-    {
-        return false;
-    }
-
-    GameComponent* removed = it->second.get();
-    PointLights.erase(std::remove(PointLights.begin(), PointLights.end(), removed), PointLights.end());
-    for (auto& pair : Components)
-    {
-        pair.second->ClearParentReferences(removed);
-    }
-
-    Components.erase(it);
-    return true;
+    auto* component = scene.FindComponentByName(Name);
+    if (!component) return false;
+    const auto result = scene.RemoveComponent(component->GetComponentId());
+    return result == SceneResult::Ok || result == SceneResult::Deferred;
 }
 
 GameComponent* Game::FindComponent(const std::string& Name) const
@@ -858,10 +979,13 @@ GameComponent* Game::FindComponent(const std::string& Name) const
 std::vector<PointLightInfo> Game::GetPointLights(size_t maxLights) const
 {
     std::vector<PointLightInfo> result;
-    result.reserve(std::min(maxLights, PointLights.size()));
+    result.reserve(std::min(maxLights, Components.size()));
+    if (!maxLights) return result;
 
-    for (PointLightComponent* pointLight : PointLights)
+    // ID order preserves the old light registration order without dangling caches.
+    for (const auto& entry : scene.GetComponentsById())
     {
+        auto* pointLight = dynamic_cast<PointLightComponent*>(entry.second);
         if (!pointLight)
         {
             continue;
@@ -2532,6 +2656,27 @@ bool Game::RenderViewportFrame(float deltaTime)
     return bRunning;
 }
 
+Game::RuntimeFrameResult Game::RunRuntimeFrame(float deltaTime)
+{
+    if (!bRuntimeWindow || !bInitialized || !std::isfinite(deltaTime) || deltaTime < 0) return RuntimeFrameResult::Failed;
+    if (bWindowCloseRequested) return RuntimeFrameResult::Closed;
+    bRunning = true;
+    if (!PumpMessages() || bWindowCloseRequested) return RuntimeFrameResult::Closed;
+    ApplyPendingResize();
+    if (!bRunning) return RuntimeFrameResult::Failed;
+    if (bMinimized) { Sleep(10); return RuntimeFrameResult::Running; }
+    ++FrameIndex;
+    Stats.Reset();
+    UpdateFrame(std::min(deltaTime, MaxFrameDeltaSeconds));
+    BeginGpuTimer();
+    RenderFrame();
+    EndGpuTimer();
+    EndFrame();
+    if (InputDevicePtr) InputDevicePtr->EndFrame();
+    LastFrameStats = Stats;
+    return bRunning ? RuntimeFrameResult::Running : RuntimeFrameResult::Failed;
+}
+
 void Game::OnWindowResized(int clientWidth, int clientHeight, bool minimized)
 {
     bMinimized = minimized || clientWidth <= 0 || clientHeight <= 0;
@@ -2627,18 +2772,28 @@ void Game::ProcessHotkeys()
 
 void Game::UpdateFrame(float realDeltaTime)
 {
+    SynchronizeSceneResources();
     const float deltaTime = realDeltaTime * SimulationTimeScale;
-    TotalTime += deltaTime;
     RealTime += realDeltaTime;
     LastRealDeltaTime = realDeltaTime;
-
     ProcessHotkeys();
+    if (bSimulationEnabled) UpdateSimulation(deltaTime);
+    else FirstPlayer->UpdateCamera(0.0f);
+    PrepareRenderFrame();
+}
 
-    // camera -> world transforms -> lights/cascades -> frame constants -> object constants
+void Game::UpdateSimulation(float deltaTime)
+{
+    auto sceneUpdate = scene.BeginUpdate(); // Covers custom PreUpdate/TickComponents too.
+    TotalTime += deltaTime;
     PreUpdate(deltaTime);
     FirstPlayer->UpdateCamera(deltaTime);
     TickComponents(deltaTime);
+}
 
+void Game::PrepareRenderFrame()
+{
+    SynchronizeSceneResources(); // Includes additions committed after gameplay callbacks.
     if (bShadowsEnabled && !bShadowResourcesReady && !bShadowInitFailed)
     {
         bShadowResourcesReady = InitShadowResources();
@@ -2668,11 +2823,26 @@ void Game::UpdateFrame(float realDeltaTime)
 void Game::TickComponents(float deltaTime)
 {
     const bool bPaused = InputDevicePtr && InputDevicePtr->IsKeyDown(Keys::Space);
-    for (auto& pair : Components)
+    scene.Tick(deltaTime, bPaused);
+}
+
+void Game::SynchronizeSceneResources()
+{
+    if (renderedSceneRevision == scene.GetRevision()) return;
+    for (const auto& entry : Components)
     {
-        GameComponent* Component = pair.second.get();
-        Component->Tick(bPaused && !Component->IsSkybox() ? 0.0f : deltaTime);
+        auto* component = entry.second.get();
+        if (component->RenderOwner == this) continue;
+        component->SetGame(this);
+        if (!dynamic_cast<PointLightComponent*>(component))
+        {
+            component->CreateBuffers(Device.Get());
+            BindComponentShaders(component, ShaderCompileVariant::Default);
+        }
+        component->RenderOwner = this;
     }
+    InvalidateStaticShadow();
+    renderedSceneRevision = scene.GetRevision();
 }
 
 void Game::BuildFrameConstants()
@@ -3111,6 +3281,7 @@ void Game::BeginGpuTimer()
             !disjoint.Disjoint && disjoint.Frequency > 0 && end >= begin)
         {
             LastGpuFrameMs = static_cast<float>(static_cast<double>(end - begin) * 1000.0 / static_cast<double>(disjoint.Frequency));
+            ++GpuTimerSamplesReady;
         }
         GpuTimerIssued[slot] = false;
     }

@@ -1,6 +1,7 @@
 #include <Engine/Render/TextureLoader.h>
 
 #include <iostream>
+#include "../Resources/VfsRead.h"
 
 // UTF-8 file names are opened with _wfopen (paths may contain non-ASCII characters).
 #define STBI_WINDOWS_UTF8
@@ -9,6 +10,17 @@
 
 namespace TextureLoader
 {
+    bool ValidateImage(const std::vector<uint8_t>& bytes)
+    {
+        if (bytes.empty() || bytes.size() > 256u * 1024 * 1024) return false;
+        int w = 0, h = 0, channels = 0;
+        if (!stbi_info_from_memory(bytes.data(), static_cast<int>(bytes.size()), &w, &h, &channels) ||
+            w <= 0 || h <= 0 || w > 16384 || h > 16384 || uint64_t(w) * h > 64u * 1024 * 1024) return false;
+        auto* image = stbi_load_from_memory(bytes.data(), static_cast<int>(bytes.size()), &w, &h, &channels, 4);
+        const bool valid = image != nullptr;
+        stbi_image_free(image);
+        return valid;
+    }
     bool LoadTexture2D(ID3D11Device* device,
                        ID3D11DeviceContext* context,
                        const std::string& path,
@@ -24,11 +36,19 @@ namespace TextureLoader
             return false;
         }
 
+        const std::vector<uint8_t> fileBytes = VfsRead::Active().ReadBytes(path);
+        const unsigned char* bufferData = fileBytes.empty() ? nullptr : fileBytes.data();
+        if (bufferData == nullptr)
+        {
+            std::cout << "Failed to load texture (VFS read failed): " << path << std::endl;
+            return false;
+        }
+
         int width = 0;
         int height = 0;
         int channels = 0;
         stbi_set_flip_vertically_on_load(flipVertically ? 1 : 0);
-        unsigned char* imageData = stbi_load(path.c_str(), &width, &height, &channels, 4);
+        unsigned char* imageData = stbi_load_from_memory(bufferData, static_cast<int>(fileBytes.size()), &width, &height, &channels, 4);
         if (!imageData)
         {
             std::cout << "Failed to load texture: " << path << std::endl;

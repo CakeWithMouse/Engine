@@ -47,3 +47,16 @@
 | 032 | Архитектура | [Один EngineRuntime.exe: игра и режим редактирования](032-runtime-game-editor-modes.md) — [промпт выполнения](032-execution-prompt.md) |
 | 033 | Рендер | [Массовая техника: инстансинг мешей и LOD](033-mass-unit-rendering.md) |
 | 034 | Рендер | [Стоимость теней: каскады для техники и запечённая карта](034-shadow-cost.md) |
+| 035 | Редактор | [Сцены как данные, JSON и встроенный Play: этапы](035-scene-editor-roadmap.md) |
+| 036 | Редактор | [Статичный preview, Space Play/Stop, P Pause](036-editor-preview-play.md) |
+| 037 | Ядро | [Scene, ID и API для редактора; без SceneObject/JSON](037-scene-core.md) |
+| 038 | Ядро | [Обнаружение классов, генератор и каталог компонентов](038-component-generation.md) |
+| 039 | Ядро/runtime | [Каталог игрового модуля и команды Scene](039-scene-module-commands.md) |
+| 040 | Ядро/runtime | [Edit-сессия, viewport и Play API без изменений Editor](040-edit-session-api.md) |
+| 041 | P1 | [JSON сцен и файловый API — выполнено](041-scene-json.md) |
+| 042 | Ядро/runtime | [startupScene и загрузка при --scene-api — выполнено](042-startup-scene.md) |
+| 043 | Ядро/runtime | [startupScene в game mode — выполнено](043-game-startup-scene.md) |
+| 044 | Ядро/runtime | [Отображение startupScene в Game — выполнено](044-game-scene-rendering.md) |
+
+- [045 — Пользовательские проекты и инструменты сцены](045-user-projects.md) — реализовано, Debug проверен.
+- [046 — Импорт моделей и текстур в редактор](046-project-assets.md).

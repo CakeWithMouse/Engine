@@ -29,12 +29,30 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Import Project="BuildSupport\Cpp.props" />
   <ItemDefinitionGroup><ClCompile><AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)ThirdParty\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories></ClCompile></ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableAssimp)'=='true'"><ClCompile><PreprocessorDefinitions>ENGINE_ENABLE_ASSIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile></ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Base\Base.cpp" />
+    <ClCompile Include="Source\Scene\Scene.cpp" />
+    <ClCompile Include="Source\Scene\SceneCommands.cpp" />
+    <ClCompile Include="Source\Scene\SceneDocument.cpp" />
+    <ClCompile Include="Source\Scene\SceneAssets.cpp" />
+    <ClCompile Include="Source\Runtime\SceneEditAssets.cpp" />
+    <ClInclude Include="Include\Engine\Scene\SceneDocument.h" />
+    <ClCompile Include="Source\Runtime\SceneEditSession.cpp" />
+    <ClCompile Include="Source\Runtime\GameEditModule.cpp" />
+    <ClInclude Include="Include\Engine\Runtime\EditSessionApi.h" />
+    <ClInclude Include="Include\Engine\Runtime\GameSceneApi.h" />
+    <ClInclude Include="Include\Engine\Runtime\GameWindowApi.h" />
+    <ClInclude Include="Include\Engine\Runtime\SceneEditSession.h" />
+    <ClInclude Include="Include\Engine\Runtime\GameEditModule.h" />
+    <ClInclude Include="Include\Engine\Scene\SceneCommands.h" />
+    <ClInclude Include="Include\Engine\Runtime\SceneModuleApi.h" />
+    <ClInclude Include="Include\Engine\Scene\Scene.h" />
     <ClCompile Include="Source\Base\Config\BaseResources.cpp" />
     <ClCompile Include="Source\Base\Config\BaseGameConfig.cpp" />
     <ClInclude Include="Include\Engine\Base\Base.h" />
     <ClInclude Include="Include\Engine\Runtime\ModuleApi.h" />
+    <ClInclude Include="Include\Engine\Runtime\ViewportSession.h" />
     <ClInclude Include="Include\Engine\Runtime\LaunchOptions.h" />
     <ClInclude Include="Include\Engine\Base\Config\BaseResources.h" />
     <ClInclude Include="Include\Engine\Base\Config\BaseGameConfig.h" />
@@ -44,7 +62,11 @@
     <ClCompile Include="Source\Components\SpecificComponents\FBXComponent.cpp" Condition="'$(EngineEnableAssimp)'=='true'" />
     <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshComponent.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\MeshComponent.cpp" />
+    <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshSkinned.cpp" />
+    <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshImpostor.cpp" />
+    <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshShadows.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\ParticleSystemComponent.cpp" />
+    <ClInclude Include="Source\Components\SpecificComponents\InstancedMeshInternal.h" />
     <ClCompile Include="Source\Components\SpecificComponents\SphereComponent.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\TriangleComponent.cpp" />
     <ClCompile Include="Source\Display\Display.cpp" />
@@ -56,11 +78,26 @@
     <ClCompile Include="Source\Render\Material.cpp" />
     <ClCompile Include="Source\Render\MaterialAsset.cpp" />
     <ClCompile Include="Source\Render\MeshPrimitives.cpp" />
-    <ClCompile Include="Source\Render\ShaderCompiler.cpp" />
     <ClCompile Include="Source\Render\TextureLoader.cpp" />
+    <ClCompile Include="Source\Render\ShaderCompiler.cpp" />
+    <ClCompile Include="Source\Render\SkeletalAnimation.cpp" />
+    <ClCompile Include="Source\Render\SkeletalBaker.cpp" />
+    <ClCompile Include="Source\Render\SkeletalLoaderStub.cpp" Condition="'$(EngineEnableAssimp)'!='true'" />
+    <ClCompile Include="Source\Render\SkeletalLoaderAssimp.cpp" Condition="'$(EngineEnableAssimp)'=='true'" />
+    <ClCompile Include="Source\Components\SpecificComponents\SkeletalMeshComponent.cpp" />
     <ClCompile Include="Source\Resources\Paths.cpp" />
     <ClCompile Include="Source\Resources\VirtualFileSystem.cpp" />
+    <ClCompile Include="Source\Resources\VfsRead.cpp" />
+    <ClCompile Include="Source\Resources\LocalVfs.cpp" />
+    <ClCompile Include="Source\Resources\HostVfsProxy.cpp" />
+    <ClCompile Include="Source\Runtime\VfsService.cpp" />
+    <ClInclude Include="Source\Resources\IVfs.h" />
+    <ClInclude Include="Source\Resources\LocalVfs.h" />
+    <ClInclude Include="Source\Resources\HostVfsProxy.h" />
+    <ClInclude Include="Source\Resources\VfsRead.h" />
     <ClInclude Include="Include\Engine\Components\GameComponents.h" />
+    <ClInclude Include="Include\Engine\Components\ComponentAnnotations.h" />
+    <ClInclude Include="Include\Engine\Components\ComponentType.h" />
     <ClInclude Include="Include\Engine\Components\Light\CubeMap.h" />
     <ClInclude Include="Include\Engine\Components\Light\PointLightComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\CubeComponent.h" />
@@ -68,6 +105,7 @@
     <ClInclude Include="Include\Engine\Components\SpecificComponents\InstancedMeshComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\MeshComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\ParticleSystemComponent.h" />
+    <ClInclude Include="Include\Engine\Components\SpecificComponents\SkeletalMeshComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\SphereComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\TriangleComponent.h" />
     <ClInclude Include="Include\Engine\Display\Display.h" />
@@ -83,9 +121,15 @@
     <ClInclude Include="Include\Engine\Render\MeshPrimitives.h" />
     <ClInclude Include="Include\Engine\Render\ShaderCompiler.h" />
     <ClInclude Include="Include\Engine\Render\ShaderConstants.h" />
+    <ClInclude Include="Include\Engine\Render\SkeletalData.h" />
+    <ClInclude Include="Include\Engine\Render\SkeletalAnimation.h" />
+    <ClInclude Include="Include\Engine\Render\SkeletalBaker.h" />
+    <ClInclude Include="Include\Engine\Render\SkeletalLoader.h" />
     <ClInclude Include="Include\Engine\Render\TextureLoader.h" />
     <ClInclude Include="Include\Engine\Resources\Paths.h" />
     <ClInclude Include="Include\Engine\Resources\VirtualFileSystem.h" />
+    <ClInclude Include="Include\Engine\Runtime\VfsApi.h" />
+    <ClInclude Include="Source\Runtime\VfsService.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />

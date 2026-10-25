@@ -10,6 +10,11 @@
     <ClCompile Include="Source\Resources\VirtualFileSystem.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Scene\Scene.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Source\Scene\SceneCommands.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Source\Scene\SceneDocument.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Source\Runtime\SceneEditSession.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Source\Runtime\GameEditModule.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Source\Resources\Paths.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
@@ -18,6 +23,17 @@
     <ClInclude Include="Include\Engine\Resources\VirtualFileSystem.h">
       <Filter>Header Files\Resources</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Engine\Scene\Scene.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Scene\SceneCommands.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Scene\SceneDocument.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Runtime\SceneModuleApi.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Runtime\EditSessionApi.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Runtime\GameSceneApi.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Runtime\GameWindowApi.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Runtime\SceneEditSession.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Runtime\GameEditModule.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Components\ComponentAnnotations.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Components\ComponentType.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="Include\Engine\Resources\Paths.h">
       <Filter>Header Files\Resources</Filter>
     </ClInclude>

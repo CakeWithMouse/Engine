@@ -7,7 +7,8 @@ struct RuntimeProject
     std::string name;
     std::filesystem::path file, module, content;
     std::string preview;
+    std::filesystem::path startupScene; // absolute resolved path; empty when omitted
 };
 
-// Three required string fields, plus an optional built-in preview scene identifier.
+// Required name/module/content; optional preview and project-relative startupScene.
 RuntimeProject ReadRuntimeProject(const std::filesystem::path& file);
