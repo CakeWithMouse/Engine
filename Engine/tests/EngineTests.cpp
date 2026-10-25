@@ -2,6 +2,7 @@
 #include <Engine/Resources/VirtualFileSystem.h>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
+#include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
 #include <Engine/Components/SpecificComponents/MeshComponent.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
 #include <Engine/Render/Material.h>
@@ -44,6 +45,11 @@ public:
         XMStoreFloat4x4(&CurrentFrame.viewMatrix, XMMatrixTranspose(view));
         XMStoreFloat4x4(&CurrentFrame.projectionMatrix, XMMatrixTranspose(projection));
         CurrentFrame.CameraPosition = XMFLOAT4(eye.x, eye.y, eye.z, 1.0f);
+        // Every point is inside: tests choose what is on screen by placement, not by culling.
+        for (XMFLOAT4& plane : CurrentFrame.FrustumPlanes)
+        {
+            plane = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+        }
     }
     bool PumpQuit() { bRunning = true; return PumpMessages(); }
     int GetExitCode() const { return ExitCode; }
@@ -325,6 +331,15 @@ void MaterialTemplateVariants()
     expectTargets(defaultSurface, {{"MATERIAL_BLEND", "3"}}, 1, 1);
     expectTargets(defaultSurface, {{"MATERIAL_UNLIT", "1"}}, 1, 1);
     expectTargets(errorSurface, {}, 1, 1); // declares MATERIAL_UNLIT itself
+
+    // Pass variants: instanced (same targets), depth-only shadow, two-target atlas bake.
+    expectTargets(defaultSurface, {{"MATERIAL_INSTANCED", "1"}}, 1, 3);
+    CHECK(CompileMaterial(defaultSurface, "VSMain", "vs_5_0", {{"MATERIAL_INSTANCED", "1"}}).Succeeded());
+    auto shadow = CompileMaterial(defaultSurface, "PSMain", "ps_5_0",
+                                  {{"MATERIAL_BLEND", "1"}, {"MATERIAL_INSTANCED", "1"}, {"MATERIAL_SHADOW", "1"}});
+    CHECK(shadow.Succeeded() && RenderTargetCount(shadow.Blob.Get()) == 0);
+    auto bake = CompileMaterial(defaultSurface, "PSMain", "ps_5_0", {{"MATERIAL_IMPOSTOR_BAKE", "1"}});
+    CHECK(bake.Succeeded() && RenderTargetCount(bake.Blob.Get()) == 2);
 
     TempShaderDir dir;
     const std::string emissive = dir.Write("Emissive.hlsl",
@@ -829,7 +844,8 @@ void MaterialComponentIntegration()
 }
 
 // Shadow pass of one component into a 64x64 depth map seen from above; returns the depth values.
-std::vector<float> RenderShadowDepth(TestGame& game, GameComponent& component)
+// cascadeIndex -1 is the baked static map (every copy of an instanced component, no cascade culling).
+std::vector<float> RenderShadowDepth(TestGame& game, GameComponent& component, int cascadeIndex = 0)
 {
     constexpr UINT Size = 64;
     ID3D11Device* device = game.GetDevice();
@@ -874,6 +890,14 @@ std::vector<float> RenderShadowDepth(TestGame& game, GameComponent& component)
     CheckHR(device->CreateInputLayout(meshElements, 3, depthShader.Blob->GetBufferPointer(), depthShader.Blob->GetBufferSize(),
                                       shadowLayout.GetAddressOf()));
     pass.MeshLayout = shadowLayout.Get();
+    ShaderCompiler::CompileResult instancedShader = ShaderCompiler::Compile(
+        EnginePaths::Shader("ShadowDepth.hlsl").generic_u8string(), "VSMainInstanced", "vs_5_0");
+    CHECK(instancedShader.Succeeded());
+    ComPtr<ID3D11VertexShader> instancedVertexShader;
+    CheckHR(device->CreateVertexShader(instancedShader.Blob->GetBufferPointer(), instancedShader.Blob->GetBufferSize(),
+                                       nullptr, instancedVertexShader.GetAddressOf()));
+    pass.InstancedVertexShader = instancedVertexShader.Get();
+    pass.CascadeIndex = cascadeIndex;
     D3D11_BUFFER_DESC bufferDesc{};
     bufferDesc.ByteWidth = sizeof(ShadowPassBufferData);
     bufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -935,6 +959,155 @@ void MaskedMaterialShadows()
     state.Blend = MaterialBlendMode::Opaque;
     material->SetRenderState(state);
     CHECK(RenderShadowDepth(game, *plane)[right] < 1.0f && !material->HasShadowShaders());
+}
+
+std::vector<uint32_t> ReadTexture(TestGame& game, ID3D11ShaderResourceView* view, UINT& width)
+{
+    ComPtr<ID3D11Resource> resource;
+    view->GetResource(resource.GetAddressOf());
+    ComPtr<ID3D11Texture2D> texture;
+    CheckHR(resource.As(&texture));
+    D3D11_TEXTURE2D_DESC desc{};
+    texture->GetDesc(&desc);
+    desc.Usage = D3D11_USAGE_STAGING; desc.BindFlags = 0; desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ; desc.MiscFlags = 0;
+    ComPtr<ID3D11Texture2D> staging;
+    CheckHR(game.GetDevice()->CreateTexture2D(&desc, nullptr, staging.GetAddressOf()));
+    game.GetContext()->CopyResource(staging.Get(), texture.Get());
+    D3D11_MAPPED_SUBRESOURCE mapped{};
+    CheckHR(game.GetContext()->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped));
+    std::vector<uint32_t> pixels(desc.Width * desc.Height);
+    for (UINT y = 0; y < desc.Height; ++y)
+    {
+        std::memcpy(&pixels[y * desc.Width], static_cast<const uint8_t*>(mapped.pData) + y * mapped.RowPitch, desc.Width * sizeof(uint32_t));
+    }
+    game.GetContext()->Unmap(staging.Get(), 0);
+    width = desc.Width;
+    return pixels;
+}
+
+void InstancedMaterials()
+{
+    TestGame game;
+    CHECK(game.CreateInputLayouts());
+    game.SetCamera({0.0f, 3.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f});
+    TempShaderDir dir;
+    MaterialRenderState unlit;
+    unlit.bUnlit = true; // exact colours
+    // Colour of the copy plus its custom data.
+    auto material = std::make_shared<Material>(dir.Write("PerCopy.hlsl",
+        "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = i.Color.rgb + i.InstanceData; }\n"), unlit);
+
+    // InstancedMeshComponent: a red copy left of the centre, a black copy with green data on the right.
+    auto* units = new InstancedMeshComponent();
+    CHECK(units->SetLod(0, MeshPrimitives::Plane(0.8f, 0.8f)));
+    MeshInstance left;
+    left.Position = {-0.6f, 0.0f, 0.0f};
+    left.Color = {1.0f, 0.0f, 0.0f, 1.0f};
+    MeshInstance right;
+    right.Position = {0.6f, 0.0f, 0.0f};
+    right.Color = {0.0f, 0.0f, 0.0f, 1.0f};
+    right.CustomData = {0.0f, 1.0f, 0.0f};
+    units->AddInstance(left);
+    units->AddInstance(right);
+    CHECK(game.RegisterComponent("units", units) == RegisterResult::Ok);
+    CHECK(units->SetMaterial(material));
+
+    // The instanced set is chosen and compiled on first use; 18.5 px per unit at this camera.
+    std::vector<uint32_t> pixels = RenderOffscreen(game, *units, D3D11_CULL_BACK);
+    CHECK(material->IsInstancingRequired() && material->GetVertexShader(true) != nullptr);
+    CHECK(pixels[32 * 64 + 21] == 0xff0000ffu); // red copy
+    CHECK(pixels[32 * 64 + 43] == 0xff00ff00u); // green from custom data
+    CHECK(pixels[32 * 64 + 32] == 0u);          // gap between the copies
+
+    // Copies made with CreateInstance on a MeshComponent use the same instanced set.
+    auto* copies = new MeshComponent(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec4(1.0f));
+    copies->SetMesh(MeshPrimitives::Plane(0.8f, 0.8f));
+    CHECK(game.RegisterComponent("copies", copies) == RegisterResult::Ok);
+    copies->CreateInstance({-0.6f, 0.0f, 0.0f}, glm::vec3(0.0f), glm::vec3(1.0f), {1.0f, 0.0f, 0.0f, 1.0f});
+    copies->CreateInstance({0.6f, 0.0f, 0.0f}, glm::vec3(0.0f), glm::vec3(1.0f), {0.0f, 0.0f, 1.0f, 1.0f});
+    CHECK(copies->SetMaterial(material) && copies->UsesInstancedDrawing());
+    pixels = RenderOffscreen(game, *copies, D3D11_CULL_BACK);
+    CHECK(pixels[32 * 64 + 21] == 0xff0000ffu && pixels[32 * 64 + 43] == 0xffff0000u && pixels[32 * 64 + 32] == 0u);
+
+    // Masked instanced shadows: the clip of every copy reaches the baked map (21.3 px per unit).
+    auto masked = std::make_shared<Material>(dir.Write("HalfMask.hlsl",
+        "void Surface(MaterialInput i, inout MaterialOutput o) { o.Alpha = i.UV.x < 0.5f ? 1.0f : 0.0f; }\n"));
+    MaterialRenderState maskedState;
+    maskedState.Blend = MaterialBlendMode::Masked;
+    masked->SetRenderState(maskedState);
+    CHECK(units->SetMaterial(masked));
+    std::vector<float> depth = RenderShadowDepth(game, *units, -1);
+    CHECK(masked->GetShadowPixelShader(true) != nullptr);
+    CHECK(depth[32 * 64 + 15] < 1.0f && depth[32 * 64 + 24] == 1.0f);  // left copy: solid | clipped
+    CHECK(depth[32 * 64 + 40] < 1.0f && depth[32 * 64 + 49] == 1.0f);  // right copy
+    std::vector<float> plainDepth = RenderShadowDepth(game, *copies, -1); // opaque material: whole copies
+    CHECK(plainDepth[32 * 64 + 24] < 1.0f && plainDepth[32 * 64 + 49] < 1.0f);
+}
+
+void ImpostorBakedThroughMaterial()
+{
+    TestGame game;
+    CHECK(game.CreateInputLayouts());
+    TempShaderDir dir;
+    Material material(dir.Write("Bake.hlsl",
+        "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = float3(0.25f, 0.5f, 1.0f); }\n"));
+    CHECK(material.Compile(game.GetDevice(), game.GetContext()));
+
+    ImpostorAtlasSettings settings;
+    settings.YawCount = 4;
+    settings.PitchCount = 1;
+    settings.TileSize = 32;
+    const MeshLodData sphere = MeshPrimitives::Sphere(0.5f);
+    auto centreOfTile = [&](ImpostorAtlas& atlas)
+    {
+        UINT width = 0;
+        const std::vector<uint32_t> albedo = ReadTexture(game, atlas.GetAlbedoSRV(), width);
+        return albedo[16 * width + 16];
+    };
+
+    ImpostorAtlas plain;
+    CHECK(plain.Build(game, sphere, nullptr, glm::vec4(1.0f), settings));
+    CHECK(centreOfTile(plain) == 0xffffffffu);
+
+    ImpostorAtlas baked;
+    CHECK(baked.Build(game, sphere, nullptr, glm::vec4(1.0f), settings, &material));
+    CHECK(centreOfTile(baked) == 0xffff8040u); // (0.25, 0.5, 1.0), full coverage
+
+    // Sprites of a one-sided material are drawn although the pass culls back faces for its meshes.
+    // Without a window every copy is below the sprite threshold. The camera is tilted: straight
+    // down, the sprite shader has no view direction around the vertical to pick a tile from.
+    game.SetCamera({0.0f, 3.0f, -1.5f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f});
+    auto* units = new InstancedMeshComponent();
+    CHECK(units->SetLod(0, sphere));
+    units->SetLodScreenHeights({10.0f});
+    units->SetImpostorEnabled(true, settings);
+    units->AddInstance(MeshInstance{});
+    auto unitMaterial = std::make_shared<Material>(dir.Write("Bake2.hlsl",
+        "cbuffer MaterialParams : register(b1) { float4 Tint = float4(0.25f, 0.5f, 1.0f, 1.0f); };\n"
+        "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = Tint.rgb; }\n"));
+    CHECK(units->SetMaterial(unitMaterial));
+    CHECK(game.RegisterComponent("units", units) == RegisterResult::Ok);
+    CHECK(units->HasImpostor());
+    const uint32_t sprite = RenderOffscreen(game, *units, D3D11_CULL_BACK)[32 * 64 + 32];
+    CHECK(sprite != 0u);
+    CHECK(units->GetDrawnImpostors() == 1 && units->GetDrawnInstancesForLod(0) == 0);
+
+    // A parameter change reaches the sprites on the next tick: the atlas is rebaked.
+    CHECK(unitMaterial->SetParameter("Tint", {1.0f, 0.0f, 0.0f, 1.0f}));
+    units->Tick(0.0f);
+    CHECK(RenderOffscreen(game, *units, D3D11_CULL_BACK)[32 * 64 + 32] != sprite);
+
+    // A .mat reloaded into the same object never repeats its revision, so its atlases are rebaked too.
+    std::shared_ptr<Material> loaded = game.LoadMaterial(dir.Write("Units.mat", R"({ "shader": "Bake2.hlsl" })"));
+    const uint64_t revision = loaded ? loaded->GetRevision() : 0;
+    CHECK(loaded && game.ReloadMaterial((dir.Root / "Units.mat").generic_u8string()) && loaded->GetRevision() != revision);
+
+    // A material with errors cannot bake: the plain bake is used instead.
+    Material broken(dir.Write("Broken.hlsl", "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = Tnt; }\n"));
+    CHECK(!broken.Compile(game.GetDevice(), game.GetContext()));
+    ImpostorAtlas fallback;
+    CHECK(fallback.Build(game, sphere, nullptr, glm::vec4(1.0f), settings, &broken));
+    CHECK(centreOfTile(fallback) == 0xffffffffu);
 }
 
 ComPtr<ID3D11Buffer> Buffer(ID3D11Device* device, UINT bytes, UINT bind, const void* data = nullptr, UINT stride = 0)
@@ -1261,6 +1434,8 @@ int main()
         {".mat format: load, validate, save", MaterialAssetFormat}, {"game material cache and reload", GameMaterialCache},
         {"materials on components and passes", MaterialComponentIntegration},
         {"masked material shadows", MaskedMaterialShadows},
+        {"instanced materials: copies, custom data, shadows", InstancedMaterials},
+        {"impostor atlas baked through a material", ImpostorBakedThroughMaterial},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
         {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests}
     };

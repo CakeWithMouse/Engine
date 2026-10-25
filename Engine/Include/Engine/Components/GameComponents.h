@@ -59,6 +59,8 @@ public:
     bool SetMaterial(std::shared_ptr<Material> material);
     Material* GetMaterial() const { return MaterialPtr.get(); }
     virtual bool SupportsMaterials() const { return false; }
+    /** Drawn with an instance stream (t0): the material uses its instanced shader set. */
+    virtual bool UsesInstancedDrawing() const { return HasInstances(); }
 
     // Lifecycle
     virtual void CreateBuffers(ID3D11Device* Device);

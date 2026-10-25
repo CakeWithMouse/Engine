@@ -5,7 +5,9 @@
 
 /**
  * One mesh in VertexFormat::Mesh (position, normal, uv): procedural shapes from MeshPrimitives or
- * any MeshLodData. Draws with the component's shaders and casts shadows; instancing is not supported.
+ * any MeshLodData. Draws with the component's shaders or material and casts shadows. Copies made
+ * with CreateInstance are drawn in one instanced call (a material then uses its instanced set).
+ * For thousands of copies with LODs and culling use InstancedMeshComponent.
  */
 class MeshComponent : public GameComponent
 {
@@ -26,6 +28,7 @@ public:
 
 private:
     void BindGeometry(ID3D11DeviceContext* context, ID3D11InputLayout* layout);
+    /** One draw of the mesh, or of every copy with the instance stream bound. */
     void DrawGeometry(ID3D11DeviceContext* context);
 
     MeshLodData Mesh;

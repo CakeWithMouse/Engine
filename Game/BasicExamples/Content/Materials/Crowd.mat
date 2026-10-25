@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "shader": "Crowd.hlsl",
+  "params": { "FlickerSpeed": 1.5, "FlickerAmount": 0.35 }
+}

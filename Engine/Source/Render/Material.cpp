@@ -93,6 +93,13 @@ namespace
     {
         return type == MaterialParameterType::Unsupported ? 0u : static_cast<uint32_t>(type) + 1u;
     }
+
+    // Unique across all materials: a material reloaded in place never repeats a revision it had.
+    uint64_t NextRevision()
+    {
+        static uint64_t revision = 0;
+        return ++revision;
+    }
 }
 
 bool MaterialRenderState::operator==(const MaterialRenderState& other) const
@@ -118,13 +125,26 @@ void Material::SetRenderState(const MaterialRenderState& state)
     State = state;
 }
 
-bool Material::CompileSet(const std::string& surface, ShaderSet& output, std::string& errors,
+void Material::RequireInstancing()
+{
+    if (!bInstancingRequired)
+    {
+        bInstancingRequired = true;
+        bNeedsCompile = true;
+    }
+}
+
+bool Material::CompileSet(const std::string& surface, bool instanced, ShaderSet& output, std::string& errors,
                           Microsoft::WRL::ComPtr<ID3DBlob>* forwardBlob, std::vector<std::string>* dependencies)
 {
     ShaderCompiler::CompileOptions options;
     // The error surface is drawn with the default state (it declares MATERIAL_UNLIT itself).
     const MaterialRenderState state = surface == SurfacePath ? State : MaterialRenderState{};
     options.Defines = MakeDefines(state);
+    if (instanced)
+    {
+        options.Defines.emplace_back("MATERIAL_INSTANCED", "1");
+    }
     options.IncludeOverrides[SurfaceIncludeName] = surface;
     ShaderCompiler::CompileOptions shadowOptions = options;
     shadowOptions.Defines.emplace_back("MATERIAL_SHADOW", "1");
@@ -210,17 +230,25 @@ bool Material::Compile(ID3D11Device* device, ID3D11DeviceContext* context)
     Device = device;
     Context = context;
     bNeedsCompile = false;
+    Revision = NextRevision();
+    // The bake shaders follow the surface; they are rebuilt the next time an atlas asks for them.
+    BakeVertexShader.Reset();
+    BakePixelShader.Reset();
+    bBakeCompiled = false;
     if (!Sampler)
     {
         TextureLoader::CreateLinearSampler(Device.Get(), D3D11_TEXTURE_ADDRESS_WRAP, Sampler);
     }
 
     ShaderSet standard;
+    ShaderSet instanced;
     Microsoft::WRL::ComPtr<ID3DBlob> forwardBlob;
     std::vector<std::string> dependencies;
     std::string errors;
-    const bool bCompiled = CompileSet(SurfacePath, standard, errors, &forwardBlob, &dependencies) &&
-                           Reflect(forwardBlob.Get(), errors);
+    // Parameters are reflected once: both sets declare the same surface.
+    const bool bCompiled = CompileSet(SurfacePath, false, standard, errors, &forwardBlob, &dependencies) &&
+                           Reflect(forwardBlob.Get(), errors) &&
+                           (!bInstancingRequired || CompileSet(SurfacePath, true, instanced, errors));
     // Known even after a failure, so a fix of any of these files can trigger a recompilation.
     Dependencies = dependencies;
 
@@ -232,19 +260,59 @@ bool Material::Compile(ID3D11Device* device, ID3D11DeviceContext* context)
         // Parameters and textures stay as they are; only the shaders change to the error surface
         // (unlit and opaque: no G-buffer or shadow shaders).
         ShaderSet fallback;
+        ShaderSet fallbackInstanced;
         std::string fallbackErrors;
-        if (!CompileSet(ErrorSurfacePath(), fallback, fallbackErrors))
+        if (!CompileSet(ErrorSurfacePath(), false, fallback, fallbackErrors) ||
+            (bInstancingRequired && !CompileSet(ErrorSurfacePath(), true, fallbackInstanced, fallbackErrors)))
         {
             std::cout << "Error material failed to compile:" << std::endl << fallbackErrors << std::endl;
             fallback = ShaderSet{};
+            fallbackInstanced = ShaderSet{};
         }
         Standard = fallback;
+        Instanced = fallbackInstanced;
         return false;
     }
 
     Errors.clear();
     Standard = standard;
+    Instanced = instanced;
     return true;
+}
+
+bool Material::GetImpostorBakeShaders(ID3D11VertexShader*& vertexShader, ID3D11PixelShader*& pixelShader)
+{
+    vertexShader = nullptr;
+    pixelShader = nullptr;
+    if (!Device || HasErrors() || !IsCompiled())
+    {
+        return false;
+    }
+    if (!bBakeCompiled)
+    {
+        bBakeCompiled = true;
+        ShaderCompiler::CompileOptions options;
+        options.Defines = MakeDefines(State);
+        options.Defines.emplace_back("MATERIAL_IMPOSTOR_BAKE", "1");
+        options.IncludeOverrides[SurfaceIncludeName] = SurfacePath;
+        const std::string templatePath = TemplatePath();
+        ShaderCompiler::CompileResult vertex = ShaderCompiler::Compile(templatePath, "VSMain", "vs_5_0", options);
+        ShaderCompiler::CompileResult pixel = ShaderCompiler::Compile(templatePath, "PSMain", "ps_5_0", options);
+        if (!vertex.Succeeded() || !pixel.Succeeded() ||
+            FAILED(Device->CreateVertexShader(vertex.Blob->GetBufferPointer(), vertex.Blob->GetBufferSize(), nullptr,
+                                              BakeVertexShader.GetAddressOf())) ||
+            FAILED(Device->CreatePixelShader(pixel.Blob->GetBufferPointer(), pixel.Blob->GetBufferSize(), nullptr,
+                                             BakePixelShader.GetAddressOf())))
+        {
+            std::cout << "Material '" << SurfacePath << "': impostor bake shaders failed:" << std::endl
+                      << vertex.Errors << pixel.Errors << std::endl;
+            BakeVertexShader.Reset();
+            BakePixelShader.Reset();
+        }
+    }
+    vertexShader = BakeVertexShader.Get();
+    pixelShader = BakePixelShader.Get();
+    return vertexShader != nullptr && pixelShader != nullptr;
 }
 
 bool Material::Reflect(ID3DBlob* pixelShader, std::string& errors)
@@ -380,6 +448,7 @@ bool Material::SetParameter(const std::string& name, const std::array<float, 4>&
     }
     std::memcpy(ParameterData.data() + parameter->Offset, value.data(), ComponentCount(parameter->Type) * sizeof(float));
     bParametersDirty = true;
+    Revision = NextRevision();
     return true;
 }
 
@@ -407,6 +476,7 @@ bool Material::SetTexture(const std::string& name, const std::string& path)
     {
         texture->Path.clear();
         texture->View.Reset();
+        Revision = NextRevision();
         return true;
     }
 
@@ -419,12 +489,14 @@ bool Material::SetTexture(const std::string& name, const std::string& path)
     }
     texture->Path = path;
     texture->View = view;
+    Revision = NextRevision();
     return true;
 }
 
-ID3D11PixelShader* Material::GetPixelShader(bool deferredGBuffer) const
+ID3D11PixelShader* Material::GetPixelShader(bool deferredGBuffer, bool instanced) const
 {
-    return deferredGBuffer ? Standard.GBufferPixelShader.Get() : Standard.ForwardPixelShader.Get();
+    const ShaderSet& set = Set(instanced);
+    return deferredGBuffer ? set.GBufferPixelShader.Get() : set.ForwardPixelShader.Get();
 }
 
 ID3D11ShaderResourceView* Material::GetWhiteTexture()

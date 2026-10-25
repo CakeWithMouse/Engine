@@ -80,11 +80,17 @@ public:
     bool IsTransparent() const { return State.Blend == MaterialBlendMode::Translucent || State.Blend == MaterialBlendMode::Additive; }
 
     /**
-     * Compiles the shaders from disk: VS and both pixel variants, and the shadow pair of a masked
-     * material. False if the surface failed (fallback active).
+     * Compiles the shaders from disk: VS and both pixel variants, the shadow pair of a masked
+     * material, and the instanced set once RequireInstancing was called. False if the surface
+     * failed (fallback active).
      */
     bool Compile(ID3D11Device* device, ID3D11DeviceContext* context);
     bool IsCompiled() const { return Standard.VertexShader != nullptr; }
+    /** Also compile the instanced set (copies read from the instance stream); on the next Compile. */
+    void RequireInstancing();
+    bool IsInstancingRequired() const { return bInstancingRequired; }
+    /** Changes whenever the look may have changed: compile, parameter, texture. */
+    uint64_t GetRevision() const { return Revision; }
     /** True while the error surface is drawn instead of this material. */
     bool HasErrors() const { return !Errors.empty(); }
     const std::string& GetErrors() const { return Errors; }
@@ -101,9 +107,10 @@ public:
     /** Loads the image (empty path: back to white). False for an unknown name or an unreadable file. */
     bool SetTexture(const std::string& name, const std::string& path);
 
-    ID3D11VertexShader* GetVertexShader() const { return Standard.VertexShader.Get(); }
+    /** instanced: the set for components drawn with an instance stream (null until compiled). */
+    ID3D11VertexShader* GetVertexShader(bool instanced = false) const { return Set(instanced).VertexShader.Get(); }
     /** deferredGBuffer: the shader of the G-buffer pass, null if the material cannot write it. */
-    ID3D11PixelShader* GetPixelShader(bool deferredGBuffer) const;
+    ID3D11PixelShader* GetPixelShader(bool deferredGBuffer, bool instanced = false) const;
     bool WritesGBuffer() const { return Standard.GBufferPixelShader != nullptr; }
 
     /**
@@ -111,11 +118,17 @@ public:
      * the engine's depth shader. Valid while HasShadowShaders().
      */
     bool HasShadowShaders() const { return Standard.ShadowPixelShader != nullptr; }
-    ID3D11VertexShader* GetShadowVertexShader() const { return Standard.ShadowVertexShader.Get(); }
-    ID3D11PixelShader* GetShadowPixelShader() const { return Standard.ShadowPixelShader.Get(); }
+    ID3D11VertexShader* GetShadowVertexShader(bool instanced = false) const { return Set(instanced).ShadowVertexShader.Get(); }
+    ID3D11PixelShader* GetShadowPixelShader(bool instanced = false) const { return Set(instanced).ShadowPixelShader.Get(); }
+
     /**
-     * Camera of a pass that is not the main view (b2, HLSL layout), e.g. the light of a shadow
-     * map. Also binds everything Bind sets.
+     * Shaders that render the surface into an impostor atlas tile (albedo with coverage, object
+     * normal). Compiled on first use; false while the material has errors.
+     */
+    bool GetImpostorBakeShaders(ID3D11VertexShader*& vertexShader, ID3D11PixelShader*& pixelShader);
+    /**
+     * Camera of a pass that is not the main view (b2, HLSL layout): the light of a shadow map or
+     * the view of an atlas tile. Also binds everything Bind sets.
      */
     void BindPassTransform(ID3D11DeviceContext* context, const DirectX::XMFLOAT4X4& viewProjection);
 
@@ -124,6 +137,7 @@ public:
     void Unbind(ID3D11DeviceContext* context) const;
 
 private:
+    /** Shaders of one way of feeding the copies: one object (b0) or an instance stream (t0). */
     struct ShaderSet
     {
         Microsoft::WRL::ComPtr<ID3D11VertexShader> VertexShader;
@@ -132,8 +146,9 @@ private:
         Microsoft::WRL::ComPtr<ID3D11VertexShader> ShadowVertexShader; // masked only
         Microsoft::WRL::ComPtr<ID3D11PixelShader> ShadowPixelShader;
     };
+    const ShaderSet& Set(bool instanced) const { return instanced ? Instanced : Standard; }
     /** forwardBlob/dependencies are filled for the reflection and the reload tracking. */
-    bool CompileSet(const std::string& surface, ShaderSet& output, std::string& errors,
+    bool CompileSet(const std::string& surface, bool instanced, ShaderSet& output, std::string& errors,
                     Microsoft::WRL::ComPtr<ID3DBlob>* forwardBlob = nullptr, std::vector<std::string>* dependencies = nullptr);
     bool Reflect(ID3DBlob* pixelShader, std::string& errors);
     bool CreateParameterBuffer();
@@ -142,12 +157,18 @@ private:
     std::string SurfacePath;
     MaterialRenderState State;
     bool bNeedsCompile = true;
+    bool bInstancingRequired = false;
+    uint64_t Revision = 0;
     std::string Errors;
     std::vector<std::string> Dependencies;
 
     Microsoft::WRL::ComPtr<ID3D11Device> Device;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> Context;
     ShaderSet Standard;
+    ShaderSet Instanced;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> BakeVertexShader; // compiled on first use
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> BakePixelShader;
+    bool bBakeCompiled = false;
     Microsoft::WRL::ComPtr<ID3D11Buffer> PassTransformBuffer;
 
     std::vector<MaterialParameter> Parameters;

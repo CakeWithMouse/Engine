@@ -4,7 +4,8 @@
 
 /**
  * Material assets on procedural meshes: a lit floor, the default material, gold, an animated
- * emissive, glass, a masked cutout and an additive hologram. Unlike the other BasicExamples
+ * emissive, glass, a masked cutout and an additive hologram, plus a crowd of a few thousand
+ * instanced copies with LODs and sprites sharing one material. Unlike the other BasicExamples
  * scenes it uses the regular renderer (depth, lights, shadows, F5 forward/deferred).
  * The .mat/.hlsl files are in GameContent/Materials; edit them there and press F6.
  */

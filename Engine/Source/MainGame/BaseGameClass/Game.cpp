@@ -1087,8 +1087,9 @@ bool Game::BindComponentShaders(GameComponent* Component, ShaderCompileVariant v
     // A material owns its shaders; null pixel shader: it cannot draw in this pass.
     if (Material* material = PrepareMaterial(Component))
     {
-        ID3D11VertexShader* vertexShader = material->GetVertexShader();
-        ID3D11PixelShader* pixelShader = material->GetPixelShader(variant == ShaderCompileVariant::DeferredGBuffer);
+        const bool bInstanced = Component->UsesInstancedDrawing();
+        ID3D11VertexShader* vertexShader = material->GetVertexShader(bInstanced);
+        ID3D11PixelShader* pixelShader = material->GetPixelShader(variant == ShaderCompileVariant::DeferredGBuffer, bInstanced);
         if (vertexShader == nullptr || pixelShader == nullptr)
         {
             return false;
@@ -1131,6 +1132,10 @@ bool Game::SupportsDeferredGeometry(GameComponent* Component)
 Material* Game::PrepareMaterial(GameComponent* Component)
 {
     Material* material = Component->GetMaterial();
+    if (material && Component->UsesInstancedDrawing())
+    {
+        material->RequireInstancing();
+    }
     if (material && material->NeedsCompile())
     {
         material->Compile(Device.Get(), Context.Get());

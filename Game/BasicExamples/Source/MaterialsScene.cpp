@@ -1,9 +1,11 @@
 #include "MaterialsScene.h"
 #include "ExampleStartup.h"
 #include <Engine/Components/Light/PointLightComponent.h>
+#include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
 #include <Engine/Components/SpecificComponents/MeshComponent.h>
 #include <Engine/Render/Material.h>
 #include <Engine/Render/MeshPrimitives.h>
+#include <random>
 #include <stdexcept>
 
 namespace
@@ -33,7 +35,7 @@ void MaterialsGame::BuildScene(const std::filesystem::path& gameContent)
     SetDirectionalLight({-0.45f, -1.0f, -0.35f}, {1.0f, 0.96f, 0.9f}, 0.85f);
     SetShadowSettings(true, 150.0f);
 
-    add("floor", MeshPrimitives::Plane(24.0f, 24.0f), {0.0f, 0.0f, 0.0f}, load("Floor.mat"));
+    add("floor", MeshPrimitives::Plane(60.0f, 60.0f), {0.0f, 0.0f, 0.0f}, load("Floor.mat"));
     const float spacing = 2.4f;
     const float left = -spacing * 2.5f;
     add("default", MeshPrimitives::Sphere(0.8f), {left, 1.0f, 0.0f}, GetDefaultMaterial(), {0.85f, 0.25f, 0.3f, 1.0f});
@@ -45,6 +47,32 @@ void MaterialsGame::BuildScene(const std::filesystem::path& gameContent)
 
     // A box behind the glass shows what translucency lets through.
     add("behind-glass", MeshPrimitives::Cube(0.9f), {left + spacing * 3.0f, 0.45f, 1.6f}, GetDefaultMaterial(), {0.2f, 0.45f, 0.95f, 1.0f});
+
+    // Thousands of copies behind the row: one instanced component, one material, two mesh levels and
+    // a sprite level baked through the material. Each copy has its colour and a flicker phase (custom data).
+    auto* crowd = new InstancedMeshComponent();
+    crowd->SetLod(0, MeshPrimitives::Sphere(0.14f, 16, 8));
+    crowd->SetLod(1, MeshPrimitives::Sphere(0.14f, 8, 4));
+    crowd->SetLodScreenHeights({18.0f, 7.0f});
+    crowd->SetImpostorEnabled(true);
+    std::mt19937 random(7);
+    std::uniform_real_distribution<float> unit(0.0f, 1.0f);
+    for (float z = 3.0f; z < 18.0f; z += 0.4f)
+    {
+        for (float x = -14.0f; x < 14.0f; x += 0.4f)
+        {
+            MeshInstance copy;
+            copy.Scale = 0.8f + 0.5f * unit(random);
+            copy.Position = {x + 0.15f * unit(random), 0.14f * copy.Scale, z + 0.15f * unit(random)};
+            const glm::vec3 hue = glm::clamp(glm::abs(glm::fract(unit(random) + glm::vec3(0.0f, 2.0f / 3.0f, 1.0f / 3.0f)) * 6.0f - 3.0f) - 1.0f,
+                                             0.0f, 1.0f);
+            copy.Color = glm::vec4(glm::mix(glm::vec3(1.0f), hue, 0.65f), 1.0f);
+            copy.CustomData = {unit(random), 0.0f, 0.0f};
+            crowd->AddInstance(copy);
+        }
+    }
+    crowd->SetMaterial(load("Crowd.mat"));
+    ExampleStartup::Register(*this, "crowd", crowd);
 
     ExampleStartup::Register(*this, "warm-light", new PointLightComponent({-4.0f, 2.5f, -2.5f}, {1.0f, 0.55f, 0.25f}, 2.0f, 9.0f));
     ExampleStartup::Register(*this, "cold-light", new PointLightComponent({4.5f, 2.5f, -2.5f}, {0.3f, 0.55f, 1.0f}, 2.0f, 9.0f));

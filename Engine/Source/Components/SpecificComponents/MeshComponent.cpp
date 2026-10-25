@@ -122,8 +122,25 @@ void MeshComponent::BindGeometry(ID3D11DeviceContext* context, ID3D11InputLayout
 
 void MeshComponent::DrawGeometry(ID3D11DeviceContext* context)
 {
-    context->DrawIndexed(static_cast<UINT>(indexCount), 0, 0);
-    if (GamePtr) GamePtr->CountDraw(static_cast<uint32_t>(indexCount));
+    if (InstanceArray.empty())
+    {
+        context->DrawIndexed(static_cast<UINT>(indexCount), 0, 0);
+        if (GamePtr) GamePtr->CountDraw(static_cast<uint32_t>(indexCount));
+        return;
+    }
+
+    // Copies made with CreateInstance: one draw, their transforms and colours from the stream at t0.
+    if (!UploadInstanceData(context))
+    {
+        return;
+    }
+    ID3D11ShaderResourceView* srv = instanceSRV.Get();
+    context->VSSetShaderResources(0, 1, &srv);
+    const UINT instanceCount = static_cast<UINT>(InstanceArray.size());
+    context->DrawIndexedInstanced(static_cast<UINT>(indexCount), instanceCount, 0, 0, 0);
+    if (GamePtr) GamePtr->CountDraw(static_cast<uint32_t>(indexCount), instanceCount);
+    ID3D11ShaderResourceView* nullSRV = nullptr;
+    context->VSSetShaderResources(0, 1, &nullSRV);
 }
 
 void MeshComponent::Render(ID3D11DeviceContext* Context)
@@ -138,6 +155,7 @@ void MeshComponent::Render(ID3D11DeviceContext* Context)
     Context->PSSetShader(pixelShader, nullptr, 0);
     BindMaterialResources(Context);
 
+    // With copies the owner's constants still carry the camera, lights and the base colour.
     Context->UpdateSubresource(cb.Get(), 0, nullptr, &ConstantPositionBuffer, 0, 0);
     Context->VSSetConstantBuffers(0, 1, cb.GetAddressOf());
     Context->PSSetConstantBuffers(0, 1, cb.GetAddressOf());
@@ -153,6 +171,7 @@ void MeshComponent::RenderShadow(ID3D11DeviceContext* context, const ShadowPassC
     {
         return;
     }
+    const bool bInstanced = !InstanceArray.empty();
 
     // A masked material clips its own silhouette: its shaders read the full object constants.
     // Shadows are drawn before the colour passes, so a changed material is compiled here.
@@ -162,8 +181,8 @@ void MeshComponent::RenderShadow(ID3D11DeviceContext* context, const ShadowPassC
         // Not shadowPass.MeshLayout: it was built for the position-only depth shader, and drivers may
         // skip attributes absent from that signature (the surface would get zero UVs and normals).
         BindGeometry(context, GamePtr->GetInputLayout(VertexFormat::Mesh));
-        context->VSSetShader(material->GetShadowVertexShader(), nullptr, 0);
-        context->PSSetShader(material->GetShadowPixelShader(), nullptr, 0);
+        context->VSSetShader(material->GetShadowVertexShader(bInstanced), nullptr, 0);
+        context->PSSetShader(material->GetShadowPixelShader(bInstanced), nullptr, 0);
         context->UpdateSubresource(cb.Get(), 0, nullptr, &ConstantPositionBuffer, 0, 0);
         context->VSSetConstantBuffers(0, 1, cb.GetAddressOf());
         context->PSSetConstantBuffers(0, 1, cb.GetAddressOf());
@@ -174,13 +193,21 @@ void MeshComponent::RenderShadow(ID3D11DeviceContext* context, const ShadowPassC
         return;
     }
 
-    // The world matrix comes from this frame's update phase.
+    // The world matrix comes from this frame's update phase; copies bring their own.
     ShadowPassBufferData shadowData = {};
     shadowData.worldMatrix = ConstantPositionBuffer.worldMatrix;
+    if (bInstanced)
+    {
+        if (shadowPass.InstancedVertexShader == nullptr)
+        {
+            return;
+        }
+        DirectX::XMStoreFloat4x4(&shadowData.worldMatrix, DirectX::XMMatrixIdentity());
+    }
     shadowData.lightViewProjection = shadowPass.LightViewProjection;
 
     BindGeometry(context, shadowPass.MeshLayout);
-    context->VSSetShader(shadowPass.VertexShader, nullptr, 0);
+    context->VSSetShader(bInstanced ? shadowPass.InstancedVertexShader : shadowPass.VertexShader, nullptr, 0);
     context->PSSetShader(nullptr, nullptr, 0);
     context->UpdateSubresource(shadowPass.ConstantBuffer, 0, nullptr, &shadowData, 0, 0);
     context->VSSetConstantBuffers(0, 1, &shadowPass.ConstantBuffer);

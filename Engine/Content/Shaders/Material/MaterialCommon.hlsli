@@ -48,7 +48,8 @@ struct MaterialInput
     float3 Normal;    // world space, normalized; flipped on back faces of two-sided materials
     float2 UV;
     float3 ViewDir;   // from the surface towards the camera, normalized
-    float4 Color;     // colour of the component (SetColor)
+    float4 Color;     // colour of the component (SetColor), times the colour of the copy when instanced
+    float3 InstanceData; // per-copy custom data of instanced components (MeshInstance::CustomData), else 0
     float Time;       // real seconds since start
     bool FrontFace;
 };

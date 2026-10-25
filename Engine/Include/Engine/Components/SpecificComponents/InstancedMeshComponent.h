@@ -13,6 +13,8 @@ struct MeshInstance
     float Yaw = 0.0f;   // radians
     float Scale = 1.0f; // uniform: instanced normals are transformed by the instance matrix
     glm::vec4 Color{1.0f, 1.0f, 1.0f, 1.0f};
+    // Free per-copy values for a material (MaterialInput.InstanceData): wear, hue, animation phase...
+    glm::vec3 CustomData{0.0f, 0.0f, 0.0f};
     bool bVisible = true;
 };
 
@@ -84,6 +86,7 @@ public:
     void SetInstancePosition(size_t index, const glm::vec3& position);
     void SetInstanceYaw(size_t index, float yaw);
     void SetInstanceColor(size_t index, const glm::vec4& color);
+    void SetInstanceCustomData(size_t index, const glm::vec3& data);
     void SetInstanceVisible(size_t index, bool visible);
     void ClearInstances();
 
@@ -95,10 +98,18 @@ public:
     uint32_t GetDrawnImpostors() const { return static_cast<uint32_t>(ImpostorLevel.ColorStaging.size()); }
 
     void CreateBuffers(ID3D11Device* Device) override;
+    /** Rebakes the sprite level when the material changed (outside of any render pass). */
+    void Tick(float deltaTime) override;
     void Render(ID3D11DeviceContext* context) override;
     void RenderShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass) override;
     // Visibility is decided per instance inside this component.
     bool SupportsFrustumCulling() const override { return false; }
+    /**
+     * A material draws every mesh level and the masked shadows; the sprite level is baked through
+     * it (albedo, normal, coverage) and rebaked when the material changes.
+     */
+    bool SupportsMaterials() const override { return true; }
+    bool UsesInstancedDrawing() const override { return true; }
     float GetLocalBoundingRadius() const override { return MeshRadius; }
     int GetIndexCount() override { return TotalIndexCount; }
 
@@ -132,6 +143,9 @@ private:
     /** Full set of instances for the baked shadow map, built once and reused between frames. */
     bool EnsureStaticShadowData(ID3D11DeviceContext* context);
     void RenderStaticShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass);
+    /** Shaders and constants of a depth pass; true if the material's own (masked) shaders are used. */
+    bool BeginShadowPass(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass);
+    void EndShadowPass(ID3D11DeviceContext* context, bool bMaterialShadow);
     void EnsureFrameData(ID3D11DeviceContext* context);
     bool UploadStream(ID3D11DeviceContext* context,
                       const std::vector<InstData>& staging,
@@ -148,8 +162,13 @@ private:
     ImpostorAtlasSettings ImpostorSettings;
     Microsoft::WRL::ComPtr<ID3D11Buffer> ImpostorConstantBuffer;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> ImpostorSampler;
+    // Sprites are never culled: a one-sided material leaves back-face culling on for the meshes.
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> ImpostorRasterState;
     bool bImpostorEnabled = false;
     bool bImpostorBuildFailed = false;
+    // The material (and its revision) the atlas was baked with; a change triggers a rebake.
+    const Material* BakedMaterial = nullptr;
+    uint64_t BakedMaterialRevision = 0;
     float LodFadeFraction = 0.06f;
     int LodCount = 0;
     std::vector<float> LodDistances;

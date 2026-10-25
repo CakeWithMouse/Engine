@@ -1,5 +1,5 @@
 {
   "version": 1,
   "shader": "Floor.hlsl",
-  "params": { "Tiles": 12 }
+  "params": { "Tiles": 30 }
 }

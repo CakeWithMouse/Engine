@@ -263,7 +263,10 @@ public:
     bool ReloadMaterial(const std::string& matPath, std::string* error = nullptr);
     /** DefaultSurface, opaque and lit; compiled on first use. */
     std::shared_ptr<Material> GetDefaultMaterial();
-    /** The component's material, compiled if its render state changed; null without one. */
+    /**
+     * The component's material, compiled if it changed (with the instanced set for components drawn
+     * with an instance stream); null without one.
+     */
     Material* PrepareMaterial(GameComponent* Component);
 
 protected:

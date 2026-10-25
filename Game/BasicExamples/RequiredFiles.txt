@@ -27,3 +27,5 @@ GameContent/Materials/Cutout.mat
 GameContent/Materials/Cutout.hlsl
 GameContent/Materials/Hologram.mat
 GameContent/Materials/Hologram.hlsl
+GameContent/Materials/Crowd.mat
+GameContent/Materials/Crowd.hlsl
