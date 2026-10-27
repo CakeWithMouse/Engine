@@ -58,14 +58,15 @@ public:
 
     /**
      * Draws with a material asset instead of the shader pair: its shaders, parameters, blend
-     * mode, culling and shadow casting. Only components drawn in VertexFormat::Mesh support
-     * materials (false otherwise, nothing changes). Null returns to the shader pair.
+     * mode, culling and shadow casting. Only components drawn in VertexFormat::Mesh or with
+     * skinned vertices support materials (false otherwise, nothing changes). Null returns to the
+     * shader pair.
      */
     bool SetMaterial(std::shared_ptr<Material> material);
     Material* GetMaterial() const { return MaterialPtr.get(); }
     virtual bool SupportsMaterials() const { return false; }
-    /** Drawn with an instance stream (t0): the material uses its instanced shader set. */
-    virtual bool UsesInstancedDrawing() const { return HasInstances(); }
+    /** MaterialVariant flags of the shader set this component draws with (instances, skinning). */
+    virtual uint32_t GetMaterialVariant() const;
 
     // Lifecycle
     virtual void CreateBuffers(ID3D11Device* Device);

@@ -9,6 +9,8 @@
 //
 // Pass variants (set by the engine):
 //     MATERIAL_INSTANCED       transform, colour and data of each copy come from the instance stream
+//     MATERIAL_SKINNED         skinned vertices: bone palette, or with MATERIAL_INSTANCED the
+//                              animation texture of a crowd (see Shaders/Skinning.hlsli)
 //     MATERIAL_SHADOW          depth of a masked material for a shadow map (clip applied)
 //     MATERIAL_IMPOSTOR_BAKE   albedo and object-space normal for one tile of an impostor atlas
 
@@ -24,6 +26,14 @@ static const float MaterialDefaultAmbientModel = 1.0f;
 StructuredBuffer<InstData> InstBuf : register(t0); // vertex stage
 #endif
 
+#if defined(MATERIAL_SKINNED)
+#if defined(MATERIAL_INSTANCED)
+#define SKINNING_ANIMATION_TEXTURE
+#define ANIM_LERP
+#endif
+#include "../Skinning.hlsli"
+#endif
+
 #if defined(MATERIAL_SHADOW) || defined(MATERIAL_IMPOSTOR_BAKE)
 // Object constants stay in b0 so Surface sees the usual inputs; the camera of the pass
 // (light of a shadow cascade, view of an atlas tile) comes separately.
@@ -33,12 +43,16 @@ cbuffer MaterialPassTransform : register(b2)
 };
 #endif
 
+#if defined(MATERIAL_SKINNED)
+typedef VS_SKINNED_IN VS_IN;
+#else
 struct VS_IN
 {
     float4 pos : POSITION;
     float3 normal : NORMAL;
-    float2 uv : TEXCOORD;
+    float2 texCoord : TEXCOORD;
 };
+#endif
 
 struct PS_IN
 {
@@ -54,18 +68,30 @@ struct PS_IN
 PS_IN VSMain(VS_IN input, uint instanceId : SV_InstanceID)
 {
     PS_IN output = (PS_IN)0;
+    float4 position = float4(input.pos.xyz, 1.0f);
+    float3 normal = input.normal;
 #if defined(MATERIAL_INSTANCED)
     InstData instance = InstBuf[instanceId];
-    float4 worldPos = mul(input.pos, instance.World);
+#endif
+#if defined(MATERIAL_SKINNED) && defined(MATERIAL_INSTANCED)
+    SkinVertex(input, instance, position.xyz, normal);
+#elif defined(MATERIAL_SKINNED)
+    SkinVertex(input, position.xyz, normal);
+#endif
+#if defined(MATERIAL_INSTANCED)
+    float4 worldPos = mul(position, instance.World);
     // Copies use a uniform scale, so their matrix transforms normals correctly.
-    output.normal = mul(input.normal, (float3x3)instance.World);
+    output.normal = mul(normal, (float3x3)instance.World);
     output.color = ObjectColor * instance.Color;
+#if !defined(MATERIAL_SKINNED)
+    // Animated copies use Params.yzw for their clip, phase and speed instead.
     output.instanceData = instance.Params.yzw;
+#endif
     output.fade = instance.Params.x;
 #else
-    float4 worldPos = mul(input.pos, worldMatrix);
+    float4 worldPos = mul(position, worldMatrix);
     // Inverse-transpose keeps normals perpendicular under non-uniform scale.
-    output.normal = mul(input.normal, (float3x3)normalMatrix);
+    output.normal = mul(normal, (float3x3)normalMatrix);
     output.color = ObjectColor;
     output.fade = 1.0f;
 #endif
@@ -75,7 +101,7 @@ PS_IN VSMain(VS_IN input, uint instanceId : SV_InstanceID)
     output.pos = mul(mul(worldPos, viewMatrix), projectionMatrix);
 #endif
     output.worldPos = worldPos.xyz;
-    output.uv = input.uv;
+    output.uv = input.texCoord;
     return output;
 }
 

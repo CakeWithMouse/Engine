@@ -49,7 +49,7 @@ struct MaterialInput
     float2 UV;
     float3 ViewDir;   // from the surface towards the camera, normalized
     float4 Color;     // colour of the component (SetColor), times the colour of the copy when instanced
-    float3 InstanceData; // per-copy custom data of instanced components (MeshInstance::CustomData), else 0
+    float3 InstanceData; // per-copy custom data (MeshInstance::CustomData); 0 without one and for animated crowds
     float Time;       // real seconds since start
     bool FrontFace;
 };

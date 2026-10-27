@@ -181,8 +181,8 @@ void MeshComponent::RenderShadow(ID3D11DeviceContext* context, const ShadowPassC
         // Not shadowPass.MeshLayout: it was built for the position-only depth shader, and drivers may
         // skip attributes absent from that signature (the surface would get zero UVs and normals).
         BindGeometry(context, GamePtr->GetInputLayout(VertexFormat::Mesh));
-        context->VSSetShader(material->GetShadowVertexShader(bInstanced), nullptr, 0);
-        context->PSSetShader(material->GetShadowPixelShader(bInstanced), nullptr, 0);
+        context->VSSetShader(material->GetShadowVertexShader(GetMaterialVariant()), nullptr, 0);
+        context->PSSetShader(material->GetShadowPixelShader(GetMaterialVariant()), nullptr, 0);
         context->UpdateSubresource(cb.Get(), 0, nullptr, &ConstantPositionBuffer, 0, 0);
         context->VSSetConstantBuffers(0, 1, cb.GetAddressOf());
         context->PSSetConstantBuffers(0, 1, cb.GetAddressOf());

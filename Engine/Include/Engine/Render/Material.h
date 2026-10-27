@@ -58,6 +58,18 @@ struct MaterialTexture
 };
 
 /**
+ * How a component feeds vertices and copies to a material. Flags: every combination is its own
+ * shader set, compiled once a component needs it.
+ */
+namespace MaterialVariant
+{
+    constexpr uint32_t Mesh = 0;      // VertexFormat::Mesh, one object (b0)
+    constexpr uint32_t Instanced = 1; // copies read from the instance stream (t0)
+    constexpr uint32_t Skinned = 2;   // skinned vertices; bone palette or animation texture in b3/t1
+    constexpr uint32_t Count = 4;
+}
+
+/**
  * A surface shader (see Shaders/Material/MaterialCommon.hlsli) compiled through the material
  * template for one render state, with its parameter values and textures.
  *
@@ -81,14 +93,14 @@ public:
 
     /**
      * Compiles the shaders from disk: VS and both pixel variants, the shadow pair of a masked
-     * material, and the instanced set once RequireInstancing was called. False if the surface
-     * failed (fallback active).
+     * material, for MaterialVariant::Mesh and every variant required so far. False if the
+     * surface failed (fallback active).
      */
     bool Compile(ID3D11Device* device, ID3D11DeviceContext* context);
-    bool IsCompiled() const { return Standard.VertexShader != nullptr; }
-    /** Also compile the instanced set (copies read from the instance stream); on the next Compile. */
-    void RequireInstancing();
-    bool IsInstancingRequired() const { return bInstancingRequired; }
+    bool IsCompiled() const { return Sets[MaterialVariant::Mesh].VertexShader != nullptr; }
+    /** Also compile the set of this MaterialVariant combination; on the next Compile. */
+    void RequireVariant(uint32_t variant);
+    bool IsVariantRequired(uint32_t variant) const { return (RequiredVariants & (1u << variant)) != 0; }
     /** Changes whenever the look may have changed: compile, parameter, texture. */
     uint64_t GetRevision() const { return Revision; }
     /** True while the error surface is drawn instead of this material. */
@@ -107,19 +119,19 @@ public:
     /** Loads the image (empty path: back to white). False for an unknown name or an unreadable file. */
     bool SetTexture(const std::string& name, const std::string& path);
 
-    /** instanced: the set for components drawn with an instance stream (null until compiled). */
-    ID3D11VertexShader* GetVertexShader(bool instanced = false) const { return Set(instanced).VertexShader.Get(); }
+    /** variant: a MaterialVariant combination; null until its set is compiled. */
+    ID3D11VertexShader* GetVertexShader(uint32_t variant = MaterialVariant::Mesh) const { return Sets[variant].VertexShader.Get(); }
     /** deferredGBuffer: the shader of the G-buffer pass, null if the material cannot write it. */
-    ID3D11PixelShader* GetPixelShader(bool deferredGBuffer, bool instanced = false) const;
-    bool WritesGBuffer() const { return Standard.GBufferPixelShader != nullptr; }
+    ID3D11PixelShader* GetPixelShader(bool deferredGBuffer, uint32_t variant = MaterialVariant::Mesh) const;
+    bool WritesGBuffer() const { return Sets[MaterialVariant::Mesh].GBufferPixelShader != nullptr; }
 
     /**
      * Masked materials draw their own shadow (the clip leaves holes); every other material uses
      * the engine's depth shader. Valid while HasShadowShaders().
      */
-    bool HasShadowShaders() const { return Standard.ShadowPixelShader != nullptr; }
-    ID3D11VertexShader* GetShadowVertexShader(bool instanced = false) const { return Set(instanced).ShadowVertexShader.Get(); }
-    ID3D11PixelShader* GetShadowPixelShader(bool instanced = false) const { return Set(instanced).ShadowPixelShader.Get(); }
+    bool HasShadowShaders() const { return Sets[MaterialVariant::Mesh].ShadowPixelShader != nullptr; }
+    ID3D11VertexShader* GetShadowVertexShader(uint32_t variant = MaterialVariant::Mesh) const { return Sets[variant].ShadowVertexShader.Get(); }
+    ID3D11PixelShader* GetShadowPixelShader(uint32_t variant = MaterialVariant::Mesh) const { return Sets[variant].ShadowPixelShader.Get(); }
 
     /**
      * Shaders that render the surface into an impostor atlas tile (albedo with coverage, object
@@ -137,7 +149,7 @@ public:
     void Unbind(ID3D11DeviceContext* context) const;
 
 private:
-    /** Shaders of one way of feeding the copies: one object (b0) or an instance stream (t0). */
+    /** Shaders of one MaterialVariant combination. */
     struct ShaderSet
     {
         Microsoft::WRL::ComPtr<ID3D11VertexShader> VertexShader;
@@ -146,9 +158,8 @@ private:
         Microsoft::WRL::ComPtr<ID3D11VertexShader> ShadowVertexShader; // masked only
         Microsoft::WRL::ComPtr<ID3D11PixelShader> ShadowPixelShader;
     };
-    const ShaderSet& Set(bool instanced) const { return instanced ? Instanced : Standard; }
     /** forwardBlob/dependencies are filled for the reflection and the reload tracking. */
-    bool CompileSet(const std::string& surface, bool instanced, ShaderSet& output, std::string& errors,
+    bool CompileSet(const std::string& surface, uint32_t variant, ShaderSet& output, std::string& errors,
                     Microsoft::WRL::ComPtr<ID3DBlob>* forwardBlob = nullptr, std::vector<std::string>* dependencies = nullptr);
     bool Reflect(ID3DBlob* pixelShader, std::string& errors);
     bool CreateParameterBuffer();
@@ -157,15 +168,14 @@ private:
     std::string SurfacePath;
     MaterialRenderState State;
     bool bNeedsCompile = true;
-    bool bInstancingRequired = false;
+    uint32_t RequiredVariants = 1u << MaterialVariant::Mesh; // bit per variant
     uint64_t Revision = 0;
     std::string Errors;
     std::vector<std::string> Dependencies;
 
     Microsoft::WRL::ComPtr<ID3D11Device> Device;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext> Context;
-    ShaderSet Standard;
-    ShaderSet Instanced;
+    ShaderSet Sets[MaterialVariant::Count];
     Microsoft::WRL::ComPtr<ID3D11VertexShader> BakeVertexShader; // compiled on first use
     Microsoft::WRL::ComPtr<ID3D11PixelShader> BakePixelShader;
     bool bBakeCompiled = false;

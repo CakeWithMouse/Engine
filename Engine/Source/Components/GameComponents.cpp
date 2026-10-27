@@ -624,6 +624,11 @@ bool GameComponent::SetMaterial(std::shared_ptr<Material> material)
     return true;
 }
 
+uint32_t GameComponent::GetMaterialVariant() const
+{
+    return HasInstances() ? MaterialVariant::Instanced : MaterialVariant::Mesh;
+}
+
 bool GameComponent::HasOpacity() const
 {
     return bHasOpacity || (MaterialPtr && MaterialPtr->IsTransparent());

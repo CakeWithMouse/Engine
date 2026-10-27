@@ -125,25 +125,29 @@ void Material::SetRenderState(const MaterialRenderState& state)
     State = state;
 }
 
-void Material::RequireInstancing()
+void Material::RequireVariant(uint32_t variant)
 {
-    if (!bInstancingRequired)
+    if (!IsVariantRequired(variant))
     {
-        bInstancingRequired = true;
+        RequiredVariants |= 1u << variant;
         bNeedsCompile = true;
     }
 }
 
-bool Material::CompileSet(const std::string& surface, bool instanced, ShaderSet& output, std::string& errors,
+bool Material::CompileSet(const std::string& surface, uint32_t variant, ShaderSet& output, std::string& errors,
                           Microsoft::WRL::ComPtr<ID3DBlob>* forwardBlob, std::vector<std::string>* dependencies)
 {
     ShaderCompiler::CompileOptions options;
     // The error surface is drawn with the default state (it declares MATERIAL_UNLIT itself).
     const MaterialRenderState state = surface == SurfacePath ? State : MaterialRenderState{};
     options.Defines = MakeDefines(state);
-    if (instanced)
+    if (variant & MaterialVariant::Instanced)
     {
         options.Defines.emplace_back("MATERIAL_INSTANCED", "1");
+    }
+    if (variant & MaterialVariant::Skinned)
+    {
+        options.Defines.emplace_back("MATERIAL_SKINNED", "1");
     }
     options.IncludeOverrides[SurfaceIncludeName] = surface;
     ShaderCompiler::CompileOptions shadowOptions = options;
@@ -240,15 +244,17 @@ bool Material::Compile(ID3D11Device* device, ID3D11DeviceContext* context)
         TextureLoader::CreateLinearSampler(Device.Get(), D3D11_TEXTURE_ADDRESS_WRAP, Sampler);
     }
 
-    ShaderSet standard;
-    ShaderSet instanced;
+    ShaderSet sets[MaterialVariant::Count];
     Microsoft::WRL::ComPtr<ID3DBlob> forwardBlob;
     std::vector<std::string> dependencies;
     std::string errors;
-    // Parameters are reflected once: both sets declare the same surface.
-    const bool bCompiled = CompileSet(SurfacePath, false, standard, errors, &forwardBlob, &dependencies) &&
-                           Reflect(forwardBlob.Get(), errors) &&
-                           (!bInstancingRequired || CompileSet(SurfacePath, true, instanced, errors));
+    // Parameters are reflected once: every set declares the same surface.
+    bool bCompiled = CompileSet(SurfacePath, MaterialVariant::Mesh, sets[MaterialVariant::Mesh], errors, &forwardBlob, &dependencies) &&
+                     Reflect(forwardBlob.Get(), errors);
+    for (uint32_t variant = 1; bCompiled && variant < MaterialVariant::Count; ++variant)
+    {
+        bCompiled = !IsVariantRequired(variant) || CompileSet(SurfacePath, variant, sets[variant], errors);
+    }
     // Known even after a failure, so a fix of any of these files can trigger a recompilation.
     Dependencies = dependencies;
 
@@ -259,24 +265,24 @@ bool Material::Compile(ID3D11Device* device, ID3D11DeviceContext* context)
 
         // Parameters and textures stay as they are; only the shaders change to the error surface
         // (unlit and opaque: no G-buffer or shadow shaders).
-        ShaderSet fallback;
-        ShaderSet fallbackInstanced;
         std::string fallbackErrors;
-        if (!CompileSet(ErrorSurfacePath(), false, fallback, fallbackErrors) ||
-            (bInstancingRequired && !CompileSet(ErrorSurfacePath(), true, fallbackInstanced, fallbackErrors)))
+        for (uint32_t variant = 0; variant < MaterialVariant::Count; ++variant)
         {
-            std::cout << "Error material failed to compile:" << std::endl << fallbackErrors << std::endl;
-            fallback = ShaderSet{};
-            fallbackInstanced = ShaderSet{};
+            Sets[variant] = ShaderSet{};
+            if (IsVariantRequired(variant) && !CompileSet(ErrorSurfacePath(), variant, Sets[variant], fallbackErrors))
+            {
+                std::cout << "Error material failed to compile:" << std::endl << fallbackErrors << std::endl;
+                Sets[variant] = ShaderSet{};
+            }
         }
-        Standard = fallback;
-        Instanced = fallbackInstanced;
         return false;
     }
 
     Errors.clear();
-    Standard = standard;
-    Instanced = instanced;
+    for (uint32_t variant = 0; variant < MaterialVariant::Count; ++variant)
+    {
+        Sets[variant] = sets[variant];
+    }
     return true;
 }
 
@@ -493,9 +499,9 @@ bool Material::SetTexture(const std::string& name, const std::string& path)
     return true;
 }
 
-ID3D11PixelShader* Material::GetPixelShader(bool deferredGBuffer, bool instanced) const
+ID3D11PixelShader* Material::GetPixelShader(bool deferredGBuffer, uint32_t variant) const
 {
-    const ShaderSet& set = Set(instanced);
+    const ShaderSet& set = Sets[variant];
     return deferredGBuffer ? set.GBufferPixelShader.Get() : set.ForwardPixelShader.Get();
 }
 

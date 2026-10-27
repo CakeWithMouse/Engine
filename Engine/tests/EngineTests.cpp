@@ -5,6 +5,7 @@
 #include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
 #include <Engine/Components/SpecificComponents/MeshComponent.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
+#include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
 #include <Engine/Render/Material.h>
 #include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/MeshPrimitives.h>
@@ -338,9 +339,15 @@ void MaterialTemplateVariants()
     expectTargets(defaultSurface, {{"MATERIAL_UNLIT", "1"}}, 1, 1);
     expectTargets(errorSurface, {}, 1, 1); // declares MATERIAL_UNLIT itself
 
-    // Pass variants: instanced (same targets), depth-only shadow, two-target atlas bake.
+    // Pass variants: instanced and skinned (same targets), depth-only shadow, two-target atlas bake.
     expectTargets(defaultSurface, {{"MATERIAL_INSTANCED", "1"}}, 1, 3);
-    CHECK(CompileMaterial(defaultSurface, "VSMain", "vs_5_0", {{"MATERIAL_INSTANCED", "1"}}).Succeeded());
+    expectTargets(defaultSurface, {{"MATERIAL_SKINNED", "1"}}, 1, 3);
+    expectTargets(defaultSurface, {{"MATERIAL_SKINNED", "1"}, {"MATERIAL_INSTANCED", "1"}}, 1, 3);
+    for (const auto& defines : std::vector<std::vector<std::pair<std::string, std::string>>>{
+             {{"MATERIAL_INSTANCED", "1"}}, {{"MATERIAL_SKINNED", "1"}}, {{"MATERIAL_SKINNED", "1"}, {"MATERIAL_INSTANCED", "1"}}})
+    {
+        CHECK(CompileMaterial(defaultSurface, "VSMain", "vs_5_0", defines).Succeeded());
+    }
     auto shadow = CompileMaterial(defaultSurface, "PSMain", "ps_5_0",
                                   {{"MATERIAL_BLEND", "1"}, {"MATERIAL_INSTANCED", "1"}, {"MATERIAL_SHADOW", "1"}});
     CHECK(shadow.Succeeded() && RenderTargetCount(shadow.Blob.Get()) == 0);
@@ -431,6 +438,7 @@ void MeshPrimitivesGeometry()
     CHECK(plane.Vertices.size() == 16 && plane.Indices.size() == 3u * 3u * 6u);
     const MeshBounds planeBounds = ComputeMeshBounds(plane);
     Near(planeBounds.Max.x, 2.0f); Near(planeBounds.Max.z, 1.0f); Near(planeBounds.Max.y, 0.0f);
+
 }
 
 // Draws one registered component into a 64x64 target with the given culling; returns RGBA8 pixels.
@@ -1020,7 +1028,7 @@ void InstancedMaterials()
 
     // The instanced set is chosen and compiled on first use; 18.5 px per unit at this camera.
     std::vector<uint32_t> pixels = RenderOffscreen(game, *units, D3D11_CULL_BACK);
-    CHECK(material->IsInstancingRequired() && material->GetVertexShader(true) != nullptr);
+    CHECK(material->IsVariantRequired(MaterialVariant::Instanced) && material->GetVertexShader(MaterialVariant::Instanced) != nullptr);
     CHECK(pixels[32 * 64 + 21] == 0xff0000ffu); // red copy
     CHECK(pixels[32 * 64 + 43] == 0xff00ff00u); // green from custom data
     CHECK(pixels[32 * 64 + 32] == 0u);          // gap between the copies
@@ -1031,7 +1039,7 @@ void InstancedMaterials()
     CHECK(game.RegisterComponent("copies", copies) == RegisterResult::Ok);
     copies->CreateInstance({-0.6f, 0.0f, 0.0f}, glm::vec3(0.0f), glm::vec3(1.0f), {1.0f, 0.0f, 0.0f, 1.0f});
     copies->CreateInstance({0.6f, 0.0f, 0.0f}, glm::vec3(0.0f), glm::vec3(1.0f), {0.0f, 0.0f, 1.0f, 1.0f});
-    CHECK(copies->SetMaterial(material) && copies->UsesInstancedDrawing());
+    CHECK(copies->SetMaterial(material) && copies->GetMaterialVariant() == MaterialVariant::Instanced);
     pixels = RenderOffscreen(game, *copies, D3D11_CULL_BACK);
     CHECK(pixels[32 * 64 + 21] == 0xff0000ffu && pixels[32 * 64 + 43] == 0xffff0000u && pixels[32 * 64 + 32] == 0u);
 
@@ -1043,11 +1051,81 @@ void InstancedMaterials()
     masked->SetRenderState(maskedState);
     CHECK(units->SetMaterial(masked));
     std::vector<float> depth = RenderShadowDepth(game, *units, -1);
-    CHECK(masked->GetShadowPixelShader(true) != nullptr);
+    CHECK(masked->GetShadowPixelShader(MaterialVariant::Instanced) != nullptr);
     CHECK(depth[32 * 64 + 15] < 1.0f && depth[32 * 64 + 24] == 1.0f);  // left copy: solid | clipped
     CHECK(depth[32 * 64 + 40] < 1.0f && depth[32 * 64 + 49] == 1.0f);  // right copy
     std::vector<float> plainDepth = RenderShadowDepth(game, *copies, -1); // opaque material: whole copies
     CHECK(plainDepth[32 * 64 + 24] < 1.0f && plainDepth[32 * 64 + 49] < 1.0f);
+}
+
+// One bone that the only clip holds 0.6 to the right (+X) of the bind pose; a 0.8 quad facing +Y on it.
+SkeletalModel ShiftedQuadModel()
+{
+    SkeletalModel model;
+    Bone root;
+    root.Name = "Root";
+    XMStoreFloat4x4(&root.LocalTransform, XMMatrixIdentity());
+    XMStoreFloat4x4(&root.InverseBindPose, XMMatrixIdentity());
+    model.ModelSkeleton.Bones.push_back(root);
+
+    AnimationClip clip;
+    clip.Name = "Shift";
+    clip.Duration = 1.0f;
+    NodeAnimationChannel channel;
+    channel.NodeName = "Root";
+    channel.BoneIndex = 0;
+    channel.PositionKeys = {{0.0f, {0.6f, 0.0f, 0.0f}}, {1.0f, {0.6f, 0.0f, 0.0f}}};
+    clip.Channels.push_back(channel);
+    model.Clips.push_back(clip);
+
+    SkeletalMesh mesh;
+    const MeshLodData quad = MeshPrimitives::Plane(0.8f, 0.8f);
+    for (const MeshVertex& source : quad.Vertices)
+    {
+        SkinnedVertex vertex;
+        vertex.Position = {source.Position.x, source.Position.y, source.Position.z};
+        vertex.Normal = {source.Normal.x, source.Normal.y, source.Normal.z};
+        vertex.TexCoord = {source.TexCoord.x, source.TexCoord.y};
+        vertex.BoneWeights[0] = 1.0f;
+        mesh.Vertices.push_back(vertex);
+    }
+    mesh.Indices = quad.Indices;
+    model.TotalIndexCount = static_cast<int>(mesh.Indices.size());
+    model.BoundingRadius = 1.0f;
+    model.Meshes.push_back(mesh);
+    return model;
+}
+
+void SkinnedMaterials()
+{
+    TestGame game;
+    CHECK(game.CreateInputLayouts());
+    game.SetCamera({0.0f, 3.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f});
+    TempShaderDir dir;
+    MaterialRenderState unlit;
+    unlit.bUnlit = true;
+    auto material = std::make_shared<Material>(dir.Write("Red.hlsl",
+        "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = float3(1, 0, 0); }\n"), unlit);
+    const size_t centre = 32 * 64 + 32, right = 32 * 64 + 43;
+
+    // One animated object: the bone palette moves the quad off the centre.
+    auto* skeletal = new SkeletalMeshComponent();
+    CHECK(skeletal->SetModel(std::make_shared<SkeletalModel>(ShiftedQuadModel())));
+    CHECK(game.RegisterComponent("skeletal", skeletal) == RegisterResult::Ok);
+    CHECK(skeletal->SetMaterial(material) && skeletal->GetMaterialVariant() == MaterialVariant::Skinned);
+    std::vector<uint32_t> pixels = RenderOffscreen(game, *skeletal, D3D11_CULL_NONE);
+    CHECK(material->GetVertexShader(MaterialVariant::Skinned) != nullptr);
+    CHECK(pixels[right] == 0xff0000ffu && pixels[centre] == 0u);
+
+    // A crowd: the same pose baked into the animation texture, one copy at the origin.
+    auto* crowd = new InstancedMeshComponent();
+    CHECK(crowd->SetAnimatedModel(game.GetDevice(), ShiftedQuadModel()));
+    crowd->AddInstance(MeshInstance{});
+    CHECK(game.RegisterComponent("crowd", crowd) == RegisterResult::Ok);
+    CHECK(crowd->SetMaterial(material));
+    CHECK(crowd->GetMaterialVariant() == (MaterialVariant::Instanced | MaterialVariant::Skinned));
+    pixels = RenderOffscreen(game, *crowd, D3D11_CULL_NONE);
+    CHECK(pixels[right] == 0xff0000ffu && pixels[centre] == 0u);
 }
 
 void ImpostorBakedThroughMaterial()
@@ -1536,7 +1614,7 @@ int main()
         {"materials on components and passes", MaterialComponentIntegration},
         {"masked material shadows", MaskedMaterialShadows},
         {"instanced materials: copies, custom data, shadows", InstancedMaterials},
-        {"impostor atlas baked through a material", ImpostorBakedThroughMaterial},
+        {"impostor atlas baked through a material", ImpostorBakedThroughMaterial}, {"skinned materials: bone palette and crowd", SkinnedMaterials},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
         {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests},
         {"vfs lifecycle B (read after stop)", VfsLifecycle_ScenarioB},

@@ -42,6 +42,8 @@ public:
     float GetModelYawDegrees() const { return modelYawDegrees; }
 
     bool CastsShadow() const override { return false; }
+    bool SupportsMaterials() const override { return true; }
+    uint32_t GetMaterialVariant() const override;
     bool SupportsFrustumCulling() const override { return false; }
 
 protected:

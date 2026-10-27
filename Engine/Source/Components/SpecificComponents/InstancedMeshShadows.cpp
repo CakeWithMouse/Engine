@@ -12,10 +12,10 @@ bool InstancedMeshComponent::BindMaterialShadow(ID3D11DeviceContext* context, co
     {
         return false;
     }
-    // The full Mesh layout: the shadow pass layout only feeds positions.
-    context->IASetInputLayout(GamePtr->GetInputLayout(VertexFormat::Mesh));
-    context->VSSetShader(material->GetShadowVertexShader(true), nullptr, 0);
-    context->PSSetShader(material->GetShadowPixelShader(true), nullptr, 0);
+    // The full vertex layout: the shadow pass layout of meshes only feeds positions.
+    context->IASetInputLayout(AnimationTextureSRV ? SkinnedInputLayout.Get() : GamePtr->GetInputLayout(VertexFormat::Mesh));
+    context->VSSetShader(material->GetShadowVertexShader(GetMaterialVariant()), nullptr, 0);
+    context->PSSetShader(material->GetShadowPixelShader(GetMaterialVariant()), nullptr, 0);
     context->UpdateSubresource(cb.Get(), 0, nullptr, &ConstantPositionBuffer, 0, 0);
     context->VSSetConstantBuffers(0, 1, cb.GetAddressOf());
     context->PSSetConstantBuffers(0, 1, cb.GetAddressOf());
@@ -133,7 +133,7 @@ void InstancedMeshComponent::RenderStaticShadow(ID3D11DeviceContext* context, co
         if (AnimClipConstantBuffer)
         {
             ID3D11Buffer* clipCB = AnimClipConstantBuffer.Get();
-            context->VSSetConstantBuffers(1, 1, &clipCB);
+            context->VSSetConstantBuffers(3, 1, &clipCB);
         }
     }
     else
@@ -147,7 +147,7 @@ void InstancedMeshComponent::RenderStaticShadow(ID3D11DeviceContext* context, co
     context->UpdateSubresource(shadowPass.ConstantBuffer, 0, nullptr, &shadowData, 0, 0);
     context->VSSetConstantBuffers(0, 1, &shadowPass.ConstantBuffer);
     // A masked material replaces the depth-only state above with its own shaders.
-    const bool bMaterialShadow = !bUseSkinned && BindMaterialShadow(context, shadowPass);
+    const bool bMaterialShadow = BindMaterialShadow(context, shadowPass);
 
     ID3D11Buffer* vertexBuffers[] = {lod.VertexBuffer.Get()};
     ID3D11ShaderResourceView* instanceSRV = StaticShadowSRV.Get();
@@ -206,7 +206,7 @@ void InstancedMeshComponent::RenderShadow(ID3D11DeviceContext* context, const Sh
         if (AnimClipConstantBuffer)
         {
             ID3D11Buffer* clipCB = AnimClipConstantBuffer.Get();
-            context->VSSetConstantBuffers(1, 1, &clipCB);
+            context->VSSetConstantBuffers(3, 1, &clipCB);
         }
     }
     else
@@ -220,7 +220,7 @@ void InstancedMeshComponent::RenderShadow(ID3D11DeviceContext* context, const Sh
     context->UpdateSubresource(shadowPass.ConstantBuffer, 0, nullptr, &shadowData, 0, 0);
     context->VSSetConstantBuffers(0, 1, &shadowPass.ConstantBuffer);
     // A masked material replaces the depth-only state above with its own shaders.
-    const bool bMaterialShadow = !bUseSkinned && BindMaterialShadow(context, shadowPass);
+    const bool bMaterialShadow = BindMaterialShadow(context, shadowPass);
 
     const int cascade = std::max(0, std::min(shadowPass.CascadeIndex, MaxShadowCascades - 1));
     const UINT offset = 0;

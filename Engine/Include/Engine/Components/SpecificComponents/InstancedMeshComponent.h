@@ -154,11 +154,11 @@ public:
     bool SupportsFrustumCulling() const override { return false; }
     /**
      * A material draws every mesh level and the masked shadows; the sprite level is baked through
-     * it (albedo, normal, coverage) and rebaked when the material changes. Skinned levels draw
-     * with their own shaders, so a skinned component takes no material.
+     * it (albedo, normal, coverage) and rebaked when the material changes. Animated copies use
+     * the skinned set of the material (MaterialInput.InstanceData is then zero).
      */
-    bool SupportsMaterials() const override { return !bIsSkinned; }
-    bool UsesInstancedDrawing() const override { return true; }
+    bool SupportsMaterials() const override { return true; }
+    uint32_t GetMaterialVariant() const override;
     float GetLocalBoundingRadius() const override { return MeshRadius; }
     int GetIndexCount() override { return TotalIndexCount; }
 
