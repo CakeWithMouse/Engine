@@ -1397,6 +1397,12 @@ namespace
     }
 }
 
+std::shared_ptr<Material> Game::FindMaterial(const std::string& matPath) const
+{
+    const auto cached = materialCache.find(ShaderCompiler::NormalizePath(matPath));
+    return cached != materialCache.end() ? cached->second.Instance : nullptr;
+}
+
 std::shared_ptr<Material> Game::LoadMaterial(const std::string& matPath, std::string* error)
 {
     const std::string key = ShaderCompiler::NormalizePath(matPath);

@@ -1,5 +1,7 @@
 #pragma once
 #include <filesystem>
+#include <map>
+#include <set>
 #include <Engine/Runtime/EditSessionApi.h>
 #include <Engine/Scene/SceneCommands.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
@@ -30,6 +32,17 @@ private:
     std::filesystem::path contentRoot_, previousGameRoot_;
     bool ownsGameMount_ = false;
     void AddAssetApi(EngineEditSessionApi& api) noexcept;
+
+    // Material editing: previews are small scenes of their own (one per editor window).
+    std::map<uint64_t, std::unique_ptr<Game>> previews_;
+    uint64_t nextPreview_ = 1;
+    std::set<std::string> modifiedMaterials_; // normalized .mat paths with unsaved edits
+    void AddMaterialApi(EngineEditSessionApi& api) noexcept;
+    /** Applies an edit to the material in every game that loaded it and marks it modified. */
+    template<class F> uint32_t EditMaterial(const char* material, F&& change);
+    /** Every game that may draw a material: the edit scene, the Play copy and the previews. */
+    std::vector<Game*> Games();
+    void RenderPreviews(double dt);
     template<class F> static uint32_t Invoke(void* context, F&& action) noexcept
     {
         if (!context) return EngineSceneInvalidArgument;

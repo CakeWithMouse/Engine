@@ -158,6 +158,7 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                     catch (...) { s.state_ = EnginePaused; return EngineSceneSimulationFailed; }
                 }
                 if (s.attached_ && !s.Active().RenderViewportFrame(0)) return EngineSceneFailure;
+                s.RenderPreviews(dt);
                 return EngineSceneOk;
             });
         },
@@ -239,5 +240,6 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
             });
         }};
     AddAssetApi(api);
+    AddMaterialApi(api);
     return api;
 }

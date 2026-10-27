@@ -27,14 +27,99 @@ void Bitmap(const fs::path& path)
     bytes[34] = 4; bytes[54] = 20; bytes[55] = char(220); bytes[56] = 40;
     Write(path, bytes);
 }
-struct Object { uint64_t id; std::string name, model, texture; };
+struct Object { uint64_t id; std::string name, model, texture, material; };
 std::vector<Object> Objects(const EngineEditSessionApi& api)
 {
     std::vector<Object> out; EngineSceneInfo info{};
     Check(api.readActiveScene(api.context, &info, [](void* p, const EngineSceneObjectInfo* o) {
-        static_cast<std::vector<Object>*>(p)->push_back({o->id, o->name, o->modelAsset, o->textureAsset});
+        static_cast<std::vector<Object>*>(p)->push_back({o->id, o->name, o->modelAsset, o->textureAsset, o->materialAsset});
     }, &out) == EngineSceneOk, "read asset snapshot");
     return out;
+}
+struct MaterialView
+{
+    std::string shader, errors;
+    EngineMaterialRenderState render{};
+    std::vector<std::pair<std::string, std::vector<float>>> parameters; // value, then default
+    std::vector<std::pair<std::string, std::string>> textures;
+    bool modified = false;
+};
+MaterialView ReadMaterial(const EngineEditSessionApi& api, const char* material)
+{
+    MaterialView view; char error[1024]{};
+    Check(api.readMaterial(api.context, material, [](void* p, const EngineMaterialInfo* info) {
+        auto& v = *static_cast<MaterialView*>(p);
+        v.shader = info->shader; v.errors = info->errors; v.render = info->render; v.modified = info->modified != 0;
+        for (uint32_t i = 0; i < info->parameterCount; ++i)
+        {
+            const auto& parameter = info->parameters[i];
+            std::vector<float> values(parameter.value, parameter.value + 4);
+            values.insert(values.end(), parameter.defaultValue, parameter.defaultValue + 4);
+            v.parameters.emplace_back(parameter.name, values);
+        }
+        for (uint32_t i = 0; i < info->textureCount; ++i) v.textures.emplace_back(info->textures[i].name, info->textures[i].path);
+    }, &view, error, sizeof(error)) == EngineSceneOk, "read material");
+    return view;
+}
+void CheckMaterialEditing(const EngineEditSessionApi& api, const fs::path& content)
+{
+    const char* surface = "cbuffer MaterialParams : register(b1) { float4 Tint = float4(1, 0, 0, 1); float Gloss = 0.5f; };\n"
+                          "Texture2D BaseMap : register(t6);\n"
+                          "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = Tint.rgb * BaseMap.Sample(MaterialSampler, i.UV).rgb; o.SpecularWeight = Gloss; }\n";
+    Write(content / "Materials/Tinted.hlsl", surface);
+    Write(content / "Materials/Tinted.mat", R"({ "shader": "Tinted.hlsl", "editor": { "note": "kept" } })");
+    const char* material = "/Game/Materials/Tinted.mat";
+    char error[1024]{};
+
+    auto view = ReadMaterial(api, material);
+    Check(view.shader == "/Game/Materials/Tinted.hlsl" && view.errors.empty() && !view.modified, "material description");
+    Check(view.parameters.size() == 2 && view.parameters[0].first == "Tint" && view.parameters[0].second[4] == 1 &&
+        view.parameters[1].second[0] == 0.5f, "parameters with their defaults");
+    Check(view.textures.size() == 1 && view.textures[0].first == "BaseMap" && view.textures[0].second.empty(), "texture slots");
+
+    const float green[4] = {0, 1, 0, 1};
+    Check(api.setMaterialParameter(api.context, material, "Tint", green) == EngineSceneOk, "set parameter");
+    Check(api.setMaterialParameter(api.context, material, "Missing", green) == EngineSceneNotFound, "unknown parameter");
+    view = ReadMaterial(api, material);
+    Check(view.parameters[0].second[1] == 1 && view.parameters[0].second[0] == 0 && view.modified, "edited value, not yet saved");
+    EngineMaterialRenderState render{EngineMaterialMasked, 0.25f, 0, 1, 1};
+    Check(api.setMaterialRenderState(api.context, material, &render) == EngineSceneOk, "set render state");
+    render.blend = 7;
+    Check(api.setMaterialRenderState(api.context, material, &render) == EngineSceneInvalidArgument, "reject unknown blend");
+    Check(ReadMaterial(api, material).render.blend == EngineMaterialMasked, "render state reported");
+    Check(api.saveMaterial(api.context, material, error, sizeof(error)) == EngineSceneOk && !ReadMaterial(api, material).modified, "save material");
+    std::ifstream savedFile(content / "Materials/Tinted.mat");
+    const auto saved = Json::parse(savedFile);
+    Check(saved.at("render").at("blend") == "masked" && saved.at("params").at("Tint")[1] == 1.0 &&
+        saved.at("editor").at("note") == "kept", "saved file keeps unknown fields");
+
+    const float blue[4] = {0, 0, 1, 1};
+    Check(api.setMaterialParameter(api.context, material, "Tint", blue) == EngineSceneOk, "edit after save");
+    Check(api.revertMaterial(api.context, material, error, sizeof(error)) == EngineSceneOk, "revert material");
+    view = ReadMaterial(api, material);
+    Check(view.parameters[0].second[1] == 1 && view.parameters[0].second[2] == 0 && !view.modified, "revert restores the saved values");
+
+    // The editor saves the surface, then asks to recompile: errors name the surface file.
+    Write(content / "Materials/Tinted.hlsl", "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = Tnt; }\n");
+    Check(api.reloadShaderFile(api.context, (content / "Materials/Tinted.hlsl").u8string().c_str()) == EngineSceneOk, "reload shader file");
+    view = ReadMaterial(api, material);
+    Check(view.errors.find("Tinted.hlsl(1,") != std::string::npos && view.errors.find("Tnt") != std::string::npos, "compile errors reported");
+    Write(content / "Materials/Tinted.hlsl", surface);
+    api.reloadShaderFile(api.context, (content / "Materials/Tinted.hlsl").u8string().c_str());
+    Check(ReadMaterial(api, material).errors.empty(), "fixed surface compiles again");
+
+    // A preview is a scene of its own in another window.
+    HWND window = CreateWindowExW(0, L"STATIC", L"Material preview", WS_OVERLAPPEDWINDOW, 0, 0, 256, 256, nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
+    Check(window != nullptr, "create preview HWND");
+    uint64_t preview = 0;
+    Check(api.attachMaterialPreview(api.context, window, 256, 256, &preview) == EngineSceneOk && preview, "attach preview");
+    Check(api.showMaterialPreview(api.context, preview, material, EnginePreviewCube, error, sizeof(error)) == EngineSceneOk, "show material");
+    Check(api.showMaterialPreview(api.context, preview, "/Game/Materials/Missing.mat", EnginePreviewCube, error, sizeof(error)) != EngineSceneOk, "missing material");
+    Check(api.materialPreviewCamera(api.context, preview, 0.3f, 0.1f, 1) == EngineSceneOk &&
+        api.resizeMaterialPreview(api.context, preview, 128, 128) == EngineSceneOk && api.frame(api.context, 0.016) == EngineSceneOk, "render preview");
+    Check(api.detachMaterialPreview(api.context, preview) == EngineSceneOk &&
+        api.detachMaterialPreview(api.context, preview) == EngineSceneNotFound, "detach preview");
+    DestroyWindow(window);
 }
 void Gltf(const fs::path& folder)
 {
@@ -100,6 +185,20 @@ int wmain(int argc, wchar_t** argv)
             unsigned threaded = 0;
             std::thread wrong([&] { threaded = api.setTexture(api.context,cube,"",nullptr,0); }); wrong.join();
             Check(threaded == EngineSceneWrongThread, "asset mutation rejects wrong thread");
+            // Materials: a .mat file inside Content, assigned to a primitive and kept by the scene document.
+            fs::create_directories(content / "Materials");
+            Write(content / "Materials/Red.hlsl", "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = float3(1, 0, 0); }\n");
+            Write(content / "Materials/Red.mat", R"({ "shader": "Red.hlsl", "render": { "lighting": "unlit" } })");
+            Write(content / "Materials/Broken.mat", "{ not json");
+            const std::string material = "/Game/Materials/Red.mat";
+            Check(api.setMaterial(api.context,cube,material.c_str(),error,sizeof(error)) == EngineSceneOk, "assign material");
+            Check(api.setMaterial(api.context,cube,"/Game/Materials/Broken.mat",error,sizeof(error)) != EngineSceneOk &&
+                std::string(error).find("Broken.mat") != std::string::npos, "invalid material is rejected with the reason");
+            Check(api.setMaterial(api.context,cube,importedTexture.c_str(),error,sizeof(error)) != EngineSceneOk, "only .mat files are materials");
+            Check(api.setMaterial(api.context,cube,"/Game/Materials/Missing.mat",error,sizeof(error)) != EngineSceneOk, "reject missing material");
+            Check(Objects(api).front().material == material, "failed assignment keeps the material");
+            Check(api.frame(api.context,0) == EngineSceneOk, "draw the material");
+            CheckMaterialEditing(api, content);
 #if defined(ENGINE_ENABLE_ASSIMP)
             Check(import(sources / "two-nodes.gltf",0) == EngineSceneOk, "import glTF with external buffer"); importedModel = path;
             const auto physical = content / fs::u8path(importedModel.substr(6));
@@ -126,8 +225,10 @@ int wmain(int argc, wchar_t** argv)
             Check(api.saveScene(api.context,saved.u8string().c_str(),error,sizeof(error)) == EngineSceneOk, "save asset references");
             const auto json = SceneDocument::Read(saved);
             Check(json.components.front().textureAsset == importedTexture, "serialized texture path");
+            Check(json.components.front().materialAsset == material, "serialized material path");
             Check(api.control(api.context,EnginePlay) == EngineSceneOk, "play clone retains assets");
             Check(Objects(api).front().texture == importedTexture, "play snapshot texture");
+            Check(Objects(api).front().material == material, "play snapshot material");
             Check(api.frame(api.context,0.05) == EngineSceneOk, "animate and render Play");
             Check(api.setTexture(api.context,cube,"",error,sizeof(error)) == EngineSceneReadOnly, "cannot mutate assets in Play");
             Check(import(sources / L"цвет.bmp",1) == EngineSceneReadOnly, "cannot import during Play");
@@ -135,6 +236,7 @@ int wmain(int argc, wchar_t** argv)
             uint64_t scene = 0;
             Check(api.loadScene(api.context,saved.u8string().c_str(),&scene,error,sizeof(error)) == EngineSceneOk, "reopen textured scene");
             Check(Objects(api).front().texture == importedTexture, "reopened texture retained");
+            Check(Objects(api).front().material == material, "reopened material retained");
             const auto texture = content / fs::u8path(importedTexture.substr(6)); fs::rename(texture, texture.wstring() + L".backup");
             Check(api.loadScene(api.context,saved.u8string().c_str(),&scene,error,sizeof(error)) != EngineSceneOk, "missing asset rejects scene load");
             Check(Objects(api).front().texture == importedTexture, "failed load preserves current scene");

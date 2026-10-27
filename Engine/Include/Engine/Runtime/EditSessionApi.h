@@ -1,9 +1,47 @@
 #pragma once
 #include <Engine/Runtime/SceneModuleApi.h>
 
-#define ENGINE_EDIT_API_VERSION 5u
+#define ENGINE_EDIT_API_VERSION 6u
 enum EngineEditState : uint32_t { EngineEditing = 0, EnginePlaying = 1, EnginePaused = 2 };
 enum EngineEditControl : uint32_t { EnginePlay = 0, EngineStop = 1, EnginePause = 2, EngineResume = 3 };
+
+// v6 material editing. A material is named by the /Game path of its .mat file. Edits reach every
+// scene and preview drawing it at once; only saveMaterial writes the file.
+enum EngineMaterialBlend : uint32_t
+{
+    EngineMaterialOpaque = 0, EngineMaterialMasked = 1, EngineMaterialTranslucent = 2, EngineMaterialAdditive = 3
+};
+struct EngineMaterialRenderState
+{
+    uint32_t blend; // EngineMaterialBlend
+    float alphaClip; // masked only, [0, 1]
+    uint32_t unlit, twoSided, castShadows; // 0 or 1
+};
+struct EngineMaterialParameter
+{
+    const char* name;
+    uint32_t components; // 1-4 floats; 0: a type the editor cannot set
+    float value[4];
+    float defaultValue[4]; // HLSL initializer
+};
+struct EngineMaterialTexture
+{
+    const char* name;
+    const char* path; // /Game path; empty: white
+};
+struct EngineMaterialInfo
+{
+    const char* shader; // /Game path of the surface .hlsl
+    const char* errors; // compiler output; empty when the surface compiles
+    EngineMaterialRenderState render;
+    uint32_t parameterCount;
+    const EngineMaterialParameter* parameters;
+    uint32_t textureCount;
+    const EngineMaterialTexture* textures;
+    uint32_t modified; // changed since it was loaded or saved
+};
+typedef void (ENGINE_MODULE_CALL *EngineMaterialVisitor)(void*, const EngineMaterialInfo*);
+enum EngineMaterialPreviewShape : uint32_t { EnginePreviewSphere = 0, EnginePreviewCube = 1, EnginePreviewPlane = 2 };
 
 // Module-owned context. Same thread, no exceptions/reentry, callback strings copied
 // by caller. Invalid after factory.destroy, which MUST precede HWND destruction/unload.
@@ -36,6 +74,30 @@ struct EngineEditSessionApi
         const EngineSceneTransform*, uint64_t* id, char* error, uint32_t capacity);
     // Empty texture path clears the override. All mutations are edit-only.
     uint32_t (ENGINE_MODULE_CALL *setTexture)(void*, uint64_t id, const char* virtualPath, char* error, uint32_t capacity);
+    // v6: /Game path of a .mat file; empty clears it. Edit only.
+    uint32_t (ENGINE_MODULE_CALL *setMaterial)(void*, uint64_t id, const char* virtualPath, char* error, uint32_t capacity);
+
+    // v6 material editing (any state). The visitor runs once, its data valid during the call.
+    uint32_t (ENGINE_MODULE_CALL *readMaterial)(void*, const char* material, EngineMaterialVisitor, void*, char* error, uint32_t capacity);
+    uint32_t (ENGINE_MODULE_CALL *setMaterialRenderState)(void*, const char* material, const EngineMaterialRenderState*);
+    uint32_t (ENGINE_MODULE_CALL *setMaterialParameter)(void*, const char* material, const char* name, const float value[4]);
+    // Texture: /Game path, empty for white.
+    uint32_t (ENGINE_MODULE_CALL *setMaterialTexture)(void*, const char* material, const char* name, const char* texture,
+        char* error, uint32_t capacity);
+    uint32_t (ENGINE_MODULE_CALL *saveMaterial)(void*, const char* material, char* error, uint32_t capacity);
+    // Re-reads the .mat file, dropping unsaved edits.
+    uint32_t (ENGINE_MODULE_CALL *revertMaterial)(void*, const char* material, char* error, uint32_t capacity);
+    // Absolute path of a shader file that changed on disk: every material and shader using it recompiles.
+    uint32_t (ENGINE_MODULE_CALL *reloadShaderFile)(void*, const char* path);
+
+    // v6 material previews: one small scene per HWND, rendered by frame. Same HWND rules as the viewport.
+    uint32_t (ENGINE_MODULE_CALL *attachMaterialPreview)(void*, void* hwnd, uint32_t width, uint32_t height, uint64_t* preview);
+    uint32_t (ENGINE_MODULE_CALL *resizeMaterialPreview)(void*, uint64_t preview, uint32_t width, uint32_t height);
+    uint32_t (ENGINE_MODULE_CALL *detachMaterialPreview)(void*, uint64_t preview);
+    uint32_t (ENGINE_MODULE_CALL *showMaterialPreview)(void*, uint64_t preview, const char* material, uint32_t shape,
+        char* error, uint32_t capacity);
+    // Orbit around the shape: radians and wheel steps.
+    uint32_t (ENGINE_MODULE_CALL *materialPreviewCamera)(void*, uint64_t preview, float yaw, float pitch, float zoom);
 };
 struct EngineEditModuleApi
 {
@@ -55,5 +117,8 @@ inline bool IsCompleteEditSessionApi(const EngineEditSessionApi& api) noexcept
     return api.version == ENGINE_EDIT_API_VERSION && api.context && IsCompleteSceneApi(api.scene) &&
         api.control && api.getState && api.readActiveScene && api.setParent && api.attachViewport &&
         api.resizeViewport && api.camera && api.frame && api.saveScene && api.loadScene && api.pickObject && api.focusObject &&
-        api.setContentRoot && api.importAsset && api.createModel && api.setTexture;
+        api.setContentRoot && api.importAsset && api.createModel && api.setTexture && api.setMaterial &&
+        api.readMaterial && api.setMaterialRenderState && api.setMaterialParameter && api.setMaterialTexture &&
+        api.saveMaterial && api.revertMaterial && api.reloadShaderFile && api.attachMaterialPreview &&
+        api.resizeMaterialPreview && api.detachMaterialPreview && api.showMaterialPreview && api.materialPreviewCamera;
 }

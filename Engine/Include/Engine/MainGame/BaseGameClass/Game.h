@@ -277,6 +277,8 @@ public:
      * materials that include it.
      */
     std::shared_ptr<Material> LoadMaterial(const std::string& matPath, std::string* error = nullptr);
+    /** A material this game already loaded from matPath; null if it did not. */
+    std::shared_ptr<Material> FindMaterial(const std::string& matPath) const;
     /** Re-reads a loaded .mat into the same Material object; on failure the previous state stays. */
     bool ReloadMaterial(const std::string& matPath, std::string* error = nullptr);
     /** DefaultSurface, opaque and lit; compiled on first use. */
