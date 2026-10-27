@@ -2,7 +2,12 @@
 #include <Windows.h>
 #include "QtHost.h"
 #include "MainWindow.h"
+#include "MaterialEditorWindow.h"
 #include <QApplication>
+#include <QListWidget>
+#include <QPlainTextEdit>
+#include <QScreen>
+#include <QTextCursor>
 #include <QAction>
 #include <QComboBox>
 #include <QColorDialog>
@@ -122,6 +127,91 @@ int wmain(int argc, wchar_t** argv)
         until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.textureAsset.empty()) return false; return true; });
         Ui([](auto* w) { Action(w, QStringLiteral("Повторить"))->trigger(); });
         until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.textureAsset.empty()) return true; return false; });
+
+        // Material editor: template from Files, live parameter, HLSL errors, recompiled parameters, save and discard.
+        const auto materialFile = root / "Content/Materials/Tint.mat", surfaceFile = root / "Content/Materials/Tint.hlsl";
+        auto editorWidget = [](auto* w, const QString& name) -> QWidget* {
+            auto* editor = w->template findChild<MaterialEditorWindow*>();
+            return editor && editor->isVisible() ? editor->template findChild<QWidget*>(name) : nullptr;
+        };
+        auto inEditor = [&](const QString& name) { bool found = false; Ui([&](auto* w) { found = editorWidget(w, name) != nullptr; }); return found; };
+        auto saveMaterial = [](auto* w) {
+            for (auto* action : w->template findChild<MaterialEditorWindow*>()->template findChildren<QAction*>())
+                if (action->text() == QStringLiteral("Сохранить")) { action->trigger(); return; }
+            throw std::runtime_error("material Save action");
+        };
+        auto typeSource = [](QPlainTextEdit* source, const QString& text) {
+            QTextCursor cursor(source->document()); // as typed: setPlainText would clear the modified flag
+            cursor.select(QTextCursor::Document);
+            cursor.insertText(text);
+        };
+        auto materialText = [&] { QFile f(QString::fromStdWString(materialFile.wstring())); f.open(QIODevice::ReadOnly); return QJsonDocument::fromJson(f.readAll()).object(); };
+        Ui([&](auto* w) { Check(w->CreateMaterial({}, QStringLiteral("Tint")).endsWith(QStringLiteral("Tint.mat")), "create material"); });
+        Check(std::filesystem::exists(materialFile) && std::filesystem::exists(surfaceFile), "material template files");
+        until([&] { return inEditor(QStringLiteral("MaterialParam_Gloss_0")) && inEditor(QStringLiteral("MaterialParam_Tint_3")); });
+        Ui([&](auto* w) {
+            // The engine presents into the native window: grab the screen, not the widget.
+            auto* preview = editorWidget(w, QStringLiteral("MaterialPreview"));
+            const QImage frame = preview->screen()->grabWindow(preview->winId()).toImage();
+            Check(frame.save(QString::fromStdWString((root / "editor-material-preview.png").wstring())), "save material preview frame");
+            const QColor center = frame.pixelColor(frame.width() / 2, frame.height() / 2), corner = frame.pixelColor(4, 4);
+            Check(corner.red() > 20 && corner.blue() > corner.red(), "preview clears to its background");
+            Check(center != corner, "preview draws the shape");
+        });
+        Ui([&](auto* w) {
+            Check(w->template findChildren<MaterialEditorWindow*>().size() == 1, "one window per material");
+            w->OpenMaterialEditor(QStringLiteral("/Game/Materials/Tint.mat"));
+            Check(w->template findChildren<MaterialEditorWindow*>().size() == 1, "reopen raises the same window");
+            Check(editorWidget(w, QStringLiteral("MaterialColor_Tint")) != nullptr, "color picker for float4");
+            static_cast<QDoubleSpinBox*>(editorWidget(w, QStringLiteral("MaterialParam_Gloss_0")))->setValue(0.9);
+        });
+        until([&] { bool modified = false; Ui([&](auto* w) { modified = w->template findChild<MaterialEditorWindow*>()->HasUnsavedChanges(); }); return modified; });
+        Ui([&](auto* w) {
+            auto* source = static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")));
+            typeSource(source, source->toPlainText().replace(QStringLiteral("o.SpecularWeight = Gloss;"), QStringLiteral("o.SpecularWeight = Missing;")));
+            saveMaterial(w);
+        });
+        int errorLine = 0;
+        until([&] {
+            Ui([&](auto* w) {
+                auto* errors = static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")));
+                for (int i = 0; errors && i < errors->count() && !errorLine; ++i) errorLine = errors->item(i)->data(Qt::UserRole).toInt();
+            });
+            return errorLine != 0;
+        });
+        Check(errorLine == 11, "compile error points at the surface line");
+        Check(std::abs(materialText().value(QStringLiteral("params")).toObject().value(QStringLiteral("Gloss")).toDouble() - 0.9) < 1e-4, "save writes edited parameter");
+        Ui([&](auto* w) {
+            auto* source = static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")));
+            typeSource(source, source->toPlainText().replace(QStringLiteral("Missing;"), QStringLiteral("Gloss * Rim;"))
+                                     .replace(QStringLiteral("float Gloss = 0.5f;"), QStringLiteral("float Gloss = 0.5f;\n    float Rim = 0.25f;")));
+            saveMaterial(w);
+        });
+        until([&] { return inEditor(QStringLiteral("MaterialParam_Rim_0")); });
+        Ui([&](auto* w) {
+            Check(static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")))->count() == 0, "fixed HLSL compiles");
+            Check(std::abs(static_cast<QDoubleSpinBox*>(editorWidget(w, QStringLiteral("MaterialParam_Gloss_0")))->value() - 0.9) < 1e-4, "recompile keeps edited value");
+            static_cast<QDoubleSpinBox*>(editorWidget(w, QStringLiteral("MaterialParam_Gloss_0")))->setValue(0.1);
+            static_cast<QComboBox*>(editorWidget(w, QStringLiteral("MaterialPreviewShape")))->setCurrentIndex(1);
+        });
+        for (int i = 0; i < 30; ++i) pump();
+        Ui([](auto* w) { QMetaObject::invokeMethod(w->template findChild<MaterialEditorWindow*>(), "close", Qt::QueuedConnection); });
+        until([&] { bool modal = false; Ui([&](auto*) { modal = qobject_cast<QMessageBox*>(QApplication::activeModalWidget()) != nullptr; }); return modal; });
+        // question() reports the clicked button; done() alone would read as NoButton
+        Ui([](auto*) { qobject_cast<QMessageBox*>(QApplication::activeModalWidget())->button(QMessageBox::Discard)->click(); });
+        until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
+        Check(std::abs(materialText().value(QStringLiteral("params")).toObject().value(QStringLiteral("Gloss")).toDouble() - 0.9) < 1e-4, "discard keeps the saved file");
+        Ui([&](auto* w) { w->OpenMaterialEditor(QString::fromStdWString(materialFile.wstring())); });
+        until([&] { return inEditor(QStringLiteral("MaterialParam_Rim_0")); });
+        Ui([&](auto* w) {
+            Check(std::abs(static_cast<QDoubleSpinBox*>(editorWidget(w, QStringLiteral("MaterialParam_Gloss_0")))->value() - 0.9) < 1e-4, "discard reverts the engine material");
+            Check(w->template findChild<MaterialEditorWindow*>()->grab().save(QString::fromStdWString((root / "editor-material.png").wstring())), "save material editor preview");
+            QMetaObject::invokeMethod(w->template findChild<MaterialEditorWindow*>(), "close", Qt::QueuedConnection);
+        });
+        until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
+
+        Ui([](auto* w) { w->activateWindow(); }); // focused-field checks below need the main window active
+
         if (argc == 4)
         {
             const auto modelSource = std::filesystem::absolute(argv[3]);

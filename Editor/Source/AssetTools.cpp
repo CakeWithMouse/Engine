@@ -1,11 +1,18 @@
 #include "MainWindow.h"
 #include "SceneObjectsPanel.h"
 #include "QtHost.h"
+#include "MaterialEditorWindow.h"
 
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QInputDialog>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QLineEdit>
 #include <QMessageBox>
+#include <QRegularExpression>
+#include <QSaveFile>
 
 void EditorMainWindow::ImportAsset(bool texture, const QString& source)
 {
@@ -108,7 +115,9 @@ void EditorMainWindow::UseAsset(const QString& path)
         QStringLiteral("tga")
     }.contains(extension);
 
-    if (!model && !texture)
+    const bool material = extension == QStringLiteral("mat");
+
+    if (!model && !texture && !material)
         return;
 
     EditorCommand c;
@@ -136,15 +145,173 @@ void EditorMainWindow::UseAsset(const QString& path)
         {
             QMessageBox::information(
                 this,
-                QStringLiteral("Назначение текстуры"),
-                QStringLiteral("Выберите объект в сцене, затем откройте текстуру двойным щелчком.")
+                material ? QStringLiteral("Назначение материала") : QStringLiteral("Назначение текстуры"),
+                material ? QStringLiteral("Выберите объект в сцене, затем назначьте материал.")
+                         : QStringLiteral("Выберите объект в сцене, затем откройте текстуру двойным щелчком.")
             );
 
             return;
         }
 
-        c.type = EditorCommand::SetTexture;
+        c.type = material ? EditorCommand::SetMaterial : EditorCommand::SetTexture;
     }
 
     host_->PostCommand(c);
+}
+
+namespace
+{
+    // Путь внутри Content проекта: "Materials/Gold.mat"; пустой, если файл вне его.
+    QString ContentRelativePath(const QString& contentRoot, const QString& path)
+    {
+        const QString relative = QDir(contentRoot).relativeFilePath(QFileInfo(path).absoluteFilePath());
+        if (relative == QStringLiteral("..") ||
+            relative.startsWith(QStringLiteral("../")) ||
+            relative.startsWith(QStringLiteral("..\\")) ||
+            QDir::isAbsolutePath(relative))
+        {
+            return {};
+        }
+        return QDir::fromNativeSeparators(relative);
+    }
+
+    const char* const MaterialSurfaceTemplate =
+        "// Surface of the material: inputs and outputs are described in Shaders/Material/MaterialCommon.hlsli.\n"
+        "cbuffer MaterialParams : register(b1)\n"
+        "{\n"
+        "    float4 Tint = float4(1.0f, 1.0f, 1.0f, 1.0f);\n"
+        "    float Gloss = 0.5f;\n"
+        "};\n"
+        "\n"
+        "void Surface(MaterialInput i, inout MaterialOutput o)\n"
+        "{\n"
+        "    o.Albedo *= Tint.rgb;\n"
+        "    o.SpecularWeight = Gloss;\n"
+        "}\n";
+}
+
+void EditorMainWindow::OpenMaterialEditor(const QString& path)
+{
+    if (!host_->HasScene())
+        return;
+
+    QString material = path;
+
+    if (!material.startsWith(QStringLiteral("/Game/")))
+    {
+        const QString relative = ContentRelativePath(QString::fromUtf8(host_->host().contentRoot), path);
+
+        if (relative.isEmpty())
+        {
+            QMessageBox::warning(
+                this,
+                QStringLiteral("Материал вне проекта"),
+                QStringLiteral("Редактировать можно только материалы из Content проекта.")
+            );
+
+            return;
+        }
+
+        material = QStringLiteral("/Game/") + relative;
+    }
+
+    // Скрытое окно уже закрывается: превью отпускается, новое окно встанет в очередь после него.
+    const QString key = material.toLower();
+    if (MaterialEditorWindow* open = materialEditors_.value(key); open && open->isVisible())
+    {
+        open->showNormal();
+        open->raise();
+        open->activateWindow();
+        return;
+    }
+
+    auto* editor = new MaterialEditorWindow(host_, material, this);
+    materialEditors_.insert(key, editor);
+    editor->show();
+}
+
+QString EditorMainWindow::CreateMaterial(const QString& directory, const QString& name)
+{
+    if (!host_->HasScene())
+        return {};
+
+    const QString content = QString::fromUtf8(host_->host().contentRoot);
+    QString target = directory;
+
+    if (target.isEmpty() || ContentRelativePath(content, target).isEmpty())
+        target = QDir(content).filePath(QStringLiteral("Materials"));
+
+    QString base = name;
+
+    if (base.isEmpty())
+    {
+        bool accepted = false;
+        base = QInputDialog::getText(
+            this,
+            QStringLiteral("Новый материал"),
+            QStringLiteral("Имя материала:"),
+            QLineEdit::Normal,
+            QStringLiteral("NewMaterial"),
+            &accepted
+        ).trimmed();
+
+        if (!accepted || base.isEmpty())
+            return {};
+    }
+
+    static const QRegularExpression validName(QStringLiteral("^[A-Za-z0-9_][A-Za-z0-9_.-]*$"));
+
+    const QDir folder(target);
+    const QString materialFile = folder.filePath(base + QStringLiteral(".mat"));
+    const QString shaderFile = folder.filePath(base + QStringLiteral(".hlsl"));
+
+    QString problem;
+
+    if (!validName.match(base).hasMatch())
+        problem = QStringLiteral("Имя может содержать латинские буквы, цифры, «_», «-» и «.».");
+    else if (QFileInfo::exists(materialFile) || QFileInfo::exists(shaderFile))
+        problem = QStringLiteral("В каталоге уже есть %1.mat или %1.hlsl.").arg(base);
+    else if (!QDir().mkpath(target))
+        problem = QStringLiteral("Не удалось создать каталог %1.").arg(target);
+    else
+    {
+        QJsonObject document;
+        document.insert(QStringLiteral("version"), 1);
+        document.insert(QStringLiteral("shader"), base + QStringLiteral(".hlsl"));
+
+        QSaveFile shader(shaderFile), material(materialFile);
+
+        if (!shader.open(QIODevice::WriteOnly) || shader.write(MaterialSurfaceTemplate) < 0 || !shader.commit() ||
+            !material.open(QIODevice::WriteOnly) || material.write(QJsonDocument(document).toJson()) < 0 || !material.commit())
+        {
+            problem = QStringLiteral("Не удалось записать файлы материала в %1.").arg(target);
+        }
+    }
+
+    if (!problem.isEmpty())
+    {
+        QMessageBox::warning(this, QStringLiteral("Новый материал"), problem);
+        return {};
+    }
+
+    OpenMaterialEditor(materialFile);
+    return materialFile;
+}
+
+bool EditorMainWindow::CloseMaterialEditors()
+{
+    QList<MaterialEditorWindow*> open;
+
+    for (const auto& editor : materialEditors_)
+        if (editor && editor->isVisible())
+            open.push_back(editor);
+
+    for (auto* editor : open)
+        if (!editor->ConfirmClose())
+            return false;
+
+    for (auto* editor : open)
+        editor->Shutdown();
+
+    return true;
 }

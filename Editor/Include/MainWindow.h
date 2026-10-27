@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include <QMainWindow>
+#include <QHash>
+#include <QPointer>
 #include <functional>
 #include <cstdint>
 
@@ -23,6 +25,7 @@ class QPoint;
 class QPushButton;
 class QAction;
 class SceneObjectsPanel;
+class MaterialEditorWindow;
 
 class EditorMainWindow : public QMainWindow
 {
@@ -37,6 +40,11 @@ public:
     void ImportAsset(bool texture, const QString& source = {});
     void AddModel(const QString& path = {});
     void UseAsset(const QString& path);
+
+    // path: файл .mat или его /Game путь. Одно окно на материал.
+    void OpenMaterialEditor(const QString& path);
+    // Создаёт .mat и .hlsl из шаблона в каталоге проекта и открывает редактор; без имени спрашивает его.
+    QString CreateMaterial(const QString& directory, const QString& name = {});
 
 public slots:
     void AppendLine(const QString& line);
@@ -69,6 +77,10 @@ private:
     void OnTransformEdited(quint64 objectId, const InspectorTransformValue& value);
     void OnPointLightEdited(quint64 objectId, const InspectorPointLightValue& value);
     void OnLightColorRequested(quint64 objectId, const QColor& current);
+
+    // Спрашивает о несохранённых материалах и закрывает их окна; false — закрытие отменено.
+    bool CloseMaterialEditors();
+    QHash<QString, QPointer<MaterialEditorWindow>> materialEditors_;
 
     EditorQtHost* host_ = nullptr;
 

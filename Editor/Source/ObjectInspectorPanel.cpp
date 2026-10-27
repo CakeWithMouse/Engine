@@ -201,6 +201,43 @@ void ObjectInspectorPanel::BuildAssetInspector(QFormLayout* form)
     {
         emit ClearTextureRequested();
     });
+
+    materialAsset_ = new QLineEdit(content);
+    materialAsset_->setReadOnly(true);
+    materialAsset_->setObjectName(QStringLiteral("MaterialAsset"));
+    materialAsset_->setMinimumWidth(0);
+    materialAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
+    materialAsset_->setPlaceholderText(QStringLiteral("по умолчанию"));
+    form->addRow(QStringLiteral("Материал"), materialAsset_);
+
+    auto* materialRowWidget = new QWidget(content);
+    auto* materialRow = new QHBoxLayout(materialRowWidget);
+    materialRow->setContentsMargins(0, 0, 0, 0);
+
+    auto* chooseMaterialButton = new QPushButton(QStringLiteral("Выбрать…"), materialRowWidget);
+    chooseMaterialButton->setObjectName(QStringLiteral("ChooseMaterial"));
+    editMaterialButton_ = new QPushButton(QStringLiteral("Редактировать"), materialRowWidget);
+    editMaterialButton_->setObjectName(QStringLiteral("EditMaterial"));
+    auto* clearMaterialButton = new QPushButton(QStringLiteral("Убрать"), materialRowWidget);
+    clearMaterialButton->setObjectName(QStringLiteral("ClearMaterial"));
+
+    materialRow->addWidget(chooseMaterialButton);
+    materialRow->addWidget(editMaterialButton_);
+    materialRow->addWidget(clearMaterialButton);
+    form->addRow(materialRowWidget);
+
+    connect(chooseMaterialButton, &QPushButton::clicked, this, [this]
+    {
+        emit ChooseMaterialRequested();
+    });
+    connect(editMaterialButton_, &QPushButton::clicked, this, [this]
+    {
+        emit EditMaterialRequested(materialAsset_->text());
+    });
+    connect(clearMaterialButton, &QPushButton::clicked, this, [this]
+    {
+        emit ClearMaterialRequested();
+    });
 }
 
 void ObjectInspectorPanel::SetEnabled(bool enabled)
@@ -291,6 +328,8 @@ void ObjectInspectorPanel::Refresh(
         objectName_->clear();
         modelAsset_->clear();
         textureAsset_->clear();
+        materialAsset_->clear();
+        editMaterialButton_->setEnabled(false);
         lightInspector_->setVisible(false);
         refreshing_ = false;
         return;
@@ -298,6 +337,8 @@ void ObjectInspectorPanel::Refresh(
 
     modelAsset_->clear();
     textureAsset_->clear();
+    materialAsset_->clear();
+    editMaterialButton_->setEnabled(false);
 
     bool selectedLight = false;
 
@@ -329,6 +370,8 @@ void ObjectInspectorPanel::Refresh(
 
         modelAsset_->setText(QString::fromStdString(object.modelAsset));
         textureAsset_->setText(QString::fromStdString(object.textureAsset));
+        materialAsset_->setText(QString::fromStdString(object.materialAsset));
+        editMaterialButton_->setEnabled(!object.materialAsset.empty());
 
         if (canReplaceWholeInspector)
         {

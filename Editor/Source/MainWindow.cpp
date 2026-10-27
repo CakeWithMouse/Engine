@@ -148,6 +148,7 @@ void EditorMainWindow::closeEvent(QCloseEvent* event)
 {
     event->ignore();
     if (closing_ || sceneBusy_ || checkingChanges_) return;
+    if (!CloseMaterialEditors()) return;
     closing_ = true;
     // Queue a barrier after viewport edits, then inspect the authoritative dirty state.
     if (host_->HasScene())
@@ -626,6 +627,48 @@ void EditorMainWindow::ConnectPanels()
 
         EditorCommand c;
         c.type = EditorCommand::SetTexture;
+        c.objectId = selectedId_;
+
+        host_->PostCommand(c);
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseMaterialRequested, this, [this]
+    {
+        if (!host_->HasScene() ||
+            sceneBusy_ ||
+            host_->PlayState() != EditorQtHost::EditorState::Edit)
+        {
+            return;
+        }
+
+        const QString path = QFileDialog::getOpenFileName(
+            this,
+            QStringLiteral("Материал из проекта"),
+            QString::fromUtf8(host_->host().contentRoot),
+            QStringLiteral("Материалы (*.mat)")
+        );
+
+        if (!path.isEmpty())
+            UseAsset(path);
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::EditMaterialRequested, this, [this](const QString& material)
+    {
+        if (!material.isEmpty())
+            OpenMaterialEditor(material);
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearMaterialRequested, this, [this]
+    {
+        if (!selectedId_ ||
+            sceneBusy_ ||
+            host_->PlayState() != EditorQtHost::EditorState::Edit)
+        {
+            return;
+        }
+
+        EditorCommand c;
+        c.type = EditorCommand::SetMaterial;
         c.objectId = selectedId_;
 
         host_->PostCommand(c);

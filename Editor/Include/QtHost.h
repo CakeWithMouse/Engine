@@ -10,6 +10,7 @@
 #include <vector>
 #include <memory>
 #include <chrono>
+#include <functional>
 class QTemporaryDir;
 
 class EditorMainWindow;
@@ -31,7 +32,8 @@ struct EditorCommand
         FetchScene, UpdateObjectTransform, RefreshScene, SelectObject, CreateObject, RemoveObject,
         RenameObject, DuplicateObject, SaveScene, LoadScene, NewScene, Undo, Redo, PickObject, FocusObject,
         SetGizmoMode, BeginGizmoDrag, EndGizmoDrag,
-        ImportModel, ImportTexture, CreateModel, SetTexture, SetPointLight,
+        ImportModel, ImportTexture, CreateModel, SetTexture, SetPointLight, SetMaterial,
+        RunTask,
     };
 
     Type type = None;
@@ -46,6 +48,9 @@ struct EditorCommand
     EngineScenePointLight pointLight{};
     EditorGizmoMode gizmo = EditorGizmoTranslate;
     QString name;
+
+    // RunTask: выполняется в потоке движка, если есть сессия сцены (редактор материалов)
+    std::function<void(const EngineEditSessionApi&)> task;
 };
 
 class EditorQtHost
@@ -72,6 +77,7 @@ public:
 
     void Log(const char* text); // любой поток
     void PostCommand(const EditorCommand& c); // поток UI
+    void RunOnUi(std::function<void()> action); // поток движка: в очередь UI, пока окно редактора живо
     double LastDt() const { return lastDt_.load(); }
     uint64_t UpdateCount() const { return updates_.load(); }
     const EngineModuleHost& host() const { return host_; }
@@ -98,6 +104,7 @@ public:
         std::string modelAsset, textureAsset;
         bool hasPointLight = false;
         EngineScenePointLight pointLight{};
+        std::string materialAsset;
     };
 
     struct SceneType

@@ -262,6 +262,7 @@ void EditorQtHost::DrainCommands()
         case EditorCommand::CreateObject:
         case EditorCommand::CreateModel:
         case EditorCommand::SetTexture:
+        case EditorCommand::SetMaterial:
         case EditorCommand::SetPointLight:
         case EditorCommand::RemoveObject:
         case EditorCommand::RenameObject:
@@ -285,7 +286,8 @@ void EditorQtHost::DrainCommands()
                     EditorCommand::CreateObject ||
                     cmd.type == EditorCommand::RemoveObject || cmd.type == EditorCommand::RenameObject || cmd.type ==
                     EditorCommand::DuplicateObject ||
-                    cmd.type == EditorCommand::CreateModel || cmd.type == EditorCommand::SetTexture || cmd.type ==
+                    cmd.type == EditorCommand::CreateModel || cmd.type == EditorCommand::SetTexture ||
+                    cmd.type == EditorCommand::SetMaterial || cmd.type ==
                     EditorCommand::SetPointLight;
                 if ((mutation || cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene ||
                     cmd.type == EditorCommand::Undo || cmd.type == EditorCommand::Redo) && PlayState() != Edit)
@@ -372,6 +374,9 @@ void EditorQtHost::DrainCommands()
                     else if (cmd.type == EditorCommand::SetTexture)
                         result = scene_.setTexture(scene_.context, cmd.objectId, cmd.path.toUtf8().constData(), error,
                                                    sizeof(error));
+                    else if (cmd.type == EditorCommand::SetMaterial)
+                        result = scene_.setMaterial(scene_.context, cmd.objectId, cmd.path.toUtf8().constData(), error,
+                                                    sizeof(error));
                     else if (cmd.type == EditorCommand::SetPointLight)
                         result = api.setPointLight(api.context, cmd.objectId, &cmd.pointLight);
                     else if (cmd.type == EditorCommand::CreateObject || cmd.type == EditorCommand::DuplicateObject ||
@@ -379,7 +384,7 @@ void EditorQtHost::DrainCommands()
                     {
                         auto view = ReadSnapshot();
                         QString type = cmd.path, base = cmd.name;
-                        QString model = cmd.type == EditorCommand::CreateModel ? cmd.path : QString(), texture;
+                        QString model = cmd.type == EditorCommand::CreateModel ? cmd.path : QString(), texture, material;
                         EngineSceneTransform transform = cmd.transform;
                         uint64_t parent = 0;
                         bool inherit = true;
@@ -400,6 +405,7 @@ void EditorQtHost::DrainCommands()
                             inherit = found->inheritScale;
                             model = QString::fromStdString(found->modelAsset);
                             texture = QString::fromStdString(found->textureAsset);
+                            material = QString::fromStdString(found->materialAsset);
                             hasLight = found->hasPointLight;
                             light = found->pointLight;
                         }
@@ -423,6 +429,9 @@ void EditorQtHost::DrainCommands()
                             if (result == EngineSceneOk && !texture.isEmpty())
                                 result = scene_.setTexture(scene_.context, id, texture.toUtf8().constData(), error,
                                                            sizeof(error));
+                            if (result == EngineSceneOk && !material.isEmpty())
+                                result = scene_.setMaterial(scene_.context, id, material.toUtf8().constData(), error,
+                                                            sizeof(error));
                             if (result == EngineSceneOk && hasLight)
                                 result = api.
                                     setPointLight(api.context, id, &light);
@@ -510,6 +519,9 @@ void EditorQtHost::DrainCommands()
                         cmd, result, QString::fromUtf8(error));
                 break;
             }
+        case EditorCommand::RunTask:
+            if (HasScene() && cmd.task) cmd.task(scene_);
+            break;
         case EditorCommand::SetGizmoMode:
             gizmoMode_.store(cmd.gizmo);
             lastTransformId_ = 0;
@@ -583,7 +595,7 @@ void ENGINE_MODULE_CALL EditorQtHost::SceneVisitor(void* context, const EngineSc
     view.objects.push_back({
         info->id, info->parentId, info->inheritParentScale != 0, info->name, info->typeName, info->transform,
         info->modelAsset ? info->modelAsset : "", info->textureAsset ? info->textureAsset : "",
-        info->hasPointLight != 0, info->pointLight
+        info->hasPointLight != 0, info->pointLight, info->materialAsset ? info->materialAsset : ""
     });
 }
 
@@ -641,6 +653,13 @@ void EditorQtHost::Complete(const EditorCommand& command, uint32_t result, const
         {
             window->CommandFinished(command, result, error);
         }, Qt::QueuedConnection);
+}
+
+void EditorQtHost::RunOnUi(std::function<void()> action)
+{
+    std::lock_guard lock(windowMutex_);
+    if (auto* window = window_)
+        QMetaObject::invokeMethod(window, std::move(action), Qt::QueuedConnection);
 }
 
 void EditorQtHost::SetGizmoMode(EditorGizmoMode mode)

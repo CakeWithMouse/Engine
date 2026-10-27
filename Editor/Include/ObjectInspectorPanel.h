@@ -66,6 +66,9 @@ signals:
 
     void ChooseTextureRequested();
     void ClearTextureRequested();
+    void ChooseMaterialRequested();
+    void EditMaterialRequested(const QString& virtualPath);
+    void ClearMaterialRequested();
 
 private:
     void BuildUi();
@@ -87,6 +90,8 @@ private:
     QLineEdit* objectName_ = nullptr;
     QLineEdit* modelAsset_ = nullptr;
     QLineEdit* textureAsset_ = nullptr;
+    QLineEdit* materialAsset_ = nullptr;
+    QPushButton* editMaterialButton_ = nullptr;
 
     QDoubleSpinBox* transform_[9]{};
 
