@@ -210,6 +210,25 @@ int wmain(int argc, wchar_t** argv)
         });
         until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
 
+        // "Редактировать" on the default material: a new material is created, assigned and opened.
+        Ui([](auto* w) {
+            auto* tree = w->findChild<QTreeWidget*>();
+            for (int i = 0; i < tree->topLevelItemCount(); ++i) if (tree->topLevelItem(i)->text(1) == QStringLiteral("Primitive.Sphere")) tree->setCurrentItem(tree->topLevelItem(i));
+        });
+        until([&] { return host.ReadSnapshot().selected != 0; });
+        const uint64_t selected = host.ReadSnapshot().selected;
+        Ui([](auto* w) {
+            auto* edit = w->template findChild<QPushButton*>(QStringLiteral("EditMaterial"));
+            Check(edit && edit->isEnabled(), "edit enabled with the default material");
+            edit->click();
+        });
+        std::string assigned;
+        until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.id == selected) assigned = o.materialAsset; return !assigned.empty(); });
+        Check(assigned.rfind("/Game/Materials/", 0) == 0 && std::filesystem::exists(root / "Content" / std::filesystem::u8path(assigned.substr(6))),
+              "default material replaced by a new asset");
+        until([&] { return inEditor(QStringLiteral("MaterialParam_Gloss_0")); });
+        Ui([](auto* w) { QMetaObject::invokeMethod(w->template findChild<MaterialEditorWindow*>(), "close", Qt::QueuedConnection); });
+        until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
         Ui([](auto* w) { w->activateWindow(); }); // focused-field checks below need the main window active
 
         if (argc == 4)

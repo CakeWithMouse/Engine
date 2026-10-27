@@ -175,6 +175,12 @@ namespace
         return QDir::fromNativeSeparators(relative);
     }
 
+    const QRegularExpression& MaterialNamePattern()
+    {
+        static const QRegularExpression pattern(QStringLiteral("^[A-Za-z0-9_][A-Za-z0-9_.-]*$"));
+        return pattern;
+    }
+
     const char* const MaterialSurfaceTemplate =
         "// Surface of the material: inputs and outputs are described in Shaders/Material/MaterialCommon.hlsli.\n"
         "cbuffer MaterialParams : register(b1)\n"
@@ -259,15 +265,13 @@ QString EditorMainWindow::CreateMaterial(const QString& directory, const QString
             return {};
     }
 
-    static const QRegularExpression validName(QStringLiteral("^[A-Za-z0-9_][A-Za-z0-9_.-]*$"));
-
     const QDir folder(target);
     const QString materialFile = folder.filePath(base + QStringLiteral(".mat"));
     const QString shaderFile = folder.filePath(base + QStringLiteral(".hlsl"));
 
     QString problem;
 
-    if (!validName.match(base).hasMatch())
+    if (!MaterialNamePattern().match(base).hasMatch())
         problem = QStringLiteral("Имя может содержать латинские буквы, цифры, «_», «-» и «.».");
     else if (QFileInfo::exists(materialFile) || QFileInfo::exists(shaderFile))
         problem = QStringLiteral("В каталоге уже есть %1.mat или %1.hlsl.").arg(base);
@@ -296,6 +300,49 @@ QString EditorMainWindow::CreateMaterial(const QString& directory, const QString
 
     OpenMaterialEditor(materialFile);
     return materialFile;
+}
+
+void EditorMainWindow::CreateMaterialForSelection()
+{
+    const auto snapshot = host_->ReadSnapshot();
+
+    if (!host_->HasScene() ||
+        sceneBusy_ ||
+        host_->PlayState() != EditorQtHost::EditorState::Edit ||
+        !snapshot.selected)
+    {
+        return;
+    }
+
+    // Имя объекта, если оно годится для файла, иначе "Material"; занятые имена получают суффикс.
+    QString base = QStringLiteral("Material");
+
+    for (const auto& object : snapshot.objects)
+    {
+        const QString name = QString::fromStdString(object.name);
+
+        if (object.id == snapshot.selected && MaterialNamePattern().match(name).hasMatch())
+            base = name;
+    }
+
+    const QDir folder(QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(QStringLiteral("Materials")));
+    QString name = base;
+
+    for (int i = 2; QFileInfo::exists(folder.filePath(name + QStringLiteral(".mat"))) ||
+                    QFileInfo::exists(folder.filePath(name + QStringLiteral(".hlsl"))); ++i)
+    {
+        name = base + QStringLiteral("_") + QString::number(i);
+    }
+
+    if (CreateMaterial(folder.path(), name).isEmpty())
+        return;
+
+    EditorCommand c;
+    c.type = EditorCommand::SetMaterial;
+    c.objectId = snapshot.selected;
+    c.path = QStringLiteral("/Game/Materials/") + name + QStringLiteral(".mat");
+
+    host_->PostCommand(c);
 }
 
 bool EditorMainWindow::CloseMaterialEditors()

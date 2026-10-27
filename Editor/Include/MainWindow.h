@@ -45,6 +45,8 @@ public:
     void OpenMaterialEditor(const QString& path);
     // Создаёт .mat и .hlsl из шаблона в каталоге проекта и открывает редактор; без имени спрашивает его.
     QString CreateMaterial(const QString& directory, const QString& name = {});
+    // Для объекта с материалом по умолчанию: новый материал в Content/Materials, назначение и редактор.
+    void CreateMaterialForSelection();
 
 public slots:
     void AppendLine(const QString& line);

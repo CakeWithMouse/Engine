@@ -656,6 +656,8 @@ void EditorMainWindow::ConnectPanels()
     {
         if (!material.isEmpty())
             OpenMaterialEditor(material);
+        else
+            CreateMaterialForSelection();
     });
 
     connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearMaterialRequested, this, [this]

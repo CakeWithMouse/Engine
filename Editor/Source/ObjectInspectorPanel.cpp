@@ -371,7 +371,11 @@ void ObjectInspectorPanel::Refresh(
         modelAsset_->setText(QString::fromStdString(object.modelAsset));
         textureAsset_->setText(QString::fromStdString(object.textureAsset));
         materialAsset_->setText(QString::fromStdString(object.materialAsset));
-        editMaterialButton_->setEnabled(!object.materialAsset.empty());
+        // С материалом по умолчанию кнопка создаёт новый материал; у света материала нет.
+        editMaterialButton_->setEnabled(!object.materialAsset.empty() || !object.hasPointLight);
+        editMaterialButton_->setToolTip(object.materialAsset.empty()
+            ? QStringLiteral("Создать материал в Content/Materials, назначить его объекту и открыть редактор")
+            : QString());
 
         if (canReplaceWholeInspector)
         {
