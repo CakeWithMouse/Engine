@@ -18,6 +18,7 @@
 #include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/ShaderCompiler.h>
 #include <dxgi1_6.h>
+#include "../../Resources/VfsRead.h"
 #include "stb_image.h"
 
 #pragma comment(lib, "d3d11.lib")
@@ -1255,6 +1256,13 @@ bool Game::SupportsDeferredGeometry(GameComponent* Component)
 
 Material* Game::PrepareMaterial(GameComponent* Component)
 {
+    // A material asset (/Game path) is loaded through the cache of this game.
+    if (!Component->MaterialAssetPath.empty() && !Component->bMaterialAssetLoaded)
+    {
+        Component->bMaterialAssetLoaded = true;
+        const std::string physical = VfsRead::Active().Resolve(Component->MaterialAssetPath);
+        Component->AssignMaterial(LoadMaterial(physical.empty() ? Component->MaterialAssetPath : physical));
+    }
     Material* material = Component->GetMaterial();
     if (material == nullptr && Component->RequiresMaterial())
     {

@@ -64,6 +64,12 @@ public:
      */
     bool SetMaterial(std::shared_ptr<Material> material);
     Material* GetMaterial() const { return MaterialPtr.get(); }
+    /**
+     * A material asset by its /Game path (scenes store this): the game loads it, through its
+     * material cache, before the next draw. Empty clears it. False if materials are unsupported.
+     */
+    bool SetMaterialAsset(const std::string& path);
+    const std::string& GetMaterialAsset() const { return MaterialAssetPath; }
     virtual bool SupportsMaterials() const { return false; }
     /** Drawn only through a material: without one of its own, the game uses its default material. */
     virtual bool RequiresMaterial() const { return false; }
@@ -172,6 +178,8 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
     std::shared_ptr<Material> MaterialPtr;
+    std::string MaterialAssetPath;
+    bool bMaterialAssetLoaded = false; // one attempt per assignment, a broken file is not retried
     // Cube map resources are owned by Game::cubeMapCache, the component only observes them.
     ID3D11ShaderResourceView* cubeMapSRV = nullptr;
     ID3D11SamplerState* cubeMapSamplerState = nullptr;
@@ -236,6 +244,7 @@ protected:
     ID3D11PixelShader* pixelShader = nullptr;
 
 private:
+    void AssignMaterial(std::shared_ptr<Material> material);
     friend class Game;
     friend class Scene;
     // Separate from GamePtr: components may be configured with a game before registration.

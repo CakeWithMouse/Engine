@@ -1,5 +1,6 @@
 #include <Engine/Scene/SceneAssets.h>
 #include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
+#include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/TextureLoader.h>
 #include <Engine/Render/SkeletalLoader.h>
 #include "../Resources/VfsRead.h"
@@ -114,11 +115,24 @@ std::unique_ptr<GameComponent> CreateModel(const std::string& path)
     if (!object->SetAssetModel(path, std::move(model.Model))) throw std::runtime_error("Invalid model");
     return object;
 }
-void Apply(GameComponent& object, const std::string& model, const std::string& texture)
+void ValidateMaterial(std::string_view path)
+{
+    if (!ValidPath(path) || (!path.empty() && Extension(fs::u8path(std::string(path))) != ".mat"))
+        throw std::runtime_error("Expected a .mat path inside /Game");
+    if (path.empty()) return;
+    const auto physical = VfsRead::Active().Resolve(path);
+    MaterialAsset asset;
+    std::string error;
+    if (physical.empty() || !MaterialAsset::Load(physical, asset, error))
+        throw std::runtime_error("Missing or invalid material: " + (error.empty() ? std::string(path) : error));
+}
+void Apply(GameComponent& object, const std::string& model, const std::string& texture, const std::string& material)
 {
     if (object.GetModelAsset() != model) throw std::runtime_error("Model asset does not match component type");
     ValidateTexture(texture);
     if (!object.TrySetTexture(texture)) throw std::runtime_error("Cannot create texture resources");
+    ValidateMaterial(material);
+    if (!object.SetMaterialAsset(material)) throw std::runtime_error("This object cannot take a material");
 }
 std::string Import(const fs::path& content, const fs::path& source, Kind kind)
 {

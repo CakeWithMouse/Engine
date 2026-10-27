@@ -8,6 +8,7 @@
 #include <Engine/Scene/SceneAssets.h>
 #include <Engine/Resources/Paths.h>
 #include "../../Source/Resources/VfsRead.h"
+#include <fstream>
 
 void Check(bool, const char*);
 namespace
@@ -61,7 +62,8 @@ void RunAssetRenderTests(HWND hwnd, const std::filesystem::path& engineContent,
     Check(game.GetScene().SetTextureAsset(added.id,"") == SceneResult::Ok, "clear GPU texture");
     Check(game.RenderViewportFrame(0) && game.greenPixels == before, "clearing restores untextured pixels");
 
-    // Scene primitives are meshes drawn by the default material, which shows the object's texture.
+    // Scene primitives are meshes drawn by materials: the default one shows the object's texture and a
+    // material asset (here unlit green, in a project path with Cyrillic letters) replaces the look.
     game.GetScene().RemoveComponent(added.id);
     auto meshCube = std::make_unique<MeshComponent>(); meshCube->SetMesh(MeshPrimitives::Cube()); meshCube->SetColor({1,1,1,1});
     object = std::move(meshCube);
@@ -71,6 +73,11 @@ void RunAssetRenderTests(HWND hwnd, const std::filesystem::path& engineContent,
     Check(game.GetScene().SetTextureAsset(added.id,texture) == SceneResult::Ok && game.RenderViewportFrame(0) &&
         game.greenPixels > meshBefore + 100, "the default material shows the texture of a mesh");
     Check(game.GetScene().SetTextureAsset(added.id,"") == SceneResult::Ok, "clear mesh texture");
+    std::filesystem::create_directories(content / "Materials");
+    std::ofstream(content / "Materials/Green.hlsl") << "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = float3(0, 1, 0); }\n";
+    std::ofstream(content / "Materials/Green.mat") << R"({ "shader": "Green.hlsl", "render": { "lighting": "unlit" } })";
+    Check(game.GetScene().SetMaterialAsset(added.id,"/Game/Materials/Green.mat") == SceneResult::Ok && game.RenderViewportFrame(0) &&
+        game.greenPixels > meshBefore + 1000, "a material asset draws the mesh");
 #if defined(ENGINE_ENABLE_ASSIMP)
     game.GetScene().RemoveComponent(added.id);
     object = SceneAssets::CreateModel(modelPath);

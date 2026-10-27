@@ -79,6 +79,7 @@ uint32_t SceneCommands::ReadScene(void* context, EngineSceneInfo* info, EngineSc
             EngineSceneObjectInfo value{object.id, object.name.c_str(), object.typeName.c_str(),
                 object.parentId, object.inheritParentScale ? 1u : 0u, Encode(object.transform),
                 object.modelAsset.c_str(), object.textureAsset.c_str()};
+            value.materialAsset = object.materialAsset.c_str();
             if (object.pointLight)
             {
                 const auto& light = *object.pointLight;

@@ -53,7 +53,8 @@ void Structure(const SceneSnapshot& data)
     for (const auto& item : data.components)
     {
         if (item.pointLight && !item.pointLight->IsValid()) Invalid("Invalid point light parameters");
-        if (!SceneAssets::ValidPath(item.modelAsset) || !SceneAssets::ValidPath(item.textureAsset))
+        if (!SceneAssets::ValidPath(item.modelAsset) || !SceneAssets::ValidPath(item.textureAsset) ||
+            !SceneAssets::ValidPath(item.materialAsset))
             Invalid("Assets must be canonical /Game paths without traversal");
         if ((item.typeName == SceneAssets::ModelType) != !item.modelAsset.empty())
             Invalid("Engine.Model requires a model asset; other types cannot specify a model");
@@ -124,10 +125,15 @@ SceneSnapshot SceneDocument::Parse(const std::string& text)
             }
             if (o.contains("assets"))
             {
-                const auto& a = o.at("assets"); RequireFields(a, {"model", "texture"});
-                if (!a.at("model").is_string() || !a.at("texture").is_string()) Invalid("Invalid asset reference");
+                // "material" is optional: documents written before materials stay readable.
+                const auto& a = o.at("assets");
+                if (a.is_object() && a.contains("material")) RequireFields(a, {"model", "texture", "material"});
+                else RequireFields(a, {"model", "texture"});
+                if (!a.at("model").is_string() || !a.at("texture").is_string() ||
+                    (a.contains("material") && !a.at("material").is_string())) Invalid("Invalid asset reference");
                 item.modelAsset = a.at("model").get<std::string>();
                 item.textureAsset = a.at("texture").get<std::string>();
+                if (a.contains("material")) item.materialAsset = a.at("material").get<std::string>();
             }
             item.id = Id(o.at("id")); item.parentId = Id(o.at("parent"));
             item.name = Text(o.at("name")); item.typeName = Text(o.at("type"));
@@ -157,8 +163,12 @@ std::string SceneDocument::Serialize(const SceneSnapshot& data)
             {"transform", {{"position", {t.position.x,t.position.y,t.position.z}},
                 {"rotation", {t.rotation.x,t.rotation.y,t.rotation.z,t.rotation.w}},
                 {"scale", {t.scale.x,t.scale.y,t.scale.z}}}}});
-        if (!o.modelAsset.empty() || !o.textureAsset.empty())
-            json["objects"].back()["assets"] = {{"model", o.modelAsset}, {"texture", o.textureAsset}};
+        if (!o.modelAsset.empty() || !o.textureAsset.empty() || !o.materialAsset.empty())
+        {
+            auto& assets = json["objects"].back()["assets"];
+            assets = {{"model", o.modelAsset}, {"texture", o.textureAsset}};
+            if (!o.materialAsset.empty()) assets["material"] = o.materialAsset;
+        }
         if (o.pointLight)
         {
             const auto& light = *o.pointLight;
@@ -187,7 +197,7 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
     {
         auto object = o.typeName == SceneAssets::ModelType ? SceneAssets::CreateModel(o.modelAsset) : catalog.Find(o.typeName)->create();
         if (!object) throw std::runtime_error("Component factory returned null");
-        SceneAssets::Apply(*object, o.modelAsset, o.textureAsset);
+        SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
         auto added = target.AddComponent(o.name, object, o.typeName);
         if (added.result != SceneResult::Ok || target.SetTransform(added.id, o.transform) != SceneResult::Ok)
             throw std::runtime_error("Cannot restore object: " + o.name);
