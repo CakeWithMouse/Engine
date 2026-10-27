@@ -7,8 +7,8 @@
 //
 // A surface file defines one function:
 //     void Surface(MaterialInput i, inout MaterialOutput o)
-// `o` arrives filled with defaults (component colour, interpolated normal), so a surface only
-// overrides what it needs. Lighting, shadows and the forward/deferred variants come from the template.
+// `o` arrives filled with defaults (component colour times the component's texture, interpolated
+// normal), so a surface only overrides what it needs. Lighting, shadows and the forward/deferred variants come from the template.
 //
 // Resources of a surface:
 //     cbuffer MaterialParams : register(b1) { ... };   parameters, listed in the editor by reflection

@@ -65,6 +65,8 @@ public:
     bool SetMaterial(std::shared_ptr<Material> material);
     Material* GetMaterial() const { return MaterialPtr.get(); }
     virtual bool SupportsMaterials() const { return false; }
+    /** Drawn only through a material: without one of its own, the game uses its default material. */
+    virtual bool RequiresMaterial() const { return false; }
     /** MaterialVariant flags of the shader set this component draws with (instances, skinning). */
     virtual uint32_t GetMaterialVariant() const;
 

@@ -15,4 +15,10 @@ namespace MeshPrimitives
     MeshLodData Cube(float size = 1.0f);
     /** Plane in XZ facing +Y, split into subdivisions x subdivisions quads; u along +X, v along -Z. */
     MeshLodData Plane(float width = 1.0f, float depth = 1.0f, int subdivisions = 1);
+    /** Cylinder along Y with flat caps; u runs around the side, v from the top (0) to the bottom (1). */
+    MeshLodData Cylinder(float radius = 0.5f, float height = 1.0f, int slices = 32);
+    /** Cone along Y with its apex at +height/2 and a flat base; side UVs as for the cylinder. */
+    MeshLodData Cone(float radius = 0.5f, float height = 1.0f, int slices = 32);
+    /** Pyramid with a size x size base at -height/2 and its apex at +height/2; flat faces. */
+    MeshLodData Pyramid(float size = 1.0f, float height = 1.0f);
 }

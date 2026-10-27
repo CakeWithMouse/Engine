@@ -439,6 +439,13 @@ void MeshPrimitivesGeometry()
     const MeshBounds planeBounds = ComputeMeshBounds(plane);
     Near(planeBounds.Max.x, 2.0f); Near(planeBounds.Max.z, 1.0f); Near(planeBounds.Max.y, 0.0f);
 
+    // Unit shapes of the scene catalog: 1 x 1 x 1 around the origin.
+    for (const MeshLodData& shape : {MeshPrimitives::Cylinder(), MeshPrimitives::Cone(), MeshPrimitives::Pyramid()})
+    {
+        CheckMesh(shape);
+        const MeshBounds bounds = ComputeMeshBounds(shape);
+        Near(bounds.Min.y, -0.5f); Near(bounds.Max.y, 0.5f); Near(bounds.Max.x, 0.5f); Near(bounds.Min.z, -0.5f);
+    }
 }
 
 // Draws one registered component into a 64x64 target with the given culling; returns RGBA8 pixels.
@@ -822,7 +829,9 @@ void MaterialComponentIntegration()
     plane->SetMesh(MeshPrimitives::Plane(2.0f, 2.0f));
     CHECK(game.RegisterComponent("plane", plane) == RegisterResult::Ok);
     CHECK(game.BindComponentShaders(plane, ShaderCompileVariant::Default));
-    ID3D11PixelShader* legacyShader = game.GetPixelShader(EnginePaths::Shader("RotatedFigure.hlsl").generic_u8string());
+    // A mesh registered without a shader pair (as by a scene) draws with the default material.
+    const uint32_t defaultPixel = RenderOffscreen(game, *plane, D3D11_CULL_BACK)[32 * 64 + 32];
+    CHECK(defaultPixel != 0u);
     CHECK(plane->SetMaterial(material));
 
     // Opaque lit: compiled on first use, drawn by the G-buffer pass, casts shadows.
@@ -850,11 +859,11 @@ void MaterialComponentIntegration()
     CHECK(material->SetParameter("Tint", {0.0f, 0.0f, 1.0f, 1.0f}));
     CHECK(RenderOffscreen(game, *plane, D3D11_CULL_BACK)[32 * 64 + 32] == 0xffff0000u);
 
-    // Without the material the shader pair is used again.
+    // Without the material the default one draws it again.
     CHECK(plane->SetMaterial(nullptr));
     CHECK(game.BindComponentShaders(plane, ShaderCompileVariant::Default));
     CHECK(game.SupportsDeferredGeometry(plane));
-    CHECK(legacyShader != nullptr && legacyShader != material->GetPixelShader(false));
+    CHECK(RenderOffscreen(game, *plane, D3D11_CULL_BACK)[32 * 64 + 32] == defaultPixel);
 }
 
 // Shadow pass of one component into a 64x64 depth map seen from above; returns the depth values.

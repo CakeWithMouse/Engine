@@ -1256,6 +1256,10 @@ bool Game::SupportsDeferredGeometry(GameComponent* Component)
 Material* Game::PrepareMaterial(GameComponent* Component)
 {
     Material* material = Component->GetMaterial();
+    if (material == nullptr && Component->RequiresMaterial())
+    {
+        material = GetDefaultMaterial().get();
+    }
     if (material)
     {
         material->RequireVariant(Component->GetMaterialVariant());

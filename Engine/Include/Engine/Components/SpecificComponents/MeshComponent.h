@@ -25,6 +25,8 @@ public:
     void RenderShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass) override;
     float GetBoundingRadius() const override;
     bool SupportsMaterials() const override { return true; }
+    // Without a shader pair of its own (e.g. created by a scene) a mesh draws with the default material.
+    bool RequiresMaterial() const override { return GetVertexShaderName().empty(); }
 
 private:
     void BindGeometry(ID3D11DeviceContext* context, ID3D11InputLayout* layout);

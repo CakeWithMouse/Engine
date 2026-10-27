@@ -282,8 +282,8 @@ public:
     /** DefaultSurface, opaque and lit; compiled on first use. */
     std::shared_ptr<Material> GetDefaultMaterial();
     /**
-     * The component's material, compiled if it changed (with the instanced set for components drawn
-     * with an instance stream); null without one.
+     * The component's material (the default one if RequiresMaterial), compiled if it changed, with
+     * the shader set of the component's MaterialVariant; null without one.
      */
     Material* PrepareMaterial(GameComponent* Component);
 

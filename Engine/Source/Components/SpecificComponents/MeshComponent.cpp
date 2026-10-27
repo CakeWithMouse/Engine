@@ -30,16 +30,18 @@ MeshComponent::MeshComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm:
 void MeshComponent::SetMesh(MeshLodData mesh)
 {
     Mesh = std::move(mesh);
-    indexCount = static_cast<int>(Mesh.Indices.size());
 
-    // Culling uses a sphere around the local origin, not around the centre of the bounds.
-    float maxRadiusSq = 0.0f;
+    // The same triangles as CPU geometry: index count, culling radius around the local origin and
+    // editor picking. Only this component's own buffers are drawn.
+    std::vector<DirectX::XMFLOAT4> points;
+    points.reserve(Mesh.Vertices.size() * 2);
     for (const MeshVertex& vertex : Mesh.Vertices)
     {
-        const DirectX::XMFLOAT4& p = vertex.Position;
-        maxRadiusSq = std::max(maxRadiusSq, p.x * p.x + p.y * p.y + p.z * p.z);
+        points.push_back(vertex.Position);
+        points.emplace_back(1.0f, 1.0f, 1.0f, 1.0f);
     }
-    LocalBoundingRadius = std::sqrt(maxRadiusSq);
+    std::vector<int> triangles(Mesh.Indices.begin(), Mesh.Indices.end());
+    InitPoints(points.data(), static_cast<int>(points.size()), triangles.data(), static_cast<int>(triangles.size()));
 
     bBuffersDirty = true;
     if (GamePtr && GamePtr->GetDevice())

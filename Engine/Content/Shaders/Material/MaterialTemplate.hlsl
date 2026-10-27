@@ -21,6 +21,9 @@
 static const float MaterialDefaultSpecularWeight = 0.25f;
 static const float MaterialDefaultAmbientModel = 1.0f;
 
+Texture2D ComponentTexture : register(t0); // pixel stage; HasTexture says whether one is bound
+SamplerState ComponentSampler : register(s0);
+
 #if defined(MATERIAL_INSTANCED)
 #include "../Instancing.hlsli"
 StructuredBuffer<InstData> InstBuf : register(t0); // vertex stage
@@ -125,13 +128,21 @@ MaterialOutput EvaluateMaterial(PS_IN input, bool frontFace)
     i.Time = TimeParams.x;
     i.FrontFace = frontFace;
 
+    // The texture of the component (SetTexture, a scene object's texture) tints the default albedo,
+    // as in the engine's other shaders; a surface may still replace it.
+    float4 baseColor = input.color;
+    if (HasTexture > 0.5f)
+    {
+        baseColor *= ComponentTexture.Sample(ComponentSampler, input.uv);
+    }
+
     MaterialOutput o;
-    o.Albedo = input.color.rgb;
+    o.Albedo = baseColor.rgb;
     o.Normal = normal;
     o.SpecularWeight = MaterialDefaultSpecularWeight;
     o.AmbientModel = MaterialDefaultAmbientModel;
     o.Emissive = float3(0.0f, 0.0f, 0.0f);
-    o.Alpha = input.color.a;
+    o.Alpha = baseColor.a;
 
     Surface(i, o);
 
