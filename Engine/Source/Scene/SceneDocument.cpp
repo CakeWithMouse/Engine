@@ -242,7 +242,7 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
     std::map<ComponentId, ComponentId> ids;
     for (const auto& o : data.components)
     {
-        auto object = o.typeName == SceneAssets::ModelType ? SceneAssets::CreateModel(o.modelAsset) : catalog.Find(o.typeName)->create();
+        auto object = o.typeName == SceneAssets::ModelType ? SceneAssets::CreateModel(o.modelAsset, false) : catalog.Find(o.typeName)->create();
         if (!object) throw std::runtime_error("Component factory returned null");
         object->LoadProjectData(o.projectData);
         SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);

@@ -35,6 +35,7 @@
   <ItemGroup>
     <ClCompile Include="AssetTests.cpp" />
     <ClCompile Include="AssetRenderTests.cpp" />
+    <ClCompile Include="ModelImportTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Engine.vcxproj">
