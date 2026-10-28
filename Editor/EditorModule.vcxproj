@@ -133,12 +133,15 @@
         <ClCompile Include="Source/Module.cpp"/>
         <ClCompile Include="Source/QtHost.cpp"/>
         <ClCompile Include="Source/MainWindow.cpp"/>
-        <ClCompile Include="Source/SceneTools.cpp"/>
         <ClCompile Include="Source/AssetTools.cpp"/>
         <ClCompile Include="Source/FileBrowser.cpp"/>
         <ClCompile Include="Source/ViewportWidget.cpp"/>
+        <ClCompile Include="Source/ObjectInspectorPanel.cpp"/>
+        <ClCompile Include="Source/SceneObjectsPanel.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_MainWindow.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_ViewportWidget.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_ObjectInspectorPanel.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_SceneObjectsPanel.cpp"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -156,7 +159,27 @@
             <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
             <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
         </CustomBuild>
+        <CustomBuild Include="Include/ObjectInspectorPanel.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
         <CustomBuild Include="Include/ViewportWidget.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+        <CustomBuild Include="Include/SceneObjectsPanel.h">
             <FileType>Document</FileType>
             <Message>MOC %(Filename).h</Message>
             <Command>

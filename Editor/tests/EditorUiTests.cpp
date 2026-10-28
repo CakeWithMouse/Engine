@@ -404,6 +404,35 @@ int wmain(int argc, wchar_t** argv)
         Check(restored, "UI undo restores transform");
         Ui([](auto* w) { Action(w, QStringLiteral("Повторить"))->trigger(); });
         until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.type == "Primitive.Sphere" && o.transform.position[0] == 3.25f) return true; return false; });
+        // The merged panels must keep main's gizmo modes and one Undo per drag.
+        Ui([](auto* w) {
+            auto* viewport = w->findChild<ViewportWidget*>();
+            w->activateWindow(); viewport->setFocus();
+        });
+        for (const auto& mode : {std::pair<int, EditorGizmoMode>{Qt::Key_2, EditorGizmoRotate},
+                                {Qt::Key_3, EditorGizmoScale}, {Qt::Key_1, EditorGizmoTranslate}}) {
+            Ui([&](auto* w) {
+                auto* viewport = w->findChild<ViewportWidget*>();
+                QKeyEvent event(QEvent::KeyPress, mode.first, Qt::NoModifier);
+                QApplication::sendEvent(viewport, &event);
+                Check(viewport->gizmoMode() == mode.second, "1/2/3 select the gizmo mode");
+            });
+            until([&] { return host.GizmoMode() == mode.second; });
+        }
+        EditorQtHost::SceneObject sphere;
+        for (const auto& o : host.ReadSnapshot().objects) if (o.type == "Primitive.Sphere") sphere = o;
+        Check(sphere.id != 0, "gizmo target exists after undo/redo");
+        EditorCommand drag; drag.type = EditorCommand::BeginGizmoDrag; drag.objectId = sphere.id;
+        host.PostCommand(drag);
+        EditorCommand transform; transform.type = EditorCommand::UpdateObjectTransform;
+        transform.objectId = sphere.id; transform.path = QStringLiteral("gizmo"); transform.transform = sphere.transform;
+        transform.transform.scale[0] = 2; host.PostCommand(transform);
+        transform.transform.scale[0] = 3; host.PostCommand(transform);
+        drag.type = EditorCommand::EndGizmoDrag; host.PostCommand(drag);
+        until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere.id) return o.transform.scale[0] == 3; return false; });
+        Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
+        until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.name == sphere.name) return o.transform.scale[0] == sphere.transform.scale[0]; return false; });
+        Check(true, "one Undo restores the transform before the whole gizmo drag");
         // Select the sphere through the actual tree before testing a focused-field save.
         Ui([](auto* w) {
             auto* tree = w->findChild<QTreeWidget*>();

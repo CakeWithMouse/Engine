@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <Engine/Runtime/ModuleApi.h>
 #include <Engine/Runtime/EditSessionApi.h>
 #include <Engine/Runtime/ProjectDataApi.h>
@@ -17,6 +17,13 @@ class QTemporaryDir;
 
 class EditorMainWindow;
 
+enum EditorGizmoMode : uint32_t
+{
+    EditorGizmoTranslate = 0,
+    EditorGizmoRotate = 1,
+    EditorGizmoScale = 2
+};
+
 struct EditorCommand
 {
     enum Type : uint32_t
@@ -26,7 +33,8 @@ struct EditorCommand
         TogglePlay, TogglePause, InputFocus, InputKey, InputPointer, ConfigurePlay,
         FetchScene, UpdateObjectTransform, RefreshScene, SelectObject, CreateObject, RemoveObject,
         RenameObject, DuplicateObject, SaveScene, LoadScene, NewScene, Undo, Redo, PickObject, FocusObject,
-        ImportModel, ImportTexture, CreateModel, SetTexture, SetPointLight, SetProjectData
+        SetGizmoMode, BeginGizmoDrag, EndGizmoDrag,
+        ImportModel, ImportTexture, CreateModel, SetTexture, SetPointLight, SetProjectData,
     };
 
     Type type = None;
@@ -37,8 +45,9 @@ struct EditorCommand
 
     // Поля для манипуляций с объектами
     uint64_t objectId = 0;
-    EngineSceneTransform transform{{0,0,0},{0,0,0,1},{1,1,1}};
+    EngineSceneTransform transform{{0, 0, 0}, {0, 0, 0, 1}, {1, 1, 1}};
     EngineScenePointLight pointLight{};
+    EditorGizmoMode gizmo = EditorGizmoTranslate;
     QString name;
 };
 
@@ -80,6 +89,7 @@ public:
     void SetViewportInputApi(const EngineViewportInputApi& api) { viewportInput_ = api; }
     void SetSelectionApi(const EngineSelectionApi& api) { selection_ = api; }
     bool HasScene() const { return sceneAvailable_.load(); }
+
     struct SceneObject
     {
         uint64_t id = 0, parent = 0;
@@ -92,7 +102,12 @@ public:
         std::string projectData;
         uint32_t gameplayKind = 0;
     };
-    struct SceneType { std::string name, label; };
+
+    struct SceneType
+    {
+        std::string name, label;
+    };
+
     struct Snapshot
     {
         std::vector<SceneObject> objects;
@@ -100,6 +115,7 @@ public:
         uint64_t selected = 0, serial = 0;
         bool dirty = false, canUndo = false, canRedo = false;
     };
+
     Snapshot ReadSnapshot();
 
     // --- Методы для работы с объектами сцены ---
@@ -107,6 +123,9 @@ public:
     void MoveSelectedObject(float right, float up, float forward);
     bool HasSelection() const { return hasSelection_.load(); }
     std::string GetSelectedObjectName();
+
+    void SetGizmoMode(EditorGizmoMode mode);
+    EditorGizmoMode GizmoMode() const { return static_cast<EditorGizmoMode>(gizmoMode_.load()); }
 
 private:
     void UiThreadMain();
@@ -147,4 +166,10 @@ private:
     std::vector<QString> undo_, redo_;
     std::atomic<bool> hasSelection_{false};
     std::mutex sceneMutex_;
+
+    std::atomic<uint32_t> gizmoMode_{EditorGizmoTranslate};
+
+    bool gizmoDragActive_ = false;
+    bool gizmoDragCheckpointed_ = false;
+    uint64_t gizmoDragObject_ = 0;
 };

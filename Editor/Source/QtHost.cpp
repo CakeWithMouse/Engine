@@ -1,4 +1,4 @@
-﻿#include "QtHost.h"
+#include "QtHost.h"
 #include <Engine/Runtime/EditorReloadApi.h>
 #include "MainWindow.h"
 #include <QApplication>
@@ -276,6 +276,7 @@ void EditorQtHost::DrainCommands()
             {
                 uint64_t id = 0;
                 if (scene_.pickObject(scene_.context, cmd.right, cmd.up, &id) == EngineSceneOk) selectedId_ = id;
+                else selectedId_ = 0;
                 PublishScene();
             }
             break;
@@ -316,8 +317,34 @@ void EditorQtHost::DrainCommands()
             try
             {
                 const auto now = std::chrono::steady_clock::now();
-                const bool coalesced = cmd.type == EditorCommand::UpdateObjectTransform && cmd.path == QStringLiteral("nudge") &&
-                    lastTransformId_ == cmd.objectId && now - lastTransformTime_ < std::chrono::milliseconds(350);
+                const bool isNudge =
+                    cmd.type == EditorCommand::UpdateObjectTransform &&
+                    cmd.path == QStringLiteral("nudge");
+
+                const bool isGizmo =
+                    cmd.type == EditorCommand::UpdateObjectTransform &&
+                    cmd.path == QStringLiteral("gizmo");
+
+                const bool gizmoSession =
+                    isGizmo &&
+                    gizmoDragActive_ &&
+                    cmd.objectId == gizmoDragObject_;
+
+                const bool coalesced =
+                    cmd.type == EditorCommand::UpdateObjectTransform &&
+                    (
+                        (isNudge &&
+                            lastTransformId_ == cmd.objectId &&
+                            now - lastTransformTime_ < std::chrono::milliseconds(350))
+                        ||
+                        (gizmoSession && gizmoDragCheckpointed_)
+                        ||
+                        (isGizmo &&
+                            !gizmoDragActive_ &&
+                            lastTransformId_ == cmd.objectId &&
+                            now - lastTransformTime_ < std::chrono::milliseconds(350))
+                    );
+
                 if (mutation && !coalesced) checkpoint = Checkpoint();
                 if (mutation) lastTransformId_ = 0;
                 if (cmd.type == EditorCommand::SelectObject) selectedId_ = cmd.objectId;
@@ -335,7 +362,14 @@ void EditorQtHost::DrainCommands()
                         for (const auto& o : ReadSnapshot().objects) if (o.id == cmd.objectId)
                         { transform = o.transform; transform.position[0] += cmd.right; transform.position[1] += cmd.up; transform.position[2] += cmd.forward; }
                     result = api.setTransform(api.context, cmd.objectId, &transform);
-                    if (result == EngineSceneOk && cmd.path == QStringLiteral("nudge")) { lastTransformId_ = cmd.objectId; lastTransformTime_ = now; }
+                    if (result == EngineSceneOk && (isNudge || isGizmo))
+                    {
+                        lastTransformId_ = cmd.objectId;
+                        lastTransformTime_ = now;
+
+                        if (isGizmo && gizmoDragActive_ && cmd.objectId == gizmoDragObject_)
+                            gizmoDragCheckpointed_ = true;
+                    }
                 }
                 else if (cmd.type == EditorCommand::RemoveObject)
                     result = api.removeObject(api.context, cmd.objectId);
@@ -478,6 +512,27 @@ void EditorQtHost::DrainCommands()
             if (cmd.type != EditorCommand::RefreshScene || !cmd.name.isEmpty()) Complete(cmd, result, QString::fromUtf8(error));
             break;
         }
+        case EditorCommand::SetGizmoMode:
+            gizmoMode_.store(cmd.gizmo);
+            lastTransformId_ = 0;
+            break;
+
+        case EditorCommand::BeginGizmoDrag:
+            if (PlayState() == Edit)
+            {
+                gizmoDragActive_ = true;
+                gizmoDragCheckpointed_ = false;
+                gizmoDragObject_ = cmd.objectId;
+                lastTransformId_ = 0;
+            }
+            break;
+
+        case EditorCommand::EndGizmoDrag:
+            gizmoDragActive_ = false;
+            gizmoDragCheckpointed_ = false;
+            gizmoDragObject_ = 0;
+            lastTransformId_ = 0;
+            break;
         default:
             break;
         }
@@ -559,4 +614,12 @@ void EditorQtHost::Complete(const EditorCommand& command, uint32_t result, const
     std::lock_guard lock(windowMutex_);
     if (auto* window = window_)
         QMetaObject::invokeMethod(window, [window, command, result, error] { window->CommandFinished(command, result, error); }, Qt::QueuedConnection);
+}
+
+void EditorQtHost::SetGizmoMode(EditorGizmoMode mode)
+{
+    EditorCommand c;
+    c.type = EditorCommand::SetGizmoMode;
+    c.gizmo = mode;
+    PostCommand(c);
 }
