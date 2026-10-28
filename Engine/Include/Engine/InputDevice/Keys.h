@@ -3,6 +3,9 @@
 enum class Keys : int {
 
 	None = 0,
+	Shift = 16,
+	Control = 17,
+	Alt = 18,
 
 	LeftButton = 500,
 	RightButton = 501,

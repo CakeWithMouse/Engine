@@ -221,7 +221,9 @@ EngineRelease InstallEngineRelease(const std::filesystem::path& runtime)
             { if (it->is_directory()) it.disable_recursion_pending(); continue; }
             const auto dest = staging / std::filesystem::relative(it->path(), release.runtime);
             if (it->is_directory()) std::filesystem::create_directories(dest);
-            else if (it->is_regular_file() && it->path().extension() != ".pdb" && it->path().extension() != ".lib" && it->path().extension() != ".exp" && it->path().filename() != "EditorUiTests.exe")
+            else if (it->is_regular_file() && it->path().extension() != ".pdb" &&
+                (it->path().extension() != ".lib" || *std::filesystem::relative(it->path(), release.runtime).begin() == "SDK") &&
+                it->path().extension() != ".exp" && it->path().filename() != "EditorUiTests.exe")
                 std::filesystem::copy_file(it->path(), dest);
         }
         ReadEngineRelease(staging);

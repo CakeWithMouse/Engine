@@ -47,6 +47,7 @@ foreach ($file in Get-ChildItem -LiteralPath $package -File -Recurse) {
     if (Test-Path -LiteralPath $source -PathType Leaf) { Copy-Item -LiteralPath $source -Destination $file.FullName -Force; if ($file.Name -in $appNames) { ++$updated } }
 }
 if ($updated -ne 10) { throw "Expected ten application binaries, got $updated" }
+Copy-Item -LiteralPath "$release/Runtime/SDK" -Destination "$package/Runtime" -Recurse -Force
 foreach ($name in @('EngineVersion.json','EngineConfiguration.txt','TemplateCompatibility.json')) {
     Copy-Item -LiteralPath "$release/Runtime/$name" -Destination "$package/Runtime/$name" -Force
 }

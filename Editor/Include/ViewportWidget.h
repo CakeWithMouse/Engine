@@ -38,6 +38,7 @@ private:
 
     EditorQtHost* host_ = nullptr;
     bool attached_ = false;
+    int inputState_ = 0;
 
     bool rmbPressed_ = false;
     bool rmbMoved_ = false;

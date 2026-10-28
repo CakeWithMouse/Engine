@@ -1,4 +1,4 @@
-#ifndef WIN32_LEAN_AND_MEAN
+﻿#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #ifndef NOMINMAX
@@ -116,6 +116,9 @@ class BaseEngine::LoadedSession
     EngineSceneApi sceneApi{};
     EngineLegacyV4::SceneApi legacyScene{};
     EngineBindEditSessionFn bindEdit = nullptr;
+    EngineBindProjectDataFn bindProjectData = nullptr;
+    EngineBindSelectionFn bindSelection = nullptr;
+    EngineBindViewportInputFn bindViewportInput = nullptr;
     std::function<void()> releaseEdit;
     void* session = nullptr;
     bool started = false;
@@ -200,7 +203,7 @@ class BaseEngine::LoadedSession
     }
 
     void LoadAndInitialize(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host,
-        const EngineEditSessionApi* editApi = nullptr)
+        const EngineEditSessionApi* editApi = nullptr, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr)
     {
         originalPath = path;
         moduleKind = kind;
@@ -247,6 +250,15 @@ class BaseEngine::LoadedSession
         }
         if (editApi)
         {
+            bindViewportInput = reinterpret_cast<EngineBindViewportInputFn>(GetProcAddress(library, "EngineBindViewportInput"));
+            if (bindViewportInput && viewportInput && !bindViewportInput(1, sizeof(*viewportInput), session, viewportInput))
+                throw std::runtime_error("Cannot bind viewport input API");
+            bindSelection = reinterpret_cast<EngineBindSelectionFn>(GetProcAddress(library, "EngineBindSelection"));
+            if (bindSelection && selection && !bindSelection(1, sizeof(*selection), session, selection))
+                throw std::runtime_error("Cannot bind selection API");
+            bindProjectData = reinterpret_cast<EngineBindProjectDataFn>(GetProcAddress(library, "EngineBindProjectData"));
+            if (bindProjectData && projectData && !bindProjectData(1, sizeof(*projectData), session, projectData))
+                throw std::runtime_error("Cannot bind project data API");
             bindEdit = reinterpret_cast<EngineBindEditSessionFn>(GetProcAddress(library, "EngineBindEditSession"));
             if (kind != ENGINE_MODULE_EDITOR || !bindEdit ||
                 !bindEdit(ENGINE_EDIT_API_VERSION, sizeof(*editApi), session, editApi))
@@ -311,11 +323,11 @@ public:
 
     void Open(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host,
         const EngineEditSessionApi* editApi = nullptr, std::function<void()> cleanup = {},
-        const std::filesystem::path& startupScene = {})
+        const std::filesystem::path& startupScene = {}, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr)
     {
         startupScenePath = startupScene;
         releaseEdit = std::move(cleanup);
-        LoadAndInitialize(path, kind, host, editApi);
+        LoadAndInitialize(path, kind, host, editApi, projectData, selection, viewportInput);
     }
 
     bool Reload()
@@ -346,6 +358,10 @@ public:
 
     bool IsStarted() const noexcept { return started && session != nullptr; }
     bool UsesContinuousFrames() const noexcept { return continuousFrames; }
+    bool EditorViewportReady() const noexcept {
+        const auto ready = reinterpret_cast<int(__cdecl*)(void*)>(GetProcAddress(library,"EngineEditorViewportReady"));
+        return ready && ready(session);
+    }
     bool GetSceneApi(EngineSceneApi& output) const noexcept
     {
         output = IsStarted() ? sceneApi : EngineSceneApi{};
@@ -365,6 +381,12 @@ public:
         sceneApi = {}; // No callable pointers survive session destruction/unloading.
         legacyScene = {};
         continuousFrames = false;
+        if (session && bindProjectData) bindProjectData(1, sizeof(EngineProjectDataApi), session, nullptr);
+        bindProjectData = nullptr;
+        if (session && bindViewportInput) bindViewportInput(1, sizeof(EngineViewportInputApi), session, nullptr);
+        bindViewportInput = nullptr;
+        if (session && bindSelection) bindSelection(1, sizeof(EngineSelectionApi), session, nullptr);
+        bindSelection = nullptr;
         if (session && bindEdit) bindEdit(ENGINE_EDIT_API_VERSION, sizeof(EngineEditSessionApi), session, nullptr);
         bindEdit = nullptr;
         if (releaseEdit) { auto cleanup = std::move(releaseEdit); releaseEdit = {}; cleanup(); }
@@ -410,6 +432,12 @@ bool BaseEngine::TryGetActiveSceneApi(EngineSceneApi& output) const noexcept
 
 bool BaseEngine::ReloadActiveModule()
 {
+    if (!activeOptions.projectFile.empty() && std::filesystem::exists(
+        std::filesystem::u8path(activeOptions.projectFile).parent_path() / "Project.code.json"))
+    {
+        std::puts("Reopen the C++ project to use its validated module path; live reload is unavailable.");
+        return false;
+    }
     if (!activeOptions.editModule.empty())
     {
         std::fputs("Close edit session before reloading: live edit data is not reloadable yet\n", stderr);
@@ -498,6 +526,32 @@ bool BaseEngine::TriggerBuild(const std::filesystem::path& repositoryRoot,
 
 bool BaseEngine::TriggerProjectBuild(bool waitForCompletion)
 {
+    if (!activeOptions.projectFile.empty())
+    {
+        const auto project = std::filesystem::u8path(activeOptions.projectFile);
+        if (std::filesystem::exists(project.parent_path() / "Project.code.json"))
+        {
+            const auto runtime = EnginePaths::ExecutableDirectory();
+            const auto script = runtime / "SDK/ProjectTools.ps1";
+            if (!std::filesystem::exists(script)) { std::fputs("Matching project SDK is missing\n", stderr); return false; }
+            auto command = L"powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"" + script.wstring() +
+                L"\" -Action Build -Project \"" + project.wstring() + L"\" -Runtime \"" + runtime.wstring() + L"\"";
+            STARTUPINFOW startup{sizeof(startup)};
+            PROCESS_INFORMATION process{};
+            if (!CreateProcessW(nullptr, command.data(), nullptr, nullptr, FALSE, CREATE_NO_WINDOW, nullptr,
+                project.parent_path().c_str(), &startup, &process)) return false;
+            ScopedHandle processHandle(process.hProcess), threadHandle(process.hThread);
+            if (waitForCompletion)
+            {
+                WaitForSingleObject(processHandle.Get(), INFINITE);
+                DWORD result = 1;
+                GetExitCodeProcess(processHandle.Get(), &result);
+                if (result) return false;
+            }
+            std::puts("Project build dispatched. Reopen the project after a successful build.");
+            return true;
+        }
+    }
     const auto hint = activeOptions.projectFile.empty() ? std::filesystem::path{} : std::filesystem::path(activeOptions.projectFile).parent_path();
     const auto repoRoot = FindRepositoryRoot(hint);
     if (repoRoot.empty())
@@ -595,8 +649,23 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
 
     EngineModuleHost host{ENGINE_MODULE_VERSION, this, Log, Exit,
         options.projectName.c_str(), options.projectFile.c_str(), options.contentRoot.c_str()};
+    reloadServiceApi = {1, this, [](void* p, const char* module, const char* checkpoint, void* hwnd,
+        uint32_t width, uint32_t height, EngineEditorReloadBindings* output, char* error, uint32_t capacity) -> uint32_t {
+        auto* engine = static_cast<BaseEngine*>(p);
+        if (!engine->editModule || !module || !checkpoint || !output) return EngineSceneInvalidArgument;
+        try {
+            const auto result = engine->editModule->Reload(std::filesystem::u8path(module), std::filesystem::u8path(checkpoint), hwnd, width, height, error, capacity);
+            if (result == EngineSceneOk) {
+                auto& current = *engine->editModule;
+                *output = {current.Api(), current.ProjectDataApi(), current.SelectionApi(), current.ViewportInputApi()};
+                std::puts("EditorHotReloadSuccess");
+            }
+            return result;
+        } catch (...) { return EngineSceneFailure; }
+    }};
     host.getService = [](void* user, uint32_t serviceId, uint32_t minVersion) -> const void* {
         auto* engine = static_cast<BaseEngine*>(user);
+        if (serviceId == EngineEditorReloadService && minVersion <= 1) return &engine->reloadServiceApi;
         if (serviceId == ENGINE_SERVICE_VFS && minVersion <= ENGINE_VFS_API_VERSION)
             return &engine->vfsServiceApi;
         return nullptr;
@@ -679,7 +748,8 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
     try
     {
         activeSession->Open(options.module, options.mode == RuntimeMode::Game ? ENGINE_MODULE_GAME : ENGINE_MODULE_EDITOR, host,
-            editModule ? &editModule->Api() : nullptr, [this] { editModule.reset(); }, options.startupScene);
+            editModule ? &editModule->Api() : nullptr, [this] { editModule.reset(); }, options.startupScene,
+            editModule ? &editModule->ProjectDataApi() : nullptr, editModule ? &editModule->SelectionApi() : nullptr, editModule ? &editModule->ViewportInputApi() : nullptr);
         state = State::Playing;
         if (!options.frames && options.mode != RuntimeMode::Editor) std::puts("Interactive stub: Enter = frame, r = reload, b = build, br = build+reload, ls, find, import, info, mkdir, rm/del, mv, cp, cat, q = exit.");
         auto previous = std::chrono::steady_clock::now();
@@ -944,6 +1014,11 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
                     }
                 }
                 if (options.mode == RuntimeMode::Editor) activeSession->Overlay();
+                if (!activeOptions.readyEvent.empty() && (options.mode != RuntimeMode::Editor || activeSession->EditorViewportReady())) {
+                    const auto event = OpenEventW(EVENT_MODIFY_STATE,FALSE,activeOptions.readyEvent.c_str());
+                    if (event) { SetEvent(event); CloseHandle(event); }
+                    activeOptions.readyEvent.clear();
+                }
                 if (options.frames || (options.mode != RuntimeMode::Editor && !activeSession->UsesContinuousFrames()))
                     std::puts(editModule ? "EngineFrameEnd (edit scene API)" : viewportSession ? "EngineFrameEnd (viewport)" : activeSession->UsesContinuousFrames() ? "EngineFrameEnd (game window)" : "EngineFrameEnd (stub)");
             }

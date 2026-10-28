@@ -1,0 +1,96 @@
+{
+  "title": "PainEngine — Практический туториал",
+  "engineVersion": "2026.10.27.0",
+  "date": "2026-10-27",
+  "revision": 1,
+  "slideCount": 23,
+  "presentation": "releases/PainEngine-Tutorial-2026-10-27-r1-final.pptx",
+  "content": "content.json",
+  "builder": "build.mjs",
+  "sources": [
+    {
+      "path": "Engine/Version.json",
+      "sha256": "d78527c0f10c364e6e39be28428b699607d99ff6c829c13f5abdfff16958b198"
+    },
+    {
+      "path": "Engine/Source/Components/Character.cpp",
+      "sha256": "3c08a6661d45b077f7f5dcb22442a76a42c58632acb18c0020be4df920f93a1b"
+    },
+    {
+      "path": "Engine/docs/INPUT-CHARACTER.md",
+      "sha256": "e49967c5cf37901c074bb98d97a41b96c344a042aa6bbb0ff3b88cbe70198aef"
+    },
+    {
+      "path": "Game/Launcher/Source/Main.cpp",
+      "sha256": "720bd5a6dfc7f2df44367f68143d2946941e1e2415b32884da69821943711a77"
+    },
+    {
+      "path": "Engine/docs/CODE-PROJECTS.md",
+      "sha256": "55804cedb2f2e881ebcc876dd88822b1273812b974c337946e1d6b887da42ac4"
+    },
+    {
+      "path": "Engine/docs/USER-PROJECTS.md",
+      "sha256": "2fde22ff3649375667ae48fc1bd0461b235f91c4ef59bb76531a58e51010bf6a"
+    },
+    {
+      "path": "Editor/Source/MainWindow.cpp",
+      "sha256": "929601e19b0be20f044072fc3c0cad959923d1bc4cfb24a954aaf863d503cf64"
+    },
+    {
+      "path": "Editor/Source/SceneTools.cpp",
+      "sha256": "31f3bd5f55c87a229d9bb1c4dab9bff123eca856da780c9b0359a5d715bab218"
+    },
+    {
+      "path": "Editor/Source/FileBrowser.cpp",
+      "sha256": "fb5433ccbdfc0d757099da2f54978ecac5e3f76b74b71e3a37a4e74a967cd416"
+    },
+    {
+      "path": "Editor/Source/ViewportWidget.cpp",
+      "sha256": "83bf1ce8a5d0678acb1cc7a5aac15bd77ba90880d9f6b11944cf77a851b858a6"
+    },
+    {
+      "path": "Engine/Include/Engine/Project/StandardTypes.h",
+      "sha256": "361e9f25c36114187fdfe3e542deb90f87cf47f0b014735474715851557589ed"
+    },
+    {
+      "path": "Editor/Source/AssetTools.cpp",
+      "sha256": "010bc6e9a36ecbd8d8ddd70f22a1b07049df2795ecef0d5fdac6bad8b209eafc"
+    },
+    {
+      "path": "Engine/docs/SCENE-JSON.md",
+      "sha256": "366fc73de2a45d8b69ae56c7fcc7ff679ce5d6c6c50f5724082fe81c0a9b42c2"
+    },
+    {
+      "path": "Editor/Source/CodeTools.cpp",
+      "sha256": "1fd6b61408a54d3b24d75a61d8374e05e4aa0d0a758b728e93b16af6c45acfd1"
+    },
+    {
+      "path": "Editor/Include/CodeClassDialog.h",
+      "sha256": "e8cad4c2d3a6e727028ada8a4d8a1881f46452378d1d4815615b9298e9c1d403"
+    },
+    {
+      "path": "Engine/BuildSupport/ProjectTools.ps1",
+      "sha256": "99fd6fc26ea6c4d6b48d38dcf948d41e8fdf8d39f50bb476bedd5995c6146ea6"
+    },
+    {
+      "path": "Engine/Source/Components/GameComponents.cpp",
+      "sha256": "394f29f7e79606e73c91cb3cd31841c75d93754b010cae1ccb88c2ba094b8271"
+    },
+    {
+      "path": "Engine/Include/Engine/InputDevice/InputActions.h",
+      "sha256": "e5105eb0e0323dff23b24c8c7cee0297f5b9b80294dd0b9cc77c9ef3e44ab963"
+    },
+    {
+      "path": "Engine/Include/Engine/MainGame/CharacterController.h",
+      "sha256": "0bf6530db1b8e1bb4b5f03470b31fd67fd7b4da7db6d1ed6d7bc90bc111fbc19"
+    },
+    {
+      "path": "Engine/Source/MainGame/CharacterController.cpp",
+      "sha256": "e0e478b2cd8ef14b1ca7afe3a9bbd86f83e698103f934db1c31bc3cf58dc459e"
+    },
+    {
+      "path": "Engine/docs/ENGINE-VERSIONS.md",
+      "sha256": "7dd610ec7aaae0a869c4417d3fa0fa90f8c098e04f9d7ef375da40e216048b56"
+    }
+  ]
+}

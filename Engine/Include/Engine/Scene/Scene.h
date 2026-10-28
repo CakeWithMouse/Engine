@@ -49,6 +49,7 @@ struct SceneComponentSnapshot
         bool IsValid() const noexcept;
     };
     std::optional<PointLight> pointLight;
+    std::string projectData; // module-defined UTF-8 JSON; scene format 3
 };
 struct SceneSnapshot
 {

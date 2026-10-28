@@ -1,4 +1,5 @@
-#include "QtHost.h"
+﻿#include "QtHost.h"
+#include <Engine/Runtime/EditorReloadApi.h>
 #include "MainWindow.h"
 #include <QApplication>
 #include <QCoreApplication>
@@ -10,6 +11,10 @@
 #include <QTemporaryDir>
 #include <QFile>
 #include <QDir>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QTemporaryFile>
 #include <algorithm>
 
 namespace
@@ -151,6 +156,15 @@ void EditorQtHost::DrainCommands()
             continue;
         switch (cmd.type)
         {
+        case EditorCommand::InputFocus:
+            if (viewportInput_.focus) viewportInput_.focus(viewportInput_.context,cmd.w);
+            break;
+        case EditorCommand::InputKey:
+            if (viewportInput_.key) viewportInput_.key(viewportInput_.context,cmd.w,cmd.h);
+            break;
+        case EditorCommand::InputPointer:
+            if (viewportInput_.pointer) viewportInput_.pointer(viewportInput_.context,cmd.yaw,cmd.pitch,cmd.zoom);
+            break;
         case EditorCommand::TogglePlay:
         case EditorCommand::TogglePause:
             if (HasScene() && viewportActive_.load())
@@ -169,6 +183,35 @@ void EditorQtHost::DrainCommands()
                 else Log("Play control failed; see engine log");
             }
             break;
+        case EditorCommand::ReloadProject:
+        {
+            if (!HasScene() || PlayState() != Edit) { Complete(cmd, EngineSceneReadOnly); break; }
+            const auto* reload = host_.getService ? static_cast<const EngineEditorReloadApi*>(host_.getService(host_.user, EngineEditorReloadService, 1)) : nullptr;
+            if (!reload || !reload->reload) { Complete(cmd, EngineSceneReadOnly, QStringLiteral("В этой версии runtime нет hot reload. Откройте проект заново.")); break; }
+            QString checkpoint;
+            try {
+                const auto selectedName = GetSelectedObjectName();
+                checkpoint = Checkpoint(); char error[2048]{}; EngineEditorReloadBindings bindings{};
+                const auto result = reload->reload(reload->context, cmd.path.toUtf8().constData(), checkpoint.toUtf8().constData(),
+                    viewportHwnd_, viewportWidth_, viewportHeight_, &bindings, error, sizeof(error));
+                if (result == EngineSceneOk && bindings.scene.context == scene_.context) {
+                    QFile::remove(checkpoint); auto unchanged=cmd; unchanged.name="unchanged"; Complete(unchanged,result); break;
+                }
+                if (result == EngineSceneOk) {
+                    SetModuleApi(bindings.scene); SetProjectDataApi(bindings.data); SetSelectionApi(bindings.selection); SetViewportInputApi(bindings.input);
+                    // Old undo files can reference types removed by the new DLL. Keep the live edit snapshot, reset only history.
+                    for (const auto& path : undo_) QFile::remove(path);
+                    for (const auto& path : redo_) QFile::remove(path);
+                    undo_.clear(); redo_.clear(); lastTransformId_ = 0;
+                    Snapshot restored; EngineSceneInfo info{};
+                    scene_.readActiveScene(scene_.context, &info, SceneVisitor, &restored); selectedId_ = 0;
+                    for (const auto& o : restored.objects) if (o.name == selectedName) selectedId_ = o.id;
+                    PublishScene();
+                }
+                QFile::remove(checkpoint); Complete(cmd, result, QString::fromUtf8(error));
+            } catch (const std::exception& e) { QFile::remove(checkpoint); Complete(cmd, EngineSceneFailure, QString::fromUtf8(e.what())); }
+            break;
+        }
         case EditorCommand::RequestExit:
             Log("EditorRequestExit");
             if (host_.requestExit) host_.requestExit(host_.user);
@@ -187,6 +230,7 @@ void EditorQtHost::DrainCommands()
                 break;
             }
         case EditorCommand::ViewportAttach:
+            viewportHwnd_ = cmd.hwnd; viewportWidth_ = cmd.w; viewportHeight_ = cmd.h;
             if (HasScene())
             {
                 const auto result = sceneViewportAttached_ ? scene_.resizeViewport(scene_.context, cmd.w, cmd.h) :
@@ -208,16 +252,19 @@ void EditorQtHost::DrainCommands()
             }
             break;
         case EditorCommand::ViewportResize:
+            viewportWidth_ = cmd.w; viewportHeight_ = cmd.h;
             if (HasScene() && viewportActive_.load()) scene_.resizeViewport(scene_.context, cmd.w, cmd.h);
             else if (viewportActive_.load() && host_.viewportResize)
                 host_.viewportResize(host_.user, cmd.w, cmd.h);
             break;
         case EditorCommand::ViewportCamera:
+            if (PlayState() != Edit && HasScene()) break;
             if (HasScene() && viewportActive_.load()) scene_.camera(scene_.context, cmd.right, cmd.up, cmd.forward, cmd.yaw, cmd.pitch, cmd.zoom);
             else if (viewportActive_.load() && host_.viewportCamera)
                 host_.viewportCamera(host_.user, cmd.right, cmd.up, cmd.forward, cmd.yaw, cmd.pitch, cmd.zoom);
             break;
         case EditorCommand::ViewportDetach:
+            viewportHwnd_ = nullptr;
             if (HasScene() && sceneViewportAttached_) scene_.resizeViewport(scene_.context, 0, 0);
             else playState_.store(Edit);
             if (viewportActive_.exchange(false) && host_.viewportDetach)
@@ -241,8 +288,11 @@ void EditorQtHost::DrainCommands()
         case EditorCommand::UpdateObjectTransform:
         case EditorCommand::CreateObject:
         case EditorCommand::CreateModel:
+        case EditorCommand::SetModel:
         case EditorCommand::SetTexture:
         case EditorCommand::SetPointLight:
+        case EditorCommand::SetProjectData:
+        case EditorCommand::ConfigurePlay:
         case EditorCommand::RemoveObject:
         case EditorCommand::RenameObject:
         case EditorCommand::DuplicateObject:
@@ -259,7 +309,7 @@ void EditorQtHost::DrainCommands()
             QString checkpoint;
             const bool mutation = cmd.type == EditorCommand::UpdateObjectTransform || cmd.type == EditorCommand::CreateObject ||
                 cmd.type == EditorCommand::RemoveObject || cmd.type == EditorCommand::RenameObject || cmd.type == EditorCommand::DuplicateObject ||
-                cmd.type == EditorCommand::CreateModel || cmd.type == EditorCommand::SetTexture || cmd.type == EditorCommand::SetPointLight;
+                cmd.type == EditorCommand::SetModel || cmd.type == EditorCommand::CreateModel || cmd.type == EditorCommand::SetTexture || cmd.type == EditorCommand::SetPointLight || cmd.type == EditorCommand::SetProjectData || cmd.type == EditorCommand::ConfigurePlay;
             if ((mutation || cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene ||
                 cmd.type == EditorCommand::Undo || cmd.type == EditorCommand::Redo) && PlayState() != Edit)
             { Complete(cmd, EngineSceneReadOnly, QStringLiteral("Остановите Play перед редактированием.")); break; }
@@ -273,7 +323,8 @@ void EditorQtHost::DrainCommands()
                 if (cmd.type == EditorCommand::SelectObject) selectedId_ = cmd.objectId;
                 else if (cmd.type == EditorCommand::FetchScene)
                 {
-                    const auto view = ReadSnapshot();
+                    auto view = ReadSnapshot();
+                    view.objects.erase(std::remove_if(view.objects.begin(),view.objects.end(),[](const auto& o){ return o.gameplayKind == 3 || o.type == "Gameplay.PlaySettings"; }),view.objects.end());
                     auto found = std::find_if(view.objects.begin(), view.objects.end(), [&](const auto& o) { return o.id == selectedId_; });
                     selectedId_ = view.objects.empty() ? 0 : (found == view.objects.end() || ++found == view.objects.end() ? view.objects.front().id : found->id);
                 }
@@ -290,15 +341,57 @@ void EditorQtHost::DrainCommands()
                     result = api.removeObject(api.context, cmd.objectId);
                 else if (cmd.type == EditorCommand::RenameObject)
                     result = api.renameObject(api.context, cmd.objectId, cmd.name.toUtf8().constData());
+                else if (cmd.type == EditorCommand::SetModel)
+                {
+                    const auto selectedName = GetSelectedObjectName();
+                    QFile input(checkpoint);
+                    if (!input.open(QIODevice::ReadOnly)) throw std::runtime_error("Cannot read model change checkpoint");
+                    auto document = QJsonDocument::fromJson(input.readAll()).object();
+                    auto objects = document["objects"].toArray();
+                    bool found = false;
+                    for (int i = 0; i < objects.size(); ++i) {
+                        auto object = objects[i].toObject();
+                        if (object["id"].toInteger() != static_cast<qint64>(cmd.objectId)) continue;
+                        const auto type = object["type"].toString();
+                        if (type != "Engine.Model" && !type.startsWith("Primitive.")) throw std::runtime_error("Only model objects and primitives support model replacement");
+                        object["type"] = "Engine.Model";
+                        auto assets = object["assets"].toObject(); assets["model"] = cmd.path;
+                        if (!assets.contains("texture")) assets["texture"] = "";
+                        object["assets"] = assets; objects[i] = object; found = true;
+                    }
+                    if (!found) throw std::runtime_error("Object no longer exists");
+                    document["objects"] = objects;
+                    QTemporaryFile candidate(historyDirectory_->filePath("model-XXXXXX.scene.json"));
+                    const auto bytes = QJsonDocument(document).toJson();
+                    if (!candidate.open() || candidate.write(bytes) != bytes.size() || !candidate.flush()) throw std::runtime_error("Cannot write model change candidate");
+                    candidate.close(); uint64_t id = 0;
+                    result = scene_.loadScene(scene_.context, candidate.fileName().toUtf8().constData(), &id, error, sizeof(error));
+                    if (result == EngineSceneOk) {
+                        Snapshot restored; EngineSceneInfo info{}; scene_.readActiveScene(scene_.context, &info, SceneVisitor, &restored);
+                        selectedId_ = 0; for (const auto& o : restored.objects) if (o.name == selectedName) selectedId_ = o.id;
+                    }
+                }
                 else if (cmd.type == EditorCommand::SetTexture)
                     result = scene_.setTexture(scene_.context, cmd.objectId, cmd.path.toUtf8().constData(), error, sizeof(error));
                 else if (cmd.type == EditorCommand::SetPointLight)
                     result = api.setPointLight ? api.setPointLight(api.context, cmd.objectId, &cmd.pointLight) : EngineSceneReadOnly;
+                else if (cmd.type == EditorCommand::SetProjectData)
+                    result = projectData_.write ? projectData_.write(projectData_.context, cmd.objectId, cmd.path.toUtf8().constData()) : EngineSceneReadOnly;
+                else if (cmd.type == EditorCommand::ConfigurePlay)
+                {
+                    uint64_t id=cmd.objectId; bool created=false;
+                    if(!projectData_.write)result=EngineSceneReadOnly;
+                    else {
+                        if(!id){result=api.createObject(api.context,"Gameplay.PlaySettings","Play Settings",&cmd.transform,&id);created=result==EngineSceneOk;}
+                        if(result==EngineSceneOk)result=projectData_.write(projectData_.context,id,cmd.path.toUtf8().constData());
+                        if(result!=EngineSceneOk&&created)api.removeObject(api.context,id);
+                    }
+                }
                 else if (cmd.type == EditorCommand::CreateObject || cmd.type == EditorCommand::DuplicateObject || cmd.type == EditorCommand::CreateModel)
                 {
                     auto view = ReadSnapshot();
                     QString type = cmd.path, base = cmd.name;
-                    QString model = cmd.type == EditorCommand::CreateModel ? cmd.path : QString(), texture;
+                    QString model = cmd.type == EditorCommand::CreateModel ? cmd.path : QString(), texture, projectData;
                     EngineSceneTransform transform = cmd.transform;
                     uint64_t parent = 0; bool inherit = true;
                     bool hasLight = false; EngineScenePointLight light{};
@@ -311,6 +404,7 @@ void EditorQtHost::DrainCommands()
                         parent = found->parent; inherit = found->inheritScale;
                         model = QString::fromStdString(found->modelAsset); texture = QString::fromStdString(found->textureAsset);
                         hasLight = found->hasPointLight; light = found->pointLight;
+                        projectData = QString::fromStdString(found->projectData);
                     }
                     QString name = base; int suffix = 1;
                     while (std::any_of(view.objects.begin(), view.objects.end(), [&](const auto& o) { return o.name == name.toStdString(); }))
@@ -324,6 +418,8 @@ void EditorQtHost::DrainCommands()
                         if (result == EngineSceneOk && !texture.isEmpty())
                             result = scene_.setTexture(scene_.context, id, texture.toUtf8().constData(), error, sizeof(error));
                         if (result == EngineSceneOk && hasLight) result = api.setPointLight ? api.setPointLight(api.context, id, &light) : EngineSceneReadOnly;
+                        if (result == EngineSceneOk && !projectData.isEmpty()) result = projectData_.write ? projectData_.write(projectData_.context, id, projectData.toUtf8().constData()) : EngineSceneReadOnly;
+                        if (result == EngineSceneOk && !projectData.isEmpty()) result = projectData_.remapDuplicate ? projectData_.remapDuplicate(projectData_.context, id, cmd.objectId) : EngineSceneReadOnly;
                         if (result == EngineSceneOk) selectedId_ = id;
                         else api.removeObject(api.context, id);
                     }
@@ -431,9 +527,14 @@ void EditorQtHost::PublishScene()
     scene_.scene.listTypes(scene_.scene.context, [](void* p, const EngineSceneTypeInfo* t) {
         static_cast<Snapshot*>(p)->types.push_back({t->typeName, t->displayName});
     }, &view);
+    if (projectData_.read) for (auto& object : view.objects)
+        projectData_.read(projectData_.context, object.id, [](void* p, const char* value) { *static_cast<std::string*>(p) = value; }, &object.projectData);
+    if (viewportInput_.objectKind) for (auto& object : view.objects)
+        viewportInput_.objectKind(viewportInput_.context,object.id,&object.gameplayKind);
     if (std::none_of(view.objects.begin(), view.objects.end(), [&](const auto& o) { return o.id == selectedId_; })) selectedId_ = 0;
     view.selected = selectedId_; view.dirty = dirty_; view.canUndo = !undo_.empty(); view.canRedo = !redo_.empty();
     hasSelection_.store(selectedId_ != 0);
+    if (selection_.select) selection_.select(selection_.context, PlayState() == Edit ? selectedId_ : 0);
     std::lock_guard lock(sceneMutex_); view.serial = snapshot_.serial + 1; snapshot_ = std::move(view);
 }
 QString EditorQtHost::Checkpoint()

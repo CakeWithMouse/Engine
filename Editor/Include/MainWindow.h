@@ -45,6 +45,9 @@ protected:
 
 private:
     void BuildSceneTools();
+    void BuildCodeTools();
+    void RunCodeTool(const QString& action, const QStringList& extra = {});
+    void ShowProjectTypes();
     void RefreshSceneTools();
     void ApplyTransform();
     void ApplyPointLight();
@@ -67,8 +70,12 @@ private:
     QLineEdit* textureAsset_ = nullptr;
     void BuildAssetInspector(class QFormLayout* form);
     QComboBox* primitive_ = nullptr;
+    QComboBox* typeCategory_ = nullptr;
+    QLabel* selectionLabel_ = nullptr;
     QDoubleSpinBox* transform_[9]{};
     QDoubleSpinBox* spawn_[3]{};
+    QWidget* characterInspector_ = nullptr;
+    QDoubleSpinBox* characterSpeed_ = nullptr;
     QWidget* lightInspector_ = nullptr;
     QDoubleSpinBox* lightValues_[5]{}; // RGB, intensity, radius
     class QCheckBox* lightEnabled_ = nullptr;
@@ -79,9 +86,12 @@ private:
     QAction* duplicateAction_ = nullptr;
     QAction* deleteAction_ = nullptr;
     QString scenePath_, hierarchyKey_;
+    QByteArray reloadTypesBefore_, reloadTypesBuilt_;
+    bool reloadTypesExisted_ = false;
     uint64_t selectedId_ = 0;
     bool sceneBusy_ = false, refreshing_ = false, closing_ = false;
     bool checkingChanges_ = false;
+    bool showServiceObjects_ = false;
     std::function<void()> afterSave_;
     std::function<void()> afterCheck_;
 

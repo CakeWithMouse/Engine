@@ -1,4 +1,5 @@
 #include <Engine/Scene/Scene.h>
+#include <Engine/Components/Character.h>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <atomic>
@@ -94,6 +95,10 @@ void Scene::RemoveNow(ComponentId id) noexcept
     if (it == byId_.end()) return;
     auto* removed = it->second;
     for (auto& entry : components_) entry.second->ClearParentReferences(removed);
+    for (auto& entry : components_) if (auto* settings=dynamic_cast<PlaySettings*>(entry.second.get())) {
+        if(settings->character==id)settings->character=0;
+        if(settings->camera==id)settings->camera=0;
+    }
     auto entry = components_.find(removed->SceneName);
     byId_.erase(it);
     components_.erase(entry);
@@ -176,6 +181,8 @@ SceneSnapshot Scene::GetSnapshot() const
                 c.GetModelAsset(), c.GetTexturePath()});
         if (const auto* light = dynamic_cast<const PointLightComponent*>(&c))
             result.components.back().pointLight = {light->GetLightColor(), light->GetIntensity(), light->GetRadius(), light->IsEnabled()};
+        result.components.back().projectData = c.SaveProjectData();
+        if (!result.components.back().projectData.empty()) result.documentVersion = 3;
     }
     return result;
 }
@@ -189,7 +196,7 @@ bool SceneComponentSnapshot::PointLight::IsValid() const noexcept
 
 void Scene::SetDocumentVersion(uint32_t version)
 {
-    if (version != 1 && version != 2) throw std::invalid_argument("Unsupported scene format");
+    if (version < 1 || version > 3) throw std::invalid_argument("Unsupported scene format");
     documentVersion_ = version;
 }
 

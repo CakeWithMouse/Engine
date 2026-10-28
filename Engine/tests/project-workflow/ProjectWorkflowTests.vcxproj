@@ -11,6 +11,8 @@
 <UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries></PropertyGroup>
 <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
 <Import Project="..\..\BuildSupport\Cpp.props" />
+<ItemDefinitionGroup Condition="'$(EngineEnableAssimp)'=='true' and '$(Configuration)'=='Debug'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/debug/lib/assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+<ItemDefinitionGroup Condition="'$(EngineEnableAssimp)'=='true' and '$(Configuration)'=='Release'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/lib/assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
 <ItemGroup><ClCompile Include="ProjectWorkflowTests.cpp" /><ClCompile Include="..\..\Runtime\Project.cpp" /></ItemGroup>
 <ItemGroup>
 <ProjectReference Include="..\..\Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project></ProjectReference>

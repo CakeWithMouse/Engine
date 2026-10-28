@@ -126,7 +126,7 @@ private:
     // advanced 0.13 per frame; this ratio keeps that look without depending on the frame rate.
     float SimulationRate = 0.05f / 0.13f;
     float MaxSimulationStep = 0.1f;
-    float LastDeltaTime = 0.016f;
+    float LastDeltaTime = 0.0f;
     float SimulationTime = 0.0f;
     float BaseLifetime = 2.8f;
     float SpreadRadius = 0.0f;

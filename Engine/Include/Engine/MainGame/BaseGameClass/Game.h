@@ -17,6 +17,9 @@
 #include <Engine/MainGame/Player.h>
 #include <Engine/Display/Display.h>
 #include <Engine/InputDevice/InputDevice.h>
+#include <Engine/InputDevice/InputActions.h>
+
+class CharacterController;
 
 enum RenderType
 {
@@ -165,6 +168,8 @@ public:
      */
     void SetSimulationTimeScale(float scale) { SimulationTimeScale = scale > 0.0f ? scale : 0.0f; }
     virtual void AfterInitialize() {}
+    // One simulation path for standalone and embedded project games.
+    void StepProjectSimulation(float deltaTime) { UpdateSimulation(deltaTime); }
 
     bool IsShadowEnabled() const { return bShadowsEnabled; }
     /** Shadows requested and shadow resources are ready. */
@@ -190,6 +195,12 @@ public:
     Player* GetPlayer() const { return FirstPlayer.get(); }
     Display* GetDisplay() const { return DisplayPtr.get(); }
     InputDevice* GetInputDevice() const { return InputDevicePtr.get(); }
+    Input::System& GetInput() { return ActionInput; }
+    CharacterController* GetCharacterController() const { return Controller.get(); }
+    void SetCharacterController(std::unique_ptr<CharacterController>);
+    virtual std::unique_ptr<CharacterController> CreateCharacterController();
+    void InitializeGameplay(); // idempotent; resolves the optional PlaySettings object
+    bool HasGameplayController() const { return Controller != nullptr; }
     ID3D11Device* GetDevice() const { return Device.Get(); }
     ID3D11DeviceContext* GetContext() const { return Context.Get(); }
     ID3D11InputLayout* GetInputLayout(VertexFormat format) const;
@@ -237,6 +248,8 @@ public:
     // Called by the window procedure.
     void OnWindowResized(int clientWidth, int clientHeight, bool minimized);
     void OnFocusLost();
+    void SetEditorSelection(uint64_t id) { EditorSelectedId = id; }
+    void RenderEditorSelection();
 
     ID3D11VertexShader* GetVertexShader() { return BaseVertexShader.Get(); }
     ID3D11VertexShader* GetVertexShader(const std::string& VertexShaderName,
@@ -280,6 +293,7 @@ protected:
     void ApplyPendingResize();
     void UpdateFrame(float realDeltaTime);
     void UpdateSimulation(float deltaTime);
+    void StartGameplayComponents();
     void PrepareRenderFrame();
     void SynchronizeSceneResources();
     /** Game logic that must run before the camera and the component ticks (scaled dt). */
@@ -357,6 +371,9 @@ protected:
     std::unique_ptr<Display> DisplayPtr;
     std::unique_ptr<InputDevice> InputDevicePtr;
     std::unique_ptr<Player> FirstPlayer;
+    Input::System ActionInput;
+    std::unique_ptr<CharacterController> Controller;
+    bool GameplayInitialized = false;
 
     // Scene owns components. The read-only alias preserves legacy traversal/order.
     Scene scene;
@@ -465,4 +482,8 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11Query> GpuTimerEnd[GpuTimerLatency];
     bool GpuTimerIssued[GpuTimerLatency] = {};
     int GpuTimerSlot = 0;
+    uint64_t EditorSelectedId = 0;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> SelectionVS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> SelectionPS;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> SelectionCB;
 };

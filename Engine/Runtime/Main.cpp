@@ -1,4 +1,4 @@
-#define NOMINMAX
+﻿#define NOMINMAX
 #include <Engine/Base/Base.h>
 #include <Engine/Resources/Paths.h>
 #include "Project.h"
@@ -14,6 +14,33 @@ int wmain(int argc, wchar_t** argv)
     std::setvbuf(stdout, nullptr, _IONBF, 0);
     try
     {
+        if (argc == 3 && std::wstring(argv[1]) == L"--validate-project")
+        {
+            const auto project = ReadRuntimeProject(argv[2]);
+            const auto runtime = EnginePaths::ExecutableDirectory();
+            const auto release = ReadEngineRelease(runtime);
+            if (project.engineVersion != release.version || project.engineConfiguration != release.configuration)
+                throw std::runtime_error("Candidate SDK/runtime identity mismatch");
+            GameEditModule module(project.module, runtime / "EngineContent", project.content);
+            const auto& api = module.Api();
+            auto validate = [&](const std::filesystem::path& file) {
+                char error[2048]{}; uint64_t id = 0;
+                if (api.loadScene(api.context, file.u8string().c_str(), &id, error, sizeof(error)) != EngineSceneOk)
+                    throw std::runtime_error(std::string("Candidate scene rejected: ") + error);
+                if (api.control(api.context, EnginePlay) != EngineSceneOk)
+                    throw std::runtime_error("Candidate Game factory failed");
+                if (api.control(api.context, EngineStop) != EngineSceneOk)
+                    throw std::runtime_error("Candidate Game cleanup failed");
+            };
+            for (const auto& item : std::filesystem::recursive_directory_iterator(project.content))
+            {
+                const auto name = item.path().filename().u8string();
+                if (item.is_regular_file() && name.size() >= 11 && name.compare(name.size() - 11, 11, ".scene.json") == 0) validate(item.path());
+            }
+            if (!project.startupScene.empty()) validate(project.startupScene);
+            std::puts("Candidate project validated");
+            return 0;
+        }
         if (argc == 5 && std::wstring(argv[1]) == L"--upgrade-project" && std::wstring(argv[3]) == L"--destination")
         {
             ProjectUpgrade::Copy(argv[2],argv[4],EnginePaths::ExecutableDirectory());
@@ -21,6 +48,8 @@ int wmain(int argc, wchar_t** argv)
             return 0;
         }
         RuntimeLaunchOptions options;
+        wchar_t readyEvent[512]{};
+        if (GetEnvironmentVariableW(L"PAINENGINE_READY_EVENT", readyEvent, 512) < 512) options.readyEvent = readyEvent;
         std::filesystem::path projectPath;
         std::set<std::wstring> seen;
         bool sceneApi = false;

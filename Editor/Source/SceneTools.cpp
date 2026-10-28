@@ -1,4 +1,4 @@
-#include "MainWindow.h"
+﻿#include "MainWindow.h"
 #include "QtHost.h"
 #include <QAction>
 #include <QApplication>
@@ -8,6 +8,8 @@
 #include <QGroupBox>
 #include <QDockWidget>
 #include <QDoubleSpinBox>
+#include <QDialog>
+#include <QDialogButtonBox>
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -19,11 +21,13 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenuBar>
+#include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QQuaternion>
 #include <QSaveFile>
 #include <QSignalBlocker>
+#include <QScrollArea>
 #include <QStatusBar>
 #include <QTreeWidget>
 #include <QVBoxLayout>
@@ -33,9 +37,52 @@ void EditorMainWindow::BuildSceneTools()
 {
     auto* menu = menuBar()->addMenu(QStringLiteral("Сцена"));
 
+    for(auto* action : menuBar()->actions()) if(action->text()==QStringLiteral("Вид") && action->menu()) {
+        auto* service=action->menu()->addAction(QStringLiteral("Служебные объекты сцены"));service->setCheckable(true);
+        connect(service,&QAction::toggled,this,[this](bool visible){
+            showServiceObjects_=visible;hierarchyKey_.clear();
+            if(!visible)for(const auto& o:host_->ReadSnapshot().objects)if(o.id==selectedId_&&o.type=="Gameplay.PlaySettings"){
+                EditorCommand c;c.type=EditorCommand::SelectObject;host_->PostCommand(c);
+            }
+            RefreshSceneTools();
+        });
+    }
     const bool available = host_->HasScene();
     menu->setEnabled(available);
-
+    auto* playMenu = menuBar()->addMenu(QStringLiteral("Запуск"));
+    playMenu->addAction(actPlay_); playMenu->addAction(actPause_); playMenu->addAction(actStop_);
+    playMenu->addSeparator(); playMenu->addAction(actExternal_);
+    playMenu->addAction(QStringLiteral("Настроить Play…"),this,[this]{
+        if(host_->PlayState()!=EditorQtHost::Edit)return;
+        const auto snapshot=host_->ReadSnapshot();
+        QJsonObject data{{"version",1},{"character",0},{"camera",0},{"standardControl",true},{"cameraDistance",5},{"cameraHeight",2},{"lookSensitivity",0.005}};
+        uint64_t settingsId=0;
+        for(const auto& o:snapshot.objects)if(o.gameplayKind==3){
+            if(settingsId){QMessageBox::warning(this,QStringLiteral("Play"),QStringLiteral("Включите «Вид → Служебные объекты сцены» и удалите лишние записи «Настройки Play». Для сцены нужна одна запись."));return;}
+            settingsId=o.id;data=QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object();
+        }
+        QDialog dialog(this);dialog.setWindowTitle(QStringLiteral("Персонаж и камера Play"));
+        auto* form=new QFormLayout(&dialog);auto* character=new QComboBox(&dialog);auto* camera=new QComboBox(&dialog);
+        character->setObjectName("PlayCharacter");camera->setObjectName("PlayCamera");
+        character->addItem(QStringLiteral("Без управления персонажем"),QVariant::fromValue<qulonglong>(0));
+        camera->addItem(QStringLiteral("Следовать за персонажем"),QVariant::fromValue<qulonglong>(0));
+        for(const auto& o:snapshot.objects){auto* box=o.gameplayKind==1?character:o.gameplayKind==2?camera:nullptr;if(box)box->addItem(QString::fromStdString(o.name),QVariant::fromValue<qulonglong>(o.id));}
+        character->setCurrentIndex((std::max)(0,character->findData(QVariant::fromValue<qulonglong>(data["character"].toInteger()))));
+        camera->setCurrentIndex((std::max)(0,camera->findData(QVariant::fromValue<qulonglong>(data["camera"].toInteger()))));
+        auto* standard=new QCheckBox(QStringLiteral("WASD: движение, ПКМ + мышь: обзор"),&dialog);standard->setChecked(data["standardControl"].toBool());
+        auto* distance=new QDoubleSpinBox(&dialog);distance->setRange(0,10000);distance->setValue(data["cameraDistance"].toDouble());
+        auto* height=new QDoubleSpinBox(&dialog);height->setRange(-10000,10000);height->setValue(data["cameraHeight"].toDouble());
+        auto* sensitivity=new QDoubleSpinBox(&dialog);sensitivity->setDecimals(4);sensitivity->setSingleStep(0.001);sensitivity->setRange(0,1);sensitivity->setValue(data["lookSensitivity"].toDouble());
+        form->addRow(QStringLiteral("Персонаж"),character);form->addRow(QStringLiteral("Камера"),camera);form->addRow(standard);
+        form->addRow(QStringLiteral("Расстояние камеры"),distance);form->addRow(QStringLiteral("Высота камеры"),height);form->addRow(QStringLiteral("Чувствительность обзора"),sensitivity);
+        form->addRow(new QLabel(QStringLiteral("Добавьте персонажа в категории Персонажи.\nФиксированная камера использует трансформацию объекта.\nSpace: Stop, P: Pause. Для управления щёлкните viewport."),&dialog));
+        auto* buttons=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel,&dialog);form->addRow(buttons);
+        connect(buttons,&QDialogButtonBox::accepted,&dialog,&QDialog::accept);connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);
+        if(dialog.exec()!=QDialog::Accepted)return;
+        data["character"]=static_cast<qint64>(character->currentData().toULongLong());data["camera"]=static_cast<qint64>(camera->currentData().toULongLong());
+        data["standardControl"]=standard->isChecked();data["cameraDistance"]=distance->value();data["cameraHeight"]=height->value();data["lookSensitivity"]=sensitivity->value();
+        EditorCommand c;c.type=EditorCommand::ConfigurePlay;c.objectId=settingsId;c.path=QString::fromUtf8(QJsonDocument(data).toJson(QJsonDocument::Compact));host_->PostCommand(c);
+    });
     menu->addAction(QStringLiteral("Новая сцена"), this, [this]
     {
         if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
@@ -69,30 +116,35 @@ void EditorMainWindow::BuildSceneTools()
 
     menu->addSeparator();
 
-    menu->addAction(QStringLiteral("Добавить модель…"), this, [this] { AddModel(); });
-    menu->addAction(QStringLiteral("Импорт модели…"), this, [this] { ImportAsset(false); });
-    menu->addAction(QStringLiteral("Импорт текстуры…"), this, [this] { ImportAsset(true); });
+    auto* resources = menu->addMenu(QStringLiteral("Ресурсы"));
+    resources->addAction(QStringLiteral("Добавить модель…"), this, [this] { AddModel(); });
+    resources->addAction(QStringLiteral("Импорт модели…"), this, [this] { ImportAsset(false); });
+    resources->addAction(QStringLiteral("Импорт текстуры…"), this, [this] { ImportAsset(true); });
     menu->addSeparator();
 
-    undoAction_ = menu->addAction(QStringLiteral("Отменить"), this, [this]
+    auto* editMenu = menuBar()->addMenu(QStringLiteral("Правка"));
+    undoAction_ = editMenu->addAction(QStringLiteral("Отменить"), this, [this]
     {
         SubmitObjectCommand(EditorCommand::Undo);
     }, QKeySequence::Undo);
 
-    redoAction_ = menu->addAction(QStringLiteral("Повторить"), this, [this]
+    redoAction_ = editMenu->addAction(QStringLiteral("Повторить"), this, [this]
     {
         SubmitObjectCommand(EditorCommand::Redo);
     }, QKeySequence::Redo);
 
-    duplicateAction_ = menu->addAction(QStringLiteral("Дублировать объект"), this, [this]
+    duplicateAction_ = editMenu->addAction(QStringLiteral("Дублировать объект"), this, [this]
     {
         SubmitObjectCommand(EditorCommand::DuplicateObject);
     }, QKeySequence(QStringLiteral("Ctrl+D")));
 
-    deleteAction_ = menu->addAction(QStringLiteral("Удалить объект"), this, [this]
+    deleteAction_ = editMenu->addAction(QStringLiteral("Удалить объект"), this, [this]
     {
         SubmitObjectCommand(EditorCommand::RemoveObject);
     });
+
+    menu->addSeparator();
+    menu->addAction(QStringLiteral("Закрыть редактор"), this, [this] { close(); });
 
     // Delete работает только в иерархии, чтобы не мешать вводу текста в полях.
     removeShortcut_ = new QAction(this);
@@ -134,15 +186,41 @@ void EditorMainWindow::BuildSceneTools()
     scenePanel_ = new QWidget(sceneToolsDock_);
     auto* layout = new QVBoxLayout(scenePanel_);
 
+    auto* placement = new QGroupBox(QStringLiteral("Добавление объекта"), scenePanel_);
+    auto* placementLayout = new QVBoxLayout(placement);
+    layout->addWidget(placement);
     primitive_ = new QComboBox(scenePanel_);
     primitive_->setObjectName(QStringLiteral("PrimitiveType"));
+    typeCategory_ = new QComboBox(scenePanel_);
+    typeCategory_->setObjectName(QStringLiteral("ObjectCategory"));
+    typeCategory_->addItem(QStringLiteral("Примитивы"), "Primitive.");
+    typeCategory_->addItem(QStringLiteral("Свет"), "Light.");
+    typeCategory_->addItem(QStringLiteral("Частицы"), "Particle.");
+    typeCategory_->addItem(QStringLiteral("Окружение"), "Environment.");
+    typeCategory_->addItem(QStringLiteral("Персонажи"), "Gameplay.Character");
+    typeCategory_->addItem(QStringLiteral("Камеры"), "Gameplay.Camera");
+    typeCategory_->addItem(QStringLiteral("Классы проекта"), "project");
+    typeCategory_->addItem(QStringLiteral("Все объекты"), "all");
+    const auto fillTypes = [this] {
+        primitive_->clear();
+        const auto category=typeCategory_->currentData().toString();
+        for (const auto& type : host_->ReadSnapshot().types) {
+            const auto name=QString::fromStdString(type.name);
+            if (name == "Gameplay.PlaySettings") continue;
+            const bool standard=name.startsWith("Primitive.")||name.startsWith("Light.")||name.startsWith("Particle.")||name.startsWith("Environment.")||name.startsWith("Gameplay.");
+            if (category=="all" || name.startsWith(category) || (category=="project"&&!standard))
+                primitive_->addItem(QString::fromStdString(type.label),name);
+        }
+        if(addPrimitiveButton_)addPrimitiveButton_->setEnabled(primitive_->count()!=0);
+    };
+    connect(typeCategory_,qOverload<int>(&QComboBox::currentIndexChanged),this,[fillTypes](int){fillTypes();});
+    fillTypes();
+    placementLayout->addWidget(new QLabel(QStringLiteral("Категория"), placement));
+    placementLayout->addWidget(typeCategory_);
+    placementLayout->addWidget(new QLabel(QStringLiteral("Объект из категории"), placement));
+    placementLayout->addWidget(primitive_);
 
-    for (const auto& type : host_->ReadSnapshot().types)
-        primitive_->addItem(QString::fromStdString(type.label), QString::fromStdString(type.name));
-
-    layout->addWidget(primitive_);
-
-    layout->addWidget(new QLabel(QStringLiteral("Точка добавления — X / Y / Z"), scenePanel_));
+    placementLayout->addWidget(new QLabel(QStringLiteral("Точка добавления — X / Y / Z"), scenePanel_));
 
     auto* spawnRow = new QHBoxLayout;
 
@@ -158,51 +236,26 @@ void EditorMainWindow::BuildSceneTools()
 
     spawn_[0]->setValue(2);
 
-    layout->addLayout(spawnRow);
+    placementLayout->addLayout(spawnRow);
 
     addPrimitiveButton_ = new QPushButton(QStringLiteral("+ Добавить объект"), scenePanel_);
     addPrimitiveButton_->setObjectName(QStringLiteral("AddPrimitive"));
-    layout->addWidget(addPrimitiveButton_);
-
-    auto* addModel = new QPushButton(QStringLiteral("+ Добавить модель…"), scenePanel_);
-    addModel->setObjectName(QStringLiteral("AddModel"));
-    addModel->setToolTip(QStringLiteral("Выбрать модель из Content/Models и разместить в точке добавления X/Y/Z."));
-    connect(addModel, &QPushButton::clicked, this, [this] { AddModel(); });
-    layout->addWidget(addModel);
-    auto* importModel = new QPushButton(QStringLiteral("Импорт модели в проект…"), scenePanel_);
-    importModel->setObjectName(QStringLiteral("SceneImportModel"));
-    importModel->setToolTip(QStringLiteral("Скопировать внешний файл в проект. Затем нажмите «Добавить модель…»."));
-    connect(importModel, &QPushButton::clicked, this, [this] { ImportAsset(false); });
-    layout->addWidget(importModel);
+    placementLayout->addWidget(addPrimitiveButton_);
 
     hierarchy_ = new QTreeWidget(scenePanel_);
     hierarchy_->setHeaderLabels({QStringLiteral("Объект"), QStringLiteral("Тип")});
     hierarchy_->setSelectionMode(QAbstractItemView::SingleSelection);
+    hierarchy_->setStyleSheet(QStringLiteral("QTreeView::item:selected { background: #a66008; color: white; }"));
 
     if (removeShortcut_)
         hierarchy_->addAction(removeShortcut_);
 
     layout->addWidget(hierarchy_, 1);
 
-    auto* buttons = new QHBoxLayout;
-
-    duplicateObjectButton_ = new QPushButton(QStringLiteral("Дубликат"), scenePanel_);
-    removeObjectButton_ = new QPushButton(QStringLiteral("Удалить"), scenePanel_);
-
-    buttons->addWidget(duplicateObjectButton_);
-    buttons->addWidget(removeObjectButton_);
-
-    layout->addLayout(buttons);
-
-    auto* help = new QLabel(QStringLiteral(
-        "ПКМ + мышь: обзор; WASD, Q/E: камера.\n"
-        "ЛКМ/Tab: выбор; F: фокус камеры.\n"
-        "Стрелки, PgUp/PgDn: объект.\n"
-        "Ctrl+S: сохранить; Ctrl+Z: отменить.\n"
-        "Play проверяет копию сцены; Stop возвращает правки."), scenePanel_);
-
-    help->setWordWrap(true);
-    layout->addWidget(help);
+    hierarchy_->setContextMenuPolicy(Qt::ActionsContextMenu);
+    hierarchy_->addAction(duplicateAction_);
+    hierarchy_->addAction(deleteAction_);
+    placement->setToolTip(QStringLiteral("Категория меняет список объектов для добавления. Выбранный объект сцены не изменяется."));
 
     sceneToolsDock_->setWidget(scenePanel_);
 
@@ -211,7 +264,18 @@ void EditorMainWindow::BuildSceneTools()
     ///////////////////////////////////////////////////////////////////
 
     inspector_ = new QWidget(inspectorDock_);
-    auto* form = new QFormLayout(inspector_);
+    auto* inspectorLayout = new QVBoxLayout(inspector_);
+    auto group = [this, inspectorLayout](const QString& title) {
+        auto* box = new QGroupBox(title, inspector_);
+        inspectorLayout->addWidget(box);
+        return new QFormLayout(box);
+    };
+    auto* form = group(QStringLiteral("Общие"));
+    selectionLabel_=new QLabel(QStringLiteral("Объект не выбран"),inspector_);
+    selectionLabel_->setObjectName(QStringLiteral("SelectedObjectLabel"));
+    selectionLabel_->setWordWrap(true);
+    selectionLabel_->setStyleSheet(QStringLiteral("font-weight: bold; color: #efa52b;"));
+    form->addRow(selectionLabel_);
 
     objectName_ = new QLineEdit(inspector_);
     objectName_->setMaxLength(120);
@@ -219,19 +283,20 @@ void EditorMainWindow::BuildSceneTools()
 
     const QString labels[] =
     {
-        QStringLiteral("Позиция X"),
-        QStringLiteral("Позиция Y"),
-        QStringLiteral("Позиция Z"),
-        QStringLiteral("Поворот X, °"),
-        QStringLiteral("Поворот Y, °"),
-        QStringLiteral("Поворот Z, °"),
-        QStringLiteral("Масштаб X"),
-        QStringLiteral("Масштаб Y"),
-        QStringLiteral("Масштаб Z")
+        QStringLiteral("X"),
+        QStringLiteral("Y"),
+        QStringLiteral("Z"),
+        QStringLiteral("X, °"),
+        QStringLiteral("Y, °"),
+        QStringLiteral("Z, °"),
+        QStringLiteral("X"),
+        QStringLiteral("Y"),
+        QStringLiteral("Z")
     };
 
     for (int i = 0; i < 9; ++i)
     {
+        if (i % 3 == 0) form = group(i == 0 ? QStringLiteral("Позиция") : i == 3 ? QStringLiteral("Поворот") : QStringLiteral("Масштаб"));
         auto* spin = transform_[i] = new QDoubleSpinBox(inspector_);
 
         spin->setObjectName(QStringLiteral("Transform%1").arg(i));
@@ -243,6 +308,8 @@ void EditorMainWindow::BuildSceneTools()
         form->addRow(labels[i], spin);
     }
 
+    form = group(QStringLiteral("Визуал"));
+    BuildAssetInspector(form);
     auto* lightGroup = new QGroupBox(QStringLiteral("Точечный свет"), inspector_);
     lightInspector_ = lightGroup;
     auto* lightForm = new QFormLayout(lightGroup);
@@ -288,8 +355,27 @@ void EditorMainWindow::BuildSceneTools()
     });
     form->addRow(lightGroup);
     lightGroup->hide();
-    BuildAssetInspector(form);
-    inspectorDock_->setWidget(inspector_);
+    auto* characterGroup = new QGroupBox(QStringLiteral("Персонаж"), inspector_);
+    characterInspector_ = characterGroup;
+    auto* characterForm = new QFormLayout(characterGroup);
+    characterSpeed_ = new QDoubleSpinBox(characterGroup);
+    characterSpeed_->setObjectName("CharacterSpeed");
+    characterSpeed_->setRange(0, 10000); characterSpeed_->setKeyboardTracking(false);
+    characterForm->addRow(QStringLiteral("Скорость, ед/с"), characterSpeed_);
+    inspectorLayout->addWidget(characterGroup);
+    connect(characterSpeed_, &QDoubleSpinBox::editingFinished, this, [this] {
+        if (refreshing_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        for (const auto& o : host_->ReadSnapshot().objects) if (o.id == selectedId_ && o.gameplayKind == 1) {
+            auto data = QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object();
+            if (data["moveSpeed"].toDouble(5) == characterSpeed_->value()) return;
+            data["moveSpeed"] = characterSpeed_->value();
+            EditorCommand c; c.type = EditorCommand::SetProjectData; c.objectId = o.id;
+            c.path = QString::fromUtf8(QJsonDocument(data).toJson()); host_->PostCommand(c);
+        }
+    });
+    inspectorLayout->addStretch();
+    auto* scroll = new QScrollArea(inspectorDock_); scroll->setWidgetResizable(true);
+    scroll->setWidget(inspector_); inspectorDock_->setWidget(scroll);
 }
 
 void EditorMainWindow::SubmitObjectCommand(int type)
@@ -361,12 +447,14 @@ void EditorMainWindow::RefreshSceneTools()
         std::map<uint64_t, QTreeWidgetItem*> items;
         for (const auto& o : view.objects)
         {
+            if (!showServiceObjects_ && (o.gameplayKind == 3 || o.type == "Gameplay.PlaySettings")) continue;
             auto* item = new QTreeWidgetItem({QString::fromStdString(o.name), QString::fromStdString(o.type)});
             item->setData(0, Qt::UserRole, QVariant::fromValue<qulonglong>(o.id));
             items[o.id] = item;
         }
         for (const auto& o : view.objects)
         {
+            if (!items.count(o.id)) continue;
             if (o.parent && items.count(o.parent)) items[o.parent]->addChild(items[o.id]);
             else hierarchy_->addTopLevelItem(items[o.id]);
         }
@@ -377,13 +465,21 @@ void EditorMainWindow::RefreshSceneTools()
         (*it)->data(0, Qt::UserRole).toULongLong() == view.selected);
     const bool selectionChanged = selectedId_ != view.selected;
     selectedId_ = view.selected;
+    selectionLabel_->setText(QStringLiteral("Объект не выбран"));
+    inspectorDock_->setWindowTitle(QStringLiteral("Свойства — нет выбора"));
     const auto* focus = QApplication::focusWidget();
     inspector_->setEnabled(edit && selectedId_);
     modelAsset_->clear(); textureAsset_->clear();
     bool selectedLight = false;
+    bool selectedCharacter = false;
     for (const auto& o : view.objects) if (o.id == selectedId_)
     {
+        selectionLabel_->setText(QStringLiteral("Выбран: %1\n%2 · ID %3").arg(QString::fromStdString(o.name),QString::fromStdString(o.type)).arg(o.id));
+        inspectorDock_->setWindowTitle(QStringLiteral("Свойства — %1").arg(QString::fromStdString(o.name)));
         selectedLight = o.hasPointLight;
+        selectedCharacter = o.gameplayKind == 1;
+        if (o.gameplayKind == 1 && (selectionChanged || !focus || !characterInspector_->isAncestorOf(focus)))
+            characterSpeed_->setValue(QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object()["moveSpeed"].toDouble(5));
         if (o.hasPointLight)
         {
             for (int i = 0; i < 5; ++i)
@@ -395,10 +491,12 @@ void EditorMainWindow::RefreshSceneTools()
                 .arg(QColor::fromRgbF(color[0], color[1], color[2]).name())
                 .arg(color[0] * 0.299 + color[1] * 0.587 + color[2] * 0.114 > 0.5 ? "black" : "white"));
         }
+        inspector_->findChild<QPushButton*>("ChooseModel")->setEnabled(o.type == "Engine.Model" || o.type.rfind("Primitive.", 0) == 0);
         modelAsset_->setText(QString::fromStdString(o.modelAsset));
         textureAsset_->setText(QString::fromStdString(o.textureAsset));
     }
     lightInspector_->setVisible(selectedLight);
+    characterInspector_->setVisible(selectedCharacter);
     if (selectionChanged || !focus || !inspector_->isAncestorOf(focus))
     {
         for (const auto& o : view.objects)
@@ -511,6 +609,40 @@ void EditorMainWindow::OpenScene(const QString& supplied)
 
 void EditorMainWindow::CommandFinished(const EditorCommand& command, uint32_t status, const QString& error)
 {
+    if (command.type == EditorCommand::ReloadProject) {
+        sceneBusy_ = false; setEnabled(true);
+        if (status != EngineSceneOk && !command.name.isEmpty()) {
+            // Roll back only our candidate module field; preserve concurrent edits to other fields.
+            const auto project=QString::fromUtf8(host_->host().projectFile);
+            QFile input(project);
+            if(input.open(QIODevice::ReadOnly)) {
+                auto data=QJsonDocument::fromJson(input.readAll()).object(); input.close();
+                const auto current=QFileInfo(project).dir().absoluteFilePath(data["module"].toString());
+                if(QDir::cleanPath(current).compare(QDir::cleanPath(command.path),Qt::CaseInsensitive)==0) {
+                    data["module"]=command.name; QSaveFile output(project); const auto bytes=QJsonDocument(data).toJson();
+                    if(!output.open(QIODevice::WriteOnly) || output.write(bytes)!=bytes.size() || !output.commit())
+                        AppendLine(QStringLiteral("Не удалось вернуть путь прежней DLL в Project.json. Работающая сцена сохранена в памяти."));
+                    else {
+                        QFile types(QFileInfo(project).dir().filePath("ProjectTypes.tsv"));
+                        if(types.open(QIODevice::ReadOnly)) {
+                            const bool unchanged=types.readAll()==reloadTypesBuilt_; types.close();
+                            if(unchanged) {
+                                if(!reloadTypesExisted_) types.remove();
+                                else { QSaveFile restore(types.fileName()); if(restore.open(QIODevice::WriteOnly) && restore.write(reloadTypesBefore_)==reloadTypesBefore_.size()) restore.commit(); }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (status == EngineSceneOk && command.name == "unchanged") { AppendLine(QStringLiteral("C++: код уже актуален. Сцена и история отмены сохранены.")); return; }
+        if (status == EngineSceneOk) {
+            hierarchyKey_.clear();
+            const auto category = typeCategory_->currentIndex();
+            typeCategory_->setCurrentIndex(-1); typeCategory_->setCurrentIndex(category);
+            AppendLine(QStringLiteral("Hot reload: DLL заменена. Сцена, выбор и камера сохранены; история отмены очищена."));
+        }
+    }
     if (command.type == EditorCommand::RefreshScene && command.name == QStringLiteral("confirm"))
     {
         auto continuation = std::move(afterCheck_);
@@ -559,7 +691,7 @@ void EditorMainWindow::CommandFinished(const EditorCommand& command, uint32_t st
     }
     if (command.type == EditorCommand::ImportModel || command.type == EditorCommand::ImportTexture)
     {
-        AppendLine(QStringLiteral("Импортировано: %1. Двойной щелчок в Files: добавить модель или назначить текстуру выбранному объекту.").arg(command.path));
+        AppendLine(QStringLiteral("Импортировано: %1. Двойной щелчок в «Ресурсы и код»: добавить модель или назначить текстуру выбранному объекту.").arg(command.path));
         statusBar()->showMessage(QStringLiteral("Импортировано: %1").arg(command.path), 8000);
     }
     else if (command.type == EditorCommand::SaveScene)

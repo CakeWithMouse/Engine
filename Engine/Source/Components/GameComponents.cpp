@@ -5,6 +5,7 @@
 #include <cstring>
 #include <directxmath.h>
 #include <iostream>
+#include <stdexcept>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/Render/TextureLoader.h>
 #include <glm/gtx/matrix_decompose.hpp>
@@ -50,8 +51,33 @@ GameComponent::GameComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm:
 
 GameComponent::~GameComponent() = default;
 
+void GameComponent::GetEditorBounds(glm::vec3& minimum, glm::vec3& maximum)
+{
+    const auto center = GetWorldPosition();
+    const float radius = IsSkybox() ? 0.4f : (std::max)(0.25f, GetWorldBoundingRadius());
+    minimum = center - glm::vec3(radius); maximum = center + glm::vec3(radius);
+    if (points.empty() || IsSkybox()) return;
+    const auto world = GetWorldMatrix();
+    for (size_t i=0; i<points.size(); i+=2) {
+        DirectX::XMFLOAT3 p;
+        DirectX::XMStoreFloat3(&p, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat4(&points[i]), DirectX::XMLoadFloat4x4(&world)));
+        const glm::vec3 v(p.x,p.y,p.z);
+        if (!i) minimum=maximum=v; else { minimum=glm::min(minimum,v); maximum=glm::max(maximum,v); }
+    }
+    minimum-=glm::vec3(0.025f); maximum+=glm::vec3(0.025f);
+}
 bool GameComponent::RaycastPrimitive(const glm::vec3& origin, const glm::vec3& direction, float& distance)
 {
+    if (IsSkybox()) return false;
+    if (points.empty()) {
+        const auto relative=origin-GetWorldPosition();
+        const float radius=(std::max)(0.25f,GetWorldBoundingRadius());
+        const float b=glm::dot(relative,direction), discriminant=b*b-glm::dot(relative,relative)+radius*radius;
+        if (discriminant<0) return false;
+        float t=-b-std::sqrt(discriminant); if(t<0)t=-b+std::sqrt(discriminant);
+        if(t<0 || t>=distance)return false;
+        distance=t;return true;
+    }
     using namespace DirectX;
     const auto world = GetWorldMatrix();
     const auto inverse = XMMatrixInverse(nullptr, XMLoadFloat4x4(&world));
@@ -704,4 +730,8 @@ void GameComponent::RenderShadow(ID3D11DeviceContext* context, const ShadowPassC
     context->VSSetConstantBuffers(0, 1, &shadowPass.ConstantBuffer);
     context->DrawIndexed(GetIndexCount(), 0, 0);
     if (GamePtr) GamePtr->CountDraw(GetIndexCount());
+}
+void GameComponent::LoadProjectData(const std::string& data)
+{
+    if (!data.empty()) throw std::runtime_error("Component has no project data codec");
 }

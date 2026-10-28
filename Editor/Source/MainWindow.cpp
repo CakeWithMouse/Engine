@@ -89,7 +89,7 @@ void EditorMainWindow::BuildUi()
 
     resizeDocks({viewportDock_, consoleDock_}, {620, 100}, Qt::Vertical);
 
-    QMenu* viewMenu = menuBar()->addMenu(QStringLiteral("&View"));
+    QMenu* viewMenu = menuBar()->addMenu(QStringLiteral("Вид"));
 
     if (viewportDock_)
         viewMenu->addAction(viewportDock_->toggleViewAction());
@@ -109,12 +109,11 @@ void EditorMainWindow::BuildUi()
     statsLabel_ = new QLabel(this);
     statusBar()->addPermanentWidget(statsLabel_);
 
-    QMenu* file = menuBar()->addMenu(QStringLiteral("&File"));
-    file->addSeparator();
-    file->addAction(QStringLiteral("Close editor"), this, [this] { close(); });
-
     // Создаёт меню "Сцена", читает startupScene, создаёт содержимое панелей
     BuildSceneTools();
+    BuildCodeTools();
+    for (const auto& title : {QStringLiteral("Сцена"),QStringLiteral("Правка"),QStringLiteral("Запуск"),QStringLiteral("Проект"),QStringLiteral("Вид")})
+        for (auto* action : menuBar()->actions()) if (action->text() == title) { menuBar()->removeAction(action); menuBar()->addAction(action); break; }
 
     // Подключаем сигналы уже в MainWindow.cpp
     ConnectSceneTools();
@@ -169,8 +168,7 @@ void EditorMainWindow::BuildToolBar()
     actPlay_ = toolBar_->addAction(QStringLiteral("▶ Play"));
     actPause_ = toolBar_->addAction(QStringLiteral("⏸ Pause"));
     actStop_ = toolBar_->addAction(QStringLiteral("⏹ Stop"));
-    toolBar_->addSeparator();
-    actExternal_ = toolBar_->addAction(QStringLiteral("🚀 External"));
+    actExternal_ = new QAction(QStringLiteral("Запустить отдельным окном"), this);
 
     connect(actPlay_, &QAction::triggered, this, [this]
     {
@@ -241,12 +239,12 @@ void EditorMainWindow::StartExternalGame()
             if (!tail.isEmpty()) host_->Log(tail.trimmed().constData());
             host_->Log(("ExternalGame exited code=" + std::to_string(code)
                 + (st == QProcess::CrashExit ? " (crash)" : "")).c_str());
-            actExternal_->setText(QStringLiteral("🚀 External"));
+            actExternal_->setText(QStringLiteral("Запустить отдельным окном"));
         });
         connect(gameProc_, &QProcess::errorOccurred, this, [this](QProcess::ProcessError e)
         {
             host_->Log(("ExternalGame error=" + std::to_string(e)).c_str());
-            actExternal_->setText(QStringLiteral("🚀 External"));
+            actExternal_->setText(QStringLiteral("Запустить отдельным окном"));
         });
     }
 
@@ -277,7 +275,7 @@ void EditorMainWindow::StartExternalGame()
     if (!gameProc_->waitForStarted(2000))
         host_->Log("ExternalGame: failed to start (check EngineRuntime.exe path)");
     else
-        actExternal_->setText(QStringLiteral("🛑 Stop external"));
+        actExternal_->setText(QStringLiteral("Остановить отдельную игру"));
 }
 
 void EditorMainWindow::StopExternalGame()
@@ -353,7 +351,7 @@ void EditorMainWindow::ShowViewportContextMenu(const QPoint& globalPos)
 
 void EditorMainWindow::BuildSceneDocks()
 {
-    sceneToolsDock_ = new QDockWidget(QStringLiteral("Сцена / примитивы"), this);
+    sceneToolsDock_ = new QDockWidget(QStringLiteral("Сцена / объекты"), this);
     sceneToolsDock_->setObjectName(QStringLiteral("SceneToolsDock"));
     sceneToolsDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     sceneToolsDock_->setFeatures(
@@ -364,6 +362,7 @@ void EditorMainWindow::BuildSceneDocks()
 
     inspectorDock_ = new QDockWidget(QStringLiteral("Свойства объекта"), this);
     inspectorDock_->setObjectName(QStringLiteral("InspectorDock"));
+    inspectorDock_->setMinimumWidth(300);
     inspectorDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     inspectorDock_->setFeatures(
         QDockWidget::DockWidgetMovable |
@@ -384,7 +383,7 @@ void EditorMainWindow::BuildSceneDocks()
 
         resizeDocks(
             {sceneToolsDock_, viewportDock_, inspectorDock_},
-            {200, 880, 200},
+            {250, 700, 320},
             Qt::Horizontal
         );
     }

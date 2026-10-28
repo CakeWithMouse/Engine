@@ -1,4 +1,4 @@
-#include "MainWindow.h"
+﻿#include "MainWindow.h"
 #include "QtHost.h"
 #include <QDir>
 #include <QFileDialog>
@@ -70,6 +70,21 @@ void EditorMainWindow::BuildAssetInspector(QFormLayout* form)
     modelAsset_ = new QLineEdit(inspector_); modelAsset_->setReadOnly(true);
     modelAsset_->setObjectName(QStringLiteral("ModelAsset"));
     form->addRow(QStringLiteral("Модель"), modelAsset_);
+    auto* chooseModel = new QPushButton(QStringLiteral("Выбрать модель…"), inspector_);
+    chooseModel->setObjectName("ChooseModel");
+    chooseModel->setToolTip(QStringLiteral("Заменить модель или превратить примитив в модель. Для C++ персонажей визуал задаётся их классом."));
+    form->addRow(chooseModel);
+    connect(chooseModel, &QPushButton::clicked, this, [this] {
+        const auto path = QFileDialog::getOpenFileName(this, QStringLiteral("Модель из проекта"),
+            QString::fromUtf8(host_->host().contentRoot), QStringLiteral("Модели (*.glb *.gltf *.obj *.fbx)"));
+        if (path.isEmpty()) return;
+        const auto relative = QDir(QString::fromUtf8(host_->host().contentRoot)).relativeFilePath(path);
+        if (relative == ".." || relative.startsWith("../") || QDir::isAbsolutePath(relative)) {
+            QMessageBox::warning(this, QStringLiteral("Ресурс вне проекта"), QStringLiteral("Сначала импортируйте модель через меню «Импорт».")); return;
+        }
+        EditorCommand c; c.type = EditorCommand::SetModel; c.objectId = selectedId_;
+        c.path = "/Game/" + QDir::fromNativeSeparators(relative); host_->PostCommand(c);
+    });
     textureAsset_ = new QLineEdit(inspector_); textureAsset_->setReadOnly(true);
     textureAsset_->setObjectName(QStringLiteral("TextureAsset"));
     form->addRow(QStringLiteral("Текстура"), textureAsset_);
