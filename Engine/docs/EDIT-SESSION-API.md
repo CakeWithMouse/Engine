@@ -7,9 +7,12 @@
 
 Обновление 041: файловые операции были добавлены в ABI v2, см. [SCENE-JSON.md](SCENE-JSON.md).
 Обновление 045: ABI v3 добавил picking/focus; Qt UI и пользовательские проекты подключены, см. [USER-PROJECTS.md](USER-PROJECTS.md).
-Текущий ABI v5 включает ресурсы из v4 и Scene API v3 с параметрами точечного света.
+ABI v5 включил ресурсы из v4 и Scene API v3 с параметрами точечного света.
 Цвет, интенсивность, радиус и включение сохраняются в JSON и Play-копии; изменения
 через scene.setPointLight запрещены в Play/Pause. Пересоберите DLL, runtime и Editor вместе.
+Обновление 047: текущий ABI v6 добавил назначение и редактирование материалов, превью и
+перекомпиляцию шейдеров; Scene API v4 — `materialAsset` в снимке объекта. См. «Дополнение v6»
+в конце и [MATERIALS.md](MATERIALS.md).
 
 ## 1. Что уже работает и что подключает разработчик редактора
 
@@ -257,3 +260,29 @@ consumer DLL для handshake BaseEngine. Проверены реальный dr
 ## Дополнение v3: выбор и камера
 
 `ENGINE_EDIT_API_VERSION = 3`. К таблице добавлены `pickObject(context, x, y, &id)` и `focusObject(context, id)`. Координаты picking — NDC от −1 до +1, Y вверх. Успешный промах возвращает ID 0. Выбор проверяет CPU-треугольники объектов, созданных через `InitPoints`, с учётом world transform и родителей. Focus использует мировую позицию и ограничивающую сферу объекта. Обе операции требуют прикреплённый viewport и выполняются на потоке сессии. Старые бинарные таблицы v2 отвергаются; пересоберите Editor и игровой модуль. Формат scene JSON не изменился.
+
+## Дополнение v6: материалы
+
+`ENGINE_EDIT_API_VERSION = 6`, вложенный Scene API — v4. Материал называется `/Game`-путём своего
+`.mat`. Правка сразу видна во всех играх сессии, которые его загрузили: редакторская сцена,
+Play-копия и превью. Файл пишет только `saveMaterial`.
+
+| Функция | Назначение |
+|---|---|
+| setMaterial(context, id, path, error, capacity) | Назначает `.mat` объекту, пустой путь — материал по умолчанию. Только Edit; объект без поддержки материалов — Failure с текстом |
+| readMaterial(context, material, visitor, user, error, capacity) | Один вызов visitor с `EngineMaterialInfo`: HLSL, ошибки компиляции, режимы, параметры, текстуры, флаг modified. Данные действительны только во время вызова |
+| setMaterialRenderState(context, material, state) | Смешивание, порог, unlit, двусторонность, тени. Неизвестный blend — InvalidArgument |
+| setMaterialParameter(context, material, name, value[4]) | Лишние компоненты игнорируются. Неизвестное имя — NotFound |
+| setMaterialTexture(context, material, name, texture, error, capacity) | `/Game`-путь текстуры, пустой — белая |
+| saveMaterial / revertMaterial | Записать `.mat` / перечитать его, отбросив несохранённые правки |
+| reloadShaderFile(context, path) | Абсолютный путь изменённого файла: перекомпилировать все материалы и шейдеры, включающие его |
+| attachMaterialPreview / resizeMaterialPreview / detachMaterialPreview | Отдельная маленькая сцена на HWND; правила владения HWND как у viewport |
+| showMaterialPreview(context, preview, material, shape, error, capacity) | Показать материал на `EnginePreviewSphere`, `Cube` или `Plane` |
+| materialPreviewCamera(context, preview, yaw, pitch, zoom) | Орбита: радианы и шаги колеса |
+
+Функции материалов, кроме `setMaterial`, доступны в любом состоянии, в том числе в Play/Pause.
+Материал, который не загружен ни одной игрой сессии, возвращает NotFound: сначала назначьте его
+объекту или покажите в превью. Превью рисуются тем же вызовом `frame`, что и viewport; detach
+выполняйте до уничтожения HWND. Строки и массивы `EngineMaterialInfo` копируйте внутри visitor.
+Пример потребителя — `Editor/Source/MaterialEditorWindow.cpp`, проверки — `CheckMaterialEditing`
+в `Engine/tests/assets/AssetTests.cpp`.
