@@ -241,6 +241,16 @@ int wmain(int argc, wchar_t** argv)
             Check(api.loadScene(api.context,saved.u8string().c_str(),&scene,error,sizeof(error)) != EngineSceneOk, "missing asset rejects scene load");
             Check(Objects(api).front().texture == importedTexture, "failed load preserves current scene");
             fs::rename(texture.wstring() + L".backup", texture);
+            // A broken material does not stop the scene: the object keeps the reference and draws the error checker.
+            const auto redMat = content / "Materials/Red.mat";
+            Write(redMat, "{ not json");
+            Check(api.loadScene(api.context,saved.u8string().c_str(),&scene,error,sizeof(error)) == EngineSceneOk, "broken material keeps the scene loadable");
+            Check(Objects(api).front().material == material && api.frame(api.context,0) == EngineSceneOk, "broken material reference kept and drawn");
+            fs::remove(redMat);
+            Check(api.loadScene(api.context,saved.u8string().c_str(),&scene,error,sizeof(error)) == EngineSceneOk, "missing material keeps the scene loadable");
+            Write(redMat, R"({ "shader": "Red.hlsl", "render": { "lighting": "unlit" } })");
+            Check(api.reloadShaderFile(api.context,"") == EngineSceneOk && api.frame(api.context,0) == EngineSceneOk, "full reload picks up the restored material");
+            Check(api.reloadShaderFile(api.context,nullptr) == EngineSceneInvalidArgument, "reload requires a path or an empty string");
         }
         const auto moved = root.wstring() + L"-moved"; fs::rename(root, moved);
         {

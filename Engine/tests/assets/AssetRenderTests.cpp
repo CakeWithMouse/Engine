@@ -16,7 +16,7 @@ namespace
 class CaptureGame : public Game
 {
 public:
-    size_t greenPixels = 0;
+    size_t greenPixels = 0, magentaPixels = 0;
     void Draw() override
     {
         Game::Draw();
@@ -28,7 +28,7 @@ public:
         Context->CopyResource(staging.Get(), BackTexture.Get());
         D3D11_MAPPED_SUBRESOURCE mapped{};
         Check(SUCCEEDED(Context->Map(staging.Get(),0,D3D11_MAP_READ,0,&mapped)), "map pixel readback");
-        greenPixels = 0;
+        greenPixels = 0; magentaPixels = 0;
         for (unsigned y = 0; y < desc.Height; ++y)
         {
             const auto* row = reinterpret_cast<const uint8_t*>(mapped.pData) + y * mapped.RowPitch;
@@ -36,6 +36,7 @@ public:
             {
                 const auto* pixel = row + x * 4;
                 if (pixel[1] > 20 && pixel[1] > pixel[0] * 2 && pixel[1] > pixel[2] * 2) ++greenPixels;
+                if (pixel[0] > 200 && pixel[2] > 200 && pixel[1] < 60) ++magentaPixels;
             }
         }
         Context->Unmap(staging.Get(),0);
@@ -78,6 +79,14 @@ void RunAssetRenderTests(HWND hwnd, const std::filesystem::path& engineContent,
     std::ofstream(content / "Materials/Green.mat") << R"({ "shader": "Green.hlsl", "render": { "lighting": "unlit" } })";
     Check(game.GetScene().SetMaterialAsset(added.id,"/Game/Materials/Green.mat") == SceneResult::Ok && game.RenderViewportFrame(0) &&
         game.greenPixels > meshBefore + 1000, "a material asset draws the mesh");
+    // A material file that cannot be read draws the error checker; fixing it and reloading restores the look.
+    std::ofstream(content / "Materials/Late.mat") << "{ not json";
+    Check(game.GetScene().SetMaterialAsset(added.id,"/Game/Materials/Late.mat") == SceneResult::Ok && game.RenderViewportFrame(0) &&
+        game.magentaPixels > 1000 && game.greenPixels < meshBefore + 100, "a broken material asset draws the error checker");
+    std::ofstream(content / "Materials/Late.mat") << R"({ "shader": "Green.hlsl", "render": { "lighting": "unlit" } })";
+    game.InvalidateAllShaders();
+    Check(game.RenderViewportFrame(0) && game.greenPixels > meshBefore + 1000 && game.magentaPixels == 0,
+        "a fixed material asset replaces the checker after a reload");
 #if defined(ENGINE_ENABLE_ASSIMP)
     game.GetScene().RemoveComponent(added.id);
     object = SceneAssets::CreateModel(modelPath);

@@ -265,7 +265,7 @@ public:
      * Shadow depth shaders are compiled once at start-up and are not affected.
      */
     bool InvalidateShaderFile(const std::string& shaderFile);
-    /** Same for every cached shader (F6 in the editor). */
+    /** Same for every cached shader; material assets that failed to load are tried again. */
     void InvalidateAllShaders();
     /** Compiler output of every failed stage/variant of this shader file; empty if none failed. */
     std::string GetShaderErrors(const std::string& shaderFile) const;
@@ -283,9 +283,12 @@ public:
     bool ReloadMaterial(const std::string& matPath, std::string* error = nullptr);
     /** DefaultSurface, opaque and lit; compiled on first use. */
     std::shared_ptr<Material> GetDefaultMaterial();
+    /** ErrorSurface (magenta checker): drawn for a material asset that is missing or cannot be read. */
+    std::shared_ptr<Material> GetErrorMaterial();
     /**
-     * The component's material (the default one if RequiresMaterial), compiled if it changed, with
-     * the shader set of the component's MaterialVariant; null without one.
+     * The component's material (the default one if RequiresMaterial, the error one if its material
+     * asset cannot be read), compiled if it changed, with the shader set of the component's
+     * MaterialVariant; null without one.
      */
     Material* PrepareMaterial(GameComponent* Component);
 
@@ -420,6 +423,9 @@ protected:
     };
     std::map<std::string, CachedMaterial> materialCache;
     std::shared_ptr<Material> defaultMaterial;
+    std::shared_ptr<Material> errorMaterial;
+    /** Components whose material asset failed to load try again on their next draw. */
+    void RetryFailedMaterialAssets();
 
     // Depth
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;          // opaque: test + write

@@ -301,6 +301,7 @@ void Game::DestroyResources(bool preserveScene)
     if (!preserveScene) scene.Clear();
     materialCache.clear();
     defaultMaterial.reset();
+    errorMaterial.reset();
     cubeMapCache.clear();
 
     vertexShaderCache.clear();
@@ -1261,7 +1262,9 @@ Material* Game::PrepareMaterial(GameComponent* Component)
     {
         Component->bMaterialAssetLoaded = true;
         const std::string physical = VfsRead::Active().Resolve(Component->MaterialAssetPath);
-        Component->AssignMaterial(LoadMaterial(physical.empty() ? Component->MaterialAssetPath : physical));
+        std::shared_ptr<Material> loaded = LoadMaterial(physical.empty() ? Component->MaterialAssetPath : physical);
+        // A missing or broken file stays visible as the error checker, not as the default look.
+        Component->AssignMaterial(loaded ? std::move(loaded) : GetErrorMaterial());
     }
     Material* material = Component->GetMaterial();
     if (material == nullptr && Component->RequiresMaterial())
@@ -1323,6 +1326,7 @@ bool Game::InvalidateShaderFile(const std::string& shaderFile)
     {
         std::cout << "Recompiled " << materialCount << " material(s) depending on " << shaderFile << std::endl;
     }
+    RetryFailedMaterialAssets();
 
     std::vector<std::string> staleKeys;
     for (const auto& entry : shaderDependencies)
@@ -1376,6 +1380,23 @@ void Game::InvalidateAllShaders()
     if (!materialCache.empty())
     {
         std::cout << "Reloaded " << materialCache.size() << " material(s)" << std::endl;
+    }
+    RetryFailedMaterialAssets();
+}
+
+void Game::RetryFailedMaterialAssets()
+{
+    if (!errorMaterial)
+    {
+        return;
+    }
+    for (auto& pair : Components)
+    {
+        GameComponent* component = pair.second.get();
+        if (!component->MaterialAssetPath.empty() && component->MaterialPtr == errorMaterial)
+        {
+            component->bMaterialAssetLoaded = false;
+        }
     }
 }
 
@@ -1457,6 +1478,16 @@ std::shared_ptr<Material> Game::GetDefaultMaterial()
         defaultMaterial->Compile(Device.Get(), Context.Get());
     }
     return defaultMaterial;
+}
+
+std::shared_ptr<Material> Game::GetErrorMaterial()
+{
+    if (!errorMaterial && Device)
+    {
+        errorMaterial = std::make_shared<Material>(EnginePaths::Shader("Material/ErrorSurface.hlsl").generic_u8string());
+        errorMaterial->Compile(Device.Get(), Context.Get());
+    }
+    return errorMaterial;
 }
 
 void Game::OnShadersInvalidated()

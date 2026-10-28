@@ -12,6 +12,8 @@ namespace SceneAssets
     // Scene references are portable, canonical /Game paths. Empty means no asset.
     bool ValidPath(std::string_view path);
     void ValidateTexture(std::string_view path);
+    // A canonical /Game path of a .mat file; the file itself is not read.
+    void ValidateMaterialPath(std::string_view path);
     // A readable .mat file (its shader is compiled later, by the game that draws it).
     void ValidateMaterial(std::string_view path);
     std::unique_ptr<GameComponent> CreateModel(const std::string& path);

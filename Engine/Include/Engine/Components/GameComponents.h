@@ -179,7 +179,7 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
     std::shared_ptr<Material> MaterialPtr;
     std::string MaterialAssetPath;
-    bool bMaterialAssetLoaded = false; // one attempt per assignment, a broken file is not retried
+    bool bMaterialAssetLoaded = false; // one attempt per assignment; a broken file is retried on shader reload
     // Cube map resources are owned by Game::cubeMapCache, the component only observes them.
     ID3D11ShaderResourceView* cubeMapSRV = nullptr;
     ID3D11SamplerState* cubeMapSamplerState = nullptr;

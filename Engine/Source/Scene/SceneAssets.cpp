@@ -115,10 +115,14 @@ std::unique_ptr<GameComponent> CreateModel(const std::string& path)
     if (!object->SetAssetModel(path, std::move(model.Model))) throw std::runtime_error("Invalid model");
     return object;
 }
-void ValidateMaterial(std::string_view path)
+void ValidateMaterialPath(std::string_view path)
 {
     if (!ValidPath(path) || (!path.empty() && Extension(fs::u8path(std::string(path))) != ".mat"))
         throw std::runtime_error("Expected a .mat path inside /Game");
+}
+void ValidateMaterial(std::string_view path)
+{
+    ValidateMaterialPath(path);
     if (path.empty()) return;
     const auto physical = VfsRead::Active().Resolve(path);
     MaterialAsset asset;
@@ -131,7 +135,8 @@ void Apply(GameComponent& object, const std::string& model, const std::string& t
     if (object.GetModelAsset() != model) throw std::runtime_error("Model asset does not match component type");
     ValidateTexture(texture);
     if (!object.TrySetTexture(texture)) throw std::runtime_error("Cannot create texture resources");
-    ValidateMaterial(material);
+    // A missing or broken .mat does not stop the scene: the game draws the error material instead.
+    ValidateMaterialPath(material);
     if (!object.SetMaterialAsset(material)) throw std::runtime_error("This object cannot take a material");
 }
 std::string Import(const fs::path& content, const fs::path& source, Kind kind)
