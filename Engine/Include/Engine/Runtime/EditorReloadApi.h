@@ -4,7 +4,7 @@
 #include <Engine/Runtime/SelectionApi.h>
 #include <Engine/Runtime/ViewportInputApi.h>
 
-// Optional host service. Frozen Module/Edit v5 layouts are unchanged.
+// Optional host service, exchanged by runtime/editor built against the same Edit API.
 constexpr uint32_t EngineEditorReloadService = 0x01524445u;
 struct EngineEditorReloadBindings {
     EngineEditSessionApi scene;

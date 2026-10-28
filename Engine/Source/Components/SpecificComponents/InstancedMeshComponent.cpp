@@ -1,4 +1,5 @@
 #include "InstancedMeshInternal.h"
+#include <Engine/Render/Material.h>
 
 using namespace InstancedMeshDetail;
 
@@ -302,7 +303,7 @@ void InstancedMeshComponent::BuildVisibleSets()
             }
             else
             {
-                data.Params = DirectX::XMFLOAT4(fade, 0.0f, 0.0f, 0.0f);
+                data.Params = DirectX::XMFLOAT4(fade, instance.CustomData.x, instance.CustomData.y, instance.CustomData.z);
             }
             LodLevel& bucket = targetLevel == impostorLevelIndex ? ImpostorLevel : Lods[targetLevel];
             bucket.ColorStaging.push_back(data);
@@ -418,6 +419,12 @@ void InstancedMeshComponent::EnsureFrameData(ID3D11DeviceContext* context)
     PreparedFrame = frameIndex;
 }
 
+uint32_t InstancedMeshComponent::GetMaterialVariant() const
+{
+    // Animated copies are skinned from the animation texture (the skinned levels need it).
+    return MaterialVariant::Instanced | (AnimationTextureSRV ? MaterialVariant::Skinned : MaterialVariant::Mesh);
+}
+
 void InstancedMeshComponent::Render(ID3D11DeviceContext* context)
 {
     if (context == nullptr || LodCount == 0 || !cb)
@@ -434,16 +441,22 @@ void InstancedMeshComponent::Render(ID3D11DeviceContext* context)
 
     if (bUseSkinned)
     {
+        // A material brings its skinned set (resolved by the pass); otherwise the crowd shaders.
+        const bool bMaterial = GetMaterial() != nullptr;
+        if (bMaterial && (vertexShader == nullptr || pixelShader == nullptr))
+        {
+            return;
+        }
         context->IASetInputLayout(SkinnedInputLayout.Get());
-        context->VSSetShader(SkinnedVertexShader.Get(), nullptr, 0);
-        context->PSSetShader(SkinnedPixelShader.Get(), nullptr, 0);
+        context->VSSetShader(bMaterial ? vertexShader : SkinnedVertexShader.Get(), nullptr, 0);
+        context->PSSetShader(bMaterial ? pixelShader : SkinnedPixelShader.Get(), nullptr, 0);
 
         ID3D11ShaderResourceView* animSRV = AnimationTextureSRV.Get();
         context->VSSetShaderResources(1, 1, &animSRV);
         if (AnimClipConstantBuffer)
         {
             ID3D11Buffer* clipCB = AnimClipConstantBuffer.Get();
-            context->VSSetConstantBuffers(1, 1, &clipCB);
+            context->VSSetConstantBuffers(3, 1, &clipCB);
         }
     }
     else

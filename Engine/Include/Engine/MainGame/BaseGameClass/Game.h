@@ -55,6 +55,7 @@ enum class RegisterResult
 const char* ToString(RegisterResult result);
 
 class GameComponent;
+class Material;
 class PointLightComponent;
 class FBXComponent;
 struct ComponentShaderVariant;
@@ -270,6 +271,40 @@ public:
     /** True if the component's material writes the full G-buffer (3 render targets). */
     bool SupportsDeferredGeometry(GameComponent* Component);
 
+    /**
+     * Drops every cached shader compiled from this file or including it, so the next request
+     * recompiles from disk (failed compilations are forgotten too). Components re-resolve their
+     * shaders on the next pass. Returns false if nothing cached depended on the file.
+     * Shadow depth shaders are compiled once at start-up and are not affected.
+     */
+    bool InvalidateShaderFile(const std::string& shaderFile);
+    /** Same for every cached shader; material assets that failed to load are tried again. */
+    void InvalidateAllShaders();
+    /** Compiler output of every failed stage/variant of this shader file; empty if none failed. */
+    std::string GetShaderErrors(const std::string& shaderFile) const;
+
+    /**
+     * Loads a .mat file once and shares it. Null if the file cannot be used (error says why);
+     * a surface that does not compile still gives a material, drawn as the error surface.
+     * Invalidating the .mat file re-reads it, invalidating a shader file recompiles the
+     * materials that include it.
+     */
+    std::shared_ptr<Material> LoadMaterial(const std::string& matPath, std::string* error = nullptr);
+    /** A material this game already loaded from matPath; null if it did not. */
+    std::shared_ptr<Material> FindMaterial(const std::string& matPath) const;
+    /** Re-reads a loaded .mat into the same Material object; on failure the previous state stays. */
+    bool ReloadMaterial(const std::string& matPath, std::string* error = nullptr);
+    /** DefaultSurface, opaque and lit; compiled on first use. */
+    std::shared_ptr<Material> GetDefaultMaterial();
+    /** ErrorSurface (magenta checker): drawn for a material asset that is missing or cannot be read. */
+    std::shared_ptr<Material> GetErrorMaterial();
+    /**
+     * The component's material (the default one if RequiresMaterial, the error one if its material
+     * asset cannot be read), compiled if it changed, with the shader set of the component's
+     * MaterialVariant; null without one.
+     */
+    Material* PrepareMaterial(GameComponent* Component);
+
 protected:
     // Initialization
     bool InitializeInternal(HWND externalWindow, int width, int height, Game* sharedViewport = nullptr, bool preserveSceneOnFailure = false);
@@ -326,6 +361,10 @@ protected:
     void FillFrameConstantBuffer(ConstantBufferData& data) const;
     bool IsVisible(GameComponent* Component);
     ComponentShaderVariant& ResolveComponentShaders(GameComponent* Component, ShaderCompileVariant variant);
+    /** After cache entries were erased: components resolve again, the fallback pair is rebuilt. */
+    void OnShadersInvalidated();
+    /** Culling of the component's material and, in the transparent pass, its blend mode. */
+    void ApplyComponentPipelineState(GameComponent* Component, bool bTransparentPass);
 
     static HRESULT CreateShader(HWND hWnd, const D3D_SHADER_MACRO* pDefines, LPCWSTR FileName, LPCSTR pEntrypoint,
                                 LPCSTR pTarget, ID3DBlob** Buffer);
@@ -340,7 +379,9 @@ protected:
 protected:
     RenderType RenderingType = Forward;
 
-    float TotalTime = 0.0f;
+    float TotalTime = 0.0f;        // scene time (scaled)
+    float RealTime = 0.0f;         // seconds of updated frames, unscaled (materials animate with it)
+    float LastRealDeltaTime = 0.0f;
     float SimulationTimeScale = 0.13f * 60.0f;
     uint64_t FrameIndex = 0;
     bool bInitialized = false;
@@ -367,6 +408,7 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11InputLayout> layout;      // VertexFormat::Primitive
     Microsoft::WRL::ComPtr<ID3D11InputLayout> meshLayout;  // VertexFormat::Mesh
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> DefaultRasterState;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> CullBackRasterState; // one-sided materials
 
     std::unique_ptr<Display> DisplayPtr;
     std::unique_ptr<InputDevice> InputDevicePtr;
@@ -386,6 +428,21 @@ protected:
     std::map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>> vertexShaderCache;
     std::map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>> pixelShaderCache;
     std::map<std::string, UINT> pixelShaderTargetCount;
+    // Same keys: normalized files each blob was built from (main file first), and failed output.
+    std::map<std::string, std::vector<std::string>> shaderDependencies;
+    std::map<std::string, std::string> shaderErrors;
+
+    // Materials by normalized .mat path; they outlive every component that uses them.
+    struct CachedMaterial
+    {
+        std::string Path; // as first requested: relative paths in the file resolve against it
+        std::shared_ptr<Material> Instance;
+    };
+    std::map<std::string, CachedMaterial> materialCache;
+    std::shared_ptr<Material> defaultMaterial;
+    std::shared_ptr<Material> errorMaterial;
+    /** Components whose material asset failed to load try again on their next draw. */
+    void RetryFailedMaterialAssets();
 
     // Depth
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;          // opaque: test + write
@@ -458,6 +515,7 @@ protected:
     bool bStaticShadowFailed = false;
 
     Microsoft::WRL::ComPtr<ID3D11BlendState> transparentBlendState;
+    Microsoft::WRL::ComPtr<ID3D11BlendState> additiveBlendState; // ONE + ONE
     Microsoft::WRL::ComPtr<ID3D11BlendState> opaqueBlendState;
 
     // Frame data and diagnostics

@@ -6,6 +6,8 @@
 #include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <array>
+#include <filesystem>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -44,6 +46,10 @@ public:
         float SunElevation = 56.0f;
         // Diagnostics: writes the shadow maps to BMP files after a few frames.
         bool DumpShadows = false;
+        // Units and scenery use the material assets of GameContent/Materials; false draws them with
+        // the old InstancedMesh shader (same look without mud), for comparisons.
+        bool Materials = true;
+        std::filesystem::path ContentRoot;
         // Animated crowd using GPU baked VAT (CesiumMan).
         bool Animated = false;
     };
@@ -75,7 +81,9 @@ private:
         std::vector<float> Speeds;
     };
 
-    InstancedMeshComponent* CreateUnitBatch(UnitMesh::VehicleType type, const std::string& shaderPath);
+    /** material: null draws the batch with the shader at shaderPath. */
+    InstancedMeshComponent* CreateUnitBatch(UnitMesh::VehicleType type, const std::string& shaderPath,
+                                            const std::shared_ptr<Material>& material);
     void UpdateUnits(float deltaTime);
     void UpdateHotkeys();
     uint32_t CountForLod(int level) const;

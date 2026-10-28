@@ -40,7 +40,7 @@ struct SceneComponentSnapshot
     bool inheritParentScale = true;
     SceneTransform transform;
     std::string typeName; // copied qualified catalog key; empty for legacy additions
-    std::string modelAsset, textureAsset;
+    std::string modelAsset, textureAsset, materialAsset;
     struct PointLight
     {
         glm::vec3 color{1.0f};
@@ -91,6 +91,7 @@ public:
     SceneResult SetParent(ComponentId child, ComponentId parent, bool inheritScale = true);
     SceneResult ClearParent(ComponentId child);
     SceneResult SetTextureAsset(ComponentId id, const std::string& path);
+    SceneResult SetMaterialAsset(ComponentId id, const std::string& path);
     SceneResult SetPointLight(ComponentId id, const SceneComponentSnapshot::PointLight& light);
     SceneSnapshot GetSnapshot() const;
     void SetDocumentVersion(uint32_t version);

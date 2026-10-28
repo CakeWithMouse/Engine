@@ -127,7 +127,7 @@ namespace VfsRead
 
         // Check physical paths against existing mount points
         std::error_code ec;
-        std::filesystem::path p(path);
+        std::filesystem::path p = std::filesystem::u8path(path.begin(), path.end()); // UTF-8, not the ANSI code page
         if (!p.is_absolute())
         {
             if (!std::filesystem::exists(p, ec))

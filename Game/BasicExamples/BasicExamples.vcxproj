@@ -34,6 +34,8 @@
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\TrianglesScene.cpp" />
     <ClCompile Include="Source\CubeScene.cpp" />
+    <ClCompile Include="Source\MaterialsScene.cpp" />
+    <ClInclude Include="Source\MaterialsScene.h" />
     <ClInclude Include="Source\Scenes.h" />
     <ClInclude Include="Source\SquareGeometry.h" />
     <ClCompile Include="..\Common\OrderedSceneGame.cpp" />

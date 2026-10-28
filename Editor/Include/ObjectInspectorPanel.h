@@ -41,6 +41,7 @@ public:
     explicit ObjectInspectorPanel(QWidget* parent = nullptr);
 
     void SetEnabled(bool enabled);
+    void SetMaterialsAvailable(bool available);
 
     void Refresh(
         const EditorQtHost::Snapshot& view,
@@ -69,6 +70,9 @@ signals:
     void CharacterSpeedEditingFinished(quint64 objectId, double speed);
     void ChooseTextureRequested();
     void ClearTextureRequested();
+    void ChooseMaterialRequested();
+    void EditMaterialRequested(const QString& virtualPath);
+    void ClearMaterialRequested();
 
 private:
     void BuildUi();
@@ -92,6 +96,9 @@ private:
     QLineEdit* objectName_ = nullptr;
     QLineEdit* modelAsset_ = nullptr;
     QLineEdit* textureAsset_ = nullptr;
+    QLineEdit* materialAsset_ = nullptr;
+    QWidget* materialActions_ = nullptr;
+    QPushButton* editMaterialButton_ = nullptr;
 
     QDoubleSpinBox* transform_[9]{};
 

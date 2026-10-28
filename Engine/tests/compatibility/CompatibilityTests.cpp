@@ -50,6 +50,16 @@ static void ExerciseModule(const fs::path& file, const fs::path& runtime, bool l
     t.position[0] = 7;
     Check(api.scene.setTransform(api.scene.context,id,&t) == EngineSceneOk,"edit frozen DLL object");
     Check(api.scene.renameObject(api.scene.context,id,"Renamed") == EngineSceneOk,"rename frozen DLL object");
+    if (lights) {
+        uint64_t lightId=0;
+        const EngineScenePointLight light{{0.2f,0.7f,0.4f},3.0f,12.0f,1};
+        Check(api.scene.createObject(api.scene.context,"Light.Point","Adapter light",&t,&lightId) == EngineSceneOk, "create light through negotiated ABI");
+        Check(api.scene.setPointLight(api.scene.context,lightId,&light) == EngineSceneOk, "edit light through negotiated ABI");
+        EngineSceneInfo lightInfo{}; bool lightFound=false;
+        Check(api.scene.readScene(api.scene.context,&lightInfo,[](void* p,const EngineSceneObjectInfo* o){
+            if(std::string(o->name)=="Adapter light") *static_cast<bool*>(p)=o->hasPointLight && o->pointLight.intensity==3 && o->pointLight.radius==12;
+        },&lightFound)==EngineSceneOk && lightFound,"point light snapshot fields survive ABI translation");
+    }
     const auto saved = project.content / "Scenes/Saved.scene.json";
     Check(api.saveScene(api.context,saved.u8string().c_str(),error,sizeof(error)) == EngineSceneOk,"save old DLL data");
     EngineSceneInfo info{}; bool found = false;
@@ -64,6 +74,17 @@ static void ExerciseModule(const fs::path& file, const fs::path& runtime, bool l
     Check(api.scene.setTransform(api.scene.context,id,&t) == EngineSceneReadOnly,"legacy read-only contract");
     Check(api.control(api.context,EngineStop) == EngineSceneOk,"Stop frozen module");
     Check(api.loadScene(api.context,saved.u8string().c_str(),&id,error,sizeof(error)) == EngineSceneOk,"reopen old saved scene");
+    if (!api.setMaterial) {
+        Check(!api.readMaterial && !api.attachMaterialPreview, "legacy DLL does not advertise unsupported materials");
+        const auto candidate = project.module.parent_path() / "ReloadCandidate.dll";
+        fs::copy_file(project.module, candidate);
+        const auto previousContext = api.context;
+        Check(module.Reload(candidate, saved, window, 640, 480, error, sizeof(error)) == EngineSceneOk, "reload frozen module through adapter");
+        Check(api.context != previousContext, "reloaded legacy session has a new identity for the editor");
+        found = false;
+        Check(api.readActiveScene(api.context,&info,visitor,&found) == EngineSceneOk && found, "legacy adapter still owns its context after reload");
+        Check(api.frame(api.context,0.016) == EngineSceneOk, "legacy viewport works after reload");
+    }
     Check(ProjectUpgrade::Hash(project.module) == beforeHash,"frozen game DLL never modified");
 }
 int wmain(int argc, wchar_t** argv)

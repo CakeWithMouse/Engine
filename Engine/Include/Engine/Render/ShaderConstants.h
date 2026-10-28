@@ -36,6 +36,7 @@ struct ConstantBufferData
     // Baked shadows of the static scene: one world-anchored map, independent of the camera.
     DirectX::XMFLOAT4X4 StaticShadowViewProjection;
     DirectX::XMFLOAT4 StaticShadowParams; // x enabled, y texel size, z depth bias, w unused
+    DirectX::XMFLOAT4 TimeParams;         // x real seconds since start, y real frame delta, z scene time, w unused
 };
 static_assert(sizeof(ConstantBufferData) % 16 == 0, "Constant buffer size must be a multiple of 16 bytes");
 
@@ -103,6 +104,7 @@ struct FrameConstants
     DirectX::XMFLOAT4 StaticShadowParams;
     // Camera frustum planes (xyz = inward normal, w = distance) for sphere culling.
     DirectX::XMFLOAT4 FrustumPlanes[6];
+    DirectX::XMFLOAT4 TimeParams;
 };
 
 template <typename TBuffer>
@@ -138,4 +140,10 @@ inline void ApplyStaticShadowConstants(ConstantBufferData& target, const FrameCo
 {
     target.StaticShadowViewProjection = frame.StaticShadowViewProjection;
     target.StaticShadowParams = frame.StaticShadowParams;
+}
+
+/** Time exists only in the full material buffer (appended last). */
+inline void ApplyTimeConstants(ConstantBufferData& target, const FrameConstants& frame)
+{
+    target.TimeParams = frame.TimeParams;
 }

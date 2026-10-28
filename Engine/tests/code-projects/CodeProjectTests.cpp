@@ -1,6 +1,7 @@
 #include <Engine/Components/ProjectObject.h>
 #include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/Scene/SceneDocument.h>
+#include <Engine/Project/StandardTypes.h>
 #include <iostream>
 #include <stdexcept>
 #include <nlohmann/json.hpp>
@@ -37,6 +38,13 @@ struct ProjectGame : Game {
 };
 int main() {
  try {
+    const auto standard = SceneProject::GetComponentTypes();
+    for (const char* type : {"Primitive.Cube", "Primitive.Sphere", "Primitive.Plane", "Primitive.Cylinder", "Primitive.Cone", "Primitive.Pyramid"}) {
+        auto object = standard.Find(type)->create();
+        Check(dynamic_cast<MeshComponent*>(object.get()) != nullptr, "SDK primitive has normals, UVs and material support");
+        Check(object->SetMaterialAsset("/Game/Materials/Test.mat"), "SDK primitive accepts a material reference");
+    }
+    Check(standard.Find("Gameplay.Character") && standard.Find("Particle.Sparks") && standard.Find("Environment.Sky"), "material primitives preserve main's standard types");
     ComponentType types[]={{"Counter","Counter",EngineComponentDetail::Create<Counter>},{"Rules","Rules",EngineComponentDetail::CreateObject<Rules>}};
     ComponentTypeCatalog catalog{types,2};
     {

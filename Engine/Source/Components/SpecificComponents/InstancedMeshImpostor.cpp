@@ -1,4 +1,5 @@
 #include "InstancedMeshInternal.h"
+#include <Engine/Render/Material.h>
 
 using namespace InstancedMeshDetail;
 
@@ -23,6 +24,20 @@ int InstancedMeshComponent::GetLevelCount() const
     return LodCount + (HasImpostor() ? 1 : 0);
 }
 
+void InstancedMeshComponent::Tick(float deltaTime)
+{
+    GameComponent::Tick(deltaTime);
+
+    const Material* material = GetMaterial();
+    const bool bStale = material != BakedMaterial || (material && material->GetRevision() != BakedMaterialRevision);
+    if (bImpostorEnabled && LodCount > 0 && bStale && (Impostor.IsValid() || bImpostorBuildFailed))
+    {
+        Impostor = ImpostorAtlas{};
+        bImpostorBuildFailed = false;
+        BuildImpostorAtlas();
+    }
+}
+
 void InstancedMeshComponent::BuildImpostorAtlas()
 {
     if (!bImpostorEnabled || bImpostorBuildFailed || Impostor.IsValid() || LodCount == 0 || GamePtr == nullptr)
@@ -37,7 +52,11 @@ void InstancedMeshComponent::BuildImpostorAtlas()
     }
 
     // The most detailed level is the source of the sprite, so designers author only that model.
-    if (!Impostor.Build(*GamePtr, Lods[0].Data, textureSRV.Get(), Color, ImpostorSettings))
+    // The material is compiled with its instanced set now: a later compile would trigger a rebake.
+    Material* material = GamePtr->PrepareMaterial(this);
+    BakedMaterial = material;
+    BakedMaterialRevision = material ? material->GetRevision() : 0;
+    if (!Impostor.Build(*GamePtr, Lods[0].Data, textureSRV.Get(), Color, ImpostorSettings, material))
     {
         std::cout << "InstancedMeshComponent: impostor atlas was not built, sprite level disabled." << std::endl;
         bImpostorBuildFailed = true;
@@ -63,8 +82,11 @@ void InstancedMeshComponent::BuildImpostorAtlas()
     bufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
     D3D11_SUBRESOURCE_DATA initial = {};
     initial.pSysMem = &constants;
+    CD3D11_RASTERIZER_DESC rasterDesc(D3D11_DEFAULT);
+    rasterDesc.CullMode = D3D11_CULL_NONE;
     if (FAILED(device->CreateBuffer(&bufferDesc, &initial, ImpostorConstantBuffer.ReleaseAndGetAddressOf())) ||
-        !TextureLoader::CreateLinearSampler(device, D3D11_TEXTURE_ADDRESS_CLAMP, ImpostorSampler))
+        !TextureLoader::CreateLinearSampler(device, D3D11_TEXTURE_ADDRESS_CLAMP, ImpostorSampler) ||
+        FAILED(device->CreateRasterizerState(&rasterDesc, ImpostorRasterState.ReleaseAndGetAddressOf())))
     {
         std::cout << "InstancedMeshComponent: failed to create impostor resources." << std::endl;
         bImpostorBuildFailed = true;
@@ -114,10 +136,15 @@ void InstancedMeshComponent::DrawImpostors(ID3D11DeviceContext* context)
     ID3D11ShaderResourceView* atlas[2] = {Impostor.GetAlbedoSRV(), Impostor.GetNormalSRV()};
     context->PSSetShaderResources(0, 2, atlas);
     context->PSSetSamplers(0, 1, ImpostorSampler.GetAddressOf());
+    // The pass may cull back faces for the meshes of a one-sided material; quads keep both sides.
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> passRasterState;
+    context->RSGetState(passRasterState.GetAddressOf());
+    context->RSSetState(ImpostorRasterState.Get());
 
     context->DrawInstanced(4, instanceCount, 0, 0);
     GamePtr->CountDraw(4, instanceCount);
 
+    context->RSSetState(passRasterState.Get());
     ID3D11ShaderResourceView* nullSRVs[2] = {nullptr, nullptr};
     context->PSSetShaderResources(0, 2, nullSRVs);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

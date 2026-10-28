@@ -1,4 +1,4 @@
-﻿#define WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <Engine/Runtime/GameEditModule.h>
 #include <Engine/Runtime/EditExtensions.h>
@@ -22,34 +22,14 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
             if (factory_.version != ENGINE_EDIT_API_VERSION || !factory_.create || !factory_.destroy ||
                 !factory_.create(content.u8string().c_str(), &api_) || !IsCompleteEditSessionApi(api_))
                 throw std::runtime_error("Cannot create edit game session");
-            const auto query = reinterpret_cast<EngineGetEditExtensionFn>(GetProcAddress(static_cast<HMODULE>(library_), "EngineGetEditExtension"));
-            if (query && query(api_.context, EngineViewportInputExtension, 1, sizeof(viewportInput_), &viewportInput_))
-                if (viewportInput_.version != 1 || viewportInput_.context != api_.context || !viewportInput_.focus || !viewportInput_.key || !viewportInput_.pointer || !viewportInput_.objectKind)
-                    throw std::runtime_error("Invalid viewport input API");
-            if (query && query(api_.context, EngineEditorCameraExtension, 1, sizeof(camera_), &camera_))
-                if (camera_.version != 1 || camera_.context != api_.context || !camera_.read || !camera_.write)
-                    throw std::runtime_error("Invalid editor camera API");
-            EnginePointLightApi light{};
-            EngineDocumentCapabilities document{};
-            if (query && query(api_.context, EngineSelectionExtension, 1, sizeof(selection_), &selection_))
-                if (selection_.version != 1 || selection_.context != api_.context || !selection_.select)
-                    throw std::runtime_error("Invalid selection API");
-            if (query && query(api_.context, EngineProjectDataExtension, 1, sizeof(projectData_), &projectData_))
-                if (projectData_.version != 1 || projectData_.context != api_.context || !projectData_.read || !projectData_.write || !projectData_.remapDuplicate)
-                    throw std::runtime_error("Invalid project data API");
-            if (query && query(api_.context, EngineDocumentExtension, 1, sizeof(document), &document))
-            {
-                if (document.version != 1 || document.minReadVersion > 1 || document.maxReadVersion < document.preferredWriteVersion ||
-                    document.preferredWriteVersion < 1 || document.preferredWriteVersion > 3)
-                    throw std::runtime_error("Unsupported document extension");
-                preferredSceneVersion_ = document.preferredWriteVersion;
-            }
-            if (query && query(api_.context, EnginePointLightExtension, 1, sizeof(light), &light))
-            {
-                if (light.version != 1 || light.context != api_.scene.context || !light.set)
-                    throw std::runtime_error("Invalid point light extension");
-                api_.scene.setPointLight = light.set;
-            }
+
+        }
+        else if (get && reinterpret_cast<EngineLegacyV5::GetFactory>(get)(5, sizeof(legacy5Factory_), &legacy5Factory_))
+        {
+            if (legacy5Factory_.version != 5 || !legacy5Factory_.create || !legacy5Factory_.destroy ||
+                !legacy5Factory_.create(content.u8string().c_str(), legacy5_.get()) || !EngineLegacyV5::Complete(*legacy5_))
+                throw std::runtime_error("Cannot create v5 edit session");
+            api_ = EngineLegacyV5::Adapt(*legacy5_);
         }
         else
         {
@@ -57,9 +37,42 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
             if (!oldGet || !oldGet(4, sizeof(legacyFactory_), &legacyFactory_) || legacyFactory_.version != 4 ||
                 !legacyFactory_.create || !legacyFactory_.destroy)
                 throw std::runtime_error("Unsupported game DLL. Open it with its original engine version or rebuild the custom game module.");
-            if (!legacyFactory_.create(content.u8string().c_str(), &legacy_) || !EngineLegacyV4::Complete(legacy_))
+            if (!legacyFactory_.create(content.u8string().c_str(), legacy_.get()) || !EngineLegacyV4::Complete(*legacy_))
                 throw std::runtime_error("Cannot create legacy edit session");
-            api_ = EngineLegacyV4::Adapt(legacy_);
+            api_ = EngineLegacyV4::Adapt(*legacy_);
+        }
+        if (!legacy_->context)
+        {
+            void* extensionContext = legacy5_->context ? legacy5_->context : api_.context;
+            const auto query = reinterpret_cast<EngineGetEditExtensionFn>(GetProcAddress(static_cast<HMODULE>(library_), "EngineGetEditExtension"));
+            if (query && query(extensionContext, EngineViewportInputExtension, 1, sizeof(viewportInput_), &viewportInput_))
+                if (viewportInput_.version != 1 || viewportInput_.context != extensionContext || !viewportInput_.focus || !viewportInput_.key || !viewportInput_.pointer || !viewportInput_.objectKind)
+                    throw std::runtime_error("Invalid viewport input API");
+            if (query && query(extensionContext, EngineEditorCameraExtension, 1, sizeof(camera_), &camera_))
+                if (camera_.version != 1 || camera_.context != extensionContext || !camera_.read || !camera_.write)
+                    throw std::runtime_error("Invalid editor camera API");
+            EnginePointLightApi light{};
+            EngineDocumentCapabilities document{};
+            if (query && query(extensionContext, EngineSelectionExtension, 1, sizeof(selection_), &selection_))
+                if (selection_.version != 1 || selection_.context != extensionContext || !selection_.select)
+                    throw std::runtime_error("Invalid selection API");
+            if (query && query(extensionContext, EngineProjectDataExtension, 1, sizeof(projectData_), &projectData_))
+                if (projectData_.version != 1 || projectData_.context != extensionContext || !projectData_.read || !projectData_.write || !projectData_.remapDuplicate)
+                    throw std::runtime_error("Invalid project data API");
+            if (query && query(extensionContext, EngineDocumentExtension, 1, sizeof(document), &document))
+            {
+                if (document.version != 1 || document.minReadVersion > 1 || document.maxReadVersion < document.preferredWriteVersion ||
+                    document.preferredWriteVersion < 1 || document.preferredWriteVersion > 3)
+                    throw std::runtime_error("Unsupported document extension");
+                preferredSceneVersion_ = document.preferredWriteVersion;
+            }
+            if (query && query(extensionContext, EnginePointLightExtension, 1, sizeof(light), &light))
+            {
+                if (light.version != 1 || light.context != (legacy5_->context ? legacy5_->scene.context : api_.scene.context) || !light.set)
+                    throw std::runtime_error("Invalid point light extension");
+                if (legacy5_->context) legacy5_->scene.setPointLight = light.set;
+                else api_.scene.setPointLight = light.set;
+            }
         }
         if (!projectContent.empty())
         {
@@ -70,7 +83,8 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
     }
     catch (...)
     {
-        if (legacy_.context && legacyFactory_.destroy) legacyFactory_.destroy(legacy_.context);
+        if (legacy5_->context && legacy5Factory_.destroy) legacy5Factory_.destroy(legacy5_->context);
+        else if (legacy_->context && legacyFactory_.destroy) legacyFactory_.destroy(legacy_->context);
         else if (api_.context && factory_.destroy) factory_.destroy(api_.context);
         api_ = {};
         FreeLibrary(static_cast<HMODULE>(library_)); library_ = nullptr;
@@ -81,7 +95,8 @@ GameEditModule::~GameEditModule()
 {
     const auto context = api_.context;
     api_ = {};
-    if (legacy_.context) legacyFactory_.destroy(legacy_.context);
+    if (legacy5_->context) legacy5Factory_.destroy(legacy5_->context);
+    else if (legacy_->context) legacyFactory_.destroy(legacy_->context);
     else if (context) factory_.destroy(context);
     if (library_) FreeLibrary(static_cast<HMODULE>(library_));
 }
@@ -119,6 +134,8 @@ uint32_t GameEditModule::Reload(const std::filesystem::path& module, const std::
         swap(projectData_, candidate->projectData_); swap(selection_, candidate->selection_);
         swap(viewportInput_, candidate->viewportInput_); swap(camera_, candidate->camera_);
         swap(legacyFactory_, candidate->legacyFactory_); swap(legacy_, candidate->legacy_);
+        swap(legacy5Factory_, candidate->legacy5Factory_); swap(legacy5_, candidate->legacy5_);
+        // Heap-owned adapter tables move with their DLL, preserving session identity.
         swap(preferredSceneVersion_, candidate->preferredSceneVersion_);
         return EngineSceneOk;
     } catch (const std::exception& e) { if (capacity) std::snprintf(error, capacity, "%s", e.what()); }

@@ -76,6 +76,7 @@ void EditorMainWindow::BuildUi()
     setCentralWidget(nullptr);
 
     console_ = new QPlainTextEdit(this);
+    console_->setObjectName(QStringLiteral("Console"));
     console_->setReadOnly(true);
     console_->setMaximumBlockCount(2000);
 
@@ -149,6 +150,7 @@ void EditorMainWindow::closeEvent(QCloseEvent* event)
 {
     event->ignore();
     if (closing_ || sceneBusy_ || checkingChanges_) return;
+    if (!CloseMaterialEditors([this] { close(); })) return;
     closing_ = true;
     // Queue a barrier after viewport edits, then inspect the authoritative dirty state.
     if (host_->HasScene())
@@ -253,6 +255,14 @@ void EditorMainWindow::BuildSceneMenu()
     resources->addAction(QStringLiteral("Добавить модель…"), this, [this] { AddModel(); });
     resources->addAction(QStringLiteral("Импорт модели…"), this, [this] { ImportAsset(false); });
     resources->addAction(QStringLiteral("Импорт текстуры…"), this, [this] { ImportAsset(true); });
+    // F6 работает и в окнах материалов.
+    auto* reloadShaders = menu->addAction(QStringLiteral("Перекомпилировать шейдеры"), this, [this]
+    {
+        ReloadShaders();
+    }, QKeySequence(Qt::Key_F6));
+    reloadShaders->setShortcutContext(Qt::ApplicationShortcut);
+    reloadShaders->setEnabled(host_->HasMaterials());
+
     menu->addSeparator();
 
     auto* editMenu = menuBar()->addMenu(QStringLiteral("Правка"));
@@ -694,6 +704,50 @@ void EditorMainWindow::ConnectPanels()
         host_->PostCommand(c);
     });
 
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseMaterialRequested, this, [this]
+    {
+        if (!host_->HasScene() ||
+            sceneBusy_ ||
+            host_->PlayState() != EditorQtHost::EditorState::Edit)
+        {
+            return;
+        }
+
+        const QString path = QFileDialog::getOpenFileName(
+            this,
+            QStringLiteral("Материал из проекта"),
+            QString::fromUtf8(host_->host().contentRoot),
+            QStringLiteral("Материалы (*.mat)")
+        );
+
+        if (!path.isEmpty())
+            UseAsset(path);
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::EditMaterialRequested, this, [this](const QString& material)
+    {
+        if (!material.isEmpty())
+            OpenMaterialEditor(material);
+        else
+            CreateMaterialForSelection();
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearMaterialRequested, this, [this]
+    {
+        if (!selectedId_ ||
+            sceneBusy_ ||
+            host_->PlayState() != EditorQtHost::EditorState::Edit)
+        {
+            return;
+        }
+
+        EditorCommand c;
+        c.type = EditorCommand::SetMaterial;
+        c.objectId = selectedId_;
+
+        host_->PostCommand(c);
+    });
+
     connect(objectInspectorPanel_, &ObjectInspectorPanel::TransformEditingFinished,
             this, &EditorMainWindow::OnTransformEdited);
 
@@ -768,6 +822,7 @@ void EditorMainWindow::RefreshSceneUi()
     {
         objectInspectorPanel_->SetEnabled(edit && selectedId_);
         objectInspectorPanel_->Refresh(view, selectedId_, selectionChanged);
+        objectInspectorPanel_->SetMaterialsAvailable(host_->HasMaterials());
     }
 
     EditorCommand c;

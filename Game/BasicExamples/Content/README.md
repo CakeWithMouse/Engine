@@ -1,2 +1,5 @@
 # BasicExamples content
-This scene uses procedural geometry and EngineContent shaders. No external game assets are required.
+The scenes use procedural geometry and EngineContent shaders. No external game assets are required.
+
+Materials/ holds the material assets (.mat + surface .hlsl) of the "Материалы" scene. The copies next
+to the exe (GameContent/Materials) are read at start-up: edit one and restart the game.

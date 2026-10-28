@@ -171,7 +171,9 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                     for (const auto& item : s.edit_->GetScene().GetComponents())
                         if (auto* particles = dynamic_cast<ParticleSystemComponent*>(item.second.get()))
                             particles->ParticleSystemComponent::Tick(static_cast<float>(dt));
-                if (s.attached_ && !s.Active().RenderViewportFrame(0)) return EngineSceneFailure;
+                // Simulation is stepped above; rendering still needs real elapsed time for materials.
+                if (s.attached_ && !s.Active().RenderViewportFrame(static_cast<float>(dt))) return EngineSceneFailure;
+                s.RenderPreviews(dt);
                 return EngineSceneOk;
             });
         },
@@ -253,6 +255,7 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
             });
         }};
     AddAssetApi(api);
+    AddMaterialApi(api);
     return api;
 }
 EngineSelectionApi SceneEditSession::GetSelectionApi() noexcept

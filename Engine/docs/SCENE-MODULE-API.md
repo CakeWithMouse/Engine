@@ -1,5 +1,10 @@
 # Каталог и команды Scene через игровой модуль
 
+Обновление 28.10.2026: Scene API v4 добавляет в конец `EngineSceneObjectInfo` поле
+`materialAsset` — `/Game`-путь `.mat`, пустая строка без материала. Назначение выполняет
+`setMaterial` edit-сессии v6, см. [EDIT-SESSION-API.md](EDIT-SESSION-API.md) и
+[MATERIALS.md](MATERIALS.md). Модули v3 отклоняются; пересоберите их вместе с runtime.
+
 Обновление 24.10.2026: Scene API v3 добавляет `hasPointLight` и `pointLight`
 в снимок объекта и `setPointLight(context, id, const EngineScenePointLight*)` в таблицу.
 Команда принимает линейный RGB 0–1, конечную интенсивность >= 0, конечный радиус > 0

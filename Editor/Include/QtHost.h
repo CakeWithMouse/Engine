@@ -13,6 +13,7 @@
 #include <vector>
 #include <memory>
 #include <chrono>
+#include <functional>
 class QTemporaryDir;
 
 class EditorMainWindow;
@@ -34,7 +35,8 @@ struct EditorCommand
         FetchScene, UpdateObjectTransform, RefreshScene, SelectObject, CreateObject, RemoveObject,
         RenameObject, DuplicateObject, SaveScene, LoadScene, NewScene, Undo, Redo, PickObject, FocusObject,
         SetGizmoMode, BeginGizmoDrag, EndGizmoDrag,
-        ImportModel, ImportTexture, CreateModel, SetTexture, SetPointLight, SetProjectData,
+        ImportModel, ImportTexture, CreateModel, SetTexture, SetPointLight, SetMaterial, SetProjectData,
+        RunTask,
     };
 
     Type type = None;
@@ -49,6 +51,9 @@ struct EditorCommand
     EngineScenePointLight pointLight{};
     EditorGizmoMode gizmo = EditorGizmoTranslate;
     QString name;
+
+    // RunTask: выполняется в потоке движка, если есть сессия сцены (редактор материалов)
+    std::function<void(const EngineEditSessionApi&)> task;
 };
 
 class EditorQtHost
@@ -75,6 +80,7 @@ public:
 
     void Log(const char* text); // любой поток
     void PostCommand(const EditorCommand& c); // поток UI
+    void RunOnUi(std::function<void()> action); // поток движка: в очередь UI, пока окно редактора живо
     double LastDt() const { return lastDt_.load(); }
     uint64_t UpdateCount() const { return updates_.load(); }
     const EngineModuleHost& host() const { return host_; }
@@ -84,10 +90,11 @@ public:
     bool ViewportActive() const { return viewportActive_.load(); }
     EditorState PlayState() const { return playState_.load(); }
 
-    void SetModuleApi(const EngineEditSessionApi& scene) { scene_ = scene; sceneAvailable_.store(scene.context != nullptr); }
+    void SetModuleApi(const EngineEditSessionApi& scene) { scene_ = scene; sceneAvailable_.store(scene.context != nullptr); materialsAvailable_.store(scene.context && scene.setMaterial && scene.readMaterial && scene.reloadShaderFile && scene.attachMaterialPreview); }
     void SetProjectDataApi(const EngineProjectDataApi& api) { projectData_ = api; }
     void SetViewportInputApi(const EngineViewportInputApi& api) { viewportInput_ = api; }
     void SetSelectionApi(const EngineSelectionApi& api) { selection_ = api; }
+    bool HasMaterials() const { return materialsAvailable_.load(); }
     bool HasScene() const { return sceneAvailable_.load(); }
 
     struct SceneObject
@@ -99,6 +106,7 @@ public:
         std::string modelAsset, textureAsset;
         bool hasPointLight = false;
         EngineScenePointLight pointLight{};
+        std::string materialAsset;
         std::string projectData;
         uint32_t gameplayKind = 0;
     };
@@ -139,6 +147,7 @@ private:
 
     EngineModuleHost host_;
     EngineEditSessionApi scene_{};
+    std::atomic<bool> materialsAvailable_{false};
     EngineProjectDataApi projectData_{};
     EngineSelectionApi selection_{};
     EngineViewportInputApi viewportInput_{};

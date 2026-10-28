@@ -1,8 +1,10 @@
-﻿#pragma once
+#pragma once
 #include <Engine/Runtime/EditSessionApi.h>
 #include <filesystem>
+#include <memory>
 #include <Engine/Runtime/EditorReloadApi.h>
 #include <Engine/Runtime/LegacyEditApi.h>
+#include <Engine/Runtime/LegacyEditApiV5.h>
 #include <Engine/Runtime/ProjectDataApi.h>
 #include <Engine/Runtime/SelectionApi.h>
 #include <Engine/Runtime/ViewportInputApi.h>
@@ -35,6 +37,8 @@ private:
     EngineSelectionApi selection_{};
     EngineViewportInputApi viewportInput_{};
     EngineLegacyV4::Factory legacyFactory_{};
-    EngineLegacyV4::EditApi legacy_{};
+    std::unique_ptr<EngineLegacyV4::EditApi> legacy_ = std::make_unique<EngineLegacyV4::EditApi>();
+    EngineLegacyV5::Factory legacy5Factory_{};
+    std::unique_ptr<EngineLegacyV5::EditApi> legacy5_ = std::make_unique<EngineLegacyV5::EditApi>();
     uint32_t preferredSceneVersion_ = 1;
 };

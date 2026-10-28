@@ -37,6 +37,7 @@
     <ClCompile Include="Source\Scene\SceneDocument.cpp" />
     <ClCompile Include="Source\Scene\SceneAssets.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditAssets.cpp" />
+    <ClCompile Include="Source\Runtime\SceneEditMaterials.cpp" />
     <ClInclude Include="Include\Engine\Scene\SceneDocument.h" />
     <ClCompile Include="Source\Runtime\SceneEditSession.cpp" />
     <ClCompile Include="Source\Runtime\GameEditModule.cpp" />
@@ -61,6 +62,7 @@
     <ClCompile Include="Source\Components\SpecificComponents\CubeComponent.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\FBXComponent.cpp" Condition="'$(EngineEnableAssimp)'=='true'" />
     <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshComponent.cpp" />
+    <ClCompile Include="Source\Components\SpecificComponents\MeshComponent.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshSkinned.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshImpostor.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshShadows.cpp" />
@@ -80,6 +82,9 @@
     <ClCompile Include="Source\MainGame\BaseGameClass\Game.cpp" />
     <ClCompile Include="Source\MainGame\Player.cpp" />
     <ClCompile Include="Source\Render\ImpostorAtlas.cpp" />
+    <ClCompile Include="Source\Render\Material.cpp" />
+    <ClCompile Include="Source\Render\MaterialAsset.cpp" />
+    <ClCompile Include="Source\Render\MeshPrimitives.cpp" />
     <ClCompile Include="Source\Render\TextureLoader.cpp" />
     <ClCompile Include="Source\Render\ShaderCompiler.cpp" />
     <ClCompile Include="Source\Render\SkeletalAnimation.cpp" />
@@ -105,6 +110,7 @@
     <ClInclude Include="Include\Engine\Components\SpecificComponents\CubeComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\FBXComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\InstancedMeshComponent.h" />
+    <ClInclude Include="Include\Engine\Components\SpecificComponents\MeshComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\ParticleSystemComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\SkeletalMeshComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\SphereComponent.h" />
@@ -116,7 +122,10 @@
     <ClInclude Include="Include\Engine\MainGame\BaseGameClass\Game.h" />
     <ClInclude Include="Include\Engine\MainGame\Player.h" />
     <ClInclude Include="Include\Engine\Render\ImpostorAtlas.h" />
+    <ClInclude Include="Include\Engine\Render\Material.h" />
+    <ClInclude Include="Include\Engine\Render\MaterialAsset.h" />
     <ClInclude Include="Include\Engine\Render\MeshData.h" />
+    <ClInclude Include="Include\Engine\Render\MeshPrimitives.h" />
     <ClInclude Include="Include\Engine\Render\ShaderCompiler.h" />
     <ClInclude Include="Include\Engine\Render\ShaderConstants.h" />
     <ClInclude Include="Include\Engine\Render\SkeletalData.h" />

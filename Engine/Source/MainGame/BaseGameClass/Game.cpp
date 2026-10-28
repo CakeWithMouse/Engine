@@ -16,8 +16,11 @@
 #include <iostream>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
+#include <Engine/Render/Material.h>
+#include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/ShaderCompiler.h>
 #include <dxgi1_6.h>
+#include "../../Resources/VfsRead.h"
 #include "stb_image.h"
 
 #pragma comment(lib, "d3d11.lib")
@@ -298,11 +301,16 @@ void Game::DestroyResources(bool preserveScene)
 
     // Components first: they observe cube maps and shaders owned by the caches below.
     if (!preserveScene) scene.Clear();
+    materialCache.clear();
+    defaultMaterial.reset();
+    errorMaterial.reset();
     cubeMapCache.clear();
 
     vertexShaderCache.clear();
     pixelShaderCache.clear();
     pixelShaderTargetCount.clear();
+    shaderDependencies.clear();
+    shaderErrors.clear();
     shaderCache.clear();
     BaseVertexShader.Reset();
     BasePixelShader.Reset();
@@ -350,11 +358,13 @@ void Game::DestroyResources(bool preserveScene)
     }
 
     transparentBlendState.Reset();
+    additiveBlendState.Reset();
     opaqueBlendState.Reset();
     depthStencilState.Reset();
     depthStencilStateReadOnly.Reset();
     depthStencilStateSkybox.Reset();
     DefaultRasterState.Reset();
+    CullBackRasterState.Reset();
     SelectionVS.Reset(); SelectionPS.Reset(); SelectionCB.Reset();
     ReleaseSwapChainResources();
 
@@ -757,7 +767,11 @@ bool Game::CreateRenderStates()
     rastDesc.FillMode = D3D11_FILL_SOLID;
     rastDesc.FrontCounterClockwise = FALSE;
     rastDesc.DepthClipEnable = TRUE;
-    if (FAILED(Device->CreateRasterizerState(&rastDesc, DefaultRasterState.ReleaseAndGetAddressOf())))
+    // Material meshes have a consistent clockwise winding, so one-sided materials cull back faces.
+    CD3D11_RASTERIZER_DESC cullBackDesc = rastDesc;
+    cullBackDesc.CullMode = D3D11_CULL_BACK;
+    if (FAILED(Device->CreateRasterizerState(&rastDesc, DefaultRasterState.ReleaseAndGetAddressOf())) ||
+        FAILED(Device->CreateRasterizerState(&cullBackDesc, CullBackRasterState.ReleaseAndGetAddressOf())))
     {
         std::cout << "Failed to create rasterizer state." << std::endl;
         return false;
@@ -777,7 +791,14 @@ bool Game::CreateRenderStates()
     opaqueDesc.RenderTarget[0].BlendEnable = FALSE;
     opaqueDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
+    D3D11_BLEND_DESC additiveDesc = transparentDesc;
+    additiveDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE; // the shader already multiplied by alpha
+    additiveDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+    additiveDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+    additiveDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+
     if (FAILED(Device->CreateBlendState(&transparentDesc, transparentBlendState.ReleaseAndGetAddressOf())) ||
+        FAILED(Device->CreateBlendState(&additiveDesc, additiveBlendState.ReleaseAndGetAddressOf())) ||
         FAILED(Device->CreateBlendState(&opaqueDesc, opaqueBlendState.ReleaseAndGetAddressOf())))
     {
         std::cout << "Failed to create blend states." << std::endl;
@@ -1071,15 +1092,25 @@ void Game::RegisterShaders(const std::string& ShaderName, const std::string& Add
 
     const LPCSTR entryPoint = isVertexShader ? "VSMain" : "PSMain";
     const LPCSTR target = isVertexShader ? "vs_5_0" : "ps_5_0";
-    const std::wstring wideShaderPath = ToWide(ShaderName);
-    Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;
-    const HRESULT res = CreateShader(DisplayPtr ? DisplayPtr->GetHwnd() : nullptr, GetVariantDefines(variant),
-                                     wideShaderPath.c_str(), entryPoint, target, shaderBlob.GetAddressOf());
-    if (FAILED(res))
+    ShaderCompiler::CompileOptions options;
+    for (const D3D_SHADER_MACRO* define = GetVariantDefines(variant); define && define->Name; ++define)
     {
-        std::cout << "Failed to compile shader: " << ShaderName << std::endl;
+        options.Defines.emplace_back(define->Name, define->Definition);
+    }
+    ShaderCompiler::CompileResult compiled = ShaderCompiler::Compile(ShaderName, entryPoint, target, options);
+    shaderDependencies[cacheKey] = std::move(compiled.Dependencies);
+    if (!compiled.Succeeded())
+    {
+        shaderErrors[cacheKey] = compiled.Errors;
+        std::cout << "Shader compilation failed: " << ShaderName << std::endl << compiled.Errors << std::endl;
+        const std::wstring wideShaderPath = ToWide(ShaderName);
+        if (GetFileAttributesW(wideShaderPath.c_str()) == INVALID_FILE_ATTRIBUTES)
+        {
+            MessageBox(DisplayPtr ? DisplayPtr->GetHwnd() : nullptr, wideShaderPath.c_str(), L"Missing Shader File", MB_OK);
+        }
         return;
     }
+    Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob = compiled.Blob;
 
     if (isVertexShader)
     {
@@ -1087,6 +1118,7 @@ void Game::RegisterShaders(const std::string& ShaderName, const std::string& Add
         if (FAILED(Device->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(),
                                               nullptr, vertexShader.GetAddressOf())))
         {
+            shaderErrors[cacheKey] = "CreateVertexShader failed";
             std::cout << "Failed to create vertex shader: " << ShaderName << std::endl;
             return;
         }
@@ -1098,6 +1130,7 @@ void Game::RegisterShaders(const std::string& ShaderName, const std::string& Add
         if (FAILED(Device->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(),
                                              nullptr, pixelShader.GetAddressOf())))
         {
+            shaderErrors[cacheKey] = "CreatePixelShader failed";
             std::cout << "Failed to create pixel shader: " << ShaderName << std::endl;
             return;
         }
@@ -1180,6 +1213,22 @@ bool Game::BindComponentShaders(GameComponent* Component, ShaderCompileVariant v
         variant = ShaderCompileVariant::Default;
     }
 
+    // A material owns its shaders; null pixel shader: it cannot draw in this pass.
+    if (Material* material = PrepareMaterial(Component))
+    {
+        const uint32_t materialVariant = Component->GetMaterialVariant();
+        ID3D11VertexShader* vertexShader = material->GetVertexShader(materialVariant);
+        ID3D11PixelShader* pixelShader = material->GetPixelShader(variant == ShaderCompileVariant::DeferredGBuffer, materialVariant);
+        if (vertexShader == nullptr || pixelShader == nullptr)
+        {
+            return false;
+        }
+        Component->SetVertexShader(vertexShader);
+        Component->SetPixelShader(pixelShader);
+        CurrentPassVariant = variant;
+        return true;
+    }
+
     ComponentShaderVariant& slot = ResolveComponentShaders(Component, variant);
     if (variant == ShaderCompileVariant::DeferredGBuffer && !slot.bWritesGBuffer)
     {
@@ -1202,7 +1251,284 @@ bool Game::SupportsDeferredGeometry(GameComponent* Component)
     {
         return false;
     }
+    if (Material* material = PrepareMaterial(Component))
+    {
+        return material->WritesGBuffer();
+    }
     return ResolveComponentShaders(Component, ShaderCompileVariant::DeferredGBuffer).bWritesGBuffer;
+}
+
+Material* Game::PrepareMaterial(GameComponent* Component)
+{
+    // A material asset (/Game path) is loaded through the cache of this game.
+    if (!Component->MaterialAssetPath.empty() && !Component->bMaterialAssetLoaded)
+    {
+        Component->bMaterialAssetLoaded = true;
+        const std::string physical = VfsRead::Active().Resolve(Component->MaterialAssetPath);
+        std::shared_ptr<Material> loaded = LoadMaterial(physical.empty() ? Component->MaterialAssetPath : physical);
+        // A missing or broken file stays visible as the error checker, not as the default look.
+        Component->AssignMaterial(loaded ? std::move(loaded) : GetErrorMaterial());
+    }
+    Material* material = Component->GetMaterial();
+    if (material == nullptr && Component->RequiresMaterial())
+    {
+        material = GetDefaultMaterial().get();
+    }
+    if (material)
+    {
+        material->RequireVariant(Component->GetMaterialVariant());
+    }
+    if (material && material->NeedsCompile())
+    {
+        material->Compile(Device.Get(), Context.Get());
+    }
+    return material;
+}
+
+void Game::ApplyComponentPipelineState(GameComponent* Component, bool bTransparentPass)
+{
+    const Material* material = Component->GetMaterial();
+    // Materials are culled unless two-sided; legacy components keep the engine-wide no-culling state.
+    ID3D11RasterizerState* raster = material && !material->GetRenderState().bTwoSided && CullBackRasterState
+                                        ? CullBackRasterState.Get()
+                                        : DefaultRasterState.Get();
+    Context->RSSetState(raster);
+    if (bTransparentPass)
+    {
+        const bool bAdditive = material && material->GetRenderState().Blend == MaterialBlendMode::Additive;
+        const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+        Context->OMSetBlendState(bAdditive ? additiveBlendState.Get() : transparentBlendState.Get(), blendFactor, 0xffffffff);
+    }
+}
+
+bool Game::InvalidateShaderFile(const std::string& shaderFile)
+{
+    const std::string file = ShaderCompiler::NormalizePath(shaderFile);
+
+    // Materials: the .mat file itself is re-read, a shader they include is recompiled.
+    size_t materialCount = 0;
+    for (auto& entry : materialCache)
+    {
+        if (entry.first == file)
+        {
+            ReloadMaterial(entry.second.Path);
+            ++materialCount;
+        }
+        else if (entry.second.Instance->DependsOn(file))
+        {
+            entry.second.Instance->Compile(Device.Get(), Context.Get());
+            ++materialCount;
+        }
+    }
+    if (defaultMaterial && defaultMaterial->DependsOn(file))
+    {
+        defaultMaterial->Compile(Device.Get(), Context.Get());
+        ++materialCount;
+    }
+    if (materialCount > 0)
+    {
+        std::cout << "Recompiled " << materialCount << " material(s) depending on " << shaderFile << std::endl;
+    }
+    RetryFailedMaterialAssets();
+
+    std::vector<std::string> staleKeys;
+    for (const auto& entry : shaderDependencies)
+    {
+        if (std::find(entry.second.begin(), entry.second.end(), file) != entry.second.end())
+        {
+            staleKeys.push_back(entry.first);
+        }
+    }
+    if (staleKeys.empty())
+    {
+        return materialCount > 0;
+    }
+
+    for (const std::string& key : staleKeys)
+    {
+        shaderCache.erase(key);
+        vertexShaderCache.erase(key);
+        pixelShaderCache.erase(key);
+        pixelShaderTargetCount.erase(key);
+        shaderDependencies.erase(key);
+        shaderErrors.erase(key);
+    }
+
+    OnShadersInvalidated();
+    std::cout << "Invalidated " << staleKeys.size() << " shader(s) depending on " << shaderFile << std::endl;
+    return true;
+}
+
+void Game::InvalidateAllShaders()
+{
+    const size_t count = shaderCache.size();
+    shaderCache.clear();
+    vertexShaderCache.clear();
+    pixelShaderCache.clear();
+    pixelShaderTargetCount.clear();
+    shaderDependencies.clear();
+    shaderErrors.clear();
+
+    OnShadersInvalidated();
+    std::cout << "Invalidated all " << count << " cached shader(s)" << std::endl;
+
+    for (auto& entry : materialCache)
+    {
+        ReloadMaterial(entry.second.Path);
+    }
+    if (defaultMaterial)
+    {
+        defaultMaterial->Compile(Device.Get(), Context.Get());
+    }
+    if (!materialCache.empty())
+    {
+        std::cout << "Reloaded " << materialCache.size() << " material(s)" << std::endl;
+    }
+    RetryFailedMaterialAssets();
+}
+
+void Game::RetryFailedMaterialAssets()
+{
+    if (!errorMaterial)
+    {
+        return;
+    }
+    for (auto& pair : Components)
+    {
+        GameComponent* component = pair.second.get();
+        if (!component->MaterialAssetPath.empty() && component->MaterialPtr == errorMaterial)
+        {
+            component->bMaterialAssetLoaded = false;
+        }
+    }
+}
+
+namespace
+{
+    /** A material from a parsed .mat: compiled, with the file's parameters and textures applied. */
+    std::shared_ptr<Material> BuildMaterial(const MaterialAsset& asset, const std::string& matPath,
+                                            ID3D11Device* device, ID3D11DeviceContext* context)
+    {
+        auto material = std::make_shared<Material>(MaterialAsset::ResolvePath(matPath, asset.Shader), asset.Render);
+        material->Compile(device, context);
+        std::vector<std::string> warnings;
+        asset.ApplyTo(*material, matPath, warnings);
+        for (const std::string& warning : warnings)
+        {
+            std::cout << "Material " << matPath << ": " << warning << std::endl;
+        }
+        return material;
+    }
+}
+
+std::shared_ptr<Material> Game::FindMaterial(const std::string& matPath) const
+{
+    const auto cached = materialCache.find(ShaderCompiler::NormalizePath(matPath));
+    return cached != materialCache.end() ? cached->second.Instance : nullptr;
+}
+
+std::shared_ptr<Material> Game::LoadMaterial(const std::string& matPath, std::string* error)
+{
+    const std::string key = ShaderCompiler::NormalizePath(matPath);
+    const auto cached = materialCache.find(key);
+    if (cached != materialCache.end())
+    {
+        return cached->second.Instance;
+    }
+
+    std::string message;
+    MaterialAsset asset;
+    if (!Device)
+    {
+        message = matPath + ": the device is not initialized";
+    }
+    else if (MaterialAsset::Load(matPath, asset, message))
+    {
+        std::shared_ptr<Material> material = BuildMaterial(asset, matPath, Device.Get(), Context.Get());
+        materialCache.emplace(key, CachedMaterial{matPath, material});
+        return material;
+    }
+    std::cout << "LoadMaterial failed: " << message << std::endl;
+    if (error) *error = message;
+    return nullptr;
+}
+
+bool Game::ReloadMaterial(const std::string& matPath, std::string* error)
+{
+    const auto cached = materialCache.find(ShaderCompiler::NormalizePath(matPath));
+    std::string message;
+    MaterialAsset asset;
+    if (cached == materialCache.end())
+    {
+        message = matPath + ": the material is not loaded";
+    }
+    else if (MaterialAsset::Load(matPath, asset, message))
+    {
+        // Same object: whoever holds the material sees the new state.
+        *cached->second.Instance = std::move(*BuildMaterial(asset, matPath, Device.Get(), Context.Get()));
+        return true;
+    }
+    std::cout << "ReloadMaterial failed: " << message << std::endl;
+    if (error) *error = message;
+    return false;
+}
+
+std::shared_ptr<Material> Game::GetDefaultMaterial()
+{
+    if (!defaultMaterial && Device)
+    {
+        defaultMaterial = std::make_shared<Material>(EnginePaths::Shader("Material/DefaultSurface.hlsl").generic_u8string());
+        defaultMaterial->Compile(Device.Get(), Context.Get());
+    }
+    return defaultMaterial;
+}
+
+std::shared_ptr<Material> Game::GetErrorMaterial()
+{
+    if (!errorMaterial && Device)
+    {
+        errorMaterial = std::make_shared<Material>(EnginePaths::Shader("Material/ErrorSurface.hlsl").generic_u8string());
+        errorMaterial->Compile(Device.Get(), Context.Get());
+    }
+    return errorMaterial;
+}
+
+void Game::OnShadersInvalidated()
+{
+    // Resolved slots point into the erased cache entries: every component resolves again.
+    for (auto& pair : Components)
+    {
+        GameComponent* component = pair.second.get();
+        for (ComponentShaderVariant& slot : component->ShaderVariants)
+        {
+            slot = ComponentShaderVariant{};
+        }
+        component->SetVertexShader(nullptr);
+        component->SetPixelShader(nullptr);
+    }
+
+    // The fallback pair keeps the old shaders alive until the new ones compile.
+    InitShaderBuffers();
+}
+
+std::string Game::GetShaderErrors(const std::string& shaderFile) const
+{
+    const std::string file = ShaderCompiler::NormalizePath(shaderFile);
+    std::string errors;
+    for (const auto& entry : shaderErrors)
+    {
+        const auto dependencies = shaderDependencies.find(entry.first);
+        if (dependencies == shaderDependencies.end() || dependencies->second.empty() || dependencies->second.front() != file)
+        {
+            continue;
+        }
+        if (!errors.empty())
+        {
+            errors += '\n';
+        }
+        errors += entry.second;
+    }
+    return errors;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -2497,7 +2823,7 @@ void Game::ProcessHotkeys()
         return;
     }
 
-    // F3: deferred debug overlay, F4: VSync, F5: forward <-> deferred.
+    // F3: deferred debug overlay, F4: VSync, F5: forward <-> deferred. Shader reload belongs to the editor.
     const bool overlayDown = InputDevicePtr->IsKeyDown(Keys::F3);
     if (overlayDown && !bOverlayKeyWasDown)
     {
@@ -2524,6 +2850,8 @@ void Game::UpdateFrame(float realDeltaTime)
 {
     SynchronizeSceneResources();
     const float deltaTime = realDeltaTime * SimulationTimeScale;
+    RealTime += realDeltaTime;
+    LastRealDeltaTime = realDeltaTime;
     ProcessHotkeys();
     if (bSimulationEnabled) UpdateSimulation(deltaTime);
     else FirstPlayer->UpdateCamera(0.0f);
@@ -2647,6 +2975,7 @@ void Game::BuildFrameConstants()
 
     const glm::vec3 cameraPosition = FirstPlayer->GetPosition();
     frame.CameraPosition = XMFLOAT4(cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f);
+    frame.TimeParams = XMFLOAT4(RealTime, LastRealDeltaTime, TotalTime, 0.0f);
 
     for (int i = 0; i < MaxPointLights; ++i)
     {
@@ -2941,8 +3270,10 @@ void Game::RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant)
         {
             continue;
         }
+        ApplyComponentPipelineState(Component, false);
         Component->Render(Context.Get());
     }
+    Context->RSSetState(DefaultRasterState.Get());
 }
 
 void Game::RenderSkybox()
@@ -3008,10 +3339,12 @@ void Game::RenderTransparent()
     {
         if (BindComponentShaders(draw.Component, ShaderCompileVariant::Default))
         {
+            ApplyComponentPipelineState(draw.Component, true);
             draw.Component->Render(Context.Get());
         }
     }
 
+    Context->RSSetState(DefaultRasterState.Get());
     Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
     Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
 }

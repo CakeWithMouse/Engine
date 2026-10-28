@@ -108,7 +108,7 @@ public:
         return api->exists(api->context, vpathStr.c_str()) != 0;
     }
 
-    std::string Resolve(std::string_view vpath) const
+    std::string Resolve(std::string_view vpath) const override
     {
         const auto* api = m_api.load();
         if (!api || !api->resolve)

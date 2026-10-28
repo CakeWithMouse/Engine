@@ -3,7 +3,7 @@
 
 // Optional, separately versioned extension of ModuleApi v4. Windows x64/default
 // packing. No STL, cross-DLL allocation ownership or exceptions. See SCENE-MODULE-API.md.
-#define ENGINE_SCENE_API_VERSION 3u
+#define ENGINE_SCENE_API_VERSION 4u
 enum EngineSceneStatus : uint32_t
 {
     EngineSceneOk = 0, EngineSceneInvalidArgument = 1, EngineSceneUnknownType = 2,
@@ -45,6 +45,7 @@ struct EngineSceneObjectInfo
     const char* textureAsset;
     uint32_t hasPointLight;
     EngineScenePointLight pointLight;
+    const char* materialAsset; // v4: /Game path of a .mat file, empty without one
 };
 struct EngineSceneInfo
 {

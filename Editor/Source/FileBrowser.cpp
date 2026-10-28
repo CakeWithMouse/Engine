@@ -1,4 +1,4 @@
-﻿#include "FileBrowser.h"
+#include "FileBrowser.h"
 #include "QtHost.h"
 #include "MainWindow.h"
 
@@ -147,6 +147,11 @@ void FileBrowserDock::OnDoubleClicked(const QModelIndex& proxyIndex)
         if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenScene(path);
         return;
     }
+    if (path.endsWith(QStringLiteral(".mat"), Qt::CaseInsensitive))
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenMaterialEditor(path);
+        return;
+    }
     const QByteArray utf8 = path.toUtf8();  // именованный QByteArray: переживает вызов Log
     const std::string msg = "EditorOpenAsset: " + std::string(utf8.constData(), utf8.size());
     host_->Log(msg.c_str());                // аудит: лог движка + консоль редактора
@@ -161,7 +166,11 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     const QString path = hasFile ? model_->filePath(index) : QString();
 
     QMenu menu(this);
-    QAction* use = hasFile && !model_->isDir(index) ? menu.addAction(QStringLiteral("Добавить модель / назначить текстуру")) : nullptr;
+    const bool isMaterial = hasFile && path.endsWith(QStringLiteral(".mat"), Qt::CaseInsensitive);
+    QAction* use = hasFile && !model_->isDir(index) ? menu.addAction(isMaterial ? QStringLiteral("Назначить материал")
+                                                                               : QStringLiteral("Добавить модель / назначить текстуру")) : nullptr;
+    QAction* editMaterial = isMaterial && host_->HasMaterials() ? menu.addAction(QStringLiteral("Редактировать материал")) : nullptr;
+    QAction* newMaterial = host_->HasMaterials() ? menu.addAction(QStringLiteral("Новый материал…")) : nullptr;
     QAction* open = hasFile ? menu.addAction(QStringLiteral("Открыть в приложении")) : nullptr;
     QAction* reveal = hasFile ? menu.addAction(QStringLiteral("Показать в проводнике")) : nullptr;
     QAction* copy = hasFile ? menu.addAction(QStringLiteral("Копировать путь")) : nullptr;
@@ -174,6 +183,16 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     if (picked == use)
     {
         if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->UseAsset(path);
+    }
+    else if (picked == editMaterial)
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenMaterialEditor(path);
+    }
+    else if (picked == newMaterial)
+    {
+        // в выбранный каталог или рядом с выбранным файлом; вне Content — в Content/Materials
+        const QString directory = !hasFile ? QString() : model_->isDir(index) ? path : QFileInfo(path).absolutePath();
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->CreateMaterial(directory);
     }
     else if (picked == open)
         QDesktopServices::openUrl(QUrl::fromLocalFile(path));

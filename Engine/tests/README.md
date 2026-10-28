@@ -2,8 +2,8 @@
 
 Импорт ресурсов и сцены: `./Engine/tests/assets/run.ps1 -EnableAssimp`.
 Проверяет настоящий игровой DLL, импорт glTF с внешними ресурсами/GLB/OBJ,
-назначение текстур, ошибки и откат, Unicode, сохранение и перенос проекта,
-Play/standalone и пиксели D3D. Без `-EnableAssimp` проверяет текстуры и
+назначение текстур и материалов, Edit API материалов и превью, ошибки и откат,
+Unicode, сохранение и перенос проекта, Play/standalone и пиксели D3D. Без `-EnableAssimp` проверяет текстуры и
 корректный отказ импорта моделей. Qt-сценарий с Undo/Redo и дублированием:
 `./Editor/tests/run.ps1 -EnableAssimp`. Подробнее: [PROJECT-ASSETS.md](../docs/PROJECT-ASSETS.md).
 

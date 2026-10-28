@@ -1,4 +1,4 @@
-﻿#include "MainWindow.h"
+#include "MainWindow.h"
 #include "QtHost.h"
 #include <Engine/Runtime/EditorReloadApi.h>
 #include "CodeClassDialog.h"
@@ -35,6 +35,8 @@ void EditorMainWindow::RunCodeTool(const QString& action, const QStringList& ext
         QMessageBox::warning(this, QStringLiteral("C++"), QStringLiteral("В этом выпуске нет SDK. Обновите копию проекта на выпуск с поддержкой C++.")); return;
     }
     if (findChild<QProcess*>(QStringLiteral("projectCodeBuild"))) return;
+    // Drain preview teardown before the new DLL is activated; honor unsaved material edits.
+    if (action != QStringLiteral("AddClass") && !CloseMaterialEditors([this, action, extra] { RunCodeTool(action, extra); })) return;
     QFile before(project); QString previousModule;
     if (before.open(QIODevice::ReadOnly)) previousModule=QJsonDocument::fromJson(before.readAll()).object()["module"].toString();
     QFile typesBefore(QFileInfo(project).dir().filePath("ProjectTypes.tsv"));

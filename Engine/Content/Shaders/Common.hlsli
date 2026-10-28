@@ -28,6 +28,7 @@ cbuffer ConstantBuffer : register(b0)
     float4x4 normalMatrix;              // inverse-transpose of worldMatrix
     float4x4 StaticShadowViewProjection; // baked shadows of the static scene
     float4 StaticShadowParams;           // x enabled, y texel size, z bias
+    float4 TimeParams;                   // x real seconds, y real frame delta, z scene time
 };
 
 // G-buffer contract:

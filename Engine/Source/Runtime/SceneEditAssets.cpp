@@ -23,7 +23,7 @@ bool Text(const char* value)
 }
 SceneEditSession::~SceneEditSession()
 {
-    play_.reset(); edit_.reset();
+    previews_.clear(); play_.reset(); edit_.reset();
     if (ownsGameMount_)
     {
         auto& vfs = VfsRead::GetVFS();
@@ -107,6 +107,18 @@ void SceneEditSession::AddAssetApi(EngineEditSessionApi& api) noexcept
                 if (!scene.FindComponent(id)) return EngineSceneNotFound;
                 SceneAssets::ValidateTexture(path);
                 return scene.SetTextureAsset(id, path) == SceneResult::Ok ? EngineSceneOk : EngineSceneFailure;
+            });
+        });
+    };
+    api.setMaterial = [](void* p, uint64_t id, const char* path, char* error, uint32_t capacity) -> uint32_t {
+        if (!path) return EngineSceneInvalidArgument;
+        return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+            if (s.state_ != EngineEditing) return EngineSceneReadOnly;
+            return AssetCall(error, capacity, [&]() -> uint32_t {
+                auto& scene = s.edit_->GetScene();
+                if (!scene.FindComponent(id)) return EngineSceneNotFound;
+                SceneAssets::ValidateMaterial(path);
+                return scene.SetMaterialAsset(id, path) == SceneResult::Ok ? EngineSceneOk : EngineSceneFailure;
             });
         });
     };

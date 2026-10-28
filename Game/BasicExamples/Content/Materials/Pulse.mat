@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "shader": "Pulse.hlsl",
+  "params": { "Speed": 2.5 }
+}

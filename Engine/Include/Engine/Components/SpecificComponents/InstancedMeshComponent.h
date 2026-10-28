@@ -15,13 +15,15 @@ struct MeshInstance
     float Yaw = 0.0f;   // radians
     float Scale = 1.0f; // uniform: instanced normals are transformed by the instance matrix
     glm::vec4 Color{1.0f, 1.0f, 1.0f, 1.0f};
+    // Free per-copy values for a material (MaterialInput.InstanceData): wear, hue, animation phase...
+    glm::vec3 CustomData{0.0f, 0.0f, 0.0f};
     bool bVisible = true;
     uint8_t Padding = 0;
     uint16_t ClipId = 0;
     float AnimationPhase = 0.0f;
     float Speed = 1.0f;
 };
-static_assert(sizeof(MeshInstance) == 48, "MeshInstance must be 48 bytes");
+static_assert(sizeof(MeshInstance) == 60, "MeshInstance must be 60 bytes");
 
 /**
  * Draws many copies of one mesh: a few detail levels, per-instance transform and colour,
@@ -115,6 +117,10 @@ public:
     {
         if (index < Instances.size()) { Instances[index].Color = color; PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true; }
     }
+    void SetInstanceCustomData(size_t index, const glm::vec3& data)
+    {
+        if (index < Instances.size()) { Instances[index].CustomData = data; PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true; }
+    }
     void SetInstanceVisible(size_t index, bool visible)
     {
         if (index < Instances.size()) { Instances[index].bVisible = visible; PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true; }
@@ -140,10 +146,19 @@ public:
     uint32_t GetDrawnImpostors() const { return static_cast<uint32_t>(ImpostorLevel.ColorStaging.size()); }
 
     void CreateBuffers(ID3D11Device* Device) override;
+    /** Rebakes the sprite level when the material changed (outside of any render pass). */
+    void Tick(float deltaTime) override;
     void Render(ID3D11DeviceContext* context) override;
     void RenderShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass) override;
     // Visibility is decided per instance inside this component.
     bool SupportsFrustumCulling() const override { return false; }
+    /**
+     * A material draws every mesh level and the masked shadows; the sprite level is baked through
+     * it (albedo, normal, coverage) and rebaked when the material changes. Animated copies use
+     * the skinned set of the material (MaterialInput.InstanceData is then zero).
+     */
+    bool SupportsMaterials() const override { return true; }
+    uint32_t GetMaterialVariant() const override;
     float GetLocalBoundingRadius() const override { return MeshRadius; }
     int GetIndexCount() override { return TotalIndexCount; }
 
@@ -182,6 +197,9 @@ private:
     void RenderStaticShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass);
     void CollectShadowCasters(const MeshInstance& instance, InstData data, int meshLevel, float radius,
                               const glm::vec3& lightDirection, const DirectX::XMFLOAT4* cascadeSpheres, int cascadeLimit);
+    /** Shaders and constants of a masked material for a depth pass; false: the pass keeps its own. */
+    bool BindMaterialShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass);
+    void UnbindMaterialShadow(ID3D11DeviceContext* context);
     void EnsureFrameData(ID3D11DeviceContext* context);
     bool UploadStream(ID3D11DeviceContext* context,
                       const std::vector<InstData>& staging,
@@ -201,8 +219,13 @@ private:
     ImpostorAtlasSettings ImpostorSettings;
     Microsoft::WRL::ComPtr<ID3D11Buffer> ImpostorConstantBuffer;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> ImpostorSampler;
+    // Sprites are never culled: a one-sided material leaves back-face culling on for the meshes.
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> ImpostorRasterState;
     bool bImpostorEnabled = false;
     bool bImpostorBuildFailed = false;
+    // The material (and its revision) the atlas was baked with; a change triggers a rebake.
+    const Material* BakedMaterial = nullptr;
+    uint64_t BakedMaterialRevision = 0;
     float LodFadeFraction = 0.06f;
     int LodCount = 0;
     std::vector<float> LodDistances;

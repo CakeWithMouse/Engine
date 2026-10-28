@@ -51,3 +51,9 @@ std::vector<uint8_t> LocalVfs::ReadBytes(std::string_view path, std::string* out
         return {};
     }
 }
+
+std::string LocalVfs::Resolve(std::string_view virtualPath) const
+{
+    const auto physical = VfsRead::GetVFS().Resolve(virtualPath);
+    return physical ? physical->generic_u8string() : std::string();
+}

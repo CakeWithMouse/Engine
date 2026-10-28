@@ -1,5 +1,6 @@
 #include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
 #include <Engine/Render/SkeletalAnimation.h>
+#include <Engine/Render/Material.h>
 #include <Engine/Render/SkeletalLoader.h>
 #include <Engine/Render/ShaderCompiler.h>
 #include <Engine/Render/TextureLoader.h>
@@ -249,6 +250,11 @@ void SkeletalMeshComponent::CreateBuffers(ID3D11Device* device)
     }
 }
 
+uint32_t SkeletalMeshComponent::GetMaterialVariant() const
+{
+    return MaterialVariant::Skinned;
+}
+
 void SkeletalMeshComponent::Render(ID3D11DeviceContext* context)
 {
     if (!context || !vertexBuffer || !indexBuffer || !boneBuffer || !vertexShader || !pixelShader || !inputLayout || !cb)
@@ -297,13 +303,32 @@ void SkeletalMeshComponent::Render(ID3D11DeviceContext* context)
     context->IASetVertexBuffers(0, 1, vbs, &stride, &offset);
     context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
 
+    // Bones in b3, shared with the skinned set of materials (Shaders/Skinning.hlsli).
+    context->VSSetConstantBuffers(0, 1, cb.GetAddressOf());
+    context->VSSetConstantBuffers(3, 1, boneBuffer.GetAddressOf());
+    context->PSSetConstantBuffers(0, 1, cb.GetAddressOf());
+
+    // A material brings its skinned set, resolved for the pass that is drawing.
+    if (GetMaterial())
+    {
+        if (GameComponent::vertexShader == nullptr || GameComponent::pixelShader == nullptr)
+        {
+            return;
+        }
+        context->VSSetShader(GameComponent::vertexShader, nullptr, 0);
+        context->PSSetShader(GameComponent::pixelShader, nullptr, 0);
+        BindMaterialResources(context);
+        context->DrawIndexed(indexCount, 0, 0);
+        if (GamePtr)
+        {
+            GamePtr->CountDraw(indexCount);
+        }
+        UnbindMaterialResources(context);
+        return;
+    }
+
     context->VSSetShader(vertexShader.Get(), nullptr, 0);
     context->PSSetShader(pixelShader.Get(), nullptr, 0);
-
-    ID3D11Buffer* vsCbs[] = { cb.Get(), boneBuffer.Get() };
-    context->VSSetConstantBuffers(0, 2, vsCbs);
-    ID3D11Buffer* psCbs[] = { cb.Get() };
-    context->PSSetConstantBuffers(0, 1, psCbs);
 
     if (textureSRV)
     {

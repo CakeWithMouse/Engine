@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "shader": "Vehicle.hlsl",
+  "params": { "Gloss": 0.2, "MudAmount": 0.0 }
+}

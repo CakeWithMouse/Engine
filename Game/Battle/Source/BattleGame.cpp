@@ -1,6 +1,7 @@
 #include "BattleGame.h"
 
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
+#include <Engine/Render/Material.h>
 #include <Engine/Render/SkeletalBaker.h>
 #include <Engine/Render/SkeletalData.h>
 #include <Engine/Render/SkeletalLoader.h>
@@ -41,9 +42,12 @@ namespace
     }
 }
 
-InstancedMeshComponent* BattleGame::CreateUnitBatch(UnitMesh::VehicleType type, const std::string& shaderPath)
+InstancedMeshComponent* BattleGame::CreateUnitBatch(UnitMesh::VehicleType type, const std::string& shaderPath,
+                                                    const std::shared_ptr<Material>& material)
 {
     auto units = std::make_unique<InstancedMeshComponent>();
+    // Set before registration, so the sprite atlas is baked through the material right away.
+    units->SetMaterial(material);
     for (int level = 0; level < 3; ++level)
     {
         MeshLodData lod = UnitMesh::BuildVehicleLod(type, level, Config.Detail);
@@ -88,6 +92,20 @@ void BattleGame::BuildScene(const Settings& settings)
     const float fieldSize = unitsPerRow * Config.Spacing;
     FieldHalfSize = fieldSize * 0.5f;
     const std::string unitShaderPath = EnginePaths::Shader("InstancedMesh.hlsl").generic_u8string();
+    std::shared_ptr<Material> unitMaterial;
+    std::shared_ptr<Material> buildingMaterial;
+    if (Config.Materials)
+    {
+        auto load = [&](const char* file)
+        {
+            std::string error;
+            std::shared_ptr<Material> material = LoadMaterial((Config.ContentRoot / "Materials" / file).generic_u8string(), &error);
+            if (!material) throw std::runtime_error(error);
+            return material;
+        };
+        unitMaterial = load("Vehicle.mat");
+        buildingMaterial = load("Building.mat");
+    }
     // The baked map covers the whole field, so scenery shadows never follow the camera.
     SetStaticShadowArea(glm::vec3(0.0f, 0.0f, 0.0f), FieldHalfSize * 1.2f + 50.0f);
 
@@ -118,6 +136,7 @@ void BattleGame::BuildScene(const Settings& settings)
             scenery->SetLodScreenHeights({40.0f, 10.0f});
             scenery->SetLodFadeFraction(0.06f);
             scenery->SetStaticShadowCaster(Config.BakedShadows);
+            scenery->SetMaterial(buildingMaterial);
 
             const int countForType = Config.SceneryCount / sceneryTypeCount +
                                      (typeIndex < Config.SceneryCount % sceneryTypeCount ? 1 : 0);
@@ -219,12 +238,13 @@ void BattleGame::BuildScene(const Settings& settings)
         {
             UnitBatch batch;
             batch.Type = static_cast<UnitMesh::VehicleType>(typeIndex);
-            batch.Component = CreateUnitBatch(batch.Type, unitShaderPath);
+            batch.Component = CreateUnitBatch(batch.Type, unitShaderPath, unitMaterial);
             UnitBatches.push_back(std::move(batch));
         }
 
         std::uniform_real_distribution<float> jitter(-0.25f, 0.25f);
         std::uniform_real_distribution<float> speed(4.0f, 9.0f);
+        std::uniform_real_distribution<float> wear(0.0f, 1.0f);
         const glm::vec4 teamColors[2] = {glm::vec4(0.35f, 0.42f, 0.30f, 1.0f), glm::vec4(0.45f, 0.33f, 0.28f, 1.0f)};
 
         for (int index = 0; index < Config.UnitCount; ++index)
@@ -244,6 +264,8 @@ void BattleGame::BuildScene(const Settings& settings)
             instance.Yaw = bSecondArmy ? 3.14159f : 0.0f;
             instance.Scale = 1.0f;
             instance.Color = teamColors[bSecondArmy ? 1 : 0];
+            // How muddy this unit is (the material's InstanceData.x; ignored by the legacy shader).
+            instance.CustomData = glm::vec3(wear(rng), 0.0f, 0.0f);
             batch.Component->AddInstance(instance);
 
             const float typeSpeed = speed(rng) * UnitMesh::VehicleSpeedScale(batch.Type);
@@ -390,7 +412,8 @@ void BattleGame::UpdateHotkeys()
         return;
     }
 
-    const bool bDown = input->IsKeyDown(Keys::F6);
+    // F7: LOD debug colours (F6 is the engine's shader reload).
+    const bool bDown = input->IsKeyDown(Keys::F7);
     if (bDown && !bLodDebugKeyWasDown)
     {
         Config.LodDebugColors = !Config.LodDebugColors;
@@ -458,11 +481,12 @@ std::string BattleGame::BuildReport() const
 
     char buffer[512];
     std::snprintf(buffer, sizeof(buffer),
-                  "units=%d types=%zu scenery=%d mode=%s shadows=%s anim=%s sprites=%s frames=%llu frame_ms=%.2f fps=%.1f gpu_ms=%.2f draws=%.1f instances=%.0f visible=%u vertices=%llu lod0=%u lod1=%u lod2=%u sprite=%u culled=%u",
+                  "units=%d types=%zu scenery=%d mode=%s shading=%s shadows=%s anim=%s sprites=%s frames=%llu frame_ms=%.2f fps=%.1f gpu_ms=%.2f draws=%.1f instances=%.0f visible=%u vertices=%llu lod0=%u lod1=%u lod2=%u sprite=%u culled=%u",
                   Config.UnitCount,
                   UnitBatches.size(),
                   Config.SceneryCount,
                   Config.Forward ? "forward" : "deferred",
+                  Config.Materials ? "materials" : "legacy",
                   Config.Shadows ? "on" : "off",
                   Config.Animated ? "on" : "off",
                   bHasImpostors ? "on" : "off",

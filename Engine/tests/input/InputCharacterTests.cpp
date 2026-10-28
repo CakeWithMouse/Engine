@@ -117,6 +117,20 @@ static void SessionChecks()
 }
 static void CameraChecks()
 {
+    {
+        HWND clockWindow=CreateWindowExW(0,L"STATIC",L"Material clock test",WS_OVERLAPPEDWINDOW,0,0,320,240,nullptr,nullptr,GetModuleHandleW(nullptr),nullptr);
+        struct Guard { HWND h; ~Guard(){DestroyWindow(h);} } clockGuard{clockWindow};
+        static Game* observed=nullptr;
+        SceneEditSession session(SceneProject::GetComponentTypes(),[]()->std::unique_ptr<Game>{
+            auto game=std::make_unique<Game>(); observed=game.get(); return game;
+        });
+        auto api=session.GetApi();
+        Check(clockWindow && api.attachViewport(api.context,clockWindow,320,240)==EngineSceneOk,"material clock viewport");
+        Check(api.control(api.context,EnginePlay)==EngineSceneOk && observed,"material clock Play");
+        Check(api.frame(api.context,.05)==EngineSceneOk && api.frame(api.context,.05)==EngineSceneOk,"material clock frames");
+        Check(std::abs(observed->GetFrameConstants().TimeParams.x-.1f)<.0001f,"material real time advances in editor Play");
+        Check(api.control(api.context,EngineStop)==EngineSceneOk,"material clock Stop");
+    }
     // A real shared D3D viewport verifies separate Players and Stop camera restoration.
     HWND window=CreateWindowExW(0,L"STATIC",L"Input camera test",WS_OVERLAPPEDWINDOW,0,0,320,240,nullptr,nullptr,GetModuleHandleW(nullptr),nullptr);
     Check(window!=nullptr,"camera test HWND");

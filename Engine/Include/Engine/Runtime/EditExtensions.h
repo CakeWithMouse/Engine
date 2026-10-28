@@ -2,7 +2,8 @@
 #include <Engine/Runtime/SceneModuleApi.h>
 #include <Engine/Runtime/EditSessionApi.h>
 
-static_assert(sizeof(EngineSceneApi) == 72 && sizeof(EngineSceneObjectInfo) == 128 && sizeof(EngineEditSessionApi) == 216,
+// v6 adds material callbacks; the shipped v4/v5 layouts remain frozen in their adapters.
+static_assert(sizeof(EngineSceneApi) == 72 && sizeof(EngineSceneObjectInfo) == 136 && sizeof(EngineEditSessionApi) == 320,
     "Released base ABI is frozen. Add a named extension instead of changing these layouts.");
 
 // Freeze base layouts. Add capabilities as separately named/versioned tables.

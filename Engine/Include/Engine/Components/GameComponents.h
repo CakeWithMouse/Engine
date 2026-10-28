@@ -23,6 +23,7 @@ namespace GameComponentNames
 }
 
 class Game;
+class Material;
 
 /** Shader pair of one pass variant, resolved lazily by Game::BindComponentShaders. */
 struct ComponentShaderVariant
@@ -55,6 +56,26 @@ public:
     bool HasTexture() const { return textureSRV != nullptr; }
     bool HasCubeMap() const { return cubeMapSRV != nullptr; }
 
+    /**
+     * Draws with a material asset instead of the shader pair: its shaders, parameters, blend
+     * mode, culling and shadow casting. Only components drawn in VertexFormat::Mesh or with
+     * skinned vertices support materials (false otherwise, nothing changes). Null returns to the
+     * shader pair.
+     */
+    bool SetMaterial(std::shared_ptr<Material> material);
+    Material* GetMaterial() const { return MaterialPtr.get(); }
+    /**
+     * A material asset by its /Game path (scenes store this): the game loads it, through its
+     * material cache, before the next draw. Empty clears it. False if materials are unsupported.
+     */
+    bool SetMaterialAsset(const std::string& path);
+    const std::string& GetMaterialAsset() const { return MaterialAssetPath; }
+    virtual bool SupportsMaterials() const { return false; }
+    /** Drawn only through a material: without one of its own, the game uses its default material. */
+    virtual bool RequiresMaterial() const { return false; }
+    /** MaterialVariant flags of the shader set this component draws with (instances, skinning). */
+    virtual uint32_t GetMaterialVariant() const;
+
     // Lifecycle
     virtual void CreateBuffers(ID3D11Device* Device);
     void SetGame(Game* game);
@@ -78,7 +99,7 @@ public:
     /** GPU work that must run once per frame independently of drawing (e.g. particle simulation). */
     virtual void DispatchCompute(ID3D11DeviceContext* context) {}
     virtual bool IsRenderable() const { return true; }
-    virtual bool CastsShadow() const { return !bHasOpacity && !bIsSkybox; }
+    virtual bool CastsShadow() const;
     /**
      * Objects that never move (terrain, buildings): their shadow is baked once into the static
      * shadow map instead of being redrawn into every cascade each frame.
@@ -122,7 +143,8 @@ public:
     uint64_t GetWorldVersion() const { return WorldVersion; }
 
     bool HasCollison() const { return bHasCollision; }
-    bool HasOpacity() const { return bHasOpacity; }
+    /** Drawn by the transparent pass: legacy opacity flag or a translucent/additive material. */
+    bool HasOpacity() const;
     bool IsSkybox() const { return bIsSkybox; }
     virtual bool DoSmthWithCollision(GameComponent* AnotherComponent) { return false; }
 
@@ -165,6 +187,9 @@ protected:
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+    std::shared_ptr<Material> MaterialPtr;
+    std::string MaterialAssetPath;
+    bool bMaterialAssetLoaded = false; // one attempt per assignment; a broken file is retried on shader reload
     // Cube map resources are owned by Game::cubeMapCache, the component only observes them.
     ID3D11ShaderResourceView* cubeMapSRV = nullptr;
     ID3D11SamplerState* cubeMapSamplerState = nullptr;
@@ -229,6 +254,7 @@ protected:
     ID3D11PixelShader* pixelShader = nullptr;
 
 private:
+    void AssignMaterial(std::shared_ptr<Material> material);
     friend class Game;
     friend class Scene;
     bool GameplayStarted = false;

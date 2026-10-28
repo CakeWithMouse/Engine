@@ -35,9 +35,14 @@ public:
 
 class BattlePreview final : public BattleGame
 {
+    std::filesystem::path content;
+public:
+    explicit BattlePreview(std::filesystem::path root) : content(std::move(root)) {}
     void AfterInitialize() override
     {
-        BuildScene(Settings{});
+        Settings settings;
+        settings.ContentRoot = content;
+        BuildScene(settings);
         SetDeferredDebugOverlay(false);
     }
 };
@@ -50,6 +55,6 @@ std::function<std::unique_ptr<Game>()> FindPreviewScene(
     if (identifier == "BasicExamples") return [] { return std::make_unique<BasicExamplesPreview>(); };
     if (identifier == "Pong") return [] { return std::make_unique<PongPreview>(); };
     if (identifier == "SunGame") return [contentRoot] { return std::make_unique<SunPreview>(contentRoot); };
-    if (identifier == "Battle") return [] { return std::make_unique<BattlePreview>(); };
+    if (identifier == "Battle") return [contentRoot] { return std::make_unique<BattlePreview>(contentRoot); };
     throw std::runtime_error("Unsupported preview scene: " + identifier);
 }
