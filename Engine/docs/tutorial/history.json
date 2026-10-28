@@ -1,0 +1,10 @@
+[
+  {
+    "content": "releases/PainEngine-Tutorial-2026-10-27-r1.content.json",
+    "summary": "Первый туториал: проекты, редактор, сцены и ресурсы, цилиндр-персонаж, Play, ввод, C++ SDK, версии и диагностика.",
+    "engineVersion": "2026.10.27.0",
+    "date": "2026-10-27",
+    "presentation": "releases/PainEngine-Tutorial-2026-10-27-r1-final.pptx",
+    "revision": 1
+  }
+]

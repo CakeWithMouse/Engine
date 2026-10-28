@@ -87,6 +87,15 @@ $script:lastGood = Get-Content -LiteralPath $generated -Raw
 Put $manifest (Join-Path $scratch 'Missing')
 Generate $false
 Put $manifest $source
+Put $header 'ENGINE_OBJECT("Rules", "Game.Rules") class Rules : public RulesBase {}; ENGINE_GAME("Game", "Game.Main") class MyGame : public Game {}; ENGINE_COMPONENT("Child", "Game.Child") class Child : public Parent {};'
+Generate $true
+$script:lastGood = Get-Content -LiteralPath $generated -Raw
+$typeManifest = Get-Content -LiteralPath (Join-Path $output 'ProjectTypes.tsv') -Raw
+if (!$typeManifest.Contains("Object`tGame.Rules") -or !$typeManifest.Contains("Game`tGame.Main") -or !$lastGood.Contains('CreateObject<::Rules>')) { throw 'Missing registered type family or stable ID' }
+Put $header 'ENGINE_OBJECT("A", "Same.ID") class A {}; ENGINE_GAME("B", "Same.ID") class B : public Game {};'
+Generate $false 'Duplicate'
+Put $header 'ENGINE_OBJECT("A", "bad/id") class A {};'
+Generate $false
 Write-Output "Scanner tests: $passed passed"
 
 # Compile-time contract: run the same build target as a consumer; no editor/link

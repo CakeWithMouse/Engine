@@ -65,6 +65,9 @@ inline std::filesystem::path Create(const std::filesystem::path& directory, cons
             light(4,"Cool Light",{-3,2,1},{0.3,0.55,1.0})})}});
         Write(root / "Project.json", {{"name",name},{"module","Game.dll"},{"content","Content"},
             {"startupScene","Content/Scenes/Main.scene.json"}});
+        const auto release = ReadEngineRelease(templateModule.parent_path().parent_path().parent_path());
+        Write(root / "Engine.lock.json", {{"format",1},{"engineVersion",release.version},
+            {"engineConfiguration",release.configuration},{"templateId","SceneProject"}});
         Validate(root / "Project.json");
         return root / "Project.json";
     }

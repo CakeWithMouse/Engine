@@ -1,7 +1,8 @@
-﻿#include "SceneObjectsPanel.h"
+#include "SceneObjectsPanel.h"
 #include "QtHost.h"
 
 #include <QVBoxLayout>
+#include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QComboBox>
@@ -26,11 +27,29 @@ void SceneObjectsPanel::BuildUi()
 {
     auto* layout = new QVBoxLayout(this);
 
+    auto* placement = new QGroupBox(QStringLiteral("Добавление объекта"), this);
+    auto* placementLayout = new QVBoxLayout(placement);
+    layout->addWidget(placement);
+    typeCategory_ = new QComboBox(placement);
+    typeCategory_->setObjectName(QStringLiteral("ObjectCategory"));
+    typeCategory_->addItem(QStringLiteral("Примитивы"), "Primitive.");
+    typeCategory_->addItem(QStringLiteral("Свет"), "Light.");
+    typeCategory_->addItem(QStringLiteral("Частицы"), "Particle.");
+    typeCategory_->addItem(QStringLiteral("Окружение"), "Environment.");
+    typeCategory_->addItem(QStringLiteral("Персонажи"), "Gameplay.Character");
+    typeCategory_->addItem(QStringLiteral("Камеры"), "Gameplay.Camera");
+    typeCategory_->addItem(QStringLiteral("Классы проекта"), "project");
+    typeCategory_->addItem(QStringLiteral("Все объекты"), "all");
+    connect(typeCategory_, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int) { FillTypes(); });
+    placementLayout->addWidget(new QLabel(QStringLiteral("Категория"), placement));
+    placementLayout->addWidget(typeCategory_);
+    placementLayout->addWidget(new QLabel(QStringLiteral("Объект из категории"), placement));
+    placement->setToolTip(QStringLiteral("Категория меняет список объектов для добавления. Выбранный объект сцены не изменяется."));
     primitive_ = new QComboBox(this);
     primitive_->setObjectName(QStringLiteral("PrimitiveType"));
-    layout->addWidget(primitive_);
+    placementLayout->addWidget(primitive_);
 
-    layout->addWidget(new QLabel(QStringLiteral("Точка добавления — X / Y / Z"), this));
+    placementLayout->addWidget(new QLabel(QStringLiteral("Точка добавления — X / Y / Z"), this));
 
     auto* spawnRow = new QHBoxLayout;
     for (int i = 0; i < 3; ++i)
@@ -43,29 +62,22 @@ void SceneObjectsPanel::BuildUi()
     }
 
     spawn_[0]->setValue(2);
-    layout->addLayout(spawnRow);
+    placementLayout->addLayout(spawnRow);
 
     addPrimitiveButton_ = new QPushButton(QStringLiteral("+ Добавить объект"), this);
     addPrimitiveButton_->setObjectName(QStringLiteral("AddPrimitive"));
-    layout->addWidget(addPrimitiveButton_);
-
-    addModelButton_ = new QPushButton(QStringLiteral("+ Добавить модель…"), this);
-    addModelButton_->setObjectName(QStringLiteral("AddModel"));
-    addModelButton_->setToolTip(QStringLiteral(
-        "Выбрать модель из Content/Models и разместить в точке добавления X/Y/Z."
-    ));
-    layout->addWidget(addModelButton_);
-
-    importModelButton_ = new QPushButton(QStringLiteral("Импорт модели в проект…"), this);
-    importModelButton_->setObjectName(QStringLiteral("SceneImportModel"));
-    importModelButton_->setToolTip(QStringLiteral(
-        "Скопировать внешний файл в проект. Затем нажмите «Добавить модель…»."
-    ));
-    layout->addWidget(importModelButton_);
+    placementLayout->addWidget(addPrimitiveButton_);
 
     hierarchy_ = new QTreeWidget(this);
     hierarchy_->setHeaderLabels({QStringLiteral("Объект"), QStringLiteral("Тип")});
     hierarchy_->setSelectionMode(QAbstractItemView::SingleSelection);
+    hierarchy_->setStyleSheet(QStringLiteral("QTreeView::item:selected { background: #a66008; color: white; }"));
+    hierarchy_->setContextMenuPolicy(Qt::ActionsContextMenu);
+    auto* duplicate = new QAction(QStringLiteral("Дублировать объект"), hierarchy_);
+    auto* remove = new QAction(QStringLiteral("Удалить объект"), hierarchy_);
+    hierarchy_->addAction(duplicate); hierarchy_->addAction(remove);
+    connect(duplicate, &QAction::triggered, this, &SceneObjectsPanel::DuplicateRequested);
+    connect(remove, &QAction::triggered, this, &SceneObjectsPanel::RemoveRequested);
 
     // Delete работает только в иерархии, чтобы не мешать вводу текста в полях.
     removeShortcut_ = new QAction(this);
@@ -74,23 +86,6 @@ void SceneObjectsPanel::BuildUi()
     hierarchy_->addAction(removeShortcut_);
 
     layout->addWidget(hierarchy_, 1);
-
-    auto* buttons = new QHBoxLayout;
-    duplicateButton_ = new QPushButton(QStringLiteral("Дубликат"), this);
-    removeButton_ = new QPushButton(QStringLiteral("Удалить"), this);
-    buttons->addWidget(duplicateButton_);
-    buttons->addWidget(removeButton_);
-    layout->addLayout(buttons);
-
-    auto* help = new QLabel(QStringLiteral(
-        "ПКМ + мышь: обзор; WASD, Q/E: камера.\n"
-        "ЛКМ/Tab: выбор; F: фокус камеры.\n"
-        "Стрелки, PgUp/PgDn: объект.\n"
-        "Ctrl+S: сохранить; Ctrl+Z: отменить.\n"
-        "Play проверяет копию сцены; Stop возвращает правки."
-    ), this);
-    help->setWordWrap(true);
-    layout->addWidget(help);
 
     connect(addPrimitiveButton_, &QPushButton::clicked, this, [this]
     {
@@ -107,11 +102,6 @@ void SceneObjectsPanel::BuildUi()
             position
         );
     });
-
-    connect(addModelButton_, &QPushButton::clicked, this, &SceneObjectsPanel::AddModelRequested);
-    connect(importModelButton_, &QPushButton::clicked, this, &SceneObjectsPanel::ImportModelRequested);
-    connect(duplicateButton_, &QPushButton::clicked, this, &SceneObjectsPanel::DuplicateRequested);
-    connect(removeButton_, &QPushButton::clicked, this, &SceneObjectsPanel::RemoveRequested);
 
     connect(removeShortcut_, &QAction::triggered, this, &SceneObjectsPanel::RemoveRequested);
 
@@ -156,14 +146,33 @@ void SceneObjectsPanel::SetPrimitiveTypes(const QVector<std::pair<QString, QStri
     if (key == primitiveKey_)
         return;
 
-    QSignalBlocker blocker(primitive_);
-
-    primitive_->clear();
-
-    for (const auto& type : types)
-        primitive_->addItem(type.first, type.second);
-
+    types_ = types;
     primitiveKey_ = key;
+    FillTypes();
+}
+
+void SceneObjectsPanel::FillTypes()
+{
+    const auto previous = primitive_->currentData();
+    const auto category = typeCategory_->currentData().toString();
+    QSignalBlocker blocker(primitive_);
+    primitive_->clear();
+    for (const auto& type : types_) {
+        const auto& name = type.second;
+        if (name == "Gameplay.PlaySettings") continue;
+        const bool standard = name.startsWith("Primitive.") || name.startsWith("Light.") || name.startsWith("Particle.") || name.startsWith("Environment.") || name.startsWith("Gameplay.");
+        if (category == "all" || name.startsWith(category) || (category == "project" && !standard))
+            primitive_->addItem(type.first, name);
+    }
+    const int selected = primitive_->findData(previous);
+    if (selected >= 0) primitive_->setCurrentIndex(selected);
+    addPrimitiveButton_->setEnabled(primitive_->count() != 0);
+}
+
+void SceneObjectsPanel::SetShowServiceObjects(bool visible)
+{
+    showServiceObjects_ = visible;
+    hierarchyKey_.clear();
 }
 
 std::array<double, 3> SceneObjectsPanel::SpawnPosition() const
@@ -206,6 +215,7 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
 
         for (const auto& object : view.objects)
         {
+            if (!showServiceObjects_ && (object.gameplayKind == 3 || object.type == "Gameplay.PlaySettings")) continue;
             auto* item = new QTreeWidgetItem({
                 QString::fromStdString(object.name),
                 QString::fromStdString(object.type)
@@ -217,6 +227,7 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
 
         for (const auto& object : view.objects)
         {
+            if (!items.count(object.id)) continue;
             if (object.parent && items.count(object.parent))
                 items[object.parent]->addChild(items[object.id]);
             else

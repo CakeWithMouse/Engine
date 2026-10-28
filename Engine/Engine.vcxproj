@@ -71,6 +71,12 @@
     <ClCompile Include="Source\Display\Display.cpp" />
     <ClCompile Include="Source\InputDevice\Delegates.cpp" />
     <ClCompile Include="Source\InputDevice\InputDevice.cpp" />
+    <ClCompile Include="Source\InputDevice\InputActions.cpp" />
+    <ClCompile Include="Source\Components\Character.cpp" />
+    <ClCompile Include="Source\MainGame\CharacterController.cpp" />
+    <ClInclude Include="Include\Engine\InputDevice\InputActions.h" />
+    <ClInclude Include="Include\Engine\Components\Character.h" />
+    <ClInclude Include="Include\Engine\MainGame\CharacterController.h" />
     <ClCompile Include="Source\MainGame\BaseGameClass\Game.cpp" />
     <ClCompile Include="Source\MainGame\Player.cpp" />
     <ClCompile Include="Source\Render\ImpostorAtlas.cpp" />

@@ -1,21 +1,31 @@
-#pragma once
+﻿#pragma once
 #include <filesystem>
+#include <Engine/Runtime/EditorReloadApi.h>
 #include <Engine/Runtime/EditSessionApi.h>
 #include <Engine/Scene/SceneCommands.h>
+#include <Engine/Runtime/ProjectDataApi.h>
+#include <Engine/Runtime/SelectionApi.h>
+#include <Engine/Runtime/ViewportInputApi.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 
 // Entire object and both Games live in the module containing the generated types.
-// No gameplay start/update callbacks. A Game owns each Scene and renders that SAME Scene.
+// Edit never invokes gameplay hooks. Play owns a separate Game and Scene.
 class SceneEditSession final
 {
 public:
-    explicit SceneEditSession(ComponentTypeCatalog catalog);
+    using GameFactory = std::unique_ptr<Game>(*)();
+    explicit SceneEditSession(ComponentTypeCatalog catalog, GameFactory factory = nullptr);
     ~SceneEditSession();
     EngineEditSessionApi GetApi() noexcept;
+    EngineProjectDataApi GetProjectDataApi() noexcept;
+    EngineEditorCameraApi GetEditorCameraApi() noexcept;
+    EngineSelectionApi GetSelectionApi() noexcept;
+    EngineViewportInputApi GetViewportInputApi() noexcept;
     SceneEditSession(const SceneEditSession&) = delete;
     SceneEditSession& operator=(const SceneEditSession&) = delete;
 private:
     ComponentTypeCatalog catalog_;
+    GameFactory gameFactory_ = nullptr;
     std::thread::id thread_ = std::this_thread::get_id();
     bool busy_ = false;
     uint32_t state_ = EngineEditing;
@@ -23,6 +33,7 @@ private:
     SceneCommands commands_;
     std::unique_ptr<Game> play_; // destroy before edit (shared viewport device)
     bool attached_ = false;
+    bool inputFocused_ = false;
     uint32_t width_ = 0, height_ = 0;
     Game& Active() { return play_ ? *play_ : *edit_; }
     std::unique_ptr<Game> CopyForPlay();

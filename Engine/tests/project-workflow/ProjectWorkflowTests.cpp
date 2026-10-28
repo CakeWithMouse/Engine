@@ -9,6 +9,7 @@
 #include <iostream>
 #include <limits>
 #include <thread>
+#include <fstream>
 
 static int checks = 0;
 static void Check(bool value, const char* message)
@@ -31,9 +32,18 @@ class LightCaptureGame : public Game
 {
 public:
     uint64_t channels[3]{};
+    std::vector<uint8_t> pixels;
+    unsigned captureWidth=0,captureHeight=0;
+    void SaveCapture(const std::filesystem::path& path) {
+        BITMAPFILEHEADER file{}; file.bfType=0x4d42; file.bfOffBits=sizeof(file)+sizeof(BITMAPINFOHEADER); file.bfSize=file.bfOffBits+static_cast<DWORD>(pixels.size());
+        BITMAPINFOHEADER info{}; info.biSize=sizeof(info); info.biWidth=captureWidth;info.biHeight=-static_cast<LONG>(captureHeight);info.biPlanes=1;info.biBitCount=32;
+        auto bgra=pixels;for(size_t i=0;i<bgra.size();i+=4)std::swap(bgra[i],bgra[i+2]);
+        std::ofstream out(path,std::ios::binary);out.write(reinterpret_cast<const char*>(&file),sizeof(file));out.write(reinterpret_cast<const char*>(&info),sizeof(info));out.write(reinterpret_cast<const char*>(bgra.data()),bgra.size());
+    }
     void Draw() override
     {
         Game::Draw();
+        RenderEditorSelection();
         D3D11_TEXTURE2D_DESC desc{}; BackTexture->GetDesc(&desc);
         desc.Usage = D3D11_USAGE_STAGING; desc.BindFlags = 0;
         desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ; desc.MiscFlags = 0;
@@ -43,10 +53,12 @@ public:
         D3D11_MAPPED_SUBRESOURCE mapped{};
         Check(SUCCEEDED(Context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped)), "map light readback");
         for (auto& channel : channels) channel = 0;
+        captureWidth=desc.Width;captureHeight=desc.Height;pixels.resize(desc.Width*desc.Height*4);
         for (unsigned y = 0; y < desc.Height; ++y)
             for (unsigned x = 0; x < desc.Width; ++x)
             {
                 const auto* pixel = static_cast<const uint8_t*>(mapped.pData) + y * mapped.RowPitch + x * 4;
+                std::copy(pixel,pixel+4,pixels.begin()+(y*desc.Width+x)*4);
                 for (int c = 0; c < 3; ++c) channels[c] += pixel[c];
             }
         Context->Unmap(staging.Get(), 0);
@@ -81,6 +93,31 @@ static void CheckLightPixels(HWND window, const std::filesystem::path& content)
     t.position = {100,0,2};
     Check(game.GetScene().SetTransform(added.id, t) == SceneResult::Ok && game.RenderViewportFrame(0), "move light outside radius");
     Check(game.channels[1] == unlit, "moving light updates actual illumination");
+    const auto cubeId=game.GetScene().FindComponentByName("cube")->GetComponentId();
+    const auto beforeSelection=game.pixels;
+    game.SetEditorSelection(cubeId);Check(game.RenderViewportFrame(0),"draw selection");
+    Check(game.pixels!=beforeSelection,"selection changes actual D3D pixels");
+    game.SetEditorSelection(0);game.RenderViewportFrame(0);
+    Check(game.pixels==beforeSelection,"deselect removes overlay without changing material");
+    const auto catalog=SceneProject::GetComponentTypes();
+    auto sky=catalog.Find("Environment.Sky")->create();
+    Check(sky->IsSkybox()&&!sky->CastsShadow(),"sky metadata");
+    float distance=10000;Check(!sky->RaycastPrimitive({0,0,5},{0,0,-1},distance),"sky does not intercept picking");
+    game.GetScene().AddComponent("Sky",sky,"Environment.Sky");
+    game.RenderViewportFrame(0);Check(game.pixels!=beforeSelection,"sky renders without texture assets");
+    const auto skyPixels=game.pixels;
+    for(const auto* type:{"Particle.Sparks","Particle.Smoke"}) {
+        auto effect=catalog.Find(type)->create();effect->SetPosition({type==std::string("Particle.Sparks")?-1.2f:1.2f,0,0});
+        game.GetScene().AddComponent(type,effect,type);
+    }
+    for(int i=0;i<45;++i) {
+        for(const auto& item:game.GetScene().GetComponents())if(auto* p=dynamic_cast<ParticleSystemComponent*>(item.second.get()))p->Tick(0.05f);
+        game.RenderViewportFrame(0);
+    }
+    Check(game.pixels!=skyPixels,"particle presets produce visible pixels");
+    const auto paused=game.pixels;game.RenderViewportFrame(0);Check(game.pixels==paused,"particles stop without simulation steps");
+    game.SetEditorSelection(cubeId);game.RenderViewportFrame(0);
+    game.SaveCapture(std::filesystem::temp_directory_path()/"engine-effects-selection.bmp");
 }
 int wmain(int argc, wchar_t** argv)
 {
@@ -107,11 +144,12 @@ int wmain(int argc, wchar_t** argv)
         {
             GameEditModule module(project.module, std::filesystem::absolute(argv[2]));
             const auto& api = module.Api(); char error[1024]{}; uint64_t scene = 0;
+            Check(module.SelectionApi().select!=nullptr,"selection extension available");
             Check(api.loadScene(api.context, project.startupScene.u8string().c_str(), &scene, error, sizeof(error)) == EngineSceneOk, "load starter scene");
             std::vector<std::string> types;
             Check(api.scene.listTypes(api.scene.context, [](void* p, const EngineSceneTypeInfo* t) {
                 static_cast<std::vector<std::string>*>(p)->push_back(t->typeName);
-            }, &types) == EngineSceneOk && types.size() == 7, "six primitives and point light");
+            }, &types) == EngineSceneOk && types.size() == 13, "primitives, light, particles and sky");
             Check(api.attachViewport(api.context, window, 640, 480) == EngineSceneOk, "attach real D3D viewport");
             Check(api.frame(api.context, 0.016) == EngineSceneOk, "initial frame");
             uint64_t picked = 0;
@@ -160,7 +198,7 @@ int wmain(int argc, wchar_t** argv)
                 edited.transform.position[0] == -2, "invalid mutations preserve authored light");
             Check(api.saveScene(api.context, project.startupScene.u8string().c_str(), error, sizeof(error)) == EngineSceneOk, "save authored scene");
             const auto saved = SceneDocument::Read(project.startupScene);
-            Check(saved.components.size() == 11, "all objects persisted");
+            Check(saved.components.size() == 17, "all objects persisted including gameplay types");
             for (const auto& o : saved.components) if (o.name == "Light.Point")
                 Check(o.pointLight && o.pointLight->color.y == 0.8f && o.pointLight->radius == 12, "JSON persists light properties");
             Check(api.control(api.context, EnginePlay) == EngineSceneOk, "play authored scene");
@@ -193,7 +231,11 @@ int wmain(int argc, wchar_t** argv)
                     a.pointLight->radius == b.pointLight->radius && a.pointLight->enabled == b.pointLight->enabled, "round trip light parameters");
             }
             auto invalidLight = ProjectLibrary::Json::parse(SceneDocument::Serialize(saved));
-            for (auto& o : invalidLight["objects"]) if (o.contains("pointLight")) o["pointLight"]["radius"] = 0;
+            for (auto& o : invalidLight["objects"]) {
+                if (o.contains("pointLight")) o["pointLight"]["radius"] = 0;
+                if (o.contains("properties") && o["properties"].contains("Engine.PointLight"))
+                    o["properties"]["Engine.PointLight"]["value"]["radius"] = 0;
+            }
             ProjectLibrary::Write(invalid, invalidLight);
             Check(api.loadScene(api.context, invalid.u8string().c_str(), &scene, error, sizeof(error)) == EngineSceneInvalidDocument,
                 "malformed light JSON rejected transactionally");

@@ -1,0 +1,529 @@
+{
+  "title": "PainEngine\nПрактический туториал",
+  "date": "2026-10-28",
+  "revision": 2,
+  "engineVersion": "2026.10.28.0",
+  "editorialPolicy": "editorial-policy.json",
+  "slides": [
+    {
+      "type": "cover",
+      "title": "PainEngine\nПрактический туториал",
+      "subtitle": "Редактор и рабочие примеры C++",
+      "image": "r2/editor.png",
+      "sources": [
+        "Engine/Version.json"
+      ],
+      "notes": "Реальный интерфейс PainEngine 2026.10.28.0. Скриншоты учебного проекта."
+    },
+    {
+      "type": "shot",
+      "title": "Первый проект в лаунчере",
+      "image": "r2/create-project.png",
+      "items": [
+        [
+          "Создать проект",
+          "Выберите папку и название. C++ можно включить сразу или использовать шаблон без кода."
+        ],
+        [
+          "Редактировать",
+          "Выберите созданный проект в списке лаунчера и откройте редактор."
+        ]
+      ],
+      "foot": "Флажок C++ создаёт исходники, включая RotatingCube. Нужны Visual Studio C++ tools и Windows SDK.",
+      "sources": [
+        "Game/Launcher/Source/Main.cpp",
+        "Engine/BuildSupport/ProjectTools.ps1"
+      ],
+      "notes": ""
+    },
+    {
+      "type": "shot",
+      "title": "Окно редактора",
+      "image": "r2/editor.png",
+      "items": [
+        [
+          "Слева",
+          "Категория, тип объекта и иерархия сцены."
+        ],
+        [
+          "Справа",
+          "Свойства выбранного объекта."
+        ],
+        [
+          "Снизу",
+          "Ресурсы и код; рядом вкладка Console."
+        ]
+      ],
+      "foot": "",
+      "sources": [
+        "Editor/Source/MainWindow.cpp",
+        "Editor/Source/SceneTools.cpp"
+      ],
+      "notes": "Панели возвращаются через меню «Вид». В центре находится реальный D3D viewport."
+    },
+    {
+      "type": "shot",
+      "title": "Камера и выделение в Edit",
+      "image": "r2/selection.png",
+      "items": [
+        [
+          "Камера",
+          "WASD; E / Q вверх и вниз. ПКМ + мышь для обзора, Shift для ускорения."
+        ],
+        [
+          "Выделение",
+          "ЛКМ или строка иерархии; Tab перебирает объекты, F фокусирует, Esc снимает выбор."
+        ],
+        [
+          "Перемещение",
+          "Стрелки и Page Up / Page Down. Точные значения вводятся в свойствах."
+        ]
+      ],
+      "foot": "Сначала щёлкните viewport. При вводе в текстовое поле горячие клавиши сцены не действуют.",
+      "sources": [
+        "Editor/Source/ViewportWidget.cpp",
+        "Editor/Source/SceneTools.cpp"
+      ],
+      "notes": ""
+    },
+    {
+      "type": "shot",
+      "title": "Модели и текстуры",
+      "image": "r2/resources-menu.png",
+      "items": [
+        [
+          "Импорт",
+          "Сцена → Ресурсы → Импорт модели… / Импорт текстуры…"
+        ],
+        [
+          "Размещение",
+          "Добавить модель… выбирает файл из Content/Models."
+        ],
+        [
+          "Текстура",
+          "Выберите объект, затем «Выбрать текстуру…» в разделе «Визуал»."
+        ]
+      ],
+      "foot": "Модели: GLB, GLTF, OBJ, FBX. Текстуры: PNG, JPG, JPEG, BMP, TGA.",
+      "sources": [
+        "Editor/Source/AssetTools.cpp",
+        "Editor/Source/SceneTools.cpp"
+      ],
+      "notes": "Импорт моделей требует Assimp; текущая сборка его включает. /Game соответствует Content проекта."
+    },
+    {
+      "type": "shot",
+      "title": "Свет, частицы и небо",
+      "image": "r2/light.png",
+      "items": [
+        [
+          "Свет",
+          "Выберите источник. В свойствах задаются цвет, интенсивность и радиус."
+        ],
+        [
+          "Частицы",
+          "В категории «Частицы» выберите искры или дым."
+        ],
+        [
+          "Небо",
+          "Категория «Окружение» → «Базовое небо»."
+        ]
+      ],
+      "foot": "Параметры выбранного типа находятся ниже трансформации в правой панели.",
+      "sources": [
+        "Editor/Source/SceneTools.cpp",
+        "Engine/Include/Engine/Project/StandardTypes.h"
+      ],
+      "notes": ""
+    },
+    {
+      "type": "shot",
+      "title": "Стандартный персонаж",
+      "image": "r2/character.png",
+      "items": [
+        [
+          "Добавление",
+          "Категория «Персонажи» → «Персонаж» → «Добавить объект»."
+        ],
+        [
+          "Управление",
+          "Назначьте персонажа в настройках Play."
+        ]
+      ],
+      "foot": "",
+      "sources": [
+        "Editor/Source/SceneTools.cpp"
+      ],
+      "notes": "Добавьте персонажа и назначьте его в диалоге Play."
+    },
+    {
+      "type": "shot",
+      "title": "Назначение для Play",
+      "image": "r2/play-settings.png",
+      "items": [
+        [
+          "Персонаж",
+          "Выберите объект сцены в первом поле."
+        ],
+        [
+          "Камера",
+          "«Следовать за персонажем» или отдельная «Камера Play»."
+        ],
+        [
+          "Ввод",
+          "Включите WASD и обзор с ПКМ. Затем щёлкните viewport в Play."
+        ]
+      ],
+      "foot": "Запуск → Настроить Play…",
+      "sources": [
+        "Editor/Source/SceneTools.cpp",
+        "Engine/docs/INPUT-CHARACTER.md"
+      ],
+      "notes": "Начальные параметры диалога: расстояние 5, высота 2, чувствительность 0.005. Настройки сохраняются вместе со сценой."
+    },
+    {
+      "type": "shot",
+      "title": "Edit, Play, Pause и Stop",
+      "image": "r2/play.png",
+      "items": [
+        [
+          "Play / Pause",
+          "Play запускает копию сцены. Pause останавливает симуляцию, Resume продолжает её."
+        ],
+        [
+          "Stop",
+          "Возвращает рабочую сцену и камеру Edit."
+        ],
+        [
+          "Отдельное окно",
+          "Запуск → Запустить отдельным окном использует сохранённые файлы проекта."
+        ]
+      ],
+      "foot": "В viewport: Space — Play / Stop, P — Pause / Resume.",
+      "sources": [
+        "Editor/Source/MainWindow.cpp",
+        "Editor/Source/ViewportWidget.cpp"
+      ],
+      "notes": ""
+    },
+    {
+      "type": "table",
+      "title": "Сохранение и структура проекта",
+      "headers": [
+        "Файл / папка",
+        "Назначение"
+      ],
+      "rows": [
+        [
+          "Project.json",
+          "Пути к модулю, Content и стартовой сцене"
+        ],
+        [
+          "Engine.lock.json",
+          "Закреплённая версия и конфигурация движка"
+        ],
+        [
+          "Content/Scenes",
+          "Сцены с объектами, трансформациями и настройками Play"
+        ],
+        [
+          "Content/Models, Content/Textures",
+          "Ресурсы проекта"
+        ],
+        [
+          "Source и Build.ps1",
+          "Код и запуск сборки C++ проекта"
+        ],
+        [
+          "Binaries",
+          "Собранные версии DLL проекта"
+        ]
+      ],
+      "foot": "Ctrl+S: «Сохранить и сделать стартовой». Для переноса сохраняйте всю папку проекта.",
+      "notes": "В текущем меню сохранение делает выбранную сцену стартовой. «Сохранить как…» создаёт отдельный файл. Сцена содержит ссылки на ресурсы, поэтому одного JSON недостаточно для переноса. После успешной сборки C++ Project.json указывает на новую DLL в Binaries. Не удаляйте активную DLL. Старые сцены без персонажа продолжают открываться. Персонаж и назначения Play сохраняются в данных компонентов.",
+      "sources": [
+        "Engine/docs/CODE-PROJECTS.md",
+        "Engine/docs/SCENE-JSON.md",
+        "Editor/Source/SceneTools.cpp"
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Граница между редактором и C++",
+      "headers": [
+        "Задача",
+        "Без кода",
+        "Через SDK / C++"
+      ],
+      "rows": [
+        [
+          "Сцена и оформление",
+          "Объекты, модели, свет, эффекты",
+          "Свои компоненты и данные"
+        ],
+        [
+          "Персонаж",
+          "Трансформация и скорость",
+          "Свой Character и поведение"
+        ],
+        [
+          "Камера Play",
+          "Слежение или отдельная камера",
+          "Свой UpdateCamera / SceneCamera"
+        ],
+        [
+          "Управление",
+          "Стандартные WASD и ПКМ",
+          "Действия, сочетания, обработчики"
+        ],
+        [
+          "Каталог объектов",
+          "Встроенные типы",
+          "Регистрация своих классов"
+        ]
+      ],
+      "foot": "Контроллер создаётся игрой и не является отдельным добавляемым объектом сцены.",
+      "notes": "Графического редактора переназначения всех действий сейчас нет. Привязки можно менять в C++ без замены обработчиков. Каталог поддерживает Component, Character как семейство компонента, Game и обычные Object через существующий адаптер. Класс Game выбирается отдельно для запуска, а компоненты и поддерживаемые Object появляются в палитре после сборки и перезапуска.",
+      "sources": [
+        "Engine/docs/INPUT-CHARACTER.md",
+        "Engine/docs/CODE-PROJECTS.md",
+        "Editor/Source/CodeTools.cpp"
+      ]
+    },
+    {
+      "type": "shot",
+      "title": "Создание C++ класса",
+      "image": "r2/class-wizard.png",
+      "items": [
+        [
+          "Мастер",
+          "Проект → C++ → Добавить C++ класс… Выберите родителя и задайте имя."
+        ],
+        [
+          "Исходники",
+          "Мастер создаёт Source/Имя.h и Source/Имя.cpp."
+        ],
+        [
+          "Сборка",
+          "Проект → C++ → Перекомпилировать / Hot Reload или Ctrl+Alt+R. Выполняйте в Edit."
+        ]
+      ],
+      "foot": "Для имени класса: латиница, цифры и _. Начинайте с буквы или _.",
+      "sources": [
+        "Editor/Source/CodeTools.cpp",
+        "Editor/Include/CodeClassDialog.h",
+        "Engine/BuildSupport/ProjectTools.ps1"
+      ],
+      "notes": ""
+    },
+    {
+      "type": "shot",
+      "title": "Базовый C++ проект: вращающийся куб",
+      "image": "r2/play.png",
+      "items": [
+        [
+          "Готовый пример",
+          "RotatingCube.h/.cpp создаются вместе с C++ проектом."
+        ],
+        [
+          "Запуск",
+          "ProjectGame добавляет куб при Play или отдельном запуске."
+        ],
+        [
+          "В Edit",
+          "Для размещения в рабочей сцене выберите RotatingCube в «Классы проекта»."
+        ]
+      ],
+      "foot": "Поворот вокруг Y: 90°/с. Позиция остаётся прежней.",
+      "sources": [
+        "Engine/BuildSupport/ProjectTools.ps1"
+      ],
+      "notes": "ProjectGame не добавляет второй пример, если в сцене уже есть RotatingCube или его наследник. Подключение C++ не переписывает файл сохранённой сцены. Существующие C++ проекты не обновляются автоматически."
+    },
+    {
+      "type": "code",
+      "title": "RotatingCube: класс и геометрия",
+      "code": "// Source/RotatingCube.h\n#pragma once\n#include <Engine/Components/ComponentAnnotations.h>\n#include <Engine/Components/SpecificComponents/CubeComponent.h>\n\nENGINE_COMPONENT(\"RotatingCube\")\nclass RotatingCube : public CubeComponent {\npublic:\n    RotatingCube();\n    void Tick(float deltaTime) override;\n};\n\n// Source/RotatingCube.cpp\n#include \"RotatingCube.h\"\nRotatingCube::RotatingCube() {\n    InitCube();\n    SetColor({1.0f, 0.65f, 0.2f, 1.0f});\n}",
+      "aside": "ENGINE_COMPONENT добавляет класс в каталог проекта.\n\nInitCube создаёт геометрию.\n\nКонструктор задаёт исходный вид.",
+      "sources": [
+        "Engine/BuildSupport/ProjectTools.ps1",
+        "Engine/Include/Engine/Components/SpecificComponents/CubeComponent.h"
+      ],
+      "foot": "",
+      "notes": ""
+    },
+    {
+      "type": "code",
+      "title": "Вращение на месте в Tick",
+      "code": "#include \"RotatingCube.h\"\n#include <cmath>\n\nvoid RotatingCube::Tick(float deltaTime)\n{\n    CubeComponent::Tick(deltaTime);\n    auto rotation = GetRotation();\n    rotation.y = std::fmod(\n        rotation.y + 90.0f * deltaTime, 360.0f);\n    SetRotation(rotation);\n}",
+      "aside": "SetRotation принимает градусы.\n\ndeltaTime — время шага в секундах.\n\nПозицию не меняем, поэтому куб вращается на месте.",
+      "sources": [
+        "Engine/BuildSupport/ProjectTools.ps1",
+        "Engine/Source/Components/GameComponents.cpp"
+      ],
+      "foot": "В ProjectGame: SetSimulationTimeScale(1.0f). Полный оборот — четыре секунды.",
+      "notes": ""
+    },
+    {
+      "type": "code",
+      "title": "Создание объекта в мире",
+      "code": "// В ProjectGame::AfterInitialize()\nGame::AfterInitialize();\nSetSimulationTimeScale(1.0f);\n\nauto& scene = GetScene();\nstd::unique_ptr<GameComponent> cube =\n    std::make_unique<RotatingCube>();\ncube->SetPosition({2.0f, 1.0f, 0.0f});\n\nconst auto added = scene.AddComponent(\n    \"MyCube\", cube, \"RotatingCube\");\nif (added.result != SceneResult::Ok &&\n    added.result != SceneResult::Deferred)\n    throw std::runtime_error(\"Cannot spawn cube\");",
+      "aside": "Подключите RotatingCube.h и <stdexcept>.\n\nСцена получает владение объектом.\n\nИмя должно быть уникальным. Во время обновления добавление может быть отложено.",
+      "sources": [
+        "Engine/BuildSupport/ProjectTools.ps1",
+        "Engine/Include/Engine/Scene/Scene.h"
+      ],
+      "foot": "Полный ProjectGame.cpp дополнительно проверяет, что куб ещё не добавлен.",
+      "notes": ""
+    },
+    {
+      "type": "code",
+      "title": "Модель и текстура из C++",
+      "code": "#include <Engine/Scene/SceneAssets.h>\n\nauto model = SceneAssets::CreateModel(\n    \"/Game/Models/CesiumMan.glb\");\nmodel->SetPosition({-2.0f, 0.0f, 0.0f});\nSceneAssets::Apply(*model, model->GetModelAsset(),\n                   \"/Game/Textures/1.jpg\");\n\nconst auto added = game.GetScene().AddComponent(\n    \"MyModel\", model, SceneAssets::ModelType);\nif (added.result != SceneResult::Ok &&\n    added.result != SceneResult::Deferred)\n    throw std::runtime_error(\"Cannot spawn model\");",
+      "aside": "/Game — папка Content проекта.\n\nСначала импортируйте файлы и подставьте их пути.\n\nCreateModel создаёт объект с геометрией модели. Apply назначает текстуру.",
+      "sources": [
+        "Engine/docs/tutorial/examples/ModelExample.cpp",
+        "Engine/Source/Scene/SceneAssets.cpp"
+      ],
+      "foot": "Полная функция: ModelExample.h/.cpp. В ProjectGame вызовите SpawnModel(*this, \"MyModel\").",
+      "notes": ""
+    },
+    {
+      "type": "code",
+      "title": "Текстура уже существующего объекта",
+      "code": "// cube — GameComponent* выбранного вами объекта\nSceneAssets::Apply(*cube, cube->GetModelAsset(),\n                   \"/Game/Textures/1.jpg\");\n\n// Для объекта, уже добавленного в сцену:\nconst auto result = game.GetScene().SetTextureAsset(\n    cube->GetComponentId(), \"/Game/Textures/1.jpg\");\nif (result != SceneResult::Ok)\n    throw std::runtime_error(\"Cannot set texture\");",
+      "aside": "Это два варианта назначения текстуры.\n\nSetTextureAsset используйте между обновлениями сцены: внутри Tick он вернёт Busy.\n\nДля новой модели используйте CreateModel, а не замену геометрии куба.",
+      "sources": [
+        "Engine/Include/Engine/Scene/SceneAssets.h",
+        "Engine/Source/Scene/Scene.cpp"
+      ],
+      "foot": "Текстура должна быть импортирована в Content. Apply проверяет файл и сообщает об ошибке исключением.",
+      "notes": ""
+    },
+    {
+      "type": "code",
+      "title": "Ввод: поля и жизненный цикл",
+      "code": "// Source/InputCube.h\n#include \"RotatingCube.h\"\n#include <Engine/InputDevice/InputActions.h>\n\nENGINE_COMPONENT(\"InputCube\")\nclass InputCube : public RotatingCube {\npublic:\n    void BeginPlay() override;\n    void Tick(float deltaTime) override;\nprivate:\n    bool spinning_ = true;\n    unsigned nextCube_ = 1;\n    Input::Connection toggle_, spawn_;\n    Input::Scope inputScope_;\n    void SpawnCube();\n};",
+      "aside": "BeginPlay вызывается перед первым игровым вводом и Tick.\n\nConnection нужно хранить.\n\nScope объявлен последним из полей: он отключит обработчики до разрушения их состояния.",
+      "sources": [
+        "Engine/docs/tutorial/examples/InputCube.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp"
+      ],
+      "foot": "Скопируйте InputCube.h/.cpp из примеров в Source и добавьте один InputCube в сцену после сборки.",
+      "notes": ""
+    },
+    {
+      "type": "code",
+      "title": "Клавиша R: остановить вращение",
+      "code": "void InputCube::BeginPlay()\n{\n    RotatingCube::BeginPlay();\n    auto& input = GetGame()->GetInput();\n    input.Bind({\"ToggleRotation\",\n        Input::Context::Game, {Keys::R}});\n    toggle_ = input.Subscribe(inputScope_,\n        Input::Context::Game, \"ToggleRotation\",\n        Input::Phase::Pressed,\n        [this](const Input::Event&) {\n            spinning_ = !spinning_;\n        });\n    // Здесь же добавьте привязку N со следующего слайда.\n}",
+      "aside": "R переключает вращение один раз на нажатие.\n\nВ Tick:\nRotatingCube::Tick(\n  spinning_ ? deltaTime : 0.0f);\n\nПосле Play щёлкните viewport.",
+      "sources": [
+        "Engine/docs/tutorial/examples/InputCube.cpp",
+        "Engine/Include/Engine/InputDevice/InputActions.h"
+      ],
+      "foot": "Контекст Game получает ввод в сфокусированном viewport в Play; Pause и потеря фокуса сбрасывают действия.",
+      "notes": ""
+    },
+    {
+      "type": "code",
+      "title": "Клавиша N: создать новый куб",
+      "code": "// Продолжение InputCube::BeginPlay()\ninput.Bind({\"SpawnCube\",\n    Input::Context::Game, {Keys::N}});\nspawn_ = input.Subscribe(inputScope_,\n    Input::Context::Game, \"SpawnCube\",\n    Input::Phase::Pressed,\n    [this](const Input::Event&) { SpawnCube(); });\n\n// В InputCube::SpawnCube()\nstd::unique_ptr<GameComponent> cube =\n    std::make_unique<RotatingCube>();\ncube->SetPosition(GetLocalPosition() +\n    glm::vec3(2.0f * number, 0, 0));\nconst auto added = scene.AddComponent(\n    name, cube, \"RotatingCube\");",
+      "aside": "SpawnCube получает GetGame()->GetScene().\n\nnumber — счётчик, name — свободное имя SpawnedCubeN.\n\nВ полном файле проверяются имя и результат добавления.",
+      "sources": [
+        "Engine/docs/tutorial/examples/InputCube.cpp"
+      ],
+      "foot": "Новый куб появляется в копии Play. После Stop он исчезает вместе с этой копией.",
+      "notes": ""
+    },
+    {
+      "type": "code",
+      "title": "Сочетания и переназначение",
+      "code": "// В BeginPlay после привязки ToggleRotation\ninput.Unbind(Input::Context::Game, \"ToggleRotation\");\ninput.Bind({\"ToggleRotation\", Input::Context::Game,\n            {Keys::Control, Keys::R}});\n\n// Две привязки одной оси\ninput.Bind({\"MoveX\", Input::Context::Game,\n            {Keys::D}, 1});\ninput.Bind({\"MoveX\", Input::Context::Game,\n            {Keys::A}, -1});",
+      "aside": "Обработчик ToggleRotation остаётся прежним.\n\nCtrl + R — одновременное удержание клавиш.\n\nДля MoveX подпишитесь на Phase::Axis и читайте e.value. A + D даёт ноль.",
+      "notes": "Привязки меняйте в потоке движка. Unbind сбрасывает активное действие и требует отпускания клавиш. Полный контракт в InputActions.h.",
+      "sources": [
+        "Engine/Include/Engine/InputDevice/InputActions.h",
+        "Engine/docs/INPUT-CHARACTER.md"
+      ]
+    },
+    {
+      "type": "code",
+      "title": "Своя схема управления",
+      "code": "class MyController : public CharacterController {\npublic:\n    using CharacterController::CharacterController;\n    void BindInput() override {\n        game_.GetInput().Bind({\"Go\",\n            Input::Context::Game, {Keys::I}});\n        connections_.push_back(game_.GetInput().Subscribe(\n            inputScope_, Input::Context::Game, \"Go\",\n            Input::Phase::Axis,\n            [this](const Input::Event& e) {\n                forward_ = e.value;\n            }));\n    }\n};",
+      "aside": "Этот вариант заменяет стандартные привязки: I задаёт движение вперёд.\n\nGame выбирает контроллер через CreateCharacterController().\n\nДля своей камеры переопределите UpdateCamera().",
+      "notes": "Добавьте #include <Engine/MainGame/CharacterController.h>. В пользовательском Game объявите std::unique_ptr<CharacterController> CreateCharacterController() override; и реализуйте: std::unique_ptr<CharacterController> MyGame::CreateCharacterController() { return std::make_unique<MyController>(*this); }. Выберите MyGame через «Типы C++ проекта… → Выбрать Game». Персонажа по-прежнему назначьте в «Настроить Play…». Оставьте управление включённым, чтобы контроллер был активен. Здесь BindInput полностью заменяет стандартную схему, поэтому WASD и обзор ПКМ больше не зарегистрированы этим контроллером. При необходимости добавьте собственные оси, свой Tick и UpdateCamera. Character можно заменить через Possess.",
+      "sources": [
+        "Engine/Include/Engine/MainGame/CharacterController.h",
+        "Engine/Source/MainGame/CharacterController.cpp",
+        "Engine/docs/INPUT-CHARACTER.md",
+        "Editor/Source/CodeTools.cpp"
+      ],
+      "foot": "Выберите MyGame: Проект → C++ → Типы C++ проекта…; персонажа назначьте в настройках Play."
+    },
+    {
+      "type": "shot",
+      "title": "Обновление движка и проекта",
+      "image": "r2/versions.png",
+      "items": [
+        [
+          "Версия",
+          "Engine.lock.json закрепляет выпуск и конфигурацию."
+        ],
+        [
+          "Обновление",
+          "В лаунчере: «Добавить версию движка…», затем «Обновить копию…»."
+        ],
+        [
+          "Проект C++",
+          "Пересоберите DLL новым SDK и проверьте сцену и Play."
+        ]
+      ],
+      "foot": "Исходный проект сохраняется; обновление выполняется в копии.",
+      "sources": [
+        "Game/Launcher/Source/Main.cpp",
+        "Engine/docs/ENGINE-VERSIONS.md"
+      ],
+      "notes": ""
+    },
+    {
+      "type": "table",
+      "title": "Частые вопросы при первом запуске",
+      "headers": [
+        "Симптом",
+        "Что проверить"
+      ],
+      "rows": [
+        [
+          "Персонаж не двигается",
+          "Play, фокус viewport, назначение и флажок управления"
+        ],
+        [
+          "После Stop позиция прежняя",
+          "Это ожидаемо: Play изменяет временную копию"
+        ],
+        [
+          "Не создаётся C++ класс",
+          "Имя начинается с буквы или _, без пробелов и .h"
+        ],
+        [
+          "Новый класс не виден",
+          "Успешная сборка, регистрация и Hot Reload в Edit"
+        ],
+        [
+          "Ошибка сборки / загрузки",
+          "Console, CodeBuild.log и логи кандидата в Binaries"
+        ],
+        [
+          "Пропала модель или текстура",
+          "Ресурс импортирован в Content и перенесён вместе с проектом"
+        ]
+      ],
+      "notes": "При ошибке сборки смотрите первую ошибку в Console / CodeBuild.log. Предыдущая DLL сохраняется. При ошибке загрузки проверьте логи кандидата в Binaries.",
+      "sources": [
+        "Engine/docs/CODE-PROJECTS.md",
+        "Editor/Include/CodeClassDialog.h",
+        "Engine/docs/INPUT-CHARACTER.md"
+      ]
+    }
+  ]
+}

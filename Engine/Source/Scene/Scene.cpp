@@ -1,4 +1,5 @@
 #include <Engine/Scene/Scene.h>
+#include <Engine/Components/Character.h>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <atomic>
@@ -94,6 +95,10 @@ void Scene::RemoveNow(ComponentId id) noexcept
     if (it == byId_.end()) return;
     auto* removed = it->second;
     for (auto& entry : components_) entry.second->ClearParentReferences(removed);
+    for (auto& entry : components_) if (auto* settings=dynamic_cast<PlaySettings*>(entry.second.get())) {
+        if(settings->character==id)settings->character=0;
+        if(settings->camera==id)settings->camera=0;
+    }
     auto entry = components_.find(removed->SceneName);
     byId_.erase(it);
     components_.erase(entry);
@@ -164,6 +169,7 @@ SceneResult Scene::ClearParent(ComponentId id)
 SceneSnapshot Scene::GetSnapshot() const
 {
     SceneSnapshot result{id_, name_, revision_, {}};
+    result.documentVersion = documentVersion_;
     result.components.reserve(byId_.size());
     for (const auto& entry : byId_)
     {
@@ -175,6 +181,8 @@ SceneSnapshot Scene::GetSnapshot() const
                 c.GetModelAsset(), c.GetTexturePath()});
         if (const auto* light = dynamic_cast<const PointLightComponent*>(&c))
             result.components.back().pointLight = {light->GetLightColor(), light->GetIntensity(), light->GetRadius(), light->IsEnabled()};
+        result.components.back().projectData = c.SaveProjectData();
+        if (!result.components.back().projectData.empty()) result.documentVersion = 3;
     }
     return result;
 }
@@ -184,6 +192,12 @@ bool SceneComponentSnapshot::PointLight::IsValid() const noexcept
     return Finite(color) && color.x >= 0 && color.x <= 1 && color.y >= 0 && color.y <= 1 &&
         color.z >= 0 && color.z <= 1 && std::isfinite(intensity) && intensity >= 0 &&
         std::isfinite(radius) && radius > 0;
+}
+
+void Scene::SetDocumentVersion(uint32_t version)
+{
+    if (version < 1 || version > 3) throw std::invalid_argument("Unsupported scene format");
+    documentVersion_ = version;
 }
 
 SceneResult Scene::SetPointLight(ComponentId id, const SceneComponentSnapshot::PointLight& light)

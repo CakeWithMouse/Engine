@@ -81,5 +81,5 @@ typedef int (ENGINE_MODULE_CALL *EngineGetSceneApiFn)(uint32_t version, uint32_t
 inline bool IsCompleteSceneApi(const EngineSceneApi& api) noexcept
 {
     return api.version == ENGINE_SCENE_API_VERSION && api.context && api.listTypes &&
-        api.readScene && api.createObject && api.removeObject && api.renameObject && api.setTransform && api.setPointLight;
+        api.readScene && api.createObject && api.removeObject && api.renameObject && api.setTransform;
 }

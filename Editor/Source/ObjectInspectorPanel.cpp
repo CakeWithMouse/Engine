@@ -1,4 +1,4 @@
-﻿#include "ObjectInspectorPanel.h"
+#include "ObjectInspectorPanel.h"
 #include "QtHost.h"
 
 #include <QFormLayout>
@@ -13,6 +13,9 @@
 #include <QPushButton>
 #include <QScrollArea>
 #include <QVBoxLayout>
+#include <QLabel>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QFrame>
 #include <QSizePolicy>
 
@@ -36,9 +39,21 @@ void ObjectInspectorPanel::BuildUi()
 
     auto* content = new QWidget(scrollArea);
 
-    auto* form = new QFormLayout(content);
-    form->setContentsMargins(6, 6, 6, 6);
-    form->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+    auto* inspectorLayout = new QVBoxLayout(content);
+    inspectorLayout->setContentsMargins(6, 6, 6, 6);
+    auto group = [content, inspectorLayout](const QString& title) {
+        auto* box = new QGroupBox(title, content);
+        inspectorLayout->addWidget(box);
+        auto* form = new QFormLayout(box);
+        form->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
+        return form;
+    };
+    auto* form = group(QStringLiteral("Общие"));
+    selectionLabel_ = new QLabel(QStringLiteral("Объект не выбран"), content);
+    selectionLabel_->setObjectName(QStringLiteral("SelectedObjectLabel"));
+    selectionLabel_->setWordWrap(true);
+    selectionLabel_->setStyleSheet(QStringLiteral("font-weight: bold; color: #efa52b;"));
+    form->addRow(selectionLabel_);
 
     scrollArea->setWidget(content);
     outerLayout->addWidget(scrollArea);
@@ -53,19 +68,20 @@ void ObjectInspectorPanel::BuildUi()
 
     const QString labels[] =
     {
-        QStringLiteral("Позиция X"),
-        QStringLiteral("Позиция Y"),
-        QStringLiteral("Позиция Z"),
-        QStringLiteral("Поворот X, °"),
-        QStringLiteral("Поворот Y, °"),
-        QStringLiteral("Поворот Z, °"),
-        QStringLiteral("Масштаб X"),
-        QStringLiteral("Масштаб Y"),
-        QStringLiteral("Масштаб Z")
+        QStringLiteral("X"),
+        QStringLiteral("Y"),
+        QStringLiteral("Z"),
+        QStringLiteral("X, °"),
+        QStringLiteral("Y, °"),
+        QStringLiteral("Z, °"),
+        QStringLiteral("X"),
+        QStringLiteral("Y"),
+        QStringLiteral("Z")
     };
 
     for (int i = 0; i < 9; ++i)
     {
+        if (i % 3 == 0) form = group(i == 0 ? QStringLiteral("Позиция") : i == 3 ? QStringLiteral("Поворот") : QStringLiteral("Масштаб"));
         auto* spin = transform_[i] = new QDoubleSpinBox(this);
         spin->setObjectName(QStringLiteral("Transform%1").arg(i));
         spin->setRange(i >= 6 ? 0.001 : -10000.0, 10000.0);
@@ -82,6 +98,9 @@ void ObjectInspectorPanel::BuildUi()
             emit TransformEditingFinished(selectedId_, CurrentTransformValue());
         });
     }
+
+    form = group(QStringLiteral("Визуал"));
+    BuildAssetInspector(form);
 
     auto* lightGroup = new QGroupBox(QStringLiteral("Точечный свет"), this);
     lightInspector_ = lightGroup;
@@ -145,10 +164,23 @@ void ObjectInspectorPanel::BuildUi()
         emit LightColorRequested(selectedId_, current);
     });
 
-    form->addRow(lightGroup);
+    inspectorLayout->addWidget(lightGroup);
     lightGroup->hide();
 
-    BuildAssetInspector(form);
+    auto* characterGroup = new QGroupBox(QStringLiteral("Персонаж"), content);
+    characterInspector_ = characterGroup;
+    auto* characterForm = new QFormLayout(characterGroup);
+    characterSpeed_ = new QDoubleSpinBox(characterGroup);
+    characterSpeed_->setObjectName("CharacterSpeed");
+    characterSpeed_->setRange(0, 10000);
+    characterSpeed_->setKeyboardTracking(false);
+    characterForm->addRow(QStringLiteral("Скорость, ед/с"), characterSpeed_);
+    inspectorLayout->addWidget(characterGroup);
+    characterGroup->hide();
+    connect(characterSpeed_, &QDoubleSpinBox::editingFinished, this, [this] {
+        if (!refreshing_ && selectedId_) emit CharacterSpeedEditingFinished(selectedId_, characterSpeed_->value());
+    });
+    inspectorLayout->addStretch();
 
     connect(objectName_, &QLineEdit::editingFinished, this, [this]
     {
@@ -169,6 +201,12 @@ void ObjectInspectorPanel::BuildAssetInspector(QFormLayout* form)
     modelAsset_->setMinimumWidth(0);
     modelAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
     form->addRow(QStringLiteral("Модель"), modelAsset_);
+
+    chooseModel_ = new QPushButton(QStringLiteral("Выбрать модель…"), content);
+    chooseModel_->setObjectName("ChooseModel");
+    chooseModel_->setToolTip(QStringLiteral("Заменить модель или превратить примитив в модель. Для C++ персонажей визуал задаётся их классом."));
+    form->addRow(chooseModel_);
+    connect(chooseModel_, &QPushButton::clicked, this, &ObjectInspectorPanel::ChooseModelRequested);
 
     textureAsset_ = new QLineEdit(content);
     textureAsset_->setReadOnly(true);
@@ -286,12 +324,16 @@ void ObjectInspectorPanel::Refresh(
             (field != focus && !field->isAncestorOf(focus));
     };
 
+    selectionLabel_->setText(QStringLiteral("Объект не выбран"));
+    chooseModel_->setEnabled(false);
+
     if (selectedId_ == 0)
     {
         objectName_->clear();
         modelAsset_->clear();
         textureAsset_->clear();
         lightInspector_->setVisible(false);
+        characterInspector_->hide();
         refreshing_ = false;
         return;
     }
@@ -307,6 +349,11 @@ void ObjectInspectorPanel::Refresh(
             continue;
 
         selectedLight = object.hasPointLight;
+        selectionLabel_->setText(QStringLiteral("Выбран: %1\n%2 · ID %3").arg(QString::fromStdString(object.name), QString::fromStdString(object.type)).arg(object.id));
+        chooseModel_->setEnabled(object.type == "Engine.Model" || object.type.rfind("Primitive.", 0) == 0);
+        characterInspector_->setVisible(object.gameplayKind == 1);
+        if (object.gameplayKind == 1 && canReplaceField(characterSpeed_))
+            characterSpeed_->setValue(QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object()["moveSpeed"].toDouble(5));
 
         if (object.hasPointLight)
         {

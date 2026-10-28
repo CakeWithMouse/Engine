@@ -6,6 +6,7 @@ class QComboBox;
 class QFileSystemModel;
 class QLineEdit;
 class QTreeView;
+class ProjectFilesFilter;
 class EditorQtHost;
 
 // Файл-менеджер проекта: дерево на QFileSystemModel с корнем в каталоге
@@ -26,6 +27,7 @@ private:
 
     EditorQtHost* host_ = nullptr;
     QFileSystemModel* model_ = nullptr;
+    ProjectFilesFilter* proxy_ = nullptr;
     QTreeView* view_ = nullptr;
     QLineEdit* filterEdit_ = nullptr;
     QComboBox* rootCombo_ = nullptr;

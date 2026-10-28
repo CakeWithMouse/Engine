@@ -37,6 +37,9 @@
   <PreviewContent Include="../../Game/Battle/Content/**/*"><ProjectName>Battle</ProjectName></PreviewContent>
 </ItemGroup>
 <Target Name="DeployPreviewProjects" AfterTargets="Build">
+  <Copy SourceFiles="../Version.json" DestinationFiles="$(OutDir)EngineVersion.json" SkipUnchangedFiles="true" />
+  <Copy SourceFiles="../TemplateCompatibility.json" DestinationFiles="$(OutDir)TemplateCompatibility.json" SkipUnchangedFiles="true" />
+  <WriteLinesToFile File="$(OutDir)EngineConfiguration.txt" Lines="$(Configuration)" Overwrite="true" WriteOnlyWhenDifferent="true" />
   <MakeDir Directories="@(PreviewProject->'$(OutDir)Projects/%(ProjectName)/Content')" />
   <Copy SourceFiles="@(PreviewProject)" DestinationFiles="@(PreviewProject->'$(OutDir)Projects/%(ProjectName)/Project.json')" SkipUnchangedFiles="true" />
   <Copy SourceFiles="@(PreviewContent)" DestinationFiles="@(PreviewContent->'$(OutDir)Projects/%(ProjectName)/Content/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />

@@ -1,0 +1,23 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<ItemGroup Label="ProjectConfigurations">
+<ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
+<ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
+</ItemGroup>
+<PropertyGroup Label="Globals"><WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion></PropertyGroup>
+<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+<PropertyGroup Label="Configuration"><ConfigurationType>Application</ConfigurationType><PlatformToolset>v145</PlatformToolset>
+<UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries><UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries></PropertyGroup>
+<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+<Import Project="..\..\BuildSupport\Cpp.props" />
+<ItemDefinitionGroup Condition="'$(EngineEnableAssimp)'=='true' and '$(Configuration)'=='Debug'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/debug/lib/assimp-vc143-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+<ItemDefinitionGroup Condition="'$(EngineEnableAssimp)'=='true' and '$(Configuration)'=='Release'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/lib/assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+<ItemGroup><ClCompile Include="EditorReloadTests.cpp" /></ItemGroup>
+<ItemGroup><ProjectReference Include="..\..\Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project></ProjectReference></ItemGroup>
+<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+<Import Project="..\..\BuildSupport\Content.targets" />
+<ItemGroup Condition="'$(EngineEnableAssimp)'=='true'">
+<InputTestRuntime Include="$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/bin/*.dll" Condition="'$(Configuration)'=='Release'" />
+<InputTestRuntime Include="$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/debug/bin/*.dll" Condition="'$(Configuration)'=='Debug'" />
+</ItemGroup>
+<Target Name="DeployInputTestRuntime" AfterTargets="Build"><Copy SourceFiles="@(InputTestRuntime)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" /></Target>
+</Project>

@@ -1,10 +1,11 @@
-#pragma once
+﻿#pragma once
 #include <Engine/Base/Config/BaseResources.h>
 #include <Engine/Base/Config/BaseGameConfig.h>
 #include <Engine/Resources/VirtualFileSystem.h>
 #include <Engine/Runtime/LaunchOptions.h>
 #include <Engine/Runtime/SceneModuleApi.h>
 #include <Engine/Runtime/VfsApi.h>
+#include <Engine/Runtime/EditorReloadApi.h>
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -24,6 +25,7 @@ class BaseEngine final
     BaseGameConfig Config;
     VirtualFileSystem& Vfs;
     EngineVfsApi vfsServiceApi{};
+    EngineEditorReloadApi reloadServiceApi{};
     enum class State { New, Starting, Ready, Playing, Stopped };
     State state = State::New;
     bool exitRequested = false;

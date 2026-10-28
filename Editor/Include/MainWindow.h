@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <QMainWindow>
 #include <functional>
@@ -49,6 +49,9 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
+    void BuildCodeTools();
+    void RunCodeTool(const QString& action, const QStringList& extra = {});
+    void ShowProjectTypes();
     void BuildUi();
     void BuildToolBar();
     void UpdatePlayButtons();
@@ -105,6 +108,8 @@ private:
     QLabel* statsLabel_ = nullptr;
 
     QString scenePath_;
+    QByteArray reloadTypesBefore_, reloadTypesBuilt_;
+    bool reloadTypesExisted_ = false;
 
     uint64_t selectedId_ = 0;
 
