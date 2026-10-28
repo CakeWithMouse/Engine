@@ -32,7 +32,7 @@ void EditorMainWindow::ImportAsset(bool texture, const QString& source)
                                       {},
                                       texture
                                           ? QStringLiteral("Текстуры (*.png *.jpg *.jpeg *.bmp *.tga)")
-                                          : QStringLiteral("Модели (*.glb *.gltf *.obj *.fbx)")
+                                          : QStringLiteral("Модели (*.glb *.gltf *.obj *.fbx *.blend)")
                                   )
                                   : QStringList{source};
 

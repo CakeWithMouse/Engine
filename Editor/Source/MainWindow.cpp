@@ -30,6 +30,7 @@
 #include <QFormLayout>
 #include <QHBoxLayout>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QQuaternion>
 #include <QSaveFile>
@@ -1167,6 +1168,21 @@ void EditorMainWindow::CommandFinished(
         AppendLine(QStringLiteral(
             "Импортировано: %1. Двойной щелчок в Files: добавить модель или назначить текстуру выбранному объекту."
         ).arg(command.path));
+
+        if (command.type == EditorCommand::ImportModel && command.path.startsWith(QStringLiteral("/Game/")))
+        {
+            QFile metadata(QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(command.path.mid(6) + QStringLiteral(".import.json")));
+            if (metadata.open(QIODevice::ReadOnly))
+            {
+                const auto imported = QJsonDocument::fromJson(metadata.readAll()).object();
+                const auto material = imported.value(QStringLiteral("defaultMaterial")).toString();
+                if (!material.isEmpty())
+                    AppendLine(QStringLiteral("Создан базовый материал %1. При добавлении модели он назначится автоматически; BaseMap можно изменить в редакторе материала.").arg(material));
+                const auto count = imported.value(QStringLiteral("materials")).toArray().size();
+                if (count > 1)
+                    AppendLine(QStringLiteral("В модели %1 материалов. Все сохранены, но объект пока использует только материал первого меша.").arg(count));
+            }
+        }
 
         statusBar()->showMessage(
             QStringLiteral("Импортировано: %1").arg(command.path),

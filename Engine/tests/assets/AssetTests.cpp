@@ -17,6 +17,7 @@ namespace fs = std::filesystem;
 using Json = nlohmann::json;
 int checks = 0;
 void RunAssetRenderTests(HWND, const fs::path&, const fs::path&, const std::string&, const std::string&);
+void RunModelImportTests(const EngineEditSessionApi&, const fs::path&, const fs::path&);
 void Check(bool ok, const char* message) { if (!ok) throw std::runtime_error(message); ++checks; }
 void Write(const fs::path& path, const std::string& bytes)
 { std::ofstream out(path, std::ios::binary); out.write(bytes.data(), bytes.size()); if (!out) throw std::runtime_error("Write fixture"); }
@@ -199,7 +200,11 @@ int wmain(int argc, wchar_t** argv)
             Check(Objects(api).front().material == material, "failed assignment keeps the material");
             Check(api.frame(api.context,0) == EngineSceneOk, "draw the material");
             CheckMaterialEditing(api, content);
+            RunModelImportTests(api, content, sources);
 #if defined(ENGINE_ENABLE_ASSIMP)
+            for (const auto& o : Objects(api))
+                if (o.name == "FBX after source deleted")
+                    Check(api.setMaterial(api.context,o.id,"",error,sizeof(error)) == EngineSceneOk, "explicitly clear auto material");
             Check(import(sources / "two-nodes.gltf",0) == EngineSceneOk, "import glTF with external buffer"); importedModel = path;
             const auto physical = content / fs::u8path(importedModel.substr(6));
             Check(fs::exists(physical.parent_path() / "mesh data.bin"), "glTF dependency copied");
@@ -226,6 +231,13 @@ int wmain(int argc, wchar_t** argv)
             const auto json = SceneDocument::Read(saved);
             Check(json.components.front().textureAsset == importedTexture, "serialized texture path");
             Check(json.components.front().materialAsset == material, "serialized material path");
+#if defined(ENGINE_ENABLE_ASSIMP)
+            for (const auto& o : json.components)
+            {
+                if (o.name == "FBX external") Check(!o.materialAsset.empty(), "automatic material saved with the scene");
+                if (o.name == "FBX after source deleted") Check(o.materialAsset.empty(), "explicitly cleared default saved as empty");
+            }
+#endif
             Check(api.control(api.context,EnginePlay) == EngineSceneOk, "play clone retains assets");
             Check(Objects(api).front().texture == importedTexture, "play snapshot texture");
             Check(Objects(api).front().material == material, "play snapshot material");
@@ -234,7 +246,22 @@ int wmain(int argc, wchar_t** argv)
             Check(import(sources / L"цвет.bmp",1) == EngineSceneReadOnly, "cannot import during Play");
             Check(api.control(api.context,EngineStop) == EngineSceneOk, "stop returns to edit scene");
             uint64_t scene = 0;
+#if defined(ENGINE_ENABLE_ASSIMP)
+            const auto importMetadata = content / "Models/auto-external/auto-external.fbx.import.json";
+            std::ifstream metadataFile(importMetadata);
+            const std::string originalMetadata{std::istreambuf_iterator<char>(metadataFile),std::istreambuf_iterator<char>()};
+            metadataFile.close();
+            Write(importMetadata,"{ broken import metadata");
+#endif
             Check(api.loadScene(api.context,saved.u8string().c_str(),&scene,error,sizeof(error)) == EngineSceneOk, "reopen textured scene");
+#if defined(ENGINE_ENABLE_ASSIMP)
+            for (const auto& o : Objects(api))
+            {
+                if (o.name == "FBX external") Check(!o.material.empty(), "restoring saved material does not depend on import metadata");
+                if (o.name == "FBX after source deleted") Check(o.material.empty(), "scene restore does not reapply a cleared automatic material");
+            }
+            Write(importMetadata,originalMetadata);
+#endif
             Check(Objects(api).front().texture == importedTexture, "reopened texture retained");
             Check(Objects(api).front().material == material, "reopened material retained");
             const auto texture = content / fs::u8path(importedTexture.substr(6)); fs::rename(texture, texture.wstring() + L".backup");

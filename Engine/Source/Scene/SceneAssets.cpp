@@ -3,6 +3,7 @@
 #include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/TextureLoader.h>
 #include <Engine/Render/SkeletalLoader.h>
+#include "ModelImport.h"
 #include "../Resources/VfsRead.h"
 #include "../../ThirdParty/nlohmann/json.hpp"
 #include <fstream>
@@ -105,7 +106,7 @@ void ValidateTexture(std::string_view path)
     if (!path.empty() && !TextureLoader::ValidateImage(VfsRead::Active().ReadBytes(path)))
         throw std::runtime_error("Missing or invalid texture: " + std::string(path));
 }
-std::unique_ptr<GameComponent> CreateModel(const std::string& path)
+std::unique_ptr<GameComponent> CreateModel(const std::string& path, bool useImportedMaterial)
 {
     if (path.empty() || !ValidPath(path)) throw std::runtime_error("Expected a model path inside /Game");
     auto model = LoadSkeletalModelFromVfs(path);
@@ -113,6 +114,9 @@ std::unique_ptr<GameComponent> CreateModel(const std::string& path)
     auto object = std::make_unique<SkeletalMeshComponent>();
     // Keep the asset reference and the loaded CPU model without importing twice.
     if (!object->SetAssetModel(path, std::move(model.Model))) throw std::runtime_error("Invalid model");
+    const auto material = useImportedMaterial ? ModelImport::DefaultMaterial(path) : std::string{};
+    ValidateMaterialPath(material);
+    if (!material.empty() && !object->SetMaterialAsset(material)) throw std::runtime_error("Cannot assign imported material");
     return object;
 }
 void ValidateMaterialPath(std::string_view path)
@@ -150,8 +154,8 @@ std::string Import(const fs::path& content, const fs::path& source, Kind kind)
             throw std::runtime_error("Supported textures: PNG, JPG, BMP, TGA");
         if (!TextureLoader::ValidateImage(Read(source))) throw std::runtime_error("Invalid or oversized image");
     }
-    else if (kind != Model || (extension != ".glb" && extension != ".gltf" && extension != ".obj" && extension != ".fbx"))
-        throw std::runtime_error("Supported models: GLB, glTF, OBJ, FBX");
+    else if (kind != Model || (extension != ".glb" && extension != ".gltf" && extension != ".obj" && extension != ".fbx" && extension != ".blend"))
+        throw std::runtime_error("Supported models: GLB, glTF, OBJ, FBX, BLEND (requires Blender)");
     CheckedSize(source);
     const auto group = content / (kind == Model ? "Models" : "Textures");
     if (!Inside(content, group)) throw std::runtime_error("Asset directory is outside project Content");
@@ -162,19 +166,23 @@ std::string Import(const fs::path& content, const fs::path& source, Kind kind)
         const auto target = group / fs::u8path(kind == Model ? name : name + extension);
         if (!Inside(content, target)) throw std::runtime_error("Invalid asset destination");
         if (fs::exists(target)) continue;
-        const auto file = kind == Model ? target / source.filename() : target;
+        const auto filename = extension == ".blend" ? fs::u8path(source.stem().u8string() + ".glb") : source.filename();
+        const auto file = kind == Model ? target / filename : target;
         const auto virtualPath = "/Game/" + file.lexically_relative(content).generic_u8string();
         if (!ValidPath(virtualPath)) throw std::runtime_error("Asset filename is not a valid project path");
         if (kind == Model && !fs::create_directory(target)) continue;
         bool copied = false;
         try
         {
-            fs::copy_file(source, file);
+            if (extension == ".blend") ModelImport::ConvertBlend(source, file);
+            else fs::copy_file(source, file);
             copied = true;
             if (kind == Model)
             {
                 if (extension == ".gltf") CopyGltfDependencies(source, target);
                 CreateModel(virtualPath); // Validate geometry before reporting success.
+                if (extension == ".fbx" || extension == ".blend")
+                    ModelImport::CreateMaterials(source, target, virtualPath);
             }
             return virtualPath;
         }

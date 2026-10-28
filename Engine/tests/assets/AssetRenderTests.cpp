@@ -100,5 +100,21 @@ void RunAssetRenderTests(HWND hwnd, const std::filesystem::path& engineContent,
     Check(added.result == SceneResult::Ok && game.RenderViewportFrame(0), "draw imported mesh");
     Check(game.GetScene().FindComponent(added.id)->HasTexture() && game.greenPixels > 100,
         "static model shader renders real textured pixels without bones");
+    for (const auto* imported : {"auto-external/auto-external.fbx", "auto-embedded/auto-embedded.fbx", "blend-packed/blend-packed.glb",
+                                "blender-external/blender-external.fbx", "blender-packed/blender-packed.fbx"})
+    {
+        if (!std::filesystem::exists(content / "Models" / imported)) continue;
+        game.GetScene().RemoveComponent(added.id);
+        object = SceneAssets::CreateModel(std::string("/Game/Models/") + imported);
+        const float radius = object->GetLocalBoundingRadius();
+        if (radius > 0) object->SetScale({1.5f/radius, 1.5f/radius, 1.5f/radius});
+        // The FBX fixture is a single triangle facing -Z after the handedness conversion.
+        if (std::filesystem::path(imported).extension() == ".fbx") object->SetRotation({0,180,0});
+        Check(!object->GetMaterialAsset().empty() && !object->HasTexture(), "imported material restored after project move");
+        added = game.GetScene().AddComponent("auto textured", object, SceneAssets::ModelType);
+        Check(added.result == SceneResult::Ok && game.RenderViewportFrame(0), "render automatic material");
+        Check(game.greenPixels > 100 && game.magentaPixels == 0,
+              "automatic FBX/BLEND material renders real green pixels after project move");
+    }
 #endif
 }

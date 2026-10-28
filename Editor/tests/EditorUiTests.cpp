@@ -498,7 +498,9 @@ int wmain(int argc, wchar_t** argv)
         {
             const auto modelSource = std::filesystem::absolute(argv[3]);
             Ui([&](auto* w) { w->ImportAsset(false, QString::fromStdWString(modelSource.wstring())); });
-            const auto importedModel = root / "Content/Models" / modelSource.stem() / modelSource.filename();
+            auto importedName = modelSource.filename();
+            if (modelSource.extension() == ".blend") importedName.replace_extension(".glb");
+            const auto importedModel = root / "Content/Models" / modelSource.stem() / importedName;
             until([&] { return std::filesystem::exists(importedModel); });
             const auto beforeReplace = host.ReadSnapshot();
             for (const auto& o : beforeReplace.objects) if (o.type == "Primitive.Sphere") {
@@ -512,6 +514,17 @@ int wmain(int argc, wchar_t** argv)
             until([&] { for(const auto& o:host.ReadSnapshot().objects) if(o.type=="Primitive.Sphere") return true; return false; });
             Ui([&](auto* w) { w->AddModel(QString::fromStdWString(importedModel.wstring())); });
             until([&] { return host.ReadSnapshot().objects.size() == 7; });
+            if (std::filesystem::exists(std::filesystem::path(importedModel.wstring() + L".import.json")))
+            {
+                const auto snapshot = host.ReadSnapshot();
+                for (const auto& object : snapshot.objects)
+                    if (object.id == snapshot.selected)
+                        Check(!object.materialAsset.empty() && object.textureAsset.empty(), "new imported model has its BaseMap material");
+                Ui([&](auto* w) {
+                    Check(w->template findChild<QPlainTextEdit*>(QStringLiteral("Console"))->toPlainText().contains(QStringLiteral("Создан базовый материал")),
+                          "editor reports automatic material creation");
+                });
+            }
             Ui([&](auto* w) { w->UseAsset(QString::fromStdWString(importedImage.wstring())); });
             until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.modelAsset.empty() && !o.textureAsset.empty()) return true; return false; });
             Ui([&](auto* w) {
