@@ -85,6 +85,15 @@ public:
     /** Per-frame: world transform and object constants from the frame snapshot. No GPU calls. */
     void Update();
     virtual void Tick(float deltaTime);
+    // Called once before the first input dispatch/tick in Play, never in Edit/Pause.
+    // Use this for input setup; call the immediate parent's BeginPlay in overrides.
+    virtual void BeginPlay() {}
+    // Optional module-local codec. Return UTF-8 JSON with its own schema version.
+    // Called for save, duplicate, undo and Play, never for transient gameplay state.
+    virtual std::string SaveProjectData() const { return {}; }
+    virtual void LoadProjectData(const std::string& data);
+    // Called after restoring all objects. Persistent references are IDs, never pointers.
+    virtual void RemapProjectReferences(const std::map<ComponentId, ComponentId>&) {}
     virtual void Render(ID3D11DeviceContext* context);
     virtual void RenderShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass);
     /** GPU work that must run once per frame independently of drawing (e.g. particle simulation). */
@@ -158,6 +167,7 @@ public:
     bool RaycastPrimitive(const glm::vec3& origin, const glm::vec3& direction, float& distance);
     /** Conservative world-space radius around GetWorldPosition(). */
     float GetWorldBoundingRadius();
+    void GetEditorBounds(glm::vec3& minimum, glm::vec3& maximum);
 
 protected:
     /** Local transform; override to change how rotation is built. */
@@ -247,6 +257,7 @@ private:
     void AssignMaterial(std::shared_ptr<Material> material);
     friend class Game;
     friend class Scene;
+    bool GameplayStarted = false;
     // Separate from GamePtr: components may be configured with a game before registration.
     Scene* RegisteredScene = nullptr;
     ComponentId SceneComponentId = 0;

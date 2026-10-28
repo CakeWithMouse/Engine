@@ -118,7 +118,7 @@ void ParticleSystemComponent::DispatchCompute(ID3D11DeviceContext* context)
         return;
     }
 
-    if (GamePtr && GamePtr->IsSimulationEnabled()) DispatchSimulation(context);
+    if (GamePtr && LastDeltaTime > 0) DispatchSimulation(context);
     if (bSortingEnabled)
     {
         DispatchSort(context);
@@ -303,6 +303,7 @@ void ParticleSystemComponent::DispatchSimulation(ID3D11DeviceContext* context)
 
     GPUParticleSimulationCB simulationData = {};
     simulationData.DeltaTime = LastDeltaTime;
+    LastDeltaTime = 0; // A rendered paused frame must not reuse the previous simulation step.
     simulationData.TotalTime = SimulationTime;
     simulationData.ParticleCount = ParticleCount;
     simulationData.BaseLifetime = BaseLifetime;

@@ -198,7 +198,7 @@ namespace
 
 void EditorMainWindow::OpenMaterialEditor(const QString& path)
 {
-    if (!host_->HasScene())
+    if (!host_->HasMaterials())
         return;
 
     QString material = path;
@@ -238,7 +238,7 @@ void EditorMainWindow::OpenMaterialEditor(const QString& path)
 
 QString EditorMainWindow::CreateMaterial(const QString& directory, const QString& name)
 {
-    if (!host_->HasScene())
+    if (!host_->HasMaterials())
         return {};
 
     const QString content = QString::fromUtf8(host_->host().contentRoot);
@@ -306,7 +306,7 @@ void EditorMainWindow::CreateMaterialForSelection()
 {
     const auto snapshot = host_->ReadSnapshot();
 
-    if (!host_->HasScene() ||
+    if (!host_->HasMaterials() ||
         sceneBusy_ ||
         host_->PlayState() != EditorQtHost::EditorState::Edit ||
         !snapshot.selected)
@@ -347,14 +347,14 @@ void EditorMainWindow::CreateMaterialForSelection()
 
 void EditorMainWindow::ReloadShaders()
 {
-    if (!host_->HasScene()) return;
+    if (!host_->HasMaterials()) return;
     EditorQtHost* host = host_;
     QPointer<EditorMainWindow> self(this);
     EditorCommand c;
     c.type = EditorCommand::RunTask;
     c.task = [host, self](const EngineEditSessionApi& api)
     {
-        const uint32_t status = api.reloadShaderFile(api.context, "");
+        const uint32_t status = api.reloadShaderFile ? api.reloadShaderFile(api.context, "") : EngineSceneReadOnly;
         host->RunOnUi([self, status]
         {
             if (!self) return;
@@ -368,7 +368,7 @@ void EditorMainWindow::ReloadShaders()
         if (editor) editor->Refresh();
 }
 
-bool EditorMainWindow::CloseMaterialEditors()
+bool EditorMainWindow::CloseMaterialEditors(std::function<void()> afterSave)
 {
     QList<MaterialEditorWindow*> open;
 
@@ -377,7 +377,7 @@ bool EditorMainWindow::CloseMaterialEditors()
             open.push_back(editor);
 
     for (auto* editor : open)
-        if (!editor->ConfirmClose())
+        if (!editor->ConfirmClose(afterSave))
             return false;
 
     for (auto* editor : open)

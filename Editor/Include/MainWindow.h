@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <QMainWindow>
 #include <QHash>
@@ -61,6 +61,9 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
+    void BuildCodeTools();
+    void RunCodeTool(const QString& action, const QStringList& extra = {});
+    void ShowProjectTypes();
     void BuildUi();
     void BuildToolBar();
     void UpdatePlayButtons();
@@ -83,7 +86,7 @@ private:
     void OnLightColorRequested(quint64 objectId, const QColor& current);
 
     // Спрашивает о несохранённых материалах и закрывает их окна; false — закрытие отменено.
-    bool CloseMaterialEditors();
+    bool CloseMaterialEditors(std::function<void()> afterSave = {});
     QHash<QString, QPointer<MaterialEditorWindow>> materialEditors_;
 
     EditorQtHost* host_ = nullptr;
@@ -121,6 +124,8 @@ private:
     QLabel* statsLabel_ = nullptr;
 
     QString scenePath_;
+    QByteArray reloadTypesBefore_, reloadTypesBuilt_;
+    bool reloadTypesExisted_ = false;
 
     uint64_t selectedId_ = 0;
 

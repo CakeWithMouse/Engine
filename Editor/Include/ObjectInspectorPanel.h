@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <QWidget>
 #include <QString>
@@ -8,6 +8,7 @@
 
 #include "QtHost.h"
 
+class QLabel;
 class QLineEdit;
 class QDoubleSpinBox;
 class QGroupBox;
@@ -40,6 +41,7 @@ public:
     explicit ObjectInspectorPanel(QWidget* parent = nullptr);
 
     void SetEnabled(bool enabled);
+    void SetMaterialsAvailable(bool available);
 
     void Refresh(
         const EditorQtHost::Snapshot& view,
@@ -64,6 +66,8 @@ signals:
 
     void LightColorRequested(quint64 objectId, const QColor& current);
 
+    void ChooseModelRequested();
+    void CharacterSpeedEditingFinished(quint64 objectId, double speed);
     void ChooseTextureRequested();
     void ClearTextureRequested();
     void ChooseMaterialRequested();
@@ -73,8 +77,6 @@ signals:
 private:
     void BuildUi();
 
-    // Если у вас уже есть собственная реализация asset-инспектора,
-    // перенесите её сюда из MainWindow.
     void BuildAssetInspector(QFormLayout* form);
 
     void UpdateLightColorButton(const float color[3]);
@@ -87,10 +89,15 @@ private:
     quint64 selectedId_ = 0;
     bool refreshing_ = false;
 
+    QLabel* selectionLabel_ = nullptr;
+    QWidget* characterInspector_ = nullptr;
+    QDoubleSpinBox* characterSpeed_ = nullptr;
+    QPushButton* chooseModel_ = nullptr;
     QLineEdit* objectName_ = nullptr;
     QLineEdit* modelAsset_ = nullptr;
     QLineEdit* textureAsset_ = nullptr;
     QLineEdit* materialAsset_ = nullptr;
+    QWidget* materialActions_ = nullptr;
     QPushButton* editMaterialButton_ = nullptr;
 
     QDoubleSpinBox* transform_[9]{};

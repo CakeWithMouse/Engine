@@ -52,12 +52,12 @@ public:
     bool HasUnsavedChanges() const;
 
     // Спрашивает о несохранённых изменениях; false — пользователь продолжает редактирование.
-    bool ConfirmClose();
+    bool ConfirmClose(std::function<void()> afterSave = {});
     // Отпускает превью в потоке движка и удаляет окно; правки, от которых отказались, откатываются.
     void Shutdown();
 
-    // Ctrl+S: записывает HLSL, перекомпилирует его и сохраняет .mat. false — файл не записан.
-    bool Save();
+    // Ctrl+S queues the engine save; completion reports whether both files were saved.
+    bool Save(std::function<void(bool)> completion = {});
     void Revert();
     // Перечитывает состояние материала из движка (после F6): ошибки и параметры, текст HLSL не трогает.
     void Refresh();
@@ -74,7 +74,8 @@ private:
     void BuildUi();
     void Engine(std::function<void(const EngineEditSessionApi&)> task);
     // Читает материал после task и показывает результат; rebuild пересоздаёт список параметров.
-    void EngineThenRead(std::function<QString(const EngineEditSessionApi&)> task, bool rebuild);
+    void EngineThenRead(std::function<QString(const EngineEditSessionApi&)> task, bool rebuild,
+        std::function<void(bool)> completion = {});
     void Apply(const MaterialEditorState& state, bool valid, bool rebuild, const QString& error);
     void RebuildSettings();
     void ShowErrors();
@@ -92,6 +93,7 @@ private:
     std::shared_ptr<EngineSide> engine_ = std::make_shared<EngineSide>();
     MaterialEditorState state_;
     bool loaded_ = false, discard_ = false, shuttingDown_ = false;
+    bool saving_ = false;
     bool edited_ = false; // правка отправлена, а ответ движка с флагом modified ещё не пришёл
 
     MaterialPreviewWidget* preview_ = nullptr;

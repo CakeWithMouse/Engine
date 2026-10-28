@@ -461,21 +461,25 @@ void MaterialEditorWindow::Engine(std::function<void(const EngineEditSessionApi&
     host_->PostCommand(c);
 }
 
-void MaterialEditorWindow::EngineThenRead(std::function<QString(const EngineEditSessionApi&)> task, bool rebuild)
+void MaterialEditorWindow::EngineThenRead(std::function<QString(const EngineEditSessionApi&)> task, bool rebuild,
+    std::function<void(bool)> completion)
 {
     QPointer<MaterialEditorWindow> self(this);
     EditorQtHost* host = host_;
     const QByteArray material = material_.toUtf8();
-    Engine([self, host, material, task = std::move(task), rebuild](const EngineEditSessionApi& api)
+    Engine([self, host, material, task = std::move(task), rebuild, completion = std::move(completion)](const EngineEditSessionApi& api)
     {
         QString error = task ? task(api) : QString();
         MaterialEditorState state;
         const QString readError = ReadMaterial(api, material, state);
         if (error.isEmpty()) error = readError;
         const bool valid = readError.isEmpty();
-        host->RunOnUi([self, state, valid, rebuild, error]
+        host->RunOnUi([self, state, valid, rebuild, error, completion]
         {
-            if (self) self->Apply(state, valid, rebuild, error);
+            if (self) {
+                self->Apply(state, valid, rebuild, error);
+                if (completion) completion(valid && error.isEmpty() && !state.modified);
+            }
         });
     });
 }
@@ -762,9 +766,9 @@ void MaterialEditorWindow::ChooseTexture(int index, bool clear)
     }, true);
 }
 
-bool MaterialEditorWindow::Save()
+bool MaterialEditorWindow::Save(std::function<void(bool)> completion)
 {
-    if (!loaded_) return false;
+    if (!loaded_ || saving_) return false;
     const bool sourceChanged = source_->document()->isModified();
     if (sourceChanged)
     {
@@ -777,17 +781,24 @@ bool MaterialEditorWindow::Save()
         }
         source_->document()->setModified(false);
     }
-    edited_ = false;
+    saving_ = true;
+    setEnabled(false);
     const QByteArray material = material_.toUtf8(), shader = shaderFile_.toUtf8();
     EngineThenRead([material, shader, sourceChanged](const EngineEditSessionApi& api)
     {
         // Сначала перекомпиляция (её делает чтение): в .mat попадает новый список параметров.
         if (sourceChanged) api.reloadShaderFile(api.context, shader.constData());
         MaterialEditorState current;
-        if (!ReadMaterial(api, material, current).isEmpty() || !current.modified) return QString();
+        const QString readError = ReadMaterial(api, material, current);
+        if (!readError.isEmpty()) return readError;
+        if (!current.modified) return QString();
         char error[4096]{};
         return StatusText(api.saveMaterial(api.context, material.constData(), error, sizeof(error)), error);
-    }, sourceChanged);
+    }, sourceChanged, [this, completion](bool saved) {
+        saving_ = false;
+        setEnabled(true);
+        if (completion) completion(saved);
+    });
     statusBar()->showMessage(QStringLiteral("Сохранение…"));
     return true;
 }
@@ -813,14 +824,21 @@ void MaterialEditorWindow::Refresh()
     if (loaded_ && !shuttingDown_) EngineThenRead({}, true);
 }
 
-bool MaterialEditorWindow::ConfirmClose()
+bool MaterialEditorWindow::ConfirmClose(std::function<void()> afterSave)
 {
+    if (saving_) return false;
     if (!HasUnsavedChanges()) return true;
     const auto choice = QMessageBox::question(
         this, QStringLiteral("Несохранённый материал"),
         QStringLiteral("Сохранить изменения материала %1?").arg(QFileInfo(material_).fileName()),
         QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save);
-    if (choice == QMessageBox::Save) return Save();
+    if (choice == QMessageBox::Save) {
+        // Do not destroy the preview or unload the DLL before the queued save succeeds.
+        Save([this, afterSave](bool saved) {
+            if (saved) { if (afterSave) afterSave(); else close(); }
+        });
+        return false;
+    }
     discard_ = choice == QMessageBox::Discard;
     return discard_;
 }

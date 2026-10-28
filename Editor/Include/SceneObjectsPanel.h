@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <QWidget>
 #include <QString>
@@ -29,6 +29,8 @@ public:
     // pair: first = label, second = internal type name
     void SetPrimitiveTypes(const QVector<std::pair<QString, QString>>& types);
 
+    void SetShowServiceObjects(bool visible);
+
     void RefreshHierarchy(const EditorQtHost::Snapshot& view);
 
     std::array<double, 3> SpawnPosition() const;
@@ -51,18 +53,18 @@ signals:
 
 private:
     void BuildUi();
+    void FillTypes();
+    QComboBox* typeCategory_ = nullptr;
+    QVector<std::pair<QString, QString>> types_;
+    bool showServiceObjects_ = false;
 
     QComboBox* primitive_ = nullptr;
     QDoubleSpinBox* spawn_[3]{};
 
     QPushButton* addPrimitiveButton_ = nullptr;
-    QPushButton* addModelButton_ = nullptr;
-    QPushButton* importModelButton_ = nullptr;
 
     QTreeWidget* hierarchy_ = nullptr;
 
-    QPushButton* duplicateButton_ = nullptr;
-    QPushButton* removeButton_ = nullptr;
 
     QAction* removeShortcut_ = nullptr;
 

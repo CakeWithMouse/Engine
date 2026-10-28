@@ -1,12 +1,15 @@
-#include <Engine/Runtime/SceneEditSession.h>
+﻿#include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/MainGame/Player.h>
 #include <Engine/Scene/SceneDocument.h>
+#include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
+#include <Engine/Components/Character.h>
 #include <cstring>
 #include <cmath>
 #include <climits>
 #include <limits>
 #include <map>
 #include <stdexcept>
+#include "../../ThirdParty/nlohmann/json.hpp"
 
 namespace
 {
@@ -38,12 +41,15 @@ std::unique_ptr<Game> EmptyGame()
     return game;
 }
 }
-SceneEditSession::SceneEditSession(ComponentTypeCatalog catalog)
-    : catalog_(catalog), edit_(EmptyGame()), commands_(edit_->GetScene(), catalog, &busy_) {}
+SceneEditSession::SceneEditSession(ComponentTypeCatalog catalog, GameFactory factory)
+    : catalog_(catalog), gameFactory_(factory), edit_(EmptyGame()), commands_(edit_->GetScene(), catalog, &busy_) {}
 
 std::unique_ptr<Game> SceneEditSession::CopyForPlay()
 {
-    auto candidate = EmptyGame();
+    auto candidate = gameFactory_ ? gameFactory_() : EmptyGame();
+    if (!candidate) throw std::runtime_error("Game factory returned null");
+    candidate->SetSimulationEnabled(false);
+    candidate->SetSimulationTimeScale(1.0f);
     SceneDocument::Restore(edit_->GetScene().GetSnapshot(), catalog_, candidate->GetScene());
     return candidate;
 }
@@ -62,6 +68,7 @@ uint32_t SceneEditSession::Control(uint32_t command)
                 if (!candidate->InitializePlayViewport(*edit_)) throw std::runtime_error("Play viewport failed");
                 *candidate->GetPlayer() = *edit_->GetPlayer();
                 candidate->GetPlayer()->SetGamePointer(candidate.get());
+                candidate->InitializeGameplay();
             }
             catch (...)
             {
@@ -70,6 +77,8 @@ uint32_t SceneEditSession::Control(uint32_t command)
                 throw;
             }
         }
+        candidate->InitializeGameplay();
+        candidate->GetInput().SetContextEnabled(Input::Context::Game, inputFocused_);
         play_ = std::move(candidate);
         state_ = EnginePlaying;
         commands_.SetReadOnly(true);
@@ -88,8 +97,8 @@ uint32_t SceneEditSession::Control(uint32_t command)
         }
         return EngineSceneOk;
     }
-    if (command == EnginePause && state_ == EnginePlaying) { state_ = EnginePaused; return EngineSceneOk; }
-    if (command == EngineResume && state_ == EnginePaused) { state_ = EnginePlaying; return EngineSceneOk; }
+    if (command == EnginePause && state_ == EnginePlaying) { play_->OnFocusLost(); play_->GetInput().SetContextEnabled(Input::Context::Game,false); state_ = EnginePaused; return EngineSceneOk; }
+    if (command == EngineResume && state_ == EnginePaused) { play_->OnFocusLost(); play_->GetInput().SetContextEnabled(Input::Context::Game,inputFocused_); state_ = EnginePlaying; return EngineSceneOk; }
     return EngineSceneInvalidArgument;
 }
 EngineEditSessionApi SceneEditSession::GetApi() noexcept
@@ -144,7 +153,8 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
                 if (!s.attached_ || !std::isfinite(r) || !std::isfinite(u) || !std::isfinite(f) ||
                     !std::isfinite(y) || !std::isfinite(pitch) || !std::isfinite(z)) return EngineSceneInvalidArgument;
-                s.Active().GetPlayer()->MoveEditorCamera(r, u, f, y, pitch, z);
+                if (s.state_ != EngineEditing) return EngineSceneReadOnly;
+                s.edit_->GetPlayer()->MoveEditorCamera(r, u, f, y, pitch, z);
                 return EngineSceneOk;
             });
         },
@@ -154,10 +164,15 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                 if (s.state_ == EnginePlaying)
                 {
                     for (const auto& item : s.play_->GetScene().GetComponents()) item.second->SetGame(s.play_.get());
-                    try { s.play_->GetScene().Tick(static_cast<float>(dt)); }
+                    try { s.play_->StepProjectSimulation(static_cast<float>(dt)); }
                     catch (...) { s.state_ = EnginePaused; return EngineSceneSimulationFailed; }
                 }
-                if (s.attached_ && !s.Active().RenderViewportFrame(0)) return EngineSceneFailure;
+                if (s.state_ == EngineEditing && s.attached_)
+                    for (const auto& item : s.edit_->GetScene().GetComponents())
+                        if (auto* particles = dynamic_cast<ParticleSystemComponent*>(item.second.get()))
+                            particles->ParticleSystemComponent::Tick(static_cast<float>(dt));
+                // Simulation is stepped above; rendering still needs real elapsed time for materials.
+                if (s.attached_ && !s.Active().RenderViewportFrame(static_cast<float>(dt))) return EngineSceneFailure;
                 s.RenderPreviews(dt);
                 return EngineSceneOk;
             });
@@ -223,7 +238,7 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                 const auto direction = glm::normalize(glm::vec3(farPoint.x, farPoint.y, farPoint.z) - origin);
                 float distance = std::numeric_limits<float>::max();
                 for (const auto& entry : s.Active().GetScene().GetComponents())
-                    if (entry.second->RaycastPrimitive(origin, direction, distance)) *id = entry.second->GetComponentId();
+                    if (!entry.second->IsSkybox() && entry.second->RaycastPrimitive(origin, direction, distance)) *id = entry.second->GetComponentId();
                 return EngineSceneOk;
             });
         },
@@ -234,7 +249,7 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                 auto* object = scene->FindComponent(id);
                 if (!object) return EngineSceneNotFound;
                 auto* player = s.Active().GetPlayer();
-                player->SetPosition(object->GetCenter() - player->GetForward() * (std::max)(2.0f, object->GetWorldBoundingRadius() * 3.0f));
+                player->SetPosition(object->GetCenter() - player->GetForward() * (object->IsSkybox() ? 2.0f : (std::max)(2.0f, object->GetWorldBoundingRadius() * 3.0f)));
                 player->MoveEditorCamera(0,0,0,0,0,0);
                 return EngineSceneOk;
             });
@@ -242,4 +257,104 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
     AddAssetApi(api);
     AddMaterialApi(api);
     return api;
+}
+EngineSelectionApi SceneEditSession::GetSelectionApi() noexcept
+{
+    return {1, this, [](void* p, uint64_t id) -> uint32_t {
+        return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+            if (id && !s.edit_->GetScene().FindComponent(id)) return EngineSceneNotFound;
+            s.edit_->SetEditorSelection(id); return EngineSceneOk;
+        });
+    }};
+}
+EngineProjectDataApi SceneEditSession::GetProjectDataApi() noexcept
+{
+    return {1, this,
+        [](void* p, uint64_t id, EngineProjectDataVisitor visit, void* user) -> uint32_t {
+            if (!visit) return EngineSceneInvalidArgument;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                  auto* object = s.Active().GetScene().FindComponent(id);
+                if (!object) return EngineSceneNotFound;
+                const auto value = object->SaveProjectData();
+                visit(user, value.c_str()); return EngineSceneOk;
+            });
+        },
+        [](void* p, uint64_t id, const char* value) -> uint32_t {
+            if (!value) return EngineSceneInvalidArgument;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (s.state_ != EngineEditing) return EngineSceneReadOnly;
+                if (std::strlen(value) > 1024 * 1024) return EngineSceneInvalidArgument;
+                if (*value) {
+                    auto json = nlohmann::json::parse(value);
+                    if (!json.is_object() || !json.contains("version") || !json["version"].is_number_unsigned()) return EngineSceneInvalidDocument;
+                }
+                auto* object = s.edit_->GetScene().FindComponent(id);
+                if (!object) return EngineSceneNotFound;
+                const auto before = object->SaveProjectData();
+                try { object->LoadProjectData(value); }
+                catch (...) { object->LoadProjectData(before); throw; }
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, uint64_t target, uint64_t source) -> uint32_t {
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (s.state_ != EngineEditing) return EngineSceneReadOnly;
+                auto* object = s.edit_->GetScene().FindComponent(target);
+                if (!object) return EngineSceneNotFound;
+                object->RemapProjectReferences({{source,target}});
+                return EngineSceneOk;
+            });
+        }};
+}
+
+EngineViewportInputApi SceneEditSession::GetViewportInputApi() noexcept
+{
+    return {1,this,
+        [](void* p,uint32_t focus)->uint32_t { return Invoke(p,[&](SceneEditSession& s)->uint32_t {
+            if(focus>1)return EngineSceneInvalidArgument;
+            s.inputFocused_=focus!=0;s.Active().OnFocusLost();
+            s.Active().GetInput().SetContextEnabled(Input::Context::Game,s.state_==EnginePlaying&&s.inputFocused_);
+            return EngineSceneOk;
+        });},
+        [](void* p,uint32_t key,uint32_t down)->uint32_t {return Invoke(p,[&](SceneEditSession& s)->uint32_t {
+            if(key>507||down>1)return EngineSceneInvalidArgument;
+            if(s.state_==EnginePlaying&&s.inputFocused_)s.play_->GetInput().SetKey(static_cast<Keys>(key),down!=0);
+            return EngineSceneOk;
+        });},
+        [](void* p,float x,float y,float wheel)->uint32_t {return Invoke(p,[&](SceneEditSession& s)->uint32_t {
+            if(!std::isfinite(x)||!std::isfinite(y)||!std::isfinite(wheel))return EngineSceneInvalidArgument;
+            if(s.state_==EnginePlaying&&s.inputFocused_)s.play_->GetInput().AddPointer(x,y,wheel);
+            return EngineSceneOk;
+        });},
+        [](void* p,uint64_t id,uint32_t* kind)->uint32_t {return Invoke(p,[&](SceneEditSession& s)->uint32_t {
+            if(!kind)return EngineSceneInvalidArgument;
+            auto* o=s.Active().GetScene().FindComponent(id);if(!o)return EngineSceneNotFound;
+            *kind=dynamic_cast<Character*>(o)?1:dynamic_cast<SceneCamera*>(o)?2:dynamic_cast<PlaySettings*>(o)?3:0;
+            return EngineSceneOk;
+        });}
+    };
+}
+
+EngineEditorCameraApi SceneEditSession::GetEditorCameraApi() noexcept
+{
+    return {1, this,
+        [](void* p, EngineEditorCameraState* output) -> uint32_t {
+            if (!output) return EngineSceneInvalidArgument;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (!s.attached_ || s.state_ != EngineEditing) return EngineSceneReadOnly;
+                auto* camera = s.edit_->GetPlayer(); const auto pos = camera->GetPosition();
+                *output = {pos.x,pos.y,pos.z,camera->GetYaw(),std::asin(std::clamp(camera->GetForward().y,-1.0f,1.0f))};
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, const EngineEditorCameraState* value) -> uint32_t {
+            if (!value || !std::isfinite(value->x) || !std::isfinite(value->y) || !std::isfinite(value->z) ||
+                !std::isfinite(value->yaw) || !std::isfinite(value->pitch)) return EngineSceneInvalidArgument;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (!s.attached_ || s.state_ != EngineEditing) return EngineSceneReadOnly;
+                auto* camera = s.edit_->GetPlayer(); camera->SetPosition({value->x,value->y,value->z});
+                camera->SetRotate(value->yaw,value->pitch); camera->MoveEditorCamera(0,0,0,0,0,0);
+                return EngineSceneOk;
+            });
+        }};
 }

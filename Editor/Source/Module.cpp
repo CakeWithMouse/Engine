@@ -1,4 +1,4 @@
-#include <Engine/Runtime/ModuleApi.h>
+﻿#include <Engine/Runtime/ModuleApi.h>
 #include <Engine/Runtime/EditSessionApi.h>
 #include <Engine/Runtime/VfsApi.h>
 #include "../../Engine/Source/Resources/VfsRead.h"
@@ -112,4 +112,30 @@ extern "C" __declspec(dllexport) int __cdecl EngineBindEditSession(uint32_t vers
     auto* e = static_cast<EditorQtHost*>(editorSession);
     e->SetModuleApi(sessionApi ? *sessionApi : EngineEditSessionApi{});
     return 1;
+}
+extern "C" __declspec(dllexport) int __cdecl EngineBindProjectData(uint32_t version,
+    uint32_t size, void* instance, const EngineProjectDataApi* api)
+{
+    if (version != 1 || size != sizeof(EngineProjectDataApi) || !instance) return 0;
+    static_cast<EditorQtHost*>(instance)->SetProjectDataApi(api ? *api : EngineProjectDataApi{});
+    return 1;
+}
+extern "C" __declspec(dllexport) int __cdecl EngineBindSelection(uint32_t version,
+    uint32_t size, void* instance, const EngineSelectionApi* api)
+{
+    if (version != 1 || size != sizeof(EngineSelectionApi) || !instance) return 0;
+    static_cast<EditorQtHost*>(instance)->SetSelectionApi(api ? *api : EngineSelectionApi{});
+    return 1;
+}
+
+extern "C" __declspec(dllexport) int __cdecl EngineBindViewportInput(uint32_t version, uint32_t size, void* instance, const EngineViewportInputApi* api)
+{
+    if (version != 1 || size != sizeof(EngineViewportInputApi) || !instance) return 0;
+    static_cast<EditorQtHost*>(instance)->SetViewportInputApi(api ? *api : EngineViewportInputApi{});
+    return 1;
+}
+
+extern "C" __declspec(dllexport) int __cdecl EngineEditorViewportReady(void* instance)
+{
+    return instance && static_cast<EditorQtHost*>(instance)->ViewportActive() ? 1 : 0;
 }

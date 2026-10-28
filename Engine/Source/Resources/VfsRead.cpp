@@ -182,3 +182,15 @@ namespace VfsRead
         return Active().ReadBytes(path, outVirtualPath);
     }
 }
+#include <Engine/Runtime/ModuleVfs.h>
+namespace EngineModuleVfs
+{
+    bool Bind(const EngineVfsApi* api) { return VfsRead::Bind(api); }
+    void Unbind() { VfsRead::Unbind(); }
+    std::string Resolve(const char* path)
+    {
+        if (VfsRead::IsBound()) return VfsRead::Resolve(path);
+        const auto result = VfsRead::GetVFS().Resolve(path);
+        return result ? result->u8string() : std::string{};
+    }
+}

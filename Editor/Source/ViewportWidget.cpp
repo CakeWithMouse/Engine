@@ -15,6 +15,22 @@
 #include <QWheelEvent>
 #include <QTimer>
 #include <QElapsedTimer>
+#include <Engine/InputDevice/Keys.h>
+
+namespace {
+uint32_t GameKey(QKeyEvent* key)
+{
+    // Native virtual keys for arbitrary bindings; physical WASD stays layout independent.
+    int logical=CameraNavigationKey(key->nativeScanCode(),key->key());
+    if (logical=='W'||logical=='A'||logical=='S'||logical=='D'||logical=='Q'||logical=='E')return logical;
+    if (key->nativeVirtualKey() && key->nativeVirtualKey()<256) return key->nativeVirtualKey();
+    if (logical>=0x20&&logical<=0x7e)return logical;
+    switch(logical){case Qt::Key_Control:return 17;case Qt::Key_Shift:return 16;case Qt::Key_Alt:return 18;
+    case Qt::Key_Escape:return 27;case Qt::Key_Tab:return 9;case Qt::Key_Return:return 13;
+    case Qt::Key_Left:return 37;case Qt::Key_Up:return 38;case Qt::Key_Right:return 39;case Qt::Key_Down:return 40;
+    default:return logical>=Qt::Key_F1&&logical<=Qt::Key_F24?112+logical-Qt::Key_F1:0;}
+}
+}
 
 namespace
 {
@@ -117,7 +133,10 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
     connect(timer, &QTimer::timeout, this, [this, elapsed]
     {
         const float dt = std::min(0.05f, static_cast<float>(elapsed->restart()) / 1000.0f);
+        const int state=host_->PlayState();
+        if(inputState_!=state){inputState_=state;keys_.clear();looking_=rmbPressed_=false;EndObjectDrag();}
         if (!attached_ || !hasFocus() || !isActiveWindow()) return;
+        if (state != EditorQtHost::Edit && host_->HasScene()) return;
 
         const float speed = dt * (keys_.contains(Qt::Key_Shift) ? 4.0f : 1.0f);
 
@@ -214,8 +233,12 @@ uint32_t ViewportWidget::PhysH() const { return static_cast<uint32_t>(std::lroun
 
 bool ViewportWidget::event(QEvent* e)
 {
+    if(e->type()==QEvent::FocusIn || (e->type()==QEvent::WindowActivate && hasFocus())){
+        EditorCommand c;c.type=EditorCommand::InputFocus;c.w=1;host_->PostCommand(c);
+    }
     if (e->type() == QEvent::FocusOut || e->type() == QEvent::WindowDeactivate || e->type() == QEvent::Hide)
     {
+        EditorCommand c;c.type=EditorCommand::InputFocus;c.w=0;host_->PostCommand(c);
         looking_ = false;
         rmbPressed_ = false;
         rmbMoved_ = false;
@@ -223,6 +246,32 @@ bool ViewportWidget::event(QEvent* e)
         EndObjectDrag();
 
         keys_.clear();
+    }
+
+    // Qt owns editor/UI shortcuts and text widgets. Only this focused widget feeds the game.
+    if(attached_ && host_->HasScene() && host_->PlayState()!=EditorQtHost::Edit)
+    {
+        if((e->type()==QEvent::KeyPress||e->type()==QEvent::KeyRelease)&&hasFocus()){
+            auto* key=static_cast<QKeyEvent*>(e);if(key->isAutoRepeat())return true;
+            const int nav=CameraNavigationKey(key->nativeScanCode(),key->key());
+            if((nav==Qt::Key_Space||nav==Qt::Key_P)&&key->modifiers()==Qt::NoModifier){
+                if(e->type()==QEvent::KeyPress){EditorCommand c;c.type=nav==Qt::Key_Space?EditorCommand::TogglePlay:EditorCommand::TogglePause;host_->PostCommand(c);}return true;
+            }
+            EditorCommand c;c.type=EditorCommand::InputKey;c.w=GameKey(key);c.h=e->type()==QEvent::KeyPress;host_->PostCommand(c);return true;
+        }
+        if(e->type()==QEvent::MouseButtonPress||e->type()==QEvent::MouseButtonRelease){
+            auto* mouse=static_cast<QMouseEvent*>(e);if(e->type()==QEvent::MouseButtonPress){activateWindow();setFocus(Qt::MouseFocusReason);lastMouse_=mouse->position();}
+            EditorCommand c;c.type=EditorCommand::InputKey;c.w=static_cast<uint32_t>(mouse->button()==Qt::RightButton?Keys::RightButton:mouse->button()==Qt::MiddleButton?Keys::MiddleButton:Keys::LeftButton);
+            c.h=e->type()==QEvent::MouseButtonPress;host_->PostCommand(c);return true;
+        }
+        if(e->type()==QEvent::MouseMove&&hasFocus()){
+            auto* mouse=static_cast<QMouseEvent*>(e);auto delta=mouse->position()-lastMouse_;lastMouse_=mouse->position();
+            EditorCommand c;c.type=EditorCommand::InputPointer;c.yaw=static_cast<float>(delta.x());c.pitch=static_cast<float>(delta.y());host_->PostCommand(c);return true;
+        }
+        if(e->type()==QEvent::Wheel&&hasFocus()){
+            EditorCommand c;c.type=EditorCommand::InputPointer;c.zoom=static_cast<float>(static_cast<QWheelEvent*>(e)->angleDelta().y())/120.f;host_->PostCommand(c);return true;
+        }
+        if(e->type()==QEvent::ContextMenu)return true;
     }
 
     if (qEnvironmentVariableIsSet("ENGINE_VIEWPORT_INPUT_TRACE") && e->type() == QEvent::KeyPress)
@@ -395,12 +444,14 @@ bool ViewportWidget::event(QEvent* e)
     if ((e->type() == QEvent::KeyPress || e->type() == QEvent::KeyRelease) && hasFocus())
     {
         auto* key = static_cast<QKeyEvent*>(e);
-
-        if (key->modifiers() & Qt::ControlModifier)
-            return QWidget::event(e);
+        if ((key->modifiers() & Qt::ControlModifier) && e->type()==QEvent::KeyPress) return QWidget::event(e);
 
         if (!key->isAutoRepeat())
         {
+            if (e->type() == QEvent::KeyPress && key->key() == Qt::Key_Escape) {
+                EditorCommand c; c.type=EditorCommand::SelectObject; host_->PostCommand(c); return true;
+            }
+            // Обработка Tab для циклического выбора объектов
             if (e->type() == QEvent::KeyPress && key->key() == Qt::Key_Tab)
             {
                 host_->FetchSceneAndSelectNext();

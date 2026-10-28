@@ -1,5 +1,7 @@
 #include <Engine/Resources/Paths.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/MainGame/CharacterController.h>
+#include <Engine/Components/Character.h>
 
 #include <algorithm>
 #include <array>
@@ -363,6 +365,7 @@ void Game::DestroyResources(bool preserveScene)
     depthStencilStateSkybox.Reset();
     DefaultRasterState.Reset();
     CullBackRasterState.Reset();
+    SelectionVS.Reset(); SelectionPS.Reset(); SelectionCB.Reset();
     ReleaseSwapChainResources();
 
     if (SwapChain && !bEmbedded)
@@ -2687,6 +2690,36 @@ void Game::Run()
     }
 }
 
+void Game::RenderEditorSelection()
+{
+    auto* object = scene.FindComponent(EditorSelectedId);
+    if (!bEmbedded || !object || !FirstPlayer) return;
+    if (!SelectionCB) {
+        Microsoft::WRL::ComPtr<ID3DBlob> vs, ps;
+        const auto file=EnginePaths::Shader("EditorSelection.hlsl").wstring();
+        if (FAILED(ShaderCompiler::CompileFromFile(file,nullptr,"VSMain","vs_5_0",vs.GetAddressOf())) ||
+            FAILED(ShaderCompiler::CompileFromFile(file,nullptr,"PSMain","ps_5_0",ps.GetAddressOf()))) return;
+        if (FAILED(Device->CreateVertexShader(vs->GetBufferPointer(),vs->GetBufferSize(),nullptr,SelectionVS.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreatePixelShader(ps->GetBufferPointer(),ps->GetBufferSize(),nullptr,SelectionPS.ReleaseAndGetAddressOf()))) return;
+        D3D11_BUFFER_DESC desc{}; desc.ByteWidth=24*sizeof(DirectX::XMFLOAT4); desc.BindFlags=D3D11_BIND_CONSTANT_BUFFER;
+        if (FAILED(Device->CreateBuffer(&desc,nullptr,SelectionCB.ReleaseAndGetAddressOf()))) return;
+    }
+    using namespace DirectX;
+    glm::vec3 lo,hi; object->GetEditorBounds(lo,hi);
+    const auto matrix=XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetViewMatrix())) * XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetProjectionMatrix()));
+    XMFLOAT4 projected[8], lines[24];
+    for (int i=0;i<8;++i) XMStoreFloat4(&projected[i],XMVector4Transform(XMVectorSet(i&1?hi.x:lo.x,i&2?hi.y:lo.y,i&4?hi.z:lo.z,1),matrix));
+    const int edges[]={0,1,0,2,0,4,1,3,1,5,2,3,2,6,3,7,4,5,4,6,5,7,6,7};
+    for(int i=0;i<24;++i)lines[i]=projected[edges[i]];
+    Context->UpdateSubresource(SelectionCB.Get(),0,nullptr,lines,0,0);
+    // Final editor-only pass; no depth attachment, so the selected object stays identifiable behind geometry.
+    Context->ClearState(); SetFullViewport();
+    Context->OMSetRenderTargets(1,RenderTargetView.GetAddressOf(),nullptr);
+    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+    Context->VSSetShader(SelectionVS.Get(),nullptr,0); Context->PSSetShader(SelectionPS.Get(),nullptr,0);
+    Context->VSSetConstantBuffers(0,1,SelectionCB.GetAddressOf());
+    Context->Draw(24,0);
+}
 bool Game::RenderViewportFrame(float deltaTime)
 {
     if (!bEmbedded || !bInitialized || ExitCode != 0) return false;
@@ -2699,6 +2732,7 @@ bool Game::RenderViewportFrame(float deltaTime)
     UpdateFrame(std::clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds));
     BeginGpuTimer();
     RenderFrame();
+    RenderEditorSelection();
     EndGpuTimer();
     EndFrame();
     LastFrameStats = Stats;
@@ -2739,6 +2773,7 @@ void Game::OnWindowResized(int clientWidth, int clientHeight, bool minimized)
 
 void Game::OnFocusLost()
 {
+    ActionInput.ReleaseAll();
     if (InputDevicePtr)
     {
         InputDevicePtr->ClearPressedKeys();
@@ -2826,10 +2861,49 @@ void Game::UpdateFrame(float realDeltaTime)
 void Game::UpdateSimulation(float deltaTime)
 {
     auto sceneUpdate = scene.BeginUpdate(); // Covers custom PreUpdate/TickComponents too.
+    InitializeGameplay();
+    StartGameplayComponents();
     TotalTime += deltaTime;
     PreUpdate(deltaTime);
-    FirstPlayer->UpdateCamera(deltaTime);
+    ActionInput.Tick(deltaTime);
+    if (Controller) Controller->Tick(deltaTime);
+    if (FirstPlayer) FirstPlayer->UpdateCamera(deltaTime);
     TickComponents(deltaTime);
+    if (Controller && FirstPlayer) Controller->UpdateCamera(*FirstPlayer);
+}
+
+std::unique_ptr<CharacterController> Game::CreateCharacterController() { return std::make_unique<CharacterController>(*this); }
+void Game::SetCharacterController(std::unique_ptr<CharacterController> controller)
+{
+    ActionInput.Reset(); Controller = std::move(controller);
+}
+void Game::InitializeGameplay()
+{
+    if (GameplayInitialized) return;
+    PlaySettings* settings = nullptr;
+    for (const auto& entry : scene.GetComponents()) if (auto* value = dynamic_cast<PlaySettings*>(entry.second.get())) {
+        if (settings) throw std::runtime_error("Only one PlaySettings object is allowed per scene");
+        settings = value;
+    }
+    if (settings) {
+        if (!Controller) Controller = CreateCharacterController();
+        if (!Controller) throw std::runtime_error("Controller factory returned null");
+        Controller->Configure(*settings);
+        if (settings->standardControl) Controller->BindInput();
+        if (FirstPlayer) Controller->UpdateCamera(*FirstPlayer);
+    }
+    GameplayInitialized = true;
+    StartGameplayComponents();
+}
+
+void Game::StartGameplayComponents()
+{
+    auto scope=scene.BeginUpdate();
+    for(const auto& entry:scene.GetComponents()) {
+        auto& component=*entry.second;
+        if(component.GameplayStarted)continue;
+        component.SetGame(this);component.GameplayStarted=true;component.BeginPlay();
+    }
 }
 
 void Game::PrepareRenderFrame()
@@ -2863,7 +2937,7 @@ void Game::PrepareRenderFrame()
 
 void Game::TickComponents(float deltaTime)
 {
-    const bool bPaused = InputDevicePtr && InputDevicePtr->IsKeyDown(Keys::Space);
+    const bool bPaused = !Controller && InputDevicePtr && InputDevicePtr->IsKeyDown(Keys::Space);
     scene.Tick(deltaTime, bPaused);
 }
 

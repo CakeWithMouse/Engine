@@ -43,6 +43,8 @@ void Vector(const Json& value, float* output, size_t count)
 }
 void Structure(const SceneSnapshot& data)
 {
+    if (data.documentVersion < 1 || data.documentVersion > 3)
+        throw SceneDocumentError(EngineSceneUnsupportedVersion, "Unsupported scene version");
     auto validText = [](const std::string& s) {
         return !s.empty() && s.find('\0') == std::string::npos && s.size() <= MaxBytes &&
             MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s.data(), static_cast<int>(s.size()), nullptr, 0);
@@ -52,6 +54,13 @@ void Structure(const SceneSnapshot& data)
     std::set<std::string> names;
     for (const auto& item : data.components)
     {
+        if (!item.projectData.empty())
+        {
+            if (data.documentVersion < 3) Invalid("Custom data requires scene format 3");
+            const auto value = Json::parse(item.projectData);
+            if (!value.is_object() || !value.contains("version") || !value["version"].is_number_unsigned())
+                Invalid("Custom data requires an object with an unsigned version");
+        }
         if (item.pointLight && !item.pointLight->IsValid()) Invalid("Invalid point light parameters");
         if (!SceneAssets::ValidPath(item.modelAsset) || !SceneAssets::ValidPath(item.textureAsset) ||
             !SceneAssets::ValidPath(item.materialAsset))
@@ -99,17 +108,38 @@ SceneSnapshot SceneDocument::Parse(const std::string& text)
             return true;
         });
         if (!json.is_object() || !json.contains("version")) Invalid("Missing version");
-        if (Id(json.at("version")) != 1) throw SceneDocumentError(EngineSceneUnsupportedVersion, "Unsupported scene version");
+        const auto version = Id(json.at("version"));
+        if (version < 1 || version > 3) throw SceneDocumentError(EngineSceneUnsupportedVersion, "Unsupported scene version; open with the original engine");
         RequireFields(json, {"version", "name", "objects"});
         SceneSnapshot data; data.name = Text(json.at("name"));
+        data.documentVersion = static_cast<uint32_t>(version);
+        if (version >= 2 && json.at("objects").is_array())
+            for (auto& object : json["objects"])
+            {
+                if (object.contains("pointLight")) Invalid("v2 uses versioned properties, not pointLight");
+                if (!object.contains("properties")) continue;
+                const auto& properties = object.at("properties");
+                if (!properties.is_object()) Invalid("Expected properties object");
+                for (auto it = properties.begin(); it != properties.end(); ++it)
+                {
+                    if (it.key() != "Engine.PointLight") Invalid("Unknown component properties; use the original engine. Nothing has been discarded.");
+                    RequireFields(it.value(), {"version", "value"});
+                    if (Id(it.value().at("version")) != 1)
+                        throw SceneDocumentError(EngineSceneUnsupportedVersion, "Unsupported point light property version");
+                    object["pointLight"] = it.value().at("value");
+                }
+                object.erase("properties");
+            }
         const auto& objects = json.at("objects");
         if (!objects.is_array() || objects.size() > 100000) Invalid("Invalid objects array");
         for (const auto& o : objects)
         {
             auto core = o;
             core.erase("assets"); core.erase("pointLight");
+            if (version >= 3) core.erase("projectData");
             RequireFields(core, {"id", "type", "name", "parent", "inheritParentScale", "transform"});
             SceneComponentSnapshot item;
+            if (version >= 3 && o.contains("projectData")) item.projectData = o.at("projectData").dump();
             if (o.contains("pointLight"))
             {
                 const auto& light = o.at("pointLight");
@@ -154,7 +184,7 @@ SceneSnapshot SceneDocument::Parse(const std::string& text)
 std::string SceneDocument::Serialize(const SceneSnapshot& data)
 {
     Structure(data);
-    Json json = {{"version", 1}, {"name", data.name}, {"objects", Json::array()}};
+    Json json = {{"version", data.documentVersion}, {"name", data.name}, {"objects", Json::array()}};
     for (const auto& o : data.components)
     {
         const auto& t = o.transform;
@@ -174,11 +204,27 @@ std::string SceneDocument::Serialize(const SceneSnapshot& data)
             const auto& light = *o.pointLight;
             json["objects"].back()["pointLight"] = {{"color", {light.color.x, light.color.y, light.color.z}},
                 {"intensity", light.intensity}, {"radius", light.radius}, {"enabled", light.enabled}};
+            if (data.documentVersion >= 2)
+            {
+                auto& object = json["objects"].back();
+                object["properties"] = {{"Engine.PointLight", {{"version",1},{"value",object["pointLight"]}}}};
+                object.erase("pointLight");
+            }
         }
+        if (!o.projectData.empty()) json["objects"].back()["projectData"] = Json::parse(o.projectData);
     }
     auto text = json.dump(2) + "\n";
     if (text.size() > MaxBytes) Invalid("Scene exceeds 16 MiB");
     return text;
+}
+SceneSnapshot SceneDocument::Migrate(const SceneSnapshot& data, uint32_t targetVersion)
+{
+    Structure(data);
+    if (targetVersion < data.documentVersion || targetVersion > 3 || targetVersion < 1)
+        throw SceneDocumentError(EngineSceneUnsupportedVersion, "Unsupported scene migration (downgrades are not automatic)");
+    auto result = data;
+    result.documentVersion = targetVersion;
+    return result;
 }
 void SceneDocument::Validate(const SceneSnapshot& data, ComponentTypeCatalog catalog)
 {
@@ -192,11 +238,13 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
     Validate(data, catalog); // No constructors before all data and keys have been checked.
     if (!target.GetComponents().empty() || target.IsUpdating()) throw std::logic_error("Restore requires an empty scene");
     target.SetName(data.name);
+    target.SetDocumentVersion(data.documentVersion);
     std::map<ComponentId, ComponentId> ids;
     for (const auto& o : data.components)
     {
         auto object = o.typeName == SceneAssets::ModelType ? SceneAssets::CreateModel(o.modelAsset) : catalog.Find(o.typeName)->create();
         if (!object) throw std::runtime_error("Component factory returned null");
+        object->LoadProjectData(o.projectData);
         SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
         auto added = target.AddComponent(o.name, object, o.typeName);
         if (added.result != SceneResult::Ok || target.SetTransform(added.id, o.transform) != SceneResult::Ok)
@@ -209,6 +257,8 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
     for (const auto& o : data.components)
         if (o.parentId && target.SetParent(ids.at(o.id), ids.at(o.parentId), o.inheritParentScale) != SceneResult::Ok)
             throw std::runtime_error("Cannot restore hierarchy");
+    for (const auto& o : data.components)
+        target.FindComponent(ids.at(o.id))->RemapProjectReferences(ids);
 }
 SceneSnapshot SceneDocument::Read(const std::filesystem::path& path)
 {
@@ -235,7 +285,8 @@ void SceneDocument::Write(const std::filesystem::path& path, const SceneSnapshot
         file = CreateFileW(temporary.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
         if (file == INVALID_HANDLE_VALUE && GetLastError() != ERROR_FILE_EXISTS) break;
     }
-    if (file == INVALID_HANDLE_VALUE) throw SceneDocumentError(EngineSceneIoError, "Cannot create temporary scene file");
+    if (file == INVALID_HANDLE_VALUE) throw SceneDocumentError(EngineSceneIoError,
+        "Cannot create temporary scene file '" + temporary.u8string() + "' (Windows error " + std::to_string(GetLastError()) + ")");
     DWORD written = 0;
     const bool ok = WriteFile(file, text.data(), static_cast<DWORD>(text.size()), &written, nullptr) &&
         written == text.size() && FlushFileBuffers(file);
