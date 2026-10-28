@@ -252,10 +252,10 @@ Objects:  {
 	Geometry: 1000001, "Geometry::", "Mesh" {
 		Vertices: *9 {
 			a: -1.000000,-1.000000,0.000000,1.000000,-1.000000,0.000000,0.000000,1.000000,0.000000
-		} 
+		}
 		PolygonVertexIndex: *3 {
 			a: 0,1,-3
-		} 
+		}
 		GeometryVersion: 124
 		LayerElementNormal: 0 {
 			Version: 101
@@ -264,7 +264,7 @@ Objects:  {
 			ReferenceInformationType: "Direct"
 			Normals: *9 {
 				a: 0.000000,0.000000,1.000000,0.000000,0.000000,1.000000,0.000000,0.000000,1.000000
-			} 
+			}
 		}
 		LayerElementUV: 0 {
 			Version: 101
@@ -273,10 +273,10 @@ Objects:  {
 			ReferenceInformationType: "IndexToDirect"
 			UV: *6 {
 				a: 0.000000,0.000000,1.000000,0.000000,0.500000,1.000000
-			} 
+			}
 			UVIndex: *3 {
 				a: 0,1,2
-			} 
+			}
 		}
 		LayerElementMaterial: 0 {
 			Version: 101
@@ -285,7 +285,7 @@ Objects:  {
 			ReferenceInformationType: "IndexToDirect"
 			Materials: *1 {
 				a: 0
-			} 
+			}
 		}
 		Layer: 0 {
 			Version: 100
