@@ -273,7 +273,7 @@ void ShaderInvalidation()
     CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::Default));
     CHECK(game.GetShaderErrors(shader).empty());
 
-    // Full reload (F6): an edit becomes visible without naming the file.
+    // Full reload (F6 in the editor): an edit becomes visible without naming the file.
     dir.Write("Hot.hlsl", "float4 PSMain() : SV_Target { return missingAfterReload; }\n");
     game.InvalidateAllShaders();
     game.BindComponentShaders(&component, ShaderCompileVariant::Default);

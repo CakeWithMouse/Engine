@@ -229,9 +229,13 @@ void SceneEditSession::AddMaterialApi(EngineEditSessionApi& api) noexcept
         });
     };
     api.reloadShaderFile = [](void* p, const char* path) -> uint32_t {
-        if (!path || !*path) return EngineSceneInvalidArgument;
+        if (!path) return EngineSceneInvalidArgument;
         return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
-            for (Game* game : s.Games()) game->InvalidateShaderFile(path);
+            for (Game* game : s.Games())
+            {
+                if (*path) game->InvalidateShaderFile(path);
+                else game->InvalidateAllShaders();
+            }
             return EngineSceneOk;
         });
     };

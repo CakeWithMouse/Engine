@@ -47,6 +47,8 @@ public:
     QString CreateMaterial(const QString& directory, const QString& name = {});
     // Для объекта с материалом по умолчанию: новый материал в Content/Materials, назначение и редактор.
     void CreateMaterialForSelection();
+    // F6: перекомпилировать все шейдеры и материалы с диска во всех сценах и превью.
+    void ReloadShaders();
 
 public slots:
     void AppendLine(const QString& line);

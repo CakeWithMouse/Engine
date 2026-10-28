@@ -88,6 +88,7 @@ struct EngineEditSessionApi
     // Re-reads the .mat file, dropping unsaved edits.
     uint32_t (ENGINE_MODULE_CALL *revertMaterial)(void*, const char* material, char* error, uint32_t capacity);
     // Absolute path of a shader file that changed on disk: every material and shader using it recompiles.
+    // Empty path (F6 in the editor): every shader and material is reloaded from disk.
     uint32_t (ENGINE_MODULE_CALL *reloadShaderFile)(void*, const char* path);
 
     // v6 material previews: one small scene per HWND, rendered by frame. Same HWND rules as the viewport.

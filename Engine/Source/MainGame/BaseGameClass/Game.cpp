@@ -2757,7 +2757,7 @@ void Game::ProcessHotkeys()
         return;
     }
 
-    // F3: deferred debug overlay, F4: VSync, F5: forward <-> deferred, F6: recompile shaders from disk.
+    // F3: deferred debug overlay, F4: VSync, F5: forward <-> deferred. Shader reload belongs to the editor.
     const bool overlayDown = InputDevicePtr->IsKeyDown(Keys::F3);
     if (overlayDown && !bOverlayKeyWasDown)
     {
@@ -2778,14 +2778,6 @@ void Game::ProcessHotkeys()
         RenderingType = RenderingType == Forward ? Deffered : Forward;
     }
     bRenderTypeKeyWasDown = renderTypeDown;
-
-    // Component shaders recompile lazily on the next pass; failures are printed by RegisterShaders.
-    const bool shaderReloadDown = InputDevicePtr->IsKeyDown(Keys::F6);
-    if (shaderReloadDown && !bShaderReloadKeyWasDown)
-    {
-        InvalidateAllShaders();
-    }
-    bShaderReloadKeyWasDown = shaderReloadDown;
 }
 
 void Game::UpdateFrame(float realDeltaTime)

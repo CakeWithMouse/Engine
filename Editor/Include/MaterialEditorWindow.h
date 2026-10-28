@@ -59,6 +59,8 @@ public:
     // Ctrl+S: записывает HLSL, перекомпилирует его и сохраняет .mat. false — файл не записан.
     bool Save();
     void Revert();
+    // Перечитывает состояние материала из движка (после F6): ошибки и параметры, текст HLSL не трогает.
+    void Refresh();
 
 protected:
     void closeEvent(QCloseEvent* event) override;

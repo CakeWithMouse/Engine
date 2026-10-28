@@ -265,7 +265,7 @@ public:
      * Shadow depth shaders are compiled once at start-up and are not affected.
      */
     bool InvalidateShaderFile(const std::string& shaderFile);
-    /** Same for every cached shader (F6). */
+    /** Same for every cached shader (F6 in the editor). */
     void InvalidateAllShaders();
     /** Compiler output of every failed stage/variant of this shader file; empty if none failed. */
     std::string GetShaderErrors(const std::string& shaderFile) const;
@@ -505,7 +505,6 @@ protected:
     bool bOverlayKeyWasDown = false;
     bool bVSyncKeyWasDown = false;
     bool bRenderTypeKeyWasDown = false;
-    bool bShaderReloadKeyWasDown = false;
     float TitleUpdateAccumulator = 0.0f;
     uint32_t TitleFrameCount = 0;
     double CpuFrameMsAccumulator = 0.0;

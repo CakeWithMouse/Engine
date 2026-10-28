@@ -808,6 +808,11 @@ void MaterialEditorWindow::Revert()
     }, true);
 }
 
+void MaterialEditorWindow::Refresh()
+{
+    if (loaded_ && !shuttingDown_) EngineThenRead({}, true);
+}
+
 bool MaterialEditorWindow::ConfirmClose()
 {
     if (!HasUnsavedChanges()) return true;

@@ -345,6 +345,29 @@ void EditorMainWindow::CreateMaterialForSelection()
     host_->PostCommand(c);
 }
 
+void EditorMainWindow::ReloadShaders()
+{
+    if (!host_->HasScene()) return;
+    EditorQtHost* host = host_;
+    QPointer<EditorMainWindow> self(this);
+    EditorCommand c;
+    c.type = EditorCommand::RunTask;
+    c.task = [host, self](const EngineEditSessionApi& api)
+    {
+        const uint32_t status = api.reloadShaderFile(api.context, "");
+        host->RunOnUi([self, status]
+        {
+            if (!self) return;
+            self->AppendLine(status == EngineSceneOk ? QStringLiteral("Шейдеры и материалы перекомпилированы с диска.")
+                                                     : QStringLiteral("Не удалось перекомпилировать шейдеры (код %1).").arg(status));
+        });
+    };
+    host_->PostCommand(c);
+    // Окна материалов перечитают ошибки и параметры после перекомпиляции: команды идут по очереди.
+    for (const auto& editor : materialEditors_)
+        if (editor) editor->Refresh();
+}
+
 bool EditorMainWindow::CloseMaterialEditors()
 {
     QList<MaterialEditorWindow*> open;

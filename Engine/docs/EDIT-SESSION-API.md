@@ -275,7 +275,7 @@ Play-копия и превью. Файл пишет только `saveMaterial`
 | setMaterialParameter(context, material, name, value[4]) | Лишние компоненты игнорируются. Неизвестное имя — NotFound |
 | setMaterialTexture(context, material, name, texture, error, capacity) | `/Game`-путь текстуры, пустой — белая |
 | saveMaterial / revertMaterial | Записать `.mat` / перечитать его, отбросив несохранённые правки |
-| reloadShaderFile(context, path) | Абсолютный путь изменённого файла: перекомпилировать все материалы и шейдеры, включающие его |
+| reloadShaderFile(context, path) | Абсолютный путь изменённого файла: перекомпилировать все материалы и шейдеры, включающие его. Пустая строка — перечитать всё (F6 редактора); null — InvalidArgument |
 | attachMaterialPreview / resizeMaterialPreview / detachMaterialPreview | Отдельная маленькая сцена на HWND; правила владения HWND как у viewport |
 | showMaterialPreview(context, preview, material, shape, error, capacity) | Показать материал на `EnginePreviewSphere`, `Cube` или `Plane` |
 | materialPreviewCamera(context, preview, yaw, pitch, zoom) | Орбита: радианы и шаги колеса |

@@ -73,6 +73,7 @@ void EditorMainWindow::BuildUi()
     setCentralWidget(nullptr);
 
     console_ = new QPlainTextEdit(this);
+    console_->setObjectName(QStringLiteral("Console"));
     console_->setReadOnly(true);
     console_->setMaximumBlockCount(2000);
 
@@ -219,6 +220,13 @@ void EditorMainWindow::BuildSceneMenu()
     {
         ImportAsset(true);
     });
+
+    // F6 работает и в окнах материалов.
+    auto* reloadShaders = menu->addAction(QStringLiteral("Перекомпилировать шейдеры"), this, [this]
+    {
+        ReloadShaders();
+    }, QKeySequence(Qt::Key_F6));
+    reloadShaders->setShortcutContext(Qt::ApplicationShortcut);
 
     menu->addSeparator();
 

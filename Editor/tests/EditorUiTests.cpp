@@ -229,6 +229,15 @@ int wmain(int argc, wchar_t** argv)
         until([&] { return inEditor(QStringLiteral("MaterialParam_Gloss_0")); });
         Ui([](auto* w) { QMetaObject::invokeMethod(w->template findChild<MaterialEditorWindow*>(), "close", Qt::QueuedConnection); });
         until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
+        // F6 is the editor's shader reload (games no longer have it): every scene and preview recompiles.
+        Ui([](auto* w) {
+            QAction* reload = nullptr;
+            for (auto* action : w->template findChildren<QAction*>()) if (action->shortcut() == QKeySequence(Qt::Key_F6)) reload = action;
+            Check(reload && reload->shortcutContext() == Qt::ApplicationShortcut, "F6 reloads shaders in every editor window");
+            reload->trigger();
+        });
+        until([&] { bool done = false; Ui([&](auto* w) {
+            done = w->template findChild<QPlainTextEdit*>(QStringLiteral("Console"))->toPlainText().contains(QStringLiteral("перекомпилированы")); }); return done; });
         Ui([](auto* w) { w->activateWindow(); }); // focused-field checks below need the main window active
 
         if (argc == 4)
