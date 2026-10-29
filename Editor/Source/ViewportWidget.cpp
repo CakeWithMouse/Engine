@@ -27,6 +27,14 @@
 #include <QVBoxLayout>
 #include <QCursor>
 #include <QApplication>
+#include <QToolButton>
+#include <QComboBox>
+#include <QButtonGroup>
+#include <QMenu>
+#include <QAction>
+#include <QSignalBlocker>
+#include <QLocale>
+#include <QRadialGradient>
 #include <Engine/InputDevice/Keys.h>
 
 namespace {
@@ -51,13 +59,13 @@ namespace
         switch (mode)
         {
         case EditorGizmoTranslate:
-            return QStringLiteral("Move");
+            return Tr("Перемещение", "Move");
         case EditorGizmoRotate:
-            return QStringLiteral("Rotate");
+            return Tr("Вращение", "Rotate");
         case EditorGizmoScale:
-            return QStringLiteral("Scale");
+            return Tr("Масштаб", "Scale");
         default:
-            return QStringLiteral("Unknown");
+            return Tr("Неизвестно", "Unknown");
         }
     }
 
@@ -123,7 +131,174 @@ namespace
         out[2] = z * inv * s;
         out[3] = std::cos(half);
     }
-}
+
+    QIcon CreateMoveGizmoIcon(const QColor& color)
+    {
+        QPixmap pix(16, 16);
+        pix.fill(Qt::transparent);
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(color, 1.5, Qt::SolidLine, Qt::RoundCap));
+        p.drawLine(8, 2, 8, 14);
+        p.drawLine(2, 8, 14, 8);
+        p.setBrush(color);
+        p.setPen(Qt::NoPen);
+        QPointF topArrow[] = {{8.0, 1.0}, {6.0, 4.0}, {10.0, 4.0}};
+        p.drawPolygon(topArrow, 3);
+        QPointF bottomArrow[] = {{8.0, 15.0}, {6.0, 12.0}, {10.0, 12.0}};
+        p.drawPolygon(bottomArrow, 3);
+        QPointF leftArrow[] = {{1.0, 8.0}, {4.0, 6.0}, {4.0, 10.0}};
+        p.drawPolygon(leftArrow, 3);
+        QPointF rightArrow[] = {{15.0, 8.0}, {12.0, 6.0}, {12.0, 10.0}};
+        p.drawPolygon(rightArrow, 3);
+        return QIcon(pix);
+    }
+
+    QIcon CreateRotateGizmoIcon(const QColor& color)
+    {
+        QPixmap pix(16, 16);
+        pix.fill(Qt::transparent);
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(color, 1.5, Qt::SolidLine, Qt::RoundCap));
+        p.setBrush(Qt::NoBrush);
+        p.drawArc(QRectF(2.5, 2.5, 11.0, 11.0), 30 * 16, 270 * 16);
+        p.setPen(Qt::NoPen);
+        p.setBrush(color);
+        QPointF head[] = {{13.5, 7.0}, {10.5, 4.5}, {14.0, 3.5}};
+        p.drawPolygon(head, 3);
+        return QIcon(pix);
+    }
+
+    QIcon CreateScaleGizmoIcon(const QColor& color)
+    {
+        QPixmap pix(16, 16);
+        pix.fill(Qt::transparent);
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(color, 1.5, Qt::SolidLine, Qt::RoundCap));
+        p.setBrush(Qt::NoBrush);
+        p.drawRect(QRectF(2.5, 7.5, 6.0, 6.0));
+        p.drawLine(QPointF(8.5, 7.5), QPointF(13.5, 2.5));
+        p.setPen(Qt::NoPen);
+        p.setBrush(color);
+        p.drawRect(QRectF(11.5, 1.5, 3.0, 3.0));
+        return QIcon(pix);
+    }
+
+    QIcon CreateMagnetIcon(const QColor& color)
+    {
+        QPixmap pix(16, 16);
+        pix.fill(Qt::transparent);
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(color, 2.0, Qt::SolidLine, Qt::FlatCap));
+        p.setBrush(Qt::NoBrush);
+        QPainterPath path;
+        path.moveTo(4, 4);
+        path.lineTo(4, 9);
+        path.arcTo(QRectF(4, 5, 8, 8), 180, 180);
+        path.lineTo(12, 4);
+        p.drawPath(path);
+        p.setPen(Qt::NoPen);
+        p.setBrush(QColor(0xEF, 0x44, 0x44));
+        p.drawRect(QRectF(3, 2, 2.5, 3));
+        p.setBrush(QColor(0x3B, 0x82, 0xF6));
+        p.drawRect(QRectF(10.5, 2, 2.5, 3));
+        return QIcon(pix);
+    }
+
+    QIcon CreateSnapGroundIcon(const QColor& color)
+    {
+        QPixmap pix(16, 16);
+        pix.fill(Qt::transparent);
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(QColor(0x22, 0xC5, 0x5E), 1.8, Qt::SolidLine, Qt::RoundCap));
+        p.drawLine(2, 13, 14, 13);
+        p.setPen(QPen(color, 1.5, Qt::SolidLine, Qt::RoundCap));
+        p.drawLine(8, 2, 8, 10);
+        p.setPen(Qt::NoPen);
+        p.setBrush(color);
+        QPointF arrow[] = {{8.0, 11.5}, {5.0, 7.5}, {11.0, 7.5}};
+        p.drawPolygon(arrow, 3);
+        return QIcon(pix);
+    }
+
+    QIcon CreateWireframeIcon(const QColor& color)
+    {
+        QPixmap pix(16, 16);
+        pix.fill(Qt::transparent);
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(color, 1.2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        p.setBrush(Qt::NoBrush);
+        QPointF topFace[] = {{8.0, 2.5}, {13.0, 5.5}, {8.0, 8.5}, {3.0, 5.5}};
+        p.drawPolygon(topFace, 4);
+        p.drawLine(QPointF(3.0, 5.5), QPointF(3.0, 11.0));
+        p.drawLine(QPointF(13.0, 5.5), QPointF(13.0, 11.0));
+        p.drawLine(QPointF(8.0, 8.5), QPointF(8.0, 14.0));
+        p.drawLine(QPointF(3.0, 11.0), QPointF(8.0, 14.0));
+        p.drawLine(QPointF(13.0, 11.0), QPointF(8.0, 14.0));
+        return QIcon(pix);
+    }
+
+    QIcon CreateSolidIcon(const QColor& color)
+    {
+        QPixmap pix(16, 16);
+        pix.fill(Qt::transparent);
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(color.darker(140), 1.0));
+        p.setBrush(color);
+        p.drawEllipse(QRectF(2.5, 2.5, 11.0, 11.0));
+        return QIcon(pix);
+    }
+
+    QIcon CreateMaterialPreviewIcon(const QColor& color)
+    {
+        QPixmap pix(16, 16);
+        pix.fill(Qt::transparent);
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(color, 1.0));
+        p.setBrush(color);
+        p.drawPie(QRectF(2.5, 2.5, 11.0, 11.0), 90 * 16, 180 * 16);
+        p.setBrush(QColor(0xE2, 0xE8, 0xF0));
+        p.drawPie(QRectF(2.5, 2.5, 11.0, 11.0), 270 * 16, 180 * 16);
+        return QIcon(pix);
+    }
+
+    QIcon CreateRenderedIcon(const QColor& color)
+    {
+        QPixmap pix(16, 16);
+        pix.fill(Qt::transparent);
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        QRadialGradient grad(6.0, 6.0, 8.0);
+        grad.setColorAt(0.0, Qt::white);
+        grad.setColorAt(0.3, color);
+        grad.setColorAt(1.0, color.darker(200));
+        p.setPen(QPen(color.darker(150), 1.0));
+        p.setBrush(grad);
+        p.drawEllipse(QRectF(2.5, 2.5, 11.0, 11.0));
+        return QIcon(pix);
+    }
+} // namespace
+
+class ViewportHeaderBar : public QFrame
+    {
+    public:
+        explicit ViewportHeaderBar(QWidget* parent = nullptr) : QFrame(parent)
+        {
+            setAttribute(Qt::WA_StyledBackground, true);
+            setAttribute(Qt::WA_NativeWindow, true);
+        }
+    protected:
+        void mousePressEvent(QMouseEvent* e) override { e->accept(); }
+        void mouseReleaseEvent(QMouseEvent* e) override { e->accept(); }
+        void mouseMoveEvent(QMouseEvent* e) override { e->accept(); }
+    };
 
 class AdjustLastOperationPanel : public QFrame
 {
@@ -452,6 +627,7 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
     updateGizmoToolTip();
 
     adjustPanel_ = new AdjustLastOperationPanel(host_, this);
+    BuildHeaderBar();
 
     auto* timer = new QTimer(this);
     auto elapsed = std::make_shared<QElapsedTimer>();
@@ -462,6 +638,7 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
         const float dt = std::min(0.05f, static_cast<float>(elapsed->restart()) / 1000.0f);
         const int state=host_->PlayState();
         if(inputState_!=state){inputState_=state;keys_.clear();looking_=rmbPressed_=false;EndObjectDrag();}
+
         if (!attached_ || !hasFocus() || !isActiveWindow()) return;
         if (state != EditorQtHost::Edit && host_->HasScene()) return;
 
@@ -541,6 +718,8 @@ void ViewportWidget::resizeEvent(QResizeEvent* e)
     QWidget::resizeEvent(e);
     if (attached_)
         SendResize();
+    if (viewportHeaderBar_)
+        viewportHeaderBar_->setGeometry(0, 0, width(), 28);
     if (adjustPanel_ && adjustPanel_->isVisible())
         adjustPanel_->move(12, height() - adjustPanel_->height() - 12);
 }
@@ -752,31 +931,47 @@ bool ViewportWidget::event(QEvent* e)
 
         if (draggingSelectedObject_)
         {
+            const bool isCtrlPressed = (mouse->modifiers() & Qt::ControlModifier) != 0;
+            const bool isSnapActive = snapEnabled_ || isCtrlPressed;
+            const QPointF total = mouse->position() - dragStartPos_;
+
             if (gizmoMode_ == EditorGizmoTranslate)
             {
-                const QPointF delta = mouse->position() - lastDragPos_;
-                lastDragPos_ = mouse->position();
-
-                float right = 0.0f;
-                float up = 0.0f;
-                float forward = 0.0f;
+                float dx = 0.0f;
+                float dy = 0.0f;
+                float dz = 0.0f;
 
                 if (mouse->modifiers() & Qt::ShiftModifier)
                 {
-                    forward = static_cast<float>(-delta.y()) * dragSensitivity_;
+                    dz = static_cast<float>(-total.y()) * 0.02f;
                 }
                 else
                 {
-                    right = static_cast<float>(delta.x()) * dragSensitivity_;
-                    up = static_cast<float>(-delta.y()) * dragSensitivity_;
+                    dx = static_cast<float>(total.x()) * 0.02f;
+                    dy = static_cast<float>(-total.y()) * 0.02f;
                 }
 
-                if (right != 0.0f || up != 0.0f || forward != 0.0f)
-                    host_->MoveSelectedObject(right, up, forward);
+                float newX = dragStartTransform_.position[0] + dx;
+                float newY = dragStartTransform_.position[1] + dy;
+                float newZ = dragStartTransform_.position[2] + dz;
+
+                if (isSnapActive && moveSnapStep_ > 1e-4)
+                {
+                    newX = static_cast<float>(std::round(newX / moveSnapStep_) * moveSnapStep_);
+                    newY = static_cast<float>(std::round(newY / moveSnapStep_) * moveSnapStep_);
+                    newZ = static_cast<float>(std::round(newZ / moveSnapStep_) * moveSnapStep_);
+                }
+
+                EngineSceneTransform t = dragStartTransform_;
+                t.position[0] = newX;
+                t.position[1] = newY;
+                t.position[2] = newZ;
+                PostSelectedTransform(t);
+                lastDragPos_ = mouse->position();
             }
             else
             {
-                ApplyRotateScaleGizmo(mouse->position());
+                ApplyRotateScaleGizmo(mouse->position(), isSnapActive);
                 lastDragPos_ = mouse->position();
             }
 
@@ -845,6 +1040,10 @@ bool ViewportWidget::event(QEvent* e)
         {
             if (e->type() == QEvent::KeyPress && key->key() == Qt::Key_Escape) {
                 EditorCommand c; c.type=EditorCommand::SelectObject; host_->PostCommand(c); return true;
+            }
+            if (e->type() == QEvent::KeyPress && key->key() == Qt::Key_End && host_->HasScene()) {
+                SnapToGround();
+                return true;
             }
             // Обработка Tab для циклического выбора объектов
             if (e->type() == QEvent::KeyPress && key->key() == Qt::Key_Tab)
@@ -1014,8 +1213,51 @@ void ViewportWidget::setGizmoMode(EditorGizmoMode mode)
 
     host_->SetGizmoMode(mode);
 
+    if (btnTranslate_ && btnRotate_ && btnScale_)
+    {
+        QSignalBlocker b1(btnTranslate_);
+        QSignalBlocker b2(btnRotate_);
+        QSignalBlocker b3(btnScale_);
+        btnTranslate_->setChecked(mode == EditorGizmoTranslate);
+        btnRotate_->setChecked(mode == EditorGizmoRotate);
+        btnScale_->setChecked(mode == EditorGizmoScale);
+    }
+
     updateGizmoToolTip();
     emit gizmoModeChanged(mode);
+}
+
+void ViewportWidget::SetShadingMode(ViewportShadingMode mode)
+{
+    shadingMode_ = mode;
+    if (btnShadingWireframe_ && btnShadingSolid_ && btnShadingUnlit_ && btnShadingRendered_)
+    {
+        QSignalBlocker b1(btnShadingWireframe_);
+        QSignalBlocker b2(btnShadingSolid_);
+        QSignalBlocker b3(btnShadingUnlit_);
+        QSignalBlocker b4(btnShadingRendered_);
+        btnShadingWireframe_->setChecked(mode == ViewportShadingMode::Wireframe);
+        btnShadingSolid_->setChecked(mode == ViewportShadingMode::Solid);
+        btnShadingUnlit_->setChecked(mode == ViewportShadingMode::Unlit);
+        btnShadingRendered_->setChecked(mode == ViewportShadingMode::Rendered);
+    }
+    emit shadingModeChanged(mode);
+}
+
+void ViewportWidget::SnapToGround()
+{
+    uint64_t id = 0;
+    EngineSceneTransform transform{};
+    if (SelectedTransform(id, transform))
+    {
+        transform.position[1] = static_cast<float>(std::abs(transform.scale[1]) * 0.5f);
+        EditorCommand c;
+        c.type = EditorCommand::UpdateObjectTransform;
+        c.objectId = id;
+        c.transform = transform;
+        c.path = QStringLiteral("snap_ground");
+        host_->PostCommand(c);
+    }
 }
 
 void ViewportWidget::updateGizmoToolTip()
@@ -1026,16 +1268,312 @@ void ViewportWidget::updateGizmoToolTip()
     {
         setToolTip(
             QStringLiteral("Gizmo: %1 | Keys: G Move, R Rotate, S Scale, 1/2/3\n"
-                "Space: Play/Stop | P: Pause | MMB: Orbit | Shift+MMB: Pan | RMB: Look (WASD) | Tab: select | Arrows/PgUp/PgDn: move")
+                "End: Snap to Ground | Space: Play/Stop | P: Pause | MMB: Orbit | Shift+MMB: Pan | RMB: Look (WASD) | Tab: select | Arrows/PgUp/PgDn: move")
             .arg(modeName));
     }
     else
     {
         setToolTip(
             QStringLiteral("Gizmo: %1 | Keys: W Move, E Rotate, R Scale, 1/2/3\n"
-                "Space: Play/Stop | P: Pause | RMB: Look (WASD) | MMB/Shift+MMB: Pan | Tab: select | Arrows/PgUp/PgDn: move")
+                "End: Snap to Ground | Space: Play/Stop | P: Pause | RMB: Look (WASD) | MMB/Shift+MMB: Pan | Tab: select | Arrows/PgUp/PgDn: move")
             .arg(modeName));
     }
+}
+
+void ViewportWidget::BuildHeaderBar()
+{
+    viewportHeaderBar_ = new ViewportHeaderBar(this);
+    viewportHeaderBar_->setObjectName(QStringLiteral("ViewportHeaderBar"));
+    viewportHeaderBar_->setFixedHeight(28);
+    viewportHeaderBar_->setStyleSheet(QStringLiteral(
+        "ViewportHeaderBar#ViewportHeaderBar {"
+        "  background-color: rgba(24, 26, 31, 0.95);"
+        "  border-bottom: 1px solid #2B2E38;"
+        "}"
+        "QToolButton, QPushButton {"
+        "  background: transparent;"
+        "  color: #C5CBD3;"
+        "  border: 1px solid transparent;"
+        "  border-radius: 3px;"
+        "  padding: 1px 4px;"
+        "  font-size: 11px;"
+        "  min-height: 20px;"
+        "}"
+        "QToolButton:hover, QPushButton:hover {"
+        "  background: #252830;"
+        "  color: #FFFFFF;"
+        "  border: 1px solid #3B404D;"
+        "}"
+        "QToolButton:checked, QPushButton:checked {"
+        "  background: #1E3A5F;"
+        "  color: #60A5FA;"
+        "  border: 1px solid #3B82F6;"
+        "  font-weight: bold;"
+        "}"
+        "QComboBox {"
+        "  background: #1A1C23;"
+        "  color: #E2E8F0;"
+        "  border: 1px solid #333742;"
+        "  border-radius: 3px;"
+        "  padding: 1px 3px;"
+        "  font-size: 11px;"
+        "  height: 20px;"
+        "}"
+        "QComboBox::drop-down {"
+        "  border: none;"
+        "  width: 14px;"
+        "}"
+        "QComboBox QAbstractItemView {"
+        "  background: #181A1F;"
+        "  color: #E2E8F0;"
+        "  selection-background-color: #3B82F6;"
+        "  border: 1px solid #333742;"
+        "}"
+    ));
+
+    auto* layout = new QHBoxLayout(viewportHeaderBar_);
+    layout->setContentsMargins(6, 2, 6, 2);
+    layout->setSpacing(3);
+
+    auto makeSep = [this, layout]() {
+        auto* sep = new QFrame(viewportHeaderBar_);
+        sep->setFrameShape(QFrame::VLine);
+        sep->setFrameShadow(QFrame::Plain);
+        sep->setStyleSheet(QStringLiteral("color: #2E323D; margin: 2px 2px;"));
+        layout->addWidget(sep);
+        return sep;
+    };
+
+    // --- Левая группа: Инструменты Гизмо ---
+    gizmoGroup_ = new QButtonGroup(this);
+    gizmoGroup_->setExclusive(true);
+
+    const QColor iconColor(0xC5, 0xCB, 0xD3);
+
+    btnTranslate_ = new QToolButton(viewportHeaderBar_);
+    btnTranslate_->setIcon(CreateMoveGizmoIcon(iconColor));
+    btnTranslate_->setCheckable(true);
+    btnTranslate_->setChecked(gizmoMode_ == EditorGizmoTranslate);
+    btnTranslate_->setToolTip(Tr("Перемещение (W / G)", "Move (W / G)"));
+    btnTranslate_->setFixedSize(24, 22);
+    gizmoGroup_->addButton(btnTranslate_, EditorGizmoTranslate);
+    layout->addWidget(btnTranslate_);
+
+    btnRotate_ = new QToolButton(viewportHeaderBar_);
+    btnRotate_->setIcon(CreateRotateGizmoIcon(iconColor));
+    btnRotate_->setCheckable(true);
+    btnRotate_->setChecked(gizmoMode_ == EditorGizmoRotate);
+    btnRotate_->setToolTip(Tr("Вращение (E / R)", "Rotate (E / R)"));
+    btnRotate_->setFixedSize(24, 22);
+    gizmoGroup_->addButton(btnRotate_, EditorGizmoRotate);
+    layout->addWidget(btnRotate_);
+
+    btnScale_ = new QToolButton(viewportHeaderBar_);
+    btnScale_->setIcon(CreateScaleGizmoIcon(iconColor));
+    btnScale_->setCheckable(true);
+    btnScale_->setChecked(gizmoMode_ == EditorGizmoScale);
+    btnScale_->setToolTip(Tr("Масштаб (R / S)", "Scale (R / S)"));
+    btnScale_->setFixedSize(24, 22);
+    gizmoGroup_->addButton(btnScale_, EditorGizmoScale);
+    layout->addWidget(btnScale_);
+
+    connect(gizmoGroup_, &QButtonGroup::idClicked, this, [this](int id) {
+        setGizmoMode(static_cast<EditorGizmoMode>(id));
+    });
+
+    comboOrientation_ = new QComboBox(viewportHeaderBar_);
+    comboOrientation_->addItem(Tr("Мир", "World"));
+    comboOrientation_->addItem(Tr("Локально", "Local"));
+    comboOrientation_->setFixedWidth(72);
+    connect(comboOrientation_, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int idx) {
+        localOrientation_ = (idx == 1);
+    });
+    layout->addWidget(comboOrientation_);
+
+    makeSep();
+
+    // --- Центральная группа: Привязка (Snapping) ---
+    btnSnap_ = new QToolButton(viewportHeaderBar_);
+    btnSnap_->setIcon(CreateMagnetIcon(iconColor));
+    btnSnap_->setText(Tr("Привязка", "Snap"));
+    btnSnap_->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    btnSnap_->setCheckable(true);
+    btnSnap_->setChecked(snapEnabled_);
+    btnSnap_->setToolTip(Tr("Привязка к сетке (Ctrl для временного снапа)", "Snapping (Hold Ctrl for temp snap)"));
+    btnSnap_->setFixedHeight(22);
+    connect(btnSnap_, &QToolButton::toggled, this, [this](bool checked) {
+        snapEnabled_ = checked;
+    });
+    layout->addWidget(btnSnap_);
+
+    comboMoveSnap_ = new QComboBox(viewportHeaderBar_);
+    const std::vector<std::pair<QString, double>> moveSteps = {
+        {QStringLiteral("0.1 m"), 0.1},
+        {QStringLiteral("0.25 m"), 0.25},
+        {QStringLiteral("0.5 m"), 0.5},
+        {QStringLiteral("1.0 m"), 1.0},
+        {QStringLiteral("2.0 m"), 2.0},
+        {QStringLiteral("5.0 m"), 5.0},
+        {QStringLiteral("10.0 m"), 10.0}
+    };
+    for (const auto& [label, val] : moveSteps) {
+        comboMoveSnap_->addItem(label, val);
+    }
+    comboMoveSnap_->setCurrentIndex(3); // 1.0 m
+    moveSnapStep_ = 1.0;
+    comboMoveSnap_->setFixedWidth(64);
+    comboMoveSnap_->setToolTip(Tr("Шаг перемещения (м)", "Move Snap Step (m)"));
+    connect(comboMoveSnap_, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int) {
+        moveSnapStep_ = comboMoveSnap_->currentData().toDouble();
+    });
+    layout->addWidget(comboMoveSnap_);
+
+    comboRotateSnap_ = new QComboBox(viewportHeaderBar_);
+    const std::vector<std::pair<QString, double>> rotSteps = {
+        {QStringLiteral("5°"), 5.0},
+        {QStringLiteral("15°"), 15.0},
+        {QStringLiteral("30°"), 30.0},
+        {QStringLiteral("45°"), 45.0},
+        {QStringLiteral("90°"), 90.0}
+    };
+    for (const auto& [label, val] : rotSteps) {
+        comboRotateSnap_->addItem(label, val);
+    }
+    comboRotateSnap_->setCurrentIndex(1); // 15°
+    rotateSnapStep_ = 15.0;
+    comboRotateSnap_->setFixedWidth(52);
+    comboRotateSnap_->setToolTip(Tr("Шаг угла вращения", "Rotate Snap Step"));
+    connect(comboRotateSnap_, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int) {
+        rotateSnapStep_ = comboRotateSnap_->currentData().toDouble();
+    });
+    layout->addWidget(comboRotateSnap_);
+
+    comboScaleSnap_ = new QComboBox(viewportHeaderBar_);
+    const std::vector<std::pair<QString, double>> scaleSteps = {
+        {QStringLiteral("0.1"), 0.1},
+        {QStringLiteral("0.25"), 0.25},
+        {QStringLiteral("0.5"), 0.5},
+        {QStringLiteral("1.0"), 1.0}
+    };
+    for (const auto& [label, val] : scaleSteps) {
+        comboScaleSnap_->addItem(label, val);
+    }
+    comboScaleSnap_->setCurrentIndex(1); // 0.25
+    scaleSnapStep_ = 0.25;
+    comboScaleSnap_->setFixedWidth(52);
+    comboScaleSnap_->setToolTip(Tr("Шаг масштабирования", "Scale Snap Step"));
+    connect(comboScaleSnap_, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int) {
+        scaleSnapStep_ = comboScaleSnap_->currentData().toDouble();
+    });
+    layout->addWidget(comboScaleSnap_);
+
+    btnSnapGround_ = new QToolButton(viewportHeaderBar_);
+    btnSnapGround_->setIcon(CreateSnapGroundIcon(iconColor));
+    btnSnapGround_->setToolTip(Tr("Посадить на землю (End)", "Snap to Ground (End)"));
+    btnSnapGround_->setFixedSize(24, 22);
+    connect(btnSnapGround_, &QToolButton::clicked, this, &ViewportWidget::SnapToGround);
+    layout->addWidget(btnSnapGround_);
+
+    layout->addStretch();
+
+    // --- Правая группа: Режимы шейдинга и Оверлеи ---
+    shadingGroup_ = new QButtonGroup(this);
+    shadingGroup_->setExclusive(true);
+
+    btnShadingWireframe_ = new QToolButton(viewportHeaderBar_);
+    btnShadingWireframe_->setIcon(CreateWireframeIcon(iconColor));
+    btnShadingWireframe_->setCheckable(true);
+    btnShadingWireframe_->setToolTip(Tr("Сетка (Wireframe)", "Wireframe"));
+    btnShadingWireframe_->setFixedSize(24, 22);
+    shadingGroup_->addButton(btnShadingWireframe_, static_cast<int>(ViewportShadingMode::Wireframe));
+    layout->addWidget(btnShadingWireframe_);
+
+    btnShadingSolid_ = new QToolButton(viewportHeaderBar_);
+    btnShadingSolid_->setIcon(CreateSolidIcon(iconColor));
+    btnShadingSolid_->setCheckable(true);
+    btnShadingSolid_->setChecked(true);
+    btnShadingSolid_->setToolTip(Tr("Сплошной (Solid)", "Solid"));
+    btnShadingSolid_->setFixedSize(24, 22);
+    shadingGroup_->addButton(btnShadingSolid_, static_cast<int>(ViewportShadingMode::Solid));
+    layout->addWidget(btnShadingSolid_);
+
+    btnShadingUnlit_ = new QToolButton(viewportHeaderBar_);
+    btnShadingUnlit_->setIcon(CreateMaterialPreviewIcon(iconColor));
+    btnShadingUnlit_->setCheckable(true);
+    btnShadingUnlit_->setToolTip(Tr("Без света / Текстуры (Unlit)", "Unlit / Material Preview"));
+    btnShadingUnlit_->setFixedSize(24, 22);
+    shadingGroup_->addButton(btnShadingUnlit_, static_cast<int>(ViewportShadingMode::Unlit));
+    layout->addWidget(btnShadingUnlit_);
+
+    btnShadingRendered_ = new QToolButton(viewportHeaderBar_);
+    btnShadingRendered_->setIcon(CreateRenderedIcon(QColor(0x38, 0xBD, 0xF8)));
+    btnShadingRendered_->setCheckable(true);
+    btnShadingRendered_->setToolTip(Tr("Полный рендер (Rendered)", "Rendered"));
+    btnShadingRendered_->setFixedSize(24, 22);
+    shadingGroup_->addButton(btnShadingRendered_, static_cast<int>(ViewportShadingMode::Rendered));
+    layout->addWidget(btnShadingRendered_);
+
+    connect(shadingGroup_, &QButtonGroup::idClicked, this, [this](int id) {
+        SetShadingMode(static_cast<ViewportShadingMode>(id));
+    });
+
+    makeSep();
+
+    btnOverlays_ = new QToolButton(viewportHeaderBar_);
+    btnOverlays_->setText(Tr("Оверлеи", "Overlays") + QStringLiteral(" ▾"));
+    btnOverlays_->setPopupMode(QToolButton::InstantPopup);
+    btnOverlays_->setFixedHeight(22);
+
+    menuOverlays_ = new QMenu(btnOverlays_);
+    menuOverlays_->setStyleSheet(QStringLiteral(
+        "QMenu {"
+        "  background: #181A1F;"
+        "  color: #E2E8F0;"
+        "  border: 1px solid #333742;"
+        "  padding: 4px;"
+        "}"
+        "QMenu::item {"
+        "  padding: 4px 20px 4px 24px;"
+        "  border-radius: 3px;"
+        "}"
+        "QMenu::item:selected {"
+        "  background: #252830;"
+        "  color: #FFFFFF;"
+        "}"
+    ));
+
+    actOverlayGrid_ = menuOverlays_->addAction(Tr("Показать сетку", "Show Grid"));
+    actOverlayGrid_->setCheckable(true);
+    actOverlayGrid_->setChecked(true);
+
+    actOverlayBackface_ = menuOverlays_->addAction(Tr("Отсечение задних граней", "Backface Culling"));
+    actOverlayBackface_->setCheckable(true);
+    actOverlayBackface_->setChecked(true);
+
+    actOverlayShadows_ = menuOverlays_->addAction(Tr("Тени", "Shadows"));
+    actOverlayShadows_->setCheckable(true);
+    actOverlayShadows_->setChecked(true);
+
+    actOverlayOutline_ = menuOverlays_->addAction(Tr("Контур выделения", "Selection Outline"));
+    actOverlayOutline_->setCheckable(true);
+    actOverlayOutline_->setChecked(true);
+
+    actOverlayGizmos_ = menuOverlays_->addAction(Tr("Служебные маркеры", "Gizmos & Icons"));
+    actOverlayGizmos_->setCheckable(true);
+    actOverlayGizmos_->setChecked(true);
+
+    menuOverlays_->addSeparator();
+
+    actOverlayStats_ = menuOverlays_->addAction(Tr("Статистика сцены", "Scene Statistics / Debug Info"));
+    actOverlayStats_->setCheckable(true);
+    actOverlayStats_->setChecked(true);
+
+    btnOverlays_->setMenu(menuOverlays_);
+    layout->addWidget(btnOverlays_);
+
+    viewportHeaderBar_->setGeometry(0, 0, width(), 28);
+    viewportHeaderBar_->show();
+    viewportHeaderBar_->raise();
 }
 
 bool ViewportWidget::SelectedTransform(uint64_t& id, EngineSceneTransform& transform)
@@ -1084,15 +1622,12 @@ bool ViewportWidget::BeginObjectDrag(const QPointF& pos)
     dragStartPos_ = pos;
     lastDragPos_ = pos;
 
-    if (gizmoMode_ != EditorGizmoTranslate)
-    {
-        EditorCommand c;
-        c.type = EditorCommand::BeginGizmoDrag;
-        c.objectId = id;
-        host_->PostCommand(c);
+    EditorCommand c;
+    c.type = EditorCommand::BeginGizmoDrag;
+    c.objectId = id;
+    host_->PostCommand(c);
 
-        gizmoDragSession_ = true;
-    }
+    gizmoDragSession_ = true;
 
     return true;
 }
@@ -1129,7 +1664,7 @@ void ViewportWidget::PostSelectedTransform(const EngineSceneTransform& transform
     host_->PostCommand(c);
 }
 
-void ViewportWidget::ApplyRotateScaleGizmo(const QPointF& pos)
+void ViewportWidget::ApplyRotateScaleGizmo(const QPointF& pos, bool isSnapActive)
 {
     if (!draggingSelectedObject_)
         return;
@@ -1139,15 +1674,22 @@ void ViewportWidget::ApplyRotateScaleGizmo(const QPointF& pos)
 
     const QPointF total = pos - dragStartPos_;
 
-    if (std::fabs(total.x()) < 1e-3 && std::fabs(total.y()) < 1e-3)
-        return;
-
     EngineSceneTransform t = dragStartTransform_;
 
     if (gizmoMode_ == EditorGizmoRotate)
     {
-        const double yaw = total.x() * static_cast<double>(rotateSensitivity_);
-        const double pitch = -total.y() * static_cast<double>(rotateSensitivity_);
+        double yaw = total.x() * static_cast<double>(rotateSensitivity_);
+        double pitch = -total.y() * static_cast<double>(rotateSensitivity_);
+        double roll = 0.0;
+
+        if (isSnapActive && rotateSnapStep_ > 1e-4)
+        {
+            const double deg2rad = 3.14159265358979323846 / 180.0;
+            const double stepRad = rotateSnapStep_ * deg2rad;
+            yaw = std::round(yaw / stepRad) * stepRad;
+            pitch = std::round(pitch / stepRad) * stepRad;
+            roll = std::round(roll / stepRad) * stepRad;
+        }
 
         double startRot[4] = {
             static_cast<double>(dragStartTransform_.rotation[0]),
@@ -1160,14 +1702,18 @@ void ViewportWidget::ApplyRotateScaleGizmo(const QPointF& pos)
 
         double qYaw[4];
         double qPitch[4];
-        double qTmp[4];
+        double qRoll[4];
+        double qTmp1[4];
+        double qTmp2[4];
         double qNew[4];
 
         AxisAngleQuat(0.0, 1.0, 0.0, yaw, qYaw);
         AxisAngleQuat(1.0, 0.0, 0.0, pitch, qPitch);
+        AxisAngleQuat(0.0, 0.0, 1.0, roll, qRoll);
 
-        MulQuat(qYaw, qPitch, qTmp);
-        MulQuat(qTmp, startRot, qNew);
+        MulQuat(qYaw, qPitch, qTmp1);
+        MulQuat(qTmp1, qRoll, qTmp2);
+        MulQuat(qTmp2, startRot, qNew);
         NormalizeQuat(qNew);
 
         using RotT = std::remove_reference_t<decltype(t.rotation[0])>;
@@ -1180,12 +1726,22 @@ void ViewportWidget::ApplyRotateScaleGizmo(const QPointF& pos)
         double factor = std::exp((total.x() - total.y()) * static_cast<double>(scaleSensitivity_));
         factor = std::max(0.01, std::min(100.0, factor));
 
+        if (isSnapActive && scaleSnapStep_ > 1e-4)
+        {
+            factor = std::max(scaleSnapStep_, std::round(factor / scaleSnapStep_) * scaleSnapStep_);
+        }
+
         using ScaleT = std::remove_reference_t<decltype(t.scale[0])>;
 
         for (int i = 0; i < 3; ++i)
         {
             const double base = dragStartTransform_.scale[i];
-            t.scale[i] = static_cast<ScaleT>(base * factor);
+            double newScale = base * factor;
+            if (isSnapActive && scaleSnapStep_ > 1e-4)
+            {
+                newScale = std::max(scaleSnapStep_, std::round(newScale / scaleSnapStep_) * scaleSnapStep_);
+            }
+            t.scale[i] = static_cast<ScaleT>(newScale);
         }
     }
 
