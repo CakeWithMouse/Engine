@@ -23,6 +23,7 @@
 ObjectInspectorPanel::ObjectInspectorPanel(QWidget* parent)
     : QWidget(parent)
 {
+    setMinimumSize(140, 80);
     BuildUi();
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
         RetranslateUi();

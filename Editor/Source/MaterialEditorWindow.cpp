@@ -343,6 +343,7 @@ void MaterialEditorWindow::RetranslateUi()
     }
     if (shapeLabel_) shapeLabel_->setText(Tr(" Форма: ", " Shape: "));
     if (shape_) {
+        QSignalBlocker blocker(shape_);
         const int cur = shape_->currentIndex();
         shape_->setItemText(0, Tr("Сфера", "Sphere"));
         shape_->setItemText(1, Tr("Куб", "Cube"));
@@ -350,6 +351,7 @@ void MaterialEditorWindow::RetranslateUi()
         shape_->setCurrentIndex(cur);
     }
     if (blend_) {
+        QSignalBlocker blocker(blend_);
         const int cur = blend_->currentIndex();
         blend_->setItemText(0, Tr("Непрозрачный", "Opaque"));
         blend_->setItemText(1, Tr("С вырезом (masked)", "Masked (alpha clip)"));

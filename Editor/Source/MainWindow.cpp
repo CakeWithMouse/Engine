@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "EditorLocale.h"
+#include <QSettings>
 #include "QtHost.h"
 #include "FileBrowser.h"
 #include "ViewportWidget.h"
@@ -70,6 +71,7 @@ void EditorMainWindow::BuildUi()
     resize(1280, 720);
 
     setDockNestingEnabled(true);
+    setDockOptions(QMainWindow::AllowNestedDocks | QMainWindow::AllowTabbedDocks | QMainWindow::AnimatedDocks | QMainWindow::GroupedDragging);
 
     setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
     setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
@@ -87,6 +89,7 @@ void EditorMainWindow::BuildUi()
         QDockWidget::DockWidgetClosable
     );
 
+    viewportDock_->setMinimumSize(140, 80);
     addDockWidget(Qt::TopDockWidgetArea, viewportDock_);
     setCentralWidget(nullptr);
 
@@ -97,20 +100,16 @@ void EditorMainWindow::BuildUi()
 
     consoleDock_ = new QDockWidget(Tr("Консоль", "Console"), this);
     consoleDock_->setWidget(console_);
+    consoleDock_->setMinimumSize(140, 80);
     addDockWidget(Qt::BottomDockWidgetArea, consoleDock_);
 
     fileDock_ = new FileBrowserDock(host_, this);
+    fileDock_->setMinimumSize(140, 80);
     addDockWidget(Qt::BottomDockWidgetArea, fileDock_);
-
-    tabifyDockWidget(consoleDock_, fileDock_);
-
-    resizeDocks({viewportDock_, consoleDock_}, {620, 100}, Qt::Vertical);
 
     BuildToolBar();
 
     BuildSceneDocks();
-
-    resizeDocks({viewportDock_, consoleDock_}, {620, 100}, Qt::Vertical);
 
     viewMenu_ = menuBar()->addMenu(Tr("Вид", "View"));
 
@@ -145,6 +144,14 @@ void EditorMainWindow::BuildUi()
     actLangRu_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::Ru);
     actLangEn_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::En);
 
+    viewMenu_->addSeparator();
+    actResetLayout_ = viewMenu_->addAction(Tr("Сбросить раскладку окон", "Reset Window Layout"), this, [this] {
+        QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
+        settings.remove(QStringLiteral("window/state"));
+        settings.remove(QStringLiteral("window/geometry"));
+        ApplyDefaultLayout();
+    });
+
     statsLabel_ = new QLabel(this);
     statusBar()->addPermanentWidget(statsLabel_);
 
@@ -175,6 +182,8 @@ void EditorMainWindow::BuildUi()
         this
     ));
 
+    ApplySavedOrInitialLayout();
+
     if (host_->HasScene())
         RefreshSceneUi();
 }
@@ -186,6 +195,15 @@ void EditorMainWindow::closeEvent(QCloseEvent* event)
     event->ignore();
     if (closing_ || sceneBusy_ || checkingChanges_) return;
     if (!CloseMaterialEditors([this] { close(); })) return;
+
+    const bool isTest = qEnvironmentVariableIsSet("PAIN_EDITOR_TEST_MODE") ||
+        (host_ && host_->host().projectName && std::string(host_->host().projectName).find("UI") != std::string::npos);
+    if (!isTest) {
+        QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
+        settings.setValue(QStringLiteral("window/geometry"), saveGeometry());
+        settings.setValue(QStringLiteral("window/state"), saveState());
+    }
+
     closing_ = true;
     // Queue a barrier after viewport edits, then inspect the authoritative dirty state.
     if (host_->HasScene())
@@ -549,9 +567,11 @@ void EditorMainWindow::BuildSceneDocks()
         QDockWidget::DockWidgetClosable
     );
 
+    sceneObjectsDock_->setMinimumSize(140, 80);
+
     inspectorDock_ = new QDockWidget(Tr("Свойства объекта", "Object Properties"), this);
     inspectorDock_->setObjectName(QStringLiteral("InspectorDock"));
-    inspectorDock_->setMinimumWidth(300);
+    inspectorDock_->setMinimumSize(140, 80);
     inspectorDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     inspectorDock_->setFeatures(
         QDockWidget::DockWidgetMovable |
@@ -591,26 +611,6 @@ void EditorMainWindow::BuildSceneDocks()
     inspectorDock_->setWidget(objectInspectorPanel_);
 
     ConnectPanels();
-
-    if (viewportDock_)
-    {
-        splitDockWidget(sceneObjectsDock_, viewportDock_, Qt::Horizontal);
-        splitDockWidget(viewportDock_, inspectorDock_, Qt::Horizontal);
-
-        resizeDocks(
-            {sceneObjectsDock_, viewportDock_, inspectorDock_},
-            {250, 700, 320},
-            Qt::Horizontal
-        );
-    }
-    else
-    {
-        resizeDocks(
-            {sceneObjectsDock_, inspectorDock_},
-            {280, 300},
-            Qt::Horizontal
-        );
-    }
 }
 
 void EditorMainWindow::ConnectPanels()
@@ -1416,4 +1416,52 @@ void EditorMainWindow::RetranslateUi()
     }
     if (actLangRu_) actLangRu_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::Ru);
     if (actLangEn_) actLangEn_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::En);
+    if (actResetLayout_) actResetLayout_->setText(Tr("Сбросить раскладку окон", "Reset Window Layout"));
+}
+
+void EditorMainWindow::ApplyDefaultLayout()
+{
+    if (viewportDock_ && consoleDock_ && fileDock_) {
+        addDockWidget(Qt::TopDockWidgetArea, viewportDock_);
+        addDockWidget(Qt::BottomDockWidgetArea, consoleDock_);
+        addDockWidget(Qt::BottomDockWidgetArea, fileDock_);
+        tabifyDockWidget(consoleDock_, fileDock_);
+        consoleDock_->raise();
+    }
+
+    if (sceneObjectsDock_ && inspectorDock_) {
+        addDockWidget(Qt::LeftDockWidgetArea, sceneObjectsDock_);
+        addDockWidget(Qt::RightDockWidgetArea, inspectorDock_);
+        if (viewportDock_) {
+            splitDockWidget(sceneObjectsDock_, viewportDock_, Qt::Horizontal);
+            splitDockWidget(viewportDock_, inspectorDock_, Qt::Horizontal);
+            resizeDocks({sceneObjectsDock_, viewportDock_, inspectorDock_}, {250, 700, 320}, Qt::Horizontal);
+        } else {
+            resizeDocks({sceneObjectsDock_, inspectorDock_}, {280, 300}, Qt::Horizontal);
+        }
+    }
+    if (viewportDock_ && consoleDock_) {
+        resizeDocks({viewportDock_, consoleDock_}, {620, 100}, Qt::Vertical);
+    }
+}
+
+void EditorMainWindow::ApplySavedOrInitialLayout()
+{
+    const bool isTest = qEnvironmentVariableIsSet("PAIN_EDITOR_TEST_MODE") ||
+        (host_ && host_->host().projectName && std::string(host_->host().projectName).find("UI") != std::string::npos);
+    if (isTest) {
+        ApplyDefaultLayout();
+        return;
+    }
+
+    QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
+    const QByteArray savedState = settings.value(QStringLiteral("window/state")).toByteArray();
+    const QByteArray savedGeom = settings.value(QStringLiteral("window/geometry")).toByteArray();
+    if (!savedState.isEmpty() && restoreState(savedState)) {
+        if (!savedGeom.isEmpty()) {
+            restoreGeometry(savedGeom);
+        }
+    } else {
+        ApplyDefaultLayout();
+    }
 }

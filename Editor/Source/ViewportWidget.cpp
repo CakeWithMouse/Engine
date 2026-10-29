@@ -122,6 +122,8 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
         // Qt не закрашивает и не буферизует: сюда Present'ит движок
         setAttribute(Qt::WA_PaintOnScreen, true);
         setAttribute(Qt::WA_NoSystemBackground, true);
+        setAttribute(Qt::WA_OpaquePaintEvent, true);
+        setAutoFillBackground(false);
     }
     setFocusPolicy(Qt::StrongFocus);
     updateGizmoToolTip();

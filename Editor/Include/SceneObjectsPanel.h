@@ -39,6 +39,7 @@ public:
     std::array<double, 3> SpawnPosition() const;
 
     void RetranslateUi();
+    QSize minimumSizeHint() const override { return QSize(140, 80); }
 
 signals:
     void AddPrimitiveRequested(

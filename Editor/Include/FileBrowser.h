@@ -23,6 +23,8 @@ public:
     void SetRootPath(const QString& path);
     void RetranslateUi();
 
+    QSize minimumSizeHint() const override { return QSize(160, 100); }
+
 private:
     void BuildUi();
     void OnDoubleClicked(const QModelIndex& index);

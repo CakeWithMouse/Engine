@@ -64,14 +64,14 @@ const char* EditorTheme::StyleRules()
 /* === Общие базовые стили === */
 QWidget {
     color: #ECEFF4;
-    background-color: transparent;
     selection-background-color: #3B82F6;
     selection-color: #FFFFFF;
     outline: none;
 }
 
-QMainWindow {
+QMainWindow, QDialog, QDockWidget, QFrame, QScrollArea, QTabWidget::pane {
     background-color: #181A1F;
+    color: #E5E7EB;
 }
 
 /* === Заголовки и стилизация QDockWidget === */
@@ -456,6 +456,12 @@ QStatusBar {
 QStatusBar QLabel {
     color: #828997;
     padding: 0 4px;
+}
+
+/* === Нативные Direct3D виджеты (не заливать фоном Qt) === */
+#MaterialPreview, ViewportWidget, MaterialPreviewWidget {
+    background: transparent;
+    border: none;
 }
 )QSS";
 }

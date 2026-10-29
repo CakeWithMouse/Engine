@@ -21,6 +21,7 @@
 SceneObjectsPanel::SceneObjectsPanel(QWidget* parent)
     : QWidget(parent)
 {
+    setMinimumSize(140, 80);
     BuildUi();
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
         RetranslateUi();
@@ -198,18 +199,20 @@ void SceneObjectsPanel::SetPrimitiveTypes(
 
 void SceneObjectsPanel::FillTypes()
 {
+    const auto previous = primitive_->currentData();
+    const auto category = typeCategory_->currentData().toString();
+    QSignalBlocker blocker(primitive_);
     primitive_->clear();
-    const QString category = typeCategory_->currentData().toString();
-    for (const auto& item : types_)
-    {
-        const auto& type = item.second;
-        bool matches = false;
-        if (category == "all") matches = true;
-        else if (category == "project") matches = !type.startsWith("Primitive.") && !type.startsWith("Light.") && !type.startsWith("Particle.") && !type.startsWith("Environment.") && !type.startsWith("Gameplay.");
-        else if (category.endsWith('.')) matches = type.startsWith(category);
-        else matches = type == category;
-        if (matches) primitive_->addItem(item.first, item.second);
+    for (const auto& type : types_) {
+        const auto& name = type.second;
+        if (name == "Gameplay.PlaySettings") continue;
+        const bool standard = name.startsWith("Primitive.") || name.startsWith("Light.") || name.startsWith("Particle.") || name.startsWith("Environment.") || name.startsWith("Gameplay.");
+        if (category == "all" || name.startsWith(category) || (category == "project" && !standard))
+            primitive_->addItem(type.first, name);
     }
+    const int selected = primitive_->findData(previous);
+    if (selected >= 0) primitive_->setCurrentIndex(selected);
+    if (addPrimitiveButton_) addPrimitiveButton_->setEnabled(primitive_->count() != 0);
 }
 
 void SceneObjectsPanel::SetShowServiceObjects(bool visible)

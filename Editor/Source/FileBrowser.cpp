@@ -53,6 +53,7 @@ FileBrowserDock::FileBrowserDock(EditorQtHost* host, QWidget* parent)
     if (projectDir_.isEmpty())
         projectDir_ = QDir::currentPath();
 
+    setMinimumSize(120, 80);
     BuildUi();
     SetRootPath(projectDir_);
 
@@ -109,8 +110,15 @@ void FileBrowserDock::BuildUi()
 
     // --- верхняя панель: фильтр + выбор корня ---
     auto* topBar = new QHBoxLayout;
+    topBar->setContentsMargins(4, 4, 4, 4);
+    topBar->setSpacing(4);
+
+    importsBtn_->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
     filterEdit_ = new QLineEdit(panel);
     filterEdit_->setPlaceholderText(Tr("Фильтр: *.json;*.png ...", "Filter: *.json;*.png ..."));
+    filterEdit_->setMinimumWidth(40);
+    filterEdit_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     connect(filterEdit_, &QLineEdit::textChanged, this,
             [this](const QString& t) { ApplyFilter(t); });
     topBar->addWidget(importsBtn_);
@@ -118,6 +126,8 @@ void FileBrowserDock::BuildUi()
 
     rootCombo_ = new QComboBox(panel);
     rootCombo_->setObjectName("FileVisibility");
+    rootCombo_->setMinimumWidth(50);
+    rootCombo_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     rootCombo_->addItem(Tr("Content и Source", "Content and Source"), projectDir_);
     rootCombo_->addItem(Tr("Весь проект", "Entire Project"), projectDir_);
     rootCombo_->setToolTip(Tr("Binaries — DLL, Intermediate — временные файлы сборки. Доступны в режиме «Весь проект».",
@@ -141,7 +151,8 @@ void FileBrowserDock::BuildUi()
     view_->hideColumn(3);                   // Date Modified не нужен
     view_->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     for (int c = 1; c < 3; ++c)
-        view_->header()->setSectionResizeMode(c, QHeaderView::ResizeToContents);
+        view_->header()->setSectionResizeMode(c, QHeaderView::Interactive);
+    view_->header()->setStretchLastSection(true);
     view_->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(view_, &QTreeView::doubleClicked, this,
             [this](const QModelIndex& i) { OnDoubleClicked(i); });

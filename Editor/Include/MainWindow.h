@@ -78,6 +78,9 @@ private:
     void BuildSceneMenu();
     void ConnectPanels();
 
+    void ApplyDefaultLayout();
+    void ApplySavedOrInitialLayout();
+
     void RefreshSceneUi();
 
     void SaveScene(bool saveAs = false, std::function<void()> after = {});
@@ -134,6 +137,7 @@ private:
     QAction* actConfigurePlay_ = nullptr;
     QAction* actLangRu_ = nullptr;
     QAction* actLangEn_ = nullptr;
+    QAction* actResetLayout_ = nullptr;
 
     QMenu* fileMenu_ = nullptr;
     QMenu* resourcesMenu_ = nullptr;

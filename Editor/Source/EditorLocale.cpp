@@ -15,6 +15,11 @@ EditorLocale::EditorLocale()
 
 void EditorLocale::LoadSettings()
 {
+    if (qEnvironmentVariableIsSet("PAIN_EDITOR_TEST_MODE"))
+    {
+        currentLanguage_ = EditorLanguage::Ru;
+        return;
+    }
     QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
     const QString langStr = settings.value(QStringLiteral("ui/language"), QStringLiteral("ru")).toString().toLower();
     if (langStr == QStringLiteral("en"))
@@ -29,6 +34,8 @@ void EditorLocale::LoadSettings()
 
 void EditorLocale::SaveSettings()
 {
+    if (qEnvironmentVariableIsSet("PAIN_EDITOR_TEST_MODE"))
+        return;
     QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
     settings.setValue(QStringLiteral("ui/language"),
                       currentLanguage_ == EditorLanguage::En ? QStringLiteral("en") : QStringLiteral("ru"));
