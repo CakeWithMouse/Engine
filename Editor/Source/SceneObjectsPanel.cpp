@@ -113,7 +113,6 @@ void SceneObjectsPanel::BuildUi()
     hierarchy_ = new QTreeWidget(this);
     hierarchy_->setHeaderLabels({Tr("Объект", "Object"), Tr("Тип", "Type")});
     hierarchy_->setSelectionMode(QAbstractItemView::SingleSelection);
-    hierarchy_->setStyleSheet(QStringLiteral("QTreeView::item:selected { background: #a66008; color: white; }"));
     hierarchy_->setContextMenuPolicy(Qt::ActionsContextMenu);
     actDuplicate_ = new QAction(Tr("Дублировать объект", "Duplicate Object"), hierarchy_);
     actRemove_ = new QAction(Tr("Удалить объект", "Remove Object"), hierarchy_);

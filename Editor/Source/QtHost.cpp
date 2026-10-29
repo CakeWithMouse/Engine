@@ -1,6 +1,7 @@
 #include "QtHost.h"
 #include <Engine/Runtime/EditorReloadApi.h>
 #include "MainWindow.h"
+#include "EditorTheme.h"
 #include <QApplication>
 #include <QCoreApplication>
 #include <QMetaObject>
@@ -91,7 +92,7 @@ void EditorQtHost::UiThreadMain()
     QApplication app(g_argc, g_argv);
     app.setQuitOnLastWindowClosed(false);
     app.setApplicationName(QStringLiteral("Engine Editor"));
-    QApplication::setStyle(QStringLiteral("Fusion"));
+    EditorTheme::Apply(app);
 
     EditorMainWindow window(this);
     {
