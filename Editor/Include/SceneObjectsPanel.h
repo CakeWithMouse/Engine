@@ -16,6 +16,9 @@ class QTreeWidget;
 class QAction;
 class QGroupBox;
 class QLabel;
+class QLineEdit;
+class QToolButton;
+class QMenu;
 
 struct EditorSnapshot;
 
@@ -60,6 +63,13 @@ signals:
 private:
     void BuildUi();
     void FillTypes();
+    void RebuildAddMenu();
+    void FilterHierarchy(const QString& query);
+
+    QLineEdit* searchEdit_ = nullptr;
+    QToolButton* addBtn_ = nullptr;
+    QMenu* addMenu_ = nullptr;
+    QToolButton* newFolderBtn_ = nullptr;
 
     QGroupBox* placementGroup_ = nullptr;
     QLabel* categoryLabel_ = nullptr;

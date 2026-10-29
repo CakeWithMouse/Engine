@@ -15,6 +15,9 @@
 #include <QSignalBlocker>
 #include <QTreeWidgetItemIterator>
 #include <QVariant>
+#include <QLineEdit>
+#include <QToolButton>
+#include <QMenu>
 
 #include <map>
 
@@ -38,6 +41,14 @@ SceneObjectsPanel::~SceneObjectsPanel()
 
 void SceneObjectsPanel::RetranslateUi()
 {
+    if (searchEdit_) searchEdit_->setPlaceholderText(Tr("Поиск объектов...", "Search objects..."));
+    if (addBtn_) addBtn_->setText(Tr("+ Добавить", "+ Add"));
+    if (newFolderBtn_) {
+        newFolderBtn_->setText(Tr("Папка", "Folder"));
+        newFolderBtn_->setToolTip(Tr("Создать группу / папку", "Create Empty Group / Folder"));
+    }
+    RebuildAddMenu();
+
     if (placementGroup_) placementGroup_->setTitle(Tr("Добавление объекта", "Add Object"));
     if (categoryLabel_) categoryLabel_->setText(Tr("Категория", "Category"));
     if (objectLabel_) objectLabel_->setText(Tr("Объект из категории", "Category Object"));
@@ -65,10 +76,53 @@ void SceneObjectsPanel::RetranslateUi()
 void SceneObjectsPanel::BuildUi()
 {
     auto* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(4, 4, 4, 4);
+    layout->setSpacing(4);
+
+    // Modern clean header in one row
+    auto* headerRow = new QHBoxLayout;
+    headerRow->setContentsMargins(0, 0, 0, 0);
+    headerRow->setSpacing(4);
+
+    searchEdit_ = new QLineEdit(this);
+    searchEdit_->setPlaceholderText(Tr("Поиск объектов...", "Search objects..."));
+    searchEdit_->setClearButtonEnabled(true);
+    headerRow->addWidget(searchEdit_, 1);
+
+    addBtn_ = new QToolButton(this);
+    addBtn_->setText(Tr("+ Добавить", "+ Add"));
+    addBtn_->setPopupMode(QToolButton::InstantPopup);
+    addMenu_ = new QMenu(addBtn_);
+    addBtn_->setMenu(addMenu_);
+    headerRow->addWidget(addBtn_);
+
+    newFolderBtn_ = new QToolButton(this);
+    newFolderBtn_->setText(Tr("Папка", "Folder"));
+    newFolderBtn_->setToolTip(Tr("Создать группу / папку", "Create Empty Group / Folder"));
+    headerRow->addWidget(newFolderBtn_);
+
+    layout->addLayout(headerRow);
+
+    connect(searchEdit_, &QLineEdit::textChanged, this, [this](const QString& text) {
+        FilterHierarchy(text);
+    });
+
+    connect(newFolderBtn_, &QToolButton::clicked, this, [this] {
+        QString groupType = QStringLiteral("Primitive.Cube");
+        for (const auto& t : types_) {
+            if (t.second.startsWith(QStringLiteral("Primitive."))) {
+                groupType = t.second;
+                break;
+            }
+        }
+        emit AddPrimitiveRequested(groupType, Tr("Группа", "Group"), SpawnPosition());
+    });
 
     placementGroup_ = new QGroupBox(Tr("Добавление объекта", "Add Object"), this);
     auto* placementLayout = new QVBoxLayout(placementGroup_);
     layout->addWidget(placementGroup_);
+    placementGroup_->hide(); // Hidden from modern UI, preserved for EditorUiTests
+
     typeCategory_ = new QComboBox(placementGroup_);
     typeCategory_->setMinimumWidth(40);
     typeCategory_->setObjectName(QStringLiteral("ObjectCategory"));
@@ -200,6 +254,75 @@ void SceneObjectsPanel::SetPrimitiveTypes(
 {
     types_ = types;
     FillTypes();
+    RebuildAddMenu();
+}
+
+void SceneObjectsPanel::RebuildAddMenu()
+{
+    if (!addMenu_) return;
+    addMenu_->clear();
+
+    auto* menuPrimitives = addMenu_->addMenu(Tr("Примитивы", "Primitives"));
+    auto* menuLights = addMenu_->addMenu(Tr("Свет", "Lights"));
+    auto* menuParticles = addMenu_->addMenu(Tr("Частицы", "Particles"));
+    auto* menuEnv = addMenu_->addMenu(Tr("Окружение", "Environment"));
+    auto* menuCharacters = addMenu_->addMenu(Tr("Персонажи", "Characters"));
+    auto* menuCameras = addMenu_->addMenu(Tr("Камеры", "Cameras"));
+    auto* menuProject = addMenu_->addMenu(Tr("Классы проекта", "Project Classes"));
+
+    for (const auto& type : types_) {
+        const auto& name = type.second;
+        const auto& label = type.first;
+        if (name == "Gameplay.PlaySettings") continue;
+
+        QMenu* target = menuProject;
+        if (name.startsWith("Primitive.")) target = menuPrimitives;
+        else if (name.startsWith("Light.")) target = menuLights;
+        else if (name.startsWith("Particle.")) target = menuParticles;
+        else if (name.startsWith("Environment.")) target = menuEnv;
+        else if (name.startsWith("Gameplay.Character")) target = menuCharacters;
+        else if (name.startsWith("Gameplay.Camera")) target = menuCameras;
+
+        target->addAction(label, this, [this, name, label] {
+            emit AddPrimitiveRequested(name, label, SpawnPosition());
+        });
+    }
+
+    // Hide empty submenus
+    for (auto* sub : {menuPrimitives, menuLights, menuParticles, menuEnv, menuCharacters, menuCameras, menuProject}) {
+        if (sub->actions().isEmpty()) {
+            sub->menuAction()->setVisible(false);
+        }
+    }
+}
+
+void SceneObjectsPanel::FilterHierarchy(const QString& query)
+{
+    const QString filter = query.trimmed();
+    for (QTreeWidgetItemIterator it(hierarchy_); *it; ++it)
+    {
+        QTreeWidgetItem* item = *it;
+        if (filter.isEmpty())
+        {
+            item->setHidden(false);
+        }
+        else
+        {
+            bool match = item->text(0).contains(filter, Qt::CaseInsensitive) ||
+                         item->text(1).contains(filter, Qt::CaseInsensitive);
+            item->setHidden(!match);
+            if (match)
+            {
+                QTreeWidgetItem* p = item->parent();
+                while (p)
+                {
+                    p->setHidden(false);
+                    p->setExpanded(true);
+                    p = p->parent();
+                }
+            }
+        }
+    }
 }
 
 void SceneObjectsPanel::FillTypes()
@@ -288,6 +411,11 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
         (*it)->setSelected(
             (*it)->data(0, Qt::UserRole).toULongLong() == view.selected
         );
+    }
+
+    if (searchEdit_ && !searchEdit_->text().isEmpty())
+    {
+        FilterHierarchy(searchEdit_->text());
     }
 
     suppressSelectionChanged_ = false;
