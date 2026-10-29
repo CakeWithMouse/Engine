@@ -53,8 +53,8 @@ if ($env:VCPKG_ROOT) {
 $start = [Diagnostics.ProcessStartInfo]::new()
 $start.FileName = $msbuild
 $start.UseShellExecute = $false
-$start.RedirectStandardOutput = $true
-$start.RedirectStandardError = $true
+$start.RedirectStandardOutput = $false
+$start.RedirectStandardError = $false
 # The desktop host may supply both PATH and Path. Normalize keys for MSBuild's CL task.
 $start.EnvironmentVariables.Clear()
 foreach ($entry in [Environment]::GetEnvironmentVariables().GetEnumerator()) {
@@ -63,12 +63,12 @@ foreach ($entry in [Environment]::GetEnvironmentVariables().GetEnumerator()) {
 $assimp = $EnableAssimp.IsPresent.ToString().ToLowerInvariant()
 $vcpkgClean = if ($env:VCPKG_ROOT) { $env:VCPKG_ROOT.TrimEnd('\') } else { $null }
 $vcpkgParam = if ($vcpkgClean) { ' "/p:VcpkgRoot=' + $vcpkgClean + '\\"' } else { '' }
-$start.Arguments = '"' + $Project + '" /nologo /verbosity:minimal /m:1 /nr:false /p:UseStructuredOutput=false /p:PreferredToolArchitecture=x64 /p:Platform=x64 /p:Configuration=' + $Configuration + ' /p:PlatformToolset=' + $PlatformToolset + ' /p:EngineEnableAssimp=' + $assimp + $vcpkgParam
+$start.Arguments = '"' + $Project + '" /nologo /verbosity:minimal /m /nr:false /p:ForceSynchronousPDBWrites=true /p:UseStructuredOutput=false /p:PreferredToolArchitecture=x64 /p:Platform=x64 /p:Configuration=' + $Configuration + ' /p:PlatformToolset=' + $PlatformToolset + ' /p:EngineEnableAssimp=' + $assimp + $vcpkgParam
 if ($EditorUiTest) { $start.Arguments += ' /p:EditorUiTest=true' }
 $process = [Diagnostics.Process]::Start($start)
-$output = $process.StandardOutput.ReadToEndAsync()
-$errors = $process.StandardError.ReadToEndAsync()
+
+
 $process.WaitForExit()
-Write-Output $output.GetAwaiter().GetResult()
-if ($errors.GetAwaiter().GetResult()) { Write-Output $errors.GetAwaiter().GetResult() }
+
+
 if ($process.ExitCode -ne 0) { throw "MSBuild failed: $($process.ExitCode)" }
