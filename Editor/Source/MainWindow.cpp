@@ -22,6 +22,7 @@
 #include <QTimer>
 #include <QVBoxLayout>
 #include <QToolBar>
+#include <QToolButton>
 #include <QProcess>
 #include <QPoint>
 #include <QFileInfo>
@@ -225,7 +226,16 @@ void EditorMainWindow::BuildUi()
 
     BuildSceneMenu();
     BuildCodeTools();
-    for (auto* menu : {sceneMenu_, editMenu_, playMenu_, projectMenu_, viewMenu_}) {
+    addMenu_ = menuBar()->addMenu(Tr("Добавить", "Add"));
+    connect(addMenu_, &QMenu::aboutToShow, this, &EditorMainWindow::RebuildAddMenu);
+    RebuildAddMenu();
+
+    helpMenu_ = menuBar()->addMenu(Tr("Справка", "Help"));
+    actDoc_ = helpMenu_->addAction(Tr("Документация (F1)", "Documentation (F1)"), this, [this] {
+    });
+    actDoc_->setShortcut(QKeySequence(Qt::Key_F1));
+
+    for (auto* menu : {sceneMenu_, editMenu_, addMenu_, viewMenu_, playMenu_, projectMenu_, helpMenu_}) {
         if (menu && menu->menuAction()) {
             menuBar()->removeAction(menu->menuAction());
             menuBar()->addAction(menu->menuAction());
@@ -429,6 +439,54 @@ void EditorMainWindow::BuildToolBar()
     actPause_ = toolBar_->addAction(EditorTheme::CreatePauseIcon(), Tr("Pause", "Pause"));
     actStop_ = toolBar_->addAction(EditorTheme::CreateStopIcon(), Tr("Stop", "Stop"));
     actExternal_ = toolBar_->addAction(EditorTheme::CreateExternalIcon(), Tr("Отдельное окно", "External"));
+
+    toolBar_->addSeparator();
+
+    cameraModeCombo_ = new QComboBox(toolBar_);
+    cameraModeCombo_->setObjectName(QStringLiteral("PlayCameraMode"));
+    cameraModeCombo_->addItem(Tr("Свободная камера", "Free Camera"), 0);
+    cameraModeCombo_->addItem(Tr("Камера игрока", "Main Camera"), 1);
+    cameraModeCombo_->setToolTip(Tr("Режим камеры во время Play: свободный полёт или следование за персонажем",
+                                    "Camera mode during Play: free flight or follow character"));
+    connect(cameraModeCombo_, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) {
+        if (host_->PlayState() != EditorQtHost::Edit) return;
+        const auto snapshot = host_->ReadSnapshot();
+        uint64_t settingsId = 0;
+        QJsonObject data{{"version", 1}, {"character", 0}, {"camera", 0}, {"standardControl", true}, {"cameraDistance", 5}, {"cameraHeight", 2}, {"lookSensitivity", 0.005}};
+        for (const auto& o : snapshot.objects) {
+            if (o.gameplayKind == 3 || o.type == "Gameplay.PlaySettings") {
+                settingsId = o.id;
+                data = QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object();
+                break;
+            }
+        }
+        if (index == 0) {
+            data["character"] = 0;
+            data["standardControl"] = false;
+        } else {
+            uint64_t charId = 0;
+            for (const auto& o : snapshot.objects) {
+                if (o.gameplayKind == 1) { charId = o.id; break; }
+            }
+            data["character"] = static_cast<qint64>(charId);
+            data["camera"] = 0;
+            data["standardControl"] = true;
+        }
+        EditorCommand c;
+        c.type = EditorCommand::ConfigurePlay;
+        c.objectId = settingsId;
+        c.path = QString::fromUtf8(QJsonDocument(data).toJson(QJsonDocument::Compact));
+        host_->PostCommand(c);
+    });
+    toolBar_->addWidget(cameraModeCombo_);
+
+    auto* configPlayBtn = new QToolButton(toolBar_);
+    configPlayBtn->setText(QStringLiteral("⚙"));
+    configPlayBtn->setToolTip(Tr("Детальные настройки Play…", "Detailed Play Settings…"));
+    connect(configPlayBtn, &QToolButton::clicked, this, [this] {
+        if (actConfigurePlay_) actConfigurePlay_->trigger();
+    });
+    toolBar_->addWidget(configPlayBtn);
     auto* rightSpacer = new QWidget(toolBar_);
     rightSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     toolBar_->addWidget(rightSpacer);
@@ -1470,7 +1528,16 @@ void EditorMainWindow::RetranslateUi()
 
     if (sceneMenu_) sceneMenu_->setTitle(Tr("Сцена", "Scene"));
     if (editMenu_) editMenu_->setTitle(Tr("Правка", "Edit"));
+    if (addMenu_) addMenu_->setTitle(Tr("Добавить", "Add"));
     if (playMenu_) playMenu_->setTitle(Tr("Запуск", "Play"));
+    if (helpMenu_) helpMenu_->setTitle(Tr("Справка", "Help"));
+    if (actDoc_) actDoc_->setText(Tr("Документация (F1)", "Documentation (F1)"));
+    if (cameraModeCombo_) {
+        const int cur = cameraModeCombo_->currentIndex();
+        cameraModeCombo_->setItemText(0, Tr("Свободная камера", "Free Camera"));
+        cameraModeCombo_->setItemText(1, Tr("Камера игрока", "Main Camera"));
+        cameraModeCombo_->setCurrentIndex(cur);
+    }
     if (viewMenu_) viewMenu_->setTitle(Tr("Вид", "View"));
     if (langMenu_) langMenu_->setTitle(Tr("Язык", "Language"));
     if (themeMenu_) themeMenu_->setTitle(Tr("Тема оформления", "Theme"));
@@ -1558,4 +1625,80 @@ void EditorMainWindow::ApplySavedOrInitialLayout()
     } else {
         ApplyDefaultLayout();
     }
+}
+
+
+void EditorMainWindow::SpawnObjectByType(const QString& typeName, const QString& typeLabel)
+{
+    if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
+    EditorCommand c;
+    c.type = EditorCommand::CreateObject;
+    c.path = typeName;
+    c.name = typeLabel;
+    if (sceneObjectsPanel_) {
+        const auto pos = sceneObjectsPanel_->SpawnPosition();
+        for (int i = 0; i < 3; ++i) c.transform.position[i] = static_cast<float>(pos[i]);
+    } else {
+        c.transform.position[0] = 0.0f;
+        c.transform.position[1] = 0.0f;
+        c.transform.position[2] = 0.0f;
+    }
+    host_->PostCommand(c);
+}
+
+void EditorMainWindow::RebuildAddMenu()
+{
+    if (!addMenu_) return;
+    addMenu_->clear();
+
+    const auto snapshot = host_->ReadSnapshot();
+
+    auto* mPrim = addMenu_->addMenu(Tr("Примитивы", "Primitives"));
+    auto* mLight = addMenu_->addMenu(Tr("Свет", "Lights"));
+    auto* mParticle = addMenu_->addMenu(Tr("Частицы", "Particles"));
+    auto* mEnv = addMenu_->addMenu(Tr("Окружение", "Environment"));
+    auto* mChar = addMenu_->addMenu(Tr("Персонажи", "Characters"));
+    auto* mCam = addMenu_->addMenu(Tr("Камеры", "Cameras"));
+    auto* mProj = addMenu_->addMenu(Tr("Классы проекта", "Project Classes"));
+
+    auto addItem = [this](QMenu* target, const QString& label, const QString& typeName) {
+        target->addAction(label, this, [this, typeName, label] {
+            SpawnObjectByType(typeName, label);
+        });
+    };
+
+    int projCount = 0;
+    for (const auto& t : snapshot.types) {
+        const QString name = QString::fromStdString(t.name);
+        const QString label = QString::fromStdString(t.label);
+        if (name == QStringLiteral("Gameplay.PlaySettings")) continue;
+
+        if (name.startsWith(QStringLiteral("Primitive."))) addItem(mPrim, label, name);
+        else if (name.startsWith(QStringLiteral("Light."))) addItem(mLight, label, name);
+        else if (name.startsWith(QStringLiteral("Particle."))) addItem(mParticle, label, name);
+        else if (name.startsWith(QStringLiteral("Environment."))) addItem(mEnv, label, name);
+        else if (name.startsWith(QStringLiteral("Gameplay.Character"))) addItem(mChar, label, name);
+        else if (name.startsWith(QStringLiteral("Gameplay.Camera"))) addItem(mCam, label, name);
+        else {
+            addItem(mProj, label, name);
+            projCount++;
+        }
+    }
+
+    if (mPrim->isEmpty()) {
+        addItem(mPrim, Tr("Куб", "Cube"), QStringLiteral("Primitive.Cube"));
+        addItem(mPrim, Tr("Сфера", "Sphere"), QStringLiteral("Primitive.Sphere"));
+        addItem(mPrim, Tr("Плоскость", "Plane"), QStringLiteral("Primitive.Plane"));
+    }
+    if (mLight->isEmpty()) {
+        addItem(mLight, Tr("Точечный свет", "Point Light"), QStringLiteral("Light.Point"));
+    }
+    if (projCount == 0) {
+        mProj->setEnabled(false);
+    }
+
+    addMenu_->addSeparator();
+    addMenu_->addAction(Tr("3D Модель из файла…", "3D Model from file…"), this, [this] {
+        AddModel();
+    });
 }

@@ -52,6 +52,8 @@ public:
     // F6: перекомпилировать все шейдеры и материалы с диска во всех сценах и превью.
     void ReloadShaders();
     void RetranslateUi();
+    void SpawnObjectByType(const QString& typeName, const QString& typeLabel);
+    void RebuildAddMenu();
 
 public slots:
     void AppendLine(const QString& line);
@@ -142,6 +144,10 @@ private:
     QMenu* fileMenu_ = nullptr;
     QMenu* resourcesMenu_ = nullptr;
     QMenu* editMenu_ = nullptr;
+    QMenu* addMenu_ = nullptr;
+    QMenu* helpMenu_ = nullptr;
+    QAction* actDoc_ = nullptr;
+    QComboBox* cameraModeCombo_ = nullptr;
     QMenu* sceneMenu_ = nullptr;
     QMenu* playMenu_ = nullptr;
     QMenu* viewMenu_ = nullptr;
