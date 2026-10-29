@@ -44,6 +44,23 @@ void EditorSettings::SetControlScheme(ControlScheme scheme)
     }
 }
 
+SpawnLocationMode EditorSettings::GetSpawnLocationMode()
+{
+    QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
+    const QString val = settings.value(QStringLiteral("viewport/spawn_location_mode"), QStringLiteral("cursor")).toString();
+    if (val.toLower() == QStringLiteral("origin")) {
+        return SpawnLocationMode::WorldOrigin;
+    }
+    return SpawnLocationMode::UnderCursor;
+}
+
+void EditorSettings::SetSpawnLocationMode(SpawnLocationMode mode)
+{
+    QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
+    settings.setValue(QStringLiteral("viewport/spawn_location_mode"),
+        mode == SpawnLocationMode::WorldOrigin ? QStringLiteral("origin") : QStringLiteral("cursor"));
+}
+
 int EditorSettings::SubscribeControlSchemeChanged(std::function<void(ControlScheme)> callback)
 {
     const int id = s_nextSubId++;

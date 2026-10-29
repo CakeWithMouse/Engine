@@ -246,6 +246,22 @@ void EditorMainWindow::BuildUi()
 
     connect(viewport_, &ViewportWidget::contextMenuRequested,
             this, &EditorMainWindow::ShowViewportContextMenu);
+    connect(viewport_, &ViewportWidget::addMenuRequested,
+            this, &EditorMainWindow::ShowViewportAddMenu);
+    connect(viewport_, &ViewportWidget::addPrimitiveRequested,
+            this, [this](const QString& typeName, const QString& typeLabel, const std::array<double, 3>& position)
+            {
+                if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+                    return;
+                EditorCommand c;
+                c.type = EditorCommand::CreateObject;
+                c.path = typeName;
+                c.name = typeLabel;
+                for (int i = 0; i < 3; ++i)
+                    c.transform.position[i] = static_cast<float>(position[i]);
+                host_->PostCommand(c);
+                if (viewport_) viewport_->ShowAdjustLastOperation(0, typeLabel, c.transform);
+            });
 
     playStateLabel_ = new QLabel(QStringLiteral("EDIT"), this);
     statusBar()->addPermanentWidget(playStateLabel_);
@@ -670,20 +686,110 @@ void EditorMainWindow::RefreshStats()
     );
 }
 
+QMenu* EditorMainWindow::BuildAddObjectMenu(QWidget* parent, const std::array<double, 3>& spawnPos)
+{
+    auto* menu = new QMenu(parent);
+
+    // Spawn Location Mode toggle
+    auto* locMenu = menu->addMenu(Tr("Точка спавна", "Spawn Location"));
+    auto* locGroup = new QActionGroup(menu);
+    locGroup->setExclusive(true);
+
+    auto* actCursor = locMenu->addAction(Tr("На проекции курсора", "Under Cursor"));
+    actCursor->setCheckable(true);
+    locGroup->addAction(actCursor);
+
+    auto* actOrigin = locMenu->addAction(Tr("В центре координат (0, 0, 0)", "World Origin (0,0,0)"));
+    actOrigin->setCheckable(true);
+    locGroup->addAction(actOrigin);
+
+    if (EditorSettings::GetSpawnLocationMode() == SpawnLocationMode::WorldOrigin) {
+        actOrigin->setChecked(true);
+    } else {
+        actCursor->setChecked(true);
+    }
+
+    connect(actCursor, &QAction::triggered, [] {
+        EditorSettings::SetSpawnLocationMode(SpawnLocationMode::UnderCursor);
+    });
+    connect(actOrigin, &QAction::triggered, [] {
+        EditorSettings::SetSpawnLocationMode(SpawnLocationMode::WorldOrigin);
+    });
+
+    menu->addSeparator();
+
+    const auto snapshot = host_->ReadSnapshot();
+
+    auto* mPrim = menu->addMenu(Tr("Примитивы", "Primitives"));
+    auto* mLight = menu->addMenu(Tr("Свет", "Lights"));
+    auto* mParticle = menu->addMenu(Tr("Частицы", "Particles"));
+    auto* mEnv = menu->addMenu(Tr("Окружение", "Environment"));
+    auto* mChar = menu->addMenu(Tr("Персонажи", "Characters"));
+    auto* mCam = menu->addMenu(Tr("Камеры", "Cameras"));
+    auto* mProj = menu->addMenu(Tr("Классы проекта", "Project Classes"));
+
+    auto addItem = [this, spawnPos](QMenu* target, const QString& label, const QString& typeName) {
+        target->addAction(label, this, [this, typeName, label, spawnPos] {
+            if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
+            EditorCommand c;
+            c.type = EditorCommand::CreateObject;
+            c.path = typeName;
+            c.name = label;
+            for (int i = 0; i < 3; ++i) c.transform.position[i] = static_cast<float>(spawnPos[i]);
+            host_->PostCommand(c);
+            if (viewport_) viewport_->ShowAdjustLastOperation(0, label, c.transform);
+        });
+    };
+
+    int projCount = 0;
+    for (const auto& t : snapshot.types) {
+        const QString name = QString::fromStdString(t.name);
+        const QString label = QString::fromStdString(t.label);
+        if (name == QStringLiteral("Gameplay.PlaySettings")) continue;
+
+        if (name.startsWith(QStringLiteral("Primitive."))) addItem(mPrim, label, name);
+        else if (name.startsWith(QStringLiteral("Light."))) addItem(mLight, label, name);
+        else if (name.startsWith(QStringLiteral("Particle."))) addItem(mParticle, label, name);
+        else if (name.startsWith(QStringLiteral("Environment."))) addItem(mEnv, label, name);
+        else if (name.startsWith(QStringLiteral("Gameplay.Character"))) addItem(mChar, label, name);
+        else if (name.startsWith(QStringLiteral("Gameplay.Camera"))) addItem(mCam, label, name);
+        else {
+            addItem(mProj, label, name);
+            projCount++;
+        }
+    }
+
+    if (mPrim->isEmpty()) {
+        addItem(mPrim, Tr("Куб", "Cube"), QStringLiteral("Primitive.Cube"));
+        addItem(mPrim, Tr("Сфера", "Sphere"), QStringLiteral("Primitive.Sphere"));
+        addItem(mPrim, Tr("Плоскость", "Plane"), QStringLiteral("Primitive.Plane"));
+    }
+    if (mLight->isEmpty()) {
+        addItem(mLight, Tr("Точечный свет", "Point Light"), QStringLiteral("Light.Point"));
+    }
+    if (projCount == 0) {
+        mProj->setEnabled(false);
+    }
+
+    return menu;
+}
+
+void EditorMainWindow::ShowViewportAddMenu(const QPoint& globalPos)
+{
+    auto* menu = BuildAddObjectMenu(this, viewport_ ? viewport_->lastSpawnPos() : std::array<double, 3>{0, 0, 0});
+    menu->setAttribute(Qt::WA_DeleteOnClose);
+    menu->exec(globalPos);
+}
+
 void EditorMainWindow::ShowViewportContextMenu(const QPoint& globalPos)
 {
     UpdatePlayButtons();
 
     QMenu menu(this);
 
-    if (actPlay_)
-        menu.addAction(actPlay_);
-
-    if (actPause_)
-        menu.addAction(actPause_);
-
-    if (actStop_)
-        menu.addAction(actStop_);
+    auto* addSubMenu = BuildAddObjectMenu(&menu, viewport_ ? viewport_->lastSpawnPos() : std::array<double, 3>{0, 0, 0});
+    addSubMenu->setTitle(Tr("+ Добавить объект", "+ Add Object"));
+    menu.addMenu(addSubMenu);
 
     menu.addSeparator();
 
@@ -693,8 +799,36 @@ void EditorMainWindow::ShowViewportContextMenu(const QPoint& globalPos)
     if (deleteAction_)
         menu.addAction(deleteAction_);
 
-    if (saveAction_)
-        menu.addAction(saveAction_);
+    auto* actFocus = menu.addAction(Tr("Сфокусировать камеру (F)", "Focus Selected (F)"), this, [this] {
+        if (host_->HasSelection()) {
+            EditorCommand c; c.type = EditorCommand::FocusObject; host_->PostCommand(c);
+        }
+    });
+    actFocus->setEnabled(host_->HasSelection());
+
+    menu.addSeparator();
+
+    auto* gizmoMenu = menu.addMenu(Tr("Режим трансформации", "Gizmo Mode"));
+    gizmoMenu->addAction(Tr("Перемещение (1 / W / G)", "Translate (1 / W / G)"), this, [this] {
+        if (viewport_) viewport_->setGizmoMode(EditorGizmoTranslate);
+    });
+    gizmoMenu->addAction(Tr("Вращение (2 / E / R)", "Rotate (2 / E / R)"), this, [this] {
+        if (viewport_) viewport_->setGizmoMode(EditorGizmoRotate);
+    });
+    gizmoMenu->addAction(Tr("Масштаб (3 / R / S)", "Scale (3 / R / S)"), this, [this] {
+        if (viewport_) viewport_->setGizmoMode(EditorGizmoScale);
+    });
+
+    menu.addSeparator();
+
+    if (actPlay_)
+        menu.addAction(actPlay_);
+
+    if (actPause_)
+        menu.addAction(actPause_);
+
+    if (actStop_)
+        menu.addAction(actStop_);
 
     if (actExternal_)
         menu.addAction(actExternal_);
@@ -1009,6 +1143,7 @@ void EditorMainWindow::RefreshSceneUi()
         sceneObjectsPanel_->SetPrimitiveTypes(primitiveTypes);
         sceneObjectsPanel_->SetEnabled(edit);
         sceneObjectsPanel_->RefreshHierarchy(view);
+        if (viewport_ && view.selected) viewport_->SetAdjustLastOperationObjectId(view.selected);
     }
 
     if (undoAction_)
@@ -1666,7 +1801,10 @@ void EditorMainWindow::SpawnObjectByType(const QString& typeName, const QString&
     c.type = EditorCommand::CreateObject;
     c.path = typeName;
     c.name = typeLabel;
-    if (sceneObjectsPanel_) {
+    if (EditorSettings::GetSpawnLocationMode() == SpawnLocationMode::UnderCursor && viewport_) {
+        const auto pos = viewport_->lastSpawnPos();
+        for (int i = 0; i < 3; ++i) c.transform.position[i] = static_cast<float>(pos[i]);
+    } else if (sceneObjectsPanel_) {
         const auto pos = sceneObjectsPanel_->SpawnPosition();
         for (int i = 0; i < 3; ++i) c.transform.position[i] = static_cast<float>(pos[i]);
     } else {
@@ -1675,12 +1813,29 @@ void EditorMainWindow::SpawnObjectByType(const QString& typeName, const QString&
         c.transform.position[2] = 0.0f;
     }
     host_->PostCommand(c);
+    if (viewport_) viewport_->ShowAdjustLastOperation(0, typeLabel, c.transform);
 }
 
 void EditorMainWindow::RebuildAddMenu()
 {
     if (!addMenu_) return;
     addMenu_->clear();
+
+    auto* locMenu = addMenu_->addMenu(Tr("Точка спавна", "Spawn Location"));
+    auto* locGroup = new QActionGroup(addMenu_);
+    locGroup->setExclusive(true);
+    auto* actCursor = locMenu->addAction(Tr("На проекции курсора", "Under Cursor"));
+    actCursor->setCheckable(true);
+    locGroup->addAction(actCursor);
+    auto* actOrigin = locMenu->addAction(Tr("В центре координат (0, 0, 0)", "World Origin (0,0,0)"));
+    actOrigin->setCheckable(true);
+    locGroup->addAction(actOrigin);
+    if (EditorSettings::GetSpawnLocationMode() == SpawnLocationMode::WorldOrigin) actOrigin->setChecked(true);
+    else actCursor->setChecked(true);
+    connect(actCursor, &QAction::triggered, [] { EditorSettings::SetSpawnLocationMode(SpawnLocationMode::UnderCursor); });
+    connect(actOrigin, &QAction::triggered, [] { EditorSettings::SetSpawnLocationMode(SpawnLocationMode::WorldOrigin); });
+
+    addMenu_->addSeparator();
 
     const auto snapshot = host_->ReadSnapshot();
 

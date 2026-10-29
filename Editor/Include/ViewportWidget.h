@@ -20,8 +20,15 @@ public:
     void setGizmoMode(EditorGizmoMode mode);
     EditorGizmoMode gizmoMode() const { return gizmoMode_; }
 
+    std::array<double, 3> ComputeSpawnPosition(const QPoint& viewportPos) const;
+    std::array<double, 3> lastSpawnPos() const { return lastSpawnPos_; }
+    void ShowAdjustLastOperation(uint64_t id, const QString& name, const EngineSceneTransform& transform);
+    void SetAdjustLastOperationObjectId(uint64_t id);
+
 signals:
     void contextMenuRequested(const QPoint& globalPos);
+    void addMenuRequested(const QPoint& globalPos);
+    void addPrimitiveRequested(const QString& typeName, const QString& typeLabel, const std::array<double, 3>& position);
     void gizmoModeChanged(EditorGizmoMode mode);
 
 protected:
@@ -81,4 +88,12 @@ private:
 
     ControlScheme controlScheme_ = ControlScheme::UnrealUnity;
     int controlSchemeSubId_ = 0;
+
+    std::array<double, 3> lastSpawnPos_{0.0, 0.0, 0.0};
+    float camPos_[3] = {0.0f, 2.5f, 5.0f};
+    float camYaw_ = -1.5707963f;
+    float camPitch_ = -0.2f;
+
+    class AdjustLastOperationPanel* adjustPanel_ = nullptr;
+    class PieMenuWidget* pieMenu_ = nullptr;
 };

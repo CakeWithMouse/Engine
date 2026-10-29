@@ -61,6 +61,7 @@ public slots:
 private slots:
     void RefreshStats();
     void ShowViewportContextMenu(const QPoint& globalPos);
+    void ShowViewportAddMenu(const QPoint& globalPos);
 
 protected:
     void closeEvent(QCloseEvent* event) override;
@@ -79,6 +80,7 @@ private:
     void BuildSceneDocks();
     void BuildSceneMenu();
     void ConnectPanels();
+    QMenu* BuildAddObjectMenu(QWidget* parent, const std::array<double, 3>& spawnPos);
 
     void ApplyDefaultLayout();
     void ApplySavedOrInitialLayout();
@@ -148,6 +150,9 @@ private:
     QAction* actSchemeUnrealUnity_ = nullptr;
     QAction* actSchemeBlender_ = nullptr;
     QActionGroup* schemeGroup_ = nullptr;
+    QActionGroup* spawnLocationGroup_ = nullptr;
+    QAction* actSpawnUnderCursor_ = nullptr;
+    QAction* actSpawnWorldOrigin_ = nullptr;
     QMenu* addMenu_ = nullptr;
     QMenu* helpMenu_ = nullptr;
     QAction* actDoc_ = nullptr;
