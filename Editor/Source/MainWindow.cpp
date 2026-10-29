@@ -1161,6 +1161,23 @@ void EditorMainWindow::ConnectPanels()
 
     connect(objectInspectorPanel_, &ObjectInspectorPanel::LightColorRequested,
             this, &EditorMainWindow::OnLightColorRequested);
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::FocusRequested, this, [this](quint64 id) {
+        if (!id || !host_->HasScene()) return;
+        EditorCommand c; c.type = EditorCommand::FocusObject; host_->PostCommand(c);
+    });
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::DuplicateRequested, this, [this](quint64 id) {
+        if (!id || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        EditorCommand c; c.type = EditorCommand::DuplicateObject; c.objectId = id; host_->PostCommand(c);
+    });
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::DeleteRequested, this, [this](quint64 id) {
+        if (!id || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        EditorCommand c; c.type = EditorCommand::RemoveObject; c.objectId = id; host_->PostCommand(c);
+    });
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearModelRequested, this, [this](quint64 id) {
+        if (!id || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        EditorCommand c; c.type = EditorCommand::SetModel; c.objectId = id; c.path.clear(); host_->PostCommand(c);
+    });
 }
 
 void EditorMainWindow::RefreshSceneUi()
