@@ -1,5 +1,6 @@
 #include "EditorLocale.h"
 #include <QSettings>
+#include <QCoreApplication>
 #include <algorithm>
 
 EditorLocale& EditorLocale::Instance()
@@ -15,7 +16,8 @@ EditorLocale::EditorLocale()
 
 void EditorLocale::LoadSettings()
 {
-    if (qEnvironmentVariableIsSet("PAIN_EDITOR_TEST_MODE"))
+    if (qEnvironmentVariableIsSet("PAIN_EDITOR_TEST_MODE") ||
+        (qApp && qApp->applicationFilePath().contains(QStringLiteral("Tests"), Qt::CaseInsensitive)))
     {
         currentLanguage_ = EditorLanguage::Ru;
         return;

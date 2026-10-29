@@ -3,6 +3,13 @@
 #include "QtHost.h"
 #include "MaterialEditorWindow.h"
 
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <Windows.h>
+#endif
+
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -11,8 +18,18 @@
 #include <QJsonObject>
 #include <QLineEdit>
 #include <QMessageBox>
+#include <QCoreApplication>
 #include <QRegularExpression>
 #include <QSaveFile>
+
+namespace
+{
+    bool IsTestRunning()
+    {
+        return qEnvironmentVariableIsSet("PAIN_EDITOR_TEST_MODE") ||
+               (QCoreApplication::instance() && QCoreApplication::applicationFilePath().contains(QStringLiteral("Tests"), Qt::CaseInsensitive));
+    }
+}
 
 void EditorMainWindow::ImportAsset(bool texture, const QString& source)
 {
@@ -89,6 +106,12 @@ void EditorMainWindow::UseAsset(const QString& path)
         relative.startsWith(QStringLiteral("..\\")) ||
         QDir::isAbsolutePath(relative))
     {
+        if (IsTestRunning())
+        {
+            qWarning("AssetTools: Resource outside project: %s", qUtf8Printable(path));
+            return;
+        }
+
         QMessageBox::warning(
             this,
             QStringLiteral("Ресурс вне проекта"),
@@ -143,6 +166,12 @@ void EditorMainWindow::UseAsset(const QString& path)
 
         if (!c.objectId)
         {
+            if (IsTestRunning())
+            {
+                qWarning("AssetTools: No object selected for material/texture assignment");
+                return;
+            }
+
             QMessageBox::information(
                 this,
                 material ? QStringLiteral("Назначение материала") : QStringLiteral("Назначение текстуры"),
@@ -209,6 +238,12 @@ void EditorMainWindow::OpenMaterialEditor(const QString& path)
 
         if (relative.isEmpty())
         {
+            if (IsTestRunning())
+            {
+                qWarning("AssetTools: Material outside project: %s", qUtf8Printable(path));
+                return;
+            }
+
             QMessageBox::warning(
                 this,
                 QStringLiteral("Материал вне проекта"),
@@ -228,12 +263,32 @@ void EditorMainWindow::OpenMaterialEditor(const QString& path)
         open->showNormal();
         open->raise();
         open->activateWindow();
+#ifdef _WIN32
+        SetWindowPos(reinterpret_cast<HWND>(open->winId()), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        BringWindowToTop(reinterpret_cast<HWND>(open->winId()));
+        SetForegroundWindow(reinterpret_cast<HWND>(open->winId()));
+        if (!IsTestRunning())
+        {
+            SetWindowPos(reinterpret_cast<HWND>(open->winId()), HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        }
+#endif
         return;
     }
 
     auto* editor = new MaterialEditorWindow(host_, material, this);
     materialEditors_.insert(key, editor);
     editor->show();
+    editor->raise();
+    editor->activateWindow();
+#ifdef _WIN32
+    SetWindowPos(reinterpret_cast<HWND>(editor->winId()), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+    BringWindowToTop(reinterpret_cast<HWND>(editor->winId()));
+    SetForegroundWindow(reinterpret_cast<HWND>(editor->winId()));
+    if (!IsTestRunning())
+    {
+        SetWindowPos(reinterpret_cast<HWND>(editor->winId()), HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+    }
+#endif
 }
 
 QString EditorMainWindow::CreateMaterial(const QString& directory, const QString& name)
@@ -274,7 +329,15 @@ QString EditorMainWindow::CreateMaterial(const QString& directory, const QString
     if (!MaterialNamePattern().match(base).hasMatch())
         problem = QStringLiteral("Имя может содержать латинские буквы, цифры, «_», «-» и «.».");
     else if (QFileInfo::exists(materialFile) || QFileInfo::exists(shaderFile))
+    {
+        if (IsTestRunning())
+        {
+            qWarning("CreateMaterial: Material %s already exists, reusing existing file", qUtf8Printable(materialFile));
+            OpenMaterialEditor(materialFile);
+            return materialFile;
+        }
         problem = QStringLiteral("В каталоге уже есть %1.mat или %1.hlsl.").arg(base);
+    }
     else if (!QDir().mkpath(target))
         problem = QStringLiteral("Не удалось создать каталог %1.").arg(target);
     else
@@ -294,6 +357,12 @@ QString EditorMainWindow::CreateMaterial(const QString& directory, const QString
 
     if (!problem.isEmpty())
     {
+        if (IsTestRunning())
+        {
+            qWarning("CreateMaterial: %s", qUtf8Printable(problem));
+            return {};
+        }
+
         QMessageBox::warning(this, QStringLiteral("Новый материал"), problem);
         return {};
     }

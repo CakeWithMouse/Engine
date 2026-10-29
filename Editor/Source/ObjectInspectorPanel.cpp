@@ -489,7 +489,8 @@ void ObjectInspectorPanel::Refresh(
 
     for (int i = 0; i < 9; ++i)
     {
-        if (selectionChanged || !transform_[i]->hasFocus())
+        const bool focused = transform_[i]->hasFocus() || transform_[i]->isAncestorOf(QApplication::focusWidget());
+        if (selectionChanged || !focused)
             transform_[i]->setValue(values[i]);
     }
 
@@ -531,7 +532,8 @@ void ObjectInspectorPanel::Refresh(
 
         for (int i = 0; i < 5; ++i)
         {
-            if (selectionChanged || !lightValues_[i]->hasFocus())
+            const bool focused = lightValues_[i]->hasFocus() || lightValues_[i]->isAncestorOf(QApplication::focusWidget());
+            if (selectionChanged || !focused)
                 lightValues_[i]->setValue(lv[i]);
         }
 
@@ -549,9 +551,11 @@ void ObjectInspectorPanel::Refresh(
         double speed = 5.0;
         if (!object.projectData.empty()) {
             const auto json = QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object();
-            if (json.contains("speed")) speed = json["speed"].toDouble();
+            if (json.contains("moveSpeed")) speed = json["moveSpeed"].toDouble();
+            else if (json.contains("speed")) speed = json["speed"].toDouble();
         }
-        if (selectionChanged || !characterSpeed_->hasFocus()) characterSpeed_->setValue(speed);
+        const bool speedFocused = characterSpeed_->hasFocus() || characterSpeed_->isAncestorOf(QApplication::focusWidget());
+        if (selectionChanged || !speedFocused) characterSpeed_->setValue(speed);
     }
     else
     {

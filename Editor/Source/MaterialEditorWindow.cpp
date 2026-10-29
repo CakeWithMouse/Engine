@@ -264,6 +264,7 @@ public:
         setAttribute(Qt::WA_NativeWindow, true);
         setAttribute(Qt::WA_PaintOnScreen, true); // сюда Present'ит движок
         setAttribute(Qt::WA_NoSystemBackground, true);
+        setStyleSheet(QStringLiteral("background: transparent; border: none;"));
         setMinimumSize(240, 240);
     }
 
@@ -458,12 +459,15 @@ void MaterialEditorWindow::BuildUi()
     preview_->attach = [this, material, engine](void* hwnd, uint32_t w, uint32_t h)
     {
         const uint32_t shape = static_cast<uint32_t>(shape_->currentIndex());
+        std::printf("DEBUG ATTACH: hwnd=%p, w=%u, h=%u, shape=%u\n", hwnd, w, h, shape);
         EngineThenRead([material, engine, hwnd, w, h, shape](const EngineEditSessionApi& api)
         {
             char error[4096]{};
             uint32_t status = api.attachMaterialPreview(api.context, hwnd, w, h, &engine->preview);
+            std::printf("DEBUG ATTACH STATUS: attachStatus=%u, preview=%p\n", status, engine->preview);
             if (status != EngineSceneOk) return QStringLiteral("Не удалось создать превью (код %1)").arg(status);
             status = api.showMaterialPreview(api.context, engine->preview, material.constData(), shape, error, sizeof(error));
+            std::printf("DEBUG SHOW PREVIEW STATUS: showStatus=%u\n", status);
             return StatusText(status, error);
         }, true);
     };

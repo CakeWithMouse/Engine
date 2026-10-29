@@ -600,12 +600,14 @@ bool ViewportWidget::event(QEvent* e)
     // Qt owns editor/UI shortcuts and text widgets. Only this focused widget feeds the game.
     if(attached_ && host_->HasScene() && host_->PlayState()!=EditorQtHost::Edit)
     {
-        if((e->type()==QEvent::KeyPress||e->type()==QEvent::KeyRelease)&&hasFocus()){
+        const bool isFocused = hasFocus() || (window() && window()->focusWidget() == this);
+        if((e->type()==QEvent::KeyPress||e->type()==QEvent::KeyRelease)&&isFocused){
             auto* key=static_cast<QKeyEvent*>(e);if(key->isAutoRepeat())return true;
             const int nav=CameraNavigationKey(key->nativeScanCode(),key->key());
             if((nav==Qt::Key_Space||nav==Qt::Key_P)&&key->modifiers()==Qt::NoModifier){
                 if(e->type()==QEvent::KeyPress){EditorCommand c;c.type=nav==Qt::Key_Space?EditorCommand::TogglePlay:EditorCommand::TogglePause;host_->PostCommand(c);}return true;
             }
+            EditorCommand f;f.type=EditorCommand::InputFocus;f.w=1;host_->PostCommand(f);
             EditorCommand c;c.type=EditorCommand::InputKey;c.w=GameKey(key);c.h=e->type()==QEvent::KeyPress;host_->PostCommand(c);return true;
         }
         if(e->type()==QEvent::MouseButtonPress||e->type()==QEvent::MouseButtonRelease){
