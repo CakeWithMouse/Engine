@@ -52,7 +52,7 @@ public:
 
     void ClearFocusIfInside();
     void RetranslateUi();
-    QSize minimumSizeHint() const override { return QSize(140, 80); }
+    QSize minimumSizeHint() const override { return QSize(80, 60); }
 
 signals:
     void NameEditingFinished(quint64 objectId, const QString& name);

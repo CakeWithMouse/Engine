@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "EditorLocale.h"
+#include "EditorTheme.h"
 #include <QSettings>
 #include "QtHost.h"
 #include "FileBrowser.h"
@@ -53,6 +54,14 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
         RetranslateUi();
     });
+    themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
+        if (actThemeDark_) actThemeDark_->setChecked(EditorTheme::Instance().Mode() == ThemeMode::Dark);
+        if (actThemeLight_) actThemeLight_->setChecked(EditorTheme::Instance().Mode() == ThemeMode::Light);
+        if (actPlay_) actPlay_->setIcon(EditorTheme::CreatePlayIcon());
+        if (actPause_) actPause_->setIcon(EditorTheme::CreatePauseIcon());
+        if (actStop_) actStop_->setIcon(EditorTheme::CreateStopIcon());
+        if (actExternal_) actExternal_->setIcon(EditorTheme::CreateExternalIcon());
+    });
 }
 
 EditorMainWindow::~EditorMainWindow()
@@ -60,6 +69,10 @@ EditorMainWindow::~EditorMainWindow()
     if (langSubId_) {
         EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
         langSubId_ = 0;
+    }
+    if (themeSubId_) {
+        EditorTheme::Instance().UnsubscribeThemeChanged(themeSubId_);
+        themeSubId_ = 0;
     }
 }
 
@@ -72,6 +85,7 @@ void EditorMainWindow::BuildUi()
 
     setDockNestingEnabled(true);
     setDockOptions(QMainWindow::AllowNestedDocks | QMainWindow::AllowTabbedDocks | QMainWindow::AnimatedDocks | QMainWindow::GroupedDragging);
+    setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::North);
 
     setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
     setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
@@ -89,7 +103,7 @@ void EditorMainWindow::BuildUi()
         QDockWidget::DockWidgetClosable
     );
 
-    viewportDock_->setMinimumSize(140, 80);
+    viewportDock_->setMinimumSize(80, 60);
     addDockWidget(Qt::TopDockWidgetArea, viewportDock_);
     setCentralWidget(nullptr);
 
@@ -97,14 +111,24 @@ void EditorMainWindow::BuildUi()
     console_->setObjectName(QStringLiteral("Console"));
     console_->setReadOnly(true);
     console_->setMaximumBlockCount(2000);
+    console_->setMinimumSize(60, 50);
+    console_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
 
     consoleDock_ = new QDockWidget(Tr("Консоль", "Console"), this);
     consoleDock_->setWidget(console_);
-    consoleDock_->setMinimumSize(140, 80);
+    consoleDock_->setMinimumSize(80, 60);
+    if (consoleDock_->widget()) {
+        consoleDock_->widget()->setMinimumSize(80, 60);
+        consoleDock_->widget()->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    }
     addDockWidget(Qt::BottomDockWidgetArea, consoleDock_);
 
     fileDock_ = new FileBrowserDock(host_, this);
-    fileDock_->setMinimumSize(140, 80);
+    fileDock_->setMinimumSize(80, 60);
+    if (fileDock_->widget()) {
+        fileDock_->widget()->setMinimumSize(80, 60);
+        fileDock_->widget()->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    }
     addDockWidget(Qt::BottomDockWidgetArea, fileDock_);
 
     BuildToolBar();
@@ -143,6 +167,50 @@ void EditorMainWindow::BuildUi()
     langGroup->addAction(actLangEn_);
     actLangRu_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::Ru);
     actLangEn_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::En);
+
+    themeMenu_ = viewMenu_->addMenu(Tr("Тема оформления", "Theme"));
+    actThemeDark_ = themeMenu_->addAction(Tr("Тёмная (Dark)", "Dark"), this, [this] {
+        EditorTheme::Instance().SetMode(ThemeMode::Dark);
+    });
+    actThemeDark_->setCheckable(true);
+    actThemeLight_ = themeMenu_->addAction(Tr("Светлая (Light)", "Light"), this, [this] {
+        EditorTheme::Instance().SetMode(ThemeMode::Light);
+    });
+    actThemeLight_->setCheckable(true);
+    auto* themeModeGroup = new QActionGroup(this);
+    themeModeGroup->addAction(actThemeDark_);
+    themeModeGroup->addAction(actThemeLight_);
+    actThemeDark_->setChecked(EditorTheme::Instance().Mode() == ThemeMode::Dark);
+    actThemeLight_->setChecked(EditorTheme::Instance().Mode() == ThemeMode::Light);
+
+    themeMenu_->addSeparator();
+    accentMenu_ = themeMenu_->addMenu(Tr("Акцентный цвет", "Accent Color"));
+    auto* accentGroup = new QActionGroup(this);
+
+    auto addAccent = [this, accentGroup](const QString& title, const QString& hex) {
+        auto* act = accentMenu_->addAction(title, this, [hex] {
+            EditorTheme::Instance().SetAccentColor(QColor(hex));
+        });
+        act->setCheckable(true);
+        accentGroup->addAction(act);
+        const QString curHex = EditorTheme::Instance().AccentColor().name(QColor::HexRgb).toUpper();
+        if (curHex == hex.toUpper()) act->setChecked(true);
+        return act;
+    };
+
+    actAccentMaxRed_ = addAccent(QStringLiteral("3ds Max Red (#E53935)"), QStringLiteral("#E53935"));
+    actAccentBlenderOrange_ = addAccent(QStringLiteral("Blender Orange (#E07A1F)"), QStringLiteral("#E07A1F"));
+    actAccentUnrealBlue_ = addAccent(QStringLiteral("Unreal Blue (#3B82F6)"), QStringLiteral("#3B82F6"));
+    actAccentUnityCyan_ = addAccent(QStringLiteral("Unity Cyan (#00BCD4)"), QStringLiteral("#00BCD4"));
+
+    accentMenu_->addSeparator();
+    actAccentCustom_ = accentMenu_->addAction(Tr("Выбрать свой цвет…", "Custom Color…"), this, [this] {
+        const QColor cur = EditorTheme::Instance().AccentColor();
+        const QColor chosen = QColorDialog::getColor(cur, this, Tr("Выберите акцентный цвет", "Select Accent Color"));
+        if (chosen.isValid()) {
+            EditorTheme::Instance().SetAccentColor(chosen);
+        }
+    });
 
     viewMenu_->addSeparator();
     actResetLayout_ = viewMenu_->addAction(Tr("Сбросить раскладку окон", "Reset Window Layout"), this, [this] {
@@ -197,6 +265,7 @@ void EditorMainWindow::closeEvent(QCloseEvent* event)
     if (!CloseMaterialEditors([this] { close(); })) return;
 
     const bool isTest = qEnvironmentVariableIsSet("PAIN_EDITOR_TEST_MODE") ||
+        qApp->applicationFilePath().contains(QStringLiteral("Tests"), Qt::CaseInsensitive) ||
         (host_ && host_->host().projectName && std::string(host_->host().projectName).find("UI") != std::string::npos);
     if (!isTest) {
         QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
@@ -351,10 +420,18 @@ void EditorMainWindow::BuildToolBar()
     toolBar_ = addToolBar(Tr("Запуск", "Play"));
     toolBar_->setMovable(false);
 
-    actPlay_ = toolBar_->addAction(QStringLiteral("▶ Play"));
-    actPause_ = toolBar_->addAction(QStringLiteral("⏸ Pause"));
-    actStop_ = toolBar_->addAction(QStringLiteral("⏹ Stop"));
-    actExternal_ = new QAction(Tr("Запустить отдельным окном", "Launch in Separate Window"), this);
+    toolBar_->setObjectName(QStringLiteral("MainToolBar"));
+    auto* leftSpacer = new QWidget(toolBar_);
+    leftSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    toolBar_->addWidget(leftSpacer);
+
+    actPlay_ = toolBar_->addAction(EditorTheme::CreatePlayIcon(), Tr("Play", "Play"));
+    actPause_ = toolBar_->addAction(EditorTheme::CreatePauseIcon(), Tr("Pause", "Pause"));
+    actStop_ = toolBar_->addAction(EditorTheme::CreateStopIcon(), Tr("Stop", "Stop"));
+    actExternal_ = toolBar_->addAction(EditorTheme::CreateExternalIcon(), Tr("Отдельное окно", "External"));
+    auto* rightSpacer = new QWidget(toolBar_);
+    rightSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    toolBar_->addWidget(rightSpacer);
 
     connect(actPlay_, &QAction::triggered, this, [this]
     {
@@ -567,11 +644,11 @@ void EditorMainWindow::BuildSceneDocks()
         QDockWidget::DockWidgetClosable
     );
 
-    sceneObjectsDock_->setMinimumSize(140, 80);
+    sceneObjectsDock_->setMinimumSize(80, 60);
 
     inspectorDock_ = new QDockWidget(Tr("Свойства объекта", "Object Properties"), this);
     inspectorDock_->setObjectName(QStringLiteral("InspectorDock"));
-    inspectorDock_->setMinimumSize(140, 80);
+    inspectorDock_->setMinimumSize(80, 60);
     inspectorDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     inspectorDock_->setFeatures(
         QDockWidget::DockWidgetMovable |
@@ -609,6 +686,14 @@ void EditorMainWindow::BuildSceneDocks()
 
     sceneObjectsDock_->setWidget(sceneObjectsPanel_);
     inspectorDock_->setWidget(objectInspectorPanel_);
+    if (sceneObjectsPanel_) {
+        sceneObjectsPanel_->setMinimumSize(80, 60);
+        sceneObjectsPanel_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    }
+    if (objectInspectorPanel_) {
+        objectInspectorPanel_->setMinimumSize(80, 60);
+        objectInspectorPanel_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    }
 
     ConnectPanels();
 }
@@ -1379,7 +1464,7 @@ void EditorMainWindow::RetranslateUi()
 
     if (viewportDock_) viewportDock_->setWindowTitle(Tr("Вьюпорт", "Viewport"));
     if (consoleDock_) consoleDock_->setWindowTitle(Tr("Консоль", "Console"));
-    if (fileDock_) fileDock_->setWindowTitle(Tr("Ресурсы и код", "Content and Code"));
+    if (fileDock_) fileDock_->setWindowTitle(Tr("Контент", "Content Browser"));
     if (sceneObjectsDock_) sceneObjectsDock_->setWindowTitle(Tr("Сцена / объекты", "Scene / Objects"));
     if (inspectorDock_) inspectorDock_->setWindowTitle(Tr("Свойства объекта", "Object Properties"));
 
@@ -1388,6 +1473,11 @@ void EditorMainWindow::RetranslateUi()
     if (playMenu_) playMenu_->setTitle(Tr("Запуск", "Play"));
     if (viewMenu_) viewMenu_->setTitle(Tr("Вид", "View"));
     if (langMenu_) langMenu_->setTitle(Tr("Язык", "Language"));
+    if (themeMenu_) themeMenu_->setTitle(Tr("Тема оформления", "Theme"));
+    if (actThemeDark_) actThemeDark_->setText(Tr("Тёмная (Dark)", "Dark"));
+    if (actThemeLight_) actThemeLight_->setText(Tr("Светлая (Light)", "Light"));
+    if (accentMenu_) accentMenu_->setTitle(Tr("Акцентный цвет", "Accent Color"));
+    if (actAccentCustom_) actAccentCustom_->setText(Tr("Выбрать свой цвет…", "Custom Color…"));
     if (resourcesMenu_) resourcesMenu_->setTitle(Tr("Ресурсы", "Assets"));
     if (projectMenu_) projectMenu_->setTitle(Tr("Проект", "Project"));
 
@@ -1408,7 +1498,10 @@ void EditorMainWindow::RetranslateUi()
 
     if (actServiceObjects_) actServiceObjects_->setText(Tr("Служебные объекты сцены", "Scene Service Objects"));
     if (actConfigurePlay_) actConfigurePlay_->setText(Tr("Настроить Play…", "Configure Play…"));
-    if (actExternal_) actExternal_->setText(Tr("Запустить отдельным окном", "Launch in Separate Window"));
+    if (actExternal_) {
+        const bool running = (gameProc_ && gameProc_->state() != QProcess::NotRunning);
+        actExternal_->setText(running ? Tr("Остановить отдельную игру", "Stop External Game") : Tr("Отдельное окно", "External"));
+    }
 
     if (langButton_) {
         langButton_->setText(EditorLocale::Instance().Language() == EditorLanguage::Ru ? QStringLiteral("RU") : QStringLiteral("EN"));
@@ -1426,7 +1519,7 @@ void EditorMainWindow::ApplyDefaultLayout()
         addDockWidget(Qt::BottomDockWidgetArea, consoleDock_);
         addDockWidget(Qt::BottomDockWidgetArea, fileDock_);
         tabifyDockWidget(consoleDock_, fileDock_);
-        consoleDock_->raise();
+        fileDock_->raise();
     }
 
     if (sceneObjectsDock_ && inspectorDock_) {
@@ -1448,6 +1541,7 @@ void EditorMainWindow::ApplyDefaultLayout()
 void EditorMainWindow::ApplySavedOrInitialLayout()
 {
     const bool isTest = qEnvironmentVariableIsSet("PAIN_EDITOR_TEST_MODE") ||
+        qApp->applicationFilePath().contains(QStringLiteral("Tests"), Qt::CaseInsensitive) ||
         (host_ && host_->host().projectName && std::string(host_->host().projectName).find("UI") != std::string::npos);
     if (isTest) {
         ApplyDefaultLayout();

@@ -43,7 +43,7 @@ protected:
 };
 
 FileBrowserDock::FileBrowserDock(EditorQtHost* host, QWidget* parent)
-    : QDockWidget(Tr("Ресурсы и код", "Content and Code"), parent)
+    : QDockWidget(Tr("Контент", "Content Browser"), parent)
     , host_(host)
 {
     const QFileInfo projectFile(QString::fromUtf8(
@@ -53,7 +53,7 @@ FileBrowserDock::FileBrowserDock(EditorQtHost* host, QWidget* parent)
     if (projectDir_.isEmpty())
         projectDir_ = QDir::currentPath();
 
-    setMinimumSize(120, 80);
+    setMinimumSize(80, 60);
     BuildUi();
     SetRootPath(projectDir_);
 
@@ -72,7 +72,7 @@ FileBrowserDock::~FileBrowserDock()
 
 void FileBrowserDock::RetranslateUi()
 {
-    setWindowTitle(Tr("Ресурсы и код", "Content and Code"));
+    setWindowTitle(Tr("Контент", "Content Browser"));
     if (importsBtn_) importsBtn_->setText(Tr("Импорт…", "Import…"));
     if (importTextureAct_) importTextureAct_->setText(Tr("Текстура…", "Texture…"));
     if (importModelAct_) importModelAct_->setText(Tr("Модель…", "Model…"));
@@ -90,6 +90,8 @@ void FileBrowserDock::RetranslateUi()
 void FileBrowserDock::BuildUi()
 {
     auto* panel = new QWidget(this);
+    panel->setMinimumSize(80, 60);
+    panel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     auto* layout = new QVBoxLayout(panel);
     layout->setContentsMargins(2, 2, 2, 2);
     importsBtn_ = new QToolButton(panel);
@@ -146,6 +148,8 @@ void FileBrowserDock::BuildUi()
     proxy_->project = QDir::cleanPath(projectDir_); proxy_->content = QDir::cleanPath(contentDir_);
     proxy_->setSourceModel(model_);
     view_ = new QTreeView(panel);
+    view_->setMinimumSize(60, 50);
+    view_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
     view_->setObjectName("ProjectFiles");
     view_->setModel(proxy_);
     view_->hideColumn(3);                   // Date Modified не нужен

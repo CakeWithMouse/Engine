@@ -21,7 +21,7 @@
 SceneObjectsPanel::SceneObjectsPanel(QWidget* parent)
     : QWidget(parent)
 {
-    setMinimumSize(140, 80);
+    setMinimumSize(80, 60);
     BuildUi();
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
         RetranslateUi();
@@ -70,6 +70,7 @@ void SceneObjectsPanel::BuildUi()
     auto* placementLayout = new QVBoxLayout(placementGroup_);
     layout->addWidget(placementGroup_);
     typeCategory_ = new QComboBox(placementGroup_);
+    typeCategory_->setMinimumWidth(40);
     typeCategory_->setObjectName(QStringLiteral("ObjectCategory"));
     typeCategory_->addItem(Tr("Примитивы", "Primitives"), "Primitive.");
     typeCategory_->addItem(Tr("Свет", "Lights"), "Light.");
@@ -88,6 +89,7 @@ void SceneObjectsPanel::BuildUi()
     placementGroup_->setToolTip(Tr("Категория меняет список объектов для добавления. Выбранный объект сцены не изменяется.",
                                   "Category changes the list of spawnable objects. Selected scene object is unchanged."));
     primitive_ = new QComboBox(this);
+    primitive_->setMinimumWidth(40);
     primitive_->setObjectName(QStringLiteral("PrimitiveType"));
     placementLayout->addWidget(primitive_);
 
@@ -101,6 +103,7 @@ void SceneObjectsPanel::BuildUi()
         spawn_[i]->setRange(-10000, 10000);
         spawn_[i]->setDecimals(2);
         spawn_[i]->setSingleStep(0.5);
+        spawn_[i]->setMinimumWidth(40);
         spawnRow->addWidget(spawn_[i]);
     }
 
@@ -112,6 +115,8 @@ void SceneObjectsPanel::BuildUi()
     placementLayout->addWidget(addPrimitiveButton_);
 
     hierarchy_ = new QTreeWidget(this);
+    hierarchy_->setMinimumSize(60, 50);
+    hierarchy_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
     hierarchy_->setHeaderLabels({Tr("Объект", "Object"), Tr("Тип", "Type")});
     hierarchy_->setSelectionMode(QAbstractItemView::SingleSelection);
     hierarchy_->setContextMenuPolicy(Qt::ActionsContextMenu);

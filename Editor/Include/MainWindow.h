@@ -148,6 +148,16 @@ private:
     QMenu* projectMenu_ = nullptr;
     QMenu* cppMenu_ = nullptr;
     QMenu* langMenu_ = nullptr;
+    QMenu* themeMenu_ = nullptr;
+    QAction* actThemeDark_ = nullptr;
+    QAction* actThemeLight_ = nullptr;
+    QMenu* accentMenu_ = nullptr;
+    QAction* actAccentMaxRed_ = nullptr;
+    QAction* actAccentBlenderOrange_ = nullptr;
+    QAction* actAccentUnrealBlue_ = nullptr;
+    QAction* actAccentUnityCyan_ = nullptr;
+    QAction* actAccentCustom_ = nullptr;
+    int themeSubId_ = 0;
 
     QPushButton* langButton_ = nullptr;
     int langSubId_ = 0;

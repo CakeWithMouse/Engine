@@ -23,7 +23,7 @@
 ObjectInspectorPanel::ObjectInspectorPanel(QWidget* parent)
     : QWidget(parent)
 {
-    setMinimumSize(140, 80);
+    setMinimumSize(80, 60);
     BuildUi();
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
         RetranslateUi();
@@ -100,6 +100,8 @@ void ObjectInspectorPanel::BuildUi()
     outerLayout->setContentsMargins(0, 0, 0, 0);
 
     auto* scrollArea = new QScrollArea(this);
+    scrollArea->setMinimumSize(60, 50);
+    scrollArea->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
     scrollArea->setWidgetResizable(true);
     scrollArea->setFrameShape(QFrame::NoFrame);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);

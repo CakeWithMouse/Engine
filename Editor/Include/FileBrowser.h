@@ -23,7 +23,7 @@ public:
     void SetRootPath(const QString& path);
     void RetranslateUi();
 
-    QSize minimumSizeHint() const override { return QSize(160, 100); }
+    QSize minimumSizeHint() const override { return QSize(80, 60); }
 
 private:
     void BuildUi();
