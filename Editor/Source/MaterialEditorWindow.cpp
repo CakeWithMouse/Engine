@@ -1,4 +1,5 @@
 #include "MaterialEditorWindow.h"
+#include "EditorLocale.h"
 
 #include <QAction>
 #include <QCheckBox>
@@ -316,6 +317,52 @@ MaterialEditorWindow::MaterialEditorWindow(EditorQtHost* host, const QString& ma
     BuildUi();
     UpdateTitle();
     resize(1200, 760);
+    langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
+        RetranslateUi();
+    });
+}
+
+MaterialEditorWindow::~MaterialEditorWindow()
+{
+    if (langSubId_) {
+        EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
+        langSubId_ = 0;
+    }
+}
+
+void MaterialEditorWindow::RetranslateUi()
+{
+    UpdateTitle();
+    if (saveAction_) {
+        saveAction_->setText(Tr("Сохранить", "Save"));
+        saveAction_->setToolTip(Tr("Записать HLSL и .mat, перекомпилировать (Ctrl+S)", "Write HLSL and .mat, recompile (Ctrl+S)"));
+    }
+    if (revertAction_) {
+        revertAction_->setText(Tr("Откатить", "Revert"));
+        revertAction_->setToolTip(Tr("Вернуть материал и HLSL к сохранённым файлам", "Revert material and HLSL to saved files"));
+    }
+    if (shapeLabel_) shapeLabel_->setText(Tr(" Форма: ", " Shape: "));
+    if (shape_) {
+        const int cur = shape_->currentIndex();
+        shape_->setItemText(0, Tr("Сфера", "Sphere"));
+        shape_->setItemText(1, Tr("Куб", "Cube"));
+        shape_->setItemText(2, Tr("Плоскость", "Plane"));
+        shape_->setCurrentIndex(cur);
+    }
+    if (blend_) {
+        const int cur = blend_->currentIndex();
+        blend_->setItemText(0, Tr("Непрозрачный", "Opaque"));
+        blend_->setItemText(1, Tr("С вырезом (masked)", "Masked (alpha clip)"));
+        blend_->setItemText(2, Tr("Полупрозрачный", "Translucent"));
+        blend_->setItemText(3, Tr("Аддитивный", "Additive"));
+        blend_->setCurrentIndex(cur);
+    }
+    if (unlit_) unlit_->setText(Tr("Без освещения", "Unlit"));
+    if (twoSided_) twoSided_->setText(Tr("Двусторонний", "Two-sided"));
+    if (castShadows_) castShadows_->setText(Tr("Отбрасывает тени", "Cast Shadows"));
+    if (blendLabel_) blendLabel_->setText(Tr("Смешивание", "Blend Mode"));
+    if (alphaClipLabel_) alphaClipLabel_->setText(Tr("Порог альфы", "Alpha Clip"));
+    if (parametersTitle_) parametersTitle_->setText(Tr("<b>Параметры и текстуры</b>", "<b>Parameters and Textures</b>"));
 }
 
 QString MaterialEditorWindow::PhysicalPath(const QString& virtualPath) const
@@ -326,18 +373,19 @@ QString MaterialEditorWindow::PhysicalPath(const QString& virtualPath) const
 
 void MaterialEditorWindow::BuildUi()
 {
-    auto* tools = addToolBar(QStringLiteral("Материал"));
+    auto* tools = addToolBar(Tr("Материал", "Material"));
     tools->setMovable(false);
-    auto* save = tools->addAction(QStringLiteral("Сохранить"), this, [this] { Save(); });
-    save->setShortcut(QKeySequence::Save);
-    save->setToolTip(QStringLiteral("Записать HLSL и .mat, перекомпилировать (Ctrl+S)"));
-    tools->addAction(QStringLiteral("Откатить"), this, [this] { Revert(); })
-         ->setToolTip(QStringLiteral("Вернуть материал и HLSL к сохранённым файлам"));
+    saveAction_ = tools->addAction(Tr("Сохранить", "Save"), this, [this] { Save(); });
+    saveAction_->setShortcut(QKeySequence::Save);
+    saveAction_->setToolTip(Tr("Записать HLSL и .mat, перекомпилировать (Ctrl+S)", "Write HLSL and .mat, recompile (Ctrl+S)"));
+    revertAction_ = tools->addAction(Tr("Откатить", "Revert"), this, [this] { Revert(); });
+    revertAction_->setToolTip(Tr("Вернуть материал и HLSL к сохранённым файлам", "Revert material and HLSL to saved files"));
     tools->addSeparator();
-    tools->addWidget(new QLabel(QStringLiteral(" Форма: "), tools));
+    shapeLabel_ = new QLabel(Tr(" Форма: ", " Shape: "), tools);
+    tools->addWidget(shapeLabel_);
     shape_ = new QComboBox(tools);
     shape_->setObjectName(QStringLiteral("MaterialPreviewShape"));
-    shape_->addItems({QStringLiteral("Сфера"), QStringLiteral("Куб"), QStringLiteral("Плоскость")});
+    shape_->addItems({Tr("Сфера", "Sphere"), Tr("Куб", "Cube"), Tr("Плоскость", "Plane")});
     tools->addWidget(shape_);
 
     preview_ = new MaterialPreviewWidget(this);
@@ -347,21 +395,23 @@ void MaterialEditorWindow::BuildUi()
     auto* settingsForm = new QFormLayout(settings);
     blend_ = new QComboBox(settings);
     blend_->setObjectName(QStringLiteral("MaterialBlend"));
-    blend_->addItems({QStringLiteral("Непрозрачный"), QStringLiteral("С вырезом (masked)"),
-                      QStringLiteral("Полупрозрачный"), QStringLiteral("Аддитивный")});
+    blend_->addItems({Tr("Непрозрачный", "Opaque"), Tr("С вырезом (masked)", "Masked (alpha clip)"),
+                      Tr("Полупрозрачный", "Translucent"), Tr("Аддитивный", "Additive")});
     alphaClip_ = new QDoubleSpinBox(settings);
     alphaClip_->setObjectName(QStringLiteral("MaterialAlphaClip"));
     alphaClip_->setRange(0.0, 1.0);
     alphaClip_->setSingleStep(0.05);
     alphaClip_->setDecimals(3);
-    unlit_ = new QCheckBox(QStringLiteral("Без освещения"), settings);
+    unlit_ = new QCheckBox(Tr("Без освещения", "Unlit"), settings);
     unlit_->setObjectName(QStringLiteral("MaterialUnlit"));
-    twoSided_ = new QCheckBox(QStringLiteral("Двусторонний"), settings);
+    twoSided_ = new QCheckBox(Tr("Двусторонний", "Two-sided"), settings);
     twoSided_->setObjectName(QStringLiteral("MaterialTwoSided"));
-    castShadows_ = new QCheckBox(QStringLiteral("Отбрасывает тени"), settings);
+    castShadows_ = new QCheckBox(Tr("Отбрасывает тени", "Cast Shadows"), settings);
     castShadows_->setObjectName(QStringLiteral("MaterialCastShadows"));
-    settingsForm->addRow(QStringLiteral("Смешивание"), blend_);
-    settingsForm->addRow(QStringLiteral("Порог альфы"), alphaClip_);
+    blendLabel_ = new QLabel(Tr("Смешивание", "Blend Mode"), settings);
+    settingsForm->addRow(blendLabel_, blend_);
+    alphaClipLabel_ = new QLabel(Tr("Порог альфы", "Alpha Clip"), settings);
+    settingsForm->addRow(alphaClipLabel_, alphaClip_);
     settingsForm->addRow(unlit_);
     settingsForm->addRow(twoSided_);
     settingsForm->addRow(castShadows_);
@@ -369,8 +419,8 @@ void MaterialEditorWindow::BuildUi()
     parameters_ = new QWidget(settings);
     parameterForm_ = new QFormLayout(parameters_);
     parameterForm_->setContentsMargins(0, 0, 0, 0);
-    auto* parametersTitle = new QLabel(QStringLiteral("<b>Параметры и текстуры</b>"), settings);
-    settingsForm->addRow(parametersTitle);
+    parametersTitle_ = new QLabel(Tr("<b>Параметры и текстуры</b>", "<b>Parameters and Textures</b>"), settings);
+    settingsForm->addRow(parametersTitle_);
     settingsForm->addRow(parameters_);
 
     auto* scroll = new QScrollArea(this);
@@ -699,7 +749,7 @@ void MaterialEditorWindow::GoToError(int line, int column)
 
 void MaterialEditorWindow::UpdateTitle()
 {
-    setWindowTitle(QStringLiteral("%1[*] — Материал").arg(QFileInfo(material_).fileName()));
+    setWindowTitle(QStringLiteral("%1[*] — %2").arg(QFileInfo(material_).fileName(), Tr("Материал", "Material")));
     setWindowModified(HasUnsavedChanges());
 }
 
@@ -829,8 +879,8 @@ bool MaterialEditorWindow::ConfirmClose(std::function<void()> afterSave)
     if (saving_) return false;
     if (!HasUnsavedChanges()) return true;
     const auto choice = QMessageBox::question(
-        this, QStringLiteral("Несохранённый материал"),
-        QStringLiteral("Сохранить изменения материала %1?").arg(QFileInfo(material_).fileName()),
+        this, Tr("Несохранённый материал", "Unsaved Material"),
+        Tr("Сохранить изменения материала %1?", "Save changes to material %1?").arg(QFileInfo(material_).fileName()),
         QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save);
     if (choice == QMessageBox::Save) {
         // Do not destroy the preview or unload the DLL before the queued save succeeds.

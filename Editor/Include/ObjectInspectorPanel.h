@@ -39,6 +39,7 @@ class ObjectInspectorPanel : public QWidget
 
 public:
     explicit ObjectInspectorPanel(QWidget* parent = nullptr);
+    ~ObjectInspectorPanel() override;
 
     void SetEnabled(bool enabled);
     void SetMaterialsAvailable(bool available);
@@ -50,6 +51,7 @@ public:
     );
 
     void ClearFocusIfInside();
+    void RetranslateUi();
 
 signals:
     void NameEditingFinished(quint64 objectId, const QString& name);
@@ -99,6 +101,22 @@ private:
     QLineEdit* materialAsset_ = nullptr;
     QWidget* materialActions_ = nullptr;
     QPushButton* editMaterialButton_ = nullptr;
+    QPushButton* chooseMaterialButton_ = nullptr;
+    QPushButton* clearMaterialButton_ = nullptr;
+    QPushButton* chooseTextureButton_ = nullptr;
+    QPushButton* clearTextureButton_ = nullptr;
+
+    QGroupBox* generalBox_ = nullptr;
+    QGroupBox* posBox_ = nullptr;
+    QGroupBox* rotBox_ = nullptr;
+    QGroupBox* scaleBox_ = nullptr;
+    QGroupBox* visualBox_ = nullptr;
+    QLabel* nameRowLabel_ = nullptr;
+    QLabel* characterSpeedLabel_ = nullptr;
+    QLabel* modelRowLabel_ = nullptr;
+    QLabel* textureRowLabel_ = nullptr;
+    QLabel* materialRowLabel_ = nullptr;
+    QLabel* lightRowLabels_[5]{};
 
     QDoubleSpinBox* transform_[9]{};
 
@@ -106,4 +124,5 @@ private:
     QDoubleSpinBox* lightValues_[5]{}; // RGB, intensity, radius
     QCheckBox* lightEnabled_ = nullptr;
     QPushButton* lightColor_ = nullptr;
+    int langSubId_ = 0;
 };

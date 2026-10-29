@@ -5,6 +5,7 @@
 #include <QVector>
 #include <array>
 #include <memory>
+#include <functional>
 
 #include "QtHost.h"
 
@@ -14,6 +15,8 @@ class QDoubleSpinBox;
 class QFormLayout;
 class QListWidget;
 class QWidget;
+class QLabel;
+class QAction;
 class MaterialPreviewWidget;
 class MaterialSourceEditor;
 
@@ -47,6 +50,7 @@ class MaterialEditorWindow : public QMainWindow
 public:
     // material: /Game путь .mat
     MaterialEditorWindow(EditorQtHost* host, const QString& material, QWidget* parent = nullptr);
+    ~MaterialEditorWindow() override;
 
     const QString& Material() const { return material_; }
     bool HasUnsavedChanges() const;
@@ -61,6 +65,7 @@ public:
     void Revert();
     // Перечитывает состояние материала из движка (после F6): ошибки и параметры, текст HLSL не трогает.
     void Refresh();
+    void RetranslateUi();
 
 protected:
     void closeEvent(QCloseEvent* event) override;
@@ -108,4 +113,12 @@ private:
     QCheckBox* castShadows_ = nullptr;
     QWidget* parameters_ = nullptr;
     QFormLayout* parameterForm_ = nullptr;
+
+    QAction* saveAction_ = nullptr;
+    QAction* revertAction_ = nullptr;
+    QLabel* shapeLabel_ = nullptr;
+    QLabel* blendLabel_ = nullptr;
+    QLabel* alphaClipLabel_ = nullptr;
+    QLabel* parametersTitle_ = nullptr;
+    int langSubId_ = 0;
 };

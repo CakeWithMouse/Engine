@@ -24,6 +24,7 @@ class QDockWidget;
 class QPoint;
 class QPushButton;
 class QAction;
+class QMenu;
 class SceneObjectsPanel;
 class MaterialEditorWindow;
 
@@ -33,6 +34,7 @@ class EditorMainWindow : public QMainWindow
 
 public:
     explicit EditorMainWindow(EditorQtHost* host, QWidget* parent = nullptr);
+    ~EditorMainWindow() override;
 
     void CommandFinished(const EditorCommand& command, uint32_t status, const QString& error);
 
@@ -49,6 +51,7 @@ public:
     void CreateMaterialForSelection();
     // F6: перекомпилировать все шейдеры и материалы с диска во всех сценах и превью.
     void ReloadShaders();
+    void RetranslateUi();
 
 public slots:
     void AppendLine(const QString& line);
@@ -117,6 +120,33 @@ private:
     QAction* redoAction_ = nullptr;
     QAction* duplicateAction_ = nullptr;
     QAction* deleteAction_ = nullptr;
+
+    QAction* actNewScene_ = nullptr;
+    QAction* actOpenScene_ = nullptr;
+    QAction* actSaveAs_ = nullptr;
+    QAction* actAddModel_ = nullptr;
+    QAction* actImportModel_ = nullptr;
+    QAction* actImportTexture_ = nullptr;
+    QAction* actReloadShaders_ = nullptr;
+    QAction* actCloseEditor_ = nullptr;
+
+    QAction* actServiceObjects_ = nullptr;
+    QAction* actConfigurePlay_ = nullptr;
+    QAction* actLangRu_ = nullptr;
+    QAction* actLangEn_ = nullptr;
+
+    QMenu* fileMenu_ = nullptr;
+    QMenu* resourcesMenu_ = nullptr;
+    QMenu* editMenu_ = nullptr;
+    QMenu* sceneMenu_ = nullptr;
+    QMenu* playMenu_ = nullptr;
+    QMenu* viewMenu_ = nullptr;
+    QMenu* projectMenu_ = nullptr;
+    QMenu* cppMenu_ = nullptr;
+    QMenu* langMenu_ = nullptr;
+
+    QPushButton* langButton_ = nullptr;
+    int langSubId_ = 0;
 
     QProcess* gameProc_ = nullptr;
 

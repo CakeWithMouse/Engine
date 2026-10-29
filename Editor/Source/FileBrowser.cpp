@@ -1,6 +1,7 @@
 #include "FileBrowser.h"
 #include "QtHost.h"
 #include "MainWindow.h"
+#include "EditorLocale.h"
 
 #include <QClipboard>
 #include <QComboBox>
@@ -42,7 +43,7 @@ protected:
 };
 
 FileBrowserDock::FileBrowserDock(EditorQtHost* host, QWidget* parent)
-    : QDockWidget(QStringLiteral("Ресурсы и код"), parent)
+    : QDockWidget(Tr("Ресурсы и код", "Content and Code"), parent)
     , host_(host)
 {
     const QFileInfo projectFile(QString::fromUtf8(
@@ -54,6 +55,35 @@ FileBrowserDock::FileBrowserDock(EditorQtHost* host, QWidget* parent)
 
     BuildUi();
     SetRootPath(projectDir_);
+
+    langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
+        RetranslateUi();
+    });
+}
+
+FileBrowserDock::~FileBrowserDock()
+{
+    if (langSubId_) {
+        EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
+        langSubId_ = 0;
+    }
+}
+
+void FileBrowserDock::RetranslateUi()
+{
+    setWindowTitle(Tr("Ресурсы и код", "Content and Code"));
+    if (importsBtn_) importsBtn_->setText(Tr("Импорт…", "Import…"));
+    if (importTextureAct_) importTextureAct_->setText(Tr("Текстура…", "Texture…"));
+    if (importModelAct_) importModelAct_->setText(Tr("Модель…", "Model…"));
+    if (filterEdit_) filterEdit_->setPlaceholderText(Tr("Фильтр: *.json;*.png ...", "Filter: *.json;*.png ..."));
+    if (rootCombo_) {
+        const int cur = rootCombo_->currentIndex();
+        rootCombo_->setItemText(0, Tr("Content и Source", "Content and Source"));
+        rootCombo_->setItemText(1, Tr("Весь проект", "Entire Project"));
+        rootCombo_->setToolTip(Tr("Binaries — DLL, Intermediate — временные файлы сборки. Доступны в режиме «Весь проект».",
+                                  "Binaries — DLL, Intermediate — temporary build files. Available in 'Entire Project' mode."));
+        rootCombo_->setCurrentIndex(cur);
+    }
 }
 
 void FileBrowserDock::BuildUi()
@@ -61,32 +91,37 @@ void FileBrowserDock::BuildUi()
     auto* panel = new QWidget(this);
     auto* layout = new QVBoxLayout(panel);
     layout->setContentsMargins(2, 2, 2, 2);
-    auto* imports = new QToolButton(panel);
-    imports->setText(QStringLiteral("Импорт…")); imports->setPopupMode(QToolButton::InstantPopup);
-    auto* importMenu = new QMenu(imports);
-    for (bool texture : {false, true}) {
-        auto* action = importMenu->addAction(texture ? QStringLiteral("Текстура…") : QStringLiteral("Модель…"));
-        action->setEnabled(host_->HasScene());
-        connect(action, &QAction::triggered, this, [this, texture] {
-            if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(texture);
-        });
-    }
-    imports->setMenu(importMenu);
+    importsBtn_ = new QToolButton(panel);
+    importsBtn_->setText(Tr("Импорт…", "Import…")); importsBtn_->setPopupMode(QToolButton::InstantPopup);
+    auto* importMenu = new QMenu(importsBtn_);
+    importModelAct_ = importMenu->addAction(Tr("Модель…", "Model…"));
+    importModelAct_->setEnabled(host_->HasScene());
+    connect(importModelAct_, &QAction::triggered, this, [this] {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(false);
+    });
+
+    importTextureAct_ = importMenu->addAction(Tr("Текстура…", "Texture…"));
+    importTextureAct_->setEnabled(host_->HasScene());
+    connect(importTextureAct_, &QAction::triggered, this, [this] {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(true);
+    });
+    importsBtn_->setMenu(importMenu);
 
     // --- верхняя панель: фильтр + выбор корня ---
     auto* topBar = new QHBoxLayout;
     filterEdit_ = new QLineEdit(panel);
-    filterEdit_->setPlaceholderText(QStringLiteral("Фильтр: *.json;*.png ..."));
+    filterEdit_->setPlaceholderText(Tr("Фильтр: *.json;*.png ...", "Filter: *.json;*.png ..."));
     connect(filterEdit_, &QLineEdit::textChanged, this,
             [this](const QString& t) { ApplyFilter(t); });
-    topBar->addWidget(imports);
+    topBar->addWidget(importsBtn_);
     topBar->addWidget(filterEdit_, 1);
 
     rootCombo_ = new QComboBox(panel);
     rootCombo_->setObjectName("FileVisibility");
-    rootCombo_->addItem(QStringLiteral("Content и Source"), projectDir_);
-    rootCombo_->addItem(QStringLiteral("Весь проект"), projectDir_);
-    rootCombo_->setToolTip(QStringLiteral("Binaries — DLL, Intermediate — временные файлы сборки. Доступны в режиме «Весь проект»."));
+    rootCombo_->addItem(Tr("Content и Source", "Content and Source"), projectDir_);
+    rootCombo_->addItem(Tr("Весь проект", "Entire Project"), projectDir_);
+    rootCombo_->setToolTip(Tr("Binaries — DLL, Intermediate — временные файлы сборки. Доступны в режиме «Весь проект».",
+                              "Binaries — DLL, Intermediate — temporary build files. Available in 'Entire Project' mode."));
     connect(rootCombo_, &QComboBox::currentIndexChanged, this,
             [this](int) { SetRootPath(rootCombo_->currentData().toString()); });
     topBar->addWidget(rootCombo_);
@@ -167,14 +202,14 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
 
     QMenu menu(this);
     const bool isMaterial = hasFile && path.endsWith(QStringLiteral(".mat"), Qt::CaseInsensitive);
-    QAction* use = hasFile && !model_->isDir(index) ? menu.addAction(isMaterial ? QStringLiteral("Назначить материал")
-                                                                               : QStringLiteral("Добавить модель / назначить текстуру")) : nullptr;
-    QAction* editMaterial = isMaterial && host_->HasMaterials() ? menu.addAction(QStringLiteral("Редактировать материал")) : nullptr;
-    QAction* newMaterial = host_->HasMaterials() ? menu.addAction(QStringLiteral("Новый материал…")) : nullptr;
-    QAction* open = hasFile ? menu.addAction(QStringLiteral("Открыть в приложении")) : nullptr;
-    QAction* reveal = hasFile ? menu.addAction(QStringLiteral("Показать в проводнике")) : nullptr;
-    QAction* copy = hasFile ? menu.addAction(QStringLiteral("Копировать путь")) : nullptr;
-    QAction* refresh = menu.addAction(QStringLiteral("Обновить"));
+    QAction* use = hasFile && !model_->isDir(index) ? menu.addAction(isMaterial ? Tr("Назначить материал", "Assign Material")
+                                                                                : Tr("Добавить модель / назначить текстуру", "Add Model / Assign Texture")) : nullptr;
+    QAction* editMaterial = isMaterial && host_->HasMaterials() ? menu.addAction(Tr("Редактировать материал", "Edit Material")) : nullptr;
+    QAction* newMaterial = host_->HasMaterials() ? menu.addAction(Tr("Новый материал…", "New Material…")) : nullptr;
+    QAction* open = hasFile ? menu.addAction(Tr("Открыть в приложении", "Open in Application")) : nullptr;
+    QAction* reveal = hasFile ? menu.addAction(Tr("Показать в проводнике", "Reveal in Explorer")) : nullptr;
+    QAction* copy = hasFile ? menu.addAction(Tr("Копировать путь", "Copy Path")) : nullptr;
+    QAction* refresh = menu.addAction(Tr("Обновить", "Refresh"));
 
     QAction* picked = menu.exec(view_->viewport()->mapToGlobal(pos));
     if (!picked)

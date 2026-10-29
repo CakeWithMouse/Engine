@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <QDockWidget>
 
@@ -6,6 +6,8 @@ class QComboBox;
 class QFileSystemModel;
 class QLineEdit;
 class QTreeView;
+class QToolButton;
+class QAction;
 class ProjectFilesFilter;
 class EditorQtHost;
 
@@ -16,8 +18,10 @@ class FileBrowserDock : public QDockWidget
 {
 public:
     FileBrowserDock(EditorQtHost* host, QWidget* parent = nullptr);
+    ~FileBrowserDock() override;
 
     void SetRootPath(const QString& path);
+    void RetranslateUi();
 
 private:
     void BuildUi();
@@ -31,6 +35,10 @@ private:
     QTreeView* view_ = nullptr;
     QLineEdit* filterEdit_ = nullptr;
     QComboBox* rootCombo_ = nullptr;
+    QToolButton* importsBtn_ = nullptr;
+    QAction* importTextureAct_ = nullptr;
+    QAction* importModelAct_ = nullptr;
+    int langSubId_ = 0;
     QString projectDir_;
     QString contentDir_;
 };

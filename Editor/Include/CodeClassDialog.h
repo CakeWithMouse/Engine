@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QVBoxLayout>
+#include "EditorLocale.h"
 
 // No engine objects are modified until the SDK accepts the complete request.
 class CodeClassDialog final : public QDialog
@@ -16,43 +17,53 @@ class CodeClassDialog final : public QDialog
 public:
     explicit CodeClassDialog(const QString& projectRoot, QWidget* parent = nullptr) : QDialog(parent)
     {
-        setWindowTitle(QStringLiteral("Добавить C++ класс"));
+        setWindowTitle(Tr("Добавить C++ класс", "Add C++ Class"));
         setMinimumWidth(560);
         auto* layout = new QVBoxLayout(this);
         auto* form = new QFormLayout;
         kind_ = new QComboBox(this); kind_->setObjectName("ClassKind");
         kind_->addItems({"Component", "Character", "Game", "Object"});
         name_ = new QLineEdit(this); name_->setObjectName("ClassName");
-        name_->setPlaceholderText(QStringLiteral("Например: MyCharacter (без .h и .cpp)"));
+        name_->setPlaceholderText(Tr("Например: MyCharacter (без .h и .cpp)", "For example: MyCharacter (without .h and .cpp)"));
         base_ = new QLineEdit(this); base_->setObjectName("ClassBase");
         header_ = new QLineEdit(this); header_->setObjectName("ClassBaseHeader");
-        form->addRow(QStringLiteral("Назначение"), kind_);
-        form->addRow(QStringLiteral("Имя класса"), name_);
-        form->addRow(QStringLiteral("Родитель"), base_);
-        form->addRow(QStringLiteral("Заголовок родителя"), header_);
+        form->addRow(Tr("Назначение", "Kind"), kind_);
+        form->addRow(Tr("Имя класса", "Class Name"), name_);
+        form->addRow(Tr("Родитель", "Parent Class"), base_);
+        form->addRow(Tr("Заголовок родителя", "Parent Header"), header_);
         layout->addLayout(form);
-        auto* hint = new QLabel(QStringLiteral("Имя: латинские буквы, цифры и _. Первая буква — не цифра.\n"
-            "Для Object родитель необязателен. Заголовок — относительно Source или SDK Include."), this);
+        auto* hint = new QLabel(Tr("Имя: латинские буквы, цифры и _. Первая буква — не цифра.\n"
+            "Для Object родитель необязателен. Заголовок — относительно Source или SDK Include.",
+            "Name: Latin letters, numbers, and _. First character cannot be a number.\n"
+            "For Object, parent is optional. Header is relative to Source or SDK Include."), this);
         hint->setWordWrap(true); layout->addWidget(hint);
         auto* error = new QLabel(this); error->setObjectName("ClassError"); error->setWordWrap(true);
         layout->addWidget(error);
         auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-        buttons->button(QDialogButtonBox::Ok)->setText(QStringLiteral("Создать")); layout->addWidget(buttons);
+        buttons->button(QDialogButtonBox::Ok)->setText(Tr("Создать", "Create"));
+        buttons->button(QDialogButtonBox::Cancel)->setText(Tr("Отмена", "Cancel"));
+        layout->addWidget(buttons);
         auto validate = [=] {
             const auto name = name_->text().trimmed(), base = base_->text().trimmed(), header = header_->text().trimmed();
             QString message;
             if (!QRegularExpression("^[A-Za-z_][A-Za-z_0-9]*$").match(name).hasMatch())
-                message = QStringLiteral("Введите имя вроде MyCharacter: без пробелов, кириллицы и расширения файла.");
+                message = Tr("Введите имя вроде MyCharacter: без пробелов, кириллицы и расширения файла.",
+                             "Enter a name like MyCharacter: no spaces, non-ASCII characters, or file extensions.");
             else if (ReservedNames().contains(name, Qt::CaseSensitive) || QRegularExpression("^(CON|PRN|AUX|NUL|COM[0-9]|LPT[0-9])$", QRegularExpression::CaseInsensitiveOption).match(name).hasMatch())
-                message = QStringLiteral("Это имя зарезервировано. Выберите другое имя класса.");
+                message = Tr("Это имя зарезервировано. Выберите другое имя класса.",
+                             "This name is reserved. Choose another class name.");
             else if (name == base)
-                message = QStringLiteral("Имя нового класса должно отличаться от имени родителя.");
+                message = Tr("Имя нового класса должно отличаться от имени родителя.",
+                             "New class name must differ from parent class name.");
             else if (QFileInfo::exists(projectRoot + "/Source/" + name + ".h") || QFileInfo::exists(projectRoot + "/Source/" + name + ".cpp"))
-                message = QStringLiteral("Файлы этого класса уже существуют. Выберите другое имя.");
+                message = Tr("Файлы этого класса уже существуют. Выберите другое имя.",
+                             "Files for this class already exist. Choose another name.");
             else if ((!base.isEmpty() && !QRegularExpression("^[A-Za-z_][A-Za-z_0-9]*(::[A-Za-z_][A-Za-z_0-9]*)*$").match(base).hasMatch()) || (base.isEmpty() && kind_->currentText() != "Object"))
-                message = QStringLiteral("Укажите имя родительского C++ класса.");
+                message = Tr("Укажите имя родительского C++ класса.",
+                             "Specify the parent C++ class name.");
             else if ((!base.isEmpty() && header.isEmpty()) || header.contains("..") || header.contains(QRegularExpression("[\"<>\\r\\n]")))
-                message = QStringLiteral("Укажите заголовок родителя без кавычек, <>, переноса строки и ..");
+                message = Tr("Укажите заголовок родителя без кавычек, <>, переноса строки и ..",
+                             "Specify the parent header without quotes, <>, newlines, or ..");
             error->setText(message); buttons->button(QDialogButtonBox::Ok)->setEnabled(message.isEmpty());
         };
         connect(kind_, &QComboBox::currentTextChanged, this, [=](const QString& kind) {

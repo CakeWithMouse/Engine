@@ -1,5 +1,6 @@
 #include "ObjectInspectorPanel.h"
 #include "QtHost.h"
+#include "EditorLocale.h"
 
 #include <QFormLayout>
 #include <QLineEdit>
@@ -23,13 +24,73 @@ ObjectInspectorPanel::ObjectInspectorPanel(QWidget* parent)
     : QWidget(parent)
 {
     BuildUi();
+    langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
+        RetranslateUi();
+    });
+}
+
+ObjectInspectorPanel::~ObjectInspectorPanel()
+{
+    if (langSubId_) {
+        EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
+        langSubId_ = 0;
+    }
 }
 
 void ObjectInspectorPanel::SetMaterialsAvailable(bool available)
 {
     materialActions_->setEnabled(available);
     materialAsset_->setEnabled(available);
-    materialActions_->setToolTip(available ? QString() : QStringLiteral("Материалы требуют обновления игрового модуля."));
+    materialActions_->setToolTip(available ? QString() : Tr("Материалы требуют обновления игрового модуля.",
+                                                           "Materials require updating the game module."));
+}
+
+void ObjectInspectorPanel::RetranslateUi()
+{
+    if (generalBox_) generalBox_->setTitle(Tr("Общие", "General"));
+    if (posBox_) posBox_->setTitle(Tr("Позиция", "Position"));
+    if (rotBox_) rotBox_->setTitle(Tr("Поворот", "Rotation"));
+    if (scaleBox_) scaleBox_->setTitle(Tr("Масштаб", "Scale"));
+    if (visualBox_) visualBox_->setTitle(Tr("Визуал", "Visuals"));
+    if (nameRowLabel_) nameRowLabel_->setText(Tr("Имя", "Name"));
+
+    if (selectedId_ == 0 && selectionLabel_)
+    {
+        selectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
+    }
+
+    if (auto* lightBox = qobject_cast<QGroupBox*>(lightInspector_))
+        lightBox->setTitle(Tr("Точечный свет", "Point Light"));
+    if (lightColor_) lightColor_->setText(Tr("Выбрать цвет…", "Choose Color…"));
+    if (lightEnabled_) lightEnabled_->setText(Tr("Включён", "Enabled"));
+
+    const QString lightLabelsEn[] = { "Red", "Green", "Blue", "Intensity", "Radius" };
+    const QString lightLabelsRu[] = { "Красный", "Зелёный", "Синий", "Интенсивность", "Радиус" };
+    for (int i = 0; i < 5; ++i)
+    {
+        if (lightRowLabels_[i])
+            lightRowLabels_[i]->setText(Tr(lightLabelsRu[i].toUtf8().constData(), lightLabelsEn[i].toUtf8().constData()));
+    }
+
+    if (auto* charBox = qobject_cast<QGroupBox*>(characterInspector_))
+        charBox->setTitle(Tr("Персонаж", "Character"));
+    if (characterSpeedLabel_) characterSpeedLabel_->setText(Tr("Скорость, ед/с", "Speed, units/s"));
+
+    if (modelRowLabel_) modelRowLabel_->setText(Tr("Модель", "Model"));
+    if (chooseModel_) {
+        chooseModel_->setText(Tr("Выбрать модель…", "Choose Model…"));
+        chooseModel_->setToolTip(Tr("Заменить модель или превратить примитив в модель. Для C++ персонажей визуал задаётся их классом.",
+                                    "Replace model or convert primitive to model. For C++ characters visuals are set by their class."));
+    }
+    if (textureRowLabel_) textureRowLabel_->setText(Tr("Текстура", "Texture"));
+    if (chooseTextureButton_) chooseTextureButton_->setText(Tr("Выбрать текстуру…", "Choose Texture…"));
+    if (clearTextureButton_) clearTextureButton_->setText(Tr("Убрать", "Clear"));
+
+    if (materialRowLabel_) materialRowLabel_->setText(Tr("Материал", "Material"));
+    if (materialAsset_) materialAsset_->setPlaceholderText(Tr("по умолчанию", "default"));
+    if (chooseMaterialButton_) chooseMaterialButton_->setText(Tr("Выбрать…", "Choose…"));
+    if (editMaterialButton_) editMaterialButton_->setText(Tr("Редактировать", "Edit"));
+    if (clearMaterialButton_) clearMaterialButton_->setText(Tr("Убрать", "Clear"));
 }
 
 void ObjectInspectorPanel::BuildUi()
@@ -48,15 +109,16 @@ void ObjectInspectorPanel::BuildUi()
 
     auto* inspectorLayout = new QVBoxLayout(content);
     inspectorLayout->setContentsMargins(6, 6, 6, 6);
-    auto group = [content, inspectorLayout](const QString& title) {
+    auto group = [content, inspectorLayout](const QString& title, QGroupBox** outBox = nullptr) {
         auto* box = new QGroupBox(title, content);
+        if (outBox) *outBox = box;
         inspectorLayout->addWidget(box);
         auto* form = new QFormLayout(box);
         form->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
         return form;
     };
-    auto* form = group(QStringLiteral("Общие"));
-    selectionLabel_ = new QLabel(QStringLiteral("Объект не выбран"), content);
+    auto* form = group(Tr("Общие", "General"), &generalBox_);
+    selectionLabel_ = new QLabel(Tr("Объект не выбран", "No object selected"), content);
     selectionLabel_->setObjectName(QStringLiteral("SelectedObjectLabel"));
     selectionLabel_->setWordWrap(true);
     selectionLabel_->setStyleSheet(QStringLiteral("font-weight: bold; color: #efa52b;"));
@@ -71,7 +133,8 @@ void ObjectInspectorPanel::BuildUi()
 
     objectName_ = new QLineEdit(this);
     objectName_->setMaxLength(120);
-    form->addRow(QStringLiteral("Имя"), objectName_);
+    nameRowLabel_ = new QLabel(Tr("Имя", "Name"), content);
+    form->addRow(nameRowLabel_, objectName_);
 
     const QString labels[] =
     {
@@ -88,7 +151,11 @@ void ObjectInspectorPanel::BuildUi()
 
     for (int i = 0; i < 9; ++i)
     {
-        if (i % 3 == 0) form = group(i == 0 ? QStringLiteral("Позиция") : i == 3 ? QStringLiteral("Поворот") : QStringLiteral("Масштаб"));
+        if (i % 3 == 0) {
+            if (i == 0) form = group(Tr("Позиция", "Position"), &posBox_);
+            else if (i == 3) form = group(Tr("Поворот", "Rotation"), &rotBox_);
+            else form = group(Tr("Масштаб", "Scale"), &scaleBox_);
+        }
         auto* spin = transform_[i] = new QDoubleSpinBox(this);
         spin->setObjectName(QStringLiteral("Transform%1").arg(i));
         spin->setRange(i >= 6 ? 0.001 : -10000.0, 10000.0);
@@ -106,26 +173,20 @@ void ObjectInspectorPanel::BuildUi()
         });
     }
 
-    form = group(QStringLiteral("Визуал"));
+    form = group(Tr("Визуал", "Visuals"), &visualBox_);
     BuildAssetInspector(form);
 
-    auto* lightGroup = new QGroupBox(QStringLiteral("Точечный свет"), this);
+    auto* lightGroup = new QGroupBox(Tr("Точечный свет", "Point Light"), this);
     lightInspector_ = lightGroup;
 
     auto* lightForm = new QFormLayout(lightGroup);
 
-    lightColor_ = new QPushButton(QStringLiteral("Выбрать цвет…"), lightGroup);
+    lightColor_ = new QPushButton(Tr("Выбрать цвет…", "Choose Color…"), lightGroup);
     lightColor_->setObjectName(QStringLiteral("LightColor"));
     lightForm->addRow(lightColor_);
 
-    const QString lightLabels[] =
-    {
-        QStringLiteral("Красный"),
-        QStringLiteral("Зелёный"),
-        QStringLiteral("Синий"),
-        QStringLiteral("Интенсивность"),
-        QStringLiteral("Радиус")
-    };
+    const QString lightLabelsEn[] = { "Red", "Green", "Blue", "Intensity", "Radius" };
+    const QString lightLabelsRu[] = { "Красный", "Зелёный", "Синий", "Интенсивность", "Радиус" };
 
     auto emitPointLightChanged = [this]
     {
@@ -143,12 +204,13 @@ void ObjectInspectorPanel::BuildUi()
         spin->setDecimals(3);
         spin->setSingleStep(i < 3 ? 0.05 : 0.5);
         spin->setKeyboardTracking(false);
-        lightForm->addRow(lightLabels[i], spin);
+        lightRowLabels_[i] = new QLabel(Tr(lightLabelsRu[i].toUtf8().constData(), lightLabelsEn[i].toUtf8().constData()), lightGroup);
+        lightForm->addRow(lightRowLabels_[i], spin);
 
         connect(spin, &QDoubleSpinBox::editingFinished, this, emitPointLightChanged);
     }
 
-    lightEnabled_ = new QCheckBox(QStringLiteral("Включён"), lightGroup);
+    lightEnabled_ = new QCheckBox(Tr("Включён", "Enabled"), lightGroup);
     lightEnabled_->setObjectName(QStringLiteral("LightEnabled"));
     lightForm->addRow(lightEnabled_);
 
@@ -174,14 +236,15 @@ void ObjectInspectorPanel::BuildUi()
     inspectorLayout->addWidget(lightGroup);
     lightGroup->hide();
 
-    auto* characterGroup = new QGroupBox(QStringLiteral("Персонаж"), content);
+    auto* characterGroup = new QGroupBox(Tr("Персонаж", "Character"), content);
     characterInspector_ = characterGroup;
     auto* characterForm = new QFormLayout(characterGroup);
     characterSpeed_ = new QDoubleSpinBox(characterGroup);
     characterSpeed_->setObjectName("CharacterSpeed");
     characterSpeed_->setRange(0, 10000);
     characterSpeed_->setKeyboardTracking(false);
-    characterForm->addRow(QStringLiteral("Скорость, ед/с"), characterSpeed_);
+    characterSpeedLabel_ = new QLabel(Tr("Скорость, ед/с", "Speed, units/s"), characterGroup);
+    characterForm->addRow(characterSpeedLabel_, characterSpeed_);
     inspectorLayout->addWidget(characterGroup);
     characterGroup->hide();
     connect(characterSpeed_, &QDoubleSpinBox::editingFinished, this, [this] {
@@ -207,11 +270,13 @@ void ObjectInspectorPanel::BuildAssetInspector(QFormLayout* form)
     modelAsset_->setObjectName(QStringLiteral("ModelAsset"));
     modelAsset_->setMinimumWidth(0);
     modelAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
-    form->addRow(QStringLiteral("Модель"), modelAsset_);
+    modelRowLabel_ = new QLabel(Tr("Модель", "Model"), content);
+    form->addRow(modelRowLabel_, modelAsset_);
 
-    chooseModel_ = new QPushButton(QStringLiteral("Выбрать модель…"), content);
+    chooseModel_ = new QPushButton(Tr("Выбрать модель…", "Choose Model…"), content);
     chooseModel_->setObjectName("ChooseModel");
-    chooseModel_->setToolTip(QStringLiteral("Заменить модель или превратить примитив в модель. Для C++ персонажей визуал задаётся их классом."));
+    chooseModel_->setToolTip(Tr("Заменить модель или превратить примитив в модель. Для C++ персонажей визуал задаётся их классом.",
+                                "Replace model or convert primitive to model. For C++ characters visuals are set by their class."));
     form->addRow(chooseModel_);
     connect(chooseModel_, &QPushButton::clicked, this, &ObjectInspectorPanel::ChooseModelRequested);
 
@@ -220,29 +285,30 @@ void ObjectInspectorPanel::BuildAssetInspector(QFormLayout* form)
     textureAsset_->setObjectName(QStringLiteral("TextureAsset"));
     textureAsset_->setMinimumWidth(0);
     textureAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
-    form->addRow(QStringLiteral("Текстура"), textureAsset_);
+    textureRowLabel_ = new QLabel(Tr("Текстура", "Texture"), content);
+    form->addRow(textureRowLabel_, textureAsset_);
 
     auto* rowWidget = new QWidget(content);
     auto* row = new QHBoxLayout(rowWidget);
     row->setContentsMargins(0, 0, 0, 0);
 
-    auto* chooseTextureButton = new QPushButton(QStringLiteral("Выбрать текстуру…"), rowWidget);
-    chooseTextureButton->setObjectName(QStringLiteral("ChooseTexture"));
+    chooseTextureButton_ = new QPushButton(Tr("Выбрать текстуру…", "Choose Texture…"), rowWidget);
+    chooseTextureButton_->setObjectName(QStringLiteral("ChooseTexture"));
 
-    auto* clearTextureButton = new QPushButton(QStringLiteral("Убрать"), rowWidget);
-    clearTextureButton->setObjectName(QStringLiteral("ClearTexture"));
+    clearTextureButton_ = new QPushButton(Tr("Убрать", "Clear"), rowWidget);
+    clearTextureButton_->setObjectName(QStringLiteral("ClearTexture"));
 
-    row->addWidget(chooseTextureButton);
-    row->addWidget(clearTextureButton);
+    row->addWidget(chooseTextureButton_);
+    row->addWidget(clearTextureButton_);
 
     form->addRow(rowWidget);
 
-    connect(chooseTextureButton, &QPushButton::clicked, this, [this]
+    connect(chooseTextureButton_, &QPushButton::clicked, this, [this]
     {
         emit ChooseTextureRequested();
     });
 
-    connect(clearTextureButton, &QPushButton::clicked, this, [this]
+    connect(clearTextureButton_, &QPushButton::clicked, this, [this]
     {
         emit ClearTextureRequested();
     });
@@ -252,27 +318,28 @@ void ObjectInspectorPanel::BuildAssetInspector(QFormLayout* form)
     materialAsset_->setObjectName(QStringLiteral("MaterialAsset"));
     materialAsset_->setMinimumWidth(0);
     materialAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
-    materialAsset_->setPlaceholderText(QStringLiteral("по умолчанию"));
-    form->addRow(QStringLiteral("Материал"), materialAsset_);
+    materialAsset_->setPlaceholderText(Tr("по умолчанию", "default"));
+    materialRowLabel_ = new QLabel(Tr("Материал", "Material"), content);
+    form->addRow(materialRowLabel_, materialAsset_);
 
     auto* materialRowWidget = new QWidget(content);
     materialActions_ = materialRowWidget;
     auto* materialRow = new QHBoxLayout(materialRowWidget);
     materialRow->setContentsMargins(0, 0, 0, 0);
 
-    auto* chooseMaterialButton = new QPushButton(QStringLiteral("Выбрать…"), materialRowWidget);
-    chooseMaterialButton->setObjectName(QStringLiteral("ChooseMaterial"));
-    editMaterialButton_ = new QPushButton(QStringLiteral("Редактировать"), materialRowWidget);
+    chooseMaterialButton_ = new QPushButton(Tr("Выбрать…", "Choose…"), materialRowWidget);
+    chooseMaterialButton_->setObjectName(QStringLiteral("ChooseMaterial"));
+    editMaterialButton_ = new QPushButton(Tr("Редактировать", "Edit"), materialRowWidget);
     editMaterialButton_->setObjectName(QStringLiteral("EditMaterial"));
-    auto* clearMaterialButton = new QPushButton(QStringLiteral("Убрать"), materialRowWidget);
-    clearMaterialButton->setObjectName(QStringLiteral("ClearMaterial"));
+    clearMaterialButton_ = new QPushButton(Tr("Убрать", "Clear"), materialRowWidget);
+    clearMaterialButton_->setObjectName(QStringLiteral("ClearMaterial"));
 
-    materialRow->addWidget(chooseMaterialButton);
+    materialRow->addWidget(chooseMaterialButton_);
     materialRow->addWidget(editMaterialButton_);
-    materialRow->addWidget(clearMaterialButton);
+    materialRow->addWidget(clearMaterialButton_);
     form->addRow(materialRowWidget);
 
-    connect(chooseMaterialButton, &QPushButton::clicked, this, [this]
+    connect(chooseMaterialButton_, &QPushButton::clicked, this, [this]
     {
         emit ChooseMaterialRequested();
     });
@@ -280,7 +347,7 @@ void ObjectInspectorPanel::BuildAssetInspector(QFormLayout* form)
     {
         emit EditMaterialRequested(materialAsset_->text());
     });
-    connect(clearMaterialButton, &QPushButton::clicked, this, [this]
+    connect(clearMaterialButton_, &QPushButton::clicked, this, [this]
     {
         emit ClearMaterialRequested();
     });
@@ -333,17 +400,10 @@ InspectorPointLightValue ObjectInspectorPanel::CurrentPointLightValue() const
 
 void ObjectInspectorPanel::UpdateLightColorButton(const float color[3])
 {
-    const QColor backgroundColor = QColor::fromRgbF(color[0], color[1], color[2]);
-
-    const double luminance =
-        color[0] * 0.299 +
-        color[1] * 0.587 +
-        color[2] * 0.114;
-
-    lightColor_->setStyleSheet(QStringLiteral("background-color: %1; color: %2;")
-                               .arg(backgroundColor.name())
-                               .arg(luminance > 0.5 ? QStringLiteral("black") : QStringLiteral("white"))
-    );
+    const QColor c = QColor::fromRgbF(color[0], color[1], color[2]);
+    lightColor_->setStyleSheet(QStringLiteral(
+        "background-color: %1; color: %2; font-weight: bold;"
+    ).arg(c.name(), c.lightnessF() > 0.5 ? QStringLiteral("black") : QStringLiteral("white")));
 }
 
 void ObjectInspectorPanel::Refresh(
@@ -353,115 +413,147 @@ void ObjectInspectorPanel::Refresh(
 )
 {
     refreshing_ = true;
+
     selectedId_ = selectedId;
-
-    QWidget* focus = QApplication::focusWidget();
-
-    const bool canReplaceWholeInspector =
-        selectionChanged ||
-        !focus ||
-        !isAncestorOf(focus);
-
-    auto canReplaceField = [&](QWidget* field)
-    {
-        return selectionChanged ||
-            !focus ||
-            (field != focus && !field->isAncestorOf(focus));
-    };
-
-    selectionLabel_->setText(QStringLiteral("Объект не выбран"));
-    chooseModel_->setEnabled(false);
 
     if (selectedId_ == 0)
     {
+        selectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
         objectName_->clear();
+
+        for (auto* spin : transform_)
+            spin->setValue(0.0);
+
         modelAsset_->clear();
         textureAsset_->clear();
         materialAsset_->clear();
         editMaterialButton_->setEnabled(false);
-        lightInspector_->setVisible(false);
+
+        lightInspector_->hide();
         characterInspector_->hide();
+
         refreshing_ = false;
         return;
     }
 
-    modelAsset_->clear();
-    textureAsset_->clear();
-    materialAsset_->clear();
-    editMaterialButton_->setEnabled(false);
+    const auto it = std::find_if(
+        view.objects.begin(),
+        view.objects.end(),
+        [selectedId](const auto& o) { return o.id == selectedId; }
+    );
 
-    bool selectedLight = false;
-
-    for (const auto& object : view.objects)
+    if (it == view.objects.end())
     {
-        if (object.id != selectedId_)
-            continue;
-
-        selectedLight = object.hasPointLight;
-        selectionLabel_->setText(QStringLiteral("Выбран: %1\n%2 · ID %3").arg(QString::fromStdString(object.name), QString::fromStdString(object.type)).arg(object.id));
-        chooseModel_->setEnabled(object.type == "Engine.Model" || object.type.rfind("Primitive.", 0) == 0);
-        characterInspector_->setVisible(object.gameplayKind == 1);
-        if (object.gameplayKind == 1 && canReplaceField(characterSpeed_))
-            characterSpeed_->setValue(QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object()["moveSpeed"].toDouble(5));
-
-        if (object.hasPointLight)
-        {
-            for (int i = 0; i < 5; ++i)
-            {
-                if (!canReplaceField(lightValues_[i]))
-                    continue;
-
-                if (i < 3)
-                    lightValues_[i]->setValue(object.pointLight.color[i]);
-                else if (i == 3)
-                    lightValues_[i]->setValue(object.pointLight.intensity);
-                else
-                    lightValues_[i]->setValue(object.pointLight.radius);
-            }
-
-            lightEnabled_->setChecked(object.pointLight.enabled != 0);
-            UpdateLightColorButton(object.pointLight.color);
-        }
-
-        modelAsset_->setText(QString::fromStdString(object.modelAsset));
-        textureAsset_->setText(QString::fromStdString(object.textureAsset));
-        materialAsset_->setText(QString::fromStdString(object.materialAsset));
-        // С материалом по умолчанию кнопка создаёт новый материал; у света материала нет.
-        editMaterialButton_->setEnabled(!object.materialAsset.empty() || !object.hasPointLight);
-        editMaterialButton_->setToolTip(object.materialAsset.empty()
-            ? QStringLiteral("Создать материал в Content/Materials, назначить его объекту и открыть редактор")
-            : QString());
-
-        if (canReplaceWholeInspector)
-        {
-            objectName_->setText(QString::fromStdString(object.name));
-
-            const auto& transform = object.transform;
-
-            const QQuaternion rotation(
-                transform.rotation[3],
-                transform.rotation[0],
-                transform.rotation[1],
-                transform.rotation[2]
-            );
-
-            const auto euler = rotation.toEulerAngles();
-
-            for (int i = 0; i < 3; ++i)
-            {
-                transform_[i]->setValue(transform.position[i]);
-                transform_[i + 6]->setValue(transform.scale[i]);
-            }
-
-            transform_[3]->setValue(euler.x());
-            transform_[4]->setValue(euler.y());
-            transform_[5]->setValue(euler.z());
-        }
-
-        break;
+        selectionLabel_->setText(Tr("Выбран несуществующий объект", "Selected object does not exist"));
+        refreshing_ = false;
+        return;
     }
 
-    lightInspector_->setVisible(selectedLight);
+    const auto& object = *it;
+
+    selectionLabel_->setText(
+        QStringLiteral("%1 [%2]")
+            .arg(QString::fromStdString(object.name))
+            .arg(QString::fromStdString(object.type))
+    );
+
+    if (selectionChanged || !objectName_->hasFocus())
+        objectName_->setText(QString::fromStdString(object.name));
+
+    const auto& t = object.transform;
+
+    const QQuaternion q(
+        t.rotation[3],
+        t.rotation[0],
+        t.rotation[1],
+        t.rotation[2]
+    );
+
+    const auto euler = q.toEulerAngles();
+
+    const double values[] =
+    {
+        t.position[0],
+        t.position[1],
+        t.position[2],
+        euler.x(),
+        euler.y(),
+        euler.z(),
+        t.scale[0],
+        t.scale[1],
+        t.scale[2]
+    };
+
+    for (int i = 0; i < 9; ++i)
+    {
+        if (selectionChanged || !transform_[i]->hasFocus())
+            transform_[i]->setValue(values[i]);
+    }
+
+    const QString model = QString::fromStdString(object.modelAsset);
+    const QString texture = QString::fromStdString(object.textureAsset);
+    const QString material = QString::fromStdString(object.materialAsset);
+
+    if (selectionChanged || !modelAsset_->hasFocus())
+        modelAsset_->setText(model);
+
+    if (selectionChanged || !textureAsset_->hasFocus())
+        textureAsset_->setText(texture);
+
+    if (selectionChanged || !materialAsset_->hasFocus())
+        materialAsset_->setText(material);
+    editMaterialButton_->setEnabled(!object.materialAsset.empty() || !object.hasPointLight);
+    editMaterialButton_->setToolTip(object.materialAsset.empty()
+        ? Tr("Создать материал в Content/Materials, назначить его объекту и открыть редактор",
+             "Create material in Content/Materials, assign to object, and open editor")
+        : QString());
+
+    const bool supportsModel = object.type == "Engine.Model" || QString::fromStdString(object.type).startsWith("Primitive.");
+    chooseModel_->setEnabled(supportsModel);
+
+    if (object.hasPointLight)
+    {
+        lightInspector_->show();
+
+        const auto& light = object.pointLight;
+
+        const double lv[] =
+        {
+            light.color[0],
+            light.color[1],
+            light.color[2],
+            light.intensity,
+            light.radius
+        };
+
+        for (int i = 0; i < 5; ++i)
+        {
+            if (selectionChanged || !lightValues_[i]->hasFocus())
+                lightValues_[i]->setValue(lv[i]);
+        }
+
+        lightEnabled_->setChecked(light.enabled != 0);
+        UpdateLightColorButton(light.color);
+    }
+    else
+    {
+        lightInspector_->hide();
+    }
+
+    if (object.gameplayKind == 1)
+    {
+        characterInspector_->show();
+        double speed = 5.0;
+        if (!object.projectData.empty()) {
+            const auto json = QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object();
+            if (json.contains("speed")) speed = json["speed"].toDouble();
+        }
+        if (selectionChanged || !characterSpeed_->hasFocus()) characterSpeed_->setValue(speed);
+    }
+    else
+    {
+        characterInspector_->hide();
+    }
 
     refreshing_ = false;
 }

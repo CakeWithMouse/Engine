@@ -14,6 +14,8 @@ class QDoubleSpinBox;
 class QPushButton;
 class QTreeWidget;
 class QAction;
+class QGroupBox;
+class QLabel;
 
 struct EditorSnapshot;
 
@@ -23,6 +25,7 @@ class SceneObjectsPanel : public QWidget
 
 public:
     explicit SceneObjectsPanel(QWidget* parent = nullptr);
+    ~SceneObjectsPanel() override;
 
     void SetEnabled(bool enabled);
 
@@ -34,6 +37,8 @@ public:
     void RefreshHierarchy(const EditorQtHost::Snapshot& view);
 
     std::array<double, 3> SpawnPosition() const;
+
+    void RetranslateUi();
 
 signals:
     void AddPrimitiveRequested(
@@ -54,6 +59,14 @@ signals:
 private:
     void BuildUi();
     void FillTypes();
+
+    QGroupBox* placementGroup_ = nullptr;
+    QLabel* categoryLabel_ = nullptr;
+    QLabel* objectLabel_ = nullptr;
+    QLabel* spawnPointLabel_ = nullptr;
+    QAction* actDuplicate_ = nullptr;
+    QAction* actRemove_ = nullptr;
+
     QComboBox* typeCategory_ = nullptr;
     QVector<std::pair<QString, QString>> types_;
     bool showServiceObjects_ = false;
@@ -65,11 +78,11 @@ private:
 
     QTreeWidget* hierarchy_ = nullptr;
 
-
     QAction* removeShortcut_ = nullptr;
 
     QString hierarchyKey_;
     QString primitiveKey_;
 
     bool suppressSelectionChanged_ = false;
+    int langSubId_ = 0;
 };

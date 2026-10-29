@@ -139,6 +139,7 @@
         <ClCompile Include="Source/ObjectInspectorPanel.cpp"/>
         <ClCompile Include="Source/SceneObjectsPanel.cpp"/>
         <ClCompile Include="Source/MaterialEditorWindow.cpp"/>
+        <ClCompile Include="Source/EditorLocale.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_MainWindow.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_ViewportWidget.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_ObjectInspectorPanel.cpp"/>
@@ -148,6 +149,7 @@
 
     <ItemGroup>
         <ClInclude Include="Include/QtHost.h"/>
+        <ClInclude Include="Include/EditorLocale.h"/>
         <ClInclude Include="Include/CodeClassDialog.h"/>
         <ClInclude Include="Include/FileBrowser.h"/>
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->
