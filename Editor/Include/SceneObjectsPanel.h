@@ -50,6 +50,12 @@ signals:
         const QString& typeLabel,
         const std::array<double, 3>& position
     );
+    void AddChildPrimitiveRequested(
+        quint64 parentId,
+        const QString& typeName,
+        const QString& typeLabel,
+        const std::array<double, 3>& position
+    );
 
     void AddModelRequested();
     void ImportModelRequested();
@@ -59,17 +65,20 @@ signals:
 
     void SelectionChanged(quint64 objectId);
     void FocusRequested();
+    void SetParentRequested(quint64 childId, quint64 parentId);
+    void RenameRequested(quint64 objectId, const QString& newName);
 
 private:
     void BuildUi();
     void FillTypes();
     void RebuildAddMenu();
     void FilterHierarchy(const QString& query);
+    void ShowTreeContextMenu(const QPoint& pos);
 
     QLineEdit* searchEdit_ = nullptr;
-    QToolButton* addBtn_ = nullptr;
+    QPushButton* addBtn_ = nullptr;
     QMenu* addMenu_ = nullptr;
-    QToolButton* newFolderBtn_ = nullptr;
+    QPushButton* newFolderBtn_ = nullptr;
 
     QGroupBox* placementGroup_ = nullptr;
     QLabel* categoryLabel_ = nullptr;

@@ -18,8 +18,46 @@
 #include <QLineEdit>
 #include <QToolButton>
 #include <QMenu>
+#include <QDropEvent>
 
 #include <map>
+
+class SceneOutlinerTree : public QTreeWidget
+{
+public:
+    explicit SceneOutlinerTree(QWidget* parent = nullptr) : QTreeWidget(parent)
+    {
+        setDragEnabled(true);
+        setAcceptDrops(true);
+        setDropIndicatorShown(true);
+        setDragDropMode(QAbstractItemView::InternalMove);
+    }
+
+    std::function<void(uint64_t childId, uint64_t parentId)> onParentChanged;
+
+protected:
+    void dropEvent(QDropEvent* event) override
+    {
+        QTreeWidgetItem* draggedItem = currentItem();
+        if (!draggedItem) {
+            QTreeWidget::dropEvent(event);
+            return;
+        }
+
+        uint64_t childId = draggedItem->data(0, Qt::UserRole).toULongLong();
+
+        QTreeWidget::dropEvent(event);
+
+        uint64_t parentId = 0;
+        if (draggedItem->parent()) {
+            parentId = draggedItem->parent()->data(0, Qt::UserRole).toULongLong();
+        }
+
+        if (childId && onParentChanged) {
+            onParentChanged(childId, parentId);
+        }
+    }
+};
 
 SceneObjectsPanel::SceneObjectsPanel(QWidget* parent)
     : QWidget(parent)
@@ -86,17 +124,15 @@ void SceneObjectsPanel::BuildUi()
 
     searchEdit_ = new QLineEdit(this);
     searchEdit_->setPlaceholderText(Tr("Поиск объектов...", "Search objects..."));
-    searchEdit_->setClearButtonEnabled(true);
     headerRow->addWidget(searchEdit_, 1);
 
-    addBtn_ = new QToolButton(this);
+    addBtn_ = new QPushButton(this);
     addBtn_->setText(Tr("+ Добавить", "+ Add"));
-    addBtn_->setPopupMode(QToolButton::InstantPopup);
     addMenu_ = new QMenu(addBtn_);
     addBtn_->setMenu(addMenu_);
     headerRow->addWidget(addBtn_);
 
-    newFolderBtn_ = new QToolButton(this);
+    newFolderBtn_ = new QPushButton(this);
     newFolderBtn_->setText(Tr("Папка", "Folder"));
     newFolderBtn_->setToolTip(Tr("Создать группу / папку", "Create Empty Group / Folder"));
     headerRow->addWidget(newFolderBtn_);
@@ -107,7 +143,7 @@ void SceneObjectsPanel::BuildUi()
         FilterHierarchy(text);
     });
 
-    connect(newFolderBtn_, &QToolButton::clicked, this, [this] {
+    connect(newFolderBtn_, &QPushButton::clicked, this, [this] {
         QString groupType = QStringLiteral("Primitive.Cube");
         for (const auto& t : types_) {
             if (t.second.startsWith(QStringLiteral("Primitive."))) {
@@ -168,23 +204,52 @@ void SceneObjectsPanel::BuildUi()
     addPrimitiveButton_->setObjectName(QStringLiteral("AddPrimitive"));
     placementLayout->addWidget(addPrimitiveButton_);
 
-    hierarchy_ = new QTreeWidget(this);
+    auto* outlinerTree = new SceneOutlinerTree(this);
+    outlinerTree->onParentChanged = [this](uint64_t childId, uint64_t parentId) {
+        emit SetParentRequested(childId, parentId);
+    };
+    hierarchy_ = outlinerTree;
     hierarchy_->setMinimumSize(60, 50);
     hierarchy_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
     hierarchy_->setHeaderLabels({Tr("Объект", "Object"), Tr("Тип", "Type")});
     hierarchy_->setSelectionMode(QAbstractItemView::SingleSelection);
-    hierarchy_->setContextMenuPolicy(Qt::ActionsContextMenu);
+    hierarchy_->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(hierarchy_, &QTreeWidget::customContextMenuRequested, this, &SceneObjectsPanel::ShowTreeContextMenu);
+
     actDuplicate_ = new QAction(Tr("Дублировать объект", "Duplicate Object"), hierarchy_);
-    actRemove_ = new QAction(Tr("Удалить объект", "Remove Object"), hierarchy_);
-    hierarchy_->addAction(actDuplicate_); hierarchy_->addAction(actRemove_);
+    actDuplicate_->setShortcut(QKeySequence(QStringLiteral("Ctrl+D")));
+    actDuplicate_->setShortcutContext(Qt::WidgetShortcut);
+    hierarchy_->addAction(actDuplicate_);
     connect(actDuplicate_, &QAction::triggered, this, &SceneObjectsPanel::DuplicateRequested);
+
+    actRemove_ = new QAction(Tr("Удалить объект", "Remove Object"), hierarchy_);
+    actRemove_->setShortcut(QKeySequence::Delete);
+    actRemove_->setShortcutContext(Qt::WidgetShortcut);
+    hierarchy_->addAction(actRemove_);
     connect(actRemove_, &QAction::triggered, this, &SceneObjectsPanel::RemoveRequested);
 
-    // Delete работает только в иерархии, чтобы не мешать вводу текста в полях.
-    removeShortcut_ = new QAction(this);
-    removeShortcut_->setShortcut(QKeySequence::Delete);
-    removeShortcut_->setShortcutContext(Qt::WidgetShortcut);
-    hierarchy_->addAction(removeShortcut_);
+    auto* actRename = new QAction(Tr("Переименовать (F2)", "Rename (F2)"), hierarchy_);
+    actRename->setShortcut(QKeySequence(Qt::Key_F2));
+    actRename->setShortcutContext(Qt::WidgetShortcut);
+    hierarchy_->addAction(actRename);
+    connect(actRename, &QAction::triggered, this, [this] {
+        if (hierarchy_->currentItem()) hierarchy_->editItem(hierarchy_->currentItem(), 0);
+    });
+
+    auto* actFocus = new QAction(Tr("Фокус (F)", "Focus (F)"), hierarchy_);
+    actFocus->setShortcut(QKeySequence(Qt::Key_F));
+    actFocus->setShortcutContext(Qt::WidgetShortcut);
+    hierarchy_->addAction(actFocus);
+    connect(actFocus, &QAction::triggered, this, &SceneObjectsPanel::FocusRequested);
+
+    connect(hierarchy_, &QTreeWidget::itemChanged, this, [this](QTreeWidgetItem* item, int col) {
+        if (col == 0 && !suppressSelectionChanged_) {
+            uint64_t id = item->data(0, Qt::UserRole).toULongLong();
+            if (id && !item->text(0).trimmed().isEmpty()) {
+                emit RenameRequested(id, item->text(0).trimmed());
+            }
+        }
+    });
 
     layout->addWidget(hierarchy_, 1);
 
@@ -204,10 +269,14 @@ void SceneObjectsPanel::BuildUi()
         );
     });
 
-    connect(removeShortcut_, &QAction::triggered, this, [this]
+    removeShortcut_ = actRemove_;
+    if (removeShortcut_)
     {
-        emit RemoveRequested();
-    });
+        connect(removeShortcut_, &QAction::triggered, this, [this]
+        {
+            emit RemoveRequested();
+        });
+    }
 
     connect(
         hierarchy_,
@@ -388,6 +457,7 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
                 QString::fromStdString(object.name),
                 QString::fromStdString(object.type)
             });
+            item->setFlags(item->flags() | Qt::ItemIsEditable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
 
             item->setData(0, Qt::UserRole, QVariant::fromValue<qulonglong>(object.id));
             items[object.id] = item;
@@ -419,4 +489,110 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
     }
 
     suppressSelectionChanged_ = false;
+}
+
+void SceneObjectsPanel::ShowTreeContextMenu(const QPoint& pos)
+{
+    QTreeWidgetItem* item = hierarchy_->itemAt(pos);
+    const uint64_t selectedId = item ? item->data(0, Qt::UserRole).toULongLong() : 0;
+    if (item) {
+        hierarchy_->setCurrentItem(item);
+    }
+
+    QMenu menu(this);
+
+    // 1. Создать внутри... / Add Child...
+    auto* addChildMenu = menu.addMenu(Tr("Создать внутри…", "Add Child…"));
+    auto* menuPrimitives = addChildMenu->addMenu(Tr("Примитивы", "Primitives"));
+    auto* menuLights = addChildMenu->addMenu(Tr("Свет", "Lights"));
+    auto* menuParticles = addChildMenu->addMenu(Tr("Частицы", "Particles"));
+    auto* menuEnv = addChildMenu->addMenu(Tr("Окружение", "Environment"));
+    auto* menuCharacters = addChildMenu->addMenu(Tr("Персонажи", "Characters"));
+    auto* menuCameras = addChildMenu->addMenu(Tr("Камеры", "Cameras"));
+    auto* menuProject = addChildMenu->addMenu(Tr("Классы проекта", "Project Classes"));
+
+    for (const auto& type : types_) {
+        const auto& name = type.second;
+        const auto& label = type.first;
+        if (name == "Gameplay.PlaySettings") continue;
+
+        QMenu* target = menuProject;
+        if (name.startsWith("Primitive.")) target = menuPrimitives;
+        else if (name.startsWith("Light.")) target = menuLights;
+        else if (name.startsWith("Particle.")) target = menuParticles;
+        else if (name.startsWith("Environment.")) target = menuEnv;
+        else if (name.startsWith("Gameplay.Character")) target = menuCharacters;
+        else if (name.startsWith("Gameplay.Camera")) target = menuCameras;
+
+        target->addAction(label, this, [this, selectedId, name, label] {
+            emit AddChildPrimitiveRequested(selectedId, name, label, SpawnPosition());
+        });
+    }
+    for (auto* sub : {menuPrimitives, menuLights, menuParticles, menuEnv, menuCharacters, menuCameras, menuProject}) {
+        if (sub->actions().isEmpty()) sub->menuAction()->setVisible(false);
+    }
+
+    // 2. Создать группу (Пустой узел) / Create Empty Group
+    menu.addAction(Tr("Создать группу (Пустой узел)", "Create Empty Group"), this, [this, selectedId] {
+        QString groupType = QStringLiteral("Primitive.Cube");
+        for (const auto& t : types_) {
+            if (t.second.startsWith(QStringLiteral("Primitive."))) {
+                groupType = t.second;
+                break;
+            }
+        }
+        if (selectedId) {
+            emit AddChildPrimitiveRequested(selectedId, groupType, Tr("Группа", "Group"), SpawnPosition());
+        } else {
+            emit AddPrimitiveRequested(groupType, Tr("Группа", "Group"), SpawnPosition());
+        }
+    });
+
+    menu.addSeparator();
+
+    // 3. Сделать родителем / Set Parent & Открепить в корень / Unparent
+    if (selectedId) {
+        if (item && item->parent()) {
+            menu.addAction(Tr("Открепить в корень", "Unparent (Clear Parent)"), this, [this, selectedId] {
+                emit SetParentRequested(selectedId, 0);
+            });
+        }
+
+        auto* setParentMenu = menu.addMenu(Tr("Назначить родителем…", "Set Parent To…"));
+        setParentMenu->addAction(Tr("Корень сцены (без родителя)", "Scene Root (None)"), this, [this, selectedId] {
+            emit SetParentRequested(selectedId, 0);
+        });
+        setParentMenu->addSeparator();
+
+        for (QTreeWidgetItemIterator it(hierarchy_); *it; ++it) {
+            uint64_t candidateId = (*it)->data(0, Qt::UserRole).toULongLong();
+            if (candidateId && candidateId != selectedId) {
+                QString candidateName = (*it)->text(0);
+                setParentMenu->addAction(candidateName, this, [this, selectedId, candidateId] {
+                    emit SetParentRequested(selectedId, candidateId);
+                });
+            }
+        }
+    }
+
+    menu.addSeparator();
+
+    // 4. Фокус, Дублировать, Переименовать, Удалить
+    auto* actFoc = menu.addAction(Tr("Фокус на объекте (F)", "Focus Selected (F)"), this, &SceneObjectsPanel::FocusRequested);
+    actFoc->setEnabled(selectedId != 0);
+
+    auto* actDup = menu.addAction(Tr("Дублировать (Ctrl+D)", "Duplicate (Ctrl+D)"), this, &SceneObjectsPanel::DuplicateRequested);
+    actDup->setEnabled(selectedId != 0);
+
+    auto* actRen = menu.addAction(Tr("Переименовать (F2)", "Rename (F2)"), this, [this, item] {
+        if (item) hierarchy_->editItem(item, 0);
+    });
+    actRen->setEnabled(selectedId != 0);
+
+    menu.addSeparator();
+
+    auto* actDel = menu.addAction(Tr("Удалить (Del)", "Delete (Del)"), this, &SceneObjectsPanel::RemoveRequested);
+    actDel->setEnabled(selectedId != 0);
+
+    menu.exec(hierarchy_->viewport()->mapToGlobal(pos));
 }

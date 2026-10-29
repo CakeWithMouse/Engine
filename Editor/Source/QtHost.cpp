@@ -312,7 +312,7 @@ void EditorQtHost::DrainCommands()
             QString checkpoint;
             const bool mutation = cmd.type == EditorCommand::UpdateObjectTransform || cmd.type == EditorCommand::CreateObject ||
                 cmd.type == EditorCommand::RemoveObject || cmd.type == EditorCommand::RenameObject || cmd.type == EditorCommand::DuplicateObject ||
-                cmd.type == EditorCommand::SetModel || cmd.type == EditorCommand::CreateModel || cmd.type == EditorCommand::SetTexture || cmd.type == EditorCommand::SetMaterial || cmd.type == EditorCommand::SetPointLight || cmd.type == EditorCommand::SetProjectData || cmd.type == EditorCommand::ConfigurePlay;
+                cmd.type == EditorCommand::SetModel || cmd.type == EditorCommand::CreateModel || cmd.type == EditorCommand::SetTexture || cmd.type == EditorCommand::SetMaterial || cmd.type == EditorCommand::SetPointLight || cmd.type == EditorCommand::SetProjectData || cmd.type == EditorCommand::ConfigurePlay || cmd.type == EditorCommand::SetParent;
             if ((mutation || cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene ||
                 cmd.type == EditorCommand::Undo || cmd.type == EditorCommand::Redo) && PlayState() != Edit)
             { Complete(cmd, EngineSceneReadOnly, QStringLiteral("Остановите Play перед редактированием.")); break; }
@@ -431,7 +431,7 @@ void EditorQtHost::DrainCommands()
                     QString type = cmd.path, base = cmd.name;
                     QString model = cmd.type == EditorCommand::CreateModel ? cmd.path : QString(), texture, material, projectData;
                     EngineSceneTransform transform = cmd.transform;
-                    uint64_t parent = 0; bool inherit = true;
+                    uint64_t parent = cmd.parentId ? cmd.parentId : (cmd.type == EditorCommand::CreateObject ? cmd.objectId : 0); bool inherit = true;
                     bool hasLight = false; EngineScenePointLight light{};
                     if (cmd.type == EditorCommand::DuplicateObject)
                     {
@@ -464,6 +464,10 @@ void EditorQtHost::DrainCommands()
                         if (result == EngineSceneOk) selectedId_ = id;
                         else api.removeObject(api.context, id);
                     }
+                }
+                else if (cmd.type == EditorCommand::SetParent)
+                {
+                    result = scene_.setParent ? scene_.setParent(scene_.context, cmd.objectId, cmd.parentId, 1) : EngineSceneOk;
                 }
                 else if (cmd.type == EditorCommand::SaveScene)
                 {
@@ -638,5 +642,14 @@ void EditorQtHost::SetGizmoMode(EditorGizmoMode mode)
     EditorCommand c;
     c.type = EditorCommand::SetGizmoMode;
     c.gizmo = mode;
+    PostCommand(c);
+}
+
+void EditorQtHost::SetParent(uint64_t childId, uint64_t parentId)
+{
+    EditorCommand c;
+    c.type = EditorCommand::SetParent;
+    c.objectId = childId;
+    c.parentId = parentId;
     PostCommand(c);
 }

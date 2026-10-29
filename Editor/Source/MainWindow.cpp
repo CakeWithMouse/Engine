@@ -133,6 +133,10 @@ void EditorMainWindow::BuildUi()
     }
     addDockWidget(Qt::BottomDockWidgetArea, fileDock_);
 
+    tabifyDockWidget(consoleDock_, fileDock_);
+
+    resizeDocks({viewportDock_, consoleDock_}, {620, 100}, Qt::Vertical);
+
     BuildToolBar();
 
     BuildSceneDocks();
@@ -479,9 +483,9 @@ void EditorMainWindow::BuildToolBar()
     leftSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     toolBar_->addWidget(leftSpacer);
 
-    actPlay_ = toolBar_->addAction(EditorTheme::CreatePlayIcon(), Tr("Play", "Play"));
-    actPause_ = toolBar_->addAction(EditorTheme::CreatePauseIcon(), Tr("Pause", "Pause"));
-    actStop_ = toolBar_->addAction(EditorTheme::CreateStopIcon(), Tr("Stop", "Stop"));
+    actPlay_ = toolBar_->addAction(EditorTheme::CreatePlayIcon(), QStringLiteral("▶ Play"));
+    actPause_ = toolBar_->addAction(EditorTheme::CreatePauseIcon(), QStringLiteral("⏸ Pause"));
+    actStop_ = toolBar_->addAction(EditorTheme::CreateStopIcon(), QStringLiteral("⏹ Stop"));
     actExternal_ = toolBar_->addAction(EditorTheme::CreateExternalIcon(), Tr("Отдельное окно", "External"));
 
     toolBar_->addSeparator();
@@ -524,10 +528,10 @@ void EditorMainWindow::BuildToolBar()
     });
     toolBar_->addWidget(cameraModeCombo_);
 
-    auto* configPlayBtn = new QToolButton(toolBar_);
+    auto* configPlayBtn = new QPushButton(toolBar_);
     configPlayBtn->setText(QStringLiteral("⚙"));
     configPlayBtn->setToolTip(Tr("Детальные настройки Play…", "Detailed Play Settings…"));
-    connect(configPlayBtn, &QToolButton::clicked, this, [this] {
+    connect(configPlayBtn, &QPushButton::clicked, this, [this] {
         if (actConfigurePlay_) actConfigurePlay_->trigger();
     });
     toolBar_->addWidget(configPlayBtn);
@@ -980,6 +984,49 @@ void EditorMainWindow::ConnectPanels()
         c.type = EditorCommand::FocusObject;
         host_->PostCommand(c);
     });
+
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::SetParentRequested, this,
+            [this](quint64 childId, quint64 parentId)
+            {
+                if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+                    return;
+                host_->SetParent(childId, parentId);
+            });
+
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::AddChildPrimitiveRequested, this,
+            [this](quint64 parentId, const QString& typeName, const QString& typeLabel, const std::array<double, 3>& position)
+            {
+                if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+                    return;
+
+                EditorCommand c;
+                c.type = EditorCommand::CreateObject;
+                c.path = typeName;
+                c.name = typeLabel;
+                c.objectId = parentId;
+                c.parentId = parentId;
+
+                for (int i = 0; i < 3; ++i)
+                    c.transform.position[i] = static_cast<float>(position[i]);
+
+                host_->PostCommand(c);
+                if (viewport_) viewport_->ShowAdjustLastOperation(0, typeLabel, c.transform);
+            });
+
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::RenameRequested, this,
+            [this](quint64 id, const QString& newName)
+            {
+                if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+                    return;
+                if (newName.trimmed().isEmpty())
+                    return;
+
+                EditorCommand c;
+                c.type = EditorCommand::RenameObject;
+                c.objectId = id;
+                c.name = newName.trimmed();
+                host_->PostCommand(c);
+            });
 
     connect(objectInspectorPanel_, &ObjectInspectorPanel::NameEditingFinished, this,
             [this](quint64 objectId, const QString& name)
@@ -1777,7 +1824,6 @@ void EditorMainWindow::ApplySavedOrInitialLayout()
         qApp->applicationFilePath().contains(QStringLiteral("Tests"), Qt::CaseInsensitive) ||
         (host_ && host_->host().projectName && std::string(host_->host().projectName).find("UI") != std::string::npos);
     if (isTest) {
-        ApplyDefaultLayout();
         return;
     }
 

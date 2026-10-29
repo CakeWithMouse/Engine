@@ -36,7 +36,7 @@ struct EditorCommand
         RenameObject, DuplicateObject, SaveScene, LoadScene, NewScene, Undo, Redo, PickObject, FocusObject,
         SetGizmoMode, BeginGizmoDrag, EndGizmoDrag,
         ImportModel, ImportTexture, CreateModel, SetTexture, SetPointLight, SetMaterial, SetProjectData,
-        RunTask,
+        RunTask, SetParent
     };
 
     Type type = None;
@@ -47,6 +47,7 @@ struct EditorCommand
 
     // Поля для манипуляций с объектами
     uint64_t objectId = 0;
+    uint64_t parentId = 0;
     EngineSceneTransform transform{{0, 0, 0}, {0, 0, 0, 1}, {1, 1, 1}};
     EngineScenePointLight pointLight{};
     EditorGizmoMode gizmo = EditorGizmoTranslate;
@@ -134,6 +135,7 @@ public:
 
     void SetGizmoMode(EditorGizmoMode mode);
     EditorGizmoMode GizmoMode() const { return static_cast<EditorGizmoMode>(gizmoMode_.load()); }
+    void SetParent(uint64_t childId, uint64_t parentId);
 
 private:
     void UiThreadMain();
