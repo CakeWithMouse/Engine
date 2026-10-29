@@ -8,8 +8,8 @@ $vswhere = Join-Path ([Environment]::GetEnvironmentVariable('ProgramFiles(x86)')
 if (!(Test-Path -LiteralPath $vswhere)) { throw 'Visual Studio with C++ tools and Windows SDK is required (vswhere.exe not found).' }
 $msbuild = & $vswhere -latest -products '*' -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' | Select-Object -First 1
 if (!$msbuild) { throw 'MSBuild with C++ tools and Windows SDK is required.' }
+$installation = & $vswhere -latest -products '*' -requires Microsoft.Component.MSBuild -property installationPath | Select-Object -First 1
 if ($PlatformToolset -eq 'auto') {
-    $installation = & $vswhere -latest -products '*' -requires Microsoft.Component.MSBuild -property installationPath | Select-Object -First 1
     $PlatformToolset = @('v145','v143') | Where-Object {
         @(Get-ChildItem -Path (Join-Path $installation "MSBuild/Microsoft/VC/*/Platforms/x64/PlatformToolsets/$_/Toolset.props") -ErrorAction SilentlyContinue).Count -gt 0
     } | Select-Object -First 1
@@ -26,14 +26,12 @@ foreach ($group in $duplicateNames) {
     [Environment]::SetEnvironmentVariable($group.Name, $value, 'Process')
 }
 
-# Auto-detect VCPKG_ROOT if not already set in environment
+# Auto-detect VCPKG_ROOT if not already set in environment (reuses $installation, no extra vswhere call)
 if (!$env:VCPKG_ROOT) {
-    $installations = & $vswhere -products '*' -property installationPath
-    foreach ($inst in $installations) {
-        $candidate = Join-Path $inst 'VC\vcpkg'
+    if ($installation) {
+        $candidate = Join-Path $installation 'VC\vcpkg'
         if (Test-Path -LiteralPath (Join-Path $candidate 'scripts\buildsystems\msbuild\vcpkg.props')) {
             $env:VCPKG_ROOT = $candidate
-            break
         }
     }
     if (!$env:VCPKG_ROOT) {
@@ -63,12 +61,17 @@ foreach ($entry in [Environment]::GetEnvironmentVariables().GetEnumerator()) {
 $assimp = $EnableAssimp.IsPresent.ToString().ToLowerInvariant()
 $vcpkgClean = if ($env:VCPKG_ROOT) { $env:VCPKG_ROOT.TrimEnd('\') } else { $null }
 $vcpkgParam = if ($vcpkgClean) { ' "/p:VcpkgRoot=' + $vcpkgClean + '\\"' } else { '' }
-$start.Arguments = '"' + $Project + '" /nologo /verbosity:minimal /m /nr:false /p:ForceSynchronousPDBWrites=true /p:UseStructuredOutput=false /p:PreferredToolArchitecture=x64 /p:Platform=x64 /p:Configuration=' + $Configuration + ' /p:PlatformToolset=' + $PlatformToolset + ' /p:EngineEnableAssimp=' + $assimp + $vcpkgParam
+
+$vcpkgInstalledInclude = Join-Path $PSScriptRoot '..\vcpkg_installed\x64-windows\include'
+$vcpkgManifestParam = if (Test-Path -LiteralPath $vcpkgInstalledInclude) { ' /p:VcpkgManifestInstall=false' } else { '' }
+
+$start.Arguments = '"' + $Project + '" /nologo /verbosity:minimal /m /nr:false /p:ForceSynchronousPDBWrites=true /p:UseStructuredOutput=false /p:PreferredToolArchitecture=x64 /p:Platform=x64 /p:Configuration=' + $Configuration + ' /p:PlatformToolset=' + $PlatformToolset + ' /p:EngineEnableAssimp=' + $assimp + $vcpkgParam + $vcpkgManifestParam
 if ($EditorUiTest) { $start.Arguments += ' /p:EditorUiTest=true' }
 $process = [Diagnostics.Process]::Start($start)
 
-
 $process.WaitForExit()
 
-
 if ($process.ExitCode -ne 0) { throw "MSBuild failed: $($process.ExitCode)" }
+
+# Automatically clean release cache after successful build so Editor.dll hash mismatch never happens
+Remove-Item -Path "$env:LOCALAPPDATA\PainEngine\Engines\2026.10.28.2" -Recurse -Force -ErrorAction SilentlyContinue

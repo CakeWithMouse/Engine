@@ -7,6 +7,7 @@
 #include <cstdint>
 
 #include "QtHost.h"
+#include "EditorDialogs.h"
 
 class ViewportWidget : public QWidget
 {
@@ -14,6 +15,7 @@ class ViewportWidget : public QWidget
 
 public:
     explicit ViewportWidget(EditorQtHost* host, QWidget* parent = nullptr);
+    ~ViewportWidget() override;
 
     void setGizmoMode(EditorGizmoMode mode);
     EditorGizmoMode gizmoMode() const { return gizmoMode_; }
@@ -57,6 +59,9 @@ private:
     bool rmbMoved_ = false;
     QPoint rmbPressPos_;
 
+    bool mmbPressed_ = false;
+    QPoint mmbPressPos_;
+
     bool lmbPressed_ = false;
     bool lmbMoved_ = false;
     bool draggingSelectedObject_ = false;
@@ -73,4 +78,7 @@ private:
     float dragSensitivity_ = 0.002f;
     float rotateSensitivity_ = 0.008f;
     float scaleSensitivity_ = 0.005f;
+
+    ControlScheme controlScheme_ = ControlScheme::UnrealUnity;
+    int controlSchemeSubId_ = 0;
 };

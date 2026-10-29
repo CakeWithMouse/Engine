@@ -144,6 +144,10 @@ private:
     QMenu* fileMenu_ = nullptr;
     QMenu* resourcesMenu_ = nullptr;
     QMenu* editMenu_ = nullptr;
+    QMenu* controlSchemeMenu_ = nullptr;
+    QAction* actSchemeUnrealUnity_ = nullptr;
+    QAction* actSchemeBlender_ = nullptr;
+    QActionGroup* schemeGroup_ = nullptr;
     QMenu* addMenu_ = nullptr;
     QMenu* helpMenu_ = nullptr;
     QAction* actDoc_ = nullptr;

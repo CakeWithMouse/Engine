@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "EditorLocale.h"
 #include "EditorTheme.h"
+#include "EditorDialogs.h"
 #include <QSettings>
 #include "QtHost.h"
 #include "FileBrowser.h"
@@ -232,6 +233,7 @@ void EditorMainWindow::BuildUi()
 
     helpMenu_ = menuBar()->addMenu(Tr("Справка", "Help"));
     actDoc_ = helpMenu_->addAction(Tr("Документация (F1)", "Documentation (F1)"), this, [this] {
+        ShowDocumentationDialog(this, scenePath_.isEmpty() ? QDir::currentPath() : QFileInfo(scenePath_).absolutePath());
     });
     actDoc_->setShortcut(QKeySequence(Qt::Key_F1));
 
@@ -417,6 +419,32 @@ void EditorMainWindow::BuildSceneMenu()
     deleteAction_ = editMenu_->addAction(Tr("Удалить объект", "Remove Object"), this, [this]
     {
         SubmitObjectCommand(EditorCommand::RemoveObject);
+    });
+
+    editMenu_->addSeparator();
+    controlSchemeMenu_ = editMenu_->addMenu(Tr("Схема управления", "Control Scheme"));
+    schemeGroup_ = new QActionGroup(this);
+    schemeGroup_->setExclusive(true);
+
+    actSchemeUnrealUnity_ = controlSchemeMenu_->addAction(Tr("Unreal / Unity (ПКМ + WASD, W/E/R)", "Unreal / Unity (RMB + WASD, W/E/R)"));
+    actSchemeUnrealUnity_->setCheckable(true);
+    schemeGroup_->addAction(actSchemeUnrealUnity_);
+
+    actSchemeBlender_ = controlSchemeMenu_->addAction(Tr("Blender (СКМ Orbit, Shift+СКМ Pan, G/R/S)", "Blender (MMB Orbit, Shift+MMB Pan, G/R/S)"));
+    actSchemeBlender_->setCheckable(true);
+    schemeGroup_->addAction(actSchemeBlender_);
+
+    if (EditorSettings::GetControlScheme() == ControlScheme::Blender) {
+        actSchemeBlender_->setChecked(true);
+    } else {
+        actSchemeUnrealUnity_->setChecked(true);
+    }
+
+    connect(actSchemeUnrealUnity_, &QAction::triggered, this, [] {
+        EditorSettings::SetControlScheme(ControlScheme::UnrealUnity);
+    });
+    connect(actSchemeBlender_, &QAction::triggered, this, [] {
+        EditorSettings::SetControlScheme(ControlScheme::Blender);
     });
 
     sceneMenu_->addSeparator();
@@ -1528,6 +1556,9 @@ void EditorMainWindow::RetranslateUi()
 
     if (sceneMenu_) sceneMenu_->setTitle(Tr("Сцена", "Scene"));
     if (editMenu_) editMenu_->setTitle(Tr("Правка", "Edit"));
+    if (controlSchemeMenu_) controlSchemeMenu_->setTitle(Tr("Схема управления", "Control Scheme"));
+    if (actSchemeUnrealUnity_) actSchemeUnrealUnity_->setText(Tr("Unreal / Unity (ПКМ + WASD, W/E/R)", "Unreal / Unity (RMB + WASD, W/E/R)"));
+    if (actSchemeBlender_) actSchemeBlender_->setText(Tr("Blender (СКМ Orbit, Shift+СКМ Pan, G/R/S)", "Blender (MMB Orbit, Shift+MMB Pan, G/R/S)"));
     if (addMenu_) addMenu_->setTitle(Tr("Добавить", "Add"));
     if (playMenu_) playMenu_->setTitle(Tr("Запуск", "Play"));
     if (helpMenu_) helpMenu_->setTitle(Tr("Справка", "Help"));

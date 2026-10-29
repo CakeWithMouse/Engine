@@ -1,6 +1,7 @@
 #include "ViewportWidget.h"
 #include "QtHost.h"
 #include "CameraKeys.h"
+#include "EditorDialogs.h"
 
 #include <type_traits>
 #include <QPainter>
@@ -116,6 +117,12 @@ namespace
 ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
     : QWidget(parent), host_(host)
 {
+    controlScheme_ = EditorSettings::GetControlScheme();
+    controlSchemeSubId_ = EditorSettings::SubscribeControlSchemeChanged([this](ControlScheme scheme) {
+        controlScheme_ = scheme;
+        updateGizmoToolTip();
+    });
+
     if (host_->HasViewport())
     {
         setAttribute(Qt::WA_NativeWindow, true);
@@ -165,6 +172,15 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
     });
     timer->start(16);
     setMinimumSize(320, 200);
+}
+
+ViewportWidget::~ViewportWidget()
+{
+    if (controlSchemeSubId_ != 0)
+    {
+        EditorSettings::UnsubscribeControlSchemeChanged(controlSchemeSubId_);
+        controlSchemeSubId_ = 0;
+    }
 }
 
 QPaintEngine* ViewportWidget::paintEngine() const
@@ -244,6 +260,7 @@ bool ViewportWidget::event(QEvent* e)
         looking_ = false;
         rmbPressed_ = false;
         rmbMoved_ = false;
+        mmbPressed_ = false;
 
         EndObjectDrag();
 
@@ -324,17 +341,44 @@ bool ViewportWidget::event(QEvent* e)
             lastMouse_ = mouse->position();
             return true;
         }
+        if (mouse->button() == Qt::MiddleButton)
+        {
+            mmbPressed_ = true;
+            mmbPressPos_ = mouse->position().toPoint();
+            lastMouse_ = mouse->position();
+            return true;
+        }
     }
 
     if (e->type() == QEvent::MouseMove)
     {
         auto* mouse = static_cast<QMouseEvent*>(e);
 
+        if (mmbPressed_)
+        {
+            const auto delta = mouse->position() - lastMouse_;
+            lastMouse_ = mouse->position();
+            EditorCommand c;
+            c.type = EditorCommand::ViewportCamera;
+            if (mouse->modifiers() & Qt::ShiftModifier)
+            {
+                c.right = static_cast<float>(-delta.x()) * 0.01f;
+                c.up = static_cast<float>(delta.y()) * 0.01f;
+            }
+            else
+            {
+                c.yaw = static_cast<float>(delta.x()) * 0.005f;
+                c.pitch = static_cast<float>(delta.y()) * 0.005f;
+            }
+            host_->PostCommand(c);
+            return true;
+        }
+
         if (rmbPressed_ && !rmbMoved_)
         {
             const QPoint delta = mouse->position().toPoint() - rmbPressPos_;
 
-            if (delta.manhattanLength() > 6)
+            if (delta.manhattanLength() >= 4)
             {
                 rmbMoved_ = true;
                 looking_ = attached_;
@@ -414,6 +458,12 @@ bool ViewportWidget::event(QEvent* e)
             return true;
         }
 
+        if (mouse->button() == Qt::MiddleButton)
+        {
+            mmbPressed_ = false;
+            return true;
+        }
+
         if (mouse->button() == Qt::RightButton)
         {
             looking_ = false;
@@ -426,6 +476,12 @@ bool ViewportWidget::event(QEvent* e)
 
             rmbPressed_ = false;
             rmbMoved_ = false;
+            keys_.remove(Qt::Key_W);
+            keys_.remove(Qt::Key_A);
+            keys_.remove(Qt::Key_S);
+            keys_.remove(Qt::Key_D);
+            keys_.remove(Qt::Key_Q);
+            keys_.remove(Qt::Key_E);
 
             return true;
         }
@@ -487,6 +543,45 @@ bool ViewportWidget::event(QEvent* e)
                 default:
                     break;
                 }
+
+                if (!rmbPressed_)
+                {
+                    const int navKey = CameraNavigationKey(key->nativeScanCode(), key->key());
+                    if (controlScheme_ == ControlScheme::Blender)
+                    {
+                        if (navKey == 'G' || key->key() == Qt::Key_G) {
+                            setGizmoMode(EditorGizmoTranslate);
+                            return true;
+                        }
+                        if (navKey == 'R' || key->key() == Qt::Key_R) {
+                            setGizmoMode(EditorGizmoRotate);
+                            return true;
+                        }
+                        if (navKey == 'S' || key->key() == Qt::Key_S) {
+                            setGizmoMode(EditorGizmoScale);
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        if (navKey == 'W' || key->key() == Qt::Key_W) {
+                            setGizmoMode(EditorGizmoTranslate);
+                            return true;
+                        }
+                        if (navKey == 'E' || key->key() == Qt::Key_E) {
+                            setGizmoMode(EditorGizmoRotate);
+                            return true;
+                        }
+                        if (navKey == 'R' || key->key() == Qt::Key_R) {
+                            setGizmoMode(EditorGizmoScale);
+                            return true;
+                        }
+                        if (navKey == 'Q' || key->key() == Qt::Key_Q) {
+                            setGizmoMode(EditorGizmoTranslate);
+                            return true;
+                        }
+                    }
+                }
             }
 
             const int navigationKey = CameraNavigationKey(key->nativeScanCode(), key->key());
@@ -535,10 +630,20 @@ void ViewportWidget::updateGizmoToolTip()
 {
     const QString modeName = GizmoModeName(gizmoMode_);
 
-    setToolTip(
-        QStringLiteral("Gizmo: %1 | Keys: 1 Move, 2 Rotate, 3 Scale\n"
-            "Space: Play/Stop | P: Pause | RMB: look | WASD: move | Tab: select object | Arrows/PgUp/PgDn: move object")
-        .arg(modeName));
+    if (controlScheme_ == ControlScheme::Blender)
+    {
+        setToolTip(
+            QStringLiteral("Gizmo: %1 | Keys: G Move, R Rotate, S Scale, 1/2/3\n"
+                "Space: Play/Stop | P: Pause | MMB: Orbit | Shift+MMB: Pan | RMB: Look (WASD) | Tab: select | Arrows/PgUp/PgDn: move")
+            .arg(modeName));
+    }
+    else
+    {
+        setToolTip(
+            QStringLiteral("Gizmo: %1 | Keys: W Move, E Rotate, R Scale, 1/2/3\n"
+                "Space: Play/Stop | P: Pause | RMB: Look (WASD) | MMB/Shift+MMB: Pan | Tab: select | Arrows/PgUp/PgDn: move")
+            .arg(modeName));
+    }
 }
 
 bool ViewportWidget::SelectedTransform(uint64_t& id, EngineSceneTransform& transform)
