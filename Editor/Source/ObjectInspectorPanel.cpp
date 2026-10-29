@@ -8,6 +8,8 @@
 #include <QGroupBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QToolButton>
+#include <QMenu>
 #include <QApplication>
 #include <QQuaternion>
 #include <QHBoxLayout>
@@ -20,6 +22,7 @@
 #include <QSizePolicy>
 #include <QSlider>
 #include <QComboBox>
+#include <QTimer>
 #include <algorithm>
 #include <cmath>
 
@@ -157,6 +160,11 @@ ObjectInspectorPanel::ObjectInspectorPanel(QWidget* parent)
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
         RetranslateUi();
     });
+
+    modifierElapsed_.start();
+    modifierTimer_ = new QTimer(this);
+    connect(modifierTimer_, &QTimer::timeout, this, &ObjectInspectorPanel::TickModifiers);
+    modifierTimer_->start(30);
 }
 
 ObjectInspectorPanel::~ObjectInspectorPanel()
@@ -211,10 +219,13 @@ void ObjectInspectorPanel::BuildUi()
     // 4. Секция Material & Surface (Материал и Поверхность)
     BuildMaterialCard(inspectorLayout);
 
-    // 5. Секция Point Light (Точечный свет)
+    // 5. Секция Modifiers Stack (Стек Модификаторов)
+    BuildModifiersCard(inspectorLayout);
+
+    // 6. Секция Point Light (Точечный свет)
     BuildPointLightCard(inspectorLayout);
 
-    // 6. Секция Character (Персонаж)
+    // 7. Секция Character (Персонаж)
     BuildCharacterCard(inspectorLayout);
 
     inspectorLayout->addStretch(1);
@@ -728,6 +739,415 @@ void ObjectInspectorPanel::BuildMaterialCard(QVBoxLayout* layout)
     layout->addWidget(cardMaterial_);
 }
 
+void ObjectInspectorPanel::BuildModifiersCard(QVBoxLayout* layout)
+{
+    cardModifiers_ = new CollapsibleCard(Tr("Модификаторы", "Modifiers"), this, true);
+    auto* contentLayout = cardModifiers_->ContentLayout();
+
+    // Верхняя строка: Кнопка "+ Add Modifier"
+    auto* topRow = new QWidget(cardModifiers_->Content());
+    auto* topLayout = new QHBoxLayout(topRow);
+    topLayout->setContentsMargins(0, 0, 0, 0);
+    topLayout->setSpacing(6);
+
+    btnAddModifier_ = new QToolButton(topRow);
+    btnAddModifier_->setText(Tr("+ Добавить модификатор", "+ Add Modifier"));
+    btnAddModifier_->setPopupMode(QToolButton::InstantPopup);
+    btnAddModifier_->setStyleSheet(QStringLiteral(
+        "QToolButton { background: #2563EB; color: #FFFFFF; font-weight: bold; border: 1px solid #3B82F6; "
+        "border-radius: 4px; padding: 4px 10px; font-size: 11px; }"
+        "QToolButton:hover { background: #1D4ED8; }"
+    ));
+
+    menuAddModifier_ = new QMenu(btnAddModifier_);
+    menuAddModifier_->setStyleSheet(QStringLiteral(
+        "QMenu { background: #181A1F; color: #E2E8F0; border: 1px solid #333742; padding: 4px; }"
+        "QMenu::item { padding: 4px 16px; border-radius: 3px; }"
+        "QMenu::item:selected { background: #252830; color: #FFFFFF; }"
+    ));
+
+    auto addModAction = [this](const QString& title, int type) {
+        auto* act = menuAddModifier_->addAction(title);
+        connect(act, &QAction::triggered, this, [this, type] {
+            if (selectedId_ == 0) return;
+            ModifierData m;
+            m.id = nextModifierId_++;
+            m.type = type;
+            m.enabled = true;
+            m.axis = (type == 0 ? 1 : (type == 1 ? 1 : 0)); // Turntable default Y, Bounce default Y, Mirror default X
+            m.speed = 45.0;
+            m.amplitude = 0.5;
+            m.frequency = 1.0;
+            m.basePosInit = false;
+            m.arrayCount = 3;
+            m.arrayOffsetX = 2.0;
+            m.arrayOffsetY = 0.0;
+            m.arrayOffsetZ = 0.0;
+            m.mirrorAxis = 0;
+
+            objectModifiers_[selectedId_].push_back(m);
+            RebuildModifiersList();
+        });
+    };
+
+    addModAction(Tr("Turntable (Вращение)", "Turntable (Rotation)"), 0);
+    addModAction(Tr("Sine Bounce (Покачивание)", "Sine Bounce (Bobbing)"), 1);
+    addModAction(Tr("Linear Array (Массив копий)", "Linear Array"), 2);
+    addModAction(Tr("Mirror (Отражение)", "Mirror"), 3);
+    addModAction(Tr("Snap to Ground (Посадка на землю)", "Snap to Ground"), 4);
+
+    btnAddModifier_->setMenu(menuAddModifier_);
+    topLayout->addWidget(btnAddModifier_);
+    topLayout->addStretch(1);
+    contentLayout->addWidget(topRow);
+
+    // Контейнер списка модификаторов
+    modifiersContainer_ = new QWidget(cardModifiers_->Content());
+    modifiersLayout_ = new QVBoxLayout(modifiersContainer_);
+    modifiersLayout_->setContentsMargins(0, 4, 0, 0);
+    modifiersLayout_->setSpacing(6);
+
+    lblNoModifiers_ = new QLabel(Tr("Нет активных модификаторов. Нажмите «+ Добавить модификатор».",
+                                   "No active modifiers. Click \"+ Add Modifier\"."), modifiersContainer_);
+    lblNoModifiers_->setStyleSheet(QStringLiteral("color: #64748B; font-size: 11px; font-style: italic; padding: 4px 0;"));
+    modifiersLayout_->addWidget(lblNoModifiers_);
+
+    contentLayout->addWidget(modifiersContainer_);
+    layout->addWidget(cardModifiers_);
+}
+
+void ObjectInspectorPanel::RebuildModifiersList()
+{
+    // Очищаем старые виджеты элементов кроме lblNoModifiers_
+    QLayoutItem* item;
+    while ((item = modifiersLayout_->takeAt(0)) != nullptr)
+    {
+        if (item->widget() && item->widget() != lblNoModifiers_)
+        {
+            item->widget()->deleteLater();
+        }
+        delete item;
+    }
+
+    if (selectedId_ == 0 || objectModifiers_.find(selectedId_) == objectModifiers_.end() || objectModifiers_[selectedId_].empty())
+    {
+        lblNoModifiers_->show();
+        modifiersLayout_->addWidget(lblNoModifiers_);
+        return;
+    }
+
+    lblNoModifiers_->hide();
+
+    auto& list = objectModifiers_[selectedId_];
+
+    for (size_t idx = 0; idx < list.size(); ++idx)
+    {
+        const int modId = list[idx].id;
+        const int modType = list[idx].type;
+
+        auto* modCard = new QFrame(modifiersContainer_);
+        modCard->setStyleSheet(QStringLiteral(
+            "QFrame { background-color: #1A1D24; border: 1px solid #2D333F; border-radius: 5px; }"
+        ));
+        auto* modLayout = new QVBoxLayout(modCard);
+        modLayout->setContentsMargins(6, 6, 6, 6);
+        modLayout->setSpacing(4);
+
+        // Header карточки модификатора
+        auto* hRow = new QWidget(modCard);
+        auto* hLayout = new QHBoxLayout(hRow);
+        hLayout->setContentsMargins(0, 0, 0, 0);
+        hLayout->setSpacing(6);
+
+        auto* chk = new QCheckBox(hRow);
+        chk->setChecked(list[idx].enabled);
+        connect(chk, &QCheckBox::toggled, this, [this, modId](bool checked) {
+            auto& mList = objectModifiers_[selectedId_];
+            for (auto& m : mList) {
+                if (m.id == modId) {
+                    m.enabled = checked;
+                    m.basePosInit = false; // сброс базы синусоиды при включении
+                    break;
+                }
+            }
+        });
+        hLayout->addWidget(chk);
+
+        QString title;
+        switch (modType)
+        {
+        case 0: title = Tr("Turntable (Вращение)", "Turntable"); break;
+        case 1: title = Tr("Sine Bounce (Покачивание)", "Sine Bounce"); break;
+        case 2: title = Tr("Linear Array (Массив)", "Linear Array"); break;
+        case 3: title = Tr("Mirror (Отражение)", "Mirror"); break;
+        case 4: title = Tr("Snap to Ground (Земля)", "Snap to Ground"); break;
+        }
+
+        auto* lblTitle = new QLabel(title, hRow);
+        lblTitle->setStyleSheet(QStringLiteral("color: #38BDF8; font-weight: bold; font-size: 11px;"));
+        hLayout->addWidget(lblTitle);
+        hLayout->addStretch(1);
+
+        auto* btnClose = new QPushButton(QStringLiteral("×"), hRow);
+        btnClose->setFixedSize(18, 18);
+        btnClose->setStyleSheet(QStringLiteral(
+            "QPushButton { background: transparent; color: #94A3B8; font-weight: bold; font-size: 13px; border: none; }"
+            "QPushButton:hover { color: #EF4444; }"
+        ));
+        connect(btnClose, &QPushButton::clicked, this, [this, modId] {
+            auto& mList = objectModifiers_[selectedId_];
+            mList.erase(std::remove_if(mList.begin(), mList.end(), [modId](const ModifierData& m) {
+                return m.id == modId;
+            }), mList.end());
+            RebuildModifiersList();
+        });
+        hLayout->addWidget(btnClose);
+        modLayout->addWidget(hRow);
+
+        // Специфичные контролы модификатора
+        if (modType == 0) // Turntable
+        {
+            auto* pRow = new QWidget(modCard);
+            auto* pLayout = new QHBoxLayout(pRow);
+            pLayout->setContentsMargins(0, 0, 0, 0);
+            pLayout->setSpacing(4);
+
+            pLayout->addWidget(new QLabel(Tr("Ось:", "Axis:"), pRow));
+            auto* comboAxis = new QComboBox(pRow);
+            comboAxis->addItems({QStringLiteral("X"), QStringLiteral("Y"), QStringLiteral("Z")});
+            comboAxis->setCurrentIndex(list[idx].axis);
+            comboAxis->setStyleSheet(QStringLiteral("QComboBox { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; font-size: 10px; }"));
+            connect(comboAxis, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, modId](int a) {
+                for (auto& m : objectModifiers_[selectedId_]) if (m.id == modId) m.axis = a;
+            });
+            pLayout->addWidget(comboAxis);
+
+            pLayout->addWidget(new QLabel(Tr("Скор. (°/с):", "Speed (°/s):"), pRow));
+            auto* spinSpd = new QDoubleSpinBox(pRow);
+            spinSpd->setRange(-720.0, 720.0);
+            spinSpd->setValue(list[idx].speed);
+            spinSpd->setStyleSheet(QStringLiteral("QDoubleSpinBox { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; font-size: 10px; }"));
+            connect(spinSpd, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, modId](double s) {
+                for (auto& m : objectModifiers_[selectedId_]) if (m.id == modId) m.speed = s;
+            });
+            pLayout->addWidget(spinSpd, 1);
+            modLayout->addWidget(pRow);
+        }
+        else if (modType == 1) // Sine Bounce
+        {
+            auto* pRow = new QWidget(modCard);
+            auto* pLayout = new QHBoxLayout(pRow);
+            pLayout->setContentsMargins(0, 0, 0, 0);
+            pLayout->setSpacing(4);
+
+            pLayout->addWidget(new QLabel(Tr("Ось:", "Axis:"), pRow));
+            auto* comboAxis = new QComboBox(pRow);
+            comboAxis->addItems({QStringLiteral("X"), QStringLiteral("Y"), QStringLiteral("Z")});
+            comboAxis->setCurrentIndex(list[idx].axis);
+            comboAxis->setStyleSheet(QStringLiteral("QComboBox { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; font-size: 10px; }"));
+            connect(comboAxis, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, modId](int a) {
+                for (auto& m : objectModifiers_[selectedId_]) {
+                    if (m.id == modId) {
+                        m.axis = a;
+                        m.basePosInit = false;
+                    }
+                }
+            });
+            pLayout->addWidget(comboAxis);
+
+            pLayout->addWidget(new QLabel(Tr("Ампл. (м):", "Amp (m):"), pRow));
+            auto* spinAmp = new QDoubleSpinBox(pRow);
+            spinAmp->setRange(0.01, 20.0);
+            spinAmp->setSingleStep(0.2);
+            spinAmp->setValue(list[idx].amplitude);
+            spinAmp->setStyleSheet(QStringLiteral("QDoubleSpinBox { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; font-size: 10px; }"));
+            connect(spinAmp, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, modId](double a) {
+                for (auto& m : objectModifiers_[selectedId_]) if (m.id == modId) m.amplitude = a;
+            });
+            pLayout->addWidget(spinAmp);
+
+            pLayout->addWidget(new QLabel(Tr("Част. (Гц):", "Freq (Hz):"), pRow));
+            auto* spinFreq = new QDoubleSpinBox(pRow);
+            spinFreq->setRange(0.1, 10.0);
+            spinFreq->setSingleStep(0.2);
+            spinFreq->setValue(list[idx].frequency);
+            spinFreq->setStyleSheet(QStringLiteral("QDoubleSpinBox { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; font-size: 10px; }"));
+            connect(spinFreq, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, modId](double f) {
+                for (auto& m : objectModifiers_[selectedId_]) if (m.id == modId) m.frequency = f;
+            });
+            pLayout->addWidget(spinFreq);
+            modLayout->addWidget(pRow);
+        }
+        else if (modType == 2) // Linear Array
+        {
+            auto* pRow1 = new QWidget(modCard);
+            auto* pLayout1 = new QHBoxLayout(pRow1);
+            pLayout1->setContentsMargins(0, 0, 0, 0);
+            pLayout1->setSpacing(4);
+
+            pLayout1->addWidget(new QLabel(Tr("Копий:", "Count:"), pRow1));
+            auto* spinCount = new QDoubleSpinBox(pRow1);
+            spinCount->setDecimals(0);
+            spinCount->setRange(2, 20);
+            spinCount->setValue(list[idx].arrayCount);
+            spinCount->setStyleSheet(QStringLiteral("QDoubleSpinBox { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; font-size: 10px; }"));
+            connect(spinCount, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, modId](double c) {
+                for (auto& m : objectModifiers_[selectedId_]) if (m.id == modId) m.arrayCount = static_cast<int>(c);
+            });
+            pLayout1->addWidget(spinCount);
+
+            pLayout1->addWidget(new QLabel(Tr("Шаг X, Y, Z:", "Offset:"), pRow1));
+            auto* spinX = new QDoubleSpinBox(pRow1);
+            spinX->setRange(-50.0, 50.0);
+            spinX->setValue(list[idx].arrayOffsetX);
+            spinX->setStyleSheet(QStringLiteral("QDoubleSpinBox { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; font-size: 10px; }"));
+            connect(spinX, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [this, modId](double x) {
+                for (auto& m : objectModifiers_[selectedId_]) if (m.id == modId) m.arrayOffsetX = x;
+            });
+            pLayout1->addWidget(spinX);
+
+            modLayout->addWidget(pRow1);
+
+            auto* btnApplyArray = new QPushButton(Tr("Создать копии в сцене (Apply)", "Apply (Create Clones in Scene)"), modCard);
+            btnApplyArray->setStyleSheet(QStringLiteral(
+                "QPushButton { background: #2563EB; color: #FFFFFF; font-weight: bold; border: 1px solid #3B82F6; border-radius: 4px; padding: 3px 8px; font-size: 10px; }"
+                "QPushButton:hover { background: #1D4ED8; }"
+            ));
+            connect(btnApplyArray, &QPushButton::clicked, this, [this, modId] {
+                for (const auto& m : objectModifiers_[selectedId_]) {
+                    if (m.id == modId) {
+                        emit CreateClonesRequested(selectedId_, m.arrayCount, m.arrayOffsetX, m.arrayOffsetY, m.arrayOffsetZ);
+                        break;
+                    }
+                }
+            });
+            modLayout->addWidget(btnApplyArray);
+        }
+        else if (modType == 3) // Mirror
+        {
+            auto* pRow = new QWidget(modCard);
+            auto* pLayout = new QHBoxLayout(pRow);
+            pLayout->setContentsMargins(0, 0, 0, 0);
+            pLayout->setSpacing(6);
+
+            pLayout->addWidget(new QLabel(Tr("Ось отражения:", "Mirror Axis:"), pRow));
+            auto* comboAxis = new QComboBox(pRow);
+            comboAxis->addItems({QStringLiteral("X"), QStringLiteral("Y"), QStringLiteral("Z")});
+            comboAxis->setCurrentIndex(list[idx].mirrorAxis);
+            comboAxis->setStyleSheet(QStringLiteral("QComboBox { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; font-size: 10px; }"));
+            connect(comboAxis, qOverload<int>(&QComboBox::currentIndexChanged), this, [this, modId](int a) {
+                for (auto& m : objectModifiers_[selectedId_]) if (m.id == modId) m.mirrorAxis = a;
+            });
+            pLayout->addWidget(comboAxis);
+
+            auto* btnApplyMirror = new QPushButton(Tr("Отразить (Apply)", "Apply Mirror"), pRow);
+            btnApplyMirror->setStyleSheet(QStringLiteral(
+                "QPushButton { background: #334155; color: #FFFFFF; font-weight: bold; border: 1px solid #475569; border-radius: 4px; padding: 3px 8px; font-size: 10px; }"
+                "QPushButton:hover { background: #475569; }"
+            ));
+            connect(btnApplyMirror, &QPushButton::clicked, this, [this, modId] {
+                for (const auto& m : objectModifiers_[selectedId_]) {
+                    if (m.id == modId) {
+                        const int axisIdx = m.mirrorAxis; // 0: X, 1: Y, 2: Z
+                        transform_[axisIdx]->setValue(-transform_[axisIdx]->value());
+                        emit TransformEditingFinished(selectedId_, CurrentTransformValue());
+                        break;
+                    }
+                }
+            });
+            pLayout->addWidget(btnApplyMirror);
+            modLayout->addWidget(pRow);
+        }
+        else if (modType == 4) // Snap to Ground
+        {
+            auto* pRow = new QWidget(modCard);
+            auto* pLayout = new QHBoxLayout(pRow);
+            pLayout->setContentsMargins(0, 0, 0, 0);
+            pLayout->setSpacing(6);
+
+            auto* lblDesc = new QLabel(Tr("Удерживает основание на Y = 0", "Holds base on Y = 0"), pRow);
+            lblDesc->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 10px; font-style: italic;"));
+            pLayout->addWidget(lblDesc);
+
+            auto* btnSnapNow = new QPushButton(Tr("Опустить (Snap)", "Snap Now"), pRow);
+            btnSnapNow->setStyleSheet(QStringLiteral(
+                "QPushButton { background: #334155; color: #FFFFFF; font-weight: bold; border: 1px solid #475569; border-radius: 4px; padding: 3px 8px; font-size: 10px; }"
+                "QPushButton:hover { background: #475569; }"
+            ));
+            connect(btnSnapNow, &QPushButton::clicked, this, [this] {
+                const double halfY = std::abs(transform_[7]->value()) * 0.5;
+                transform_[1]->setValue(halfY);
+                emit TransformEditingFinished(selectedId_, CurrentTransformValue());
+            });
+            pLayout->addWidget(btnSnapNow);
+            modLayout->addWidget(pRow);
+        }
+
+        modifiersLayout_->addWidget(modCard);
+    }
+}
+
+void ObjectInspectorPanel::TickModifiers()
+{
+    if (selectedId_ == 0 || refreshing_)
+        return;
+
+    auto it = objectModifiers_.find(selectedId_);
+    if (it == objectModifiers_.end() || it->second.empty())
+        return;
+
+    const double dt = std::min(0.1, static_cast<double>(modifierElapsed_.restart()) / 1000.0);
+    bool hasChange = false;
+
+    for (auto& mod : it->second)
+    {
+        if (!mod.enabled)
+            continue;
+
+        if (mod.type == 0) // Turntable
+        {
+            const int rotIdx = 3 + mod.axis; // 3: X, 4: Y, 5: Z
+            const double currentRot = transform_[rotIdx]->value();
+            double nextRot = currentRot + mod.speed * dt;
+            if (nextRot > 360.0) nextRot -= 360.0;
+            else if (nextRot < -360.0) nextRot += 360.0;
+
+            transform_[rotIdx]->setValue(nextRot);
+            hasChange = true;
+        }
+        else if (mod.type == 1) // Sine Bounce
+        {
+            const int posIdx = mod.axis; // 0: X, 1: Y, 2: Z
+            if (!mod.basePosInit)
+            {
+                mod.basePos = transform_[posIdx]->value();
+                mod.basePosInit = true;
+            }
+
+            bouncePhase_ += 2.0 * 3.14159265358979323846 * mod.frequency * dt;
+            if (bouncePhase_ > 628.31853) bouncePhase_ -= 628.31853;
+
+            const double offset = std::sin(bouncePhase_) * mod.amplitude;
+            transform_[posIdx]->setValue(mod.basePos + offset);
+            hasChange = true;
+        }
+        else if (mod.type == 4) // Snap to Ground (держит основание на Y = 0)
+        {
+            const double targetY = std::abs(transform_[7]->value()) * 0.5;
+            if (std::abs(transform_[1]->value() - targetY) > 0.001)
+            {
+                transform_[1]->setValue(targetY);
+                hasChange = true;
+            }
+        }
+    }
+
+    if (hasChange)
+    {
+        emit TransformEditingFinished(selectedId_, CurrentTransformValue());
+    }
+}
+
 void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
 {
     cardLight_ = new CollapsibleCard(Tr("Точечный свет", "Point Light"), this, true);
@@ -1023,8 +1443,13 @@ void ObjectInspectorPanel::RetranslateUi()
     if (cardTransform_) cardTransform_->SetTitle(Tr("Трансформация", "Transform"));
     if (cardGeometry_) cardGeometry_->SetTitle(Tr("Геометрия", "Geometry"));
     if (cardMaterial_) cardMaterial_->SetTitle(Tr("Материал и Поверхность", "Material & Surface"));
+    if (cardModifiers_) cardModifiers_->SetTitle(Tr("Модификаторы", "Modifiers"));
     if (cardLight_) cardLight_->SetTitle(Tr("Точечный свет", "Point Light"));
     if (cardCharacter_) cardCharacter_->SetTitle(Tr("Персонаж", "Character"));
+
+    if (btnAddModifier_) btnAddModifier_->setText(Tr("+ Добавить модификатор", "+ Add Modifier"));
+    if (lblNoModifiers_) lblNoModifiers_->setText(Tr("Нет активных модификаторов. Нажмите «+ Добавить модификатор».",
+                                                   "No active modifiers. Click \"+ Add Modifier\"."));
 
     if (nameRowLabel_) nameRowLabel_->setText(Tr("Имя", "Name"));
     if (btnQuickFocus_) btnQuickFocus_->setText(Tr("Фокус (F)", "Focus (F)"));
@@ -1157,6 +1582,7 @@ void ObjectInspectorPanel::Refresh(
         if (cardLight_) cardLight_->hide();
         if (cardCharacter_) cardCharacter_->hide();
 
+        RebuildModifiersList();
         refreshing_ = false;
         return;
     }
@@ -1172,6 +1598,7 @@ void ObjectInspectorPanel::Refresh(
         selectedType_.clear();
         selectionLabel_->setText(Tr("Выбран несуществующий объект", "Selected object does not exist"));
         typeBadgeLabel_->setText(QStringLiteral("None"));
+        RebuildModifiersList();
         refreshing_ = false;
         return;
     }
@@ -1259,6 +1686,12 @@ void ObjectInspectorPanel::Refresh(
 
     const bool supportsModel = object.type == "Engine.Model" || isPrimitive;
     chooseModel_->setEnabled(supportsModel);
+
+    // Модификаторы
+    if (selectionChanged)
+    {
+        RebuildModifiersList();
+    }
 
     // Точечный свет (Point Light)
     if (object.hasPointLight)

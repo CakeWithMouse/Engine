@@ -1178,6 +1178,16 @@ void EditorMainWindow::ConnectPanels()
         if (!id || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
         EditorCommand c; c.type = EditorCommand::SetModel; c.objectId = id; c.path.clear(); host_->PostCommand(c);
     });
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::CreateClonesRequested, this,
+        [this](quint64 sourceId, int count, double ox, double oy, double oz) {
+            if (!sourceId || count < 2 || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+            for (int i = 1; i < count; ++i) {
+                EditorCommand c;
+                c.type = EditorCommand::DuplicateObject;
+                c.objectId = sourceId;
+                host_->PostCommand(c);
+            }
+        });
 }
 
 void EditorMainWindow::RefreshSceneUi()

@@ -6,6 +6,9 @@
 #include <array>
 #include <cstdint>
 #include <string>
+#include <vector>
+#include <unordered_map>
+#include <QElapsedTimer>
 
 #include "QtHost.h"
 
@@ -15,10 +18,13 @@ class QDoubleSpinBox;
 class QGroupBox;
 class QCheckBox;
 class QPushButton;
+class QToolButton;
+class QMenu;
 class QFormLayout;
 class QSlider;
 class QComboBox;
 class QVBoxLayout;
+class QTimer;
 class CollapsibleCard;
 
 struct EditorSnapshot;
@@ -87,6 +93,7 @@ signals:
     void FocusRequested(quint64 objectId);
     void DuplicateRequested(quint64 objectId);
     void DeleteRequested(quint64 objectId);
+    void CreateClonesRequested(quint64 sourceId, int count, double ox, double oy, double oz);
 
 private:
     void BuildUi();
@@ -94,8 +101,12 @@ private:
     void BuildTransformCard(QVBoxLayout* layout);
     void BuildGeometryCard(QVBoxLayout* layout);
     void BuildMaterialCard(QVBoxLayout* layout);
+    void BuildModifiersCard(QVBoxLayout* layout);
     void BuildPointLightCard(QVBoxLayout* layout);
     void BuildCharacterCard(QVBoxLayout* layout);
+
+    void RebuildModifiersList();
+    void TickModifiers();
 
     void UpdateLightColorButton(const float color[3]);
 
@@ -159,6 +170,7 @@ private:
     CollapsibleCard* cardTransform_ = nullptr;
     CollapsibleCard* cardGeometry_ = nullptr;
     CollapsibleCard* cardMaterial_ = nullptr;
+    CollapsibleCard* cardModifiers_ = nullptr;
     CollapsibleCard* cardLight_ = nullptr;
     CollapsibleCard* cardCharacter_ = nullptr;
 
@@ -188,6 +200,35 @@ private:
     QLabel* lblAnimSpeed_ = nullptr;
     QDoubleSpinBox* spinPlaybackSpeed_ = nullptr;
     QCheckBox* chkAnimationLoop_ = nullptr;
+
+    // Modifiers Stack
+    struct ModifierData {
+        int id = 0;
+        int type = 0; // 0: Turntable, 1: SineBounce, 2: LinearArray, 3: Mirror, 4: SnapGround
+        bool enabled = true;
+        int axis = 1; // 0: X, 1: Y, 2: Z
+        double speed = 45.0; // deg/s
+        double amplitude = 0.5; // m
+        double frequency = 1.0; // Hz
+        double basePos = 0.0;
+        bool basePosInit = false;
+        int arrayCount = 3;
+        double arrayOffsetX = 2.0;
+        double arrayOffsetY = 0.0;
+        double arrayOffsetZ = 0.0;
+        int mirrorAxis = 0;
+    };
+
+    QToolButton* btnAddModifier_ = nullptr;
+    QMenu* menuAddModifier_ = nullptr;
+    QWidget* modifiersContainer_ = nullptr;
+    QVBoxLayout* modifiersLayout_ = nullptr;
+    QLabel* lblNoModifiers_ = nullptr;
+    QTimer* modifierTimer_ = nullptr;
+    QElapsedTimer modifierElapsed_;
+    double bouncePhase_ = 0.0;
+    std::unordered_map<quint64, std::vector<ModifierData>> objectModifiers_;
+    int nextModifierId_ = 1;
 
     // Light
     QWidget* lightInspector_ = nullptr;
