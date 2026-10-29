@@ -16,12 +16,20 @@ class QComboBox;
 class QButtonGroup;
 class QMenu;
 class QAction;
+class ViewportStatsOverlay;
 
 enum class ViewportShadingMode : uint32_t {
     Wireframe = 0,
     Solid = 1,
     Unlit = 2,
     Rendered = 3
+};
+
+enum class AxisLock : uint32_t {
+    All = 0,
+    X = 1,
+    Y = 2,
+    Z = 3
 };
 
 class ViewportWidget : public QWidget
@@ -37,6 +45,12 @@ public:
 
     void SetShadingMode(ViewportShadingMode mode);
     ViewportShadingMode shadingMode() const { return shadingMode_; }
+
+    void SetAxisLock(AxisLock axis);
+    AxisLock axisLock() const { return activeAxis_; }
+
+    void ClearSelection();
+    void RetranslateUi();
 
     void SnapToGround();
 
@@ -78,6 +92,7 @@ private:
     void ApplyRotateScaleGizmo(const QPointF& pos, bool isSnapActive);
     void PostSelectedTransform(const EngineSceneTransform& transform);
     void updateGizmoToolTip();
+    void UpdateStatsOverlay();
 
     EditorQtHost* host_ = nullptr;
 
@@ -122,6 +137,11 @@ private:
     QToolButton* btnTranslate_ = nullptr;
     QToolButton* btnRotate_ = nullptr;
     QToolButton* btnScale_ = nullptr;
+    QButtonGroup* axisGroup_ = nullptr;
+    QToolButton* btnAxisAll_ = nullptr;
+    QToolButton* btnAxisX_ = nullptr;
+    QToolButton* btnAxisY_ = nullptr;
+    QToolButton* btnAxisZ_ = nullptr;
     QComboBox* comboOrientation_ = nullptr;
 
     QToolButton* btnSnap_ = nullptr;
@@ -151,6 +171,13 @@ private:
     double scaleSnapStep_ = 0.25;
     ViewportShadingMode shadingMode_ = ViewportShadingMode::Solid;
     bool localOrientation_ = false;
+    AxisLock activeAxis_ = AxisLock::All;
+
+    ViewportStatsOverlay* statsOverlay_ = nullptr;
+    float fpsSmooth_ = 60.0f;
+    float frameTimeSmooth_ = 16.6f;
+    int statsUpdateCounter_ = 0;
+    int langSubId_ = 0;
 
     class AdjustLastOperationPanel* adjustPanel_ = nullptr;
     class PieMenuWidget* pieMenu_ = nullptr;

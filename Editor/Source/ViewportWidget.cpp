@@ -300,6 +300,112 @@ class ViewportHeaderBar : public QFrame
         void mouseMoveEvent(QMouseEvent* e) override { e->accept(); }
     };
 
+class ViewportStatsOverlay : public QFrame
+{
+public:
+    explicit ViewportStatsOverlay(QWidget* parent = nullptr) : QFrame(parent)
+    {
+        setAttribute(Qt::WA_StyledBackground, true);
+        setAttribute(Qt::WA_NativeWindow, true);
+        setAttribute(Qt::WA_TransparentForMouseEvents, true);
+
+        setStyleSheet(QStringLiteral(
+            "ViewportStatsOverlay {"
+            "  background-color: rgba(18, 20, 24, 0.88);"
+            "  border: 1px solid rgba(255, 255, 255, 0.10);"
+            "  border-radius: 6px;"
+            "}"
+            "QLabel {"
+            "  color: #94A3B8;"
+            "  font-family: 'Consolas', 'Segoe UI', monospace;"
+            "  font-size: 11px;"
+            "  background: transparent;"
+            "  border: none;"
+            "  padding: 0px;"
+            "}"
+        ));
+
+        auto* layout = new QVBoxLayout(this);
+        layout->setContentsMargins(10, 8, 10, 8);
+        layout->setSpacing(3);
+
+        lblFps_ = new QLabel(this);
+        lblObjects_ = new QLabel(this);
+        lblTris_ = new QLabel(this);
+        lblSelected_ = new QLabel(this);
+        lblModes_ = new QLabel(this);
+
+        for (auto* lbl : {lblFps_, lblObjects_, lblTris_, lblSelected_, lblModes_})
+        {
+            lbl->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+            lbl->setTextFormat(Qt::RichText);
+            layout->addWidget(lbl);
+        }
+    }
+
+    void UpdateStats(float fps, float frameTimeMs,
+                     int totalObjects, int lightCount, int meshCount, uint64_t estTris,
+                     const QString& selectedName, const QString& selectedCoords,
+                     const QString& shadingStr, const QString& snapStr)
+    {
+        lblFps_->setText(QStringLiteral(
+            "<span style='color:#38BDF8; font-weight:bold;'>FPS:</span> <span style='color:#22C55E; font-weight:bold;'>%1</span> "
+            "<span style='color:#64748B;'>(%2 ms)</span>")
+            .arg(fps, 0, 'f', 1)
+            .arg(frameTimeMs, 0, 'f', 1));
+
+        lblObjects_->setText(QStringLiteral(
+            "<span style='color:#38BDF8; font-weight:bold;'>%1:</span> <span style='color:#F1F5F9; font-weight:bold;'>%2</span> | "
+            "<span style='color:#F59E0B;'>%3:</span> <b>%4</b> | "
+            "<span style='color:#A855F7;'>%5:</span> <b>%6</b>")
+            .arg(Tr("Объекты", "Objects")).arg(totalObjects)
+            .arg(Tr("Источники", "Lights")).arg(lightCount)
+            .arg(Tr("Меши", "Meshes")).arg(meshCount));
+
+        lblTris_->setText(QStringLiteral(
+            "<span style='color:#38BDF8; font-weight:bold;'>%1:</span> <span style='color:#F1F5F9; font-weight:bold;'>%2</span>")
+            .arg(Tr("Треугольники (est.)", "Tris (est.)"))
+            .arg(QLocale().toString(static_cast<qlonglong>(estTris))));
+
+        if (!selectedCoords.isEmpty())
+        {
+            lblSelected_->setText(QStringLiteral(
+                "<span style='color:#38BDF8; font-weight:bold;'>%1:</span> "
+                "<span style='color:#38BDF8;'><b>%2</b></span> <span style='color:#CBD5E1;'>(%3)</span>")
+                .arg(Tr("Выделено", "Selected"))
+                .arg(selectedName)
+                .arg(selectedCoords));
+        }
+        else
+        {
+            lblSelected_->setText(QStringLiteral(
+                "<span style='color:#38BDF8; font-weight:bold;'>%1:</span> <span style='color:#64748B;'>%2</span>")
+                .arg(Tr("Выделено", "Selected"))
+                .arg(selectedName));
+        }
+
+        lblModes_->setText(QStringLiteral(
+            "<span style='color:#38BDF8; font-weight:bold;'>%1:</span> <span style='color:#F1F5F9;'>%2</span> | "
+            "<span style='color:#38BDF8; font-weight:bold;'>%3:</span> <span style='color:#F1F5F9;'>%4</span>")
+            .arg(Tr("Шейдинг", "Shading")).arg(shadingStr)
+            .arg(Tr("Привязка", "Snap")).arg(snapStr));
+
+        adjustSize();
+    }
+
+protected:
+    void mousePressEvent(QMouseEvent* e) override { e->ignore(); }
+    void mouseReleaseEvent(QMouseEvent* e) override { e->ignore(); }
+    void mouseMoveEvent(QMouseEvent* e) override { e->ignore(); }
+
+private:
+    QLabel* lblFps_ = nullptr;
+    QLabel* lblObjects_ = nullptr;
+    QLabel* lblTris_ = nullptr;
+    QLabel* lblSelected_ = nullptr;
+    QLabel* lblModes_ = nullptr;
+};
+
 class AdjustLastOperationPanel : public QFrame
 {
 public:
@@ -629,6 +735,15 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
     adjustPanel_ = new AdjustLastOperationPanel(host_, this);
     BuildHeaderBar();
 
+    statsOverlay_ = new ViewportStatsOverlay(this);
+    statsOverlay_->move(10, 36);
+    statsOverlay_->setVisible(actOverlayStats_ && actOverlayStats_->isChecked());
+
+    langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
+        RetranslateUi();
+    });
+    RetranslateUi();
+
     auto* timer = new QTimer(this);
     auto elapsed = std::make_shared<QElapsedTimer>();
     elapsed->start();
@@ -636,6 +751,20 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
     connect(timer, &QTimer::timeout, this, [this, elapsed]
     {
         const float dt = std::min(0.05f, static_cast<float>(elapsed->restart()) / 1000.0f);
+        const float instantFps = (dt > 1e-5f) ? (1.0f / dt) : 60.0f;
+        const float instantMs = dt * 1000.0f;
+        fpsSmooth_ = fpsSmooth_ * 0.92f + instantFps * 0.08f;
+        frameTimeSmooth_ = frameTimeSmooth_ * 0.92f + instantMs * 0.08f;
+
+        if (statsOverlay_ && statsOverlay_->isVisible())
+        {
+            if (++statsUpdateCounter_ >= 6)
+            {
+                statsUpdateCounter_ = 0;
+                UpdateStatsOverlay();
+            }
+        }
+
         const int state=host_->PlayState();
         if(inputState_!=state){inputState_=state;keys_.clear();looking_=rmbPressed_=false;EndObjectDrag();}
 
@@ -681,6 +810,11 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
 
 ViewportWidget::~ViewportWidget()
 {
+    if (langSubId_ != 0)
+    {
+        EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
+        langSubId_ = 0;
+    }
     if (controlSchemeSubId_ != 0)
     {
         EditorSettings::UnsubscribeControlSchemeChanged(controlSchemeSubId_);
@@ -719,9 +853,20 @@ void ViewportWidget::resizeEvent(QResizeEvent* e)
     if (attached_)
         SendResize();
     if (viewportHeaderBar_)
+    {
         viewportHeaderBar_->setGeometry(0, 0, width(), 28);
+        viewportHeaderBar_->raise();
+    }
+    if (statsOverlay_)
+    {
+        statsOverlay_->move(10, 36);
+        statsOverlay_->raise();
+    }
     if (adjustPanel_ && adjustPanel_->isVisible())
+    {
         adjustPanel_->move(12, height() - adjustPanel_->height() - 12);
+        adjustPanel_->raise();
+    }
 }
 
 void ViewportWidget::paintEvent(QPaintEvent*)
@@ -941,14 +1086,29 @@ bool ViewportWidget::event(QEvent* e)
                 float dy = 0.0f;
                 float dz = 0.0f;
 
-                if (mouse->modifiers() & Qt::ShiftModifier)
+                if (activeAxis_ == AxisLock::X)
+                {
+                    dx = static_cast<float>(total.x()) * 0.02f;
+                }
+                else if (activeAxis_ == AxisLock::Y)
+                {
+                    dy = static_cast<float>(-total.y()) * 0.02f;
+                }
+                else if (activeAxis_ == AxisLock::Z)
                 {
                     dz = static_cast<float>(-total.y()) * 0.02f;
                 }
                 else
                 {
-                    dx = static_cast<float>(total.x()) * 0.02f;
-                    dy = static_cast<float>(-total.y()) * 0.02f;
+                    if (mouse->modifiers() & Qt::ShiftModifier)
+                    {
+                        dz = static_cast<float>(-total.y()) * 0.02f;
+                    }
+                    else
+                    {
+                        dx = static_cast<float>(total.x()) * 0.02f;
+                        dy = static_cast<float>(-total.y()) * 0.02f;
+                    }
                 }
 
                 float newX = dragStartTransform_.position[0] + dx;
@@ -957,9 +1117,12 @@ bool ViewportWidget::event(QEvent* e)
 
                 if (isSnapActive && moveSnapStep_ > 1e-4)
                 {
-                    newX = static_cast<float>(std::round(newX / moveSnapStep_) * moveSnapStep_);
-                    newY = static_cast<float>(std::round(newY / moveSnapStep_) * moveSnapStep_);
-                    newZ = static_cast<float>(std::round(newZ / moveSnapStep_) * moveSnapStep_);
+                    if (activeAxis_ == AxisLock::X || activeAxis_ == AxisLock::All)
+                        newX = static_cast<float>(std::round(newX / moveSnapStep_) * moveSnapStep_);
+                    if (activeAxis_ == AxisLock::Y || activeAxis_ == AxisLock::All)
+                        newY = static_cast<float>(std::round(newY / moveSnapStep_) * moveSnapStep_);
+                    if (activeAxis_ == AxisLock::Z || activeAxis_ == AxisLock::All)
+                        newZ = static_cast<float>(std::round(newZ / moveSnapStep_) * moveSnapStep_);
                 }
 
                 EngineSceneTransform t = dragStartTransform_;
@@ -1039,7 +1202,8 @@ bool ViewportWidget::event(QEvent* e)
         if (!key->isAutoRepeat())
         {
             if (e->type() == QEvent::KeyPress && key->key() == Qt::Key_Escape) {
-                EditorCommand c; c.type=EditorCommand::SelectObject; host_->PostCommand(c); return true;
+                ClearSelection();
+                return true;
             }
             if (e->type() == QEvent::KeyPress && key->key() == Qt::Key_End && host_->HasScene()) {
                 SnapToGround();
@@ -1171,6 +1335,19 @@ bool ViewportWidget::event(QEvent* e)
                             setGizmoMode(EditorGizmoTranslate);
                             return true;
                         }
+                    }
+
+                    if (navKey == 'X' || key->key() == Qt::Key_X) {
+                        SetAxisLock(activeAxis_ == AxisLock::X ? AxisLock::All : AxisLock::X);
+                        return true;
+                    }
+                    if (navKey == 'Y' || key->key() == Qt::Key_Y) {
+                        SetAxisLock(activeAxis_ == AxisLock::Y ? AxisLock::All : AxisLock::Y);
+                        return true;
+                    }
+                    if (navKey == 'Z' || key->key() == Qt::Key_Z) {
+                        SetAxisLock(activeAxis_ == AxisLock::Z ? AxisLock::All : AxisLock::Z);
+                        return true;
                     }
                 }
             }
@@ -1381,6 +1558,64 @@ void ViewportWidget::BuildHeaderBar()
         setGizmoMode(static_cast<EditorGizmoMode>(id));
     });
 
+    makeSep();
+
+    axisGroup_ = new QButtonGroup(this);
+    axisGroup_->setExclusive(true);
+
+    btnAxisAll_ = new QToolButton(viewportHeaderBar_);
+    btnAxisAll_->setText(QStringLiteral("All"));
+    btnAxisAll_->setCheckable(true);
+    btnAxisAll_->setChecked(true);
+    btnAxisAll_->setToolTip(Tr("Все оси (Свободно)", "All Axes (Free)"));
+    btnAxisAll_->setStyleSheet(QStringLiteral(
+        "QToolButton { background-color: #262930; color: #94A3B8; border: 1px solid #3A3F4B; border-radius: 4px; font-weight: bold; font-size: 10px; min-width: 24px; min-height: 20px; max-height: 20px; padding: 1px 4px; }"
+        "QToolButton:hover { background-color: #333842; color: #F1F5F9; }"
+        "QToolButton:checked { background-color: #334155; color: #F8FAFC; border: 1px solid #64748B; }"
+    ));
+    axisGroup_->addButton(btnAxisAll_, static_cast<int>(AxisLock::All));
+    layout->addWidget(btnAxisAll_);
+
+    btnAxisX_ = new QToolButton(viewportHeaderBar_);
+    btnAxisX_->setText(QStringLiteral("X"));
+    btnAxisX_->setCheckable(true);
+    btnAxisX_->setToolTip(Tr("Ограничение по оси X (Клавиша X)", "Constrain to X Axis (X key)"));
+    btnAxisX_->setStyleSheet(QStringLiteral(
+        "QToolButton { background-color: #262930; color: #EF4444; border: 1px solid #3A3F4B; border-radius: 4px; font-weight: bold; font-size: 10px; min-width: 20px; min-height: 20px; max-height: 20px; padding: 1px 4px; }"
+        "QToolButton:hover { background-color: #3A2326; }"
+        "QToolButton:checked { background-color: #7F1D1D; color: #FCA5A5; border: 1px solid #EF4444; }"
+    ));
+    axisGroup_->addButton(btnAxisX_, static_cast<int>(AxisLock::X));
+    layout->addWidget(btnAxisX_);
+
+    btnAxisY_ = new QToolButton(viewportHeaderBar_);
+    btnAxisY_->setText(QStringLiteral("Y"));
+    btnAxisY_->setCheckable(true);
+    btnAxisY_->setToolTip(Tr("Ограничение по оси Y (Клавиша Y)", "Constrain to Y Axis (Y key)"));
+    btnAxisY_->setStyleSheet(QStringLiteral(
+        "QToolButton { background-color: #262930; color: #22C55E; border: 1px solid #3A3F4B; border-radius: 4px; font-weight: bold; font-size: 10px; min-width: 20px; min-height: 20px; max-height: 20px; padding: 1px 4px; }"
+        "QToolButton:hover { background-color: #1F3626; }"
+        "QToolButton:checked { background-color: #14532D; color: #86EFAC; border: 1px solid #22C55E; }"
+    ));
+    axisGroup_->addButton(btnAxisY_, static_cast<int>(AxisLock::Y));
+    layout->addWidget(btnAxisY_);
+
+    btnAxisZ_ = new QToolButton(viewportHeaderBar_);
+    btnAxisZ_->setText(QStringLiteral("Z"));
+    btnAxisZ_->setCheckable(true);
+    btnAxisZ_->setToolTip(Tr("Ограничение по оси Z (Клавиша Z)", "Constrain to Z Axis (Z key)"));
+    btnAxisZ_->setStyleSheet(QStringLiteral(
+        "QToolButton { background-color: #262930; color: #3B82F6; border: 1px solid #3A3F4B; border-radius: 4px; font-weight: bold; font-size: 10px; min-width: 20px; min-height: 20px; max-height: 20px; padding: 1px 4px; }"
+        "QToolButton:hover { background-color: #1E293B; }"
+        "QToolButton:checked { background-color: #1E3A8A; color: #93C5FD; border: 1px solid #3B82F6; }"
+    ));
+    axisGroup_->addButton(btnAxisZ_, static_cast<int>(AxisLock::Z));
+    layout->addWidget(btnAxisZ_);
+
+    connect(axisGroup_, &QButtonGroup::idClicked, this, [this](int id) {
+        SetAxisLock(static_cast<AxisLock>(id));
+    });
+
     comboOrientation_ = new QComboBox(viewportHeaderBar_);
     comboOrientation_->addItem(Tr("Мир", "World"));
     comboOrientation_->addItem(Tr("Локально", "Local"));
@@ -1568,6 +1803,16 @@ void ViewportWidget::BuildHeaderBar()
     actOverlayStats_->setCheckable(true);
     actOverlayStats_->setChecked(true);
 
+    connect(actOverlayStats_, &QAction::toggled, this, [this](bool checked) {
+        if (statsOverlay_) {
+            statsOverlay_->setVisible(checked);
+            if (checked) {
+                statsOverlay_->raise();
+                UpdateStatsOverlay();
+            }
+        }
+    });
+
     btnOverlays_->setMenu(menuOverlays_);
     layout->addWidget(btnOverlays_);
 
@@ -1678,9 +1923,27 @@ void ViewportWidget::ApplyRotateScaleGizmo(const QPointF& pos, bool isSnapActive
 
     if (gizmoMode_ == EditorGizmoRotate)
     {
-        double yaw = total.x() * static_cast<double>(rotateSensitivity_);
-        double pitch = -total.y() * static_cast<double>(rotateSensitivity_);
+        double yaw = 0.0;
+        double pitch = 0.0;
         double roll = 0.0;
+
+        if (activeAxis_ == AxisLock::X)
+        {
+            pitch = -total.y() * static_cast<double>(rotateSensitivity_);
+        }
+        else if (activeAxis_ == AxisLock::Y)
+        {
+            yaw = total.x() * static_cast<double>(rotateSensitivity_);
+        }
+        else if (activeAxis_ == AxisLock::Z)
+        {
+            roll = total.x() * static_cast<double>(rotateSensitivity_);
+        }
+        else
+        {
+            yaw = total.x() * static_cast<double>(rotateSensitivity_);
+            pitch = -total.y() * static_cast<double>(rotateSensitivity_);
+        }
 
         if (isSnapActive && rotateSnapStep_ > 1e-4)
         {
@@ -1735,13 +1998,25 @@ void ViewportWidget::ApplyRotateScaleGizmo(const QPointF& pos, bool isSnapActive
 
         for (int i = 0; i < 3; ++i)
         {
-            const double base = dragStartTransform_.scale[i];
-            double newScale = base * factor;
-            if (isSnapActive && scaleSnapStep_ > 1e-4)
+            bool modifyAxis = true;
+            if (activeAxis_ == AxisLock::X && i != 0) modifyAxis = false;
+            if (activeAxis_ == AxisLock::Y && i != 1) modifyAxis = false;
+            if (activeAxis_ == AxisLock::Z && i != 2) modifyAxis = false;
+
+            if (modifyAxis)
             {
-                newScale = std::max(scaleSnapStep_, std::round(newScale / scaleSnapStep_) * scaleSnapStep_);
+                const double base = dragStartTransform_.scale[i];
+                double newScale = base * factor;
+                if (isSnapActive && scaleSnapStep_ > 1e-4)
+                {
+                    newScale = std::max(scaleSnapStep_, std::round(newScale / scaleSnapStep_) * scaleSnapStep_);
+                }
+                t.scale[i] = static_cast<ScaleT>(newScale);
             }
-            t.scale[i] = static_cast<ScaleT>(newScale);
+            else
+            {
+                t.scale[i] = dragStartTransform_.scale[i];
+            }
         }
     }
 
@@ -1825,4 +2100,177 @@ void ViewportWidget::SetAdjustLastOperationObjectId(uint64_t id)
     if (adjustPanel_) {
         adjustPanel_->SetObjectId(id);
     }
+}
+
+void ViewportWidget::SetAxisLock(AxisLock axis)
+{
+    activeAxis_ = axis;
+
+    if (btnAxisAll_ && btnAxisX_ && btnAxisY_ && btnAxisZ_)
+    {
+        QSignalBlocker b0(btnAxisAll_);
+        QSignalBlocker b1(btnAxisX_);
+        QSignalBlocker b2(btnAxisY_);
+        QSignalBlocker b3(btnAxisZ_);
+        btnAxisAll_->setChecked(axis == AxisLock::All);
+        btnAxisX_->setChecked(axis == AxisLock::X);
+        btnAxisY_->setChecked(axis == AxisLock::Y);
+        btnAxisZ_->setChecked(axis == AxisLock::Z);
+    }
+}
+
+void ViewportWidget::ClearSelection()
+{
+    EditorCommand c;
+    c.type = EditorCommand::SelectObject;
+    c.objectId = 0;
+    host_->PostCommand(c);
+}
+
+void ViewportWidget::RetranslateUi()
+{
+    updateGizmoToolTip();
+
+    if (btnTranslate_)
+        btnTranslate_->setToolTip(Tr("Перемещение (W / G)", "Move (W / G)"));
+    if (btnRotate_)
+        btnRotate_->setToolTip(Tr("Вращение (E / R)", "Rotate (E / R)"));
+    if (btnScale_)
+        btnScale_->setToolTip(Tr("Масштаб (R / S)", "Scale (R / S)"));
+
+    if (btnAxisAll_)
+        btnAxisAll_->setToolTip(Tr("Все оси (Свободно)", "All Axes (Free)"));
+    if (btnAxisX_)
+        btnAxisX_->setToolTip(Tr("Ограничение по оси X (Клавиша X)", "Constrain to X Axis (X key)"));
+    if (btnAxisY_)
+        btnAxisY_->setToolTip(Tr("Ограничение по оси Y (Клавиша Y)", "Constrain to Y Axis (Y key)"));
+    if (btnAxisZ_)
+        btnAxisZ_->setToolTip(Tr("Ограничение по оси Z (Клавиша Z)", "Constrain to Z Axis (Z key)"));
+
+    if (comboOrientation_)
+    {
+        const int cur = comboOrientation_->currentIndex();
+        comboOrientation_->setItemText(0, Tr("Мир", "World"));
+        comboOrientation_->setItemText(1, Tr("Локально", "Local"));
+        comboOrientation_->setCurrentIndex(cur);
+        comboOrientation_->setToolTip(Tr("Ориентация трансформации", "Transform Orientation"));
+    }
+
+    if (btnSnap_)
+    {
+        btnSnap_->setText(Tr("Привязка", "Snap"));
+        btnSnap_->setToolTip(Tr("Привязка к сетке (Ctrl для временного снапа)", "Snapping (Hold Ctrl for temp snap)"));
+    }
+    if (comboMoveSnap_)
+        comboMoveSnap_->setToolTip(Tr("Шаг перемещения (м)", "Move Snap Step (m)"));
+    if (comboRotateSnap_)
+        comboRotateSnap_->setToolTip(Tr("Шаг вращения", "Rotate Snap Step"));
+    if (comboScaleSnap_)
+        comboScaleSnap_->setToolTip(Tr("Шаг масштабирования", "Scale Snap Step"));
+    if (btnSnapGround_)
+        btnSnapGround_->setToolTip(Tr("Посадить на землю (End)", "Snap to Ground (End)"));
+
+    if (btnShadingWireframe_)
+        btnShadingWireframe_->setToolTip(Tr("Сетка (Wireframe)", "Wireframe"));
+    if (btnShadingSolid_)
+        btnShadingSolid_->setToolTip(Tr("Сплошной (Solid)", "Solid"));
+    if (btnShadingUnlit_)
+        btnShadingUnlit_->setToolTip(Tr("Без света / Текстуры (Unlit)", "Unlit / Material Preview"));
+    if (btnShadingRendered_)
+        btnShadingRendered_->setToolTip(Tr("Полный рендер (Rendered)", "Rendered"));
+
+    if (btnOverlays_)
+    {
+        btnOverlays_->setText(Tr("Оверлеи", "Overlays") + QStringLiteral(" ▾"));
+        btnOverlays_->setToolTip(Tr("Оверлеи вьюпорта", "Viewport Overlays"));
+    }
+
+    if (actOverlayGrid_)
+        actOverlayGrid_->setText(Tr("Показать сетку", "Show Grid"));
+    if (actOverlayBackface_)
+        actOverlayBackface_->setText(Tr("Отсечение задних граней", "Backface Culling"));
+    if (actOverlayShadows_)
+        actOverlayShadows_->setText(Tr("Тени", "Shadows"));
+    if (actOverlayOutline_)
+        actOverlayOutline_->setText(Tr("Контур выделения", "Selection Outline"));
+    if (actOverlayGizmos_)
+        actOverlayGizmos_->setText(Tr("Служебные маркеры", "Gizmos & Icons"));
+    if (actOverlayStats_)
+        actOverlayStats_->setText(Tr("Статистика сцены", "Scene Statistics / Debug Info"));
+
+    UpdateStatsOverlay();
+}
+
+void ViewportWidget::UpdateStatsOverlay()
+{
+    if (!statsOverlay_ || !statsOverlay_->isVisible())
+        return;
+
+    const auto snap = host_->ReadSnapshot();
+    const int totalObjects = static_cast<int>(snap.objects.size());
+    int lightCount = 0;
+    int meshCount = 0;
+    uint64_t estTris = 0;
+
+    QString selectedName = Tr("Нет", "None");
+    QString selectedCoords;
+
+    for (const auto& obj : snap.objects)
+    {
+        const bool isLight = obj.hasPointLight ||
+            (obj.type.find("Light") != std::string::npos) ||
+            (obj.type.find("light") != std::string::npos);
+
+        if (isLight)
+            lightCount++;
+        else
+            meshCount++;
+
+        if (obj.type.find("Cube") != std::string::npos || obj.type.find("Box") != std::string::npos)
+            estTris += 12;
+        else if (obj.type.find("Plane") != std::string::npos || obj.type.find("Quad") != std::string::npos)
+            estTris += 2;
+        else if (obj.type.find("Sphere") != std::string::npos)
+            estTris += 960;
+        else if (obj.type.find("Cylinder") != std::string::npos)
+            estTris += 240;
+        else if (!isLight)
+            estTris += 500;
+
+        if (snap.selected != 0 && obj.id == snap.selected)
+        {
+            selectedName = QString::fromStdString(obj.name.empty() ? obj.type : obj.name);
+            selectedCoords = QStringLiteral("%1, %2, %3")
+                .arg(obj.transform.position[0], 0, 'f', 2)
+                .arg(obj.transform.position[1], 0, 'f', 2)
+                .arg(obj.transform.position[2], 0, 'f', 2);
+        }
+    }
+
+    QString shadingStr;
+    switch (shadingMode_)
+    {
+    case ViewportShadingMode::Wireframe: shadingStr = Tr("Сетка", "Wireframe"); break;
+    case ViewportShadingMode::Solid: shadingStr = Tr("Сплошной", "Solid"); break;
+    case ViewportShadingMode::Unlit: shadingStr = Tr("Без света", "Unlit"); break;
+    case ViewportShadingMode::Rendered: shadingStr = Tr("Рендер", "Rendered"); break;
+    }
+
+    QString snapStr;
+    if (snapEnabled_)
+    {
+        snapStr = QStringLiteral("%1 (%2m, %3°)")
+            .arg(Tr("Вкл", "On"))
+            .arg(moveSnapStep_, 0, 'f', (moveSnapStep_ < 1.0 ? 2 : 1))
+            .arg(rotateSnapStep_, 0, 'f', 0);
+    }
+    else
+    {
+        snapStr = Tr("Выкл", "Off");
+    }
+
+    statsOverlay_->UpdateStats(fpsSmooth_, frameTimeSmooth_,
+                               totalObjects, lightCount, meshCount, estTris,
+                               selectedName, selectedCoords,
+                               shadingStr, snapStr);
 }

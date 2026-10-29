@@ -1731,6 +1731,7 @@ void EditorMainWindow::RetranslateUi()
         .arg(Tr("Редактор PainEngine", "PainEngine Editor"), QString::fromUtf8(host_->host().projectName)));
 
     if (viewportDock_) viewportDock_->setWindowTitle(Tr("Вьюпорт", "Viewport"));
+    if (viewport_) viewport_->RetranslateUi();
     if (consoleDock_) consoleDock_->setWindowTitle(Tr("Консоль", "Console"));
     if (fileDock_) fileDock_->setWindowTitle(Tr("Контент", "Content Browser"));
     if (sceneObjectsDock_) sceneObjectsDock_->setWindowTitle(Tr("Сцена / объекты", "Scene / Objects"));
