@@ -62,7 +62,7 @@
     <ItemDefinitionGroup>
         <ClCompile>
             <!-- %(AdditionalIncludeDirectories) берёт include-пути из Cpp.props, сверху кладём Qt -->
-            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtWidgets;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtCore;$(IntDir)moc;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtWidgets;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtCore;$(IntDir)moc;$(ProjectDir)Core;$(ProjectDir)Host;$(ProjectDir)UI;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
             <PreprocessorDefinitions>QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
             <LanguageStandard>stdcpp17</LanguageStandard>
             <ExceptionHandling>Sync</ExceptionHandling>
