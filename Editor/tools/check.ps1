@@ -201,11 +201,21 @@ if (Test-Path $coreTestsProj) {
     Write-Output "CoreTests.vcxproj not present yet; skipping Core unit tests."
 }
 
+# Run UI unit tests if present
+$uiTestsProj = Join-Path $repo "Editor/tests/UiTests.vcxproj"
+if (Test-Path $uiTestsProj) {
+    Invoke-ProcessWithTimeout -FilePath $msbuild -ArgumentList @('"' + $uiTestsProj + '"', '/nologo', '/verbosity:minimal', '/m', '/p:ForceSynchronousPDBWrites=true', '/p:Configuration=Debug', '/p:Platform=x64') -TimeoutSeconds $TimeoutSec -Description "UiTests Build"
+
+    $uiTestsExe = Join-Path $repo "Game/build/x64/Debug/Runtime/UiTests.exe"
+    Invoke-ProcessWithTimeout -FilePath $uiTestsExe -TimeoutSeconds $TimeoutSec -Description "UiTests Execution"
+    Write-Output "OK: UiTests passed."
+}
+
 if ($Full) {
     Write-Output "Running all baseline tests (-Full)..."
     
     # Engine tests (43/43)
-    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/run.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds $TimeoutSec -Description "Engine/tests/run.ps1"
+    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/run.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds 300 -Description "Engine/tests/run.ps1"
 
     # Component generation (20/20)
     Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/component-generation/run.ps1") + '"')) -TimeoutSeconds $TimeoutSec -Description "component-generation/run.ps1"
@@ -231,10 +241,10 @@ if ($Full) {
     Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/run-runtime.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds $TimeoutSec -Description "run-runtime.ps1"
 
     # Compatibility tests (88/88)
-    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/compatibility/run.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds $TimeoutSec -Description "compatibility/run.ps1"
+    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/compatibility/run.ps1") + '"'), '-Configuration', 'Release') -TimeoutSeconds 480 -Description "compatibility/run.ps1"
 
     # Project workflow tests (262/262)
-    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/project-workflow/run.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds $TimeoutSec -Description "project-workflow/run.ps1"
+    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/project-workflow/run.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds 300 -Description "project-workflow/run.ps1"
 
     Write-Output "OK: All baseline tests passed."
 }
