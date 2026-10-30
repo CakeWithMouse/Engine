@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <ItemGroup Label="ProjectConfigurations">
         <ProjectConfiguration Include="Debug|x64">
@@ -72,7 +72,7 @@
         <Link>
             <AdditionalLibraryDirectories>$(QtInstallDir)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
             <!-- %(AdditionalDependencies) сохраняет всё, что дал Cpp.props -->
-            <AdditionalDependencies>Qt6Widgets$(QtLibSuffix).lib;Qt6Gui$(QtLibSuffix).lib;Qt6Core$(QtLibSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
+            <AdditionalDependencies>$(QtInstallDir)\lib\Qt6Widgets$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Gui$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Core$(QtLibSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
         </Link>
         <PostBuildEvent>
             <Message>windeployqt: Qt runtime -&gt; $(OutDir)</Message>
