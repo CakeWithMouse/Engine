@@ -145,18 +145,25 @@ Write-Output "OK: Architectural layers check passed."
 
 # 5. Check line count (wc -l <= 500)
 Write-Output "--- 3. Checking line counts of modified files ---"
-$changedFiles = Invoke-Git @("diff", "--name-only", "HEAD", "--", "Editor/")
-foreach ($f in ($changedFiles -split "`r?`n")) {
+$diffFiles = Invoke-Git @("diff", "--name-only", "HEAD", "--", "Editor/")
+$untrackedFiles = Invoke-Git @("ls-files", "--others", "--exclude-standard", "--", "Editor/")
+$allCandidateFiles = @($diffFiles -split "`r?`n") + @($untrackedFiles -split "`r?`n") | Select-Object -Unique
+$hasOversizedFiles = $false
+foreach ($f in $allCandidateFiles) {
     if (!$f -or !(Test-Path (Join-Path $repo $f))) { continue }
     $ext = [IO.Path]::GetExtension($f).ToLower()
     if ($ext -in @('.h', '.hpp', '.cpp', '.cxx')) {
         $lineCount = (Get-Content (Join-Path $repo $f) | Measure-Object -Line).Lines
         if ($lineCount -gt 500) {
-            Write-Warning "File $f exceeds 500 lines ($lineCount lines)."
+            Write-Error "FAIL: File $f exceeds 500 lines ($lineCount lines > 500)."
+            $hasOversizedFiles = $true
         } else {
             Write-Output "  $f : $lineCount lines"
         }
     }
+}
+if ($hasOversizedFiles) {
+    throw "Line count check failed: files exceed 500 lines."
 }
 
 # 6. Find MSBuild via vswhere

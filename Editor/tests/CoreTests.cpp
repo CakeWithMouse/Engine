@@ -7,7 +7,9 @@
 #include <QTemporaryDir>
 #include <cassert>
 #include <cstdio>
+#ifdef _DEBUG
 #include <crtdbg.h>
+#endif
 #include <thread>
 #include <vector>
 
@@ -194,12 +196,14 @@ void TestFileService()
 
 int main(int argc, char* argv[])
 {
+#ifdef _DEBUG
     _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
     _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
     _CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
     _CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
     _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
     _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+#endif
 
     std::setvbuf(stdout, nullptr, _IONBF, 0);
     std::setvbuf(stderr, nullptr, _IONBF, 0);
