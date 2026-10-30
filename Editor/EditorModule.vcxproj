@@ -139,6 +139,7 @@
         <ClCompile Include="Source/ObjectInspectorPanel.cpp"/>
         <ClCompile Include="Source/SceneObjectsPanel.cpp"/>
         <ClCompile Include="Source/MaterialEditorWindow.cpp"/>
+        <ClCompile Include="Source/MaterialGraphWidget.cpp"/>
         <ClCompile Include="Source/EditorLocale.cpp"/>
         <ClCompile Include="Source/EditorTheme.cpp"/>
         <ClCompile Include="Source/EditorDialogs.cpp"/>
@@ -156,6 +157,7 @@
         <ClInclude Include="Include/EditorDialogs.h"/>
         <ClInclude Include="Include/CodeClassDialog.h"/>
         <ClInclude Include="Include/FileBrowser.h"/>
+        <ClInclude Include="Include/MaterialGraphWidget.h"/>
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->
         <CustomBuild Include="Include/MainWindow.h">
             <FileType>Document</FileType>
