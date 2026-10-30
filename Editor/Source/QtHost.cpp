@@ -289,6 +289,15 @@ void EditorQtHost::Complete(const EditorCommand& command, uint32_t status, const
     }
 }
 
+void EditorQtHost::SetParent(uint64_t childId, uint64_t parentId)
+{
+    EditorCommand c;
+    c.type = EditorCommand::SetParent;
+    c.objectId = childId;
+    c.parentId = parentId;
+    PostCommand(c);
+}
+
 void EditorQtHost::RunOnUi(std::function<void()> action)
 {
     if (QCoreApplication::instance())

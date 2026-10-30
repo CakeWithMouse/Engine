@@ -14,6 +14,10 @@ class QDoubleSpinBox;
 class QPushButton;
 class QTreeWidget;
 class QAction;
+class QGroupBox;
+class QLabel;
+class QLineEdit;
+class QMenu;
 
 struct EditorSnapshot;
 
@@ -23,6 +27,7 @@ class SceneObjectsPanel : public QWidget
 
 public:
     explicit SceneObjectsPanel(QWidget* parent = nullptr);
+    ~SceneObjectsPanel() override;
 
     void SetEnabled(bool enabled);
 
@@ -35,8 +40,17 @@ public:
 
     std::array<double, 3> SpawnPosition() const;
 
+    void RetranslateUi();
+    QSize minimumSizeHint() const override { return QSize(80, 60); }
+
 signals:
     void AddPrimitiveRequested(
+        const QString& typeName,
+        const QString& typeLabel,
+        const std::array<double, 3>& position
+    );
+    void AddChildPrimitiveRequested(
+        quint64 parentId,
         const QString& typeName,
         const QString& typeLabel,
         const std::array<double, 3>& position
@@ -50,10 +64,27 @@ signals:
 
     void SelectionChanged(quint64 objectId);
     void FocusRequested();
+    void SetParentRequested(quint64 childId, quint64 parentId);
+    void RenameRequested(quint64 objectId, const QString& newName);
 
 private:
     void BuildUi();
     void FillTypes();
+    void RebuildAddMenu();
+    void FilterHierarchy(const QString& query);
+    void ShowTreeContextMenu(const QPoint& pos);
+
+    QLineEdit* searchEdit_ = nullptr;
+    QPushButton* addBtn_ = nullptr;
+    QMenu* addMenu_ = nullptr;
+
+    QGroupBox* placementGroup_ = nullptr;
+    QLabel* categoryLabel_ = nullptr;
+    QLabel* objectLabel_ = nullptr;
+    QLabel* spawnPointLabel_ = nullptr;
+    QAction* actDuplicate_ = nullptr;
+    QAction* actRemove_ = nullptr;
+
     QComboBox* typeCategory_ = nullptr;
     QVector<std::pair<QString, QString>> types_;
     bool showServiceObjects_ = false;
@@ -65,11 +96,11 @@ private:
 
     QTreeWidget* hierarchy_ = nullptr;
 
-
     QAction* removeShortcut_ = nullptr;
 
     QString hierarchyKey_;
     QString primitiveKey_;
 
     bool suppressSelectionChanged_ = false;
+    int langSubId_ = 0;
 };

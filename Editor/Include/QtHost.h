@@ -52,6 +52,7 @@ public:
 
     void SetGizmoMode(EditorGizmoMode mode) override;
     EditorGizmoMode GizmoMode() const override { return static_cast<EditorGizmoMode>(gizmoMode_.load()); }
+    void SetParent(uint64_t childId, uint64_t parentId) override;
 
     void RunOnUi(std::function<void()> action) override;
     void SetUiListener(IEditorUiListener* listener) override;

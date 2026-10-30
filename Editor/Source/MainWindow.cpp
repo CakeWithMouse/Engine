@@ -547,44 +547,39 @@ void EditorMainWindow::ConnectPanels()
                 host_->PostCommand(c);
             });
 
-    connect(sceneObjectsPanel_, &SceneObjectsPanel::AddModelRequested, this, [this]
-    {
-        AddModel();
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::AddModelRequested, this, [this] { AddModel(); });
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::ImportModelRequested, this, [this] { ImportAsset(false); });
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::DuplicateRequested, this, [this] { SubmitObjectCommand(EditorCommand::DuplicateObject); });
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::RemoveRequested, this, [this] { SubmitObjectCommand(EditorCommand::RemoveObject); });
+
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::SelectionChanged, this, [this](quint64 objectId) {
+        if (sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        EditorCommand c; c.type = EditorCommand::SelectObject; c.objectId = objectId; host_->PostCommand(c);
     });
 
-    connect(sceneObjectsPanel_, &SceneObjectsPanel::ImportModelRequested, this, [this]
-    {
-        ImportAsset(false);
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::FocusRequested, this, [this] {
+        if (sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        EditorCommand c; c.type = EditorCommand::FocusObject; host_->PostCommand(c);
     });
 
-    connect(sceneObjectsPanel_, &SceneObjectsPanel::DuplicateRequested, this, [this]
-    {
-        SubmitObjectCommand(EditorCommand::DuplicateObject);
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::SetParentRequested, this, [this](quint64 childId, quint64 parentId) {
+        if (sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        host_->SetParent(childId, parentId);
     });
 
-    connect(sceneObjectsPanel_, &SceneObjectsPanel::RemoveRequested, this, [this]
-    {
-        SubmitObjectCommand(EditorCommand::RemoveObject);
-    });
-
-    connect(sceneObjectsPanel_, &SceneObjectsPanel::SelectionChanged, this, [this](quint64 objectId)
-    {
-        if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
-            return;
-
-        EditorCommand c;
-        c.type = EditorCommand::SelectObject;
-        c.objectId = objectId;
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::AddChildPrimitiveRequested, this,
+            [this](quint64 parentId, const QString& typeName, const QString& typeLabel, const std::array<double, 3>& pos) {
+        if (sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        EditorCommand c; c.type = EditorCommand::CreateObject; c.path = typeName; c.name = typeLabel; c.parentId = parentId;
+        c.transform.position[0] = static_cast<float>(pos[0]);
+        c.transform.position[1] = static_cast<float>(pos[1]);
+        c.transform.position[2] = static_cast<float>(pos[2]);
         host_->PostCommand(c);
     });
 
-    connect(sceneObjectsPanel_, &SceneObjectsPanel::FocusRequested, this, [this]
-    {
-        if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
-            return;
-
-        EditorCommand c;
-        c.type = EditorCommand::FocusObject;
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::RenameRequested, this, [this](quint64 objectId, const QString& name) {
+        if (!objectId || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        EditorCommand c; c.type = EditorCommand::RenameObject; c.objectId = objectId; c.name = name.trimmed();
         host_->PostCommand(c);
     });
 
@@ -1288,6 +1283,7 @@ void EditorMainWindow::RetranslateUi()
 {
     setWindowTitle(QStringLiteral("PainEngine Editor - %1").arg(QString::fromUtf8(host_->host().projectName)));
     if (mainToolBar_) mainToolBar_->RetranslateUi();
+    if (sceneObjectsPanel_) sceneObjectsPanel_->RetranslateUi();
     if (viewMenu_) viewMenu_->setTitle(Tr("Вид", "View"));
     if (themeMenu_) themeMenu_->setTitle(Tr("Тема оформления", "Theme"));
     if (langMenu_) langMenu_->setTitle(Tr("Язык", "Language"));

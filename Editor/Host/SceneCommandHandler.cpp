@@ -28,6 +28,7 @@ bool SceneCommandHandler::CanHandle(EditorCommand::Type type) const
     case EditorCommand::RemoveObject:
     case EditorCommand::RenameObject:
     case EditorCommand::DuplicateObject:
+    case EditorCommand::SetParent:
     case EditorCommand::SaveScene:
     case EditorCommand::LoadScene:
     case EditorCommand::NewScene:
@@ -62,7 +63,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
         cmd.type == EditorCommand::RemoveObject || cmd.type == EditorCommand::RenameObject || cmd.type == EditorCommand::DuplicateObject ||
         cmd.type == EditorCommand::SetModel || cmd.type == EditorCommand::CreateModel || cmd.type == EditorCommand::SetTexture ||
         cmd.type == EditorCommand::SetMaterial || cmd.type == EditorCommand::SetPointLight || cmd.type == EditorCommand::SetProjectData ||
-        cmd.type == EditorCommand::ConfigurePlay);
+        cmd.type == EditorCommand::ConfigurePlay || cmd.type == EditorCommand::SetParent);
 
     if ((mutation || cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene ||
         cmd.type == EditorCommand::Undo || cmd.type == EditorCommand::Redo) && playState != IEditorHost::Edit)
@@ -121,6 +122,10 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
         else if (cmd.type == EditorCommand::RenameObject)
         {
             result = api.renameObject(api.context, cmd.objectId, cmd.name.toUtf8().constData());
+        }
+        else if (cmd.type == EditorCommand::SetParent)
+        {
+            result = ctx.scene.setParent ? ctx.scene.setParent(ctx.scene.context, cmd.objectId, cmd.parentId, 1) : EngineSceneOk;
         }
         else if (cmd.type == EditorCommand::SetModel)
         {

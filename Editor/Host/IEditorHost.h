@@ -27,7 +27,7 @@ struct EditorCommand
         TogglePlay, TogglePause, InputFocus, InputKey, InputPointer, ConfigurePlay,
         FetchScene, UpdateObjectTransform, RefreshScene, SelectObject, CreateObject, RemoveObject,
         RenameObject, DuplicateObject, SaveScene, LoadScene, NewScene, Undo, Redo, PickObject, FocusObject,
-        SetGizmoMode, BeginGizmoDrag, EndGizmoDrag,
+        SetGizmoMode, BeginGizmoDrag, EndGizmoDrag, SetParent,
         ImportModel, ImportTexture, CreateModel, SetTexture, SetPointLight, SetMaterial, SetProjectData,
         RunTask,
     };
@@ -40,6 +40,7 @@ struct EditorCommand
 
     // Поля для манипуляций с объектами
     uint64_t objectId = 0;
+    uint64_t parentId = 0;
     EngineSceneTransform transform{{0, 0, 0}, {0, 0, 0, 1}, {1, 1, 1}};
     EngineScenePointLight pointLight{};
     EditorGizmoMode gizmo = EditorGizmoTranslate;
@@ -118,6 +119,7 @@ public:
 
     virtual void SetGizmoMode(EditorGizmoMode mode) = 0;
     virtual EditorGizmoMode GizmoMode() const = 0;
+    virtual void SetParent(uint64_t childId, uint64_t parentId) = 0;
 
     virtual void RunOnUi(std::function<void()> action) = 0;
     virtual void SetUiListener(IEditorUiListener* listener) = 0;
