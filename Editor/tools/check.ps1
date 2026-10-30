@@ -225,6 +225,16 @@ if (Test-Path $coreTestsProj) {
     Write-Output "CoreTests.vcxproj not present yet; skipping Core unit tests."
 }
 
+# Run Host unit tests if present
+$hostTestsProj = Join-Path $repo "Editor/tests/HostTests.vcxproj"
+if (Test-Path $hostTestsProj) {
+    Invoke-ProcessWithTimeout -FilePath $msbuild -ArgumentList @('"' + $hostTestsProj + '"', '/nologo', '/verbosity:minimal', '/m', '/p:ForceSynchronousPDBWrites=true', '/p:Configuration=Debug', '/p:Platform=x64') -TimeoutSeconds $TimeoutSec -Description "HostTests Build"
+
+    $hostTestsExe = Join-Path $repo "Game/build/x64/Debug/Runtime/HostTests.exe"
+    Invoke-ProcessWithTimeout -FilePath $hostTestsExe -TimeoutSeconds $TimeoutSec -Description "HostTests Execution"
+    Write-Output "OK: HostTests passed."
+}
+
 # Run UI unit tests if present
 $uiTestsProj = Join-Path $repo "Editor/tests/UiTests.vcxproj"
 if (Test-Path $uiTestsProj) {
