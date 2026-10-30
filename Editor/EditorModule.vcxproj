@@ -139,6 +139,10 @@
         <ClCompile Include="UI/EditorApp.cpp"/>
         <ClCompile Include="UI/EditorTheme.cpp"/>
         <ClCompile Include="UI/EditorStyles.cpp"/>
+        <ClCompile Include="UI/DockLayoutManager.cpp"/>
+        <ClCompile Include="UI/MainToolBar.cpp"/>
+        <ClCompile Include="UI/PlaySettingsDialog.cpp"/>
+        <ClCompile Include="UI/ExternalGameRunner.cpp"/>
         <ClCompile Include="Source/MainWindow.cpp"/>
         <ClCompile Include="Source/AssetTools.cpp"/>
         <ClCompile Include="Source/FileBrowser.cpp"/>
@@ -158,6 +162,7 @@
         <ClCompile Include="$(IntDir)moc/moc_ObjectInspectorPanel.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_SceneObjectsPanel.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_MaterialEditorWindow.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_MainToolBar.cpp"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -239,6 +244,16 @@
             <Command>
                 if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
                 "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+        <CustomBuild Include="UI/MainToolBar.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include" -I"$(ProjectDir)UI" -I"$(ProjectDir)Core"
             </Command>
             <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
             <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>

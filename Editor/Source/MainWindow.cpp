@@ -4,6 +4,12 @@
 #include "ViewportWidget.h"
 #include "SceneObjectsPanel.h"
 #include "ObjectInspectorPanel.h"
+#include "MainToolBar.h"
+#include "DockLayoutManager.h"
+#include "PlaySettingsDialog.h"
+#include "ExternalGameRunner.h"
+#include "EditorTheme.h"
+#include "EditorLocale.h"
 
 #include <QDockWidget>
 #include <QCloseEvent>
@@ -46,6 +52,13 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     auto* timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &EditorMainWindow::RefreshStats);
     timer->start(250);
+
+    langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] { RetranslateUi(); });
+    themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
+        if (actThemeDark_) actThemeDark_->setChecked(EditorTheme::Instance().Mode() == ThemeMode::Dark);
+        if (actThemeLight_) actThemeLight_->setChecked(EditorTheme::Instance().Mode() == ThemeMode::Light);
+        if (mainToolBar_) mainToolBar_->RefreshIcons();
+    });
 }
 
 void EditorMainWindow::BuildUi()
@@ -87,18 +100,45 @@ void EditorMainWindow::BuildUi()
 
     fileDock_ = new FileBrowserDock(host_, this);
     addDockWidget(Qt::BottomDockWidgetArea, fileDock_);
-
     tabifyDockWidget(consoleDock_, fileDock_);
 
-    resizeDocks({viewportDock_, consoleDock_}, {620, 100}, Qt::Vertical);
-
     BuildToolBar();
-
     BuildSceneDocks();
 
-    resizeDocks({viewportDock_, consoleDock_}, {620, 100}, Qt::Vertical);
+    DockLayoutManager::UnlockDockResizing(viewportDock_);
+    DockLayoutManager::UnlockDockResizing(consoleDock_);
+    DockLayoutManager::UnlockDockResizing(fileDock_);
+    DockLayoutManager::UnlockDockResizing(sceneObjectsDock_);
+    DockLayoutManager::UnlockDockResizing(inspectorDock_);
+    DockLayoutManager::RestoreLayout(this);
 
-    QMenu* viewMenu = menuBar()->addMenu(QStringLiteral("Вид"));
+    viewMenu_ = menuBar()->addMenu(Tr("Вид", "View"));
+    langMenu_ = viewMenu_->addMenu(Tr("Язык", "Language"));
+    langMenu_->addAction(QStringLiteral("Русский"), this, [] { EditorLocale::Instance().SetLanguage(EditorLanguage::Ru); });
+    langMenu_->addAction(QStringLiteral("English"), this, [] { EditorLocale::Instance().SetLanguage(EditorLanguage::En); });
+
+    themeMenu_ = viewMenu_->addMenu(Tr("Тема оформления", "Theme"));
+    actThemeDark_ = themeMenu_->addAction(Tr("Тёмная (Dark)", "Dark"), this, [] { EditorTheme::Instance().SetMode(ThemeMode::Dark); });
+    actThemeDark_->setCheckable(true);
+    actThemeLight_ = themeMenu_->addAction(Tr("Светлая (Light)", "Light"), this, [] { EditorTheme::Instance().SetMode(ThemeMode::Light); });
+    actThemeLight_->setCheckable(true);
+    actThemeDark_->setChecked(EditorTheme::Instance().Mode() == ThemeMode::Dark);
+    actThemeLight_->setChecked(EditorTheme::Instance().Mode() == ThemeMode::Light);
+
+    auto* accentMenu = themeMenu_->addMenu(Tr("Акцентный цвет", "Accent Color"));
+    accentMenu->addAction(QStringLiteral("Pain Red (#DC2626)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#DC2626"))); });
+    accentMenu->addAction(QStringLiteral("3ds Max Red (#E53935)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#E53935"))); });
+    accentMenu->addAction(QStringLiteral("Blender Orange (#E07A1F)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#E07A1F"))); });
+    accentMenu->addAction(QStringLiteral("Unreal Blue (#3B82F6)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#3B82F6"))); });
+    accentMenu->addAction(QStringLiteral("Unity Cyan (#00BCD4)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#00BCD4"))); });
+
+    viewMenu_->addSeparator();
+    actResetLayout_ = viewMenu_->addAction(Tr("Сбросить раскладку окон", "Reset Window Layout"), this, [this] {
+        DockLayoutManager::ResetLayout(this);
+    });
+    viewMenu_->addSeparator();
+
+    QMenu* viewMenu = viewMenu_;
 
     if (viewportDock_)
         viewMenu->addAction(viewportDock_->toggleViewAction());
@@ -152,6 +192,7 @@ void EditorMainWindow::closeEvent(QCloseEvent* event)
     event->ignore();
     if (closing_ || sceneBusy_ || checkingChanges_) return;
     if (!CloseMaterialEditors([this] { close(); })) return;
+    DockLayoutManager::SaveLayout(this);
     closing_ = true;
     // Queue a barrier after viewport edits, then inspect the authoritative dirty state.
     if (host_->HasScene())
@@ -188,36 +229,17 @@ void EditorMainWindow::BuildSceneMenu()
     auto* playMenu = menuBar()->addMenu(QStringLiteral("Запуск"));
     playMenu->addAction(actPlay_); playMenu->addAction(actPause_); playMenu->addAction(actStop_);
     playMenu->addSeparator(); playMenu->addAction(actExternal_);
-    playMenu->addAction(QStringLiteral("Настроить Play…"),this,[this]{
-        if(host_->PlayState()!=EditorQtHost::Edit)return;
-        const auto snapshot=host_->ReadSnapshot();
-        QJsonObject data{{"version",1},{"character",0},{"camera",0},{"standardControl",true},{"cameraDistance",5},{"cameraHeight",2},{"lookSensitivity",0.005}};
-        uint64_t settingsId=0;
-        for(const auto& o:snapshot.objects)if(o.gameplayKind==3){
-            if(settingsId){QMessageBox::warning(this,QStringLiteral("Play"),QStringLiteral("Включите «Вид → Служебные объекты сцены» и удалите лишние записи «Настройки Play». Для сцены нужна одна запись."));return;}
-            settingsId=o.id;data=QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object();
+    actConfigurePlay_ = playMenu->addAction(QStringLiteral("Настроить Play…"), this, [this] {
+        if (host_->PlayState() != EditorQtHost::Edit) return;
+        const auto snapshot = host_->ReadSnapshot();
+        std::vector<PlaySettingsObjectView> views;
+        for (const auto& o : snapshot.objects) views.push_back({o.id, o.gameplayKind, o.name, o.projectData});
+        PlaySettingsDialog dialog(views, this);
+        uint64_t settingsId = 0; QString configJson;
+        if (dialog.Execute(settingsId, configJson)) {
+            EditorCommand c; c.type = EditorCommand::ConfigurePlay; c.objectId = settingsId; c.path = configJson;
+            host_->PostCommand(c);
         }
-        QDialog dialog(this);dialog.setWindowTitle(QStringLiteral("Персонаж и камера Play"));
-        auto* form=new QFormLayout(&dialog);auto* character=new QComboBox(&dialog);auto* camera=new QComboBox(&dialog);
-        character->setObjectName("PlayCharacter");camera->setObjectName("PlayCamera");
-        character->addItem(QStringLiteral("Без управления персонажем"),QVariant::fromValue<qulonglong>(0));
-        camera->addItem(QStringLiteral("Следовать за персонажем"),QVariant::fromValue<qulonglong>(0));
-        for(const auto& o:snapshot.objects){auto* box=o.gameplayKind==1?character:o.gameplayKind==2?camera:nullptr;if(box)box->addItem(QString::fromStdString(o.name),QVariant::fromValue<qulonglong>(o.id));}
-        character->setCurrentIndex((std::max)(0,character->findData(QVariant::fromValue<qulonglong>(data["character"].toInteger()))));
-        camera->setCurrentIndex((std::max)(0,camera->findData(QVariant::fromValue<qulonglong>(data["camera"].toInteger()))));
-        auto* standard=new QCheckBox(QStringLiteral("WASD: движение, ПКМ + мышь: обзор"),&dialog);standard->setChecked(data["standardControl"].toBool());
-        auto* distance=new QDoubleSpinBox(&dialog);distance->setRange(0,10000);distance->setValue(data["cameraDistance"].toDouble());
-        auto* height=new QDoubleSpinBox(&dialog);height->setRange(-10000,10000);height->setValue(data["cameraHeight"].toDouble());
-        auto* sensitivity=new QDoubleSpinBox(&dialog);sensitivity->setDecimals(4);sensitivity->setSingleStep(0.001);sensitivity->setRange(0,1);sensitivity->setValue(data["lookSensitivity"].toDouble());
-        form->addRow(QStringLiteral("Персонаж"),character);form->addRow(QStringLiteral("Камера"),camera);form->addRow(standard);
-        form->addRow(QStringLiteral("Расстояние камеры"),distance);form->addRow(QStringLiteral("Высота камеры"),height);form->addRow(QStringLiteral("Чувствительность обзора"),sensitivity);
-        form->addRow(new QLabel(QStringLiteral("Добавьте персонажа в категории Персонажи.\nФиксированная камера использует трансформацию объекта.\nSpace: Stop, P: Pause. Для управления щёлкните viewport."),&dialog));
-        auto* buttons=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel,&dialog);form->addRow(buttons);
-        connect(buttons,&QDialogButtonBox::accepted,&dialog,&QDialog::accept);connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);
-        if(dialog.exec()!=QDialog::Accepted)return;
-        data["character"]=static_cast<qint64>(character->currentData().toULongLong());data["camera"]=static_cast<qint64>(camera->currentData().toULongLong());
-        data["standardControl"]=standard->isChecked();data["cameraDistance"]=distance->value();data["cameraHeight"]=height->value();data["lookSensitivity"]=sensitivity->value();
-        EditorCommand c;c.type=EditorCommand::ConfigurePlay;c.objectId=settingsId;c.path=QString::fromUtf8(QJsonDocument(data).toJson(QJsonDocument::Compact));host_->PostCommand(c);
     });
     menu->addAction(QStringLiteral("Новая сцена"), this, [this]
     {
@@ -295,126 +317,68 @@ void EditorMainWindow::BuildSceneMenu()
 
 void EditorMainWindow::BuildToolBar()
 {
-    toolBar_ = addToolBar(QStringLiteral("Play"));
-    toolBar_->setMovable(false);
+    mainToolBar_ = new MainToolBar(this);
+    toolBar_ = mainToolBar_;
+    addToolBar(mainToolBar_);
 
-    actPlay_ = toolBar_->addAction(QStringLiteral("▶ Play"));
-    actPause_ = toolBar_->addAction(QStringLiteral("⏸ Pause"));
-    actStop_ = toolBar_->addAction(QStringLiteral("⏹ Stop"));
-    actExternal_ = new QAction(QStringLiteral("Запустить отдельным окном"), this);
+    actPlay_ = mainToolBar_->ActPlay();
+    actPause_ = mainToolBar_->ActPause();
+    actStop_ = mainToolBar_->ActStop();
+    actExternal_ = mainToolBar_->ActExternal();
 
-    connect(actPlay_, &QAction::triggered, this, [this]
-    {
-        EditorCommand c;
-        EditorQtHost::EditorState m = host_->PlayState();
-        c.type = m == EditorQtHost::EditorState::Edit ? EditorCommand::TogglePlay : EditorCommand::TogglePause;
+    connect(mainToolBar_, &MainToolBar::PlayTriggered, this, [this] {
+        EditorCommand c; c.type = host_->PlayState() == EditorQtHost::Edit ? EditorCommand::TogglePlay : EditorCommand::TogglePause;
         host_->PostCommand(c);
     });
-    connect(actPause_, &QAction::triggered, this, [this]
-    {
-        // toggle Pause/Resume
-        EditorCommand c;
-        c.type = EditorCommand::TogglePause;
-        host_->PostCommand(c);
+    connect(mainToolBar_, &MainToolBar::PauseTriggered, this, [this] {
+        EditorCommand c; c.type = EditorCommand::TogglePause; host_->PostCommand(c);
     });
-    connect(actStop_, &QAction::triggered, this, [this]
-    {
-        EditorCommand c;
-        c.type = EditorCommand::TogglePlay;
-        host_->PostCommand(c);
+    connect(mainToolBar_, &MainToolBar::StopTriggered, this, [this] {
+        EditorCommand c; c.type = EditorCommand::TogglePlay; host_->PostCommand(c);
     });
-    connect(actExternal_, &QAction::triggered, this, [this]
-    {
-        if (gameProc_ && gameProc_->state() != QProcess::NotRunning)
-        {
-            StopExternalGame();
-            return;
-        }
+    connect(mainToolBar_, &MainToolBar::ExternalTriggered, this, [this] {
+        if (externalGameRunner_ && externalGameRunner_->IsRunning()) { StopExternalGame(); return; }
         if (host_->HasScene()) SaveScene(false, [this] { StartExternalGame(); });
         else StartExternalGame();
     });
+    connect(mainToolBar_, &MainToolBar::ConfigPlayTriggered, this, [this] {
+        if (actConfigurePlay_) actConfigurePlay_->trigger();
+    });
+    connect(mainToolBar_, &MainToolBar::CameraModeChanged, this, [this](int mode) {
+        if (host_->PlayState() != EditorQtHost::Edit) return;
+        const auto snapshot = host_->ReadSnapshot();
+        uint64_t settingsId = 0;
+        QJsonObject data{{"version", 1}, {"character", 0}, {"camera", 0}, {"standardControl", true}};
+        for (const auto& o : snapshot.objects) if (o.gameplayKind == 3) { settingsId = o.id; data = QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object(); break; }
+        if (mode == 0) { data["character"] = 0; data["standardControl"] = false; }
+        else {
+            uint64_t charId = 0;
+            for (const auto& o : snapshot.objects) if (o.gameplayKind == 1) { charId = o.id; break; }
+            data["character"] = static_cast<qint64>(charId); data["standardControl"] = true;
+        }
+        EditorCommand c; c.type = EditorCommand::ConfigurePlay; c.objectId = settingsId;
+        c.path = QString::fromUtf8(QJsonDocument(data).toJson(QJsonDocument::Compact));
+        host_->PostCommand(c);
+    });
+    connect(mainToolBar_, &MainToolBar::LangToggleTriggered, this, &EditorMainWindow::RetranslateUi);
 
-    // режимы доступны только если движок поддерживает setPlayMode
-    const bool canPlay = host_->PlayState() == 1;
-    actPlay_->setEnabled(canPlay);
-    actPause_->setEnabled(canPlay);
-    actStop_->setEnabled(canPlay);
+    UpdatePlayButtons();
 }
 
 void EditorMainWindow::UpdatePlayButtons()
 {
-    const EditorQtHost::EditorState m = host_->PlayState();
-    actExternal_->setEnabled(!sceneBusy_);
-    actPlay_->setEnabled(
-        !sceneBusy_ && (m == EditorQtHost::EditorState::Edit || m == EditorQtHost::EditorState::Pause));
-    actPause_->setEnabled(m == EditorQtHost::EditorState::Play);
-    actStop_->setEnabled(m != EditorQtHost::EditorState::Edit);
+    if (mainToolBar_) mainToolBar_->UpdatePlayState(static_cast<int>(host_->PlayState()), sceneBusy_);
 }
 
 void EditorMainWindow::StartExternalGame()
 {
-    if (gameProc_ && gameProc_->state() != QProcess::NotRunning)
-        return;
-    if (!gameProc_)
-    {
-        gameProc_ = new QProcess(this);
-        // EngineRuntime — консольное приложение (std::cin/std::puts), поэтому MergedChannels
-        // реально ловит его stdout/stderr. Лаунчер — GUI (wWinMain), у него вывода нет:
-        // ещё одна причина не запускать его отсюда.
-        gameProc_->setProcessChannelMode(QProcess::MergedChannels);
-        connect(gameProc_, &QProcess::readyReadStandardOutput, this, [this]
-        {
-            host_->Log(gameProc_->readAllStandardOutput().trimmed().constData());
-        });
-        connect(gameProc_, &QProcess::finished, this, [this](int code, QProcess::ExitStatus st)
-        {
-            const QByteArray tail = gameProc_->readAllStandardOutput();
-            if (!tail.isEmpty()) host_->Log(tail.trimmed().constData());
-            host_->Log(("ExternalGame exited code=" + std::to_string(code)
-                + (st == QProcess::CrashExit ? " (crash)" : "")).c_str());
-            actExternal_->setText(QStringLiteral("Запустить отдельным окном"));
-        });
-        connect(gameProc_, &QProcess::errorOccurred, this, [this](QProcess::ProcessError e)
-        {
-            host_->Log(("ExternalGame error=" + std::to_string(e)).c_str());
-            actExternal_->setText(QStringLiteral("Запустить отдельным окном"));
-        });
-    }
-
-    const QString runtimeDir = QCoreApplication::applicationDirPath(); // .../Runtime
-    const QString runtime = QDir(runtimeDir).absoluteFilePath(QStringLiteral("EngineRuntime.exe"));
-    const QString project = QString::fromUtf8(host_->host().projectFile ? host_->host().projectFile : "");
-
-    if (!QFileInfo::exists(runtime))
-    {
-        host_->Log(("ExternalGame: runtime not found: " + runtime.toStdString()).c_str());
-        return;
-    }
-    if (project.isEmpty())
-    {
-        host_->Log("ExternalGame: empty projectFile in host");
-        return;
-    }
-
-    gameProc_->setProgram(runtime);
-    // Ровно та строка, что лаунчер собирает для кнопки «Играть»: --mode game, без --no-editor.
-    gameProc_->setArguments({QStringLiteral("--project"), project, QStringLiteral("--mode"), QStringLiteral("game")});
-    gameProc_->setWorkingDirectory(runtimeDir);
-
-    host_->Log(("ExternalGame start: " + runtime.toStdString()
-        + " --project " + project.toStdString() + " --mode game").c_str());
-
-    gameProc_->start();
-    if (!gameProc_->waitForStarted(2000))
-        host_->Log("ExternalGame: failed to start (check EngineRuntime.exe path)");
-    else
-        actExternal_->setText(QStringLiteral("Остановить отдельную игру"));
+    if (!externalGameRunner_) externalGameRunner_ = new ExternalGameRunner(host_, actExternal_, this);
+    externalGameRunner_->Start();
 }
 
 void EditorMainWindow::StopExternalGame()
 {
-    if (gameProc_ && gameProc_->state() != QProcess::NotRunning)
-        gameProc_->kill();
+    if (externalGameRunner_) externalGameRunner_->Stop();
 }
 
 void EditorMainWindow::RefreshStats()
@@ -1318,4 +1282,16 @@ void EditorMainWindow::OpenScene(const QString& supplied)
 
         host_->PostCommand(c);
     });
+}
+
+void EditorMainWindow::RetranslateUi()
+{
+    setWindowTitle(QStringLiteral("PainEngine Editor - %1").arg(QString::fromUtf8(host_->host().projectName)));
+    if (mainToolBar_) mainToolBar_->RetranslateUi();
+    if (viewMenu_) viewMenu_->setTitle(Tr("Вид", "View"));
+    if (themeMenu_) themeMenu_->setTitle(Tr("Тема оформления", "Theme"));
+    if (langMenu_) langMenu_->setTitle(Tr("Язык", "Language"));
+    if (actThemeDark_) actThemeDark_->setText(Tr("Тёмная (Dark)", "Dark"));
+    if (actThemeLight_) actThemeLight_->setText(Tr("Светлая (Light)", "Light"));
+    if (actResetLayout_) actResetLayout_->setText(Tr("Сбросить раскладку окон", "Reset Window Layout"));
 }

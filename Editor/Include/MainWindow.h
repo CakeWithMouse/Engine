@@ -25,6 +25,8 @@ class QPushButton;
 class QAction;
 class SceneObjectsPanel;
 class MaterialEditorWindow;
+class MainToolBar;
+class ExternalGameRunner;
 
 class EditorMainWindow : public QMainWindow, public IEditorUiListener
 {
@@ -74,6 +76,7 @@ public slots:
 private slots:
     void RefreshStats();
     void ShowViewportContextMenu(const QPoint& globalPos);
+    void RetranslateUi();
 
 protected:
     void closeEvent(QCloseEvent* event) override;
@@ -123,7 +126,19 @@ private:
     SceneObjectsPanel* sceneObjectsPanel_ = nullptr;
     ObjectInspectorPanel* objectInspectorPanel_ = nullptr;
 
+    MainToolBar* mainToolBar_ = nullptr;
     QToolBar* toolBar_ = nullptr;
+
+    QMenu* viewMenu_ = nullptr;
+    QMenu* themeMenu_ = nullptr;
+    QMenu* langMenu_ = nullptr;
+    QAction* actThemeDark_ = nullptr;
+    QAction* actThemeLight_ = nullptr;
+    QAction* actResetLayout_ = nullptr;
+    QAction* actConfigurePlay_ = nullptr;
+
+    int langSubId_ = 0;
+    int themeSubId_ = 0;
 
     QAction* actPlay_ = nullptr;
     QAction* actPause_ = nullptr;
@@ -136,6 +151,7 @@ private:
     QAction* duplicateAction_ = nullptr;
     QAction* deleteAction_ = nullptr;
 
+    ExternalGameRunner* externalGameRunner_ = nullptr;
     QProcess* gameProc_ = nullptr;
 
     QLabel* playStateLabel_ = nullptr;
