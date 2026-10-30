@@ -43,3 +43,4 @@ inline QString Tr(const char* ruUtf8, const char* enUtf8)
 {
     return EditorLocale::Instance().Translate(ruUtf8, enUtf8);
 }
+

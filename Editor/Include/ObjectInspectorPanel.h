@@ -94,6 +94,9 @@ private:
     bool refreshing_ = false;
     int langSubId_ = 0;
 
+    // Placeholder when no object is selected
+    QLabel* noSelectionLabel_ = nullptr;
+
     // Cards
     CollapsibleCard* cardGeneral_ = nullptr;
     TransformCard* cardTransform_ = nullptr;

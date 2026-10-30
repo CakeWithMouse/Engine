@@ -27,3 +27,4 @@ private:
     std::vector<std::pair<int, std::function<void(ControlScheme)>>> subscribers_;
     int nextSubId_ = 1;
 };
+

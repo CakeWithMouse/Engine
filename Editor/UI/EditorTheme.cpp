@@ -241,3 +241,4 @@ QIcon EditorTheme::CreateExternalIcon(const QColor& color)
     }
     return QIcon(pix);
 }
+

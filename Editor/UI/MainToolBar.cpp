@@ -112,3 +112,4 @@ void MainToolBar::RefreshIcons()
     if (actStop_) actStop_->setIcon(EditorTheme::CreateStopIcon());
     if (actExternal_) actExternal_->setIcon(EditorTheme::CreateExternalIcon());
 }
+

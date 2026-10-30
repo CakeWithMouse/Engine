@@ -50,3 +50,4 @@ private:
     int nextId_ = 1;
     std::vector<std::pair<int, std::function<void()>>> subscribers_;
 };
+

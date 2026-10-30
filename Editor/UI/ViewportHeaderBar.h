@@ -161,3 +161,4 @@ private:
     QComboBox* comboSnapStep_ = nullptr;
     QPushButton* btnScheme_ = nullptr;
 };
+

@@ -87,3 +87,4 @@ QString EditorLocale::Translate(const char* ruUtf8, const char* enUtf8) const
     }
     return QString::fromUtf8(ruUtf8 ? ruUtf8 : (enUtf8 ? enUtf8 : ""));
 }
+

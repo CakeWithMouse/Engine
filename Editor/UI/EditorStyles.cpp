@@ -231,3 +231,4 @@ QStatusBar {
         .arg(textDisabled)    // %12
         .arg(accentHover);    // %13
 }
+

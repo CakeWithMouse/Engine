@@ -37,3 +37,4 @@ namespace GizmoMath
         double outScale[3]
     );
 }
+

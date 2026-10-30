@@ -18,3 +18,4 @@ public:
                                   QDockWidget* fileDock,
                                   QDockWidget* consoleDock);
 };
+

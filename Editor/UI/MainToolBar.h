@@ -41,3 +41,4 @@ private:
     QToolButton* configPlayBtn_ = nullptr;
     QPushButton* langButton_ = nullptr;
 };
+

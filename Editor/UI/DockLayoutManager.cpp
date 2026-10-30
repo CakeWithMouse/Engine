@@ -67,3 +67,4 @@ void DockLayoutManager::ApplyDefaultDocks(QMainWindow* window,
         fileDock->raise();
     }
 }
+

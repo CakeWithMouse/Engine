@@ -67,3 +67,4 @@ inline void UnregisterViewportCommands()
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Gizmo.FocusSelected"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Editor.ToggleControlScheme"));
 }
+

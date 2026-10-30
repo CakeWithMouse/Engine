@@ -92,6 +92,11 @@ void ObjectInspectorPanel::BuildUi()
     inspectorLayout->setContentsMargins(6, 6, 6, 6);
     inspectorLayout->setSpacing(6);
 
+    noSelectionLabel_ = new QLabel(Tr("Объект не выбран", "No object selected"), content);
+    noSelectionLabel_->setAlignment(Qt::AlignCenter);
+    noSelectionLabel_->setStyleSheet(QStringLiteral("color: #64748B; font-size: 13px; font-weight: 500; padding: 40px 10px;"));
+    inspectorLayout->addWidget(noSelectionLabel_);
+
     BuildGeneralCard(inspectorLayout);
 
     cardTransform_ = new TransformCard(this);
@@ -112,6 +117,13 @@ void ObjectInspectorPanel::BuildUi()
 
     BuildPointLightCard(inspectorLayout);
     BuildCharacterCard(inspectorLayout);
+
+    cardGeneral_->hide();
+    cardTransform_->hide();
+    cardMaterial_->hide();
+    lightInspector_->hide();
+    characterInspector_->hide();
+    noSelectionLabel_->show();
 
     inspectorLayout->addStretch(1);
     scrollArea->setWidget(content);
@@ -304,6 +316,7 @@ void ObjectInspectorPanel::BuildCharacterCard(QVBoxLayout* layout)
 
 void ObjectInspectorPanel::RetranslateUi()
 {
+    if (noSelectionLabel_) noSelectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
     if (cardGeneral_) cardGeneral_->SetTitle(Tr("Общие", "General"));
     if (cardLight_) cardLight_->SetTitle(Tr("Точечный свет", "Point Light"));
     if (cardCharacter_) cardCharacter_->SetTitle(Tr("Персонаж", "Character"));
@@ -378,15 +391,21 @@ void ObjectInspectorPanel::Refresh(
 
     if (selectedId_ == 0)
     {
-        selectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
-        typeBadgeLabel_->setText(QStringLiteral("None"));
-        objectName_->clear();
-        cardMaterial_->Clear();
-        lightInspector_->setVisible(false);
+        noSelectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
+        noSelectionLabel_->show();
+        cardGeneral_->hide();
+        cardTransform_->hide();
+        cardMaterial_->hide();
+        lightInspector_->hide();
         characterInspector_->hide();
         refreshing_ = false;
         return;
     }
+
+    noSelectionLabel_->hide();
+    cardGeneral_->show();
+    cardTransform_->show();
+    cardMaterial_->show();
 
     cardMaterial_->Clear();
 

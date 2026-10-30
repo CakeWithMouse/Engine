@@ -57,3 +57,4 @@ void EditorSettings::UnsubscribeControlSchemeChanged(int id)
         }
     }
 }
+

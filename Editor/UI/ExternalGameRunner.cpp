@@ -67,3 +67,4 @@ void ExternalGameRunner::Stop()
 {
     if (IsRunning()) proc_->kill();
 }
+

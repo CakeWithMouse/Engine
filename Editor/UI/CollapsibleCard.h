@@ -93,3 +93,4 @@ private:
     QWidget* content_ = nullptr;
     QVBoxLayout* contentLayout_ = nullptr;
 };
+

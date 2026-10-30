@@ -19,3 +19,4 @@ protected:
         event->ignore();
     }
 };
+

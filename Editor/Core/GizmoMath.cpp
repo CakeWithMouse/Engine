@@ -167,3 +167,4 @@ namespace GizmoMath
             outScale[i] = startScale[i] * factor;
     }
 }
+

@@ -170,8 +170,6 @@
     <ItemGroup>
         <ClInclude Include="Core/IUserPrompt.h"/>
         <ClInclude Include="Core/EditorLocale.h"/>
-        <ClInclude Include="Core/GizmoMath.h"/>
-        <ClInclude Include="Core/EditorSettings.h"/>
         <CustomBuild Include="Core/Logger.h">
             <FileType>Document</FileType>
             <Message>MOC %(Filename).h</Message>
@@ -252,22 +250,22 @@
             <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
             <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
         </CustomBuild>
-        <CustomBuild Include="UI/MainToolBar.h">
-            <FileType>Document</FileType>
-            <Message>MOC %(Filename).h</Message>
-            <Command>
-                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
-                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include" -I"$(ProjectDir)UI" -I"$(ProjectDir)Core"
-            </Command>
-            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
-            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
-        </CustomBuild>
         <CustomBuild Include="Include/MaterialEditorWindow.h">
             <FileType>Document</FileType>
             <Message>MOC %(Filename).h</Message>
             <Command>
                 if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
                 "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+            <CustomBuild Include="UI/MainToolBar.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include" -I"$(ProjectDir)UI" -I"$(ProjectDir)Core"
             </Command>
             <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
             <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>

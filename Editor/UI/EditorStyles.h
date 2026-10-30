@@ -9,3 +9,4 @@ namespace EditorStyles
 {
     QString BuildStyleSheet(ThemeMode mode, const QColor& accentColor);
 }
+

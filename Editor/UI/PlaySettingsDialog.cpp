@@ -92,3 +92,4 @@ bool PlaySettingsDialog::Execute(uint64_t& outSettingsId, QString& outConfigJson
     outConfigJson = QString::fromUtf8(QJsonDocument(data).toJson(QJsonDocument::Compact));
     return true;
 }
+
