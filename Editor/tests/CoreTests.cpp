@@ -7,6 +7,8 @@
 #include "../Core/MaterialGraphModel.cpp"
 #include "../Core/HlslGraphCompiler.cpp"
 #include "core/MaterialGraphTests.h"
+#include "../Core/SceneFile.cpp"
+#include "core/SceneFileTests.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
@@ -212,6 +214,13 @@ void TestMaterialGraph()
     gChecks += 18;
 }
 
+void TestSceneFile()
+{
+    RunSceneFileTests();
+    // 21 distinct checks in RunSceneFileTests
+    gChecks += 21;
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -255,6 +264,10 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestMaterialGraph...\n");
     std::fflush(stdout);
     TestMaterialGraph();
+
+    std::printf("[Test] TestSceneFile...\n");
+    std::fflush(stdout);
+    TestSceneFile();
 
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);
