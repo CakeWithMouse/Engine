@@ -25,6 +25,8 @@ class QPoint;
 class QPushButton;
 class QAction;
 class QMenu;
+class QCheckBox;
+class QToolButton;
 class SceneObjectsPanel;
 class MaterialEditorWindow;
 
@@ -65,12 +67,16 @@ private slots:
 
 protected:
     void closeEvent(QCloseEvent* event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
     void BuildCodeTools();
     void RunCodeTool(const QString& action, const QStringList& extra = {});
     void ShowProjectTypes();
     void BuildUi();
+    void BuildConsole();
+    void ExecuteTerminalCommand(const QString& command);
+    void RefreshConsoleDisplay();
     void BuildToolBar();
     void UpdatePlayButtons();
 
@@ -106,6 +112,29 @@ private:
 
     QPlainTextEdit* console_ = nullptr;
     QDockWidget* consoleDock_ = nullptr;
+
+    enum class LogLevel { Info, Warning, Error, Command };
+    struct ConsoleLogEntry {
+        LogLevel level = LogLevel::Info;
+        QString text;
+        int count = 1;
+        QString time;
+    };
+    QList<ConsoleLogEntry> logEntries_;
+    int logInfoCount_ = 0;
+    int logWarnCount_ = 0;
+    int logErrorCount_ = 0;
+
+    QToolButton* btnFilterInfo_ = nullptr;
+    QToolButton* btnFilterWarn_ = nullptr;
+    QToolButton* btnFilterError_ = nullptr;
+    QLineEdit* consoleFilterEdit_ = nullptr;
+    QCheckBox* chkCollapse_ = nullptr;
+    QPushButton* btnClearConsole_ = nullptr;
+
+    QLineEdit* terminalInput_ = nullptr;
+    QStringList terminalHistory_;
+    int terminalHistoryIndex_ = -1;
 
     FileBrowserDock* fileDock_ = nullptr;
 

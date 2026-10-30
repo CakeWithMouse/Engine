@@ -45,6 +45,10 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QCheckBox>
+#include <QCompleter>
+#include <QTime>
+#include <QScrollBar>
+#include <QRegularExpression>
 
 EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     : QMainWindow(parent), host_(host)
@@ -109,7 +113,7 @@ void EditorMainWindow::BuildUi()
     addDockWidget(Qt::TopDockWidgetArea, viewportDock_);
     setCentralWidget(nullptr);
 
-    console_ = new QPlainTextEdit(this);
+    BuildConsole(); /*
     console_->setObjectName(QStringLiteral("Console"));
     console_->setReadOnly(true);
     console_->setMaximumBlockCount(2000);
@@ -118,7 +122,7 @@ void EditorMainWindow::BuildUi()
 
     consoleDock_ = new QDockWidget(Tr("Консоль", "Console"), this);
     consoleDock_->setWidget(console_);
-    consoleDock_->setMinimumSize(80, 60);
+    consoleDock_->setMinimumSize(80, 60); */
     if (consoleDock_->widget()) {
         consoleDock_->widget()->setMinimumSize(80, 60);
         consoleDock_->widget()->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
@@ -288,7 +292,510 @@ void EditorMainWindow::BuildUi()
         RefreshSceneUi();
 }
 
-void EditorMainWindow::AppendLine(const QString& line) { console_->appendPlainText(line); }
+void EditorMainWindow::BuildConsole()
+{
+    consoleDock_ = new QDockWidget(Tr("Консоль и Терминал", "Console & Terminal"), this);
+    consoleDock_->setObjectName(QStringLiteral("ConsoleDock"));
+    consoleDock_->setMinimumSize(80, 60);
+
+    auto* container = new QWidget(consoleDock_);
+    container->setObjectName(QStringLiteral("ConsoleContainer"));
+    auto* mainLayout = new QVBoxLayout(container);
+    mainLayout->setContentsMargins(4, 4, 4, 4);
+    mainLayout->setSpacing(4);
+
+    // 1. Верхняя панель фильтров
+    auto* topBar = new QHBoxLayout;
+    topBar->setContentsMargins(2, 2, 2, 2);
+    topBar->setSpacing(4);
+
+    btnFilterInfo_ = new QToolButton(container);
+    btnFilterInfo_->setText(QStringLiteral("Info: 0"));
+    btnFilterInfo_->setCheckable(true);
+    btnFilterInfo_->setChecked(true);
+    btnFilterInfo_->setStyleSheet(QStringLiteral(
+        "QToolButton { background: #1E293B; color: #94A3B8; border: 1px solid #334155; border-radius: 4px; padding: 2px 8px; font-size: 11px; }"
+        "QToolButton:checked { background: #2563EB; color: #FFFFFF; font-weight: bold; border-color: #3B82F6; }"
+    ));
+    connect(btnFilterInfo_, &QToolButton::toggled, this, [this] { RefreshConsoleDisplay(); });
+    topBar->addWidget(btnFilterInfo_);
+
+    btnFilterWarn_ = new QToolButton(container);
+    btnFilterWarn_->setText(QStringLiteral("Warn: 0"));
+    btnFilterWarn_->setCheckable(true);
+    btnFilterWarn_->setChecked(true);
+    btnFilterWarn_->setStyleSheet(QStringLiteral(
+        "QToolButton { background: #1E293B; color: #94A3B8; border: 1px solid #334155; border-radius: 4px; padding: 2px 8px; font-size: 11px; }"
+        "QToolButton:checked { background: #D97706; color: #FFFFFF; font-weight: bold; border-color: #F59E0B; }"
+    ));
+    connect(btnFilterWarn_, &QToolButton::toggled, this, [this] { RefreshConsoleDisplay(); });
+    topBar->addWidget(btnFilterWarn_);
+
+    btnFilterError_ = new QToolButton(container);
+    btnFilterError_->setText(QStringLiteral("Error: 0"));
+    btnFilterError_->setCheckable(true);
+    btnFilterError_->setChecked(true);
+    btnFilterError_->setStyleSheet(QStringLiteral(
+        "QToolButton { background: #1E293B; color: #94A3B8; border: 1px solid #334155; border-radius: 4px; padding: 2px 8px; font-size: 11px; }"
+        "QToolButton:checked { background: #DC2626; color: #FFFFFF; font-weight: bold; border-color: #EF4444; }"
+    ));
+    connect(btnFilterError_, &QToolButton::toggled, this, [this] { RefreshConsoleDisplay(); });
+    topBar->addWidget(btnFilterError_);
+
+    topBar->addSpacing(8);
+
+    consoleFilterEdit_ = new QLineEdit(container);
+    consoleFilterEdit_->setPlaceholderText(Tr("Поиск в логе...", "Filter log..."));
+    consoleFilterEdit_->setMinimumWidth(80);
+    consoleFilterEdit_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    connect(consoleFilterEdit_, &QLineEdit::textChanged, this, [this] { RefreshConsoleDisplay(); });
+    topBar->addWidget(consoleFilterEdit_, 1);
+
+    chkCollapse_ = new QCheckBox(Tr("Схлопывать", "Collapse"), container);
+    chkCollapse_->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px;"));
+    connect(chkCollapse_, &QCheckBox::toggled, this, [this] { RefreshConsoleDisplay(); });
+    topBar->addWidget(chkCollapse_);
+
+    btnClearConsole_ = new QPushButton(Tr("Очистить", "Clear"), container);
+    btnClearConsole_->setStyleSheet(QStringLiteral(
+        "QPushButton { background: #1E293B; color: #94A3B8; border: 1px solid #334155; border-radius: 4px; padding: 2px 8px; font-size: 11px; }"
+        "QPushButton:hover { background: #334155; color: #FFFFFF; }"
+    ));
+    connect(btnClearConsole_, &QPushButton::clicked, this, [this] {
+        ExecuteTerminalCommand(QStringLiteral("clear"));
+    });
+    topBar->addWidget(btnClearConsole_);
+
+    mainLayout->addLayout(topBar);
+
+    // 2. Текстовая область логов
+    console_ = new QPlainTextEdit(container);
+    console_->setObjectName(QStringLiteral("Console"));
+    console_->setReadOnly(true);
+    console_->setMaximumBlockCount(2000);
+    console_->setMinimumSize(60, 50);
+    console_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
+    console_->setStyleSheet(QStringLiteral(
+        "QPlainTextEdit#Console { background-color: #121418; color: #CBD5E1; border: 1px solid #232730; border-radius: 4px; padding: 4px; font-family: 'Consolas', monospace; font-size: 11px; }"
+    ));
+    mainLayout->addWidget(console_, 1);
+
+    // 3. Командный терминал
+    auto* bottomBar = new QHBoxLayout;
+    bottomBar->setContentsMargins(2, 2, 2, 2);
+    bottomBar->setSpacing(4);
+
+    auto* promptLabel = new QLabel(QStringLiteral("Terminal &gt;"), container);
+    promptLabel->setStyleSheet(QStringLiteral("color: #38BDF8; font-weight: bold; font-family: Consolas, monospace; font-size: 12px;"));
+    bottomBar->addWidget(promptLabel);
+
+    terminalInput_ = new QLineEdit(container);
+    terminalInput_->setObjectName(QStringLiteral("TerminalInput"));
+    terminalInput_->setPlaceholderText(Tr("Введите команду (help, spawn Cube, reload_shaders, select, pos ...)",
+                                          "Enter command (help, spawn Cube, reload_shaders, select, pos ...)"));
+    terminalInput_->setStyleSheet(QStringLiteral(
+        "QLineEdit#TerminalInput { background-color: #181B22; color: #38BDF8; border: 1px solid #2B3342; border-radius: 4px; padding: 3px 8px; font-family: Consolas, monospace; font-size: 11px; }"
+        "QLineEdit#TerminalInput:focus { border: 1px solid #38BDF8; }"
+    ));
+    terminalInput_->installEventFilter(this);
+
+    const QStringList cmdList = {
+        QStringLiteral("help"),
+        QStringLiteral("spawn Cube"), QStringLiteral("spawn Sphere"), QStringLiteral("spawn Cylinder"),
+        QStringLiteral("spawn Cone"), QStringLiteral("spawn Plane"), QStringLiteral("spawn PointLight"),
+        QStringLiteral("spawn Character"),
+        QStringLiteral("select "), QStringLiteral("deselect"),
+        QStringLiteral("pos 0 0 0"), QStringLiteral("rot 0 0 0"), QStringLiteral("scale 1 1 1"),
+        QStringLiteral("delete"), QStringLiteral("duplicate"), QStringLiteral("focus"),
+        QStringLiteral("reload_shaders"),
+        QStringLiteral("play"), QStringLiteral("pause"), QStringLiteral("stop"),
+        QStringLiteral("clear")
+    };
+    auto* completer = new QCompleter(cmdList, terminalInput_);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    completer->setFilterMode(Qt::MatchContains);
+    terminalInput_->setCompleter(completer);
+    bottomBar->addWidget(terminalInput_, 1);
+
+    auto* btnRun = new QPushButton(QStringLiteral("↵ Run"), container);
+    btnRun->setStyleSheet(QStringLiteral(
+        "QPushButton { background: #2563EB; color: #FFFFFF; font-weight: bold; border-radius: 4px; padding: 3px 10px; font-size: 11px; }"
+        "QPushButton:hover { background: #1D4ED8; }"
+    ));
+    connect(btnRun, &QPushButton::clicked, this, [this] {
+        const QString text = terminalInput_->text().trimmed();
+        if (!text.isEmpty()) {
+            terminalHistory_.append(text);
+            terminalHistoryIndex_ = terminalHistory_.size();
+            terminalInput_->clear();
+            ExecuteTerminalCommand(text);
+        }
+    });
+    bottomBar->addWidget(btnRun);
+
+    mainLayout->addLayout(bottomBar);
+
+    consoleDock_->setWidget(container);
+}
+
+void EditorMainWindow::AppendLine(const QString& line)
+{
+    const QString trimmed = line.trimmed();
+    if (trimmed.isEmpty()) return;
+
+    LogLevel level = LogLevel::Info;
+    if (trimmed.startsWith(QStringLiteral(">"))) {
+        level = LogLevel::Command;
+    } else if (trimmed.contains(QStringLiteral("error"), Qt::CaseInsensitive) ||
+               trimmed.contains(QStringLiteral("failed"), Qt::CaseInsensitive) ||
+               trimmed.contains(QStringLiteral("critical"), Qt::CaseInsensitive) ||
+               trimmed.contains(QStringLiteral("exception"), Qt::CaseInsensitive)) {
+        level = LogLevel::Error;
+        logErrorCount_++;
+    } else if (trimmed.contains(QStringLiteral("warn"), Qt::CaseInsensitive)) {
+        level = LogLevel::Warning;
+        logWarnCount_++;
+    } else {
+        level = LogLevel::Info;
+        logInfoCount_++;
+    }
+
+    if (btnFilterInfo_) btnFilterInfo_->setText(QStringLiteral("Info: %1").arg(logInfoCount_));
+    if (btnFilterWarn_) btnFilterWarn_->setText(QStringLiteral("Warn: %1").arg(logWarnCount_));
+    if (btnFilterError_) btnFilterError_->setText(QStringLiteral("Error: %1").arg(logErrorCount_));
+
+    const QString timeStr = QTime::currentTime().toString(QStringLiteral("hh:mm:ss"));
+
+    if (chkCollapse_ && chkCollapse_->isChecked() && !logEntries_.isEmpty() && logEntries_.last().text == trimmed) {
+        logEntries_.last().count++;
+        RefreshConsoleDisplay();
+        return;
+    }
+
+    ConsoleLogEntry entry;
+    entry.level = level;
+    entry.text = trimmed;
+    entry.count = 1;
+    entry.time = timeStr;
+    logEntries_.append(entry);
+
+    if (logEntries_.size() > 2000) {
+        logEntries_.removeFirst();
+    }
+
+    RefreshConsoleDisplay();
+}
+
+void EditorMainWindow::RefreshConsoleDisplay()
+{
+    if (!console_) return;
+
+    const bool showInfo = !btnFilterInfo_ || btnFilterInfo_->isChecked();
+    const bool showWarn = !btnFilterWarn_ || btnFilterWarn_->isChecked();
+    const bool showError = !btnFilterError_ || btnFilterError_->isChecked();
+    const QString search = consoleFilterEdit_ ? consoleFilterEdit_->text().trimmed() : QString();
+
+    console_->clear();
+
+    for (const auto& entry : logEntries_) {
+        if (entry.level == LogLevel::Info && !showInfo) continue;
+        if (entry.level == LogLevel::Warning && !showWarn) continue;
+        if (entry.level == LogLevel::Error && !showError) continue;
+
+        if (!search.isEmpty() && !entry.text.contains(search, Qt::CaseInsensitive))
+            continue;
+
+        QString color = QStringLiteral("#CBD5E1");
+        QString prefix;
+        if (entry.level == LogLevel::Command) {
+            color = QStringLiteral("#38BDF8");
+        } else if (entry.level == LogLevel::Error) {
+            color = QStringLiteral("#F87171");
+            prefix = QStringLiteral("<b style='color:#EF4444;'>[ERROR]</b> ");
+        } else if (entry.level == LogLevel::Warning) {
+            color = QStringLiteral("#FBBF24");
+            prefix = QStringLiteral("<b style='color:#F59E0B;'>[WARN]</b> ");
+        }
+
+        QString countBadge;
+        if (entry.count > 1) {
+            countBadge = QStringLiteral(" <span style='background:#334155;color:#94A3B8;padding:1px 5px;border-radius:8px;font-size:10px;'>x%1</span>").arg(entry.count);
+        }
+
+        const QString lineHtml = QStringLiteral("<div style='font-family:Consolas, monospace; font-size:11px; margin:1px 0;'>"
+                                               "<span style='color:#64748B;'>[%1]</span> %2<span style='color:%3;'>%4</span>%5</div>")
+                                    .arg(entry.time, prefix, color, entry.text.toHtmlEscaped(), countBadge);
+
+        console_->appendHtml(lineHtml);
+    }
+
+    if (console_->verticalScrollBar()) {
+        console_->verticalScrollBar()->setValue(console_->verticalScrollBar()->maximum());
+    }
+}
+
+void EditorMainWindow::ExecuteTerminalCommand(const QString& rawCommand)
+{
+    const QString cmd = rawCommand.trimmed();
+    if (cmd.isEmpty()) return;
+
+    AppendLine(QStringLiteral("> ") + cmd);
+
+    const QStringList parts = cmd.split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts);
+    if (parts.isEmpty()) return;
+
+    const QString action = parts[0].toLower();
+
+    if (action == QStringLiteral("help")) {
+        AppendLine(QStringLiteral("=== Доступные команды терминала / Available Terminal Commands ==="));
+        AppendLine(QStringLiteral("  help                              - Показать список команд"));
+        AppendLine(QStringLiteral("  spawn <type> [count] [x y z]      - Создать объект (Cube, Sphere, PointLight, etc.)"));
+        AppendLine(QStringLiteral("  select <name_or_id>               - Выбрать объект по имени или ID"));
+        AppendLine(QStringLiteral("  deselect                          - Снять выделение"));
+        AppendLine(QStringLiteral("  pos <x> <y> <z>                   - Задать позицию объекта"));
+        AppendLine(QStringLiteral("  rot <x> <y> <z>                   - Задать поворот объекта (Euler °)"));
+        AppendLine(QStringLiteral("  scale <x> <y> <z>                 - Задать масштаб объекта"));
+        AppendLine(QStringLiteral("  delete                            - Удалить выбранный объект"));
+        AppendLine(QStringLiteral("  duplicate                         - Дублировать выбранный объект"));
+        AppendLine(QStringLiteral("  focus                             - Сфокусировать камеру на объекте (F)"));
+        AppendLine(QStringLiteral("  reload_shaders                    - Перекомпилировать шейдеры и материалы (F6)"));
+        AppendLine(QStringLiteral("  play                              - Запустить симуляцию / Play"));
+        AppendLine(QStringLiteral("  pause                             - Приостановить симуляцию / Pause"));
+        AppendLine(QStringLiteral("  stop                              - Остановить симуляцию / Stop"));
+        AppendLine(QStringLiteral("  clear                             - Очистить лог консоли"));
+        return;
+    }
+
+    if (action == QStringLiteral("clear")) {
+        logEntries_.clear();
+        logInfoCount_ = 0;
+        logWarnCount_ = 0;
+        logErrorCount_ = 0;
+        if (btnFilterInfo_) btnFilterInfo_->setText(QStringLiteral("Info: 0"));
+        if (btnFilterWarn_) btnFilterWarn_->setText(QStringLiteral("Warn: 0"));
+        if (btnFilterError_) btnFilterError_->setText(QStringLiteral("Error: 0"));
+        if (console_) console_->clear();
+        return;
+    }
+
+    if (action == QStringLiteral("reload_shaders")) {
+        ReloadShaders();
+        AppendLine(QStringLiteral("Команда: Перезагрузка шейдеров запущена."));
+        return;
+    }
+
+    if (action == QStringLiteral("play")) {
+        if (actPlay_) actPlay_->trigger();
+        return;
+    }
+
+    if (action == QStringLiteral("pause")) {
+        if (actPause_) actPause_->trigger();
+        return;
+    }
+
+    if (action == QStringLiteral("stop")) {
+        if (actStop_) actStop_->trigger();
+        return;
+    }
+
+    if (action == QStringLiteral("deselect")) {
+        EditorCommand c;
+        c.type = EditorCommand::SelectObject;
+        c.objectId = 0;
+        host_->PostCommand(c);
+        AppendLine(QStringLiteral("Выделение снято."));
+        return;
+    }
+
+    if (action == QStringLiteral("select")) {
+        if (parts.size() < 2) {
+            AppendLine(QStringLiteral("[Warn] Использование: select <name_or_id>"));
+            return;
+        }
+        bool isNum = false;
+        quint64 targetId = parts[1].toULongLong(&isNum);
+        if (!isNum) {
+            const auto snap = host_->ReadSnapshot();
+            for (const auto& obj : snap.objects) {
+                if (QString::fromStdString(obj.name).compare(parts[1], Qt::CaseInsensitive) == 0 ||
+                    QString::fromStdString(obj.type).compare(parts[1], Qt::CaseInsensitive) == 0) {
+                    targetId = obj.id;
+                    break;
+                }
+            }
+        }
+        if (targetId != 0) {
+            EditorCommand c;
+            c.type = EditorCommand::SelectObject;
+            c.objectId = targetId;
+            host_->PostCommand(c);
+            AppendLine(QStringLiteral("Выбран объект ID: %1").arg(targetId));
+        } else {
+            AppendLine(QStringLiteral("[Warn] Объект не найден: %1").arg(parts[1]));
+        }
+        return;
+    }
+
+    if (action == QStringLiteral("spawn")) {
+        if (parts.size() < 2) {
+            AppendLine(QStringLiteral("[Warn] Использование: spawn <type> [count] [x y z]"));
+            return;
+        }
+        QString type = parts[1];
+        int count = 1;
+        int nextArg = 2;
+        if (parts.size() > 2) {
+            bool ok = false;
+            int parsedCount = parts[2].toInt(&ok);
+            if (ok && parsedCount > 0) {
+                count = std::min(100, parsedCount);
+                nextArg = 3;
+            }
+        }
+        std::array<double, 3> basePos{};
+        if (sceneObjectsPanel_) basePos = sceneObjectsPanel_->SpawnPosition();
+        if (parts.size() >= nextArg + 3) {
+            basePos[0] = parts[nextArg].toDouble();
+            basePos[1] = parts[nextArg + 1].toDouble();
+            basePos[2] = parts[nextArg + 2].toDouble();
+        }
+        for (int i = 0; i < count; ++i) {
+            std::array<double, 3> pos = basePos;
+            if (count > 1) {
+                pos[0] += (i % 5) * 2.0;
+                pos[2] += (i / 5) * 2.0;
+            }
+            if (sceneObjectsPanel_) {
+                emit sceneObjectsPanel_->AddPrimitiveRequested(type, type, pos);
+            } else {
+                SpawnObjectByType(type, type);
+            }
+        }
+        AppendLine(QStringLiteral("Создано объектов «%1»: %2").arg(type).arg(count));
+        return;
+    }
+
+    if (action == QStringLiteral("delete")) {
+        const auto snap = host_->ReadSnapshot();
+        if (snap.selected != 0) {
+            EditorCommand c;
+            c.type = EditorCommand::RemoveObject;
+            c.objectId = snap.selected;
+            host_->PostCommand(c);
+            AppendLine(QStringLiteral("Удалён объект ID: %1").arg(snap.selected));
+        } else {
+            AppendLine(QStringLiteral("[Warn] Нет выбранного объекта для удаления."));
+        }
+        return;
+    }
+
+    if (action == QStringLiteral("duplicate")) {
+        const auto snap = host_->ReadSnapshot();
+        if (snap.selected != 0) {
+            EditorCommand c;
+            c.type = EditorCommand::DuplicateObject;
+            c.objectId = snap.selected;
+            host_->PostCommand(c);
+            AppendLine(QStringLiteral("Дублирован объект ID: %1").arg(snap.selected));
+        } else {
+            AppendLine(QStringLiteral("[Warn] Нет выбранного объекта для дублирования."));
+        }
+        return;
+    }
+
+    if (action == QStringLiteral("focus")) {
+        const auto snap = host_->ReadSnapshot();
+        if (snap.selected != 0) {
+            EditorCommand c;
+            c.type = EditorCommand::FocusObject;
+            c.objectId = snap.selected;
+            host_->PostCommand(c);
+            AppendLine(QStringLiteral("Фокус на объекте ID: %1").arg(snap.selected));
+        } else {
+            AppendLine(QStringLiteral("[Warn] Нет выбранного объекта для фокуса."));
+        }
+        return;
+    }
+
+    if (action == QStringLiteral("pos") || action == QStringLiteral("rot") || action == QStringLiteral("scale")) {
+        const auto snap = host_->ReadSnapshot();
+        if (snap.selected == 0) {
+            AppendLine(QStringLiteral("[Warn] Нет выбранного объекта."));
+            return;
+        }
+        if (parts.size() < 4) {
+            AppendLine(QStringLiteral("[Warn] Использование: %1 <x> <y> <z>").arg(action));
+            return;
+        }
+        float x = parts[1].toFloat();
+        float y = parts[2].toFloat();
+        float z = parts[3].toFloat();
+
+        for (const auto& obj : snap.objects) {
+            if (obj.id == snap.selected) {
+                EngineSceneTransform tr = obj.transform;
+                if (action == QStringLiteral("pos")) {
+                    tr.position[0] = x; tr.position[1] = y; tr.position[2] = z;
+                } else if (action == QStringLiteral("rot")) {
+                    QQuaternion q = QQuaternion::fromEulerAngles(x, y, z);
+                    tr.rotation[0] = q.x(); tr.rotation[1] = q.y(); tr.rotation[2] = q.z(); tr.rotation[3] = q.scalar();
+                } else if (action == QStringLiteral("scale")) {
+                    tr.scale[0] = x; tr.scale[1] = y; tr.scale[2] = z;
+                }
+                EditorCommand c;
+                c.type = EditorCommand::UpdateObjectTransform;
+                c.objectId = snap.selected;
+                c.transform = tr;
+                c.path = QStringLiteral("terminal");
+                host_->PostCommand(c);
+                AppendLine(QStringLiteral("Обновлена трансформация объекта ID %1 (%2: %3, %4, %5)").arg(snap.selected).arg(action).arg(x).arg(y).arg(z));
+                break;
+            }
+        }
+        return;
+    }
+
+    AppendLine(QStringLiteral("[Warn] Неизвестная команда: «%1». Введите «help» для списка команд.").arg(action));
+}
+
+bool EditorMainWindow::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == terminalInput_) {
+        if (event->type() == QEvent::KeyPress) {
+            auto* ke = static_cast<QKeyEvent*>(event);
+            if (ke->key() == Qt::Key_Return || ke->key() == Qt::Key_Enter) {
+                const QString text = terminalInput_->text().trimmed();
+                if (!text.isEmpty()) {
+                    terminalHistory_.append(text);
+                    terminalHistoryIndex_ = terminalHistory_.size();
+                    terminalInput_->clear();
+                    ExecuteTerminalCommand(text);
+                    return true;
+                }
+            } else if (ke->key() == Qt::Key_Up) {
+                if (!terminalHistory_.isEmpty()) {
+                    if (terminalHistoryIndex_ > 0)
+                        terminalHistoryIndex_--;
+                    terminalInput_->setText(terminalHistory_[terminalHistoryIndex_]);
+                    return true;
+                }
+            } else if (ke->key() == Qt::Key_Down) {
+                if (!terminalHistory_.isEmpty()) {
+                    if (terminalHistoryIndex_ < terminalHistory_.size() - 1) {
+                        terminalHistoryIndex_++;
+                        terminalInput_->setText(terminalHistory_[terminalHistoryIndex_]);
+                    } else {
+                        terminalHistoryIndex_ = terminalHistory_.size();
+                        terminalInput_->clear();
+                    }
+                    return true;
+                }
+            }
+        }
+    }
+    return QMainWindow::eventFilter(watched, event);
+}
 
 void EditorMainWindow::closeEvent(QCloseEvent* event)
 {
@@ -1818,6 +2325,10 @@ void EditorMainWindow::RetranslateUi()
     if (actLangRu_) actLangRu_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::Ru);
     if (actLangEn_) actLangEn_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::En);
     if (actResetLayout_) actResetLayout_->setText(Tr("Сбросить раскладку окон", "Reset Window Layout"));
+    if (consoleDock_) consoleDock_->setWindowTitle(Tr("Консоль и Терминал", "Console & Terminal"));
+    if (consoleFilterEdit_) consoleFilterEdit_->setPlaceholderText(Tr("Поиск в логе...", "Filter log..."));
+    if (chkCollapse_) chkCollapse_->setText(Tr("Схлопывать", "Collapse"));
+    if (btnClearConsole_) btnClearConsole_->setText(Tr("Очистить", "Clear"));
 }
 
 void EditorMainWindow::ApplyDefaultLayout()
