@@ -58,7 +58,7 @@ void SceneObjectsPanel::BuildUi()
     addBtn_->setObjectName(QStringLiteral("SceneAddButton"));
     addMenu_ = new QMenu(this);
     addBtn_->setMenu(addMenu_);
-    connect(addMenu_, &QMenu::aboutToShow, this, &SceneObjectsPanel::RebuildAddMenu);
+    RebuildAddMenu();
     topBar->addWidget(addBtn_);
 
     mainLayout->addLayout(topBar);
@@ -184,6 +184,7 @@ void SceneObjectsPanel::SetEnabled(bool enabled)
 
 void SceneObjectsPanel::SetPrimitiveTypes(const QVector<std::pair<QString, QString>>& types)
 {
+    if (types_ == types) return;
     types_ = types;
     RebuildAddMenu();
 }
@@ -335,4 +336,5 @@ void SceneObjectsPanel::RetranslateUi()
     if (hierarchy_) hierarchy_->setHeaderLabels({Tr("Объект", "Object"), Tr("Тип", "Type")});
     if (actDuplicate_) actDuplicate_->setText(Tr("Дублировать объект", "Duplicate Object"));
     if (actRemove_) actRemove_->setText(Tr("Удалить объект", "Remove Object"));
+    RebuildAddMenu();
 }
