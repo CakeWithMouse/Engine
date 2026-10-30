@@ -34,7 +34,7 @@
 - [x] **Шаг 3.2 (feat):** `Core/HlslGraphCompiler` + `Core/MaterialGraphModel`: из `CompileGraphToHlsl` в `MaterialGraphWidget.cpp`. Модель без QGraphicsItem, числа в C-локали, JSON через QJsonDocument. Тесты: граф -> HLSL эталонные строки, round-trip JSON (76/76 PASS).
 - [x] **Шаг 3.3 (feat):** `Core/SceneFile`: чтение/запись сцены через FileService. Тест на имя объекта a"b} (97/97 PASS).
 - [x] **Шаг 3.4 (feat):** `Core/Terminal`: парсер команд (help, spawn, select, deselect, pos, rot, scale, delete, duplicate, focus, play, pause, stop, clear), только маппинг текста на команды CommandRegistry. Парсер ничего не исполняет сам. Тесты на кавычки, count, x y z (125/125 PASS).
-- [ ] **Шаг 3.5 (feat):** `Core/AssetOps`: создание/переименование/дублирование/удаление в песочнице корня проекта через FileService.
+- [x] **Шаг 3.5 (feat):** `Core/AssetOps`: создание/переименование/дублирование/удаление в песочнице корня проекта через FileService (169/169 PASS).
 
 ---
 
@@ -44,7 +44,7 @@
 |---|---|---|---|
 | Сборка `Editor` (Debug) | **FAIL (LNK1104)** | **PASS** | 0 ошибок, 0 новых warnings |
 | Сборка `Editor` (Release) | **FAIL (C1083 LTCG)** | **PASS** | Собрано из пути без запятых (`Documents\GitHub\Engine`) |
-| `Editor/tests/CoreTests.exe` | — | **125/125 PASS** | Юнит-тесты Core без виджетов (+28 Terminal) |
+| `Editor/tests/CoreTests.exe` | — | **169/169 PASS** | Юнит-тесты Core без виджетов (+44 AssetOps) |
 | `Editor/tests/UiTests.exe` | — | **15/15 PASS** | Самопроверка тестового каркаса UI |
 | `Engine/tests/run.ps1` | **43/43 PASS** | **43/43 PASS** | Тесты ядра Engine |
 | `Engine/tests/component-generation/run.ps1` | **20/20 PASS** | **20/20 PASS** | Генератор компонентов и контракты |
@@ -97,6 +97,8 @@
    - Одно нажатие `Undo` возвращает объект в состояние до начала жеста.
 10. **Выделение Core/GizmoMath без виджетов (S3.1):**
     - Математические операции гизмо (`ApplyRotateScaleGizmo`, кватернионы, `ComputeSpawnPosition`, `AxisLock`) изолированы в чистом слое Core без зависимостей от Qt-виджетов.
+11. **Изолированные дисковые операции Core/AssetOps (S3.5):**
+    - Операции над ассетами (создание, переименование, дублирование с авторазрешением коллизий `_Copy_N`, удаление файлов и рекурсивное удаление папок) выполняются через `FileService` с проверкой песочницы `ResolveSandboxPath`, предотвращая утечки путей и path traversal.
 
 ---
 

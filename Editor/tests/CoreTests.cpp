@@ -11,6 +11,8 @@
 #include "core/SceneFileTests.h"
 #include "../Core/Terminal.cpp"
 #include "core/TerminalTests.h"
+#include "../Core/AssetOps.cpp"
+#include "core/AssetOpsTests.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
@@ -230,6 +232,13 @@ void TestTerminal()
     gChecks += 28;
 }
 
+void TestAssetOps()
+{
+    RunAssetOpsTests();
+    // 44 distinct checks in RunAssetOpsTests
+    gChecks += 44;
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -281,6 +290,10 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestTerminal...\n");
     std::fflush(stdout);
     TestTerminal();
+
+    std::printf("[Test] TestAssetOps...\n");
+    std::fflush(stdout);
+    TestAssetOps();
 
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);
