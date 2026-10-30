@@ -39,11 +39,17 @@ public:
 
     void OnLogMessage(const QString& line) override
     {
-        QMetaObject::invokeMethod(this, [this, line] { AppendLine(line); }, Qt::QueuedConnection);
+        QPointer<EditorMainWindow> self(this);
+        QMetaObject::invokeMethod(this, [self, line] {
+            if (self) self->AppendLine(line);
+        }, Qt::QueuedConnection);
     }
     void OnCommandFinished(const EditorCommand& command, uint32_t status, const QString& error = {}) override
     {
-        QMetaObject::invokeMethod(this, [this, command, status, error] { CommandFinished(command, status, error); }, Qt::QueuedConnection);
+        QPointer<EditorMainWindow> self(this);
+        QMetaObject::invokeMethod(this, [self, command, status, error] {
+            if (self) self->CommandFinished(command, status, error);
+        }, Qt::QueuedConnection);
     }
 
     void CommandFinished(const EditorCommand& command, uint32_t status, const QString& error);
