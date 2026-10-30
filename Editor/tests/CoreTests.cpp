@@ -194,6 +194,29 @@ void TestFileService()
 }
 } // namespace
 
+#include "EditorLocale.h"
+
+static void TestEditorLocale()
+{
+    auto& loc = EditorLocale::Instance();
+    loc.SetLanguage(EditorLanguage::Ru);
+    Check(loc.Language() == EditorLanguage::Ru, "Locale default Ru");
+    Check(Tr("Файл", "File") == QStringLiteral("Файл"), "Translate Ru");
+
+    bool notified = false;
+    int sub = loc.SubscribeLanguageChanged([&] { notified = true; });
+    loc.SetLanguage(EditorLanguage::En);
+    Check(notified == true, "Locale subscriber notified on change");
+    Check(loc.Language() == EditorLanguage::En, "Locale changed to En");
+    Check(Tr("Файл", "File") == QStringLiteral("File"), "Translate En");
+
+    loc.UnsubscribeLanguageChanged(sub);
+    notified = false;
+    loc.SetLanguage(EditorLanguage::Ru);
+    Check(notified == false, "Unsubscribed callback not notified");
+    Check(Tr("Файл", "File") == QStringLiteral("Файл"), "Translate Ru again");
+}
+
 int main(int argc, char* argv[])
 {
 #ifdef _DEBUG
@@ -227,6 +250,10 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestFileService...\n");
     std::fflush(stdout);
     TestFileService();
+
+    std::printf("[Test] TestEditorLocale...\n");
+    std::fflush(stdout);
+    TestEditorLocale();
 
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);
