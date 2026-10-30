@@ -22,6 +22,9 @@
 
 | Тест / Скрипт | Результат на `main` | Результат после fix(build) | Примечание |
 |---|---|---|---|
+| Сборка `Editor` (Debug) | **FAIL (LNK1104)** | **PASS** | 0 ошибок, 0 новых warnings |
+| Сборка `Editor` (Release) | **FAIL (C1083 LTCG)** | **PASS** | Собрано из пути без запятых (`Documents\GitHub\Engine`) |
+| `Editor/tests/CoreTests.exe` | — | **47/47 PASS** | Юнит-тесты Core без виджетов |
 | `Engine/tests/run.ps1` | **43/43 PASS** | **43/43 PASS** | Тесты ядра Engine |
 | `Engine/tests/component-generation/run.ps1` | **20/20 PASS** | **20/20 PASS** | Генератор компонентов и контракты |
 | `Engine/tests/edit-session/run.ps1` | **609/609 PASS** | **609/609 PASS** | Edit session API (без GUI) |
@@ -31,10 +34,10 @@
 | `Engine/tests/code-projects/class-names.ps1` | **27/27 PASS** | **27/27 PASS** | Имена классов |
 | `Game/tests/run-games.ps1` | **27/27 PASS** | **27/27 PASS** | Игры и Launcher |
 | `Editor/tests/run.ps1` | **LNK1104 FAIL** | **35/67 (FAIL на L394)** | Сборка успешна; остановка на проверке экранного захвата превью `grabWindow` |
-| `Engine/tests/run-runtime.ps1` | **LNK1104 FAIL** | **PASS** | Зависел от `Editor.dll` |
-| `Engine/tests/compatibility/run.ps1` | **LNK1104 FAIL** | **PASS** | Зависел от `Editor.dll` |
-| `Engine/tests/project-workflow/run.ps1` | **LNK1104 FAIL** | **PASS** | Зависел от `Editor.dll` |
-| `Engine/tests/run-editor-viewport.ps1` | **FAIL** | **PASS** | Зависел от `Editor.dll` |
+| `Engine/tests/run-runtime.ps1` | **LNK1104 FAIL** | **25/25 PASS** | Ранее зависел от `Editor.dll` |
+| `Engine/tests/compatibility/run.ps1` | **LNK1104 FAIL** | **88/88 PASS** | Ранее зависел от `Editor.dll` |
+| `Engine/tests/project-workflow/run.ps1` | **LNK1104 FAIL** | **262/262 PASS** | Ранее зависел от `Editor.dll` |
+| `Engine/tests/run-editor-viewport.ps1` | **FAIL** | **FAIL** | Остановка при закрытии редактора |
 | `Engine/tests/assets/run.ps1` | **FAIL (PS parse)** | **FAIL (PS parse)** | Эталон: не запускается в PS5.1 (нет BOM) |
 | `Engine/tests/code-projects/portable.ps1` | **FAIL (PS parse)** | **FAIL (PS parse)** | Эталон: не запускается в PS5.1 (нет BOM) |
 | `Engine/tests/code-projects/run.ps1` | **FAIL (PS parse)** | **FAIL (PS parse)** | Эталон: не запускается в PS5.1 (here-string `@'`) |
@@ -65,6 +68,7 @@
 
 ## Backlog
 
+- [ ] **Release Editor (LTCG, Editor.iobj) в путях с запятой:** Release Editor не собирается из каталога с запятой в пути (`fatal error C1083: Не удается открыть промежуточный файл компилятора: ...Editor.iobj: No such file or directory`); гипотеза подтверждена фактом успешной сборки из `C:\Users\Yuri\Documents\GitHub\Engine`. Требуется правка `EditorModule.vcxproj` (настройка `IntermediateOutputPath` без макросов, ломающихся на запятых) и проверка `-PathStress`.
 - [ ] **Скрипты тестов PS 5.1:** 4 скрипта на `main` не парсятся (`assets/run.ps1`, `code-projects/portable.ps1`, `code-projects/run.ps1`, `input/run.ps1`). Эталон = не запускается, причина: нет BOM / несовместимый синтаксис PowerShell 5.1. Требуется согласование фикса кодировки/форматирования в `Engine/tests/`.
 - [ ] **Тест `EditorUiTests.cpp:394`:** падение `preview clears to its background` связано с `grabWindow` в виртуализированном/фоновом графическом окружении. Оставить красным до этапа переработки окна материалов.
 - [ ] **Content Browser Sandbox:** замена открытого `QFileSystemModel` на изолированную модель на базе `FileService`, запрещающую выход за корень проекта.

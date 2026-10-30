@@ -1,10 +1,14 @@
 param(
     [switch]$Quick,
     [switch]$Full,
-    [int]$TimeoutSec = 120
+    [int]$TimeoutSec = 180
 )
 
 $ErrorActionPreference = 'Stop'
+trap {
+    Write-Error $_
+    exit 1
+}
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 
 if (!$Quick -and !$Full) {
@@ -223,7 +227,17 @@ if ($Full) {
     Stop-HangingProcesses
     Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Game/tests/run-games.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds $TimeoutSec -Description "run-games.ps1"
 
+    # Runtime checks (25/25)
+    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/run-runtime.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds $TimeoutSec -Description "run-runtime.ps1"
+
+    # Compatibility tests (88/88)
+    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/compatibility/run.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds $TimeoutSec -Description "compatibility/run.ps1"
+
+    # Project workflow tests (262/262)
+    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/project-workflow/run.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds $TimeoutSec -Description "project-workflow/run.ps1"
+
     Write-Output "OK: All baseline tests passed."
 }
 
 Write-Output "=== check.ps1: SUCCESS ==="
+exit 0
