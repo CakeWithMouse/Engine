@@ -17,8 +17,12 @@ class QListWidget;
 class QWidget;
 class QLabel;
 class QAction;
+class QPushButton;
+class QToolButton;
+class QTabWidget;
 class MaterialPreviewWidget;
 class MaterialSourceEditor;
+class MaterialGraphWidget;
 
 // Состояние материала в том виде, в каком его вернул readMaterial (копия для потока UI).
 struct MaterialEditorState
@@ -41,8 +45,7 @@ struct MaterialEditorState
     bool modified = false;
 };
 
-// Отдельное окно на один .mat: превью, текст поверхности (HLSL), настройки и ошибки компиляции.
-// Все вызовы движка идут через EditorQtHost в поток движка, ответы возвращаются в поток UI.
+// Отдельное окно на один .mat: превью, нодовый граф + AI, HLSL код, PBR/ORM настройки и диагностика.
 class MaterialEditorWindow : public QMainWindow
 {
     Q_OBJECT
@@ -67,6 +70,10 @@ public:
     void Refresh();
     void RetranslateUi();
 
+    void ApplyPbrOrmPreset(int presetId);
+    void CreateMaterialInstance();
+    void InsertOrmSamplingIntoHlsl();
+
 protected:
     void closeEvent(QCloseEvent* event) override;
 
@@ -90,6 +97,7 @@ private:
     void SetParameter(int index, const std::array<float, 4>& value);
     void ChooseTexture(int index, bool clear);
     void GoToError(int line, int column);
+    void UpdateCompileStatus(bool success, int errorCount = 0);
 
     QString PhysicalPath(const QString& virtualPath) const;
 
@@ -101,24 +109,49 @@ private:
     bool saving_ = false;
     bool edited_ = false; // правка отправлена, а ответ движка с флагом modified ещё не пришёл
 
+    // Viewport & Preview
     MaterialPreviewWidget* preview_ = nullptr;
     QComboBox* shape_ = nullptr;
+    QPushButton* btnResetView_ = nullptr;
+    QLabel* shapeLabel_ = nullptr;
+
+    // Central Tab Area: Node Graph & HLSL Source
+    QTabWidget* mainTabs_ = nullptr;
+    MaterialGraphWidget* graphWidget_ = nullptr;
     MaterialSourceEditor* source_ = nullptr;
+
+    // Diagnostics
+    QLabel* lblCompileStatus_ = nullptr;
     QListWidget* errors_ = nullptr;
 
+    // Surface & Blend State
     QComboBox* blend_ = nullptr;
     QDoubleSpinBox* alphaClip_ = nullptr;
     QCheckBox* unlit_ = nullptr;
     QCheckBox* twoSided_ = nullptr;
     QCheckBox* castShadows_ = nullptr;
-    QWidget* parameters_ = nullptr;
-    QFormLayout* parameterForm_ = nullptr;
-
-    QAction* saveAction_ = nullptr;
-    QAction* revertAction_ = nullptr;
-    QLabel* shapeLabel_ = nullptr;
     QLabel* blendLabel_ = nullptr;
     QLabel* alphaClipLabel_ = nullptr;
+
+    // PBR & ORM Quick Channels
+    QWidget* pbrChannelsCard_ = nullptr;
+    QPushButton* btnInsertOrm_ = nullptr;
+
+    // Shader Parameters (Tweakables)
+    QWidget* parameters_ = nullptr;
+    QFormLayout* parameterForm_ = nullptr;
     QLabel* parametersTitle_ = nullptr;
+
+    // Toolbar actions
+    QAction* saveAction_ = nullptr;
+    QAction* revertAction_ = nullptr;
+    QToolButton* btnPresets_ = nullptr;
+    QAction* actPresetPbrOrm_ = nullptr;
+    QAction* actPresetUnlit_ = nullptr;
+    QAction* actPresetLava_ = nullptr;
+    QAction* actPresetHolo_ = nullptr;
+    QAction* actPresetFoliage_ = nullptr;
+    QAction* actCreateInstance_ = nullptr;
+
     int langSubId_ = 0;
 };

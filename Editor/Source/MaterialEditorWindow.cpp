@@ -1,5 +1,7 @@
 #include "MaterialEditorWindow.h"
+#include "MaterialGraphWidget.h"
 #include "EditorLocale.h"
+#include "MainWindow.h"
 
 #include <QAction>
 #include <QCheckBox>
@@ -33,6 +35,14 @@
 #include <QSyntaxHighlighter>
 #include <QTextBlock>
 #include <QToolBar>
+#include <QToolButton>
+#include <QTabWidget>
+#include <QMenu>
+#include <QSlider>
+#include <QGroupBox>
+#include <QInputDialog>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QVBoxLayout>
 #include <QWheelEvent>
 #include <algorithm>
@@ -117,7 +127,6 @@ protected:
                 setFormat(static_cast<int>(m.capturedStart()), static_cast<int>(m.capturedLength()), rule.format);
             }
 
-        // Комментарии последними: перекрывают всё внутри себя. Состояние блока 1 — внутри /* */.
         setCurrentBlockState(0);
         int start = previousBlockState() == 1 ? 0 : -1;
         int from = 0;
@@ -265,7 +274,7 @@ public:
         setAttribute(Qt::WA_PaintOnScreen, true); // сюда Present'ит движок
         setAttribute(Qt::WA_NoSystemBackground, true);
         setStyleSheet(QStringLiteral("background: transparent; border: none;"));
-        setMinimumSize(240, 240);
+        setMinimumSize(220, 200);
     }
 
     QPaintEngine* paintEngine() const override { return nullptr; }
@@ -317,7 +326,7 @@ MaterialEditorWindow::MaterialEditorWindow(EditorQtHost* host, const QString& ma
     setObjectName(QStringLiteral("MaterialEditor"));
     BuildUi();
     UpdateTitle();
-    resize(1200, 760);
+    resize(1240, 800);
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
         RetranslateUi();
     });
@@ -335,14 +344,25 @@ void MaterialEditorWindow::RetranslateUi()
 {
     UpdateTitle();
     if (saveAction_) {
-        saveAction_->setText(Tr("Сохранить", "Save"));
-        saveAction_->setToolTip(Tr("Записать HLSL и .mat, перекомпилировать (Ctrl+S)", "Write HLSL and .mat, recompile (Ctrl+S)"));
+        saveAction_->setText(Tr("💾 Сохранить и Скомпилировать", "💾 Save & Compile"));
+        saveAction_->setToolTip(Tr("Записать HLSL и .mat, перекомпилировать шейдер (Ctrl+S)", "Write HLSL and .mat, recompile shader (Ctrl+S)"));
     }
     if (revertAction_) {
-        revertAction_->setText(Tr("Откатить", "Revert"));
+        revertAction_->setText(Tr("↺ Откатить", "↺ Revert"));
         revertAction_->setToolTip(Tr("Вернуть материал и HLSL к сохранённым файлам", "Revert material and HLSL to saved files"));
     }
+    if (btnPresets_) btnPresets_->setText(Tr("⚡ Пресеты PBR / ORM ▾", "⚡ PBR / ORM Presets ▾"));
+    if (actPresetPbrOrm_) actPresetPbrOrm_->setText(Tr("Standard PBR + ORM", "Standard PBR + ORM"));
+    if (actPresetUnlit_) actPresetUnlit_->setText(Tr("Unlit Emissive (Свечение)", "Unlit Emissive"));
+    if (actPresetLava_) actPresetLava_->setText(Tr("Animated Lava / Pulse (Анимация)", "Animated Lava / Pulse"));
+    if (actPresetHolo_) actPresetHolo_->setText(Tr("Fresnel Hologram (Голограмма)", "Fresnel Hologram"));
+    if (actPresetFoliage_) actPresetFoliage_->setText(Tr("Masked Foliage (Листва)", "Masked Foliage"));
+    if (actCreateInstance_) actCreateInstance_->setText(Tr("Создать Material Instance…", "Create Material Instance…"));
+
     if (shapeLabel_) shapeLabel_->setText(Tr(" Форма: ", " Shape: "));
+    if (btnResetView_) btnResetView_->setText(Tr("↺ Ракурс", "↺ Reset View"));
+    if (btnResetView_) btnResetView_->setToolTip(Tr("Сбросить положение камеры превью", "Reset preview camera"));
+
     if (shape_) {
         QSignalBlocker blocker(shape_);
         const int cur = shape_->currentIndex();
@@ -351,21 +371,31 @@ void MaterialEditorWindow::RetranslateUi()
         shape_->setItemText(2, Tr("Плоскость", "Plane"));
         shape_->setCurrentIndex(cur);
     }
+
+    if (blendLabel_) blendLabel_->setText(Tr("Режим смешивания (Blend Mode)", "Blend Mode"));
     if (blend_) {
         QSignalBlocker blocker(blend_);
         const int cur = blend_->currentIndex();
-        blend_->setItemText(0, Tr("Непрозрачный", "Opaque"));
-        blend_->setItemText(1, Tr("С вырезом (masked)", "Masked (alpha clip)"));
-        blend_->setItemText(2, Tr("Полупрозрачный", "Translucent"));
-        blend_->setItemText(3, Tr("Аддитивный", "Additive"));
+        blend_->setItemText(0, Tr("Непрозрачный PBR (Opaque)", "Opaque PBR"));
+        blend_->setItemText(1, Tr("Маска прозрачности (Masked / Alpha Clip)", "Masked / Alpha Clip"));
+        blend_->setItemText(2, Tr("Полупрозрачный (Translucent / Glass)", "Translucent / Glass"));
+        blend_->setItemText(3, Tr("Аддитивное свечение (Additive)", "Additive Emissive"));
         blend_->setCurrentIndex(cur);
     }
-    if (unlit_) unlit_->setText(Tr("Без освещения", "Unlit"));
-    if (twoSided_) twoSided_->setText(Tr("Двусторонний", "Two-sided"));
-    if (castShadows_) castShadows_->setText(Tr("Отбрасывает тени", "Cast Shadows"));
-    if (blendLabel_) blendLabel_->setText(Tr("Смешивание", "Blend Mode"));
-    if (alphaClipLabel_) alphaClipLabel_->setText(Tr("Порог альфы", "Alpha Clip"));
-    if (parametersTitle_) parametersTitle_->setText(Tr("<b>Параметры и текстуры</b>", "<b>Parameters and Textures</b>"));
+    if (alphaClipLabel_) alphaClipLabel_->setText(Tr("Порог альфы (Alpha Clip)", "Alpha Clip"));
+    if (unlit_) unlit_->setText(Tr("Без освещения (Unlit / Emissive)", "Unlit / Emissive"));
+    if (twoSided_) twoSided_->setText(Tr("Двусторонний рендер (Two-Sided)", "Two-Sided"));
+    if (castShadows_) castShadows_->setText(Tr("Отбрасывать тени (Cast Shadows)", "Cast Shadows"));
+
+    if (btnInsertOrm_) btnInsertOrm_->setText(Tr("⚡ Вставить сэмплирование ORM в шейдер", "⚡ Insert ORM Sampling into HLSL"));
+    if (parametersTitle_) parametersTitle_->setText(Tr("<b>Параметры шейдера (Tweakables)</b>", "<b>Shader Parameters (Tweakables)</b>"));
+
+    if (mainTabs_) {
+        mainTabs_->setTabText(0, Tr("Нодовый Граф (Node Graph + AI)", "Node Graph (+ AI)"));
+        mainTabs_->setTabText(1, Tr("HLSL Surface Code (Код шейдера)", "HLSL Surface Code"));
+    }
+
+    if (graphWidget_) graphWidget_->RetranslateUi();
 }
 
 QString MaterialEditorWindow::PhysicalPath(const QString& virtualPath) const
@@ -376,14 +406,53 @@ QString MaterialEditorWindow::PhysicalPath(const QString& virtualPath) const
 
 void MaterialEditorWindow::BuildUi()
 {
+    // ==========================================
+    // 1. Верхний тулбар окна материала (UE5 style)
+    // ==========================================
     auto* tools = addToolBar(Tr("Материал", "Material"));
     tools->setMovable(false);
-    saveAction_ = tools->addAction(Tr("Сохранить", "Save"), this, [this] { Save(); });
+    tools->setStyleSheet(QStringLiteral(
+        "QToolBar { background-color: #16181D; border-bottom: 1px solid #282C34; spacing: 4px; padding: 3px; }"
+    ));
+
+    saveAction_ = tools->addAction(Tr("💾 Сохранить и Скомпилировать", "💾 Save & Compile"), this, [this] { Save(); });
     saveAction_->setShortcut(QKeySequence::Save);
-    saveAction_->setToolTip(Tr("Записать HLSL и .mat, перекомпилировать (Ctrl+S)", "Write HLSL and .mat, recompile (Ctrl+S)"));
-    revertAction_ = tools->addAction(Tr("Откатить", "Revert"), this, [this] { Revert(); });
+    saveAction_->setToolTip(Tr("Записать HLSL и .mat, перекомпилировать шейдер (Ctrl+S)", "Write HLSL and .mat, recompile shader (Ctrl+S)"));
+
+    revertAction_ = tools->addAction(Tr("↺ Откатить", "↺ Revert"), this, [this] { Revert(); });
     revertAction_->setToolTip(Tr("Вернуть материал и HLSL к сохранённым файлам", "Revert material and HLSL to saved files"));
+
     tools->addSeparator();
+
+    // Пресеты PBR / ORM
+    btnPresets_ = new QToolButton(tools);
+    btnPresets_->setText(Tr("⚡ Пресеты PBR / ORM ▾", "⚡ PBR / ORM Presets ▾"));
+    btnPresets_->setPopupMode(QToolButton::InstantPopup);
+    btnPresets_->setStyleSheet(QStringLiteral(
+        "QToolButton { background: #1E293B; color: #38BDF8; font-weight: bold; border: 1px solid #0284C7; border-radius: 4px; padding: 3px 8px; font-size: 11px; }"
+        "QToolButton:hover { background: #0369A1; color: white; }"
+    ));
+    auto* menuPresets = new QMenu(btnPresets_);
+    actPresetPbrOrm_ = menuPresets->addAction(Tr("Standard PBR + ORM", "Standard PBR + ORM"), this, [this] { ApplyPbrOrmPreset(0); });
+    actPresetUnlit_ = menuPresets->addAction(Tr("Unlit Emissive (Свечение)", "Unlit Emissive"), this, [this] { ApplyPbrOrmPreset(1); });
+    actPresetLava_ = menuPresets->addAction(Tr("Animated Lava / Pulse (Анимация)", "Animated Lava / Pulse"), this, [this] { ApplyPbrOrmPreset(2); });
+    actPresetHolo_ = menuPresets->addAction(Tr("Fresnel Hologram (Голограмма)", "Fresnel Hologram"), this, [this] { ApplyPbrOrmPreset(3); });
+    actPresetFoliage_ = menuPresets->addAction(Tr("Masked Foliage (Листва)", "Masked Foliage"), this, [this] { ApplyPbrOrmPreset(4); });
+    btnPresets_->setMenu(menuPresets);
+    tools->addWidget(btnPresets_);
+
+    // Кнопка создания Material Instance
+    auto* btnInst = new QToolButton(tools);
+    btnInst->setText(Tr("✨ Material Instance…", "✨ Material Instance…"));
+    btnInst->setStyleSheet(QStringLiteral(
+        "QToolButton { background: #1E293B; color: #A78BFA; border: 1px solid #6D28D9; border-radius: 4px; padding: 3px 8px; font-size: 11px; }"
+        "QToolButton:hover { background: #5B21B6; color: white; }"
+    ));
+    connect(btnInst, &QToolButton::clicked, this, [this] { CreateMaterialInstance(); });
+    tools->addWidget(btnInst);
+
+    tools->addSeparator();
+
     shapeLabel_ = new QLabel(Tr(" Форма: ", " Shape: "), tools);
     tools->addWidget(shapeLabel_);
     shape_ = new QComboBox(tools);
@@ -391,83 +460,201 @@ void MaterialEditorWindow::BuildUi()
     shape_->addItems({Tr("Сфера", "Sphere"), Tr("Куб", "Cube"), Tr("Плоскость", "Plane")});
     tools->addWidget(shape_);
 
+    btnResetView_ = new QPushButton(Tr("↺ Ракурс", "↺ Reset View"), tools);
+    btnResetView_->setToolTip(Tr("Сбросить положение камеры превью", "Reset preview camera"));
+    btnResetView_->setStyleSheet(QStringLiteral(
+        "QPushButton { background: #1F2430; color: #CBD5E1; border: 1px solid #333844; border-radius: 3px; padding: 2px 6px; font-size: 10px; }"
+        "QPushButton:hover { background: #2A3040; color: white; }"
+    ));
+    tools->addWidget(btnResetView_);
+
+    // ==========================================
+    // 2. Левая колонка (Preview + Свойства)
+    // ==========================================
     preview_ = new MaterialPreviewWidget(this);
     preview_->setObjectName(QStringLiteral("MaterialPreview"));
 
-    auto* settings = new QWidget(this);
-    auto* settingsForm = new QFormLayout(settings);
-    blend_ = new QComboBox(settings);
+    auto* leftScroll = new QScrollArea(this);
+    leftScroll->setWidgetResizable(true);
+    leftScroll->setStyleSheet(QStringLiteral("QScrollArea { border: none; background: #181A20; }"));
+
+    auto* settings = new QWidget(leftScroll);
+    settings->setObjectName(QStringLiteral("MaterialSettingsPanel"));
+    auto* settingsLayout = new QVBoxLayout(settings);
+    settingsLayout->setContentsMargins(8, 8, 8, 8);
+    settingsLayout->setSpacing(8);
+
+    // Секция 1: Surface & Blend State
+    auto* grpSurface = new QGroupBox(Tr("Свойства поверхности (Surface & Blend)", "Surface & Blend"), settings);
+    grpSurface->setStyleSheet(QStringLiteral(
+        "QGroupBox { font-weight: bold; color: #60A5FA; border: 1px solid #2B303C; border-radius: 6px; margin-top: 6px; padding-top: 10px; background: #1C1F26; }"
+        "QGroupBox::title { subcontrol-origin: margin; left: 8px; padding: 0 4px; }"
+    ));
+    auto* formSurface = new QFormLayout(grpSurface);
+    formSurface->setContentsMargins(6, 6, 6, 6);
+    formSurface->setSpacing(6);
+
+    blend_ = new QComboBox(grpSurface);
     blend_->setObjectName(QStringLiteral("MaterialBlend"));
-    blend_->addItems({Tr("Непрозрачный", "Opaque"), Tr("С вырезом (masked)", "Masked (alpha clip)"),
-                      Tr("Полупрозрачный", "Translucent"), Tr("Аддитивный", "Additive")});
-    alphaClip_ = new QDoubleSpinBox(settings);
+    blend_->addItems({
+        Tr("Непрозрачный PBR (Opaque)", "Opaque PBR"),
+        Tr("Маска прозрачности (Masked / Alpha Clip)", "Masked / Alpha Clip"),
+        Tr("Полупрозрачный (Translucent / Glass)", "Translucent / Glass"),
+        Tr("Аддитивное свечение (Additive)", "Additive Emissive")
+    });
+    blendLabel_ = new QLabel(Tr("Режим смешивания (Blend Mode)", "Blend Mode"), grpSurface);
+    formSurface->addRow(blendLabel_, blend_);
+
+    alphaClip_ = new QDoubleSpinBox(grpSurface);
     alphaClip_->setObjectName(QStringLiteral("MaterialAlphaClip"));
     alphaClip_->setRange(0.0, 1.0);
     alphaClip_->setSingleStep(0.05);
     alphaClip_->setDecimals(3);
-    unlit_ = new QCheckBox(Tr("Без освещения", "Unlit"), settings);
-    unlit_->setObjectName(QStringLiteral("MaterialUnlit"));
-    twoSided_ = new QCheckBox(Tr("Двусторонний", "Two-sided"), settings);
-    twoSided_->setObjectName(QStringLiteral("MaterialTwoSided"));
-    castShadows_ = new QCheckBox(Tr("Отбрасывает тени", "Cast Shadows"), settings);
-    castShadows_->setObjectName(QStringLiteral("MaterialCastShadows"));
-    blendLabel_ = new QLabel(Tr("Смешивание", "Blend Mode"), settings);
-    settingsForm->addRow(blendLabel_, blend_);
-    alphaClipLabel_ = new QLabel(Tr("Порог альфы", "Alpha Clip"), settings);
-    settingsForm->addRow(alphaClipLabel_, alphaClip_);
-    settingsForm->addRow(unlit_);
-    settingsForm->addRow(twoSided_);
-    settingsForm->addRow(castShadows_);
+    alphaClipLabel_ = new QLabel(Tr("Порог альфы (Alpha Clip)", "Alpha Clip"), grpSurface);
+    formSurface->addRow(alphaClipLabel_, alphaClip_);
 
-    parameters_ = new QWidget(settings);
+    unlit_ = new QCheckBox(Tr("Без освещения (Unlit / Emissive)", "Unlit / Emissive"), grpSurface);
+    unlit_->setObjectName(QStringLiteral("MaterialUnlit"));
+    formSurface->addRow(unlit_);
+
+    twoSided_ = new QCheckBox(Tr("Двусторонний рендер (Two-Sided)", "Two-Sided"), grpSurface);
+    twoSided_->setObjectName(QStringLiteral("MaterialTwoSided"));
+    formSurface->addRow(twoSided_);
+
+    castShadows_ = new QCheckBox(Tr("Отбрасывать тени (Cast Shadows)", "Cast Shadows"), grpSurface);
+    castShadows_->setObjectName(QStringLiteral("MaterialCastShadows"));
+    formSurface->addRow(castShadows_);
+
+    settingsLayout->addWidget(grpSurface);
+
+    // Секция 2: PBR & ORM Texture Channels
+    auto* grpPbr = new QGroupBox(Tr("PBR & ORM Текстуры", "PBR & ORM Textures"), settings);
+    grpPbr->setStyleSheet(QStringLiteral(
+        "QGroupBox { font-weight: bold; color: #34D399; border: 1px solid #2B303C; border-radius: 6px; margin-top: 6px; padding-top: 10px; background: #1C1F26; }"
+        "QGroupBox::title { subcontrol-origin: margin; left: 8px; padding: 0 4px; }"
+    ));
+    auto* layoutPbr = new QVBoxLayout(grpPbr);
+    layoutPbr->setContentsMargins(6, 6, 6, 6);
+    layoutPbr->setSpacing(4);
+
+    btnInsertOrm_ = new QPushButton(Tr("⚡ Вставить сэмплирование ORM в шейдер", "⚡ Insert ORM Sampling into HLSL"), grpPbr);
+    btnInsertOrm_->setStyleSheet(QStringLiteral(
+        "QPushButton { background: #065F46; color: #6EE7B7; border: 1px solid #059669; border-radius: 4px; padding: 3px 6px; font-size: 11px; font-weight: bold; }"
+        "QPushButton:hover { background: #047857; color: white; }"
+    ));
+    connect(btnInsertOrm_, &QPushButton::clicked, this, [this] { InsertOrmSamplingIntoHlsl(); });
+    layoutPbr->addWidget(btnInsertOrm_);
+
+    pbrChannelsCard_ = grpPbr;
+    settingsLayout->addWidget(grpPbr);
+
+    // Секция 3: Shader Parameters (Tweakables)
+    auto* grpParams = new QGroupBox(Tr("Параметры шейдера (Tweakables)", "Shader Parameters (Tweakables)"), settings);
+    grpParams->setStyleSheet(QStringLiteral(
+        "QGroupBox { font-weight: bold; color: #FBBF24; border: 1px solid #2B303C; border-radius: 6px; margin-top: 6px; padding-top: 10px; background: #1C1F26; }"
+        "QGroupBox::title { subcontrol-origin: margin; left: 8px; padding: 0 4px; }"
+    ));
+    auto* layoutParams = new QVBoxLayout(grpParams);
+    layoutParams->setContentsMargins(6, 6, 6, 6);
+    layoutParams->setSpacing(4);
+
+    parameters_ = new QWidget(grpParams);
     parameterForm_ = new QFormLayout(parameters_);
     parameterForm_->setContentsMargins(0, 0, 0, 0);
-    parametersTitle_ = new QLabel(Tr("<b>Параметры и текстуры</b>", "<b>Parameters and Textures</b>"), settings);
-    settingsForm->addRow(parametersTitle_);
-    settingsForm->addRow(parameters_);
+    parameterForm_->setSpacing(6);
+    layoutParams->addWidget(parameters_);
 
-    auto* scroll = new QScrollArea(this);
-    scroll->setWidgetResizable(true);
-    scroll->setWidget(settings);
+    settingsLayout->addWidget(grpParams);
+    settingsLayout->addStretch(1);
+
+    leftScroll->setWidget(settings);
     settings->setEnabled(false); // до первого ответа движка
 
-    source_ = new MaterialSourceEditor(this);
-    source_->setObjectName(QStringLiteral("MaterialSource"));
-    errors_ = new QListWidget(this);
-    errors_->setObjectName(QStringLiteral("MaterialErrors"));
+    auto* leftSplitter = new QSplitter(Qt::Vertical, this);
+    leftSplitter->addWidget(preview_);
+    leftSplitter->addWidget(leftScroll);
+    leftSplitter->setStretchFactor(0, 3);
+    leftSplitter->setStretchFactor(1, 4);
 
-    auto* left = new QSplitter(Qt::Vertical, this);
-    left->addWidget(preview_);
-    left->addWidget(scroll);
-    left->setStretchFactor(0, 3);
-    left->setStretchFactor(1, 2);
-    auto* right = new QSplitter(Qt::Vertical, this);
-    right->addWidget(source_);
-    right->addWidget(errors_);
-    right->setStretchFactor(0, 4);
-    right->setStretchFactor(1, 1);
-    auto* main = new QSplitter(Qt::Horizontal, this);
-    main->addWidget(left);
-    main->addWidget(right);
-    main->setStretchFactor(0, 2);
-    main->setStretchFactor(1, 3);
-    setCentralWidget(main);
+    // ==========================================
+    // 3. Правая колонка (Табы: Graph + Source) + Диагностика
+    // ==========================================
+    mainTabs_ = new QTabWidget(this);
+    mainTabs_->setStyleSheet(QStringLiteral(
+        "QTabWidget::pane { border: 1px solid #282C34; background: #14161C; }"
+        "QTabBar::tab { background: #181A20; color: #94A3B8; border: 1px solid #282C34; padding: 6px 14px; font-weight: bold; border-top-left-radius: 4px; border-top-right-radius: 4px; }"
+        "QTabBar::tab:selected { background: #2563EB; color: #FFFFFF; border-color: #3B82F6; }"
+    ));
+
+    // Вкладка 0: Визуальный нодовый граф + AI
+    graphWidget_ = new MaterialGraphWidget(mainTabs_);
+    graphWidget_->SetOnHlslGeneratedCallback([this](const QString& hlsl) {
+        if (source_) {
+            source_->setPlainText(hlsl);
+            source_->document()->setModified(true);
+            UpdateTitle();
+            Save();
+        }
+    });
+    mainTabs_->addTab(graphWidget_, Tr("Нодовый Граф (Node Graph + AI)", "Node Graph (+ AI)"));
+
+    // Вкладка 1: HLSL редактор кода
+    source_ = new MaterialSourceEditor(mainTabs_);
+    source_->setObjectName(QStringLiteral("MaterialSource"));
+    mainTabs_->addTab(source_, Tr("HLSL Surface Code (Код шейдера)", "HLSL Surface Code"));
+
+    // Панель диагностики компилятора снизу
+    auto* diagWidget = new QWidget(this);
+    diagWidget->setStyleSheet(QStringLiteral("background: #121418; border-top: 1px solid #242832;"));
+    auto* diagLayout = new QVBoxLayout(diagWidget);
+    diagLayout->setContentsMargins(4, 4, 4, 4);
+    diagLayout->setSpacing(2);
+
+    lblCompileStatus_ = new QLabel(diagWidget);
+    lblCompileStatus_->setStyleSheet(QStringLiteral(
+        "background: #064E3B; color: #34D399; font-weight: bold; font-size: 11px; padding: 3px 8px; border-radius: 3px; border: 1px solid #059669;"
+    ));
+    lblCompileStatus_->setText(Tr("✓ Шейдер скомпилирован успешно (Ready)", "✓ Shader Compiled Successfully (Ready)"));
+    diagLayout->addWidget(lblCompileStatus_);
+
+    errors_ = new QListWidget(diagWidget);
+    errors_->setObjectName(QStringLiteral("MaterialErrors"));
+    errors_->setStyleSheet(QStringLiteral(
+        "QListWidget#MaterialErrors { background: #181A20; color: #F87171; border: 1px solid #2D3340; border-radius: 4px; font-family: Consolas, monospace; font-size: 11px; }"
+    ));
+    diagLayout->addWidget(errors_, 1);
+
+    auto* rightSplitter = new QSplitter(Qt::Vertical, this);
+    rightSplitter->addWidget(mainTabs_);
+    rightSplitter->addWidget(diagWidget);
+    rightSplitter->setStretchFactor(0, 5);
+    rightSplitter->setStretchFactor(1, 1);
+    rightSplitter->setSizes({ 560, 140 });
+
+    auto* mainSplitter = new QSplitter(Qt::Horizontal, this);
+    mainSplitter->addWidget(leftSplitter);
+    mainSplitter->addWidget(rightSplitter);
+    mainSplitter->setStretchFactor(0, 2);
+    mainSplitter->setStretchFactor(1, 3);
+    mainSplitter->setSizes({ 360, 840 });
+
+    setCentralWidget(mainSplitter);
     statusBar();
 
+    // ==========================================
+    // 4. Подключение событий движка
+    // ==========================================
     const QByteArray material = material_.toUtf8();
     auto engine = engine_;
     preview_->attach = [this, material, engine](void* hwnd, uint32_t w, uint32_t h)
     {
         const uint32_t shape = static_cast<uint32_t>(shape_->currentIndex());
-        std::printf("DEBUG ATTACH: hwnd=%p, w=%u, h=%u, shape=%u\n", hwnd, w, h, shape);
         EngineThenRead([material, engine, hwnd, w, h, shape](const EngineEditSessionApi& api)
         {
             char error[4096]{};
             uint32_t status = api.attachMaterialPreview(api.context, hwnd, w, h, &engine->preview);
-            std::printf("DEBUG ATTACH STATUS: attachStatus=%u, preview=%p\n", status, engine->preview);
             if (status != EngineSceneOk) return QStringLiteral("Не удалось создать превью (код %1)").arg(status);
             status = api.showMaterialPreview(api.context, engine->preview, material.constData(), shape, error, sizeof(error));
-            std::printf("DEBUG SHOW PREVIEW STATUS: showStatus=%u\n", status);
             return StatusText(status, error);
         }, true);
     };
@@ -485,6 +672,13 @@ void MaterialEditorWindow::BuildUi()
             if (engine->preview) api.materialPreviewCamera(api.context, engine->preview, yaw, pitch, zoom);
         });
     };
+
+    connect(btnResetView_, &QPushButton::clicked, this, [this, engine] {
+        Engine([engine](const EngineEditSessionApi& api) {
+            if (engine->preview) api.materialPreviewCamera(api.context, engine->preview, 0.0f, 0.0f, 0.0f);
+        });
+    });
+
     connect(shape_, &QComboBox::currentIndexChanged, this, [this, material, engine](int index)
     {
         EngineThenRead([material, engine, index](const EngineEditSessionApi& api)
@@ -552,6 +746,10 @@ void MaterialEditorWindow::Apply(const MaterialEditorState& state, bool valid, b
         {
             shaderFile_ = PhysicalPath(state_.shader);
             LoadShaderText();
+            if (graphWidget_)
+            {
+                graphWidget_->SetMaterialPath(PhysicalPath(material_), shaderFile_);
+            }
         }
         if (first || rebuild) RebuildSettings();
         ShowErrors();
@@ -560,11 +758,20 @@ void MaterialEditorWindow::Apply(const MaterialEditorState& state, bool valid, b
     {
         errors_->clear();
         errors_->addItem(error);
+        UpdateCompileStatus(false, 1);
     }
 
-    if (!error.isEmpty()) statusBar()->showMessage(error);
-    else statusBar()->showMessage(state_.errors.isEmpty() ? QStringLiteral("Шейдер скомпилирован")
-                                                          : QStringLiteral("Ошибки компиляции: см. список под текстом"));
+    if (!error.isEmpty())
+    {
+        statusBar()->showMessage(error);
+        UpdateCompileStatus(false, 1);
+    }
+    else
+    {
+        statusBar()->showMessage(state_.errors.isEmpty() ? Tr("Шейдер скомпилирован", "Shader compiled")
+                                                              : Tr("Ошибки компиляции: см. список под текстом", "Compilation errors: see list"));
+        UpdateCompileStatus(state_.errors.isEmpty(), state_.errors.isEmpty() ? 0 : 1);
+    }
     UpdateTitle();
 }
 
@@ -604,6 +811,8 @@ void MaterialEditorWindow::RebuildSettings()
         auto* row = new QWidget(parameters_);
         auto* layout = new QHBoxLayout(row);
         layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(4);
+
         if (!parameter.components)
         {
             layout->addWidget(new QLabel(QStringLiteral("тип не поддерживается редактором"), row));
@@ -612,19 +821,52 @@ void MaterialEditorWindow::RebuildSettings()
         }
 
         std::vector<QDoubleSpinBox*> spins;
-        for (uint32_t i = 0; i < parameter.components; ++i)
+        QSlider* syncSlider = nullptr;
+
+        // Если скаляр 0..1 (Metallic, Roughness, Gloss, Specular) — добавляем синхронный ползунок
+        if (parameter.components == 1)
         {
             auto* spin = new QDoubleSpinBox(row);
-            spin->setObjectName(QStringLiteral("MaterialParam_%1_%2").arg(parameter.name).arg(i));
-            spin->setRange(-100000.0, 100000.0);
+            spin->setObjectName(QStringLiteral("MaterialParam_%1_0").arg(parameter.name));
+            spin->setRange(-10000.0, 10000.0);
             spin->setDecimals(3);
             spin->setSingleStep(0.05);
-            spin->setKeyboardTracking(false);
-            spin->setValue(parameter.value[i]);
-            spin->setMinimumWidth(64);
-            layout->addWidget(spin, 1);
+            spin->setValue(parameter.value[0]);
+            spin->setMinimumWidth(55);
+            layout->addWidget(spin);
             spins.push_back(spin);
+
+            syncSlider = new QSlider(Qt::Horizontal, row);
+            syncSlider->setRange(0, 100);
+            syncSlider->setValue(qBound(0, static_cast<int>(parameter.value[0] * 100.0), 100));
+            syncSlider->setFixedWidth(70);
+            layout->addWidget(syncSlider);
+
+            connect(syncSlider, &QSlider::valueChanged, this, [spin](int v) {
+                spin->setValue(v / 100.0);
+            });
+            connect(spin, qOverload<double>(&QDoubleSpinBox::valueChanged), this, [syncSlider](double v) {
+                QSignalBlocker b(syncSlider);
+                syncSlider->setValue(qBound(0, static_cast<int>(v * 100.0), 100));
+            });
         }
+        else
+        {
+            for (uint32_t i = 0; i < parameter.components; ++i)
+            {
+                auto* spin = new QDoubleSpinBox(row);
+                spin->setObjectName(QStringLiteral("MaterialParam_%1_%2").arg(parameter.name).arg(i));
+                spin->setRange(-100000.0, 100000.0);
+                spin->setDecimals(3);
+                spin->setSingleStep(0.05);
+                spin->setKeyboardTracking(false);
+                spin->setValue(parameter.value[i]);
+                spin->setMinimumWidth(50);
+                layout->addWidget(spin, 1);
+                spins.push_back(spin);
+            }
+        }
+
         auto values = [spins] {
             std::array<float, 4> value{};
             for (size_t i = 0; i < spins.size(); ++i) value[i] = static_cast<float>(spins[i]->value());
@@ -643,13 +885,13 @@ void MaterialEditorWindow::RebuildSettings()
         {
             color = new QPushButton(row);
             color->setObjectName(QStringLiteral("MaterialColor_%1").arg(parameter.name));
-            color->setFixedSize(28, 22);
-            color->setToolTip(QStringLiteral("Выбрать цвет"));
+            color->setFixedSize(26, 20);
+            color->setToolTip(Tr("Выбрать цвет", "Choose Color"));
             layout->addWidget(color);
         }
         const uint32_t components = parameter.components;
         auto paint = [color, components](const std::array<float, 4>& value) {
-            if (color) color->setStyleSheet(QStringLiteral("background-color: %1;").arg(ToColor(value, components).name()));
+            if (color) color->setStyleSheet(QStringLiteral("background-color: %1; border: 1px solid #444; border-radius: 3px;").arg(ToColor(value, components).name()));
         };
         paint(parameter.value);
 
@@ -678,8 +920,8 @@ void MaterialEditorWindow::RebuildSettings()
             });
 
         auto* reset = new QPushButton(QStringLiteral("↺"), row);
-        reset->setFixedWidth(28);
-        reset->setToolTip(QStringLiteral("Значение из HLSL"));
+        reset->setFixedWidth(24);
+        reset->setToolTip(Tr("Сбросить к исходному из HLSL", "Reset to default from HLSL"));
         layout->addWidget(reset);
         connect(reset, &QPushButton::clicked, this, [this, index, setValues, paint]
         {
@@ -688,36 +930,66 @@ void MaterialEditorWindow::RebuildSettings()
             paint(value);
             SetParameter(index, value);
         });
+
         parameterForm_->addRow(parameter.name, row);
     }
 
+    // Текстурные слоты
     for (int index = 0; index < state_.textures.size(); ++index)
     {
         const auto& texture = state_.textures[index];
         auto* row = new QWidget(parameters_);
         auto* layout = new QHBoxLayout(row);
         layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(4);
+
         auto* path = new QLineEdit(texture.path, row);
         path->setObjectName(QStringLiteral("MaterialTexture_%1").arg(texture.name));
         path->setReadOnly(true);
-        path->setPlaceholderText(QStringLiteral("белая"));
+        path->setPlaceholderText(Tr("белая текстура", "default white"));
+        path->setStyleSheet(QStringLiteral("background: #1C1F26; color: #CBD5E1; border: 1px solid #333844; border-radius: 3px; font-size: 10px;"));
+
         auto* choose = new QPushButton(QStringLiteral("…"), row);
-        choose->setFixedWidth(28);
-        choose->setToolTip(QStringLiteral("Выбрать текстуру проекта"));
+        choose->setFixedWidth(24);
+        choose->setToolTip(Tr("Выбрать текстуру проекта", "Choose project texture"));
+
         auto* clear = new QPushButton(QStringLiteral("×"), row);
-        clear->setFixedWidth(28);
-        clear->setToolTip(QStringLiteral("Белая текстура"));
+        clear->setFixedWidth(24);
+        clear->setToolTip(Tr("Очистить текстуру", "Clear texture"));
+
         layout->addWidget(path, 1);
         layout->addWidget(choose);
         layout->addWidget(clear);
+
         connect(choose, &QPushButton::clicked, this, [this, index] { ChooseTexture(index, false); });
         connect(clear, &QPushButton::clicked, this, [this, index] { ChooseTexture(index, true); });
+
         parameterForm_->addRow(texture.name, row);
     }
 
     if (state_.parameters.isEmpty() && state_.textures.isEmpty())
-        parameterForm_->addRow(new QLabel(QStringLiteral("В HLSL нет cbuffer MaterialParams и текстур t6+"), parameters_));
+        parameterForm_->addRow(new QLabel(Tr("В HLSL нет cbuffer MaterialParams и текстур t6+", "No cbuffer MaterialParams or textures in HLSL"), parameters_));
+
     parameters_->parentWidget()->setEnabled(true);
+}
+
+void MaterialEditorWindow::UpdateCompileStatus(bool success, int errorCount)
+{
+    if (!lblCompileStatus_) return;
+    if (success && errorCount == 0)
+    {
+        lblCompileStatus_->setText(Tr("✓ Шейдер скомпилирован успешно (Ready)", "✓ Shader Compiled Successfully (Ready)"));
+        lblCompileStatus_->setStyleSheet(QStringLiteral(
+            "background: #064E3B; color: #34D399; font-weight: bold; font-size: 11px; padding: 3px 8px; border-radius: 3px; border: 1px solid #059669;"
+        ));
+    }
+    else
+    {
+        lblCompileStatus_->setText(Tr("⚠ Ошибки компиляции (%1) — см. список ниже", "⚠ Compilation Errors (%1) — see list below").arg(std::max(1, errorCount)));
+        lblCompileStatus_->setStyleSheet(QStringLiteral(
+            "background: #450A0A; color: #F87171; font-weight: bold; font-size: 11px; padding: 3px 8px; border-radius: 3px; border: 1px solid #DC2626;"
+        ));
+    }
 }
 
 void MaterialEditorWindow::ShowErrors()
@@ -726,9 +998,12 @@ void MaterialEditorWindow::ShowErrors()
     QSet<int> lines;
     const QString surface = QFileInfo(shaderFile_).absoluteFilePath();
     static const QRegularExpression location(QStringLiteral(R"(^(.*)\((\d+),(\d+)(?:-\d+)?\):)"));
+
+    int errCount = 0;
     for (const QString& text : state_.errors.split(QLatin1Char('\n'), Qt::SkipEmptyParts))
     {
         auto* item = new QListWidgetItem(text.trimmed(), errors_);
+        errCount++;
         const auto match = location.match(text);
         if (!match.hasMatch() || surface.isEmpty()) continue;
         const QString file = QFileInfo(match.captured(1).trimmed()).absoluteFilePath();
@@ -740,10 +1015,12 @@ void MaterialEditorWindow::ShowErrors()
         lines.insert(line);
     }
     source_->SetErrorLines(lines);
+    UpdateCompileStatus(errCount == 0, errCount);
 }
 
 void MaterialEditorWindow::GoToError(int line, int column)
 {
+    if (mainTabs_) mainTabs_->setCurrentIndex(1); // Переключить на вкладку HLSL
     const QTextBlock block = source_->document()->findBlockByNumber(line - 1);
     if (!block.isValid()) return;
     QTextCursor cursor(block);
@@ -822,6 +1099,222 @@ void MaterialEditorWindow::ChooseTexture(int index, bool clear)
     }, true);
 }
 
+void MaterialEditorWindow::ApplyPbrOrmPreset(int presetId)
+{
+    QString code;
+    if (presetId == 0) // Standard PBR + ORM
+    {
+        code = QStringLiteral(
+            "// Standard PBR + ORM Material\n"
+            "cbuffer MaterialParams : register(b1)\n"
+            "{\n"
+            "    float4 BaseColor = float4(0.85f, 0.85f, 0.85f, 1.0f);\n"
+            "    float Metallic = 0.0f;\n"
+            "    float Roughness = 0.5f;\n"
+            "    float AmbientOcclusion = 1.0f;\n"
+            "};\n\n"
+            "Texture2D BaseMap : register(t6);\n"
+            "Texture2D NormalMap : register(t7);\n"
+            "Texture2D OrmMap : register(t8);\n\n"
+            "void Surface(MaterialInput i, inout MaterialOutput o)\n"
+            "{\n"
+            "    float4 baseTex = BaseMap.Sample(MaterialSampler, i.UV);\n"
+            "    float3 ormTex = OrmMap.Sample(MaterialSampler, i.UV).rgb; // R: AO, G: Roughness, B: Metallic\n\n"
+            "    float3 finalColor = BaseColor.rgb * baseTex.rgb;\n"
+            "    float finalRoughness = Roughness * ormTex.g;\n"
+            "    float finalMetallic = Metallic * ormTex.b;\n"
+            "    float finalAO = AmbientOcclusion * ormTex.r;\n\n"
+            "    o.Albedo = saturate(finalColor);\n"
+            "    o.SpecularWeight = saturate(1.0f - finalRoughness);\n"
+            "    o.AmbientModel = saturate(finalAO);\n"
+            "    o.Alpha = BaseColor.a * baseTex.a;\n"
+            "}\n"
+        );
+        blend_->setCurrentIndex(0); // Opaque
+    }
+    else if (presetId == 1) // Unlit Emissive
+    {
+        code = QStringLiteral(
+            "// Unlit Emissive Material\n"
+            "cbuffer MaterialParams : register(b1)\n"
+            "{\n"
+            "    float4 EmissiveColor = float4(0.0f, 0.85f, 1.0f, 1.0f);\n"
+            "    float Intensity = 2.5f;\n"
+            "};\n\n"
+            "Texture2D BaseMap : register(t6);\n\n"
+            "void Surface(MaterialInput i, inout MaterialOutput o)\n"
+            "{\n"
+            "    float4 baseTex = BaseMap.Sample(MaterialSampler, i.UV);\n"
+            "    o.Albedo = saturate(EmissiveColor.rgb * baseTex.rgb * Intensity);\n"
+            "    o.SpecularWeight = 0.0f;\n"
+            "    o.AmbientModel = 1.0f;\n"
+            "    o.Alpha = EmissiveColor.a * baseTex.a;\n"
+            "}\n"
+        );
+        unlit_->setChecked(true);
+    }
+    else if (presetId == 2) // Animated Lava / Pulse
+    {
+        code = QStringLiteral(
+            "// Animated Lava / Pulse\n"
+            "#define MATERIAL_EMISSIVE 1\n\n"
+            "cbuffer MaterialParams : register(b1)\n"
+            "{\n"
+            "    float4 LavaColor = float4(1.0f, 0.25f, 0.05f, 1.0f);\n"
+            "    float4 CrustColor = float4(0.12f, 0.08f, 0.06f, 1.0f);\n"
+            "    float PulseSpeed = 2.5f;\n"
+            "    float GlowIntensity = 3.0f;\n"
+            "};\n\n"
+            "void Surface(MaterialInput i, inout MaterialOutput o)\n"
+            "{\n"
+            "    float wave = 0.5f + 0.5f * sin(i.Time * PulseSpeed + (i.WorldPos.x + i.WorldPos.z) * 2.0f);\n"
+            "    float3 col = lerp(CrustColor.rgb, LavaColor.rgb, wave);\n\n"
+            "    o.Albedo = col;\n"
+            "    o.Emissive = LavaColor.rgb * (wave * GlowIntensity);\n"
+            "    o.SpecularWeight = 0.2f * (1.0f - wave);\n"
+            "    o.AmbientModel = 0.5f;\n"
+            "}\n"
+        );
+    }
+    else if (presetId == 3) // Fresnel Hologram
+    {
+        code = QStringLiteral(
+            "// Fresnel Hologram\n"
+            "#define MATERIAL_EMISSIVE 1\n\n"
+            "cbuffer MaterialParams : register(b1)\n"
+            "{\n"
+            "    float4 HoloColor = float4(0.1f, 0.9f, 1.0f, 1.0f);\n"
+            "    float FresnelPower = 3.0f;\n"
+            "    float ScanlineSpeed = 4.0f;\n"
+            "    float ScanlineDensity = 40.0f;\n"
+            "};\n\n"
+            "void Surface(MaterialInput i, inout MaterialOutput o)\n"
+            "{\n"
+            "    float fresnel = pow(1.0f - saturate(dot(i.Normal, i.ViewDir)), FresnelPower);\n"
+            "    float scanline = 0.7f + 0.3f * sin(i.WorldPos.y * ScanlineDensity + i.Time * ScanlineSpeed);\n"
+            "    float3 glow = HoloColor.rgb * fresnel * scanline * 2.0f;\n\n"
+            "    o.Albedo = glow;\n"
+            "    o.Emissive = glow;\n"
+            "    o.SpecularWeight = 0.9f;\n"
+            "    o.AmbientModel = 1.0f;\n"
+            "    o.Alpha = saturate(fresnel * scanline + 0.15f);\n"
+            "}\n"
+        );
+        blend_->setCurrentIndex(2); // Translucent
+    }
+    else if (presetId == 4) // Masked Foliage
+    {
+        code = QStringLiteral(
+            "// Masked Foliage\n"
+            "cbuffer MaterialParams : register(b1)\n"
+            "{\n"
+            "    float4 FoliageTint = float4(0.28f, 0.65f, 0.22f, 1.0f);\n"
+            "    float WindSpeed = 1.5f;\n"
+            "    float AlphaCutoff = 0.5f;\n"
+            "};\n\n"
+            "Texture2D BaseMap : register(t6);\n\n"
+            "void Surface(MaterialInput i, inout MaterialOutput o)\n"
+            "{\n"
+            "    float4 tex = BaseMap.Sample(MaterialSampler, i.UV);\n"
+            "    float3 col = FoliageTint.rgb * tex.rgb;\n\n"
+            "    o.Albedo = saturate(col);\n"
+            "    o.SpecularWeight = 0.15f;\n"
+            "    o.AmbientModel = 0.85f;\n"
+            "    o.Alpha = tex.a;\n"
+            "}\n"
+        );
+        blend_->setCurrentIndex(1); // Masked
+        twoSided_->setChecked(true);
+    }
+
+    if (source_)
+    {
+        source_->setPlainText(code);
+        source_->document()->setModified(true);
+        UpdateTitle();
+        Save();
+    }
+}
+
+void MaterialEditorWindow::CreateMaterialInstance()
+{
+    QFileInfo fi(PhysicalPath(material_));
+    QString defaultName = fi.baseName() + QStringLiteral("_Inst");
+
+    bool ok = false;
+    QString name = QInputDialog::getText(this, Tr("Новый Material Instance", "New Material Instance"),
+        Tr("Имя дочернего материала:", "Child Material Name:"), QLineEdit::Normal, defaultName, &ok);
+    if (!ok || name.trimmed().isEmpty()) return;
+
+    QString fileName = name.trimmed();
+    if (!fileName.endsWith(QStringLiteral(".mat"), Qt::CaseInsensitive))
+        fileName += QStringLiteral(".mat");
+
+    QString dirPath = fi.dir().absolutePath();
+    QString fullPath = QDir(dirPath).filePath(fileName);
+
+    QJsonObject root;
+    root[QStringLiteral("version")] = 1;
+    root[QStringLiteral("name")] = QFileInfo(fullPath).baseName();
+    root[QStringLiteral("parent")] = material_;
+    root[QStringLiteral("isInstance")] = true;
+
+    QFile file(fullPath);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+        file.close();
+
+        // Открыть новый инстанс материала
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget()))
+        {
+            editor->OpenMaterialEditor(fullPath);
+        }
+    }
+}
+
+void MaterialEditorWindow::InsertOrmSamplingIntoHlsl()
+{
+    if (!source_) return;
+    QString text = source_->toPlainText();
+
+    if (!text.contains(QStringLiteral("OrmMap"), Qt::CaseInsensitive))
+    {
+        // Вставить Texture2D OrmMap : register(t8);
+        const int insertPos = text.indexOf(QStringLiteral("void Surface"));
+        if (insertPos >= 0)
+        {
+            text.insert(insertPos, QStringLiteral("Texture2D OrmMap : register(t8);\n\n"));
+        }
+        else
+        {
+            text += QStringLiteral("\nTexture2D OrmMap : register(t8);\n");
+        }
+    }
+
+    if (!text.contains(QStringLiteral("OrmMap.Sample")))
+    {
+        const int surfaceStart = text.indexOf(QStringLiteral("void Surface"));
+        if (surfaceStart >= 0)
+        {
+            const int braceOpen = text.indexOf(QLatin1Char('{'), surfaceStart);
+            if (braceOpen >= 0)
+            {
+                QString injection = QStringLiteral("\n    // ORM Map unpacking (R: Ambient Occlusion, G: Roughness, B: Metallic)\n"
+                                                   "    float3 orm = OrmMap.Sample(MaterialSampler, i.UV).rgb;\n"
+                                                   "    o.SpecularWeight = saturate(1.0f - orm.g);\n"
+                                                   "    o.AmbientModel = saturate(orm.r);\n");
+                text.insert(braceOpen + 1, injection);
+            }
+        }
+    }
+
+    source_->setPlainText(text);
+    source_->document()->setModified(true);
+    UpdateTitle();
+    Save();
+}
+
 bool MaterialEditorWindow::Save(std::function<void(bool)> completion)
 {
     if (!loaded_ || saving_) return false;
@@ -842,7 +1335,6 @@ bool MaterialEditorWindow::Save(std::function<void(bool)> completion)
     const QByteArray material = material_.toUtf8(), shader = shaderFile_.toUtf8();
     EngineThenRead([material, shader, sourceChanged](const EngineEditSessionApi& api)
     {
-        // Сначала перекомпиляция (её делает чтение): в .mat попадает новый список параметров.
         if (sourceChanged) api.reloadShaderFile(api.context, shader.constData());
         MaterialEditorState current;
         const QString readError = ReadMaterial(api, material, current);
@@ -889,7 +1381,6 @@ bool MaterialEditorWindow::ConfirmClose(std::function<void()> afterSave)
         Tr("Сохранить изменения материала %1?", "Save changes to material %1?").arg(QFileInfo(material_).fileName()),
         QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Save);
     if (choice == QMessageBox::Save) {
-        // Do not destroy the preview or unload the DLL before the queued save succeeds.
         Save([this, afterSave](bool saved) {
             if (saved) { if (afterSave) afterSave(); else close(); }
         });
@@ -904,7 +1395,7 @@ void MaterialEditorWindow::Shutdown()
     if (shuttingDown_) return;
     shuttingDown_ = true;
     const bool revert = discard_ && (edited_ || state_.modified);
-    hide(); // нативное окно живо, пока движок не отпустит превью
+    hide();
     QPointer<MaterialEditorWindow> self(this);
     EditorQtHost* host = host_;
     const QByteArray material = material_.toUtf8();
