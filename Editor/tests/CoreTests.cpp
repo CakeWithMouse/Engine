@@ -4,6 +4,9 @@
 #include "../Core/FileService.h"
 #include "../Core/GizmoMath.cpp"
 #include "core/GizmoMathTests.h"
+#include "../Core/MaterialGraphModel.cpp"
+#include "../Core/HlslGraphCompiler.cpp"
+#include "core/MaterialGraphTests.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
@@ -202,6 +205,13 @@ void TestGizmoMath()
     gChecks += 11;
 }
 
+void TestMaterialGraph()
+{
+    RunMaterialGraphTests();
+    // 18 distinct checks in RunMaterialGraphTests
+    gChecks += 18;
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -241,6 +251,10 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestGizmoMath...\n");
     std::fflush(stdout);
     TestGizmoMath();
+
+    std::printf("[Test] TestMaterialGraph...\n");
+    std::fflush(stdout);
+    TestMaterialGraph();
 
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);
