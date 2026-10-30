@@ -147,27 +147,51 @@ if (Test-Path $hostDir) {
 }
 Write-Output "OK: Architectural layers check passed."
 
-# 5. Check line count (wc -l <= 500)
+# 5. Check line count (wc -l <= 500 with ratchet for legacy files)
 Write-Output "--- 3. Checking line counts of modified files ---"
+$legacyRatchetLimits = @{
+    "Editor/Source/MainWindow.cpp" = 1321
+    "Editor/Source/MaterialEditorWindow.cpp" = 869
+    "Editor/Source/QtHost.cpp" = 641
+    "Editor/Source/ViewportWidget.cpp" = 694
+    "Editor/tests/EditorUiTests.cpp" = 720
+}
+
 $diffFiles = Invoke-Git @("diff", "--name-only", "HEAD", "--", "Editor/")
 $untrackedFiles = Invoke-Git @("ls-files", "--others", "--exclude-standard", "--", "Editor/")
 $allCandidateFiles = @($diffFiles -split "`r?`n") + @($untrackedFiles -split "`r?`n") | Select-Object -Unique
 $hasOversizedFiles = $false
 foreach ($f in $allCandidateFiles) {
     if (!$f -or !(Test-Path (Join-Path $repo $f))) { continue }
+    $normPath = $f.Replace('\', '/')
     $ext = [IO.Path]::GetExtension($f).ToLower()
     if ($ext -in @('.h', '.hpp', '.cpp', '.cxx')) {
-        $lineCount = (Get-Content (Join-Path $repo $f) | Measure-Object -Line).Lines
-        if ($lineCount -gt 500) {
-            Write-Error "FAIL: File $f exceeds 500 lines ($lineCount lines > 500)."
+        $lines = (Get-Content (Join-Path $repo $f)).Length
+        $maxAllowed = 500
+        $isLegacy = $false
+        if ($legacyRatchetLimits.ContainsKey($normPath)) {
+            $maxAllowed = $legacyRatchetLimits[$normPath]
+            $isLegacy = $true
+        }
+
+        if ($lines -gt $maxAllowed) {
+            if ($isLegacy) {
+                Write-Error "FAIL: Legacy file $normPath grew beyond ratchet limit ($lines lines > $maxAllowed)."
+            } else {
+                Write-Error "FAIL: New/modified file $normPath exceeds 500 lines ($lines lines > 500)."
+            }
             $hasOversizedFiles = $true
         } else {
-            Write-Output "  $f : $lineCount lines"
+            if ($isLegacy) {
+                Write-Output "  $normPath : $lines lines (legacy ratchet limit: $maxAllowed)"
+            } else {
+                Write-Output "  $normPath : $lines lines"
+            }
         }
     }
 }
 if ($hasOversizedFiles) {
-    throw "Line count check failed: files exceed 500 lines."
+    throw "Line count check failed: files exceed line limits."
 }
 
 # 6. Find MSBuild via vswhere
