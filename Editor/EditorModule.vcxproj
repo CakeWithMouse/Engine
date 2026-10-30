@@ -132,6 +132,11 @@
         <ClCompile Include="../Engine/Source/Runtime/GameEditModule.cpp" Condition="'$(EditorUiTest)'=='true'"/>
         <ClCompile Include="Source/Module.cpp"/>
         <ClCompile Include="Source/QtHost.cpp"/>
+        <ClCompile Include="Host/EditorHistory.cpp"/>
+        <ClCompile Include="Host/ViewportCommandHandler.cpp"/>
+        <ClCompile Include="Host/AssetCommandHandler.cpp"/>
+        <ClCompile Include="Host/SceneCommandHandler.cpp"/>
+        <ClCompile Include="UI/EditorApp.cpp"/>
         <ClCompile Include="Source/MainWindow.cpp"/>
         <ClCompile Include="Source/AssetTools.cpp"/>
         <ClCompile Include="Source/FileBrowser.cpp"/>
@@ -185,6 +190,12 @@
             <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
         </CustomBuild>
         <ClInclude Include="Include/QtHost.h"/>
+        <ClInclude Include="Host/IEditorHost.h"/>
+        <ClInclude Include="Host/EditorHistory.h"/>
+        <ClInclude Include="Host/ViewportCommandHandler.h"/>
+        <ClInclude Include="Host/AssetCommandHandler.h"/>
+        <ClInclude Include="Host/SceneCommandHandler.h"/>
+        <ClInclude Include="UI/EditorApp.h"/>
         <ClInclude Include="Include/CodeClassDialog.h"/>
         <ClInclude Include="Include/FileBrowser.h"/>
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->

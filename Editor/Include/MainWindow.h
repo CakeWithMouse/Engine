@@ -7,8 +7,7 @@
 #include <cstdint>
 
 #include "ObjectInspectorPanel.h"
-
-struct EditorCommand;
+#include "IEditorHost.h"
 
 class QTreeWidget;
 class QLineEdit;
@@ -27,12 +26,25 @@ class QAction;
 class SceneObjectsPanel;
 class MaterialEditorWindow;
 
-class EditorMainWindow : public QMainWindow
+class EditorMainWindow : public QMainWindow, public IEditorUiListener
 {
     Q_OBJECT
 
 public:
     explicit EditorMainWindow(EditorQtHost* host, QWidget* parent = nullptr);
+    ~EditorMainWindow() override
+    {
+        if (host_) host_->SetUiListener(nullptr);
+    }
+
+    void OnLogMessage(const QString& line) override
+    {
+        QMetaObject::invokeMethod(this, [this, line] { AppendLine(line); }, Qt::QueuedConnection);
+    }
+    void OnCommandFinished(const EditorCommand& command, uint32_t status, const QString& error = {}) override
+    {
+        QMetaObject::invokeMethod(this, [this, command, status, error] { CommandFinished(command, status, error); }, Qt::QueuedConnection);
+    }
 
     void CommandFinished(const EditorCommand& command, uint32_t status, const QString& error);
 
