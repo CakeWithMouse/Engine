@@ -142,6 +142,9 @@ private:
     QMenu* themeMenu_ = nullptr;
     QMenu* langMenu_ = nullptr;
     QMenu* accentMenu_ = nullptr;
+    QMenu* schemeMenu_ = nullptr;
+    QAction* actSchemeUnreal_ = nullptr;
+    QAction* actSchemeBlender_ = nullptr;
 
     QAction* actNewScene_ = nullptr;
     QAction* actOpenScene_ = nullptr;

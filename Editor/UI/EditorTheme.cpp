@@ -7,6 +7,7 @@
 #include <QStyleFactory>
 #include <QFont>
 #include <QPainter>
+#include <QPainterPath>
 #include <QPixmap>
 #include <QPointF>
 #include <QDir>
@@ -323,6 +324,144 @@ QIcon EditorTheme::CreateSettingsIcon(const QColor& color)
             p.drawLine(QPointF(0.0, -5.5), QPointF(0.0, -7.5));
             p.restore();
         }
+    }
+    return QIcon(pix);
+}
+
+QIcon EditorTheme::CreateTranslateIcon(const QColor& color)
+{
+    QPixmap pix(16, 16);
+    pix.fill(Qt::transparent);
+    {
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(color, 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        p.drawLine(QPointF(8.0, 3.5), QPointF(8.0, 12.5));
+        p.drawLine(QPointF(3.5, 8.0), QPointF(12.5, 8.0));
+        p.setPen(Qt::NoPen);
+        p.setBrush(color);
+        const QPointF up[3] = { QPointF(5.5, 5.0), QPointF(8.0, 1.5), QPointF(10.5, 5.0) };
+        const QPointF down[3] = { QPointF(5.5, 11.0), QPointF(8.0, 14.5), QPointF(10.5, 11.0) };
+        const QPointF left[3] = { QPointF(5.0, 5.5), QPointF(1.5, 8.0), QPointF(5.0, 10.5) };
+        const QPointF right[3] = { QPointF(11.0, 5.5), QPointF(14.5, 8.0), QPointF(11.0, 10.5) };
+        p.drawPolygon(up, 3);
+        p.drawPolygon(down, 3);
+        p.drawPolygon(left, 3);
+        p.drawPolygon(right, 3);
+    }
+    return QIcon(pix);
+}
+
+QIcon EditorTheme::CreateRotateIcon(const QColor& color)
+{
+    QPixmap pix(16, 16);
+    pix.fill(Qt::transparent);
+    {
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(color, 1.6, Qt::SolidLine, Qt::RoundCap));
+        p.setBrush(Qt::NoBrush);
+        p.drawArc(QRectF(2.5, 2.5, 11.0, 11.0), 30 * 16, 275 * 16);
+        p.setPen(Qt::NoPen);
+        p.setBrush(color);
+        const QPointF arrow[3] = { QPointF(10.0, 2.0), QPointF(14.5, 4.5), QPointF(11.5, 7.5) };
+        p.drawPolygon(arrow, 3);
+    }
+    return QIcon(pix);
+}
+
+QIcon EditorTheme::CreateScaleIcon(const QColor& color)
+{
+    QPixmap pix(16, 16);
+    pix.fill(Qt::transparent);
+    {
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(Qt::NoPen);
+        p.setBrush(color);
+        p.drawRect(QRectF(2.0, 9.5, 4.5, 4.5));
+        p.drawRect(QRectF(8.5, 2.0, 5.5, 5.5));
+        p.setPen(QPen(color, 1.5, Qt::SolidLine, Qt::RoundCap));
+        p.drawLine(QPointF(6.0, 10.0), QPointF(9.5, 6.5));
+    }
+    return QIcon(pix);
+}
+
+QIcon EditorTheme::CreateWorldIcon(const QColor& color)
+{
+    QPixmap pix(16, 16);
+    pix.fill(Qt::transparent);
+    {
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(color, 1.4));
+        p.setBrush(Qt::NoBrush);
+        p.drawEllipse(QRectF(2.5, 2.5, 11.0, 11.0));
+        p.drawLine(QPointF(2.5, 8.0), QPointF(13.5, 8.0));
+        p.drawEllipse(QRectF(5.0, 2.5, 6.0, 11.0));
+    }
+    return QIcon(pix);
+}
+
+QIcon EditorTheme::CreateLocalIcon()
+{
+    QPixmap pix(16, 16);
+    pix.fill(Qt::transparent);
+    {
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        const QPointF o(8.0, 9.0);
+        p.setPen(QPen(QColor(0x22, 0xC5, 0x5E), 1.8, Qt::SolidLine, Qt::RoundCap));
+        p.drawLine(o, QPointF(8.0, 2.5));
+        p.setPen(QPen(QColor(0xEF, 0x44, 0x44), 1.8, Qt::SolidLine, Qt::RoundCap));
+        p.drawLine(o, QPointF(2.5, 12.5));
+        p.setPen(QPen(QColor(0x3B, 0x82, 0xF6), 1.8, Qt::SolidLine, Qt::RoundCap));
+        p.drawLine(o, QPointF(13.5, 12.5));
+        p.setPen(Qt::NoPen);
+        p.setBrush(QColor(0xFB, 0xBF, 0x24));
+        p.drawEllipse(QRectF(6.5, 7.5, 3.0, 3.0));
+    }
+    return QIcon(pix);
+}
+
+QIcon EditorTheme::CreateSnapIcon(const QColor& color)
+{
+    QPixmap pix(16, 16);
+    pix.fill(Qt::transparent);
+    {
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(color, 2.0, Qt::SolidLine, Qt::FlatCap));
+        p.setBrush(Qt::NoBrush);
+        QPainterPath path;
+        path.moveTo(4.0, 5.0);
+        path.lineTo(4.0, 9.5);
+        path.arcTo(QRectF(4.0, 5.5, 8.0, 8.0), 180, -180);
+        path.lineTo(12.0, 5.0);
+        p.drawPath(path);
+        p.setPen(Qt::NoPen);
+        p.setBrush(QColor(0xEF, 0x44, 0x44));
+        p.drawRect(QRectF(2.5, 2.5, 3.0, 2.5));
+        p.setBrush(QColor(0x3B, 0x82, 0xF6));
+        p.drawRect(QRectF(10.5, 2.5, 3.0, 2.5));
+    }
+    return QIcon(pix);
+}
+
+QIcon EditorTheme::CreateResetIcon(const QColor& color)
+{
+    QPixmap pix(16, 16);
+    pix.fill(Qt::transparent);
+    {
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(color, 1.5, Qt::SolidLine, Qt::RoundCap));
+        p.setBrush(Qt::NoBrush);
+        p.drawArc(QRectF(2.5, 2.5, 11.0, 11.0), 40 * 16, 270 * 16);
+        p.setPen(Qt::NoPen);
+        p.setBrush(color);
+        const QPointF arrow[3] = { QPointF(10.0, 1.5), QPointF(6.0, 4.0), QPointF(9.5, 6.5) };
+        p.drawPolygon(arrow, 3);
     }
     return QIcon(pix);
 }

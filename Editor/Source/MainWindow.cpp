@@ -153,20 +153,8 @@ void EditorMainWindow::BuildUi()
 
     QMenu* viewMenu = viewMenu_;
 
-    if (viewportDock_)
-        viewMenu->addAction(viewportDock_->toggleViewAction());
-
-    if (consoleDock_)
-        viewMenu->addAction(consoleDock_->toggleViewAction());
-
-    if (fileDock_)
-        viewMenu->addAction(fileDock_->toggleViewAction());
-
-    if (sceneObjectsDock_)
-        viewMenu->addAction(sceneObjectsDock_->toggleViewAction());
-
-    if (inspectorDock_)
-        viewMenu->addAction(inspectorDock_->toggleViewAction());
+    for (QDockWidget* d : {static_cast<QDockWidget*>(viewportDock_), static_cast<QDockWidget*>(consoleDock_), static_cast<QDockWidget*>(fileDock_), static_cast<QDockWidget*>(sceneObjectsDock_), static_cast<QDockWidget*>(inspectorDock_)})
+        if (d) viewMenu->addAction(d->toggleViewAction());
 
     statsLabel_ = new QLabel(this);
     statusBar()->addPermanentWidget(statsLabel_);
@@ -285,21 +273,26 @@ void EditorMainWindow::BuildSceneMenu()
     });
 
     editMenu_ = menuBar()->addMenu(Tr("Правка", "Edit"));
-    undoAction_ = editMenu_->addAction(Tr("Отменить", "Undo"), this, [this] {
-        SubmitObjectCommand(EditorCommand::Undo);
-    }, QKeySequence::Undo);
-
-    redoAction_ = editMenu_->addAction(Tr("Повторить", "Redo"), this, [this] {
-        SubmitObjectCommand(EditorCommand::Redo);
-    }, QKeySequence::Redo);
-
-    duplicateAction_ = editMenu_->addAction(Tr("Дублировать объект", "Duplicate Object"), this, [this] {
-        SubmitObjectCommand(EditorCommand::DuplicateObject);
-    }, QKeySequence(QStringLiteral("Ctrl+D")));
-
-    deleteAction_ = editMenu_->addAction(Tr("Удалить объект", "Remove Object"), this, [this] {
-        SubmitObjectCommand(EditorCommand::RemoveObject);
-    });
+    undoAction_ = editMenu_->addAction(Tr("Отменить", "Undo"), this, [this] { SubmitObjectCommand(EditorCommand::Undo); }, QKeySequence::Undo);
+    redoAction_ = editMenu_->addAction(Tr("Повторить", "Redo"), this, [this] { SubmitObjectCommand(EditorCommand::Redo); }, QKeySequence::Redo);
+    duplicateAction_ = editMenu_->addAction(Tr("Дублировать объект", "Duplicate Object"), this, [this] { SubmitObjectCommand(EditorCommand::DuplicateObject); }, QKeySequence(QStringLiteral("Ctrl+D")));
+    deleteAction_ = editMenu_->addAction(Tr("Удалить объект", "Remove Object"), this, [this] { SubmitObjectCommand(EditorCommand::RemoveObject); });
+    editMenu_->addSeparator();
+    schemeMenu_ = editMenu_->addMenu(Tr("Схема управления", "Control Scheme"));
+    actSchemeUnreal_ = schemeMenu_->addAction(QStringLiteral("Unreal / Unity"), this, [] { CommandRegistry::Instance().Execute(QStringLiteral("Editor.SetControlSchemeUnreal")); });
+    actSchemeUnreal_->setCheckable(true);
+    actSchemeBlender_ = schemeMenu_->addAction(QStringLiteral("Blender"), this, [] { CommandRegistry::Instance().Execute(QStringLiteral("Editor.SetControlSchemeBlender")); });
+    actSchemeBlender_->setCheckable(true);
+    auto* sGroup = new QActionGroup(this);
+    sGroup->addAction(actSchemeUnreal_);
+    sGroup->addAction(actSchemeBlender_);
+    auto updateScheme = [this] {
+        const bool blender = EditorSettings::Instance().GetControlScheme() == ControlScheme::Blender;
+        actSchemeBlender_->setChecked(blender);
+        actSchemeUnreal_->setChecked(!blender);
+    };
+    updateScheme();
+    EditorSettings::Instance().SubscribeControlSchemeChanged([updateScheme](ControlScheme) { updateScheme(); });
 
     if (viewMenu_ && !actServiceObjects_) {
         actServiceObjects_ = viewMenu_->addAction(Tr("Служебные объекты сцены", "Scene Service Objects"));
@@ -1290,6 +1283,7 @@ void EditorMainWindow::RetranslateUi()
     if (sceneMenu_) sceneMenu_->setTitle(Tr("Сцена", "Scene"));
     if (playMenu_) playMenu_->setTitle(Tr("Запуск", "Play"));
     if (editMenu_) editMenu_->setTitle(Tr("Правка", "Edit"));
+    if (schemeMenu_) schemeMenu_->setTitle(Tr("Схема управления", "Control Scheme"));
     if (viewMenu_) viewMenu_->setTitle(Tr("Вид", "View"));
     if (resourcesSubMenu_) resourcesSubMenu_->setTitle(Tr("Ресурсы", "Assets"));
     if (themeMenu_) themeMenu_->setTitle(Tr("Тема оформления", "Theme"));

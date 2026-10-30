@@ -55,6 +55,16 @@ inline void RegisterViewportCommands(ViewportWidget* viewport, EditorQtHost* hos
         EditorSettings::Instance().SetControlScheme(scheme == ControlScheme::Blender ? ControlScheme::UnrealUnity : ControlScheme::Blender);
         return true;
     });
+
+    reg(QStringLiteral("Editor.SetControlSchemeUnreal"), QStringLiteral("Set Unreal Control Scheme"), [](const CommandContext&) {
+        EditorSettings::Instance().SetControlScheme(ControlScheme::UnrealUnity);
+        return true;
+    });
+
+    reg(QStringLiteral("Editor.SetControlSchemeBlender"), QStringLiteral("Set Blender Control Scheme"), [](const CommandContext&) {
+        EditorSettings::Instance().SetControlScheme(ControlScheme::Blender);
+        return true;
+    });
 }
 
 inline void UnregisterViewportCommands()
@@ -66,5 +76,6 @@ inline void UnregisterViewportCommands()
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Gizmo.ToggleSnap"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Gizmo.FocusSelected"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Editor.ToggleControlScheme"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Editor.SetControlSchemeUnreal"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Editor.SetControlSchemeBlender"));
 }
-

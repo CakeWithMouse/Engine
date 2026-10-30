@@ -32,7 +32,7 @@ MainToolBar::MainToolBar(QWidget* parent)
 
     configPlayBtn_ = new QToolButton(this);
     configPlayBtn_->setObjectName(QStringLiteral("ConfigPlayBtn"));
-    configPlayBtn_->setText(QStringLiteral("⚙"));
+    configPlayBtn_->setIcon(EditorTheme::CreateSettingsIcon());
     configPlayBtn_->setToolTip(Tr("Детальные настройки Play…", "Detailed Play Settings…"));
     connect(configPlayBtn_, &QToolButton::clicked, this, &MainToolBar::ConfigPlayTriggered);
     addWidget(configPlayBtn_);

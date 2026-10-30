@@ -3,6 +3,7 @@
 #include "CollapsibleCard.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "EditorLocale.h"
+#include "EditorTheme.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -92,7 +93,8 @@ private:
         const QString axisColors[3] = {QStringLiteral("#EF4444"), QStringLiteral("#22C55E"), QStringLiteral("#3B82F6")};
 
         const auto makeResetBtn = [this](const QString& toolTip) {
-            auto* btn = new QPushButton(QStringLiteral("↺"), Content());
+            auto* btn = new QPushButton(Content());
+            btn->setIcon(EditorTheme::CreateResetIcon());
             btn->setFixedSize(22, 22);
             btn->setToolTip(toolTip);
 
