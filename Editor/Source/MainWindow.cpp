@@ -95,24 +95,23 @@ void EditorMainWindow::BuildUi()
     console_->setObjectName(QStringLiteral("Console"));
     console_->setReadOnly(true);
     console_->setMaximumBlockCount(2000);
+    console_->setMinimumSize(60, 50);
+    console_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
 
     consoleDock_ = new QDockWidget(QStringLiteral("Console"), this);
+    consoleDock_->setObjectName(QStringLiteral("ConsoleDock"));
     consoleDock_->setWidget(console_);
     addDockWidget(Qt::BottomDockWidgetArea, consoleDock_);
 
     fileDock_ = new FileBrowserDock(host_, this);
+    fileDock_->setObjectName(QStringLiteral("FileBrowserDock"));
     addDockWidget(Qt::BottomDockWidgetArea, fileDock_);
     tabifyDockWidget(consoleDock_, fileDock_);
 
     BuildToolBar();
     BuildSceneDocks();
 
-    DockLayoutManager::UnlockDockResizing(viewportDock_);
-    DockLayoutManager::UnlockDockResizing(consoleDock_);
-    DockLayoutManager::UnlockDockResizing(fileDock_);
-    DockLayoutManager::UnlockDockResizing(sceneObjectsDock_);
-    DockLayoutManager::UnlockDockResizing(inspectorDock_);
-    DockLayoutManager::RestoreLayout(this);
+    ApplySavedOrInitialLayout();
 
     viewMenu_ = menuBar()->addMenu(Tr("Вид", "View"));
     langMenu_ = viewMenu_->addMenu(Tr("Язык", "Language"));
@@ -136,7 +135,8 @@ void EditorMainWindow::BuildUi()
 
     viewMenu_->addSeparator();
     actResetLayout_ = viewMenu_->addAction(Tr("Сбросить раскладку окон", "Reset Window Layout"), this, [this] {
-        DockLayoutManager::ResetLayout(this);
+        DockLayoutManager::ResetLayout(this, ProjectPath());
+        ApplyDefaultLayout();
     });
     viewMenu_->addSeparator();
 
@@ -194,7 +194,7 @@ void EditorMainWindow::closeEvent(QCloseEvent* event)
     event->ignore();
     if (closing_ || sceneBusy_ || checkingChanges_) return;
     if (!CloseMaterialEditors([this] { close(); })) return;
-    DockLayoutManager::SaveLayout(this);
+    DockLayoutManager::SaveLayout(this, ProjectPath());
     closing_ = true;
     // Queue a barrier after viewport edits, then inspect the authoritative dirty state.
     if (host_->HasScene())
@@ -449,7 +449,6 @@ void EditorMainWindow::BuildSceneDocks()
 
     inspectorDock_ = new QDockWidget(QStringLiteral("Свойства объекта"), this);
     inspectorDock_->setObjectName(QStringLiteral("InspectorDock"));
-    inspectorDock_->setMinimumWidth(300);
     inspectorDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     inspectorDock_->setFeatures(
         QDockWidget::DockWidgetMovable |
@@ -1263,6 +1262,28 @@ void EditorMainWindow::OpenScene(const QString& supplied)
 
         host_->PostCommand(c);
     });
+}
+
+void EditorMainWindow::ApplySavedOrInitialLayout()
+{
+    const bool isTest = qEnvironmentVariableIsSet("PAIN_EDITOR_TEST_MODE") ||
+        qApp->applicationFilePath().contains(QStringLiteral("Tests"), Qt::CaseInsensitive) ||
+        (host_ && host_->host().projectName && std::string(host_->host().projectName).find("UI") != std::string::npos);
+
+    if (isTest || !DockLayoutManager::RestoreLayout(this, ProjectPath())) {
+        ApplyDefaultLayout();
+    }
+}
+
+void EditorMainWindow::ApplyDefaultLayout()
+{
+    DockLayoutManager::ApplyDefaultLayout(this, viewportDock_, sceneObjectsDock_, inspectorDock_, fileDock_, consoleDock_);
+}
+
+QString EditorMainWindow::ProjectPath() const
+{
+    if (!host_ || !host_->host().projectFile) return QString();
+    return QString::fromUtf8(host_->host().projectFile);
 }
 
 void EditorMainWindow::RetranslateUi()

@@ -196,6 +196,7 @@ void TestFileService()
 
 #include "EditorLocale.h"
 #include "GizmoMath.h"
+#include "SettingsService.h"
 
 static void TestGizmoMath()
 {
@@ -294,6 +295,31 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestGizmoMath...\n");
     std::fflush(stdout);
     TestGizmoMath();
+
+    std::printf("[Test] TestSettingsService...\n");
+    std::fflush(stdout);
+    {
+        const QString k1 = SettingsService::ComputeProjectKey("C:/Proj1/p.painproj");
+        const QString k2 = SettingsService::ComputeProjectKey("C:/Proj2/p.painproj");
+        const QString kEmpty = SettingsService::ComputeProjectKey("");
+        Check(!k1.isEmpty(), "k1 not empty");
+        Check(!k2.isEmpty(), "k2 not empty");
+        Check(k1 != k2, "k1 != k2");
+        Check(kEmpty == QStringLiteral("default"), "kEmpty is default");
+
+        SettingsService::Instance().SaveProjectLayout("C:/Proj1/p.painproj", QByteArray("STATE1"), QByteArray("GEOM1"));
+        QByteArray s, g;
+        Check(SettingsService::Instance().RestoreProjectLayout("C:/Proj1/p.painproj", s, g), "restore layout proj1");
+        Check(s == QByteArray("STATE1"), "state proj1");
+        Check(g == QByteArray("GEOM1"), "geom proj1");
+
+        QByteArray s2, g2;
+        Check(!SettingsService::Instance().RestoreProjectLayout("C:/ProjNew/never.painproj", s2, g2), "new project gets no saved layout");
+
+        SettingsService::Instance().ResetProjectLayout("C:/Proj1/p.painproj");
+        QByteArray s3, g3;
+        Check(!SettingsService::Instance().RestoreProjectLayout("C:/Proj1/p.painproj", s3, g3), "reset layout proj1");
+    }
 
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);

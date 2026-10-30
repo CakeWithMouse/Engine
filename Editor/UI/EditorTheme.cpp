@@ -1,5 +1,6 @@
 #include "EditorTheme.h"
 #include "EditorStyles.h"
+#include "SettingsService.h"
 
 #include <QApplication>
 #include <QPalette>
@@ -8,7 +9,6 @@
 #include <QPainter>
 #include <QPixmap>
 #include <QPointF>
-#include <QSettings>
 
 EditorTheme& EditorTheme::Instance()
 {
@@ -18,11 +18,10 @@ EditorTheme& EditorTheme::Instance()
 
 EditorTheme::EditorTheme()
 {
-    QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
-    const QString modeStr = settings.value(QStringLiteral("ui/theme_mode"), QStringLiteral("dark")).toString();
+    const QString modeStr = SettingsService::Instance().GetValue(QStringLiteral("ui/theme_mode"), QStringLiteral("dark")).toString();
     mode_ = (modeStr.toLower() == QStringLiteral("light")) ? ThemeMode::Light : ThemeMode::Dark;
 
-    const QString accentStr = settings.value(QStringLiteral("ui/accent_color"), QStringLiteral("#DC2626")).toString();
+    const QString accentStr = SettingsService::Instance().GetValue(QStringLiteral("ui/accent_color"), QStringLiteral("#DC2626")).toString();
     accentColor_ = QColor(accentStr);
     if (!accentColor_.isValid()) {
         accentColor_ = QColor(QStringLiteral("#DC2626"));
@@ -50,8 +49,7 @@ void EditorTheme::SetMode(ThemeMode mode)
 {
     if (mode_ == mode) return;
     mode_ = mode;
-    QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
-    settings.setValue(QStringLiteral("ui/theme_mode"), mode_ == ThemeMode::Light ? QStringLiteral("light") : QStringLiteral("dark"));
+    SettingsService::Instance().SetValue(QStringLiteral("ui/theme_mode"), mode_ == ThemeMode::Light ? QStringLiteral("light") : QStringLiteral("dark"));
     ApplyToApp();
     NotifyChanged();
 }
@@ -60,8 +58,7 @@ void EditorTheme::SetAccentColor(const QColor& color)
 {
     if (!color.isValid() || accentColor_ == color) return;
     accentColor_ = color;
-    QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
-    settings.setValue(QStringLiteral("ui/accent_color"), accentColor_.name(QColor::HexRgb));
+    SettingsService::Instance().SetValue(QStringLiteral("ui/accent_color"), accentColor_.name(QColor::HexRgb));
     ApplyToApp();
     NotifyChanged();
 }

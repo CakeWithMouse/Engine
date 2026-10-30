@@ -96,6 +96,10 @@ private:
     void BuildSceneMenu();
     void ConnectPanels();
 
+    void ApplyDefaultLayout();
+    void ApplySavedOrInitialLayout();
+    QString ProjectPath() const;
+
     void RefreshSceneUi();
 
     void SaveScene(bool saveAs = false, std::function<void()> after = {});

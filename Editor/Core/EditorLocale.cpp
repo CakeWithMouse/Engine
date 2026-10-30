@@ -1,5 +1,5 @@
 #include "EditorLocale.h"
-#include <QSettings>
+#include "SettingsService.h" 
 #include <algorithm>
 
 EditorLocale& EditorLocale::Instance()
@@ -15,8 +15,7 @@ EditorLocale::EditorLocale()
 
 void EditorLocale::LoadSettings()
 {
-    QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
-    const QString langStr = settings.value(QStringLiteral("ui/language"), QStringLiteral("ru")).toString().toLower();
+    const QString langStr = SettingsService::Instance().GetValue(QStringLiteral("ui/language"), QStringLiteral("ru")).toString().toLower();
     if (langStr == QStringLiteral("en"))
     {
         currentLanguage_ = EditorLanguage::En;
@@ -29,8 +28,7 @@ void EditorLocale::LoadSettings()
 
 void EditorLocale::SaveSettings()
 {
-    QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
-    settings.setValue(QStringLiteral("ui/language"),
+    SettingsService::Instance().SetValue(QStringLiteral("ui/language"),
                       currentLanguage_ == EditorLanguage::En ? QStringLiteral("en") : QStringLiteral("ru"));
 }
 

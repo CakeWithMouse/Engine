@@ -72,6 +72,7 @@
         <ClCompile Include="../Core/CommandRegistry.cpp"/>
         <ClCompile Include="../Core/FileService.cpp"/>
         <ClCompile Include="../Core/EditorLocale.cpp"/>
+        <ClCompile Include="../Core/SettingsService.cpp"/>
         <ClCompile Include="../Core/GizmoMath.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_Logger.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_CommandRegistry.cpp"/>

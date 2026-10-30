@@ -1,5 +1,5 @@
 #include "EditorSettings.h"
-#include <QSettings>
+#include "SettingsService.h" 
 #include <QString>
 
 EditorSettings& EditorSettings::Instance()
@@ -9,8 +9,7 @@ EditorSettings& EditorSettings::Instance()
     if (!initialized)
     {
         initialized = true;
-        QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
-        const QString val = settings.value(QStringLiteral("viewport/control_scheme"), QStringLiteral("unreal_unity")).toString();
+        const QString val = SettingsService::Instance().GetValue(QStringLiteral("viewport/control_scheme"), QStringLiteral("unreal_unity")).toString();
         instance.scheme_ = (val.toLower() == QStringLiteral("blender")) ? ControlScheme::Blender : ControlScheme::UnrealUnity;
     }
     return instance;
@@ -28,8 +27,7 @@ void EditorSettings::SetControlScheme(ControlScheme scheme)
 
     scheme_ = scheme;
 
-    QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
-    settings.setValue(QStringLiteral("viewport/control_scheme"),
+    SettingsService::Instance().SetValue(QStringLiteral("viewport/control_scheme"),
                       scheme == ControlScheme::Blender ? QStringLiteral("blender") : QStringLiteral("unreal_unity"));
 
     for (const auto& sub : subscribers_)

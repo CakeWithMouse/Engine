@@ -1,10 +1,13 @@
 #include "DockLayoutManager.h"
-#include <QSettings>
+#include "SettingsService.h"
+#include <QAbstractScrollArea>
+#include <QList>
 
 void DockLayoutManager::UnlockDockResizing(QDockWidget* dock)
 {
     if (!dock) return;
     dock->setMinimumSize(80, 60);
+    dock->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     if (dock->widget()) {
         UnlockWidgetResizing(dock->widget());
     }
@@ -15,56 +18,71 @@ void DockLayoutManager::UnlockWidgetResizing(QWidget* widget)
     if (!widget) return;
     widget->setMinimumSize(80, 60);
     widget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    for (auto* child : widget->findChildren<QAbstractScrollArea*>()) {
+        child->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
+        child->setMinimumSize(60, 50);
+    }
 }
 
-void DockLayoutManager::SaveLayout(QMainWindow* window, bool isTestMode)
+void DockLayoutManager::SaveLayout(QMainWindow* window, const QString& projectPath, bool isTestMode)
 {
     if (!window || isTestMode) return;
-    QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
-    settings.setValue(QStringLiteral("window/geometry"), window->saveGeometry());
-    settings.setValue(QStringLiteral("window/state"), window->saveState());
+    SettingsService::Instance().SaveProjectLayout(projectPath, window->saveState(), window->saveGeometry());
 }
 
-bool DockLayoutManager::RestoreLayout(QMainWindow* window)
+bool DockLayoutManager::RestoreLayout(QMainWindow* window, const QString& projectPath)
 {
     if (!window) return false;
-    QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
-    const QByteArray savedState = settings.value(QStringLiteral("window/state")).toByteArray();
-    const QByteArray savedGeom = settings.value(QStringLiteral("window/geometry")).toByteArray();
-    if (!savedState.isEmpty() && window->restoreState(savedState)) {
-        if (!savedGeom.isEmpty()) {
-            window->restoreGeometry(savedGeom);
+    QByteArray state, geom;
+    if (SettingsService::Instance().RestoreProjectLayout(projectPath, state, geom)) {
+        if (window->restoreState(state)) {
+            if (!geom.isEmpty()) {
+                window->restoreGeometry(geom);
+            }
+            return true;
         }
-        return true;
     }
     return false;
 }
 
-void DockLayoutManager::ResetLayout(QMainWindow* window)
+void DockLayoutManager::ResetLayout(QMainWindow* window, const QString& projectPath)
 {
     if (!window) return;
-    QSettings settings(QStringLiteral("PainEngine"), QStringLiteral("Editor"));
-    settings.remove(QStringLiteral("window/state"));
-    settings.remove(QStringLiteral("window/geometry"));
+    SettingsService::Instance().ResetProjectLayout(projectPath);
 }
 
-void DockLayoutManager::ApplyDefaultDocks(QMainWindow* window,
-                                         QDockWidget* viewportDock,
-                                         QDockWidget* sceneObjectsDock,
-                                         QDockWidget* inspectorDock,
-                                         QDockWidget* fileDock,
-                                         QDockWidget* consoleDock)
+void DockLayoutManager::ApplyDefaultLayout(QMainWindow* window,
+                                          QDockWidget* viewportDock,
+                                          QDockWidget* sceneObjectsDock,
+                                          QDockWidget* inspectorDock,
+                                          QDockWidget* fileDock,
+                                          QDockWidget* consoleDock)
 {
     if (!window) return;
+
+    for (auto* dock : {viewportDock, sceneObjectsDock, inspectorDock, fileDock, consoleDock}) {
+        if (dock) {
+            dock->setFloating(false);
+            dock->show();
+            UnlockDockResizing(dock);
+        }
+    }
+
     if (viewportDock) window->addDockWidget(Qt::TopDockWidgetArea, viewportDock);
     if (sceneObjectsDock) window->addDockWidget(Qt::LeftDockWidgetArea, sceneObjectsDock);
     if (inspectorDock) window->addDockWidget(Qt::RightDockWidgetArea, inspectorDock);
-    if (fileDock) window->addDockWidget(Qt::BottomDockWidgetArea, fileDock);
     if (consoleDock) window->addDockWidget(Qt::BottomDockWidgetArea, consoleDock);
+    if (fileDock) window->addDockWidget(Qt::BottomDockWidgetArea, fileDock);
 
     if (fileDock && consoleDock) {
-        window->tabifyDockWidget(fileDock, consoleDock);
+        window->tabifyDockWidget(consoleDock, fileDock);
         fileDock->raise();
     }
-}
 
+    if (viewportDock && fileDock) {
+        window->resizeDocks({viewportDock, fileDock}, {500, 200}, Qt::Vertical);
+    }
+    if (sceneObjectsDock && viewportDock && inspectorDock) {
+        window->resizeDocks({sceneObjectsDock, viewportDock, inspectorDock}, {220, 600, 280}, Qt::Horizontal);
+    }
+}
