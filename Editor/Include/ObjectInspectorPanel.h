@@ -10,11 +10,13 @@
 
 class QLabel;
 class QLineEdit;
-class QDoubleSpinBox;
-class QGroupBox;
 class QCheckBox;
 class QPushButton;
-class QFormLayout;
+class QVBoxLayout;
+class NoWheelDoubleSpinBox;
+class CollapsibleCard;
+class TransformCard;
+class MaterialCard;
 
 struct EditorSnapshot;
 
@@ -39,6 +41,7 @@ class ObjectInspectorPanel : public QWidget
 
 public:
     explicit ObjectInspectorPanel(QWidget* parent = nullptr);
+    ~ObjectInspectorPanel() override;
 
     void SetEnabled(bool enabled);
     void SetMaterialsAvailable(bool available);
@@ -50,6 +53,8 @@ public:
     );
 
     void ClearFocusIfInside();
+    void RetranslateUi();
+    QSize minimumSizeHint() const override { return QSize(80, 60); }
 
 signals:
     void NameEditingFinished(quint64 objectId, const QString& name);
@@ -76,34 +81,40 @@ signals:
 
 private:
     void BuildUi();
-
-    void BuildAssetInspector(QFormLayout* form);
+    void BuildGeneralCard(QVBoxLayout* layout);
+    void BuildPointLightCard(QVBoxLayout* layout);
+    void BuildCharacterCard(QVBoxLayout* layout);
 
     void UpdateLightColorButton(const float color[3]);
-
     InspectorTransformValue CurrentTransformValue() const;
     InspectorPointLightValue CurrentPointLightValue() const;
-
     bool HasFocusedChild() const;
 
     quint64 selectedId_ = 0;
     bool refreshing_ = false;
+    int langSubId_ = 0;
 
+    // Cards
+    CollapsibleCard* cardGeneral_ = nullptr;
+    TransformCard* cardTransform_ = nullptr;
+    MaterialCard* cardMaterial_ = nullptr;
+    CollapsibleCard* cardLight_ = nullptr;
+    CollapsibleCard* cardCharacter_ = nullptr;
+
+    // General
     QLabel* selectionLabel_ = nullptr;
-    QWidget* characterInspector_ = nullptr;
-    QDoubleSpinBox* characterSpeed_ = nullptr;
-    QPushButton* chooseModel_ = nullptr;
+    QLabel* typeBadgeLabel_ = nullptr;
     QLineEdit* objectName_ = nullptr;
-    QLineEdit* modelAsset_ = nullptr;
-    QLineEdit* textureAsset_ = nullptr;
-    QLineEdit* materialAsset_ = nullptr;
-    QWidget* materialActions_ = nullptr;
-    QPushButton* editMaterialButton_ = nullptr;
 
-    QDoubleSpinBox* transform_[9]{};
-
+    // Point Light
     QWidget* lightInspector_ = nullptr;
-    QDoubleSpinBox* lightValues_[5]{}; // RGB, intensity, radius
+    NoWheelDoubleSpinBox* lightValues_[5]{};
     QCheckBox* lightEnabled_ = nullptr;
     QPushButton* lightColor_ = nullptr;
+    QLabel* lightRowLabels_[5]{};
+
+    // Character
+    QWidget* characterInspector_ = nullptr;
+    NoWheelDoubleSpinBox* characterSpeed_ = nullptr;
+    QLabel* characterSpeedLabel_ = nullptr;
 };

@@ -1,35 +1,77 @@
 #include "ObjectInspectorPanel.h"
-#include "QtHost.h"
+#include "CollapsibleCard.h"
+#include "TransformCard.h"
+#include "MaterialCard.h"
+#include "NoWheelDoubleSpinBox.h"
+#include "EditorLocale.h"
 
-#include <QFormLayout>
-#include <QLineEdit>
-#include <QDoubleSpinBox>
-#include <QGroupBox>
-#include <QCheckBox>
-#include <QPushButton>
 #include <QApplication>
-#include <QQuaternion>
+#include <QCheckBox>
 #include <QHBoxLayout>
-#include <QPushButton>
-#include <QScrollArea>
-#include <QVBoxLayout>
-#include <QLabel>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QFrame>
-#include <QSizePolicy>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QQuaternion>
+#include <QScrollArea>
+#include <QVBoxLayout>
+
+static QWidget* CreateAxisCell(NoWheelDoubleSpinBox* spin, const QString& axisLetter, const QString& badgeColor, QWidget* parent)
+{
+    auto* cell = new QWidget(parent);
+    auto* layout = new QHBoxLayout(cell);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+
+    auto* badge = new QLabel(axisLetter, cell);
+    badge->setFixedSize(16, 22);
+    badge->setAlignment(Qt::AlignCenter);
+    badge->setStyleSheet(QStringLiteral(
+        "background-color: %1; color: white; font-weight: bold; font-size: 10px; "
+        "border-top-left-radius: 4px; border-bottom-left-radius: 4px;"
+    ).arg(badgeColor));
+    layout->addWidget(badge);
+
+    spin->setParent(cell);
+    spin->setFixedHeight(22);
+    spin->setStyleSheet(QStringLiteral(
+        "QDoubleSpinBox { background-color: #1F232B; color: #F1F5F9; border: 1px solid #333842; "
+        "border-left: none; border-top-right-radius: 4px; border-bottom-right-radius: 4px; "
+        "font-size: 11px; padding: 1px 2px; }"
+        "QDoubleSpinBox:focus { border: 1px solid #3B82F6; }"
+    ));
+    layout->addWidget(spin, 1);
+    return cell;
+}
 
 ObjectInspectorPanel::ObjectInspectorPanel(QWidget* parent)
     : QWidget(parent)
 {
     BuildUi();
+    langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
+        RetranslateUi();
+    });
+}
+
+ObjectInspectorPanel::~ObjectInspectorPanel()
+{
+    if (langSubId_)
+    {
+        EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
+        langSubId_ = 0;
+    }
+}
+
+void ObjectInspectorPanel::SetEnabled(bool enabled)
+{
+    setEnabled(enabled);
 }
 
 void ObjectInspectorPanel::SetMaterialsAvailable(bool available)
 {
-    materialActions_->setEnabled(available);
-    materialAsset_->setEnabled(available);
-    materialActions_->setToolTip(available ? QString() : QStringLiteral("Материалы требуют обновления игрового модуля."));
+    if (cardMaterial_)
+        cardMaterial_->SetMaterialsAvailable(available);
 }
 
 void ObjectInspectorPanel::BuildUi()
@@ -42,253 +84,240 @@ void ObjectInspectorPanel::BuildUi()
     scrollArea->setFrameShape(QFrame::NoFrame);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollArea->setMinimumHeight(0);
+    scrollArea->setStyleSheet(QStringLiteral("QScrollArea { background-color: #12141A; }"));
 
     auto* content = new QWidget(scrollArea);
-
+    content->setStyleSheet(QStringLiteral("background-color: #12141A;"));
     auto* inspectorLayout = new QVBoxLayout(content);
     inspectorLayout->setContentsMargins(6, 6, 6, 6);
-    auto group = [content, inspectorLayout](const QString& title) {
-        auto* box = new QGroupBox(title, content);
-        inspectorLayout->addWidget(box);
-        auto* form = new QFormLayout(box);
-        form->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
-        return form;
-    };
-    auto* form = group(QStringLiteral("Общие"));
-    selectionLabel_ = new QLabel(QStringLiteral("Объект не выбран"), content);
-    selectionLabel_->setObjectName(QStringLiteral("SelectedObjectLabel"));
-    selectionLabel_->setWordWrap(true);
-    selectionLabel_->setStyleSheet(QStringLiteral("font-weight: bold; color: #efa52b;"));
-    form->addRow(selectionLabel_);
+    inspectorLayout->setSpacing(6);
 
+    BuildGeneralCard(inspectorLayout);
+
+    cardTransform_ = new TransformCard(this);
+    cardTransform_->SetOnChanged([this] {
+        if (refreshing_ || selectedId_ == 0) return;
+        emit TransformEditingFinished(selectedId_, CurrentTransformValue());
+    });
+    inspectorLayout->addWidget(cardTransform_);
+
+    cardMaterial_ = new MaterialCard(this);
+    cardMaterial_->onEditMaterial = [this](const QString& path) { emit EditMaterialRequested(path); };
+    cardMaterial_->onChooseMaterial = [this] { emit ChooseMaterialRequested(); };
+    cardMaterial_->onClearMaterial = [this] { emit ClearMaterialRequested(); };
+    cardMaterial_->onChooseModel = [this] { emit ChooseModelRequested(); };
+    cardMaterial_->onChooseTexture = [this] { emit ChooseTextureRequested(); };
+    cardMaterial_->onClearTexture = [this] { emit ClearTextureRequested(); };
+    inspectorLayout->addWidget(cardMaterial_);
+
+    BuildPointLightCard(inspectorLayout);
+    BuildCharacterCard(inspectorLayout);
+
+    inspectorLayout->addStretch(1);
     scrollArea->setWidget(content);
     outerLayout->addWidget(scrollArea);
 
-    // Чтобы сама панель могла нормально сжиматься внутри дока
     setMinimumHeight(0);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+}
 
-    objectName_ = new QLineEdit(this);
+void ObjectInspectorPanel::BuildGeneralCard(QVBoxLayout* layout)
+{
+    cardGeneral_ = new CollapsibleCard(Tr("Общие", "General"), this, true);
+    auto* cl = cardGeneral_->ContentLayout();
+
+    auto* rowHeader = new QWidget(cardGeneral_->Content());
+    auto* layoutHeader = new QHBoxLayout(rowHeader);
+    layoutHeader->setContentsMargins(0, 0, 0, 0);
+    layoutHeader->setSpacing(6);
+
+    typeBadgeLabel_ = new QLabel(QStringLiteral("None"), rowHeader);
+    typeBadgeLabel_->setStyleSheet(QStringLiteral(
+        "background-color: #2D333F; color: #94A3B8; font-weight: bold; font-size: 10px; "
+        "padding: 2px 6px; border-radius: 4px; border: 1px solid #3E4554;"
+    ));
+    layoutHeader->addWidget(typeBadgeLabel_);
+
+    selectionLabel_ = new QLabel(Tr("Объект не выбран", "No object selected"), rowHeader);
+    selectionLabel_->setObjectName(QStringLiteral("SelectedObjectLabel"));
+    selectionLabel_->setWordWrap(true);
+    selectionLabel_->setStyleSheet(QStringLiteral("font-weight: bold; color: #38BDF8; font-size: 11px;"));
+    layoutHeader->addWidget(selectionLabel_, 1);
+    cl->addWidget(rowHeader);
+
+    auto* rowName = new QWidget(cardGeneral_->Content());
+    auto* lName = new QHBoxLayout(rowName);
+    lName->setContentsMargins(0, 0, 0, 0);
+    lName->setSpacing(6);
+
+    auto* lblName = new QLabel(Tr("Имя", "Name"), rowName);
+    lblName->setFixedWidth(40);
+    lblName->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px;"));
+    lName->addWidget(lblName);
+
+    objectName_ = new QLineEdit(rowName);
     objectName_->setMaxLength(120);
-    form->addRow(QStringLiteral("Имя"), objectName_);
+    objectName_->setStyleSheet(QStringLiteral(
+        "QLineEdit { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; "
+        "border-radius: 4px; padding: 2px 6px; font-size: 11px; }"
+        "QLineEdit:focus { border: 1px solid #3B82F6; }"
+    ));
+    connect(objectName_, &QLineEdit::editingFinished, this, [this] {
+        if (refreshing_ || selectedId_ == 0) return;
+        emit NameEditingFinished(selectedId_, objectName_->text().trimmed());
+    });
+    lName->addWidget(objectName_, 1);
+    cl->addWidget(rowName);
 
-    const QString labels[] =
-    {
-        QStringLiteral("X"),
-        QStringLiteral("Y"),
-        QStringLiteral("Z"),
-        QStringLiteral("X, °"),
-        QStringLiteral("Y, °"),
-        QStringLiteral("Z, °"),
-        QStringLiteral("X"),
-        QStringLiteral("Y"),
-        QStringLiteral("Z")
-    };
+    layout->addWidget(cardGeneral_);
+}
 
-    for (int i = 0; i < 9; ++i)
-    {
-        if (i % 3 == 0) form = group(i == 0 ? QStringLiteral("Позиция") : i == 3 ? QStringLiteral("Поворот") : QStringLiteral("Масштаб"));
-        auto* spin = transform_[i] = new QDoubleSpinBox(this);
-        spin->setObjectName(QStringLiteral("Transform%1").arg(i));
-        spin->setRange(i >= 6 ? 0.001 : -10000.0, 10000.0);
-        spin->setDecimals(3);
-        spin->setSingleStep(i >= 3 && i < 6 ? 15.0 : 0.25);
-        spin->setKeyboardTracking(false);
-        form->addRow(labels[i], spin);
+void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
+{
+    cardLight_ = new CollapsibleCard(Tr("Точечный свет", "Point Light"), this, true);
+    lightInspector_ = cardLight_;
+    auto* cl = cardLight_->ContentLayout();
 
-        connect(spin, &QDoubleSpinBox::editingFinished, this, [this]
-        {
-            if (refreshing_ || selectedId_ == 0)
-                return;
-
-            emit TransformEditingFinished(selectedId_, CurrentTransformValue());
-        });
-    }
-
-    form = group(QStringLiteral("Визуал"));
-    BuildAssetInspector(form);
-
-    auto* lightGroup = new QGroupBox(QStringLiteral("Точечный свет"), this);
-    lightInspector_ = lightGroup;
-
-    auto* lightForm = new QFormLayout(lightGroup);
-
-    lightColor_ = new QPushButton(QStringLiteral("Выбрать цвет…"), lightGroup);
-    lightColor_->setObjectName(QStringLiteral("LightColor"));
-    lightForm->addRow(lightColor_);
-
-    const QString lightLabels[] =
-    {
-        QStringLiteral("Красный"),
-        QStringLiteral("Зелёный"),
-        QStringLiteral("Синий"),
-        QStringLiteral("Интенсивность"),
-        QStringLiteral("Радиус")
-    };
-
-    auto emitPointLightChanged = [this]
-    {
-        if (refreshing_ || selectedId_ == 0)
-            return;
-
+    auto emitPointLightChanged = [this] {
+        if (refreshing_ || selectedId_ == 0) return;
         emit PointLightEditingFinished(selectedId_, CurrentPointLightValue());
     };
 
-    for (int i = 0; i < 5; ++i)
-    {
-        auto* spin = lightValues_[i] = new QDoubleSpinBox(lightGroup);
-        spin->setObjectName(QStringLiteral("LightValue%1").arg(i));
-        spin->setRange(i == 4 ? 0.01 : 0.0, i < 3 ? 1.0 : 10000.0);
-        spin->setDecimals(3);
-        spin->setSingleStep(i < 3 ? 0.05 : 0.5);
-        spin->setKeyboardTracking(false);
-        lightForm->addRow(lightLabels[i], spin);
+    auto* rowTop = new QWidget(cardLight_->Content());
+    auto* lTop = new QHBoxLayout(rowTop);
+    lTop->setContentsMargins(0, 0, 0, 0);
+    lTop->setSpacing(6);
 
-        connect(spin, &QDoubleSpinBox::editingFinished, this, emitPointLightChanged);
-    }
-
-    lightEnabled_ = new QCheckBox(QStringLiteral("Включён"), lightGroup);
+    lightEnabled_ = new QCheckBox(Tr("Включён", "Enabled"), rowTop);
     lightEnabled_->setObjectName(QStringLiteral("LightEnabled"));
-    lightForm->addRow(lightEnabled_);
+    lightEnabled_->setStyleSheet(QStringLiteral("color: #E2E8F0; font-size: 11px; font-weight: bold;"));
+    connect(lightEnabled_, &QCheckBox::clicked, this, emitPointLightChanged);
+    lTop->addWidget(lightEnabled_);
 
-    connect(lightEnabled_, &QCheckBox::clicked, this, [this, emitPointLightChanged](bool)
-    {
-        emitPointLightChanged();
-    });
-
-    connect(lightColor_, &QPushButton::clicked, this, [this]
-    {
-        if (refreshing_ || selectedId_ == 0)
-            return;
-
-        const QColor current = QColor::fromRgbF(
-            lightValues_[0]->value(),
-            lightValues_[1]->value(),
-            lightValues_[2]->value()
-        );
-
+    lightColor_ = new QPushButton(Tr("Выбрать цвет…", "Choose Color…"), rowTop);
+    lightColor_->setObjectName(QStringLiteral("LightColor"));
+    lightColor_->setStyleSheet(QStringLiteral(
+        "QPushButton { background: #333842; color: #FFFFFF; font-weight: bold; border: 1px solid #4B5263; border-radius: 4px; padding: 3px 8px; font-size: 11px; }"
+    ));
+    connect(lightColor_, &QPushButton::clicked, this, [this] {
+        if (refreshing_ || selectedId_ == 0) return;
+        const QColor current = QColor::fromRgbF(lightValues_[0]->value(), lightValues_[1]->value(), lightValues_[2]->value());
         emit LightColorRequested(selectedId_, current);
     });
+    lTop->addWidget(lightColor_, 1);
+    cl->addWidget(rowTop);
 
-    inspectorLayout->addWidget(lightGroup);
-    lightGroup->hide();
+    auto* rowRgb = new QWidget(cardLight_->Content());
+    auto* lRgb = new QHBoxLayout(rowRgb);
+    lRgb->setContentsMargins(0, 0, 0, 0);
+    lRgb->setSpacing(4);
 
-    auto* characterGroup = new QGroupBox(QStringLiteral("Персонаж"), content);
-    characterInspector_ = characterGroup;
-    auto* characterForm = new QFormLayout(characterGroup);
-    characterSpeed_ = new QDoubleSpinBox(characterGroup);
-    characterSpeed_->setObjectName("CharacterSpeed");
+    const QString rgbLetters[3] = {QStringLiteral("R"), QStringLiteral("G"), QStringLiteral("B")};
+    const QString rgbColors[3] = {QStringLiteral("#EF4444"), QStringLiteral("#22C55E"), QStringLiteral("#3B82F6")};
+
+    for (int i = 0; i < 3; ++i)
+    {
+        auto* spin = lightValues_[i] = new NoWheelDoubleSpinBox(rowRgb);
+        spin->setObjectName(QStringLiteral("LightValue%1").arg(i));
+        spin->setRange(0.0, 1.0);
+        spin->setDecimals(2);
+        spin->setSingleStep(0.05);
+        spin->setKeyboardTracking(false);
+        connect(spin, &QDoubleSpinBox::editingFinished, this, emitPointLightChanged);
+        lRgb->addWidget(CreateAxisCell(spin, rgbLetters[i], rgbColors[i], rowRgb), 1);
+    }
+    cl->addWidget(rowRgb);
+
+    auto* rowInt = new QWidget(cardLight_->Content());
+    auto* lInt = new QHBoxLayout(rowInt);
+    lInt->setContentsMargins(0, 0, 0, 0);
+    lInt->setSpacing(6);
+
+    lightRowLabels_[3] = new QLabel(Tr("Интенсивность", "Intensity"), rowInt);
+    lightRowLabels_[3]->setFixedWidth(80);
+    lightRowLabels_[3]->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px;"));
+    lInt->addWidget(lightRowLabels_[3]);
+
+    lightValues_[3] = new NoWheelDoubleSpinBox(rowInt);
+    lightValues_[3]->setRange(0.0, 10000.0);
+    lightValues_[3]->setDecimals(2);
+    lightValues_[3]->setSingleStep(0.5);
+    lightValues_[3]->setKeyboardTracking(false);
+    lightValues_[3]->setStyleSheet(QStringLiteral("QDoubleSpinBox { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; border-radius: 4px; font-size: 11px; }"));
+    connect(lightValues_[3], &QDoubleSpinBox::editingFinished, this, emitPointLightChanged);
+    lInt->addWidget(lightValues_[3], 1);
+    cl->addWidget(rowInt);
+
+    auto* rowRad = new QWidget(cardLight_->Content());
+    auto* lRad = new QHBoxLayout(rowRad);
+    lRad->setContentsMargins(0, 0, 0, 0);
+    lRad->setSpacing(6);
+
+    lightRowLabels_[4] = new QLabel(Tr("Радиус", "Radius"), rowRad);
+    lightRowLabels_[4]->setFixedWidth(80);
+    lightRowLabels_[4]->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px;"));
+    lRad->addWidget(lightRowLabels_[4]);
+
+    lightValues_[4] = new NoWheelDoubleSpinBox(rowRad);
+    lightValues_[4]->setRange(0.01, 10000.0);
+    lightValues_[4]->setDecimals(2);
+    lightValues_[4]->setSingleStep(0.5);
+    lightValues_[4]->setKeyboardTracking(false);
+    lightValues_[4]->setStyleSheet(QStringLiteral("QDoubleSpinBox { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; border-radius: 4px; font-size: 11px; }"));
+    connect(lightValues_[4], &QDoubleSpinBox::editingFinished, this, emitPointLightChanged);
+    lRad->addWidget(lightValues_[4], 1);
+    cl->addWidget(rowRad);
+
+    layout->addWidget(cardLight_);
+    cardLight_->hide();
+}
+
+void ObjectInspectorPanel::BuildCharacterCard(QVBoxLayout* layout)
+{
+    cardCharacter_ = new CollapsibleCard(Tr("Персонаж", "Character"), this, true);
+    characterInspector_ = cardCharacter_;
+    auto* cl = cardCharacter_->ContentLayout();
+
+    auto* rowSpeed = new QWidget(cardCharacter_->Content());
+    auto* lSpeed = new QHBoxLayout(rowSpeed);
+    lSpeed->setContentsMargins(0, 0, 0, 0);
+    lSpeed->setSpacing(6);
+
+    characterSpeedLabel_ = new QLabel(Tr("Скорость, ед/с", "Speed, u/s"), rowSpeed);
+    characterSpeedLabel_->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px;"));
+    lSpeed->addWidget(characterSpeedLabel_);
+
+    characterSpeed_ = new NoWheelDoubleSpinBox(rowSpeed);
+    characterSpeed_->setObjectName(QStringLiteral("CharacterSpeed"));
     characterSpeed_->setRange(0, 10000);
     characterSpeed_->setKeyboardTracking(false);
-    characterForm->addRow(QStringLiteral("Скорость, ед/с"), characterSpeed_);
-    inspectorLayout->addWidget(characterGroup);
-    characterGroup->hide();
+    characterSpeed_->setStyleSheet(QStringLiteral("QDoubleSpinBox { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; border-radius: 4px; font-size: 11px; }"));
     connect(characterSpeed_, &QDoubleSpinBox::editingFinished, this, [this] {
         if (!refreshing_ && selectedId_) emit CharacterSpeedEditingFinished(selectedId_, characterSpeed_->value());
     });
-    inspectorLayout->addStretch();
+    lSpeed->addWidget(characterSpeed_, 1);
+    cl->addWidget(rowSpeed);
 
-    connect(objectName_, &QLineEdit::editingFinished, this, [this]
-    {
-        if (refreshing_ || selectedId_ == 0)
-            return;
-
-        emit NameEditingFinished(selectedId_, objectName_->text().trimmed());
-    });
+    layout->addWidget(cardCharacter_);
+    cardCharacter_->hide();
 }
 
-void ObjectInspectorPanel::BuildAssetInspector(QFormLayout* form)
+void ObjectInspectorPanel::RetranslateUi()
 {
-    auto* content = form->parentWidget();
+    if (cardGeneral_) cardGeneral_->SetTitle(Tr("Общие", "General"));
+    if (cardLight_) cardLight_->SetTitle(Tr("Точечный свет", "Point Light"));
+    if (cardCharacter_) cardCharacter_->SetTitle(Tr("Персонаж", "Character"));
+    if (cardTransform_) cardTransform_->RetranslateUi();
+    if (cardMaterial_) cardMaterial_->RetranslateUi();
 
-    modelAsset_ = new QLineEdit(content);
-    modelAsset_->setReadOnly(true);
-    modelAsset_->setObjectName(QStringLiteral("ModelAsset"));
-    modelAsset_->setMinimumWidth(0);
-    modelAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
-    form->addRow(QStringLiteral("Модель"), modelAsset_);
+    if (lightEnabled_) lightEnabled_->setText(Tr("Включён", "Enabled"));
+    if (lightColor_) lightColor_->setText(Tr("Выбрать цвет…", "Choose Color…"));
+    if (lightRowLabels_[3]) lightRowLabels_[3]->setText(Tr("Интенсивность", "Intensity"));
+    if (lightRowLabels_[4]) lightRowLabels_[4]->setText(Tr("Радиус", "Radius"));
+    if (characterSpeedLabel_) characterSpeedLabel_->setText(Tr("Скорость, ед/с", "Speed, u/s"));
 
-    chooseModel_ = new QPushButton(QStringLiteral("Выбрать модель…"), content);
-    chooseModel_->setObjectName("ChooseModel");
-    chooseModel_->setToolTip(QStringLiteral("Заменить модель или превратить примитив в модель. Для C++ персонажей визуал задаётся их классом."));
-    form->addRow(chooseModel_);
-    connect(chooseModel_, &QPushButton::clicked, this, &ObjectInspectorPanel::ChooseModelRequested);
-
-    textureAsset_ = new QLineEdit(content);
-    textureAsset_->setReadOnly(true);
-    textureAsset_->setObjectName(QStringLiteral("TextureAsset"));
-    textureAsset_->setMinimumWidth(0);
-    textureAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
-    form->addRow(QStringLiteral("Текстура"), textureAsset_);
-
-    auto* rowWidget = new QWidget(content);
-    auto* row = new QHBoxLayout(rowWidget);
-    row->setContentsMargins(0, 0, 0, 0);
-
-    auto* chooseTextureButton = new QPushButton(QStringLiteral("Выбрать текстуру…"), rowWidget);
-    chooseTextureButton->setObjectName(QStringLiteral("ChooseTexture"));
-
-    auto* clearTextureButton = new QPushButton(QStringLiteral("Убрать"), rowWidget);
-    clearTextureButton->setObjectName(QStringLiteral("ClearTexture"));
-
-    row->addWidget(chooseTextureButton);
-    row->addWidget(clearTextureButton);
-
-    form->addRow(rowWidget);
-
-    connect(chooseTextureButton, &QPushButton::clicked, this, [this]
-    {
-        emit ChooseTextureRequested();
-    });
-
-    connect(clearTextureButton, &QPushButton::clicked, this, [this]
-    {
-        emit ClearTextureRequested();
-    });
-
-    materialAsset_ = new QLineEdit(content);
-    materialAsset_->setReadOnly(true);
-    materialAsset_->setObjectName(QStringLiteral("MaterialAsset"));
-    materialAsset_->setMinimumWidth(0);
-    materialAsset_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
-    materialAsset_->setPlaceholderText(QStringLiteral("по умолчанию"));
-    form->addRow(QStringLiteral("Материал"), materialAsset_);
-
-    auto* materialRowWidget = new QWidget(content);
-    materialActions_ = materialRowWidget;
-    auto* materialRow = new QHBoxLayout(materialRowWidget);
-    materialRow->setContentsMargins(0, 0, 0, 0);
-
-    auto* chooseMaterialButton = new QPushButton(QStringLiteral("Выбрать…"), materialRowWidget);
-    chooseMaterialButton->setObjectName(QStringLiteral("ChooseMaterial"));
-    editMaterialButton_ = new QPushButton(QStringLiteral("Редактировать"), materialRowWidget);
-    editMaterialButton_->setObjectName(QStringLiteral("EditMaterial"));
-    auto* clearMaterialButton = new QPushButton(QStringLiteral("Убрать"), materialRowWidget);
-    clearMaterialButton->setObjectName(QStringLiteral("ClearMaterial"));
-
-    materialRow->addWidget(chooseMaterialButton);
-    materialRow->addWidget(editMaterialButton_);
-    materialRow->addWidget(clearMaterialButton);
-    form->addRow(materialRowWidget);
-
-    connect(chooseMaterialButton, &QPushButton::clicked, this, [this]
-    {
-        emit ChooseMaterialRequested();
-    });
-    connect(editMaterialButton_, &QPushButton::clicked, this, [this]
-    {
-        emit EditMaterialRequested(materialAsset_->text());
-    });
-    connect(clearMaterialButton, &QPushButton::clicked, this, [this]
-    {
-        emit ClearMaterialRequested();
-    });
-}
-
-void ObjectInspectorPanel::SetEnabled(bool enabled)
-{
-    setEnabled(enabled);
+    if (selectedId_ == 0 && selectionLabel_)
+        selectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
 }
 
 void ObjectInspectorPanel::ClearFocusIfInside()
@@ -306,44 +335,29 @@ bool ObjectInspectorPanel::HasFocusedChild() const
 InspectorTransformValue ObjectInspectorPanel::CurrentTransformValue() const
 {
     InspectorTransformValue value;
-
-    for (int i = 0; i < 3; ++i)
-    {
-        value.position[i] = transform_[i]->value();
-        value.euler[i] = transform_[i + 3]->value();
-        value.scale[i] = transform_[i + 6]->value();
-    }
-
+    if (cardTransform_)
+        cardTransform_->GetValues(value.position.data(), value.euler.data(), value.scale.data());
     return value;
 }
 
 InspectorPointLightValue ObjectInspectorPanel::CurrentPointLightValue() const
 {
     InspectorPointLightValue value;
-
     for (int i = 0; i < 3; ++i)
         value.color[i] = lightValues_[i]->value();
-
     value.intensity = lightValues_[3]->value();
     value.radius = lightValues_[4]->value();
     value.enabled = lightEnabled_->isChecked();
-
     return value;
 }
 
 void ObjectInspectorPanel::UpdateLightColorButton(const float color[3])
 {
     const QColor backgroundColor = QColor::fromRgbF(color[0], color[1], color[2]);
-
-    const double luminance =
-        color[0] * 0.299 +
-        color[1] * 0.587 +
-        color[2] * 0.114;
-
+    const double luminance = color[0] * 0.299 + color[1] * 0.587 + color[2] * 0.114;
     lightColor_->setStyleSheet(QStringLiteral("background-color: %1; color: %2;")
                                .arg(backgroundColor.name())
-                               .arg(luminance > 0.5 ? QStringLiteral("black") : QStringLiteral("white"))
-    );
+                               .arg(luminance > 0.5 ? QStringLiteral("black") : QStringLiteral("white")));
 }
 
 void ObjectInspectorPanel::Refresh(
@@ -356,39 +370,25 @@ void ObjectInspectorPanel::Refresh(
     selectedId_ = selectedId;
 
     QWidget* focus = QApplication::focusWidget();
+    const bool canReplaceWholeInspector = selectionChanged || !focus || !isAncestorOf(focus);
 
-    const bool canReplaceWholeInspector =
-        selectionChanged ||
-        !focus ||
-        !isAncestorOf(focus);
-
-    auto canReplaceField = [&](QWidget* field)
-    {
-        return selectionChanged ||
-            !focus ||
-            (field != focus && !field->isAncestorOf(focus));
+    auto canReplaceField = [&](QWidget* field) {
+        return selectionChanged || !focus || (field != focus && !field->isAncestorOf(focus));
     };
-
-    selectionLabel_->setText(QStringLiteral("Объект не выбран"));
-    chooseModel_->setEnabled(false);
 
     if (selectedId_ == 0)
     {
+        selectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
+        typeBadgeLabel_->setText(QStringLiteral("None"));
         objectName_->clear();
-        modelAsset_->clear();
-        textureAsset_->clear();
-        materialAsset_->clear();
-        editMaterialButton_->setEnabled(false);
+        cardMaterial_->Clear();
         lightInspector_->setVisible(false);
         characterInspector_->hide();
         refreshing_ = false;
         return;
     }
 
-    modelAsset_->clear();
-    textureAsset_->clear();
-    materialAsset_->clear();
-    editMaterialButton_->setEnabled(false);
+    cardMaterial_->Clear();
 
     bool selectedLight = false;
 
@@ -398,8 +398,8 @@ void ObjectInspectorPanel::Refresh(
             continue;
 
         selectedLight = object.hasPointLight;
-        selectionLabel_->setText(QStringLiteral("Выбран: %1\n%2 · ID %3").arg(QString::fromStdString(object.name), QString::fromStdString(object.type)).arg(object.id));
-        chooseModel_->setEnabled(object.type == "Engine.Model" || object.type.rfind("Primitive.", 0) == 0);
+        typeBadgeLabel_->setText(QString::fromStdString(object.type));
+        selectionLabel_->setText(QStringLiteral("%1 · ID %2").arg(QString::fromStdString(object.name)).arg(object.id));
         characterInspector_->setVisible(object.gameplayKind == 1);
         if (object.gameplayKind == 1 && canReplaceField(characterSpeed_))
             characterSpeed_->setValue(QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object()["moveSpeed"].toDouble(5));
@@ -423,21 +423,20 @@ void ObjectInspectorPanel::Refresh(
             UpdateLightColorButton(object.pointLight.color);
         }
 
-        modelAsset_->setText(QString::fromStdString(object.modelAsset));
-        textureAsset_->setText(QString::fromStdString(object.textureAsset));
-        materialAsset_->setText(QString::fromStdString(object.materialAsset));
-        // С материалом по умолчанию кнопка создаёт новый материал; у света материала нет.
-        editMaterialButton_->setEnabled(!object.materialAsset.empty() || !object.hasPointLight);
-        editMaterialButton_->setToolTip(object.materialAsset.empty()
-            ? QStringLiteral("Создать материал в Content/Materials, назначить его объекту и открыть редактор")
-            : QString());
+        const bool canChooseModel = (object.type == "Engine.Model" || object.type.rfind("Primitive.", 0) == 0);
+        cardMaterial_->SetData(
+            QString::fromStdString(object.materialAsset),
+            QString::fromStdString(object.modelAsset),
+            QString::fromStdString(object.textureAsset),
+            canChooseModel,
+            object.hasPointLight
+        );
 
         if (canReplaceWholeInspector)
         {
             objectName_->setText(QString::fromStdString(object.name));
 
             const auto& transform = object.transform;
-
             const QQuaternion rotation(
                 transform.rotation[3],
                 transform.rotation[0],
@@ -446,22 +445,16 @@ void ObjectInspectorPanel::Refresh(
             );
 
             const auto euler = rotation.toEulerAngles();
+            const double pos[3] = {transform.position[0], transform.position[1], transform.position[2]};
+            const double rotDeg[3] = {euler.x(), euler.y(), euler.z()};
+            const double scale[3] = {transform.scale[0], transform.scale[1], transform.scale[2]};
 
-            for (int i = 0; i < 3; ++i)
-            {
-                transform_[i]->setValue(transform.position[i]);
-                transform_[i + 6]->setValue(transform.scale[i]);
-            }
-
-            transform_[3]->setValue(euler.x());
-            transform_[4]->setValue(euler.y());
-            transform_[5]->setValue(euler.z());
+            cardTransform_->SetValues(pos, rotDeg, scale, canReplaceField);
         }
 
         break;
     }
 
     lightInspector_->setVisible(selectedLight);
-
     refreshing_ = false;
 }
