@@ -163,3 +163,4 @@ QString EditorHistory::GetTemporaryFilePath(const QString& templateName)
 
     return historyDirectory_->filePath(templateName);
 }
+

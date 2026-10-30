@@ -48,3 +48,4 @@ private:
     std::vector<QString> undo_;
     std::vector<QString> redo_;
 };
+

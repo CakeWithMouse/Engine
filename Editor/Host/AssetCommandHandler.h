@@ -35,3 +35,4 @@ public:
                 uint32_t& result,
                 QString& error);
 };
+

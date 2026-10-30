@@ -38,3 +38,4 @@ private:
     uint32_t viewportHeight_ = 0;
     bool sceneViewportAttached_ = false;
 };
+

@@ -46,3 +46,4 @@ private:
     std::atomic<bool> hasSelection_{false};
     bool dirty_ = false;
 };
+

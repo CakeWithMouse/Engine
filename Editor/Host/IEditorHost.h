@@ -122,3 +122,4 @@ public:
     virtual void RunOnUi(std::function<void()> action) = 0;
     virtual void SetUiListener(IEditorUiListener* listener) = 0;
 };
+
