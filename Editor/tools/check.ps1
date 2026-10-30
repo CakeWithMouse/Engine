@@ -185,18 +185,16 @@ Write-Output "OK: Build succeeded."
 
 # 8. Tests
 Write-Output "--- 5. Running tests ---"
-if ($Quick) {
-    # In Quick mode, run Core unit tests if present
-    $coreTestsProj = Join-Path $repo "Editor/tests/CoreTests.vcxproj"
-    if (Test-Path $coreTestsProj) {
-        Invoke-ProcessWithTimeout -FilePath $msbuild -ArgumentList @('"' + $coreTestsProj + '"', '/nologo', '/verbosity:minimal', '/m', '/p:ForceSynchronousPDBWrites=true', '/p:Configuration=Debug', '/p:Platform=x64') -TimeoutSeconds $TimeoutSec -Description "CoreTests Build"
+# Run Core unit tests if present
+$coreTestsProj = Join-Path $repo "Editor/tests/CoreTests.vcxproj"
+if (Test-Path $coreTestsProj) {
+    Invoke-ProcessWithTimeout -FilePath $msbuild -ArgumentList @('"' + $coreTestsProj + '"', '/nologo', '/verbosity:minimal', '/m', '/p:ForceSynchronousPDBWrites=true', '/p:Configuration=Debug', '/p:Platform=x64') -TimeoutSeconds $TimeoutSec -Description "CoreTests Build"
 
-        $coreTestsExe = Join-Path $repo "Game/build/x64/Debug/Runtime/CoreTests.exe"
-        Invoke-ProcessWithTimeout -FilePath $coreTestsExe -TimeoutSeconds $TimeoutSec -Description "CoreTests Execution"
-        Write-Output "OK: CoreTests passed."
-    } else {
-        Write-Output "CoreTests.vcxproj not present yet; skipping Core unit tests."
-    }
+    $coreTestsExe = Join-Path $repo "Game/build/x64/Debug/Runtime/CoreTests.exe"
+    Invoke-ProcessWithTimeout -FilePath $coreTestsExe -TimeoutSeconds $TimeoutSec -Description "CoreTests Execution"
+    Write-Output "OK: CoreTests passed."
+} else {
+    Write-Output "CoreTests.vcxproj not present yet; skipping Core unit tests."
 }
 
 if ($Full) {
