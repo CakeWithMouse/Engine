@@ -147,6 +147,44 @@ if (Test-Path $hostDir) {
 }
 Write-Output "OK: Architectural layers check passed."
 
+# 4b. Check localization: no hardcoded Cyrillic strings outside localization table (Tr)
+Write-Output "--- 2b. Checking localization: Cyrillic literals outside Tr() ---"
+$legacyCyrillicRatchet = @{
+    "Editor/Source/AssetTools.cpp" = 600
+    "Editor/Source/CodeTools.cpp" = 750
+    "Editor/Source/MainWindow.cpp" = 1050
+    "Editor/Source/MaterialEditorWindow.cpp" = 800
+}
+
+$dirsToCheck = @("Editor/UI", "Editor/Source")
+foreach ($d in $dirsToCheck) {
+    $fullDir = Join-Path $repo $d
+    if (!(Test-Path $fullDir)) { continue }
+    $codeFiles = Get-ChildItem -Path $fullDir -Recurse -Include *.h, *.cpp
+    foreach ($f in $codeFiles) {
+        $relPath = ($f.FullName.Substring($repo.Length + 1)).Replace("\", "/")
+        $raw = [System.IO.File]::ReadAllText($f.FullName, [System.Text.Encoding]::UTF8)
+        $noComments = [System.Text.RegularExpressions.Regex]::Replace($raw, "/\*.*?\*/", "", [System.Text.RegularExpressions.RegexOptions]::Singleline)
+        $noComments = [System.Text.RegularExpressions.Regex]::Replace($noComments, "//.*", "")
+        $noTr = [System.Text.RegularExpressions.Regex]::Replace($noComments, "Tr\s*\([^)]*\)", "", [System.Text.RegularExpressions.RegexOptions]::Singleline)
+        $cyrillicMatches = [System.Text.RegularExpressions.Regex]::Matches($noTr, "[Ѐ-ӿ]")
+        $count = $cyrillicMatches.Count
+        if ($count -gt 0) {
+            if ($legacyCyrillicRatchet.ContainsKey($relPath)) {
+                $limit = $legacyCyrillicRatchet[$relPath]
+                if ($count -gt $limit) {
+                    Write-Error "FAIL: Legacy file $relPath exceeded Cyrillic ratchet limit ($count > $limit)."
+                    exit 1
+                }
+            } else {
+                Write-Error "FAIL: Hardcoded Cyrillic detected outside Tr() in $relPath ($count characters)."
+                exit 1
+            }
+        }
+    }
+}
+Write-Output "OK: Localization check passed."
+
 # 5. Check line count (wc -l <= 500 with ratchet for legacy files)
 Write-Output "--- 3. Checking line counts of modified files ---"
 $legacyRatchetLimits = @{

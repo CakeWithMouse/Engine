@@ -113,6 +113,7 @@ void SceneObjectsPanel::BuildUi()
 void SceneObjectsPanel::RebuildAddMenu()
 {
     if (!addMenu_) return;
+    qDeleteAll(addMenu_->findChildren<QMenu*>(QString(), Qt::FindDirectChildrenOnly));
     addMenu_->clear();
 
     auto* menuPrimitives = addMenu_->addMenu(Tr("Примитивы", "Primitives"));

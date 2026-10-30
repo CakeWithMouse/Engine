@@ -1,5 +1,7 @@
 #include "UiTestHelperTests.h"
+#include "UiSmokeTests.h"
 #include <QApplication>
+#include <iostream>
 
 int main(int argc, char* argv[])
 {
@@ -9,12 +11,12 @@ int main(int argc, char* argv[])
     try
     {
         UiTestHelperTests::Run();
+        UiSmokeTests::Run();
         return 0;
     }
     catch (const std::exception& ex)
     {
-        std::cerr << "UiTestHelperTests failed: " << ex.what() << std::endl;
+        std::cerr << "UiTests failed: " << ex.what() << std::endl;
         return 1;
     }
 }
-
