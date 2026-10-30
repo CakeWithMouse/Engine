@@ -64,19 +64,12 @@ public:
 
     QString CurrentStyleSheet() const;
 
-    // Vector icons (without emoji)
+    // Vector icons for toolbar (without emoji)
     static QIcon CreatePlayIcon(const QColor& color = QColor(0x4A, 0xDE, 0x80));
     static QIcon CreatePauseIcon(const QColor& color = QColor(0xFB, 0xBF, 0x24));
     static QIcon CreateStopIcon(const QColor& color = QColor(0xF8, 0xF1, 0x71));
     static QIcon CreateExternalIcon(const QColor& color = QColor(0x60, 0xA5, 0xFA));
     static QIcon CreateSettingsIcon(const QColor& color = QColor(0x94, 0xA3, 0xB8));
-    static QIcon CreateTranslateIcon(const QColor& color = QColor(0xCB, 0xD5, 0xE1));
-    static QIcon CreateRotateIcon(const QColor& color = QColor(0xCB, 0xD5, 0xE1));
-    static QIcon CreateScaleIcon(const QColor& color = QColor(0xCB, 0xD5, 0xE1));
-    static QIcon CreateWorldIcon(const QColor& color = QColor(0xCB, 0xD5, 0xE1));
-    static QIcon CreateLocalIcon();
-    static QIcon CreateSnapIcon(const QColor& color = QColor(0xCB, 0xD5, 0xE1));
-    static QIcon CreateResetIcon(const QColor& color = QColor(0x94, 0xA3, 0xB8));
 
 private:
     EditorTheme();

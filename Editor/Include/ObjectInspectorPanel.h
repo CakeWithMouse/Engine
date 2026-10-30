@@ -17,6 +17,7 @@ class NoWheelDoubleSpinBox;
 class CollapsibleCard;
 class TransformCard;
 class MaterialCard;
+class GeometryCard;
 
 struct EditorSnapshot;
 
@@ -72,6 +73,7 @@ signals:
     void LightColorRequested(quint64 objectId, const QColor& current);
 
     void ChooseModelRequested();
+    void ClearModelRequested();
     void CharacterSpeedEditingFinished(quint64 objectId, double speed);
     void ChooseTextureRequested();
     void ClearTextureRequested();
@@ -100,6 +102,7 @@ private:
     // Cards
     CollapsibleCard* cardGeneral_ = nullptr;
     TransformCard* cardTransform_ = nullptr;
+    GeometryCard* cardGeometry_ = nullptr;
     MaterialCard* cardMaterial_ = nullptr;
     CollapsibleCard* cardLight_ = nullptr;
     CollapsibleCard* cardCharacter_ = nullptr;

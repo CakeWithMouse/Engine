@@ -13,7 +13,7 @@ class MaterialCard : public CollapsibleCard
 {
 public:
     explicit MaterialCard(QWidget* parent = nullptr)
-        : CollapsibleCard(Tr("Материал и Визуал", "Material & Visual"), parent, true)
+        : CollapsibleCard(Tr("Материал", "Material"), parent, true)
     {
         BuildCard();
     }
@@ -29,59 +29,45 @@ public:
             materialAsset_->setEnabled(available);
     }
 
-    void SetData(const QString& material, const QString& model, const QString& texture, bool canChooseModel, bool hasPointLight)
+    void SetData(const QString& material, bool hasPointLight)
     {
         materialAsset_->setText(material);
-        modelAsset_->setText(model);
-        textureAsset_->setText(texture);
-        chooseModel_->setEnabled(canChooseModel);
         editMaterialButton_->setEnabled(!material.isEmpty() || !hasPointLight);
         editMaterialButton_->setToolTip(material.isEmpty()
             ? Tr("Создать материал в Content/Materials, назначить его объекту и открыть редактор",
                  "Create material in Content/Materials, assign to object and open editor")
             : QString());
+        clearMaterialButton_->setEnabled(!material.isEmpty());
     }
 
     void Clear()
     {
         materialAsset_->clear();
-        modelAsset_->clear();
-        textureAsset_->clear();
         editMaterialButton_->setEnabled(false);
-        chooseModel_->setEnabled(false);
+        clearMaterialButton_->setEnabled(false);
     }
 
     void RetranslateUi()
     {
-        SetTitle(Tr("Материал и Визуал", "Material & Visual"));
-        if (labelMatTitle_) labelMatTitle_->setText(Tr("Материал (.mat)", "Material (.mat)"));
-        if (labelModelTitle_) labelModelTitle_->setText(Tr("Модель", "Model"));
-        if (labelTexTitle_) labelTexTitle_->setText(Tr("Текстура", "Texture"));
+        SetTitle(Tr("Материал", "Material"));
+        if (labelMatTitle_) labelMatTitle_->setText(Tr("Слот материала (.mat)", "Material Slot (.mat)"));
         if (materialAsset_) materialAsset_->setPlaceholderText(Tr("по умолчанию", "default"));
-        if (textureAsset_) textureAsset_->setPlaceholderText(Tr("нет", "none"));
         if (editMaterialButton_) editMaterialButton_->setText(Tr("Редактировать", "Edit Material"));
         if (chooseMaterialButton_) chooseMaterialButton_->setText(Tr("Выбрать…", "Browse…"));
         if (clearMaterialButton_) clearMaterialButton_->setText(Tr("Убрать", "Clear"));
-        if (chooseModel_) chooseModel_->setText(Tr("Выбрать модель…", "Choose Model…"));
-        if (chooseTextureButton_) chooseTextureButton_->setText(Tr("Выбрать…", "Browse…"));
-        if (clearTextureButton_) clearTextureButton_->setText(Tr("Убрать", "Clear"));
     }
 
     // Callbacks
     std::function<void(const QString&)> onEditMaterial;
     std::function<void()> onChooseMaterial;
     std::function<void()> onClearMaterial;
-    std::function<void()> onChooseModel;
-    std::function<void()> onChooseTexture;
-    std::function<void()> onClearTexture;
 
 private:
     void BuildCard()
     {
         auto* cl = ContentLayout();
 
-        // 1. Material
-        labelMatTitle_ = new QLabel(Tr("Материал (.mat)", "Material (.mat)"), Content());
+        labelMatTitle_ = new QLabel(Tr("Слот материала (.mat)", "Material Slot (.mat)"), Content());
         labelMatTitle_->setObjectName(QStringLiteral("CardSectionLabel"));
         cl->addWidget(labelMatTitle_);
 
@@ -117,54 +103,6 @@ private:
         });
         lMatBtns->addWidget(clearMaterialButton_);
         cl->addWidget(materialActions_);
-
-        // 2. Model
-        labelModelTitle_ = new QLabel(Tr("Модель", "Model"), Content());
-        labelModelTitle_->setObjectName(QStringLiteral("CardSectionLabel"));
-        cl->addWidget(labelModelTitle_);
-
-        modelAsset_ = new QLineEdit(Content());
-        modelAsset_->setReadOnly(true);
-        modelAsset_->setObjectName(QStringLiteral("ModelAsset"));
-        cl->addWidget(modelAsset_);
-
-        chooseModel_ = new QPushButton(Tr("Выбрать модель…", "Choose Model…"), Content());
-        chooseModel_->setObjectName(QStringLiteral("ChooseModel"));
-        QObject::connect(chooseModel_, &QPushButton::clicked, [this] {
-            if (onChooseModel) onChooseModel();
-        });
-        cl->addWidget(chooseModel_);
-
-        // 3. Texture
-        labelTexTitle_ = new QLabel(Tr("Текстура", "Texture"), Content());
-        labelTexTitle_->setObjectName(QStringLiteral("CardSectionLabel"));
-        cl->addWidget(labelTexTitle_);
-
-        textureAsset_ = new QLineEdit(Content());
-        textureAsset_->setReadOnly(true);
-        textureAsset_->setObjectName(QStringLiteral("TextureAsset"));
-        textureAsset_->setPlaceholderText(Tr("нет", "none"));
-        cl->addWidget(textureAsset_);
-
-        auto* rowTexBtns = new QWidget(Content());
-        auto* lTexBtns = new QHBoxLayout(rowTexBtns);
-        lTexBtns->setContentsMargins(0, 0, 0, 0);
-        lTexBtns->setSpacing(4);
-
-        chooseTextureButton_ = new QPushButton(Tr("Выбрать…", "Browse…"), rowTexBtns);
-        chooseTextureButton_->setObjectName(QStringLiteral("ChooseTexture"));
-        QObject::connect(chooseTextureButton_, &QPushButton::clicked, [this] {
-            if (onChooseTexture) onChooseTexture();
-        });
-        lTexBtns->addWidget(chooseTextureButton_);
-
-        clearTextureButton_ = new QPushButton(Tr("Убрать", "Clear"), rowTexBtns);
-        clearTextureButton_->setObjectName(QStringLiteral("ClearTexture"));
-        QObject::connect(clearTextureButton_, &QPushButton::clicked, [this] {
-            if (onClearTexture) onClearTexture();
-        });
-        lTexBtns->addWidget(clearTextureButton_);
-        cl->addWidget(rowTexBtns);
     }
 
     QLineEdit* materialAsset_ = nullptr;
@@ -172,15 +110,5 @@ private:
     QPushButton* editMaterialButton_ = nullptr;
     QPushButton* chooseMaterialButton_ = nullptr;
     QPushButton* clearMaterialButton_ = nullptr;
-
-    QLineEdit* modelAsset_ = nullptr;
-    QPushButton* chooseModel_ = nullptr;
-
-    QLineEdit* textureAsset_ = nullptr;
-    QPushButton* chooseTextureButton_ = nullptr;
-    QPushButton* clearTextureButton_ = nullptr;
-
     QLabel* labelMatTitle_ = nullptr;
-    QLabel* labelModelTitle_ = nullptr;
-    QLabel* labelTexTitle_ = nullptr;
 };

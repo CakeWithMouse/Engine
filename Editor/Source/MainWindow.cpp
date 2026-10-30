@@ -591,6 +591,10 @@ void EditorMainWindow::ConnectPanels()
         EditorCommand c; c.type = EditorCommand::SetModel; c.objectId = selectedId_;
         c.path = "/Game/" + QDir::fromNativeSeparators(relative); host_->PostCommand(c);
     });
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearModelRequested, this, [this] {
+        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        EditorCommand c; c.type = EditorCommand::SetModel; c.objectId = selectedId_; host_->PostCommand(c);
+    });
     connect(objectInspectorPanel_, &ObjectInspectorPanel::CharacterSpeedEditingFinished, this, [this](quint64 id, double speed) {
         if (sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
         for (const auto& o : host_->ReadSnapshot().objects) if (o.id == id && o.gameplayKind == 1) {
@@ -601,41 +605,14 @@ void EditorMainWindow::ConnectPanels()
             c.path = QString::fromUtf8(QJsonDocument(data).toJson()); host_->PostCommand(c);
         }
     });
-
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseTextureRequested, this, [this]
-    {
-        if (!host_->HasScene() ||
-            sceneBusy_ ||
-            host_->PlayState() != EditorQtHost::EditorState::Edit)
-        {
-            return;
-        }
-
-        const QString path = QFileDialog::getOpenFileName(
-            this,
-            QStringLiteral("Текстура из проекта"),
-            QString::fromUtf8(host_->host().contentRoot),
-            QStringLiteral("Текстуры (*.png *.jpg *.jpeg *.bmp *.tga)")
-        );
-
-        if (!path.isEmpty())
-            UseAsset(path);
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseTextureRequested, this, [this] {
+        if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        const QString p = QFileDialog::getOpenFileName(this, QStringLiteral("Текстура из проекта"), QString::fromUtf8(host_->host().contentRoot), QStringLiteral("Текстуры (*.png *.jpg *.jpeg *.bmp *.tga)"));
+        if (!p.isEmpty()) UseAsset(p);
     });
-
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearTextureRequested, this, [this]
-    {
-        if (!selectedId_ ||
-            sceneBusy_ ||
-            host_->PlayState() != EditorQtHost::EditorState::Edit)
-        {
-            return;
-        }
-
-        EditorCommand c;
-        c.type = EditorCommand::SetTexture;
-        c.objectId = selectedId_;
-
-        host_->PostCommand(c);
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearTextureRequested, this, [this] {
+        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        EditorCommand c; c.type = EditorCommand::SetTexture; c.objectId = selectedId_; host_->PostCommand(c);
     });
 
     connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseMaterialRequested, this, [this]

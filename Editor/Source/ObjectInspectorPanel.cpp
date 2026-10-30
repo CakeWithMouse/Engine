@@ -2,6 +2,7 @@
 #include "CollapsibleCard.h"
 #include "TransformCard.h"
 #include "MaterialCard.h"
+#include "GeometryCard.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "EditorLocale.h"
 
@@ -101,13 +102,15 @@ void ObjectInspectorPanel::BuildUi()
     });
     inspectorLayout->addWidget(cardTransform_);
 
+    cardGeometry_ = new GeometryCard(this);
+    cardGeometry_->onChooseModel = [this] { emit ChooseModelRequested(); };
+    cardGeometry_->onClearModel = [this] { emit ClearModelRequested(); };
+    inspectorLayout->addWidget(cardGeometry_);
+
     cardMaterial_ = new MaterialCard(this);
     cardMaterial_->onEditMaterial = [this](const QString& path) { emit EditMaterialRequested(path); };
     cardMaterial_->onChooseMaterial = [this] { emit ChooseMaterialRequested(); };
     cardMaterial_->onClearMaterial = [this] { emit ClearMaterialRequested(); };
-    cardMaterial_->onChooseModel = [this] { emit ChooseModelRequested(); };
-    cardMaterial_->onChooseTexture = [this] { emit ChooseTextureRequested(); };
-    cardMaterial_->onClearTexture = [this] { emit ClearTextureRequested(); };
     inspectorLayout->addWidget(cardMaterial_);
 
     BuildPointLightCard(inspectorLayout);
@@ -115,6 +118,7 @@ void ObjectInspectorPanel::BuildUi()
 
     cardGeneral_->hide();
     cardTransform_->hide();
+    cardGeometry_->hide();
     cardMaterial_->hide();
     lightInspector_->hide();
     characterInspector_->hide();
@@ -300,6 +304,7 @@ void ObjectInspectorPanel::RetranslateUi()
     if (cardLight_) cardLight_->SetTitle(Tr("Точечный свет", "Point Light"));
     if (cardCharacter_) cardCharacter_->SetTitle(Tr("Персонаж", "Character"));
     if (cardTransform_) cardTransform_->RetranslateUi();
+    if (cardGeometry_) cardGeometry_->RetranslateUi();
     if (cardMaterial_) cardMaterial_->RetranslateUi();
 
     if (lightEnabled_) lightEnabled_->setText(Tr("Включён", "Enabled"));
@@ -375,6 +380,7 @@ void ObjectInspectorPanel::Refresh(
         noSelectionLabel_->show();
         cardGeneral_->hide();
         cardTransform_->hide();
+        cardGeometry_->hide();
         cardMaterial_->hide();
         lightInspector_->hide();
         characterInspector_->hide();
@@ -386,7 +392,7 @@ void ObjectInspectorPanel::Refresh(
     cardGeneral_->show();
     cardTransform_->show();
     cardMaterial_->show();
-
+    cardGeometry_->Clear();
     cardMaterial_->Clear();
 
     bool selectedLight = false;
@@ -423,13 +429,10 @@ void ObjectInspectorPanel::Refresh(
         }
 
         const bool canChooseModel = (object.type == "Engine.Model" || object.type.rfind("Primitive.", 0) == 0);
-        cardMaterial_->SetData(
-            QString::fromStdString(object.materialAsset),
-            QString::fromStdString(object.modelAsset),
-            QString::fromStdString(object.textureAsset),
-            canChooseModel,
-            object.hasPointLight
-        );
+        const bool hasMesh = canChooseModel || !object.modelAsset.empty();
+        cardGeometry_->setVisible(hasMesh);
+        if (hasMesh) cardGeometry_->SetData(QString::fromStdString(object.modelAsset), canChooseModel);
+        cardMaterial_->SetData(QString::fromStdString(object.materialAsset), object.hasPointLight);
 
         if (canReplaceWholeInspector)
         {
