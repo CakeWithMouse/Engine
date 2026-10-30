@@ -162,10 +162,10 @@ void ObjectInspectorPanel::BuildGeneralCard(QVBoxLayout* layout)
     lName->setContentsMargins(0, 0, 0, 0);
     lName->setSpacing(6);
 
-    auto* lblName = new QLabel(Tr("Имя", "Name"), rowName);
-    lblName->setFixedWidth(40);
-    lblName->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px;"));
-    lName->addWidget(lblName);
+    labelName_ = new QLabel(Tr("Имя", "Name"), rowName);
+    labelName_->setFixedWidth(40);
+    labelName_->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px;"));
+    lName->addWidget(labelName_);
 
     objectName_ = new QLineEdit(rowName);
     objectName_->setMaxLength(120);
@@ -328,6 +328,7 @@ void ObjectInspectorPanel::RetranslateUi()
     if (lightRowLabels_[3]) lightRowLabels_[3]->setText(Tr("Интенсивность", "Intensity"));
     if (lightRowLabels_[4]) lightRowLabels_[4]->setText(Tr("Радиус", "Radius"));
     if (characterSpeedLabel_) characterSpeedLabel_->setText(Tr("Скорость, ед/с", "Speed, u/s"));
+    if (labelName_) labelName_->setText(Tr("Имя", "Name"));
 
     if (selectedId_ == 0 && selectionLabel_)
         selectionLabel_->setText(Tr("Объект не выбран", "No object selected"));

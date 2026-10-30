@@ -13,10 +13,10 @@ MainToolBar::MainToolBar(QWidget* parent)
     leftSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     addWidget(leftSpacer);
 
-    actPlay_ = addAction(QStringLiteral("Play"));
-    actPause_ = addAction(QStringLiteral("Pause"));
-    actStop_ = addAction(QStringLiteral("Stop"));
-    actExternal_ = addAction(QStringLiteral("External"));
+    actPlay_ = addAction(Tr("Play", "Play"));
+    actPause_ = addAction(Tr("Pause", "Pause"));
+    actStop_ = addAction(Tr("Stop", "Stop"));
+    actExternal_ = addAction(Tr("Отдельное окно", "External"));
 
     actPlay_->setObjectName(QStringLiteral("ActPlay"));
     actPause_->setObjectName(QStringLiteral("ActPause"));
@@ -40,21 +40,6 @@ MainToolBar::MainToolBar(QWidget* parent)
     auto* rightSpacer = new QWidget(this);
     rightSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     addWidget(rightSpacer);
-
-    langButton_ = new QPushButton(this);
-    langButton_->setObjectName(QStringLiteral("LangToggleBtn"));
-    langButton_->setFixedWidth(40);
-    langButton_->setText(EditorLocale::Instance().Language() == EditorLanguage::Ru ? QStringLiteral("RU") : QStringLiteral("EN"));
-    langButton_->setToolTip(Tr("Переключить язык интерфейса (RU/EN)", "Toggle UI language (RU/EN)"));
-    connect(langButton_, &QPushButton::clicked, this, [this] {
-        if (EditorLocale::Instance().Language() == EditorLanguage::Ru) {
-            EditorLocale::Instance().SetLanguage(EditorLanguage::En);
-        } else {
-            EditorLocale::Instance().SetLanguage(EditorLanguage::Ru);
-        }
-        emit LangToggleTriggered();
-    });
-    addWidget(langButton_);
 }
 
 void MainToolBar::UpdatePlayState(int state, bool sceneBusy)
@@ -76,10 +61,6 @@ void MainToolBar::RetranslateUi()
 
     if (configPlayBtn_) {
         configPlayBtn_->setToolTip(Tr("Детальные настройки Play…", "Detailed Play Settings…"));
-    }
-    if (langButton_) {
-        langButton_->setText(EditorLocale::Instance().Language() == EditorLanguage::Ru ? QStringLiteral("RU") : QStringLiteral("EN"));
-        langButton_->setToolTip(Tr("Переключить язык интерфейса (RU/EN)", "Toggle UI language (RU/EN)"));
     }
 }
 

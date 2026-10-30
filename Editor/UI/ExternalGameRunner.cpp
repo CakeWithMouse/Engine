@@ -1,4 +1,5 @@
 #include "ExternalGameRunner.h"
+#include "EditorLocale.h"
 #include "QtHost.h"
 #include <QCoreApplication>
 #include <QDir>
@@ -28,11 +29,11 @@ void ExternalGameRunner::Start()
             if (!tail.isEmpty() && host_) host_->Log(tail.trimmed().constData());
             if (host_) host_->Log(("ExternalGame exited code=" + std::to_string(code)
                 + (st == QProcess::CrashExit ? " (crash)" : "")).c_str());
-            if (actExternal_) actExternal_->setText(QStringLiteral("Запустить отдельным окном"));
+            if (actExternal_) actExternal_->setText(Tr("Отдельное окно", "External"));
         });
         connect(proc_, &QProcess::errorOccurred, this, [this](QProcess::ProcessError e) {
             if (host_) host_->Log(("ExternalGame error=" + std::to_string(e)).c_str());
-            if (actExternal_) actExternal_->setText(QStringLiteral("Запустить отдельным окном"));
+            if (actExternal_) actExternal_->setText(Tr("Отдельное окно", "External"));
         });
     }
 
@@ -59,7 +60,7 @@ void ExternalGameRunner::Start()
     if (!proc_->waitForStarted(2000)) {
         if (host_) host_->Log("ExternalGame: failed to start (check EngineRuntime.exe path)");
     } else {
-        if (actExternal_) actExternal_->setText(QStringLiteral("Остановить отдельную игру"));
+        if (actExternal_) actExternal_->setText(Tr("Остановить отдельную игру", "Stop External Game"));
     }
 }
 
@@ -67,4 +68,3 @@ void ExternalGameRunner::Stop()
 {
     if (IsRunning()) proc_->kill();
 }
-

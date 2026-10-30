@@ -107,6 +107,7 @@ private:
     // General
     QLabel* selectionLabel_ = nullptr;
     QLabel* typeBadgeLabel_ = nullptr;
+    QLabel* labelName_ = nullptr;
     QLineEdit* objectName_ = nullptr;
 
     // Point Light

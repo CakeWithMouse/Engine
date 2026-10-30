@@ -27,7 +27,6 @@ signals:
     void StopTriggered();
     void ExternalTriggered();
     void ConfigPlayTriggered();
-    void LangToggleTriggered();
 
 private:
     QAction* actPlay_ = nullptr;
@@ -35,5 +34,4 @@ private:
     QAction* actStop_ = nullptr;
     QAction* actExternal_ = nullptr;
     QToolButton* configPlayBtn_ = nullptr;
-    QPushButton* langButton_ = nullptr;
 };

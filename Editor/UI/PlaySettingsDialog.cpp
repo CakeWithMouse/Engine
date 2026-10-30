@@ -1,4 +1,5 @@
 #include "PlaySettingsDialog.h"
+#include "EditorLocale.h"
 #include <QFormLayout>
 #include <QComboBox>
 #include <QCheckBox>
@@ -13,7 +14,7 @@
 PlaySettingsDialog::PlaySettingsDialog(const std::vector<PlaySettingsObjectView>& objects, QWidget* parent)
     : QDialog(parent), objects_(objects)
 {
-    setWindowTitle(QStringLiteral("Персонаж и камера Play"));
+    setWindowTitle(Tr("Персонаж и камера Play", "Play Character & Camera"));
 }
 
 bool PlaySettingsDialog::Execute(uint64_t& outSettingsId, QString& outConfigJson)
@@ -24,7 +25,9 @@ bool PlaySettingsDialog::Execute(uint64_t& outSettingsId, QString& outConfigJson
     for (const auto& o : objects_) {
         if (o.gameplayKind == 3) {
             if (settingsId) {
-                QMessageBox::warning(this, QStringLiteral("Play"), QStringLiteral("Включите «Вид → Служебные объекты сцены» и удалите лишние записи «Настройки Play». Для сцены нужна одна запись."));
+                QMessageBox::warning(this, Tr("Настройки Play", "Play Settings"),
+                    Tr("Включите «Вид → Служебные объекты сцены» и удалите лишние записи «Настройки Play». Для сцены нужна одна запись.",
+                       "Enable «View -> Scene Service Objects» and remove duplicate «Play Settings» entries. Only one entry is needed for the scene."));
                 return false;
             }
             settingsId = o.id;
@@ -38,8 +41,8 @@ bool PlaySettingsDialog::Execute(uint64_t& outSettingsId, QString& outConfigJson
     character->setObjectName(QStringLiteral("PlayCharacter"));
     camera->setObjectName(QStringLiteral("PlayCamera"));
 
-    character->addItem(QStringLiteral("Без управления персонажем"), QVariant::fromValue<qulonglong>(0));
-    camera->addItem(QStringLiteral("Следовать за персонажем"), QVariant::fromValue<qulonglong>(0));
+    character->addItem(Tr("Без управления персонажем", "No Character Control"), QVariant::fromValue<qulonglong>(0));
+    camera->addItem(Tr("Следовать за персонажем", "Follow Character"), QVariant::fromValue<qulonglong>(0));
 
     for (const auto& o : objects_) {
         auto* box = o.gameplayKind == 1 ? character : o.gameplayKind == 2 ? camera : nullptr;
@@ -49,7 +52,7 @@ bool PlaySettingsDialog::Execute(uint64_t& outSettingsId, QString& outConfigJson
     character->setCurrentIndex((std::max)(0, character->findData(QVariant::fromValue<qulonglong>(data["character"].toInteger()))));
     camera->setCurrentIndex((std::max)(0, camera->findData(QVariant::fromValue<qulonglong>(data["camera"].toInteger()))));
 
-    auto* standard = new QCheckBox(QStringLiteral("WASD: движение, ПКМ + мышь: обзор"), this);
+    auto* standard = new QCheckBox(Tr("WASD: движение, ПКМ + мышь: обзор", "WASD: movement, RMB + mouse: look"), this);
     standard->setChecked(data["standardControl"].toBool());
 
     auto* distance = new QDoubleSpinBox(this);
@@ -66,13 +69,14 @@ bool PlaySettingsDialog::Execute(uint64_t& outSettingsId, QString& outConfigJson
     sensitivity->setRange(0, 1);
     sensitivity->setValue(data["lookSensitivity"].toDouble());
 
-    form->addRow(QStringLiteral("Персонаж"), character);
-    form->addRow(QStringLiteral("Камера"), camera);
+    form->addRow(Tr("Персонаж", "Character"), character);
+    form->addRow(Tr("Камера", "Camera"), camera);
     form->addRow(standard);
-    form->addRow(QStringLiteral("Расстояние камеры"), distance);
-    form->addRow(QStringLiteral("Высота камеры"), height);
-    form->addRow(QStringLiteral("Чувствительность обзора"), sensitivity);
-    form->addRow(new QLabel(QStringLiteral("Добавьте персонажа в категории Персонажи.\nФиксированная камера использует трансформацию объекта.\nSpace: Stop, P: Pause. Для управления щёлкните viewport."), this));
+    form->addRow(Tr("Расстояние камеры", "Camera Distance"), distance);
+    form->addRow(Tr("Высота камеры", "Camera Height"), height);
+    form->addRow(Tr("Чувствительность обзора", "Look Sensitivity"), sensitivity);
+    form->addRow(new QLabel(Tr("Добавьте персонажа в категории Персонажи.\nФиксированная камера использует трансформацию объекта.\nSpace: Stop, P: Pause. Для управления щёлкните viewport.",
+                               "Add a character in the Characters category.\nFixed camera uses object transform.\nSpace: Stop, P: Pause. Click viewport for controls."), this));
 
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     form->addRow(buttons);
@@ -92,4 +96,3 @@ bool PlaySettingsDialog::Execute(uint64_t& outSettingsId, QString& outConfigJson
     outConfigJson = QString::fromUtf8(QJsonDocument(data).toJson(QJsonDocument::Compact));
     return true;
 }
-

@@ -12,6 +12,7 @@
 #include "EditorLocale.h"
 #include "ViewportCommands.h"
 
+#include <QActionGroup>
 #include <QDockWidget>
 #include <QCloseEvent>
 #include <QDir>
@@ -115,23 +116,33 @@ void EditorMainWindow::BuildUi()
 
     viewMenu_ = menuBar()->addMenu(Tr("Вид", "View"));
     langMenu_ = viewMenu_->addMenu(Tr("Язык", "Language"));
-    langMenu_->addAction(QStringLiteral("Русский"), this, [] { EditorLocale::Instance().SetLanguage(EditorLanguage::Ru); });
-    langMenu_->addAction(QStringLiteral("English"), this, [] { EditorLocale::Instance().SetLanguage(EditorLanguage::En); });
+    actLangRu_ = langMenu_->addAction(QStringLiteral("Русский"), this, [] { EditorLocale::Instance().SetLanguage(EditorLanguage::Ru); });
+    actLangEn_ = langMenu_->addAction(QStringLiteral("English"), this, [] { EditorLocale::Instance().SetLanguage(EditorLanguage::En); });
+    actLangRu_->setCheckable(true);
+    actLangEn_->setCheckable(true);
+    auto* langGroup = new QActionGroup(this);
+    langGroup->addAction(actLangRu_);
+    langGroup->addAction(actLangEn_);
+    actLangRu_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::Ru);
+    actLangEn_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::En);
 
     themeMenu_ = viewMenu_->addMenu(Tr("Тема оформления", "Theme"));
     actThemeDark_ = themeMenu_->addAction(Tr("Тёмная (Dark)", "Dark"), this, [] { EditorTheme::Instance().SetMode(ThemeMode::Dark); });
     actThemeDark_->setCheckable(true);
     actThemeLight_ = themeMenu_->addAction(Tr("Светлая (Light)", "Light"), this, [] { EditorTheme::Instance().SetMode(ThemeMode::Light); });
     actThemeLight_->setCheckable(true);
+    auto* themeGroup = new QActionGroup(this);
+    themeGroup->addAction(actThemeDark_);
+    themeGroup->addAction(actThemeLight_);
     actThemeDark_->setChecked(EditorTheme::Instance().Mode() == ThemeMode::Dark);
     actThemeLight_->setChecked(EditorTheme::Instance().Mode() == ThemeMode::Light);
 
-    auto* accentMenu = themeMenu_->addMenu(Tr("Акцентный цвет", "Accent Color"));
-    accentMenu->addAction(QStringLiteral("Pain Red (#DC2626)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#DC2626"))); });
-    accentMenu->addAction(QStringLiteral("3ds Max Red (#E53935)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#E53935"))); });
-    accentMenu->addAction(QStringLiteral("Blender Orange (#E07A1F)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#E07A1F"))); });
-    accentMenu->addAction(QStringLiteral("Unreal Blue (#3B82F6)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#3B82F6"))); });
-    accentMenu->addAction(QStringLiteral("Unity Cyan (#00BCD4)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#00BCD4"))); });
+    accentMenu_ = themeMenu_->addMenu(Tr("Акцентный цвет", "Accent Color"));
+    accentMenu_->addAction(QStringLiteral("Pain Red (#DC2626)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#DC2626"))); });
+    accentMenu_->addAction(QStringLiteral("3ds Max Red (#E53935)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#E53935"))); });
+    accentMenu_->addAction(QStringLiteral("Blender Orange (#E07A1F)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#E07A1F"))); });
+    accentMenu_->addAction(QStringLiteral("Unreal Blue (#3B82F6)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#3B82F6"))); });
+    accentMenu_->addAction(QStringLiteral("Unity Cyan (#00BCD4)"), [] { EditorTheme::Instance().SetAccentColor(QColor(QStringLiteral("#00BCD4"))); });
 
     viewMenu_->addSeparator();
     actResetLayout_ = viewMenu_->addAction(Tr("Сбросить раскладку окон", "Reset Window Layout"), this, [this] {
@@ -214,24 +225,53 @@ void EditorMainWindow::closeEvent(QCloseEvent* event)
 
 void EditorMainWindow::BuildSceneMenu()
 {
-    auto* menu = menuBar()->addMenu(QStringLiteral("Сцена"));
+    sceneMenu_ = menuBar()->addMenu(Tr("Сцена", "Scene"));
+    sceneMenu_->setEnabled(host_->HasScene());
 
-    for(auto* action : menuBar()->actions()) if(action->text()==QStringLiteral("Вид") && action->menu()) {
-        auto* service=action->menu()->addAction(QStringLiteral("Служебные объекты сцены"));service->setCheckable(true);
-        connect(service,&QAction::toggled,this,[this](bool visible){
-            if (sceneObjectsPanel_) sceneObjectsPanel_->SetShowServiceObjects(visible);
-            if(!visible)for(const auto& o:host_->ReadSnapshot().objects)if(o.id==selectedId_&&o.type=="Gameplay.PlaySettings"){
-                EditorCommand c;c.type=EditorCommand::SelectObject;host_->PostCommand(c);
-            }
-            RefreshSceneUi();
+    actNewScene_ = sceneMenu_->addAction(Tr("Новая сцена", "New Scene"), this, [this] {
+        if (sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+        MaybeSave([this] {
+            sceneBusy_ = true;
+            EditorCommand c; c.type = EditorCommand::NewScene; host_->PostCommand(c);
         });
-    }
-    const bool available = host_->HasScene();
-    menu->setEnabled(available);
-    auto* playMenu = menuBar()->addMenu(QStringLiteral("Запуск"));
-    playMenu->addAction(actPlay_); playMenu->addAction(actPause_); playMenu->addAction(actStop_);
-    playMenu->addSeparator(); playMenu->addAction(actExternal_);
-    actConfigurePlay_ = playMenu->addAction(QStringLiteral("Настроить Play…"), this, [this] {
+    }, QKeySequence::New);
+
+    actOpenScene_ = sceneMenu_->addAction(Tr("Открыть сцену…", "Open Scene…"), this, [this] {
+        OpenScene();
+    }, QKeySequence::Open);
+
+    saveAction_ = sceneMenu_->addAction(Tr("Сохранить и сделать стартовой", "Save and Make Default"), this, [this] {
+        SaveScene();
+    }, QKeySequence::Save);
+
+    actSaveSceneAs_ = sceneMenu_->addAction(Tr("Сохранить как…", "Save As…"), this, [this] {
+        SaveScene(true);
+    }, QKeySequence::SaveAs);
+
+    sceneMenu_->addSeparator();
+
+    resourcesSubMenu_ = sceneMenu_->addMenu(Tr("Ресурсы", "Assets"));
+    actAddModel_ = resourcesSubMenu_->addAction(Tr("Добавить модель…", "Add Model…"), this, [this] { AddModel(); });
+    actImportModel_ = resourcesSubMenu_->addAction(Tr("Импорт модели…", "Import Model…"), this, [this] { ImportAsset(false); });
+    actImportTexture_ = resourcesSubMenu_->addAction(Tr("Импорт текстуры…", "Import Texture…"), this, [this] { ImportAsset(true); });
+
+    actReloadShaders_ = sceneMenu_->addAction(Tr("Перекомпилировать шейдеры", "Reload Shaders"), this, [this] {
+        ReloadShaders();
+    }, QKeySequence(Qt::Key_F6));
+    actReloadShaders_->setShortcutContext(Qt::ApplicationShortcut);
+    actReloadShaders_->setEnabled(host_->HasMaterials());
+
+    sceneMenu_->addSeparator();
+    actExit_ = sceneMenu_->addAction(Tr("Закрыть редактор", "Exit Editor"), this, [this] { close(); });
+
+    playMenu_ = menuBar()->addMenu(Tr("Запуск", "Play"));
+    if (actPlay_) playMenu_->addAction(actPlay_);
+    if (actPause_) playMenu_->addAction(actPause_);
+    if (actStop_) playMenu_->addAction(actStop_);
+    playMenu_->addSeparator();
+    if (actExternal_) playMenu_->addAction(actExternal_);
+
+    actConfigurePlay_ = playMenu_->addAction(Tr("Настроить Play…", "Configure Play…"), this, [this] {
         if (host_->PlayState() != EditorQtHost::Edit) return;
         const auto snapshot = host_->ReadSnapshot();
         std::vector<PlaySettingsObjectView> views;
@@ -243,78 +283,35 @@ void EditorMainWindow::BuildSceneMenu()
             host_->PostCommand(c);
         }
     });
-    menu->addAction(QStringLiteral("Новая сцена"), this, [this]
-    {
-        if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
-            return;
 
-        MaybeSave([this]
-        {
-            sceneBusy_ = true;
-
-            EditorCommand c;
-            c.type = EditorCommand::NewScene;
-
-            host_->PostCommand(c);
-        });
-    }, QKeySequence::New);
-
-    menu->addAction(QStringLiteral("Открыть сцену…"), this, [this]
-    {
-        OpenScene();
-    }, QKeySequence::Open);
-
-    saveAction_ = menu->addAction(QStringLiteral("Сохранить и сделать стартовой"), this, [this]
-    {
-        SaveScene();
-    }, QKeySequence::Save);
-
-    menu->addAction(QStringLiteral("Сохранить как…"), this, [this]
-    {
-        SaveScene(true);
-    }, QKeySequence::SaveAs);
-
-    menu->addSeparator();
-
-    auto* resources = menu->addMenu(QStringLiteral("Ресурсы"));
-    resources->addAction(QStringLiteral("Добавить модель…"), this, [this] { AddModel(); });
-    resources->addAction(QStringLiteral("Импорт модели…"), this, [this] { ImportAsset(false); });
-    resources->addAction(QStringLiteral("Импорт текстуры…"), this, [this] { ImportAsset(true); });
-    // F6 работает и в окнах материалов.
-    auto* reloadShaders = menu->addAction(QStringLiteral("Перекомпилировать шейдеры"), this, [this]
-    {
-        ReloadShaders();
-    }, QKeySequence(Qt::Key_F6));
-    reloadShaders->setShortcutContext(Qt::ApplicationShortcut);
-    reloadShaders->setEnabled(host_->HasMaterials());
-
-    menu->addSeparator();
-
-    auto* editMenu = menuBar()->addMenu(QStringLiteral("Правка"));
-    undoAction_ = editMenu->addAction(QStringLiteral("Отменить"), this, [this]
-    {
+    editMenu_ = menuBar()->addMenu(Tr("Правка", "Edit"));
+    undoAction_ = editMenu_->addAction(Tr("Отменить", "Undo"), this, [this] {
         SubmitObjectCommand(EditorCommand::Undo);
     }, QKeySequence::Undo);
 
-    redoAction_ = editMenu->addAction(QStringLiteral("Повторить"), this, [this]
-    {
+    redoAction_ = editMenu_->addAction(Tr("Повторить", "Redo"), this, [this] {
         SubmitObjectCommand(EditorCommand::Redo);
     }, QKeySequence::Redo);
 
-    duplicateAction_ = editMenu->addAction(QStringLiteral("Дублировать объект"), this, [this]
-    {
+    duplicateAction_ = editMenu_->addAction(Tr("Дублировать объект", "Duplicate Object"), this, [this] {
         SubmitObjectCommand(EditorCommand::DuplicateObject);
     }, QKeySequence(QStringLiteral("Ctrl+D")));
 
-    deleteAction_ = editMenu->addAction(QStringLiteral("Удалить объект"), this, [this]
-    {
+    deleteAction_ = editMenu_->addAction(Tr("Удалить объект", "Remove Object"), this, [this] {
         SubmitObjectCommand(EditorCommand::RemoveObject);
     });
 
-    menu->addSeparator();
-    menu->addAction(QStringLiteral("Закрыть редактор"), this, [this] { close(); });
-
-
+    if (viewMenu_ && !actServiceObjects_) {
+        actServiceObjects_ = viewMenu_->addAction(Tr("Служебные объекты сцены", "Scene Service Objects"));
+        actServiceObjects_->setCheckable(true);
+        connect(actServiceObjects_, &QAction::toggled, this, [this](bool visible) {
+            if (sceneObjectsPanel_) sceneObjectsPanel_->SetShowServiceObjects(visible);
+            if (!visible) for (const auto& o : host_->ReadSnapshot().objects) if (o.id == selectedId_ && o.type == "Gameplay.PlaySettings") {
+                EditorCommand c; c.type = EditorCommand::SelectObject; host_->PostCommand(c);
+            }
+            RefreshSceneUi();
+        });
+    }
 }
 
 void EditorMainWindow::BuildToolBar()
@@ -346,7 +343,6 @@ void EditorMainWindow::BuildToolBar()
     connect(mainToolBar_, &MainToolBar::ConfigPlayTriggered, this, [this] {
         if (actConfigurePlay_) actConfigurePlay_->trigger();
     });
-    connect(mainToolBar_, &MainToolBar::LangToggleTriggered, this, &EditorMainWindow::RetranslateUi);
 
     UpdatePlayButtons();
 }
@@ -1269,10 +1265,7 @@ void EditorMainWindow::ApplySavedOrInitialLayout()
     const bool isTest = qEnvironmentVariableIsSet("PAIN_EDITOR_TEST_MODE") ||
         qApp->applicationFilePath().contains(QStringLiteral("Tests"), Qt::CaseInsensitive) ||
         (host_ && host_->host().projectName && std::string(host_->host().projectName).find("UI") != std::string::npos);
-
-    if (isTest || !DockLayoutManager::RestoreLayout(this, ProjectPath())) {
-        ApplyDefaultLayout();
-    }
+    if (isTest || !DockLayoutManager::RestoreLayout(this, ProjectPath())) ApplyDefaultLayout();
 }
 
 void EditorMainWindow::ApplyDefaultLayout()
@@ -1282,19 +1275,45 @@ void EditorMainWindow::ApplyDefaultLayout()
 
 QString EditorMainWindow::ProjectPath() const
 {
-    if (!host_ || !host_->host().projectFile) return QString();
-    return QString::fromUtf8(host_->host().projectFile);
+    return (host_ && host_->host().projectFile) ? QString::fromUtf8(host_->host().projectFile) : QString();
 }
 
 void EditorMainWindow::RetranslateUi()
 {
     setWindowTitle(QStringLiteral("PainEngine Editor - %1").arg(QString::fromUtf8(host_->host().projectName)));
-    if (mainToolBar_) mainToolBar_->RetranslateUi();
-    if (sceneObjectsPanel_) sceneObjectsPanel_->RetranslateUi();
+
+    if (viewportDock_) viewportDock_->setWindowTitle(Tr("Вьюпорт", "Viewport"));
+    if (consoleDock_) consoleDock_->setWindowTitle(Tr("Консоль", "Console"));
+    if (fileDock_) fileDock_->setWindowTitle(Tr("Контент", "Content Browser"));
+    if (sceneObjectsDock_) sceneObjectsDock_->setWindowTitle(Tr("Сцена / объекты", "Scene / Objects"));
+    if (inspectorDock_) inspectorDock_->setWindowTitle(Tr("Свойства объекта", "Object Properties"));
+    if (sceneMenu_) sceneMenu_->setTitle(Tr("Сцена", "Scene"));
+    if (playMenu_) playMenu_->setTitle(Tr("Запуск", "Play"));
+    if (editMenu_) editMenu_->setTitle(Tr("Правка", "Edit"));
     if (viewMenu_) viewMenu_->setTitle(Tr("Вид", "View"));
+    if (resourcesSubMenu_) resourcesSubMenu_->setTitle(Tr("Ресурсы", "Assets"));
     if (themeMenu_) themeMenu_->setTitle(Tr("Тема оформления", "Theme"));
     if (langMenu_) langMenu_->setTitle(Tr("Язык", "Language"));
+    if (accentMenu_) accentMenu_->setTitle(Tr("Акцентный цвет", "Accent Color"));
+
+    if (actNewScene_) actNewScene_->setText(Tr("Новая сцена", "New Scene"));
+    if (actOpenScene_) actOpenScene_->setText(Tr("Открыть сцену…", "Open Scene…"));
+    if (saveAction_) saveAction_->setText(Tr("Сохранить и сделать стартовой", "Save and Make Default"));
+    if (actSaveSceneAs_) actSaveSceneAs_->setText(Tr("Сохранить как…", "Save As…"));
+    if (actExit_) actExit_->setText(Tr("Закрыть редактор", "Exit Editor"));
+    if (actServiceObjects_) actServiceObjects_->setText(Tr("Служебные объекты сцены", "Scene Service Objects"));
+    if (actConfigurePlay_) actConfigurePlay_->setText(Tr("Настроить Play…", "Configure Play…"));
+    if (actAddModel_) actAddModel_->setText(Tr("Добавить модель…", "Add Model…"));
+    if (actImportModel_) actImportModel_->setText(Tr("Импорт модели…", "Import Model…"));
+    if (actImportTexture_) actImportTexture_->setText(Tr("Импорт текстуры…", "Import Texture…"));
+    if (actReloadShaders_) actReloadShaders_->setText(Tr("Перекомпилировать шейдеры", "Reload Shaders"));
+    if (undoAction_) undoAction_->setText(Tr("Отменить", "Undo"));
+    if (redoAction_) redoAction_->setText(Tr("Повторить", "Redo"));
+    if (duplicateAction_) duplicateAction_->setText(Tr("Дублировать объект", "Duplicate Object"));
+    if (deleteAction_) deleteAction_->setText(Tr("Удалить объект", "Remove Object"));
     if (actThemeDark_) actThemeDark_->setText(Tr("Тёмная (Dark)", "Dark"));
     if (actThemeLight_) actThemeLight_->setText(Tr("Светлая (Light)", "Light"));
     if (actResetLayout_) actResetLayout_->setText(Tr("Сбросить раскладку окон", "Reset Window Layout"));
+    if (actLangRu_) actLangRu_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::Ru);
+    if (actLangEn_) actLangEn_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::En);
 }

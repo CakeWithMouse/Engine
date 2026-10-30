@@ -133,13 +133,31 @@ private:
     MainToolBar* mainToolBar_ = nullptr;
     QToolBar* toolBar_ = nullptr;
 
+    QMenu* sceneMenu_ = nullptr;
+    QMenu* playMenu_ = nullptr;
+    QMenu* editMenu_ = nullptr;
     QMenu* viewMenu_ = nullptr;
+    QMenu* resourcesSubMenu_ = nullptr;
+    QMenu* projectMenu_ = nullptr;
     QMenu* themeMenu_ = nullptr;
     QMenu* langMenu_ = nullptr;
+    QMenu* accentMenu_ = nullptr;
+
+    QAction* actNewScene_ = nullptr;
+    QAction* actOpenScene_ = nullptr;
+    QAction* actSaveSceneAs_ = nullptr;
+    QAction* actExit_ = nullptr;
+    QAction* actServiceObjects_ = nullptr;
+    QAction* actConfigurePlay_ = nullptr;
+    QAction* actAddModel_ = nullptr;
+    QAction* actImportModel_ = nullptr;
+    QAction* actImportTexture_ = nullptr;
+    QAction* actReloadShaders_ = nullptr;
+    QAction* actResetLayout_ = nullptr;
     QAction* actThemeDark_ = nullptr;
     QAction* actThemeLight_ = nullptr;
-    QAction* actResetLayout_ = nullptr;
-    QAction* actConfigurePlay_ = nullptr;
+    QAction* actLangRu_ = nullptr;
+    QAction* actLangEn_ = nullptr;
 
     int langSubId_ = 0;
     int themeSubId_ = 0;
