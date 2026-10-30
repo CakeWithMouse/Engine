@@ -7,6 +7,9 @@
 #include <cstdint>
 
 #include "QtHost.h"
+#include "EditorSettings.h"
+
+class ViewportHeaderBar;
 
 class ViewportWidget : public QWidget
 {
@@ -14,9 +17,20 @@ class ViewportWidget : public QWidget
 
 public:
     explicit ViewportWidget(EditorQtHost* host, QWidget* parent = nullptr);
+    ~ViewportWidget() override;
 
     void setGizmoMode(EditorGizmoMode mode);
     EditorGizmoMode gizmoMode() const { return gizmoMode_; }
+
+    void SetSnapEnabled(bool enabled);
+    bool IsSnapEnabled() const { return snapEnabled_; }
+    void ToggleSnap();
+
+    void SetCoordinateSpaceLocal(bool local);
+    bool IsCoordinateSpaceLocal() const { return localOrientation_; }
+    void ToggleCoordinateSpace();
+
+    void RetranslateUi();
 
 signals:
     void contextMenuRequested(const QPoint& globalPos);
@@ -29,6 +43,16 @@ protected:
     void hideEvent(QHideEvent* e) override;
     void resizeEvent(QResizeEvent* e) override;
     void paintEvent(QPaintEvent* e) override;
+
+    // Split input handlers by method
+    bool HandleFocusEvent(QEvent* e);
+    bool HandleGameInput(QEvent* e);
+    bool HandleKeyPress(QKeyEvent* e);
+    bool HandleKeyRelease(QKeyEvent* e);
+    bool HandleMousePress(QMouseEvent* e);
+    bool HandleMouseMove(QMouseEvent* e);
+    bool HandleMouseRelease(QMouseEvent* e);
+    bool HandleWheel(QWheelEvent* e);
 
     QSet<int> keys_;
     QPointF lastMouse_;
@@ -73,4 +97,15 @@ private:
     float dragSensitivity_ = 0.002f;
     float rotateSensitivity_ = 0.008f;
     float scaleSensitivity_ = 0.005f;
+
+    // S6 Gizmo & Snapping & Space
+    bool snapEnabled_ = false;
+    double moveSnapStep_ = 0.5;
+    double rotateSnapStep_ = 15.0;
+    double scaleSnapStep_ = 0.25;
+    bool localOrientation_ = false;
+
+    ViewportHeaderBar* headerBar_ = nullptr;
+    int schemeSubId_ = 0;
+    int langSubId_ = 0;
 };

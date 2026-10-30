@@ -10,6 +10,7 @@
 #include "ExternalGameRunner.h"
 #include "EditorTheme.h"
 #include "EditorLocale.h"
+#include "ViewportCommands.h"
 
 #include <QDockWidget>
 #include <QCloseEvent>
@@ -74,6 +75,7 @@ void EditorMainWindow::BuildUi()
     setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
 
     viewport_ = new ViewportWidget(host_, this);
+    RegisterViewportCommands(viewport_, host_);
 
     viewportDock_ = new QDockWidget(QStringLiteral("Viewport"), this);
     viewportDock_->setObjectName(QStringLiteral("ViewportDock"));

@@ -195,6 +195,42 @@ void TestFileService()
 } // namespace
 
 #include "EditorLocale.h"
+#include "GizmoMath.h"
+
+static void TestGizmoMath()
+{
+    // 1. Translation snap
+    Check(std::abs(GizmoMath::SnapTranslation(1.35, 0.5) - 1.5) < 1e-6, "SnapTranslation 1.35 to step 0.5 is 1.5");
+    Check(std::abs(GizmoMath::SnapTranslation(1.10, 0.5) - 1.0) < 1e-6, "SnapTranslation 1.10 to step 0.5 is 1.0");
+    Check(std::abs(GizmoMath::SnapTranslation(2.75, 0.0) - 2.75) < 1e-6, "SnapTranslation with step 0 is unchanged");
+
+    // 2. Rotation snap (degrees step, radians input)
+    constexpr double kPi = 3.14159265358979323846;
+    const double rad32 = 32.0 * (kPi / 180.0);
+    const double snappedRad = GizmoMath::SnapRotation(rad32, 15.0);
+    const double degSnapped = snappedRad * (180.0 / kPi);
+    Check(std::abs(degSnapped - 30.0) < 1e-4, "SnapRotation 32 deg to step 15 deg is 30 deg");
+
+    // 3. Scale snap
+    Check(std::abs(GizmoMath::SnapScale(1.18, 0.25) - 1.25) < 1e-6, "SnapScale 1.18 to step 0.25 is 1.25");
+
+    // 4. TransformDelta World vs Local
+    const double delta[3] = {1.0, 2.0, 3.0};
+    const double qIdent[4] = {0.0, 0.0, 0.0, 1.0};
+    double outWorld[3]{};
+    GizmoMath::TransformDelta(delta, qIdent, false, outWorld);
+    Check(std::abs(outWorld[0] - 1.0) < 1e-6 && std::abs(outWorld[1] - 2.0) < 1e-6 && std::abs(outWorld[2] - 3.0) < 1e-6,
+          "TransformDelta World returns unchanged delta");
+
+    // 90 deg around Z: turns (1, 0, 0) into (0, 1, 0)
+    double qZ90[4]{};
+    GizmoMath::AxisAngleQuat(0.0, 0.0, 1.0, kPi * 0.5, qZ90);
+    const double unitX[3] = {1.0, 0.0, 0.0};
+    double outLocal[3]{};
+    GizmoMath::TransformDelta(unitX, qZ90, true, outLocal);
+    Check(std::abs(outLocal[0]) < 1e-5 && std::abs(outLocal[1] - 1.0) < 1e-5 && std::abs(outLocal[2]) < 1e-5,
+          "TransformDelta Local rotates vector by quaternion");
+}
 
 static void TestEditorLocale()
 {
@@ -254,6 +290,10 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestEditorLocale...\n");
     std::fflush(stdout);
     TestEditorLocale();
+
+    std::printf("[Test] TestGizmoMath...\n");
+    std::fflush(stdout);
+    TestGizmoMath();
 
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);

@@ -154,6 +154,8 @@
         <ClCompile Include="Core/CommandRegistry.cpp"/>
         <ClCompile Include="Core/FileService.cpp"/>
         <ClCompile Include="Core/EditorLocale.cpp"/>
+        <ClCompile Include="Core/GizmoMath.cpp"/>
+        <ClCompile Include="Core/EditorSettings.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_Logger.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_CommandRegistry.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_FileService.cpp"/>
@@ -168,6 +170,8 @@
     <ItemGroup>
         <ClInclude Include="Core/IUserPrompt.h"/>
         <ClInclude Include="Core/EditorLocale.h"/>
+        <ClInclude Include="Core/GizmoMath.h"/>
+        <ClInclude Include="Core/EditorSettings.h"/>
         <CustomBuild Include="Core/Logger.h">
             <FileType>Document</FileType>
             <Message>MOC %(Filename).h</Message>
