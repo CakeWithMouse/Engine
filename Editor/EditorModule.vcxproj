@@ -137,6 +137,8 @@
         <ClCompile Include="Host/AssetCommandHandler.cpp"/>
         <ClCompile Include="Host/SceneCommandHandler.cpp"/>
         <ClCompile Include="UI/EditorApp.cpp"/>
+        <ClCompile Include="UI/EditorTheme.cpp"/>
+        <ClCompile Include="UI/EditorStyles.cpp"/>
         <ClCompile Include="Source/MainWindow.cpp"/>
         <ClCompile Include="Source/AssetTools.cpp"/>
         <ClCompile Include="Source/FileBrowser.cpp"/>

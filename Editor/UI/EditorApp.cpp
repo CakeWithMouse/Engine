@@ -2,6 +2,7 @@
 #include "MainWindow.h"
 #include "IEditorHost.h"
 #include "QtHost.h"
+#include "EditorTheme.h"
 #include <QApplication>
 #include <functional>
 
@@ -18,7 +19,7 @@ namespace
         QApplication app(g_argc, g_argv);
         app.setQuitOnLastWindowClosed(false);
         app.setApplicationName(QStringLiteral("Engine Editor"));
-        QApplication::setStyle(QStringLiteral("Fusion"));
+        EditorTheme::Apply(app);
 
         auto* qtHost = dynamic_cast<EditorQtHost*>(host);
         EditorMainWindow window(qtHost);
