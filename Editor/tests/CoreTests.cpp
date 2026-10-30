@@ -9,6 +9,8 @@
 #include "core/MaterialGraphTests.h"
 #include "../Core/SceneFile.cpp"
 #include "core/SceneFileTests.h"
+#include "../Core/Terminal.cpp"
+#include "core/TerminalTests.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
@@ -221,6 +223,13 @@ void TestSceneFile()
     gChecks += 21;
 }
 
+void TestTerminal()
+{
+    RunTerminalTests();
+    // 28 distinct checks in RunTerminalTests
+    gChecks += 28;
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -268,6 +277,10 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestSceneFile...\n");
     std::fflush(stdout);
     TestSceneFile();
+
+    std::printf("[Test] TestTerminal...\n");
+    std::fflush(stdout);
+    TestTerminal();
 
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);
