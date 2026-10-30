@@ -80,12 +80,7 @@ private:
 
         spin->setParent(cell);
         spin->setFixedHeight(22);
-        spin->setStyleSheet(QStringLiteral(
-            "QDoubleSpinBox { background-color: #1F232B; color: #F1F5F9; border: 1px solid #333842; "
-            "border-left: none; border-top-right-radius: 4px; border-bottom-right-radius: 4px; "
-            "font-size: 11px; padding: 1px 2px; }"
-            "QDoubleSpinBox:focus { border: 1px solid #3B82F6; }"
-        ));
+        spin->setStyleSheet(QStringLiteral("border-left: none; border-top-left-radius: 0px; border-bottom-left-radius: 0px;"));
         layout->addWidget(spin, 1);
         return cell;
     }
@@ -100,10 +95,7 @@ private:
             auto* btn = new QPushButton(QStringLiteral("↺"), Content());
             btn->setFixedSize(22, 22);
             btn->setToolTip(toolTip);
-            btn->setStyleSheet(QStringLiteral(
-                "QPushButton { background-color: #242832; color: #94A3B8; border: 1px solid #383E4C; border-radius: 4px; font-size: 12px; font-weight: bold; }"
-                "QPushButton:hover { background-color: #313847; color: #FFFFFF; }"
-            ));
+
             return btn;
         };
 
@@ -118,8 +110,8 @@ private:
         lPos->setSpacing(4);
 
         labelPosRow_ = new QLabel(Tr("Позиция", "Position"), rowPos);
+        labelPosRow_->setObjectName(QStringLiteral("CardFieldLabel"));
         labelPosRow_->setFixedWidth(56);
-        labelPosRow_->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px;"));
         lPos->addWidget(labelPosRow_);
 
         for (int i = 0; i < 3; ++i)
@@ -148,8 +140,8 @@ private:
         lRot->setSpacing(4);
 
         labelRotRow_ = new QLabel(Tr("Поворот", "Rotation"), rowRot);
+        labelRotRow_->setObjectName(QStringLiteral("CardFieldLabel"));
         labelRotRow_->setFixedWidth(56);
-        labelRotRow_->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px;"));
         lRot->addWidget(labelRotRow_);
 
         for (int i = 3; i < 6; ++i)
@@ -178,8 +170,8 @@ private:
         lScale->setSpacing(4);
 
         labelScaleRow_ = new QLabel(Tr("Масштаб", "Scale"), rowScale);
+        labelScaleRow_->setObjectName(QStringLiteral("CardFieldLabel"));
         labelScaleRow_->setFixedWidth(56);
-        labelScaleRow_->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px;"));
         lScale->addWidget(labelScaleRow_);
 
         for (int i = 6; i < 9; ++i)

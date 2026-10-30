@@ -9,6 +9,8 @@
 #include <QPainter>
 #include <QPixmap>
 #include <QPointF>
+#include <QDir>
+#include <QFileInfo>
 
 EditorTheme& EditorTheme::Instance()
 {
@@ -63,6 +65,36 @@ void EditorTheme::SetAccentColor(const QColor& color)
     NotifyChanged();
 }
 
+ThemePalette EditorTheme::Palette() const
+{
+    ThemePalette pal;
+    const bool isDark = (mode_ == ThemeMode::Dark);
+    pal.textPrimary = isDark ? QColor(0xEC, 0xEF, 0xF4) : QColor(0x1F, 0x23, 0x28);
+    pal.textSecondary = isDark ? QColor(0xAB, 0xB2, 0xBF) : QColor(0x48, 0x4F, 0x58);
+    pal.textDisabled = isDark ? QColor(0x5C, 0x63, 0x70) : QColor(0x8C, 0x95, 0x9F);
+    pal.bgWindow = isDark ? QColor(0x18, 0x1A, 0x1F) : QColor(0xF0, 0xF2, 0xF5);
+    pal.bgPanel = isDark ? QColor(0x20, 0x23, 0x2A) : QColor(0xF6, 0xF8, 0xFA);
+    pal.bgDarkest = isDark ? QColor(0x14, 0x16, 0x1A) : QColor(0xFF, 0xFF, 0xFF);
+    pal.bgButton = isDark ? QColor(0x21, 0x25, 0x2B) : QColor(0xEA, 0xEE, 0xF2);
+    pal.bgButtonHover = isDark ? QColor(0x28, 0x2C, 0x34) : QColor(0xE1, 0xE4, 0xE8);
+    pal.bgButtonPressed = isDark ? QColor(0x1C, 0x20, 0x26) : QColor(0xD8, 0xDE, 0xE4);
+    pal.borderLight = isDark ? QColor(0x2C, 0x31, 0x3A) : QColor(0xD0, 0xD7, 0xDE);
+    pal.borderMid = isDark ? QColor(0x3E, 0x44, 0x51) : QColor(0xAF, 0xB8, 0xC1);
+    pal.accent = accentColor_;
+    pal.accentHover = accentColor_.lighter(120);
+    pal.axisX = QColor(QStringLiteral("#EF4444"));
+    pal.axisY = QColor(QStringLiteral("#22C55E"));
+    pal.axisZ = QColor(QStringLiteral("#3B82F6"));
+    return pal;
+}
+
+QColor EditorTheme::TextPrimary() const { return Palette().textPrimary; }
+QColor EditorTheme::TextSecondary() const { return Palette().textSecondary; }
+QColor EditorTheme::BgWindow() const { return Palette().bgWindow; }
+QColor EditorTheme::BgPanel() const { return Palette().bgPanel; }
+QColor EditorTheme::BgDarkest() const { return Palette().bgDarkest; }
+QColor EditorTheme::BorderLight() const { return Palette().borderLight; }
+
 int EditorTheme::SubscribeThemeChanged(std::function<void()> callback)
 {
     const int id = nextId_++;
@@ -92,9 +124,7 @@ void EditorTheme::ApplyToApp()
     if (!app_) return;
 
     QPalette palette;
-    const bool isDark = (mode_ == ThemeMode::Dark);
-
-    if (isDark)
+    if (mode_ == ThemeMode::Dark)
     {
         const QColor bgDarkest(0x14, 0x16, 0x1A);
         const QColor bgDark(0x18, 0x1A, 0x1F);
@@ -169,9 +199,46 @@ void EditorTheme::ApplyToApp()
     app_->setStyleSheet(CurrentStyleSheet());
 }
 
+static void EnsureArrowIcons(ThemeMode mode, QString& outUp, QString& outDown, QString& outRight)
+{
+    const QString dirPath = QDir::cleanPath(QDir::tempPath() + QStringLiteral("/PainEngineTheme"));
+    QDir().mkpath(dirPath);
+
+    const bool isDark = (mode == ThemeMode::Dark);
+    const QString suffix = isDark ? QStringLiteral("_dark.png") : QStringLiteral("_light.png");
+    outUp = dirPath + QStringLiteral("/arrow_up") + suffix;
+    outDown = dirPath + QStringLiteral("/arrow_down") + suffix;
+    outRight = dirPath + QStringLiteral("/arrow_right") + suffix;
+
+    const QColor arrowColor = isDark ? QColor(0xEC, 0xEF, 0xF4) : QColor(0x1F, 0x23, 0x28);
+
+    auto renderTriangle = [&](const QString& path, const QPointF pts[3]) {
+        QPixmap pix(12, 12);
+        pix.fill(Qt::transparent);
+        {
+            QPainter p(&pix);
+            p.setRenderHint(QPainter::Antialiasing);
+            p.setPen(Qt::NoPen);
+            p.setBrush(arrowColor);
+            p.drawPolygon(pts, 3);
+        }
+        pix.save(path, "PNG");
+    };
+
+    const QPointF upPts[3] = { QPointF(2.0, 8.5), QPointF(6.0, 3.5), QPointF(10.0, 8.5) };
+    const QPointF downPts[3] = { QPointF(2.0, 3.5), QPointF(10.0, 3.5), QPointF(6.0, 8.5) };
+    const QPointF rightPts[3] = { QPointF(3.5, 2.0), QPointF(8.5, 6.0), QPointF(3.5, 10.0) };
+
+    renderTriangle(outUp, upPts);
+    renderTriangle(outDown, downPts);
+    renderTriangle(outRight, rightPts);
+}
+
 QString EditorTheme::CurrentStyleSheet() const
 {
-    return EditorStyles::BuildStyleSheet(mode_, accentColor_);
+    QString arrowUp, arrowDown, arrowRight;
+    EnsureArrowIcons(mode_, arrowUp, arrowDown, arrowRight);
+    return EditorStyles::BuildStyleSheet(mode_, accentColor_, arrowUp, arrowDown, arrowRight);
 }
 
 QIcon EditorTheme::CreatePlayIcon(const QColor& color)
@@ -239,3 +306,23 @@ QIcon EditorTheme::CreateExternalIcon(const QColor& color)
     return QIcon(pix);
 }
 
+QIcon EditorTheme::CreateSettingsIcon(const QColor& color)
+{
+    QPixmap pix(16, 16);
+    pix.fill(Qt::transparent);
+    {
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(QPen(color, 1.5));
+        p.setBrush(Qt::NoBrush);
+        p.drawEllipse(QRectF(4.0, 4.0, 8.0, 8.0));
+        for (int i = 0; i < 8; ++i) {
+            p.save();
+            p.translate(8.0, 8.0);
+            p.rotate(i * 45.0);
+            p.drawLine(QPointF(0.0, -5.5), QPointF(0.0, -7.5));
+            p.restore();
+        }
+    }
+    return QIcon(pix);
+}

@@ -1,7 +1,10 @@
 #include "EditorStyles.h"
 #include "EditorTheme.h"
 
-QString EditorStyles::BuildStyleSheet(ThemeMode mode, const QColor& accentColor)
+QString EditorStyles::BuildStyleSheet(ThemeMode mode, const QColor& accentColor,
+                                       const QString& arrowUp,
+                                       const QString& arrowDown,
+                                       const QString& arrowRight)
 {
     const bool isDark = (mode == ThemeMode::Dark);
     const QString accent = accentColor.name(QColor::HexRgb).toUpper();
@@ -19,7 +22,7 @@ QString EditorStyles::BuildStyleSheet(ThemeMode mode, const QColor& accentColor)
     const QString borderLight = isDark ? QStringLiteral("#2C313A") : QStringLiteral("#D0D7DE");
     const QString borderMid = isDark ? QStringLiteral("#3E4451") : QStringLiteral("#AFB8C1");
 
-    return QString(R"QSS(
+    QString qss = QString(R"QSS(
 QWidget {
     color: %1;
     selection-background-color: %2;
@@ -91,6 +94,7 @@ QPushButton {
     border: 1px solid %6;
     border-radius: 4px;
     padding: 5px 12px;
+    color: %1;
     font-weight: 500;
 }
 QPushButton:hover {
@@ -164,11 +168,6 @@ QScrollBar::handle:vertical {
 QScrollBar::handle:vertical:hover {
     background-color: %2;
 }
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,
-QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-    background: transparent;
-    height: 0;
-}
 QScrollBar:horizontal {
     background-color: %5;
     height: 8px;
@@ -183,11 +182,6 @@ QScrollBar::handle:horizontal {
 }
 QScrollBar::handle:horizontal:hover {
     background-color: %2;
-}
-QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal,
-QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
-    background: transparent;
-    width: 0;
 }
 QGroupBox {
     font-weight: 600;
@@ -212,6 +206,80 @@ QStatusBar {
     border-top: 1px solid %6;
     color: %4;
 }
+
+/* Collapsible cards and inspector tokens */
+QFrame#CollapsibleCard {
+    background-color: %7;
+    border: 1px solid %6;
+    border-radius: 6px;
+    margin-bottom: 6px;
+}
+QPushButton#CardHeaderBtn {
+    background-color: %8;
+    color: %1;
+    font-weight: 600;
+    font-size: 11px;
+    text-align: left;
+    padding: 6px 10px;
+    border: none;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+QPushButton#CardHeaderBtn:hover {
+    background-color: %9;
+    color: %1;
+}
+QLabel#CardSectionLabel {
+    color: %4;
+    font-size: 11px;
+    font-weight: bold;
+}
+QLabel#CardFieldLabel {
+    color: %4;
+    font-size: 11px;
+}
+QLabel#SelectedObjectLabel {
+    color: %2;
+    font-weight: bold;
+    font-size: 11px;
+}
+QLabel#TypeBadgeLabel {
+    background-color: %8;
+    color: %4;
+    font-weight: bold;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid %6;
+}
+QLabel#NoSelectionLabel {
+    color: %12;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 40px 10px;
+}
+QScrollArea#InspectorScrollArea, QWidget#InspectorScrollContent {
+    background-color: %3;
+    border: none;
+}
+QPushButton#PrimaryActionButton {
+    background-color: %2;
+    color: #FFFFFF;
+    font-weight: bold;
+    border: 1px solid %2;
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 11px;
+}
+QPushButton#PrimaryActionButton:hover {
+    background-color: %13;
+}
+QPushButton#PrimaryActionButton:disabled {
+    background-color: %8;
+    color: %12;
+    border: 1px solid %6;
+}
+
 #MaterialPreview, ViewportWidget, MaterialPreviewWidget {
     background: transparent;
     border: none;
@@ -230,5 +298,72 @@ QStatusBar {
         .arg(bgButtonPressed) // %11
         .arg(textDisabled)    // %12
         .arg(accentHover);    // %13
-}
 
+    if (!arrowUp.isEmpty() && !arrowDown.isEmpty()) {
+        qss += QString(R"QSS(
+QSpinBox::up-button, QDoubleSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 16px;
+    border-left: 1px solid %1;
+    border-bottom: 1px solid %1;
+    background-color: %2;
+}
+QSpinBox::up-button:hover, QDoubleSpinBox::up-button:hover {
+    background-color: %3;
+}
+QSpinBox::down-button, QDoubleSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    width: 16px;
+    border-left: 1px solid %1;
+    background-color: %2;
+}
+QSpinBox::down-button:hover, QDoubleSpinBox::down-button:hover {
+    background-color: %3;
+}
+QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {
+    image: url("%4");
+    width: 8px;
+    height: 8px;
+}
+QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {
+    image: url("%5");
+    width: 8px;
+    height: 8px;
+}
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px;
+    border-left: 1px solid %1;
+    background-color: %2;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+QComboBox::drop-down:hover {
+    background-color: %3;
+}
+QComboBox::down-arrow {
+    image: url("%5");
+    width: 8px;
+    height: 8px;
+}
+)QSS").arg(borderLight, bgButton, bgButtonHover, arrowUp, arrowDown);
+    }
+
+    if (!arrowRight.isEmpty() && !arrowDown.isEmpty()) {
+        qss += QString(R"QSS(
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+    image: url("%1");
+}
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings {
+    image: url("%2");
+}
+)QSS").arg(arrowRight, arrowDown);
+    }
+
+    return qss;
+}

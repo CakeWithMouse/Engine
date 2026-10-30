@@ -13,14 +13,6 @@ public:
         : QFrame(parent), expanded_(expanded), titleText_(title)
     {
         setObjectName(QStringLiteral("CollapsibleCard"));
-        setStyleSheet(QStringLiteral(
-            "QFrame#CollapsibleCard {"
-            "  background-color: #171A21;"
-            "  border: 1px solid #282D37;"
-            "  border-radius: 6px;"
-            "  margin-bottom: 6px;"
-            "}"
-        ));
 
         auto* mainLayout = new QVBoxLayout(this);
         mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -29,23 +21,6 @@ public:
         headerBtn_ = new QPushButton(this);
         headerBtn_->setObjectName(QStringLiteral("CardHeaderBtn"));
         headerBtn_->setCursor(Qt::PointingHandCursor);
-        headerBtn_->setStyleSheet(QStringLiteral(
-            "QPushButton#CardHeaderBtn {"
-            "  background-color: #1E222B;"
-            "  color: #E2E8F0;"
-            "  font-weight: 600;"
-            "  font-size: 11px;"
-            "  text-align: left;"
-            "  padding: 6px 10px;"
-            "  border: none;"
-            "  border-top-left-radius: 5px;"
-            "  border-top-right-radius: 5px;"
-            "}"
-            "QPushButton#CardHeaderBtn:hover {"
-            "  background-color: #262C38;"
-            "  color: #FFFFFF;"
-            "}"
-        ));
         UpdateHeaderText();
 
         QObject::connect(headerBtn_, &QPushButton::clicked, [this] {
@@ -93,4 +68,3 @@ private:
     QWidget* content_ = nullptr;
     QVBoxLayout* contentLayout_ = nullptr;
 };
-

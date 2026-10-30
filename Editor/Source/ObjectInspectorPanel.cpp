@@ -35,12 +35,7 @@ static QWidget* CreateAxisCell(NoWheelDoubleSpinBox* spin, const QString& axisLe
 
     spin->setParent(cell);
     spin->setFixedHeight(22);
-    spin->setStyleSheet(QStringLiteral(
-        "QDoubleSpinBox { background-color: #1F232B; color: #F1F5F9; border: 1px solid #333842; "
-        "border-left: none; border-top-right-radius: 4px; border-bottom-right-radius: 4px; "
-        "font-size: 11px; padding: 1px 2px; }"
-        "QDoubleSpinBox:focus { border: 1px solid #3B82F6; }"
-    ));
+    spin->setStyleSheet(QStringLiteral("border-left: none; border-top-left-radius: 0px; border-bottom-left-radius: 0px;"));
     layout->addWidget(spin, 1);
     return cell;
 }
@@ -84,17 +79,17 @@ void ObjectInspectorPanel::BuildUi()
     scrollArea->setFrameShape(QFrame::NoFrame);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    scrollArea->setStyleSheet(QStringLiteral("QScrollArea { background-color: #12141A; }"));
+    scrollArea->setObjectName(QStringLiteral("InspectorScrollArea"));
 
     auto* content = new QWidget(scrollArea);
-    content->setStyleSheet(QStringLiteral("background-color: #12141A;"));
+    content->setObjectName(QStringLiteral("InspectorScrollContent"));
     auto* inspectorLayout = new QVBoxLayout(content);
     inspectorLayout->setContentsMargins(6, 6, 6, 6);
     inspectorLayout->setSpacing(6);
 
     noSelectionLabel_ = new QLabel(Tr("Объект не выбран", "No object selected"), content);
+    noSelectionLabel_->setObjectName(QStringLiteral("NoSelectionLabel"));
     noSelectionLabel_->setAlignment(Qt::AlignCenter);
-    noSelectionLabel_->setStyleSheet(QStringLiteral("color: #64748B; font-size: 13px; font-weight: 500; padding: 40px 10px;"));
     inspectorLayout->addWidget(noSelectionLabel_);
 
     BuildGeneralCard(inspectorLayout);
@@ -144,16 +139,12 @@ void ObjectInspectorPanel::BuildGeneralCard(QVBoxLayout* layout)
     layoutHeader->setSpacing(6);
 
     typeBadgeLabel_ = new QLabel(QStringLiteral("None"), rowHeader);
-    typeBadgeLabel_->setStyleSheet(QStringLiteral(
-        "background-color: #2D333F; color: #94A3B8; font-weight: bold; font-size: 10px; "
-        "padding: 2px 6px; border-radius: 4px; border: 1px solid #3E4554;"
-    ));
+    typeBadgeLabel_->setObjectName(QStringLiteral("TypeBadgeLabel"));
     layoutHeader->addWidget(typeBadgeLabel_);
 
     selectionLabel_ = new QLabel(Tr("Объект не выбран", "No object selected"), rowHeader);
     selectionLabel_->setObjectName(QStringLiteral("SelectedObjectLabel"));
     selectionLabel_->setWordWrap(true);
-    selectionLabel_->setStyleSheet(QStringLiteral("font-weight: bold; color: #38BDF8; font-size: 11px;"));
     layoutHeader->addWidget(selectionLabel_, 1);
     cl->addWidget(rowHeader);
 
@@ -163,17 +154,12 @@ void ObjectInspectorPanel::BuildGeneralCard(QVBoxLayout* layout)
     lName->setSpacing(6);
 
     labelName_ = new QLabel(Tr("Имя", "Name"), rowName);
+    labelName_->setObjectName(QStringLiteral("CardFieldLabel"));
     labelName_->setFixedWidth(40);
-    labelName_->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px;"));
     lName->addWidget(labelName_);
 
     objectName_ = new QLineEdit(rowName);
     objectName_->setMaxLength(120);
-    objectName_->setStyleSheet(QStringLiteral(
-        "QLineEdit { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; "
-        "border-radius: 4px; padding: 2px 6px; font-size: 11px; }"
-        "QLineEdit:focus { border: 1px solid #3B82F6; }"
-    ));
     connect(objectName_, &QLineEdit::editingFinished, this, [this] {
         if (refreshing_ || selectedId_ == 0) return;
         emit NameEditingFinished(selectedId_, objectName_->text().trimmed());
@@ -202,15 +188,11 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
 
     lightEnabled_ = new QCheckBox(Tr("Включён", "Enabled"), rowTop);
     lightEnabled_->setObjectName(QStringLiteral("LightEnabled"));
-    lightEnabled_->setStyleSheet(QStringLiteral("color: #E2E8F0; font-size: 11px; font-weight: bold;"));
     connect(lightEnabled_, &QCheckBox::clicked, this, emitPointLightChanged);
     lTop->addWidget(lightEnabled_);
 
     lightColor_ = new QPushButton(Tr("Выбрать цвет…", "Choose Color…"), rowTop);
     lightColor_->setObjectName(QStringLiteral("LightColor"));
-    lightColor_->setStyleSheet(QStringLiteral(
-        "QPushButton { background: #333842; color: #FFFFFF; font-weight: bold; border: 1px solid #4B5263; border-radius: 4px; padding: 3px 8px; font-size: 11px; }"
-    ));
     connect(lightColor_, &QPushButton::clicked, this, [this] {
         if (refreshing_ || selectedId_ == 0) return;
         const QColor current = QColor::fromRgbF(lightValues_[0]->value(), lightValues_[1]->value(), lightValues_[2]->value());
@@ -246,8 +228,8 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     lInt->setSpacing(6);
 
     lightRowLabels_[3] = new QLabel(Tr("Интенсивность", "Intensity"), rowInt);
+    lightRowLabels_[3]->setObjectName(QStringLiteral("CardFieldLabel"));
     lightRowLabels_[3]->setFixedWidth(80);
-    lightRowLabels_[3]->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px;"));
     lInt->addWidget(lightRowLabels_[3]);
 
     lightValues_[3] = new NoWheelDoubleSpinBox(rowInt);
@@ -255,7 +237,6 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     lightValues_[3]->setDecimals(2);
     lightValues_[3]->setSingleStep(0.5);
     lightValues_[3]->setKeyboardTracking(false);
-    lightValues_[3]->setStyleSheet(QStringLiteral("QDoubleSpinBox { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; border-radius: 4px; font-size: 11px; }"));
     connect(lightValues_[3], &QDoubleSpinBox::editingFinished, this, emitPointLightChanged);
     lInt->addWidget(lightValues_[3], 1);
     cl->addWidget(rowInt);
@@ -266,8 +247,8 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     lRad->setSpacing(6);
 
     lightRowLabels_[4] = new QLabel(Tr("Радиус", "Radius"), rowRad);
+    lightRowLabels_[4]->setObjectName(QStringLiteral("CardFieldLabel"));
     lightRowLabels_[4]->setFixedWidth(80);
-    lightRowLabels_[4]->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px;"));
     lRad->addWidget(lightRowLabels_[4]);
 
     lightValues_[4] = new NoWheelDoubleSpinBox(rowRad);
@@ -275,7 +256,6 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     lightValues_[4]->setDecimals(2);
     lightValues_[4]->setSingleStep(0.5);
     lightValues_[4]->setKeyboardTracking(false);
-    lightValues_[4]->setStyleSheet(QStringLiteral("QDoubleSpinBox { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; border-radius: 4px; font-size: 11px; }"));
     connect(lightValues_[4], &QDoubleSpinBox::editingFinished, this, emitPointLightChanged);
     lRad->addWidget(lightValues_[4], 1);
     cl->addWidget(rowRad);
@@ -296,14 +276,13 @@ void ObjectInspectorPanel::BuildCharacterCard(QVBoxLayout* layout)
     lSpeed->setSpacing(6);
 
     characterSpeedLabel_ = new QLabel(Tr("Скорость, ед/с", "Speed, u/s"), rowSpeed);
-    characterSpeedLabel_->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px;"));
+    characterSpeedLabel_->setObjectName(QStringLiteral("CardFieldLabel"));
     lSpeed->addWidget(characterSpeedLabel_);
 
     characterSpeed_ = new NoWheelDoubleSpinBox(rowSpeed);
     characterSpeed_->setObjectName(QStringLiteral("CharacterSpeed"));
     characterSpeed_->setRange(0, 10000);
     characterSpeed_->setKeyboardTracking(false);
-    characterSpeed_->setStyleSheet(QStringLiteral("QDoubleSpinBox { background: #1F232B; color: #F1F5F9; border: 1px solid #333842; border-radius: 4px; font-size: 11px; }"));
     connect(characterSpeed_, &QDoubleSpinBox::editingFinished, this, [this] {
         if (!refreshing_ && selectedId_) emit CharacterSpeedEditingFinished(selectedId_, characterSpeed_->value());
     });

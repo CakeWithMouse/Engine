@@ -82,17 +82,13 @@ private:
 
         // 1. Material
         labelMatTitle_ = new QLabel(Tr("Материал (.mat)", "Material (.mat)"), Content());
-        labelMatTitle_->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px; font-weight: bold;"));
+        labelMatTitle_->setObjectName(QStringLiteral("CardSectionLabel"));
         cl->addWidget(labelMatTitle_);
 
         materialAsset_ = new QLineEdit(Content());
         materialAsset_->setReadOnly(true);
         materialAsset_->setObjectName(QStringLiteral("MaterialAsset"));
         materialAsset_->setPlaceholderText(Tr("по умолчанию", "default"));
-        materialAsset_->setStyleSheet(QStringLiteral(
-            "QLineEdit { background: #1F232B; color: #CBD5E1; border: 1px solid #333842; "
-            "border-radius: 4px; padding: 2px 6px; font-size: 11px; }"
-        ));
         cl->addWidget(materialAsset_);
 
         materialActions_ = new QWidget(Content());
@@ -101,12 +97,7 @@ private:
         lMatBtns->setSpacing(4);
 
         editMaterialButton_ = new QPushButton(Tr("Редактировать", "Edit Material"), materialActions_);
-        editMaterialButton_->setObjectName(QStringLiteral("EditMaterial"));
-        editMaterialButton_->setStyleSheet(QStringLiteral(
-            "QPushButton { background: #2563EB; color: #FFFFFF; font-weight: bold; border: 1px solid #3B82F6; border-radius: 4px; padding: 3px 10px; font-size: 11px; }"
-            "QPushButton:hover { background: #1D4ED8; }"
-            "QPushButton:disabled { background: #1E293B; color: #64748B; border: 1px solid #334155; }"
-        ));
+        editMaterialButton_->setObjectName(QStringLiteral("PrimaryActionButton"));
         QObject::connect(editMaterialButton_, &QPushButton::clicked, [this] {
             if (onEditMaterial) onEditMaterial(materialAsset_->text());
         });
@@ -114,10 +105,6 @@ private:
 
         chooseMaterialButton_ = new QPushButton(Tr("Выбрать…", "Browse…"), materialActions_);
         chooseMaterialButton_->setObjectName(QStringLiteral("ChooseMaterial"));
-        chooseMaterialButton_->setStyleSheet(QStringLiteral(
-            "QPushButton { background: #262B35; color: #CBD5E1; border: 1px solid #3A404D; border-radius: 4px; padding: 3px 8px; font-size: 11px; }"
-            "QPushButton:hover { background: #333947; color: #FFFFFF; }"
-        ));
         QObject::connect(chooseMaterialButton_, &QPushButton::clicked, [this] {
             if (onChooseMaterial) onChooseMaterial();
         });
@@ -125,10 +112,6 @@ private:
 
         clearMaterialButton_ = new QPushButton(Tr("Убрать", "Clear"), materialActions_);
         clearMaterialButton_->setObjectName(QStringLiteral("ClearMaterial"));
-        clearMaterialButton_->setStyleSheet(QStringLiteral(
-            "QPushButton { background: #262B35; color: #94A3B8; border: 1px solid #3A404D; border-radius: 4px; padding: 3px 8px; font-size: 11px; }"
-            "QPushButton:hover { background: #333947; color: #FFFFFF; }"
-        ));
         QObject::connect(clearMaterialButton_, &QPushButton::clicked, [this] {
             if (onClearMaterial) onClearMaterial();
         });
@@ -137,24 +120,16 @@ private:
 
         // 2. Model
         labelModelTitle_ = new QLabel(Tr("Модель", "Model"), Content());
-        labelModelTitle_->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px; font-weight: bold; margin-top: 4px;"));
+        labelModelTitle_->setObjectName(QStringLiteral("CardSectionLabel"));
         cl->addWidget(labelModelTitle_);
 
         modelAsset_ = new QLineEdit(Content());
         modelAsset_->setReadOnly(true);
         modelAsset_->setObjectName(QStringLiteral("ModelAsset"));
-        modelAsset_->setStyleSheet(QStringLiteral(
-            "QLineEdit { background: #1F232B; color: #CBD5E1; border: 1px solid #333842; "
-            "border-radius: 4px; padding: 2px 6px; font-size: 11px; }"
-        ));
         cl->addWidget(modelAsset_);
 
         chooseModel_ = new QPushButton(Tr("Выбрать модель…", "Choose Model…"), Content());
         chooseModel_->setObjectName(QStringLiteral("ChooseModel"));
-        chooseModel_->setStyleSheet(QStringLiteral(
-            "QPushButton { background: #262B35; color: #CBD5E1; border: 1px solid #3A404D; border-radius: 4px; padding: 3px 8px; font-size: 11px; }"
-            "QPushButton:hover { background: #333947; color: #FFFFFF; }"
-        ));
         QObject::connect(chooseModel_, &QPushButton::clicked, [this] {
             if (onChooseModel) onChooseModel();
         });
@@ -162,17 +137,13 @@ private:
 
         // 3. Texture
         labelTexTitle_ = new QLabel(Tr("Текстура", "Texture"), Content());
-        labelTexTitle_->setStyleSheet(QStringLiteral("color: #94A3B8; font-size: 11px; font-weight: bold; margin-top: 4px;"));
+        labelTexTitle_->setObjectName(QStringLiteral("CardSectionLabel"));
         cl->addWidget(labelTexTitle_);
 
         textureAsset_ = new QLineEdit(Content());
         textureAsset_->setReadOnly(true);
         textureAsset_->setObjectName(QStringLiteral("TextureAsset"));
         textureAsset_->setPlaceholderText(Tr("нет", "none"));
-        textureAsset_->setStyleSheet(QStringLiteral(
-            "QLineEdit { background: #1F232B; color: #CBD5E1; border: 1px solid #333842; "
-            "border-radius: 4px; padding: 2px 6px; font-size: 11px; }"
-        ));
         cl->addWidget(textureAsset_);
 
         auto* rowTexBtns = new QWidget(Content());
@@ -182,10 +153,6 @@ private:
 
         chooseTextureButton_ = new QPushButton(Tr("Выбрать…", "Browse…"), rowTexBtns);
         chooseTextureButton_->setObjectName(QStringLiteral("ChooseTexture"));
-        chooseTextureButton_->setStyleSheet(QStringLiteral(
-            "QPushButton { background: #262B35; color: #CBD5E1; border: 1px solid #3A404D; border-radius: 4px; padding: 3px 8px; font-size: 11px; }"
-            "QPushButton:hover { background: #333947; color: #FFFFFF; }"
-        ));
         QObject::connect(chooseTextureButton_, &QPushButton::clicked, [this] {
             if (onChooseTexture) onChooseTexture();
         });
@@ -193,10 +160,6 @@ private:
 
         clearTextureButton_ = new QPushButton(Tr("Убрать", "Clear"), rowTexBtns);
         clearTextureButton_->setObjectName(QStringLiteral("ClearTexture"));
-        clearTextureButton_->setStyleSheet(QStringLiteral(
-            "QPushButton { background: #262B35; color: #94A3B8; border: 1px solid #3A404D; border-radius: 4px; padding: 3px 8px; font-size: 11px; }"
-            "QPushButton:hover { background: #333947; color: #FFFFFF; }"
-        ));
         QObject::connect(clearTextureButton_, &QPushButton::clicked, [this] {
             if (onClearTexture) onClearTexture();
         });
