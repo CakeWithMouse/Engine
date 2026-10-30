@@ -3,8 +3,13 @@
 #include "MainWindow.h"
 #include "EditorLocale.h"
 #include "CodeClassDialog.h"
+#include "EditorDialogs.h"
 
 #include <QFileIconProvider>
+#include <QDropEvent>
+#include <QDragEnterEvent>
+#include <QDragMoveEvent>
+#include <QMimeData>
 #include <QPainter>
 #include <QPainterPath>
 #include <QImageReader>
@@ -528,6 +533,7 @@ void FileBrowserDock::BuildUi()
     gridView_->setSpacing(6);
     connect(gridView_, &QListView::doubleClicked, this, [this](const QModelIndex& idx) { OnDoubleClicked(idx); });
     connect(gridView_, &QListView::customContextMenuRequested, this, [this](const QPoint& pt) { OnContextMenu(pt, true); });
+    gridView_->viewport()->installEventFilter(this);
     viewStack_->addWidget(gridView_);
 
     // Вид 2: List / Tree View
@@ -543,6 +549,7 @@ void FileBrowserDock::BuildUi()
     view_->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(view_, &QTreeView::doubleClicked, this, [this](const QModelIndex& idx) { OnDoubleClicked(idx); });
     connect(view_, &QTreeView::customContextMenuRequested, this, [this](const QPoint& pt) { OnContextMenu(pt, false); });
+    view_->viewport()->installEventFilter(this);
     viewStack_->addWidget(view_);
 
     splitter_->addWidget(viewStack_);
@@ -904,4 +911,81 @@ void FileBrowserDock::DeleteItem(const QString& path)
             QFile::remove(path);
         }
     }
+}
+
+bool FileBrowserDock::eventFilter(QObject* watched, QEvent* event)
+{
+    if ((gridView_ && watched == gridView_->viewport()) || (view_ && watched == view_->viewport()))
+    {
+        if (event->type() == QEvent::DragEnter)
+        {
+            auto* de = static_cast<QDragEnterEvent*>(event);
+            if (de->mimeData()->hasUrls())
+            {
+                de->acceptProposedAction();
+                return true;
+            }
+        }
+        else if (event->type() == QEvent::DragMove)
+        {
+            auto* dm = static_cast<QDragMoveEvent*>(event);
+            dm->acceptProposedAction();
+            return true;
+        }
+        else if (event->type() == QEvent::Drop)
+        {
+            auto* drop = static_cast<QDropEvent*>(event);
+            if (drop->mimeData()->hasUrls())
+            {
+                auto* editor = qobject_cast<EditorMainWindow*>(window());
+                bool anyImported = false;
+                for (const QUrl& url : drop->mimeData()->urls())
+                {
+                    const QString localPath = url.toLocalFile();
+                    if (localPath.isEmpty() || !QFile::exists(localPath)) continue;
+
+                    const QFileInfo fi(localPath);
+                    const QString ext = fi.suffix().toLower();
+                    const bool isModel = (ext == QStringLiteral("fbx") || ext == QStringLiteral("obj") ||
+                                          ext == QStringLiteral("blend") || ext == QStringLiteral("gltf") ||
+                                          ext == QStringLiteral("glb"));
+                    const bool isTex = (ext == QStringLiteral("png") || ext == QStringLiteral("jpg") ||
+                                        ext == QStringLiteral("jpeg") || ext == QStringLiteral("bmp") ||
+                                        ext == QStringLiteral("tga") || ext == QStringLiteral("dds"));
+
+                    if (!localPath.startsWith(projectDir_, Qt::CaseInsensitive))
+                    {
+                        if (isModel)
+                        {
+                            AssetImportDialog dialog(localPath, currentFolder_, this);
+                            if (dialog.exec() == QDialog::Accepted)
+                            {
+                                if (editor) editor->ImportAsset(false, localPath);
+                                anyImported = true;
+                            }
+                        }
+                        else if (isTex)
+                        {
+                            if (editor) editor->ImportAsset(true, localPath);
+                            anyImported = true;
+                        }
+                        else
+                        {
+                            const QString destFile = QDir(currentFolder_).filePath(fi.fileName());
+                            QFile::copy(localPath, destFile);
+                            anyImported = true;
+                        }
+                    }
+                }
+                if (anyImported)
+                {
+                    model_->setRootPath(model_->rootPath());
+                    folderModel_->setRootPath(folderModel_->rootPath());
+                }
+                drop->acceptProposedAction();
+                return true;
+            }
+        }
+    }
+    return QDockWidget::eventFilter(watched, event);
 }

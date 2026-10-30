@@ -2,6 +2,7 @@
 #include "SceneObjectsPanel.h"
 #include "QtHost.h"
 #include "MaterialEditorWindow.h"
+#include "EditorDialogs.h"
 
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -53,17 +54,46 @@ void EditorMainWindow::ImportAsset(bool texture, const QString& source)
                                   )
                                   : QStringList{source};
 
+    const QString contentRoot = QString::fromUtf8(host_->host().contentRoot ? host_->host().contentRoot : "");
+    const QString destDir = contentRoot + (texture ? QStringLiteral("/Textures") : QStringLiteral("/Models"));
+
     for (const auto& path : paths)
     {
-        EditorCommand c;
+        bool spawnInScene = false;
+        double scale = 1.0;
+        if (!texture && !IsTestRunning())
+        {
+            AssetImportDialog dialog(path, destDir, this);
+            if (dialog.exec() != QDialog::Accepted)
+                continue;
 
+            auto settings = dialog.GetSettings();
+            spawnInScene = settings.spawnInScene;
+            scale = settings.scaleFactor;
+        }
+
+        EditorCommand c;
         c.type = texture
                      ? EditorCommand::ImportTexture
                      : EditorCommand::ImportModel;
-
         c.path = path;
-
         host_->PostCommand(c);
+
+        if (spawnInScene)
+        {
+            QFileInfo fi(path);
+            EditorCommand sc;
+            sc.type = EditorCommand::CreateModel;
+            sc.name = fi.completeBaseName();
+            sc.path = QStringLiteral("/Game/Models/") + fi.completeBaseName() + QStringLiteral(".glb");
+            std::array<double, 3> spawn{};
+            if (sceneObjectsPanel_)
+                spawn = sceneObjectsPanel_->SpawnPosition();
+            for (int i = 0; i < 3; ++i)
+                sc.transform.position[i] = static_cast<float>(spawn[i]);
+            sc.transform.scale[0] = sc.transform.scale[1] = sc.transform.scale[2] = static_cast<float>(scale);
+            host_->PostCommand(sc);
+        }
     }
 }
 

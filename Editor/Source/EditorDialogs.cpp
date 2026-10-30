@@ -17,6 +17,14 @@
 #include <QDialogButtonBox>
 #include <QCoreApplication>
 #include <QTextDocument>
+#include <QDoubleSpinBox>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QGroupBox>
+#include <QFormLayout>
+#include <QFileDialog>
+#include <QProcess>
+#include <QRegularExpression>
 
 namespace {
     std::vector<std::pair<int, std::function<void(ControlScheme)>>> s_schemeSubscribers;
@@ -240,4 +248,242 @@ void ShowDocumentationDialog(QWidget* parent, const QString& projectRoot)
     dialog->exec();
     dialog->deleteLater();
 }
+
+AssetImportDialog::AssetImportDialog(const QString& sourcePath, const QString& destinationDir, QWidget* parent)
+    : QDialog(parent)
+    , sourcePath_(sourcePath)
+    , destinationDir_(destinationDir)
+{
+    setWindowTitle(Tr("Настройки импорта ассета", "Asset Import Settings") + QStringLiteral(" — ") + QFileInfo(sourcePath_).fileName());
+    setMinimumWidth(540);
+    DetectBlender();
+    BuildUi();
+}
+
+void AssetImportDialog::DetectBlender()
+{
+    isBlenderFound_ = false;
+    detectedBlenderPath_.clear();
+
+    // 1. Поиск через where.exe в системном PATH
+    QProcess proc;
+    proc.start(QStringLiteral("where.exe"), { QStringLiteral("blender") });
+    if (proc.waitForFinished(1000) && proc.exitCode() == 0) {
+        const QString out = QString::fromUtf8(proc.readAllStandardOutput()).trimmed();
+        if (!out.isEmpty()) {
+            const QString firstLine = out.split(QRegularExpression(QStringLiteral("[\r\n]+")), Qt::SkipEmptyParts).first().trimmed();
+            if (QFile::exists(firstLine)) {
+                detectedBlenderPath_ = firstLine;
+                isBlenderFound_ = true;
+                return;
+            }
+        }
+    }
+
+    // 2. Поиск в стандартных каталогах установки Blender Foundation
+    const QStringList baseSearchDirs = {
+        QStringLiteral("C:/Program Files/Blender Foundation"),
+        QStringLiteral("C:/Program Files (x86)/Blender Foundation"),
+        QDir::homePath() + QStringLiteral("/AppData/Local/Programs/Blender Foundation")
+    };
+
+    for (const auto& basePath : baseSearchDirs) {
+        QDir baseDir(basePath);
+        if (baseDir.exists()) {
+            const QStringList subDirs = baseDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name | QDir::Reversed);
+            for (const auto& sub : subDirs) {
+                const QString candidate = baseDir.filePath(sub + QStringLiteral("/blender.exe"));
+                if (QFile::exists(candidate)) {
+                    detectedBlenderPath_ = candidate;
+                    isBlenderFound_ = true;
+                    return;
+                }
+            }
+        }
+    }
+}
+
+void AssetImportDialog::BuildUi()
+{
+    auto* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(12, 12, 12, 12);
+    mainLayout->setSpacing(10);
+
+    const QFileInfo fi(sourcePath_);
+    const QString ext = fi.suffix().toLower();
+    const bool isBlend = (ext == QStringLiteral("blend"));
+    const bool isFbx = (ext == QStringLiteral("fbx"));
+    const bool isObj = (ext == QStringLiteral("obj"));
+    const bool isGltf = (ext == QStringLiteral("gltf") || ext == QStringLiteral("glb"));
+
+    QString typeName = Tr("3D Модель", "3D Model");
+    if (isBlend) typeName = QStringLiteral("Blender 3D (.blend)");
+    else if (isFbx) typeName = QStringLiteral("Autodesk Filmbox (.fbx)");
+    else if (isObj) typeName = QStringLiteral("Wavefront 3D (.obj)");
+    else if (isGltf) typeName = QStringLiteral("glTF 2.0 (.gltf/.glb)");
+
+    // 1. Шапка файла
+    auto* headerBox = new QFrame(this);
+    headerBox->setStyleSheet(QStringLiteral("background: #181A20; border: 1px solid #282C34; border-radius: 6px; padding: 6px;"));
+    auto* headerLayout = new QVBoxLayout(headerBox);
+    headerLayout->setContentsMargins(6, 6, 6, 6);
+    headerLayout->setSpacing(4);
+
+    auto* lblName = new QLabel(QStringLiteral("<b>%1</b> (%2)").arg(fi.fileName(), typeName), headerBox);
+    lblName->setStyleSheet(QStringLiteral("font-size: 13px; color: #60A5FA;"));
+    headerLayout->addWidget(lblName);
+
+    lblSourcePath_ = new QLabel(Tr("Источник: ", "Source: ") + sourcePath_, headerBox);
+    lblSourcePath_->setStyleSheet(QStringLiteral("font-size: 10px; color: #94A3B8;"));
+    lblSourcePath_->setWordWrap(true);
+    headerLayout->addWidget(lblSourcePath_);
+
+    QString sizeStr = QString::number(fi.size() / 1024.0, 'f', 1) + QStringLiteral(" KB");
+    if (fi.size() > 1024 * 1024)
+        sizeStr = QString::number(fi.size() / (1024.0 * 1024.0), 'f', 2) + QStringLiteral(" MB");
+    auto* lblSize = new QLabel(Tr("Размер: ", "Size: ") + sizeStr, headerBox);
+    lblSize->setStyleSheet(QStringLiteral("font-size: 10px; color: #64748B;"));
+    headerLayout->addWidget(lblSize);
+
+    mainLayout->addWidget(headerBox);
+
+    // 2. Статус Blender
+    auto* blenderBox = new QFrame(this);
+    blenderBox->setStyleSheet(QStringLiteral("background: #1A1D24; border: 1px solid #2B303C; border-radius: 6px;"));
+    auto* blenderLayout = new QHBoxLayout(blenderBox);
+    blenderLayout->setContentsMargins(8, 6, 8, 6);
+    blenderLayout->setSpacing(6);
+
+    lblBlenderStatus_ = new QLabel(blenderBox);
+    lblBlenderStatus_->setWordWrap(true);
+    if (isBlenderFound_) {
+        lblBlenderStatus_->setText(Tr("✓ Обнаружен Blender: ", "✓ Blender detected: ") + detectedBlenderPath_);
+        lblBlenderStatus_->setStyleSheet(QStringLiteral("color: #10B981; font-weight: bold; font-size: 11px;"));
+    } else {
+        lblBlenderStatus_->setText(Tr("⚠ Blender не найден в системе (требуется для файлов .blend)",
+                                      "⚠ Blender not detected (required for .blend files)"));
+        lblBlenderStatus_->setStyleSheet(QStringLiteral("color: #F59E0B; font-weight: bold; font-size: 11px;"));
+    }
+    blenderLayout->addWidget(lblBlenderStatus_, 1);
+
+    btnBrowseBlender_ = new QPushButton(Tr("Обзор…", "Browse…"), blenderBox);
+    btnBrowseBlender_->setFixedWidth(70);
+    connect(btnBrowseBlender_, &QPushButton::clicked, this, [this] {
+        QString file = QFileDialog::getOpenFileName(this, Tr("Укажите blender.exe", "Select blender.exe"), {}, QStringLiteral("Blender (blender.exe)"));
+        if (!file.isEmpty() && QFile::exists(file)) {
+            detectedBlenderPath_ = file;
+            isBlenderFound_ = true;
+            lblBlenderStatus_->setText(Tr("✓ Выбран Blender: ", "✓ Selected Blender: ") + detectedBlenderPath_);
+            lblBlenderStatus_->setStyleSheet(QStringLiteral("color: #10B981; font-weight: bold; font-size: 11px;"));
+        }
+    });
+    blenderLayout->addWidget(btnBrowseBlender_);
+
+    if (isBlend || isBlenderFound_) {
+        mainLayout->addWidget(blenderBox);
+    }
+
+    // 3. Секция Transform
+    auto* grpTransform = new QGroupBox(Tr("Трансформация (Transform)", "Transform"), this);
+    auto* formTransform = new QFormLayout(grpTransform);
+    formTransform->setContentsMargins(8, 8, 8, 8);
+    formTransform->setSpacing(6);
+
+    spinScale_ = new QDoubleSpinBox(grpTransform);
+    spinScale_->setRange(0.0001, 10000.0);
+    spinScale_->setDecimals(4);
+    spinScale_->setSingleStep(0.1);
+    spinScale_->setValue(1.0);
+    formTransform->addRow(Tr("Масштаб (Scale Factor):", "Scale Factor:"), spinScale_);
+
+    comboUpAxis_ = new QComboBox(grpTransform);
+    comboUpAxis_->addItem(Tr("Z-Up (конвертировать в Y-Up движка)", "Z-Up (convert to Y-Up)"), 0);
+    comboUpAxis_->addItem(Tr("Y-Up (без конвертации)", "Y-Up (no conversion)"), 1);
+    comboUpAxis_->setCurrentIndex(isBlend ? 0 : 1);
+    formTransform->addRow(Tr("Ориентация высоты (Up Axis):", "Up Axis:"), comboUpAxis_);
+
+    mainLayout->addWidget(grpTransform);
+
+    // 4. Секция Меша и Геометрии
+    auto* grpMesh = new QGroupBox(Tr("Геометрия и Сетка (Mesh Options)", "Mesh Options"), this);
+    auto* layoutMesh = new QVBoxLayout(grpMesh);
+    layoutMesh->setContentsMargins(8, 8, 8, 8);
+    layoutMesh->setSpacing(4);
+
+    auto* rowMeshType = new QHBoxLayout;
+    rowMeshType->addWidget(new QLabel(Tr("Тип меша:", "Mesh Type:"), grpMesh));
+    comboMeshType_ = new QComboBox(grpMesh);
+    comboMeshType_->addItem(Tr("Static Mesh (Статический меш)", "Static Mesh"), 0);
+    comboMeshType_->addItem(Tr("Skeletal Mesh (Скелетный меш с костями)", "Skeletal Mesh"), 1);
+    rowMeshType->addWidget(comboMeshType_, 1);
+    layoutMesh->addLayout(rowMeshType);
+
+    chkCombineMeshes_ = new QCheckBox(Tr("Объединить подсетки (Combine Meshes)", "Combine Meshes"), grpMesh);
+    chkCombineMeshes_->setChecked(true);
+    layoutMesh->addWidget(chkCombineMeshes_);
+
+    chkNormalsTangents_ = new QCheckBox(Tr("Генерировать нормали и тангенты (Normals & Tangents)", "Generate Normals & Tangents"), grpMesh);
+    chkNormalsTangents_->setChecked(true);
+    layoutMesh->addWidget(chkNormalsTangents_);
+
+    chkApplyModifiers_ = new QCheckBox(Tr("Применять модификаторы (Blender Apply Modifiers)", "Apply Modifiers (Blender)"), grpMesh);
+    chkApplyModifiers_->setChecked(true);
+    chkApplyModifiers_->setEnabled(isBlend);
+    layoutMesh->addWidget(chkApplyModifiers_);
+
+    mainLayout->addWidget(grpMesh);
+
+    // 5. Материалы и Текстуры
+    auto* grpMat = new QGroupBox(Tr("Материалы и Текстуры (Materials & Textures)", "Materials & Textures"), this);
+    auto* layoutMat = new QVBoxLayout(grpMat);
+    layoutMat->setContentsMargins(8, 8, 8, 8);
+    layoutMat->setSpacing(4);
+
+    chkImportTextures_ = new QCheckBox(Tr("Импортировать встроенные текстуры (Embedded Textures)", "Import Embedded Textures"), grpMat);
+    chkImportTextures_->setChecked(true);
+    layoutMat->addWidget(chkImportTextures_);
+
+    chkAutoPbrMat_ = new QCheckBox(Tr("Автоматически создать PBR-материал (.mat)", "Auto-Create PBR Material (.mat)"), grpMat);
+    chkAutoPbrMat_->setChecked(true);
+    layoutMat->addWidget(chkAutoPbrMat_);
+
+    mainLayout->addWidget(grpMat);
+
+    // 6. Действие в сцене
+    chkSpawnInScene_ = new QCheckBox(Tr("Добавить объект в сцену сразу после импорта", "Spawn in scene after import"), this);
+    chkSpawnInScene_->setChecked(true);
+    chkSpawnInScene_->setStyleSheet(QStringLiteral("font-weight: bold; color: #60A5FA;"));
+    mainLayout->addWidget(chkSpawnInScene_);
+
+    // 7. Кнопки Ok / Cancel
+    auto* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+    buttonBox->button(QDialogButtonBox::Ok)->setText(Tr("Импортировать", "Import"));
+    buttonBox->button(QDialogButtonBox::Ok)->setStyleSheet(QStringLiteral(
+        "QPushButton { background: #2563EB; color: #FFFFFF; font-weight: bold; border-radius: 4px; padding: 5px 16px; }"
+        "QPushButton:hover { background: #1D4ED8; }"
+    ));
+    buttonBox->button(QDialogButtonBox::Cancel)->setText(Tr("Отмена", "Cancel"));
+    connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    mainLayout->addWidget(buttonBox);
+}
+
+AssetImportSettings AssetImportDialog::GetSettings() const
+{
+    AssetImportSettings s;
+    s.sourcePath = sourcePath_;
+    s.destinationDir = destinationDir_;
+    s.scaleFactor = spinScale_ ? spinScale_->value() : 1.0;
+    s.upAxis = comboUpAxis_ ? comboUpAxis_->currentIndex() : 0;
+    s.isSkeletalMesh = comboMeshType_ && comboMeshType_->currentIndex() == 1;
+    s.combineMeshes = chkCombineMeshes_ && chkCombineMeshes_->isChecked();
+    s.generateNormalsTangents = chkNormalsTangents_ && chkNormalsTangents_->isChecked();
+    s.applyModifiers = chkApplyModifiers_ && chkApplyModifiers_->isChecked();
+    s.importEmbeddedTextures = chkImportTextures_ && chkImportTextures_->isChecked();
+    s.autoCreatePbrMaterial = chkAutoPbrMat_ && chkAutoPbrMat_->isChecked();
+    s.spawnInScene = chkSpawnInScene_ && chkSpawnInScene_->isChecked();
+    s.blenderPath = detectedBlenderPath_;
+    return s;
+}
+
 

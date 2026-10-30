@@ -1,6 +1,7 @@
 #include "ObjectInspectorPanel.h"
 #include "QtHost.h"
 #include "EditorLocale.h"
+#include "MainWindow.h"
 
 #include <QFormLayout>
 #include <QLineEdit>
@@ -23,6 +24,12 @@
 #include <QSlider>
 #include <QComboBox>
 #include <QTimer>
+#include <QDropEvent>
+#include <QDragEnterEvent>
+#include <QDragMoveEvent>
+#include <QMimeData>
+#include <QUrl>
+#include <QDir>
 #include <algorithm>
 #include <cmath>
 
@@ -544,6 +551,8 @@ void ObjectInspectorPanel::BuildGeometryCard(QVBoxLayout* layout)
     modelAsset_->setReadOnly(true);
     modelAsset_->setObjectName(QStringLiteral("ModelAsset"));
     modelAsset_->setPlaceholderText(Tr("нет модели", "none"));
+    modelAsset_->setAcceptDrops(true);
+    modelAsset_->installEventFilter(this);
     modelAsset_->setStyleSheet(QStringLiteral(
         "QLineEdit { background: #1F232B; color: #CBD5E1; border: 1px solid #333842; "
         "border-radius: 4px; padding: 2px 6px; font-size: 11px; }"
@@ -653,6 +662,8 @@ void ObjectInspectorPanel::BuildMaterialCard(QVBoxLayout* layout)
     materialAsset_->setReadOnly(true);
     materialAsset_->setObjectName(QStringLiteral("MaterialAsset"));
     materialAsset_->setPlaceholderText(Tr("по умолчанию (default)", "default"));
+    materialAsset_->setAcceptDrops(true);
+    materialAsset_->installEventFilter(this);
     materialAsset_->setStyleSheet(QStringLiteral(
         "QLineEdit { background: #1F232B; color: #CBD5E1; border: 1px solid #333842; "
         "border-radius: 4px; padding: 2px 6px; font-size: 11px; }"
@@ -706,6 +717,8 @@ void ObjectInspectorPanel::BuildMaterialCard(QVBoxLayout* layout)
     textureAsset_->setReadOnly(true);
     textureAsset_->setObjectName(QStringLiteral("TextureAsset"));
     textureAsset_->setPlaceholderText(Tr("нет текстуры", "none"));
+    textureAsset_->setAcceptDrops(true);
+    textureAsset_->installEventFilter(this);
     textureAsset_->setStyleSheet(QStringLiteral(
         "QLineEdit { background: #1F232B; color: #CBD5E1; border: 1px solid #333842; "
         "border-radius: 4px; padding: 2px 6px; font-size: 11px; }"
@@ -1762,4 +1775,46 @@ void ObjectInspectorPanel::Refresh(
     }
 
     refreshing_ = false;
+}
+
+bool ObjectInspectorPanel::eventFilter(QObject* watched, QEvent* event)
+{
+    if (watched == materialAsset_ || watched == textureAsset_ || watched == modelAsset_)
+    {
+        if (event->type() == QEvent::DragEnter)
+        {
+            auto* de = static_cast<QDragEnterEvent*>(event);
+            if (de->mimeData()->hasUrls() || de->mimeData()->hasText())
+            {
+                de->acceptProposedAction();
+                return true;
+            }
+        }
+        else if (event->type() == QEvent::DragMove)
+        {
+            auto* dm = static_cast<QDragMoveEvent*>(event);
+            dm->acceptProposedAction();
+            return true;
+        }
+        else if (event->type() == QEvent::Drop)
+        {
+            auto* drop = static_cast<QDropEvent*>(event);
+            QString path;
+            if (drop->mimeData()->hasUrls() && !drop->mimeData()->urls().isEmpty())
+                path = drop->mimeData()->urls().first().toLocalFile();
+            else if (drop->mimeData()->hasText())
+                path = drop->mimeData()->text().trimmed();
+
+            if (!path.isEmpty())
+            {
+                if (auto* editor = qobject_cast<EditorMainWindow*>(window()))
+                {
+                    editor->UseAsset(path);
+                }
+            }
+            drop->acceptProposedAction();
+            return true;
+        }
+    }
+    return QWidget::eventFilter(watched, event);
 }

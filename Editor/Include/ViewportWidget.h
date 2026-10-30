@@ -93,6 +93,7 @@ private:
     void PostSelectedTransform(const EngineSceneTransform& transform);
     void updateGizmoToolTip();
     void UpdateStatsOverlay();
+    void HandleViewportDrop(class QDropEvent* drop);
 
     EditorQtHost* host_ = nullptr;
 

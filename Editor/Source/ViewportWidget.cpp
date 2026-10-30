@@ -35,6 +35,15 @@
 #include <QSignalBlocker>
 #include <QLocale>
 #include <QRadialGradient>
+#include <QDropEvent>
+#include <QDragEnterEvent>
+#include <QDragMoveEvent>
+#include <QMimeData>
+#include <QUrl>
+#include <QFile>
+#include <QFileInfo>
+#include <QDir>
+#include "MainWindow.h"
 #include <Engine/InputDevice/Keys.h>
 
 namespace {
@@ -730,6 +739,7 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
         setAutoFillBackground(false);
     }
     setFocusPolicy(Qt::StrongFocus);
+    setAcceptDrops(true);
     updateGizmoToolTip();
 
     adjustPanel_ = new AdjustLastOperationPanel(host_, this);
@@ -905,6 +915,29 @@ uint32_t ViewportWidget::PhysH() const { return static_cast<uint32_t>(std::lroun
 
 bool ViewportWidget::event(QEvent* e)
 {
+    if (e->type() == QEvent::DragEnter)
+    {
+        auto* de = static_cast<QDragEnterEvent*>(e);
+        if (de->mimeData()->hasUrls() || de->mimeData()->hasText())
+        {
+            de->acceptProposedAction();
+            return true;
+        }
+    }
+    if (e->type() == QEvent::DragMove)
+    {
+        auto* dm = static_cast<QDragMoveEvent*>(e);
+        dm->acceptProposedAction();
+        return true;
+    }
+    if (e->type() == QEvent::Drop)
+    {
+        auto* drop = static_cast<QDropEvent*>(e);
+        HandleViewportDrop(drop);
+        drop->acceptProposedAction();
+        return true;
+    }
+
     if(e->type()==QEvent::FocusIn || (e->type()==QEvent::WindowActivate && hasFocus())){
         EditorCommand c;c.type=EditorCommand::InputFocus;c.w=1;host_->PostCommand(c);
     }
@@ -2273,4 +2306,98 @@ void ViewportWidget::UpdateStatsOverlay()
                                totalObjects, lightCount, meshCount, estTris,
                                selectedName, selectedCoords,
                                shadingStr, snapStr);
+}
+
+void ViewportWidget::HandleViewportDrop(QDropEvent* drop)
+{
+    if (!drop || !drop->mimeData()) return;
+
+    QStringList paths;
+    if (drop->mimeData()->hasUrls()) {
+        for (const QUrl& url : drop->mimeData()->urls()) {
+            const QString local = url.toLocalFile();
+            if (!local.isEmpty()) paths << local;
+        }
+    } else if (drop->mimeData()->hasText()) {
+        const QString text = drop->mimeData()->text().trimmed();
+        if (QFile::exists(text)) paths << text;
+    }
+
+    if (paths.isEmpty()) return;
+
+    auto* editor = qobject_cast<EditorMainWindow*>(window());
+    const QPoint dropPos = drop->position().toPoint();
+    const auto spawnPos = ComputeSpawnPosition(dropPos);
+
+    for (const QString& path : paths) {
+        QFileInfo fi(path);
+        const QString ext = fi.suffix().toLower();
+        const bool isMat = (ext == QStringLiteral("mat"));
+        const bool isModel = (ext == QStringLiteral("fbx") || ext == QStringLiteral("obj") ||
+                              ext == QStringLiteral("blend") || ext == QStringLiteral("gltf") ||
+                              ext == QStringLiteral("glb"));
+        const bool isTex = (ext == QStringLiteral("png") || ext == QStringLiteral("jpg") ||
+                            ext == QStringLiteral("jpeg") || ext == QStringLiteral("bmp") ||
+                            ext == QStringLiteral("tga") || ext == QStringLiteral("dds"));
+        const bool isScene = (ext == QStringLiteral("json") && path.endsWith(QStringLiteral(".scene.json"), Qt::CaseInsensitive));
+
+        const QString contentRoot = QString::fromUtf8(host_->host().contentRoot ? host_->host().contentRoot : "");
+        const bool isInsideProject = !contentRoot.isEmpty() && path.startsWith(contentRoot, Qt::CaseInsensitive);
+
+        if (isMat) {
+            // Pick object under dropPos
+            EditorCommand pc;
+            pc.type = EditorCommand::PickObject;
+            pc.right = static_cast<float>(2.0 * dropPos.x() / width() - 1.0);
+            pc.up = static_cast<float>(1.0 - 2.0 * dropPos.y() / height());
+            host_->PostCommand(pc);
+
+            if (editor) editor->UseAsset(path);
+        } else if (isTex) {
+            EditorCommand pc;
+            pc.type = EditorCommand::PickObject;
+            pc.right = static_cast<float>(2.0 * dropPos.x() / width() - 1.0);
+            pc.up = static_cast<float>(1.0 - 2.0 * dropPos.y() / height());
+            host_->PostCommand(pc);
+
+            if (isInsideProject) {
+                if (editor) editor->UseAsset(path);
+            } else {
+                if (editor) editor->ImportAsset(true, path);
+            }
+        } else if (isModel) {
+            if (isInsideProject) {
+                EditorCommand c;
+                c.type = EditorCommand::CreateModel;
+                c.name = fi.completeBaseName();
+                QDir content(contentRoot);
+                const QString rel = content.relativeFilePath(path);
+                c.path = QStringLiteral("/Game/") + QDir::fromNativeSeparators(rel);
+                c.transform.position[0] = static_cast<float>(spawnPos[0]);
+                c.transform.position[1] = static_cast<float>(spawnPos[1]);
+                c.transform.position[2] = static_cast<float>(spawnPos[2]);
+                c.transform.scale[0] = c.transform.scale[1] = c.transform.scale[2] = 1.0f;
+                host_->PostCommand(c);
+            } else {
+                AssetImportDialog dialog(path, contentRoot + QStringLiteral("/Models"), this);
+                if (dialog.exec() == QDialog::Accepted) {
+                    auto settings = dialog.GetSettings();
+                    if (editor) editor->ImportAsset(false, path);
+                    if (settings.spawnInScene) {
+                        EditorCommand c;
+                        c.type = EditorCommand::CreateModel;
+                        c.name = fi.completeBaseName();
+                        c.path = QStringLiteral("/Game/Models/") + fi.completeBaseName() + QStringLiteral(".glb");
+                        c.transform.position[0] = static_cast<float>(spawnPos[0]);
+                        c.transform.position[1] = static_cast<float>(spawnPos[1]);
+                        c.transform.position[2] = static_cast<float>(spawnPos[2]);
+                        c.transform.scale[0] = c.transform.scale[1] = c.transform.scale[2] = static_cast<float>(settings.scaleFactor);
+                        host_->PostCommand(c);
+                    }
+                }
+            }
+        } else if (isScene) {
+            if (editor) editor->OpenScene(path);
+        }
+    }
 }

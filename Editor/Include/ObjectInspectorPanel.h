@@ -65,6 +65,9 @@ public:
     void RetranslateUi();
     QSize minimumSizeHint() const override { return QSize(80, 60); }
 
+protected:
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
 signals:
     void NameEditingFinished(quint64 objectId, const QString& name);
 
