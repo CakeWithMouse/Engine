@@ -2,6 +2,8 @@
 #include "../Core/Logger.h"
 #include "../Core/CommandRegistry.h"
 #include "../Core/FileService.h"
+#include "../Core/GizmoMath.cpp"
+#include "core/GizmoMathTests.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
@@ -192,6 +194,14 @@ void TestFileService()
     Check(!fs.ReadFile("../forbidden.txt", readBack, &error), "Read outside sandbox rejected");
     Check(!fs.DeleteFile("../forbidden.txt", &error), "Delete outside sandbox rejected");
 }
+
+void TestGizmoMath()
+{
+    RunGizmoMathTests();
+    // 11 distinct checks in RunGizmoMathTests
+    gChecks += 11;
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -228,8 +238,11 @@ int main(int argc, char* argv[])
     std::fflush(stdout);
     TestFileService();
 
+    std::printf("[Test] TestGizmoMath...\n");
+    std::fflush(stdout);
+    TestGizmoMath();
+
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);
     return 0;
 }
-
