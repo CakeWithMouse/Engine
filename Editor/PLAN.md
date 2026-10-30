@@ -111,6 +111,8 @@
    - метод `setMaterialAsset(void* context, uint64_t id, const char* path)`;
    - API управления материалом: компиляция шейдера, чтение/запись скалярных и векторных параметров без прямого дискового ввода-вывода в обход движка.
 
+9. **Переключение режима Play-камеры:** API переключения активной камеры во время Play (Free Camera / Main Camera / Follow Camera) в `EngineSceneApi`/`EngineEditSessionApi` без записи фиктивных данных проекта.
+
 ---
 
 ## Не проверено в рантайме

@@ -2,7 +2,6 @@
 
 #include <QToolBar>
 #include <QAction>
-#include <QComboBox>
 #include <QPushButton>
 #include <QToolButton>
 
@@ -17,7 +16,6 @@ public:
     QAction* ActPause() const { return actPause_; }
     QAction* ActStop() const { return actStop_; }
     QAction* ActExternal() const { return actExternal_; }
-    QComboBox* CameraModeCombo() const { return cameraModeCombo_; }
 
     void UpdatePlayState(int state, bool sceneBusy);
     void RetranslateUi();
@@ -29,7 +27,6 @@ signals:
     void StopTriggered();
     void ExternalTriggered();
     void ConfigPlayTriggered();
-    void CameraModeChanged(int mode);
     void LangToggleTriggered();
 
 private:
@@ -37,8 +34,6 @@ private:
     QAction* actPause_ = nullptr;
     QAction* actStop_ = nullptr;
     QAction* actExternal_ = nullptr;
-    QComboBox* cameraModeCombo_ = nullptr;
     QToolButton* configPlayBtn_ = nullptr;
     QPushButton* langButton_ = nullptr;
 };
-

@@ -346,22 +346,6 @@ void EditorMainWindow::BuildToolBar()
     connect(mainToolBar_, &MainToolBar::ConfigPlayTriggered, this, [this] {
         if (actConfigurePlay_) actConfigurePlay_->trigger();
     });
-    connect(mainToolBar_, &MainToolBar::CameraModeChanged, this, [this](int mode) {
-        if (host_->PlayState() != EditorQtHost::Edit) return;
-        const auto snapshot = host_->ReadSnapshot();
-        uint64_t settingsId = 0;
-        QJsonObject data{{"version", 1}, {"character", 0}, {"camera", 0}, {"standardControl", true}};
-        for (const auto& o : snapshot.objects) if (o.gameplayKind == 3) { settingsId = o.id; data = QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object(); break; }
-        if (mode == 0) { data["character"] = 0; data["standardControl"] = false; }
-        else {
-            uint64_t charId = 0;
-            for (const auto& o : snapshot.objects) if (o.gameplayKind == 1) { charId = o.id; break; }
-            data["character"] = static_cast<qint64>(charId); data["standardControl"] = true;
-        }
-        EditorCommand c; c.type = EditorCommand::ConfigurePlay; c.objectId = settingsId;
-        c.path = QString::fromUtf8(QJsonDocument(data).toJson(QJsonDocument::Compact));
-        host_->PostCommand(c);
-    });
     connect(mainToolBar_, &MainToolBar::LangToggleTriggered, this, &EditorMainWindow::RetranslateUi);
 
     UpdatePlayButtons();

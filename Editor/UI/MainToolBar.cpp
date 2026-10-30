@@ -1,22 +1,22 @@
 #include "MainToolBar.h"
-#include "EditorTheme.h"
 #include "EditorLocale.h"
-#include <QSizePolicy>
+#include "EditorTheme.h"
 
 MainToolBar::MainToolBar(QWidget* parent)
-    : QToolBar(Tr("Запуск", "Play"), parent)
+    : QToolBar(parent)
 {
     setObjectName(QStringLiteral("MainToolBar"));
     setMovable(false);
+    setFloatable(false);
 
     auto* leftSpacer = new QWidget(this);
     leftSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     addWidget(leftSpacer);
 
-    actPlay_ = addAction(EditorTheme::CreatePlayIcon(), Tr("Play", "Play"));
-    actPause_ = addAction(EditorTheme::CreatePauseIcon(), Tr("Pause", "Pause"));
-    actStop_ = addAction(EditorTheme::CreateStopIcon(), Tr("Stop", "Stop"));
-    actExternal_ = addAction(EditorTheme::CreateExternalIcon(), Tr("Отдельное окно", "External"));
+    actPlay_ = addAction(QStringLiteral("Play"));
+    actPause_ = addAction(QStringLiteral("Pause"));
+    actStop_ = addAction(QStringLiteral("Stop"));
+    actExternal_ = addAction(QStringLiteral("External"));
 
     actPlay_->setObjectName(QStringLiteral("ActPlay"));
     actPause_->setObjectName(QStringLiteral("ActPause"));
@@ -29,17 +29,6 @@ MainToolBar::MainToolBar(QWidget* parent)
     connect(actExternal_, &QAction::triggered, this, &MainToolBar::ExternalTriggered);
 
     addSeparator();
-
-    cameraModeCombo_ = new QComboBox(this);
-    cameraModeCombo_->setObjectName(QStringLiteral("PlayCameraMode"));
-    cameraModeCombo_->addItem(Tr("Свободная камера", "Free Camera"), 0);
-    cameraModeCombo_->addItem(Tr("Камера игрока", "Main Camera"), 1);
-    cameraModeCombo_->setToolTip(Tr("Режим камеры во время Play: свободный полёт или следование за персонажем",
-                                    "Camera mode during Play: free flight or follow character"));
-    connect(cameraModeCombo_, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) {
-        emit CameraModeChanged(cameraModeCombo_->itemData(index).toInt());
-    });
-    addWidget(cameraModeCombo_);
 
     configPlayBtn_ = new QToolButton(this);
     configPlayBtn_->setObjectName(QStringLiteral("ConfigPlayBtn"));
@@ -85,17 +74,6 @@ void MainToolBar::RetranslateUi()
     if (actStop_) actStop_->setText(Tr("Stop", "Stop"));
     if (actExternal_) actExternal_->setText(Tr("Отдельное окно", "External"));
 
-    if (cameraModeCombo_) {
-        const int cur = cameraModeCombo_->currentIndex();
-        cameraModeCombo_->blockSignals(true);
-        cameraModeCombo_->clear();
-        cameraModeCombo_->addItem(Tr("Свободная камера", "Free Camera"), 0);
-        cameraModeCombo_->addItem(Tr("Камера игрока", "Main Camera"), 1);
-        cameraModeCombo_->setCurrentIndex(cur >= 0 ? cur : 0);
-        cameraModeCombo_->setToolTip(Tr("Режим камеры во время Play: свободный полёт или следование за персонажем",
-                                        "Camera mode during Play: free flight or follow character"));
-        cameraModeCombo_->blockSignals(false);
-    }
     if (configPlayBtn_) {
         configPlayBtn_->setToolTip(Tr("Детальные настройки Play…", "Detailed Play Settings…"));
     }
@@ -112,4 +90,3 @@ void MainToolBar::RefreshIcons()
     if (actStop_) actStop_->setIcon(EditorTheme::CreateStopIcon());
     if (actExternal_) actExternal_->setIcon(EditorTheme::CreateExternalIcon());
 }
-
