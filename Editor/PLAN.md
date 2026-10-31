@@ -18,6 +18,16 @@
 
 ---
 
+---
+
+## Чек-лист среза S7 (Исправление регрессий: доки, вьюпорт гизмо/снап, шапка вьюпорта)
+
+- [x] **Шаг 7.1 (fix):** Устранение сдавливания вьюпорта, разблокировка сплиттеров доков (`QSizePolicy::Ignored`, `AdjustIgnored`, `Expanding` для вьюпорта), корректный `splitDockWidget` в `DockLayoutManager` и очистка конфликтующего layout в `BuildSceneDocks`.
+- [x] **Шаг 7.2 (fix):** Восстановление `host_->SetGizmoMode(mode)`, снаппинг перемещения по накопленному смещению жеста от `dragStartTransform_.position`, коалесцирование жеста через `BeginGizmoDrag`/`EndGizmoDrag` и юнит-тест в `CoreTests`.
+- [x] **Шаг 7.3 (refactor):** Перенос `ViewportHeaderBar` в обычный layout `ViewportContainer` над нативным HWND `ViewportWidget`, перевод фона и иконок на непрозрачные токены `EditorTheme` с автообновлением.
+
+---
+
 ## Чек-лист среза S2 (Host-слой, развязка QtHost и MainWindow, декомпозиция DrainCommands, Checkpoint coalescing)
 
 - [x] **Шаг 2.1 (refactor):** Создание `Editor/Host/IEditorHost.h` с интерфейсами `IEditorHost` и `IEditorUiListener`. Развязка `QtHost` от `MainWindow.h` (удалено поле `window_`, удалён прямой `#include "MainWindow.h"`, связь событий через `IEditorUiListener`).
@@ -34,7 +44,7 @@
 |---|---|---|---|
 | Сборка `Editor` (Debug) | **FAIL (LNK1104)** | **PASS** | 0 ошибок, 0 новых warnings |
 | Сборка `Editor` (Release) | **FAIL (C1083 LTCG)** | **PASS** | Собрано из пути без запятых (`Documents\GitHub\Engine`) |
-| `Editor/tests/CoreTests.exe` | — | **47/47 PASS** | Юнит-тесты Core без виджетов |
+| `Editor/tests/CoreTests.exe` | — | **72/72 PASS** | Юнит-тесты Core без виджетов |
 | `Editor/tests/UiTests.exe` | — | **15/15 PASS** | Самопроверка тестового каркаса UI |
 | `Engine/tests/run.ps1` | **43/43 PASS** | **43/43 PASS** | Тесты ядра Engine |
 | `Engine/tests/component-generation/run.ps1` | **20/20 PASS** | **20/20 PASS** | Генератор компонентов и контракты |
@@ -88,6 +98,20 @@
 
 ---
 
+10. **Политика размеров доков и вьюпорта:**
+    - `ViewportWidget` получает `QSizePolicy::Expanding` и малый `minimumSize(80, 60)` / `minimumSizeHint(80, 60)`.
+    - Все панели (`SceneObjectsPanel`, `ObjectInspectorPanel`, `FileBrowser`, `Console`) получают `QSizePolicy::Ignored` и `AdjustIgnored`, исключая самопроизвольное выдавливание вьюпорта при изменении содержимого.
+    - В `DockLayoutManager::ApplyDefaultLayout` доки иерархии, вьюпорта и свойств связываются через канонический `splitDockWidget(scene, viewport, Horizontal)` и `splitDockWidget(viewport, inspector, Horizontal)`.
+11. **Квантование и снаппинг жестов во вьюпорте:**
+    - Восстановлен вызов `host_->SetGizmoMode(mode)` для синхронизации режима гизмо с Host и C-ABI.
+    - Перемещение объекта в Translate-режиме обрамляется `BeginGizmoDrag` / `EndGizmoDrag`, коалесцируя весь жест в один Checkpoint Undo.
+    - Снаппинг перемещения рассчитывается по накопленному смещению жеста (`dragStartTransform_.position + totalDelta`), предотвращая обнуление микродельт отдельных тиков.
+12. **Размещение шапки вьюпорта ViewportHeaderBar:**
+    - Панель инструментов вьюпорта вынесена из полупрозрачного оверлея поверх нативного HWND в стандартный виджет над вьюпортом внутри `ViewportContainer` (`QVBoxLayout`).
+    - Оформление переведено на непрозрачные токены `EditorTheme::Instance().Palette()` с подпиской на изменение темы `SubscribeThemeChanged`.
+
+---
+
 ## Backlog
 
 - [ ] **Release Editor (LTCG, Editor.iobj) в путях с запятой:** Release Editor не собирается из каталога с запятой в пути (`fatal error C1083: Не удается открыть промежуточный файл компилятора: ...Editor.iobj: No such file or directory`); гипотеза подтверждена фактом успешной сборки из `C:\Users\Yuri\Documents\GitHub\Engine`. Требуется правка `EditorModule.vcxproj` (настройка `IntermediateOutputPath` без макросов, ломающихся на запятых) и проверка `-PathStress`.
@@ -118,4 +142,7 @@
 ## Не проверено в рантайме
 
 - Интерактивная работа GUI Editor в реальной пользовательской сессии (клики мыши, хоткеи, навигация вьюпорта, манипуляторы гизмо).
+- Ручное перетаскивание сплиттеров панелей Сцена/Инспектор/Консоль и проверка стабильности размеров после плавания/возврата вьюпорта (Сценарий п.1).
+- Смещение объекта мышью с включенным Snap во вьюпорте и проверка пошагового скачкообразного движения (Сценарий п.2).
+- Визуальное переключение темы Dark/Light для шапки вьюпорта `ViewportHeaderBar` (Сценарий п.3).
 - Поведение hot reload (горячая перезагрузка ассетов и шейдеров): тесты `UiTests` проверяют только хелперы взаимодействия тестового каркаса (`UiTestHelper`), а реальный жизненный цикл перезагрузки ассетов и перекомпиляции шейдеров в рантайме НЕ проверен.
