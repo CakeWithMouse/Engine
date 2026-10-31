@@ -465,3 +465,19 @@ QIcon EditorTheme::CreateResetIcon(const QColor& color)
     }
     return QIcon(pix);
 }
+
+QIcon EditorTheme::CreateMoreIcon(const QColor& color)
+{
+    QPixmap pix(16, 16);
+    pix.fill(Qt::transparent);
+    {
+        QPainter p(&pix);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setPen(Qt::NoPen);
+        p.setBrush(color);
+        p.drawEllipse(QRectF(1.5, 6.5, 3.0, 3.0));
+        p.drawEllipse(QRectF(6.5, 6.5, 3.0, 3.0));
+        p.drawEllipse(QRectF(11.5, 6.5, 3.0, 3.0));
+    }
+    return QIcon(pix);
+}

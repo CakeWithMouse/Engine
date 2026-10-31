@@ -77,6 +77,7 @@ public:
     static QIcon CreateLocalIcon();
     static QIcon CreateSnapIcon(const QColor& color = QColor(0xCB, 0xD5, 0xE1));
     static QIcon CreateResetIcon(const QColor& color = QColor(0x94, 0xA3, 0xB8));
+    static QIcon CreateMoreIcon(const QColor& color = QColor(0xCB, 0xD5, 0xE1));
 
 private:
     EditorTheme();
