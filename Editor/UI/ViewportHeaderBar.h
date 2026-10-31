@@ -21,10 +21,10 @@ public:
         : QFrame(parent)
     {
         setObjectName(QStringLiteral("ViewportHeaderBar"));
-        setFixedHeight(28);
+        setFixedHeight(31);
 
         layout_ = new QHBoxLayout(this);
-        layout_->setContentsMargins(4, 2, 4, 2);
+        layout_->setContentsMargins(4, 3, 4, 3);
         layout_->setSpacing(2);
 
         btnTranslate_ = new QPushButton(this);

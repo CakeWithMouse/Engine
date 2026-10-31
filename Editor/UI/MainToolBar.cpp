@@ -8,7 +8,7 @@ MainToolBar::MainToolBar(QWidget* parent)
     setObjectName(QStringLiteral("MainToolBar"));
     setMovable(false);
     setFloatable(false);
-    setFixedHeight(30);
+    setFixedHeight(32);
     setIconSize(QSize(16, 16));
     setToolButtonStyle(Qt::ToolButtonIconOnly);
 
@@ -74,7 +74,7 @@ void MainToolBar::ApplyTheme()
         "  border: none;"
         "  border-bottom: 1px solid %2;"
         "  spacing: 3px;"
-        "  padding: 2px 4px;"
+        "  padding: 3px 4px;"
         "}"
         "QToolBar#MainToolBar QToolButton {"
         "  background-color: transparent;"

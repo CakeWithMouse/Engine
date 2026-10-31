@@ -67,7 +67,7 @@ private:
 
         chooseModel_ = new QPushButton(Tr("Выбрать модель…", "Choose Model…"), btnRow);
         chooseModel_->setObjectName(QStringLiteral("ChooseModel"));
-        chooseModel_->setFixedHeight(22);
+        chooseModel_->setFixedHeight(24);
         QObject::connect(chooseModel_, &QPushButton::clicked, [this] {
             if (onChooseModel) onChooseModel();
         });
@@ -75,7 +75,7 @@ private:
 
         clearModel_ = new QPushButton(Tr("Очистить", "Clear"), btnRow);
         clearModel_->setObjectName(QStringLiteral("ClearModel"));
-        clearModel_->setFixedHeight(22);
+        clearModel_->setFixedHeight(24);
         QObject::connect(clearModel_, &QPushButton::clicked, [this] {
             if (onClearModel) onClearModel();
         });

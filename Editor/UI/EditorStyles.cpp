@@ -255,9 +255,9 @@ QFrame#CollapsibleCard QComboBox {
     color: %1;
 }
 QFrame#CollapsibleCard QPushButton:not(#CardHeaderBtn) {
-    min-height: 22px;
-    max-height: 22px;
-    padding: 1px 6px;
+    min-height: 24px;
+    max-height: 24px;
+    padding: 3px 8px;
     font-size: 11px;
 }
 QLabel#SelectedObjectLabel {

@@ -725,8 +725,6 @@ void EditorMainWindow::RefreshSceneUi()
     const bool selectionChanged = selectedId_ != view.selected;
     selectedId_ = view.selected;
     inspectorDock_->setWindowTitle(Tr("Инспектор", "Inspector"));
-    for (const auto& o : view.objects) if (o.id == selectedId_)
-        inspectorDock_->setWindowTitle(QString::fromStdString(o.name));
 
     if (objectInspectorPanel_)
     {
@@ -1265,7 +1263,7 @@ void EditorMainWindow::RetranslateUi()
     if (consoleDock_) consoleDock_->setWindowTitle(Tr("Консоль", "Console"));
     if (fileDock_) fileDock_->setWindowTitle(Tr("Контент", "Content Browser"));
     if (sceneObjectsDock_) sceneObjectsDock_->setWindowTitle(Tr("Сцена / объекты", "Scene / Objects"));
-    if (inspectorDock_ && selectedId_ == 0) inspectorDock_->setWindowTitle(Tr("Инспектор", "Inspector"));
+    if (inspectorDock_) inspectorDock_->setWindowTitle(Tr("Инспектор", "Inspector"));
     if (sceneMenu_) sceneMenu_->setTitle(Tr("Сцена", "Scene"));
     if (playMenu_) playMenu_->setTitle(Tr("Запуск", "Play"));
     if (editMenu_) editMenu_->setTitle(Tr("Правка", "Edit"));

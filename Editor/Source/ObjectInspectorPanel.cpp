@@ -198,7 +198,7 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
 
     lightColor_ = new QPushButton(Tr("Выбрать цвет…", "Choose Color…"), rowTop);
     lightColor_->setObjectName(QStringLiteral("LightColor"));
-    lightColor_->setFixedHeight(22);
+    lightColor_->setFixedHeight(24);
     connect(lightColor_, &QPushButton::clicked, this, [this] {
         if (refreshing_ || selectedId_ == 0) return;
         const QColor current = QColor::fromRgbF(lightValues_[0]->value(), lightValues_[1]->value(), lightValues_[2]->value());
