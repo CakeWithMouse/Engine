@@ -40,9 +40,14 @@ if ($DisableAssimp) {
     }
     if ($vcpkgRoot -and (Test-Path -LiteralPath (Join-Path $vcpkgRoot 'scripts\buildsystems\msbuild\vcpkg.props'))) {
         $env:VCPKG_ROOT = $vcpkgRoot
+        # Only an Assimp that is already installed turns the optional target on. vcpkg.json is
+        # committed, so treating it as a signal enabled Assimp on every machine with vcpkg and
+        # made a failed port install a failed build of the whole engine - and installing it from
+        # the manifest is not always possible (under a non-ASCII path the port's own link step
+        # gets a mangled library name). Ask for it with -EnableAssimp to install it on purpose.
         $installedHeader = Join-Path $PSScriptRoot 'vcpkg_installed\x64-windows\include\assimp\scene.h'
         $vcpkgInstalledHeader = Join-Path $vcpkgRoot 'installed\x64-windows\include\assimp\scene.h'
-        if ((Test-Path -LiteralPath $installedHeader) -or (Test-Path -LiteralPath $vcpkgInstalledHeader) -or (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'vcpkg.json'))) {
+        if ((Test-Path -LiteralPath $installedHeader) -or (Test-Path -LiteralPath $vcpkgInstalledHeader)) {
             $useAssimp = $true
         }
     }

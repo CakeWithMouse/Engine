@@ -104,8 +104,15 @@ private:
     void UpdateUnits(float deltaTime);
     void UpdateHotkeys();
     uint32_t CountForLod(int level) const;
-    /** Builds the on-screen panels once; UpdateHud only changes their text. */
+    /** Debug colours per detail level, from F6 and from the button in the HUD. */
+    void SetLodDebugColors(bool enabled);
+    /** Reads the panels from GameContent/UI/Hud.ui; UpdateHud only changes their text. */
     void BuildHud();
+    /**
+     * Looks the elements the scene writes to up in the markup. Called again after a hot reload,
+     * because rebuilding the tree invalidates every pointer into it.
+     */
+    void BindHud();
     void UpdateHud();
 
     UIComponent* Hud = nullptr;
@@ -116,6 +123,8 @@ private:
     UILabel* HudLodLabels[4] = {};
     UIBar* HudFrameBar = nullptr;
     double HudFrameMs = 0.0;
+    /** The markup revision the pointers above were taken from. */
+    uint32_t HudRevision = 0;
     bool bHudKeyWasDown = false;
 
     std::vector<UnitBatch> UnitBatches;

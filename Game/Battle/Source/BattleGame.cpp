@@ -320,56 +320,53 @@ void BattleGame::BuildHud()
     font.PixelHeight = 18;
     hud->SetFont(font);
 
-    const glm::vec4 panelColor(0.05f, 0.06f, 0.07f, 0.62f);
-    const glm::vec4 textColor(0.93f, 0.94f, 0.91f, 1.0f);
-    const glm::vec4 dimColor(0.58f, 0.62f, 0.66f, 1.0f);
-    const glm::vec4 accentColor(0.89f, 0.52f, 0.24f, 1.0f);
-
-    // Left panel: what the renderer is doing with the field right now.
-    UIPanel* leftPanel = hud->AddPanel(UIRect{UIAnchor::TopLeft, 16.0f, 16.0f, 296.0f, 166.0f}, panelColor);
-    leftPanel->BorderWidth = 1.0f;
-    leftPanel->BorderColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.12f);
-
-    hud->AddLabel(UIRect{UIAnchor::TopLeft, 32.0f, 30.0f, 0.0f, 0.0f}, "КАДР", accentColor);
-    HudFrameLabel = hud->AddLabel(UIRect{UIAnchor::TopLeft, 32.0f, 56.0f, 0.0f, 0.0f}, "", textColor);
-    HudDrawLabel = hud->AddLabel(UIRect{UIAnchor::TopLeft, 32.0f, 78.0f, 0.0f, 0.0f}, "", dimColor);
-    HudUnitLabel = hud->AddLabel(UIRect{UIAnchor::TopLeft, 32.0f, 100.0f, 0.0f, 0.0f}, "", dimColor);
-
-    hud->AddLabel(UIRect{UIAnchor::TopLeft, 32.0f, 128.0f, 0.0f, 0.0f}, "Загрузка кадра", dimColor);
-    // One frame of the 60 FPS budget: the bar fills as the frame approaches 16.7 ms.
-    HudFrameBar = hud->AddBar(UIRect{UIAnchor::TopLeft, 32.0f, 150.0f, 264.0f, 10.0f});
-
-    // Right panel: how the units are split between the detail levels.
-    UIPanel* rightPanel = hud->AddPanel(UIRect{UIAnchor::TopRight, 16.0f, 16.0f, 238.0f, 166.0f}, panelColor);
-    rightPanel->BorderWidth = 1.0f;
-    rightPanel->BorderColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.12f);
-
-    hud->AddLabel(UIRect{UIAnchor::TopRight, 238.0f, 30.0f, 0.0f, 0.0f}, "ДЕТАЛИЗАЦИЯ", accentColor);
-
-    // The swatches repeat the colours of the F6 debug view, so the two read as one thing.
-    const glm::vec4 lodColors[4] = {
-        glm::vec4(0.25f, 1.0f, 0.35f, 1.0f),
-        glm::vec4(1.0f, 0.85f, 0.2f, 1.0f),
-        glm::vec4(1.0f, 0.4f, 0.2f, 1.0f),
-        glm::vec4(0.6f, 0.4f, 1.0f, 1.0f)
-    };
-    const char* lodNames[4] = {"LOD0", "LOD1", "LOD2", "Спрайт"};
-    for (int level = 0; level < 4; ++level)
+    // What the HUD looks like lives in the markup next to the exe, and the component watches it:
+    // panels can be moved, recoloured or dropped while the scene runs. The scene only knows the
+    // names it writes to, so a layout change needs no rebuild.
+    const std::string markup = (Config.ContentRoot / "UI" / "Hud.ui").generic_u8string();
+    if (!hud->LoadMarkup(markup))
     {
-        const float row = 56.0f + static_cast<float>(level) * 24.0f;
-        hud->AddPanel(UIRect{UIAnchor::TopRight, 222.0f, row + 4.0f, 10.0f, 10.0f}, lodColors[level]);
-        hud->AddLabel(UIRect{UIAnchor::TopRight, 202.0f, row, 0.0f, 0.0f}, lodNames[level], dimColor);
-        HudLodLabels[level] = hud->AddLabel(UIRect{UIAnchor::TopRight, 32.0f, row, 90.0f, 0.0f}, "0", textColor);
-        HudLodLabels[level]->bAlignRight = true;
+        // The component printed the line that is wrong; the field is worth more than the panels.
+        return;
     }
-
-    // The height is the line itself: a bottom anchor measures the far edge, so without it the
-    // text would hang past the bottom of the window.
-    HudHintLabel = hud->AddLabel(UIRect{UIAnchor::BottomLeft, 16.0f, 16.0f, 0.0f, 18.0f},
-                                 "F6 — раскраска по уровням   F7 — скрыть панели   WASD — камера", textColor);
 
     const std::string uiShaderPath = EnginePaths::Shader("UI.hlsl").generic_u8string();
     Hud = Register(*this, "Hud", std::move(hud), uiShaderPath, uiShaderPath);
+    BindHud();
+}
+
+void BattleGame::BindHud()
+{
+    if (Hud == nullptr)
+    {
+        return;
+    }
+    HudRevision = Hud->GetMarkupRevision();
+
+    HudFrameLabel = Hud->Find<UILabel>("frame");
+    HudDrawLabel = Hud->Find<UILabel>("draws");
+    HudUnitLabel = Hud->Find<UILabel>("units");
+    HudHintLabel = Hud->Find<UILabel>("hint");
+    HudFrameBar = Hud->Find<UIBar>("load");
+    for (int level = 0; level < 4; ++level)
+    {
+        HudLodLabels[level] = Hud->Find<UILabel>("lod" + std::to_string(level));
+    }
+
+    // The markup says what the button looks like; what it does stays here.
+    if (UIButton* toggle = Hud->Find<UIButton>("lodToggle"))
+    {
+        toggle->OnClick = [this]() { SetLodDebugColors(!Config.LodDebugColors); };
+    }
+}
+
+void BattleGame::SetLodDebugColors(bool enabled)
+{
+    Config.LodDebugColors = enabled;
+    for (UnitBatch& batch : UnitBatches)
+    {
+        batch.Component->SetLodDebugColors(enabled);
+    }
 }
 
 void BattleGame::UpdateHud()
@@ -377,6 +374,11 @@ void BattleGame::UpdateHud()
     if (Hud == nullptr || !Hud->IsVisible())
     {
         return;
+    }
+    if (Hud->GetMarkupRevision() != HudRevision)
+    {
+        // The markup was edited while the game runs: the tree, and every pointer into it, is new.
+        BindHud();
     }
 
     const double frameMs = LastTimestampMs > 0.0 ? (NowMs() - LastTimestampMs) : 0.0;
@@ -386,23 +388,40 @@ void BattleGame::UpdateHud()
     const bool bSettled = GetFrameIndex() > 10;
     HudFrameMs = (bSettled && HudFrameMs > 0.0) ? HudFrameMs * 0.9 + frameMs * 0.1 : frameMs;
 
-    std::ostringstream frameText;
-    frameText.precision(1);
-    frameText << std::fixed << HudFrameMs << " мс   " << (HudFrameMs > 0.001 ? 1000.0 / HudFrameMs : 0.0) << " FPS";
-    HudFrameLabel->SetText(frameText.str());
+    // Every element is optional: the markup is authored outside the code, and a panel someone
+    // renamed or deleted must not take the scene down with it.
+    if (HudFrameLabel != nullptr)
+    {
+        std::ostringstream frameText;
+        frameText.precision(1);
+        frameText << std::fixed << HudFrameMs << " мс   "
+                  << (HudFrameMs > 0.001 ? 1000.0 / HudFrameMs : 0.0) << " FPS";
+        HudFrameLabel->SetText(frameText.str());
+    }
+    if (HudDrawLabel != nullptr)
+    {
+        HudDrawLabel->SetText("Вызовов отрисовки: " + std::to_string(LastFrameStats.DrawCalls));
+    }
+    if (HudUnitLabel != nullptr)
+    {
+        HudUnitLabel->SetText("Техники: " + std::to_string(Config.UnitCount) +
+                              "   отсечено: " + std::to_string(LastFrameStats.CulledInstances));
+    }
 
-    HudDrawLabel->SetText("Вызовов отрисовки: " + std::to_string(LastFrameStats.DrawCalls));
-    HudUnitLabel->SetText("Техники: " + std::to_string(Config.UnitCount) +
-                          "   отсечено: " + std::to_string(LastFrameStats.CulledInstances));
-
-    // 16.7 ms is the whole budget of a 60 FPS frame.
-    HudFrameBar->Fill = static_cast<float>(HudFrameMs / 16.7);
-    HudFrameBar->FillColor = HudFrameMs > 16.7 ? glm::vec4(0.85f, 0.3f, 0.25f, 0.9f)
-                                               : glm::vec4(0.89f, 0.52f, 0.24f, 0.9f);
+    if (HudFrameBar != nullptr)
+    {
+        // 16.7 ms is the whole budget of a 60 FPS frame.
+        HudFrameBar->Fill = static_cast<float>(HudFrameMs / 16.7);
+        HudFrameBar->FillColor = HudFrameMs > 16.7 ? glm::vec4(0.85f, 0.3f, 0.25f, 0.9f)
+                                                   : glm::vec4(0.89f, 0.52f, 0.24f, 0.9f);
+    }
 
     for (int level = 0; level < 4; ++level)
     {
-        HudLodLabels[level]->SetText(std::to_string(CountForLod(level)));
+        if (HudLodLabels[level] != nullptr)
+        {
+            HudLodLabels[level]->SetText(std::to_string(CountForLod(level)));
+        }
     }
 }
 
@@ -550,15 +569,12 @@ void BattleGame::UpdateHotkeys()
         return;
     }
 
-    // F7: LOD debug colours (F6 is the engine's shader reload).
-    const bool bDown = input->IsKeyDown(Keys::F7);
+    // F6: LOD debug colours. F1-F5 belong to the engine and the camera; F7 hides the panels, and
+    // both used to sit on F7, so one key toggled the colours and the whole HUD at once.
+    const bool bDown = input->IsKeyDown(Keys::F6);
     if (bDown && !bLodDebugKeyWasDown)
     {
-        Config.LodDebugColors = !Config.LodDebugColors;
-        for (UnitBatch& batch : UnitBatches)
-        {
-            batch.Component->SetLodDebugColors(Config.LodDebugColors);
-        }
+        SetLodDebugColors(!Config.LodDebugColors);
     }
     bLodDebugKeyWasDown = bDown;
 

@@ -3,7 +3,10 @@
 #include <algorithm>
 #include <iostream>
 #include <Engine/Display/Display.h>
+#include <Engine/InputDevice/InputDevice.h>
+#include <Engine/InputDevice/Keys.h>
 #include <Engine/Resources/Paths.h>
+#include <Engine/UI/UIMarkup.h>
 
 namespace
 {
@@ -40,6 +43,126 @@ UIBar* UIComponent::AddBar(const UIRect& rect)
     auto bar = std::make_unique<UIBar>();
     bar->Rect = rect;
     return Add(std::move(bar));
+}
+
+UIButton* UIComponent::AddButton(const UIRect& rect, const std::string& utf8, std::function<void()> onClick)
+{
+    auto button = std::make_unique<UIButton>();
+    button->Rect = rect;
+    button->SetText(utf8);
+    button->OnClick = std::move(onClick);
+    return Add(std::move(button));
+}
+
+void UIComponent::Clear()
+{
+    Root->ClearChildren();
+    // The router holds raw pointers into the tree that is going away.
+    Router.Reset();
+}
+
+void UIComponent::SetVisible(bool visible)
+{
+    bVisible = visible;
+    if (!visible)
+    {
+        // Nothing may stay hovered or captured behind a hidden interface.
+        Router.Reset();
+    }
+}
+
+bool UIComponent::LoadMarkup(const std::string& path)
+{
+    MarkupPath = path;
+    bMarkupErrorReported = false;
+    return ReadMarkup(path);
+}
+
+void UIComponent::ClearMarkup()
+{
+    MarkupPath.clear();
+}
+
+bool UIComponent::ReadMarkup(const std::string& path)
+{
+    std::unique_ptr<UIElement> root;
+    std::string error;
+    std::vector<std::string> warnings;
+    if (!UIMarkup::Load(path, root, error, &warnings))
+    {
+        if (!bMarkupErrorReported)
+        {
+            std::cout << "UIComponent: " << error << std::endl;
+            bMarkupErrorReported = true;
+        }
+        return false;
+    }
+    for (const std::string& warning : warnings)
+    {
+        std::cout << "UIComponent: " << warning << std::endl;
+    }
+
+    Router.Reset();
+    Root = std::move(root);
+    ++MarkupRevision;
+    bMarkupErrorReported = false;
+
+    std::error_code ec;
+    MarkupWriteTime = std::filesystem::last_write_time(std::filesystem::u8path(path), ec);
+    return true;
+}
+
+void UIComponent::PollMarkup()
+{
+    if (MarkupPath.empty() || !bMarkupHotReload)
+    {
+        return;
+    }
+    std::error_code ec;
+    const std::filesystem::file_time_type written =
+        std::filesystem::last_write_time(std::filesystem::u8path(MarkupPath), ec);
+    if (ec)
+    {
+        // The file is being written right now, or was removed: keep what is on screen.
+        return;
+    }
+    if (written == MarkupWriteTime)
+    {
+        return;
+    }
+    MarkupWriteTime = written;
+    if (ReadMarkup(MarkupPath))
+    {
+        std::cout << "UIComponent: reloaded " << MarkupPath << std::endl;
+    }
+}
+
+void UIComponent::Tick(float deltaTime)
+{
+    GameComponent::Tick(deltaTime);
+
+    PollMarkup();
+
+    Game* game = GetGame();
+    if (game == nullptr || game->GetDisplay() == nullptr)
+    {
+        return;
+    }
+    const float screenWidth = static_cast<float>(game->GetDisplay()->GetWidth());
+    const float screenHeight = static_cast<float>(game->GetDisplay()->GetHeight());
+    LayoutTree(screenWidth, screenHeight);
+
+    // Hit-testing needs boxes, so the layout above has to run first even when nothing is drawn.
+    InputDevice* input = game->GetInputDevice();
+    if (!bVisible || input == nullptr)
+    {
+        return;
+    }
+    UIInputState state;
+    state.MouseX = input->MousePosition.x;
+    state.MouseY = input->MousePosition.y;
+    state.bMouseDown = input->IsKeyDown(Keys::LeftButton);
+    Router.Update(*Root, state);
 }
 
 void UIComponent::SetFont(const FontAtlasSettings& settings)
@@ -130,20 +253,21 @@ void UIComponent::CreateBuffers(ID3D11Device* Device)
     }
 }
 
+void UIComponent::LayoutTree(float screenWidth, float screenHeight)
+{
+    UIBox screen;
+    screen.Width = screenWidth;
+    screen.Height = screenHeight;
+    Root->Layout(screen);
+}
+
 void UIComponent::BuildVertices(float screenWidth, float screenHeight)
 {
     DrawList.Vertices.clear();
     DrawList.Font = &Font;
     DrawList.ScreenWidth = screenWidth;
     DrawList.ScreenHeight = screenHeight;
-
-    for (const std::unique_ptr<UIElement>& element : Elements)
-    {
-        if (element)
-        {
-            element->Build(DrawList);
-        }
-    }
+    Root->Build(DrawList);
 }
 
 bool UIComponent::UploadVertices(ID3D11DeviceContext* context, ID3D11Device* device)
@@ -183,7 +307,8 @@ bool UIComponent::UploadVertices(ID3D11DeviceContext* context, ID3D11Device* dev
 void UIComponent::Render(ID3D11DeviceContext* context)
 {
     Game* game = GetGame();
-    if (context == nullptr || game == nullptr || game->GetDisplay() == nullptr || Elements.empty())
+    if (context == nullptr || game == nullptr || game->GetDisplay() == nullptr ||
+        Root->GetChildren().empty())
     {
         return;
     }
@@ -197,6 +322,9 @@ void UIComponent::Render(ID3D11DeviceContext* context)
 
     const float screenWidth = static_cast<float>(game->GetDisplay()->GetWidth());
     const float screenHeight = static_cast<float>(game->GetDisplay()->GetHeight());
+    // Laid out here as well: a component that is drawn without being ticked, or a window resized
+    // between the two, must not draw last frame's boxes.
+    LayoutTree(screenWidth, screenHeight);
     BuildVertices(screenWidth, screenHeight);
     if (!UploadVertices(context, device))
     {

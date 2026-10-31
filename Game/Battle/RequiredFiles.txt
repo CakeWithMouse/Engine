@@ -22,3 +22,4 @@ EngineContent/Shaders/Material/ErrorSurface.hlsl
 GameContent/Materials/Vehicle.mat
 GameContent/Materials/Vehicle.hlsl
 GameContent/Materials/Building.mat
+GameContent/UI/Hud.ui

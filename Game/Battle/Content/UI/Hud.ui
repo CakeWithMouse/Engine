@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  HUD of the Battle scene. The copy next to the exe (GameContent/UI/Hud.ui) is the one the game
+  reads, and it is watched while the game runs: save the file and the interface is rebuilt.
+
+  Game code only looks elements up by name and writes their text, so moving a panel, recolouring
+  it or dropping a line needs no rebuild. The names it expects are frame, draws, units, load,
+  lod0..lod3, hint and lodToggle.
+-->
+<UI>
+
+  <!-- Left panel: what the renderer is doing with the field right now. -->
+  <Panel name="statsPanel" anchor="TopLeft" rect="16 16 296 166"
+         color="#0D0F129E" border="1" borderColor="#FFFFFF1F" padding="16 14 16 14">
+    <Label text="КАДР" color="#E3853DFF"/>
+    <Label name="frame"  rect="0 26" color="#EDF0E8FF"/>
+    <Label name="draws"  rect="0 48" color="#949EA8FF"/>
+    <Label name="units"  rect="0 70" color="#949EA8FF"/>
+    <Label text="Загрузка кадра" rect="0 98" color="#949EA8FF"/>
+    <!-- One frame of the 60 FPS budget: the bar fills as the frame approaches 16.7 ms. -->
+    <Bar name="load" rect="0 120 264 10" trackColor="#FFFFFF26" fillColor="#E3853DE6"/>
+  </Panel>
+
+  <!-- Right panel: how the units are split between the detail levels. The swatches repeat the
+       colours of the F6 debug view, so the two read as one thing. -->
+  <Panel name="lodPanel" anchor="TopRight" rect="16 16 238 166"
+         color="#0D0F129E" border="1" borderColor="#FFFFFF1F" padding="16 14 16 14">
+    <Label text="ДЕТАЛИЗАЦИЯ" color="#E3853DFF"/>
+
+    <Label text="LOD0" rect="0 26" color="#949EA8FF"/>
+    <Label name="lod0" anchor="TopRight" rect="20 26 90" align="right" color="#EDF0E8FF"/>
+    <Panel anchor="TopRight" rect="0 30 10 10" color="#40FF59FF"/>
+
+    <Label text="LOD1" rect="0 50" color="#949EA8FF"/>
+    <Label name="lod1" anchor="TopRight" rect="20 50 90" align="right" color="#EDF0E8FF"/>
+    <Panel anchor="TopRight" rect="0 54 10 10" color="#FFD933FF"/>
+
+    <Label text="LOD2" rect="0 74" color="#949EA8FF"/>
+    <Label name="lod2" anchor="TopRight" rect="20 74 90" align="right" color="#EDF0E8FF"/>
+    <Panel anchor="TopRight" rect="0 78 10 10" color="#FF6633FF"/>
+
+    <Label text="Спрайт" rect="0 98" color="#949EA8FF"/>
+    <Label name="lod3" anchor="TopRight" rect="20 98 90" align="right" color="#EDF0E8FF"/>
+    <Panel anchor="TopRight" rect="0 102 10 10" color="#9966FFFF"/>
+  </Panel>
+
+  <!-- The height is the line itself: a bottom anchor measures the far edge, so without it the
+       text would hang past the bottom of the window. -->
+  <Label name="hint" anchor="BottomLeft" rect="16 16 0 18" color="#EDF0E8FF"
+         text="F6 — раскраска по уровням   F7 — скрыть панели   WASD — камера"/>
+
+  <Button name="lodToggle" anchor="BottomRight" rect="16 16 196 30" text="Раскраска по уровням"
+          color="#141A20D9" hoverColor="#1F2A33E6" pressedColor="#0A0E12F2"
+          textColor="#EDF0E8FF" border="1" borderColor="#FFFFFF38"/>
+
+</UI>

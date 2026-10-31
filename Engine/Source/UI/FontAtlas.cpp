@@ -28,6 +28,25 @@ namespace
     constexpr int WhiteBlockSize = 4;
     constexpr int CellPadding = 1;
 
+    /** A font name for a message. Narrowing the wide string by hand turns a Cyrillic name to mush. */
+    std::string ToUtf8(const std::wstring& wide)
+    {
+        if (wide.empty())
+        {
+            return {};
+        }
+        const int needed = WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), static_cast<int>(wide.size()),
+                                               nullptr, 0, nullptr, nullptr);
+        if (needed <= 0)
+        {
+            return {};
+        }
+        std::string utf8(static_cast<size_t>(needed), '\0');
+        WideCharToMultiByte(CP_UTF8, 0, wide.c_str(), static_cast<int>(wide.size()),
+                            &utf8[0], needed, nullptr, nullptr);
+        return utf8;
+    }
+
     struct DeviceContextScope
     {
         HDC Dc = nullptr;
@@ -73,7 +92,7 @@ bool FontAtlas::Build(ID3D11Device* device, const FontAtlasSettings& settings)
                              ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, settings.Face.c_str());
     if (scope.Font == nullptr)
     {
-        std::cout << "FontAtlas: font '" << std::string(settings.Face.begin(), settings.Face.end())
+        std::cout << "FontAtlas: font '" << ToUtf8(settings.Face)
                   << "' could not be created." << std::endl;
         return false;
     }
