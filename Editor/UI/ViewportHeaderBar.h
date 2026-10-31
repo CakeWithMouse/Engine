@@ -303,6 +303,7 @@ private:
         if (!overflowMenu_)
             return;
 
+        qDeleteAll(overflowMenu_->children());
         overflowMenu_->clear();
         const auto p = EditorTheme::Instance().Palette();
 
