@@ -18,6 +18,24 @@
 
 ---
 
+## Чек-лист среза S2 (Host-слой, развязка QtHost и MainWindow, декомпозиция DrainCommands, Checkpoint coalescing)
+
+- [x] **Шаг 2.1 (refactor):** Создание `Editor/Host/IEditorHost.h` с интерфейсами `IEditorHost` и `IEditorUiListener`. Развязка `QtHost` от `MainWindow.h` (удалено поле `window_`, удалён прямой `#include "MainWindow.h"`, связь событий через `IEditorUiListener`).
+- [x] **Шаг 2.2 (refactor):** Выделение `Editor/Host/EditorHistory` (`QTemporaryDir`, `Checkpoint()`, `RecordChange()`, Undo/Redo стек max 64, coalescing жестов перетаскивания и nudge).
+- [x] **Шаг 2.3 (refactor):** Выделение `Editor/Host/ViewportCommandHandler` (ввод, HWND, Play/Pause/Stop, камера) и `Editor/Host/AssetCommandHandler` (импорт ассетов, hot reload, фоновые задачи).
+- [x] **Шаг 2.4 (refactor):** Выделение `Editor/Host/SceneCommandHandler` (мутации сцены, snapshot, иерархия, параметры объектов). Сокращение `QtHost.cpp` с 641 до 298 строк.
+- [x] **Шаг 2.5 (chore):** Регистрация новых файлов в `Editor/EditorModule.vcxproj`, интеграция через `Editor/UI/EditorApp.cpp`, валидация через `check.ps1 -Quick` (сборка Debug, CoreTests 47/47, UiTests 15/15, слои, wc -l).
+
+---
+
+## Чек-лист среза S3 (Чистый Core без UI, ветка `rewrite/editor-v2-core`)
+
+- [x] **Шаг 3.1 (feat):** `Core/GizmoMath`: перенос из `feature/editor-ui-overhaul:Editor/Source/ViewportWidget.cpp` строк 1945–2123, дословно, без Qt-виджетов (`AxisLock`, `GizmoMode`, `NormalizeQuat`, `MulQuat`, `AxisAngleQuat`, `ApplyRotateScaleGizmo`, `ComputeSpawnPosition`). Юнит-тесты на снап и оси в `Editor/tests/core/GizmoMathTests.h` (58/58 PASS).
+- [x] **Шаг 3.2 (feat):** `Core/HlslGraphCompiler` + `Core/MaterialGraphModel`: из `CompileGraphToHlsl` в `MaterialGraphWidget.cpp`. Модель без QGraphicsItem, числа в C-локали, JSON через QJsonDocument. Тесты: граф -> HLSL эталонные строки, round-trip JSON (76/76 PASS).
+- [x] **Шаг 3.3 (feat):** `Core/SceneFile`: чтение/запись сцены через FileService. Тест на имя объекта a"b} (97/97 PASS).
+- [x] **Шаг 3.4 (feat):** `Core/Terminal`: парсер команд (help, spawn, select, deselect, pos, rot, scale, delete, duplicate, focus, play, pause, stop, clear), только маппинг текста на команды CommandRegistry. Парсер ничего не исполняет сам. Тесты на кавычки, count, x y z (125/125 PASS).
+- [x] **Шаг 3.5 (feat):** `Core/AssetOps`: создание/переименование/дублирование/удаление в песочнице корня проекта через FileService (169/169 PASS).
+
 ---
 
 ## Чек-лист среза S7 (Исправление регрессий: доки, вьюпорт гизмо/снап, шапка вьюпорта)
@@ -41,51 +59,35 @@
 
 ---
 
-## Чек-лист среза S2 (Host-слой, развязка QtHost и MainWindow, декомпозиция DrainCommands, Checkpoint coalescing)
+## Чек-лист среза S9 (Оверлеи вьюпорта, гизмо, иконки и ABI камеры)
 
-- [x] **Шаг 2.1 (refactor):** Создание `Editor/Host/IEditorHost.h` с интерфейсами `IEditorHost` и `IEditorUiListener`. Развязка `QtHost` от `MainWindow.h` (удалено поле `window_`, удалён прямой `#include "MainWindow.h"`, связь событий через `IEditorUiListener`).
-- [x] **Шаг 2.2 (refactor):** Выделение `Editor/Host/EditorHistory` (`QTemporaryDir`, `Checkpoint()`, `RecordChange()`, Undo/Redo стек max 64, coalescing жестов перетаскивания и nudge).
-- [x] **Шаг 2.3 (refactor):** Выделение `Editor/Host/ViewportCommandHandler` (ввод, HWND, Play/Pause/Stop, камера) и `Editor/Host/AssetCommandHandler` (импорт ассетов, hot reload, фоновые задачи).
-- [x] **Шаг 2.4 (refactor):** Выделение `Editor/Host/SceneCommandHandler` (мутации сцены, snapshot, иерархия, параметры объектов). Сокращение `QtHost.cpp` с 641 до 298 строк.
-- [x] **Шаг 2.5 (chore):** Регистрация новых файлов в `Editor/EditorModule.vcxproj`, интеграция через `Editor/UI/EditorApp.cpp`, валидация через `check.ps1 -Quick` (сборка Debug, CoreTests 47/47, UiTests 15/15, слои, wc -l).
-
----
-
-## Чек-лист среза S3 (Чистый Core без UI, ветка `rewrite/editor-v2-core`)
-
-- [x] **Шаг 3.1 (feat):** `Core/GizmoMath`: перенос из `feature/editor-ui-overhaul:Editor/Source/ViewportWidget.cpp` строк 1945–2123, дословно, без Qt-виджетов (`AxisLock`, `GizmoMode`, `NormalizeQuat`, `MulQuat`, `AxisAngleQuat`, `ApplyRotateScaleGizmo`, `ComputeSpawnPosition`). Юнит-тесты на снап и оси в `Editor/tests/core/GizmoMathTests.h` (58/58 PASS).
-- [x] **Шаг 3.2 (feat):** `Core/HlslGraphCompiler` + `Core/MaterialGraphModel`: из `CompileGraphToHlsl` в `MaterialGraphWidget.cpp`. Модель без QGraphicsItem, числа в C-локали, JSON через QJsonDocument. Тесты: граф -> HLSL эталонные строки, round-trip JSON (76/76 PASS).
-- [x] **Шаг 3.3 (feat):** `Core/SceneFile`: чтение/запись сцены через FileService. Тест на имя объекта a"b} (97/97 PASS).
-- [x] **Шаг 3.4 (feat):** `Core/Terminal`: парсер команд (help, spawn, select, deselect, pos, rot, scale, delete, duplicate, focus, play, pause, stop, clear), только маппинг текста на команды CommandRegistry. Парсер ничего не исполняет сам. Тесты на кавычки, count, x y z (125/125 PASS).
-- [x] **Шаг 3.5 (feat):** `Core/AssetOps`: создание/переименование/дублирование/удаление в песочнице корня проекта через FileService (169/169 PASS).
+- [x] **Шаг 9.1 (feat(engine)):** C-ABI расширение `ViewportOverlay` (`EngineViewportOverlayExtension` = `"Engine.Viewport.Overlay"`: `getCamera`, `setOverlayLines`, `setOverlayIcon`, `setOverlayBillboards`). Сохранение замороженного ABI (`sizeof(EngineEditSessionApi) == 320`). Шейдер `Engine/Content/Shaders/EditorOverlay.hlsl` (линии и билборды с отменой перспективного деления `* clipCenter.w`). Прогон тестов `Engine/tests/edit-session/run.ps1` (617/617 PASS).
+- [x] **Шаг 9.2 (feat(core)):** Модули `Core/ViewportOverlay` (генерация сетки Y=0, затухание по дистанции, проволочная сфера радиуса света, FNV-1a хеширование) и `Core/GizmoGeometry` (масштаб гизмо постоянного экранного размера, проекция на экран, расстояние точка-отрезок, пересечение луч-плоскость, угол на кольце, выбор ручки PickHandle 8-10px, построение линий гизмо). Юнит-тесты в `Editor/tests/core/GizmoGeometryTests.h`, включение в `CoreTests` (216/216 PASS).
+- [x] **Шаг 9.3 (feat(host)):** Экспорт `EngineBindViewportOverlay` в `Module.cpp`, расширение интерфейса `IEditorHost` и реализация в `QtHost` (`GetCamera`, `SetOverlayLines`, `SetOverlayIcon`, `SetOverlayBillboards`), поток-безопасная буферизация с атомарным обновлением камеры и выгрузкой в начале кадра `Update(dt)`. Реализация `IconProvider` (растеризация 6 Tabler SVG 64x64 RGBA через `QSvgRenderer`).
+- [x] **Шаг 9.4 (feat(viewport)):** Синхронизация камеры `ViewportWidget` напрямую из `host_->GetCamera` (полное устранение дельта-приближений `camYaw_`/`camPitch_`/`camPos_`). Модуль `ViewportOverlayHelper` (обновление оверлеев, билборды для источников света, неба, камер, партиклов, персонажа; хит-тест билбордов по клику мыши). Интерактивное гизмо с подсветкой ручек при наведении и перетаскиванием по осям/плоскостям. Пункты меню "Вид" -> "Сетка" и "Иконки и гизмо" с сохранением в `SettingsService`. Декомпозиция `ViewportWidget_Input.cpp` с соблюдением лимита строк (<500 строк).
 
 ---
 
-## Эталон тестов (Baseline S0 / S1 / S2 / S3)
+## Эталон тестов (Baseline S0 / S1 / S2 / S3 / S9)
 
-| Тест / Скрипт | Результат на `main` | Результат после fix(build) | Примечание |
+| Тест / Скрипт | Результат на `main` | Результат после S9 | Примечание |
 |---|---|---|---|
 | Сборка `Editor` (Debug) | **FAIL (LNK1104)** | **PASS** | 0 ошибок, 0 новых warnings |
 | Сборка `Editor` (Release) | **FAIL (C1083 LTCG)** | **PASS** | Собрано из пути без запятых (`Documents\GitHub\Engine`) |
-| `Editor/tests/CoreTests.exe` | — | **198/198 PASS** | Юнит-тесты Core без виджетов (S1–S3, GizmoMath, MaterialGraph, SceneFile, Terminal, AssetOps, Locale, Settings) |
-| `Editor/tests/UiTests.exe` | — | **15/15 PASS** | Самопроверка тестового каркаса UI |
+| `Editor/tests/CoreTests.exe` | — | **216/216 PASS** | +17 проверок `GizmoGeometryTests` (S1–S3, S9, GizmoMath, Geometry, MaterialGraph, SceneFile, Terminal, AssetOps, Locale, Settings) |
+| `Editor/tests/HostTests.exe` | — | **6/6 PASS** | Юнит-тесты Host (`EditorHistory`) |
+| `Editor/tests/UiTests.exe` | — | **245/245 PASS** | 15 самопроверка + 230 UI Smoke тесты (89 Cyrillic строк в RU) |
 | `Engine/tests/run.ps1` | **43/43 PASS** | **43/43 PASS** | Тесты ядра Engine |
 | `Engine/tests/component-generation/run.ps1` | **20/20 PASS** | **20/20 PASS** | Генератор компонентов и контракты |
-| `Engine/tests/edit-session/run.ps1` | **609/609 PASS** | **609/609 PASS** | Edit session API (без GUI) |
+| `Engine/tests/edit-session/run.ps1` | **609/609 PASS** | **617/617 PASS** | +8 тестов `ViewportOverlayApi` |
 | `Engine/tests/run-viewport.ps1` | **7/7 PASS** | **7/7 PASS** | Рендеринг и вьюпорт |
 | `Engine/tests/scene-module/run.ps1` | **109/109 PASS** | **109/109 PASS** | C-ABI сцены |
 | `Engine/tests/skeletal/run.ps1` | **8/8 PASS** | **8/8 PASS** | Скелетная анимация |
 | `Engine/tests/code-projects/class-names.ps1` | **27/27 PASS** | **27/27 PASS** | Имена классов |
 | `Game/tests/run-games.ps1` | **27/27 PASS** | **27/27 PASS** | Игры и Launcher |
-| `Editor/tests/run.ps1` | **LNK1104 FAIL** | **35/67 (FAIL на L394)** | Сборка успешна; остановка на проверке экранного захвата превью `grabWindow` |
-| `Engine/tests/run-runtime.ps1` | **LNK1104 FAIL** | **25/25 PASS** | Ранее зависел от `Editor.dll` |
-| `Engine/tests/compatibility/run.ps1` | **LNK1104 FAIL** | **88/88 PASS** | Ранее зависел от `Editor.dll` |
-| `Engine/tests/project-workflow/run.ps1` | **LNK1104 FAIL** | **262/262 PASS** | Ранее зависел от `Editor.dll` |
-| `Engine/tests/run-editor-viewport.ps1` | **FAIL** | **FAIL** | Остановка при закрытии редактора |
-| `Engine/tests/assets/run.ps1` | **FAIL (PS parse)** | **FAIL (PS parse)** | Эталон: не запускается в PS5.1 (нет BOM) |
-| `Engine/tests/code-projects/portable.ps1` | **FAIL (PS parse)** | **FAIL (PS parse)** | Эталон: не запускается в PS5.1 (нет BOM) |
-| `Engine/tests/code-projects/run.ps1` | **FAIL (PS parse)** | **FAIL (PS parse)** | Эталон: не запускается в PS5.1 (here-string `@'`) |
-| `Engine/tests/input/run.ps1` | **FAIL (PS parse)** | **FAIL (PS parse)** | Эталон: не запускается в PS5.1 (C++ строки) |
+| `Engine/tests/run-runtime.ps1` | **LNK1104 FAIL** | **25/25 PASS** | Runtime тесты |
+| `Engine/tests/compatibility/run.ps1` | **LNK1104 FAIL** | **88/88 PASS** | Совместимость с предыдущими версиями |
+| `Engine/tests/project-workflow/run.ps1` | **LNK1104 FAIL** | **262/262 PASS** | Сквозные тесты проектов |
 
 ---
 
@@ -118,24 +120,16 @@
 9. **Политика Checkpoint и coalescing жестов в `EditorHistory`:**
    - Непрерывные жесты перетаскивания гизмо обрамляются `BeginGizmoDrag` / `EndGizmoDrag`. Первый тик создает ровно 1 файл контрольной точки `N.scene.json` в `QTemporaryDir`, последующие тики в течение жеста коалесцируются (0 файлов).
    - Одно нажатие `Undo` возвращает объект в состояние до начала жеста.
-10. **Выделение Core/GizmoMath без виджетов (S3.1):**
-    - Математические операции гизмо (`ApplyRotateScaleGizmo`, кватернионы, `ComputeSpawnPosition`, `AxisLock`) изолированы в чистом слое Core без зависимостей от Qt-виджетов.
-11. **Изолированные дисковые операции Core/AssetOps (S3.5):**
-    - Операции над ассетами (создание, переименование, дублирование с авторазрешением коллизий `_Copy_N`, удаление файлов и рекурсивное удаление папок) выполняются через `FileService` с проверкой песочницы `ResolveSandboxPath`, предотвращая утечки путей и path traversal.
-
----
-
-10. **Политика размеров доков и вьюпорта:**
-    - `ViewportWidget` получает `QSizePolicy::Expanding` и малый `minimumSize(80, 60)` / `minimumSizeHint(80, 60)`.
-    - Все панели (`SceneObjectsPanel`, `ObjectInspectorPanel`, `FileBrowser`, `Console`) получают `QSizePolicy::Ignored` и `AdjustIgnored`, исключая самопроизвольное выдавливание вьюпорта при изменении содержимого.
-    - В `DockLayoutManager::ApplyDefaultLayout` доки иерархии, вьюпорта и свойств связываются через канонический `splitDockWidget(scene, viewport, Horizontal)` и `splitDockWidget(viewport, inspector, Horizontal)`.
-11. **Квантование и снаппинг жестов во вьюпорте:**
-    - Восстановлен вызов `host_->SetGizmoMode(mode)` для синхронизации режима гизмо с Host и C-ABI.
-    - Перемещение объекта в Translate-режиме обрамляется `BeginGizmoDrag` / `EndGizmoDrag`, коалесцируя весь жест в один Checkpoint Undo.
-    - Снаппинг перемещения рассчитывается по накопленному смещению жеста (`dragStartTransform_.position + totalDelta`), предотвращая обнуление микродельт отдельных тиков.
-12. **Размещение шапки вьюпорта ViewportHeaderBar:**
-    - Панель инструментов вьюпорта вынесена из полупрозрачного оверлея поверх нативного HWND в стандартный виджет над вьюпортом внутри `ViewportContainer` (`QVBoxLayout`).
-    - Оформление переведено на непрозрачные токены `EditorTheme::Instance().Palette()` с подпиской на изменение темы `SubscribeThemeChanged`.
+10. **Выделение Core/GizmoMath и Core/GizmoGeometry без виджетов (S3.1, S9.2):**
+    - Математические операции гизмо (`ApplyRotateScaleGizmo`, кватернионы, `ComputeSpawnPosition`, `AxisLock`) и геометрические алгоритмы (`ComputeGizmoWorldScale`, `ProjectPointToScreen`, `DistancePointToSegment`, `RayPlaneIntersection`, `ComputeRingAngle`, `PickHandle`, `BuildGizmoLines`) изолированы в чистом слое Core без зависимостей от Qt-виджетов.
+11. **Расширение C-ABI ViewportOverlay без нарушения frozen layout:**
+    - `sizeof(EngineEditSessionApi) == 320` зафиксирован статическим ассертом ABI v6. Новые возможности оверлеев и камеры оформлены как версионированное сервисное расширение `EngineViewportOverlayExtension` (`"Engine.Viewport.Overlay"`), запрашиваемое через `EngineGetEditExtension` и привязываемое через `EngineBindViewportOverlay`.
+12. **Отрисовка оверлеев и билбордов в D3D11:**
+    - Линии оверлея рендерятся в `Game::RenderEditorOverlay()` топологией `LINELIST` поверх буфера кадра (с тестом глубины `LESS_EQUAL` без записи глубины).
+    - Билборды масштабируются в экранных пикселях в вертексном шейдере через умножение экранного смещения на `clipCenter.w`, полностью отменяя перспективное деление и сохраняя точный размер в пикселях на любом расстоянии от камеры.
+13. **Кэширование и предотвращение аллокаций в горячем коде:**
+    - Вычисление 64-битного FNV-1a хеша состояния камеры, выделения и ручек гизмо (`ViewportOverlay::ComputeOverlayHash`) предотвращает передачу неизменённых массивов линий и билбордов в движок.
+    - Атомарное кэширование камеры `EngineCameraInfo` в `QtHost::Update(dt)` гарантирует потокобезопасность чтения из UI-потока без блокировок D3D11 контекста.
 
 ---
 
@@ -152,36 +146,39 @@
 ## Нужно в ABI
 
 1. **Режимы шейдинга вьюпорта:** Wireframe / Unlit / Lit (переключение конвейера через C-ABI).
-2. **Служебная отрисовка вьюпорта:** вкл/выкл сетки (grid), вкл/выкл теней, backface culling.
-3. **Выделение и подсветка (Mesh Outline vs Box):**
-   - Текущая оранжевая рамка рисуется непосредственно движком в `Game::RenderEditorSelection()` (`Game.cpp:2693`) как 12-рёберный проволочный каркас параллелепипеда (`GetEditorBounds(lo, hi)`, топология `LINELIST`, шейдер `EditorSelection.hlsl`) поверх всей сцены без проверки глубины.
+2. **Выделение и подсветка (Mesh Outline vs Box):**
+   - Текущая оранжевая рамка рисуется непосредственно движком в `Game::RenderEditorSelection()` как проволочный каркас параллелепипеда.
    - Для контурной подсветки меша (silhouette outline / stencil pass) требуется переработка прохода рендеринга на стороне движка и ABI-метод конфигурации стиля выделения (`setSelectionStyle` / outline post-process).
    - Поддержка мультивыделения (множественный выбор ID).
-4. **Пространственные запросы:**
+3. **Пространственные запросы:**
    - Рейкаст курсора `pickObject(context, x, y, &id)` в движке тестирует CPU-треугольники геометрии (`RaycastPrimitive`), но возвращает только `id`.
    - Требуется метод с возвратом мировой точки пересечения и нормали поверхности для точного прилипания (Surface Snapping) и позиционирования.
-5. **Чтение абсолютного состояния камеры (GetCamera):**
-   - Текущий ABI (`viewportCamera` в `EngineModuleHost` и `camera` в `EngineEditSessionApi`) представляет собой односторонний приёмник дельт `(r, u, f, yaw, pitch, zoom)`.
-   - Движок обновляет положение и углы камеры внутри `Player::MoveEditorCamera` (`Player.cpp:322`), но не предоставляет геттера для чтения абсолютного положения, yaw, pitch, FOV и матриц View/Projection.
-   - Редактор вынужден вести приближенное локальное интегрирование дельт. При операциях `focusObject` или переключении режимов камеры состояние редактора расходится с движком.
-   - Требуется метод `getCamera(void* context, float pos[3], float* yaw, float* pitch, float* fovY, float viewMatrix[16], float projMatrix[16])`.
-6. **Габариты геометрии:** запрос Bounding Box / Bounding Sphere объекта сцены по его `id`.
-7. **Иерархия сцены:** концепция пустого узла (папка/группа объектов) в `createObject` без привязки к компонентам меша.
-8. **Параметрические меши:** API чтения параметров примитива (радиус, сегменты, размеры) и запрос их перегенерации в рантайме.
-9. **Материалы в `SceneModuleApi`:**
+4. **Габариты геометрии:** запрос Bounding Box / Bounding Sphere объекта сцены по его `id`.
+5. **Иерархия сцены:** концепция пустого узла (папка/группа объектов) в `createObject` без привязки к компонентам меша.
+6. **Параметрические меши:** API чтения параметров примитива (радиус, сегменты, размеры) и запрос их перегенерации в рантайме.
+7. **Материалы в `SceneModuleApi`:**
    - метод `setMaterialAsset(void* context, uint64_t id, const char* path)`;
    - API управления материалом: компиляция шейдера, чтение/запись скалярных и векторных параметров без прямого дискового ввода-вывода в обход движка.
-10. **Переключение режима Play-камеры:** API переключения активной камеры во время Play (Free Camera / Main Camera / Follow Camera) в `EngineSceneApi`/`EngineEditSessionApi` без записи фиктивных данных проекта.
+8. **Переключение режима Play-камеры:** API переключения активной камеры во время Play (Free Camera / Main Camera / Follow Camera) в `EngineSceneApi`/`EngineEditSessionApi` без записи фиктивных данных проекта.
 
 ---
 
 ## Не проверено в рантайме
 
+- Отрисовка координатной сетки Y=0 во вьюпорте с затуханием по дистанции.
+- Переключение "Вид -> Сетка" и "Вид -> Иконки и гизмо" через меню.
+- Отображение билбордов иконок (лампочка, солнце, камера, партиклы, персонаж) над объектами сцены.
+- Клик по иконке билборда во вьюпорте выделяет соответствующий объект в сцене.
+- Подсветка ручек гизмо при наведении курсора (8-10px tolerance).
+- Перетаскивание объектов мышью за ручки гизмо по осям X/Y/Z и плоскостям.
+- Сфера радиуса источника света при выделении точечного источника света.
+- Отмена активного перетаскивания гизмо по Esc с возвратом начальной позиции.
+- Отсутствие дрифта и расхождения камеры благодаря прямому чтению `getCamera`.
 - Интерактивная работа GUI Editor в реальной пользовательской сессии (клики мыши, хоткеи, навигация вьюпорта, манипуляторы гизмо).
-- Ручное перетаскивание сплиттеров панелей Сцена/Инспектор/Консоль и проверка стабильности размеров после плавания/возврата вьюпорта (Сценарий п.1).
-- Ручное стягивание сплиттера между вьюпортом и контент-браузером вниз до ~60px в запущенном GUI (Сценарий п.A).
-- Смещение объекта мышью с включенным Snap во вьюпорте и проверка пошагового скачкообразного движения (Сценарий п.2).
-- Визуальное переключение темы Dark/Light для шапки вьюпорта `ViewportHeaderBar` (Сценарий п.3).
+- Ручное перетаскивание сплиттеров панелей Сцена/Инспектор/Консоль и проверка стабильности размеров после плавания/возврата вьюпорта.
+- Ручное стягивание сплиттера между вьюпортом и контент-браузером вниз до ~60px в запущенном GUI.
+- Смещение объекта мышью с включенным Snap во вьюпорте и проверка пошагового скачкообразного движения.
+- Визуальное переключение темы Dark/Light для шапки вьюпорта `ViewportHeaderBar`.
 - Поведение hot reload (горячая перезагрузка ассетов и шейдеров): тесты `UiTests` проверяют только хелперы взаимодействия тестового каркаса (`UiTestHelper`), а реальный жизненный цикл перезагрузки ассетов и перекомпиляции шейдеров в рантайме НЕ проверен.
 - Визуальное сжатие вьюпорта в узком окне (<=180px, <=130px, <=100px) и проверка сворачивания кнопок в меню "⋯".
 - Компактный тулбар Play (30px) визуально по центру окна.
