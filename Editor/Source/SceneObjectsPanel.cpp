@@ -42,6 +42,7 @@ void SceneObjectsPanel::BuildUi()
     auto* mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(4, 4, 4, 4);
     mainLayout->setSpacing(4);
+    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 
     // 1. Поиск и кнопка +Add
     auto* topBar = new QHBoxLayout();

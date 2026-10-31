@@ -129,7 +129,7 @@ void ObjectInspectorPanel::BuildUi()
     outerLayout->addWidget(scrollArea);
 
     setMinimumHeight(0);
-    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 }
 
 void ObjectInspectorPanel::BuildGeneralCard(QVBoxLayout* layout)

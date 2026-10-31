@@ -97,7 +97,8 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
         }
     });
     timer->start(16);
-    setMinimumSize(320, 200);
+    setMinimumSize(80, 60);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
 ViewportWidget::~ViewportWidget()

@@ -32,6 +32,9 @@ public:
 
     void RetranslateUi();
 
+    QSize minimumSizeHint() const override { return QSize(80, 60); }
+    QSize sizeHint() const override { return QSize(800, 600); }
+
 signals:
     void contextMenuRequested(const QPoint& globalPos);
     void gizmoModeChanged(EditorGizmoMode mode);

@@ -477,26 +477,6 @@ void EditorMainWindow::BuildSceneDocks()
     inspectorDock_->setWidget(objectInspectorPanel_);
 
     ConnectPanels();
-
-    if (viewportDock_)
-    {
-        splitDockWidget(sceneObjectsDock_, viewportDock_, Qt::Horizontal);
-        splitDockWidget(viewportDock_, inspectorDock_, Qt::Horizontal);
-
-        resizeDocks(
-            {sceneObjectsDock_, viewportDock_, inspectorDock_},
-            {250, 700, 320},
-            Qt::Horizontal
-        );
-    }
-    else
-    {
-        resizeDocks(
-            {sceneObjectsDock_, inspectorDock_},
-            {280, 300},
-            Qt::Horizontal
-        );
-    }
 }
 
 void EditorMainWindow::ConnectPanels()
@@ -1235,7 +1215,17 @@ void EditorMainWindow::ApplySavedOrInitialLayout()
     const bool isTest = qEnvironmentVariableIsSet("PAIN_EDITOR_TEST_MODE") ||
         qApp->applicationFilePath().contains(QStringLiteral("Tests"), Qt::CaseInsensitive) ||
         (host_ && host_->host().projectName && std::string(host_->host().projectName).find("UI") != std::string::npos);
-    if (isTest || !DockLayoutManager::RestoreLayout(this, ProjectPath())) ApplyDefaultLayout();
+    if (isTest || !DockLayoutManager::RestoreLayout(this, ProjectPath()))
+    {
+        ApplyDefaultLayout();
+    }
+    else
+    {
+        for (auto* dock : {static_cast<QDockWidget*>(viewportDock_), static_cast<QDockWidget*>(sceneObjectsDock_), static_cast<QDockWidget*>(inspectorDock_), static_cast<QDockWidget*>(fileDock_), static_cast<QDockWidget*>(consoleDock_)})
+        {
+            if (dock) DockLayoutManager::UnlockDockResizing(dock);
+        }
+    }
 }
 
 void EditorMainWindow::ApplyDefaultLayout()

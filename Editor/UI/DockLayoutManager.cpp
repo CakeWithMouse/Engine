@@ -68,9 +68,21 @@ void DockLayoutManager::ApplyDefaultLayout(QMainWindow* window,
         }
     }
 
-    if (viewportDock) window->addDockWidget(Qt::TopDockWidgetArea, viewportDock);
     if (sceneObjectsDock) window->addDockWidget(Qt::LeftDockWidgetArea, sceneObjectsDock);
-    if (inspectorDock) window->addDockWidget(Qt::RightDockWidgetArea, inspectorDock);
+    if (viewportDock) {
+        if (sceneObjectsDock) {
+            window->splitDockWidget(sceneObjectsDock, viewportDock, Qt::Horizontal);
+        } else {
+            window->addDockWidget(Qt::LeftDockWidgetArea, viewportDock);
+        }
+    }
+    if (inspectorDock) {
+        if (viewportDock) {
+            window->splitDockWidget(viewportDock, inspectorDock, Qt::Horizontal);
+        } else {
+            window->addDockWidget(Qt::RightDockWidgetArea, inspectorDock);
+        }
+    }
     if (consoleDock) window->addDockWidget(Qt::BottomDockWidgetArea, consoleDock);
     if (fileDock) window->addDockWidget(Qt::BottomDockWidgetArea, fileDock);
 
@@ -79,10 +91,10 @@ void DockLayoutManager::ApplyDefaultLayout(QMainWindow* window,
         fileDock->raise();
     }
 
-    if (viewportDock && fileDock) {
-        window->resizeDocks({viewportDock, fileDock}, {500, 200}, Qt::Vertical);
+    if (viewportDock && (fileDock || consoleDock)) {
+        window->resizeDocks({viewportDock, fileDock ? fileDock : consoleDock}, {500, 180}, Qt::Vertical);
     }
     if (sceneObjectsDock && viewportDock && inspectorDock) {
-        window->resizeDocks({sceneObjectsDock, viewportDock, inspectorDock}, {220, 600, 280}, Qt::Horizontal);
+        window->resizeDocks({sceneObjectsDock, viewportDock, inspectorDock}, {240, 720, 320}, Qt::Horizontal);
     }
 }
