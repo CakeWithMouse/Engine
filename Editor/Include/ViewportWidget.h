@@ -31,6 +31,7 @@ public:
     void ToggleCoordinateSpace();
 
     void RetranslateUi();
+    void AttachHeaderBar(ViewportHeaderBar* bar);
 
     QSize minimumSizeHint() const override { return QSize(80, 60); }
     QSize sizeHint() const override { return QSize(800, 600); }

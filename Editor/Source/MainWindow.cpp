@@ -11,6 +11,7 @@
 #include "EditorTheme.h"
 #include "EditorLocale.h"
 #include "ViewportCommands.h"
+#include "ViewportHeaderBar.h"
 
 #include <QActionGroup>
 #include <QDockWidget>
@@ -76,11 +77,25 @@ void EditorMainWindow::BuildUi()
     setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
 
     viewport_ = new ViewportWidget(host_, this);
+
+    auto* viewportContainer = new QWidget(this);
+    viewportContainer->setObjectName(QStringLiteral("ViewportContainer"));
+    viewportContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    auto* viewportLayout = new QVBoxLayout(viewportContainer);
+    viewportLayout->setContentsMargins(0, 0, 0, 0);
+    viewportLayout->setSpacing(0);
+
+    auto* headerBar = new ViewportHeaderBar(viewportContainer);
+    viewport_->AttachHeaderBar(headerBar);
+
+    viewportLayout->addWidget(headerBar);
+    viewportLayout->addWidget(viewport_, 1);
+
     RegisterViewportCommands(viewport_, host_);
 
     viewportDock_ = new QDockWidget(QStringLiteral("Viewport"), this);
     viewportDock_->setObjectName(QStringLiteral("ViewportDock"));
-    viewportDock_->setWidget(viewport_);
+    viewportDock_->setWidget(viewportContainer);
     viewportDock_->setFocusProxy(viewport_);
     viewportDock_->setAllowedAreas(Qt::AllDockWidgetAreas);
     viewportDock_->setFeatures(

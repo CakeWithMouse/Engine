@@ -49,16 +49,9 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
     setFocusPolicy(Qt::StrongFocus);
     updateGizmoToolTip();
 
-    headerBar_ = new ViewportHeaderBar(this);
-    headerBar_->move(8, 8);
-    connect(headerBar_->ComboSnapStep(), &QComboBox::currentTextChanged, this, [this](const QString& text) {
-        moveSnapStep_ = text.toDouble();
-    });
-
     schemeSubId_ = EditorSettings::Instance().SubscribeControlSchemeChanged([this](ControlScheme scheme) {
         if (headerBar_) headerBar_->SetControlScheme(scheme);
     });
-    headerBar_->SetControlScheme(EditorSettings::Instance().GetControlScheme());
 
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
         RetranslateUi();
@@ -142,10 +135,20 @@ void ViewportWidget::hideEvent(QHideEvent* e)
 void ViewportWidget::resizeEvent(QResizeEvent* e)
 {
     QWidget::resizeEvent(e);
-    if (headerBar_)
-        headerBar_->move(8, 8);
     if (attached_)
         SendResize();
+}
+
+void ViewportWidget::AttachHeaderBar(ViewportHeaderBar* bar)
+{
+    headerBar_ = bar;
+    if (!headerBar_) return;
+    connect(headerBar_->ComboSnapStep(), &QComboBox::currentTextChanged, this, [this](const QString& text) {
+        moveSnapStep_ = text.toDouble();
+    });
+    headerBar_->SetGizmoMode(static_cast<int>(gizmoMode_));
+    headerBar_->SetSnapActive(snapEnabled_);
+    headerBar_->SetCoordinateSpaceLocal(localOrientation_);
 }
 
 void ViewportWidget::paintEvent(QPaintEvent*)

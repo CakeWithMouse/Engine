@@ -17,49 +17,13 @@ public:
         : QFrame(parent)
     {
         setObjectName(QStringLiteral("ViewportHeaderBar"));
-        setStyleSheet(QStringLiteral(
-            "QFrame#ViewportHeaderBar {"
-            "  background-color: rgba(23, 26, 33, 220);"
-            "  border: 1px solid rgba(255, 255, 255, 0.12);"
-            "  border-radius: 6px;"
-            "  padding: 2px 4px;"
-            "}"
-            "QPushButton {"
-            "  background-color: transparent;"
-            "  border: 1px solid transparent;"
-            "  border-radius: 4px;"
-            "  padding: 2px;"
-            "  min-width: 24px;"
-            "  max-width: 24px;"
-            "  min-height: 24px;"
-            "  max-height: 24px;"
-            "}"
-            "QPushButton:hover {"
-            "  background-color: rgba(255, 255, 255, 0.08);"
-            "  border-color: rgba(255, 255, 255, 0.15);"
-            "}"
-            "QPushButton:checked {"
-            "  background-color: rgba(220, 38, 38, 0.35);"
-            "  border: 1px solid #DC2626;"
-            "}"
-            "QComboBox {"
-            "  background-color: #1E222B;"
-            "  color: #CBD5E1;"
-            "  border: 1px solid #333842;"
-            "  border-radius: 3px;"
-            "  padding: 1px 4px;"
-            "  font-size: 11px;"
-            "  min-height: 20px;"
-            "  max-height: 22px;"
-            "}"
-        ));
+        setFixedHeight(30);
 
         auto* layout = new QHBoxLayout(this);
-        layout->setContentsMargins(3, 2, 3, 2);
+        layout->setContentsMargins(4, 2, 4, 2);
         layout->setSpacing(3);
 
         btnTranslate_ = new QPushButton(this);
-        btnTranslate_->setIcon(EditorTheme::CreateTranslateIcon());
         btnTranslate_->setIconSize(QSize(16, 16));
         btnTranslate_->setCheckable(true);
         btnTranslate_->setChecked(true);
@@ -70,7 +34,6 @@ public:
         layout->addWidget(btnTranslate_);
 
         btnRotate_ = new QPushButton(this);
-        btnRotate_->setIcon(EditorTheme::CreateRotateIcon());
         btnRotate_->setIconSize(QSize(16, 16));
         btnRotate_->setCheckable(true);
         btnRotate_->setFocusPolicy(Qt::NoFocus);
@@ -80,7 +43,6 @@ public:
         layout->addWidget(btnRotate_);
 
         btnScale_ = new QPushButton(this);
-        btnScale_->setIcon(EditorTheme::CreateScaleIcon());
         btnScale_->setIconSize(QSize(16, 16));
         btnScale_->setCheckable(true);
         btnScale_->setFocusPolicy(Qt::NoFocus);
@@ -92,7 +54,6 @@ public:
         layout->addSpacing(4);
 
         btnCoordSpace_ = new QPushButton(this);
-        btnCoordSpace_->setIcon(EditorTheme::CreateWorldIcon());
         btnCoordSpace_->setIconSize(QSize(16, 16));
         btnCoordSpace_->setFocusPolicy(Qt::NoFocus);
         QObject::connect(btnCoordSpace_, &QPushButton::clicked, [] {
@@ -103,7 +64,6 @@ public:
         layout->addSpacing(4);
 
         btnSnap_ = new QPushButton(this);
-        btnSnap_->setIcon(EditorTheme::CreateSnapIcon());
         btnSnap_->setIconSize(QSize(16, 16));
         btnSnap_->setCheckable(true);
         btnSnap_->setFocusPolicy(Qt::NoFocus);
@@ -118,7 +78,78 @@ public:
         comboSnapStep_->setFocusPolicy(Qt::NoFocus);
         layout->addWidget(comboSnapStep_);
 
+        layout->addStretch(1);
+
+        ApplyTheme();
         RetranslateUi();
+
+        themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
+            ApplyTheme();
+        });
+    }
+
+    ~ViewportHeaderBar() override
+    {
+        if (themeSubId_)
+        {
+            EditorTheme::Instance().UnsubscribeThemeChanged(themeSubId_);
+            themeSubId_ = 0;
+        }
+    }
+
+    void ApplyTheme()
+    {
+        const auto p = EditorTheme::Instance().Palette();
+        setStyleSheet(QStringLiteral(
+            "QFrame#ViewportHeaderBar {"
+            "  background-color: %1;"
+            "  border: none;"
+            "  border-bottom: 1px solid %2;"
+            "  padding: 0px;"
+            "}"
+            "QPushButton {"
+            "  background-color: transparent;"
+            "  border: 1px solid transparent;"
+            "  border-radius: 4px;"
+            "  padding: 2px;"
+            "  min-width: 24px;"
+            "  max-width: 24px;"
+            "  min-height: 24px;"
+            "  max-height: 24px;"
+            "}"
+            "QPushButton:hover {"
+            "  background-color: %3;"
+            "  border-color: %2;"
+            "}"
+            "QPushButton:checked {"
+            "  background-color: %4;"
+            "  border: 1px solid %5;"
+            "}"
+            "QComboBox {"
+            "  background-color: %6;"
+            "  color: %7;"
+            "  border: 1px solid %2;"
+            "  border-radius: 3px;"
+            "  padding: 1px 4px;"
+            "  font-size: 11px;"
+            "  min-height: 20px;"
+            "  max-height: 22px;"
+            "}"
+        ).arg(
+            p.bgPanel.name(),
+            p.borderLight.name(),
+            p.bgButtonHover.name(),
+            p.bgButton.name(),
+            p.accent.name(),
+            p.bgButton.name(),
+            p.textPrimary.name()
+        ));
+
+        btnTranslate_->setIcon(EditorTheme::CreateTranslateIcon(p.textPrimary));
+        btnRotate_->setIcon(EditorTheme::CreateRotateIcon(p.textPrimary));
+        btnScale_->setIcon(EditorTheme::CreateScaleIcon(p.textPrimary));
+        btnCoordSpace_->setIcon(isLocal_ ? EditorTheme::CreateLocalIcon() : EditorTheme::CreateWorldIcon(p.textPrimary));
+        btnSnap_->setIcon(EditorTheme::CreateSnapIcon(p.textPrimary));
     }
 
     void SetGizmoMode(int mode)
@@ -131,7 +162,8 @@ public:
     void SetCoordinateSpaceLocal(bool local)
     {
         isLocal_ = local;
-        btnCoordSpace_->setIcon(local ? EditorTheme::CreateLocalIcon() : EditorTheme::CreateWorldIcon());
+        const auto p = EditorTheme::Instance().Palette();
+        btnCoordSpace_->setIcon(local ? EditorTheme::CreateLocalIcon() : EditorTheme::CreateWorldIcon(p.textPrimary));
         btnCoordSpace_->setToolTip(local
             ? Tr("Пространство координат: Local", "Coordinate Space: Local")
             : Tr("Пространство координат: World", "Coordinate Space: World"));
@@ -144,7 +176,6 @@ public:
 
     void SetControlScheme(ControlScheme)
     {
-        // Control scheme is now managed in Edit menu
     }
 
     double CurrentSnapStep() const
@@ -173,5 +204,6 @@ private:
     QPushButton* btnCoordSpace_ = nullptr;
     QPushButton* btnSnap_ = nullptr;
     QComboBox* comboSnapStep_ = nullptr;
+    int themeSubId_ = 0;
     bool isLocal_ = false;
 };
