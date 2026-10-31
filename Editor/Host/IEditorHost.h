@@ -4,6 +4,7 @@
 #include <Engine/Runtime/ProjectDataApi.h>
 #include <Engine/Runtime/SelectionApi.h>
 #include <Engine/Runtime/ViewportInputApi.h>
+#include <Engine/Runtime/ViewportOverlayApi.h>
 
 #include <cstdint>
 #include <string>
@@ -120,6 +121,11 @@ public:
     virtual void SetGizmoMode(EditorGizmoMode mode) = 0;
     virtual EditorGizmoMode GizmoMode() const = 0;
     virtual void SetParent(uint64_t childId, uint64_t parentId) = 0;
+
+    virtual bool GetCamera(EngineCameraInfo& info) const = 0;
+    virtual void SetOverlayLines(const std::vector<EngineOverlayLine>& lines, float thickness = 1.0f) = 0;
+    virtual void SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels) = 0;
+    virtual void SetOverlayBillboards(const std::vector<EngineOverlayBillboard>& billboards) = 0;
 
     virtual void RunOnUi(std::function<void()> action) = 0;
     virtual void SetUiListener(IEditorUiListener* listener) = 0;

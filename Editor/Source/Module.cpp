@@ -1,4 +1,4 @@
-﻿#include <Engine/Runtime/ModuleApi.h>
+#include <Engine/Runtime/ModuleApi.h>
 #include <Engine/Runtime/EditSessionApi.h>
 #include <Engine/Runtime/VfsApi.h>
 #include "../../Engine/Source/Resources/VfsRead.h"
@@ -132,6 +132,13 @@ extern "C" __declspec(dllexport) int __cdecl EngineBindViewportInput(uint32_t ve
 {
     if (version != 1 || size != sizeof(EngineViewportInputApi) || !instance) return 0;
     static_cast<EditorQtHost*>(instance)->SetViewportInputApi(api ? *api : EngineViewportInputApi{});
+    return 1;
+}
+
+extern "C" __declspec(dllexport) int __cdecl EngineBindViewportOverlay(uint32_t version, uint32_t size, void* instance, const EngineViewportOverlayApi* api)
+{
+    if (version != 1 || size != sizeof(EngineViewportOverlayApi) || !instance) return 0;
+    static_cast<EditorQtHost*>(instance)->SetViewportOverlayApi(api ? *api : EngineViewportOverlayApi{});
     return 1;
 }
 

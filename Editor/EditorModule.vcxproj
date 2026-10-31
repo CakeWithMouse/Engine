@@ -141,6 +141,7 @@
         <ClCompile Include="UI/EditorStyles.cpp"/>
         <ClCompile Include="UI/DockLayoutManager.cpp"/>
         <ClCompile Include="UI/MainToolBar.cpp"/>
+        <ClCompile Include="UI/IconProvider.cpp"/>
         <ClCompile Include="UI/PlaySettingsDialog.cpp"/>
         <ClCompile Include="UI/ExternalGameRunner.cpp"/>
         <ClCompile Include="Source/MainWindow.cpp"/>
@@ -224,6 +225,7 @@
         <ClInclude Include="Host/AssetCommandHandler.h"/>
         <ClInclude Include="Host/SceneCommandHandler.h"/>
         <ClInclude Include="UI/EditorApp.h"/>
+        <ClInclude Include="UI/IconProvider.h"/>
         <ClInclude Include="Include/CodeClassDialog.h"/>
         <ClInclude Include="Include/FileBrowser.h"/>
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->

@@ -69,6 +69,64 @@ void EditorQtHost::Update(double dt)
     updates_.fetch_add(1);
     lastDt_.store(dt);
     DrainCommands();
+
+    if (overlay_.getCamera)
+    {
+        EngineCameraInfo cam{};
+        if (overlay_.getCamera(overlay_.context, &cam))
+        {
+            std::lock_guard lk(cameraMutex_);
+            lastCamera_ = cam;
+            lastCameraValid_ = true;
+        }
+    }
+
+    if (overlay_.setOverlayLines || overlay_.setOverlayBillboards || overlay_.setOverlayIcon)
+    {
+        std::vector<PendingIcon> iconsToUpload;
+        std::vector<EngineOverlayLine> linesToSend;
+        std::vector<EngineOverlayBillboard> billboardsToSend;
+        float thicknessToSend = 1.0f;
+        bool sendLines = false;
+        bool sendBillboards = false;
+
+        {
+            std::lock_guard lk(overlayMutex_);
+            if (!pendingIcons_.empty())
+            {
+                iconsToUpload.swap(pendingIcons_);
+            }
+            if (pendingLinesDirty_)
+            {
+                linesToSend = pendingLines_;
+                thicknessToSend = pendingThickness_;
+                pendingLinesDirty_ = false;
+                sendLines = true;
+            }
+            if (pendingBillboardsDirty_)
+            {
+                billboardsToSend = pendingBillboards_;
+                pendingBillboardsDirty_ = false;
+                sendBillboards = true;
+            }
+        }
+
+        if (overlay_.setOverlayIcon)
+        {
+            for (const auto& icon : iconsToUpload)
+            {
+                overlay_.setOverlayIcon(overlay_.context, icon.id, icon.width, icon.height, icon.pixels.data());
+            }
+        }
+        if (sendLines && overlay_.setOverlayLines)
+        {
+            overlay_.setOverlayLines(overlay_.context, linesToSend.data(), static_cast<uint32_t>(linesToSend.size()), thicknessToSend);
+        }
+        if (sendBillboards && overlay_.setOverlayBillboards)
+        {
+            overlay_.setOverlayBillboards(overlay_.context, billboardsToSend.data(), static_cast<uint32_t>(billboardsToSend.size()));
+        }
+    }
     if (HasScene())
     {
         uint32_t state = 0;
@@ -287,6 +345,41 @@ void EditorQtHost::Complete(const EditorCommand& command, uint32_t status, const
     {
         uiListener_->OnCommandFinished(command, status, error);
     }
+}
+
+bool EditorQtHost::GetCamera(EngineCameraInfo& info) const
+{
+    std::lock_guard lk(cameraMutex_);
+    if (!lastCameraValid_) return false;
+    info = lastCamera_;
+    return true;
+}
+
+void EditorQtHost::SetOverlayLines(const std::vector<EngineOverlayLine>& lines, float thickness)
+{
+    std::lock_guard lk(overlayMutex_);
+    pendingLines_ = lines;
+    pendingThickness_ = thickness;
+    pendingLinesDirty_ = true;
+}
+
+void EditorQtHost::SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels)
+{
+    if (!rgbaPixels || width == 0 || height == 0) return;
+    std::lock_guard lk(overlayMutex_);
+    PendingIcon icon;
+    icon.id = iconId;
+    icon.width = width;
+    icon.height = height;
+    icon.pixels.assign(rgbaPixels, rgbaPixels + (width * height * 4));
+    pendingIcons_.push_back(std::move(icon));
+}
+
+void EditorQtHost::SetOverlayBillboards(const std::vector<EngineOverlayBillboard>& billboards)
+{
+    std::lock_guard lk(overlayMutex_);
+    pendingBillboards_ = billboards;
+    pendingBillboardsDirty_ = true;
 }
 
 void EditorQtHost::SetParent(uint64_t childId, uint64_t parentId)

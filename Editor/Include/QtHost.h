@@ -54,6 +54,11 @@ public:
     EditorGizmoMode GizmoMode() const override { return static_cast<EditorGizmoMode>(gizmoMode_.load()); }
     void SetParent(uint64_t childId, uint64_t parentId) override;
 
+    bool GetCamera(EngineCameraInfo& info) const override;
+    void SetOverlayLines(const std::vector<EngineOverlayLine>& lines, float thickness = 1.0f) override;
+    void SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels) override;
+    void SetOverlayBillboards(const std::vector<EngineOverlayBillboard>& billboards) override;
+
     void RunOnUi(std::function<void()> action) override;
     void SetUiListener(IEditorUiListener* listener) override;
 
@@ -62,6 +67,7 @@ public:
     void SetProjectDataApi(const EngineProjectDataApi& api) { projectData_ = api; }
     void SetViewportInputApi(const EngineViewportInputApi& api) { viewportInput_ = api; }
     void SetSelectionApi(const EngineSelectionApi& api) { selection_ = api; }
+    void SetViewportOverlayApi(const EngineViewportOverlayApi& api) { overlay_ = api; }
 
 private:
     void UiThreadMain();
@@ -73,6 +79,29 @@ private:
     EngineProjectDataApi projectData_{};
     EngineSelectionApi selection_{};
     EngineViewportInputApi viewportInput_{};
+    EngineViewportOverlayApi overlay_{};
+
+    struct PendingIcon
+    {
+        uint32_t id = 0;
+        uint32_t width = 0;
+        uint32_t height = 0;
+        std::vector<uint8_t> pixels;
+    };
+
+    mutable std::mutex cameraMutex_;
+    EngineCameraInfo lastCamera_{};
+    bool lastCameraValid_ = false;
+
+    std::mutex overlayMutex_;
+    std::vector<EngineOverlayLine> pendingLines_;
+    float pendingThickness_ = 1.0f;
+    bool pendingLinesDirty_ = false;
+
+    std::vector<EngineOverlayBillboard> pendingBillboards_;
+    bool pendingBillboardsDirty_ = false;
+
+    std::vector<PendingIcon> pendingIcons_;
 
     std::atomic<bool> materialsAvailable_{false};
     std::atomic<bool> sceneAvailable_{false};
