@@ -37,6 +37,7 @@ public:
     void CommandFinished(const EditorCommand& command, uint32_t status, const QString& error);
 
     void OpenScene(const QString& path = {});
+    void UpdateAsset(const QString& path, bool move, const QString& supplied = {});
     void ImportAsset(bool texture, const QString& source = {});
     void AddModel(const QString& path = {});
     void UseAsset(const QString& path);
@@ -59,12 +60,21 @@ private slots:
 
 protected:
     void closeEvent(QCloseEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
+    bool eventFilter(QObject* object, QEvent* event) override;
 
 private:
     void BuildCodeTools();
     void RunCodeTool(const QString& action, const QStringList& extra = {});
     void ShowProjectTypes();
     void BuildUi();
+    void ResetPanelLayout();
+    void CompactContentPanel();
+    QString LayoutSettingsKey() const;
+    QByteArray defaultPanelLayout_;
+    bool panelLayoutReady_ = false;
+    QSize panelWindowSize_;
+    int contentPanelHeight_ = 180;
     void BuildToolBar();
     void UpdatePlayButtons();
 
@@ -78,6 +88,10 @@ private:
     void RefreshSceneUi();
 
     void SaveScene(bool saveAs = false, std::function<void()> after = {});
+    void SetStartupScene();
+    void OfferRecovery();
+    void ExportProject();
+    QProcess* exportProcess_ = nullptr;
     void MaybeSave(std::function<void()> after);
     void SubmitObjectCommand(int type);
 

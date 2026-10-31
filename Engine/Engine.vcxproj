@@ -42,6 +42,9 @@
     <ClCompile Include="Source\Runtime\SceneEditMaterials.cpp" />
     <ClInclude Include="Include\Engine\Scene\SceneDocument.h" />
     <ClCompile Include="Source\Runtime\SceneEditSession.cpp" />
+    <ClCompile Include="Source\Runtime\SceneEditBatch.cpp" />
+    <ClCompile Include="Source\Runtime\SceneAuthoring.cpp" />
+    <ClCompile Include="Source\Scene\AssetUpdate.cpp" />
     <ClCompile Include="Source\Runtime\GameEditModule.cpp" />
     <ClInclude Include="Include\Engine\Runtime\EditSessionApi.h" />
     <ClInclude Include="Include\Engine\Runtime\GameSceneApi.h" />

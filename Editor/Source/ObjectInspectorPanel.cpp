@@ -1,5 +1,7 @@
 #include "ObjectInspectorPanel.h"
 #include "QtHost.h"
+#include "PropertySection.h"
+#include <QMap>
 
 #include <QFormLayout>
 #include <QLineEdit>
@@ -48,10 +50,17 @@ void ObjectInspectorPanel::BuildUi()
 
     auto* inspectorLayout = new QVBoxLayout(content);
     inspectorLayout->setContentsMargins(6, 6, 6, 6);
-    auto group = [content, inspectorLayout](const QString& title) {
-        auto* box = new QGroupBox(title, content);
-        inspectorLayout->addWidget(box);
-        auto* form = new QFormLayout(box);
+    QMap<QString,PropertySection*> groups;
+    auto group = [content, inspectorLayout,&groups](const QString& title) {
+        auto* layout=inspectorLayout;QString path;
+        const auto parts=title.split('/');
+        for(int i=0;i<parts.size();++i) {
+            path+=(path.isEmpty()?QString():QString("/"))+parts[i];
+            if(!groups.contains(path)) {auto* section=new PropertySection(parts[i],path,content);groups[path]=section;layout->addWidget(section);
+                if(i+1<parts.size())new QVBoxLayout(section->body);}
+            if(i+1<parts.size())layout=qobject_cast<QVBoxLayout*>(groups[path]->body->layout());
+        }
+        auto* form = new QFormLayout(groups[title]->body);
         form->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
         return form;
     };
@@ -88,7 +97,7 @@ void ObjectInspectorPanel::BuildUi()
 
     for (int i = 0; i < 9; ++i)
     {
-        if (i % 3 == 0) form = group(i == 0 ? QStringLiteral("Позиция") : i == 3 ? QStringLiteral("Поворот") : QStringLiteral("Масштаб"));
+        if (i % 3 == 0) form = group(i == 0 ? QStringLiteral("Трансформация/Позиция") : i == 3 ? QStringLiteral("Трансформация/Поворот") : QStringLiteral("Трансформация/Масштаб"));
         auto* spin = transform_[i] = new QDoubleSpinBox(this);
         spin->setObjectName(QStringLiteral("Transform%1").arg(i));
         spin->setRange(i >= 6 ? 0.001 : -10000.0, 10000.0);
@@ -109,10 +118,10 @@ void ObjectInspectorPanel::BuildUi()
     form = group(QStringLiteral("Визуал"));
     BuildAssetInspector(form);
 
-    auto* lightGroup = new QGroupBox(QStringLiteral("Точечный свет"), this);
+    auto* lightGroup = new PropertySection(QStringLiteral("Точечный свет"),"Light",this);
     lightInspector_ = lightGroup;
 
-    auto* lightForm = new QFormLayout(lightGroup);
+    auto* lightForm = new QFormLayout(lightGroup->body);
 
     lightColor_ = new QPushButton(QStringLiteral("Выбрать цвет…"), lightGroup);
     lightColor_->setObjectName(QStringLiteral("LightColor"));
@@ -174,9 +183,9 @@ void ObjectInspectorPanel::BuildUi()
     inspectorLayout->addWidget(lightGroup);
     lightGroup->hide();
 
-    auto* characterGroup = new QGroupBox(QStringLiteral("Персонаж"), content);
+    auto* characterGroup = new PropertySection(QStringLiteral("Персонаж"),"Character",content);
     characterInspector_ = characterGroup;
-    auto* characterForm = new QFormLayout(characterGroup);
+    auto* characterForm = new QFormLayout(characterGroup->body);
     characterSpeed_ = new QDoubleSpinBox(characterGroup);
     characterSpeed_->setObjectName("CharacterSpeed");
     characterSpeed_->setRange(0, 10000);
@@ -187,6 +196,8 @@ void ObjectInspectorPanel::BuildUi()
     connect(characterSpeed_, &QDoubleSpinBox::editingFinished, this, [this] {
         if (!refreshing_ && selectedId_) emit CharacterSpeedEditingFinished(selectedId_, characterSpeed_->value());
     });
+    properties_=new QWidget(content);propertiesLayout_=new QVBoxLayout(properties_);propertiesLayout_->setContentsMargins(0,0,0,0);
+    inspectorLayout->addWidget(properties_);
     inspectorLayout->addStretch();
 
     connect(objectName_, &QLineEdit::editingFinished, this, [this]
@@ -381,6 +392,7 @@ void ObjectInspectorPanel::Refresh(
         editMaterialButton_->setEnabled(false);
         lightInspector_->setVisible(false);
         characterInspector_->hide();
+        properties_->hide();
         refreshing_ = false;
         return;
     }
@@ -397,6 +409,7 @@ void ObjectInspectorPanel::Refresh(
         if (object.id != selectedId_)
             continue;
 
+        RefreshProjectProperties(view,object);
         selectedLight = object.hasPointLight;
         selectionLabel_->setText(QStringLiteral("Выбран: %1\n%2 · ID %3").arg(QString::fromStdString(object.name), QString::fromStdString(object.type)).arg(object.id));
         chooseModel_->setEnabled(object.type == "Engine.Model" || object.type.rfind("Primitive.", 0) == 0);

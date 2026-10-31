@@ -18,5 +18,17 @@
     "examples": "releases/PainEngine-Tutorial-2026-10-30-r3-examples.zip",
     "content": "releases/PainEngine-Tutorial-2026-10-30-r3.content.json",
     "summary": "Материалы, автоматический импорт текстур FBX/BLEND, актуальные скриншоты, уточнённые C++ примеры и полный архив исходников. Сохранены сокращения пользователя."
+  },
+  {
+    "revision": 4,
+    "date": "2026-10-31",
+    "engineVersion": "2026.10.31.2",
+    "sourceCommit": "a3e05e3bd4bf3e983edffa3c2b16fca7ecdd3f48",
+    "slideCount": 36,
+    "presentation": "releases/PainEngine-Tutorial-2026-10-31-r4-final.pptx",
+    "pdf": "releases/PainEngine-Tutorial-2026-10-31-r4-final.pdf",
+    "examples": "releases/PainEngine-Tutorial-2026-10-31-r4-examples.zip",
+    "content": "releases/PainEngine-Tutorial-2026-10-31-r4.content.json",
+    "summary": "Пользовательские свойства и учебный проект с двумя кубами, сворачиваемый инспектор, перемещение панели контента, переимпорт ресурсов, сохранение, восстановление, экспорт и предложение обновления старого проекта. Реальные новые снимки интерфейса; сокращения пользователя сохранены."
   }
 ]

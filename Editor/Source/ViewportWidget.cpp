@@ -163,6 +163,7 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
     });
     timer->start(16);
     setMinimumSize(320, 200);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
 QPaintEngine* ViewportWidget::paintEngine() const
@@ -308,6 +309,7 @@ bool ViewportWidget::event(QEvent* e)
 
             EditorCommand c;
             c.type = EditorCommand::PickObject;
+            if (mouse->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) c.name = "toggle";
             c.right = static_cast<float>(2.0 * mouse->position().x() / width() - 1.0);
             c.up = static_cast<float>(1.0 - 2.0 * mouse->position().y() / height());
             host_->PostCommand(c);
@@ -372,25 +374,12 @@ bool ViewportWidget::event(QEvent* e)
         {
             if (gizmoMode_ == EditorGizmoTranslate)
             {
-                const QPointF delta = mouse->position() - lastDragPos_;
-                lastDragPos_ = mouse->position();
-
-                float right = 0.0f;
-                float up = 0.0f;
-                float forward = 0.0f;
-
-                if (mouse->modifiers() & Qt::ShiftModifier)
-                {
-                    forward = static_cast<float>(-delta.y()) * dragSensitivity_;
-                }
-                else
-                {
-                    right = static_cast<float>(delta.x()) * dragSensitivity_;
-                    up = static_cast<float>(-delta.y()) * dragSensitivity_;
-                }
-
-                if (right != 0.0f || up != 0.0f || forward != 0.0f)
-                    host_->MoveSelectedObject(right, up, forward);
+                const QPointF delta = mouse->position() - dragStartPos_;
+                auto transform = dragStartTransform_;
+                if (mouse->modifiers() & Qt::ShiftModifier) transform.position[2] -= static_cast<float>(delta.y()) * dragSensitivity_;
+                else { transform.position[0] += static_cast<float>(delta.x()) * dragSensitivity_; transform.position[1] -= static_cast<float>(delta.y()) * dragSensitivity_; }
+                if(moveSnap_ > 0) for(auto& value:transform.position)value=static_cast<float>(std::round(value/moveSnap_)*moveSnap_);
+                PostSelectedTransform(transform);
             }
             else
             {
@@ -585,7 +574,6 @@ bool ViewportWidget::BeginObjectDrag(const QPointF& pos)
     dragStartPos_ = pos;
     lastDragPos_ = pos;
 
-    if (gizmoMode_ != EditorGizmoTranslate)
     {
         EditorCommand c;
         c.type = EditorCommand::BeginGizmoDrag;
@@ -647,8 +635,9 @@ void ViewportWidget::ApplyRotateScaleGizmo(const QPointF& pos)
 
     if (gizmoMode_ == EditorGizmoRotate)
     {
-        const double yaw = total.x() * static_cast<double>(rotateSensitivity_);
-        const double pitch = -total.y() * static_cast<double>(rotateSensitivity_);
+        double yaw = total.x() * static_cast<double>(rotateSensitivity_);
+        double pitch = -total.y() * static_cast<double>(rotateSensitivity_);
+        if(angleSnap_ > 0) { const double step=angleSnap_*3.141592653589793/180.0; yaw=std::round(yaw/step)*step; pitch=std::round(pitch/step)*step; }
 
         double startRot[4] = {
             static_cast<double>(dragStartTransform_.rotation[0]),

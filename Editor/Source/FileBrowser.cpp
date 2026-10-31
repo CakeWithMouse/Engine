@@ -45,6 +45,10 @@ FileBrowserDock::FileBrowserDock(EditorQtHost* host, QWidget* parent)
     : QDockWidget(QStringLiteral("Ресурсы и код"), parent)
     , host_(host)
 {
+    setObjectName(QStringLiteral("ContentDock"));
+    setAllowedAreas(Qt::AllDockWidgetAreas);
+    setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetClosable);
+    setToolTip(QStringLiteral("Потяните заголовок или вкладку, чтобы переместить панель. Верхняя граница меняет высоту. Команды размещения — в меню «Вид»."));
     const QFileInfo projectFile(QString::fromUtf8(
         host_->host().projectFile ? host_->host().projectFile : ""));
     projectDir_ = projectFile.absoluteDir().absolutePath();
@@ -62,6 +66,7 @@ void FileBrowserDock::BuildUi()
     auto* layout = new QVBoxLayout(panel);
     layout->setContentsMargins(2, 2, 2, 2);
     auto* imports = new QToolButton(panel);
+    imports->setObjectName(QStringLiteral("ImportAssets"));
     imports->setText(QStringLiteral("Импорт…")); imports->setPopupMode(QToolButton::InstantPopup);
     auto* importMenu = new QMenu(imports);
     for (bool texture : {false, true}) {
@@ -174,13 +179,19 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     QAction* open = hasFile ? menu.addAction(QStringLiteral("Открыть в приложении")) : nullptr;
     QAction* reveal = hasFile ? menu.addAction(QStringLiteral("Показать в проводнике")) : nullptr;
     QAction* copy = hasFile ? menu.addAction(QStringLiteral("Копировать путь")) : nullptr;
+    const bool asset=hasFile&&!model_->isDir(index)&&QStringList{"fbx","obj","gltf","glb","png","jpg","jpeg","bmp","tga","mat"}.contains(QFileInfo(path).suffix().toLower());
+    QAction* reimport=asset&&!isMaterial&&host_->ReadSnapshot().authoring?menu.addAction(QStringLiteral("Переимпортировать…")):nullptr;
+    QAction* move=asset&&host_->ReadSnapshot().authoring?menu.addAction(QStringLiteral("Переместить / переименовать…")):nullptr;
     QAction* refresh = menu.addAction(QStringLiteral("Обновить"));
 
     QAction* picked = menu.exec(view_->viewport()->mapToGlobal(pos));
     if (!picked)
         return;
 
-    if (picked == use)
+    if(picked==reimport || picked==move) {
+        if(auto* editor=qobject_cast<EditorMainWindow*>(parentWidget()))editor->UpdateAsset(path,picked==move);
+    }
+    else if (picked == use)
     {
         if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->UseAsset(path);
     }

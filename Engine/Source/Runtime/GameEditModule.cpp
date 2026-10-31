@@ -45,12 +45,18 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
         {
             void* extensionContext = legacy5_->context ? legacy5_->context : api_.context;
             const auto query = reinterpret_cast<EngineGetEditExtensionFn>(GetProcAddress(static_cast<HMODULE>(library_), "EngineGetEditExtension"));
+            if (query && query(extensionContext, EngineSceneBatchExtension, 1, sizeof(batch_), &batch_))
+                if (batch_.version != 1 || batch_.context != extensionContext || !batch_.apply || !batch_.select)
+                    throw std::runtime_error("Invalid batch API");
             if (query && query(extensionContext, EngineViewportInputExtension, 1, sizeof(viewportInput_), &viewportInput_))
                 if (viewportInput_.version != 1 || viewportInput_.context != extensionContext || !viewportInput_.focus || !viewportInput_.key || !viewportInput_.pointer || !viewportInput_.objectKind)
                     throw std::runtime_error("Invalid viewport input API");
             if (query && query(extensionContext, EngineEditorCameraExtension, 1, sizeof(camera_), &camera_))
                 if (camera_.version != 1 || camera_.context != extensionContext || !camera_.read || !camera_.write)
                     throw std::runtime_error("Invalid editor camera API");
+            if(query && query(extensionContext,EngineAuthoringExtension,1,sizeof(authoring_),&authoring_))
+                if(authoring_.version!=1 || authoring_.context!=extensionContext || !authoring_.describe || !authoring_.setProperty || !authoring_.asset)
+                    throw std::runtime_error("Invalid authoring API");
             EnginePointLightApi light{};
             EngineDocumentCapabilities document{};
             if (query && query(extensionContext, EngineSelectionExtension, 1, sizeof(selection_), &selection_))
@@ -131,7 +137,7 @@ uint32_t GameEditModule::Reload(const std::filesystem::path& module, const std::
         using std::swap;
         swap(loadedModule_, candidate->loadedModule_);
         swap(library_, candidate->library_); swap(factory_, candidate->factory_); swap(api_, candidate->api_);
-        swap(projectData_, candidate->projectData_); swap(selection_, candidate->selection_);
+        swap(projectData_, candidate->projectData_); swap(selection_, candidate->selection_); swap(batch_, candidate->batch_); swap(authoring_, candidate->authoring_);
         swap(viewportInput_, candidate->viewportInput_); swap(camera_, candidate->camera_);
         swap(legacyFactory_, candidate->legacyFactory_); swap(legacy_, candidate->legacy_);
         swap(legacy5Factory_, candidate->legacy5Factory_); swap(legacy5_, candidate->legacy5_);

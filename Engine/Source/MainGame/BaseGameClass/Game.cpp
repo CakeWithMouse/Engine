@@ -2692,8 +2692,9 @@ void Game::Run()
 
 void Game::RenderEditorSelection()
 {
-    auto* object = scene.FindComponent(EditorSelectedId);
-    if (!bEmbedded || !object || !FirstPlayer) return;
+    if (!bEmbedded || !FirstPlayer) return;
+    auto ids = EditorSelectedIds; if (ids.empty() && EditorSelectedId) ids.push_back(EditorSelectedId);
+    if (ids.empty()) return;
     if (!SelectionCB) {
         Microsoft::WRL::ComPtr<ID3DBlob> vs, ps;
         const auto file=EnginePaths::Shader("EditorSelection.hlsl").wstring();
@@ -2705,20 +2706,23 @@ void Game::RenderEditorSelection()
         if (FAILED(Device->CreateBuffer(&desc,nullptr,SelectionCB.ReleaseAndGetAddressOf()))) return;
     }
     using namespace DirectX;
-    glm::vec3 lo,hi; object->GetEditorBounds(lo,hi);
-    const auto matrix=XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetViewMatrix())) * XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetProjectionMatrix()));
-    XMFLOAT4 projected[8], lines[24];
-    for (int i=0;i<8;++i) XMStoreFloat4(&projected[i],XMVector4Transform(XMVectorSet(i&1?hi.x:lo.x,i&2?hi.y:lo.y,i&4?hi.z:lo.z,1),matrix));
-    const int edges[]={0,1,0,2,0,4,1,3,1,5,2,3,2,6,3,7,4,5,4,6,5,7,6,7};
-    for(int i=0;i<24;++i)lines[i]=projected[edges[i]];
-    Context->UpdateSubresource(SelectionCB.Get(),0,nullptr,lines,0,0);
-    // Final editor-only pass; no depth attachment, so the selected object stays identifiable behind geometry.
-    Context->ClearState(); SetFullViewport();
-    Context->OMSetRenderTargets(1,RenderTargetView.GetAddressOf(),nullptr);
-    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-    Context->VSSetShader(SelectionVS.Get(),nullptr,0); Context->PSSetShader(SelectionPS.Get(),nullptr,0);
-    Context->VSSetConstantBuffers(0,1,SelectionCB.GetAddressOf());
-    Context->Draw(24,0);
+    for (auto id : ids) {
+        auto* object = scene.FindComponent(id); if (!object) continue;
+        glm::vec3 lo,hi; object->GetEditorBounds(lo,hi);
+        const auto matrix=XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetViewMatrix())) * XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetProjectionMatrix()));
+        XMFLOAT4 projected[8], lines[24];
+        for (int i=0;i<8;++i) XMStoreFloat4(&projected[i],XMVector4Transform(XMVectorSet(i&1?hi.x:lo.x,i&2?hi.y:lo.y,i&4?hi.z:lo.z,1),matrix));
+        const int edges[]={0,1,0,2,0,4,1,3,1,5,2,3,2,6,3,7,4,5,4,6,5,7,6,7};
+        for(int i=0;i<24;++i)lines[i]=projected[edges[i]];
+        Context->UpdateSubresource(SelectionCB.Get(),0,nullptr,lines,0,0);
+        // Final editor-only pass; no depth attachment, so the selected object stays identifiable behind geometry.
+        Context->ClearState(); SetFullViewport();
+        Context->OMSetRenderTargets(1,RenderTargetView.GetAddressOf(),nullptr);
+        Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+        Context->VSSetShader(SelectionVS.Get(),nullptr,0); Context->PSSetShader(SelectionPS.Get(),nullptr,0);
+        Context->VSSetConstantBuffers(0,1,SelectionCB.GetAddressOf());
+        Context->Draw(24,0);
+    }
 }
 bool Game::RenderViewportFrame(float deltaTime)
 {

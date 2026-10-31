@@ -3,6 +3,9 @@
 #include <QWidget>
 #include <QString>
 #include <QColor>
+#include <QJsonObject>
+#include <functional>
+#include <vector>
 #include <array>
 #include <cstdint>
 
@@ -15,6 +18,7 @@ class QGroupBox;
 class QCheckBox;
 class QPushButton;
 class QFormLayout;
+class QVBoxLayout;
 
 struct EditorSnapshot;
 
@@ -52,6 +56,7 @@ public:
     void ClearFocusIfInside();
 
 signals:
+    void PropertyEditingFinished(quint64 objectId, const QString& path, const QString& value);
     void NameEditingFinished(quint64 objectId, const QString& name);
 
     void TransformEditingFinished(
@@ -76,6 +81,12 @@ signals:
 
 private:
     void BuildUi();
+    void RefreshProjectProperties(const EditorQtHost::Snapshot&, const EditorQtHost::SceneObject&);
+    QWidget* properties_ = nullptr;
+    QVBoxLayout* propertiesLayout_ = nullptr;
+    QString propertiesKey_;
+    std::vector<std::function<void(const QJsonObject&)>> propertyRefresh_;
+    void SubmitProperty(const QString& path,const QJsonValue& value);
 
     void BuildAssetInspector(QFormLayout* form);
 

@@ -56,10 +56,19 @@ int wmain(int argc,wchar_t** argv) {
         if(result!=EngineSceneOk) std::cerr<<error<<'\n';
         Check(result==EngineSceneOk,"reload commits candidate with same HWND"); api=module.Api();
         Check(api.context!=previousContext,"session replaced without closing window");
+        Check(module.BatchApi().context==api.context && module.BatchApi().select,
+            "group extension follows the new session after reload");
+        Check(module.BatchApi().select(module.BatchApi().context,nullptr,0)==EngineSceneOk,
+            "new group extension remains callable after unloading the old DLL");
         EngineEditorCameraState after{}; Check(module.EditorCameraApi().read(module.EditorCameraApi().context,&after)==EngineSceneOk,"read camera after reload");
         Check(std::abs(before.x-after.x)<.0001f && std::abs(before.y-after.y)<.0001f && std::abs(before.z-after.z)<.0001f && std::abs(before.yaw-after.yaw)<.0001f && std::abs(before.pitch-after.pitch)<.0001f,"editor camera restored across DLL replacement");
         Check(module.Reload(candidate,checkpoint,window,320,240,error,sizeof(error))==EngineSceneOk && module.Api().context==api.context,"unchanged build keeps session and mounts");
         auto objects=Read(api);
+        Check(module.AuthoringApi().context==api.context && module.AuthoringApi().describe,
+            "authoring extension follows reloaded session");
+        std::string schema;
+        Check(module.AuthoringApi().describe(api.context,objects.at("Hero").id,[](void* p,const char* value){*static_cast<std::string*>(p)=value;},&schema)==EngineSceneOk,
+            "authoring callable after unloading old DLL");
         Check(objects.size()==2 && objects.at("Hero").type=="Gameplay.Character" && objects.at("Hero").transform.position[0]==2.5f,"live transform and types restored");
         std::string json;const auto newData=module.ProjectDataApi();
         Check(newData.read(newData.context,objects.at("Hero").id,[](void* p,const char* value){*static_cast<std::string*>(p)=value;},&json)==EngineSceneOk && json.find("9")!=std::string::npos,"character settings restored");

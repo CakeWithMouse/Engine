@@ -1,0 +1,173 @@
+{
+  "name": "Пользовательские свойства — два куба",
+  "objects": [
+    {
+      "id": 1,
+      "inheritParentScale": true,
+      "name": "Ground",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0,
+          -0.5,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          20,
+          1,
+          20
+        ]
+      },
+      "type": "Primitive.Plane"
+    },
+    {
+      "id": 2,
+      "inheritParentScale": true,
+      "name": "Медленный куб — 45 градусов в секунду",
+      "parent": 0,
+      "transform": {
+        "position": [
+          -2,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "type": "RotatingCube",
+      "projectData": {
+        "version": 1,
+        "speed": 45,
+        "enabled": true,
+        "brightness": 0.5
+      }
+    },
+    {
+      "id": 3,
+      "inheritParentScale": true,
+      "name": "Warm Light",
+      "parent": 0,
+      "transform": {
+        "position": [
+          2,
+          3,
+          2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "type": "Light.Point",
+      "properties": {
+        "Engine.PointLight": {
+          "version": 1,
+          "value": {
+            "color": [
+              1,
+              0.65,
+              0.35
+            ],
+            "enabled": true,
+            "intensity": 2,
+            "radius": 10
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "inheritParentScale": true,
+      "name": "Cool Light",
+      "parent": 0,
+      "transform": {
+        "position": [
+          -3,
+          2,
+          1
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "type": "Light.Point",
+      "properties": {
+        "Engine.PointLight": {
+          "version": 1,
+          "value": {
+            "color": [
+              0.3,
+              0.55,
+              1
+            ],
+            "enabled": true,
+            "intensity": 2,
+            "radius": 10
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "inheritParentScale": true,
+      "name": "Быстрый куб — 180 градусов в секунду",
+      "parent": 0,
+      "transform": {
+        "position": [
+          2,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "type": "RotatingCube",
+      "projectData": {
+        "version": 1,
+        "speed": 180,
+        "enabled": true,
+        "brightness": 1
+      }
+    }
+  ],
+  "version": 3
+}

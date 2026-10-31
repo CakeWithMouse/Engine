@@ -14,6 +14,9 @@
 #include <memory>
 #include <chrono>
 #include <functional>
+#include "RecoveryStore.h"
+#include <Engine/Runtime/SceneBatchApi.h>
+#include <Engine/Runtime/AuthoringApi.h>
 class QTemporaryDir;
 
 class EditorMainWindow;
@@ -36,7 +39,7 @@ struct EditorCommand
         RenameObject, DuplicateObject, SaveScene, LoadScene, NewScene, Undo, Redo, PickObject, FocusObject,
         SetGizmoMode, BeginGizmoDrag, EndGizmoDrag,
         ImportModel, ImportTexture, CreateModel, SetTexture, SetPointLight, SetMaterial, SetProjectData,
-        RunTask,
+        RunTask, WriteRecovery, DiscardRecovery, SetProperty, UpdateAsset,
     };
 
     Type type = None;
@@ -47,6 +50,7 @@ struct EditorCommand
 
     // Поля для манипуляций с объектами
     uint64_t objectId = 0;
+    std::vector<uint64_t> objectIds;
     EngineSceneTransform transform{{0, 0, 0}, {0, 0, 0, 1}, {1, 1, 1}};
     EngineScenePointLight pointLight{};
     EditorGizmoMode gizmo = EditorGizmoTranslate;
@@ -94,6 +98,8 @@ public:
     void SetProjectDataApi(const EngineProjectDataApi& api) { projectData_ = api; }
     void SetViewportInputApi(const EngineViewportInputApi& api) { viewportInput_ = api; }
     void SetSelectionApi(const EngineSelectionApi& api) { selection_ = api; }
+    void SetBatchApi(const EngineSceneBatchApi& api) { batch_ = api; }
+    void SetAuthoringApi(const EngineAuthoringApi& api) { authoring_ = api; }
     bool HasMaterials() const { return materialsAvailable_.load(); }
     bool HasScene() const { return sceneAvailable_.load(); }
 
@@ -109,6 +115,7 @@ public:
         std::string materialAsset;
         std::string projectData;
         uint32_t gameplayKind = 0;
+        std::string propertySchema;
     };
 
     struct SceneType
@@ -121,7 +128,9 @@ public:
         std::vector<SceneObject> objects;
         std::vector<SceneType> types;
         uint64_t selected = 0, serial = 0;
+        std::vector<uint64_t> selectedIds;
         bool dirty = false, canUndo = false, canRedo = false;
+        bool batchEditing = false, authoring = false;
     };
 
     Snapshot ReadSnapshot();
@@ -150,6 +159,17 @@ private:
     std::atomic<bool> materialsAvailable_{false};
     EngineProjectDataApi projectData_{};
     EngineSelectionApi selection_{};
+    EngineSceneBatchApi batch_{};
+    EngineAuthoringApi authoring_{};
+    const EngineAuthoringApi* AuthoringApi() const {
+        if(host_.getService)return static_cast<const EngineAuthoringApi*>(host_.getService(host_.user,EngineAuthoringService,1));
+        return authoring_.describe?&authoring_:nullptr;
+    }
+    std::vector<uint64_t> selectedIds_;
+    const EngineSceneBatchApi* BatchApi() const {
+        if (host_.getService) return static_cast<const EngineSceneBatchApi*>(host_.getService(host_.user, EngineEditorBatchService, 1));
+        return batch_.apply ? &batch_ : nullptr;
+    }
     EngineViewportInputApi viewportInput_{};
     std::atomic<bool> sceneAvailable_{false};
     std::mutex logMutex_;
@@ -179,6 +199,9 @@ private:
     std::atomic<uint32_t> gizmoMode_{EditorGizmoTranslate};
 
     bool gizmoDragActive_ = false;
+    RecoveryStore recovery_;
+    std::chrono::steady_clock::time_point recoveryTime_{};
+    void WriteRecovery();
     bool gizmoDragCheckpointed_ = false;
     uint64_t gizmoDragObject_ = 0;
 };
