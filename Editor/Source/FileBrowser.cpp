@@ -73,7 +73,7 @@ FileBrowserDock::~FileBrowserDock()
 void FileBrowserDock::BuildUi()
 {
     auto* panel = new QWidget(this);
-    panel->setMinimumSize(80, 60);
+    panel->setMinimumSize(40, 30);
     panel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 
     auto* layout = new QVBoxLayout(panel);
@@ -126,6 +126,8 @@ void FileBrowserDock::BuildUi()
     view_->setModel(proxy_);
     view_->hideColumn(3);
     view_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
+    view_->setMinimumSize(40, 20);
+    view_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     view_->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     for (int c = 1; c < 3; ++c)
         view_->header()->setSectionResizeMode(c, QHeaderView::ResizeToContents);

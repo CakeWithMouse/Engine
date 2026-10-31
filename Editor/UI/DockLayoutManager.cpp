@@ -6,7 +6,7 @@
 void DockLayoutManager::UnlockDockResizing(QDockWidget* dock)
 {
     if (!dock) return;
-    dock->setMinimumSize(80, 60);
+    dock->setMinimumSize(40, 40);
     dock->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     if (dock->widget()) {
         UnlockWidgetResizing(dock->widget());
@@ -16,11 +16,12 @@ void DockLayoutManager::UnlockDockResizing(QDockWidget* dock)
 void DockLayoutManager::UnlockWidgetResizing(QWidget* widget)
 {
     if (!widget) return;
-    widget->setMinimumSize(80, 60);
+    widget->setMinimumSize(40, 30);
     widget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     for (auto* child : widget->findChildren<QAbstractScrollArea*>()) {
         child->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
-        child->setMinimumSize(60, 50);
+        child->setMinimumSize(30, 20);
+        child->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     }
 }
 
@@ -68,19 +69,19 @@ void DockLayoutManager::ApplyDefaultLayout(QMainWindow* window,
         }
     }
 
-    if (sceneObjectsDock) window->addDockWidget(Qt::LeftDockWidgetArea, sceneObjectsDock);
+    if (sceneObjectsDock) window->addDockWidget(Qt::TopDockWidgetArea, sceneObjectsDock);
     if (viewportDock) {
         if (sceneObjectsDock) {
             window->splitDockWidget(sceneObjectsDock, viewportDock, Qt::Horizontal);
         } else {
-            window->addDockWidget(Qt::LeftDockWidgetArea, viewportDock);
+            window->addDockWidget(Qt::TopDockWidgetArea, viewportDock);
         }
     }
     if (inspectorDock) {
         if (viewportDock) {
             window->splitDockWidget(viewportDock, inspectorDock, Qt::Horizontal);
         } else {
-            window->addDockWidget(Qt::RightDockWidgetArea, inspectorDock);
+            window->addDockWidget(Qt::TopDockWidgetArea, inspectorDock);
         }
     }
     if (consoleDock) window->addDockWidget(Qt::BottomDockWidgetArea, consoleDock);

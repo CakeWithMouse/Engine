@@ -75,12 +75,15 @@ void EditorMainWindow::BuildUi()
 
     setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
     setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
+    setCorner(Qt::BottomLeftCorner, Qt::BottomDockWidgetArea);
+    setCorner(Qt::BottomRightCorner, Qt::BottomDockWidgetArea);
 
     viewport_ = new ViewportWidget(host_, this);
 
     auto* viewportContainer = new QWidget(this);
     viewportContainer->setObjectName(QStringLiteral("ViewportContainer"));
-    viewportContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    viewportContainer->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    viewportContainer->setMinimumSize(40, 30);
     auto* viewportLayout = new QVBoxLayout(viewportContainer);
     viewportLayout->setContentsMargins(0, 0, 0, 0);
     viewportLayout->setSpacing(0);
@@ -111,8 +114,9 @@ void EditorMainWindow::BuildUi()
     console_->setObjectName(QStringLiteral("Console"));
     console_->setReadOnly(true);
     console_->setMaximumBlockCount(2000);
-    console_->setMinimumSize(60, 50);
+    console_->setMinimumSize(40, 20);
     console_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
+    console_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 
     consoleDock_ = new QDockWidget(QStringLiteral("Console"), this);
     consoleDock_->setObjectName(QStringLiteral("ConsoleDock"));
