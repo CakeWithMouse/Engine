@@ -96,7 +96,7 @@ void EditorMainWindow::BuildUi()
 
     RegisterViewportCommands(viewport_, host_);
 
-    viewportDock_ = new QDockWidget(QStringLiteral("Viewport"), this);
+    viewportDock_ = new QDockWidget(Tr("Вьюпорт", "Viewport"), this);
     viewportDock_->setObjectName(QStringLiteral("ViewportDock"));
     viewportDock_->setWidget(viewportContainer);
     viewportDock_->setFocusProxy(viewport_);
@@ -118,7 +118,7 @@ void EditorMainWindow::BuildUi()
     console_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
     console_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 
-    consoleDock_ = new QDockWidget(QStringLiteral("Console"), this);
+    consoleDock_ = new QDockWidget(Tr("Консоль", "Console"), this);
     consoleDock_->setObjectName(QStringLiteral("ConsoleDock"));
     consoleDock_->setWidget(console_);
     addDockWidget(Qt::BottomDockWidgetArea, consoleDock_);
@@ -446,7 +446,7 @@ void EditorMainWindow::ShowViewportContextMenu(const QPoint& globalPos)
 
 void EditorMainWindow::BuildSceneDocks()
 {
-    sceneObjectsDock_ = new QDockWidget(QStringLiteral("Сцена / объекты"), this);
+    sceneObjectsDock_ = new QDockWidget(Tr("Сцена / объекты", "Scene / Objects"), this);
     sceneObjectsDock_->setObjectName(QStringLiteral("SceneObjectsDock"));
     sceneObjectsDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     sceneObjectsDock_->setFeatures(
@@ -455,7 +455,7 @@ void EditorMainWindow::BuildSceneDocks()
         QDockWidget::DockWidgetClosable
     );
 
-    inspectorDock_ = new QDockWidget(QStringLiteral("Свойства объекта"), this);
+    inspectorDock_ = new QDockWidget(Tr("Инспектор", "Inspector"), this);
     inspectorDock_->setObjectName(QStringLiteral("InspectorDock"));
     inspectorDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     inspectorDock_->setFeatures(
@@ -724,9 +724,9 @@ void EditorMainWindow::RefreshSceneUi()
 
     const bool selectionChanged = selectedId_ != view.selected;
     selectedId_ = view.selected;
-    inspectorDock_->setWindowTitle(QStringLiteral("Свойства — нет выбора"));
+    inspectorDock_->setWindowTitle(Tr("Инспектор", "Inspector"));
     for (const auto& o : view.objects) if (o.id == selectedId_)
-        inspectorDock_->setWindowTitle(QStringLiteral("Свойства — %1").arg(QString::fromStdString(o.name)));
+        inspectorDock_->setWindowTitle(QString::fromStdString(o.name));
 
     if (objectInspectorPanel_)
     {
@@ -1265,7 +1265,7 @@ void EditorMainWindow::RetranslateUi()
     if (consoleDock_) consoleDock_->setWindowTitle(Tr("Консоль", "Console"));
     if (fileDock_) fileDock_->setWindowTitle(Tr("Контент", "Content Browser"));
     if (sceneObjectsDock_) sceneObjectsDock_->setWindowTitle(Tr("Сцена / объекты", "Scene / Objects"));
-    if (inspectorDock_) inspectorDock_->setWindowTitle(Tr("Свойства объекта", "Object Properties"));
+    if (inspectorDock_ && selectedId_ == 0) inspectorDock_->setWindowTitle(Tr("Инспектор", "Inspector"));
     if (sceneMenu_) sceneMenu_->setTitle(Tr("Сцена", "Scene"));
     if (playMenu_) playMenu_->setTitle(Tr("Запуск", "Play"));
     if (editMenu_) editMenu_->setTitle(Tr("Правка", "Edit"));

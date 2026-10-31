@@ -145,12 +145,14 @@ QHeaderView::section {
 QDockWidget {
     titlebar-close-icon: none;
     titlebar-normal-icon: none;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 400;
 }
 QDockWidget::title {
     background-color: %7;
     border-bottom: 1px solid %6;
-    padding: 6px 8px;
+    padding: 2px 4px;
+    height: 20px;
     text-align: left;
 }
 QScrollBar:vertical {
