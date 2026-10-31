@@ -231,6 +231,25 @@ static void TestGizmoMath()
     GizmoMath::TransformDelta(unitX, qZ90, true, outLocal);
     Check(std::abs(outLocal[0]) < 1e-5 && std::abs(outLocal[1] - 1.0) < 1e-5 && std::abs(outLocal[2]) < 1e-5,
           "TransformDelta Local rotates vector by quaternion");
+
+    // 5. Accumulated translation snapping
+    // Small tick deltas (e.g. 0.05) would round to 0 if snapped per-tick with step 1.0.
+    const double smallDelta = 0.05;
+    double perTickAccum = 0.0;
+    for (int i = 0; i < 15; ++i)
+        perTickAccum += GizmoMath::SnapTranslation(smallDelta, 1.0);
+    Check(perTickAccum == 0.0, "Per-tick snapping of small delta rounds to zero every tick");
+
+    // Snapping the accumulated gesture offset (startPos + accumulatedDelta) preserves movement and jumps cleanly to 1.0.
+    const double startPos = 0.0;
+    double accumulatedDelta = 0.0;
+    double lastSnapped = startPos;
+    for (int tick = 0; tick < 12; ++tick)
+    {
+        accumulatedDelta += 0.05;
+        lastSnapped = GizmoMath::SnapTranslation(startPos + accumulatedDelta, 1.0);
+    }
+    Check(lastSnapped == 1.0, "Accumulated offset reaches threshold and snaps to 1.0");
 }
 
 static void TestEditorLocale()

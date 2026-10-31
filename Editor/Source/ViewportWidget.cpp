@@ -364,20 +364,17 @@ bool ViewportWidget::HandleMouseMove(QMouseEvent* mouse)
     {
         if (gizmoMode_ == EditorGizmoTranslate)
         {
-            const QPointF delta = mouse->position() - lastDragPos_;
+            const QPointF total = mouse->position() - dragStartPos_;
             lastDragPos_ = mouse->position();
 
             double rawDelta[3] = {0.0, 0.0, 0.0};
             if (mouse->modifiers() & Qt::ShiftModifier)
-                rawDelta[2] = static_cast<double>(-delta.y()) * dragSensitivity_;
+                rawDelta[2] = static_cast<double>(-total.y()) * dragSensitivity_;
             else
             {
-                rawDelta[0] = static_cast<double>(delta.x()) * dragSensitivity_;
-                rawDelta[1] = static_cast<double>(-delta.y()) * dragSensitivity_;
+                rawDelta[0] = static_cast<double>(total.x()) * dragSensitivity_;
+                rawDelta[1] = static_cast<double>(-total.y()) * dragSensitivity_;
             }
-
-            if (snapEnabled_)
-                GizmoMath::SnapVector(rawDelta, moveSnapStep_, rawDelta);
 
             double finalDelta[3] = {rawDelta[0], rawDelta[1], rawDelta[2]};
             if (localOrientation_)
@@ -389,8 +386,16 @@ bool ViewportWidget::HandleMouseMove(QMouseEvent* mouse)
                 GizmoMath::TransformDelta(rawDelta, objRot, true, finalDelta);
             }
 
-            if (finalDelta[0] != 0.0 || finalDelta[1] != 0.0 || finalDelta[2] != 0.0)
-                host_->MoveSelectedObject(static_cast<float>(finalDelta[0]), static_cast<float>(finalDelta[1]), static_cast<float>(finalDelta[2]));
+            EngineSceneTransform t = dragStartTransform_;
+            using PosT = std::remove_reference_t<decltype(t.position[0])>;
+            for (int i = 0; i < 3; ++i)
+            {
+                double targetPos = static_cast<double>(dragStartTransform_.position[i]) + finalDelta[i];
+                if (snapEnabled_)
+                    targetPos = GizmoMath::SnapTranslation(targetPos, moveSnapStep_);
+                t.position[i] = static_cast<PosT>(targetPos);
+            }
+            PostSelectedTransform(t);
         }
         else
         {
@@ -511,6 +516,7 @@ void ViewportWidget::setGizmoMode(EditorGizmoMode mode)
         return;
 
     gizmoMode_ = mode;
+    host_->SetGizmoMode(mode);
     updateGizmoToolTip();
     if (headerBar_)
         headerBar_->SetGizmoMode(static_cast<int>(mode));
@@ -595,14 +601,11 @@ bool ViewportWidget::BeginObjectDrag(const QPointF& pos)
     dragStartPos_ = pos;
     lastDragPos_ = pos;
 
-    if (gizmoMode_ != EditorGizmoTranslate)
-    {
-        EditorCommand c;
-        c.type = EditorCommand::BeginGizmoDrag;
-        c.objectId = dragObjectId_;
-        host_->PostCommand(c);
-        gizmoDragSession_ = true;
-    }
+    EditorCommand c;
+    c.type = EditorCommand::BeginGizmoDrag;
+    c.objectId = dragObjectId_;
+    host_->PostCommand(c);
+    gizmoDragSession_ = true;
 
     return true;
 }
