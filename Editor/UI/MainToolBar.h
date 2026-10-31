@@ -11,6 +11,7 @@ class MainToolBar : public QToolBar
 
 public:
     explicit MainToolBar(QWidget* parent = nullptr);
+    ~MainToolBar() override;
 
     QAction* ActPlay() const { return actPlay_; }
     QAction* ActPause() const { return actPause_; }
@@ -20,6 +21,7 @@ public:
     void UpdatePlayState(int state, bool sceneBusy);
     void RetranslateUi();
     void RefreshIcons();
+    void ApplyTheme();
 
 signals:
     void PlayTriggered();
@@ -34,4 +36,5 @@ private:
     QAction* actStop_ = nullptr;
     QAction* actExternal_ = nullptr;
     QToolButton* configPlayBtn_ = nullptr;
+    int themeSubId_ = 0;
 };
