@@ -1,6 +1,9 @@
 #include <Engine/Render/ImpostorAtlas.h>
 
 #include <algorithm>
+#include <cstdio>
+#include <cstring>
+#include <vector>
 #include <cmath>
 #include <iostream>
 #include <Engine/MainGame/BaseGameClass/Game.h>
@@ -19,6 +22,23 @@ namespace
     };
 
     constexpr UINT MeshVertexStride = sizeof(MeshVertex);
+
+    // A sprite is only a few pixels wide, so it must not point-sample a full-size tile: without
+    // mips the surviving texels change with the distance to the camera and the field gets rings.
+    // Mips stop at this tile size, below which the silhouette would dissolve into one average.
+    constexpr int SmallestTileTexels = 16;
+
+    int CountMipLevels(int tileSize)
+    {
+        int levels = 1;
+        int size = tileSize;
+        while (size > SmallestTileTexels)
+        {
+            size /= 2;
+            ++levels;
+        }
+        return levels;
+    }
 }
 
 MeshBounds ComputeMeshBounds(const MeshLodData& mesh)
@@ -84,7 +104,7 @@ bool ImpostorAtlas::Build(Game& game,
     {
         return false;
     }
-    TileInset = 1.5f / static_cast<float>(Settings.TileSize);
+    MipLevels = CountMipLevels(Settings.TileSize);
 
     const UINT atlasWidth = static_cast<UINT>(Settings.TileSize * Settings.YawCount);
     const UINT atlasHeight = static_cast<UINT>(Settings.TileSize * Settings.PitchCount);
@@ -97,14 +117,18 @@ bool ImpostorAtlas::Build(Game& game,
         D3D11_TEXTURE2D_DESC desc = {};
         desc.Width = atlasWidth;
         desc.Height = atlasHeight;
-        desc.MipLevels = 1;
+        desc.MipLevels = static_cast<UINT>(MipLevels);
         desc.ArraySize = 1;
         desc.Format = format;
         desc.SampleDesc.Count = 1;
         desc.Usage = D3D11_USAGE_DEFAULT;
         desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+        desc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+        // Every tile starts at a multiple of its size, so a texel of any of these mips stays
+        // inside one tile and the chain never mixes two views of the model.
+        CD3D11_RENDER_TARGET_VIEW_DESC rtvDesc(D3D11_RTV_DIMENSION_TEXTURE2D, format, 0);
         return SUCCEEDED(device->CreateTexture2D(&desc, nullptr, texture.ReleaseAndGetAddressOf())) &&
-               SUCCEEDED(device->CreateRenderTargetView(texture.Get(), nullptr, rtv.ReleaseAndGetAddressOf())) &&
+               SUCCEEDED(device->CreateRenderTargetView(texture.Get(), &rtvDesc, rtv.ReleaseAndGetAddressOf())) &&
                SUCCEEDED(device->CreateShaderResourceView(texture.Get(), nullptr, srv.ReleaseAndGetAddressOf()));
     };
 
@@ -308,7 +332,138 @@ bool ImpostorAtlas::Build(Game& game,
         material->Unbind(context);
     }
 
+    // Colour is averaged together with the transparent background, so the shader divides it back
+    // by the coverage; the normal is renormalised there as well.
+    context->GenerateMips(AlbedoSRV.Get());
+    context->GenerateMips(NormalSRV.Get());
+
     std::cout << "ImpostorAtlas: baked " << Settings.YawCount << "x" << Settings.PitchCount
-              << " views at " << Settings.TileSize << " px." << std::endl;
+              << " views at " << Settings.TileSize << " px, " << MipLevels << " mips." << std::endl;
     return true;
+}
+
+namespace
+{
+    /** 24-bit BMP, bottom-up like the format wants. */
+    bool WriteColorBmp(const std::string& path, const std::vector<uint8_t>& rgb, int width, int height)
+    {
+        FILE* file = nullptr;
+        if (fopen_s(&file, path.c_str(), "wb") != 0 || file == nullptr)
+        {
+            return false;
+        }
+
+        const int rowSize = ((width * 3 + 3) / 4) * 4;
+        const uint32_t pixelBytes = static_cast<uint32_t>(rowSize) * height;
+        const uint32_t fileSize = 54 + pixelBytes;
+        uint8_t header[54] = {};
+        header[0] = 'B';
+        header[1] = 'M';
+        std::memcpy(header + 2, &fileSize, 4);
+        const uint32_t offset = 54;
+        std::memcpy(header + 10, &offset, 4);
+        const uint32_t infoSize = 40;
+        std::memcpy(header + 14, &infoSize, 4);
+        std::memcpy(header + 18, &width, 4);
+        std::memcpy(header + 22, &height, 4);
+        const uint16_t planes = 1;
+        const uint16_t bits = 24;
+        std::memcpy(header + 26, &planes, 2);
+        std::memcpy(header + 28, &bits, 2);
+        std::memcpy(header + 34, &pixelBytes, 4);
+        std::fwrite(header, 1, sizeof(header), file);
+
+        std::vector<uint8_t> row(static_cast<size_t>(rowSize), 0);
+        for (int y = height - 1; y >= 0; --y)
+        {
+            for (int x = 0; x < width; ++x)
+            {
+                const size_t source = (static_cast<size_t>(y) * width + x) * 3;
+                row[static_cast<size_t>(x) * 3 + 0] = rgb[source + 2];
+                row[static_cast<size_t>(x) * 3 + 1] = rgb[source + 1];
+                row[static_cast<size_t>(x) * 3 + 2] = rgb[source + 0];
+            }
+            std::fwrite(row.data(), 1, row.size(), file);
+        }
+        std::fclose(file);
+        return true;
+    }
+}
+
+bool ImpostorAtlas::Dump(Game& game, const std::string& pathPrefix) const
+{
+    ID3D11Device* device = game.GetDevice();
+    ID3D11DeviceContext* context = game.GetContext();
+    if (device == nullptr || context == nullptr || !IsValid())
+    {
+        return false;
+    }
+
+    auto dumpLayer = [&](ID3D11Texture2D* texture, const char* layer) -> bool
+    {
+        D3D11_TEXTURE2D_DESC desc = {};
+        texture->GetDesc(&desc);
+
+        bool ok = true;
+        for (UINT mip = 0; mip < desc.MipLevels; ++mip)
+        {
+            const UINT width = std::max<UINT>(1, desc.Width >> mip);
+            const UINT height = std::max<UINT>(1, desc.Height >> mip);
+
+            D3D11_TEXTURE2D_DESC stagingDesc = desc;
+            stagingDesc.Width = width;
+            stagingDesc.Height = height;
+            stagingDesc.MipLevels = 1;
+            stagingDesc.Usage = D3D11_USAGE_STAGING;
+            stagingDesc.BindFlags = 0;
+            stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+            stagingDesc.MiscFlags = 0;
+
+            Microsoft::WRL::ComPtr<ID3D11Texture2D> staging;
+            if (FAILED(device->CreateTexture2D(&stagingDesc, nullptr, staging.GetAddressOf())))
+            {
+                ok = false;
+                continue;
+            }
+            context->CopySubresourceRegion(staging.Get(), 0, 0, 0, 0, texture, mip, nullptr);
+
+            D3D11_MAPPED_SUBRESOURCE mapped = {};
+            if (FAILED(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped)))
+            {
+                ok = false;
+                continue;
+            }
+
+            std::vector<uint8_t> rgb(static_cast<size_t>(width) * height * 3, 0);
+            size_t covered = 0;
+            for (UINT y = 0; y < height; ++y)
+            {
+                const uint8_t* row = static_cast<const uint8_t*>(mapped.pData) + static_cast<size_t>(y) * mapped.RowPitch;
+                for (UINT x = 0; x < width; ++x)
+                {
+                    const uint8_t* texel = row + static_cast<size_t>(x) * 4;
+                    const size_t target = (static_cast<size_t>(y) * width + x) * 3;
+                    rgb[target + 0] = texel[0];
+                    rgb[target + 1] = texel[1];
+                    rgb[target + 2] = texel[2];
+                    if (texel[3] >= 90)
+                    {
+                        ++covered;
+                    }
+                }
+            }
+            context->Unmap(staging.Get(), 0);
+
+            const std::string file = pathPrefix + "-" + layer + "-mip" + std::to_string(mip) + ".bmp";
+            const bool written = WriteColorBmp(file, rgb, static_cast<int>(width), static_cast<int>(height));
+            std::cout << "impostor-dump " << layer << " mip=" << mip << " size=" << width << "x" << height
+                      << " written=" << (written ? 1 : 0) << " covered=" << covered << std::endl;
+            ok = ok && written;
+        }
+        return ok;
+    };
+
+    const bool albedo = dumpLayer(AlbedoTexture.Get(), "albedo");
+    const bool normal = dumpLayer(NormalTexture.Get(), "normal");
+    return albedo && normal;
 }

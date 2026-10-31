@@ -228,6 +228,12 @@ public:
      * (<prefix>-cascade0.bmp, ...). Depth is remapped so that occupied texels are visible.
      */
     bool DumpShadowMaps(const std::string& pathPrefix);
+    /** Writes the finished frame to a BMP: lets a render be inspected without a screenshot. */
+    bool DumpFrame(const std::string& path);
+    /** Name of the GPU the device was created on: every measurement is of a specific adapter. */
+    const std::string& GetAdapterName() const { return AdapterName; }
+    /** Dumps the next finished frame, before it is presented. */
+    void RequestFrameDump(const std::string& path) { PendingFrameDump = path; }
 
     void SetStaticShadowArea(const glm::vec3& center, float extent);
     void InvalidateStaticShadow() { bStaticShadowDirty = true; }
@@ -359,6 +365,8 @@ protected:
     void RenderSkybox();
     void DispatchComputePhase();
     void RenderTransparent();
+    /** Screen-space interface, after everything else in the frame. */
+    void RenderUI();
     void RenderDeferredLightingPass();
     void RenderDeferredDebugOverlay();
     void FillFrameConstantBuffer(ConstantBufferData& data) const;
@@ -483,6 +491,9 @@ protected:
     bool bShadowResourcesReady = false;
     bool bShadowInitFailed = false;
     float ShadowDistance = 1200.0f;
+    std::string PendingFrameDump;
+    std::string AdapterName;
+    int AdapterDedicatedMemoryMb = 0;
     int ShadowMapSize = 2048;
     DirectX::XMFLOAT4 CascadeSplits = DirectX::XMFLOAT4(80.0f, 260.0f, 900.0f, 0.0f);
     DirectX::XMFLOAT4 ShadowParams = DirectX::XMFLOAT4(0.0f, static_cast<float>(MaxShadowCascades), 0.0012f, 1.0f / 2048.0f);

@@ -2,6 +2,9 @@ param([Parameter(Mandatory=$true)][string]$Project,
     [ValidateSet('Debug','Release')][string]$Configuration = 'Debug',
     [string]$PlatformToolset = 'auto',
     [switch]$EnableAssimp,
+    # Builds this project alone. Used when a referenced project cannot be built here, which is
+    # the editor without Qt: everything else still has to come out.
+    [switch]$SkipProjectReferences,
     [switch]$EditorUiTest)
 $ErrorActionPreference = 'Stop'
 $vswhere = Join-Path ([Environment]::GetEnvironmentVariable('ProgramFiles(x86)')) 'Microsoft Visual Studio\Installer\vswhere.exe'
@@ -64,6 +67,7 @@ $assimp = $EnableAssimp.IsPresent.ToString().ToLowerInvariant()
 $vcpkgClean = if ($env:VCPKG_ROOT) { $env:VCPKG_ROOT.TrimEnd('\') } else { $null }
 $vcpkgParam = if ($vcpkgClean) { ' "/p:VcpkgRoot=' + $vcpkgClean + '\\"' } else { '' }
 $start.Arguments = '"' + $Project + '" /nologo /verbosity:minimal /m:1 /nr:false /p:UseStructuredOutput=false /p:PreferredToolArchitecture=x64 /p:Platform=x64 /p:Configuration=' + $Configuration + ' /p:PlatformToolset=' + $PlatformToolset + ' /p:EngineEnableAssimp=' + $assimp + $vcpkgParam
+if ($SkipProjectReferences) { $start.Arguments += ' /p:BuildProjectReferences=false' }
 if ($EditorUiTest) { $start.Arguments += ' /p:EditorUiTest=true' }
 $process = [Diagnostics.Process]::Start($start)
 $output = $process.StandardOutput.ReadToEndAsync()

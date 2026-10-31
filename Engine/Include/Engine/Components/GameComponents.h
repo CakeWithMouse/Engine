@@ -99,6 +99,8 @@ public:
     /** GPU work that must run once per frame independently of drawing (e.g. particle simulation). */
     virtual void DispatchCompute(ID3D11DeviceContext* context) {}
     virtual bool IsRenderable() const { return true; }
+    /** Screen-space interface: drawn in its own pass after the scene, never in a world pass. */
+    virtual bool IsScreenSpaceUI() const { return false; }
     virtual bool CastsShadow() const;
     /**
      * Objects that never move (terrain, buildings): their shadow is baked once into the static

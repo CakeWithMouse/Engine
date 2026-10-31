@@ -55,18 +55,27 @@ int main(int argc, char** argv)
             if (argument == "--no-impostors") { settings.Impostors = false; continue; }
             if (argument == "--detail" && i + 1 < argc) { settings.Detail = ParseInt(argv[++i], "--detail"); continue; }
             if (argument == "--dump-shadows") { settings.DumpShadows = true; continue; }
+            if (argument == "--dump-impostors") { settings.DumpImpostors = true; continue; }
             if (argument == "--sun" && i + 1 < argc) { settings.SunElevation = static_cast<float>(ParseInt(argv[++i], "--sun")); continue; }
+            if (argument == "--shadow-distance" && i + 1 < argc) { settings.ShadowDistance = static_cast<float>(ParseInt(argv[++i], "--shadow-distance")); continue; }
             if (argument == "--scenery" && i + 1 < argc) { settings.SceneryCount = ParseInt(argv[++i], "--scenery"); continue; }
             if (argument == "--types" && i + 1 < argc) { settings.VehicleTypes = ParseInt(argv[++i], "--types"); continue; }
             if (argument == "--no-baked-shadows") { settings.BakedShadows = false; continue; }
             if (argument == "--sprite-px" && i + 1 < argc) { settings.SpritePixels = static_cast<float>(ParseInt(argv[++i], "--sprite-px")); continue; }
             if (argument == "--lod-debug") { settings.LodDebugColors = true; continue; }
+            if (argument == "--lock-camera") { settings.LockCamera = true; continue; }
+            if (argument == "--auto-lod") { settings.AutoLod = true; continue; }
+            if (argument == "--validate") { settings.ValidateAssets = true; continue; }
+            if (argument == "--no-hud") { settings.Hud = false; continue; }
+            if (argument == "--dump-frame" && i + 1 < argc) { settings.DumpFrame = argv[++i]; continue; }
             if (argument == "--legacy-shaders") { settings.Materials = false; continue; }
             if (argument == "--anim") { settings.Animated = true; continue; }
             throw std::runtime_error(
-                "Usage: Battle.exe [--bench N] [--warmup N] [--units N] [--types N] [--spacing N] [--camera N] [--frames N] [--detail N]\n"
-                "        [--scenery N] [--sprite-px N] [--sun N] [--no-shadows] [--no-baked-shadows]\n"
-                "        [--no-impostors] [--forward] [--static] [--lod-debug] [--legacy-shaders] [--dump-shadows] [--smoke] [--anim]");
+                "Usage: Battle.exe [--bench N] [--warmup N] [--units N] [--types N] [--spacing N] [--camera N]\n"
+                "        [--frames N] [--detail N] [--scenery N] [--sprite-px N] [--sun N] [--shadow-distance N]\n"
+                "        [--no-shadows] [--no-baked-shadows] [--no-impostors] [--forward] [--static] [--lod-debug]\n"
+                "        [--legacy-shaders] [--anim] [--lock-camera] [--auto-lod] [--validate] [--no-hud]\n"
+                "        [--dump-shadows] [--dump-impostors] [--dump-frame FILE] [--smoke]");
         }
         if (settings.UnitCount < 1) throw std::runtime_error("--units must be positive");
         if (smoke && frameLimit == 0) frameLimit = 30;

@@ -15,7 +15,7 @@ Engine/
     Base/                       BaseEngine, BaseResources, BaseGameConfig
   Source/                       реализации ядра
   Content/Shaders/              общие шейдеры
-  ThirdParty/                   GLM, stb и лицензии
+  ThirdParty/                   GLM, stb, meshoptimizer и лицензии
   tests/                       EngineTests и run.ps1
   docs/, README.md             документация пользователя и разработчика
   build/                       результаты сборки Engine и его тестов

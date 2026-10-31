@@ -3,6 +3,8 @@
 #include "BattleBench.h"
 #include "UnitMesh.h"
 
+#include <Engine/Components/SpecificComponents/UIComponent.h>
+
 #include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <array>
@@ -22,7 +24,7 @@ public:
     struct Settings
     {
         int UnitCount = 30000;
-        float Spacing = 7.0f;
+        float Spacing = 8.0f;
         // Distance from the camera to the centre of the field; 0 picks it from the field size.
         float CameraRadius = 0.0f;
         // Camera pitch above the horizon, degrees.
@@ -44,8 +46,23 @@ public:
         bool BakedShadows = true;
         // Sun elevation above the horizon, degrees. Low sun makes shadows long and easy to check.
         float SunElevation = 56.0f;
+        // Past this distance from the camera a unit stops casting a shadow.
+        float ShadowDistance = 900.0f;
         // Diagnostics: writes the shadow maps to BMP files after a few frames.
         bool DumpShadows = false;
+        // Diagnostics: writes the baked sprite atlas to BMP files after a few frames.
+        bool DumpImpostors = false;
+        // Diagnostics: writes the finished frame to this BMP file, then keeps running.
+        std::string DumpFrame;
+        // Ignores the mouse and the keyboard, so two runs of the same scene frame it identically.
+        // Screenshots taken for comparison are only readable with this on.
+        bool LockCamera = false;
+        // Supply only LOD0 and let the engine build the coarser levels from it.
+        bool AutoLod = false;
+        // Check LOD0 against the model contract and print a report.
+        bool ValidateAssets = false;
+        // On-screen panels in the corner of the scene; F7 toggles them at runtime.
+        bool Hud = true;
         // Units and scenery use the material assets of GameContent/Materials; false draws them with
         // the old InstancedMesh shader (same look without mud), for comparisons.
         bool Materials = true;
@@ -87,6 +104,28 @@ private:
     void UpdateUnits(float deltaTime);
     void UpdateHotkeys();
     uint32_t CountForLod(int level) const;
+    /** Debug colours per detail level, from F6 and from the button in the HUD. */
+    void SetLodDebugColors(bool enabled);
+    /** Reads the panels from GameContent/UI/Hud.ui; UpdateHud only changes their text. */
+    void BuildHud();
+    /**
+     * Looks the elements the scene writes to up in the markup. Called again after a hot reload,
+     * because rebuilding the tree invalidates every pointer into it.
+     */
+    void BindHud();
+    void UpdateHud();
+
+    UIComponent* Hud = nullptr;
+    UILabel* HudFrameLabel = nullptr;
+    UILabel* HudDrawLabel = nullptr;
+    UILabel* HudUnitLabel = nullptr;
+    UILabel* HudHintLabel = nullptr;
+    UILabel* HudLodLabels[4] = {};
+    UIBar* HudFrameBar = nullptr;
+    double HudFrameMs = 0.0;
+    /** The markup revision the pointers above were taken from. */
+    uint32_t HudRevision = 0;
+    bool bHudKeyWasDown = false;
 
     std::vector<UnitBatch> UnitBatches;
     InstancedMeshComponent* Scenery = nullptr;

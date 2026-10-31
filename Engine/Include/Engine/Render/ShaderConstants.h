@@ -69,7 +69,10 @@ struct InstData
 {
     DirectX::XMFLOAT4X4 World;
     DirectX::XMFLOAT4 ObjectColor;
-    // x = fade of this instance in a LOD transition (1 = fully visible), yzw reserved.
+    // x = fade of this instance in a LOD transition: the magnitude is the weight (1 = fully
+    // visible) and the sign says which side of the transition it is on, negative being the level
+    // that fades in, so the pair splits one dither pattern instead of both testing it.
+    // yzw = whatever draws the instance: the animation clip, or the material's per-instance data.
     DirectX::XMFLOAT4 Params{1.0f, 0.0f, 0.0f, 0.0f};
 };
 
