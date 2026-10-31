@@ -16,7 +16,8 @@ public:
         GizmoGeometry::Handle hoveredHandle,
         int gizmoMode,
         bool localSpace,
-        uint64_t& inOutHash
+        uint64_t& inOutHash,
+        GizmoGeometry::Handle activeHandle = GizmoGeometry::Handle::None
     );
 
     static uint64_t HitTestBillboard(

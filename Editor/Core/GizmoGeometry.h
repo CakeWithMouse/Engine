@@ -23,20 +23,20 @@ namespace GizmoGeometry
 
     struct Palette
     {
-        uint32_t axisX      = 0xFF3030E8; // Red
-        uint32_t axisY      = 0xFF30E830; // Green
-        uint32_t axisZ      = 0xFFE88030; // Blue
-        uint32_t highlight  = 0xFF20FFFF; // Yellow / Gold
-        uint32_t planeXY    = 0x8030E8E8;
-        uint32_t planeXZ    = 0x80E830E8;
-        uint32_t planeYZ    = 0x80E8E830;
+        uint32_t axisX      = 0xFF0000FF; // Red
+        uint32_t axisY      = 0xFF00FF00; // Green
+        uint32_t axisZ      = 0xFFFF4010; // Blue
+        uint32_t highlight  = 0xFF00FFFF; // Yellow
+        uint32_t planeXY    = 0x59FF4010; // Semi-transparent alpha 0.35
+        uint32_t planeXZ    = 0x5900FF00;
+        uint32_t planeYZ    = 0x590000FF;
         uint32_t center     = 0xFFE0E0E0;
     };
 
     float ComputeGizmoWorldScale(
         const float objPos[3],
         const EngineCameraInfo& cam,
-        float screenPixelSize = 90.0f
+        float screenPixelSize = 100.0f
     );
 
     bool ProjectPointToScreen(
@@ -46,6 +46,23 @@ namespace GizmoGeometry
         int screenWidth,
         int screenHeight,
         float screenOut[2]
+    );
+
+    bool ScreenToWorldRay(
+        float mouseX,
+        float mouseY,
+        const EngineCameraInfo& cam,
+        float rayOrigin[3],
+        float rayDir[3]
+    );
+
+    bool ClosestPointOnAxis(
+        const float rayOrigin[3],
+        const float rayDir[3],
+        const float axisOrigin[3],
+        const float axisDir[3],
+        float outPoint[3],
+        float* outS = nullptr
     );
 
     float DistancePointToSegment(
@@ -69,6 +86,14 @@ namespace GizmoGeometry
         const float worldPoint[3]
     );
 
+    void GetGizmoAxes(
+        const float objRot[4],
+        bool isLocal,
+        float axisX[3],
+        float axisY[3],
+        float axisZ[3]
+    );
+
     Handle PickHandle(
         GizmoMath::GizmoMode mode,
         const float objPos[3],
@@ -77,7 +102,7 @@ namespace GizmoGeometry
         float mouseX,
         float mouseY,
         const EngineCameraInfo& cam,
-        float thresholdPx = 8.0f
+        float thresholdPx = 10.0f
     );
 
     std::vector<EngineOverlayLine> BuildGizmoLines(
