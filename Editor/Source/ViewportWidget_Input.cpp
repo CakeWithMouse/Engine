@@ -155,23 +155,31 @@ bool ViewportWidget::HandleMousePress(QMouseEvent* mouse)
         lmbPressPos_ = mouse->position().toPoint();
         lastDragPos_ = mouse->position();
 
-        if (hoveredHandle_ != GizmoGeometry::Handle::None && host_->HasSelection())
+        if (hasCameraInfo_ && host_->HasSelection())
         {
-            switch (hoveredHandle_)
+            uint64_t selId = 0;
+            EngineSceneTransform selTrans{};
+            if (SelectedTransform(selId, selTrans))
             {
-            case GizmoGeometry::Handle::AxisX: activeAxis_ = GizmoMath::AxisLock::X; break;
-            case GizmoGeometry::Handle::AxisY: activeAxis_ = GizmoMath::AxisLock::Y; break;
-            case GizmoGeometry::Handle::AxisZ: activeAxis_ = GizmoMath::AxisLock::Z; break;
-            case GizmoGeometry::Handle::PlaneXY: activeAxis_ = GizmoMath::AxisLock::Z; break;
-            case GizmoGeometry::Handle::PlaneXZ: activeAxis_ = GizmoMath::AxisLock::Y; break;
-            case GizmoGeometry::Handle::PlaneYZ: activeAxis_ = GizmoMath::AxisLock::X; break;
-            case GizmoGeometry::Handle::Center:
-            default:
-                activeAxis_ = GizmoMath::AxisLock::All;
-                break;
+                GizmoMath::GizmoMode mode = (gizmoMode_ == EditorGizmoTranslate) ? GizmoMath::GizmoMode::Translate :
+                                            (gizmoMode_ == EditorGizmoRotate) ? GizmoMath::GizmoMode::Rotate :
+                                                                                GizmoMath::GizmoMode::Scale;
+                auto hitHandle = GizmoGeometry::PickHandle(
+                    mode,
+                    selTrans.position,
+                    selTrans.rotation,
+                    localOrientation_,
+                    static_cast<float>(mouse->position().x()),
+                    static_cast<float>(mouse->position().y()),
+                    lastCameraInfo_,
+                    10.0f
+                );
+                if (hitHandle != GizmoGeometry::Handle::None)
+                {
+                    if (BeginGizmoDragGesture(mouse->position(), hitHandle))
+                        return true;
+                }
             }
-            if (BeginObjectDrag(mouse->position()))
-                return true;
         }
 
         if (hasCameraInfo_)
@@ -262,7 +270,15 @@ bool ViewportWidget::HandleMouseMove(QMouseEvent* mouse)
             if (handle != hoveredHandle_)
             {
                 hoveredHandle_ = handle;
-                setCursor(hoveredHandle_ != GizmoGeometry::Handle::None ? Qt::SizeAllCursor : Qt::ArrowCursor);
+                if (hoveredHandle_ == GizmoGeometry::Handle::None) setCursor(Qt::ArrowCursor);
+                else if (hoveredHandle_ == GizmoGeometry::Handle::PlaneXY ||
+                         hoveredHandle_ == GizmoGeometry::Handle::PlaneXZ ||
+                         hoveredHandle_ == GizmoGeometry::Handle::PlaneYZ ||
+                         hoveredHandle_ == GizmoGeometry::Handle::Center)
+                    setCursor(Qt::SizeAllCursor);
+                else
+                    setCursor(Qt::PointingHandCursor);
+
                 ViewportOverlayHelper::UpdateOverlays(
                     host_,
                     lastCameraInfo_,
@@ -270,64 +286,32 @@ bool ViewportWidget::HandleMouseMove(QMouseEvent* mouse)
                     hoveredHandle_,
                     static_cast<int>(gizmoMode_),
                     localOrientation_,
-                    overlayHash_
+                    overlayHash_,
+                    activeGizmoHandle_
                 );
             }
         }
         else if (hoveredHandle_ != GizmoGeometry::Handle::None)
         {
             hoveredHandle_ = GizmoGeometry::Handle::None;
-            unsetCursor();
-        }
-    }
-
-    if (lmbPressed_ && !draggingSelectedObject_)
-    {
-        const QPoint delta = mouse->position().toPoint() - lmbPressPos_;
-        if (!lmbMoved_ && delta.manhattanLength() > 6)
-            lmbMoved_ = true;
-
-        if (lmbMoved_ && host_->HasSelection())
-        {
-            if (BeginObjectDrag(mouse->position()))
-                return true;
+            setCursor(Qt::ArrowCursor);
+            ViewportOverlayHelper::UpdateOverlays(
+                host_,
+                lastCameraInfo_,
+                hasCameraInfo_,
+                hoveredHandle_,
+                static_cast<int>(gizmoMode_),
+                localOrientation_,
+                overlayHash_,
+                activeGizmoHandle_
+            );
         }
     }
 
     if (draggingSelectedObject_)
     {
-        if (gizmoMode_ == EditorGizmoTranslate)
-        {
-            const QPointF total = mouse->position() - dragStartPos_;
-            lastDragPos_ = mouse->position();
-
-            const auto finalDelta = GizmoMath::ComputeTranslateDelta(
-                total,
-                height(),
-                camYaw_,
-                camPitch_,
-                camPos_,
-                dragStartTransform_.position,
-                activeAxis_,
-                localOrientation_,
-                dragStartTransform_.rotation,
-                snapEnabled_,
-                moveSnapStep_
-            );
-
-            EngineSceneTransform t = dragStartTransform_;
-            using PosT = std::remove_reference_t<decltype(t.position[0])>;
-            for (int i = 0; i < 3; ++i)
-            {
-                t.position[i] = static_cast<PosT>(static_cast<double>(dragStartTransform_.position[i]) + finalDelta[i]);
-            }
-            PostSelectedTransform(t);
-        }
-        else
-        {
-            ApplyRotateScaleGizmo(mouse->position());
-            lastDragPos_ = mouse->position();
-        }
+        ApplyGizmoDragGesture(mouse->position());
+        lastDragPos_ = mouse->position();
         return true;
     }
 
@@ -339,8 +323,10 @@ bool ViewportWidget::HandleMouseRelease(QMouseEvent* mouse)
     if (mouse->button() == Qt::LeftButton && (lmbPressed_ || draggingSelectedObject_))
     {
         EndObjectDrag();
-        hoveredHandle_ = GizmoGeometry::Handle::None;
-        unsetCursor();
+        if (hoveredHandle_ != GizmoGeometry::Handle::None)
+            setCursor(Qt::PointingHandCursor);
+        else
+            setCursor(Qt::ArrowCursor);
         return true;
     }
     if (mouse->button() == Qt::RightButton)
@@ -396,16 +382,46 @@ bool ViewportWidget::HandleKeyPress(QKeyEvent* key)
         if (key->key() == Qt::Key_X)
         {
             activeAxis_ = (activeAxis_ == GizmoMath::AxisLock::X) ? GizmoMath::AxisLock::All : GizmoMath::AxisLock::X;
+            if (draggingSelectedObject_)
+            {
+                activeGizmoHandle_ = GizmoGeometry::Handle::AxisX;
+                float ax[3], ay[3], az[3];
+                GizmoGeometry::GetGizmoAxes(dragStartTransform_.rotation, localOrientation_, ax, ay, az);
+                float rO[3], rD[3];
+                GizmoGeometry::ScreenToWorldRay(static_cast<float>(lastDragPos_.x()), static_cast<float>(lastDragPos_.y()), lastCameraInfo_, rO, rD);
+                GizmoGeometry::ClosestPointOnAxis(rO, rD, dragStartTransform_.position, ax, dragStartHitPoint_, &dragStartS_);
+                ViewportOverlayHelper::UpdateOverlays(host_, lastCameraInfo_, hasCameraInfo_, hoveredHandle_, static_cast<int>(gizmoMode_), localOrientation_, overlayHash_, activeGizmoHandle_);
+            }
             return true;
         }
         if (key->key() == Qt::Key_Y)
         {
             activeAxis_ = (activeAxis_ == GizmoMath::AxisLock::Y) ? GizmoMath::AxisLock::All : GizmoMath::AxisLock::Y;
+            if (draggingSelectedObject_)
+            {
+                activeGizmoHandle_ = GizmoGeometry::Handle::AxisY;
+                float ax[3], ay[3], az[3];
+                GizmoGeometry::GetGizmoAxes(dragStartTransform_.rotation, localOrientation_, ax, ay, az);
+                float rO[3], rD[3];
+                GizmoGeometry::ScreenToWorldRay(static_cast<float>(lastDragPos_.x()), static_cast<float>(lastDragPos_.y()), lastCameraInfo_, rO, rD);
+                GizmoGeometry::ClosestPointOnAxis(rO, rD, dragStartTransform_.position, ay, dragStartHitPoint_, &dragStartS_);
+                ViewportOverlayHelper::UpdateOverlays(host_, lastCameraInfo_, hasCameraInfo_, hoveredHandle_, static_cast<int>(gizmoMode_), localOrientation_, overlayHash_, activeGizmoHandle_);
+            }
             return true;
         }
         if (key->key() == Qt::Key_Z)
         {
             activeAxis_ = (activeAxis_ == GizmoMath::AxisLock::Z) ? GizmoMath::AxisLock::All : GizmoMath::AxisLock::Z;
+            if (draggingSelectedObject_)
+            {
+                activeGizmoHandle_ = GizmoGeometry::Handle::AxisZ;
+                float ax[3], ay[3], az[3];
+                GizmoGeometry::GetGizmoAxes(dragStartTransform_.rotation, localOrientation_, ax, ay, az);
+                float rO[3], rD[3];
+                GizmoGeometry::ScreenToWorldRay(static_cast<float>(lastDragPos_.x()), static_cast<float>(lastDragPos_.y()), lastCameraInfo_, rO, rD);
+                GizmoGeometry::ClosestPointOnAxis(rO, rD, dragStartTransform_.position, az, dragStartHitPoint_, &dragStartS_);
+                ViewportOverlayHelper::UpdateOverlays(host_, lastCameraInfo_, hasCameraInfo_, hoveredHandle_, static_cast<int>(gizmoMode_), localOrientation_, overlayHash_, activeGizmoHandle_);
+            }
             return true;
         }
 
