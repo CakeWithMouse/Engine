@@ -33,7 +33,7 @@ function Invoke-Git {
 
 # 0. Check and kill hanging processes from previous runs
 function Stop-HangingProcesses {
-    $names = @("EngineLauncher", "Editor", "EditorUiTests", "CoreTests")
+    $names = @("EngineLauncher", "EngineRuntime", "Editor", "EditorUiTests", "CoreTests", "HostTests", "UiTests")
     $hanging = Get-Process -Name $names -ErrorAction SilentlyContinue
     if ($hanging) {
         Write-Warning "Found hanging processes from previous run: $($hanging.ProcessName -join ', '). Terminating..."
@@ -50,15 +50,34 @@ $engineVersion = (Get-Content -LiteralPath $versionJsonPath -Raw | ConvertFrom-J
 if (!$engineVersion) { throw "Failed to parse engine version from $versionJsonPath" }
 Write-Output "Engine version: $engineVersion"
 
-# 2. Clear engine release cache for this version before tests start
+# 2. Engine release cache management
 function Clear-EngineCache {
     $cacheDir = Join-Path $env:LOCALAPPDATA ("PainEngine\Engines\" + $engineVersion)
     if (Test-Path -LiteralPath $cacheDir) {
         Write-Output "Clearing cached engine version directory: $cacheDir"
+        Stop-HangingProcesses
         Remove-Item -LiteralPath $cacheDir -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
-Clear-EngineCache
+
+function Restore-EngineCache {
+    $runtimeDir = Join-Path $repo "Game/build/x64/Debug/Runtime"
+    $launcherExe = Join-Path $repo "Game/build/x64/Debug/EngineLauncher.exe"
+    if ((Test-Path -LiteralPath $runtimeDir) -and (Test-Path -LiteralPath $launcherExe)) {
+        Write-Output "Restoring engine cache via EngineLauncher..."
+        $proc = Start-Process -FilePath $launcherExe -PassThru
+        Start-Sleep -Milliseconds 1500
+        if (!$proc.HasExited) {
+            Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
+        }
+        $target = Join-Path $env:LOCALAPPDATA ("PainEngine\Engines\$engineVersion\Debug\EngineVersion.json")
+        if (Test-Path -LiteralPath $target) {
+            Write-Output "OK: Engine cache restored ($target)."
+        } else {
+            Write-Warning "Engine cache restoration failed."
+        }
+    }
+}
 
 # Helper for process execution with timeout and process-tree termination
 function Invoke-ProcessWithTimeout {
@@ -167,7 +186,7 @@ foreach ($d in $dirsToCheck) {
         $noComments = [System.Text.RegularExpressions.Regex]::Replace($raw, "/\*.*?\*/", "", [System.Text.RegularExpressions.RegexOptions]::Singleline)
         $noComments = [System.Text.RegularExpressions.Regex]::Replace($noComments, "//.*", "")
         $noTr = [System.Text.RegularExpressions.Regex]::Replace($noComments, "Tr\s*\([^)]*\)", "", [System.Text.RegularExpressions.RegexOptions]::Singleline)
-        $cyrillicMatches = [System.Text.RegularExpressions.Regex]::Matches($noTr, "[Ѐ-ӿ]")
+        $cyrillicMatches = [System.Text.RegularExpressions.Regex]::Matches($noTr, "[\u0400-\u04FF]")
         $count = $cyrillicMatches.Count
         if ($count -gt 0) {
             if ($legacyCyrillicRatchet.ContainsKey($relPath)) {
@@ -307,18 +326,23 @@ if ($Full) {
     # Game checks (27/27)
     Clear-EngineCache
     Stop-HangingProcesses
-    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Game/tests/run-games.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds $TimeoutSec -Description "run-games.ps1"
+    try {
+        Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Game/tests/run-games.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds $TimeoutSec -Description "run-games.ps1"
 
-    # Runtime checks (25/25)
-    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/run-runtime.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds $TimeoutSec -Description "run-runtime.ps1"
+        # Runtime checks (25/25)
+        Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/run-runtime.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds $TimeoutSec -Description "run-runtime.ps1"
 
-    # Compatibility tests (88/88)
-    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/compatibility/run.ps1") + '"'), '-Configuration', 'Release') -TimeoutSeconds 480 -Description "compatibility/run.ps1"
+        # Compatibility tests (88/88)
+        Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/compatibility/run.ps1") + '"'), '-Configuration', 'Release') -TimeoutSeconds 480 -Description "compatibility/run.ps1"
 
-    # Project workflow tests (262/262)
-    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/project-workflow/run.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds 300 -Description "project-workflow/run.ps1"
+        # Project workflow tests (262/262)
+        Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/project-workflow/run.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds 300 -Description "project-workflow/run.ps1"
 
-    Write-Output "OK: All baseline tests passed."
+        Write-Output "OK: All baseline tests passed."
+    }
+    finally {
+        Restore-EngineCache
+    }
 }
 
 Write-Output "=== check.ps1: SUCCESS ==="
