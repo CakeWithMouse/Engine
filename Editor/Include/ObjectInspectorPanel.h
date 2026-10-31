@@ -3,6 +3,7 @@
 #include <QWidget>
 #include <QString>
 #include <QColor>
+#include <QJsonObject>
 #include <array>
 #include <cstdint>
 
@@ -58,6 +59,7 @@ public:
     QSize minimumSizeHint() const override { return QSize(80, 60); }
 
 signals:
+    void PropertyEditingFinished(quint64 objectId, const QString& path, const QString& value);
     void NameEditingFinished(quint64 objectId, const QString& name);
 
     void TransformEditingFinished(
@@ -83,6 +85,12 @@ signals:
 
 private:
     void BuildUi();
+    void RefreshProjectProperties(const EditorQtHost::Snapshot&, const EditorQtHost::SceneObject&);
+    void SubmitProperty(const QString& path, const QJsonValue& value);
+    QWidget* properties_ = nullptr;
+    QVBoxLayout* propertiesLayout_ = nullptr;
+    QString propertiesKey_;
+    std::vector<std::function<void(const QJsonObject&)>> propertyRefresh_;
     void BuildGeneralCard(QVBoxLayout* layout);
     void BuildPointLightCard(QVBoxLayout* layout);
     void BuildCharacterCard(QVBoxLayout* layout);

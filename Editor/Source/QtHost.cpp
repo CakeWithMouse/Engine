@@ -42,7 +42,7 @@ bool EditorQtHost::Start()
 
     if (HasScene())
     {
-        SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_};
+        SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi()};
         sceneHandler_.PublishScene(sctx, playState_.load());
     }
 
@@ -74,7 +74,15 @@ void EditorQtHost::Update(double dt)
     updates_.fetch_add(1);
     lastDt_.store(dt);
     DrainCommands();
+    if (std::chrono::steady_clock::now() - recoveryTime_ >= std::chrono::seconds(30)) {
+        recoveryTime_ = std::chrono::steady_clock::now(); WriteRecovery();
+    }
 
+    if (host_.getService) {
+        const auto* current = static_cast<const EngineViewportOverlayApi*>(host_.getService(host_.user, EngineViewportOverlayService, 1));
+        if (current && (current->context != overlay_.context || current->getCamera != overlay_.getCamera)) SetViewportOverlayApi(*current);
+        else if (!current && overlay_.context) SetViewportOverlayApi({});
+    }
     if (overlay_.getCamera)
     {
         EngineCameraInfo cam{};
@@ -113,9 +121,10 @@ void EditorQtHost::Update(double dt)
 
         {
             std::lock_guard lk(overlayMutex_);
-            if (!pendingIcons_.empty())
+            if (iconsDirty_ && lastCameraValid_)
             {
-                iconsToUpload.swap(pendingIcons_);
+                iconsToUpload = pendingIcons_;
+                iconsDirty_ = false;
             }
             if (pendingLinesDirty_)
             {
@@ -136,13 +145,15 @@ void EditorQtHost::Update(double dt)
         {
             for (const auto& icon : iconsToUpload)
             {
-                overlay_.setOverlayIcon(overlay_.context, icon.id, icon.width, icon.height, icon.pixels.data());
+                if (overlay_.setOverlayIcon(overlay_.context, icon.id, icon.width, icon.height, icon.pixels.data()) != EngineSceneOk) {
+                    std::lock_guard lk(overlayMutex_); iconsDirty_ = true;
+                }
             }
         }
         else if (!iconsToUpload.empty())
         {
             std::lock_guard lk(overlayMutex_);
-            pendingIcons_.insert(pendingIcons_.begin(), iconsToUpload.begin(), iconsToUpload.end());
+            iconsDirty_ = true;
         }
         if (sendLines && overlay_.setOverlayLines)
         {
@@ -250,8 +261,27 @@ void EditorQtHost::DrainCommands()
 
         if (cmd.type == EditorCommand::RequestExit)
         {
+            recovery_.Clear();
             Log("EditorRequestExit");
             if (host_.requestExit) host_.requestExit(host_.user);
+        }
+        else if (cmd.type == EditorCommand::WriteRecovery) { WriteRecovery(); }
+        else if (cmd.type == EditorCommand::DiscardRecovery) { recovery_.Clear(); }
+        else if (cmd.type == EditorCommand::UpdateAsset) {
+            const auto* api = AuthoringApi(); char detail[2048]{};
+            const auto name = sceneHandler_.GetSelectedObjectName();
+            result = playState_.load() == Edit && api && api->asset ? api->asset(api->context, cmd.w, cmd.path.toUtf8().constData(), cmd.name.toUtf8().constData(), detail, sizeof(detail)) : EngineSceneReadOnly;
+            if (result == EngineSceneOk) {
+                history_.Reset();
+                SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi()};
+                sceneHandler_.SetSelectedId(0);
+                sceneHandler_.MarkDirty();
+                sceneHandler_.PublishScene(ctx, playState_.load());
+                for (const auto& o : sceneHandler_.ReadSnapshot().objects) if (o.name == name) sceneHandler_.SetSelectedId(o.id);
+                sceneHandler_.PublishScene(ctx, playState_.load());
+                recovery_.Clear(); WriteRecovery();
+            }
+            Complete(cmd, result, QString::fromUtf8(detail));
         }
         else if (cmd.type == EditorCommand::SetGizmoMode)
         {
@@ -274,13 +304,18 @@ void EditorQtHost::DrainCommands()
                 viewportInput_,
                 [this](const char* msg) { Log(msg); },
                 [this] {
-                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_};
+                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi()};
                     sceneHandler_.PublishScene(sctx, playState_.load());
                 }
             };
             uint64_t sel = sceneHandler_.SelectedId();
             viewportHandler_.Handle(cmd, vctx, viewportActive_, playState_, sel, result, error);
-            sceneHandler_.SetSelectedId(sel);
+            if (cmd.type == EditorCommand::PickObject) {
+                sceneHandler_.PickSelection(sel, cmd.name == "toggle" && BatchApi());
+                SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi()};
+                sceneHandler_.PublishScene(ctx, playState_.load());
+            }
+            if (cmd.type == EditorCommand::TogglePlay && result == EngineSceneOk) InvalidateOverlays();
             Complete(cmd, result, error);
         }
         else if (assetHandler_.CanHandle(cmd.type))
@@ -293,6 +328,7 @@ void EditorQtHost::DrainCommands()
                 viewportInput_,
                 [this](const char* msg) { Log(msg); },
                 [this](const auto& s, const auto& d, const auto& sel, const auto& in) {
+                    recovery_.RefreshBuild();
                     SetModuleApi(s);
                     SetProjectDataApi(d);
                     SetSelectionApi(sel);
@@ -301,7 +337,7 @@ void EditorQtHost::DrainCommands()
                 [this] { return sceneHandler_.GetSelectedObjectName(); },
                 [this](uint64_t id) { sceneHandler_.SetSelectedId(id); },
                 [this] {
-                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_};
+                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi()};
                     sceneHandler_.PublishScene(sctx, playState_.load());
                 }
             };
@@ -314,19 +350,29 @@ void EditorQtHost::DrainCommands()
         }
         else if (sceneHandler_.CanHandle(cmd.type))
         {
-            SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_};
+            SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi()};
             sceneHandler_.Handle(cmd, sctx, history_, playState_.load(), result, error);
+            if (result == EngineSceneOk) {
+                if (cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene || cmd.type == EditorCommand::Undo || cmd.type == EditorCommand::Redo) InvalidateOverlays();
+                if (cmd.type == EditorCommand::SaveScene) { recovery_.scenePath = cmd.path; recovery_.Clear(); }
+                if (cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene) {
+                    recovery_.Clear(); recovery_.scenePath = sceneHandler_.IsDirty() ? QString{} : cmd.path;
+                    if (cmd.name == "recovery") { WriteRecovery(); if (!RecoveryStore::Read(recovery_.record + ".json").isEmpty()) recovery_.ForgetSnapshot(cmd.path); }
+                }
+            }
             if (cmd.type != EditorCommand::RefreshScene || !cmd.name.isEmpty())
                 Complete(cmd, result, error);
         }
     }
+    canUndo_.store(history_.CanUndo());
+    canRedo_.store(history_.CanRedo());
 }
 
 IEditorHost::Snapshot EditorQtHost::ReadSnapshot()
 {
     auto snapshot = sceneHandler_.ReadSnapshot();
-    snapshot.canUndo = history_.CanUndo();
-    snapshot.canRedo = history_.CanRedo();
+    snapshot.canUndo = canUndo_.load();
+    snapshot.canRedo = canRedo_.load();
     return snapshot;
 }
 
@@ -362,6 +408,7 @@ void EditorQtHost::SetGizmoMode(EditorGizmoMode mode)
 void EditorQtHost::SetModuleApi(const EngineEditSessionApi& scene)
 {
     scene_ = scene;
+    SetViewportOverlayApi({});
     sceneAvailable_.store(scene.context != nullptr);
     materialsAvailable_.store(scene.context && scene.setMaterial && scene.readMaterial && scene.reloadShaderFile && scene.attachMaterialPreview);
 }
@@ -406,7 +453,11 @@ void EditorQtHost::SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t heig
     icon.width = width;
     icon.height = height;
     icon.pixels.assign(rgbaPixels, rgbaPixels + (width * height * 4));
-    pendingIcons_.push_back(std::move(icon));
+    for (auto& existing : pendingIcons_) if (existing.id == iconId) {
+        if (existing.width == width && existing.height == height && existing.pixels == icon.pixels) return;
+        existing = std::move(icon); iconsDirty_ = true; return;
+    }
+    pendingIcons_.push_back(std::move(icon)); iconsDirty_ = true;
 }
 
 void EditorQtHost::SetOverlayBillboards(const std::vector<EngineOverlayBillboard>& billboards)
@@ -436,7 +487,34 @@ void EditorQtHost::RunOnUi(std::function<void()> action)
 void EditorQtHost::SetViewportOverlayApi(const EngineViewportOverlayApi& api)
 {
     overlay_ = api;
+    { std::lock_guard lk(cameraMutex_); lastCameraValid_ = false; }
+    InvalidateOverlays();
     const bool found = (overlay_.version == 1 && overlay_.setOverlayLines && overlay_.getCamera);
     std::printf("[Info] Viewport overlay service: %s (version %u)\n", found ? "FOUND" : "NOT FOUND", overlay_.version);
     std::fflush(stdout);
+}
+
+void EditorQtHost::InitializeRecovery() {
+    if (host_.projectFile && *host_.projectFile) {
+        try { recovery_.Open(QString::fromUtf8(host_.projectFile), QCoreApplication::applicationDirPath()); }
+        catch (const std::exception& e) { Log(e.what()); }
+    }
+}
+void EditorQtHost::WriteRecovery()
+{
+    if (!HasScene() || !sceneHandler_.IsDirty() || PlayState() != Edit || recovery_.record.isEmpty() || !recovery_.lock || !recovery_.lock->isLocked()) return;
+    QString path;
+    try {
+        path = recovery_.NextScene(); char error[2048]{};
+        if (scene_.saveScene(scene_.context, path.toUtf8().constData(), error, sizeof(error)) != EngineSceneOk)
+            throw std::runtime_error(error);
+        recovery_.Commit(path);
+        Log("Recovery: unsaved scene checkpoint committed");
+    } catch (const std::exception& e) { QFile::remove(path); Log(e.what()); }
+}
+
+
+void EditorQtHost::InvalidateOverlays() {
+    std::lock_guard lk(overlayMutex_);
+    iconsDirty_ = true; pendingLinesDirty_ = true; pendingBillboardsDirty_ = true;
 }

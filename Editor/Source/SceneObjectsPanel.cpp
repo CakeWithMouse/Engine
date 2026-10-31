@@ -74,7 +74,7 @@ void SceneObjectsPanel::BuildUi()
     hierarchy_->setMinimumSize(80, 60);
     hierarchy_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
     hierarchy_->setHeaderLabels({Tr("Объект", "Object"), Tr("Тип", "Type")});
-    hierarchy_->setSelectionMode(QAbstractItemView::SingleSelection);
+    hierarchy_->setSelectionMode(QAbstractItemView::ExtendedSelection);
     hierarchy_->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(hierarchy_, &QTreeWidget::customContextMenuRequested, this, &SceneObjectsPanel::ShowTreeContextMenu);
 
@@ -99,7 +99,13 @@ void SceneObjectsPanel::BuildUi()
     connect(hierarchy_, &QTreeWidget::itemSelectionChanged, this, [this] {
         if (suppressSelectionChanged_) return;
         const auto items = hierarchy_->selectedItems();
-        emit SelectionChanged(items.empty() ? 0 : items.front()->data(0, Qt::UserRole).toULongLong());
+        const quint64 objectId = items.isEmpty()
+                                     ? 0
+                                     : items.front()->data(0, Qt::UserRole).toULongLong();
+
+        QVector<quint64> ids; for (auto* item : items) ids.push_back(item->data(0, Qt::UserRole).toULongLong());
+        const auto active = hierarchy_->currentItem();
+        emit SelectionChanged(active && active->isSelected() ? active->data(0, Qt::UserRole).toULongLong() : objectId, ids);
     });
 
     connect(hierarchy_, &QTreeWidget::itemChanged, this, [this](QTreeWidgetItem* item, int column) {
@@ -138,9 +144,11 @@ void SceneObjectsPanel::RebuildAddMenu()
         else if (name.startsWith("Gameplay.Character")) target = menuCharacters;
         else if (name.startsWith("Gameplay.Camera")) target = menuCameras;
 
-        target->addAction(label, this, [this, name, label] {
+        auto* action = target->addAction(label, this, [this, name, label] {
             emit AddPrimitiveRequested(name, label, SpawnPosition());
         });
+        action->setObjectName("CreateObject." + name);
+        action->setData(name);
     }
 
     for (auto* sub : {menuPrimitives, menuLights, menuParticles, menuEnv, menuCharacters, menuCameras, menuProject}) {
@@ -205,6 +213,7 @@ std::array<double, 3> SceneObjectsPanel::SpawnPosition() const
 void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
 {
     suppressSelectionChanged_ = true;
+    hierarchy_->setSelectionMode(view.batchEditing ? QAbstractItemView::ExtendedSelection : QAbstractItemView::SingleSelection);
 
     QString key;
     for (const auto& object : view.objects)
@@ -253,7 +262,7 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
     for (QTreeWidgetItemIterator it(hierarchy_); *it; ++it)
     {
         (*it)->setSelected(
-            (*it)->data(0, Qt::UserRole).toULongLong() == view.selected
+            std::find(view.selectedIds.begin(), view.selectedIds.end(), (*it)->data(0, Qt::UserRole).toULongLong()) != view.selectedIds.end()
         );
     }
 

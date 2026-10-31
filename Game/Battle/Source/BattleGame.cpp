@@ -1,6 +1,7 @@
 #include "BattleGame.h"
 
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
+#include <Engine/Components/SpecificComponents/UIComponent.h>
 #include <Engine/Render/Material.h>
 #include <Engine/Render/SkeletalBaker.h>
 #include <Engine/Render/SkeletalData.h>
@@ -8,6 +9,8 @@
 #include <Engine/Resources/Paths.h>
 #include <Engine/Resources/VirtualFileSystem.h>
 #include "../../Engine/Source/Resources/VfsRead.h"
+#include <iomanip>
+#include <sstream>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -46,9 +49,13 @@ InstancedMeshComponent* BattleGame::CreateUnitBatch(UnitMesh::VehicleType type, 
                                                     const std::shared_ptr<Material>& material)
 {
     auto units = std::make_unique<InstancedMeshComponent>();
+    units->SetAssetValidation(Config.ValidateAssets, UnitMesh::VehicleName(type));
     // Set before registration, so the sprite atlas is baked through the material right away.
     units->SetMaterial(material);
-    for (int level = 0; level < 3; ++level)
+
+    // Either the designer hands over every level, or only LOD0 and the engine builds the rest.
+    const int suppliedLevels = Config.AutoLod ? 1 : 3;
+    for (int level = 0; level < suppliedLevels; ++level)
     {
         MeshLodData lod = UnitMesh::BuildVehicleLod(type, level, Config.Detail);
         std::cout << UnitMesh::VehicleName(type) << " LOD" << level << ": "
@@ -58,13 +65,18 @@ InstancedMeshComponent* BattleGame::CreateUnitBatch(UnitMesh::VehicleType type, 
             throw std::runtime_error(std::string("Cannot build LOD for ") + UnitMesh::VehicleName(type));
         }
     }
+    if (Config.AutoLod)
+    {
+        // Same ratios the hand-made levels have: LOD1 about a ninth of LOD0, LOD2 a silhouette.
+        units->SetAutoLod({0.12f, 0.025f});
+    }
 
     // Switching by on-screen size: independent of model size, window size and field of view.
     // Three mesh levels plus the generated sprite level, so three thresholds.
     units->SetLodScreenHeights({45.0f, 16.0f, Config.SpritePixels});
     units->SetLodFadeFraction(0.06f);
     units->SetDrawDistance(2500.0f);
-    units->SetShadowDistance(900.0f);
+    units->SetShadowDistance(Config.ShadowDistance);
     units->SetShadowLodBias(1);
     units->SetLodDebugColors(Config.LodDebugColors);
     if (Config.Impostors)
@@ -242,7 +254,15 @@ void BattleGame::BuildScene(const Settings& settings)
             UnitBatches.push_back(std::move(batch));
         }
 
-        std::uniform_real_distribution<float> jitter(-0.25f, 0.25f);
+        // A formation on an exact lattice does not read as an army: every vehicle is the same box
+        // at the same angle, so the rows merge into unbroken bars with the ground showing between
+        // them, and from a distance the field looks striped. Rows are offset by half a step
+        // against each other and every vehicle is turned a few degrees, which keeps the formation
+        // but breaks the lattice. Sideways there is room to spare between the rows, along the row
+        // there is not.
+        std::uniform_real_distribution<float> jitterAcross(-0.3f, 0.3f);
+        std::uniform_real_distribution<float> jitterAlong(-0.12f, 0.12f);
+        std::uniform_real_distribution<float> yawJitter(-0.14f, 0.14f);
         std::uniform_real_distribution<float> speed(4.0f, 9.0f);
         std::uniform_real_distribution<float> wear(0.0f, 1.0f);
         const glm::vec4 teamColors[2] = {glm::vec4(0.35f, 0.42f, 0.30f, 1.0f), glm::vec4(0.45f, 0.33f, 0.28f, 1.0f)};
@@ -253,15 +273,16 @@ void BattleGame::BuildScene(const Settings& settings)
             const int column = index % unitsPerRow;
             // Types alternate along the row, so every formation mixes vehicles.
             UnitBatch& batch = UnitBatches[static_cast<size_t>((row + column) % typeCount)];
+            const float rowStagger = (row % 2 == 0) ? 0.0f : 0.5f;
 
             MeshInstance instance;
             instance.Position = glm::vec3(
-                (column - unitsPerRow * 0.5f + jitter(rng)) * Config.Spacing,
+                (column - unitsPerRow * 0.5f + rowStagger + jitterAcross(rng)) * Config.Spacing,
                 0.0f,
-                (row - unitsPerRow * 0.5f + jitter(rng)) * Config.Spacing);
+                (row - unitsPerRow * 0.5f + jitterAlong(rng)) * Config.Spacing);
             // Two armies facing each other across the middle of the field.
             const bool bSecondArmy = instance.Position.z > 0.0f;
-            instance.Yaw = bSecondArmy ? 3.14159f : 0.0f;
+            instance.Yaw = (bSecondArmy ? 3.14159f : 0.0f) + yawJitter(rng);
             instance.Scale = 1.0f;
             instance.Color = teamColors[bSecondArmy ? 1 : 0];
             // How muddy this unit is (the material's InstanceData.x; ignored by the legacy shader).
@@ -279,8 +300,126 @@ void BattleGame::BuildScene(const Settings& settings)
     player->SetMinMaximalOrbitRadius(40.0f, std::max(600.0f, fieldSize * 1.5f));
     player->SetOrbitRadius(Config.CameraRadius > 0.0f ? Config.CameraRadius : std::max(180.0f, fieldSize * 0.37f));
     player->SetRotate(0.8f, glm::radians(std::max(10.0f, std::min(Config.CameraPitch, 85.0f))));
-    player->StopRotate(true, true);
-    player->EnableWASD(true);
+    // StopRotate enables the mouse control; a locked camera keeps the same framing between runs.
+    player->StopRotate(!Config.LockCamera, !Config.LockCamera);
+    player->EnableWASD(!Config.LockCamera);
+
+    BuildHud();
+}
+
+void BattleGame::BuildHud()
+{
+    if (!Config.Hud)
+    {
+        return;
+    }
+
+    auto hud = std::make_unique<UIComponent>();
+    FontAtlasSettings font;
+    font.Face = L"Consolas";
+    font.PixelHeight = 18;
+    hud->SetFont(font);
+
+    // What the HUD looks like lives in the markup next to the exe, and the component watches it:
+    // panels can be moved, recoloured or dropped while the scene runs. The scene only knows the
+    // names it writes to, so a layout change needs no rebuild.
+    const std::string markup = (Config.ContentRoot / "UI" / "Hud.ui").generic_u8string();
+    if (!hud->LoadMarkup(markup))
+    {
+        // The component printed the line that is wrong; the field is worth more than the panels.
+        return;
+    }
+
+    const std::string uiShaderPath = EnginePaths::Shader("UI.hlsl").generic_u8string();
+    Hud = Register(*this, "Hud", std::move(hud), uiShaderPath, uiShaderPath);
+    BindHud();
+}
+
+void BattleGame::BindHud()
+{
+    if (Hud == nullptr)
+    {
+        return;
+    }
+    HudRevision = Hud->GetMarkupRevision();
+
+    HudFrameLabel = Hud->Find<UILabel>("frame");
+    HudDrawLabel = Hud->Find<UILabel>("draws");
+    HudUnitLabel = Hud->Find<UILabel>("units");
+    HudHintLabel = Hud->Find<UILabel>("hint");
+    HudFrameBar = Hud->Find<UIBar>("load");
+    for (int level = 0; level < 4; ++level)
+    {
+        HudLodLabels[level] = Hud->Find<UILabel>("lod" + std::to_string(level));
+    }
+
+    // The markup says what the button looks like; what it does stays here.
+    Hud->BindClick("lodToggle", [this]() { SetLodDebugColors(!Config.LodDebugColors); });
+}
+
+void BattleGame::SetLodDebugColors(bool enabled)
+{
+    Config.LodDebugColors = enabled;
+    for (UnitBatch& batch : UnitBatches)
+    {
+        batch.Component->SetLodDebugColors(enabled);
+    }
+}
+
+void BattleGame::UpdateHud()
+{
+    if (Hud == nullptr || !Hud->IsVisible())
+    {
+        return;
+    }
+    if (Hud->GetMarkupRevision() != HudRevision)
+    {
+        // The markup was edited while the game runs: the tree, and every pointer into it, is new.
+        BindHud();
+    }
+
+    const double frameMs = LastTimestampMs > 0.0 ? (NowMs() - LastTimestampMs) : 0.0;
+    // A moving average: the raw frame time jitters too much to read off the screen. The first
+    // frames carry the cost of building atlases and shadow maps, and smoothing them in would keep
+    // the number wrong for a hundred frames, so until the scene settles the average just follows.
+    const bool bSettled = GetFrameIndex() > 10;
+    HudFrameMs = (bSettled && HudFrameMs > 0.0) ? HudFrameMs * 0.9 + frameMs * 0.1 : frameMs;
+
+    // Every element is optional: the markup is authored outside the code, and a panel someone
+    // renamed or deleted must not take the scene down with it.
+    if (HudFrameLabel != nullptr)
+    {
+        std::ostringstream frameText;
+        frameText.precision(1);
+        frameText << std::fixed << HudFrameMs << " мс   "
+                  << (HudFrameMs > 0.001 ? 1000.0 / HudFrameMs : 0.0) << " FPS";
+        HudFrameLabel->SetText(frameText.str());
+    }
+    if (HudDrawLabel != nullptr)
+    {
+        HudDrawLabel->SetText("Вызовов отрисовки: " + std::to_string(LastFrameStats.DrawCalls));
+    }
+    if (HudUnitLabel != nullptr)
+    {
+        HudUnitLabel->SetText("Техники: " + std::to_string(Config.UnitCount) +
+                              "   отсечено: " + std::to_string(LastFrameStats.CulledInstances));
+    }
+
+    if (HudFrameBar != nullptr)
+    {
+        // 16.7 ms is the whole budget of a 60 FPS frame.
+        HudFrameBar->Fill = static_cast<float>(HudFrameMs / 16.7);
+        HudFrameBar->FillColor = HudFrameMs > 16.7 ? glm::vec4(0.85f, 0.3f, 0.25f, 0.9f)
+                                                   : glm::vec4(0.89f, 0.52f, 0.24f, 0.9f);
+    }
+
+    for (int level = 0; level < 4; ++level)
+    {
+        if (HudLodLabels[level] != nullptr)
+        {
+            HudLodLabels[level]->SetText(std::to_string(CountForLod(level)));
+        }
+    }
 }
 
 void BattleGame::EnableBench(uint64_t benchFrames, uint64_t warmupFrames)
@@ -300,6 +439,7 @@ void BattleGame::PreUpdate(float deltaTime)
     {
         UpdateUnits(deltaTime);
     }
+    UpdateHud();
 
     if (Bench.IsBenchActive())
     {
@@ -367,6 +507,20 @@ void BattleGame::PreUpdate(float deltaTime)
         DumpShadowMaps("shadow");
     }
 
+    // Late enough that the scene has settled and the frame time on screen is the real one.
+    if (!Config.DumpFrame.empty() && GetFrameIndex() == 60)
+    {
+        RequestFrameDump(Config.DumpFrame);
+    }
+
+    if (Config.DumpImpostors && GetFrameIndex() == 20)
+    {
+        for (const UnitBatch& batch : UnitBatches)
+        {
+            batch.Component->DumpImpostorAtlas(std::string("impostor-") + UnitMesh::VehicleName(batch.Type));
+        }
+    }
+
     if (FrameLimit > 0 && GetFrameIndex() >= FrameLimit)
     {
         PostQuitMessage(0);
@@ -412,17 +566,21 @@ void BattleGame::UpdateHotkeys()
         return;
     }
 
-    // F7: LOD debug colours (F6 is the engine's shader reload).
-    const bool bDown = input->IsKeyDown(Keys::F7);
+    // F6: LOD debug colours. F1-F5 belong to the engine and the camera; F7 hides the panels, and
+    // both used to sit on F7, so one key toggled the colours and the whole HUD at once.
+    const bool bDown = input->IsKeyDown(Keys::F6);
     if (bDown && !bLodDebugKeyWasDown)
     {
-        Config.LodDebugColors = !Config.LodDebugColors;
-        for (UnitBatch& batch : UnitBatches)
-        {
-            batch.Component->SetLodDebugColors(Config.LodDebugColors);
-        }
+        SetLodDebugColors(!Config.LodDebugColors);
     }
     bLodDebugKeyWasDown = bDown;
+
+    const bool bHudDown = input->IsKeyDown(Keys::F7);
+    if (bHudDown && !bHudKeyWasDown && Hud != nullptr)
+    {
+        Hud->SetVisible(!Hud->IsVisible());
+    }
+    bHudKeyWasDown = bHudDown;
 }
 
 uint32_t BattleGame::CountForLod(int level) const
@@ -479,9 +637,10 @@ std::string BattleGame::BuildReport() const
     const uint32_t visible = static_cast<uint32_t>(Config.UnitCount > static_cast<int>(culled) ? Config.UnitCount - culled : 0);
     const uint64_t drawnVertices = static_cast<uint64_t>(visible) * static_cast<uint64_t>(UnitVertexCount > 0 ? UnitVertexCount : 100);
 
-    char buffer[512];
+    // Long enough for every field plus the adapter name, which snprintf would otherwise cut.
+    char buffer[768];
     std::snprintf(buffer, sizeof(buffer),
-                  "units=%d types=%zu scenery=%d mode=%s shading=%s shadows=%s anim=%s sprites=%s frames=%llu frame_ms=%.2f fps=%.1f gpu_ms=%.2f draws=%.1f instances=%.0f visible=%u vertices=%llu lod0=%u lod1=%u lod2=%u sprite=%u culled=%u",
+                  "units=%d types=%zu scenery=%d mode=%s shading=%s shadows=%s anim=%s sprites=%s frames=%llu frame_ms=%.2f fps=%.1f gpu_ms=%.2f draws=%.1f instances=%.0f visible=%u vertices=%llu lod0=%u lod1=%u lod2=%u sprite=%u culled=%u gpu=%s",
                   Config.UnitCount,
                   UnitBatches.size(),
                   Config.SceneryCount,
@@ -498,6 +657,7 @@ std::string BattleGame::BuildReport() const
                   static_cast<double>(InstancesSum) / frames,
                   visible,
                   static_cast<unsigned long long>(drawnVertices),
-                  CountForLod(0), CountForLod(1), CountForLod(2), sprites, culled);
+                  CountForLod(0), CountForLod(1), CountForLod(2), sprites, culled,
+                  GetAdapterName().c_str());
     return buffer;
 }

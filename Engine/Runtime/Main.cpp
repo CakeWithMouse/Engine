@@ -3,6 +3,7 @@
 #include <Engine/Resources/Paths.h>
 #include "Project.h"
 #include "ProjectUpgrade.h"
+#include "ProjectExport.h"
 #include "PreviewScenes.h"
 #include <cstdio>
 #include <set>
@@ -14,12 +15,16 @@ int wmain(int argc, wchar_t** argv)
     std::setvbuf(stdout, nullptr, _IONBF, 0);
     try
     {
-        if (argc == 3 && std::wstring(argv[1]) == L"--validate-project")
+        if (argc == 5 && std::wstring(argv[1]) == L"--export-project" && std::wstring(argv[3]) == L"--destination") {
+            ProjectExport::Export(argv[2],argv[4],EnginePaths::ExecutableDirectory());
+            std::puts("Game export validated and published"); return 0;
+        }
+        if (argc == 3 && (std::wstring(argv[1]) == L"--validate-project" || std::wstring(argv[1]) == L"--validate-compatible-project"))
         {
             const auto project = ReadRuntimeProject(argv[2]);
             const auto runtime = EnginePaths::ExecutableDirectory();
             const auto release = ReadEngineRelease(runtime);
-            if (project.engineVersion != release.version || project.engineConfiguration != release.configuration)
+            if (std::wstring(argv[1]) == L"--validate-project" && (project.engineVersion != release.version || project.engineConfiguration != release.configuration))
                 throw std::runtime_error("Candidate SDK/runtime identity mismatch");
             GameEditModule module(project.module, runtime / "EngineContent", project.content);
             const auto& api = module.Api();
@@ -52,13 +57,14 @@ int wmain(int argc, wchar_t** argv)
         if (GetEnvironmentVariableW(L"PAINENGINE_READY_EVENT", readyEvent, 512) < 512) options.readyEvent = readyEvent;
         std::filesystem::path projectPath;
         std::set<std::wstring> seen;
-        bool sceneApi = false;
+        bool sceneApi = false, compatibleEngine = false;
         for (int i = 1; i < argc; ++i)
         {
             const std::wstring key = argv[i];
             if (!seen.insert(key).second) throw std::runtime_error("Duplicate launch option");
             if (key == L"--test-fail-engine") { options.failEngineForTest = true; continue; }
             if (key == L"--scene-api") { sceneApi = true; continue; }
+            if (key == L"--compatible-engine") { compatibleEngine = true; continue; }
             if (++i == argc) throw std::runtime_error("Missing launch option value");
             const std::wstring value = argv[i];
             if (key == L"--project") projectPath = value;
@@ -82,7 +88,7 @@ int wmain(int argc, wchar_t** argv)
         // Explicit relative project paths are relative to the host, never caller CWD.
         if (projectPath.is_relative()) projectPath = directory / projectPath;
         const auto project = ReadRuntimeProject(projectPath);
-        if (!project.engineVersion.empty())
+        if (!project.engineVersion.empty() && !compatibleEngine)
         {
             const auto release = ReadEngineRelease(directory);
             if (project.engineVersion != release.version || project.engineConfiguration != release.configuration)

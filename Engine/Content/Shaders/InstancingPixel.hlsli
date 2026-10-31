@@ -12,7 +12,7 @@ struct PS_IN
     float3 normal : NORMAL;
     float2 texCoord : TEXCOORD0;
     float3 worldPos : TEXCOORD1;
-    float fade : TEXCOORD2;
+    float fade : TEXCOORD2; // signed LOD cross-fade of the copy, see InstData.Params
     float4 color : COLOR;
 };
 
@@ -27,7 +27,7 @@ float4 SampleBaseColor(PS_IN input)
 #if defined(DEFERRED_GBUFFER)
 GBufferOut PSMain(PS_IN input)
 {
-    ClipByFade(input.fade, input.pos.xy);
+    ClipByFade(input.fade, input.pos.xy + DitherPhase(input.worldPos));
     float4 baseColor = SampleBaseColor(input);
     MaterialLighting material = MakeMaterialLighting(UnitSpecularWeight, UnitAmbientModel);
     return EncodeGBuffer(baseColor.rgb, input.normal, input.worldPos, material);
@@ -35,7 +35,7 @@ GBufferOut PSMain(PS_IN input)
 #else
 float4 PSMain(PS_IN input) : SV_Target
 {
-    ClipByFade(input.fade, input.pos.xy);
+    ClipByFade(input.fade, input.pos.xy + DitherPhase(input.worldPos));
     float4 baseColor = SampleBaseColor(input);
     MaterialLighting material = MakeMaterialLighting(UnitSpecularWeight, UnitAmbientModel);
     float3 litColor = ComputeSceneLighting(baseColor.rgb, normalize(input.normal), input.worldPos, material);

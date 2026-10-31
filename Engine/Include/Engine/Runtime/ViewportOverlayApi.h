@@ -1,6 +1,7 @@
 #pragma once
 #include <Engine/Runtime/ModuleApi.h>
 
+constexpr uint32_t EngineViewportOverlayService = 0x014F564Cu;
 constexpr const char* EngineViewportOverlayExtension = "Engine.Viewport.Overlay";
 
 struct EngineOverlayLine

@@ -62,7 +62,7 @@ signals:
     void DuplicateRequested();
     void RemoveRequested();
 
-    void SelectionChanged(quint64 objectId);
+    void SelectionChanged(quint64 objectId, const QVector<quint64>& objectIds);
     void FocusRequested();
     void SetParentRequested(quint64 childId, quint64 parentId);
     void RenameRequested(quint64 objectId, const QString& newName);

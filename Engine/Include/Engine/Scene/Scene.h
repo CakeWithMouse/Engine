@@ -19,7 +19,7 @@ using ComponentId = uint64_t;
 enum class SceneResult
 {
     Ok, Deferred, NullComponent, EmptyName, DuplicateName, AlreadyOwned,
-    NotFound, InvalidParent, ParentCycle, InvalidTransform, Busy
+    NotFound, InvalidParent, ParentCycle, InvalidTransform, Busy, DuplicateSingleton
 };
 struct AddComponentResult
 {

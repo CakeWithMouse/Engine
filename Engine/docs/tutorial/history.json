@@ -6,5 +6,53 @@
     "date": "2026-10-27",
     "presentation": "releases/PainEngine-Tutorial-2026-10-27-r1-final.pptx",
     "revision": 1
+  },
+  {
+    "revision": 3,
+    "date": "2026-10-30",
+    "engineVersion": "2026.10.28.2",
+    "sourceCommit": "eb2fed06ffc0058ad4e35876c4c55921fbb9e590",
+    "slideCount": 27,
+    "presentation": "releases/PainEngine-Tutorial-2026-10-30-r3-final.pptx",
+    "pdf": "releases/PainEngine-Tutorial-2026-10-30-r3-final.pdf",
+    "examples": "releases/PainEngine-Tutorial-2026-10-30-r3-examples.zip",
+    "content": "releases/PainEngine-Tutorial-2026-10-30-r3.content.json",
+    "summary": "Материалы, автоматический импорт текстур FBX/BLEND, актуальные скриншоты, уточнённые C++ примеры и полный архив исходников. Сохранены сокращения пользователя."
+  },
+  {
+    "revision": 4,
+    "date": "2026-10-31",
+    "engineVersion": "2026.10.31.2",
+    "sourceCommit": "a3e05e3bd4bf3e983edffa3c2b16fca7ecdd3f48",
+    "slideCount": 36,
+    "presentation": "releases/PainEngine-Tutorial-2026-10-31-r4-final.pptx",
+    "pdf": "releases/PainEngine-Tutorial-2026-10-31-r4-final.pdf",
+    "examples": "releases/PainEngine-Tutorial-2026-10-31-r4-examples.zip",
+    "content": "releases/PainEngine-Tutorial-2026-10-31-r4.content.json",
+    "summary": "Пользовательские свойства и учебный проект с двумя кубами, сворачиваемый инспектор, перемещение панели контента, переимпорт ресурсов, сохранение, восстановление, экспорт и предложение обновления старого проекта. Реальные новые снимки интерфейса; сокращения пользователя сохранены."
+  },
+  {
+    "revision": 5,
+    "date": "2026-10-31",
+    "engineVersion": "2026.10.31.2",
+    "sourceCommit": "a1519576e136aa87f4d4a30e542519d88acb5386",
+    "slideCount": 44,
+    "presentation": "releases/PainEngine-Tutorial-2026-10-31-r5-final.pptx",
+    "pdf": "releases/PainEngine-Tutorial-2026-10-31-r5-final.pdf",
+    "examples": "releases/PainEngine-Tutorial-2026-10-31-r5-examples.zip",
+    "content": "releases/PainEngine-Tutorial-2026-10-31-r5.content.json",
+    "summary": "Игровой UI Александра: XML-разметка .ui, расположение элементов, кнопки, горячее обновление и повторная привязка обработчиков. Практика Battle и исходники TutorialHud. Направленный свет и его настройки в редакторе. Сохранены прежние разделы и сокращения пользователя."
+  },
+  {
+    "revision": 6,
+    "date": "2026-10-31",
+    "engineVersion": "2026.10.31.3",
+    "sourceCommit": "a1519576e136aa87f4d4a30e542519d88acb5386",
+    "slideCount": 47,
+    "presentation": "releases/PainEngine-Tutorial-2026-10-31-r6-final.pptx",
+    "pdf": "releases/PainEngine-Tutorial-2026-10-31-r6-final.pdf",
+    "examples": "releases/PainEngine-Tutorial-2026-10-31-r6-examples.zip",
+    "content": "releases/PainEngine-Tutorial-2026-10-31-r6.content.json",
+    "summary": "HUD без C++ через настройки проекта, визуальный редактор .ui, проверка Play и безопасные привязки обработчиков. Реальные снимки новых окон; прежние разделы, опубликованные редакции и сокращения пользователя сохранены."
   }
 ]

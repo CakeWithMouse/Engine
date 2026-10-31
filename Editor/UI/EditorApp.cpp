@@ -28,6 +28,7 @@ namespace
         EditorTheme::Apply(app);
 
         auto* qtHost = dynamic_cast<EditorQtHost*>(host);
+        qtHost->InitializeRecovery();
         EditorMainWindow window(qtHost);
         host->SetUiListener(&window);
         window.show();

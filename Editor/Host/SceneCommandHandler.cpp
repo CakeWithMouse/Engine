@@ -23,6 +23,7 @@ bool SceneCommandHandler::CanHandle(EditorCommand::Type type) const
     case EditorCommand::SetTexture:
     case EditorCommand::SetMaterial:
     case EditorCommand::SetPointLight:
+    case EditorCommand::SetProperty:
     case EditorCommand::SetProjectData:
     case EditorCommand::ConfigurePlay:
     case EditorCommand::RemoveObject:
@@ -63,7 +64,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
         cmd.type == EditorCommand::RemoveObject || cmd.type == EditorCommand::RenameObject || cmd.type == EditorCommand::DuplicateObject ||
         cmd.type == EditorCommand::SetModel || cmd.type == EditorCommand::CreateModel || cmd.type == EditorCommand::SetTexture ||
         cmd.type == EditorCommand::SetMaterial || cmd.type == EditorCommand::SetPointLight || cmd.type == EditorCommand::SetProjectData ||
-        cmd.type == EditorCommand::ConfigurePlay || cmd.type == EditorCommand::SetParent);
+        cmd.type == EditorCommand::ConfigurePlay || cmd.type == EditorCommand::SetProperty || cmd.type == EditorCommand::SetParent);
 
     if ((mutation || cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene ||
         cmd.type == EditorCommand::Undo || cmd.type == EditorCommand::Redo) && playState != IEditorHost::Edit)
@@ -75,6 +76,8 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
 
     try
     {
+        if (cmd.type != EditorCommand::UpdateObjectTransform && cmd.type != EditorCommand::RefreshScene)
+            history.BreakCoalescing();
         const auto now = std::chrono::steady_clock::now();
         const bool coalesced = history.ShouldCoalesce(cmd, now);
 
@@ -83,7 +86,8 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
 
         if (cmd.type == EditorCommand::SelectObject)
         {
-            selectedId_ = cmd.objectId;
+            if (cmd.name == "toggle" && ctx.batch) PickSelection(cmd.objectId, true);
+            else { selectedId_ = cmd.objectId; selectedIds_ = cmd.objectIds; }
         }
         else if (cmd.type == EditorCommand::FetchScene)
         {
@@ -93,7 +97,26 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
             auto found = std::find_if(view.objects.begin(), view.objects.end(),
                 [&](const auto& o) { return o.id == selectedId_; });
             selectedId_ = view.objects.empty() ? 0 : (found == view.objects.end() || ++found == view.objects.end() ? view.objects.front().id : found->id);
+            selectedIds_.clear();
         }
+                else if ((cmd.type == EditorCommand::UpdateObjectTransform || cmd.type == EditorCommand::RemoveObject || cmd.type == EditorCommand::DuplicateObject) && selectedIds_.size() > 1) {
+                    const auto* batch = ctx.batch;
+                    if (!batch || !batch->apply) throw std::runtime_error("This game DLL supports single-object editing. Rebuild a project copy with the current SDK for group operations.");
+                    auto target = cmd.transform;
+                    if (cmd.path == "nudge") for (const auto& o : ReadSnapshot().objects) if (o.id == cmd.objectId) {
+                        target = o.transform; target.position[0] += cmd.right; target.position[1] += cmd.up; target.position[2] += cmd.forward;
+                    }
+                    std::vector<uint64_t> output(selectedIds_.size());
+                    const auto active = std::find(selectedIds_.begin(),selectedIds_.end(),cmd.objectId);
+                    const auto activeIndex = active == selectedIds_.end() ? 0 : static_cast<size_t>(active-selectedIds_.begin());
+                    const auto operation = cmd.type == EditorCommand::RemoveObject ? EngineBatchDelete : cmd.type == EditorCommand::DuplicateObject ? EngineBatchDuplicate : EngineBatchTransform;
+                    result = batch->apply(batch->context,operation,selectedIds_.data(),static_cast<uint32_t>(selectedIds_.size()),cmd.objectId,&target,output.data(),errorBuf,sizeof(errorBuf));
+                    if(result == EngineSceneOk) {
+                        selectedIds_ = output; selectedId_ = output[activeIndex];
+                        selectedIds_.erase(std::remove(selectedIds_.begin(),selectedIds_.end(),0),selectedIds_.end());
+                        history.OnTransformApplied(cmd, now);
+                    }
+                }
         else if (cmd.type == EditorCommand::UpdateObjectTransform)
         {
             auto transform = cmd.transform;
@@ -125,7 +148,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
         }
         else if (cmd.type == EditorCommand::SetParent)
         {
-            result = ctx.scene.setParent ? ctx.scene.setParent(ctx.scene.context, cmd.objectId, cmd.parentId, 1) : EngineSceneOk;
+            result = ctx.scene.setParent ? ctx.scene.setParent(ctx.scene.context, cmd.objectId, cmd.parentId, 1) : EngineSceneReadOnly;
         }
         else if (cmd.type == EditorCommand::SetModel)
         {
@@ -184,6 +207,10 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
         {
             result = api.setPointLight ? api.setPointLight(api.context, cmd.objectId, &cmd.pointLight) : EngineSceneReadOnly;
         }
+        else if (cmd.type == EditorCommand::SetProperty)
+        {
+            result = ctx.authoring && ctx.authoring->setProperty ? ctx.authoring->setProperty(ctx.authoring->context, cmd.objectId, cmd.path.toUtf8().constData(), cmd.name.toUtf8().constData(), errorBuf, sizeof(errorBuf)) : EngineSceneReadOnly;
+        }
         else if (cmd.type == EditorCommand::SetProjectData)
         {
             result = ctx.projectData.write ? ctx.projectData.write(ctx.projectData.context, cmd.objectId, cmd.path.toUtf8().constData()) : EngineSceneReadOnly;
@@ -216,7 +243,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
             QString model = (cmd.type == EditorCommand::CreateModel ? cmd.path : QString());
             QString texture, material, projectData;
             EngineSceneTransform transform = cmd.transform;
-            uint64_t parent = 0;
+            uint64_t parent = cmd.parentId;
             bool inherit = true;
             bool hasLight = false;
             EngineScenePointLight light{};
@@ -261,7 +288,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
                     result = ctx.projectData.write ? ctx.projectData.write(ctx.projectData.context, id, projectData.toUtf8().constData()) : EngineSceneReadOnly;
                 if (result == EngineSceneOk && !projectData.isEmpty())
                     result = ctx.projectData.remapDuplicate ? ctx.projectData.remapDuplicate(ctx.projectData.context, id, cmd.objectId) : EngineSceneReadOnly;
-                if (result == EngineSceneOk) selectedId_ = id;
+                if (result == EngineSceneOk) { selectedId_ = id; selectedIds_.clear(); }
                 else api.removeObject(api.context, id);
             }
         }
@@ -281,7 +308,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
             if (result == EngineSceneOk)
             {
                 selectedId_ = 0;
-                dirty_ = (cmd.type == EditorCommand::NewScene);
+                dirty_ = (cmd.type == EditorCommand::NewScene || cmd.name == "recovery");
                 history.ClearHistory();
             }
         }
@@ -329,6 +356,19 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
 void SceneCommandHandler::SetSelectedId(uint64_t id)
 {
     selectedId_ = id;
+    selectedIds_.clear();
+}
+
+void SceneCommandHandler::PickSelection(uint64_t id, bool toggle)
+{
+    selectedId_ = id;
+    auto found = std::find(selectedIds_.begin(), selectedIds_.end(), id);
+    if (toggle && id) {
+        if (found == selectedIds_.end()) selectedIds_.push_back(id);
+        else { selectedIds_.erase(found); selectedId_ = selectedIds_.empty() ? 0 : selectedIds_.back(); }
+    } else if (!id || found == selectedIds_.end()) {
+        selectedIds_.clear(); if (id) selectedIds_.push_back(id);
+    }
 }
 
 IEditorHost::Snapshot SceneCommandHandler::ReadSnapshot()
@@ -387,14 +427,27 @@ void SceneCommandHandler::PublishScene(const Context& ctx, IEditorHost::EditorSt
     if (std::none_of(view.objects.begin(), view.objects.end(), [&](const auto& o) { return o.id == selectedId_; }))
         selectedId_ = 0;
 
-    view.selected = selectedId_;
-    view.dirty = dirty_;
-    view.canUndo = false; // will be populated with history if needed, or by caller
-    view.canRedo = false;
+    if(!selectedId_)selectedIds_.clear();
+    if(!ctx.batch) { selectedIds_.clear(); if(selectedId_)selectedIds_.push_back(selectedId_); }
+    selectedIds_.erase(std::remove_if(selectedIds_.begin(),selectedIds_.end(),[&](auto id){return std::none_of(view.objects.begin(),view.objects.end(),[&](const auto& o){return o.id==id;});}),selectedIds_.end());
+    if(selectedId_ && std::find(selectedIds_.begin(),selectedIds_.end(),selectedId_)==selectedIds_.end()) { selectedIds_.clear(); selectedIds_.push_back(selectedId_); }
+    // A selected descendant follows its selected ancestor. Use that ancestor as
+    // the inspector/drag anchor so absolute local targets remain stable per frame.
+    auto ancestor = selectedId_;
+    while (ancestor) {
+        const auto item=std::find_if(view.objects.begin(),view.objects.end(),[&](const auto& o){return o.id==ancestor;});
+        ancestor=item==view.objects.end()?0:item->parent;
+        if(ancestor && std::find(selectedIds_.begin(),selectedIds_.end(),ancestor)!=selectedIds_.end())selectedId_=ancestor;
+    }
+    view.authoring=ctx.authoring!=nullptr;
+    if(const auto* authoring=ctx.authoring)for(auto& o:view.objects)if(o.id==selectedId_)
+        authoring->describe(authoring->context,o.id,[](void* p,const char* text){*static_cast<std::string*>(p)=text;},&o.propertySchema);
+    view.selectedIds = selectedIds_;
+    view.batchEditing = ctx.batch != nullptr;
+    view.selected = selectedId_; view.dirty = dirty_; view.canUndo = false; view.canRedo = false;
     hasSelection_.store(selectedId_ != 0);
-
-    if (ctx.selection.select)
-        ctx.selection.select(ctx.selection.context, playState == IEditorHost::Edit ? selectedId_ : 0);
+    if (const auto* batch = ctx.batch; batch && batch->select) batch->select(batch->context,selectedIds_.data(),playState==IEditorHost::Edit ? static_cast<uint32_t>(selectedIds_.size()) : 0);
+    else if (ctx.selection.select) ctx.selection.select(ctx.selection.context, playState == IEditorHost::Edit ? selectedId_ : 0);
 
     std::lock_guard lock(sceneMutex_);
     view.serial = snapshot_.serial + 1;

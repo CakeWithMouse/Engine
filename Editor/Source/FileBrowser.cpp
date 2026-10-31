@@ -46,6 +46,10 @@ FileBrowserDock::FileBrowserDock(EditorQtHost* host, QWidget* parent)
     : QDockWidget(Tr("Контент", "Content Browser"), parent)
     , host_(host)
 {
+    setObjectName(QStringLiteral("ContentDock"));
+    setAllowedAreas(Qt::AllDockWidgetAreas);
+    setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetClosable);
+    setToolTip(QStringLiteral("Потяните заголовок или вкладку, чтобы переместить панель. Верхняя граница меняет высоту. Команды размещения — в меню «Вид»."));
     const QFileInfo projectFile(QString::fromUtf8(
         host_->host().projectFile ? host_->host().projectFile : ""));
     projectDir_ = projectFile.absoluteDir().absolutePath();
@@ -79,6 +83,7 @@ void FileBrowserDock::BuildUi()
     auto* layout = new QVBoxLayout(panel);
     layout->setContentsMargins(2, 2, 2, 2);
     imports_ = new QToolButton(panel);
+    imports_->setObjectName(QStringLiteral("ImportAssets"));
     imports_->setPopupMode(QToolButton::InstantPopup);
     auto* importMenu = new QMenu(imports_);
 
@@ -187,6 +192,11 @@ void FileBrowserDock::OnDoubleClicked(const QModelIndex& proxyIndex)
         if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenScene(path);
         return;
     }
+    if (path.endsWith(QStringLiteral(".ui"), Qt::CaseInsensitive))
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenUIEditor(path);
+        return;
+    }
     if (path.endsWith(QStringLiteral(".mat"), Qt::CaseInsensitive))
     {
         if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenMaterialEditor(path);
@@ -215,12 +225,18 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     QAction* reveal = hasFile ? menu.addAction(Tr("Показать в проводнике", "Reveal in Explorer")) : nullptr;
     QAction* copy = hasFile ? menu.addAction(Tr("Копировать путь", "Copy Path")) : nullptr;
     QAction* refresh = menu.addAction(Tr("Обновить", "Refresh"));
+    const bool asset=hasFile&&!model_->isDir(index)&&QStringList{"fbx","obj","gltf","glb","png","jpg","jpeg","bmp","tga","mat"}.contains(QFileInfo(path).suffix().toLower());
+    QAction* reimport=asset&&!isMaterial&&host_->ReadSnapshot().authoring?menu.addAction(QStringLiteral("Переимпортировать…")):nullptr;
+    QAction* move=asset&&host_->ReadSnapshot().authoring?menu.addAction(QStringLiteral("Переместить / переименовать…")):nullptr;
 
     QAction* picked = menu.exec(view_->viewport()->mapToGlobal(pos));
     if (!picked)
         return;
 
-    if (picked == use)
+    if(picked==reimport || picked==move) {
+        if(auto* editor=qobject_cast<EditorMainWindow*>(parentWidget()))editor->UpdateAsset(path,picked==move);
+    }
+    else if (picked == use)
     {
         if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->UseAsset(path);
     }

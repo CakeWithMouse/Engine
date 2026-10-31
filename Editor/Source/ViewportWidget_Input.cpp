@@ -188,6 +188,7 @@ bool ViewportWidget::HandleMousePress(QMouseEvent* mouse)
                 EditorCommand c;
                 c.type = EditorCommand::SelectObject;
                 c.objectId = bbObj;
+                if (mouse->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) c.name = "toggle";
                 host_->PostCommand(c);
                 return true;
             }
@@ -195,6 +196,7 @@ bool ViewportWidget::HandleMousePress(QMouseEvent* mouse)
 
         EditorCommand c;
         c.type = EditorCommand::PickObject;
+        if (mouse->modifiers() & (Qt::ControlModifier | Qt::ShiftModifier)) c.name = "toggle";
         c.right = static_cast<float>(2.0 * mouse->position().x() / width() - 1.0);
         c.up = static_cast<float>(1.0 - 2.0 * mouse->position().y() / height());
         host_->PostCommand(c);

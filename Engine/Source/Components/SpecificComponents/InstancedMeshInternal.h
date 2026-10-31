@@ -40,6 +40,19 @@ namespace InstancedMeshDetail
         float Padding[3] = {};
     };
 
+    /**
+     * A stable 0..1 value per instance. Stable matters: the unit keeps its place in the shadow
+     * fade from frame to frame, so the shadows thin out instead of flickering.
+     */
+    inline float StableUnitFraction(size_t index)
+    {
+        uint32_t hash = static_cast<uint32_t>(index) * 2654435761u;
+        hash ^= hash >> 15;
+        hash *= 2246822519u;
+        hash ^= hash >> 13;
+        return static_cast<float>(hash & 0xFFFFFFu) / 16777215.0f;
+    }
+
     inline const glm::vec4 LodDebugColors[InstancedMeshComponent::MaxLodCount] =
     {
         glm::vec4(0.25f, 1.0f, 0.35f, 1.0f),

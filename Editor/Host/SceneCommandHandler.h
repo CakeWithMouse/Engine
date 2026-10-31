@@ -13,6 +13,8 @@ public:
         EngineProjectDataApi projectData;
         EngineSelectionApi selection;
         EngineViewportInputApi viewportInput;
+        const EngineSceneBatchApi* batch = nullptr;
+        const EngineAuthoringApi* authoring = nullptr;
     };
 
     SceneCommandHandler();
@@ -30,6 +32,8 @@ public:
     void PublishScene(const Context& ctx, IEditorHost::EditorState playState);
 
     void SetSelectedId(uint64_t id);
+    void PickSelection(uint64_t id, bool toggle);
+    void MarkDirty() { dirty_ = true; }
     uint64_t SelectedId() const { return selectedId_; }
     bool HasSelection() const { return hasSelection_.load(); }
     std::string GetSelectedObjectName();
@@ -43,6 +47,7 @@ private:
     std::mutex sceneMutex_;
     IEditorHost::Snapshot snapshot_;
     uint64_t selectedId_ = 0;
+    std::vector<uint64_t> selectedIds_;
     std::atomic<bool> hasSelection_{false};
     bool dirty_ = false;
 };

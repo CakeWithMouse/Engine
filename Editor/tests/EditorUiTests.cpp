@@ -3,7 +3,12 @@
 #include "QtHost.h"
 #include "MainWindow.h"
 #include "MaterialEditorWindow.h"
+#include "UIEditorWindow.h"
+#include <Engine/UI/UIMarkup.h>
+#include <QDialogButtonBox>
 #include "CodeClassDialog.h"
+#include "ObjectInspectorPanel.h"
+#include "PropertySection.h"
 #include <Engine/Runtime/LegacyEditApi.h>
 #include <Engine/Runtime/EditExtensions.h>
 #include <Engine/Runtime/ProjectDataApi.h>
@@ -11,6 +16,7 @@
 #include <QDialog>
 #include <QTimer>
 #include <QApplication>
+#include <QAbstractEventDispatcher>
 #include <QListWidget>
 #include <QPlainTextEdit>
 #include <QScreen>
@@ -32,20 +38,26 @@
 #include <QDockWidget>
 #include <QLabel>
 #include <QKeyEvent>
+#include <QMouseEvent>
+#include <QStyle>
 #include <QLineEdit>
 #include <QToolButton>
 #include <QGroupBox>
 #include <QTreeView>
 #include "ViewportWidget.h"
+#include "SceneObjectsPanel.h"
+#include "CollapsibleCard.h"
+#include <QMenu>
 #include <chrono>
 #include <filesystem>
+#include <fstream>
 #include <cstdio>
 #include <stdexcept>
 
 namespace
 {
 int checks = 0;
-void Check(bool value, const char* message) { if (!value) throw std::runtime_error(message); ++checks; }
+void Check(bool value, const char* message) { if (!value) throw std::runtime_error(message); ++checks; if(qEnvironmentVariableIsSet("ENGINE_UI_TEST_TRACE")) { std::printf("CHECK %d: %s\n",checks,message);std::fflush(stdout); } }
 void Ui(const std::function<void(EditorMainWindow*)>& action)
 {
     std::exception_ptr failure;
@@ -62,23 +74,35 @@ void Ui(const std::function<void(EditorMainWindow*)>& action)
 }
 QAction* Action(EditorMainWindow* window, const QString& label)
 {
-    for (auto* action : window->findChildren<QAction*>()) if (action->text() == label) return action;
+    QString id;
+    if(label==QStringLiteral("▶ Play")) id="ActPlay";
+    if(label==QStringLiteral("⏹ Stop")) id="ActStop";
+    if(label==QStringLiteral("⏸ Pause")) id="ActPause";
+    if(!id.isEmpty()) if(auto* a=window->findChild<QAction*>(id)) return a;
+    QString text=label;
+
+    if(text==QStringLiteral("Сбросить расположение панелей")) text=QStringLiteral("Сбросить раскладку окон");
+    for (auto* action : window->findChildren<QAction*>()) if (action->text() == text) return action;
     throw std::runtime_error("Action not found: " + label.toStdString());
 }
-void Add(EditorMainWindow* window, int index)
-{
-    auto* combo = window->findChild<QComboBox*>(QStringLiteral("PrimitiveType"));
-    auto* category=window->findChild<QComboBox*>(QStringLiteral("ObjectCategory"));
-    Check(category!=nullptr,"category picker"); category->setCurrentIndex(category->findData(QStringLiteral("all")));
-    Check(combo && combo->count() == 12, "categorized object palette"); combo->setCurrentIndex(index);
-    auto* button = window->findChild<QPushButton*>(QStringLiteral("AddPrimitive"));
-    Check(button && button->isEnabled(), "add button enabled"); button->click();
+QAction* CreateAction(EditorMainWindow* window, const QString& type) {
+    auto* action=window->findChild<QAction*>("CreateObject."+type);
+    Check(action!=nullptr, "object type is available in categorized add menu"); return action;
+}
+void Add(EditorMainWindow* window, int index) {
+    auto* panel=window->findChild<SceneObjectsPanel*>();Check(panel && panel->isEnabled(), "add palette enabled");
+    QList<QAction*> actions;
+    for(auto* action:panel->findChildren<QAction*>()) if(action->objectName().startsWith("CreateObject.")) actions.push_back(action);
+    Check(actions.size()==13,"categorized add menu includes all placeable types");
+    Check(index>=0 && index<actions.size(),"valid object menu index");actions[index]->trigger();
 }
 }
-void ReloadUiChecks(const std::filesystem::path& root, const std::filesystem::path& engineContent)
+void ReloadUiChecks(const std::filesystem::path& root, const std::filesystem::path& engineContent, bool buildCode=false)
 {
     const auto manifest=(root/"Project.json").u8string(), content=(root/"Content").u8string();
-    auto ownedModule=std::make_unique<GameEditModule>(root/"Game.dll",engineContent,root/"Content");
+    auto initialModule=root/"Game.dll";
+    if(buildCode){std::ifstream input(root/"Project.json",std::ios::binary);const std::string bytes{std::istreambuf_iterator<char>(input),{}};initialModule=root/std::filesystem::u8path(QJsonDocument::fromJson(QByteArray::fromStdString(bytes)).object()["module"].toString().toStdString());}
+    auto ownedModule=std::make_unique<GameEditModule>(initialModule,engineContent,root/"Content");
     auto& module=*ownedModule;
     char error[1024]{};uint64_t id=0;
     Check(module.Api().loadScene(module.Api().context,(root/"Content/Scenes/Main.scene.json").u8string().c_str(),&id,error,sizeof(error))==EngineSceneOk,"reload UI scene");
@@ -90,7 +114,14 @@ void ReloadUiChecks(const std::filesystem::path& root, const std::filesystem::pa
         return result;
     }};
     EngineModuleHost callbacks{ENGINE_MODULE_VERSION,&context,[](void*,const char* text){std::puts(text);},[](void* p){static_cast<Context*>(p)->exit=true;},"Reload UI",manifest.c_str(),content.c_str()};
-    callbacks.getService=[](void* p,uint32_t service,uint32_t version)->const void* {return service==EngineEditorReloadService&&version<=1?&static_cast<Context*>(p)->service:nullptr;};
+    callbacks.getService=[](void* p,uint32_t service,uint32_t version)->const void* {
+        auto& c=*static_cast<Context*>(p);if(version>1)return nullptr;
+        if(service==EngineEditorReloadService)return &c.service;
+        if(service==EngineViewportOverlayService)return &c.module->ViewportOverlayApi();
+        if(service==EngineEditorBatchService)return &c.module->BatchApi();
+        if(service==EngineAuthoringService)return &c.module->AuthoringApi();
+        return nullptr;
+    };
     EditorQtHost host(callbacks);host.SetModuleApi(module.Api());host.SetProjectDataApi(module.ProjectDataApi());host.SetSelectionApi(module.SelectionApi());host.SetViewportInputApi(module.ViewportInputApi());
     struct Cleanup { EditorQtHost& host; std::unique_ptr<GameEditModule>& module; ~Cleanup(){host.SetModuleApi({});module.reset();host.Stop();} } cleanup{host,ownedModule};
     Check(host.Start(),"start reload UI");
@@ -103,6 +134,23 @@ void ReloadUiChecks(const std::filesystem::path& root, const std::filesystem::pa
     EditorCommand move;move.type=EditorCommand::UpdateObjectTransform;move.objectId=selected.id;move.transform=selected.transform;move.transform.position[0]=8;host.PostCommand(move);
     until([&]{return host.ReadSnapshot().dirty;});
     EditorMainWindow* windowBefore=nullptr;Ui([&](auto* w){windowBefore=w;});
+    if(buildCode){
+        const auto previous=module.Api().context;
+        Ui([](auto* w){Action(w,QStringLiteral("Перекомпилировать / Hot Reload"))->trigger();});
+        const auto deadline=GetTickCount64()+180000;
+        while(module.Api().context==previous){
+            QString failure;Ui([&](auto* w){if(auto* box=qobject_cast<QMessageBox*>(QApplication::activeModalWidget())){failure=box->text();if(auto* console=w->findChild<QPlainTextEdit*>("Console"))failure+="\n"+console->toPlainText();box->accept();}});
+            if(!failure.isEmpty())throw std::runtime_error(failure.toStdString());
+            Check(GetTickCount64()<deadline,"real code build timeout");pump();
+        }
+        for(int i=0;i<30;++i)pump();
+        Ui([&](auto* w){Check(w==windowBefore,"real build preserves editor window");Check(CreateAction(w,"Spawner"),"new Spawner visible after real Hot Reload");});
+        const auto view=host.ReadSnapshot();bool preserved=false;for(const auto& o:view.objects)if(o.id==view.selected)preserved=o.name==selected.name&&o.transform.position[0]==8;
+        Check(view.dirty&&!view.canUndo&&preserved,"real build preserves unsaved scene and selection");
+        Ui([](auto* w){w->close();});until([&]{bool modal=false;Ui([&](auto*){modal=qobject_cast<QMessageBox*>(QApplication::activeModalWidget())!=nullptr;});return modal;});
+        Ui([](auto*){qobject_cast<QMessageBox*>(QApplication::activeModalWidget())->button(QMessageBox::Discard)->click();});until([&]{return context.exit;});
+        host.SetModuleApi({});ownedModule.reset();host.Stop();std::printf("Real code Hot Reload: %d checks passed\n",checks);return;
+    }
     const auto candidate=root/"ReloadCandidate.dll";std::filesystem::copy_file(root/"Game.dll",candidate,std::filesystem::copy_options::overwrite_existing);
     const auto old=module.Api().context;EditorCommand reload;reload.type=EditorCommand::ReloadProject;reload.path=QString::fromStdWString(candidate.wstring());host.PostCommand(reload);
     until([&]{return module.Api().context!=old;});
@@ -131,14 +179,18 @@ int wmain(int argc, wchar_t** argv)
         Check(argc == 3 || argc == 4, "usage: EditorUiTests <project directory> <EngineContent> [model]");
         const auto root = std::filesystem::absolute(argv[1]);
         if(argc==4&&std::wstring(argv[3])==L"--reload"){ReloadUiChecks(root,std::filesystem::absolute(argv[2]));return 0;}
+        if(argc==4&&std::wstring(argv[3])==L"--code-reload"){ReloadUiChecks(root,std::filesystem::absolute(argv[2]),true);return 0;}
         const auto manifest = (root / "Project.json").u8string(), content = (root / "Content").u8string();
         const auto engineContent = std::filesystem::absolute(argv[2]).u8string();
-        const bool codeProject = argc == 4 && std::wstring(argv[3]) == L"--code";
+        const bool propertiesProject = argc == 4 && std::wstring(argv[3]) == L"--properties";
+        const bool codeProject = propertiesProject || (argc == 4 && std::wstring(argv[3]) == L"--code");
         std::filesystem::path modulePath = root / "Game.dll";
         if (codeProject) {
-            QFile project(QString::fromStdWString((root / "Project.json").wstring()));
-            Check(project.open(QIODevice::ReadOnly),"read code project");
-            modulePath = root / std::filesystem::u8path(QJsonDocument::fromJson(project.readAll()).object().value("module").toString().toUtf8().constData());
+            // Do not create QObjects before the host starts its Qt GUI thread.
+            std::ifstream project(root / "Project.json", std::ios::binary);
+            Check(project.is_open(),"read code project");
+            const std::string bytes{std::istreambuf_iterator<char>(project), std::istreambuf_iterator<char>()};
+            modulePath = root / std::filesystem::u8path(QJsonDocument::fromJson(QByteArray::fromStdString(bytes)).object().value("module").toString().toUtf8().constData());
         }
         HMODULE library = LoadLibraryExW(modulePath.c_str(), nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
         Check(library != nullptr, "load project module");
@@ -168,8 +220,14 @@ int wmain(int argc, wchar_t** argv)
         EngineProjectDataApi projectData{};
         auto query = reinterpret_cast<EngineGetEditExtensionFn>(GetProcAddress(library,"EngineGetEditExtension"));
         if (!legacy && query && query(api.context,EngineProjectDataExtension,1,sizeof(projectData),&projectData)) host.SetProjectDataApi(projectData);
+        EngineSceneBatchApi batch{};
+        if (!legacy && query && query(api.context,EngineSceneBatchExtension,1,sizeof(batch),&batch)) host.SetBatchApi(batch);
+        EngineAuthoringApi authoring{};
+        if (!legacy && query && query(api.context,EngineAuthoringExtension,1,sizeof(authoring),&authoring)) host.SetAuthoringApi(authoring);
         EngineSelectionApi selection{};
         if (!legacy && query && query(api.context,EngineSelectionExtension,1,sizeof(selection),&selection)) host.SetSelectionApi(selection);
+        EngineViewportOverlayApi overlay{};
+        if (!legacy && query && query(api.context,EngineViewportOverlayExtension,1,sizeof(overlay),&overlay)) host.SetViewportOverlayApi(overlay);
         EngineViewportInputApi viewportInput{};
         if (!legacy && query && query(api.context,EngineViewportInputExtension,1,sizeof(viewportInput),&viewportInput)) host.SetViewportInputApi(viewportInput);
         struct HostCleanup
@@ -177,7 +235,25 @@ int wmain(int argc, wchar_t** argv)
             EditorQtHost& host; EngineEditModuleApi factory; void*& context;
             ~HostCleanup() { host.SetModuleApi({}); if (context) { factory.destroy(context); context = nullptr; } host.Stop(); }
         } hostCleanup{host, factory, sessionGuard.context};
+        if (argc == 4 && std::wstring(argv[3]) == L"--recovery-check") {
+            const auto candidates = RecoveryStore::Candidates(QString::fromStdString(manifest));
+            Check(!candidates.isEmpty(),"abruptly terminated editor has a recovery record");
+            const auto info=RecoveryStore::Read(candidates.front());
+            const auto saved=QFileInfo(candidates.front()).dir().filePath(info["snapshot"].toString());
+            Check(api.loadScene(api.context,saved.toUtf8().constData(),&scene,error,sizeof(error))==EngineSceneOk,"recover actual scene through DLL");
+            size_t count=0; EngineSceneInfo sceneInfo{};
+            api.readActiveScene(api.context,&sceneInfo,[](void* p,const EngineSceneObjectInfo*){++*static_cast<size_t*>(p);},&count);
+            Check(count==7,"all unsaved objects recovered");
+            Check(!info["moduleSha256"].toString().isEmpty(),"recovery records game build identity");
+            std::puts("Recovery process-restart checks passed"); return 0;
+        }
         Check(host.Start(), "start Qt editor");
+        Ui([](auto* window) {
+            Check(QCoreApplication::eventDispatcher() == QAbstractEventDispatcher::instance(),
+                  "Qt main event dispatcher belongs to the editor UI thread");
+            QEvent event(QEvent::User);
+            QApplication::sendEvent(window, &event);
+        });
         auto pump = [&] { host.Update(0.016); Check(api.frame(api.context, 0.016) == EngineSceneOk, "editor render frame"); Sleep(10); };
         int waitIndex = 0;
         auto until = [&](const std::function<bool()>& predicate) {
@@ -197,6 +273,173 @@ int wmain(int argc, wchar_t** argv)
             for (int i = 0; i < 30; ++i) pump();
         };
         until([&] { return host.ViewportActive(); });
+        if (argc == 4 && std::wstring(argv[3]) == L"--hud-restart") {
+            std::fprintf(stderr,"HUD restart: viewport ready\n");
+            Ui([&](auto* w) {
+                QTimer::singleShot(60,w,[]{
+                    auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());
+                    std::fprintf(stderr,"HUD restart dialog: %s\n",dialog?dialog->windowTitle().toUtf8().constData():"none");
+                    Check(dialog,"HUD settings after process restart");
+                    auto* choice=dialog->findChild<QComboBox*>("ProjectHudChoice");
+                    Check(choice&&choice->currentData().toString()=="UI/EditorHud.ui","HUD selection persists across process restart");
+                    choice->setCurrentIndex(choice->findData(QString()));
+                    std::fprintf(stderr,"HUD restart selection: %d '%s'\n",choice->currentIndex(),choice->currentData().toString().toUtf8().constData());
+                    dialog->findChild<QDialogButtonBox*>()->button(QDialogButtonBox::Ok)->click();
+                });
+                w->ShowHudSettings();
+                std::fprintf(stderr,"HUD restart: saved None\n");
+                QFile setting(QString::fromStdWString((root/"Content/ProjectHud.txt").wstring()));
+                Check(setting.open(QIODevice::ReadOnly)&&setting.readAll().trimmed().isEmpty(),"None saved through HUD settings");
+                QTimer::singleShot(60,w,[]{
+                    auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());
+                    Check(dialog->findChild<QComboBox*>("ProjectHudChoice")->currentData().toString().isEmpty(),"None persists on reopening");
+                    dialog->reject();
+                });
+                w->ShowHudSettings();
+            });
+            std::fprintf(stderr,"HUD restart: settings checked\n");
+            Ui([](auto* w){Action(w,QStringLiteral("▶ Play"))->trigger();});
+            until([&]{return host.PlayState()==EditorQtHost::Play;});
+            Ui([](auto* w){Action(w,QStringLiteral("⏹ Stop"))->trigger();});
+            until([&]{return host.PlayState()==EditorQtHost::Edit;});
+            std::fprintf(stderr,"HUD restart: Play/Stop checked\n");
+            Ui([](auto* w){w->close();});until([&]{return exit;});
+            host.SetModuleApi({}); factory.destroy(api.context); sessionGuard.context=nullptr; host.Stop();
+            std::printf("HUD restart/None: %d checks passed\n",checks);return 0;
+        }
+        Ui([](auto* w){
+            ObjectInspectorPanel panel(w);EditorQtHost::Snapshot view;
+            EditorQtHost::SceneObject object{};object.id=123;object.name="Property probe";object.type="UiProbe";
+            object.projectData=R"({"version":1,"speed":5,"enabled":true,"mode":"walk","target":123,"asset":"/Game/pixel.bmp"})";
+            object.propertySchema=R"({"version":1,"fields":[{"path":"/speed","type":"number","group":"Behavior/Movement","min":0,"max":20},{"path":"/enabled","type":"bool","group":"Behavior/Movement"},{"path":"/mode","type":"enum","options":[{"label":"Walk","value":"walk"}]},{"path":"/target","type":"object"},{"path":"/asset","type":"asset"}]})";
+            view.objects.push_back(object);panel.Refresh(view,123,true);
+            auto* number=panel.findChild<QDoubleSpinBox*>("Property/speed");auto* check=panel.findChild<QCheckBox*>("Property/enabled");
+            auto* mode=panel.findChild<QComboBox*>("Property/mode");auto* target=panel.findChild<QComboBox*>("Property/target");
+            Check(number&&number->value()==5&&number->maximum()==20,"typed numeric value and bounds");
+            Check(check&&check->isChecked(),"typed boolean");Check(mode&&mode->currentText()=="Walk","typed enum");Check(target&&target->currentText()=="Property probe","typed object reference");
+            Check(panel.findChild<QLineEdit*>("Property/asset")->text()=="/Game/pixel.bmp","typed asset path");
+            QString path,value;quint64 selected=0;QObject::connect(&panel,&ObjectInspectorPanel::PropertyEditingFinished,&panel,[&](auto id,const auto& p,const auto& v){selected=id;path=p;value=v;});
+            number->setValue(7);QMetaObject::invokeMethod(number,"editingFinished");Check(selected==123&&path=="/speed"&&value=="7","typed property signal contains scalar JSON");
+            auto* header=panel.findChild<QToolButton*>("Section.UiProbe/Behavior/Movement");Check(header!=nullptr,"nested collapsible section");
+            const bool wasOpen=header->isChecked();header->setChecked(false);
+            Check(static_cast<PropertySection*>(header->parentWidget())->body->isHidden(),"collapse hides section body");
+            panel.Refresh(view,123,false);Check(panel.findChild<QDoubleSpinBox*>("Property/speed")==number&&!header->isChecked(),"refresh preserves widget and collapse state");
+            {ObjectInspectorPanel restored(w);restored.Refresh(view,123,true);Check(!restored.findChild<QToolButton*>("Section.UiProbe/Behavior/Movement")->isChecked(),"collapsed hierarchy persists across inspector recreation");}
+            header->setChecked(wasOpen);
+        });
+
+
+        if(argc==4&&std::wstring(argv[3])==L"--layout") {
+            int height=0;QPoint boundary;
+            Ui([&](auto* w){
+                QDockWidget* files=nullptr;for(auto* d:w->template findChildren<QDockWidget*>())if(d->objectName()==QStringLiteral("ContentDock"))files=d;
+                Check(files!=nullptr,"content dock exists");files->raise();w->resize(1600,950);
+                std::printf("Layout before: content=%d min=%d max=%d features=%d area=%d\n",files->height(),files->minimumHeight(),files->maximumHeight(),int(files->features()),int(w->dockWidgetArea(files)));
+                Action(w,QStringLiteral("Ресурсы: компактная панель"))->trigger();
+            });for(int i=0;i<15;++i)pump();
+            Ui([](auto* w){w->resize(1800,1100);});for(int i=0;i<15;++i)pump();
+            Ui([&](auto* w){QDockWidget* files=nullptr;for(auto* d:w->template findChildren<QDockWidget*>())if(d->objectName()==QStringLiteral("ContentDock"))files=d;
+                height=files->height();std::printf("Layout resized: content=%d\n",height);for(auto* d:w->findChildren<QDockWidget*>())std::printf("Dock %s: area=%d size=%dx%d min=%d visible=%d\n",d->objectName().toUtf8().constData(),int(w->dockWidgetArea(d)),d->width(),d->height(),d->minimumHeight(),d->isVisible());Check(height<=240,"compact panel does not consume most of the window");
+                boundary=QPoint(w->width()/2,files->mapTo(w,QPoint()).y()-w->style()->pixelMetric(QStyle::PM_DockWidgetSeparatorExtent)/2);
+                QMouseEvent press(QEvent::MouseButtonPress,boundary,w->mapToGlobal(boundary),Qt::LeftButton,Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(w,&press);
+            });for(int i=0;i<3;++i)pump();
+            Ui([&](auto* w){const auto end=boundary+QPoint(0,-90);QMouseEvent move(QEvent::MouseMove,end,w->mapToGlobal(end),Qt::NoButton,Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(w,&move);});for(int i=0;i<10;++i)pump();
+            Ui([&](auto* w){const auto end=boundary+QPoint(0,-90);QMouseEvent release(QEvent::MouseButtonRelease,end,w->mapToGlobal(end),Qt::LeftButton,Qt::NoButton,Qt::NoModifier);QApplication::sendEvent(w,&release);});for(int i=0;i<10;++i)pump();
+            Ui([&](auto* w){QDockWidget* files=nullptr;for(auto* d:w->template findChildren<QDockWidget*>())if(d->objectName()==QStringLiteral("ContentDock"))files=d;std::printf("Layout dragged: content=%d (before %d)\n",files->height(),height);Check(files->height()>height+40,"content separator drag resizes panel");
+                Action(w,QStringLiteral("Ресурсы: отдельное окно"))->trigger();Check(files->isFloating(),"content floats");w->addDockWidget(Qt::LeftDockWidgetArea,files);files->setFloating(false);Check(w->dockWidgetArea(files)==Qt::LeftDockWidgetArea,"content can dock at side");
+                const auto layout=w->saveState(1);Action(w,QStringLiteral("Сбросить расположение панелей"))->trigger();Check(!files->isFloating()&&w->dockWidgetArea(files)==Qt::BottomDockWidgetArea,"reset returns content below viewport");
+                Check(w->restoreState(layout,1)&&w->dockWidgetArea(files)==Qt::LeftDockWidgetArea,"panel layout restores by stable names");
+                Action(w,QStringLiteral("Сбросить расположение панелей"))->trigger();w->grab().save(QString::fromStdWString((root/"editor-layout.png").wstring()));w->close();});until([&]{return exit;});host.SetModuleApi({});factory.destroy(api.context);sessionGuard.context=nullptr;host.Stop();
+            std::printf("Layout EditorUiTests: %d checks passed\n",checks);return 0;
+        }
+        if(propertiesProject) {
+            EditorCommand add;add.type=EditorCommand::CreateObject;add.path="RotatingCube";add.name="PropertyCube";host.PostCommand(add);
+            auto value=[&](){for(const auto& o:host.ReadSnapshot().objects)if(o.name=="PropertyCube")return QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object()["speed"].toDouble(-1);return -1.0;};
+            until([&]{return value()==90;});
+            Ui([](auto* w){auto* spin=w->template findChild<QDoubleSpinBox*>("Property/speed");Check(spin&&spin->value()==90,"generated class property appears in inspector");spin->setValue(180);QMetaObject::invokeMethod(spin,"editingFinished");});
+            until([&]{return value()==180;});
+            bool brightness=false;Ui([&](auto* w){if(auto* field=w->template findChild<QDoubleSpinBox*>("Property/brightness")){brightness=true;field->setValue(0.25);QMetaObject::invokeMethod(field,"editingFinished");}});
+            if(brightness){
+                until([&]{for(const auto& o:host.ReadSnapshot().objects)if(o.name=="PropertyCube")return QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object()["brightness"].toDouble()==0.25;return false;});
+                Ui([&](auto* w){w->grab().save(QString::fromStdWString((root/"tutorial-properties.png").wstring()));Action(w,QStringLiteral("Отменить"))->trigger();});
+                until([&]{for(const auto& o:host.ReadSnapshot().objects)if(o.name=="PropertyCube")return QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object()["brightness"].toDouble()==1;return false;});
+            }
+            Ui([](auto* w){Action(w,QStringLiteral("Отменить"))->trigger();});until([&]{return value()==90;});
+            Ui([](auto* w){Action(w,QStringLiteral("Повторить"))->trigger();});until([&]{return value()==180;});
+            Ui([](auto* w){Action(w,QStringLiteral("Сохранить сцену"))->trigger();});until([&]{return !host.ReadSnapshot().dirty;});
+            Ui([](auto* w){Action(w,QStringLiteral("▶ Play"))->trigger();});until([&]{return host.PlayState()==EditorQtHost::Play;});Check(value()==180,"typed value survives Play copy");
+            Ui([](auto* w){Action(w,QStringLiteral("⏹ Stop"))->trigger();});until([&]{return host.PlayState()==EditorQtHost::Edit;});Check(value()==180,"Stop preserves authoring value");
+            Ui([](auto* w){w->close();});until([&]{return exit;});host.SetModuleApi({});factory.destroy(api.context);sessionGuard.context=nullptr;host.Stop();
+            std::printf("Properties EditorUiTests: %d checks passed\n",checks);return 0;
+        }
+        if(argc==4&&std::wstring(argv[3])==L"--authoring") {
+            Check(authoring.context!=nullptr,"authoring extension exposed");
+            const auto source=root/"Reimport.bmp";QImage original(2,2,QImage::Format_RGB32);original.fill(Qt::red);Check(original.save(QString::fromStdWString(source.wstring())),"write reimport source");
+            EditorCommand import;import.type=EditorCommand::ImportTexture;import.path=QString::fromStdWString(source.wstring());import.w=1;host.PostCommand(import);
+            const auto asset=root/"Content/Textures/Reimport.bmp";
+            until([&]{return std::filesystem::exists(asset);});
+            original.fill(Qt::blue);Check(original.save(QString::fromStdWString(source.wstring())),"change reimport source");
+            Ui([&](auto* w){w->UpdateAsset(QString::fromStdWString(asset.wstring()),false,QString::fromStdWString(source.wstring()));});
+            until([&]{return QImage(QString::fromStdWString(asset.wstring())).pixelColor(0,0)==QColor(Qt::blue);});
+            Check(host.ReadSnapshot().dirty&&!host.ReadSnapshot().canUndo,"asset update marks dirty and clears stale undo");
+            Ui([&](auto* w){w->UpdateAsset(QString::fromStdWString(asset.wstring()),true,"Images/Renamed.bmp");});
+            until([&]{return std::filesystem::exists(root/"Content/Images/Renamed.bmp");});
+            Check(!std::filesystem::exists(asset),"asset move replaces old location");
+            Ui([](auto* w){Action(w,QStringLiteral("Сохранить сцену"))->trigger();});until([&]{return !host.ReadSnapshot().dirty;});
+            Ui([](auto* w){w->close();});until([&]{return exit;});
+            host.SetModuleApi({});factory.destroy(api.context);sessionGuard.context=nullptr;host.Stop();
+            std::printf("Authoring EditorUiTests: %d checks passed\n",checks);return 0;
+        }
+
+        if (argc == 4 && std::wstring(argv[3]) == L"--workflow") {
+            for(int i=0;i<3;++i){EditorCommand add;add.type=EditorCommand::CreateObject;add.path="Primitive.Cube";add.name=QString("Batch %1").arg(i);host.PostCommand(add);}
+            until([&]{return host.ReadSnapshot().objects.size()==7;});
+            auto view=host.ReadSnapshot();std::vector<uint64_t> ids;
+            for(const auto& o:view.objects)if(o.name.find("Batch ")==0)ids.push_back(o.id);
+            Check(ids.size()==3,"three group objects");
+            EditorCommand select;select.type=EditorCommand::SelectObject;select.objectIds=ids;select.objectId=ids.front();host.PostCommand(select);
+            until([&]{return host.ReadSnapshot().selectedIds.size()==3;});
+            Ui([&](auto* w) {
+                auto* tree=w->template findChild<QTreeWidget*>();
+                Check(tree->selectionMode()==QAbstractItemView::ExtendedSelection,"group hierarchy is enabled");
+                tree->clearSelection();
+                for(int i=0;i<tree->topLevelItemCount();++i) {
+                    auto* item=tree->topLevelItem(i);
+                    if(item->text(0).startsWith("Batch "))item->setSelected(true);
+                }
+            });
+            until([&]{return host.ReadSnapshot().selectedIds.size()==3;});
+            EditorCommand drag;drag.type=EditorCommand::BeginGizmoDrag;drag.objectId=ids.front();host.PostCommand(drag);
+            EditorCommand change;change.type=EditorCommand::UpdateObjectTransform;change.objectId=ids.front();change.path="gizmo";change.transform.position[0]=5;host.PostCommand(change);
+            change.transform.position[0]=10;host.PostCommand(change);
+            drag.type=EditorCommand::EndGizmoDrag;host.PostCommand(drag);
+            until([&]{for(const auto& o:host.ReadSnapshot().objects)if(o.id==ids.front())return o.transform.position[0]==10;return false;});
+            EditorCommand duplicate;duplicate.type=EditorCommand::DuplicateObject;duplicate.objectId=ids.front();host.PostCommand(duplicate);
+            until([&]{return host.ReadSnapshot().objects.size()==10;});
+            EditorCommand undo;undo.type=EditorCommand::Undo;host.PostCommand(undo);
+            until([&]{return host.ReadSnapshot().objects.size()==7;});
+            Check(host.ReadSnapshot().dirty,"group undo leaves document unsaved");
+            host.PostCommand(undo);
+            until([&]{for(const auto& o:host.ReadSnapshot().objects)if(o.name.find("Batch ")==0 && o.transform.position[0]!=0)return false;return true;});
+            EditorCommand redo;redo.type=EditorCommand::Redo;host.PostCommand(redo);
+            until([&]{for(const auto& o:host.ReadSnapshot().objects)if(o.name.find("Batch ")==0 && o.transform.position[0]!=10)return false;return true;});
+            const QJsonValue before=RecoveryStore::Read(QString::fromStdString(manifest))["startupScene"];
+            EditorCommand save;save.type=EditorCommand::SaveScene;save.path=QString::fromStdWString((root/"Content/Scenes/Other.scene.json").wstring());host.PostCommand(save);
+            until([&]{return !host.ReadSnapshot().dirty;});
+            Check(RecoveryStore::Read(QString::fromStdString(manifest))["startupScene"]==before,"Save does not change startupScene");
+            Ui([](auto* w){Action(w,QStringLiteral("Сделать стартовой сценой"))->trigger();});
+            until([&]{return RecoveryStore::Read(QString::fromStdString(manifest))["startupScene"].toString().endsWith("Other.scene.json");});
+            view=host.ReadSnapshot();select.objectIds.clear();select.objectId=view.objects.front().id;host.PostCommand(select);
+            until([&]{return host.ReadSnapshot().selected==select.objectId;});
+            change.objectId=select.objectId;change.path.clear();change.transform=view.objects.front().transform;change.transform.position[1]+=3;host.PostCommand(change);
+            until([&]{return host.ReadSnapshot().dirty;});
+            EditorCommand recover;recover.type=EditorCommand::WriteRecovery;host.PostCommand(recover);
+            for(int i=0;i<30;++i)pump();
+            Check(RecoveryStore::Candidates(QString::fromStdString(manifest)).isEmpty(),"live editor is not offered for recovery");
+            std::puts("Group UI and save checks passed; simulating process crash"); std::fflush(stdout);
+            TerminateProcess(GetCurrentProcess(),0); return 0;
+        }
+
         Ui([&](auto* w) {
             CodeClassDialog dialog(QString::fromStdWString(root.wstring()), w);
             auto* name = dialog.findChild<QLineEdit*>("ClassName");
@@ -226,11 +469,7 @@ int wmain(int argc, wchar_t** argv)
             const auto original = host.ReadSnapshot().objects.size();
             Ui([](auto* w) {
                 Check(Action(w,QStringLiteral("Добавить C++ в проект…")) && Action(w,QStringLiteral("Добавить C++ класс…")) && Action(w,QStringLiteral("Перекомпилировать / Hot Reload")),"C++ workflow actions visible");
-                  auto* category=w->findChild<QComboBox*>(QStringLiteral("ObjectCategory"));category->setCurrentIndex(category->findData(QStringLiteral("all")));
-                auto* palette=w->findChild<QComboBox*>(QStringLiteral("PrimitiveType"));
-                const auto index=palette->findData(QStringLiteral("RulesObject"));
-                Check(index>=0,"independent hierarchy visible in palette");
-                palette->setCurrentIndex(index);w->findChild<QPushButton*>(QStringLiteral("AddPrimitive"))->click();
+                CreateAction(w,"RulesObject")->trigger();
             });
             until([&]{return host.ReadSnapshot().objects.size()==original+1;});
             bool classesVisible=false;
@@ -251,10 +490,7 @@ int wmain(int argc, wchar_t** argv)
             Ui([](auto* w){Action(w,QStringLiteral("Отменить"))->trigger();});
             until([&]{return host.ReadSnapshot().objects.size()==original+1;});
               Ui([](auto* w) {
-                  auto* palette=w->findChild<QComboBox*>(QStringLiteral("PrimitiveType"));
-                  const auto index=palette->findData(QStringLiteral("ProjectComponent"));
-                  Check(index>=0,"custom component visible");
-                  palette->setCurrentIndex(index);w->findChild<QPushButton*>(QStringLiteral("AddPrimitive"))->click();
+                  CreateAction(w,"ProjectComponent")->trigger();
               });
               until([&]{return host.ReadSnapshot().objects.size()==original+2;});
               const auto dataObject=host.ReadSnapshot().selected;
@@ -273,7 +509,7 @@ int wmain(int argc, wchar_t** argv)
             until([&]{return host.PlayState()==EditorQtHost::Play;});
             Ui([](auto* w){Action(w,QStringLiteral("⏹ Stop"))->trigger();});
             until([&]{return host.PlayState()==EditorQtHost::Edit;});
-            Ui([](auto* w){Action(w,QStringLiteral("Сохранить и сделать стартовой"))->trigger();});
+            Ui([](auto* w){Action(w,QStringLiteral("Сохранить сцену"))->trigger();});
             until([&]{return !host.ReadSnapshot().dirty;});
             Ui([](auto* w){w->close();});until([&]{return exit;});
             host.SetProjectDataApi({});host.SetModuleApi({});factory.destroy(api.context);sessionGuard.context=nullptr;host.Stop();
@@ -283,9 +519,8 @@ int wmain(int argc, wchar_t** argv)
         {
             const auto originalCount = host.ReadSnapshot().objects.size();
             Ui([](auto* w) {
-                auto* combo = w->findChild<QComboBox*>(QStringLiteral("PrimitiveType"));
-                Check(combo && combo->count() == 6,"legacy palette excludes unavailable lights");
-                combo->setCurrentIndex(0); w->findChild<QPushButton*>(QStringLiteral("AddPrimitive"))->click();
+                QList<QAction*> actions;for(auto* a:w->findChildren<QAction*>())if(a->objectName().startsWith("CreateObject."))actions.push_back(a);
+                Check(actions.size()==6,"legacy menu excludes unavailable lights");actions.front()->trigger();
             });
             until([&] { return host.ReadSnapshot().objects.size() == originalCount + 1; });
             auto selectedX = [&] { const auto view = host.ReadSnapshot(); for (const auto& o : view.objects) if (o.id == view.selected) return o.transform.position[0]; return -999.0f; };
@@ -302,7 +537,7 @@ int wmain(int argc, wchar_t** argv)
             until([&] { return !host.ReadSnapshot().selected; });
             Ui([](auto* w) { Action(w,QStringLiteral("Повторить"))->trigger(); });
             until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.transform.position[0] == 3.5f) return true; return false; });
-            Ui([](auto* w) { Action(w,QStringLiteral("Сохранить и сделать стартовой"))->trigger(); });
+            Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); });
             until([&] { return !host.ReadSnapshot().dirty; });
             Ui([](auto* w) { Action(w,QStringLiteral("▶ Play"))->trigger(); });
             until([&] { return host.PlayState() == EditorQtHost::Play; });
@@ -317,16 +552,9 @@ int wmain(int argc, wchar_t** argv)
             return 0;
         }
         Ui([](auto* w) {
-            auto* category=w->findChild<QComboBox*>(QStringLiteral("ObjectCategory"));
-            auto* types=w->findChild<QComboBox*>(QStringLiteral("PrimitiveType"));
-            Check(types->count()==6,"default shows only primitives");
-            category->setCurrentIndex(category->findData(QStringLiteral("Particle.")));
-            Check(types->count()==2 && types->findData(QStringLiteral("Particle.Sparks"))>=0 && types->findData(QStringLiteral("Particle.Smoke"))>=0,"two particle presets in category");
-            category->setCurrentIndex(category->findData(QStringLiteral("Environment.")));
-            Check(types->count()==1 && types->currentData().toString()=="Environment.Sky","sky category");
-            category->setCurrentIndex(category->findData(QStringLiteral("project")));
-            Check(types->findData("Gameplay.PlaySettings")<0,"service settings not placeable");
-            Check(types->count()==0&&!w->findChild<QPushButton*>(QStringLiteral("AddPrimitive"))->isEnabled(),"empty category cannot spawn");
+            Check(CreateAction(w,"Particle.Sparks") && CreateAction(w,"Particle.Smoke"),"particle presets available");
+            Check(CreateAction(w,"Environment.Sky"),"sky available");
+            Check(!w->findChild<QAction*>("CreateObject.Gameplay.PlaySettings"),"service settings not placeable");
             Check(w->findChild<QTreeWidget*>()->topLevelItemCount() == 4, "starter hierarchy"); Add(w, 0);
         });
         until([&] { return host.ReadSnapshot().objects.size() == 5; });
@@ -334,12 +562,14 @@ int wmain(int argc, wchar_t** argv)
         until([&] { return host.ReadSnapshot().objects.size() == 6; });
         const auto imagePath = QString::fromStdWString((root / L"outside.bmp").wstring());
         Ui([&](auto* w) {
-            Check(w->findChild<QToolButton*>()->menu() != nullptr, "imports grouped into menu");
+            Check(w->findChild<QToolButton*>("ImportAssets")->menu() != nullptr, "imports grouped into menu");
             Check(w->findChild<QPushButton*>("ChooseModel") != nullptr, "model picker exists");
             Check(w->findChild<QLineEdit*>("ModelAsset")->isReadOnly() && w->findChild<QLineEdit*>("TextureAsset")->isReadOnly(), "asset paths locked");
-            for (const auto& title : {QStringLiteral("Общие"),QStringLiteral("Позиция"),QStringLiteral("Поворот"),QStringLiteral("Масштаб"),QStringLiteral("Визуал"),QStringLiteral("Добавление объекта")}) {
+            for (const auto& title : {QStringLiteral("Общие"),QStringLiteral("Трансформация"),QStringLiteral("Геометрия"),QStringLiteral("Материал")}) {
                 bool found=false; for (auto* group : w->template findChildren<QGroupBox*>()) found |= group->title()==title;
-                Check(found,"inspector and placement categories");
+                for(auto* header:w->template findChildren<QToolButton*>())found|=header->objectName().startsWith("Section.")&&header->text()==title;
+                for(auto* button:w->template findChildren<QPushButton*>()) found|=button->objectName()=="CardHeaderBtn" && button->text().contains(title);
+                Check(found,"inspector card categories");
             }
             for (auto* button : w->template findChildren<QPushButton*>()) Check(button->text()!=QStringLiteral("Дубликат") && button->text()!=QStringLiteral("Удалить"),"no redundant hierarchy buttons");
             auto* visibility=w->findChild<QComboBox*>("FileVisibility");
@@ -591,7 +821,7 @@ int wmain(int argc, wchar_t** argv)
             for (int i = 0; i < tree->topLevelItemCount(); ++i) if (tree->topLevelItem(i)->text(1) == QStringLiteral("Primitive.Sphere")) tree->setCurrentItem(tree->topLevelItem(i));
         });
         until([&] { return selectedX() == 3.25f; });
-        Ui([](auto* w) { auto* x = w->findChild<QDoubleSpinBox*>(QStringLiteral("Transform0")); x->setFocus(); x->setValue(4.5); Action(w, QStringLiteral("Сохранить и сделать стартовой"))->trigger(); });
+        Ui([](auto* w) { auto* x = w->findChild<QDoubleSpinBox*>(QStringLiteral("Transform0")); x->setFocus(); x->setValue(4.5); Action(w, QStringLiteral("Сохранить сцену"))->trigger(); });
         until([&] { return selectedX() == 4.5f && !host.ReadSnapshot().dirty; });
         QFile file(QString::fromStdWString(sceneFile.wstring())); Check(file.open(QIODevice::ReadOnly), "saved scene readable");
         Check(QJsonDocument::fromJson(file.readAll()).object().value(QStringLiteral("objects")).toArray().size() == 6, "UI save persists all objects"); file.close();
@@ -649,11 +879,11 @@ int wmain(int argc, wchar_t** argv)
             selectedLight().transform.position[0] == -2, "duplicate preserves light properties and offsets position");
         Ui([](auto* w) { Action(w, QStringLiteral("Удалить объект"))->trigger(); });
         until([&] { return host.ReadSnapshot().objects.size() == 7; });
-        Ui([](auto* w) { Action(w, QStringLiteral("Сохранить и сделать стартовой"))->trigger(); });
+        Ui([](auto* w) { Action(w, QStringLiteral("Сохранить сцену"))->trigger(); });
         until([&] { return !host.ReadSnapshot().dirty; });
         Ui([](auto* w) { Action(w, QStringLiteral("▶ Play"))->trigger(); });
         until([&] { return host.PlayState() == EditorQtHost::Play; });
-        Ui([](auto* w) { Check(!w->findChild<QPushButton*>(QStringLiteral("AddPrimitive"))->isEnabled(), "editing disabled during Play"); Action(w, QStringLiteral("⏹ Stop"))->trigger(); });
+        Ui([](auto* w) { Check(!w->findChild<QPushButton*>(QStringLiteral("SceneAddButton"))->isEnabled(), "editing disabled during Play"); Action(w, QStringLiteral("⏹ Stop"))->trigger(); });
         until([&] { return host.PlayState() == EditorQtHost::Edit; });
         Ui([](auto* w) {
             auto* tree = w->findChild<QTreeWidget*>();
@@ -668,15 +898,55 @@ int wmain(int argc, wchar_t** argv)
         Ui([](auto*) { qobject_cast<QMessageBox*>(QApplication::activeModalWidget())->done(QMessageBox::Cancel); });
         for (int i = 0; i < 30; ++i) pump();
         Check(host.ReadSnapshot().objects.size() == 7 && host.ReadSnapshot().dirty, "cancel New keeps scene");
+        Ui([&](auto* w) {
+            const auto file=QString::fromStdWString((root/"Content/UI/EditorHud.ui").wstring());
+            Check(!QFile::exists(QString::fromStdWString((root/"Content/ProjectHud.txt").wstring())),"new project has no HUD selection");
+            Check(w->CreateUI(file)==file,"create UI through editor");
+            UIEditorWindow* ui=nullptr;for(auto* widget:QApplication::topLevelWidgets())if(auto* candidate=dynamic_cast<UIEditorWindow*>(widget))if(QFileInfo(candidate->FilePath()).absoluteFilePath()==QFileInfo(file).absoluteFilePath())ui=candidate;
+            Check(ui&&ui->Root(),"visual UI editor loaded");
+            ui->AddElement("Panel");auto* panel=dynamic_cast<UIPanel*>(ui->Selected());Check(panel,"add panel");
+            panel->Padding={8,9,10,11};panel->BorderWidth=3;panel->bInteractive=true;
+            ui->AddElement("Label");auto* label=dynamic_cast<UILabel*>(ui->Selected());Check(label&&label->GetParent()==panel,"label nested in panel");
+            auto* text=ui->findChild<QLineEdit*>("UIText");text->setText(QStringLiteral("Здоровье & энергия"));QMetaObject::invokeMethod(text,"editingFinished",Qt::DirectConnection);
+            ui->findChild<QDoubleSpinBox*>("UIRect0")->setValue(24);
+            ui->findChild<QComboBox*>("UIAnchor")->setCurrentIndex(int(UIAnchor::TopRight));
+            Check(label->GetText()=="Здоровье & энергия"&&label->Rect.X==24&&label->Rect.Anchor==UIAnchor::TopRight,"inspector changes label");
+            ui->Select(panel);ui->AddElement("Button");Check(dynamic_cast<UIButton*>(ui->Selected()),"add button");
+            ui->findChild<QDoubleSpinBox*>("UIRect1")->setValue(80);
+            QTimer::singleShot(60,ui,[]{auto* dialog=qobject_cast<QColorDialog*>(QApplication::activeModalWidget());Check(dialog,"UI color dialog");dialog->setCurrentColor(QColor(32,180,210,128));dialog->accept();});
+            ui->findChild<QPushButton*>("UIColor")->click();
+            Check(std::abs(dynamic_cast<UIButton*>(ui->Selected())->Color.a-128.0f/255)<0.01,"UI color alpha");
+            ui->Select(panel);ui->AddElement("Bar");ui->findChild<QDoubleSpinBox*>("UIRect1")->setValue(130);
+            Check(ui->Save(),"save UI atomically");Check(ui->Reload(),"reload UI");
+            auto* loaded=dynamic_cast<UIPanel*>(ui->Root()->Find("panel1"));Check(loaded&&loaded->Padding.Left==8&&loaded->BorderWidth==3&&loaded->bInteractive,"unexposed supported properties survive save");
+            Check(ui->Root()->FindAs<UILabel>("label1")->GetText()=="Здоровье & энергия","escaped UTF8 text round trip");
+            ui->findChild<QComboBox*>("UIPreviewSize")->setCurrentIndex(2);QApplication::processEvents();
+            Check(ui->findChild<QWidget*>("UICanvas")->grab().toImage().size().width()>0,"preview without Play");
+            auto* canvas=ui->findChild<QWidget*>("UICanvas");auto* button=ui->Root()->FindAs<UIButton>("button1");
+            const double scale=std::min(double(canvas->width())/800,double(canvas->height())/600);
+            const auto box=button->GetBox();const QPointF point((box.X+8)*scale,(box.Y+8)*scale);const float oldX=button->Rect.X;
+            QMouseEvent press(QEvent::MouseButtonPress,point,point,Qt::LeftButton,Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(canvas,&press);
+            Check(ui->Selected()==button,"canvas selection synchronizes hierarchy and inspector");
+            QMouseEvent move(QEvent::MouseMove,point+QPointF(20*scale,10*scale),point+QPointF(20*scale,10*scale),Qt::NoButton,Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(canvas,&move);
+            QMouseEvent release(QEvent::MouseButtonRelease,point,point,Qt::LeftButton,Qt::NoButton,Qt::NoModifier);QApplication::sendEvent(canvas,&release);
+            Check(std::abs(button->Rect.X-oldX-20)<0.01,"canvas drag updates runtime rect");Check(ui->Save(),"save drag");
+            QApplication::processEvents();
+            ui->grab().save(QString::fromStdWString((root/"ui-editor.png").wstring()));
+            ui->Select(loaded);ui->AddElement("Label");auto deleted=ui->Selected()->Name;ui->DeleteSelected();Check(!ui->Root()->Find(deleted),"delete UI element");Check(ui->Save(),"save after delete");
+            QTimer::singleShot(60,w,[]{auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());Check(dialog,"HUD settings dialog");auto* choice=dialog->findChild<QComboBox*>("ProjectHudChoice");Check(choice&&choice->currentData().toString().isEmpty(),"HUD defaults to none");int index=choice->findData("UI/EditorHud.ui");Check(index>=0,"existing UI listed");choice->setCurrentIndex(index);dialog->findChild<QDialogButtonBox*>()->button(QDialogButtonBox::Ok)->click();});
+            w->ShowHudSettings();
+            QTimer::singleShot(60,w,[&]{auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());auto* choice=dialog->findChild<QComboBox*>("ProjectHudChoice");Check(choice->currentData().toString()=="UI/EditorHud.ui","HUD selection survives reopening settings");dialog->grab().save(QString::fromStdWString((root/"hud-settings.png").wstring()));dialog->reject();});w->ShowHudSettings();
+            ui->close();
+        });
         Ui([](auto* w) { w->close(); });
         until([&] { bool modal = false; Ui([&](auto*) { modal = qobject_cast<QMessageBox*>(QApplication::activeModalWidget()) != nullptr; }); return modal; });
         Check(!exit, "unsaved close waits for a decision");
         Ui([](auto*) { auto* box = qobject_cast<QMessageBox*>(QApplication::activeModalWidget()); Check(box, "unsaved changes prompt"); box->done(QMessageBox::Cancel); });
         for (int i = 0; i < 30; ++i) pump();
         Check(!exit && host.ReadSnapshot().dirty, "cancel preserves editing session");
-        Ui([](auto* w) { Action(w, QStringLiteral("Сохранить и сделать стартовой"))->trigger(); });
+        Ui([](auto* w) { Action(w, QStringLiteral("Сохранить сцену"))->trigger(); });
         until([&] { return !host.ReadSnapshot().dirty; });
-        Ui([](auto* w) { Add(w,10); });
+        Ui([](auto* w) { Add(w,11); });
         until([&] { for(const auto& o:host.ReadSnapshot().objects)if(o.gameplayKind==1)return true;return false; });
         Ui([](auto* w) {
             auto* speed=w->findChild<QDoubleSpinBox*>("CharacterSpeed"); Check(speed && speed->isVisible(),"character settings in inspector");
@@ -698,7 +968,7 @@ int wmain(int argc, wchar_t** argv)
             Action(w,QStringLiteral("Служебные объекты сцены"))->setChecked(true);Check(hasSettings(),"old service records remain accessible for repair");
             Action(w,QStringLiteral("Служебные объекты сцены"))->setChecked(false);Check(!hasSettings(),"service records can be hidden again");
         });
-        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить и сделать стартовой"))->trigger(); });
+        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); });
         until([&] { return !host.ReadSnapshot().dirty; });
         Ui([](auto* w) { Action(w,QStringLiteral("▶ Play"))->trigger(); });until([&]{return host.PlayState()==EditorQtHost::Play;});
         auto heroZ=[&]{float z=999;EngineSceneInfo info{};api.readActiveScene(api.context,&info,[](void* p,const EngineSceneObjectInfo* o){if(std::string(o->typeName)=="Gameplay.Character")*static_cast<float*>(p)=o->transform.position[2];},&z);return z;};
@@ -710,6 +980,59 @@ int wmain(int argc, wchar_t** argv)
         for(int i=0;i<10;++i)pump();Check(heroZ()==stopped,"typing in editor does not move character");
         Ui([](auto* w){delete w->template findChild<QLineEdit*>("InputTextProbe");Action(w,QStringLiteral("⏹ Stop"))->trigger();});until([&]{return host.PlayState()==EditorQtHost::Edit;});
         Check(heroZ()==0,"Stop restores authored character");
+        auto sunObject = [&] {
+            for (const auto& object : host.ReadSnapshot().objects) if(object.type=="Light.Directional") return object;
+            return EditorQtHost::SceneObject{};
+        };
+        auto sunSettings = [&] { return QJsonDocument::fromJson(QByteArray::fromStdString(sunObject().projectData)).object(); };
+        Ui([](auto* w) { Action(w,QStringLiteral("Направленный свет"))->trigger(); });
+        until([&] { return sunObject().id && host.ReadSnapshot().selected==sunObject().id; });
+        const auto withSun = host.ReadSnapshot().objects.size();
+        Ui([](auto* w) {
+            auto* intensity=w->template findChild<QDoubleSpinBox*>("Property/intensity");
+            auto* color=w->template findChild<QPushButton*>("Property/color");
+            Check(intensity && color && w->template findChild<QCheckBox*>("Property/shadows"),"directional light inspector controls");
+            intensity->setValue(2.5);QMetaObject::invokeMethod(intensity,"editingFinished",Qt::DirectConnection);
+        });
+        until([&] { return sunSettings()["intensity"].toDouble()==2.5; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Отменить"))->trigger(); });
+        until([&] { return sunSettings()["intensity"].toDouble()==1; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Повторить"))->trigger(); });
+        until([&] { return sunSettings()["intensity"].toDouble()==2.5; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Направленный свет"))->trigger(); });
+        until([&] { return host.ReadSnapshot().selected==sunObject().id; });
+        Check(host.ReadSnapshot().objects.size()==withSun,"global sun action selects existing singleton");
+        Ui([](auto* w) {
+            auto* yaw=w->template findChild<QDoubleSpinBox*>("Transform4");yaw->setValue(65);
+            QMetaObject::invokeMethod(yaw,"editingFinished",Qt::DirectConnection);
+            w->template findChild<QCheckBox*>("Property/shadows")->click();
+        });
+        until([&] { return !sunSettings()["shadows"].toBool(); });
+        const auto sunRotation = sunObject().transform;
+        Check(std::abs(sunRotation.rotation[1])>0.1f,"inspector rotates directional light");
+        Ui([](auto* w) {
+            QTimer::singleShot(80,w,[]{
+                auto* dialog=qobject_cast<QColorDialog*>(QApplication::activeModalWidget());Check(dialog,"sun color dialog");
+                dialog->setCurrentColor(QColor::fromRgbF(0.2,0.6,1));dialog->accept();
+            });
+            w->template findChild<QPushButton*>("Property/color")->click();
+        });
+        until([&] { return std::abs(sunSettings()["color"].toArray()[0].toDouble()-0.2)<0.01; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); });
+        until([&] { return !host.ReadSnapshot().dirty; });
+        Ui([](auto* w) { Action(w,QStringLiteral("▶ Play"))->trigger(); });
+        until([&] { return host.PlayState()==EditorQtHost::Play; });
+        Check(sunSettings()["intensity"].toDouble()==2.5,"Play keeps authored sun");
+        Ui([](auto* w) { Action(w,QStringLiteral("⏹ Stop"))->trigger(); });
+        until([&] { return host.PlayState()==EditorQtHost::Edit; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Направленный свет"))->trigger(); });
+        until([&] { return host.ReadSnapshot().selected==sunObject().id; });
+        Ui([&](auto* w) { w->grab().save(QString::fromStdWString((root / "directional-light-inspector.png").wstring())); Action(w,QStringLiteral("Удалить объект"))->trigger(); });
+        until([&] { return !sunObject().id; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Отменить"))->trigger(); });
+        until([&] { return sunObject().id && sunSettings()["intensity"].toDouble()==2.5; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); });
+        until([&] { return !host.ReadSnapshot().dirty; });
         Ui([](auto* w) { w->close(); });
         until([&] { return exit; });
         host.SetModuleApi({}); factory.destroy(api.context); sessionGuard.context = nullptr; host.Stop();

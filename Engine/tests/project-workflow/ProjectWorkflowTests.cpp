@@ -119,6 +119,109 @@ static void CheckLightPixels(HWND window, const std::filesystem::path& content)
     game.SetEditorSelection(cubeId);game.RenderViewportFrame(0);
     game.SaveCapture(std::filesystem::temp_directory_path()/"engine-effects-selection.bmp");
 }
+static void CheckShadowPixels(HWND window)
+{
+    LightCaptureGame game;
+    game.SetRenderingType(Custom); game.SetSimulationEnabled(false); game.SetVSync(false);
+    game.SetSceneLightingEnabled(true);
+    Check(game.InitializeViewport(window, 640, 480, true), "attach shadow pixel viewport");
+    game.GetPlayer()->SetPosition({0, 3, 6});
+    game.GetPlayer()->Rotate(0, -0.4f);
+    auto cube = SceneProject::GetComponentTypes().Find("Primitive.Cube")->create();
+    cube->SetPosition({0, 0.5f, 0});
+    Check(game.GetScene().AddComponent("caster", cube, "Primitive.Cube").result == SceneResult::Ok, "add shadow caster");
+    auto floor = SceneProject::GetComponentTypes().Find("Primitive.Plane")->create();
+    floor->SetScale({10, 1, 10});
+    Check(game.GetScene().AddComponent("floor", floor, "Primitive.Plane").result == SceneResult::Ok, "add shadow receiver");
+    Check(game.RenderViewportFrame(0), "render scene without a sun");
+    const auto dark = game.pixels;
+    const auto center = (240 * 640 + 320) * 4;
+    Check(dark[center] == 0 && dark[center+1] == 0 && dark[center+2] == 0,
+        "ordinary geometry has no hidden ambient or default sun");
+    auto sun = SceneProject::GetComponentTypes().Find("Light.Directional")->create();
+    auto* light = static_cast<DirectionalLightComponent*>(sun.get());
+    auto settings = ProjectLibrary::Json::parse(light->SaveProjectData());
+    settings["shadows"] = false; light->LoadProjectData(settings.dump());
+    const auto added = game.GetScene().AddComponent("sun", sun, "Light.Directional");
+    Check(added.result == SceneResult::Ok, "add explicit directional light");
+    Check(game.RenderViewportFrame(0), "render without shadows");
+    const auto before = game.pixels;
+    Check(before != dark, "adding sun lights geometry");
+    settings["shadows"] = true; light->LoadProjectData(settings.dump());
+    Check(game.RenderViewportFrame(0) && game.AreShadowsActive(), "render with shadows");
+    size_t darkened = 0;
+    for (size_t i = 0; i < before.size(); i += 4)
+        if (int(before[i]) + before[i+1] + before[i+2] > int(game.pixels[i]) + game.pixels[i+1] + game.pixels[i+2] + 30)
+            ++darkened;
+    Check(darkened > 100, "cube casts a visible shadow onto the floor");
+    game.SaveCapture(std::filesystem::temp_directory_path() / "engine-editor-shadows.bmp");
+    const auto lit = game.pixels;
+    light->SetPosition({100, 200, -50}); light->SetScale({2, 3, 4});
+    Check(game.RenderViewportFrame(0) && game.pixels == lit, "sun position and scale do not affect light");
+    light->SetScale({-2, 3, 4});
+    Check(game.RenderViewportFrame(0) && game.pixels == lit, "negative sun scale does not reverse lighting");
+    light->SetRotation({-55, 65, 0});
+    Check(game.RenderViewportFrame(0) && game.pixels != lit, "sun rotation changes illumination and shadows");
+    settings["enabled"] = false; light->LoadProjectData(settings.dump());
+    Check(game.RenderViewportFrame(0) && game.pixels == dark && !game.AreShadowsActive(), "disabled sun leaves no light or shadows");
+    settings["enabled"] = true; settings["color"] = {0,1,0}; light->LoadProjectData(settings.dump());
+    Check(game.RenderViewportFrame(0) && game.pixels != dark, "sun color editable at runtime");
+    Check(game.GetFrameConstants().DirectionalLightColorIntensity.x == 0 && game.GetFrameConstants().DirectionalLightColorIntensity.y == 1, "authored color reaches GPU constants");
+    Check(game.GetScene().RemoveComponent(added.id) == SceneResult::Ok, "delete sun");
+    Check(game.RenderViewportFrame(0) && game.pixels == dark && !game.AreShadowsActive(), "deleted sun leaves no residual lighting");
+}
+
+static void CheckDirectionalAuthoring(const std::filesystem::path& modulePath,
+    const std::filesystem::path& content, const std::filesystem::path& root)
+{
+    GameEditModule module(modulePath, content);
+    const auto& api = module.Api();
+    const auto& authoring = module.AuthoringApi();
+    const auto& projectData = module.ProjectDataApi();
+    uint64_t id = 0, second = 123; char error[1024]{};
+    Check(api.scene.createObject(api.scene.context, "Light.Directional", "Sun", nullptr, &id) == EngineSceneOk, "create singleton sun via DLL");
+    Check(api.scene.createObject(api.scene.context, "Light.Directional", "Second sun", nullptr, &second) == EngineSceneInvalidArgument && !second, "second sun rejected");
+    auto read = [&](uint64_t object) {
+        std::string data;
+        Check(projectData.read(projectData.context, object, [](void* p, const char* value) { *static_cast<std::string*>(p) = value; }, &data) == EngineSceneOk, "read sun settings");
+        return ProjectLibrary::Json::parse(data);
+    };
+    auto set = [&](const char* path, const char* value) {
+        return authoring.setProperty(authoring.context, id, path, value, error, sizeof(error));
+    };
+    Check(set("/intensity", "2.5") == EngineSceneOk && set("/color", "[0.2,0.6,1]") == EngineSceneOk &&
+        set("/shadowDistance", "350") == EngineSceneOk && set("/shadows", "false") == EngineSceneOk, "edit sun through inspector API");
+    const auto authored = read(id);
+    Check(set("/color", "[2,0,0]") != EngineSceneOk && set("/intensity", "-1") != EngineSceneOk &&
+        set("/shadowDistance", "1") != EngineSceneOk && read(id) == authored, "invalid sun settings preserve previous values");
+    const auto& batch = module.BatchApi(); uint64_t output = 0;
+    Check(batch.apply(batch.context, EngineBatchDuplicate, &id, 1, id, nullptr, &output, error, sizeof(error)) != EngineSceneOk &&
+        read(id) == authored, "batch duplicate cannot create second sun");
+    const auto file = (root / "sun.scene.json").u8string();
+    Check(api.saveScene(api.context, file.c_str(), error, sizeof(error)) == EngineSceneOk, "save sun scene");
+    const auto saved = SceneDocument::Read(std::filesystem::u8path(file));
+    Check(saved.documentVersion == 3 && saved.components.size() == 1, "sun persists in scene document");
+    Check(api.control(api.context, EnginePlay) == EngineSceneOk && read(id) == authored, "Play copies sun settings");
+    Check(set("/intensity", "1") == EngineSceneReadOnly, "sun inspector read-only during Play");
+    Check(api.control(api.context, EngineStop) == EngineSceneOk, "Stop restores authored sun");
+    Check(api.scene.removeObject(api.scene.context, id) == EngineSceneOk, "delete singleton");
+    uint64_t scene = 0;
+    Check(api.loadScene(api.context, file.c_str(), &scene, error, sizeof(error)) == EngineSceneOk && read(id) == authored, "reopen preserves sun properties");
+    auto invalid = saved; auto copy = invalid.components.front(); copy.id = 999; copy.name = "Second sun";
+    invalid.components.push_back(copy);
+    bool rejected = false;
+    try { SceneDocument::Validate(invalid, SceneProject::GetComponentTypes()); } catch (const SceneDocumentError&) { rejected = true; }
+    Check(rejected, "document rejects multiple suns before restoration");
+    Scene pending;
+    auto first = SceneProject::GetComponentTypes().Find("Light.Directional")->create();
+    auto another = SceneProject::GetComponentTypes().Find("Light.Directional")->create();
+    {
+        auto scope = pending.BeginUpdate();
+        Check(pending.AddComponent("first", first).result == SceneResult::Deferred && !first, "deferred sun owns singleton slot");
+        Check(pending.AddComponent("another", another).result == SceneResult::DuplicateSingleton && another, "pending duplicate retains ownership");
+    }
+}
+
 int wmain(int argc, wchar_t** argv)
 {
     try
@@ -149,7 +252,7 @@ int wmain(int argc, wchar_t** argv)
             std::vector<std::string> types;
             Check(api.scene.listTypes(api.scene.context, [](void* p, const EngineSceneTypeInfo* t) {
                 static_cast<std::vector<std::string>*>(p)->push_back(t->typeName);
-            }, &types) == EngineSceneOk && types.size() == 13, "primitives, light, particles and sky");
+            }, &types) == EngineSceneOk && types.size() == 14, "primitives, lights, particles and sky");
             Check(api.attachViewport(api.context, window, 640, 480) == EngineSceneOk, "attach real D3D viewport");
             Check(api.frame(api.context, 0.016) == EngineSceneOk, "initial frame");
             uint64_t picked = 0;
@@ -198,7 +301,7 @@ int wmain(int argc, wchar_t** argv)
                 edited.transform.position[0] == -2, "invalid mutations preserve authored light");
             Check(api.saveScene(api.context, project.startupScene.u8string().c_str(), error, sizeof(error)) == EngineSceneOk, "save authored scene");
             const auto saved = SceneDocument::Read(project.startupScene);
-            Check(saved.components.size() == 17, "all objects persisted including gameplay types");
+            Check(saved.components.size() == 18, "all objects persisted including gameplay types");
             for (const auto& o : saved.components) if (o.name == "Light.Point")
                 Check(o.pointLight && o.pointLight->color.y == 0.8f && o.pointLight->radius == 12, "JSON persists light properties");
             Check(api.control(api.context, EnginePlay) == EngineSceneOk, "play authored scene");
@@ -248,6 +351,8 @@ int wmain(int argc, wchar_t** argv)
             Check(ReadLight(api, "Light.Point").pointLight.color[0] == 1, "absent properties use factory defaults");
         }
         CheckLightPixels(window, std::filesystem::absolute(argv[2]));
+        CheckShadowPixels(window);
+        CheckDirectionalAuthoring(project.module, std::filesystem::absolute(argv[2]), root);
         // The procedural catalog also produces drawable CPU meshes before any GPU initialization.
         for (const auto& type : {"Primitive.Cube", "Primitive.Sphere", "Primitive.Plane", "Primitive.Cylinder", "Primitive.Cone", "Primitive.Pyramid"})
         {

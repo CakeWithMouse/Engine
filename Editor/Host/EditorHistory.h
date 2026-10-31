@@ -32,6 +32,7 @@ public:
     bool CanRedo() const { return !redo_.empty(); }
 
     void ClearHistory();
+    void BreakCoalescing();
     QString CreateEmptySceneFile();
     QString GetTemporaryFilePath(const QString& templateName);
 
