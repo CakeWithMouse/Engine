@@ -13,9 +13,13 @@
 #include <glm/vec3.hpp>
 
 #include <Engine/Render/ShaderConstants.h>
+#include <Engine/Scene/Scene.h>
 #include <Engine/MainGame/Player.h>
 #include <Engine/Display/Display.h>
 #include <Engine/InputDevice/InputDevice.h>
+#include <Engine/InputDevice/InputActions.h>
+
+class CharacterController;
 
 enum RenderType
 {
@@ -44,12 +48,14 @@ enum class RegisterResult
     EmptyName,
     DuplicateName,
     DeviceNotReady,
-    AlreadyOwned
+    AlreadyOwned,
+    InvalidParent
 };
 
 const char* ToString(RegisterResult result);
 
 class GameComponent;
+class Material;
 class PointLightComponent;
 class FBXComponent;
 struct ComponentShaderVariant;
@@ -127,9 +133,16 @@ public:
 
     /** Creates window, device and base resources. Returns false (and releases everything) on failure. */
     bool Initialize();
+    // Standalone window driven by a module host, without StartGame's nested loop.
+    bool InitializeRuntimeWindow(bool visible = true);
+    enum class RuntimeFrameResult { Running, Closed, Failed };
+    RuntimeFrameResult RunRuntimeFrame(float deltaTime);
+    bool IsRuntimeWindow() const { return bRuntimeWindow; }
+    void RequestWindowClose() { bWindowCloseRequested = true; }
     // Embedded preview: host owns HWND and drives frames/resizes on the render thread.
     // No Raw Input registration, window procedure replacement or nested message loop.
-    bool InitializeViewport(HWND window, int width, int height);
+    // preserveSceneOnFailure is for data-only edit scenes (no custom AfterInitialize).
+    bool InitializeViewport(HWND window, int width, int height, bool preserveSceneOnFailure = false);
     bool RenderViewportFrame(float deltaTime);
     // Transitional preview sessions share one device/swap chain, never scene objects.
     bool InitializePlayViewport(Game& editorScene);
@@ -156,6 +169,8 @@ public:
      */
     void SetSimulationTimeScale(float scale) { SimulationTimeScale = scale > 0.0f ? scale : 0.0f; }
     virtual void AfterInitialize() {}
+    // One simulation path for standalone and embedded project games.
+    void StepProjectSimulation(float deltaTime) { UpdateSimulation(deltaTime); }
 
     bool IsShadowEnabled() const { return bShadowsEnabled; }
     /** Shadows requested and shadow resources are ready. */
@@ -164,12 +179,15 @@ public:
     /**
      * Adds a component to the scene. On Ok the scene takes ownership of the pointer.
      * On any other result nothing is changed and ownership stays with its current owner.
+     * During gameplay update, Ok reserves the component; Find sees it after the update boundary.
      */
     RegisterResult RegisterComponent(const std::string& Name, GameComponent* Component,
                                      const std::string& PShaderName = {}, const std::string& VShaderName = {});
-    /** Removes and destroys a component. Children lose their parent, lights leave the light list. */
+    /** Removes a component (deferred during gameplay update). Children lose their parent. */
     bool UnregisterComponent(const std::string& Name);
     GameComponent* FindComponent(const std::string& Name) const;
+    Scene& GetScene() noexcept { return scene; }
+    const Scene& GetScene() const noexcept { return scene; }
 
     bool CreateProceduralCubeMap(const std::string& cubeMapName, CubeMapPreset preset, int faceSize = 256);
     bool CreateCubeMapFromFiles(const std::string& cubeMapName, const std::vector<std::string>& facePaths);
@@ -178,6 +196,12 @@ public:
     Player* GetPlayer() const { return FirstPlayer.get(); }
     Display* GetDisplay() const { return DisplayPtr.get(); }
     InputDevice* GetInputDevice() const { return InputDevicePtr.get(); }
+    Input::System& GetInput() { return ActionInput; }
+    CharacterController* GetCharacterController() const { return Controller.get(); }
+    void SetCharacterController(std::unique_ptr<CharacterController>);
+    virtual std::unique_ptr<CharacterController> CreateCharacterController();
+    void InitializeGameplay(); // idempotent; resolves the optional PlaySettings object
+    bool HasGameplayController() const { return Controller != nullptr; }
     ID3D11Device* GetDevice() const { return Device.Get(); }
     ID3D11DeviceContext* GetContext() const { return Context.Get(); }
     ID3D11InputLayout* GetInputLayout(VertexFormat format) const;
@@ -231,6 +255,8 @@ public:
     // Called by the window procedure.
     void OnWindowResized(int clientWidth, int clientHeight, bool minimized);
     void OnFocusLost();
+    void SetEditorSelection(uint64_t id) { EditorSelectedId = id; }
+    void RenderEditorSelection();
 
     ID3D11VertexShader* GetVertexShader() { return BaseVertexShader.Get(); }
     ID3D11VertexShader* GetVertexShader(const std::string& VertexShaderName,
@@ -251,9 +277,43 @@ public:
     /** True if the component's material writes the full G-buffer (3 render targets). */
     bool SupportsDeferredGeometry(GameComponent* Component);
 
+    /**
+     * Drops every cached shader compiled from this file or including it, so the next request
+     * recompiles from disk (failed compilations are forgotten too). Components re-resolve their
+     * shaders on the next pass. Returns false if nothing cached depended on the file.
+     * Shadow depth shaders are compiled once at start-up and are not affected.
+     */
+    bool InvalidateShaderFile(const std::string& shaderFile);
+    /** Same for every cached shader; material assets that failed to load are tried again. */
+    void InvalidateAllShaders();
+    /** Compiler output of every failed stage/variant of this shader file; empty if none failed. */
+    std::string GetShaderErrors(const std::string& shaderFile) const;
+
+    /**
+     * Loads a .mat file once and shares it. Null if the file cannot be used (error says why);
+     * a surface that does not compile still gives a material, drawn as the error surface.
+     * Invalidating the .mat file re-reads it, invalidating a shader file recompiles the
+     * materials that include it.
+     */
+    std::shared_ptr<Material> LoadMaterial(const std::string& matPath, std::string* error = nullptr);
+    /** A material this game already loaded from matPath; null if it did not. */
+    std::shared_ptr<Material> FindMaterial(const std::string& matPath) const;
+    /** Re-reads a loaded .mat into the same Material object; on failure the previous state stays. */
+    bool ReloadMaterial(const std::string& matPath, std::string* error = nullptr);
+    /** DefaultSurface, opaque and lit; compiled on first use. */
+    std::shared_ptr<Material> GetDefaultMaterial();
+    /** ErrorSurface (magenta checker): drawn for a material asset that is missing or cannot be read. */
+    std::shared_ptr<Material> GetErrorMaterial();
+    /**
+     * The component's material (the default one if RequiresMaterial, the error one if its material
+     * asset cannot be read), compiled if it changed, with the shader set of the component's
+     * MaterialVariant; null without one.
+     */
+    Material* PrepareMaterial(GameComponent* Component);
+
 protected:
     // Initialization
-    bool InitializeInternal(HWND externalWindow, int width, int height, Game* sharedViewport = nullptr);
+    bool InitializeInternal(HWND externalWindow, int width, int height, Game* sharedViewport = nullptr, bool preserveSceneOnFailure = false);
     void InitSwapChainDesc(int width, int height);
     bool CreateDeviceAndSwapChain();
     bool CreateSwapChainResources(int width, int height);
@@ -266,7 +326,7 @@ protected:
     bool InitStaticShadowResources();
     void RenderStaticShadowMap();
     bool InitDeferredResources();
-    void DestroyResources();
+    void DestroyResources(bool preserveScene = false);
 
     // Frame phases
     void Run();
@@ -274,7 +334,9 @@ protected:
     void ApplyPendingResize();
     void UpdateFrame(float realDeltaTime);
     void UpdateSimulation(float deltaTime);
+    void StartGameplayComponents();
     void PrepareRenderFrame();
+    void SynchronizeSceneResources();
     /** Game logic that must run before the camera and the component ticks (scaled dt). */
     virtual void PreUpdate(float deltaTime) {}
     /** Advances components. Default: tick everything, Space pauses everything except the skybox. */
@@ -307,6 +369,10 @@ protected:
     void FillFrameConstantBuffer(ConstantBufferData& data) const;
     bool IsVisible(GameComponent* Component);
     ComponentShaderVariant& ResolveComponentShaders(GameComponent* Component, ShaderCompileVariant variant);
+    /** After cache entries were erased: components resolve again, the fallback pair is rebuilt. */
+    void OnShadersInvalidated();
+    /** Culling of the component's material and, in the transparent pass, its blend mode. */
+    void ApplyComponentPipelineState(GameComponent* Component, bool bTransparentPass);
 
     static HRESULT CreateShader(HWND hWnd, const D3D_SHADER_MACRO* pDefines, LPCWSTR FileName, LPCSTR pEntrypoint,
                                 LPCSTR pTarget, ID3DBlob** Buffer);
@@ -321,12 +387,15 @@ protected:
 protected:
     RenderType RenderingType = Forward;
 
-    float TotalTime = 0.0f;
+    float TotalTime = 0.0f;        // scene time (scaled)
+    float RealTime = 0.0f;         // seconds of updated frames, unscaled (materials animate with it)
+    float LastRealDeltaTime = 0.0f;
     float SimulationTimeScale = 0.13f * 60.0f;
     uint64_t FrameIndex = 0;
     bool bInitialized = false;
     bool bEmbedded = false;
     bool bSimulationEnabled = true; // Standalone games retain their existing behavior.
+    bool bRuntimeWindow = false, bRuntimeWindowVisible = true, bWindowCloseRequested = false;
     bool bRunning = false;
     int ExitCode = 0;
 
@@ -347,14 +416,19 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11InputLayout> layout;      // VertexFormat::Primitive
     Microsoft::WRL::ComPtr<ID3D11InputLayout> meshLayout;  // VertexFormat::Mesh
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> DefaultRasterState;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> CullBackRasterState; // one-sided materials
 
     std::unique_ptr<Display> DisplayPtr;
     std::unique_ptr<InputDevice> InputDevicePtr;
     std::unique_ptr<Player> FirstPlayer;
+    Input::System ActionInput;
+    std::unique_ptr<CharacterController> Controller;
+    bool GameplayInitialized = false;
 
-    // Scene: the registry owns components, PointLights only observes them.
-    std::map<std::string, std::unique_ptr<GameComponent>> Components;
-    std::vector<PointLightComponent*> PointLights;
+    // Scene owns components. The read-only alias preserves legacy traversal/order.
+    Scene scene;
+    const Scene::ComponentMap& Components = scene.GetComponents();
+    uint64_t renderedSceneRevision = UINT64_MAX;
     std::map<std::string, std::unique_ptr<CubeMapResource>> cubeMapCache;
 
     // Shader cache, keys: file|stage|variant|policy
@@ -362,6 +436,21 @@ protected:
     std::map<std::string, Microsoft::WRL::ComPtr<ID3D11VertexShader>> vertexShaderCache;
     std::map<std::string, Microsoft::WRL::ComPtr<ID3D11PixelShader>> pixelShaderCache;
     std::map<std::string, UINT> pixelShaderTargetCount;
+    // Same keys: normalized files each blob was built from (main file first), and failed output.
+    std::map<std::string, std::vector<std::string>> shaderDependencies;
+    std::map<std::string, std::string> shaderErrors;
+
+    // Materials by normalized .mat path; they outlive every component that uses them.
+    struct CachedMaterial
+    {
+        std::string Path; // as first requested: relative paths in the file resolve against it
+        std::shared_ptr<Material> Instance;
+    };
+    std::map<std::string, CachedMaterial> materialCache;
+    std::shared_ptr<Material> defaultMaterial;
+    std::shared_ptr<Material> errorMaterial;
+    /** Components whose material asset failed to load try again on their next draw. */
+    void RetryFailedMaterialAssets();
 
     // Depth
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;          // opaque: test + write
@@ -437,6 +526,7 @@ protected:
     bool bStaticShadowFailed = false;
 
     Microsoft::WRL::ComPtr<ID3D11BlendState> transparentBlendState;
+    Microsoft::WRL::ComPtr<ID3D11BlendState> additiveBlendState; // ONE + ONE
     Microsoft::WRL::ComPtr<ID3D11BlendState> opaqueBlendState;
 
     // Frame data and diagnostics
@@ -461,4 +551,8 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11Query> GpuTimerEnd[GpuTimerLatency];
     bool GpuTimerIssued[GpuTimerLatency] = {};
     int GpuTimerSlot = 0;
+    uint64_t EditorSelectedId = 0;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> SelectionVS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> SelectionPS;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> SelectionCB;
 };

@@ -17,4 +17,11 @@
   <ItemGroup><ProjectReference Include="../Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project></ProjectReference></ItemGroup>
   <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets" />
   <Import Project="../BuildSupport/Content.targets" />
+  <!-- The Battle preview loads its material assets from the content root (the executable directory here). -->
+  <ItemGroup>
+    <BattleMaterials Include="$(RepositoryRoot)Game\Battle\Content\Materials\*" />
+  </ItemGroup>
+  <Target Name="DeployBattleMaterials" AfterTargets="Build">
+    <Copy SourceFiles="@(BattleMaterials)" DestinationFolder="$(OutDir)Materials" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

@@ -2,5 +2,6 @@
   "name": "Runtime Example",
   "module": "Game.dll",
   "content": "Content",
-  "preview": "BasicExamples"
+  "preview": "BasicExamples",
+  "startupScene": "Content/Scenes/Main.scene.json"
 }

@@ -34,7 +34,7 @@ foreach ($game in @('BasicExamples','Pong','SunGame','Battle')) {
     Invoke-CheckedProcess $launcher "--check $game"
     Invoke-CheckedProcess $launcher "--smoke $game"
 }
-foreach ($scene in @('triangles','cube')) {
+foreach ($scene in @('triangles','cube','materials')) {
     Invoke-CheckedProcess (Join-Path $output 'BasicExamples/BasicExamples.exe') "--scene $scene --smoke"
 }
 Invoke-CheckedProcess (Join-Path $output 'BasicExamples/BasicExamples.exe') '--smoke --scene unknown' 1

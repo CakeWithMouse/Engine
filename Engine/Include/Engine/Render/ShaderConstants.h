@@ -36,6 +36,7 @@ struct ConstantBufferData
     // Baked shadows of the static scene: one world-anchored map, independent of the camera.
     DirectX::XMFLOAT4X4 StaticShadowViewProjection;
     DirectX::XMFLOAT4 StaticShadowParams; // x enabled, y texel size, z depth bias, w unused
+    DirectX::XMFLOAT4 TimeParams;         // x real seconds since start, y real frame delta, z scene time, w unused
 };
 static_assert(sizeof(ConstantBufferData) % 16 == 0, "Constant buffer size must be a multiple of 16 bytes");
 
@@ -68,9 +69,10 @@ struct InstData
 {
     DirectX::XMFLOAT4X4 World;
     DirectX::XMFLOAT4 ObjectColor;
-    // x = fade of this instance in a LOD transition (1 = fully visible),
-    // y = 1 on the level that fades in, so the pair splits one dither pattern,
-    // zw = this unit's own phase in the dither pattern, in pixels.
+    // x = fade of this instance in a LOD transition: the magnitude is the weight (1 = fully
+    // visible) and the sign says which side of the transition it is on, negative being the level
+    // that fades in, so the pair splits one dither pattern instead of both testing it.
+    // yzw = whatever draws the instance: the animation clip, or the material's per-instance data.
     DirectX::XMFLOAT4 Params{1.0f, 0.0f, 0.0f, 0.0f};
 };
 
@@ -105,6 +107,7 @@ struct FrameConstants
     DirectX::XMFLOAT4 StaticShadowParams;
     // Camera frustum planes (xyz = inward normal, w = distance) for sphere culling.
     DirectX::XMFLOAT4 FrustumPlanes[6];
+    DirectX::XMFLOAT4 TimeParams;
 };
 
 template <typename TBuffer>
@@ -140,4 +143,10 @@ inline void ApplyStaticShadowConstants(ConstantBufferData& target, const FrameCo
 {
     target.StaticShadowViewProjection = frame.StaticShadowViewProjection;
     target.StaticShadowParams = frame.StaticShadowParams;
+}
+
+/** Time exists only in the full material buffer (appended last). */
+inline void ApplyTimeConstants(ConstantBufferData& target, const FrameConstants& frame)
+{
+    target.TimeParams = frame.TimeParams;
 }

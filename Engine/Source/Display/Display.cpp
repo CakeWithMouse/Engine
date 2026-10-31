@@ -34,6 +34,9 @@ Display::Display(HWND externalWindow, int width, int height)
 
 void Display::InitWinClass()
 {
+    // The window procedure can reside in a reloadable game DLL, not the exe.
+    GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        reinterpret_cast<LPCWSTR>(&WindowProc), &hInstance);
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     wc.lpfnWndProc = WindowProc;
     wc.cbClsExtra = 0;
@@ -94,6 +97,9 @@ LRESULT Display::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     switch (msg)
     {
+    case WM_CLOSE:
+        if (game && game->IsRuntimeWindow()) { game->RequestWindowClose(); return 0; }
+        break;
     case WM_INPUT:
     {
         InputDevice* inputDevice = game ? game->GetInputDevice() : nullptr;
@@ -153,7 +159,8 @@ LRESULT Display::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
         if (wParam == VK_ESCAPE)
         {
-            PostQuitMessage(0);
+            if (game && game->IsRuntimeWindow()) game->RequestWindowClose();
+            else PostQuitMessage(0);
         }
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
@@ -180,7 +187,7 @@ LRESULT Display::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
     {
         SetWindowLongPtr(hwnd, GWLP_USERDATA, 0);
-        PostQuitMessage(0);
+        if (game) PostQuitMessage(0); // owner teardown clears userdata; do not poison the next session
         return 0;
     }
 
@@ -199,6 +206,7 @@ Display::~Display()
         DestroyWindow(hWnd);
     }
     hWnd = nullptr;
+    if (ownsWindow) UnregisterClassW(applicationName, hInstance);
 }
 
 void Display::SetGamePointer(Game* gamePtr)

@@ -7,13 +7,24 @@
 <PropertyGroup Label="Globals"><ProjectGuid>{30B3ACB8-B4EF-5CF4-8E65-FA5CB8AC1DC6}</ProjectGuid><WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion></PropertyGroup>
 <Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props" />
 <PropertyGroup Label="Configuration"><ConfigurationType>Application</ConfigurationType><PlatformToolset>v145</PlatformToolset><CharacterSet>Unicode</CharacterSet><UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries><UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries></PropertyGroup>
+<PropertyGroup>
+  <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'==''">false</EngineEnableAssimp>
+  <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VCPKG_ROOT)'!=''">$(VCPKG_ROOT)\</VcpkgRoot>
+  <VcpkgRoot Condition="'$(VcpkgRoot)'==''">C:\vcpkg\</VcpkgRoot>
+  <VcpkgEnableManifest>$(EngineEnableAssimp)</VcpkgEnableManifest>
+  <VcpkgEnabled>$(EngineEnableAssimp)</VcpkgEnabled>
+  <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\</VcpkgManifestRoot>
+  <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\vcpkg_installed\</VcpkgInstalledDir>
+</PropertyGroup>
+<Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
 <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props" />
 <Import Project="..\BuildSupport\Cpp.props" />
 <PropertyGroup><OutDir>$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/Runtime/</OutDir><TargetName>EngineRuntime</TargetName></PropertyGroup>
 <ItemGroup><ClCompile Include="Main.cpp" /><ClCompile Include="Project.cpp" /></ItemGroup>
 <Import Project="../../Game/Common/PreviewScenes.props" />
-<ItemGroup><ProjectReference Include="..\Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project><LinkLibraryDependencies>true</LinkLibraryDependencies></ProjectReference><ProjectReference Include="..\..\Editor\EditorModule.vcxproj"><Project>{D1C7E1A4-515D-501E-AEC8-7E082E8D7425}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference><ProjectReference Include="..\..\Game\RuntimeExample\RuntimeExample.vcxproj"><Project>{7A86EB5A-6C85-5FFA-8266-59398BABE19F}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference></ItemGroup>
+<ItemGroup><ProjectReference Include="..\Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project><LinkLibraryDependencies>true</LinkLibraryDependencies></ProjectReference><ProjectReference Include="..\..\Editor\EditorModule.vcxproj"><Project>{D1C7E1A4-515D-501E-AEC8-7E082E8D7425}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference><ProjectReference Include="..\..\Game\RuntimeExample\RuntimeExample.vcxproj"><Project>{7A86EB5A-6C85-5FFA-8266-59398BABE19F}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference><ProjectReference Include="../../Game/SceneProject/SceneProject.vcxproj"><Project>{84C260EA-D588-4DE9-A997-B8F549FE0210}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference></ItemGroup>
 <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets" />
+<Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
 <Import Project="../BuildSupport/Content.targets" />
 <ItemGroup>
   <PreviewProject Include="../../Game/BasicExamples/Project.json"><ProjectName>BasicExamples</ProjectName></PreviewProject>
@@ -26,6 +37,9 @@
   <PreviewContent Include="../../Game/Battle/Content/**/*"><ProjectName>Battle</ProjectName></PreviewContent>
 </ItemGroup>
 <Target Name="DeployPreviewProjects" AfterTargets="Build">
+  <Copy SourceFiles="../Version.json" DestinationFiles="$(OutDir)EngineVersion.json" SkipUnchangedFiles="true" />
+  <Copy SourceFiles="../TemplateCompatibility.json" DestinationFiles="$(OutDir)TemplateCompatibility.json" SkipUnchangedFiles="true" />
+  <WriteLinesToFile File="$(OutDir)EngineConfiguration.txt" Lines="$(Configuration)" Overwrite="true" WriteOnlyWhenDifferent="true" />
   <MakeDir Directories="@(PreviewProject->'$(OutDir)Projects/%(ProjectName)/Content')" />
   <Copy SourceFiles="@(PreviewProject)" DestinationFiles="@(PreviewProject->'$(OutDir)Projects/%(ProjectName)/Project.json')" SkipUnchangedFiles="true" />
   <Copy SourceFiles="@(PreviewContent)" DestinationFiles="@(PreviewContent->'$(OutDir)Projects/%(ProjectName)/Content/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />

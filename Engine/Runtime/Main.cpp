@@ -1,7 +1,8 @@
-#define NOMINMAX
+﻿#define NOMINMAX
 #include <Engine/Base/Base.h>
 #include <Engine/Resources/Paths.h>
 #include "Project.h"
+#include "ProjectUpgrade.h"
 #include "PreviewScenes.h"
 #include <cstdio>
 #include <set>
@@ -13,14 +14,51 @@ int wmain(int argc, wchar_t** argv)
     std::setvbuf(stdout, nullptr, _IONBF, 0);
     try
     {
+        if (argc == 3 && std::wstring(argv[1]) == L"--validate-project")
+        {
+            const auto project = ReadRuntimeProject(argv[2]);
+            const auto runtime = EnginePaths::ExecutableDirectory();
+            const auto release = ReadEngineRelease(runtime);
+            if (project.engineVersion != release.version || project.engineConfiguration != release.configuration)
+                throw std::runtime_error("Candidate SDK/runtime identity mismatch");
+            GameEditModule module(project.module, runtime / "EngineContent", project.content);
+            const auto& api = module.Api();
+            auto validate = [&](const std::filesystem::path& file) {
+                char error[2048]{}; uint64_t id = 0;
+                if (api.loadScene(api.context, file.u8string().c_str(), &id, error, sizeof(error)) != EngineSceneOk)
+                    throw std::runtime_error(std::string("Candidate scene rejected: ") + error);
+                if (api.control(api.context, EnginePlay) != EngineSceneOk)
+                    throw std::runtime_error("Candidate Game factory failed");
+                if (api.control(api.context, EngineStop) != EngineSceneOk)
+                    throw std::runtime_error("Candidate Game cleanup failed");
+            };
+            for (const auto& item : std::filesystem::recursive_directory_iterator(project.content))
+            {
+                const auto name = item.path().filename().u8string();
+                if (item.is_regular_file() && name.size() >= 11 && name.compare(name.size() - 11, 11, ".scene.json") == 0) validate(item.path());
+            }
+            if (!project.startupScene.empty()) validate(project.startupScene);
+            std::puts("Candidate project validated");
+            return 0;
+        }
+        if (argc == 5 && std::wstring(argv[1]) == L"--upgrade-project" && std::wstring(argv[3]) == L"--destination")
+        {
+            ProjectUpgrade::Copy(argv[2],argv[4],EnginePaths::ExecutableDirectory());
+            std::puts("Project upgraded into a new copy. Original preserved.");
+            return 0;
+        }
         RuntimeLaunchOptions options;
+        wchar_t readyEvent[512]{};
+        if (GetEnvironmentVariableW(L"PAINENGINE_READY_EVENT", readyEvent, 512) < 512) options.readyEvent = readyEvent;
         std::filesystem::path projectPath;
         std::set<std::wstring> seen;
+        bool sceneApi = false;
         for (int i = 1; i < argc; ++i)
         {
             const std::wstring key = argv[i];
             if (!seen.insert(key).second) throw std::runtime_error("Duplicate launch option");
             if (key == L"--test-fail-engine") { options.failEngineForTest = true; continue; }
+            if (key == L"--scene-api") { sceneApi = true; continue; }
             if (++i == argc) throw std::runtime_error("Missing launch option value");
             const std::wstring value = argv[i];
             if (key == L"--project") projectPath = value;
@@ -44,10 +82,23 @@ int wmain(int argc, wchar_t** argv)
         // Explicit relative project paths are relative to the host, never caller CWD.
         if (projectPath.is_relative()) projectPath = directory / projectPath;
         const auto project = ReadRuntimeProject(projectPath);
+        if (!project.engineVersion.empty())
+        {
+            const auto release = ReadEngineRelease(directory);
+            if (project.engineVersion != release.version || project.engineConfiguration != release.configuration)
+                throw std::runtime_error("Project is pinned to another engine release. Open it through EngineLauncher.");
+        }
         options.projectName = project.name;
         options.projectFile = project.file.u8string();
         options.contentRoot = project.content.u8string();
         options.module = options.mode == RuntimeMode::Game ? project.module : directory / "Editor.dll";
+        if (options.mode == RuntimeMode::Game) options.startupScene = project.startupScene;
+        if (sceneApi || (options.mode == RuntimeMode::Editor && !project.startupScene.empty() && project.preview.empty()))
+        {
+            if (options.mode != RuntimeMode::Editor) throw std::runtime_error("--scene-api requires editor mode");
+            options.editModule = project.module;
+            options.startupScene = project.startupScene;
+        }
         EnginePaths::SetContentRoot(directory / "EngineContent");
         std::printf("Project: %s\nMode: %s\n", options.projectName.c_str(), options.mode == RuntimeMode::Game ? "game" : "editor");
         BaseEngine engine;

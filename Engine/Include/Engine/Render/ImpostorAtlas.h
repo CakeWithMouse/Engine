@@ -7,6 +7,7 @@
 #include <Engine/Render/MeshData.h>
 
 class Game;
+class Material;
 
 /**
  * Angles captured in the atlas. Defaults suit a strategy camera looking down at the field.
@@ -31,11 +32,16 @@ struct ImpostorAtlasSettings
 class ImpostorAtlas
 {
 public:
+    /**
+     * material: bake the surface of this material (its albedo, normal and clip) instead of the mesh
+     * colour and texture. A material that cannot bake (errors) falls back to the plain bake.
+     */
     bool Build(Game& game,
                const MeshLodData& mesh,
                ID3D11ShaderResourceView* modelTexture,
                const glm::vec4& baseColor,
-               const ImpostorAtlasSettings& settings);
+               const ImpostorAtlasSettings& settings,
+               Material* material = nullptr);
 
     bool IsValid() const { return AlbedoSRV != nullptr && NormalSRV != nullptr; }
     ID3D11ShaderResourceView* GetAlbedoSRV() const { return AlbedoSRV.Get(); }

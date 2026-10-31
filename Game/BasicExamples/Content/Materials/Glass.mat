@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "shader": "Glass.hlsl",
+  "render": { "blend": "translucent", "castShadows": false }
+}

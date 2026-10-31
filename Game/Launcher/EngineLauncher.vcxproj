@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
@@ -20,9 +20,13 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Import Project="..\..\Engine\BuildSupport\Cpp.props" />
   <PropertyGroup><OutDir>$(RepositoryRoot)Game\build\$(Platform)\$(Configuration)\</OutDir><IntDir>$(RepositoryRoot)Game\build\obj\$(Platform)\$(Configuration)\EngineLauncher\</IntDir></PropertyGroup>
-  <ItemGroup><ClCompile Include="Source\Main.cpp" /><ClInclude Include="Source\Catalog.h" /></ItemGroup>
-  <ItemDefinitionGroup><Link><SubSystem>Windows</SubSystem><AdditionalDependencies>shell32.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+  <ItemGroup><ClCompile Include="Source\Main.cpp" /><ClCompile Include="../../Engine/Runtime/Project.cpp" /><ResourceCompile Include="Source/Launcher.rc"><AdditionalOptions>/c65001 %(AdditionalOptions)</AdditionalOptions></ResourceCompile><ClInclude Include="Source\Catalog.h" /></ItemGroup>
+  <ItemDefinitionGroup><Link><SubSystem>Windows</SubSystem><AdditionalDependencies>gdiplus.lib;shell32.lib;ole32.lib;uuid.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
   <ItemGroup><ProjectReference Include="../../Engine/Runtime/EngineRuntime.vcxproj"><Project>{30B3ACB8-B4EF-5CF4-8E65-FA5CB8AC1DC6}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference></ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="DeployProjectSdk" AfterTargets="Build">
+    <MSBuild Projects="../../Engine/Tools/ComponentGenerator/ComponentGenerator.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform);PlatformToolset=$(PlatformToolset)" />
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(RepositoryRoot)Engine/BuildSupport/New-ProjectSdk.ps1&quot; -Runtime &quot;$(OutDir)Runtime&quot; -Configuration $(Configuration) -PlatformToolset $(PlatformToolset)" />
+  </Target>
 
 </Project>

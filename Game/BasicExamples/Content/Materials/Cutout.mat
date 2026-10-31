@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "shader": "Cutout.hlsl",
+  "render": { "blend": "masked", "alphaClip": 0.5, "twoSided": true }
+}

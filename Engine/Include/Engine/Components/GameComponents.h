@@ -1,4 +1,5 @@
 #pragma once
+#include <Engine/Components/ComponentAnnotations.h>
 #include <cstdint>
 #include <d3d11.h>
 #include <directxmath.h>
@@ -22,6 +23,7 @@ namespace GameComponentNames
 }
 
 class Game;
+class Material;
 
 /** Shader pair of one pass variant, resolved lazily by Game::BindComponentShaders. */
 struct ComponentShaderVariant
@@ -44,19 +46,54 @@ public:
 
     // Material
     virtual void SetTexture(const std::string& texturePath);
+    const std::string& GetTexturePath() const { return texturePath; }
+    virtual std::string GetModelAsset() const { return {}; }
+    // Transactional texture assignment; also works before device creation.
+    bool TrySetTexture(const std::string& path);
     void SetCubeMap(CubeMapResource* cubeMap);
     void SetReflectionSettings(float strength, float fresnelPower = 5.0f);
     ID3D11ShaderResourceView* GetTexture() const { return textureSRV.Get(); }
     bool HasTexture() const { return textureSRV != nullptr; }
     bool HasCubeMap() const { return cubeMapSRV != nullptr; }
 
+    /**
+     * Draws with a material asset instead of the shader pair: its shaders, parameters, blend
+     * mode, culling and shadow casting. Only components drawn in VertexFormat::Mesh or with
+     * skinned vertices support materials (false otherwise, nothing changes). Null returns to the
+     * shader pair.
+     */
+    bool SetMaterial(std::shared_ptr<Material> material);
+    Material* GetMaterial() const { return MaterialPtr.get(); }
+    /**
+     * A material asset by its /Game path (scenes store this): the game loads it, through its
+     * material cache, before the next draw. Empty clears it. False if materials are unsupported.
+     */
+    bool SetMaterialAsset(const std::string& path);
+    const std::string& GetMaterialAsset() const { return MaterialAssetPath; }
+    virtual bool SupportsMaterials() const { return false; }
+    /** Drawn only through a material: without one of its own, the game uses its default material. */
+    virtual bool RequiresMaterial() const { return false; }
+    /** MaterialVariant flags of the shader set this component draws with (instances, skinning). */
+    virtual uint32_t GetMaterialVariant() const;
+
     // Lifecycle
     virtual void CreateBuffers(ID3D11Device* Device);
-    void SetGame(Game* game) { GamePtr = game; }
+    void SetGame(Game* game);
     Game* GetGame() const { return GamePtr; }
+    Scene* GetScene() const noexcept { return RegisteredScene; }
+    ComponentId GetComponentId() const noexcept { return SceneComponentId; }
     /** Per-frame: world transform and object constants from the frame snapshot. No GPU calls. */
     void Update();
     virtual void Tick(float deltaTime);
+    // Called once before the first input dispatch/tick in Play, never in Edit/Pause.
+    // Use this for input setup; call the immediate parent's BeginPlay in overrides.
+    virtual void BeginPlay() {}
+    // Optional module-local codec. Return UTF-8 JSON with its own schema version.
+    // Called for save, duplicate, undo and Play, never for transient gameplay state.
+    virtual std::string SaveProjectData() const { return {}; }
+    virtual void LoadProjectData(const std::string& data);
+    // Called after restoring all objects. Persistent references are IDs, never pointers.
+    virtual void RemapProjectReferences(const std::map<ComponentId, ComponentId>&) {}
     virtual void Render(ID3D11DeviceContext* context);
     virtual void RenderShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass);
     /** GPU work that must run once per frame independently of drawing (e.g. particle simulation). */
@@ -64,7 +101,7 @@ public:
     virtual bool IsRenderable() const { return true; }
     /** Screen-space interface: drawn in its own pass after the scene, never in a world pass. */
     virtual bool IsScreenSpaceUI() const { return false; }
-    virtual bool CastsShadow() const { return !bHasOpacity && !bIsSkybox; }
+    virtual bool CastsShadow() const;
     /**
      * Objects that never move (terrain, buildings): their shadow is baked once into the static
      * shadow map instead of being redrawn into every cascade each frame.
@@ -108,7 +145,8 @@ public:
     uint64_t GetWorldVersion() const { return WorldVersion; }
 
     bool HasCollison() const { return bHasCollision; }
-    bool HasOpacity() const { return bHasOpacity; }
+    /** Drawn by the transparent pass: legacy opacity flag or a translucent/additive material. */
+    bool HasOpacity() const;
     bool IsSkybox() const { return bIsSkybox; }
     virtual bool DoSmthWithCollision(GameComponent* AnotherComponent) { return false; }
 
@@ -127,8 +165,11 @@ public:
     virtual float GetBoundingRadius() const;
     /** Radius of the geometry around the local origin, without any scale. */
     virtual float GetLocalBoundingRadius() const { return LocalBoundingRadius; }
+    // CPU triangle picking for InitPoints primitives; distance uses the supplied world ray.
+    bool RaycastPrimitive(const glm::vec3& origin, const glm::vec3& direction, float& distance);
     /** Conservative world-space radius around GetWorldPosition(). */
     float GetWorldBoundingRadius();
+    void GetEditorBounds(glm::vec3& minimum, glm::vec3& maximum);
 
 protected:
     /** Local transform; override to change how rotation is built. */
@@ -142,11 +183,15 @@ protected:
     void BindMaterialResources(ID3D11DeviceContext* context);
     void UnbindMaterialResources(ID3D11DeviceContext* context);
     void CreateSamplerState();
+    void LoadPendingTexture();
 
     std::vector<std::unique_ptr<GameComponent>> InstanceArray;
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
+    std::shared_ptr<Material> MaterialPtr;
+    std::string MaterialAssetPath;
+    bool bMaterialAssetLoaded = false; // one attempt per assignment; a broken file is retried on shader reload
     // Cube map resources are owned by Game::cubeMapCache, the component only observes them.
     ID3D11ShaderResourceView* cubeMapSRV = nullptr;
     ID3D11SamplerState* cubeMapSamplerState = nullptr;
@@ -211,9 +256,16 @@ protected:
     ID3D11PixelShader* pixelShader = nullptr;
 
 private:
+    void AssignMaterial(std::shared_ptr<Material> material);
     friend class Game;
+    friend class Scene;
+    bool GameplayStarted = false;
     // Separate from GamePtr: components may be configured with a game before registration.
-    Game* RegisteredOwner = nullptr;
+    Scene* RegisteredScene = nullptr;
+    ComponentId SceneComponentId = 0;
+    std::string SceneName;
+    std::string SceneTypeName; // assigned by Scene on addition, independent of instance name
+    Game* RenderOwner = nullptr;
     std::string VertexShaderName;
     std::string PixelShaderName;
     ComponentShaderVariant ShaderVariants[2];

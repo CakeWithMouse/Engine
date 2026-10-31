@@ -1,4 +1,6 @@
 #include "VfsRead.h"
+#include "HostVfsProxy.h"
+#include "LocalVfs.h"
 
 #include <Engine/Resources/Paths.h>
 #include <cstdio>
@@ -125,10 +127,10 @@ namespace VfsRead
 
         // Check physical paths against existing mount points
         std::error_code ec;
-        // The string holds UTF-8. The narrow path constructor would read it in the system code
-        // page, so a repository under a non-ASCII directory stops resolving: every lookup falls
-        // through to the unmounted-root branch and the engine finds none of its own shaders.
-        std::filesystem::path p = std::filesystem::u8path(pathStr);
+        // The narrow path constructor would read the string in the system code page, so a
+        // repository under a non-ASCII directory stops resolving: every lookup falls through to
+        // the unmounted-root branch and the engine finds none of its own shaders.
+        std::filesystem::path p = std::filesystem::u8path(path.begin(), path.end()); // UTF-8, not the ANSI code page
         if (!p.is_absolute())
         {
             if (!std::filesystem::exists(p, ec))
@@ -180,28 +182,18 @@ namespace VfsRead
 
     std::vector<uint8_t> ReadBytes(std::string_view path, std::string* outVirtualPath)
     {
-        auto& vfs = GetVFS();
-        const std::string vPath = ToVirtualPath(vfs, path);
-        if (outVirtualPath)
-        {
-            *outVirtualPath = vPath;
-        }
-
-        try
-        {
-            return vfs.ReadBytes(vPath);
-        }
-        catch (const std::exception& ex)
-        {
-            std::fprintf(stderr, "[VfsRead] Failed to read bytes for path '%s' (virtual: '%s'): %s\n",
-                std::string(path).c_str(), vPath.c_str(), ex.what());
-            return {};
-        }
-        catch (...)
-        {
-            std::fprintf(stderr, "[VfsRead] Failed to read bytes for path '%s' (virtual: '%s'): unknown exception\n",
-                std::string(path).c_str(), vPath.c_str());
-            return {};
-        }
+        return Active().ReadBytes(path, outVirtualPath);
+    }
+}
+#include <Engine/Runtime/ModuleVfs.h>
+namespace EngineModuleVfs
+{
+    bool Bind(const EngineVfsApi* api) { return VfsRead::Bind(api); }
+    void Unbind() { VfsRead::Unbind(); }
+    std::string Resolve(const char* path)
+    {
+        if (VfsRead::IsBound()) return VfsRead::Resolve(path);
+        const auto result = VfsRead::GetVFS().Resolve(path);
+        return result ? result->u8string() : std::string{};
     }
 }

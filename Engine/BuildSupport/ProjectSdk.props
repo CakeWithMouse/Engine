@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TargetName>Game</TargetName>
+    <IntDir>$(MSBuildProjectDirectory)\Intermediate\$(Configuration)\</IntDir>
+    <OutDir>$(ProjectBuildOutput)\</OutDir>
+    <EngineGeneratedDir>$(IntDir)Generated\</EngineGeneratedDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard><ConformanceMode>true</ConformanceMode>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(EngineSdk)\Include;$(EngineGeneratedDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary Condition="'$(Configuration)'=='Debug'">MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)'=='Release'">MultiThreadedDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>NOMINMAX;UNICODE;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization Condition="'$(Configuration)'=='Debug'">Disabled</Optimization>
+      <Optimization Condition="'$(Configuration)'=='Release'">MaxSpeed</Optimization>
+    </ClCompile>
+    <Link><AdditionalLibraryDirectories>$(EngineSdk)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories><AdditionalDependencies>Engine.lib;d3d11.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies></Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectSdkLibrary Include="$(EngineSdk)\Lib\*.lib" Exclude="$(EngineSdk)\Lib\Engine.lib" />
+    <ClCompile Include="$(MSBuildProjectDirectory)\Source\**\*.cpp" />
+    <ClCompile Include="$(EngineGeneratedDir)GeneratedComponents.cpp" />
+    <ClInclude Include="$(MSBuildProjectDirectory)\Source\**\*.h" />
+  </ItemGroup>
+  <PropertyGroup><ProjectSdkLibraries>@(ProjectSdkLibrary)</ProjectSdkLibraries></PropertyGroup>
+  <ItemDefinitionGroup><Link><AdditionalDependencies>$(ProjectSdkLibraries);%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+</Project>

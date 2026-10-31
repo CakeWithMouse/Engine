@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <cstdint>
 #include <filesystem>
 #include <string>
@@ -10,6 +10,11 @@ struct RuntimeLaunchOptions
 {
     RuntimeMode mode = RuntimeMode::Game;
     std::filesystem::path module;
+    // Opt-in editor integration; requires Editor EngineBindEditSession export.
+    std::filesystem::path editModule;
+    // Optional absolute path; game mode or editModule (CLI --scene-api).
+    std::filesystem::path startupScene;
+    std::wstring readyEvent; // optional launcher handshake, not persisted
     std::string projectName;
     std::string projectFile;
     std::string contentRoot;

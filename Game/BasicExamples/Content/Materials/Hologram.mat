@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "shader": "Hologram.hlsl",
+  "render": { "blend": "additive", "lighting": "unlit", "twoSided": true, "castShadows": false }
+}

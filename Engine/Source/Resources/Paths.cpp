@@ -16,7 +16,7 @@ std::filesystem::path EnginePaths::ExecutableDirectory()
 
 void EnginePaths::SetContentRoot(const std::filesystem::path& root)
 {
-    contentRoot = std::filesystem::absolute(root).lexically_normal();
+    contentRoot = root.empty() ? std::filesystem::path{} : std::filesystem::absolute(root).lexically_normal();
 }
 
 std::filesystem::path EnginePaths::ContentRoot()

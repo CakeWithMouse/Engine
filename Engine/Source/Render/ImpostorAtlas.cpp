@@ -7,6 +7,8 @@
 #include <cmath>
 #include <iostream>
 #include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/Render/Material.h>
+#include <Engine/Render/ShaderConstants.h>
 #include <Engine/Render/TextureLoader.h>
 #include <Engine/Resources/Paths.h>
 
@@ -81,7 +83,8 @@ bool ImpostorAtlas::Build(Game& game,
                           const MeshLodData& mesh,
                           ID3D11ShaderResourceView* modelTexture,
                           const glm::vec4& baseColor,
-                          const ImpostorAtlasSettings& settings)
+                          const ImpostorAtlasSettings& settings,
+                          Material* material)
 {
     using namespace DirectX;
 
@@ -193,10 +196,26 @@ bool ImpostorAtlas::Build(Game& game,
         return false;
     }
 
-    const std::string bakeShader = EnginePaths::Shader("ImpostorBake.hlsl").generic_u8string();
-    ID3D11VertexShader* vertexShader = game.GetVertexShader(bakeShader);
-    ID3D11PixelShader* pixelShader = game.GetPixelShader(bakeShader);
-    if (vertexShader == nullptr || pixelShader == nullptr)
+    // A material bakes its own surface; it reads full object constants (b0) and the tile camera (b2).
+    ID3D11VertexShader* vertexShader = nullptr;
+    ID3D11PixelShader* pixelShader = nullptr;
+    const bool bMaterialBake = material != nullptr && material->GetImpostorBakeShaders(vertexShader, pixelShader);
+    Microsoft::WRL::ComPtr<ID3D11Buffer> objectBuffer;
+    if (bMaterialBake)
+    {
+        D3D11_BUFFER_DESC objectDesc = {};
+        objectDesc.Usage = D3D11_USAGE_DEFAULT;
+        objectDesc.ByteWidth = sizeof(ConstantBufferData);
+        objectDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        device->CreateBuffer(&objectDesc, nullptr, objectBuffer.GetAddressOf());
+    }
+    else
+    {
+        const std::string bakeShader = EnginePaths::Shader("ImpostorBake.hlsl").generic_u8string();
+        vertexShader = game.GetVertexShader(bakeShader);
+        pixelShader = game.GetPixelShader(bakeShader);
+    }
+    if (vertexShader == nullptr || pixelShader == nullptr || (bMaterialBake && !objectBuffer))
     {
         std::cout << "ImpostorAtlas: bake shaders are unavailable." << std::endl;
         AlbedoSRV.Reset();
@@ -236,8 +255,9 @@ bool ImpostorAtlas::Build(Game& game,
     context->IASetIndexBuffer(indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
     context->VSSetShader(vertexShader, nullptr, 0);
     context->PSSetShader(pixelShader, nullptr, 0);
-    context->VSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
-    context->PSSetConstantBuffers(0, 1, constantBuffer.GetAddressOf());
+    ID3D11Buffer* objectConstants = bMaterialBake ? objectBuffer.Get() : constantBuffer.Get();
+    context->VSSetConstantBuffers(0, 1, &objectConstants);
+    context->PSSetConstantBuffers(0, 1, &objectConstants);
     context->PSSetShaderResources(0, 1, &modelTexture);
     context->PSSetSamplers(0, 1, sampler.GetAddressOf());
 
@@ -273,7 +293,21 @@ bool ImpostorAtlas::Build(Game& game,
             XMStoreFloat4x4(&constants.ViewProjection, XMMatrixTranspose(XMMatrixMultiply(view, projection)));
             constants.BaseColor = XMFLOAT4(baseColor.x, baseColor.y, baseColor.z, baseColor.w);
             constants.Flags = XMFLOAT4(modelTexture != nullptr ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f);
-            context->UpdateSubresource(constantBuffer.Get(), 0, nullptr, &constants, 0, 0);
+            if (bMaterialBake)
+            {
+                // Model space is the world of the bake; the colour of each copy is applied when drawing.
+                ConstantBufferData object = {};
+                XMStoreFloat4x4(&object.worldMatrix, XMMatrixIdentity());
+                XMStoreFloat4x4(&object.normalMatrix, XMMatrixIdentity());
+                object.ObjectColor = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+                XMStoreFloat4(&object.CameraPosition, eye);
+                context->UpdateSubresource(objectBuffer.Get(), 0, nullptr, &object, 0, 0);
+                material->BindPassTransform(context, constants.ViewProjection);
+            }
+            else
+            {
+                context->UpdateSubresource(constantBuffer.Get(), 0, nullptr, &constants, 0, 0);
+            }
 
             // One pixel of margin keeps filtering from reaching into the neighbouring tile.
             D3D11_VIEWPORT viewport = {};
@@ -293,6 +327,10 @@ bool ImpostorAtlas::Build(Game& game,
     ID3D11ShaderResourceView* nullSRV = nullptr;
     context->PSSetShaderResources(0, 1, &nullSRV);
     context->OMSetRenderTargets(0, nullptr, nullptr);
+    if (bMaterialBake)
+    {
+        material->Unbind(context);
+    }
 
     // Colour is averaged together with the transparent background, so the shader divides it back
     // by the coverage; the normal is renormalised there as well.

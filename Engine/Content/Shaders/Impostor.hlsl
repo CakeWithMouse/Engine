@@ -26,8 +26,7 @@ struct PS_IN
     float3 worldPos : TEXCOORD2;
     float3 axisRight : TEXCOORD3;
     float3 axisForward : TEXCOORD4;
-    // xy transition weight and direction, zw this unit's own phase in the dither pattern.
-    float4 fade : TEXCOORD5;
+    float fade : TEXCOORD5; // signed LOD cross-fade of the copy, see InstData.Params
     float4 color : COLOR;
 };
 
@@ -67,7 +66,7 @@ PS_IN VSMain(uint vertexId : SV_VertexID, uint instanceId : SV_InstanceID)
     output.axisRight = axisRight;
     output.axisForward = axisForward;
     output.color = ObjectColor * instance.Color;
-    output.fade = instance.Params;
+    output.fade = instance.Params.x;
 
     // Tile that matches the direction the camera looks from, in the model's own frame.
     const float localX = dot(viewDir, axisRight);
@@ -166,8 +165,9 @@ float3 ImpostorNormal(PS_IN input, float3 objectNormal)
 GBufferOut PSMain(PS_IN input)
 {
     const ImpostorSample atlas = SampleImpostor(input);
-    ClipByCoverage(atlas.Coverage, input.pos.xy + input.fade.zw);
-    ClipByFade(input.fade.x, input.fade.y, input.pos.xy + input.fade.zw);
+    const float2 ditherPhase = DitherPhase(input.worldPos);
+    ClipByCoverage(atlas.Coverage, input.pos.xy + ditherPhase);
+    ClipByFade(input.fade, input.pos.xy + ditherPhase);
 
     MaterialLighting material = MakeMaterialLighting(UnitSpecularWeight, UnitAmbientModel);
     return EncodeGBuffer(atlas.Albedo * input.color.rgb, ImpostorNormal(input, atlas.Normal),
@@ -177,8 +177,9 @@ GBufferOut PSMain(PS_IN input)
 float4 PSMain(PS_IN input) : SV_Target
 {
     const ImpostorSample atlas = SampleImpostor(input);
-    ClipByCoverage(atlas.Coverage, input.pos.xy + input.fade.zw);
-    ClipByFade(input.fade.x, input.fade.y, input.pos.xy + input.fade.zw);
+    const float2 ditherPhase = DitherPhase(input.worldPos);
+    ClipByCoverage(atlas.Coverage, input.pos.xy + ditherPhase);
+    ClipByFade(input.fade, input.pos.xy + ditherPhase);
 
     MaterialLighting material = MakeMaterialLighting(UnitSpecularWeight, UnitAmbientModel);
     const float3 litColor = ComputeSceneLighting(atlas.Albedo * input.color.rgb,

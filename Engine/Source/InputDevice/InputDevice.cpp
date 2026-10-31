@@ -34,6 +34,8 @@ void InputDevice::OnKeyDown(KeyboardInputEventArgs args)
 
 	if (args.MakeCode == 42) key = Keys::LeftShift;
 	if (args.MakeCode == 54) key = Keys::RightShift;
+	if (args.VKey == VK_CONTROL) key = (args.Flags & RI_KEY_E0) ? Keys::RightControl : Keys::LeftControl;
+	if (args.VKey == VK_MENU) key = (args.Flags & RI_KEY_E0) ? Keys::RightAlt : Keys::LeftAlt;
 
 	if(Break) {
 		RemovePressedKey(key);
@@ -67,6 +69,7 @@ void InputDevice::OnMouseMove(RawMouseEventArgs args)
 	MousePosition = glm::vec2(p.x, p.y);
 	MouseOffset += eventOffset;
 	MouseWheelDelta += eventWheel;
+	game->GetInput().AddPointer(eventOffset.x, eventOffset.y, static_cast<float>(eventWheel) / 120.0f);
 
 	const MouseMoveEventArgs moveArgs = {MousePosition, eventOffset, eventWheel};
 
@@ -76,11 +79,13 @@ void InputDevice::OnMouseMove(RawMouseEventArgs args)
 void InputDevice::AddPressedKey(Keys key)
 {
 	keys.insert(key);
+	game->GetInput().SetKey(key, true);
 }
 
 void InputDevice::RemovePressedKey(Keys key)
 {
 	keys.erase(key);
+	game->GetInput().SetKey(key, false);
 }
 
 bool InputDevice::IsKeyDown(Keys key) const
@@ -91,6 +96,8 @@ bool InputDevice::IsKeyDown(Keys key) const
 void InputDevice::ClearPressedKeys()
 {
 	keys.clear();
+	game->GetInput().ReleaseAll();
+	EndFrame();
 }
 
 void InputDevice::EndFrame()

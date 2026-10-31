@@ -1,9 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <ItemGroup Label="ProjectConfigurations">
-        <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
-        <ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
-        <ProjectConfiguration Include="RelWithDebInfo|x64"><Configuration>RelWithDebInfo</Configuration><Platform>x64</Platform></ProjectConfiguration>
+        <ProjectConfiguration Include="Debug|x64">
+            <Configuration>Debug</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+        <ProjectConfiguration Include="Release|x64">
+            <Configuration>Release</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+        <ProjectConfiguration Include="RelWithDebInfo|x64">
+            <Configuration>RelWithDebInfo</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
     </ItemGroup>
 
     <PropertyGroup Label="Globals">
@@ -11,10 +20,11 @@
         <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     </PropertyGroup>
 
-    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props" />
+    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props"/>
 
     <PropertyGroup Label="Configuration">
         <ConfigurationType>DynamicLibrary</ConfigurationType>
+        <ConfigurationType Condition="'$(EditorUiTest)'=='true'">Application</ConfigurationType>
         <PlatformToolset>v145</PlatformToolset>
         <CharacterSet>Unicode</CharacterSet>
         <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
@@ -23,8 +33,8 @@
         <WholeProgramOptimization Condition="'$(Configuration)'!='Release'">false</WholeProgramOptimization>
     </PropertyGroup>
 
-    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props" />
-    <Import Project="..\Engine\BuildSupport\Cpp.props" />
+    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props"/>
+    <Import Project="..\Engine\BuildSupport\Cpp.props"/>
 
     <!-- ===== Выходные пути, как у вас ===== -->
     <PropertyGroup>
@@ -34,11 +44,14 @@
         <!-- obj/moc оставляем раздельными по конфигурациям редактора -->
         <IntDir>$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/obj/Editor/</IntDir>
         <TargetName>Editor</TargetName>
+        <TargetName Condition="'$(EditorUiTest)'=='true'">EditorUiTests</TargetName>
+        <IntDir Condition="'$(EditorUiTest)'=='true'">$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/obj/EditorUiTests/</IntDir>
     </PropertyGroup>
 
     <!-- ===== Qt: подставьте свою версию/путь ===== -->
     <PropertyGroup>
         <QtInstallDir Condition="'$(QtInstallDir)'=='' AND '$(QTDIR)'!=''">$(QTDIR)</QtInstallDir>
+        <QtInstallDir Condition="'$(QtInstallDir)'=='' AND Exists('$(MSBuildThisFileDirectory)ThirdParty/Qt/6.7.3/msvc2019_64/bin/moc.exe')">$(MSBuildThisFileDirectory)ThirdParty/Qt/6.7.3/msvc2019_64</QtInstallDir>
         <QtInstallDir Condition="'$(QtInstallDir)'==''">$(MSBuildThisFileDirectory)ThirdParty\Qt6.7</QtInstallDir>
         <QtUseDebugLibraries Condition="'$(Configuration)'=='Debug' AND Exists('$(QtInstallDir)/lib/Qt6Widgetsd.lib')">true</QtUseDebugLibraries>
         <QtLibSuffix Condition="'$(QtUseDebugLibraries)'=='true'">d</QtLibSuffix>
@@ -49,7 +62,8 @@
     <ItemDefinitionGroup>
         <ClCompile>
             <!-- %(AdditionalIncludeDirectories) берёт include-пути из Cpp.props, сверху кладём Qt -->
-            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtWidgets;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtCore;$(IntDir)moc;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>            <PreprocessorDefinitions>QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtWidgets;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtCore;$(IntDir)moc;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <PreprocessorDefinitions>QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
             <LanguageStandard>stdcpp17</LanguageStandard>
             <ExceptionHandling>Sync</ExceptionHandling>
             <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -114,18 +128,28 @@
 
     <!-- ===== Исходники в Source/ (как у вас было Source/Module.cpp) ===== -->
     <ItemGroup>
-        <ClCompile Include="Source/Module.cpp" />
-        <ClCompile Include="Source/QtHost.cpp" />
-        <ClCompile Include="Source/MainWindow.cpp" />
-        <ClCompile Include="Source/FileBrowser.cpp" />
-        <ClCompile Include="Source/ViewportWidget.cpp" />
-        <ClCompile Include="$(IntDir)moc/moc_MainWindow.cpp" />
+        <ClCompile Include="tests/EditorUiTests.cpp" Condition="'$(EditorUiTest)'=='true'"/>
+        <ClCompile Include="../Engine/Source/Runtime/GameEditModule.cpp" Condition="'$(EditorUiTest)'=='true'"/>
+        <ClCompile Include="Source/Module.cpp"/>
+        <ClCompile Include="Source/QtHost.cpp"/>
+        <ClCompile Include="Source/MainWindow.cpp"/>
+        <ClCompile Include="Source/AssetTools.cpp"/>
+        <ClCompile Include="Source/FileBrowser.cpp"/>
+        <ClCompile Include="Source/ViewportWidget.cpp"/>
+        <ClCompile Include="Source/ObjectInspectorPanel.cpp"/>
+        <ClCompile Include="Source/SceneObjectsPanel.cpp"/>
+        <ClCompile Include="Source/MaterialEditorWindow.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_MainWindow.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_ViewportWidget.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_ObjectInspectorPanel.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_SceneObjectsPanel.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_MaterialEditorWindow.cpp"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ClInclude Include="Include/QtHost.h" />
-        <ClInclude Include="Include/ViewportWidget.h" />
-        <ClInclude Include="Include/FileBrowser.h" />
+        <ClInclude Include="Include/QtHost.h"/>
+        <ClInclude Include="Include/CodeClassDialog.h"/>
+        <ClInclude Include="Include/FileBrowser.h"/>
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->
         <CustomBuild Include="Include/MainWindow.h">
             <FileType>Document</FileType>
@@ -137,8 +161,57 @@
             <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
             <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
         </CustomBuild>
+        <CustomBuild Include="Include/ObjectInspectorPanel.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+        <CustomBuild Include="Include/ViewportWidget.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+        <CustomBuild Include="Include/SceneObjectsPanel.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+        <CustomBuild Include="Include/MaterialEditorWindow.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
     </ItemGroup>
 
-    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets" />
-    <ImportGroup Label="ExtensionTargets" />
+    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets"/>
+    <Target Name="DeployRedistributableD3DCompiler" AfterTargets="Build">
+        <!-- windeployqt can select the OS copy, which requires newer Windows private APIs. -->
+        <PropertyGroup>
+            <RedistributableD3DCompiler>$(WindowsSdkDir)Redist/D3D/x64/d3dcompiler_47.dll</RedistributableD3DCompiler>
+        </PropertyGroup>
+        <Error Condition="!Exists('$(RedistributableD3DCompiler)')" Text="Windows SDK x64 D3D redistributable is missing; never substitute the System32 DLL."/>
+        <Copy SourceFiles="$(RedistributableD3DCompiler)" DestinationFiles="$(OutDir)D3Dcompiler_47.dll" SkipUnchangedFiles="true"/>
+    </Target>
+    <ImportGroup Label="ExtensionTargets"/>
+  <ItemGroup><ClCompile Include="Source/CodeTools.cpp" /></ItemGroup>
 </Project>

@@ -7,6 +7,8 @@
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Render/ImpostorAtlas.h>
 #include <Engine/Render/MeshData.h>
+#include <Engine/Render/SkeletalData.h>
+#include <Engine/Render/SkeletalBaker.h>
 
 /** One rendered unit. Ground vehicles only need yaw and a uniform scale. */
 struct MeshInstance
@@ -15,8 +17,15 @@ struct MeshInstance
     float Yaw = 0.0f;   // radians
     float Scale = 1.0f; // uniform: instanced normals are transformed by the instance matrix
     glm::vec4 Color{1.0f, 1.0f, 1.0f, 1.0f};
+    // Free per-copy values for a material (MaterialInput.InstanceData): wear, hue, animation phase...
+    glm::vec3 CustomData{0.0f, 0.0f, 0.0f};
     bool bVisible = true;
+    uint8_t Padding = 0;
+    uint16_t ClipId = 0;
+    float AnimationPhase = 0.0f;
+    float Speed = 1.0f;
 };
+static_assert(sizeof(MeshInstance) == 60, "MeshInstance must be 60 bytes");
 
 /**
  * Draws many copies of one mesh: a few detail levels, per-instance transform and colour,
@@ -36,7 +45,22 @@ public:
 
     /** Sets the geometry of one detail level (0 = most detailed). Levels must be filled in order. */
     bool SetLod(int level, MeshLodData data);
+    /** Sets skinned geometry for one LOD level using compact CrowdSkinnedVertex (32B). */
+    bool SetSkinnedLod(int level, const std::vector<CrowdSkinnedVertex>& vertices, const std::vector<uint32_t>& indices);
+    /** Sets skinned geometry for one LOD level using standard SkinnedVertex (64B). */
+    bool SetSkinnedLod(int level, const std::vector<SkinnedVertex>& vertices, const std::vector<uint32_t>& indices);
     int GetLodCount() const { return LodCount; }
+
+    /** Sets animation matrix texture baked by SkeletalBaker (RGBA32F matrix texture). */
+    void SetAnimationTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, const std::vector<BakedClipInfo>& clips = {});
+    void SetAnimationTexture(ID3D11ShaderResourceView* srv, const std::vector<BakedClipInfo>& clips = {});
+    bool HasAnimationTexture() const { return AnimationTextureSRV != nullptr; }
+    void SetAnimationLerp(bool enabled) { bAnimationLerp = enabled; }
+    /**
+     * Bakes all clips of a SkeletalModel into a VAT texture, creates D3D11 resources,
+     * flattens mesh into CrowdSkinnedVertex LOD0, and sets animation texture.
+     */
+    bool SetAnimatedModel(ID3D11Device* device, const SkeletalModel& model, float sampleFps = 30.0f);
 
     /**
      * Builds the levels the designer did not supply out of LOD0, so a single model is enough to
@@ -110,11 +134,38 @@ public:
     void ReserveInstances(size_t count) { Instances.reserve(count); }
     size_t GetMeshInstanceCount() const { return Instances.size(); }
     const MeshInstance& GetMeshInstance(size_t index) const { return Instances[index]; }
-    void SetInstancePosition(size_t index, const glm::vec3& position);
-    void SetInstanceYaw(size_t index, float yaw);
-    void SetInstanceColor(size_t index, const glm::vec4& color);
-    void SetInstanceVisible(size_t index, bool visible);
-    void ClearInstances();
+    void SetInstancePosition(size_t index, const glm::vec3& position)
+    {
+        if (index < Instances.size()) { Instances[index].Position = position; PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true; }
+    }
+    void SetInstanceYaw(size_t index, float yaw)
+    {
+        if (index < Instances.size()) { Instances[index].Yaw = yaw; PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true; }
+    }
+    void SetInstanceColor(size_t index, const glm::vec4& color)
+    {
+        if (index < Instances.size()) { Instances[index].Color = color; PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true; }
+    }
+    void SetInstanceCustomData(size_t index, const glm::vec3& data)
+    {
+        if (index < Instances.size()) { Instances[index].CustomData = data; PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true; }
+    }
+    void SetInstanceVisible(size_t index, bool visible)
+    {
+        if (index < Instances.size()) { Instances[index].bVisible = visible; PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true; }
+    }
+    void SetInstanceAnimationPhase(size_t index, float phase)
+    {
+        if (index < Instances.size()) { Instances[index].AnimationPhase = phase; PreparedFrame = UINT64_MAX; }
+    }
+    void SetInstancePositionAndPhase(size_t index, const glm::vec3& position, float phase)
+    {
+        if (index < Instances.size()) { Instances[index].Position = position; Instances[index].AnimationPhase = phase; PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true; }
+    }
+    void ClearInstances()
+    {
+        Instances.clear(); PreparedFrame = UINT64_MAX; bStaticShadowDataDirty = true;
+    }
 
     // Diagnostics for the last frame.
     uint32_t GetDrawnInstances() const { return DrawnInstances; }
@@ -124,10 +175,19 @@ public:
     uint32_t GetDrawnImpostors() const { return static_cast<uint32_t>(ImpostorLevel.ColorStaging.size()); }
 
     void CreateBuffers(ID3D11Device* Device) override;
+    /** Rebakes the sprite level when the material changed (outside of any render pass). */
+    void Tick(float deltaTime) override;
     void Render(ID3D11DeviceContext* context) override;
     void RenderShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass) override;
     // Visibility is decided per instance inside this component.
     bool SupportsFrustumCulling() const override { return false; }
+    /**
+     * A material draws every mesh level and the masked shadows; the sprite level is baked through
+     * it (albedo, normal, coverage) and rebaked when the material changes. Animated copies use
+     * the skinned set of the material (MaterialInput.InstanceData is then zero).
+     */
+    bool SupportsMaterials() const override { return true; }
+    uint32_t GetMaterialVariant() const override;
     float GetLocalBoundingRadius() const override { return MeshRadius; }
     int GetIndexCount() override { return TotalIndexCount; }
 
@@ -135,9 +195,12 @@ private:
     struct LodLevel
     {
         MeshLodData Data;
+        std::vector<CrowdSkinnedVertex> CrowdVertices;
+        std::vector<SkinnedVertex> SkinnedVertices;
         Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
         Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer;
         UINT IndexCount = 0;
+        UINT VertexStride = sizeof(MeshVertex);
 
         // Per-frame instance streams: one for the camera pass and one per shadow cascade.
         std::vector<InstData> ColorStaging;
@@ -163,6 +226,11 @@ private:
     /** Full set of instances for the baked shadow map, built once and reused between frames. */
     bool EnsureStaticShadowData(ID3D11DeviceContext* context);
     void RenderStaticShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass);
+    void CollectShadowCasters(const MeshInstance& instance, InstData data, int meshLevel, float radius,
+                              const glm::vec3& lightDirection, const DirectX::XMFLOAT4* cascadeSpheres, int cascadeLimit);
+    /** Shaders and constants of a masked material for a depth pass; false: the pass keeps its own. */
+    bool BindMaterialShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass);
+    void UnbindMaterialShadow(ID3D11DeviceContext* context);
     void EnsureFrameData(ID3D11DeviceContext* context);
     bool UploadStream(ID3D11DeviceContext* context,
                       const std::vector<InstData>& staging,
@@ -170,7 +238,10 @@ private:
                       Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& srv,
                       size_t& capacity);
     bool CreateLodBuffers(ID3D11Device* device, LodLevel& lod);
+    bool CreateSkinnedLodBuffers(ID3D11Device* device, LodLevel& lod);
     int SelectLod(float distance, float screenHeightPixels) const;
+    bool EnsureSkinnedShaders(ID3D11Device* device);
+    void UpdateAnimClipConstantBuffer(ID3D11Device* device);
 
     LodLevel Lods[MaxLodCount];
     // The sprite level reuses the instance stream of LodLevel; its mesh buffers stay empty.
@@ -179,12 +250,17 @@ private:
     ImpostorAtlasSettings ImpostorSettings;
     Microsoft::WRL::ComPtr<ID3D11Buffer> ImpostorConstantBuffer;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> ImpostorSampler;
+    // Sprites are never culled: a one-sided material leaves back-face culling on for the meshes.
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> ImpostorRasterState;
     bool bImpostorEnabled = false;
     bool bImpostorBuildFailed = false;
     std::vector<float> AutoLodRatios;
     bool bAutoLodBuilt = false;
     bool bValidateAsset = false;
     std::string AssetName;
+    // The material (and its revision) the atlas was baked with; a change triggers a rebake.
+    const Material* BakedMaterial = nullptr;
+    uint64_t BakedMaterialRevision = 0;
     float LodFadeFraction = 0.06f;
     int LodCount = 0;
     std::vector<float> LodDistances;
@@ -206,6 +282,20 @@ private:
     bool bStaticShadowDataDirty = true;
     float MeshRadius = 0.0f;   // local radius of LOD 0, unscaled
     int TotalIndexCount = 0;   // LOD 0, for diagnostics only
+
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> AnimationTexture;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> AnimationTextureSRV;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> AnimClipConstantBuffer;
+    std::vector<BakedClipInfo> AnimationClips;
+    bool bAnimationLerp = false;
+    bool bIsSkinned = false;
+    bool bIsCrowdVertex = true;
+
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> SkinnedVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> SkinnedPixelShader;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> SkinnedInputLayout;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> SkinnedShadowVertexShader;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> SkinnedShadowInputLayout;
 
     uint64_t PreparedFrame = UINT64_MAX;
     uint32_t DrawnInstances = 0;

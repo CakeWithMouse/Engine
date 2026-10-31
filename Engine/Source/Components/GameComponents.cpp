@@ -5,7 +5,9 @@
 #include <cstring>
 #include <directxmath.h>
 #include <iostream>
+#include <stdexcept>
 #include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/Render/Material.h>
 #include <Engine/Render/TextureLoader.h>
 #include <glm/gtx/matrix_decompose.hpp>
 
@@ -50,6 +52,65 @@ GameComponent::GameComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm:
 
 GameComponent::~GameComponent() = default;
 
+void GameComponent::GetEditorBounds(glm::vec3& minimum, glm::vec3& maximum)
+{
+    const auto center = GetWorldPosition();
+    const float radius = IsSkybox() ? 0.4f : (std::max)(0.25f, GetWorldBoundingRadius());
+    minimum = center - glm::vec3(radius); maximum = center + glm::vec3(radius);
+    if (points.empty() || IsSkybox()) return;
+    const auto world = GetWorldMatrix();
+    for (size_t i=0; i<points.size(); i+=2) {
+        DirectX::XMFLOAT3 p;
+        DirectX::XMStoreFloat3(&p, DirectX::XMVector3TransformCoord(DirectX::XMLoadFloat4(&points[i]), DirectX::XMLoadFloat4x4(&world)));
+        const glm::vec3 v(p.x,p.y,p.z);
+        if (!i) minimum=maximum=v; else { minimum=glm::min(minimum,v); maximum=glm::max(maximum,v); }
+    }
+    minimum-=glm::vec3(0.025f); maximum+=glm::vec3(0.025f);
+}
+bool GameComponent::RaycastPrimitive(const glm::vec3& origin, const glm::vec3& direction, float& distance)
+{
+    if (IsSkybox()) return false;
+    if (points.empty()) {
+        const auto relative=origin-GetWorldPosition();
+        const float radius=(std::max)(0.25f,GetWorldBoundingRadius());
+        const float b=glm::dot(relative,direction), discriminant=b*b-glm::dot(relative,relative)+radius*radius;
+        if (discriminant<0) return false;
+        float t=-b-std::sqrt(discriminant); if(t<0)t=-b+std::sqrt(discriminant);
+        if(t<0 || t>=distance)return false;
+        distance=t;return true;
+    }
+    using namespace DirectX;
+    const auto world = GetWorldMatrix();
+    const auto inverse = XMMatrixInverse(nullptr, XMLoadFloat4x4(&world));
+    XMFLOAT3 localOrigin, localDirection;
+    XMStoreFloat3(&localOrigin, XMVector3TransformCoord(XMVectorSet(origin.x, origin.y, origin.z, 1), inverse));
+    XMStoreFloat3(&localDirection, XMVector3TransformNormal(XMVectorSet(direction.x, direction.y, direction.z, 0), inverse));
+    const glm::vec3 o(localOrigin.x, localOrigin.y, localOrigin.z), d(localDirection.x, localDirection.y, localDirection.z);
+    bool hit = false;
+    auto vertex = [&](int index) { const auto& v = points[static_cast<size_t>(index) * 2]; return glm::vec3(v.x, v.y, v.z); };
+    for (size_t i = 0; i + 2 < indices.size(); i += 3)
+    {
+        const int a = indices[i], b = indices[i+1], c = indices[i+2];
+        if (a < 0 || b < 0 || c < 0 || static_cast<size_t>((std::max)({a,b,c})) >= points.size() / 2) continue;
+        const auto v = vertex(a), e1 = vertex(b) - v, e2 = vertex(c) - v;
+        const auto p = glm::cross(d, e2); const float det = glm::dot(e1, p);
+        if (std::abs(det) < 1e-8f) continue;
+        const auto t = o - v; const float u = glm::dot(t, p) / det;
+        if (u < 0 || u > 1) continue;
+        const auto q = glm::cross(t, e1); const float w = glm::dot(d, q) / det;
+        if (w < 0 || u + w > 1) continue;
+        const float candidate = glm::dot(e2, q) / det;
+        if (candidate >= 0 && candidate < distance) { distance = candidate; hit = true; }
+    }
+    return hit;
+}
+
+void GameComponent::SetGame(Game* game)
+{
+    GamePtr = game;
+    for (auto& instance : InstanceArray) instance->SetGame(game);
+}
+
 GameComponent* GameComponent::CreateInstance(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm::vec4 Color)
 {
     std::unique_ptr<GameComponent> NewComponent = std::make_unique<GameComponent>(pos, rot, scale, Color);
@@ -78,6 +139,7 @@ void GameComponent::InitPoints(DirectX::XMFLOAT4* NewPoints, int pointCount, int
 
 void GameComponent::CreateBuffers(ID3D11Device* Device)
 {
+    LoadPendingTexture();
     if (Device == nullptr || points.empty() || indices.empty())
     {
         return;
@@ -188,6 +250,7 @@ void GameComponent::UpdateObjectConstants()
     {
         ApplyFrameConstants(ConstantPositionBuffer, GamePtr->GetFrameConstants());
         ApplyStaticShadowConstants(ConstantPositionBuffer, GamePtr->GetFrameConstants());
+        ApplyTimeConstants(ConstantPositionBuffer, GamePtr->GetFrameConstants());
     }
 }
 
@@ -222,6 +285,7 @@ void GameComponent::SetRotationQuat(const glm::quat& rotQuat)
 
 bool GameComponent::SetParent(GameComponent* parent)
 {
+    if (RegisteredScene && parent && parent->RegisteredScene != RegisteredScene) return false;
     for (GameComponent* ancestor = parent; ancestor != nullptr; ancestor = ancestor->Parent)
     {
         if (ancestor == this)
@@ -395,15 +459,27 @@ DirectX::XMMATRIX GameComponent::GetLocalMatrix() const
 
 void GameComponent::SetTexture(const std::string& path)
 {
+    TrySetTexture(path);
+}
+
+bool GameComponent::TrySetTexture(const std::string& path)
+{
+    if (path.empty()) { texturePath.clear(); textureSRV.Reset(); return true; }
     ID3D11Device* device = GamePtr ? GamePtr->GetDevice() : nullptr;
     ID3D11DeviceContext* context = GamePtr ? GamePtr->GetContext() : nullptr;
-    if (!TextureLoader::LoadTexture2D(device, context, path, true, textureSRV))
-    {
-        return;
-    }
-
+    if (!device || !context) { texturePath = path; return true; }
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> candidate;
+    if (!TextureLoader::LoadTexture2D(device, context, path, true, candidate)) return false;
     texturePath = path;
+    textureSRV = std::move(candidate);
     CreateSamplerState();
+    return true;
+}
+
+void GameComponent::LoadPendingTexture()
+{
+    if (!texturePath.empty() && !textureSRV && !TrySetTexture(texturePath))
+        throw std::runtime_error("Cannot load texture: " + texturePath);
 }
 
 void GameComponent::SetCubeMap(CubeMapResource* cubeMap)
@@ -538,6 +614,11 @@ void GameComponent::BindMaterialResources(ID3D11DeviceContext* context)
         ID3D11ShaderResourceView* staticShadowSRV = GamePtr->IsStaticShadowReady() ? GamePtr->GetStaticShadowSRV() : nullptr;
         context->PSSetShaderResources(5, 1, &staticShadowSRV);
     }
+
+    if (MaterialPtr)
+    {
+        MaterialPtr->Bind(context);
+    }
 }
 
 void GameComponent::UnbindMaterialResources(ID3D11DeviceContext* context)
@@ -547,6 +628,63 @@ void GameComponent::UnbindMaterialResources(ID3D11DeviceContext* context)
     context->PSSetShaderResources(1, 1, &nullSRV);
     context->PSSetShaderResources(4, 1, &nullSRV);
     context->PSSetShaderResources(5, 1, &nullSRV);
+    if (MaterialPtr)
+    {
+        MaterialPtr->Unbind(context);
+    }
+}
+
+bool GameComponent::SetMaterial(std::shared_ptr<Material> material)
+{
+    if (material && !SupportsMaterials())
+    {
+        std::cout << "SetMaterial: this component type is not drawn in the Mesh vertex format, material ignored." << std::endl;
+        return false;
+    }
+    MaterialAssetPath.clear();
+    AssignMaterial(std::move(material));
+    return true;
+}
+
+bool GameComponent::SetMaterialAsset(const std::string& path)
+{
+    if (!path.empty() && !SupportsMaterials())
+    {
+        return false;
+    }
+    MaterialAssetPath = path;
+    bMaterialAssetLoaded = false;
+    AssignMaterial(nullptr);
+    return true;
+}
+
+void GameComponent::AssignMaterial(std::shared_ptr<Material> material)
+{
+    MaterialPtr = std::move(material);
+    // The resolved shader pair belongs to the previous material (or none).
+    for (ComponentShaderVariant& slot : ShaderVariants)
+    {
+        slot = ComponentShaderVariant{};
+    }
+}
+
+uint32_t GameComponent::GetMaterialVariant() const
+{
+    return HasInstances() ? MaterialVariant::Instanced : MaterialVariant::Mesh;
+}
+
+bool GameComponent::HasOpacity() const
+{
+    return bHasOpacity || (MaterialPtr && MaterialPtr->IsTransparent());
+}
+
+bool GameComponent::CastsShadow() const
+{
+    if (MaterialPtr && !MaterialPtr->GetRenderState().bCastShadows)
+    {
+        return false;
+    }
+    return !HasOpacity() && !bIsSkybox;
 }
 
 void GameComponent::Render(ID3D11DeviceContext* Context)
@@ -656,4 +794,8 @@ void GameComponent::RenderShadow(ID3D11DeviceContext* context, const ShadowPassC
     context->VSSetConstantBuffers(0, 1, &shadowPass.ConstantBuffer);
     context->DrawIndexed(GetIndexCount(), 0, 0);
     if (GamePtr) GamePtr->CountDraw(GetIndexCount());
+}
+void GameComponent::LoadProjectData(const std::string& data)
+{
+    if (!data.empty()) throw std::runtime_error("Component has no project data codec");
 }

@@ -1,5 +1,6 @@
-﻿#include "FileBrowser.h"
+#include "FileBrowser.h"
 #include "QtHost.h"
+#include "MainWindow.h"
 
 #include <QClipboard>
 #include <QComboBox>
@@ -17,11 +18,31 @@
 #include <QTreeView>
 #include <QUrl>
 #include <QVBoxLayout>
+#include <QToolButton>
+#include <QSortFilterProxyModel>
 
 #include <string>
 
+class ProjectFilesFilter final : public QSortFilterProxyModel
+{
+public:
+    QString project, content;
+    bool full = false;
+    using QSortFilterProxyModel::QSortFilterProxyModel;
+    void ShowFull(bool value) { full = value; invalidateFilter(); }
+protected:
+    bool filterAcceptsRow(int row, const QModelIndex& parent) const override {
+        const auto* files = static_cast<QFileSystemModel*>(sourceModel());
+        if (!full && QDir::cleanPath(files->filePath(parent)) == project) {
+            const auto index = files->index(row, 0, parent);
+            return files->isDir(index) && (files->fileName(index) == "Source" || QDir::cleanPath(files->filePath(index)) == content);
+        }
+        return true;
+    }
+};
+
 FileBrowserDock::FileBrowserDock(EditorQtHost* host, QWidget* parent)
-    : QDockWidget(QStringLiteral("Files"), parent)
+    : QDockWidget(QStringLiteral("Ресурсы и код"), parent)
     , host_(host)
 {
     const QFileInfo projectFile(QString::fromUtf8(
@@ -40,18 +61,32 @@ void FileBrowserDock::BuildUi()
     auto* panel = new QWidget(this);
     auto* layout = new QVBoxLayout(panel);
     layout->setContentsMargins(2, 2, 2, 2);
+    auto* imports = new QToolButton(panel);
+    imports->setText(QStringLiteral("Импорт…")); imports->setPopupMode(QToolButton::InstantPopup);
+    auto* importMenu = new QMenu(imports);
+    for (bool texture : {false, true}) {
+        auto* action = importMenu->addAction(texture ? QStringLiteral("Текстура…") : QStringLiteral("Модель…"));
+        action->setEnabled(host_->HasScene());
+        connect(action, &QAction::triggered, this, [this, texture] {
+            if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(texture);
+        });
+    }
+    imports->setMenu(importMenu);
 
     // --- верхняя панель: фильтр + выбор корня ---
     auto* topBar = new QHBoxLayout;
     filterEdit_ = new QLineEdit(panel);
-    filterEdit_->setPlaceholderText(QStringLiteral("filter: *.json;*.png ..."));
+    filterEdit_->setPlaceholderText(QStringLiteral("Фильтр: *.json;*.png ..."));
     connect(filterEdit_, &QLineEdit::textChanged, this,
             [this](const QString& t) { ApplyFilter(t); });
+    topBar->addWidget(imports);
     topBar->addWidget(filterEdit_, 1);
 
     rootCombo_ = new QComboBox(panel);
-    rootCombo_->addItem(QStringLiteral("Project"), projectDir_);
-    rootCombo_->addItem(QStringLiteral("Content"), contentDir_);
+    rootCombo_->setObjectName("FileVisibility");
+    rootCombo_->addItem(QStringLiteral("Content и Source"), projectDir_);
+    rootCombo_->addItem(QStringLiteral("Весь проект"), projectDir_);
+    rootCombo_->setToolTip(QStringLiteral("Binaries — DLL, Intermediate — временные файлы сборки. Доступны в режиме «Весь проект»."));
     connect(rootCombo_, &QComboBox::currentIndexChanged, this,
             [this](int) { SetRootPath(rootCombo_->currentData().toString()); });
     topBar->addWidget(rootCombo_);
@@ -62,8 +97,12 @@ void FileBrowserDock::BuildUi()
     model_->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
     model_->setNameFilterDisables(false);   // не гасить неподходящее, а скрывать
 
+    proxy_ = new ProjectFilesFilter(this);
+    proxy_->project = QDir::cleanPath(projectDir_); proxy_->content = QDir::cleanPath(contentDir_);
+    proxy_->setSourceModel(model_);
     view_ = new QTreeView(panel);
-    view_->setModel(model_);
+    view_->setObjectName("ProjectFiles");
+    view_->setModel(proxy_);
     view_->hideColumn(3);                   // Date Modified не нужен
     view_->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     for (int c = 1; c < 3; ++c)
@@ -82,7 +121,8 @@ void FileBrowserDock::SetRootPath(const QString& path)
 {
     if (path.isEmpty())
         return;
-    view_->setRootIndex(model_->setRootPath(path));
+    proxy_->ShowFull(rootCombo_->currentIndex() == 1);
+    view_->setRootIndex(proxy_->mapFromSource(model_->setRootPath(path)));
 }
 
 void FileBrowserDock::ApplyFilter(const QString& text)
@@ -95,39 +135,66 @@ void FileBrowserDock::ApplyFilter(const QString& text)
     model_->setNameFilters(filters);
 }
 
-void FileBrowserDock::OnDoubleClicked(const QModelIndex& index)
+void FileBrowserDock::OnDoubleClicked(const QModelIndex& proxyIndex)
 {
+    const auto index = proxy_->mapToSource(proxyIndex);
     if (!index.isValid() || model_->isDir(index))
         return;                             // каталоги раскрываются штатно
 
     const QString path = model_->filePath(index);
+    if (path.endsWith(QStringLiteral(".scene.json"), Qt::CaseInsensitive))
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenScene(path);
+        return;
+    }
+    if (path.endsWith(QStringLiteral(".mat"), Qt::CaseInsensitive))
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenMaterialEditor(path);
+        return;
+    }
     const QByteArray utf8 = path.toUtf8();  // именованный QByteArray: переживает вызов Log
     const std::string msg = "EditorOpenAsset: " + std::string(utf8.constData(), utf8.size());
     host_->Log(msg.c_str());                // аудит: лог движка + консоль редактора
 
-    EditorCommand cmd;
-    cmd.type = EditorCommand::LoadAsset;
-    cmd.path = path;
-    host_->PostCommand(cmd);                // движок получит в Update (пока stub)
+    if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->UseAsset(path);
 }
 
 void FileBrowserDock::OnContextMenu(const QPoint& pos)
 {
-    const QModelIndex index = view_->indexAt(pos);
+    const QModelIndex index = proxy_->mapToSource(view_->indexAt(pos));
     const bool hasFile = index.isValid();
     const QString path = hasFile ? model_->filePath(index) : QString();
 
     QMenu menu(this);
-    QAction* open = hasFile ? menu.addAction(QStringLiteral("Open externally")) : nullptr;
-    QAction* reveal = hasFile ? menu.addAction(QStringLiteral("Show in Explorer")) : nullptr;
-    QAction* copy = hasFile ? menu.addAction(QStringLiteral("Copy path")) : nullptr;
-    QAction* refresh = menu.addAction(QStringLiteral("Refresh"));
+    const bool isMaterial = hasFile && path.endsWith(QStringLiteral(".mat"), Qt::CaseInsensitive);
+    QAction* use = hasFile && !model_->isDir(index) ? menu.addAction(isMaterial ? QStringLiteral("Назначить материал")
+                                                                               : QStringLiteral("Добавить модель / назначить текстуру")) : nullptr;
+    QAction* editMaterial = isMaterial && host_->HasMaterials() ? menu.addAction(QStringLiteral("Редактировать материал")) : nullptr;
+    QAction* newMaterial = host_->HasMaterials() ? menu.addAction(QStringLiteral("Новый материал…")) : nullptr;
+    QAction* open = hasFile ? menu.addAction(QStringLiteral("Открыть в приложении")) : nullptr;
+    QAction* reveal = hasFile ? menu.addAction(QStringLiteral("Показать в проводнике")) : nullptr;
+    QAction* copy = hasFile ? menu.addAction(QStringLiteral("Копировать путь")) : nullptr;
+    QAction* refresh = menu.addAction(QStringLiteral("Обновить"));
 
     QAction* picked = menu.exec(view_->viewport()->mapToGlobal(pos));
     if (!picked)
         return;
 
-    if (picked == open)
+    if (picked == use)
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->UseAsset(path);
+    }
+    else if (picked == editMaterial)
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenMaterialEditor(path);
+    }
+    else if (picked == newMaterial)
+    {
+        // в выбранный каталог или рядом с выбранным файлом; вне Content — в Content/Materials
+        const QString directory = !hasFile ? QString() : model_->isDir(index) ? path : QFileInfo(path).absolutePath();
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->CreateMaterial(directory);
+    }
+    else if (picked == open)
         QDesktopServices::openUrl(QUrl::fromLocalFile(path));
     else if (picked == reveal)
         // запятая после /select — обязательная часть синтаксиса explorer.exe

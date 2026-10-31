@@ -28,13 +28,14 @@ Player::Player()
 
 void Player::UpdateCamera(float deltaTime)
 {
-    ProcessInput(deltaTime);
+    const bool controlled = GamePtr && GamePtr->HasGameplayController();
+    if (!controlled) ProcessInput(deltaTime);
 
     switch (cameraMode)
     {
     case CameraMode::Free:
         {
-            UpdateFreeCamera(deltaTime);
+            if (!controlled) UpdateFreeCamera(deltaTime);
             break;
         }
     case CameraMode::Orbital:
@@ -45,7 +46,7 @@ void Player::UpdateCamera(float deltaTime)
     case CameraMode::ThirdPerson:
         {
             // TODO: do=)
-            UpdateFreeCamera(deltaTime);
+            if (!controlled) UpdateFreeCamera(deltaTime);
             break;
         }
     }

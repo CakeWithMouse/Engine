@@ -1,5 +1,7 @@
 #include <Engine/Resources/Paths.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/MainGame/CharacterController.h>
+#include <Engine/Components/Character.h>
 
 #include <algorithm>
 #include <array>
@@ -14,13 +16,26 @@
 #include <iostream>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
+#include <Engine/Render/Material.h>
+#include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/ShaderCompiler.h>
+#include <dxgi1_6.h>
+#include "../../Resources/VfsRead.h"
 #include "stb_image.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "dxguid.lib")
+
+// Export high-performance GPU preferences for NVIDIA Optimus and AMD PowerXpress
+extern "C"
+{
+    __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+}
+#pragma comment(linker, "/include:NvOptimusEnablement")
+#pragma comment(linker, "/include:AmdPowerXpressRequestHighPerformance")
 
 namespace
 {
@@ -260,6 +275,7 @@ const char* ToString(RegisterResult result)
     case RegisterResult::DuplicateName: return "DuplicateName";
     case RegisterResult::DeviceNotReady: return "DeviceNotReady";
     case RegisterResult::AlreadyOwned: return "AlreadyOwned";
+    case RegisterResult::InvalidParent: return "InvalidParent";
     default: return "Unknown";
     }
 }
@@ -275,7 +291,7 @@ Game::~Game()
     DestroyResources();
 }
 
-void Game::DestroyResources()
+void Game::DestroyResources(bool preserveScene)
 {
     if (Context)
     {
@@ -284,13 +300,17 @@ void Game::DestroyResources()
     }
 
     // Components first: they observe cube maps and shaders owned by the caches below.
-    PointLights.clear();
-    Components.clear();
+    if (!preserveScene) scene.Clear();
+    materialCache.clear();
+    defaultMaterial.reset();
+    errorMaterial.reset();
     cubeMapCache.clear();
 
     vertexShaderCache.clear();
     pixelShaderCache.clear();
     pixelShaderTargetCount.clear();
+    shaderDependencies.clear();
+    shaderErrors.clear();
     shaderCache.clear();
     BaseVertexShader.Reset();
     BasePixelShader.Reset();
@@ -338,11 +358,14 @@ void Game::DestroyResources()
     }
 
     transparentBlendState.Reset();
+    additiveBlendState.Reset();
     opaqueBlendState.Reset();
     depthStencilState.Reset();
     depthStencilStateReadOnly.Reset();
     depthStencilStateSkybox.Reset();
     DefaultRasterState.Reset();
+    CullBackRasterState.Reset();
+    SelectionVS.Reset(); SelectionPS.Reset(); SelectionCB.Reset();
     ReleaseSwapChainResources();
 
     if (SwapChain && !bEmbedded)
@@ -369,10 +392,17 @@ bool Game::Initialize()
     return InitializeInternal(nullptr, 0, 0);
 }
 
-bool Game::InitializeViewport(HWND window, int width, int height)
+bool Game::InitializeRuntimeWindow(bool visible)
+{
+    bRuntimeWindow = true;
+    bRuntimeWindowVisible = visible;
+    return InitializeInternal(nullptr, 0, 0);
+}
+
+bool Game::InitializeViewport(HWND window, int width, int height, bool preserveSceneOnFailure)
 {
     if (!IsWindow(window) || width <= 0 || height <= 0) return false;
-    return InitializeInternal(window, width, height);
+    return InitializeInternal(window, width, height, nullptr, preserveSceneOnFailure);
 }
 
 bool Game::InitializePlayViewport(Game& editorScene)
@@ -398,17 +428,17 @@ bool Game::RestoreViewportTargets()
     return CreateSwapChainResources(DisplayPtr->GetWidth(), DisplayPtr->GetHeight());
 }
 
-bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int requestedHeight, Game* sharedViewport)
+bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int requestedHeight, Game* sharedViewport, bool preserveSceneOnFailure)
 {
     if (bInitialized)
     {
         return true;
     }
 
-    auto fail = [this](const char* reason) -> bool
+    auto fail = [this, preserveSceneOnFailure](const char* reason) -> bool
     {
         std::cout << "Initialization failed: " << reason << std::endl;
-        DestroyResources();
+        DestroyResources(preserveSceneOnFailure);
         return false;
     };
 
@@ -426,7 +456,7 @@ bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int reque
     if (!bEmbedded) InputDevicePtr = std::make_unique<InputDevice>(this);
 
     const HWND hWnd = DisplayPtr->GetHwnd();
-    if (!bEmbedded)
+    if (!bEmbedded && (!bRuntimeWindow || bRuntimeWindowVisible))
     {
         ShowWindow(hWnd, SW_SHOW);
         SetForegroundWindow(hWnd);
@@ -454,7 +484,7 @@ bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int reque
     }
     if (GetFileAttributesW(ShaderPath().c_str()) == INVALID_FILE_ATTRIBUTES)
     {
-        if (!bEmbedded) MessageBox(hWnd, L"EngineContent/Shaders/RotatedFigure.hlsl was not found. Check the deployed engine content.",
+        if (!bEmbedded && !bRuntimeWindow) MessageBox(hWnd, L"EngineContent/Shaders/RotatedFigure.hlsl was not found. Check the deployed engine content.",
                    L"Missing shader", MB_OK);
         return fail("shader files not found");
     }
@@ -502,6 +532,65 @@ void Game::InitSwapChainDesc(int width, int height)
 
 bool Game::CreateDeviceAndSwapChain()
 {
+    // 1. Select high-performance discrete DXGI adapter
+    Microsoft::WRL::ComPtr<IDXGIFactory1> dxgiFactory1;
+    HRESULT hrFactory = CreateDXGIFactory1(IID_PPV_ARGS(&dxgiFactory1));
+    Microsoft::WRL::ComPtr<IDXGIFactory6> dxgiFactory6;
+    Microsoft::WRL::ComPtr<IDXGIAdapter1> selectedAdapter;
+    DXGI_ADAPTER_DESC1 selectedDesc = {};
+    SIZE_T maxDedicatedVram = 0;
+
+    auto considerAdapter = [&](Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter)
+    {
+        if (!adapter) return;
+        DXGI_ADAPTER_DESC1 desc = {};
+        adapter->GetDesc1(&desc);
+        if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) return;
+        if (!selectedAdapter || desc.DedicatedVideoMemory > maxDedicatedVram)
+        {
+            maxDedicatedVram = desc.DedicatedVideoMemory;
+            selectedAdapter = adapter;
+            selectedDesc = desc;
+        }
+    };
+
+    if (SUCCEEDED(hrFactory))
+    {
+        if (SUCCEEDED(dxgiFactory1.As(&dxgiFactory6)))
+        {
+            Microsoft::WRL::ComPtr<IDXGIAdapter1> prefAdapter;
+            for (UINT i = 0;
+                 dxgiFactory6->EnumAdapterByGpuPreference(
+                     i,
+                     DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+                     IID_PPV_ARGS(&prefAdapter)) == S_OK;
+                 ++i)
+            {
+                considerAdapter(prefAdapter);
+                prefAdapter.Reset();
+            }
+        }
+
+        UINT i = 0;
+        Microsoft::WRL::ComPtr<IDXGIAdapter1> cur;
+        while (dxgiFactory1->EnumAdapters1(i++, &cur) != DXGI_ERROR_NOT_FOUND)
+        {
+            considerAdapter(cur);
+            cur.Reset();
+        }
+    }
+
+
+    if (selectedAdapter)
+    {
+        std::wcout << L"[DirectX] Selected GPU: " << selectedDesc.Description
+                   << L" (VRAM: " << (selectedDesc.DedicatedVideoMemory / (1024 * 1024)) << L" MB)\n";
+    }
+    else
+    {
+        std::cout << "[DirectX] No discrete adapter found, using default hardware device.\n";
+    }
+
     // The renderer needs SM5 and compute shaders, so lower feature levels are not accepted.
     const D3D_FEATURE_LEVEL FeatureLevels[] = {
         D3D_FEATURE_LEVEL_11_1,
@@ -514,9 +603,10 @@ bool Game::CreateDeviceAndSwapChain()
         SwapChain.Reset();
         Context.Reset();
         Device.Reset();
+        const D3D_DRIVER_TYPE driverType = selectedAdapter ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_HARDWARE;
         return D3D11CreateDeviceAndSwapChain(
-            nullptr,
-            D3D_DRIVER_TYPE_HARDWARE,
+            selectedAdapter ? selectedAdapter.Get() : nullptr,
+            driverType,
             nullptr,
             flags,
             levels,
@@ -539,6 +629,17 @@ bool Game::CreateDeviceAndSwapChain()
     {
         // Runtimes without 11.1 reject the whole array; retry with 11.0 only.
         hr = tryCreate(createDeviceFlags, &FeatureLevels[1], 1);
+    }
+    if (FAILED(hr) && selectedAdapter)
+    {
+        std::cout << "[DirectX] Creation with explicit adapter failed (0x" << std::hex << hr << std::dec
+                  << "), falling back to default hardware driver.\n";
+        selectedAdapter.Reset();
+        hr = tryCreate(createDeviceFlags, FeatureLevels, ARRAYSIZE(FeatureLevels));
+        if (hr == E_INVALIDARG)
+        {
+            hr = tryCreate(createDeviceFlags, &FeatureLevels[1], 1);
+        }
     }
     if (FAILED(hr) && (createDeviceFlags & D3D11_CREATE_DEVICE_DEBUG))
     {
@@ -579,6 +680,7 @@ bool Game::CreateDeviceAndSwapChain()
               << " on " << AdapterName << " (" << AdapterDedicatedMemoryMb << " MB dedicated)" << std::endl;
     return true;
 }
+
 
 bool Game::CreateSwapChainResources(int width, int height)
 {
@@ -681,7 +783,11 @@ bool Game::CreateRenderStates()
     rastDesc.FillMode = D3D11_FILL_SOLID;
     rastDesc.FrontCounterClockwise = FALSE;
     rastDesc.DepthClipEnable = TRUE;
-    if (FAILED(Device->CreateRasterizerState(&rastDesc, DefaultRasterState.ReleaseAndGetAddressOf())))
+    // Material meshes have a consistent clockwise winding, so one-sided materials cull back faces.
+    CD3D11_RASTERIZER_DESC cullBackDesc = rastDesc;
+    cullBackDesc.CullMode = D3D11_CULL_BACK;
+    if (FAILED(Device->CreateRasterizerState(&rastDesc, DefaultRasterState.ReleaseAndGetAddressOf())) ||
+        FAILED(Device->CreateRasterizerState(&cullBackDesc, CullBackRasterState.ReleaseAndGetAddressOf())))
     {
         std::cout << "Failed to create rasterizer state." << std::endl;
         return false;
@@ -701,7 +807,14 @@ bool Game::CreateRenderStates()
     opaqueDesc.RenderTarget[0].BlendEnable = FALSE;
     opaqueDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
+    D3D11_BLEND_DESC additiveDesc = transparentDesc;
+    additiveDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE; // the shader already multiplied by alpha
+    additiveDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+    additiveDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+    additiveDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+
     if (FAILED(Device->CreateBlendState(&transparentDesc, transparentBlendState.ReleaseAndGetAddressOf())) ||
+        FAILED(Device->CreateBlendState(&additiveDesc, additiveBlendState.ReleaseAndGetAddressOf())) ||
         FAILED(Device->CreateBlendState(&opaqueDesc, opaqueBlendState.ReleaseAndGetAddressOf())))
     {
         std::cout << "Failed to create blend states." << std::endl;
@@ -826,9 +939,17 @@ RegisterResult Game::RegisterComponent(const std::string& Name, GameComponent* C
     {
         result = RegisterResult::DuplicateName;
     }
-    else if (Component->RegisteredOwner != nullptr)
+    else if (Component->RegisteredScene != nullptr)
     {
         result = RegisterResult::AlreadyOwned;
+    }
+    else if (scene.ValidateAddition(Name, Component) == SceneResult::InvalidParent)
+    {
+        result = RegisterResult::InvalidParent;
+    }
+    else if (scene.ValidateAddition(Name, Component) == SceneResult::DuplicateName)
+    {
+        result = RegisterResult::DuplicateName; // Includes names reserved during Tick.
     }
 
     if (result != RegisterResult::Ok)
@@ -853,32 +974,27 @@ RegisterResult Game::RegisterComponent(const std::string& Name, GameComponent* C
         BindComponentShaders(Component, ShaderCompileVariant::Default);
     }
 
-    Components.emplace(Name, std::unique_ptr<GameComponent>(Component));
-    Component->RegisteredOwner = this;
-    if (pointLight != nullptr)
+    std::unique_ptr<GameComponent> owner(Component);
+    try
     {
-        PointLights.push_back(pointLight);
+        const auto added = scene.AddComponent(Name, owner);
+        if (added.result != SceneResult::Ok && added.result != SceneResult::Deferred)
+        {
+            owner.release();
+            return added.result == SceneResult::DuplicateName ? RegisterResult::DuplicateName : RegisterResult::InvalidParent;
+        }
     }
+    catch (...) { owner.release(); throw; }
+    Component->RenderOwner = this;
     return RegisterResult::Ok;
 }
 
 bool Game::UnregisterComponent(const std::string& Name)
 {
-    auto it = Components.find(Name);
-    if (it == Components.end())
-    {
-        return false;
-    }
-
-    GameComponent* removed = it->second.get();
-    PointLights.erase(std::remove(PointLights.begin(), PointLights.end(), removed), PointLights.end());
-    for (auto& pair : Components)
-    {
-        pair.second->ClearParentReferences(removed);
-    }
-
-    Components.erase(it);
-    return true;
+    auto* component = scene.FindComponentByName(Name);
+    if (!component) return false;
+    const auto result = scene.RemoveComponent(component->GetComponentId());
+    return result == SceneResult::Ok || result == SceneResult::Deferred;
 }
 
 GameComponent* Game::FindComponent(const std::string& Name) const
@@ -890,10 +1006,13 @@ GameComponent* Game::FindComponent(const std::string& Name) const
 std::vector<PointLightInfo> Game::GetPointLights(size_t maxLights) const
 {
     std::vector<PointLightInfo> result;
-    result.reserve(std::min(maxLights, PointLights.size()));
+    result.reserve(std::min(maxLights, Components.size()));
+    if (!maxLights) return result;
 
-    for (PointLightComponent* pointLight : PointLights)
+    // ID order preserves the old light registration order without dangling caches.
+    for (const auto& entry : scene.GetComponentsById())
     {
+        auto* pointLight = dynamic_cast<PointLightComponent*>(entry.second);
         if (!pointLight)
         {
             continue;
@@ -995,15 +1114,25 @@ void Game::RegisterShaders(const std::string& ShaderName, const std::string& Add
 
     const LPCSTR entryPoint = isVertexShader ? "VSMain" : "PSMain";
     const LPCSTR target = isVertexShader ? "vs_5_0" : "ps_5_0";
-    const std::wstring wideShaderPath = ToWide(ShaderName);
-    Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob;
-    const HRESULT res = CreateShader(DisplayPtr ? DisplayPtr->GetHwnd() : nullptr, GetVariantDefines(variant),
-                                     wideShaderPath.c_str(), entryPoint, target, shaderBlob.GetAddressOf());
-    if (FAILED(res))
+    ShaderCompiler::CompileOptions options;
+    for (const D3D_SHADER_MACRO* define = GetVariantDefines(variant); define && define->Name; ++define)
     {
-        std::cout << "Failed to compile shader: " << ShaderName << std::endl;
+        options.Defines.emplace_back(define->Name, define->Definition);
+    }
+    ShaderCompiler::CompileResult compiled = ShaderCompiler::Compile(ShaderName, entryPoint, target, options);
+    shaderDependencies[cacheKey] = std::move(compiled.Dependencies);
+    if (!compiled.Succeeded())
+    {
+        shaderErrors[cacheKey] = compiled.Errors;
+        std::cout << "Shader compilation failed: " << ShaderName << std::endl << compiled.Errors << std::endl;
+        const std::wstring wideShaderPath = ToWide(ShaderName);
+        if (GetFileAttributesW(wideShaderPath.c_str()) == INVALID_FILE_ATTRIBUTES)
+        {
+            MessageBox(DisplayPtr ? DisplayPtr->GetHwnd() : nullptr, wideShaderPath.c_str(), L"Missing Shader File", MB_OK);
+        }
         return;
     }
+    Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob = compiled.Blob;
 
     if (isVertexShader)
     {
@@ -1011,6 +1140,7 @@ void Game::RegisterShaders(const std::string& ShaderName, const std::string& Add
         if (FAILED(Device->CreateVertexShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(),
                                               nullptr, vertexShader.GetAddressOf())))
         {
+            shaderErrors[cacheKey] = "CreateVertexShader failed";
             std::cout << "Failed to create vertex shader: " << ShaderName << std::endl;
             return;
         }
@@ -1022,6 +1152,7 @@ void Game::RegisterShaders(const std::string& ShaderName, const std::string& Add
         if (FAILED(Device->CreatePixelShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(),
                                              nullptr, pixelShader.GetAddressOf())))
         {
+            shaderErrors[cacheKey] = "CreatePixelShader failed";
             std::cout << "Failed to create pixel shader: " << ShaderName << std::endl;
             return;
         }
@@ -1104,6 +1235,22 @@ bool Game::BindComponentShaders(GameComponent* Component, ShaderCompileVariant v
         variant = ShaderCompileVariant::Default;
     }
 
+    // A material owns its shaders; null pixel shader: it cannot draw in this pass.
+    if (Material* material = PrepareMaterial(Component))
+    {
+        const uint32_t materialVariant = Component->GetMaterialVariant();
+        ID3D11VertexShader* vertexShader = material->GetVertexShader(materialVariant);
+        ID3D11PixelShader* pixelShader = material->GetPixelShader(variant == ShaderCompileVariant::DeferredGBuffer, materialVariant);
+        if (vertexShader == nullptr || pixelShader == nullptr)
+        {
+            return false;
+        }
+        Component->SetVertexShader(vertexShader);
+        Component->SetPixelShader(pixelShader);
+        CurrentPassVariant = variant;
+        return true;
+    }
+
     ComponentShaderVariant& slot = ResolveComponentShaders(Component, variant);
     if (variant == ShaderCompileVariant::DeferredGBuffer && !slot.bWritesGBuffer)
     {
@@ -1126,7 +1273,284 @@ bool Game::SupportsDeferredGeometry(GameComponent* Component)
     {
         return false;
     }
+    if (Material* material = PrepareMaterial(Component))
+    {
+        return material->WritesGBuffer();
+    }
     return ResolveComponentShaders(Component, ShaderCompileVariant::DeferredGBuffer).bWritesGBuffer;
+}
+
+Material* Game::PrepareMaterial(GameComponent* Component)
+{
+    // A material asset (/Game path) is loaded through the cache of this game.
+    if (!Component->MaterialAssetPath.empty() && !Component->bMaterialAssetLoaded)
+    {
+        Component->bMaterialAssetLoaded = true;
+        const std::string physical = VfsRead::Active().Resolve(Component->MaterialAssetPath);
+        std::shared_ptr<Material> loaded = LoadMaterial(physical.empty() ? Component->MaterialAssetPath : physical);
+        // A missing or broken file stays visible as the error checker, not as the default look.
+        Component->AssignMaterial(loaded ? std::move(loaded) : GetErrorMaterial());
+    }
+    Material* material = Component->GetMaterial();
+    if (material == nullptr && Component->RequiresMaterial())
+    {
+        material = GetDefaultMaterial().get();
+    }
+    if (material)
+    {
+        material->RequireVariant(Component->GetMaterialVariant());
+    }
+    if (material && material->NeedsCompile())
+    {
+        material->Compile(Device.Get(), Context.Get());
+    }
+    return material;
+}
+
+void Game::ApplyComponentPipelineState(GameComponent* Component, bool bTransparentPass)
+{
+    const Material* material = Component->GetMaterial();
+    // Materials are culled unless two-sided; legacy components keep the engine-wide no-culling state.
+    ID3D11RasterizerState* raster = material && !material->GetRenderState().bTwoSided && CullBackRasterState
+                                        ? CullBackRasterState.Get()
+                                        : DefaultRasterState.Get();
+    Context->RSSetState(raster);
+    if (bTransparentPass)
+    {
+        const bool bAdditive = material && material->GetRenderState().Blend == MaterialBlendMode::Additive;
+        const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+        Context->OMSetBlendState(bAdditive ? additiveBlendState.Get() : transparentBlendState.Get(), blendFactor, 0xffffffff);
+    }
+}
+
+bool Game::InvalidateShaderFile(const std::string& shaderFile)
+{
+    const std::string file = ShaderCompiler::NormalizePath(shaderFile);
+
+    // Materials: the .mat file itself is re-read, a shader they include is recompiled.
+    size_t materialCount = 0;
+    for (auto& entry : materialCache)
+    {
+        if (entry.first == file)
+        {
+            ReloadMaterial(entry.second.Path);
+            ++materialCount;
+        }
+        else if (entry.second.Instance->DependsOn(file))
+        {
+            entry.second.Instance->Compile(Device.Get(), Context.Get());
+            ++materialCount;
+        }
+    }
+    if (defaultMaterial && defaultMaterial->DependsOn(file))
+    {
+        defaultMaterial->Compile(Device.Get(), Context.Get());
+        ++materialCount;
+    }
+    if (materialCount > 0)
+    {
+        std::cout << "Recompiled " << materialCount << " material(s) depending on " << shaderFile << std::endl;
+    }
+    RetryFailedMaterialAssets();
+
+    std::vector<std::string> staleKeys;
+    for (const auto& entry : shaderDependencies)
+    {
+        if (std::find(entry.second.begin(), entry.second.end(), file) != entry.second.end())
+        {
+            staleKeys.push_back(entry.first);
+        }
+    }
+    if (staleKeys.empty())
+    {
+        return materialCount > 0;
+    }
+
+    for (const std::string& key : staleKeys)
+    {
+        shaderCache.erase(key);
+        vertexShaderCache.erase(key);
+        pixelShaderCache.erase(key);
+        pixelShaderTargetCount.erase(key);
+        shaderDependencies.erase(key);
+        shaderErrors.erase(key);
+    }
+
+    OnShadersInvalidated();
+    std::cout << "Invalidated " << staleKeys.size() << " shader(s) depending on " << shaderFile << std::endl;
+    return true;
+}
+
+void Game::InvalidateAllShaders()
+{
+    const size_t count = shaderCache.size();
+    shaderCache.clear();
+    vertexShaderCache.clear();
+    pixelShaderCache.clear();
+    pixelShaderTargetCount.clear();
+    shaderDependencies.clear();
+    shaderErrors.clear();
+
+    OnShadersInvalidated();
+    std::cout << "Invalidated all " << count << " cached shader(s)" << std::endl;
+
+    for (auto& entry : materialCache)
+    {
+        ReloadMaterial(entry.second.Path);
+    }
+    if (defaultMaterial)
+    {
+        defaultMaterial->Compile(Device.Get(), Context.Get());
+    }
+    if (!materialCache.empty())
+    {
+        std::cout << "Reloaded " << materialCache.size() << " material(s)" << std::endl;
+    }
+    RetryFailedMaterialAssets();
+}
+
+void Game::RetryFailedMaterialAssets()
+{
+    if (!errorMaterial)
+    {
+        return;
+    }
+    for (auto& pair : Components)
+    {
+        GameComponent* component = pair.second.get();
+        if (!component->MaterialAssetPath.empty() && component->MaterialPtr == errorMaterial)
+        {
+            component->bMaterialAssetLoaded = false;
+        }
+    }
+}
+
+namespace
+{
+    /** A material from a parsed .mat: compiled, with the file's parameters and textures applied. */
+    std::shared_ptr<Material> BuildMaterial(const MaterialAsset& asset, const std::string& matPath,
+                                            ID3D11Device* device, ID3D11DeviceContext* context)
+    {
+        auto material = std::make_shared<Material>(MaterialAsset::ResolvePath(matPath, asset.Shader), asset.Render);
+        material->Compile(device, context);
+        std::vector<std::string> warnings;
+        asset.ApplyTo(*material, matPath, warnings);
+        for (const std::string& warning : warnings)
+        {
+            std::cout << "Material " << matPath << ": " << warning << std::endl;
+        }
+        return material;
+    }
+}
+
+std::shared_ptr<Material> Game::FindMaterial(const std::string& matPath) const
+{
+    const auto cached = materialCache.find(ShaderCompiler::NormalizePath(matPath));
+    return cached != materialCache.end() ? cached->second.Instance : nullptr;
+}
+
+std::shared_ptr<Material> Game::LoadMaterial(const std::string& matPath, std::string* error)
+{
+    const std::string key = ShaderCompiler::NormalizePath(matPath);
+    const auto cached = materialCache.find(key);
+    if (cached != materialCache.end())
+    {
+        return cached->second.Instance;
+    }
+
+    std::string message;
+    MaterialAsset asset;
+    if (!Device)
+    {
+        message = matPath + ": the device is not initialized";
+    }
+    else if (MaterialAsset::Load(matPath, asset, message))
+    {
+        std::shared_ptr<Material> material = BuildMaterial(asset, matPath, Device.Get(), Context.Get());
+        materialCache.emplace(key, CachedMaterial{matPath, material});
+        return material;
+    }
+    std::cout << "LoadMaterial failed: " << message << std::endl;
+    if (error) *error = message;
+    return nullptr;
+}
+
+bool Game::ReloadMaterial(const std::string& matPath, std::string* error)
+{
+    const auto cached = materialCache.find(ShaderCompiler::NormalizePath(matPath));
+    std::string message;
+    MaterialAsset asset;
+    if (cached == materialCache.end())
+    {
+        message = matPath + ": the material is not loaded";
+    }
+    else if (MaterialAsset::Load(matPath, asset, message))
+    {
+        // Same object: whoever holds the material sees the new state.
+        *cached->second.Instance = std::move(*BuildMaterial(asset, matPath, Device.Get(), Context.Get()));
+        return true;
+    }
+    std::cout << "ReloadMaterial failed: " << message << std::endl;
+    if (error) *error = message;
+    return false;
+}
+
+std::shared_ptr<Material> Game::GetDefaultMaterial()
+{
+    if (!defaultMaterial && Device)
+    {
+        defaultMaterial = std::make_shared<Material>(EnginePaths::Shader("Material/DefaultSurface.hlsl").generic_u8string());
+        defaultMaterial->Compile(Device.Get(), Context.Get());
+    }
+    return defaultMaterial;
+}
+
+std::shared_ptr<Material> Game::GetErrorMaterial()
+{
+    if (!errorMaterial && Device)
+    {
+        errorMaterial = std::make_shared<Material>(EnginePaths::Shader("Material/ErrorSurface.hlsl").generic_u8string());
+        errorMaterial->Compile(Device.Get(), Context.Get());
+    }
+    return errorMaterial;
+}
+
+void Game::OnShadersInvalidated()
+{
+    // Resolved slots point into the erased cache entries: every component resolves again.
+    for (auto& pair : Components)
+    {
+        GameComponent* component = pair.second.get();
+        for (ComponentShaderVariant& slot : component->ShaderVariants)
+        {
+            slot = ComponentShaderVariant{};
+        }
+        component->SetVertexShader(nullptr);
+        component->SetPixelShader(nullptr);
+    }
+
+    // The fallback pair keeps the old shaders alive until the new ones compile.
+    InitShaderBuffers();
+}
+
+std::string Game::GetShaderErrors(const std::string& shaderFile) const
+{
+    const std::string file = ShaderCompiler::NormalizePath(shaderFile);
+    std::string errors;
+    for (const auto& entry : shaderErrors)
+    {
+        const auto dependencies = shaderDependencies.find(entry.first);
+        if (dependencies == shaderDependencies.end() || dependencies->second.empty() || dependencies->second.front() != file)
+        {
+            continue;
+        }
+        if (!errors.empty())
+        {
+            errors += '\n';
+        }
+        errors += entry.second;
+    }
+    return errors;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -2381,6 +2805,36 @@ void Game::Run()
     }
 }
 
+void Game::RenderEditorSelection()
+{
+    auto* object = scene.FindComponent(EditorSelectedId);
+    if (!bEmbedded || !object || !FirstPlayer) return;
+    if (!SelectionCB) {
+        Microsoft::WRL::ComPtr<ID3DBlob> vs, ps;
+        const auto file=EnginePaths::Shader("EditorSelection.hlsl").wstring();
+        if (FAILED(ShaderCompiler::CompileFromFile(file,nullptr,"VSMain","vs_5_0",vs.GetAddressOf())) ||
+            FAILED(ShaderCompiler::CompileFromFile(file,nullptr,"PSMain","ps_5_0",ps.GetAddressOf()))) return;
+        if (FAILED(Device->CreateVertexShader(vs->GetBufferPointer(),vs->GetBufferSize(),nullptr,SelectionVS.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreatePixelShader(ps->GetBufferPointer(),ps->GetBufferSize(),nullptr,SelectionPS.ReleaseAndGetAddressOf()))) return;
+        D3D11_BUFFER_DESC desc{}; desc.ByteWidth=24*sizeof(DirectX::XMFLOAT4); desc.BindFlags=D3D11_BIND_CONSTANT_BUFFER;
+        if (FAILED(Device->CreateBuffer(&desc,nullptr,SelectionCB.ReleaseAndGetAddressOf()))) return;
+    }
+    using namespace DirectX;
+    glm::vec3 lo,hi; object->GetEditorBounds(lo,hi);
+    const auto matrix=XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetViewMatrix())) * XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetProjectionMatrix()));
+    XMFLOAT4 projected[8], lines[24];
+    for (int i=0;i<8;++i) XMStoreFloat4(&projected[i],XMVector4Transform(XMVectorSet(i&1?hi.x:lo.x,i&2?hi.y:lo.y,i&4?hi.z:lo.z,1),matrix));
+    const int edges[]={0,1,0,2,0,4,1,3,1,5,2,3,2,6,3,7,4,5,4,6,5,7,6,7};
+    for(int i=0;i<24;++i)lines[i]=projected[edges[i]];
+    Context->UpdateSubresource(SelectionCB.Get(),0,nullptr,lines,0,0);
+    // Final editor-only pass; no depth attachment, so the selected object stays identifiable behind geometry.
+    Context->ClearState(); SetFullViewport();
+    Context->OMSetRenderTargets(1,RenderTargetView.GetAddressOf(),nullptr);
+    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+    Context->VSSetShader(SelectionVS.Get(),nullptr,0); Context->PSSetShader(SelectionPS.Get(),nullptr,0);
+    Context->VSSetConstantBuffers(0,1,SelectionCB.GetAddressOf());
+    Context->Draw(24,0);
+}
 bool Game::RenderViewportFrame(float deltaTime)
 {
     if (!bEmbedded || !bInitialized || ExitCode != 0) return false;
@@ -2393,10 +2847,32 @@ bool Game::RenderViewportFrame(float deltaTime)
     UpdateFrame(std::clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds));
     BeginGpuTimer();
     RenderFrame();
+    RenderEditorSelection();
     EndGpuTimer();
     EndFrame();
     LastFrameStats = Stats;
     return bRunning;
+}
+
+Game::RuntimeFrameResult Game::RunRuntimeFrame(float deltaTime)
+{
+    if (!bRuntimeWindow || !bInitialized || !std::isfinite(deltaTime) || deltaTime < 0) return RuntimeFrameResult::Failed;
+    if (bWindowCloseRequested) return RuntimeFrameResult::Closed;
+    bRunning = true;
+    if (!PumpMessages() || bWindowCloseRequested) return RuntimeFrameResult::Closed;
+    ApplyPendingResize();
+    if (!bRunning) return RuntimeFrameResult::Failed;
+    if (bMinimized) { Sleep(10); return RuntimeFrameResult::Running; }
+    ++FrameIndex;
+    Stats.Reset();
+    UpdateFrame(std::min(deltaTime, MaxFrameDeltaSeconds));
+    BeginGpuTimer();
+    RenderFrame();
+    EndGpuTimer();
+    EndFrame();
+    if (InputDevicePtr) InputDevicePtr->EndFrame();
+    LastFrameStats = Stats;
+    return bRunning ? RuntimeFrameResult::Running : RuntimeFrameResult::Failed;
 }
 
 void Game::OnWindowResized(int clientWidth, int clientHeight, bool minimized)
@@ -2412,6 +2888,7 @@ void Game::OnWindowResized(int clientWidth, int clientHeight, bool minimized)
 
 void Game::OnFocusLost()
 {
+    ActionInput.ReleaseAll();
     if (InputDevicePtr)
     {
         InputDevicePtr->ClearPressedKeys();
@@ -2461,7 +2938,7 @@ void Game::ProcessHotkeys()
         return;
     }
 
-    // F3: deferred debug overlay, F4: VSync, F5: forward <-> deferred.
+    // F3: deferred debug overlay, F4: VSync, F5: forward <-> deferred. Shader reload belongs to the editor.
     const bool overlayDown = InputDevicePtr->IsKeyDown(Keys::F3);
     if (overlayDown && !bOverlayKeyWasDown)
     {
@@ -2486,7 +2963,10 @@ void Game::ProcessHotkeys()
 
 void Game::UpdateFrame(float realDeltaTime)
 {
+    SynchronizeSceneResources();
     const float deltaTime = realDeltaTime * SimulationTimeScale;
+    RealTime += realDeltaTime;
+    LastRealDeltaTime = realDeltaTime;
     ProcessHotkeys();
     if (bSimulationEnabled) UpdateSimulation(deltaTime);
     else FirstPlayer->UpdateCamera(0.0f);
@@ -2495,14 +2975,55 @@ void Game::UpdateFrame(float realDeltaTime)
 
 void Game::UpdateSimulation(float deltaTime)
 {
+    auto sceneUpdate = scene.BeginUpdate(); // Covers custom PreUpdate/TickComponents too.
+    InitializeGameplay();
+    StartGameplayComponents();
     TotalTime += deltaTime;
     PreUpdate(deltaTime);
-    FirstPlayer->UpdateCamera(deltaTime);
+    ActionInput.Tick(deltaTime);
+    if (Controller) Controller->Tick(deltaTime);
+    if (FirstPlayer) FirstPlayer->UpdateCamera(deltaTime);
     TickComponents(deltaTime);
+    if (Controller && FirstPlayer) Controller->UpdateCamera(*FirstPlayer);
+}
+
+std::unique_ptr<CharacterController> Game::CreateCharacterController() { return std::make_unique<CharacterController>(*this); }
+void Game::SetCharacterController(std::unique_ptr<CharacterController> controller)
+{
+    ActionInput.Reset(); Controller = std::move(controller);
+}
+void Game::InitializeGameplay()
+{
+    if (GameplayInitialized) return;
+    PlaySettings* settings = nullptr;
+    for (const auto& entry : scene.GetComponents()) if (auto* value = dynamic_cast<PlaySettings*>(entry.second.get())) {
+        if (settings) throw std::runtime_error("Only one PlaySettings object is allowed per scene");
+        settings = value;
+    }
+    if (settings) {
+        if (!Controller) Controller = CreateCharacterController();
+        if (!Controller) throw std::runtime_error("Controller factory returned null");
+        Controller->Configure(*settings);
+        if (settings->standardControl) Controller->BindInput();
+        if (FirstPlayer) Controller->UpdateCamera(*FirstPlayer);
+    }
+    GameplayInitialized = true;
+    StartGameplayComponents();
+}
+
+void Game::StartGameplayComponents()
+{
+    auto scope=scene.BeginUpdate();
+    for(const auto& entry:scene.GetComponents()) {
+        auto& component=*entry.second;
+        if(component.GameplayStarted)continue;
+        component.SetGame(this);component.GameplayStarted=true;component.BeginPlay();
+    }
 }
 
 void Game::PrepareRenderFrame()
 {
+    SynchronizeSceneResources(); // Includes additions committed after gameplay callbacks.
     if (bShadowsEnabled && !bShadowResourcesReady && !bShadowInitFailed)
     {
         bShadowResourcesReady = InitShadowResources();
@@ -2531,12 +3052,27 @@ void Game::PrepareRenderFrame()
 
 void Game::TickComponents(float deltaTime)
 {
-    const bool bPaused = InputDevicePtr && InputDevicePtr->IsKeyDown(Keys::Space);
-    for (auto& pair : Components)
+    const bool bPaused = !Controller && InputDevicePtr && InputDevicePtr->IsKeyDown(Keys::Space);
+    scene.Tick(deltaTime, bPaused);
+}
+
+void Game::SynchronizeSceneResources()
+{
+    if (renderedSceneRevision == scene.GetRevision()) return;
+    for (const auto& entry : Components)
     {
-        GameComponent* Component = pair.second.get();
-        Component->Tick(bPaused && !Component->IsSkybox() ? 0.0f : deltaTime);
+        auto* component = entry.second.get();
+        if (component->RenderOwner == this) continue;
+        component->SetGame(this);
+        if (!dynamic_cast<PointLightComponent*>(component))
+        {
+            component->CreateBuffers(Device.Get());
+            BindComponentShaders(component, ShaderCompileVariant::Default);
+        }
+        component->RenderOwner = this;
     }
+    InvalidateStaticShadow();
+    renderedSceneRevision = scene.GetRevision();
 }
 
 void Game::BuildFrameConstants()
@@ -2554,6 +3090,7 @@ void Game::BuildFrameConstants()
 
     const glm::vec3 cameraPosition = FirstPlayer->GetPosition();
     frame.CameraPosition = XMFLOAT4(cameraPosition.x, cameraPosition.y, cameraPosition.z, 1.0f);
+    frame.TimeParams = XMFLOAT4(RealTime, LastRealDeltaTime, TotalTime, 0.0f);
 
     for (int i = 0; i < MaxPointLights; ++i)
     {
@@ -2858,8 +3395,10 @@ void Game::RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant)
         {
             continue;
         }
+        ApplyComponentPipelineState(Component, false);
         Component->Render(Context.Get());
     }
+    Context->RSSetState(DefaultRasterState.Get());
 }
 
 void Game::RenderSkybox()
@@ -2949,10 +3488,12 @@ void Game::RenderTransparent()
     {
         if (BindComponentShaders(draw.Component, ShaderCompileVariant::Default))
         {
+            ApplyComponentPipelineState(draw.Component, true);
             draw.Component->Render(Context.Get());
         }
     }
 
+    Context->RSSetState(DefaultRasterState.Get());
     Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
     Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
 }
