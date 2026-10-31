@@ -21,6 +21,7 @@ public:
         headerBtn_ = new QPushButton(this);
         headerBtn_->setObjectName(QStringLiteral("CardHeaderBtn"));
         headerBtn_->setCursor(Qt::PointingHandCursor);
+        headerBtn_->setFixedHeight(22);
         UpdateHeaderText();
 
         QObject::connect(headerBtn_, &QPushButton::clicked, [this] {
@@ -30,8 +31,8 @@ public:
 
         content_ = new QWidget(this);
         contentLayout_ = new QVBoxLayout(content_);
-        contentLayout_->setContentsMargins(8, 8, 8, 8);
-        contentLayout_->setSpacing(6);
+        contentLayout_->setContentsMargins(6, 4, 6, 4);
+        contentLayout_->setSpacing(4);
         mainLayout->addWidget(content_);
 
         content_->setVisible(expanded_);

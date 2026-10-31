@@ -85,8 +85,8 @@ void ObjectInspectorPanel::BuildUi()
     auto* content = new QWidget(scrollArea);
     content->setObjectName(QStringLiteral("InspectorScrollContent"));
     auto* inspectorLayout = new QVBoxLayout(content);
-    inspectorLayout->setContentsMargins(6, 6, 6, 6);
-    inspectorLayout->setSpacing(6);
+    inspectorLayout->setContentsMargins(4, 4, 4, 4);
+    inspectorLayout->setSpacing(4);
 
     noSelectionLabel_ = new QLabel(Tr("Объект не выбран", "No object selected"), content);
     noSelectionLabel_->setObjectName(QStringLiteral("NoSelectionLabel"));
@@ -164,6 +164,7 @@ void ObjectInspectorPanel::BuildGeneralCard(QVBoxLayout* layout)
 
     objectName_ = new QLineEdit(rowName);
     objectName_->setMaxLength(120);
+    objectName_->setFixedHeight(22);
     connect(objectName_, &QLineEdit::editingFinished, this, [this] {
         if (refreshing_ || selectedId_ == 0) return;
         emit NameEditingFinished(selectedId_, objectName_->text().trimmed());
@@ -197,6 +198,7 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
 
     lightColor_ = new QPushButton(Tr("Выбрать цвет…", "Choose Color…"), rowTop);
     lightColor_->setObjectName(QStringLiteral("LightColor"));
+    lightColor_->setFixedHeight(22);
     connect(lightColor_, &QPushButton::clicked, this, [this] {
         if (refreshing_ || selectedId_ == 0) return;
         const QColor current = QColor::fromRgbF(lightValues_[0]->value(), lightValues_[1]->value(), lightValues_[2]->value());
@@ -237,6 +239,7 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     lInt->addWidget(lightRowLabels_[3]);
 
     lightValues_[3] = new NoWheelDoubleSpinBox(rowInt);
+    lightValues_[3]->setFixedHeight(22);
     lightValues_[3]->setRange(0.0, 10000.0);
     lightValues_[3]->setDecimals(2);
     lightValues_[3]->setSingleStep(0.5);
@@ -256,6 +259,7 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     lRad->addWidget(lightRowLabels_[4]);
 
     lightValues_[4] = new NoWheelDoubleSpinBox(rowRad);
+    lightValues_[4]->setFixedHeight(22);
     lightValues_[4]->setRange(0.01, 10000.0);
     lightValues_[4]->setDecimals(2);
     lightValues_[4]->setSingleStep(0.5);
@@ -285,6 +289,7 @@ void ObjectInspectorPanel::BuildCharacterCard(QVBoxLayout* layout)
 
     characterSpeed_ = new NoWheelDoubleSpinBox(rowSpeed);
     characterSpeed_->setObjectName(QStringLiteral("CharacterSpeed"));
+    characterSpeed_->setFixedHeight(22);
     characterSpeed_->setRange(0, 10000);
     characterSpeed_->setKeyboardTracking(false);
     connect(characterSpeed_, &QDoubleSpinBox::editingFinished, this, [this] {

@@ -74,6 +74,7 @@ private:
         materialAsset_ = new QLineEdit(Content());
         materialAsset_->setReadOnly(true);
         materialAsset_->setObjectName(QStringLiteral("MaterialAsset"));
+        materialAsset_->setFixedHeight(22);
         materialAsset_->setPlaceholderText(Tr("по умолчанию", "default"));
         cl->addWidget(materialAsset_);
 
@@ -84,6 +85,7 @@ private:
 
         editMaterialButton_ = new QPushButton(Tr("Редактировать", "Edit Material"), materialActions_);
         editMaterialButton_->setObjectName(QStringLiteral("PrimaryActionButton"));
+        editMaterialButton_->setFixedHeight(22);
         QObject::connect(editMaterialButton_, &QPushButton::clicked, [this] {
             if (onEditMaterial) onEditMaterial(materialAsset_->text());
         });
@@ -91,6 +93,7 @@ private:
 
         chooseMaterialButton_ = new QPushButton(Tr("Выбрать…", "Browse…"), materialActions_);
         chooseMaterialButton_->setObjectName(QStringLiteral("ChooseMaterial"));
+        chooseMaterialButton_->setFixedHeight(22);
         QObject::connect(chooseMaterialButton_, &QPushButton::clicked, [this] {
             if (onChooseMaterial) onChooseMaterial();
         });
@@ -98,6 +101,7 @@ private:
 
         clearMaterialButton_ = new QPushButton(Tr("Убрать", "Clear"), materialActions_);
         clearMaterialButton_->setObjectName(QStringLiteral("ClearMaterial"));
+        clearMaterialButton_->setFixedHeight(22);
         QObject::connect(clearMaterialButton_, &QPushButton::clicked, [this] {
             if (onClearMaterial) onClearMaterial();
         });

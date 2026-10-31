@@ -56,6 +56,7 @@ private:
         modelAsset_ = new QLineEdit(Content());
         modelAsset_->setReadOnly(true);
         modelAsset_->setObjectName(QStringLiteral("ModelAsset"));
+        modelAsset_->setFixedHeight(22);
         modelAsset_->setPlaceholderText(Tr("нет модели", "none"));
         cl->addWidget(modelAsset_);
 
@@ -66,6 +67,7 @@ private:
 
         chooseModel_ = new QPushButton(Tr("Выбрать модель…", "Choose Model…"), btnRow);
         chooseModel_->setObjectName(QStringLiteral("ChooseModel"));
+        chooseModel_->setFixedHeight(22);
         QObject::connect(chooseModel_, &QPushButton::clicked, [this] {
             if (onChooseModel) onChooseModel();
         });
@@ -73,6 +75,7 @@ private:
 
         clearModel_ = new QPushButton(Tr("Очистить", "Clear"), btnRow);
         clearModel_->setObjectName(QStringLiteral("ClearModel"));
+        clearModel_->setFixedHeight(22);
         QObject::connect(clearModel_, &QPushButton::clicked, [this] {
             if (onClearModel) onClearModel();
         });

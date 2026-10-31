@@ -213,8 +213,8 @@ QStatusBar {
 QFrame#CollapsibleCard {
     background-color: %7;
     border: 1px solid %6;
-    border-radius: 6px;
-    margin-bottom: 6px;
+    border-radius: 4px;
+    margin-bottom: 4px;
 }
 QPushButton#CardHeaderBtn {
     background-color: %8;
@@ -222,10 +222,13 @@ QPushButton#CardHeaderBtn {
     font-weight: 600;
     font-size: 11px;
     text-align: left;
-    padding: 6px 10px;
+    height: 22px;
+    min-height: 22px;
+    max-height: 22px;
+    padding: 0px 8px;
     border: none;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
 }
 QPushButton#CardHeaderBtn:hover {
     background-color: %9;
@@ -233,11 +236,28 @@ QPushButton#CardHeaderBtn:hover {
 }
 QLabel#CardSectionLabel {
     color: %4;
-    font-size: 11px;
-    font-weight: bold;
+    font-size: 10px;
+    font-weight: 500;
 }
 QLabel#CardFieldLabel {
     color: %4;
+    font-size: 11px;
+    font-weight: normal;
+}
+QFrame#CollapsibleCard QLineEdit,
+QFrame#CollapsibleCard QSpinBox,
+QFrame#CollapsibleCard QDoubleSpinBox,
+QFrame#CollapsibleCard QComboBox {
+    min-height: 22px;
+    max-height: 22px;
+    padding: 1px 4px;
+    font-size: 11px;
+    color: %1;
+}
+QFrame#CollapsibleCard QPushButton:not(#CardHeaderBtn) {
+    min-height: 22px;
+    max-height: 22px;
+    padding: 1px 6px;
     font-size: 11px;
 }
 QLabel#SelectedObjectLabel {
