@@ -554,9 +554,15 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11Buffer> SelectionCB;
 
     struct OverlayLineVertex {
-        float x, y, z;
+        float x0, y0, z0;
+        float x1, y1, z1;
         uint32_t color;
+        float sideX, sideY;
+        float thickness;
     };
+    std::vector<OverlayLineVertex> OverlayDepthVertices;
+    std::vector<OverlayLineVertex> OverlayTopVertices;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> OverlayRasterState;
     struct OverlayBillboardVertex {
         float x, y, z;
         float offsetX, offsetY;
