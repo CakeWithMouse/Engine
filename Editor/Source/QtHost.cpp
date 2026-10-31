@@ -61,6 +61,11 @@ bool EditorQtHost::Start()
     Log("EditorStart");
     Log(host_.projectName ? host_.projectName : "(no project)");
     Log(host_.projectFile ? host_.projectFile : "(no project file)");
+    if (overlay_.version == 0)
+    {
+        std::printf("[Info] Viewport overlay service: NOT FOUND (version 0)\n");
+        std::fflush(stdout);
+    }
     return true;
 }
 
@@ -73,11 +78,27 @@ void EditorQtHost::Update(double dt)
     if (overlay_.getCamera)
     {
         EngineCameraInfo cam{};
-        if (overlay_.getCamera(overlay_.context, &cam))
+        if (overlay_.getCamera(overlay_.context, &cam) == EngineSceneOk)
         {
             std::lock_guard lk(cameraMutex_);
             lastCamera_ = cam;
-            lastCameraValid_ = true;
+            lastCameraValid_ = (cam.width > 0 && cam.height > 0);
+        }
+        else
+        {
+            std::lock_guard lk(cameraMutex_);
+            lastCameraValid_ = false;
+        }
+    }
+
+    {
+        static int sLastCameraState = -1;
+        int curCameraState = (lastCameraValid_ ? 1 : 0);
+        if (curCameraState != sLastCameraState)
+        {
+            sLastCameraState = curCameraState;
+            std::printf("[Info] Camera: %s\n", (curCameraState == 1) ? "ok" : "zero");
+            std::fflush(stdout);
         }
     }
 
@@ -118,13 +139,26 @@ void EditorQtHost::Update(double dt)
                 overlay_.setOverlayIcon(overlay_.context, icon.id, icon.width, icon.height, icon.pixels.data());
             }
         }
+        else if (!iconsToUpload.empty())
+        {
+            std::lock_guard lk(overlayMutex_);
+            pendingIcons_.insert(pendingIcons_.begin(), iconsToUpload.begin(), iconsToUpload.end());
+        }
         if (sendLines && overlay_.setOverlayLines)
         {
             overlay_.setOverlayLines(overlay_.context, linesToSend.data(), static_cast<uint32_t>(linesToSend.size()), thicknessToSend);
+            uint64_t hash = 14695981039346656037ull;
+            const auto* ptr = reinterpret_cast<const uint8_t*>(linesToSend.data());
+            const size_t sz = linesToSend.size() * sizeof(EngineOverlayLine);
+            for (size_t i = 0; i < sz; ++i) { hash ^= ptr[i]; hash *= 1099511628211ull; }
+            std::printf("[Info] Overlay lines sent: count %zu, hash %llu\n", linesToSend.size(), hash);
+            std::fflush(stdout);
         }
         if (sendBillboards && overlay_.setOverlayBillboards)
         {
             overlay_.setOverlayBillboards(overlay_.context, billboardsToSend.data(), static_cast<uint32_t>(billboardsToSend.size()));
+            std::printf("[Info] Billboards sent: count %zu\n", billboardsToSend.size());
+            std::fflush(stdout);
         }
     }
     if (HasScene())
@@ -397,4 +431,12 @@ void EditorQtHost::RunOnUi(std::function<void()> action)
     {
         QMetaObject::invokeMethod(QCoreApplication::instance(), std::move(action), Qt::QueuedConnection);
     }
+}
+
+void EditorQtHost::SetViewportOverlayApi(const EngineViewportOverlayApi& api)
+{
+    overlay_ = api;
+    const bool found = (overlay_.version == 1 && overlay_.setOverlayLines && overlay_.getCamera);
+    std::printf("[Info] Viewport overlay service: %s (version %u)\n", found ? "FOUND" : "NOT FOUND", overlay_.version);
+    std::fflush(stdout);
 }

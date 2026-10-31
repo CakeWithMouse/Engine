@@ -170,6 +170,11 @@ void EditorMainWindow::BuildUi()
     });
 
     viewMenu_->addSeparator();
+    if (!SettingsService::Instance().Contains(QStringLiteral("view/grid")))
+        SettingsService::Instance().SetValue(QStringLiteral("view/grid"), true);
+    if (!SettingsService::Instance().Contains(QStringLiteral("view/overlays")))
+        SettingsService::Instance().SetValue(QStringLiteral("view/overlays"), true);
+
     actGrid_ = viewMenu_->addAction(Tr("Сетка", "Grid"), this, [this] {
         CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleGrid"));
         if (actGrid_) actGrid_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool());

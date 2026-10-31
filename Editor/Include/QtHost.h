@@ -67,7 +67,7 @@ public:
     void SetProjectDataApi(const EngineProjectDataApi& api) { projectData_ = api; }
     void SetViewportInputApi(const EngineViewportInputApi& api) { viewportInput_ = api; }
     void SetSelectionApi(const EngineSelectionApi& api) { selection_ = api; }
-    void SetViewportOverlayApi(const EngineViewportOverlayApi& api) { overlay_ = api; }
+    void SetViewportOverlayApi(const EngineViewportOverlayApi& api);
 
 private:
     void UiThreadMain();
