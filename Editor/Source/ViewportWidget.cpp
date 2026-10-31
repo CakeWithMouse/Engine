@@ -86,7 +86,14 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
             c.right = static_cast<float>(keys_.contains(Qt::Key_D) - keys_.contains(Qt::Key_A)) * speed;
             c.up = static_cast<float>(keys_.contains(Qt::Key_E) - keys_.contains(Qt::Key_Q)) * speed;
             c.forward = static_cast<float>(keys_.contains(Qt::Key_W) - keys_.contains(Qt::Key_S)) * speed;
-            if (c.right || c.up || c.forward) host_->PostCommand(c);
+            if (c.right || c.up || c.forward)
+            {
+                host_->PostCommand(c);
+                const auto basis = GizmoMath::ComputeCameraBasis(camYaw_, camPitch_);
+                camPos_[0] += static_cast<float>(basis.right[0] * c.right + basis.forward[0] * c.forward) * 5.0f;
+                camPos_[1] += static_cast<float>(c.up + basis.forward[1] * c.forward) * 5.0f;
+                camPos_[2] += static_cast<float>(basis.right[2] * c.right + basis.forward[2] * c.forward) * 5.0f;
+            }
         }
     });
     timer->start(16);
@@ -342,10 +349,15 @@ bool ViewportWidget::HandleMouseMove(QMouseEvent* mouse)
     {
         const auto delta = mouse->position() - lastMouse_;
         lastMouse_ = mouse->position();
+        const float yawDelta = static_cast<float>(delta.x()) * 0.005f;
+        const float pitchDelta = static_cast<float>(delta.y()) * 0.005f;
+        camYaw_ -= yawDelta;
+        camPitch_ = std::max(-1.56f, std::min(1.56f, camPitch_ - pitchDelta));
+
         EditorCommand c;
         c.type = EditorCommand::ViewportCamera;
-        c.yaw = static_cast<float>(delta.x()) * 0.005f;
-        c.pitch = static_cast<float>(delta.y()) * 0.005f;
+        c.yaw = yawDelta;
+        c.pitch = pitchDelta;
         host_->PostCommand(c);
         return true;
     }
@@ -370,33 +382,25 @@ bool ViewportWidget::HandleMouseMove(QMouseEvent* mouse)
             const QPointF total = mouse->position() - dragStartPos_;
             lastDragPos_ = mouse->position();
 
-            double rawDelta[3] = {0.0, 0.0, 0.0};
-            if (mouse->modifiers() & Qt::ShiftModifier)
-                rawDelta[2] = static_cast<double>(-total.y()) * dragSensitivity_;
-            else
-            {
-                rawDelta[0] = static_cast<double>(total.x()) * dragSensitivity_;
-                rawDelta[1] = static_cast<double>(-total.y()) * dragSensitivity_;
-            }
-
-            double finalDelta[3] = {rawDelta[0], rawDelta[1], rawDelta[2]};
-            if (localOrientation_)
-            {
-                const double objRot[4] = {
-                    dragStartTransform_.rotation[0], dragStartTransform_.rotation[1],
-                    dragStartTransform_.rotation[2], dragStartTransform_.rotation[3]
-                };
-                GizmoMath::TransformDelta(rawDelta, objRot, true, finalDelta);
-            }
+            const auto finalDelta = GizmoMath::ComputeTranslateDelta(
+                total,
+                height(),
+                camYaw_,
+                camPitch_,
+                camPos_,
+                dragStartTransform_.position,
+                activeAxis_,
+                localOrientation_,
+                dragStartTransform_.rotation,
+                snapEnabled_,
+                moveSnapStep_
+            );
 
             EngineSceneTransform t = dragStartTransform_;
             using PosT = std::remove_reference_t<decltype(t.position[0])>;
             for (int i = 0; i < 3; ++i)
             {
-                double targetPos = static_cast<double>(dragStartTransform_.position[i]) + finalDelta[i];
-                if (snapEnabled_)
-                    targetPos = GizmoMath::SnapTranslation(targetPos, moveSnapStep_);
-                t.position[i] = static_cast<PosT>(targetPos);
+                t.position[i] = static_cast<PosT>(static_cast<double>(dragStartTransform_.position[i]) + finalDelta[i]);
             }
             PostSelectedTransform(t);
         }
@@ -433,10 +437,16 @@ bool ViewportWidget::HandleMouseRelease(QMouseEvent* mouse)
 bool ViewportWidget::HandleWheel(QWheelEvent* wheel)
 {
     if (!attached_ || !hasFocus()) return false;
+    const float zoom = static_cast<float>(wheel->angleDelta().y()) / 120.0f;
     EditorCommand c;
     c.type = EditorCommand::ViewportCamera;
-    c.zoom = static_cast<float>(wheel->angleDelta().y()) / 120.0f;
+    c.zoom = zoom;
     host_->PostCommand(c);
+
+    const auto basis = GizmoMath::ComputeCameraBasis(camYaw_, camPitch_);
+    camPos_[0] += static_cast<float>(basis.forward[0] * zoom);
+    camPos_[1] += static_cast<float>(basis.forward[1] * zoom);
+    camPos_[2] += static_cast<float>(basis.forward[2] * zoom);
     return true;
 }
 
@@ -447,6 +457,11 @@ bool ViewportWidget::HandleKeyPress(QKeyEvent* key)
 
     if (key->key() == Qt::Key_Escape)
     {
+        if (draggingSelectedObject_)
+        {
+            CancelObjectDrag();
+            return true;
+        }
         EditorCommand c; c.type = EditorCommand::SelectObject; host_->PostCommand(c);
         return true;
     }
@@ -462,6 +477,22 @@ bool ViewportWidget::HandleKeyPress(QKeyEvent* key)
     // Hotkeys active when not flying camera with RMB
     if (!looking_)
     {
+        if (key->key() == Qt::Key_X)
+        {
+            activeAxis_ = (activeAxis_ == GizmoMath::AxisLock::X) ? GizmoMath::AxisLock::All : GizmoMath::AxisLock::X;
+            return true;
+        }
+        if (key->key() == Qt::Key_Y)
+        {
+            activeAxis_ = (activeAxis_ == GizmoMath::AxisLock::Y) ? GizmoMath::AxisLock::All : GizmoMath::AxisLock::Y;
+            return true;
+        }
+        if (key->key() == Qt::Key_Z)
+        {
+            activeAxis_ = (activeAxis_ == GizmoMath::AxisLock::Z) ? GizmoMath::AxisLock::All : GizmoMath::AxisLock::Z;
+            return true;
+        }
+
         if (scheme == ControlScheme::UnrealUnity)
         {
             if (navKey == 'W') { CommandRegistry::Instance().Execute(QStringLiteral("Gizmo.SetTranslate")); return true; }
@@ -625,8 +656,27 @@ void ViewportWidget::EndObjectDrag()
     }
     draggingSelectedObject_ = false;
     dragObjectId_ = 0;
+    activeAxis_ = GizmoMath::AxisLock::All;
     lmbPressed_ = false;
     lmbMoved_ = false;
+}
+
+void ViewportWidget::CancelObjectDrag()
+{
+    if (!draggingSelectedObject_) return;
+    const uint64_t id = dragObjectId_;
+    const EngineSceneTransform startT = dragStartTransform_;
+    EndObjectDrag();
+
+    if (id)
+    {
+        EditorCommand c;
+        c.type = EditorCommand::UpdateObjectTransform;
+        c.objectId = id;
+        c.transform = startT;
+        c.path = QStringLiteral("gizmo");
+        host_->PostCommand(c);
+    }
 }
 
 void ViewportWidget::PostSelectedTransform(const EngineSceneTransform& transform)
@@ -649,31 +699,19 @@ void ViewportWidget::ApplyRotateScaleGizmo(const QPointF& pos)
     if (std::fabs(total.x()) < 1e-3 && std::fabs(total.y()) < 1e-3)
         return;
 
-    EngineSceneTransform t = dragStartTransform_;
-
-    if (gizmoMode_ == EditorGizmoRotate)
-    {
-        const double startRot[4] = {
-            dragStartTransform_.rotation[0], dragStartTransform_.rotation[1],
-            dragStartTransform_.rotation[2], dragStartTransform_.rotation[3]
-        };
-        double newRot[4]{};
-        GizmoMath::ApplyRotation(startRot, total.x(), total.y(), rotateSensitivity_, snapEnabled_, rotateSnapStep_, newRot);
-        using RotT = std::remove_reference_t<decltype(t.rotation[0])>;
-        for (int i = 0; i < 4; ++i)
-            t.rotation[i] = static_cast<RotT>(newRot[i]);
-    }
-    else if (gizmoMode_ == EditorGizmoScale)
-    {
-        const double startScale[3] = {
-            dragStartTransform_.scale[0], dragStartTransform_.scale[1], dragStartTransform_.scale[2]
-        };
-        double newScale[3]{};
-        GizmoMath::ApplyScale(startScale, total.x(), total.y(), scaleSensitivity_, snapEnabled_, scaleSnapStep_, newScale);
-        using ScaleT = std::remove_reference_t<decltype(t.scale[0])>;
-        for (int i = 0; i < 3; ++i)
-            t.scale[i] = static_cast<ScaleT>(newScale[i]);
-    }
+    const GizmoMath::GizmoMode mode = (gizmoMode_ == EditorGizmoRotate) ? GizmoMath::GizmoMode::Rotate : GizmoMath::GizmoMode::Scale;
+    EngineSceneTransform t = GizmoMath::ApplyRotateScaleGizmo(
+        mode,
+        dragStartTransform_,
+        total,
+        activeAxis_,
+        snapEnabled_,
+        rotateSnapStep_,
+        scaleSnapStep_,
+        rotateSensitivity_,
+        scaleSensitivity_,
+        localOrientation_
+    );
 
     PostSelectedTransform(t);
 }

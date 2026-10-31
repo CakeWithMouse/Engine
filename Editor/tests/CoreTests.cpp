@@ -262,7 +262,7 @@ void TestGizmoMath()
 
     // 6. RunGizmoMathTests from rewrite/editor-v2-core
     RunGizmoMathTests();
-    gChecks += 11;
+    gChecks += 15;
 }
 
 void TestMaterialGraph()

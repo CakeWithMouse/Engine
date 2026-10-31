@@ -25,6 +25,30 @@ namespace GizmoMath
         Scale = 2
     };
 
+    struct CameraBasis
+    {
+        double forward[3];
+        double right[3];
+        double up[3];
+    };
+
+    CameraBasis ComputeCameraBasis(float yaw, float pitch);
+
+    std::array<double, 3> ComputeTranslateDelta(
+        const QPointF& mouseDelta,
+        int viewportHeight,
+        float camYaw,
+        float camPitch,
+        const float camPos[3],
+        const float objStartPos[3],
+        AxisLock activeAxis,
+        bool isLocal,
+        const float objStartRot[4],
+        bool snapEnabled,
+        double snapStep,
+        float fovYRad = 1.04719755f
+    );
+
     void NormalizeQuat(double q[4]);
     void AxisAngleQuat(double ax, double ay, double az, double angleRad, double out[4]);
     void MulQuat(const double q1[4], const double q2[4], double out[4]);
@@ -66,7 +90,8 @@ namespace GizmoMath
         double rotateSnapStepDeg,
         double scaleSnapStep,
         float rotateSensitivity = 0.01f,
-        float scaleSensitivity = 0.01f
+        float scaleSensitivity = 0.01f,
+        bool isLocal = false
     );
 
     std::array<double, 3> ComputeSpawnPosition(

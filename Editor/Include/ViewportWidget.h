@@ -8,6 +8,7 @@
 
 #include "QtHost.h"
 #include "EditorSettings.h"
+#include "GizmoMath.h"
 
 class ViewportHeaderBar;
 
@@ -72,6 +73,7 @@ private:
     bool SelectedTransform(uint64_t& id, EngineSceneTransform& transform);
     bool BeginObjectDrag(const QPointF& pos);
     void EndObjectDrag();
+    void CancelObjectDrag();
     void ApplyRotateScaleGizmo(const QPointF& pos);
     void PostSelectedTransform(const EngineSceneTransform& transform);
     void updateGizmoToolTip();
@@ -92,6 +94,10 @@ private:
     QPointF lastDragPos_;
 
     EditorGizmoMode gizmoMode_ = EditorGizmoTranslate;
+    GizmoMath::AxisLock activeAxis_ = GizmoMath::AxisLock::All;
+    float camYaw_ = -1.5707963f;
+    float camPitch_ = 0.0f;
+    float camPos_[3] = {0.0f, 0.0f, -5.0f};
 
     bool gizmoDragSession_ = false;
     uint64_t dragObjectId_ = 0;

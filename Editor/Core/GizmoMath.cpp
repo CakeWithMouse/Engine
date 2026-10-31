@@ -6,6 +6,141 @@
 
 namespace GizmoMath
 {
+    CameraBasis ComputeCameraBasis(float yaw, float pitch)
+    {
+        const double cy = std::cos(static_cast<double>(yaw));
+        const double sy = std::sin(static_cast<double>(yaw));
+        const double cp = std::cos(static_cast<double>(pitch));
+        const double sp = std::sin(static_cast<double>(pitch));
+
+        CameraBasis b{};
+        // Forward vector in engine DirectX LH coordinates (Player.cpp:295-297)
+        b.forward[0] = cy * cp;
+        b.forward[1] = sp;
+        b.forward[2] = sy * cp;
+
+        // Camera right vector: points towards screen-right
+        b.right[0] = -sy;
+        b.right[1] = 0.0;
+        b.right[2] = cy;
+
+        // Camera up vector: cross(right, forward)
+        b.up[0] = -cy * sp;
+        b.up[1] = cp;
+        b.up[2] = -sy * sp;
+
+        return b;
+    }
+
+    std::array<double, 3> ComputeTranslateDelta(
+        const QPointF& mouseDelta,
+        int viewportHeight,
+        float camYaw,
+        float camPitch,
+        const float camPos[3],
+        const float objStartPos[3],
+        AxisLock activeAxis,
+        bool isLocal,
+        const float objStartRot[4],
+        bool snapEnabled,
+        double snapStep,
+        float fovYRad)
+    {
+        const double screenDx = mouseDelta.x();
+        const double screenDy = -mouseDelta.y(); // Qt mouse Y is downwards; screen Y is upwards
+
+        const CameraBasis basis = ComputeCameraBasis(camYaw, camPitch);
+
+        const double toObj[3] = {
+            static_cast<double>(objStartPos[0] - camPos[0]),
+            static_cast<double>(objStartPos[1] - camPos[1]),
+            static_cast<double>(objStartPos[2] - camPos[2])
+        };
+
+        double dist = toObj[0] * basis.forward[0] + toObj[1] * basis.forward[1] + toObj[2] * basis.forward[2];
+        if (dist < 0.1)
+        {
+            const double lenSq = toObj[0] * toObj[0] + toObj[1] * toObj[1] + toObj[2] * toObj[2];
+            dist = std::sqrt(lenSq);
+        }
+        if (dist < 0.5)
+            dist = 5.0;
+
+        const double tanHalfFov = std::tan(static_cast<double>(fovYRad) * 0.5);
+        const double vh = viewportHeight > 0 ? static_cast<double>(viewportHeight) : 600.0;
+        const double worldPerPixel = (2.0 * dist * tanHalfFov) / vh;
+
+        std::array<double, 3> delta{0.0, 0.0, 0.0};
+
+        if (activeAxis == AxisLock::All)
+        {
+            delta[0] = (screenDx * basis.right[0] + screenDy * basis.up[0]) * worldPerPixel;
+            delta[1] = (screenDx * basis.right[1] + screenDy * basis.up[1]) * worldPerPixel;
+            delta[2] = (screenDx * basis.right[2] + screenDy * basis.up[2]) * worldPerPixel;
+
+            if (snapEnabled && snapStep > 1e-6)
+            {
+                for (int i = 0; i < 3; ++i)
+                {
+                    const double targetPos = static_cast<double>(objStartPos[i]) + delta[i];
+                    const double snappedPos = SnapTranslation(targetPos, snapStep);
+                    delta[i] = snappedPos - static_cast<double>(objStartPos[i]);
+                }
+            }
+        }
+        else
+        {
+            double axisWorld[3]{0.0, 0.0, 0.0};
+            const double axisLocal[3] = {
+                activeAxis == AxisLock::X ? 1.0 : 0.0,
+                activeAxis == AxisLock::Y ? 1.0 : 0.0,
+                activeAxis == AxisLock::Z ? 1.0 : 0.0
+            };
+
+            if (isLocal && objStartRot != nullptr)
+            {
+                const double rot[4] = {
+                    static_cast<double>(objStartRot[0]),
+                    static_cast<double>(objStartRot[1]),
+                    static_cast<double>(objStartRot[2]),
+                    static_cast<double>(objStartRot[3])
+                };
+                RotateVectorQuat(rot, axisLocal, axisWorld);
+            }
+            else
+            {
+                axisWorld[0] = axisLocal[0];
+                axisWorld[1] = axisLocal[1];
+                axisWorld[2] = axisLocal[2];
+            }
+
+            const double axisScreenX = axisWorld[0] * basis.right[0] + axisWorld[1] * basis.right[1] + axisWorld[2] * basis.right[2];
+            const double axisScreenY = axisWorld[0] * basis.up[0] + axisWorld[1] * basis.up[1] + axisWorld[2] * basis.up[2];
+            const double screenLenSq = axisScreenX * axisScreenX + axisScreenY * axisScreenY;
+
+            double s = 0.0;
+            if (screenLenSq < 1e-3)
+            {
+                s = screenDy * worldPerPixel;
+            }
+            else
+            {
+                s = ((screenDx * axisScreenX + screenDy * axisScreenY) / screenLenSq) * worldPerPixel;
+            }
+
+            if (snapEnabled && snapStep > 1e-6)
+            {
+                s = SnapTranslation(s, snapStep);
+            }
+
+            delta[0] = s * axisWorld[0];
+            delta[1] = s * axisWorld[1];
+            delta[2] = s * axisWorld[2];
+        }
+
+        return delta;
+    }
+
     constexpr double kPi = 3.14159265358979323846;
 
     void NormalizeQuat(double q[4])
@@ -180,7 +315,8 @@ namespace GizmoMath
         double rotateSnapStepDeg,
         double scaleSnapStep,
         float rotateSensitivity,
-        float scaleSensitivity)
+        float scaleSensitivity,
+        bool isLocal)
     {
         EngineSceneTransform t = startTransform;
 
@@ -242,7 +378,10 @@ namespace GizmoMath
 
             MulQuat(qYaw, qPitch, qTmp1);
             MulQuat(qTmp1, qRoll, qTmp2);
-            MulQuat(qTmp2, startRot, qNew);
+            if (isLocal)
+                MulQuat(startRot, qTmp2, qNew);
+            else
+                MulQuat(qTmp2, startRot, qNew);
             NormalizeQuat(qNew);
 
             using RotT = std::remove_reference_t<decltype(t.rotation[0])>;
