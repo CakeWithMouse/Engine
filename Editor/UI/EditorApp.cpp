@@ -45,29 +45,41 @@ namespace
             }
 
             QTimer::singleShot(1500, [&window, host, screenshotPath] {
-                std::printf("[Info] SmokeEditor: selecting Cube (id 2)\n");
+                auto snap = host->ReadSnapshot();
+                uint64_t targetId = 2;
+                for (const auto& obj : snap.objects) {
+                    if (obj.id != 0) { targetId = obj.id; break; }
+                }
+                std::printf("[Info] SmokeEditor: selecting object (id %llu)\n", targetId);
                 std::fflush(stdout);
                 EditorCommand c1;
                 c1.type = EditorCommand::SelectObject;
-                c1.objectId = 2;
+                c1.objectId = targetId;
                 host->PostCommand(c1);
 
-                QTimer::singleShot(600, [&window, host, screenshotPath] {
-                    std::printf("[Info] SmokeEditor: selecting Warm Light (id 3)\n");
-                    std::fflush(stdout);
-                    EditorCommand c2;
-                    c2.type = EditorCommand::SelectObject;
-                    c2.objectId = 3;
-                    host->PostCommand(c2);
-
-                    QTimer::singleShot(800, [&window, screenshotPath] {
-                        QPixmap grab = window.grab();
-                        grab.save(screenshotPath);
-                        std::printf("[Info] SmokeEditor: screenshot saved to %s (%dx%d)\n",
-                            screenshotPath.toUtf8().constData(), grab.width(), grab.height());
+                uint64_t secondId = 0;
+                for (const auto& obj : snap.objects) {
+                    if (obj.id != targetId && obj.id != 0) { secondId = obj.id; break; }
+                }
+                if (secondId != 0)
+                {
+                    QTimer::singleShot(600, [host, secondId] {
+                        std::printf("[Info] SmokeEditor: selecting second object (id %llu)\n", secondId);
                         std::fflush(stdout);
-                        QApplication::quit();
+                        EditorCommand c2;
+                        c2.type = EditorCommand::SelectObject;
+                        c2.objectId = secondId;
+                        host->PostCommand(c2);
                     });
+                }
+
+                QTimer::singleShot(1400, [&window, screenshotPath] {
+                    QPixmap grab = window.grab();
+                    grab.save(screenshotPath);
+                    std::printf("[Info] SmokeEditor: screenshot saved to %s (%dx%d)\n",
+                        screenshotPath.toUtf8().constData(), grab.width(), grab.height());
+                    std::fflush(stdout);
+                    QApplication::quit();
                 });
             });
         }

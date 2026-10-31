@@ -76,6 +76,10 @@
 - [x] **Шаг 9.5d (fix(settings)):** Включение сетки и иконок/гизмо по умолчанию в `MainWindow.cpp` (`view/grid` и `view/overlays` принудительно инициализируются в `true` при первом запуске).
 - [x] **Шаг 9.5e (tool):** Создание `Editor/tools/run-editor.ps1`: завершение зависших процессов, очистка устаревшего кэша `%LOCALAPPDATA%\PainEngine\Engines\<version>`, сборка Debug с `/m /p:ForceSynchronousPDBWrites=true`, деплой `EditorOverlay.hlsl` и запуск лаунчера.
 - [x] **Шаг 9.5f (test):** Режим `--smoke-editor` в `EditorApp.cpp` и автоматическая визуальная верификация пикселей (`smoke_screenshot.png`): подтверждено наличие пикселей сетки, осей гизмо (красный >6200 px, зеленый, синий) и радиуса теплого света `RGB(255, 166, 89)` (>7700 px).
+- [x] **Шаг 9.5g (fix(engine)):** Устранение порядка умножения матриц в `Game::RenderEditorOverlay()` (`Game.cpp`): `Player::ViewMatrix` и `ProjectionMatrix` возвращаются транспонированными (`V^T`, `P^T`), добавлен `XMMatrixTranspose` перед перемножением, исключающий искажение и culling оверлеев.
+- [x] **Шаг 9.5h (fix(engine)):** Транспонирование матриц вида и проекции в `Game::GetCameraInfo()` (`Game.cpp`): передача канонических row-major матриц в `EngineCameraInfo`, исключающая отрицательный `cw` в `GizmoGeometry::ProjectPointToScreen`.
+- [x] **Шаг 9.5i (diag(engine)):** Логирование инициализации шейдеров `EditorOverlay.hlsl` (`[Info]`/`[Error]`) и D3D11 staging readback в `Game::RenderViewportFrame()` для объективной проверки пикселей swapchain без зависимости от grab Qt-окна.
+- [x] **Шаг 9.5j (fix(ui)):** Динамический выбор объектов в smoke-режиме `EditorApp.cpp` на основе снапшота сцены.
 
 ---
 
@@ -174,13 +178,16 @@
 
 ---
 
-## Проверено в рантайме (автоматический smoke-editor со скриншотом в S9.5)
+## Проверено в рантайме (автоматический smoke-editor и прямой D3D readback)
 
 - [x] Отрисовка координатной сетки Y=0 во вьюпорте и генерация линий сетки (139-141 линий).
-- [x] Появление интерактивного гизмо при выделении Cube (id 2) и Warm Light (id 3) (+35 линий гизмо).
-- [x] Сфера радиуса источника света при выделении Warm Light (+144 линии радиуса, цвет `RGB(255, 166, 89)`).
-- [x] Отправка билбордов вьюпорта (2 билборда для Warm Light и Cool Light) и процедурный fallback для иконок.
-- [x] Чтение и валидация камеры из `getCamera` без дрифта (`[Info] Camera: ok`).
+- [x] Появление интерактивного гизмо при выделении объекта (+33-35 линий гизмо).
+- [x] Прямой D3D11 staging readback бэкбуфера (713x426):
+  - Кадр 30: 713 пикселей диагностической красной линии (на всю ширину вьюпорта), 7165 пикселей сетки (non-bg).
+  - Кадр 130: 754 пикселя красных элементов (+41 пиксель оси X гизмо и стрелки), 649 пикселей рамки выделения, 8311 суммарных пикселей геометрии и оверлея.
+- [x] Компиляция шейдера `EditorOverlay.hlsl` по всем 4 точкам входа (`VSLine`, `PSLine`, `VSBillboard`, `PSBillboard`) с явным логированием `[Info] EditorOverlay pipeline and shaders compiled successfully`.
+- [x] Положение `RenderEditorOverlay()` в едином конвейере кадра: сразу после `RenderEditorSelection()` и непосредственно перед `EndFrame()` / `Present()`.
+- [x] Чтение и валидация камеры из `getCamera` без дрифта и инверсии W (`[Info] Camera: ok`).
 - [x] Включение сетки и оверлеев по умолчанию (`true`).
 
 ---

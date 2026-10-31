@@ -2794,10 +2794,10 @@ bool Game::GetCameraInfo(EngineCameraInfo& info) const
     info.position[0] = pos.x;
     info.position[1] = pos.y;
     info.position[2] = pos.z;
-    const auto& view = FirstPlayer->GetViewMatrix();
-    std::memcpy(info.viewMatrix, &view, sizeof(float) * 16);
-    const auto& proj = FirstPlayer->GetProjectionMatrix();
-    std::memcpy(info.projMatrix, &proj, sizeof(float) * 16);
+    const auto view = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&FirstPlayer->GetViewMatrix()));
+    DirectX::XMStoreFloat4x4(reinterpret_cast<DirectX::XMFLOAT4X4*>(info.viewMatrix), view);
+    const auto proj = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&FirstPlayer->GetProjectionMatrix()));
+    DirectX::XMStoreFloat4x4(reinterpret_cast<DirectX::XMFLOAT4X4*>(info.projMatrix), proj);
     info.fov = FirstPlayer->GetFovY();
     const uint32_t w = static_cast<uint32_t>(std::max(DisplayPtr->GetWidth(), 1));
     const uint32_t h = static_cast<uint32_t>(std::max(DisplayPtr->GetHeight(), 1));
@@ -2810,33 +2810,58 @@ bool Game::GetCameraInfo(EngineCameraInfo& info) const
 void Game::RenderEditorOverlay()
 {
     if (!bEmbedded || !FirstPlayer || !Device || !Context || !RenderTargetView) return;
+
     if (PendingOverlayLines.empty() && PendingOverlayBillboards.empty()) return;
 
     if (!OverlayCB)
     {
         const auto shaderFile = EnginePaths::Shader("EditorOverlay.hlsl").wstring();
         Microsoft::WRL::ComPtr<ID3DBlob> vsBlob, psBlob;
+        std::string errorMsg;
 
-        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "VSLine", "vs_5_0", vsBlob.ReleaseAndGetAddressOf())) ||
-            FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "PSLine", "ps_5_0", psBlob.ReleaseAndGetAddressOf())))
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "VSLine", "vs_5_0", vsBlob.ReleaseAndGetAddressOf(), &errorMsg)))
+        {
+            std::printf("[Error] EditorOverlay VSLine compile failed: %s\n", errorMsg.c_str());
             return;
+        }
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "PSLine", "ps_5_0", psBlob.ReleaseAndGetAddressOf(), &errorMsg)))
+        {
+            std::printf("[Error] EditorOverlay PSLine compile failed: %s\n", errorMsg.c_str());
+            return;
+        }
         if (FAILED(Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, OverlayLineVS.ReleaseAndGetAddressOf())) ||
             FAILED(Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, OverlayLinePS.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create line shaders for EditorOverlay\n");
             return;
+        }
 
         const D3D11_INPUT_ELEMENT_DESC lineLayoutDesc[] = {
             {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
             {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
         };
         if (FAILED(Device->CreateInputLayout(lineLayoutDesc, 2, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), OverlayLineLayout.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create line input layout for EditorOverlay\n");
             return;
+        }
 
-        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "VSBillboard", "vs_5_0", vsBlob.ReleaseAndGetAddressOf())) ||
-            FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "PSBillboard", "ps_5_0", psBlob.ReleaseAndGetAddressOf())))
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "VSBillboard", "vs_5_0", vsBlob.ReleaseAndGetAddressOf(), &errorMsg)))
+        {
+            std::printf("[Error] EditorOverlay VSBillboard compile failed: %s\n", errorMsg.c_str());
             return;
+        }
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "PSBillboard", "ps_5_0", psBlob.ReleaseAndGetAddressOf(), &errorMsg)))
+        {
+            std::printf("[Error] EditorOverlay PSBillboard compile failed: %s\n", errorMsg.c_str());
+            return;
+        }
         if (FAILED(Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, OverlayBillboardVS.ReleaseAndGetAddressOf())) ||
             FAILED(Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, OverlayBillboardPS.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create billboard shaders for EditorOverlay\n");
             return;
+        }
 
         const D3D11_INPUT_ELEMENT_DESC bbLayoutDesc[] = {
             {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -2845,14 +2870,20 @@ void Game::RenderEditorOverlay()
             {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0}
         };
         if (FAILED(Device->CreateInputLayout(bbLayoutDesc, 4, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), OverlayBillboardLayout.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create billboard input layout for EditorOverlay\n");
             return;
+        }
 
         D3D11_BUFFER_DESC cbDesc{};
         cbDesc.ByteWidth = sizeof(OverlayConstantsData);
         cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
         cbDesc.Usage = D3D11_USAGE_DEFAULT;
         if (FAILED(Device->CreateBuffer(&cbDesc, nullptr, OverlayCB.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create constant buffer for EditorOverlay\n");
             return;
+        }
 
         D3D11_BLEND_DESC blendDesc{};
         blendDesc.RenderTarget[0].BlendEnable = TRUE;
@@ -2880,12 +2911,15 @@ void Game::RenderEditorOverlay()
         sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
         sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
         Device->CreateSamplerState(&sampDesc, OverlaySamplerState.ReleaseAndGetAddressOf());
+
+        std::printf("[Info] EditorOverlay pipeline and shaders compiled successfully (%ls)\n", shaderFile.c_str());
+        std::fflush(stdout);
     }
 
     using namespace DirectX;
     OverlayConstantsData cbData{};
-    const auto view = XMLoadFloat4x4(&FirstPlayer->GetViewMatrix());
-    const auto proj = XMLoadFloat4x4(&FirstPlayer->GetProjectionMatrix());
+    const auto view = XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetViewMatrix()));
+    const auto proj = XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetProjectionMatrix()));
     const auto vp = XMMatrixMultiply(view, proj);
     XMStoreFloat4x4(&cbData.ViewProjection, XMMatrixTranspose(vp));
     const float screenW = static_cast<float>(std::max(DisplayPtr->GetWidth(), 1));
@@ -3065,6 +3099,56 @@ bool Game::RenderViewportFrame(float deltaTime)
     RenderFrame();
     RenderEditorSelection();
     RenderEditorOverlay();
+
+    static int sReadbackDone = 0;
+    static int sFrameCounter = 0;
+    ++sFrameCounter;
+    const bool isSmokeEditor = (std::wcsstr(GetCommandLineW(), L"--smoke-editor") != nullptr) ||
+                               (GetEnvironmentVariableW(L"PAINENGINE_SMOKE_EDITOR", nullptr, 0) > 0);
+    const bool shouldCheck = isSmokeEditor && BackTexture && Device && Context &&
+                             ((sReadbackDone == 0 && sFrameCounter >= 30) || (sReadbackDone == 1 && sFrameCounter >= 130));
+    if (shouldCheck)
+    {
+        D3D11_TEXTURE2D_DESC desc{};
+        BackTexture->GetDesc(&desc);
+        desc.Usage = D3D11_USAGE_STAGING;
+        desc.BindFlags = 0;
+        desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        desc.MiscFlags = 0;
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> staging;
+        if (SUCCEEDED(Device->CreateTexture2D(&desc, nullptr, staging.GetAddressOf())))
+        {
+            Context->CopyResource(staging.Get(), BackTexture.Get());
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            if (SUCCEEDED(Context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped)))
+            {
+                size_t redLinePixels = 0;
+                size_t nonBgPixels = 0;
+                size_t warmLightRadiusPixels = 0;
+                for (unsigned y = 0; y < desc.Height; ++y)
+                {
+                    const auto* row = reinterpret_cast<const uint8_t*>(mapped.pData) + y * mapped.RowPitch;
+                    for (unsigned x = 0; x < desc.Width; ++x)
+                    {
+                        const auto* p = row + x * 4;
+                        // Diagnostic red line: R > 180, G < 50, B < 50
+                        if (p[0] > 180 && p[1] < 50 && p[2] < 50) ++redLinePixels;
+                        // Warm Light radius lines: warm orange (R > 180, G between 100 and 180, B < 80)
+                        if (p[0] > 180 && p[1] >= 100 && p[1] <= 180 && p[2] < 80) ++warmLightRadiusPixels;
+                        // Background clear color is {0, 0, 51}
+                        const bool isBg = (p[0] <= 2 && p[1] <= 2 && std::abs(static_cast<int>(p[2]) - 51) <= 2);
+                        if (!isBg) ++nonBgPixels;
+                    }
+                }
+                Context->Unmap(staging.Get(), 0);
+                std::printf("[Info] [D3D-Readback frame %d] Backbuffer: %ux%u, Diagnostic Red: %zu, Warm Light Radius: %zu, Non-Bg: %zu\n",
+                    sFrameCounter, desc.Width, desc.Height, redLinePixels, warmLightRadiusPixels, nonBgPixels);
+                std::fflush(stdout);
+                ++sReadbackDone;
+            }
+        }
+    }
+
     EndGpuTimer();
     EndFrame();
     LastFrameStats = Stats;
