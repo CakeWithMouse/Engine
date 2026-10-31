@@ -62,8 +62,8 @@
     <ItemDefinitionGroup>
         <ClCompile>
             <!-- %(AdditionalIncludeDirectories) берёт include-пути из Cpp.props, сверху кладём Qt -->
-            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtWidgets;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtCore;$(IntDir)moc;$(ProjectDir)Core;$(ProjectDir)Host;$(ProjectDir)UI;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-            <PreprocessorDefinitions>QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtWidgets;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtCore;$(QtInstallDir)/include/QtSvg;$(IntDir)moc;$(ProjectDir)Core;$(ProjectDir)Host;$(ProjectDir)UI;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <PreprocessorDefinitions>QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;QT_SVG_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
             <LanguageStandard>stdcpp17</LanguageStandard>
             <ExceptionHandling>Sync</ExceptionHandling>
             <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -72,7 +72,7 @@
         <Link>
             <AdditionalLibraryDirectories>$(QtInstallDir)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
             <!-- %(AdditionalDependencies) сохраняет всё, что дал Cpp.props -->
-            <AdditionalDependencies>$(QtInstallDir)\lib\Qt6Widgets$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Gui$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Core$(QtLibSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
+            <AdditionalDependencies>$(QtInstallDir)\lib\Qt6Widgets$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Gui$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Core$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Svg$(QtLibSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
         </Link>
         <PostBuildEvent>
             <Message>windeployqt: Qt runtime -&gt; $(OutDir)</Message>
@@ -155,6 +155,8 @@
         <ClCompile Include="Core/FileService.cpp"/>
         <ClCompile Include="Core/EditorLocale.cpp"/>
         <ClCompile Include="Core/GizmoMath.cpp"/>
+        <ClCompile Include="Core/ViewportOverlay.cpp"/>
+        <ClCompile Include="Core/GizmoGeometry.cpp"/>
         <ClCompile Include="Core/EditorSettings.cpp"/>
         <ClCompile Include="Core/SettingsService.cpp"/>
         <ClCompile Include="Core/AssetOps.cpp"/>
@@ -178,6 +180,8 @@
         <ClInclude Include="Core/EditorLocale.h"/>
         <ClInclude Include="Core/SettingsService.h"/>
         <ClInclude Include="Core/GizmoMath.h"/>
+        <ClInclude Include="Core/ViewportOverlay.h"/>
+        <ClInclude Include="Core/GizmoGeometry.h"/>
         <ClInclude Include="Core/AssetOps.h"/>
         <ClInclude Include="Core/HlslGraphCompiler.h"/>
         <ClInclude Include="Core/MaterialGraphModel.h"/>

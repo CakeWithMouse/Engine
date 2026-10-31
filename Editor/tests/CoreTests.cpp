@@ -15,6 +15,7 @@
 #include "core/TerminalTests.h"
 #include "../Core/AssetOps.h"
 #include "core/AssetOpsTests.h"
+#include "core/GizmoGeometryTests.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
@@ -338,6 +339,13 @@ void TestSettingsService()
     Check(!SettingsService::Instance().RestoreProjectLayout("C:/Proj1/p.painproj", s3, g3), "reset layout proj1");
 }
 
+void TestGizmoGeometry()
+{
+    RunGizmoGeometryTests([](bool cond, const char* msg) {
+        Check(cond, msg);
+    });
+}
+
 } // namespace
 
 int main(int argc, char* argv[])
@@ -381,6 +389,10 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestGizmoMath...\n");
     std::fflush(stdout);
     TestGizmoMath();
+
+    std::printf("[Test] TestGizmoGeometry...\n");
+    std::fflush(stdout);
+    TestGizmoGeometry();
 
     std::printf("[Test] TestSettingsService...\n");
     std::fflush(stdout);
