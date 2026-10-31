@@ -14,6 +14,7 @@
 #include <QPushButton>
 #include <QDir>
 #include <QMap>
+#include <QColorDialog>
 #include <cmath>
 namespace {
 QJsonValue Read(const QJsonObject& data,const QString& path) {
@@ -68,6 +69,18 @@ void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot
                 spin->setDecimals(type=="integer"?0:field["decimals"].toInt(3));spin->setSingleStep(field["step"].toDouble(type=="integer"?1:0.1));spin->setKeyboardTracking(false);
                 connect(spin,&QDoubleSpinBox::editingFinished,this,[this,spin,path,type]{SubmitProperty(path,type=="integer"?QJsonValue(static_cast<qint64>(spin->value())):QJsonValue(spin->value()));});
                 propertyRefresh_.push_back([spin,path](const auto& data){if(!Editing(spin)){QSignalBlocker block(spin);spin->setValue(Read(data,path).toDouble());}});
+            } else if(type=="color") {
+                auto* button=new QPushButton(properties_);widget=button;
+                connect(button,&QPushButton::clicked,this,[this,button,path] {
+                    const auto color=QColorDialog::getColor(button->property("color").value<QColor>(),this,QStringLiteral("Цвет света"));
+                    if(color.isValid())SubmitProperty(path,QJsonArray{color.redF(),color.greenF(),color.blueF()});
+                });
+                propertyRefresh_.push_back([button,path](const auto& data) {
+                    const auto rgb=Read(data,path).toArray();if(rgb.size()!=3)return;
+                    const auto color=QColor::fromRgbF(rgb[0].toDouble(),rgb[1].toDouble(),rgb[2].toDouble());
+                    button->setProperty("color",color);button->setText(color.name());
+                    button->setStyleSheet(QString("background-color:%1;color:%2").arg(color.name(),color.lightnessF()>0.5?"black":"white"));
+                });
             } else if(type=="bool") {
                 auto* check=new QCheckBox(properties_);widget=check;
                 connect(check,&QCheckBox::clicked,this,[this,check,path]{SubmitProperty(path,check->isChecked());});

@@ -38,6 +38,7 @@ std::unique_ptr<Game> EmptyGame()
     auto game = std::make_unique<Game>();
     game->SetSimulationEnabled(false); // frame() is the sole simulation owner
     game->SetVSync(false);
+    game->SetSceneLightingEnabled(true);
     return game;
 }
 }
@@ -50,6 +51,7 @@ std::unique_ptr<Game> SceneEditSession::CopyForPlay()
     if (!candidate) throw std::runtime_error("Game factory returned null");
     candidate->SetSimulationEnabled(false);
     candidate->SetSimulationTimeScale(1.0f);
+    candidate->SetSceneLightingEnabled(true);
     SceneDocument::Restore(edit_->GetScene().GetSnapshot(), catalog_, candidate->GetScene());
     return candidate;
 }

@@ -262,6 +262,10 @@ void EditorMainWindow::BuildSceneMenu()
     }
     const bool available = host_->HasScene();
     menu->setEnabled(available);
+    auto* sunlight = menu->addAction(QStringLiteral("Направленный свет"), this, &EditorMainWindow::ShowDirectionalLight);
+    sunlight->setObjectName("SceneDirectionalLight");
+    sunlight->setToolTip(QStringLiteral("Выбрать единственный источник света сцены или добавить его, если он отсутствует"));
+    menu->addSeparator();
     auto* playMenu = menuBar()->addMenu(QStringLiteral("Запуск"));
     playMenu->addAction(actPlay_); playMenu->addAction(actPause_); playMenu->addAction(actStop_);
     playMenu->addSeparator(); playMenu->addAction(actExternal_);
@@ -645,6 +649,24 @@ void EditorMainWindow::BuildSceneDocks()
     }
 }
 
+void EditorMainWindow::ShowDirectionalLight()
+{
+    if (sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+    for (const auto& object : host_->ReadSnapshot().objects)
+        if (object.type == "Light.Directional") {
+            EditorCommand c; c.type = EditorCommand::SelectObject; c.objectId = object.id;
+            host_->PostCommand(c); return;
+        }
+    EditorCommand c; c.type = EditorCommand::CreateObject;
+    c.path = "Light.Directional"; c.name = QStringLiteral("Направленный свет");
+    const auto rotation = QQuaternion::fromEulerAngles(-55, -30, 0);
+    c.transform.rotation[0] = rotation.x(); c.transform.rotation[1] = rotation.y();
+    c.transform.rotation[2] = rotation.z(); c.transform.rotation[3] = rotation.scalar();
+    const auto position = sceneObjectsPanel_->SpawnPosition();
+    for (int i=0;i<3;++i) c.transform.position[i] = static_cast<float>(position[i]);
+    host_->PostCommand(c);
+}
+
 void EditorMainWindow::ConnectPanels()
 {
     if (!sceneObjectsPanel_ || !objectInspectorPanel_)
@@ -655,6 +677,7 @@ void EditorMainWindow::ConnectPanels()
             {
                 if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
                     return;
+                if (typeName == "Light.Directional") { ShowDirectionalLight(); return; }
 
                 EditorCommand c;
                 c.type = EditorCommand::CreateObject;
@@ -858,6 +881,8 @@ void EditorMainWindow::RefreshSceneUi()
     const bool edit =
         host_->PlayState() == EditorQtHost::EditorState::Edit &&
         !sceneBusy_;
+    if (auto* action = findChild<QAction*>("SceneDirectionalLight"))
+        action->setEnabled(edit && std::any_of(view.types.begin(), view.types.end(), [](const auto& type) { return type.name == "Light.Directional"; }));
 
     if (sceneObjectsPanel_)
     {

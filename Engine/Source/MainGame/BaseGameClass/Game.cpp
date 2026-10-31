@@ -16,6 +16,7 @@
 #include <iostream>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
+#include <Engine/Components/Light/DirectionalLightComponent.h>
 #include <Engine/Render/Material.h>
 #include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/ShaderCompiler.h>
@@ -2714,6 +2715,26 @@ void Game::RenderEditorSelection()
         for (int i=0;i<8;++i) XMStoreFloat4(&projected[i],XMVector4Transform(XMVectorSet(i&1?hi.x:lo.x,i&2?hi.y:lo.y,i&4?hi.z:lo.z,1),matrix));
         const int edges[]={0,1,0,2,0,4,1,3,1,5,2,3,2,6,3,7,4,5,4,6,5,7,6,7};
         for(int i=0;i<24;++i)lines[i]=projected[edges[i]];
+        if (auto* sun = dynamic_cast<DirectionalLightComponent*>(object))
+        {
+            const auto origin = sun->GetWorldPosition();
+            const auto rotation = sun->GetLightRotation();
+            const auto right = rotation * glm::vec3(1,0,0), up = rotation * glm::vec3(0,1,0);
+            const auto direction = sun->GetDirection(), tip = origin + direction * 2.0f;
+            auto line = [&](int i, glm::vec3 a, glm::vec3 b) {
+                XMStoreFloat4(&lines[i*2], XMVector4Transform(XMVectorSet(a.x,a.y,a.z,1),matrix));
+                XMStoreFloat4(&lines[i*2+1], XMVector4Transform(XMVectorSet(b.x,b.y,b.z,1),matrix));
+            };
+            for (int i=0;i<8;++i) {
+                const float angle = i * glm::pi<float>() / 4;
+                const auto radial = right * std::cos(angle) + up * std::sin(angle);
+                line(i, origin + radial * 0.15f, origin + radial * 0.35f);
+            }
+            line(8, origin, tip);
+            line(9, tip, tip - direction * 0.4f + right * 0.2f);
+            line(10, tip, tip - direction * 0.4f - right * 0.2f);
+            line(11, tip, tip - direction * 0.4f + up * 0.2f);
+        }
         Context->UpdateSubresource(SelectionCB.Get(),0,nullptr,lines,0,0);
         // Final editor-only pass; no depth attachment, so the selected object stays identifiable behind geometry.
         Context->ClearState(); SetFullViewport();
@@ -2913,6 +2934,19 @@ void Game::StartGameplayComponents()
 void Game::PrepareRenderFrame()
 {
     SynchronizeSceneResources(); // Includes additions committed after gameplay callbacks.
+    DirectionalLightComponent* sun = nullptr;
+    for (const auto& entry : scene.GetComponents())
+        if ((sun = dynamic_cast<DirectionalLightComponent*>(entry.second.get()))) break;
+    if (bSceneLighting || sun)
+    {
+        const bool lit = sun && sun->IsEnabled() && sun->GetIntensity() > 0;
+        if (sun) SetDirectionalLight(sun->GetDirection(), sun->GetLightColor(), lit ? sun->GetIntensity() : 0);
+        else SetDirectionalLightIntensity(0);
+        const bool shadows = lit && sun->HasShadows();
+        const float distance = sun ? sun->GetShadowDistance() : ShadowDistance;
+        if (shadows != bShadowsEnabled || distance != ShadowDistance)
+            SetShadowSettings(shadows, distance);
+    }
     if (bShadowsEnabled && !bShadowResourcesReady && !bShadowInitFailed)
     {
         bShadowResourcesReady = InitShadowResources();
@@ -2996,7 +3030,8 @@ void Game::BuildFrameConstants()
         frame.LightColors[i] = XMFLOAT4(light.Color.x, light.Color.y, light.Color.z, 1.0f);
         frame.LightParams[i] = XMFLOAT4(light.Intensity, light.Radius, light.bEnabled ? 1.0f : 0.0f, 0.0f);
     }
-    frame.LightMeta = XMFLOAT4(static_cast<float>(lightCount), AmbientIntensity, SpecularShininess, 0.0f);
+    frame.LightMeta = XMFLOAT4(static_cast<float>(lightCount), bSceneLighting ? 0.0f : AmbientIntensity,
+        SpecularShininess, bSceneLighting ? 1.0f : 0.0f);
 
     // The directional light does not depend on shadows; shadow data does.
     frame.LightDirection = DirectionalLightDirection;

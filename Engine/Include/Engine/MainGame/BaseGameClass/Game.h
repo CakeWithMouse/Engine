@@ -157,6 +157,8 @@ public:
     void SetRenderingType(RenderType NewType) { RenderingType = NewType; }
     RenderType GetRenderingType() const { return RenderingType; }
     void SetShadowSettings(bool enabled, float shadowDistance);
+    // Scene projects use their single DirectionalLightComponent, with no implicit sun or ambient.
+    void SetSceneLightingEnabled(bool enabled) { bSceneLighting = enabled; }
     void SetDirectionalLight(const glm::vec3& direction, const glm::vec3& color, float intensity);
     void SetDirectionalLightDirection(const glm::vec3& direction);
     void SetDirectionalLightColor(const glm::vec3& color);
@@ -473,6 +475,7 @@ protected:
 
     // Lighting
     float AmbientIntensity = 0.06f;
+    bool bSceneLighting = false;
     float SpecularShininess = 32.0f;
 
     // Shadows (created lazily when enabled)

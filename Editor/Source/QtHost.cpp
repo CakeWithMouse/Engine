@@ -36,13 +36,6 @@ EditorQtHost::~EditorQtHost() { Stop(); }
 bool EditorQtHost::Start()
 {
     if (uiThread_.joinable()) return false;
-    historyDirectory_ = std::make_unique<QTemporaryDir>();
-    if (host_.projectFile && *host_.projectFile) {
-        try { wchar_t executable[32768]{}; GetModuleFileNameW(nullptr, executable, 32768);
-            recovery_.Open(QString::fromUtf8(host_.projectFile), QFileInfo(QString::fromWCharArray(executable)).absolutePath()); }
-        catch (const std::exception& e) { Log(e.what()); }
-    }
-    recoveryTime_ = std::chrono::steady_clock::now();
     if (HasScene() && host_.contentRoot && *host_.contentRoot)
     {
         char error[1024]{};
@@ -99,10 +92,23 @@ void EditorQtHost::Stop()
 
 void EditorQtHost::UiThreadMain()
 {
+    // On Windows Qt adopts the first thread that creates a QObject as its GUI
+    // thread. QApplication must precede even the QFile objects in recovery_.Open;
+    // opening those on the engine thread makes widget event delivery assert.
     QApplication app(g_argc, g_argv);
     app.setQuitOnLastWindowClosed(false);
     app.setApplicationName(QStringLiteral("Engine Editor"));
     QApplication::setStyle(QStringLiteral("Fusion"));
+
+    // Publish this state to the engine together with uiReady_, before it can
+    // process edits. Establish the recovery lock before the window scans records.
+    historyDirectory_ = std::make_unique<QTemporaryDir>();
+    if (host_.projectFile && *host_.projectFile) {
+        try { wchar_t executable[32768]{}; GetModuleFileNameW(nullptr, executable, 32768);
+            recovery_.Open(QString::fromUtf8(host_.projectFile), QFileInfo(QString::fromWCharArray(executable)).absolutePath()); }
+        catch (const std::exception& e) { Log(e.what()); }
+    }
+    recoveryTime_ = std::chrono::steady_clock::now();
 
     EditorMainWindow window(this);
     {
@@ -496,6 +502,8 @@ void EditorQtHost::DrainCommands()
                     {
                         auto found = std::find_if(view.objects.begin(), view.objects.end(), [&](const auto& o) { return o.id == cmd.objectId; });
                         if (found == view.objects.end()) throw std::runtime_error("Object no longer exists");
+                        if (found->type == "Light.Directional")
+                            throw std::runtime_error("В сцене может быть только один направленный источник света.");
                         type = QString::fromStdString(found->type); base = QString::fromStdString(found->name);
                         transform = found->transform; transform.position[0] += 1;
                         parent = found->parent; inherit = found->inheritScale;

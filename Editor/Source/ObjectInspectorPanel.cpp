@@ -116,6 +116,7 @@ void ObjectInspectorPanel::BuildUi()
     }
 
     form = group(QStringLiteral("Визуал"));
+    visualInspector_ = groups[QStringLiteral("Визуал")];
     BuildAssetInspector(form);
 
     auto* lightGroup = new PropertySection(QStringLiteral("Точечный свет"),"Light",this);
@@ -410,6 +411,7 @@ void ObjectInspectorPanel::Refresh(
             continue;
 
         RefreshProjectProperties(view,object);
+        visualInspector_->setVisible(object.type != "Light.Directional");
         selectedLight = object.hasPointLight;
         selectionLabel_->setText(QStringLiteral("Выбран: %1\n%2 · ID %3").arg(QString::fromStdString(object.name), QString::fromStdString(object.type)).arg(object.id));
         chooseModel_->setEnabled(object.type == "Engine.Model" || object.type.rfind("Primitive.", 0) == 0);
@@ -440,7 +442,9 @@ void ObjectInspectorPanel::Refresh(
         textureAsset_->setText(QString::fromStdString(object.textureAsset));
         materialAsset_->setText(QString::fromStdString(object.materialAsset));
         // С материалом по умолчанию кнопка создаёт новый материал; у света материала нет.
-        editMaterialButton_->setEnabled(!object.materialAsset.empty() || !object.hasPointLight);
+        editMaterialButton_->setEnabled(object.type != "Light.Directional" && (!object.materialAsset.empty() || !object.hasPointLight));
+        if (object.type == "Light.Directional")
+            selectionLabel_->setText(selectionLabel_->text() + QStringLiteral("\nОдин на всю сцену. Поворот задаёт направление.\nПозиция и масштаб не влияют на освещение."));
         editMaterialButton_->setToolTip(object.materialAsset.empty()
             ? QStringLiteral("Создать материал в Content/Materials, назначить его объекту и открыть редактор")
             : QString());

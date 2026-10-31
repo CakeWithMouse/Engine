@@ -46,6 +46,10 @@ EngineAuthoringApi SceneEditSession::GetAuthoringApi() noexcept {
                     if(type=="number"||type=="integer") {
                         if(!value.is_number() || (type=="integer"&&!value.is_number_integer()))throw std::runtime_error("Expected numeric property");
                         const auto number=value.get<double>();if(!std::isfinite(number)||number<field.value("min",-1e12)||number>field.value("max",1e12))throw std::runtime_error("Property outside allowed range");
+                    } else if(type=="color") {
+                        if(!value.is_array()||value.size()!=3)throw std::runtime_error("Expected RGB color");
+                        for(const auto& channel:value)if(!channel.is_number()||!std::isfinite(channel.get<double>())||channel.get<double>()<0||channel.get<double>()>1)
+                            throw std::runtime_error("Color channel outside [0,1]");
                     } else if(type=="bool"){if(!value.is_boolean())throw std::runtime_error("Expected boolean property");}
                     else if(type=="enum") {bool found=false;for(const auto& option:field.at("options"))if(option.at("value")==value)found=true;if(!found)throw std::runtime_error("Unknown enum value");}
                     else if(type=="object") {

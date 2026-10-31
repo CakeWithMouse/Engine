@@ -2,6 +2,7 @@
 #include <Engine/Components/Character.h>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
+#include <Engine/Components/Light/DirectionalLightComponent.h>
 #include <atomic>
 #include <cmath>
 #include <stdexcept>
@@ -34,6 +35,13 @@ SceneResult Scene::ValidateAddition(std::string_view name, const GameComponent* 
     if (name.empty()) return SceneResult::EmptyName;
     if (components_.count(name) || pendingAdds_.count(name)) return SceneResult::DuplicateName;
     if (component->RegisteredScene) return SceneResult::AlreadyOwned;
+    if (dynamic_cast<const DirectionalLightComponent*>(component))
+    {
+        for (const auto* entries : {&components_, &pendingAdds_})
+            for (const auto& entry : *entries)
+                if (dynamic_cast<const DirectionalLightComponent*>(entry.second.get()))
+                    return SceneResult::DuplicateSingleton;
+    }
     const auto* parent = component->GetParent();
     if (parent && (parent->RegisteredScene != this || !byId_.count(parent->SceneComponentId)))
         return SceneResult::InvalidParent;

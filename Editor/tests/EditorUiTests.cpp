@@ -13,6 +13,7 @@
 #include <QDialog>
 #include <QTimer>
 #include <QApplication>
+#include <QAbstractEventDispatcher>
 #include <QListWidget>
 #include <QPlainTextEdit>
 #include <QScreen>
@@ -43,6 +44,7 @@
 #include "ViewportWidget.h"
 #include <chrono>
 #include <filesystem>
+#include <fstream>
 #include <cstdio>
 #include <stdexcept>
 
@@ -74,7 +76,7 @@ void Add(EditorMainWindow* window, int index)
     auto* combo = window->findChild<QComboBox*>(QStringLiteral("PrimitiveType"));
     auto* category=window->findChild<QComboBox*>(QStringLiteral("ObjectCategory"));
     Check(category!=nullptr,"category picker"); category->setCurrentIndex(category->findData(QStringLiteral("all")));
-    Check(combo && combo->count() == 12, "categorized object palette"); combo->setCurrentIndex(index);
+    Check(combo && combo->count() == 13, "categorized object palette"); combo->setCurrentIndex(index);
     auto* button = window->findChild<QPushButton*>(QStringLiteral("AddPrimitive"));
     Check(button && button->isEnabled(), "add button enabled"); button->click();
 }
@@ -141,9 +143,11 @@ int wmain(int argc, wchar_t** argv)
         const bool codeProject = propertiesProject || (argc == 4 && std::wstring(argv[3]) == L"--code");
         std::filesystem::path modulePath = root / "Game.dll";
         if (codeProject) {
-            QFile project(QString::fromStdWString((root / "Project.json").wstring()));
-            Check(project.open(QIODevice::ReadOnly),"read code project");
-            modulePath = root / std::filesystem::u8path(QJsonDocument::fromJson(project.readAll()).object().value("module").toString().toUtf8().constData());
+            // Do not create QObjects before the host starts its Qt GUI thread.
+            std::ifstream project(root / "Project.json", std::ios::binary);
+            Check(project.is_open(),"read code project");
+            const std::string bytes{std::istreambuf_iterator<char>(project), std::istreambuf_iterator<char>()};
+            modulePath = root / std::filesystem::u8path(QJsonDocument::fromJson(QByteArray::fromStdString(bytes)).object().value("module").toString().toUtf8().constData());
         }
         HMODULE library = LoadLibraryExW(modulePath.c_str(), nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
         Check(library != nullptr, "load project module");
@@ -199,6 +203,12 @@ int wmain(int argc, wchar_t** argv)
             std::puts("Recovery process-restart checks passed"); return 0;
         }
         Check(host.Start(), "start Qt editor");
+        Ui([](auto* window) {
+            Check(QCoreApplication::eventDispatcher() == QAbstractEventDispatcher::instance(),
+                  "Qt main event dispatcher belongs to the editor UI thread");
+            QEvent event(QEvent::User);
+            QApplication::sendEvent(window, &event);
+        });
         auto pump = [&] { host.Update(0.016); Check(api.frame(api.context, 0.016) == EngineSceneOk, "editor render frame"); Sleep(10); };
         int waitIndex = 0;
         auto until = [&](const std::function<bool()>& predicate) {
@@ -831,7 +841,7 @@ int wmain(int argc, wchar_t** argv)
         Check(!exit && host.ReadSnapshot().dirty, "cancel preserves editing session");
         Ui([](auto* w) { Action(w, QStringLiteral("Сохранить сцену"))->trigger(); });
         until([&] { return !host.ReadSnapshot().dirty; });
-        Ui([](auto* w) { Add(w,10); });
+        Ui([](auto* w) { Add(w,11); });
         until([&] { for(const auto& o:host.ReadSnapshot().objects)if(o.gameplayKind==1)return true;return false; });
         Ui([](auto* w) {
             auto* speed=w->findChild<QDoubleSpinBox*>("CharacterSpeed"); Check(speed && speed->isVisible(),"character settings in inspector");
@@ -865,6 +875,59 @@ int wmain(int argc, wchar_t** argv)
         for(int i=0;i<10;++i)pump();Check(heroZ()==stopped,"typing in editor does not move character");
         Ui([](auto* w){delete w->template findChild<QLineEdit*>("InputTextProbe");Action(w,QStringLiteral("⏹ Stop"))->trigger();});until([&]{return host.PlayState()==EditorQtHost::Edit;});
         Check(heroZ()==0,"Stop restores authored character");
+        auto sunObject = [&] {
+            for (const auto& object : host.ReadSnapshot().objects) if(object.type=="Light.Directional") return object;
+            return EditorQtHost::SceneObject{};
+        };
+        auto sunSettings = [&] { return QJsonDocument::fromJson(QByteArray::fromStdString(sunObject().projectData)).object(); };
+        Ui([](auto* w) { Action(w,QStringLiteral("Направленный свет"))->trigger(); });
+        until([&] { return sunObject().id && host.ReadSnapshot().selected==sunObject().id; });
+        const auto withSun = host.ReadSnapshot().objects.size();
+        Ui([](auto* w) {
+            auto* intensity=w->template findChild<QDoubleSpinBox*>("Property/intensity");
+            auto* color=w->template findChild<QPushButton*>("Property/color");
+            Check(intensity && color && w->template findChild<QCheckBox*>("Property/shadows"),"directional light inspector controls");
+            intensity->setValue(2.5);QMetaObject::invokeMethod(intensity,"editingFinished",Qt::DirectConnection);
+        });
+        until([&] { return sunSettings()["intensity"].toDouble()==2.5; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Отменить"))->trigger(); });
+        until([&] { return sunSettings()["intensity"].toDouble()==1; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Повторить"))->trigger(); });
+        until([&] { return sunSettings()["intensity"].toDouble()==2.5; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Направленный свет"))->trigger(); });
+        until([&] { return host.ReadSnapshot().selected==sunObject().id; });
+        Check(host.ReadSnapshot().objects.size()==withSun,"global sun action selects existing singleton");
+        Ui([](auto* w) {
+            auto* yaw=w->template findChild<QDoubleSpinBox*>("Transform4");yaw->setValue(65);
+            QMetaObject::invokeMethod(yaw,"editingFinished",Qt::DirectConnection);
+            w->template findChild<QCheckBox*>("Property/shadows")->click();
+        });
+        until([&] { return !sunSettings()["shadows"].toBool(); });
+        const auto sunRotation = sunObject().transform;
+        Check(std::abs(sunRotation.rotation[1])>0.1f,"inspector rotates directional light");
+        Ui([](auto* w) {
+            QTimer::singleShot(80,w,[]{
+                auto* dialog=qobject_cast<QColorDialog*>(QApplication::activeModalWidget());Check(dialog,"sun color dialog");
+                dialog->setCurrentColor(QColor::fromRgbF(0.2,0.6,1));dialog->accept();
+            });
+            w->template findChild<QPushButton*>("Property/color")->click();
+        });
+        until([&] { return std::abs(sunSettings()["color"].toArray()[0].toDouble()-0.2)<0.01; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); });
+        until([&] { return !host.ReadSnapshot().dirty; });
+        Ui([](auto* w) { Action(w,QStringLiteral("▶ Play"))->trigger(); });
+        until([&] { return host.PlayState()==EditorQtHost::Play; });
+        Check(sunSettings()["intensity"].toDouble()==2.5,"Play keeps authored sun");
+        Ui([](auto* w) { Action(w,QStringLiteral("⏹ Stop"))->trigger(); });
+        until([&] { return host.PlayState()==EditorQtHost::Edit; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Направленный свет"))->trigger(); });
+        until([&] { return host.ReadSnapshot().selected==sunObject().id; });
+        Ui([&](auto* w) { w->grab().save(QString::fromStdWString((root / "directional-light-inspector.png").wstring())); Action(w,QStringLiteral("Удалить объект"))->trigger(); });
+        until([&] { return !sunObject().id; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Отменить"))->trigger(); });
+        until([&] { return sunObject().id && sunSettings()["intensity"].toDouble()==2.5; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); });
+        until([&] { return !host.ReadSnapshot().dirty; });
         Ui([](auto* w) { w->close(); });
         until([&] { return exit; });
         host.SetModuleApi({}); factory.destroy(api.context); sessionGuard.context = nullptr; host.Stop();

@@ -83,6 +83,7 @@ private:
 
     void BuildSceneDocks();
     void BuildSceneMenu();
+    void ShowDirectionalLight();
     void ConnectPanels();
 
     void RefreshSceneUi();

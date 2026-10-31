@@ -109,6 +109,7 @@ private:
     QLineEdit* textureAsset_ = nullptr;
     QLineEdit* materialAsset_ = nullptr;
     QWidget* materialActions_ = nullptr;
+    QWidget* visualInspector_ = nullptr;
     QPushButton* editMaterialButton_ = nullptr;
 
     QDoubleSpinBox* transform_[9]{};

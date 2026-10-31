@@ -1,6 +1,7 @@
 #pragma once
 #include <Engine/Components/ComponentType.h>
 #include <Engine/Components/Light/PointLightComponent.h>
+#include <Engine/Components/Light/DirectionalLightComponent.h>
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
 #include <Engine/Components/SpecificComponents/MeshComponent.h>
 #include <Engine/Render/MeshPrimitives.h>
@@ -111,6 +112,7 @@ inline ComponentTypeCatalog GetComponentTypes()
         {"Primitive.Cone", "Конус", EngineComponentDetail::Create<Cone>},
         {"Primitive.Pyramid", "Пирамида", EngineComponentDetail::Create<Pyramid>},
         {"Light.Point", "Точечный свет", EngineComponentDetail::Create<PointLight>},
+        {"Light.Directional", "Направленный свет", EngineComponentDetail::Create<DirectionalLightComponent>},
         {"Particle.Sparks", "Искры", EngineComponentDetail::Create<Sparks>},
         {"Particle.Smoke", "Дым", EngineComponentDetail::Create<Smoke>},
         {"Environment.Sky", "Базовое небо", EngineComponentDetail::Create<Sky>},
