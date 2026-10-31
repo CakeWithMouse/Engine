@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <ItemGroup Label="ProjectConfigurations">
+        <ProjectConfiguration Include="Debug|x64">
+            <Configuration>Debug</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+        <ProjectConfiguration Include="Release|x64">
+            <Configuration>Release</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+    </ItemGroup>
+
+    <PropertyGroup Label="Globals">
+        <ProjectGuid>{A83F11E2-749C-4D2A-B9E4-58273F0A11C8}</ProjectGuid>
+        <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    </PropertyGroup>
+
+    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.Default.props"/>
+
+    <PropertyGroup Label="Configuration">
+        <ConfigurationType>Application</ConfigurationType>
+        <PlatformToolset>v145</PlatformToolset>
+        <CharacterSet>Unicode</CharacterSet>
+        <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
+        <UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries>
+    </PropertyGroup>
+
+    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props"/>
+    <Import Project="..\..\Engine\BuildSupport\Cpp.props"/>
+
+    <PropertyGroup>
+        <GameConfig Condition="'$(GameConfig)'==''">$(Configuration)</GameConfig>
+        <OutDir>$(RepositoryRoot)Game/build/$(Platform)/$(GameConfig)/Runtime/</OutDir>
+        <IntDir>$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/obj/UiTests/</IntDir>
+        <TargetName>UiTests</TargetName>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <QtInstallDir Condition="'$(QtInstallDir)'=='' AND '$(QTDIR)'!=''">$(QTDIR)</QtInstallDir>
+        <QtInstallDir Condition="'$(QtInstallDir)'=='' AND Exists('$(MSBuildThisFileDirectory)../ThirdParty/Qt/6.7.3/msvc2019_64/bin/moc.exe')">$(MSBuildThisFileDirectory)../ThirdParty/Qt/6.7.3/msvc2019_64</QtInstallDir>
+        <QtInstallDir Condition="'$(QtInstallDir)'==''">$(MSBuildThisFileDirectory)..\ThirdParty\Qt6.7</QtInstallDir>
+        <QtUseDebugLibraries Condition="'$(Configuration)'=='Debug' AND Exists('$(QtInstallDir)/lib/Qt6Cored.lib')">true</QtUseDebugLibraries>
+        <QtLibSuffix Condition="'$(QtUseDebugLibraries)'=='true'">d</QtLibSuffix>
+        <QtLibSuffix Condition="'$(QtUseDebugLibraries)'!='true'"></QtLibSuffix>
+    </PropertyGroup>
+
+    <ItemDefinitionGroup>
+        <ClCompile>
+            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtCore;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtWidgets;$(IntDir)moc;$(ProjectDir);$(ProjectDir)../Core;$(ProjectDir)../Include;$(ProjectDir)../UI;$(ProjectDir)../Host;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <PreprocessorDefinitions>QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <LanguageStandard>stdcpp17</LanguageStandard>
+            <MultiProcessorCompilation>true</MultiProcessorCompilation>
+            <AdditionalOptions>/utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
+        </ClCompile>
+        <Link>
+            <SubSystem>Console</SubSystem>
+            <AdditionalDependencies>$(QtInstallDir)\lib\Qt6Core$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Gui$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Widgets$(QtLibSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
+        </Link>
+    </ItemDefinitionGroup>
+
+    <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug' AND '$(QtUseDebugLibraries)'!='true'">
+        <ClCompile>
+            <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+            <PreprocessorDefinitions>NDEBUG;$([System.String]::Copy('%(PreprocessorDefinitions)').Replace('_DEBUG;', '').Replace(';_DEBUG', ''))</PreprocessorDefinitions>
+        </ClCompile>
+    </ItemDefinitionGroup>
+
+    <ItemGroup>
+        <ClCompile Include="UiTestRunner.cpp"/>
+        <ClCompile Include="../Core/Logger.cpp"/>
+        <ClCompile Include="../Core/CommandRegistry.cpp"/>
+        <ClCompile Include="../Core/FileService.cpp"/>
+        <ClCompile Include="../Core/EditorLocale.cpp"/>
+        <ClCompile Include="../Core/EditorSettings.cpp"/>
+        <ClCompile Include="../Core/SettingsService.cpp"/>
+        <ClCompile Include="../UI/EditorTheme.cpp"/>
+        <ClCompile Include="../UI/EditorStyles.cpp"/>
+        <ClCompile Include="../UI/MainToolBar.cpp"/>
+        <ClCompile Include="../Source/SceneObjectsPanel.cpp"/>
+        <ClCompile Include="../Source/ObjectInspectorPanel.cpp"/>
+        <ClCompile Include="../Source/ProjectProperties.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_Logger.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_CommandRegistry.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_FileService.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_MainToolBar.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_SceneObjectsPanel.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_ObjectInspectorPanel.cpp"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ClInclude Include="UiTestHelper.h"/>
+        <ClInclude Include="UiTestHelperTests.h"/>
+        <ClInclude Include="UiSmokeTests.h"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <CustomBuild Include="../Core/Logger.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)../Core"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+        <CustomBuild Include="../Core/CommandRegistry.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)../Core"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+        <CustomBuild Include="../Core/FileService.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)../Core"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+        <CustomBuild Include="../UI/MainToolBar.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)../Core" -I"$(ProjectDir)../UI" -I"$(ProjectDir)../Include" -I"$(ProjectDir)../Host"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+        <CustomBuild Include="../Include/SceneObjectsPanel.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)../Core" -I"$(ProjectDir)../UI" -I"$(ProjectDir)../Include" -I"$(ProjectDir)../Host"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+        <CustomBuild Include="../Include/ObjectInspectorPanel.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)../Core" -I"$(ProjectDir)../UI" -I"$(ProjectDir)../Include" -I"$(ProjectDir)../Host"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+    </ItemGroup>
+
+    <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets"/>
+</Project>

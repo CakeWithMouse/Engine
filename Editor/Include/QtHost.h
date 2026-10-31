@@ -1,207 +1,150 @@
 #pragma once
-#include <Engine/Runtime/ModuleApi.h>
-#include <Engine/Runtime/EditSessionApi.h>
-#include <Engine/Runtime/ProjectDataApi.h>
-#include <Engine/Runtime/SelectionApi.h>
-#include <Engine/Runtime/ViewportInputApi.h>
+#include "IEditorHost.h"
+#include "EditorHistory.h"
+#include "ViewportCommandHandler.h"
+#include "AssetCommandHandler.h"
+#include "SceneCommandHandler.h"
+
 #include <atomic>
 #include <cstdint>
 #include <deque>
 #include <mutex>
-#include <QString>
 #include <thread>
-#include <vector>
 #include <memory>
 #include <chrono>
 #include <functional>
 #include "RecoveryStore.h"
-#include <Engine/Runtime/SceneBatchApi.h>
-#include <Engine/Runtime/AuthoringApi.h>
-class QTemporaryDir;
 
-class EditorMainWindow;
-
-enum EditorGizmoMode : uint32_t
-{
-    EditorGizmoTranslate = 0,
-    EditorGizmoRotate = 1,
-    EditorGizmoScale = 2
-};
-
-struct EditorCommand
-{
-    enum Type : uint32_t
-    {
-        None = 0, RequestExit, ReloadProject, LoadAsset, SetModel,
-        ViewportAttach, ViewportResize, ViewportDetach, ViewportCamera,
-        TogglePlay, TogglePause, InputFocus, InputKey, InputPointer, ConfigurePlay,
-        FetchScene, UpdateObjectTransform, RefreshScene, SelectObject, CreateObject, RemoveObject,
-        RenameObject, DuplicateObject, SaveScene, LoadScene, NewScene, Undo, Redo, PickObject, FocusObject,
-        SetGizmoMode, BeginGizmoDrag, EndGizmoDrag,
-        ImportModel, ImportTexture, CreateModel, SetTexture, SetPointLight, SetMaterial, SetProjectData,
-        RunTask, WriteRecovery, DiscardRecovery, SetProperty, UpdateAsset,
-    };
-
-    Type type = None;
-    float right = 0, up = 0, forward = 0, yaw = 0, pitch = 0, zoom = 0;
-    QString path;
-    void* hwnd = nullptr;
-    uint32_t w = 0, h = 0;
-
-    // Поля для манипуляций с объектами
-    uint64_t objectId = 0;
-    std::vector<uint64_t> objectIds;
-    EngineSceneTransform transform{{0, 0, 0}, {0, 0, 0, 1}, {1, 1, 1}};
-    EngineScenePointLight pointLight{};
-    EditorGizmoMode gizmo = EditorGizmoTranslate;
-    QString name;
-
-    // RunTask: выполняется в потоке движка, если есть сессия сцены (редактор материалов)
-    std::function<void(const EngineEditSessionApi&)> task;
-};
-
-class EditorQtHost
+class EditorQtHost : public IEditorHost
 {
 public:
-    explicit EditorQtHost(const EngineModuleHost& host);
-    ~EditorQtHost();
+    using UiLauncher = std::function<void(IEditorHost*, std::atomic<bool>*)>;
+
+    explicit EditorQtHost(const EngineModuleHost& host, UiLauncher uiLauncher = nullptr);
+    ~EditorQtHost() override;
     EditorQtHost(const EditorQtHost&) = delete;
     EditorQtHost& operator=(const EditorQtHost&) = delete;
 
-    enum EditorState:int
-    {
-        Edit = 0,
-        Play = 1,
-        Pause = 2
-    };
-
     bool Start(); // поток движка
     void Update(double dt); // поток движка
-    void Overlay()
-    {
-    } // поток движка
+    void Overlay() {} // поток движка
     void Stop(); // поток движка
 
-    void Log(const char* text); // любой поток
-    void PostCommand(const EditorCommand& c); // поток UI
-    void RunOnUi(std::function<void()> action); // поток движка: в очередь UI, пока окно редактора живо
-    double LastDt() const { return lastDt_.load(); }
-    uint64_t UpdateCount() const { return updates_.load(); }
-    const EngineModuleHost& host() const { return host_; }
-    const EngineEditSessionApi& scene() const { return scene_; }
+    // IEditorHost methods
+    void PostCommand(const EditorCommand& c) override;
+    Snapshot ReadSnapshot() override;
+    void Log(const char* text) override;
 
-    bool HasViewport() const { return HasScene() || host_.viewportAttach != nullptr; }
-    bool ViewportActive() const { return viewportActive_.load(); }
-    EditorState PlayState() const { return playState_.load(); }
+    bool HasScene() const override { return sceneAvailable_.load(); }
+    bool HasMaterials() const override { return materialsAvailable_.load(); }
+    bool HasViewport() const override { return HasScene() || host_.viewportAttach != nullptr; }
+    bool ViewportActive() const override { return viewportActive_.load(); }
+    EditorState PlayState() const override { return playState_.load(); }
 
-    void SetModuleApi(const EngineEditSessionApi& scene) { scene_ = scene; sceneAvailable_.store(scene.context != nullptr); materialsAvailable_.store(scene.context && scene.setMaterial && scene.readMaterial && scene.reloadShaderFile && scene.attachMaterialPreview); }
+    double LastDt() const override { return lastDt_.load(); }
+    uint64_t UpdateCount() const override { return updates_.load(); }
+    const EngineModuleHost& host() const override { return host_; }
+    const EngineEditSessionApi& scene() const override { return scene_; }
+
+    void MoveSelectedObject(float right, float up, float forward) override;
+    void FetchSceneAndSelectNext() override;
+    bool HasSelection() const override;
+    std::string GetSelectedObjectName() override;
+
+    void SetGizmoMode(EditorGizmoMode mode) override;
+    EditorGizmoMode GizmoMode() const override { return static_cast<EditorGizmoMode>(gizmoMode_.load()); }
+    void SetParent(uint64_t childId, uint64_t parentId) override;
+
+    bool GetCamera(EngineCameraInfo& info) const override;
+    void SetOverlayLines(const std::vector<EngineOverlayLine>& lines, float thickness = 1.0f) override;
+    void SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels) override;
+    void SetOverlayBillboards(const std::vector<EngineOverlayBillboard>& billboards) override;
+
+    void RunOnUi(std::function<void()> action) override;
+    void SetUiListener(IEditorUiListener* listener) override;
+
+    // Configuration / extension APIs
+    void SetModuleApi(const EngineEditSessionApi& scene);
     void SetProjectDataApi(const EngineProjectDataApi& api) { projectData_ = api; }
     void SetViewportInputApi(const EngineViewportInputApi& api) { viewportInput_ = api; }
     void SetSelectionApi(const EngineSelectionApi& api) { selection_ = api; }
+    void InitializeRecovery();
     void SetBatchApi(const EngineSceneBatchApi& api) { batch_ = api; }
     void SetAuthoringApi(const EngineAuthoringApi& api) { authoring_ = api; }
-    bool HasMaterials() const { return materialsAvailable_.load(); }
-    bool HasScene() const { return sceneAvailable_.load(); }
-
-    struct SceneObject
-    {
-        uint64_t id = 0, parent = 0;
-        bool inheritScale = true;
-        std::string name, type;
-        EngineSceneTransform transform{};
-        std::string modelAsset, textureAsset;
-        bool hasPointLight = false;
-        EngineScenePointLight pointLight{};
-        std::string materialAsset;
-        std::string projectData;
-        uint32_t gameplayKind = 0;
-        std::string propertySchema;
-    };
-
-    struct SceneType
-    {
-        std::string name, label;
-    };
-
-    struct Snapshot
-    {
-        std::vector<SceneObject> objects;
-        std::vector<SceneType> types;
-        uint64_t selected = 0, serial = 0;
-        std::vector<uint64_t> selectedIds;
-        bool dirty = false, canUndo = false, canRedo = false;
-        bool batchEditing = false, authoring = false;
-    };
-
-    Snapshot ReadSnapshot();
-
-    // --- Методы для работы с объектами сцены ---
-    void FetchSceneAndSelectNext();
-    void MoveSelectedObject(float right, float up, float forward);
-    bool HasSelection() const { return hasSelection_.load(); }
-    std::string GetSelectedObjectName();
-
-    void SetGizmoMode(EditorGizmoMode mode);
-    EditorGizmoMode GizmoMode() const { return static_cast<EditorGizmoMode>(gizmoMode_.load()); }
+    void SetViewportOverlayApi(const EngineViewportOverlayApi& api);
 
 private:
     void UiThreadMain();
     void DrainCommands();
-
-    void PublishScene();
     void Complete(const EditorCommand& command, uint32_t status, const QString& error = {});
-    QString Checkpoint();
-    void RecordChange(const QString& checkpoint);
-    static void ENGINE_MODULE_CALL SceneVisitor(void* ctx, const EngineSceneObjectInfo* info);
 
     EngineModuleHost host_;
     EngineEditSessionApi scene_{};
-    std::atomic<bool> materialsAvailable_{false};
     EngineProjectDataApi projectData_{};
     EngineSelectionApi selection_{};
     EngineSceneBatchApi batch_{};
     EngineAuthoringApi authoring_{};
-    const EngineAuthoringApi* AuthoringApi() const {
-        if(host_.getService)return static_cast<const EngineAuthoringApi*>(host_.getService(host_.user,EngineAuthoringService,1));
-        return authoring_.describe?&authoring_:nullptr;
-    }
-    std::vector<uint64_t> selectedIds_;
     const EngineSceneBatchApi* BatchApi() const {
         if (host_.getService) return static_cast<const EngineSceneBatchApi*>(host_.getService(host_.user, EngineEditorBatchService, 1));
         return batch_.apply ? &batch_ : nullptr;
     }
-    EngineViewportInputApi viewportInput_{};
-    std::atomic<bool> sceneAvailable_{false};
-    std::mutex logMutex_;
-    std::thread uiThread_;
-    std::atomic<bool> uiReady_{false};
-    std::mutex windowMutex_;
-    EditorMainWindow* window_ = nullptr;
-    std::mutex commandMutex_;
-    std::deque<EditorCommand> commands_;
-    std::atomic<double> lastDt_{0.0};
-    std::atomic<uint64_t> updates_{0};
-    std::atomic<bool> viewportActive_{false};
-    std::atomic<EditorState> playState_{Edit};
-
-    Snapshot snapshot_;
-    uint64_t selectedId_ = 0;
-    bool dirty_ = false, sceneViewportAttached_ = false;
-    void* viewportHwnd_ = nullptr;
-    uint32_t viewportWidth_ = 0, viewportHeight_ = 0;
-    std::unique_ptr<QTemporaryDir> historyDirectory_;
-    uint64_t historySerial_ = 0, lastTransformId_ = 0;
-    std::chrono::steady_clock::time_point lastTransformTime_{};
-    std::vector<QString> undo_, redo_;
-    std::atomic<bool> hasSelection_{false};
-    std::mutex sceneMutex_;
-
-    std::atomic<uint32_t> gizmoMode_{EditorGizmoTranslate};
-
-    bool gizmoDragActive_ = false;
+    const EngineAuthoringApi* AuthoringApi() const {
+        if (host_.getService) return static_cast<const EngineAuthoringApi*>(host_.getService(host_.user, EngineAuthoringService, 1));
+        return authoring_.describe ? &authoring_ : nullptr;
+    }
     RecoveryStore recovery_;
     std::chrono::steady_clock::time_point recoveryTime_{};
     void WriteRecovery();
-    bool gizmoDragCheckpointed_ = false;
-    uint64_t gizmoDragObject_ = 0;
+    EngineViewportInputApi viewportInput_{};
+    EngineViewportOverlayApi overlay_{};
+
+    struct PendingIcon
+    {
+        uint32_t id = 0;
+        uint32_t width = 0;
+        uint32_t height = 0;
+        std::vector<uint8_t> pixels;
+    };
+
+    mutable std::mutex cameraMutex_;
+    EngineCameraInfo lastCamera_{};
+    bool lastCameraValid_ = false;
+
+    std::mutex overlayMutex_;
+    std::vector<EngineOverlayLine> pendingLines_;
+    float pendingThickness_ = 1.0f;
+    bool pendingLinesDirty_ = false;
+
+    std::vector<EngineOverlayBillboard> pendingBillboards_;
+    bool pendingBillboardsDirty_ = false;
+
+    std::vector<PendingIcon> pendingIcons_;
+    bool iconsDirty_ = false;
+    std::atomic<bool> canUndo_{false}, canRedo_{false};
+    void InvalidateOverlays();
+
+    std::atomic<bool> materialsAvailable_{false};
+    std::atomic<bool> sceneAvailable_{false};
+    std::atomic<bool> viewportActive_{false};
+    std::atomic<EditorState> playState_{Edit};
+    std::atomic<uint32_t> gizmoMode_{EditorGizmoTranslate};
+
+    std::atomic<double> lastDt_{0.0};
+    std::atomic<uint64_t> updates_{0};
+
+    std::mutex logMutex_;
+    std::mutex listenerMutex_;
+    IEditorUiListener* uiListener_ = nullptr;
+
+    std::thread uiThread_;
+    std::atomic<bool> uiReady_{false};
+    UiLauncher uiLauncher_;
+
+    std::mutex commandMutex_;
+    std::deque<EditorCommand> commands_;
+
+    EditorHistory history_;
+    ViewportCommandHandler viewportHandler_;
+    AssetCommandHandler assetHandler_;
+    SceneCommandHandler sceneHandler_;
 };

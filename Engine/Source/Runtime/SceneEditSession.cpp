@@ -1,4 +1,4 @@
-﻿#include <Engine/Runtime/SceneEditSession.h>
+#include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/MainGame/Player.h>
 #include <Engine/Scene/SceneDocument.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
@@ -342,6 +342,39 @@ EngineEditorCameraApi SceneEditSession::GetEditorCameraApi() noexcept
         }};
 }
 
+
+EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
+{
+    return {1, this,
+        [](void* p, EngineCameraInfo* info) -> uint32_t {
+            if (!info) return EngineSceneInvalidArgument;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (!s.attached_) return EngineSceneFailure;
+                auto& game = s.Active();
+                if (!game.GetCameraInfo(*info)) return EngineSceneFailure;
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, const EngineOverlayLine* lines, uint32_t count, float thickness) -> uint32_t {
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                s.Active().SetOverlayLines(lines, count, thickness);
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, uint32_t iconId, uint32_t w, uint32_t h, const uint8_t* rgba) -> uint32_t {
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                s.Active().SetOverlayIcon(iconId, w, h, rgba);
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, const EngineOverlayBillboard* billboards, uint32_t count) -> uint32_t {
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                s.Active().SetOverlayBillboards(billboards, count);
+                return EngineSceneOk;
+            });
+        }
+    };
+}
 void SceneEditSession::ReplaceEdit(const SceneSnapshot& data)
 {
     auto candidate = EmptyGame();

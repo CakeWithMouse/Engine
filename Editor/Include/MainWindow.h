@@ -7,8 +7,7 @@
 #include <cstdint>
 
 #include "ObjectInspectorPanel.h"
-
-struct EditorCommand;
+#include "IEditorHost.h"
 
 class QTreeWidget;
 class QLineEdit;
@@ -26,14 +25,32 @@ class QPushButton;
 class QAction;
 class SceneObjectsPanel;
 class MaterialEditorWindow;
+class MainToolBar;
+class ExternalGameRunner;
 class UIEditorWindow;
 
-class EditorMainWindow : public QMainWindow
+class EditorMainWindow : public QMainWindow, public IEditorUiListener
 {
     Q_OBJECT
 
 public:
     explicit EditorMainWindow(EditorQtHost* host, QWidget* parent = nullptr);
+    ~EditorMainWindow() override;
+
+    void OnLogMessage(const QString& line) override
+    {
+        QPointer<EditorMainWindow> self(this);
+        QMetaObject::invokeMethod(this, [self, line] {
+            if (self) self->AppendLine(line);
+        }, Qt::QueuedConnection);
+    }
+    void OnCommandFinished(const EditorCommand& command, uint32_t status, const QString& error = {}) override
+    {
+        QPointer<EditorMainWindow> self(this);
+        QMetaObject::invokeMethod(this, [self, command, status, error] {
+            if (self) self->CommandFinished(command, status, error);
+        }, Qt::QueuedConnection);
+    }
 
     void CommandFinished(const EditorCommand& command, uint32_t status, const QString& error);
 
@@ -61,24 +78,24 @@ public slots:
 private slots:
     void RefreshStats();
     void ShowViewportContextMenu(const QPoint& globalPos);
+    void RetranslateUi();
 
 protected:
     void closeEvent(QCloseEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
-    bool eventFilter(QObject* object, QEvent* event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
+    int controlSchemeSubId_ = 0;
     void BuildCodeTools();
     void RunCodeTool(const QString& action, const QStringList& extra = {});
     void ShowProjectTypes();
     void BuildUi();
-    void ResetPanelLayout();
     void CompactContentPanel();
-    QString LayoutSettingsKey() const;
-    QByteArray defaultPanelLayout_;
-    bool panelLayoutReady_ = false;
-    QSize panelWindowSize_;
+    void ResizeContentPanel(int height);
     int contentPanelHeight_ = 180;
+    QSize panelWindowSize_;
+    bool panelLayoutReady_ = false;
     void BuildToolBar();
     void UpdatePlayButtons();
 
@@ -89,6 +106,10 @@ private:
     void BuildSceneMenu();
     void ShowDirectionalLight();
     void ConnectPanels();
+
+    void ApplyDefaultLayout();
+    void ApplySavedOrInitialLayout();
+    QString ProjectPath() const;
 
     void RefreshSceneUi();
 
@@ -125,7 +146,42 @@ private:
     SceneObjectsPanel* sceneObjectsPanel_ = nullptr;
     ObjectInspectorPanel* objectInspectorPanel_ = nullptr;
 
+    MainToolBar* mainToolBar_ = nullptr;
     QToolBar* toolBar_ = nullptr;
+
+    QMenu* sceneMenu_ = nullptr;
+    QMenu* playMenu_ = nullptr;
+    QMenu* editMenu_ = nullptr;
+    QMenu* viewMenu_ = nullptr;
+    QMenu* resourcesSubMenu_ = nullptr;
+    QMenu* projectMenu_ = nullptr;
+    QMenu* themeMenu_ = nullptr;
+    QMenu* langMenu_ = nullptr;
+    QMenu* accentMenu_ = nullptr;
+    QMenu* schemeMenu_ = nullptr;
+    QAction* actSchemeUnreal_ = nullptr;
+    QAction* actSchemeBlender_ = nullptr;
+
+    QAction* actNewScene_ = nullptr;
+    QAction* actOpenScene_ = nullptr;
+    QAction* actSaveSceneAs_ = nullptr;
+    QAction* actExit_ = nullptr;
+    QAction* actServiceObjects_ = nullptr;
+    QAction* actConfigurePlay_ = nullptr;
+    QAction* actAddModel_ = nullptr;
+    QAction* actImportModel_ = nullptr;
+    QAction* actImportTexture_ = nullptr;
+    QAction* actReloadShaders_ = nullptr;
+    QAction* actResetLayout_ = nullptr;
+    QAction* actGrid_ = nullptr;
+    QAction* actOverlays_ = nullptr;
+    QAction* actThemeDark_ = nullptr;
+    QAction* actThemeLight_ = nullptr;
+    QAction* actLangRu_ = nullptr;
+    QAction* actLangEn_ = nullptr;
+
+    int langSubId_ = 0;
+    int themeSubId_ = 0;
 
     QAction* actPlay_ = nullptr;
     QAction* actPause_ = nullptr;
@@ -138,6 +194,7 @@ private:
     QAction* duplicateAction_ = nullptr;
     QAction* deleteAction_ = nullptr;
 
+    ExternalGameRunner* externalGameRunner_ = nullptr;
     QProcess* gameProc_ = nullptr;
 
     QLabel* playStateLabel_ = nullptr;

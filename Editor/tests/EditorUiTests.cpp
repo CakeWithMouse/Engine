@@ -45,6 +45,9 @@
 #include <QGroupBox>
 #include <QTreeView>
 #include "ViewportWidget.h"
+#include "SceneObjectsPanel.h"
+#include "CollapsibleCard.h"
+#include <QMenu>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
@@ -54,7 +57,7 @@
 namespace
 {
 int checks = 0;
-void Check(bool value, const char* message) { if (!value) throw std::runtime_error(message); ++checks; }
+void Check(bool value, const char* message) { if (!value) throw std::runtime_error(message); ++checks; if(qEnvironmentVariableIsSet("ENGINE_UI_TEST_TRACE")) { std::printf("CHECK %d: %s\n",checks,message);std::fflush(stdout); } }
 void Ui(const std::function<void(EditorMainWindow*)>& action)
 {
     std::exception_ptr failure;
@@ -71,17 +74,27 @@ void Ui(const std::function<void(EditorMainWindow*)>& action)
 }
 QAction* Action(EditorMainWindow* window, const QString& label)
 {
-    for (auto* action : window->findChildren<QAction*>()) if (action->text() == label) return action;
+    QString id;
+    if(label==QStringLiteral("▶ Play")) id="ActPlay";
+    if(label==QStringLiteral("⏹ Stop")) id="ActStop";
+    if(label==QStringLiteral("⏸ Pause")) id="ActPause";
+    if(!id.isEmpty()) if(auto* a=window->findChild<QAction*>(id)) return a;
+    QString text=label;
+
+    if(text==QStringLiteral("Сбросить расположение панелей")) text=QStringLiteral("Сбросить раскладку окон");
+    for (auto* action : window->findChildren<QAction*>()) if (action->text() == text) return action;
     throw std::runtime_error("Action not found: " + label.toStdString());
 }
-void Add(EditorMainWindow* window, int index)
-{
-    auto* combo = window->findChild<QComboBox*>(QStringLiteral("PrimitiveType"));
-    auto* category=window->findChild<QComboBox*>(QStringLiteral("ObjectCategory"));
-    Check(category!=nullptr,"category picker"); category->setCurrentIndex(category->findData(QStringLiteral("all")));
-    Check(combo && combo->count() == 13, "categorized object palette"); combo->setCurrentIndex(index);
-    auto* button = window->findChild<QPushButton*>(QStringLiteral("AddPrimitive"));
-    Check(button && button->isEnabled(), "add button enabled"); button->click();
+QAction* CreateAction(EditorMainWindow* window, const QString& type) {
+    auto* action=window->findChild<QAction*>("CreateObject."+type);
+    Check(action!=nullptr, "object type is available in categorized add menu"); return action;
+}
+void Add(EditorMainWindow* window, int index) {
+    auto* panel=window->findChild<SceneObjectsPanel*>();Check(panel && panel->isEnabled(), "add palette enabled");
+    QList<QAction*> actions;
+    for(auto* action:panel->findChildren<QAction*>()) if(action->objectName().startsWith("CreateObject.")) actions.push_back(action);
+    Check(actions.size()==13,"categorized add menu includes all placeable types");
+    Check(index>=0 && index<actions.size(),"valid object menu index");actions[index]->trigger();
 }
 }
 void ReloadUiChecks(const std::filesystem::path& root, const std::filesystem::path& engineContent, bool buildCode=false)
@@ -101,7 +114,14 @@ void ReloadUiChecks(const std::filesystem::path& root, const std::filesystem::pa
         return result;
     }};
     EngineModuleHost callbacks{ENGINE_MODULE_VERSION,&context,[](void*,const char* text){std::puts(text);},[](void* p){static_cast<Context*>(p)->exit=true;},"Reload UI",manifest.c_str(),content.c_str()};
-    callbacks.getService=[](void* p,uint32_t service,uint32_t version)->const void* {return service==EngineEditorReloadService&&version<=1?&static_cast<Context*>(p)->service:nullptr;};
+    callbacks.getService=[](void* p,uint32_t service,uint32_t version)->const void* {
+        auto& c=*static_cast<Context*>(p);if(version>1)return nullptr;
+        if(service==EngineEditorReloadService)return &c.service;
+        if(service==EngineViewportOverlayService)return &c.module->ViewportOverlayApi();
+        if(service==EngineEditorBatchService)return &c.module->BatchApi();
+        if(service==EngineAuthoringService)return &c.module->AuthoringApi();
+        return nullptr;
+    };
     EditorQtHost host(callbacks);host.SetModuleApi(module.Api());host.SetProjectDataApi(module.ProjectDataApi());host.SetSelectionApi(module.SelectionApi());host.SetViewportInputApi(module.ViewportInputApi());
     struct Cleanup { EditorQtHost& host; std::unique_ptr<GameEditModule>& module; ~Cleanup(){host.SetModuleApi({});module.reset();host.Stop();} } cleanup{host,ownedModule};
     Check(host.Start(),"start reload UI");
@@ -124,7 +144,7 @@ void ReloadUiChecks(const std::filesystem::path& root, const std::filesystem::pa
             Check(GetTickCount64()<deadline,"real code build timeout");pump();
         }
         for(int i=0;i<30;++i)pump();
-        Ui([&](auto* w){Check(w==windowBefore,"real build preserves editor window");auto* category=w->findChild<QComboBox*>("ObjectCategory");category->setCurrentIndex(category->findData("project"));auto* types=w->findChild<QComboBox*>("PrimitiveType");Check(types->findData("Spawner")>=0,"new Spawner visible after real Hot Reload");});
+        Ui([&](auto* w){Check(w==windowBefore,"real build preserves editor window");Check(CreateAction(w,"Spawner"),"new Spawner visible after real Hot Reload");});
         const auto view=host.ReadSnapshot();bool preserved=false;for(const auto& o:view.objects)if(o.id==view.selected)preserved=o.name==selected.name&&o.transform.position[0]==8;
         Check(view.dirty&&!view.canUndo&&preserved,"real build preserves unsaved scene and selection");
         Ui([](auto* w){w->close();});until([&]{bool modal=false;Ui([&](auto*){modal=qobject_cast<QMessageBox*>(QApplication::activeModalWidget())!=nullptr;});return modal;});
@@ -206,6 +226,8 @@ int wmain(int argc, wchar_t** argv)
         if (!legacy && query && query(api.context,EngineAuthoringExtension,1,sizeof(authoring),&authoring)) host.SetAuthoringApi(authoring);
         EngineSelectionApi selection{};
         if (!legacy && query && query(api.context,EngineSelectionExtension,1,sizeof(selection),&selection)) host.SetSelectionApi(selection);
+        EngineViewportOverlayApi overlay{};
+        if (!legacy && query && query(api.context,EngineViewportOverlayExtension,1,sizeof(overlay),&overlay)) host.SetViewportOverlayApi(overlay);
         EngineViewportInputApi viewportInput{};
         if (!legacy && query && query(api.context,EngineViewportInputExtension,1,sizeof(viewportInput),&viewportInput)) host.SetViewportInputApi(viewportInput);
         struct HostCleanup
@@ -310,20 +332,20 @@ int wmain(int argc, wchar_t** argv)
         if(argc==4&&std::wstring(argv[3])==L"--layout") {
             int height=0;QPoint boundary;
             Ui([&](auto* w){
-                QDockWidget* files=nullptr;for(auto* d:w->template findChildren<QDockWidget*>())if(d->windowTitle()==QStringLiteral("Ресурсы и код"))files=d;
+                QDockWidget* files=nullptr;for(auto* d:w->template findChildren<QDockWidget*>())if(d->objectName()==QStringLiteral("ContentDock"))files=d;
                 Check(files!=nullptr,"content dock exists");files->raise();w->resize(1600,950);
                 std::printf("Layout before: content=%d min=%d max=%d features=%d area=%d\n",files->height(),files->minimumHeight(),files->maximumHeight(),int(files->features()),int(w->dockWidgetArea(files)));
                 Action(w,QStringLiteral("Ресурсы: компактная панель"))->trigger();
             });for(int i=0;i<15;++i)pump();
             Ui([](auto* w){w->resize(1800,1100);});for(int i=0;i<15;++i)pump();
-            Ui([&](auto* w){QDockWidget* files=nullptr;for(auto* d:w->template findChildren<QDockWidget*>())if(d->windowTitle()==QStringLiteral("Ресурсы и код"))files=d;
-                height=files->height();std::printf("Layout resized: content=%d\n",height);Check(height<=240,"compact panel does not consume most of the window");
+            Ui([&](auto* w){QDockWidget* files=nullptr;for(auto* d:w->template findChildren<QDockWidget*>())if(d->objectName()==QStringLiteral("ContentDock"))files=d;
+                height=files->height();std::printf("Layout resized: content=%d\n",height);for(auto* d:w->findChildren<QDockWidget*>())std::printf("Dock %s: area=%d size=%dx%d min=%d visible=%d\n",d->objectName().toUtf8().constData(),int(w->dockWidgetArea(d)),d->width(),d->height(),d->minimumHeight(),d->isVisible());Check(height<=240,"compact panel does not consume most of the window");
                 boundary=QPoint(w->width()/2,files->mapTo(w,QPoint()).y()-w->style()->pixelMetric(QStyle::PM_DockWidgetSeparatorExtent)/2);
                 QMouseEvent press(QEvent::MouseButtonPress,boundary,w->mapToGlobal(boundary),Qt::LeftButton,Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(w,&press);
             });for(int i=0;i<3;++i)pump();
             Ui([&](auto* w){const auto end=boundary+QPoint(0,-90);QMouseEvent move(QEvent::MouseMove,end,w->mapToGlobal(end),Qt::NoButton,Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(w,&move);});for(int i=0;i<10;++i)pump();
             Ui([&](auto* w){const auto end=boundary+QPoint(0,-90);QMouseEvent release(QEvent::MouseButtonRelease,end,w->mapToGlobal(end),Qt::LeftButton,Qt::NoButton,Qt::NoModifier);QApplication::sendEvent(w,&release);});for(int i=0;i<10;++i)pump();
-            Ui([&](auto* w){QDockWidget* files=nullptr;for(auto* d:w->template findChildren<QDockWidget*>())if(d->windowTitle()==QStringLiteral("Ресурсы и код"))files=d;std::printf("Layout dragged: content=%d (before %d)\n",files->height(),height);Check(files->height()>height+40,"content separator drag resizes panel");
+            Ui([&](auto* w){QDockWidget* files=nullptr;for(auto* d:w->template findChildren<QDockWidget*>())if(d->objectName()==QStringLiteral("ContentDock"))files=d;std::printf("Layout dragged: content=%d (before %d)\n",files->height(),height);Check(files->height()>height+40,"content separator drag resizes panel");
                 Action(w,QStringLiteral("Ресурсы: отдельное окно"))->trigger();Check(files->isFloating(),"content floats");w->addDockWidget(Qt::LeftDockWidgetArea,files);files->setFloating(false);Check(w->dockWidgetArea(files)==Qt::LeftDockWidgetArea,"content can dock at side");
                 const auto layout=w->saveState(1);Action(w,QStringLiteral("Сбросить расположение панелей"))->trigger();Check(!files->isFloating()&&w->dockWidgetArea(files)==Qt::BottomDockWidgetArea,"reset returns content below viewport");
                 Check(w->restoreState(layout,1)&&w->dockWidgetArea(files)==Qt::LeftDockWidgetArea,"panel layout restores by stable names");
@@ -447,11 +469,7 @@ int wmain(int argc, wchar_t** argv)
             const auto original = host.ReadSnapshot().objects.size();
             Ui([](auto* w) {
                 Check(Action(w,QStringLiteral("Добавить C++ в проект…")) && Action(w,QStringLiteral("Добавить C++ класс…")) && Action(w,QStringLiteral("Перекомпилировать / Hot Reload")),"C++ workflow actions visible");
-                  auto* category=w->findChild<QComboBox*>(QStringLiteral("ObjectCategory"));category->setCurrentIndex(category->findData(QStringLiteral("all")));
-                auto* palette=w->findChild<QComboBox*>(QStringLiteral("PrimitiveType"));
-                const auto index=palette->findData(QStringLiteral("RulesObject"));
-                Check(index>=0,"independent hierarchy visible in palette");
-                palette->setCurrentIndex(index);w->findChild<QPushButton*>(QStringLiteral("AddPrimitive"))->click();
+                CreateAction(w,"RulesObject")->trigger();
             });
             until([&]{return host.ReadSnapshot().objects.size()==original+1;});
             bool classesVisible=false;
@@ -472,10 +490,7 @@ int wmain(int argc, wchar_t** argv)
             Ui([](auto* w){Action(w,QStringLiteral("Отменить"))->trigger();});
             until([&]{return host.ReadSnapshot().objects.size()==original+1;});
               Ui([](auto* w) {
-                  auto* palette=w->findChild<QComboBox*>(QStringLiteral("PrimitiveType"));
-                  const auto index=palette->findData(QStringLiteral("ProjectComponent"));
-                  Check(index>=0,"custom component visible");
-                  palette->setCurrentIndex(index);w->findChild<QPushButton*>(QStringLiteral("AddPrimitive"))->click();
+                  CreateAction(w,"ProjectComponent")->trigger();
               });
               until([&]{return host.ReadSnapshot().objects.size()==original+2;});
               const auto dataObject=host.ReadSnapshot().selected;
@@ -504,9 +519,8 @@ int wmain(int argc, wchar_t** argv)
         {
             const auto originalCount = host.ReadSnapshot().objects.size();
             Ui([](auto* w) {
-                auto* combo = w->findChild<QComboBox*>(QStringLiteral("PrimitiveType"));
-                Check(combo && combo->count() == 6,"legacy palette excludes unavailable lights");
-                combo->setCurrentIndex(0); w->findChild<QPushButton*>(QStringLiteral("AddPrimitive"))->click();
+                QList<QAction*> actions;for(auto* a:w->findChildren<QAction*>())if(a->objectName().startsWith("CreateObject."))actions.push_back(a);
+                Check(actions.size()==6,"legacy menu excludes unavailable lights");actions.front()->trigger();
             });
             until([&] { return host.ReadSnapshot().objects.size() == originalCount + 1; });
             auto selectedX = [&] { const auto view = host.ReadSnapshot(); for (const auto& o : view.objects) if (o.id == view.selected) return o.transform.position[0]; return -999.0f; };
@@ -538,16 +552,9 @@ int wmain(int argc, wchar_t** argv)
             return 0;
         }
         Ui([](auto* w) {
-            auto* category=w->findChild<QComboBox*>(QStringLiteral("ObjectCategory"));
-            auto* types=w->findChild<QComboBox*>(QStringLiteral("PrimitiveType"));
-            Check(types->count()==6,"default shows only primitives");
-            category->setCurrentIndex(category->findData(QStringLiteral("Particle.")));
-            Check(types->count()==2 && types->findData(QStringLiteral("Particle.Sparks"))>=0 && types->findData(QStringLiteral("Particle.Smoke"))>=0,"two particle presets in category");
-            category->setCurrentIndex(category->findData(QStringLiteral("Environment.")));
-            Check(types->count()==1 && types->currentData().toString()=="Environment.Sky","sky category");
-            category->setCurrentIndex(category->findData(QStringLiteral("project")));
-            Check(types->findData("Gameplay.PlaySettings")<0,"service settings not placeable");
-            Check(types->count()==0&&!w->findChild<QPushButton*>(QStringLiteral("AddPrimitive"))->isEnabled(),"empty category cannot spawn");
+            Check(CreateAction(w,"Particle.Sparks") && CreateAction(w,"Particle.Smoke"),"particle presets available");
+            Check(CreateAction(w,"Environment.Sky"),"sky available");
+            Check(!w->findChild<QAction*>("CreateObject.Gameplay.PlaySettings"),"service settings not placeable");
             Check(w->findChild<QTreeWidget*>()->topLevelItemCount() == 4, "starter hierarchy"); Add(w, 0);
         });
         until([&] { return host.ReadSnapshot().objects.size() == 5; });
@@ -558,10 +565,11 @@ int wmain(int argc, wchar_t** argv)
             Check(w->findChild<QToolButton*>("ImportAssets")->menu() != nullptr, "imports grouped into menu");
             Check(w->findChild<QPushButton*>("ChooseModel") != nullptr, "model picker exists");
             Check(w->findChild<QLineEdit*>("ModelAsset")->isReadOnly() && w->findChild<QLineEdit*>("TextureAsset")->isReadOnly(), "asset paths locked");
-            for (const auto& title : {QStringLiteral("Общие"),QStringLiteral("Позиция"),QStringLiteral("Поворот"),QStringLiteral("Масштаб"),QStringLiteral("Визуал"),QStringLiteral("Добавление объекта")}) {
+            for (const auto& title : {QStringLiteral("Общие"),QStringLiteral("Трансформация"),QStringLiteral("Геометрия"),QStringLiteral("Материал")}) {
                 bool found=false; for (auto* group : w->template findChildren<QGroupBox*>()) found |= group->title()==title;
                 for(auto* header:w->template findChildren<QToolButton*>())found|=header->objectName().startsWith("Section.")&&header->text()==title;
-                Check(found,"inspector and placement categories");
+                for(auto* button:w->template findChildren<QPushButton*>()) found|=button->objectName()=="CardHeaderBtn" && button->text().contains(title);
+                Check(found,"inspector card categories");
             }
             for (auto* button : w->template findChildren<QPushButton*>()) Check(button->text()!=QStringLiteral("Дубликат") && button->text()!=QStringLiteral("Удалить"),"no redundant hierarchy buttons");
             auto* visibility=w->findChild<QComboBox*>("FileVisibility");
@@ -875,7 +883,7 @@ int wmain(int argc, wchar_t** argv)
         until([&] { return !host.ReadSnapshot().dirty; });
         Ui([](auto* w) { Action(w, QStringLiteral("▶ Play"))->trigger(); });
         until([&] { return host.PlayState() == EditorQtHost::Play; });
-        Ui([](auto* w) { Check(!w->findChild<QPushButton*>(QStringLiteral("AddPrimitive"))->isEnabled(), "editing disabled during Play"); Action(w, QStringLiteral("⏹ Stop"))->trigger(); });
+        Ui([](auto* w) { Check(!w->findChild<QPushButton*>(QStringLiteral("SceneAddButton"))->isEnabled(), "editing disabled during Play"); Action(w, QStringLiteral("⏹ Stop"))->trigger(); });
         until([&] { return host.PlayState() == EditorQtHost::Edit; });
         Ui([](auto* w) {
             auto* tree = w->findChild<QTreeWidget*>();

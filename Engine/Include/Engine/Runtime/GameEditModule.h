@@ -10,6 +10,7 @@
 #include <Engine/Runtime/SceneBatchApi.h>
 #include <Engine/Runtime/AuthoringApi.h>
 #include <Engine/Runtime/ViewportInputApi.h>
+#include <Engine/Runtime/ViewportOverlayApi.h>
 
 // Host-side RAII owner of an edit-only DLL session. Must be created, called and
 // destroyed on the engine thread, before HWND destruction. Reload reconstructs scene objects from a validated checkpoint.
@@ -29,6 +30,7 @@ public:
     const EngineProjectDataApi& ProjectDataApi() const noexcept { return projectData_; }
     const EngineViewportInputApi& ViewportInputApi() const noexcept { return viewportInput_; }
     const EngineSelectionApi& SelectionApi() const noexcept { return selection_; }
+    const EngineViewportOverlayApi& ViewportOverlayApi() const noexcept { return overlay_; }
     const EngineAuthoringApi& AuthoringApi() const noexcept { return authoring_; }
     const EngineSceneBatchApi& BatchApi() const noexcept { return batch_; }
 private:
@@ -42,6 +44,7 @@ private:
     EngineSceneBatchApi batch_{};
     EngineAuthoringApi authoring_{};
     EngineViewportInputApi viewportInput_{};
+    EngineViewportOverlayApi overlay_{};
     EngineLegacyV4::Factory legacyFactory_{};
     std::unique_ptr<EngineLegacyV4::EditApi> legacy_ = std::make_unique<EngineLegacyV4::EditApi>();
     EngineLegacyV5::Factory legacy5Factory_{};

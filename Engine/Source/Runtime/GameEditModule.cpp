@@ -59,6 +59,9 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
                     throw std::runtime_error("Invalid authoring API");
             EnginePointLightApi light{};
             EngineDocumentCapabilities document{};
+            if (query && query(extensionContext, EngineViewportOverlayExtension, 1, sizeof(overlay_), &overlay_))
+                if (overlay_.version != 1 || overlay_.context != extensionContext || !overlay_.getCamera || !overlay_.setOverlayLines || !overlay_.setOverlayIcon || !overlay_.setOverlayBillboards)
+                    throw std::runtime_error("Invalid viewport overlay API");
             if (query && query(extensionContext, EngineSelectionExtension, 1, sizeof(selection_), &selection_))
                 if (selection_.version != 1 || selection_.context != extensionContext || !selection_.select)
                     throw std::runtime_error("Invalid selection API");
@@ -139,6 +142,7 @@ uint32_t GameEditModule::Reload(const std::filesystem::path& module, const std::
         swap(library_, candidate->library_); swap(factory_, candidate->factory_); swap(api_, candidate->api_);
         swap(projectData_, candidate->projectData_); swap(selection_, candidate->selection_); swap(batch_, candidate->batch_); swap(authoring_, candidate->authoring_);
         swap(viewportInput_, candidate->viewportInput_); swap(camera_, candidate->camera_);
+        swap(overlay_, candidate->overlay_);
         swap(legacyFactory_, candidate->legacyFactory_); swap(legacy_, candidate->legacy_);
         swap(legacy5Factory_, candidate->legacy5Factory_); swap(legacy5_, candidate->legacy5_);
         // Heap-owned adapter tables move with their DLL, preserving session identity.

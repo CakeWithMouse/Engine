@@ -9,6 +9,8 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <Engine/Runtime/ViewportOverlayApi.h>
 #include <wrl/client.h>
 #include <glm/vec3.hpp>
 
@@ -236,6 +238,12 @@ public:
     const std::string& GetAdapterName() const { return AdapterName; }
     /** Dumps the next finished frame, before it is presented. */
     void RequestFrameDump(const std::string& path) { PendingFrameDump = path; }
+
+    void SetOverlayLines(const EngineOverlayLine* lines, uint32_t count, float thickness);
+    void SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels);
+    void SetOverlayBillboards(const EngineOverlayBillboard* billboards, uint32_t count);
+    bool GetCameraInfo(EngineCameraInfo& info) const;
+    void RenderEditorOverlay();
 
     void SetStaticShadowArea(const glm::vec3& center, float extent);
     void InvalidateStaticShadow() { bStaticShadowDirty = true; }
@@ -563,4 +571,50 @@ protected:
     std::vector<uint64_t> EditorSelectedIds;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> SelectionPS;
     Microsoft::WRL::ComPtr<ID3D11Buffer> SelectionCB;
+
+    struct OverlayLineVertex {
+        float x, y, z;
+        uint32_t color;
+    };
+    struct OverlayBillboardVertex {
+        float x, y, z;
+        float offsetX, offsetY;
+        float u, v;
+        uint32_t tint;
+    };
+    struct OverlayConstantsData {
+        DirectX::XMFLOAT4X4 ViewProjection;
+        DirectX::XMFLOAT4 ScreenSize;
+    };
+
+    struct CachedOverlayIcon {
+        uint32_t width = 0;
+        uint32_t height = 0;
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
+    };
+
+    std::vector<EngineOverlayLine> PendingOverlayLines;
+    float OverlayLineThickness = 1.0f;
+    std::unordered_map<uint32_t, CachedOverlayIcon> OverlayIcons;
+    std::vector<EngineOverlayBillboard> PendingOverlayBillboards;
+
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> OverlayLineVS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> OverlayLinePS;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> OverlayLineLayout;
+
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> OverlayBillboardVS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> OverlayBillboardPS;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> OverlayBillboardLayout;
+
+    Microsoft::WRL::ComPtr<ID3D11Buffer> OverlayCB;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> OverlayLineVB;
+    size_t OverlayLineVBCapacity = 0;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> OverlayBillboardVB;
+    size_t OverlayBillboardVBCapacity = 0;
+
+    Microsoft::WRL::ComPtr<ID3D11BlendState> OverlayBlendState;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> OverlayDepthReadOnlyState;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> OverlayDepthDisabledState;
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> OverlaySamplerState;
 };

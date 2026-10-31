@@ -1,4 +1,5 @@
 #include "MaterialEditorWindow.h"
+#include "EditorTheme.h"
 
 #include <QAction>
 #include <QCheckBox>
@@ -621,16 +622,13 @@ void MaterialEditorWindow::RebuildSettings()
                 SetParameter(index, value);
             });
 
-        auto* reset = new QPushButton(QStringLiteral("↺"), row);
+        auto* reset = new QPushButton(EditorTheme::CreateResetIcon(), QString(), row);
         reset->setFixedWidth(28);
         reset->setToolTip(QStringLiteral("Значение из HLSL"));
         layout->addWidget(reset);
-        connect(reset, &QPushButton::clicked, this, [this, index, setValues, paint]
-        {
-            const auto value = state_.parameters[index].defaultValue;
-            setValues(value);
-            paint(value);
-            SetParameter(index, value);
+        connect(reset, &QPushButton::clicked, this, [this, index, setValues, paint] {
+            const auto val = state_.parameters[index].defaultValue;
+            setValues(val); paint(val); SetParameter(index, val);
         });
         parameterForm_->addRow(parameter.name, row);
     }

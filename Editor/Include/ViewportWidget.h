@@ -7,6 +7,11 @@
 #include <cstdint>
 
 #include "QtHost.h"
+#include "EditorSettings.h"
+#include "GizmoMath.h"
+#include "GizmoGeometry.h"
+
+class ViewportHeaderBar;
 
 class ViewportWidget : public QWidget
 {
@@ -14,10 +19,24 @@ class ViewportWidget : public QWidget
 
 public:
     explicit ViewportWidget(EditorQtHost* host, QWidget* parent = nullptr);
+    ~ViewportWidget() override;
 
     void setGizmoMode(EditorGizmoMode mode);
     EditorGizmoMode gizmoMode() const { return gizmoMode_; }
-    void SetSnapping(double movement, double angle) { moveSnap_ = movement; angleSnap_ = angle; }
+
+    void SetSnapEnabled(bool enabled);
+    bool IsSnapEnabled() const { return snapEnabled_; }
+    void ToggleSnap();
+
+    void SetCoordinateSpaceLocal(bool local);
+    bool IsCoordinateSpaceLocal() const { return localOrientation_; }
+    void ToggleCoordinateSpace();
+
+    void RetranslateUi();
+    void AttachHeaderBar(ViewportHeaderBar* bar);
+
+    QSize minimumSizeHint() const override { return QSize(80, 60); }
+    QSize sizeHint() const override { return QSize(800, 600); }
 
 signals:
     void contextMenuRequested(const QPoint& globalPos);
@@ -30,6 +49,16 @@ protected:
     void hideEvent(QHideEvent* e) override;
     void resizeEvent(QResizeEvent* e) override;
     void paintEvent(QPaintEvent* e) override;
+
+    // Split input handlers by method
+    bool HandleFocusEvent(QEvent* e);
+    bool HandleGameInput(QEvent* e);
+    bool HandleKeyPress(QKeyEvent* e);
+    bool HandleKeyRelease(QKeyEvent* e);
+    bool HandleMousePress(QMouseEvent* e);
+    bool HandleMouseMove(QMouseEvent* e);
+    bool HandleMouseRelease(QMouseEvent* e);
+    bool HandleWheel(QWheelEvent* e);
 
     QSet<int> keys_;
     QPointF lastMouse_;
@@ -45,6 +74,7 @@ private:
     bool SelectedTransform(uint64_t& id, EngineSceneTransform& transform);
     bool BeginObjectDrag(const QPointF& pos);
     void EndObjectDrag();
+    void CancelObjectDrag();
     void ApplyRotateScaleGizmo(const QPointF& pos);
     void PostSelectedTransform(const EngineSceneTransform& transform);
     void updateGizmoToolTip();
@@ -65,6 +95,14 @@ private:
     QPointF lastDragPos_;
 
     EditorGizmoMode gizmoMode_ = EditorGizmoTranslate;
+    GizmoMath::AxisLock activeAxis_ = GizmoMath::AxisLock::All;
+    GizmoGeometry::Handle hoveredHandle_ = GizmoGeometry::Handle::None;
+    uint64_t overlayHash_ = 0;
+    EngineCameraInfo lastCameraInfo_{};
+    bool hasCameraInfo_ = false;
+    float camYaw_ = -1.5707963f;
+    float camPitch_ = 0.0f;
+    float camPos_[3] = {0.0f, 0.0f, -5.0f};
 
     bool gizmoDragSession_ = false;
     uint64_t dragObjectId_ = 0;
@@ -72,7 +110,17 @@ private:
     QPointF dragStartPos_;
 
     float dragSensitivity_ = 0.002f;
-    double moveSnap_ = 0, angleSnap_ = 0;
     float rotateSensitivity_ = 0.008f;
     float scaleSensitivity_ = 0.005f;
+
+    // S6 Gizmo & Snapping & Space
+    bool snapEnabled_ = false;
+    double moveSnapStep_ = 0.5;
+    double rotateSnapStep_ = 15.0;
+    double scaleSnapStep_ = 0.25;
+    bool localOrientation_ = false;
+
+    ViewportHeaderBar* headerBar_ = nullptr;
+    int schemeSubId_ = 0;
+    int langSubId_ = 0;
 };

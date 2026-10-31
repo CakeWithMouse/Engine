@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <ItemGroup Label="ProjectConfigurations">
         <ProjectConfiguration Include="Debug|x64">
@@ -59,11 +59,15 @@
     </PropertyGroup>
 
     <!-- ===== Qt-настройки (кладем ПОСЛЕ Cpp.props, чтобы переопределить/дополнить) ===== -->
+    <PropertyGroup Condition="Exists('$(QtInstallDir)/include/QtSvg/QSvgRenderer') AND Exists('$(QtInstallDir)/lib/Qt6Svg$(QtLibSuffix).lib')">
+        <QtSvgLibrary>$(QtInstallDir)\lib\Qt6Svg$(QtLibSuffix).lib;</QtSvgLibrary>
+        <QtSvgDefine>ENGINE_HAS_QTSVG;</QtSvgDefine>
+    </PropertyGroup>
     <ItemDefinitionGroup>
         <ClCompile>
             <!-- %(AdditionalIncludeDirectories) берёт include-пути из Cpp.props, сверху кладём Qt -->
-            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtWidgets;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtCore;$(IntDir)moc;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-            <PreprocessorDefinitions>QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtWidgets;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtCore;$(QtInstallDir)/include/QtSvg;$(IntDir)moc;$(ProjectDir)Core;$(ProjectDir)Host;$(ProjectDir)UI;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <PreprocessorDefinitions>$(QtSvgDefine)QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;QT_SVG_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
             <LanguageStandard>stdcpp17</LanguageStandard>
             <ExceptionHandling>Sync</ExceptionHandling>
             <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -72,7 +76,7 @@
         <Link>
             <AdditionalLibraryDirectories>$(QtInstallDir)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
             <!-- %(AdditionalDependencies) сохраняет всё, что дал Cpp.props -->
-            <AdditionalDependencies>Qt6Widgets$(QtLibSuffix).lib;Qt6Gui$(QtLibSuffix).lib;Qt6Core$(QtLibSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
+            <AdditionalDependencies>$(QtInstallDir)\lib\Qt6Widgets$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Gui$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Core$(QtLibSuffix).lib;$(QtSvgLibrary)%(AdditionalDependencies)</AdditionalDependencies>
         </Link>
         <PostBuildEvent>
             <Message>windeployqt: Qt runtime -&gt; $(OutDir)</Message>
@@ -132,14 +136,45 @@
         <ClCompile Include="../Engine/Source/Runtime/GameEditModule.cpp" Condition="'$(EditorUiTest)'=='true'"/>
         <ClCompile Include="Source/Module.cpp"/>
         <ClCompile Include="Source/QtHost.cpp"/>
+        <ClCompile Include="Host/EditorHistory.cpp"/>
+        <ClCompile Include="Host/ViewportCommandHandler.cpp"/>
+        <ClCompile Include="Host/AssetCommandHandler.cpp"/>
+        <ClCompile Include="Host/SceneCommandHandler.cpp"/>
+        <ClCompile Include="UI/EditorApp.cpp"/>
+        <ClCompile Include="UI/EditorTheme.cpp"/>
+        <ClCompile Include="UI/EditorStyles.cpp"/>
+        <ClCompile Include="UI/DockLayoutManager.cpp"/>
+        <ClCompile Include="UI/MainToolBar.cpp"/>
+        <ClCompile Include="UI/IconProvider.cpp"/>
+        <ClCompile Include="UI/PlaySettingsDialog.cpp"/>
+        <ClCompile Include="UI/ExternalGameRunner.cpp"/>
         <ClCompile Include="Source/MainWindow.cpp"/>
         <ClCompile Include="Source/AssetTools.cpp"/>
         <ClCompile Include="Source/FileBrowser.cpp"/>
         <ClCompile Include="Source/ViewportWidget.cpp"/>
+        <ClCompile Include="Source/ViewportWidget_Input.cpp"/>
+        <ClCompile Include="UI/ViewportOverlayHelper.cpp"/>
         <ClCompile Include="Source/ObjectInspectorPanel.cpp"/>
         <ClCompile Include="Source/ProjectProperties.cpp"/>
         <ClCompile Include="Source/SceneObjectsPanel.cpp"/>
         <ClCompile Include="Source/MaterialEditorWindow.cpp"/>
+        <ClCompile Include="Core/Logger.cpp"/>
+        <ClCompile Include="Core/CommandRegistry.cpp"/>
+        <ClCompile Include="Core/FileService.cpp"/>
+        <ClCompile Include="Core/EditorLocale.cpp"/>
+        <ClCompile Include="Core/GizmoMath.cpp"/>
+        <ClCompile Include="Core/ViewportOverlay.cpp"/>
+        <ClCompile Include="Core/GizmoGeometry.cpp"/>
+        <ClCompile Include="Core/EditorSettings.cpp"/>
+        <ClCompile Include="Core/SettingsService.cpp"/>
+        <ClCompile Include="Core/AssetOps.cpp"/>
+        <ClCompile Include="Core/HlslGraphCompiler.cpp"/>
+        <ClCompile Include="Core/MaterialGraphModel.cpp"/>
+        <ClCompile Include="Core/SceneFile.cpp"/>
+        <ClCompile Include="Core/Terminal.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_Logger.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_CommandRegistry.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_FileService.cpp"/>
         <ClCompile Include="Source/UIEditorWindow.cpp"/>
         <ClCompile Include="Source/HudTools.cpp"/>
         <ClCompile Include="../Engine/Source/UI/UIElement.cpp"/>
@@ -150,10 +185,60 @@
         <ClCompile Include="$(IntDir)moc/moc_ObjectInspectorPanel.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_SceneObjectsPanel.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_MaterialEditorWindow.cpp"/>
+        <ClCompile Include="$(IntDir)moc/moc_MainToolBar.cpp"/>
     </ItemGroup>
 
     <ItemGroup>
+        <ClInclude Include="Core/IUserPrompt.h"/>
+        <ClInclude Include="Core/EditorLocale.h"/>
+        <ClInclude Include="Core/SettingsService.h"/>
+        <ClInclude Include="Core/GizmoMath.h"/>
+        <ClInclude Include="Core/ViewportOverlay.h"/>
+        <ClInclude Include="Core/GizmoGeometry.h"/>
+        <ClInclude Include="Core/AssetOps.h"/>
+        <ClInclude Include="Core/HlslGraphCompiler.h"/>
+        <ClInclude Include="Core/MaterialGraphModel.h"/>
+        <ClInclude Include="Core/SceneFile.h"/>
+        <ClInclude Include="Core/Terminal.h"/>
+        <CustomBuild Include="Core/Logger.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Core" -I"$(ProjectDir)Include"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+        <CustomBuild Include="Core/CommandRegistry.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Core" -I"$(ProjectDir)Include"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+        <CustomBuild Include="Core/FileService.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Core" -I"$(ProjectDir)Include"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
         <ClInclude Include="Include/QtHost.h"/>
+        <ClInclude Include="Host/IEditorHost.h"/>
+        <ClInclude Include="Host/EditorHistory.h"/>
+        <ClInclude Include="Host/ViewportCommandHandler.h"/>
+        <ClInclude Include="Host/AssetCommandHandler.h"/>
+        <ClInclude Include="Host/SceneCommandHandler.h"/>
+        <ClInclude Include="UI/EditorApp.h"/>
+        <ClInclude Include="UI/IconProvider.h"/>
+        <ClInclude Include="UI/ViewportOverlayHelper.h"/>
         <ClInclude Include="Include/CodeClassDialog.h"/>
         <ClInclude Include="Include/FileBrowser.h"/>
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->
@@ -203,6 +288,16 @@
             <Command>
                 if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
                 "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include"
+            </Command>
+            <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
+            <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
+        </CustomBuild>
+            <CustomBuild Include="UI/MainToolBar.h">
+            <FileType>Document</FileType>
+            <Message>MOC %(Filename).h</Message>
+            <Command>
+                if not exist "$(IntDir)moc" mkdir "$(IntDir)moc"
+                "$(QtInstallDir)/bin/moc.exe" "%(FullPath)" -o "$(IntDir)moc/moc_%(Filename).cpp" -DUNICODE -D_UNICODE -DWIN32 -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -I"$(QtInstallDir)/include" -I"$(ProjectDir)Include" -I"$(ProjectDir)UI" -I"$(ProjectDir)Core"
             </Command>
             <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
             <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
