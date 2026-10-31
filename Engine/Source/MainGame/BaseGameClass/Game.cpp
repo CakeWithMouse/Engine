@@ -366,6 +366,12 @@ void Game::DestroyResources(bool preserveScene)
     DefaultRasterState.Reset();
     CullBackRasterState.Reset();
     SelectionVS.Reset(); SelectionPS.Reset(); SelectionCB.Reset();
+    OverlayLineVS.Reset(); OverlayLinePS.Reset(); OverlayLineLayout.Reset();
+    OverlayBillboardVS.Reset(); OverlayBillboardPS.Reset(); OverlayBillboardLayout.Reset();
+    OverlayCB.Reset(); OverlayLineVB.Reset(); OverlayLineVBCapacity = 0;
+    OverlayBillboardVB.Reset(); OverlayBillboardVBCapacity = 0;
+    OverlayBlendState.Reset(); OverlayDepthReadOnlyState.Reset(); OverlayDepthDisabledState.Reset(); OverlaySamplerState.Reset();
+    OverlayIcons.clear(); PendingOverlayLines.clear(); PendingOverlayBillboards.clear();
     ReleaseSwapChainResources();
 
     if (SwapChain && !bEmbedded)
@@ -2720,6 +2726,331 @@ void Game::RenderEditorSelection()
     Context->VSSetConstantBuffers(0,1,SelectionCB.GetAddressOf());
     Context->Draw(24,0);
 }
+
+void Game::SetOverlayLines(const EngineOverlayLine* lines, uint32_t count, float thickness)
+{
+    if (!lines || count == 0)
+    {
+        PendingOverlayLines.clear();
+        return;
+    }
+    PendingOverlayLines.assign(lines, lines + count);
+    OverlayLineThickness = thickness;
+}
+
+void Game::SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels)
+{
+    if (!rgbaPixels || width == 0 || height == 0)
+    {
+        OverlayIcons.erase(iconId);
+        return;
+    }
+    if (!Device) return;
+
+    D3D11_TEXTURE2D_DESC desc{};
+    desc.Width = width;
+    desc.Height = height;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+    D3D11_SUBRESOURCE_DATA sub{};
+    sub.pSysMem = rgbaPixels;
+    sub.SysMemPitch = width * 4;
+
+    CachedOverlayIcon icon;
+    icon.width = width;
+    icon.height = height;
+    if (SUCCEEDED(Device->CreateTexture2D(&desc, &sub, icon.texture.ReleaseAndGetAddressOf())))
+    {
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+        srvDesc.Format = desc.Format;
+        srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MipLevels = 1;
+        if (SUCCEEDED(Device->CreateShaderResourceView(icon.texture.Get(), &srvDesc, icon.srv.ReleaseAndGetAddressOf())))
+        {
+            OverlayIcons[iconId] = std::move(icon);
+        }
+    }
+}
+
+void Game::SetOverlayBillboards(const EngineOverlayBillboard* billboards, uint32_t count)
+{
+    if (!billboards || count == 0)
+    {
+        PendingOverlayBillboards.clear();
+        return;
+    }
+    PendingOverlayBillboards.assign(billboards, billboards + count);
+}
+
+bool Game::GetCameraInfo(EngineCameraInfo& info) const
+{
+    if (!FirstPlayer || !DisplayPtr) return false;
+    const auto pos = FirstPlayer->GetPosition();
+    info.position[0] = pos.x;
+    info.position[1] = pos.y;
+    info.position[2] = pos.z;
+    const auto& view = FirstPlayer->GetViewMatrix();
+    std::memcpy(info.viewMatrix, &view, sizeof(float) * 16);
+    const auto& proj = FirstPlayer->GetProjectionMatrix();
+    std::memcpy(info.projMatrix, &proj, sizeof(float) * 16);
+    info.fov = FirstPlayer->GetFovY();
+    const uint32_t w = static_cast<uint32_t>(std::max(DisplayPtr->GetWidth(), 1));
+    const uint32_t h = static_cast<uint32_t>(std::max(DisplayPtr->GetHeight(), 1));
+    info.width = w;
+    info.height = h;
+    info.aspect = h > 0 ? static_cast<float>(w) / static_cast<float>(h) : 1.0f;
+    return true;
+}
+
+void Game::RenderEditorOverlay()
+{
+    if (!bEmbedded || !FirstPlayer || !Device || !Context || !RenderTargetView) return;
+    if (PendingOverlayLines.empty() && PendingOverlayBillboards.empty()) return;
+
+    if (!OverlayCB)
+    {
+        const auto shaderFile = EnginePaths::Shader("EditorOverlay.hlsl").wstring();
+        Microsoft::WRL::ComPtr<ID3DBlob> vsBlob, psBlob;
+
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "VSLine", "vs_5_0", vsBlob.ReleaseAndGetAddressOf())) ||
+            FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "PSLine", "ps_5_0", psBlob.ReleaseAndGetAddressOf())))
+            return;
+        if (FAILED(Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, OverlayLineVS.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, OverlayLinePS.ReleaseAndGetAddressOf())))
+            return;
+
+        const D3D11_INPUT_ELEMENT_DESC lineLayoutDesc[] = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        };
+        if (FAILED(Device->CreateInputLayout(lineLayoutDesc, 2, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), OverlayLineLayout.ReleaseAndGetAddressOf())))
+            return;
+
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "VSBillboard", "vs_5_0", vsBlob.ReleaseAndGetAddressOf())) ||
+            FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "PSBillboard", "ps_5_0", psBlob.ReleaseAndGetAddressOf())))
+            return;
+        if (FAILED(Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, OverlayBillboardVS.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, OverlayBillboardPS.ReleaseAndGetAddressOf())))
+            return;
+
+        const D3D11_INPUT_ELEMENT_DESC bbLayoutDesc[] = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        };
+        if (FAILED(Device->CreateInputLayout(bbLayoutDesc, 4, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), OverlayBillboardLayout.ReleaseAndGetAddressOf())))
+            return;
+
+        D3D11_BUFFER_DESC cbDesc{};
+        cbDesc.ByteWidth = sizeof(OverlayConstantsData);
+        cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        cbDesc.Usage = D3D11_USAGE_DEFAULT;
+        if (FAILED(Device->CreateBuffer(&cbDesc, nullptr, OverlayCB.ReleaseAndGetAddressOf())))
+            return;
+
+        D3D11_BLEND_DESC blendDesc{};
+        blendDesc.RenderTarget[0].BlendEnable = TRUE;
+        blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+        blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+        blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+        blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+        blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+        blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+        blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        Device->CreateBlendState(&blendDesc, OverlayBlendState.ReleaseAndGetAddressOf());
+
+        D3D11_DEPTH_STENCIL_DESC depthDesc{};
+        depthDesc.DepthEnable = TRUE;
+        depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+        depthDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+        Device->CreateDepthStencilState(&depthDesc, OverlayDepthReadOnlyState.ReleaseAndGetAddressOf());
+
+        depthDesc.DepthEnable = FALSE;
+        Device->CreateDepthStencilState(&depthDesc, OverlayDepthDisabledState.ReleaseAndGetAddressOf());
+
+        D3D11_SAMPLER_DESC sampDesc{};
+        sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+        sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+        sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+        sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+        Device->CreateSamplerState(&sampDesc, OverlaySamplerState.ReleaseAndGetAddressOf());
+    }
+
+    using namespace DirectX;
+    OverlayConstantsData cbData{};
+    const auto view = XMLoadFloat4x4(&FirstPlayer->GetViewMatrix());
+    const auto proj = XMLoadFloat4x4(&FirstPlayer->GetProjectionMatrix());
+    const auto vp = XMMatrixMultiply(view, proj);
+    XMStoreFloat4x4(&cbData.ViewProjection, XMMatrixTranspose(vp));
+    const float screenW = static_cast<float>(std::max(DisplayPtr->GetWidth(), 1));
+    const float screenH = static_cast<float>(std::max(DisplayPtr->GetHeight(), 1));
+    cbData.ScreenSize = XMFLOAT4(screenW, screenH, 1.0f / screenW, 1.0f / screenH);
+    Context->UpdateSubresource(OverlayCB.Get(), 0, nullptr, &cbData, 0, 0);
+
+    if (!PendingOverlayLines.empty())
+    {
+        std::vector<OverlayLineVertex> depthVertices;
+        std::vector<OverlayLineVertex> topVertices;
+        depthVertices.reserve(PendingOverlayLines.size() * 2);
+        topVertices.reserve(PendingOverlayLines.size() * 2);
+
+        for (const auto& line : PendingOverlayLines)
+        {
+            const bool depthTest = (line.flags & 1) != 0 && (line.flags & 2) == 0;
+            auto& target = depthTest ? depthVertices : topVertices;
+            target.push_back({line.x0, line.y0, line.z0, line.rgba});
+            target.push_back({line.x1, line.y1, line.z1, line.rgba});
+        }
+
+        const size_t totalVertices = depthVertices.size() + topVertices.size();
+        if (totalVertices > OverlayLineVBCapacity || !OverlayLineVB)
+        {
+            OverlayLineVBCapacity = std::max(totalVertices, OverlayLineVBCapacity * 2 + 512);
+            D3D11_BUFFER_DESC vbDesc{};
+            vbDesc.ByteWidth = static_cast<UINT>(OverlayLineVBCapacity * sizeof(OverlayLineVertex));
+            vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+            vbDesc.Usage = D3D11_USAGE_DYNAMIC;
+            vbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+            OverlayLineVB.Reset();
+            Device->CreateBuffer(&vbDesc, nullptr, OverlayLineVB.ReleaseAndGetAddressOf());
+        }
+
+        if (OverlayLineVB && totalVertices > 0)
+        {
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            if (SUCCEEDED(Context->Map(OverlayLineVB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
+            {
+                auto* dst = static_cast<OverlayLineVertex*>(mapped.pData);
+                if (!depthVertices.empty())
+                {
+                    std::memcpy(dst, depthVertices.data(), depthVertices.size() * sizeof(OverlayLineVertex));
+                    dst += depthVertices.size();
+                }
+                if (!topVertices.empty())
+                {
+                    std::memcpy(dst, topVertices.data(), topVertices.size() * sizeof(OverlayLineVertex));
+                }
+                Context->Unmap(OverlayLineVB.Get(), 0);
+            }
+
+            Context->ClearState();
+            SetFullViewport();
+            Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+            Context->IASetInputLayout(OverlayLineLayout.Get());
+            const UINT stride = sizeof(OverlayLineVertex), offset = 0;
+            Context->IASetVertexBuffers(0, 1, OverlayLineVB.GetAddressOf(), &stride, &offset);
+            Context->VSSetShader(OverlayLineVS.Get(), nullptr, 0);
+            Context->PSSetShader(OverlayLinePS.Get(), nullptr, 0);
+            Context->VSSetConstantBuffers(0, 1, OverlayCB.GetAddressOf());
+            Context->OMSetBlendState(OverlayBlendState.Get(), nullptr, 0xFFFFFFFF);
+
+            if (!depthVertices.empty() && depthStencilView)
+            {
+                Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
+                Context->OMSetDepthStencilState(OverlayDepthReadOnlyState.Get(), 0);
+                Context->Draw(static_cast<UINT>(depthVertices.size()), 0);
+            }
+
+            if (!topVertices.empty())
+            {
+                Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
+                Context->OMSetDepthStencilState(OverlayDepthDisabledState.Get(), 0);
+                Context->Draw(static_cast<UINT>(topVertices.size()), static_cast<UINT>(depthVertices.size()));
+            }
+        }
+    }
+
+    if (!PendingOverlayBillboards.empty())
+    {
+        std::vector<OverlayBillboardVertex> bbVertices;
+        bbVertices.reserve(PendingOverlayBillboards.size() * 6);
+
+        struct DrawBatch { uint32_t iconId; UINT startVertex; UINT vertexCount; };
+        std::vector<DrawBatch> batches;
+
+        std::vector<EngineOverlayBillboard> sortedBB = PendingOverlayBillboards;
+        std::sort(sortedBB.begin(), sortedBB.end(), [](const auto& a, const auto& b) {
+            return a.iconId < b.iconId;
+        });
+
+        uint32_t currentIcon = 0xFFFFFFFF;
+        for (const auto& bb : sortedBB)
+        {
+            if (bb.iconId != currentIcon)
+            {
+                currentIcon = bb.iconId;
+                batches.push_back({currentIcon, static_cast<UINT>(bbVertices.size()), 0});
+            }
+
+            const float half = bb.sizePixels * 0.5f;
+            const float x = bb.x, y = bb.y, z = bb.z;
+            const uint32_t tint = bb.rgbaTint;
+
+            bbVertices.push_back({x, y, z, -half, -half, 0.0f, 0.0f, tint});
+            bbVertices.push_back({x, y, z,  half, -half, 1.0f, 0.0f, tint});
+            bbVertices.push_back({x, y, z, -half,  half, 0.0f, 1.0f, tint});
+
+            bbVertices.push_back({x, y, z, -half,  half, 0.0f, 1.0f, tint});
+            bbVertices.push_back({x, y, z,  half, -half, 1.0f, 0.0f, tint});
+            bbVertices.push_back({x, y, z,  half,  half, 1.0f, 1.0f, tint});
+
+            batches.back().vertexCount += 6;
+        }
+
+        const size_t totalBBVertices = bbVertices.size();
+        if (totalBBVertices > OverlayBillboardVBCapacity || !OverlayBillboardVB)
+        {
+            OverlayBillboardVBCapacity = std::max(totalBBVertices, OverlayBillboardVBCapacity * 2 + 256);
+            D3D11_BUFFER_DESC vbDesc{};
+            vbDesc.ByteWidth = static_cast<UINT>(OverlayBillboardVBCapacity * sizeof(OverlayBillboardVertex));
+            vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+            vbDesc.Usage = D3D11_USAGE_DYNAMIC;
+            vbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+            OverlayBillboardVB.Reset();
+            Device->CreateBuffer(&vbDesc, nullptr, OverlayBillboardVB.ReleaseAndGetAddressOf());
+        }
+
+        if (OverlayBillboardVB && totalBBVertices > 0)
+        {
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            if (SUCCEEDED(Context->Map(OverlayBillboardVB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
+            {
+                std::memcpy(mapped.pData, bbVertices.data(), bbVertices.size() * sizeof(OverlayBillboardVertex));
+                Context->Unmap(OverlayBillboardVB.Get(), 0);
+            }
+
+            Context->ClearState();
+            SetFullViewport();
+            Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            Context->IASetInputLayout(OverlayBillboardLayout.Get());
+            const UINT stride = sizeof(OverlayBillboardVertex), offset = 0;
+            Context->IASetVertexBuffers(0, 1, OverlayBillboardVB.GetAddressOf(), &stride, &offset);
+            Context->VSSetShader(OverlayBillboardVS.Get(), nullptr, 0);
+            Context->PSSetShader(OverlayBillboardPS.Get(), nullptr, 0);
+            Context->VSSetConstantBuffers(0, 1, OverlayCB.GetAddressOf());
+            Context->PSSetSamplers(0, 1, OverlaySamplerState.GetAddressOf());
+            Context->OMSetBlendState(OverlayBlendState.Get(), nullptr, 0xFFFFFFFF);
+            Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
+            Context->OMSetDepthStencilState(OverlayDepthDisabledState.Get(), 0);
+
+            for (const auto& batch : batches)
+            {
+                auto it = OverlayIcons.find(batch.iconId);
+                if (it != OverlayIcons.end() && it->second.srv)
+                {
+                    Context->PSSetShaderResources(0, 1, it->second.srv.GetAddressOf());
+                    Context->Draw(batch.vertexCount, batch.startVertex);
+                }
+            }
+        }
+    }
+}
 bool Game::RenderViewportFrame(float deltaTime)
 {
     if (!bEmbedded || !bInitialized || ExitCode != 0) return false;
@@ -2733,6 +3064,7 @@ bool Game::RenderViewportFrame(float deltaTime)
     BeginGpuTimer();
     RenderFrame();
     RenderEditorSelection();
+    RenderEditorOverlay();
     EndGpuTimer();
     EndFrame();
     LastFrameStats = Stats;

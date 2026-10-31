@@ -119,6 +119,7 @@ class BaseEngine::LoadedSession
     EngineBindProjectDataFn bindProjectData = nullptr;
     EngineBindSelectionFn bindSelection = nullptr;
     EngineBindViewportInputFn bindViewportInput = nullptr;
+    EngineBindViewportOverlayFn bindViewportOverlay = nullptr;
     std::function<void()> releaseEdit;
     void* session = nullptr;
     bool started = false;
@@ -203,7 +204,7 @@ class BaseEngine::LoadedSession
     }
 
     void LoadAndInitialize(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host,
-        const EngineEditSessionApi* editApi = nullptr, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr)
+        const EngineEditSessionApi* editApi = nullptr, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr, const EngineViewportOverlayApi* overlay = nullptr)
     {
         originalPath = path;
         moduleKind = kind;
@@ -253,6 +254,9 @@ class BaseEngine::LoadedSession
             bindViewportInput = reinterpret_cast<EngineBindViewportInputFn>(GetProcAddress(library, "EngineBindViewportInput"));
             if (bindViewportInput && viewportInput && !bindViewportInput(1, sizeof(*viewportInput), session, viewportInput))
                 throw std::runtime_error("Cannot bind viewport input API");
+            bindViewportOverlay = reinterpret_cast<EngineBindViewportOverlayFn>(GetProcAddress(library, "EngineBindViewportOverlay"));
+            if (bindViewportOverlay && overlay && !bindViewportOverlay(1, sizeof(*overlay), session, overlay))
+                throw std::runtime_error("Cannot bind viewport overlay API");
             bindSelection = reinterpret_cast<EngineBindSelectionFn>(GetProcAddress(library, "EngineBindSelection"));
             if (bindSelection && selection && !bindSelection(1, sizeof(*selection), session, selection))
                 throw std::runtime_error("Cannot bind selection API");
@@ -323,11 +327,11 @@ public:
 
     void Open(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host,
         const EngineEditSessionApi* editApi = nullptr, std::function<void()> cleanup = {},
-        const std::filesystem::path& startupScene = {}, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr)
+        const std::filesystem::path& startupScene = {}, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr, const EngineViewportOverlayApi* overlay = nullptr)
     {
         startupScenePath = startupScene;
         releaseEdit = std::move(cleanup);
-        LoadAndInitialize(path, kind, host, editApi, projectData, selection, viewportInput);
+        LoadAndInitialize(path, kind, host, editApi, projectData, selection, viewportInput, overlay);
     }
 
     bool Reload()
@@ -383,6 +387,8 @@ public:
         continuousFrames = false;
         if (session && bindProjectData) bindProjectData(1, sizeof(EngineProjectDataApi), session, nullptr);
         bindProjectData = nullptr;
+        if (session && bindViewportOverlay) bindViewportOverlay(1, sizeof(EngineViewportOverlayApi), session, nullptr);
+        bindViewportOverlay = nullptr;
         if (session && bindViewportInput) bindViewportInput(1, sizeof(EngineViewportInputApi), session, nullptr);
         bindViewportInput = nullptr;
         if (session && bindSelection) bindSelection(1, sizeof(EngineSelectionApi), session, nullptr);
@@ -749,7 +755,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
     {
         activeSession->Open(options.module, options.mode == RuntimeMode::Game ? ENGINE_MODULE_GAME : ENGINE_MODULE_EDITOR, host,
             editModule ? &editModule->Api() : nullptr, [this] { editModule.reset(); }, options.startupScene,
-            editModule ? &editModule->ProjectDataApi() : nullptr, editModule ? &editModule->SelectionApi() : nullptr, editModule ? &editModule->ViewportInputApi() : nullptr);
+            editModule ? &editModule->ProjectDataApi() : nullptr, editModule ? &editModule->SelectionApi() : nullptr, editModule ? &editModule->ViewportInputApi() : nullptr, editModule ? &editModule->ViewportOverlayApi() : nullptr);
         state = State::Playing;
         if (!options.frames && options.mode != RuntimeMode::Editor) std::puts("Interactive stub: Enter = frame, r = reload, b = build, br = build+reload, ls, find, import, info, mkdir, rm/del, mv, cp, cat, q = exit.");
         auto previous = std::chrono::steady_clock::now();

@@ -8,6 +8,7 @@
 #include <Engine/Runtime/ProjectDataApi.h>
 #include <Engine/Runtime/SelectionApi.h>
 #include <Engine/Runtime/ViewportInputApi.h>
+#include <Engine/Runtime/ViewportOverlayApi.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 
 // Entire object and both Games live in the module containing the generated types.
@@ -23,6 +24,7 @@ public:
     EngineEditorCameraApi GetEditorCameraApi() noexcept;
     EngineSelectionApi GetSelectionApi() noexcept;
     EngineViewportInputApi GetViewportInputApi() noexcept;
+    EngineViewportOverlayApi GetViewportOverlayApi() noexcept;
     SceneEditSession(const SceneEditSession&) = delete;
     SceneEditSession& operator=(const SceneEditSession&) = delete;
 private:

@@ -156,6 +156,18 @@ int wmain(int argc, wchar_t** argv)
             Check(Read(api).info.id == sceneId && live == 1, "failed attach preserves scene objects");
             EnginePaths::SetContentRoot(content);
             Check(api.attachViewport(api.context, window, 320, 240) == EngineSceneOk, "attach same edit Scene");
+            auto overlay = session.GetViewportOverlayApi();
+            EngineCameraInfo camInfo{};
+            Check(overlay.getCamera(overlay.context, &camInfo) == EngineSceneOk && camInfo.width == 320 && camInfo.height == 240, "getCamera returns valid camera state");
+            Check(overlay.setOverlayLines(overlay.context, nullptr, 0, 1.0f) == EngineSceneOk, "empty setOverlayLines");
+            EngineOverlayLine testLine{0,0,0, 1,1,1, 0xFFFFFFFF, 0};
+            Check(overlay.setOverlayLines(overlay.context, &testLine, 1, 1.0f) == EngineSceneOk, "setOverlayLines with line");
+            uint8_t rgba[16] = {255,255,255,255, 255,255,255,255, 255,255,255,255, 255,255,255,255};
+            Check(overlay.setOverlayIcon(overlay.context, 1, 2, 2, rgba) == EngineSceneOk, "setOverlayIcon");
+            EngineOverlayBillboard testBb{1, 0,0,0, 24.0f, 0xFFFFFFFF, 1};
+            Check(overlay.setOverlayBillboards(overlay.context, &testBb, 1) == EngineSceneOk, "setOverlayBillboards");
+            Check(overlay.setOverlayBillboards(overlay.context, nullptr, 0) == EngineSceneOk, "clear setOverlayBillboards");
+            Check(overlay.setOverlayLines(overlay.context, nullptr, 0, 1.0f) == EngineSceneOk, "clear setOverlayLines");
             const auto beforeTicks = ticks;
             Check(api.frame(api.context, 0.05) == EngineSceneOk && ticks == beforeTicks, "render Edit without Tick");
             Check(editObject->GetGame() && editObject->GetGame()->GetScene().FindComponent(id) == editObject, "renderer uses exact edited instance");
@@ -184,6 +196,7 @@ int wmain(int argc, wchar_t** argv)
             uint64_t id;
             Check(api.scene.createObject(api.scene.context, "RuntimeExample::Mover", "DLL viewport", nullptr, &id) == EngineSceneOk, "DLL viewport object");
             Check(api.attachViewport(api.context, window, 320, 240) == EngineSceneOk, "DLL viewport attach");
+            Check(dll.ViewportOverlayApi().getCamera != nullptr, "DLL exposes overlay extension");
             Check(api.frame(api.context, 0.05) == EngineSceneOk, "DLL edit frame");
             Check(api.control(api.context, EnginePlay) == EngineSceneOk && api.frame(api.context, 0.05) == EngineSceneOk, "DLL play viewport");
             Check(api.control(api.context, EngineStop) == EngineSceneOk && api.frame(api.context, 0.05) == EngineSceneOk, "DLL restore viewport");
