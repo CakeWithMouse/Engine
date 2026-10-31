@@ -47,19 +47,41 @@ int wmain(int argc,wchar_t** argv) {
         const auto checkpoint=scratch/"Unsaved.scene.json";
         Check(api.saveScene(api.context,checkpoint.u8string().c_str(),error,sizeof(error))==EngineSceneOk,"checkpoint unsaved edits");
         const auto previousContext=api.context;
+        Check(module.ViewportOverlayApi().context==previousContext,"initial overlay belongs to live session");
         Check(module.Reload(scratch/"Missing.dll",checkpoint,window,320,240,error,sizeof(error))!=EngineSceneOk,"failed candidate rejected");
         Check(module.Api().context==previousContext && module.Api().frame(previousContext,0)==EngineSceneOk,"failure keeps live scene renderable");
         const auto invalid=scratch/"Invalid.scene.json"; std::ofstream(invalid)<<"{}";
         Check(module.Reload(candidate,invalid,window,320,240,error,sizeof(error))!=EngineSceneOk,"invalid live scene rejected");
         Check(module.Api().context==previousContext,"invalid checkpoint does not commit");
+        Check(module.ViewportOverlayApi().context==previousContext,"failed reload keeps overlay context");
         auto result=module.Reload(candidate,checkpoint,window,320,240,error,sizeof(error));
         if(result!=EngineSceneOk) std::cerr<<error<<'\n';
         Check(result==EngineSceneOk,"reload commits candidate with same HWND"); api=module.Api();
         Check(api.context!=previousContext,"session replaced without closing window");
+        const auto overlay=module.ViewportOverlayApi();
+        Check(overlay.context==api.context,"overlay extension follows new DLL session");
+        EngineCameraInfo cameraInfo{};
+        Check(overlay.getCamera && overlay.getCamera(overlay.context,&cameraInfo)==EngineSceneOk,"camera callback remains callable after DLL unload");
+        Check(cameraInfo.width==320 && cameraInfo.height==240,"overlay camera keeps viewport dimensions");
+        EngineOverlayLine line{};
+        Check(overlay.setOverlayLines(overlay.context,&line,1,1)==EngineSceneOk,"overlay line callback survives hot reload");
+        uint8_t icon[4]={255,255,255,255};
+        Check(overlay.setOverlayIcon(overlay.context,1,1,1,icon)==EngineSceneOk,"overlay texture callback survives hot reload");
+        EngineOverlayBillboard billboard{1,0,0,0,16,0xffffffff,0};
+        Check(overlay.setOverlayBillboards(overlay.context,&billboard,1)==EngineSceneOk,"overlay billboard callback survives hot reload");
+        Check(module.BatchApi().context==api.context && module.BatchApi().select,
+            "group extension follows the new session after reload");
+        Check(module.BatchApi().select(module.BatchApi().context,nullptr,0)==EngineSceneOk,
+            "new group extension remains callable after unloading the old DLL");
         EngineEditorCameraState after{}; Check(module.EditorCameraApi().read(module.EditorCameraApi().context,&after)==EngineSceneOk,"read camera after reload");
         Check(std::abs(before.x-after.x)<.0001f && std::abs(before.y-after.y)<.0001f && std::abs(before.z-after.z)<.0001f && std::abs(before.yaw-after.yaw)<.0001f && std::abs(before.pitch-after.pitch)<.0001f,"editor camera restored across DLL replacement");
         Check(module.Reload(candidate,checkpoint,window,320,240,error,sizeof(error))==EngineSceneOk && module.Api().context==api.context,"unchanged build keeps session and mounts");
         auto objects=Read(api);
+        Check(module.AuthoringApi().context==api.context && module.AuthoringApi().describe,
+            "authoring extension follows reloaded session");
+        std::string schema;
+        Check(module.AuthoringApi().describe(api.context,objects.at("Hero").id,[](void* p,const char* value){*static_cast<std::string*>(p)=value;},&schema)==EngineSceneOk,
+            "authoring callable after unloading old DLL");
         Check(objects.size()==2 && objects.at("Hero").type=="Gameplay.Character" && objects.at("Hero").transform.position[0]==2.5f,"live transform and types restored");
         std::string json;const auto newData=module.ProjectDataApi();
         Check(newData.read(newData.context,objects.at("Hero").id,[](void* p,const char* value){*static_cast<std::string*>(p)=value;},&json)==EngineSceneOk && json.find("9")!=std::string::npos,"character settings restored");
@@ -74,6 +96,7 @@ int wmain(int argc,wchar_t** argv) {
         Check(Read(api).at("Hero").transform.position[2]==0,"held keys do not survive Stop");
         Check(api.control(api.context,EngineStop)==EngineSceneOk,"final Stop");
         Check(module.Reload(original,checkpoint,window,320,240,error,sizeof(error))==EngineSceneOk,"second reload");
+        Check(module.ViewportOverlayApi().context==module.Api().context,"overlay follows repeated reload");
         std::cout<<"Editor reload: "<<checks<<" checks passed\n";return 0;
     } catch(const std::exception& e) {std::cerr<<e.what()<<'\n';return 1;}
 }

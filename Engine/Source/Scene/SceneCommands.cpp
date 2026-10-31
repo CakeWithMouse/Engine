@@ -12,7 +12,7 @@ uint32_t Status(SceneResult result)
     case SceneResult::NotFound: return EngineSceneNotFound;
     case SceneResult::DuplicateName: return EngineSceneDuplicateName;
     case SceneResult::Busy: return EngineSceneBusy;
-    case SceneResult::EmptyName: case SceneResult::InvalidTransform: return EngineSceneInvalidArgument;
+    case SceneResult::EmptyName: case SceneResult::InvalidTransform: case SceneResult::DuplicateSingleton: return EngineSceneInvalidArgument;
     default: return EngineSceneFailure;
     }
 }

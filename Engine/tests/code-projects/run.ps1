@@ -1,6 +1,7 @@
 param([ValidateSet('Debug','Release')][string]$Configuration='Debug', [switch]$SkipBuild)
 $ErrorActionPreference='Stop'
 $repo=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
+& "$PSScriptRoot/run-metadata.ps1"
 if(!$SkipBuild){
  & "$repo/Engine/build.ps1" -Target EngineLauncher -Configuration $Configuration -EnableAssimp $true
  & "$repo/Engine/BuildSupport/Invoke-MSBuild.ps1" -Project "$PSScriptRoot/CodeProjectTests.vcxproj" -Configuration $Configuration -EnableAssimp

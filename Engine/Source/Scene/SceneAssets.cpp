@@ -184,6 +184,10 @@ std::string Import(const fs::path& content, const fs::path& source, Kind kind)
                 if (extension == ".fbx" || extension == ".blend")
                     ModelImport::CreateMaterials(source, target, virtualPath);
             }
+            std::ofstream metadata(fs::u8path(file.u8string()+".source.json"),std::ios::binary);
+            metadata.exceptions(std::ios::failbit|std::ios::badbit);
+            metadata << nlohmann::json{{"version",1},{"source",source.u8string()},{"kind",static_cast<unsigned>(kind)}}.dump(2);
+            metadata.close();
             return virtualPath;
         }
         catch (...)
@@ -191,6 +195,7 @@ std::string Import(const fs::path& content, const fs::path& source, Kind kind)
             // Only the new path created by this import is rolled back.
             std::error_code ignored;
             if ((kind == Model || copied) && Inside(content, target)) fs::remove_all(target, ignored);
+            if (kind == Texture && copied) fs::remove(fs::u8path(file.u8string()+".source.json"), ignored);
             throw;
         }
     }

@@ -6,6 +6,8 @@
 #include <Engine/Runtime/ViewportInputApi.h>
 #include <Engine/Runtime/ViewportOverlayApi.h>
 
+#include <Engine/Runtime/SceneBatchApi.h>
+#include <Engine/Runtime/AuthoringApi.h>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -30,7 +32,7 @@ struct EditorCommand
         RenameObject, DuplicateObject, SaveScene, LoadScene, NewScene, Undo, Redo, PickObject, FocusObject,
         SetGizmoMode, BeginGizmoDrag, EndGizmoDrag, SetParent,
         ImportModel, ImportTexture, CreateModel, SetTexture, SetPointLight, SetMaterial, SetProjectData,
-        RunTask,
+        RunTask, WriteRecovery, DiscardRecovery, SetProperty, UpdateAsset,
     };
 
     Type type = None;
@@ -42,6 +44,7 @@ struct EditorCommand
     // Поля для манипуляций с объектами
     uint64_t objectId = 0;
     uint64_t parentId = 0;
+    std::vector<uint64_t> objectIds;
     EngineSceneTransform transform{{0, 0, 0}, {0, 0, 0, 1}, {1, 1, 1}};
     EngineScenePointLight pointLight{};
     EditorGizmoMode gizmo = EditorGizmoTranslate;
@@ -83,6 +86,7 @@ public:
         std::string materialAsset;
         std::string projectData;
         uint32_t gameplayKind = 0;
+        std::string propertySchema;
     };
 
     struct SceneType
@@ -96,6 +100,8 @@ public:
         std::vector<SceneType> types;
         uint64_t selected = 0, serial = 0;
         bool dirty = false, canUndo = false, canRedo = false;
+        std::vector<uint64_t> selectedIds;
+        bool batchEditing = false, authoring = false;
     };
 
     virtual void PostCommand(const EditorCommand& c) = 0;

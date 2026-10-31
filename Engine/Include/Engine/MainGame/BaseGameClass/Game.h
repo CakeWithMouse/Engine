@@ -59,6 +59,7 @@ const char* ToString(RegisterResult result);
 class GameComponent;
 class Material;
 class PointLightComponent;
+class UIComponent;
 class FBXComponent;
 struct ComponentShaderVariant;
 
@@ -159,6 +160,8 @@ public:
     void SetRenderingType(RenderType NewType) { RenderingType = NewType; }
     RenderType GetRenderingType() const { return RenderingType; }
     void SetShadowSettings(bool enabled, float shadowDistance);
+    // Scene projects use their single DirectionalLightComponent, with no implicit sun or ambient.
+    void SetSceneLightingEnabled(bool enabled) { bSceneLighting = enabled; }
     void SetDirectionalLight(const glm::vec3& direction, const glm::vec3& color, float intensity);
     void SetDirectionalLightDirection(const glm::vec3& direction);
     void SetDirectionalLightColor(const glm::vec3& color);
@@ -196,6 +199,7 @@ public:
     CubeMapResource* GetCubeMap(const std::string& cubeMapName) const;
 
     Player* GetPlayer() const { return FirstPlayer.get(); }
+    UIComponent* GetProjectHud() const { return ProjectHudComponent.get(); }
     Display* GetDisplay() const { return DisplayPtr.get(); }
     InputDevice* GetInputDevice() const { return InputDevicePtr.get(); }
     Input::System& GetInput() { return ActionInput; }
@@ -228,6 +232,12 @@ public:
      * (<prefix>-cascade0.bmp, ...). Depth is remapped so that occupied texels are visible.
      */
     bool DumpShadowMaps(const std::string& pathPrefix);
+    /** Writes the finished frame to a BMP: lets a render be inspected without a screenshot. */
+    bool DumpFrame(const std::string& path);
+    /** Name of the GPU the device was created on: every measurement is of a specific adapter. */
+    const std::string& GetAdapterName() const { return AdapterName; }
+    /** Dumps the next finished frame, before it is presented. */
+    void RequestFrameDump(const std::string& path) { PendingFrameDump = path; }
 
     void SetOverlayLines(const EngineOverlayLine* lines, uint32_t count, float thickness);
     void SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels);
@@ -257,7 +267,8 @@ public:
     // Called by the window procedure.
     void OnWindowResized(int clientWidth, int clientHeight, bool minimized);
     void OnFocusLost();
-    void SetEditorSelection(uint64_t id) { EditorSelectedId = id; }
+    void SetEditorSelection(uint64_t id) { EditorSelectedId = id; EditorSelectedIds.clear(); }
+    void SetEditorSelections(std::vector<uint64_t> ids) { EditorSelectedIds = std::move(ids); EditorSelectedId = 0; }
     void RenderEditorSelection();
 
     ID3D11VertexShader* GetVertexShader() { return BaseVertexShader.Get(); }
@@ -364,6 +375,8 @@ protected:
     void RenderSkybox();
     void DispatchComputePhase();
     void RenderTransparent();
+    /** Screen-space interface, after everything else in the frame. */
+    void RenderUI();
     void RenderDeferredLightingPass();
     void RenderDeferredDebugOverlay();
     void FillFrameConstantBuffer(ConstantBufferData& data) const;
@@ -424,6 +437,7 @@ protected:
     Input::System ActionInput;
     std::unique_ptr<CharacterController> Controller;
     bool GameplayInitialized = false;
+    std::unique_ptr<UIComponent> ProjectHudComponent;
 
     // Scene owns components. The read-only alias preserves legacy traversal/order.
     Scene scene;
@@ -480,6 +494,7 @@ protected:
 
     // Lighting
     float AmbientIntensity = 0.06f;
+    bool bSceneLighting = false;
     float SpecularShininess = 32.0f;
 
     // Shadows (created lazily when enabled)
@@ -487,6 +502,9 @@ protected:
     bool bShadowResourcesReady = false;
     bool bShadowInitFailed = false;
     float ShadowDistance = 1200.0f;
+    std::string PendingFrameDump;
+    std::string AdapterName;
+    int AdapterDedicatedMemoryMb = 0;
     int ShadowMapSize = 2048;
     DirectX::XMFLOAT4 CascadeSplits = DirectX::XMFLOAT4(80.0f, 260.0f, 900.0f, 0.0f);
     DirectX::XMFLOAT4 ShadowParams = DirectX::XMFLOAT4(0.0f, static_cast<float>(MaxShadowCascades), 0.0012f, 1.0f / 2048.0f);
@@ -550,6 +568,7 @@ protected:
     int GpuTimerSlot = 0;
     uint64_t EditorSelectedId = 0;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> SelectionVS;
+    std::vector<uint64_t> EditorSelectedIds;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> SelectionPS;
     Microsoft::WRL::ComPtr<ID3D11Buffer> SelectionCB;
 

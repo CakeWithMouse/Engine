@@ -26,8 +26,15 @@ void EditorHistory::Reset()
     gizmoDragObject_ = 0;
 }
 
+void EditorHistory::BreakCoalescing()
+{
+    lastTransformId_ = 0;
+    gizmoDragCheckpointed_ = false;
+}
+
 void EditorHistory::ClearHistory()
 {
+    BreakCoalescing();
     for (const auto& file : undo_) QFile::remove(file);
     for (const auto& file : redo_) QFile::remove(file);
     undo_.clear();
@@ -107,7 +114,7 @@ void EditorHistory::EndGizmoDrag()
 
 bool EditorHistory::Undo(const EngineEditSessionApi& scene, uint32_t& result, char* error, size_t errorSize)
 {
-    lastTransformId_ = 0;
+    BreakCoalescing();
     if (undo_.empty()) return false;
 
     const auto current = Checkpoint(scene);
@@ -126,7 +133,7 @@ bool EditorHistory::Undo(const EngineEditSessionApi& scene, uint32_t& result, ch
 
 bool EditorHistory::Redo(const EngineEditSessionApi& scene, uint32_t& result, char* error, size_t errorSize)
 {
-    lastTransformId_ = 0;
+    BreakCoalescing();
     if (redo_.empty()) return false;
 
     const auto current = Checkpoint(scene);

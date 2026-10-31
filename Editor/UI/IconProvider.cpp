@@ -1,7 +1,9 @@
 #include "IconProvider.h"
 #include "EditorIconData.h"
 #include "IEditorHost.h"
+#ifdef ENGINE_HAS_QTSVG
 #include <QSvgRenderer>
+#endif
 #include <QPainter>
 #include <QImage>
 #include <QByteArray>
@@ -10,9 +12,7 @@
 void IconProvider::UploadIcons(IEditorHost* host, bool force)
 {
     if (!host) return;
-    static int sUploadCount = 0;
-    if (sUploadCount >= 5 && !force) return;
-    ++sUploadCount;
+    (void)force;
 
     auto renderSvg = [](const char* svgData, EditorIcons::IconId id, int size = 64) -> QImage {
         QImage image(size, size, QImage::Format_RGBA8888);
@@ -20,6 +20,7 @@ void IconProvider::UploadIcons(IEditorHost* host, bool force)
 
         const char* svgStart = std::strstr(svgData, "<svg");
         QByteArray bytes(svgStart ? svgStart : svgData);
+#ifdef ENGINE_HAS_QTSVG
         QSvgRenderer renderer(bytes);
         if (renderer.isValid())
         {
@@ -27,6 +28,11 @@ void IconProvider::UploadIcons(IEditorHost* host, bool force)
             renderer.render(&painter);
         }
 
+#else
+        image.loadFromData(bytes, "SVG");
+        if (image.isNull()) { image = QImage(size, size, QImage::Format_RGBA8888); image.fill(Qt::transparent); }
+        else image = image.scaled(size, size).convertToFormat(QImage::Format_RGBA8888);
+#endif
         bool hasPixels = false;
         for (int y = 0; y < size && !hasPixels; ++y)
         {
@@ -78,9 +84,11 @@ void IconProvider::UploadIcons(IEditorHost* host, bool force)
         { EditorIcons::IconId::Character,  EditorIcons::SVG_USER }
     };
 
-    for (const auto& item : icons)
-    {
-        QImage img = renderSvg(item.svg, item.id, 64);
-        host->SetOverlayIcon(static_cast<uint32_t>(item.id), 64, 64, img.constBits());
-    }
+    static const auto images = [&] {
+        std::vector<QImage> result;
+        for (const auto& item : icons) result.push_back(renderSvg(item.svg, item.id, 64));
+        return result;
+    }();
+    for (size_t i = 0; i < images.size(); ++i)
+        host->SetOverlayIcon(static_cast<uint32_t>(icons[i].id), 64, 64, images[i].constBits());
 }

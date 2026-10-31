@@ -8,7 +8,9 @@
 #include <shlobj.h>
 #include <wrl/client.h>
 #include "ProjectLibrary.h"
+#include "ProjectVersion.h"
 #include "LaunchSplash.h"
+#include "../../../Engine/Runtime/ProjectExport.h"
 
 namespace
 {
@@ -21,6 +23,7 @@ constexpr INT_PTR EditId = 102;
 constexpr INT_PTR CreateId = 103, OpenId = 104;
 constexpr INT_PTR InstallEngineId = 105, UpgradeId = 106, PinEngineId = 107;
 constexpr INT_PTR EnableCodeId = 108, BuildCodeId = 109;
+constexpr INT_PTR ExportId = 112;
 std::vector<std::filesystem::path> userProjects;
 
 void RunProjectCodeTool(const std::filesystem::path& project, const wchar_t* action)
@@ -151,21 +154,59 @@ void ReloadProjects(const std::filesystem::path& selected = {})
     }
     SendMessageW(list, LB_SETCURSEL, selection, 0);
 }
-int LaunchProject(const std::filesystem::path& file, bool editor, bool smoke = false)
+void UpgradeProject(const std::filesystem::path& file, const std::filesystem::path& destination);
+void UpdateStatus();
+struct UpgradePrompt { std::wstring text; bool previousAvailable; };
+INT_PTR CALLBACK UpgradeDialogProc(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    if(message==WM_INITDIALOG) {
+        const auto& prompt=*reinterpret_cast<const UpgradePrompt*>(lParam);
+        SetDlgItemTextW(window,211,prompt.text.c_str());
+        EnableWindow(GetDlgItem(window,IDNO),prompt.previousAvailable);
+        return TRUE;
+    }
+    if(message==WM_COMMAND && (LOWORD(wParam)==IDYES || LOWORD(wParam)==IDNO || LOWORD(wParam)==IDCANCEL)) {
+        EndDialog(window,LOWORD(wParam));return TRUE;
+    }
+    if(message==WM_CLOSE){EndDialog(window,IDCANCEL);return TRUE;}
+    return FALSE;
+}
+int LaunchProject(const std::filesystem::path& file, bool editor, bool smoke = false, bool currentEngine = false, bool promptInSmoke = false)
+{
+    auto project = std::filesystem::absolute(file);
+    auto settings = ProjectLibrary::Validate(project);
+    const auto current = ExampleDeployment::ExecutableDirectory() / "Runtime";
+    const auto release = ReadEngineRelease(current);
+    if(!currentEngine && (!smoke || promptInSmoke) && ProjectVersion::IsNewer(release.version,settings.engineVersion)) {
+        bool previousAvailable=false;
+        try { ResolveEngineRelease(settings,current);previousAvailable=true; } catch(const std::exception&) {}
+        const auto destination=ProjectVersion::CopyDestination(project,release.version);
+        UpgradePrompt prompt{L"Проект: "+ExampleDeployment::Wide(settings.name)+L"\r\nВерсия проекта: "+ExampleDeployment::Wide(settings.engineVersion)+
+            L"\r\nНовая версия движка: "+ExampleDeployment::Wide(release.version)+
+            L"\r\n\r\nОбновить проект для запуска на новой версии? Будет создана и проверена копия. Исходный проект сохранится.\r\n\r\nПапка копии:\r\n"+destination.wstring(),previousAvailable};
+        if(!previousAvailable)prompt.text+=L"\r\n\r\nПрежняя версия движка не установлена.";
+        const auto choice=DialogBoxParamW(GetModuleHandleW(nullptr),MAKEINTRESOURCEW(210),GetActiveWindow(),UpgradeDialogProc,reinterpret_cast<LPARAM>(&prompt));
+        if(choice==-1)throw std::runtime_error("Cannot show project upgrade dialog");
+        if(choice!=IDYES && choice!=IDNO){if(status)SetWindowTextW(status,L"Запуск отменён.");return 0;}
+        if(choice==IDYES) {
+            { LaunchSplash upgrading(L"Обновление копии проекта…",!smoke,GetActiveWindow()); UpgradeProject(project,destination); }
+            project=destination/project.filename();settings=ProjectLibrary::Validate(project);
+            ProjectLibrary::Remember(project);if(list){ReloadProjects(project);UpdateStatus();}
+            currentEngine=true;
+        }
+    }
     LaunchSplash splash(editor ? L"Запуск редактора…" : L"Запуск игры…", !smoke, GetActiveWindow());
     LaunchReadiness readiness;
-    const auto settings = ProjectLibrary::Validate(file);
-    const auto runtime = ResolveEngineRelease(settings, ExampleDeployment::ExecutableDirectory() / "Runtime").runtime / "EngineRuntime.exe";
+    const auto runtime = (currentEngine ? release : ResolveEngineRelease(settings, current)).runtime / "EngineRuntime.exe";
     if (!std::filesystem::is_regular_file(runtime)) throw std::runtime_error("EngineRuntime.exe is missing");
-    const auto project = std::filesystem::absolute(file);
     std::wstring command = L"\"" + runtime.wstring() + L"\" --project \"" + project.wstring() + L"\" --mode " + (editor ? L"editor --scene-api" : L"game");
     if (smoke) command += L" --frames 3";
+    if (currentEngine) command += L" --compatible-engine";
     STARTUPINFOW startup{}; startup.cb = sizeof(startup); PROCESS_INFORMATION process{};
     if (!CreateProcessW(runtime.c_str(), command.data(), nullptr, nullptr, FALSE, smoke ? CREATE_NO_WINDOW : CREATE_NEW_CONSOLE,
         nullptr, runtime.parent_path().c_str(), &startup, &process)) throw std::runtime_error("Cannot start project, Windows error " + std::to_string(GetLastError()));
     CloseHandle(process.hThread);
-    if (!smoke) { try { readiness.Wait(process.hProcess,process.dwProcessId); } catch (...) { CloseHandle(process.hProcess); throw; } CloseHandle(process.hProcess); return 0; }
+    if (!smoke) { try { readiness.Wait(process.hProcess,process.dwProcessId); } catch (...) { CloseHandle(process.hProcess); throw; } CloseHandle(process.hProcess); if(status)SetWindowTextW(status,L"Приложение запущено. Лаунчер можно закрыть."); return 0; }
     if (WaitForSingleObject(process.hProcess, 60000) != WAIT_OBJECT_0)
     { TerminateProcess(process.hProcess, 124); CloseHandle(process.hProcess); throw std::runtime_error("Project smoke timed out"); }
     DWORD code = 1; GetExitCodeProcess(process.hProcess, &code); CloseHandle(process.hProcess); return static_cast<int>(code);
@@ -264,6 +305,11 @@ void UpdateStatus()
         try
         {
             const auto project = ProjectLibrary::Validate(projectFile);
+            const auto current=ReadEngineRelease(ExampleDeployment::ExecutableDirectory()/"Runtime");
+            if(ProjectVersion::IsNewer(current.version,project.engineVersion)) {
+                SetWindowTextW(status,(L"Версия проекта: "+ExampleDeployment::Wide(project.engineVersion)+L". Доступна новая: "+ExampleDeployment::Wide(current.version)+L".\r\nПри запуске будет предложено обновление копии.").c_str());
+                EnableWindow(editButton,TRUE);return;
+            }
             const auto release = ResolveEngineRelease(project, ExampleDeployment::ExecutableDirectory() / "Runtime");
             SetWindowTextW(status, (L"Движок: " + ExampleDeployment::Wide(release.version) + L" " + ExampleDeployment::Wide(release.configuration) +
                 (project.engineVersion.empty() ? L" (старый проект, режим совместимости)" : L" (закреплён)") + L"\r\n" + projectFile.wstring()).c_str());
@@ -324,6 +370,7 @@ LRESULT WindowProcImpl(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
         auto* projectMenu = CreatePopupMenu();
         AppendMenuW(projectMenu,MF_STRING,CreateId,L"Создать проект…");
         AppendMenuW(projectMenu,MF_STRING,OpenId,L"Открыть проект…");
+        AppendMenuW(projectMenu,MF_STRING,ExportId,L"Экспорт игры на текущем движке…");
         auto* codeMenu = CreatePopupMenu();
         AppendMenuW(codeMenu,MF_STRING,EnableCodeId,L"Добавить C++…");
         AppendMenuW(codeMenu,MF_STRING,BuildCodeId,L"Собрать C++ проект");
@@ -344,6 +391,18 @@ LRESULT WindowProcImpl(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
         if (list && LOWORD(wParam) != WA_INACTIVE) UpdateStatus();
         return 0;
     case WM_COMMAND:
+        if (LOWORD(wParam) == ExportId) {
+            try {
+                const auto project=SelectedProject(); if(project.empty())throw std::runtime_error("Select your project first");
+                const auto parent=Pick(window,true); if(parent.empty())return 0;
+                const auto target=parent/(project.parent_path().filename().wstring()+L"-Export");
+                LaunchSplash splash(L"Проверка и экспорт игры…",true,window);
+                ProjectExport::CheckProcess(ExampleDeployment::ExecutableDirectory()/"Runtime/EngineRuntime.exe",
+                    L"--export-project \""+project.wstring()+L"\" --destination \""+target.wstring()+L"\"",project.parent_path()/"Export.log");
+                SetWindowTextW(status,(L"Готовая игра: "+target.wstring()+L". Запуск: Start.cmd").c_str());
+            } catch(const std::exception& e){MessageBoxW(window,ExampleDeployment::Wide(e.what()).c_str(),L"Экспорт",MB_OK|MB_ICONERROR);}
+            return 0;
+        }
         if (LOWORD(wParam) == EnableCodeId || LOWORD(wParam) == BuildCodeId)
         {
             try {
@@ -416,9 +475,8 @@ LRESULT WindowProcImpl(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
             try
             {
                 const auto project = SelectedProject();
-                if (project.empty()) Launch(Selected(), false, LOWORD(wParam) == EditId);
+                if (project.empty()) { Launch(Selected(), false, LOWORD(wParam) == EditId);SetWindowTextW(status, L"Приложение запущено. Лаунчер можно закрыть."); }
                 else LaunchProject(project, LOWORD(wParam) != LaunchId);
-                SetWindowTextW(status, L"Приложение запущено. Лаунчер можно закрыть.");
             }
             catch (const std::exception& error)
             {
@@ -456,6 +514,15 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
         if (diagnostic)
         {
             const std::wstring option = argv[1];
+            if(argc==3 && (option==L"--smoke-project-prompt" || option==L"--smoke-project-editor-prompt")) {
+                const std::filesystem::path file=argv[2];LocalFree(argv);argv=nullptr;
+                return LaunchProject(file,option==L"--smoke-project-editor-prompt",true,false,true);
+            }
+            if (argc == 3 && (option == L"--smoke-project-current" || option == L"--smoke-project-editor-current"))
+            {
+                const std::filesystem::path file = argv[2]; LocalFree(argv); argv = nullptr;
+                return LaunchProject(file, option == L"--smoke-project-editor-current", true, true);
+            }
             if ((option == L"--enable-code" || option == L"--build-project") && argc == 3)
             {
                 RunProjectCodeTool(std::filesystem::absolute(argv[2]),option == L"--enable-code" ? L"Enable" : L"Build");

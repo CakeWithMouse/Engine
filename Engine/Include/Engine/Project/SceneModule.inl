@@ -1,11 +1,12 @@
 ﻿#include <Engine/MainGame/BaseGameClass/Game.h>
-#ifdef SCENE_MODULE_CREATE_GAME
 #define SCENE_MODULE_DOCUMENT_VERSION 3
-#else
-#define SCENE_MODULE_DOCUMENT_VERSION 2
-#endif
 #ifndef SCENE_MODULE_CREATE_GAME
-static std::unique_ptr<Game> DefaultProjectGame() { return std::make_unique<Game>(); }
+static std::unique_ptr<Game> DefaultProjectGame()
+{
+    auto game = std::make_unique<Game>();
+    game->SetSceneLightingEnabled(true);
+    return game;
+}
 #define SCENE_MODULE_CREATE_GAME DefaultProjectGame
 #endif
 // Shared scene-only module lifecycle. The including project supplies ProjectComponentTypes().
@@ -37,7 +38,7 @@ struct Session
     bool started = false, sceneLoaded = false;
     bool startCalled = false, loading = false;
     std::thread::id thread = std::this_thread::get_id();
-    explicit Session(const EngineModuleHost& value) : host(value) {}
+    explicit Session(const EngineModuleHost& value) : host(value) { game->SetSceneLightingEnabled(true); }
 };
 void Log(Session* s, const char* text) { s->host.log(s->host.user, text); }
 void* __cdecl Create(const EngineModuleHost* host)
@@ -236,6 +237,12 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetEditExtension(void* contex
     {
         *static_cast<EngineViewportInputApi*>(output) = static_cast<SceneEditSession*>(context)->GetViewportInputApi();
         return 1;
+    }
+    if (std::strcmp(name, EngineAuthoringExtension)==0 && size==sizeof(EngineAuthoringApi)) {
+        *static_cast<EngineAuthoringApi*>(output)=static_cast<SceneEditSession*>(context)->GetAuthoringApi();return 1;
+    }
+    if (std::strcmp(name, EngineSceneBatchExtension) == 0 && size == sizeof(EngineSceneBatchApi)) {
+        *static_cast<EngineSceneBatchApi*>(output) = static_cast<SceneEditSession*>(context)->GetBatchApi(); return 1;
     }
     if (std::strcmp(name, EngineSelectionExtension) == 0 && size == sizeof(EngineSelectionApi))
     {

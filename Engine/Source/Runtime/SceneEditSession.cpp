@@ -1,4 +1,4 @@
-﻿#include <Engine/Runtime/SceneEditSession.h>
+#include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/MainGame/Player.h>
 #include <Engine/Scene/SceneDocument.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
@@ -38,6 +38,7 @@ std::unique_ptr<Game> EmptyGame()
     auto game = std::make_unique<Game>();
     game->SetSimulationEnabled(false); // frame() is the sole simulation owner
     game->SetVSync(false);
+    game->SetSceneLightingEnabled(true);
     return game;
 }
 }
@@ -50,6 +51,7 @@ std::unique_ptr<Game> SceneEditSession::CopyForPlay()
     if (!candidate) throw std::runtime_error("Game factory returned null");
     candidate->SetSimulationEnabled(false);
     candidate->SetSimulationTimeScale(1.0f);
+    candidate->SetSceneLightingEnabled(true);
     SceneDocument::Restore(edit_->GetScene().GetSnapshot(), catalog_, candidate->GetScene());
     return candidate;
 }
@@ -196,26 +198,7 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                 if (s.attached_ && (!s.width_ || !s.height_)) return EngineSceneBusy;
                 return DocumentCall(path, error, capacity, [&](const std::filesystem::path& file) {
                     auto data = SceneDocument::Read(file);
-                    auto candidate = EmptyGame();
-                    SceneDocument::Restore(data, s.catalog_, candidate->GetScene());
-                    if (s.attached_)
-                    {
-                        s.edit_->SuspendViewportTargets();
-                        try
-                        {
-                            if (!candidate->InitializePlayViewport(*s.edit_)) throw std::runtime_error("Loaded scene viewport failed");
-                            *candidate->GetPlayer() = *s.edit_->GetPlayer();
-                            candidate->GetPlayer()->SetGamePointer(candidate.get());
-                        }
-                        catch (...)
-                        {
-                            candidate.reset();
-                            s.edit_->RestoreViewportTargets();
-                            throw;
-                        }
-                    }
-                    s.commands_.Rebind(candidate->GetScene());
-                    s.edit_.swap(candidate); // noexcept commit; old scene dies inside this call
+                    s.ReplaceEdit(data);
                     *newId = s.edit_->GetScene().GetId();
                 });
             });
@@ -391,4 +374,27 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
             });
         }
     };
+}
+void SceneEditSession::ReplaceEdit(const SceneSnapshot& data)
+{
+    auto candidate = EmptyGame();
+    SceneDocument::Restore(data, catalog_, candidate->GetScene());
+    if (attached_)
+    {
+        edit_->SuspendViewportTargets();
+        try
+        {
+            if (!candidate->InitializePlayViewport(*edit_)) throw std::runtime_error("Loaded scene viewport failed");
+            *candidate->GetPlayer() = *edit_->GetPlayer();
+            candidate->GetPlayer()->SetGamePointer(candidate.get());
+        }
+        catch (...)
+        {
+            candidate.reset();
+            edit_->RestoreViewportTargets();
+            throw;
+        }
+    }
+    commands_.Rebind(candidate->GetScene());
+    edit_.swap(candidate); // noexcept commit; old scene dies inside this call
 }

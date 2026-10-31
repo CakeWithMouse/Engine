@@ -44,5 +44,12 @@
   <Copy SourceFiles="@(PreviewProject)" DestinationFiles="@(PreviewProject->'$(OutDir)Projects/%(ProjectName)/Project.json')" SkipUnchangedFiles="true" />
   <Copy SourceFiles="@(PreviewContent)" DestinationFiles="@(PreviewContent->'$(OutDir)Projects/%(ProjectName)/Content/%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 </Target>
+<Target Name="DeployReleaseCrt" AfterTargets="Build" Condition="'$(Configuration)'=='Release'">
+  <ItemGroup>
+    <ReleaseCrt Include="$(VCInstallDir)Redist/MSVC/$(VCToolsRedistVersion)/x64/Microsoft.VC*.CRT/*.dll" />
+  </ItemGroup>
+  <Error Condition="'@(ReleaseCrt)'==''" Text="Visual C++ x64 redistributable DLLs are missing; install the MSVC redistributable component before packaging." />
+  <Copy SourceFiles="@(ReleaseCrt)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+</Target>
 
 </Project>

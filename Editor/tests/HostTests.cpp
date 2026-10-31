@@ -1,10 +1,16 @@
 #include "EditorHistory.h"
 #include <iostream>
-#include <cassert>
+#include <stdexcept>
+#define CHECK(condition) do { if (!(condition)) throw std::runtime_error("Check failed: " #condition); } while (false)
 #include <chrono>
+#include <QCoreApplication>
+#include "HostRegressionTests.h"
+#include "OverlayHostTests.h"
 
-int main()
+int main(int argc, char** argv)
 {
+    try {
+    QCoreApplication app(argc, argv);
     std::cout << "[Test] Running HostTests (EditorHistory)..." << std::endl;
 
     int checksPassed = 0;
@@ -41,8 +47,8 @@ int main()
 
         history.EndGizmoDrag();
 
-        assert(falseCount == 1);
-        assert(trueCount == 299);
+        CHECK(falseCount == 1);
+        CHECK(trueCount == 299);
         checksPassed += 2;
     }
 
@@ -87,7 +93,7 @@ int main()
         }
         history.EndGizmoDrag();
 
-        assert(totalFalseCount == 2);
+        CHECK(totalFalseCount == 2);
         checksPassed += 1;
     }
 
@@ -105,25 +111,28 @@ int main()
 
         // Initial nudge: should NOT coalesce
         bool coalesced0 = history.ShouldCoalesce(cmd, t0);
-        assert(!coalesced0);
+        CHECK(!coalesced0);
         history.OnTransformApplied(cmd, t0);
         checksPassed += 1;
 
         // Nudge within 100 ms (< 350 ms): MUST coalesce
         const auto t1 = t0 + std::chrono::milliseconds(100);
         bool coalesced1 = history.ShouldCoalesce(cmd, t1);
-        assert(coalesced1);
+        CHECK(coalesced1);
         history.OnTransformApplied(cmd, t1);
         checksPassed += 1;
 
         // Nudge after 400 ms (> 350 ms from t1): MUST NOT coalesce
         const auto t2 = t1 + std::chrono::milliseconds(400);
         bool coalesced2 = history.ShouldCoalesce(cmd, t2);
-        assert(!coalesced2);
+        CHECK(!coalesced2);
         checksPassed += 1;
     }
 
+    checksPassed += HostRegressionTests::Run();
+    checksPassed += OverlayHostTests::Run();
     std::cout << "HostTests: " << checksPassed << " checks passed." << std::endl;
     return 0;
+    } catch (const std::exception& e) { std::cerr << e.what() << std::endl; return 1; }
 }
 

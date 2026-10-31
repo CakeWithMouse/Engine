@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
+import { createRequire } from 'node:module';
 
 const workspaceDir = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(workspaceDir, '../../..');
@@ -27,7 +28,7 @@ function text(slide, value, x, y, w, h, size=26, color='#243646', bold=false, fa
 }
 async function picture(slide, file, position, fit='contain') {
   const b=await fs.readFile(path.join(workspaceDir,'assets',file));
-  slide.images.add({blob:b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength),contentType:'image/png',alt:'Скриншот PainEngine: '+file,position,fit});
+  slide.images.add({blob:b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength),contentType:/\.jpe?g$/i.test(file)?'image/jpeg':'image/png',alt:'Скриншот PainEngine: '+file,position,fit});
 }
 function block(slide,x,y,w,h,color) {
   slide.shapes.add({geometry:'rect',position:{left:x,top:y,width:w,height:h},fill:color,line:{fill:'none',width:0}});
@@ -43,7 +44,7 @@ for (const [index,d] of data.slides.entries()) {
     text(slide,d.title,48,90,405,280,52,'#FFFFFF',true);
     text(slide,d.subtitle,48,430,390,110,29,'#BFE0E5');
     await picture(slide,d.image,{left:510,top:130,width:730,height:440});
-    text(slide,`${data.engineVersion}  /  28.10.2026`,48,628,650,38,22,'#A6C5D1');
+    text(slide,`${data.engineVersion}  /  ${data.date.split('-').reverse().join('.')}`,48,628,650,38,22,'#A6C5D1');
   } else {
     block(slide,0,0,1280,124,dark?'#183449':'#D1E3E8');
     text(slide,d.title,48,35,1184,80,40,titleColor,true);
@@ -59,7 +60,7 @@ for (const [index,d] of data.slides.entries()) {
       table.cells.block({row:0,column:0,rowCount:1,columnCount:cols}).assign({fill:'#13384A',textStyle:{typeface:font,fontSize:24,bold:true,color:'#FFFFFF'}});
     } else if(d.type==='code') {
       block(slide,40,148,840,475,'#0A1420');
-      text(slide,d.code,56,166,812,440,21,'#BCE8ED',false,'Consolas');
+      text(slide,d.code,56,166,812,440,d.codeSize||21,'#BCE8ED',false,'Consolas');
       text(slide,d.aside,914,164,318,450,25,'#E1E9EF');
     } else if(d.type==='shot') {
       block(slide,40,148,390,475,'#D7E6EA');
@@ -85,10 +86,17 @@ for (const [index,d] of data.slides.entries()) {
     text(slide,String(index+1).padStart(2,'0'),1180,684,40,24,16,dark?'#9BB3C4':'#66808F');
   }
   slide.speakerNotes.text=d.notes+'\n\nИсточники в репозитории O:/Engine/Engine:\n'+d.sources.join('\n');
-  await fs.writeFile(path.join(buildDir,`slide-${String(index+1).padStart(2,'0')}.png`),new Uint8Array(await (await deck.export({slide,format:'png',scale:1})).arrayBuffer()));
+  await fs.writeFile(path.join(buildDir,`slide-${String(index+1).padStart(2,'0')}.png`),new Uint8Array(await (await deck.export({slide,format:'png',scale:2})).arrayBuffer()));
   console.log(`Rendered slide ${index+1}/${data.slides.length}`);
 }
 const candidate=path.join(buildDir,'candidate.pptx');
+if (process.env.TUTORIAL_PDF_ONLY === '1') {
+  // Resume a failed PDF export after the unchanged PPTX has passed finalization.
+  await fs.access(output);
+  const receipt=JSON.parse(await fs.readFile(path.join(buildDir,'final-validation.json'),'utf8'));
+  const digest=createHash('sha256').update(await fs.readFile(output)).digest('hex');
+  if (receipt.finalSha256 !== digest) throw new Error('Validated PPTX hash mismatch');
+} else {
 await (await PresentationFile.exportPptx(deck)).save(candidate);
 await finalizePresentation({
   workspaceDir,candidatePath:candidate,finalPath:output,pythonExecutable:python,
@@ -98,8 +106,22 @@ await finalizePresentation({
   requiredNativeTableOwnerSlides:tableSlides,fontPolicy:{basis:'design',families:[font,'Consolas']},
   verifyArtifactToolImport:true,receiptPath:path.join(buildDir,'final-validation.json')
 });
+}
 const pdfPath=output.replace(/\.pptx$/,'.pdf');
-await fs.writeFile(pdfPath,new Uint8Array(await (await deck.export({format:'pdf'})).arrayBuffer()));
+// The bundled artifact-tool PDF path lacks standard-font data. Package the
+// reviewed 2x slide renders instead; the companion PPTX retains editable text.
+const require=createRequire(import.meta.url);
+const { PDFDocument }=require(path.join(runtimeModules,'pdf-lib'));
+const pdf=await PDFDocument.create();
+pdf.setTitle(data.title.replace('\n',' — '));
+pdf.setSubject(`PainEngine ${data.engineVersion}; revision ${data.revision}; ${data.date}`);
+pdf.setLanguage('ru-RU');
+for (let n=1;n<=data.slides.length;n++) {
+  const bytes=await fs.readFile(path.join(buildDir,`slide-${String(n).padStart(2,'0')}.png`));
+  const img=await pdf.embedPng(bytes);
+  pdf.addPage([960,540]).drawImage(img,{x:0,y:0,width:960,height:540});
+}
+await fs.writeFile(pdfPath,await pdf.save());
 // A source manifest makes updates detect code changes even without a version bump.
 const sourcePaths=[...new Set(data.slides.flatMap(s=>s.sources))].filter(s=>!s.endsWith('/current.json'));
 const sources=[];
@@ -108,7 +130,7 @@ for(const relative of sourcePaths) {
   sources.push({path:relative,sha256:createHash('sha256').update(bytes).digest('hex')});
 }
 await fs.writeFile(path.join(buildDir,'pending-current.json'),JSON.stringify({
-  title:data.title.replace('\n',' — '),engineVersion:data.engineVersion,date:data.date,revision:data.revision,
+  title:data.title.replace('\n',' — '),engineVersion:data.engineVersion,date:data.date,revision:data.revision,sourceCommit:data.sourceCommit,
   slideCount:data.slides.length,presentation:path.relative(workspaceDir,output).replaceAll('\\','/'),
   pdf:path.relative(workspaceDir,pdfPath).replaceAll('\\','/'),content:'content.json',builder:'build.mjs',editorialPolicy:'editorial-policy.json',sources
 },null,2));

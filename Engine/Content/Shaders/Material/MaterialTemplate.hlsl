@@ -111,7 +111,7 @@ PS_IN VSMain(VS_IN input, uint instanceId : SV_InstanceID)
 MaterialOutput EvaluateMaterial(PS_IN input, bool frontFace)
 {
 #if defined(MATERIAL_INSTANCED)
-    ClipByFade(input.fade, input.pos.xy);
+    ClipByFade(input.fade, input.pos.xy + DitherPhase(input.worldPos));
 #endif
     float3 normal = normalize(input.normal);
 #if defined(MATERIAL_TWO_SIDED)

@@ -72,9 +72,13 @@ void InstancedMeshComponent::BuildImpostorAtlas()
     constants.AtlasParams = DirectX::XMFLOAT4(static_cast<float>(settings.YawCount),
                                               static_cast<float>(settings.PitchCount),
                                               minPitch, pitchStep);
+    // The shader derives the tile margin from the mip it samples, so it needs the tile size and
+    // the coarsest mip rather than one fixed inset: a margin of half a texel of the top mip
+    // leaks a neighbouring view once the sprite drops to a coarser one.
     constants.ModelParams = DirectX::XMFLOAT4(Impostor.GetBounds().Radius,
                                               Impostor.GetBounds().Center.y,
-                                              Impostor.GetTileInset(), 0.0f);
+                                              static_cast<float>(settings.TileSize),
+                                              Impostor.GetMaxMipLevel());
 
     D3D11_BUFFER_DESC bufferDesc = {};
     bufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -148,4 +152,13 @@ void InstancedMeshComponent::DrawImpostors(ID3D11DeviceContext* context)
     ID3D11ShaderResourceView* nullSRVs[2] = {nullptr, nullptr};
     context->PSSetShaderResources(0, 2, nullSRVs);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+bool InstancedMeshComponent::DumpImpostorAtlas(const std::string& pathPrefix)
+{
+    if (GamePtr == nullptr || !Impostor.IsValid())
+    {
+        return false;
+    }
+    return Impostor.Dump(*GamePtr, pathPrefix);
 }

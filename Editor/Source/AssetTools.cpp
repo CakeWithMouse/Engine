@@ -13,6 +13,35 @@
 #include <QMessageBox>
 #include <QRegularExpression>
 #include <QSaveFile>
+#include <QTimer>
+
+void EditorMainWindow::UpdateAsset(const QString& path,bool move,const QString& supplied)
+{
+    if(sceneBusy_||host_->PlayState()!=EditorQtHost::Edit||!host_->ReadSnapshot().authoring)return;
+    if(!CloseMaterialEditors([this,path,move,supplied]{UpdateAsset(path,move,supplied);}))return;
+    const QString content=QString::fromUtf8(host_->host().contentRoot);
+    const auto relative=QDir(content).relativeFilePath(path);
+    if(relative.startsWith("..")||QDir::isAbsolutePath(relative))return;
+    QString argument=supplied;
+    if(move && argument.isEmpty()) {
+        bool ok=false;
+        argument=QInputDialog::getText(this,QStringLiteral("Переместить ресурс"),
+            QStringLiteral("Новый путь относительно Content. Для модели перемещается вся её папка; имя файла модели сохраняется.\nСсылки в сценах и материалах будут обновлены. История Undo сцены будет очищена."),QLineEdit::Normal,relative,&ok);
+        if(!ok||argument.isEmpty())return;
+    } else if(!move && argument.isEmpty()) {
+        const auto metadata=RecoveryStore::Read(path+".source.json");
+        const auto original=metadata["source"].toString();
+        argument=QFileDialog::getOpenFileName(this,QStringLiteral("Исходный файл для переимпорта"),original,
+            QStringLiteral("Ресурсы (*.fbx *.blend *.glb *.gltf *.obj *.png *.jpg *.jpeg *.bmp *.tga)"));
+        if(argument.isEmpty())return;
+        if(QMessageBox::question(this,QStringLiteral("Переимпорт ресурса"),QStringLiteral("Обновить ресурс во всех сценах? Назначения и правки материалов сохранятся. История Undo сцены будет очищена. Прежние файлы останутся в .painengine/AssetBackups."))!=QMessageBox::Yes)return;
+    }
+    if(move) {argument=QDir::fromNativeSeparators(argument);if(!argument.startsWith("/Game/"))argument="/Game/"+argument;}
+    // Material preview detaches are queued first; the asset operation then runs
+    // on the engine thread with no preview holding the replaced resources.
+    EditorCommand c;c.type=EditorCommand::UpdateAsset;c.w=move?1:0;c.path="/Game/"+QDir::fromNativeSeparators(relative);c.name=argument;
+    sceneBusy_=true;host_->PostCommand(c);
+}
 
 void EditorMainWindow::ImportAsset(bool texture, const QString& source)
 {

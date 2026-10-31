@@ -13,6 +13,7 @@
 #include <memory>
 #include <chrono>
 #include <functional>
+#include "RecoveryStore.h"
 
 class EditorQtHost : public IEditorHost
 {
@@ -67,6 +68,9 @@ public:
     void SetProjectDataApi(const EngineProjectDataApi& api) { projectData_ = api; }
     void SetViewportInputApi(const EngineViewportInputApi& api) { viewportInput_ = api; }
     void SetSelectionApi(const EngineSelectionApi& api) { selection_ = api; }
+    void InitializeRecovery();
+    void SetBatchApi(const EngineSceneBatchApi& api) { batch_ = api; }
+    void SetAuthoringApi(const EngineAuthoringApi& api) { authoring_ = api; }
     void SetViewportOverlayApi(const EngineViewportOverlayApi& api);
 
 private:
@@ -78,6 +82,19 @@ private:
     EngineEditSessionApi scene_{};
     EngineProjectDataApi projectData_{};
     EngineSelectionApi selection_{};
+    EngineSceneBatchApi batch_{};
+    EngineAuthoringApi authoring_{};
+    const EngineSceneBatchApi* BatchApi() const {
+        if (host_.getService) return static_cast<const EngineSceneBatchApi*>(host_.getService(host_.user, EngineEditorBatchService, 1));
+        return batch_.apply ? &batch_ : nullptr;
+    }
+    const EngineAuthoringApi* AuthoringApi() const {
+        if (host_.getService) return static_cast<const EngineAuthoringApi*>(host_.getService(host_.user, EngineAuthoringService, 1));
+        return authoring_.describe ? &authoring_ : nullptr;
+    }
+    RecoveryStore recovery_;
+    std::chrono::steady_clock::time_point recoveryTime_{};
+    void WriteRecovery();
     EngineViewportInputApi viewportInput_{};
     EngineViewportOverlayApi overlay_{};
 
@@ -102,6 +119,9 @@ private:
     bool pendingBillboardsDirty_ = false;
 
     std::vector<PendingIcon> pendingIcons_;
+    bool iconsDirty_ = false;
+    std::atomic<bool> canUndo_{false}, canRedo_{false};
+    void InvalidateOverlays();
 
     std::atomic<bool> materialsAvailable_{false};
     std::atomic<bool> sceneAvailable_{false};

@@ -27,6 +27,7 @@ class SceneObjectsPanel;
 class MaterialEditorWindow;
 class MainToolBar;
 class ExternalGameRunner;
+class UIEditorWindow;
 
 class EditorMainWindow : public QMainWindow, public IEditorUiListener
 {
@@ -34,10 +35,7 @@ class EditorMainWindow : public QMainWindow, public IEditorUiListener
 
 public:
     explicit EditorMainWindow(EditorQtHost* host, QWidget* parent = nullptr);
-    ~EditorMainWindow() override
-    {
-        if (host_) host_->SetUiListener(nullptr);
-    }
+    ~EditorMainWindow() override;
 
     void OnLogMessage(const QString& line) override
     {
@@ -57,6 +55,7 @@ public:
     void CommandFinished(const EditorCommand& command, uint32_t status, const QString& error);
 
     void OpenScene(const QString& path = {});
+    void UpdateAsset(const QString& path, bool move, const QString& supplied = {});
     void ImportAsset(bool texture, const QString& source = {});
     void AddModel(const QString& path = {});
     void UseAsset(const QString& path);
@@ -69,6 +68,9 @@ public:
     void CreateMaterialForSelection();
     // F6: перекомпилировать все шейдеры и материалы с диска во всех сценах и превью.
     void ReloadShaders();
+    void OpenUIEditor(const QString& path);
+    void ShowHudSettings();
+    QString CreateUI(const QString& supplied = {});
 
 public slots:
     void AppendLine(const QString& line);
@@ -80,12 +82,20 @@ private slots:
 
 protected:
     void closeEvent(QCloseEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
+    int controlSchemeSubId_ = 0;
     void BuildCodeTools();
     void RunCodeTool(const QString& action, const QStringList& extra = {});
     void ShowProjectTypes();
     void BuildUi();
+    void CompactContentPanel();
+    void ResizeContentPanel(int height);
+    int contentPanelHeight_ = 180;
+    QSize panelWindowSize_;
+    bool panelLayoutReady_ = false;
     void BuildToolBar();
     void UpdatePlayButtons();
 
@@ -94,6 +104,7 @@ private:
 
     void BuildSceneDocks();
     void BuildSceneMenu();
+    void ShowDirectionalLight();
     void ConnectPanels();
 
     void ApplyDefaultLayout();
@@ -103,6 +114,10 @@ private:
     void RefreshSceneUi();
 
     void SaveScene(bool saveAs = false, std::function<void()> after = {});
+    void SetStartupScene();
+    void OfferRecovery();
+    void ExportProject();
+    QProcess* exportProcess_ = nullptr;
     void MaybeSave(std::function<void()> after);
     void SubmitObjectCommand(int type);
 
@@ -113,6 +128,7 @@ private:
     // Спрашивает о несохранённых материалах и закрывает их окна; false — закрытие отменено.
     bool CloseMaterialEditors(std::function<void()> afterSave = {});
     QHash<QString, QPointer<MaterialEditorWindow>> materialEditors_;
+    QHash<QString, QPointer<UIEditorWindow>> uiEditors_;
 
     EditorQtHost* host_ = nullptr;
 

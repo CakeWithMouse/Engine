@@ -51,7 +51,7 @@ void ExternalGameRunner::Start()
     }
 
     proc_->setProgram(runtime);
-    proc_->setArguments({QStringLiteral("--project"), project, QStringLiteral("--mode"), QStringLiteral("game")});
+    proc_->setArguments({QStringLiteral("--project"), project, QStringLiteral("--mode"), QStringLiteral("game"), QStringLiteral("--compatible-engine")});
     proc_->setWorkingDirectory(runtimeDir);
 
     if (host_) host_->Log(("ExternalGame start: " + runtime.toStdString() + " --project " + project.toStdString() + " --mode game").c_str());

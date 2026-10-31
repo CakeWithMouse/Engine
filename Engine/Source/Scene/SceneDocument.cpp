@@ -52,8 +52,14 @@ void Structure(const SceneSnapshot& data)
     if (!validText(data.name) || data.components.size() > 100000) Invalid("Invalid scene name or too many objects");
     std::map<uint64_t, uint64_t> parents;
     std::set<std::string> names;
+    bool hasDirectionalLight = false;
     for (const auto& item : data.components)
     {
+        if (item.typeName == "Light.Directional")
+        {
+            if (hasDirectionalLight) Invalid("Only one directional light is allowed per scene");
+            hasDirectionalLight = true;
+        }
         if (!item.projectData.empty())
         {
             if (data.documentVersion < 3) Invalid("Custom data requires scene format 3");

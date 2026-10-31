@@ -96,7 +96,7 @@ void Player::ProcessInput(float deltaTime)
     if (cameraMode == CameraMode::Free || cameraMode == CameraMode::ThirdPerson)
     {
         //glm::vec2 mouseDelta = {0.f, 0.f}; //input->MouseOffset;
-        glm::vec2 mouseDelta = input->MouseOffset; //input->MouseOffset;
+        glm::vec2 mouseDelta = input->IsPointerBlocked() ? glm::vec2(0.0f) : input->MouseOffset;
 
         yaw -= mouseDelta.x * mouseSensitivity;
         pitch -= mouseDelta.y * mouseSensitivity;
@@ -106,7 +106,7 @@ void Player::ProcessInput(float deltaTime)
     }
     else if (cameraMode == CameraMode::Orbital)
     {
-        glm::vec2 mouseDelta = input->MouseOffset;
+        glm::vec2 mouseDelta = input->IsPointerBlocked() ? glm::vec2(0.0f) : input->MouseOffset;
         
         if (bStopRotateYaw)
         {

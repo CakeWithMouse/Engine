@@ -7,7 +7,10 @@ struct InstData
 {
     float4x4 World;
     float4 Color;
-    float4 Params; // x = LOD transition fade, 1 = fully visible
+    // x = LOD transition fade: magnitude is the weight (1 = fully visible), sign says which side
+    // of the transition this copy is on (negative = the level that fades in). yzw belong to
+    // whatever draws the copy - the animation clip, or the per-instance data of its material.
+    float4 Params;
 };
 
 /** Ordered 4x4 dither threshold for the pixel. */
@@ -25,15 +28,46 @@ float DitherThreshold(float2 pixelPosition)
 }
 
 /**
+ * The same pattern read along the other axis. Two tests on one pixel (coverage and cross-fade)
+ * must not use the same ordering, or the pixels one keeps are the ones the other throws away.
+ */
+float DitherThresholdCrossed(float2 pixelPosition)
+{
+    return DitherThreshold(float2(pixelPosition.y, pixelPosition.x) + 2.0f);
+}
+
+/**
+ * Where this copy starts reading the dither pattern. Without it every copy tests the same 4x4
+ * cells at the same screen positions, and a field of small copies fades as one coarse grid
+ * instead of as individual copies. Derived from the world position, which every path already
+ * has in the pixel shader, so it costs no room in the instance stream.
+ */
+float2 DitherPhase(float3 worldPosition)
+{
+    const float hash = frac(dot(worldPosition, float3(0.0937f, 0.1731f, 0.2659f)) * 43758.5453f);
+    return float2(floor(hash * 4.0f), floor(frac(hash * 7.0f) * 4.0f));
+}
+
+/**
  * Cross-fade between two detail levels without alpha blending: both levels are drawn and each
  * pixel keeps only one of them. Opaque geometry stays opaque, so the G-buffer and depth stay valid.
+ *
+ * The two levels must split the pixels, not test the same threshold independently: with the same
+ * test each of them drops the pixels above its own fade, and in the middle of the band half the
+ * pixels are dropped twice. On a field of small units that shows up as a bright ring of ground at
+ * every switching distance. The level that fades in therefore takes exactly the pixels the other
+ * one gives up, and it is marked by a negative fade.
  */
-void ClipByFade(float fade, float2 pixelPosition)
+void ClipByFade(float signedFade, float2 pixelPosition)
 {
-    if (fade < 0.999f)
+    const float weight = abs(signedFade);
+    if (weight >= 0.999f)
     {
-        clip(fade - DitherThreshold(pixelPosition));
+        return;
     }
+
+    const float threshold = DitherThreshold(pixelPosition);
+    clip(signedFade < 0.0f ? threshold - (1.0f - weight) : weight - threshold);
 }
 
 #endif

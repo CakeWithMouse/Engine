@@ -47,7 +47,7 @@
 
     <ItemDefinitionGroup>
         <ClCompile>
-            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtCore;$(ProjectDir)../Host;$(RepositoryRoot)Engine/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtCore;$(ProjectDir)../Host;$(ProjectDir)../Include;$(RepositoryRoot)Engine/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
             <PreprocessorDefinitions>QT_CORE_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
             <LanguageStandard>stdcpp17</LanguageStandard>
             <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -68,7 +68,11 @@
 
     <ItemGroup>
         <ClCompile Include="HostTests.cpp"/>
+        <ClCompile Include="../Source/QtHost.cpp"/>
+        <ClCompile Include="../Host/ViewportCommandHandler.cpp"/>
+        <ClCompile Include="../Host/AssetCommandHandler.cpp"/>
         <ClCompile Include="../Host/EditorHistory.cpp"/>
+        <ClCompile Include="../Host/SceneCommandHandler.cpp"/>
     </ItemGroup>
 
     <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets"/>

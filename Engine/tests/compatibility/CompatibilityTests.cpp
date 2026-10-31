@@ -1,6 +1,7 @@
 #define NOMINMAX
 #include <Windows.h>
 #include "../../Runtime/ProjectUpgrade.h"
+#include "../../Runtime/ProjectExport.h"
 #include "../../../Game/Launcher/Source/ProjectLibrary.h"
 #include <Engine/Runtime/EditExtensions.h>
 #include <iostream>
@@ -99,6 +100,18 @@ int wmain(int argc, wchar_t** argv)
         const auto old = LegacyProject(fs::absolute(argv[2]),root / "Old project");
         const auto lights = LegacyProject(fs::absolute(argv[3]),root / "Light project");
         ExerciseModule(old,runtime,false); ExerciseModule(lights,runtime,true);
+        for (const auto& fixture : {std::make_pair(old,"2026.10.24.0"),std::make_pair(lights,"2026.10.24.1")}) {
+            const auto lock=fixture.first.parent_path()/"Engine.lock.json";
+            ProjectUpgrade::WriteJson(lock,{{"format",1},{"engineVersion",fixture.second},{"engineConfiguration","Release"}});
+            const auto projectHash=ProjectUpgrade::Hash(fixture.first), lockHash=ProjectUpgrade::Hash(lock), dllHash=ProjectUpgrade::Hash(fixture.first.parent_path()/"Game.dll");
+            Reject([&] { ProjectExport::CheckProcess(runtime/"EngineRuntime.exe",L"--project \""+fixture.first.wstring()+L"\" --mode game --frames 3",fixture.first.parent_path()/"pinned.log"); },"ordinary launch still respects engine lock");
+            for(const auto* mode:{L"game",L"editor"}) {
+                const auto args=L"--project \""+fixture.first.wstring()+L"\" --mode "+mode+L" --compatible-engine --frames 3"+(std::wstring(mode)==L"editor"?L" --scene-api":L"");
+                ProjectExport::CheckProcess(runtime/"EngineRuntime.exe",args,fixture.first.parent_path()/(std::wstring(mode)+L"-current.log"));
+                Check(true,"pinned historical game launches on new runtime");
+            }
+            Check(ProjectUpgrade::Hash(fixture.first)==projectHash && ProjectUpgrade::Hash(lock)==lockHash && ProjectUpgrade::Hash(fixture.first.parent_path()/"Game.dll")==dllHash,"compatible launch preserves project, lock and frozen DLL");
+        }
         auto current = ProjectLibrary::Create(root / "New project","Current",runtime / "Templates/SceneProject/Game.dll");
         auto settings = ReadRuntimeProject(current);
         Check(settings.engineVersion == release.version && settings.engineConfiguration == release.configuration,"new project records engine release");

@@ -15,4 +15,15 @@ BEGIN
     PUSHBUTTON "Отмена", IDCANCEL, 283, 141, 54, 17
 END
 
+210 DIALOGEX 0, 0, 390, 220
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Новая версия движка"
+FONT 9, "Segoe UI"
+BEGIN
+    LTEXT "", 211, 12, 12, 366, 159
+    DEFPUSHBUTTON "Обновить копию и запустить", IDYES, 12, 179, 170, 20
+    PUSHBUTTON "Открыть на прежней версии", IDNO, 190, 179, 188, 20
+    PUSHBUTTON "Отмена", IDCANCEL, 308, 201, 70, 17
+END
+
 301 RCDATA "../../../Engine/docs/tutorial/assets/cover.png"

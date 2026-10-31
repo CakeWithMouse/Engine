@@ -90,6 +90,7 @@ void InputDevice::RemovePressedKey(Keys key)
 
 bool InputDevice::IsKeyDown(Keys key) const
 {
+	if (pointerBlocked && (key == Keys::LeftButton || key == Keys::RightButton || key == Keys::MiddleButton)) return false;
 	return keys.count(key) != 0;
 }
 

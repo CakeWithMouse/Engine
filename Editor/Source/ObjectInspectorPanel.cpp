@@ -93,6 +93,10 @@ void ObjectInspectorPanel::BuildUi()
     noSelectionLabel_->setAlignment(Qt::AlignCenter);
     inspectorLayout->addWidget(noSelectionLabel_);
 
+    properties_ = new QWidget(content);
+    propertiesLayout_ = new QVBoxLayout(properties_);
+    propertiesLayout_->setContentsMargins(0,0,0,0);
+    properties_->hide();
     BuildGeneralCard(inspectorLayout);
 
     cardTransform_ = new TransformCard(this);
@@ -105,6 +109,8 @@ void ObjectInspectorPanel::BuildUi()
     cardGeometry_ = new GeometryCard(this);
     cardGeometry_->onChooseModel = [this] { emit ChooseModelRequested(); };
     cardGeometry_->onClearModel = [this] { emit ClearModelRequested(); };
+    cardGeometry_->onChooseTexture = [this] { emit ChooseTextureRequested(); };
+    cardGeometry_->onClearTexture = [this] { emit ClearTextureRequested(); };
     inspectorLayout->addWidget(cardGeometry_);
 
     cardMaterial_ = new MaterialCard(this);
@@ -112,6 +118,7 @@ void ObjectInspectorPanel::BuildUi()
     cardMaterial_->onChooseMaterial = [this] { emit ChooseMaterialRequested(); };
     cardMaterial_->onClearMaterial = [this] { emit ClearMaterialRequested(); };
     inspectorLayout->addWidget(cardMaterial_);
+    inspectorLayout->addWidget(properties_);
 
     BuildPointLightCard(inspectorLayout);
     BuildCharacterCard(inspectorLayout);
@@ -239,6 +246,7 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     lInt->addWidget(lightRowLabels_[3]);
 
     lightValues_[3] = new NoWheelDoubleSpinBox(rowInt);
+    lightValues_[3]->setObjectName("LightValue3");
     lightValues_[3]->setFixedHeight(22);
     lightValues_[3]->setRange(0.0, 10000.0);
     lightValues_[3]->setDecimals(2);
@@ -259,6 +267,7 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     lRad->addWidget(lightRowLabels_[4]);
 
     lightValues_[4] = new NoWheelDoubleSpinBox(rowRad);
+    lightValues_[4]->setObjectName("LightValue4");
     lightValues_[4]->setFixedHeight(22);
     lightValues_[4]->setRange(0.01, 10000.0);
     lightValues_[4]->setDecimals(2);
@@ -371,6 +380,7 @@ void ObjectInspectorPanel::Refresh(
 {
     refreshing_ = true;
     selectedId_ = selectedId;
+    properties_->hide();
 
     QWidget* focus = QApplication::focusWidget();
     const bool canReplaceWholeInspector = selectionChanged || !focus || !isAncestorOf(focus);
@@ -407,6 +417,7 @@ void ObjectInspectorPanel::Refresh(
         if (object.id != selectedId_)
             continue;
 
+        RefreshProjectProperties(view, object);
         selectedLight = object.hasPointLight;
         typeBadgeLabel_->setText(QString::fromStdString(object.type));
         selectionLabel_->setText(QStringLiteral("%1 · ID %2").arg(QString::fromStdString(object.name)).arg(object.id));
@@ -436,8 +447,9 @@ void ObjectInspectorPanel::Refresh(
         const bool canChooseModel = (object.type == "Engine.Model" || object.type.rfind("Primitive.", 0) == 0);
         const bool hasMesh = canChooseModel || !object.modelAsset.empty();
         cardGeometry_->setVisible(hasMesh);
-        if (hasMesh) cardGeometry_->SetData(QString::fromStdString(object.modelAsset), canChooseModel);
-        cardMaterial_->SetData(QString::fromStdString(object.materialAsset), object.hasPointLight);
+        if (hasMesh) { cardGeometry_->SetData(QString::fromStdString(object.modelAsset), canChooseModel); cardGeometry_->SetTexture(QString::fromStdString(object.textureAsset)); }
+        cardMaterial_->SetData(QString::fromStdString(object.materialAsset), object.hasPointLight || object.type == "Light.Directional");
+        cardMaterial_->setVisible(object.type != "Light.Directional" && !object.hasPointLight);
 
         if (canReplaceWholeInspector)
         {

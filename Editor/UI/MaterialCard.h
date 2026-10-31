@@ -84,7 +84,7 @@ private:
         lMatBtns->setSpacing(4);
 
         editMaterialButton_ = new QPushButton(Tr("Редактировать", "Edit Material"), materialActions_);
-        editMaterialButton_->setObjectName(QStringLiteral("PrimaryActionButton"));
+        editMaterialButton_->setObjectName(QStringLiteral("EditMaterial"));
         editMaterialButton_->setFixedHeight(24);
         QObject::connect(editMaterialButton_, &QPushButton::clicked, [this] {
             if (onEditMaterial) onEditMaterial(materialAsset_->text());

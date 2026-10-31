@@ -23,31 +23,31 @@ namespace
             return static_cast<uint32_t>(EditorIcons::IconId::PointLight);
         }
 
-        if (obj.type == "Environment.Sky" || obj.name.find("Sky") != std::string::npos || obj.name.find("Sun") != std::string::npos)
+        if (obj.type == "Light.Directional" || obj.type == "Environment.Sky" || obj.name.find("Sky") != std::string::npos || obj.name.find("Sun") != std::string::npos)
         {
             outColor = 0xFF30D0FF;
             return static_cast<uint32_t>(EditorIcons::IconId::SunSky);
         }
 
-        if (obj.type == "Camera" || obj.name.find("Camera") != std::string::npos)
+        if (obj.gameplayKind != 2 && (obj.type == "Camera" || obj.name.find("Camera") != std::string::npos))
         {
             outColor = 0xFFE0E0E0;
             return static_cast<uint32_t>(EditorIcons::IconId::Camera);
         }
 
-        if (obj.type == "GameCamera")
+        if (obj.gameplayKind == 2 || obj.type == "Gameplay.Camera" || obj.type == "GameCamera")
         {
             outColor = 0xFF80E080;
             return static_cast<uint32_t>(EditorIcons::IconId::GameCamera);
         }
 
-        if (obj.type == "Particles" || obj.name.find("Particle") != std::string::npos)
+        if (obj.type.rfind("Particle.", 0) == 0 || obj.type == "Particles" || obj.name.find("Particle") != std::string::npos)
         {
             outColor = 0xFFE080FF;
             return static_cast<uint32_t>(EditorIcons::IconId::Particles);
         }
 
-        if (obj.type == "Character" || obj.type == "Player" || obj.name.find("Player") != std::string::npos)
+        if (obj.gameplayKind == 1 || obj.type == "Character" || obj.type == "Player" || obj.name.find("Player") != std::string::npos)
         {
             outColor = 0xFF50E050;
             return static_cast<uint32_t>(EditorIcons::IconId::Character);

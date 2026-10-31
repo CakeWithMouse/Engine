@@ -7,6 +7,8 @@
 #include <Engine/Runtime/LegacyEditApiV5.h>
 #include <Engine/Runtime/ProjectDataApi.h>
 #include <Engine/Runtime/SelectionApi.h>
+#include <Engine/Runtime/SceneBatchApi.h>
+#include <Engine/Runtime/AuthoringApi.h>
 #include <Engine/Runtime/ViewportInputApi.h>
 #include <Engine/Runtime/ViewportOverlayApi.h>
 
@@ -29,6 +31,8 @@ public:
     const EngineViewportInputApi& ViewportInputApi() const noexcept { return viewportInput_; }
     const EngineSelectionApi& SelectionApi() const noexcept { return selection_; }
     const EngineViewportOverlayApi& ViewportOverlayApi() const noexcept { return overlay_; }
+    const EngineAuthoringApi& AuthoringApi() const noexcept { return authoring_; }
+    const EngineSceneBatchApi& BatchApi() const noexcept { return batch_; }
 private:
     std::filesystem::path engineContent_, projectContent_, loadedModule_;
     EngineEditorCameraApi camera_{};
@@ -37,6 +41,8 @@ private:
     EngineEditSessionApi api_{};
     EngineProjectDataApi projectData_{};
     EngineSelectionApi selection_{};
+    EngineSceneBatchApi batch_{};
+    EngineAuthoringApi authoring_{};
     EngineViewportInputApi viewportInput_{};
     EngineViewportOverlayApi overlay_{};
     EngineLegacyV4::Factory legacyFactory_{};

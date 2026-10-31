@@ -69,6 +69,8 @@ public:
     void SetContextPriority(Context, int);
     void SetKey(Keys, bool down); // repeated downs are ignored
     void AddPointer(float x, float y, float wheel = 0);
+    void SetPointerBlocked(bool blocked);
+    bool IsPhysicalKeyDown(Keys key) const;
     void Tick(float deltaTime); // drains edges, then one Held/Axis event per frame
     void Reset(); // cancel actions, suppress held keys until their physical release
     void ReleaseAll(); // focus lost: also forget physical device state
