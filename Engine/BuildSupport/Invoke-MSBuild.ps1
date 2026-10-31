@@ -1,7 +1,10 @@
 param([Parameter(Mandatory=$true)][string]$Project,
     [ValidateSet('Debug','Release')][string]$Configuration = 'Debug',
     [string]$PlatformToolset = 'auto',
-    [switch]$EnableAssimp)
+    [switch]$EnableAssimp,
+    # Builds this project alone. Used when a referenced project cannot be built here, which is
+    # the editor without Qt: everything else still has to come out.
+    [switch]$SkipProjectReferences)
 $ErrorActionPreference = 'Stop'
 $vswhere = Join-Path ([Environment]::GetEnvironmentVariable('ProgramFiles(x86)')) 'Microsoft Visual Studio\Installer\vswhere.exe'
 if (!(Test-Path -LiteralPath $vswhere)) { throw 'Visual Studio with C++ tools and Windows SDK is required (vswhere.exe not found).' }
@@ -36,6 +39,7 @@ foreach ($entry in [Environment]::GetEnvironmentVariables().GetEnumerator()) {
 }
 $assimp = $EnableAssimp.IsPresent.ToString().ToLowerInvariant()
 $start.Arguments = '"' + $Project + '" /nologo /verbosity:minimal /m:1 /nr:false /p:UseStructuredOutput=false /p:PreferredToolArchitecture=x64 /p:Platform=x64 /p:Configuration=' + $Configuration + ' /p:PlatformToolset=' + $PlatformToolset + ' /p:EngineEnableAssimp=' + $assimp
+if ($SkipProjectReferences) { $start.Arguments += ' /p:BuildProjectReferences=false' }
 $process = [Diagnostics.Process]::Start($start)
 $output = $process.StandardOutput.ReadToEndAsync()
 $errors = $process.StandardError.ReadToEndAsync()

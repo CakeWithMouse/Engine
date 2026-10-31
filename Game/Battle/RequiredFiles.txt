@@ -14,3 +14,4 @@ EngineContent/Shaders/ReflectiveSphere.hlsl
 EngineContent/Shaders/RotatedFigure.hlsl
 EngineContent/Shaders/ShadowDepth.hlsl
 EngineContent/Shaders/Skybox.hlsl
+EngineContent/Shaders/UI.hlsl

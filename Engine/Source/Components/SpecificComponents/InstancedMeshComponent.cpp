@@ -259,6 +259,12 @@ void InstancedMeshComponent::ClearInstances()
 
 uint32_t InstancedMeshComponent::GetDrawnInstancesForLod(int level) const
 {
+    // SelectLod can return the sprite level, so asking for it by number has to work too -
+    // otherwise a caller counting the levels silently reports zero for the farthest one.
+    if (level >= 0 && level == GetImpostorLevelIndex())
+    {
+        return GetDrawnImpostors();
+    }
     if (level < 0 || level >= LodCount)
     {
         return 0;

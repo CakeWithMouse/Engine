@@ -3,6 +3,8 @@
 #include "BattleBench.h"
 #include "UnitMesh.h"
 
+#include <Engine/Components/SpecificComponents/UIComponent.h>
+
 #include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <array>
@@ -48,6 +50,8 @@ public:
         bool DumpShadows = false;
         // Diagnostics: writes the baked sprite atlas to BMP files after a few frames.
         bool DumpImpostors = false;
+        // Diagnostics: writes the finished frame to this BMP file, then keeps running.
+        std::string DumpFrame;
         // Ignores the mouse and the keyboard, so two runs of the same scene frame it identically.
         // Screenshots taken for comparison are only readable with this on.
         bool LockCamera = false;
@@ -55,6 +59,8 @@ public:
         bool AutoLod = false;
         // Check LOD0 against the model contract and print a report.
         bool ValidateAssets = false;
+        // On-screen panels in the corner of the scene; F7 toggles them at runtime.
+        bool Hud = true;
     };
 
     void BuildScene(const Settings& settings);
@@ -88,6 +94,19 @@ private:
     void UpdateUnits(float deltaTime);
     void UpdateHotkeys();
     uint32_t CountForLod(int level) const;
+    /** Builds the on-screen panels once; UpdateHud only changes their text. */
+    void BuildHud();
+    void UpdateHud();
+
+    UIComponent* Hud = nullptr;
+    UILabel* HudFrameLabel = nullptr;
+    UILabel* HudDrawLabel = nullptr;
+    UILabel* HudUnitLabel = nullptr;
+    UILabel* HudHintLabel = nullptr;
+    UILabel* HudLodLabels[4] = {};
+    UIBar* HudFrameBar = nullptr;
+    double HudFrameMs = 0.0;
+    bool bHudKeyWasDown = false;
 
     std::vector<UnitBatch> UnitBatches;
     InstancedMeshComponent* Scenery = nullptr;

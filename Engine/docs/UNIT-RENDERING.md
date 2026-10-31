@@ -223,6 +223,6 @@ asset-check Tank: 2160 triangles, 1470 vertices, size 3.50 x 2.20 x 6.20 m, pivo
 ./Game/build/x64/Release/Battle/Battle.exe --units 20000 --frames 300
 ```
 
-Ключи сцены: `--units N`, `--types N`, `--spacing N`, `--camera N`, `--frames N`, `--detail N`, `--scenery N`, `--sprite-px N`, `--pitch N`, `--sun N`, `--shadow-distance N`, `--auto-lod`, `--validate`, `--dump-shadows`, `--dump-impostors`, `--no-shadows`, `--no-baked-shadows`, `--no-impostors`, `--forward`, `--static`, `--lod-debug`, `--lock-camera`, `--smoke`.
+Ключи сцены: `--units N`, `--types N`, `--spacing N`, `--camera N`, `--frames N`, `--detail N`, `--scenery N`, `--sprite-px N`, `--pitch N`, `--sun N`, `--shadow-distance N`, `--auto-lod`, `--validate`, `--dump-shadows`, `--dump-impostors`, `--no-shadows`, `--no-baked-shadows`, `--no-impostors`, `--forward`, `--static`, `--lod-debug`, `--lock-camera`, `--no-hud`, `--dump-frame <файл>`, `--smoke`.
 
 Диагностика полос и колец: `--lock-camera` для повторяемого кадра, `--no-impostors` чтобы понять, в спрайтах дело или нет, `--shadow-distance N` чтобы проверить, не граница ли теней, `--dump-impostors` чтобы посмотреть сам запечённый атлас (все мипы обоих слоёв ложатся рядом с exe в BMP). Клавиша **F6** включает раскраску по уровням детализации: зелёный — LOD0, жёлтый — LOD1, оранжевый — LOD2, фиолетовый — спрайт. Это самый быстрый способ проверить, что переключение уровней происходит там, где задумано.

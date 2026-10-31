@@ -47,6 +47,7 @@
     <ClCompile Include="Source\Components\SpecificComponents\ParticleSystemComponent.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\SphereComponent.cpp" />
     <ClCompile Include="Source\Components\SpecificComponents\TriangleComponent.cpp" />
+    <ClCompile Include="Source\Components\SpecificComponents\UIComponent.cpp" />
     <ClCompile Include="Source\Display\Display.cpp" />
     <ClCompile Include="Source\InputDevice\Delegates.cpp" />
     <ClCompile Include="Source\InputDevice\InputDevice.cpp" />
@@ -54,6 +55,8 @@
     <ClCompile Include="Source\MainGame\Player.cpp" />
     <ClCompile Include="Source\Render\ImpostorAtlas.cpp" />
     <ClCompile Include="Source\Render\MeshSimplifier.cpp" />
+    <ClCompile Include="Source\UI\FontAtlas.cpp" />
+    <ClCompile Include="Source\UI\UIElement.cpp" />
     <ClCompile Include="Source\Render\MeshValidation.cpp" />
     <ClCompile Include="ThirdParty\meshoptimizer\src\allocator.cpp" />
     <ClCompile Include="ThirdParty\meshoptimizer\src\indexgenerator.cpp" />
@@ -75,6 +78,7 @@
     <ClInclude Include="Include\Engine\Components\SpecificComponents\ParticleSystemComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\SphereComponent.h" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\TriangleComponent.h" />
+    <ClInclude Include="Include\Engine\Components\SpecificComponents\UIComponent.h" />
     <ClInclude Include="Include\Engine\Display\Display.h" />
     <ClInclude Include="Include\Engine\InputDevice\Delegates.h" />
     <ClInclude Include="Include\Engine\InputDevice\InputDevice.h" />
@@ -83,6 +87,8 @@
     <ClInclude Include="Include\Engine\MainGame\Player.h" />
     <ClInclude Include="Include\Engine\Render\ImpostorAtlas.h" />
     <ClInclude Include="Include\Engine\Render\MeshSimplifier.h" />
+    <ClInclude Include="Include\Engine\UI\FontAtlas.h" />
+    <ClInclude Include="Include\Engine\UI\UIElement.h" />
     <ClInclude Include="Include\Engine\Render\MeshValidation.h" />
     <ClInclude Include="Include\Engine\Render\MeshData.h" />
     <ClInclude Include="Include\Engine\Render\ShaderCompiler.h" />

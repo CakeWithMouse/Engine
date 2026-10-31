@@ -1,7 +1,10 @@
 #include "BattleGame.h"
 
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
+#include <Engine/Components/SpecificComponents/UIComponent.h>
 #include <Engine/Resources/Paths.h>
+#include <iomanip>
+#include <sstream>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -200,6 +203,107 @@ void BattleGame::BuildScene(const Settings& settings)
     // StopRotate enables the mouse control; a locked camera keeps the same framing between runs.
     player->StopRotate(!Config.LockCamera, !Config.LockCamera);
     player->EnableWASD(!Config.LockCamera);
+
+    BuildHud();
+}
+
+void BattleGame::BuildHud()
+{
+    if (!Config.Hud)
+    {
+        return;
+    }
+
+    auto hud = std::make_unique<UIComponent>();
+    FontAtlasSettings font;
+    font.Face = L"Consolas";
+    font.PixelHeight = 18;
+    hud->SetFont(font);
+
+    const glm::vec4 panelColor(0.05f, 0.06f, 0.07f, 0.62f);
+    const glm::vec4 textColor(0.93f, 0.94f, 0.91f, 1.0f);
+    const glm::vec4 dimColor(0.58f, 0.62f, 0.66f, 1.0f);
+    const glm::vec4 accentColor(0.89f, 0.52f, 0.24f, 1.0f);
+
+    // Left panel: what the renderer is doing with the field right now.
+    UIPanel* leftPanel = hud->AddPanel(UIRect{UIAnchor::TopLeft, 16.0f, 16.0f, 296.0f, 166.0f}, panelColor);
+    leftPanel->BorderWidth = 1.0f;
+    leftPanel->BorderColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.12f);
+
+    hud->AddLabel(UIRect{UIAnchor::TopLeft, 32.0f, 30.0f, 0.0f, 0.0f}, "КАДР", accentColor);
+    HudFrameLabel = hud->AddLabel(UIRect{UIAnchor::TopLeft, 32.0f, 56.0f, 0.0f, 0.0f}, "", textColor);
+    HudDrawLabel = hud->AddLabel(UIRect{UIAnchor::TopLeft, 32.0f, 78.0f, 0.0f, 0.0f}, "", dimColor);
+    HudUnitLabel = hud->AddLabel(UIRect{UIAnchor::TopLeft, 32.0f, 100.0f, 0.0f, 0.0f}, "", dimColor);
+
+    hud->AddLabel(UIRect{UIAnchor::TopLeft, 32.0f, 128.0f, 0.0f, 0.0f}, "Загрузка кадра", dimColor);
+    // One frame of the 60 FPS budget: the bar fills as the frame approaches 16.7 ms.
+    HudFrameBar = hud->AddBar(UIRect{UIAnchor::TopLeft, 32.0f, 150.0f, 264.0f, 10.0f});
+
+    // Right panel: how the units are split between the detail levels.
+    UIPanel* rightPanel = hud->AddPanel(UIRect{UIAnchor::TopRight, 16.0f, 16.0f, 238.0f, 166.0f}, panelColor);
+    rightPanel->BorderWidth = 1.0f;
+    rightPanel->BorderColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.12f);
+
+    hud->AddLabel(UIRect{UIAnchor::TopRight, 238.0f, 30.0f, 0.0f, 0.0f}, "ДЕТАЛИЗАЦИЯ", accentColor);
+
+    // The swatches repeat the colours of the F6 debug view, so the two read as one thing.
+    const glm::vec4 lodColors[4] = {
+        glm::vec4(0.25f, 1.0f, 0.35f, 1.0f),
+        glm::vec4(1.0f, 0.85f, 0.2f, 1.0f),
+        glm::vec4(1.0f, 0.4f, 0.2f, 1.0f),
+        glm::vec4(0.6f, 0.4f, 1.0f, 1.0f)
+    };
+    const char* lodNames[4] = {"LOD0", "LOD1", "LOD2", "Спрайт"};
+    for (int level = 0; level < 4; ++level)
+    {
+        const float row = 56.0f + static_cast<float>(level) * 24.0f;
+        hud->AddPanel(UIRect{UIAnchor::TopRight, 222.0f, row + 4.0f, 10.0f, 10.0f}, lodColors[level]);
+        hud->AddLabel(UIRect{UIAnchor::TopRight, 202.0f, row, 0.0f, 0.0f}, lodNames[level], dimColor);
+        HudLodLabels[level] = hud->AddLabel(UIRect{UIAnchor::TopRight, 32.0f, row, 90.0f, 0.0f}, "0", textColor);
+        HudLodLabels[level]->bAlignRight = true;
+    }
+
+    // The height is the line itself: a bottom anchor measures the far edge, so without it the
+    // text would hang past the bottom of the window.
+    HudHintLabel = hud->AddLabel(UIRect{UIAnchor::BottomLeft, 16.0f, 16.0f, 0.0f, 18.0f},
+                                 "F6 — раскраска по уровням   F7 — скрыть панели   WASD — камера", textColor);
+
+    const std::string uiShaderPath = EnginePaths::Shader("UI.hlsl").generic_u8string();
+    Hud = Register(*this, "Hud", std::move(hud), uiShaderPath, uiShaderPath);
+}
+
+void BattleGame::UpdateHud()
+{
+    if (Hud == nullptr || !Hud->IsVisible())
+    {
+        return;
+    }
+
+    const double frameMs = LastTimestampMs > 0.0 ? (NowMs() - LastTimestampMs) : 0.0;
+    // A moving average: the raw frame time jitters too much to read off the screen. The first
+    // frames carry the cost of building atlases and shadow maps, and smoothing them in would keep
+    // the number wrong for a hundred frames, so until the scene settles the average just follows.
+    const bool bSettled = GetFrameIndex() > 10;
+    HudFrameMs = (bSettled && HudFrameMs > 0.0) ? HudFrameMs * 0.9 + frameMs * 0.1 : frameMs;
+
+    std::ostringstream frameText;
+    frameText.precision(1);
+    frameText << std::fixed << HudFrameMs << " мс   " << (HudFrameMs > 0.001 ? 1000.0 / HudFrameMs : 0.0) << " FPS";
+    HudFrameLabel->SetText(frameText.str());
+
+    HudDrawLabel->SetText("Вызовов отрисовки: " + std::to_string(LastFrameStats.DrawCalls));
+    HudUnitLabel->SetText("Техники: " + std::to_string(Config.UnitCount) +
+                          "   отсечено: " + std::to_string(LastFrameStats.CulledInstances));
+
+    // 16.7 ms is the whole budget of a 60 FPS frame.
+    HudFrameBar->Fill = static_cast<float>(HudFrameMs / 16.7);
+    HudFrameBar->FillColor = HudFrameMs > 16.7 ? glm::vec4(0.85f, 0.3f, 0.25f, 0.9f)
+                                               : glm::vec4(0.89f, 0.52f, 0.24f, 0.9f);
+
+    for (int level = 0; level < 4; ++level)
+    {
+        HudLodLabels[level]->SetText(std::to_string(CountForLod(level)));
+    }
 }
 
 void BattleGame::EnableBench(uint64_t benchFrames, uint64_t warmupFrames)
@@ -219,6 +323,7 @@ void BattleGame::PreUpdate(float deltaTime)
     {
         UpdateUnits(deltaTime);
     }
+    UpdateHud();
 
     if (Bench.IsBenchActive())
     {
@@ -269,6 +374,12 @@ void BattleGame::PreUpdate(float deltaTime)
     if (Config.DumpShadows && GetFrameIndex() == 20)
     {
         DumpShadowMaps("shadow");
+    }
+
+    // Late enough that the scene has settled and the frame time on screen is the real one.
+    if (!Config.DumpFrame.empty() && GetFrameIndex() == 60)
+    {
+        RequestFrameDump(Config.DumpFrame);
     }
 
     if (Config.DumpImpostors && GetFrameIndex() == 20)
@@ -322,6 +433,13 @@ void BattleGame::UpdateHotkeys()
         }
     }
     bLodDebugKeyWasDown = bDown;
+
+    const bool bHudDown = input->IsKeyDown(Keys::F7);
+    if (bHudDown && !bHudKeyWasDown && Hud != nullptr)
+    {
+        Hud->SetVisible(!Hud->IsVisible());
+    }
+    bHudKeyWasDown = bHudDown;
 }
 
 uint32_t BattleGame::CountForLod(int level) const
@@ -363,7 +481,7 @@ std::string BattleGame::BuildReport() const
 
     char buffer[512];
     std::snprintf(buffer, sizeof(buffer),
-                  "units=%d types=%zu scenery=%d mode=%s shadows=%s sprites=%s frames=%llu frame_ms=%.2f fps=%.1f gpu_ms=%.2f draws=%.1f instances=%.0f lod0=%u lod1=%u lod2=%u sprite=%u culled=%u",
+                  "units=%d types=%zu scenery=%d mode=%s shadows=%s sprites=%s frames=%llu frame_ms=%.2f fps=%.1f gpu_ms=%.2f draws=%.1f instances=%.0f lod0=%u lod1=%u lod2=%u sprite=%u culled=%u gpu=%s",
                   Config.UnitCount,
                   UnitBatches.size(),
                   Config.SceneryCount,
@@ -376,6 +494,7 @@ std::string BattleGame::BuildReport() const
                   GpuMsSum / frames,
                   static_cast<double>(DrawCallSum) / frames,
                   static_cast<double>(InstancesSum) / frames,
-                  CountForLod(0), CountForLod(1), CountForLod(2), sprites, culled);
+                  CountForLod(0), CountForLod(1), CountForLod(2), sprites, culled,
+                  GetAdapterName().c_str());
     return buffer;
 }

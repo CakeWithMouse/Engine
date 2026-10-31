@@ -54,7 +54,18 @@ function ProjectFile([string]$Directory, [string]$Module) {
     return "$Directory/Project.json"
 }
 
-foreach ($mode in @('game','editor')) {
+# The editor module is a Qt build, and Qt is not in the repository. When it was not produced the
+# editor checks have nothing to run against, so they are reported as skipped instead of failing -
+# the same way run-games.ps1 reports Katamari when Assimp is missing.
+$editorModule = Join-Path (Split-Path $runtime) 'Editor.dll'
+$editorBuilt = (Test-Path -LiteralPath $editorModule) -and
+               ((Get-Item -LiteralPath $editorModule).LastWriteTime -ge (Get-Item -LiteralPath $runtime).LastWriteTime)
+if (-not $editorBuilt) {
+    Write-Host 'Editor module: not built (requires Qt 6). Editor checks are skipped.'
+}
+
+$runtimeModes = if ($editorBuilt) { @('game','editor') } else { @('game') }
+foreach ($mode in $runtimeModes) {
     $prefix = if ($mode -eq 'game') { 'Game' } else { 'Editor' }
     $log = Run $mode $runtime "--project `"$project`" --mode $mode --frames 3"
     Ordered $log @('EngineStarting','ResourcesReady','EngineReady','ModuleLoaded',"${prefix}Create","${prefix}Start")
@@ -115,9 +126,11 @@ Require ((Count $log 'FixtureDestroy') -eq 1) 'Editor failure destroy count'
 Pass 'editor start failure'
 
 # Editor must work even when the project's game DLL does not exist.
-$log = Run 'editor-no-game' $runtime "--project `"$missing`" --mode editor --frames 1"
-Require ($log -match 'EditorUpdates=1' -and $log -notmatch 'GameCreate') 'Editor requires game DLL'
-Pass 'editor without game DLL'
+if ($editorBuilt) {
+    $log = Run 'editor-no-game' $runtime "--project `"$missing`" --mode editor --frames 1"
+    Require ($log -match 'EditorUpdates=1' -and $log -notmatch 'GameCreate') 'Editor requires game DLL'
+    Pass 'editor without game DLL'
+}
 
 $log = Run 'interactive-exit' $runtime "--project `"$project`" --mode game" 0 "`nq`n"
 Require ($log -match 'GameUpdates=1') 'Interactive Enter/q contract failed'
@@ -146,27 +159,30 @@ $spaced = "$work/deployment with spaces"
 New-Item -ItemType Directory -Path $spaced -Force | Out-Null
 Copy-Item -LiteralPath "$output/Runtime" -Destination "$spaced/Runtime" -Recurse
 Copy-Item -LiteralPath "$output/EngineLauncher.exe" -Destination "$spaced/EngineLauncher.exe"
-foreach ($mode in @('game','editor')) {
+foreach ($mode in $runtimeModes) {
     $log = Run "spaced-$mode" "$spaced/Runtime/EngineRuntime.exe" "--project Projects/RuntimeExample/Project.json --mode $mode --frames 2"
     Require ($log -match 'Updates=2') 'Relative host project path failed'
 }
 Pass 'spaces and unrelated cwd'
-foreach ($option in @('--check','--check-editor','--smoke','--smoke-editor')) {
+$launcherOptions = if ($editorBuilt) { @('--check','--check-editor','--smoke','--smoke-editor') } else { @('--check','--smoke') }
+foreach ($option in $launcherOptions) {
     $null = Run "launcher-$($option.TrimStart('-'))" "$spaced/EngineLauncher.exe" "$option RuntimeExample"
 }
 $null = Run 'katamari-editor-disabled' "$output/EngineLauncher.exe" '--check-editor Katamari' 1
 Pass 'launcher both modes and unsupported editing rejection'
-foreach ($scene in @('BasicExamples','Pong','SunGame','Battle')) {
-    $null = Run "launcher-preview-$scene" "$output/EngineLauncher.exe" "--smoke-editor $scene"
-    $sceneLog = Run "preview-$scene" $runtime "--project Projects/$scene/Project.json --mode editor --frames 3"
-    Require ($sceneLog.Contains("PreviewScene: $scene")) 'Launcher selected the wrong preview'
-    Ordered $sceneLog @('ViewportReady','EngineRender (viewport)','ViewportStopped','EngineStopped')
-    Require ((Count $sceneLog 'EngineRender (viewport)') -eq 3) 'Preview did not render three frames'
-    Pass "preview $scene"
+if ($editorBuilt) {
+    foreach ($scene in @('BasicExamples','Pong','SunGame','Battle')) {
+        $null = Run "launcher-preview-$scene" "$output/EngineLauncher.exe" "--smoke-editor $scene"
+        $sceneLog = Run "preview-$scene" $runtime "--project Projects/$scene/Project.json --mode editor --frames 3"
+        Require ($sceneLog.Contains("PreviewScene: $scene")) 'Launcher selected the wrong preview'
+        Ordered $sceneLog @('ViewportReady','EngineRender (viewport)','ViewportStopped','EngineStopped')
+        Require ((Count $sceneLog 'EngineRender (viewport)') -eq 3) 'Preview did not render three frames'
+        Pass "preview $scene"
+    }
+    $unknownPreview = ProjectFile "$work/unknown-preview" 'missing.dll'
+    @{name='Unknown preview';module='missing.dll';content='Content';preview='UnknownScene'} | ConvertTo-Json | Set-Content -LiteralPath $unknownPreview -Encoding UTF8
+    $log = Run 'unknown-preview' $runtime "--project `"$unknownPreview`" --mode editor --frames 1" 1
+    Require ($log.Contains('Unsupported preview scene')) 'Unknown preview silently opened another scene'
+    Pass 'unknown preview rejected'
 }
-$unknownPreview = ProjectFile "$work/unknown-preview" 'missing.dll'
-@{name='Unknown preview';module='missing.dll';content='Content';preview='UnknownScene'} | ConvertTo-Json | Set-Content -LiteralPath $unknownPreview -Encoding UTF8
-$log = Run 'unknown-preview' $runtime "--project `"$unknownPreview`" --mode editor --frames 1" 1
-Require ($log.Contains('Unsupported preview scene')) 'Unknown preview silently opened another scene'
-Pass 'unknown preview rejected'
 Write-Host "$script:passed runtime checks passed. Logs: $work"
