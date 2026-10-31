@@ -1750,6 +1750,8 @@ void MeshValidationRules()
 void SceneOwnershipTests();
 void SceneHierarchyTests();
 void SceneDeferredTests();
+void SceneBatchTests();
+void AuthoringTests();
 
 int main()
 {
@@ -1759,6 +1761,8 @@ int main()
         {"scene ownership and IDs (no GPU)", SceneOwnershipTests},
         {"scene hierarchy and snapshots (no GPU)", SceneHierarchyTests},
         {"scene deferred mutations (no GPU)", SceneDeferredTests},
+        {"atomic group transforms, references and deletion (no GPU)", SceneBatchTests},
+        {"typed properties and transactional asset updates", AuthoringTests},
         {"registry ownership", RegistryOwnership}, {"registration failure ownership", RegistryFailures},
         {"transform hierarchy and cache", TransformHierarchy}, {"unregister hierarchy and instances", UnregisterHierarchyAndInstances},
         {"frame light snapshot", LightSnapshot}, {"forward/deferred shader variants", ShaderVariants},

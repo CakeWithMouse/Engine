@@ -17,6 +17,7 @@ public:
 
     void setGizmoMode(EditorGizmoMode mode);
     EditorGizmoMode gizmoMode() const { return gizmoMode_; }
+    void SetSnapping(double movement, double angle) { moveSnap_ = movement; angleSnap_ = angle; }
 
 signals:
     void contextMenuRequested(const QPoint& globalPos);
@@ -71,6 +72,7 @@ private:
     QPointF dragStartPos_;
 
     float dragSensitivity_ = 0.002f;
+    double moveSnap_ = 0, angleSnap_ = 0;
     float rotateSensitivity_ = 0.008f;
     float scaleSensitivity_ = 0.005f;
 };

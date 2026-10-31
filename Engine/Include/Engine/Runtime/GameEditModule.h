@@ -7,6 +7,8 @@
 #include <Engine/Runtime/LegacyEditApiV5.h>
 #include <Engine/Runtime/ProjectDataApi.h>
 #include <Engine/Runtime/SelectionApi.h>
+#include <Engine/Runtime/SceneBatchApi.h>
+#include <Engine/Runtime/AuthoringApi.h>
 #include <Engine/Runtime/ViewportInputApi.h>
 
 // Host-side RAII owner of an edit-only DLL session. Must be created, called and
@@ -27,6 +29,8 @@ public:
     const EngineProjectDataApi& ProjectDataApi() const noexcept { return projectData_; }
     const EngineViewportInputApi& ViewportInputApi() const noexcept { return viewportInput_; }
     const EngineSelectionApi& SelectionApi() const noexcept { return selection_; }
+    const EngineAuthoringApi& AuthoringApi() const noexcept { return authoring_; }
+    const EngineSceneBatchApi& BatchApi() const noexcept { return batch_; }
 private:
     std::filesystem::path engineContent_, projectContent_, loadedModule_;
     EngineEditorCameraApi camera_{};
@@ -35,6 +39,8 @@ private:
     EngineEditSessionApi api_{};
     EngineProjectDataApi projectData_{};
     EngineSelectionApi selection_{};
+    EngineSceneBatchApi batch_{};
+    EngineAuthoringApi authoring_{};
     EngineViewportInputApi viewportInput_{};
     EngineLegacyV4::Factory legacyFactory_{};
     std::unique_ptr<EngineLegacyV4::EditApi> legacy_ = std::make_unique<EngineLegacyV4::EditApi>();

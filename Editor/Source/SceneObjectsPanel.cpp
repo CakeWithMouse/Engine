@@ -70,7 +70,7 @@ void SceneObjectsPanel::BuildUi()
 
     hierarchy_ = new QTreeWidget(this);
     hierarchy_->setHeaderLabels({QStringLiteral("Объект"), QStringLiteral("Тип")});
-    hierarchy_->setSelectionMode(QAbstractItemView::SingleSelection);
+    hierarchy_->setSelectionMode(QAbstractItemView::ExtendedSelection);
     hierarchy_->setStyleSheet(QStringLiteral("QTreeView::item:selected { background: #a66008; color: white; }"));
     hierarchy_->setContextMenuPolicy(Qt::ActionsContextMenu);
     auto* duplicate = new QAction(QStringLiteral("Дублировать объект"), hierarchy_);
@@ -115,7 +115,9 @@ void SceneObjectsPanel::BuildUi()
                                      ? 0
                                      : items.front()->data(0, Qt::UserRole).toULongLong();
 
-        emit SelectionChanged(objectId);
+        QVector<quint64> ids; for (auto* item : items) ids.push_back(item->data(0, Qt::UserRole).toULongLong());
+        const auto active = hierarchy_->currentItem();
+        emit SelectionChanged(active && active->isSelected() ? active->data(0, Qt::UserRole).toULongLong() : objectId, ids);
     });
 
     connect(hierarchy_, &QTreeWidget::itemDoubleClicked, this,
@@ -191,6 +193,7 @@ std::array<double, 3> SceneObjectsPanel::SpawnPosition() const
 void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
 {
     suppressSelectionChanged_ = true;
+    hierarchy_->setSelectionMode(view.batchEditing ? QAbstractItemView::ExtendedSelection : QAbstractItemView::SingleSelection);
 
     QString key;
     key.reserve(static_cast<int>(view.objects.size()) * 64);
@@ -241,7 +244,7 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
     for (QTreeWidgetItemIterator it(hierarchy_); *it; ++it)
     {
         (*it)->setSelected(
-            (*it)->data(0, Qt::UserRole).toULongLong() == view.selected
+            std::find(view.selectedIds.begin(), view.selectedIds.end(), (*it)->data(0, Qt::UserRole).toULongLong()) != view.selectedIds.end()
         );
     }
 

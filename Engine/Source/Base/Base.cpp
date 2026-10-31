@@ -115,6 +115,7 @@ class BaseEngine::LoadedSession
     EngineModuleApi api{};
     EngineSceneApi sceneApi{};
     EngineLegacyV4::SceneApi legacyScene{};
+    EngineLegacyV5::SceneApi legacy5Scene{};
     EngineBindEditSessionFn bindEdit = nullptr;
     EngineBindProjectDataFn bindProjectData = nullptr;
     EngineBindSelectionFn bindSelection = nullptr;
@@ -304,8 +305,11 @@ class BaseEngine::LoadedSession
             const auto getSceneApi = reinterpret_cast<EngineGetSceneApiFn>(GetProcAddress(library, "EngineGetSceneApi"));
             if (getSceneApi && !getSceneApi(ENGINE_SCENE_API_VERSION, sizeof(sceneApi), session, &sceneApi))
             {
+                const auto lightsGet = reinterpret_cast<EngineLegacyV5::GetScene>(getSceneApi);
                 const auto oldGet = reinterpret_cast<EngineLegacyV4::GetScene>(getSceneApi);
-                if (oldGet(2, sizeof(legacyScene), session, &legacyScene) && EngineLegacyV4::Complete(legacyScene))
+                if (lightsGet(3, sizeof(legacy5Scene), session, &legacy5Scene) && EngineLegacyV5::Complete(legacy5Scene))
+                    sceneApi = EngineLegacyV5::Adapt(legacy5Scene);
+                else if (oldGet(2, sizeof(legacyScene), session, &legacyScene) && EngineLegacyV4::Complete(legacyScene))
                     sceneApi = EngineLegacyV4::Adapt(legacyScene);
             }
             if (getSceneApi && !IsCompleteSceneApi(sceneApi))
@@ -380,6 +384,7 @@ public:
     {
         sceneApi = {}; // No callable pointers survive session destruction/unloading.
         legacyScene = {};
+        legacy5Scene = {};
         continuousFrames = false;
         if (session && bindProjectData) bindProjectData(1, sizeof(EngineProjectDataApi), session, nullptr);
         bindProjectData = nullptr;
@@ -666,6 +671,8 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
     host.getService = [](void* user, uint32_t serviceId, uint32_t minVersion) -> const void* {
         auto* engine = static_cast<BaseEngine*>(user);
         if (serviceId == EngineEditorReloadService && minVersion <= 1) return &engine->reloadServiceApi;
+        if(serviceId==EngineAuthoringService && minVersion<=1 && engine->editModule && engine->editModule->AuthoringApi().describe) return &engine->editModule->AuthoringApi();
+        if (serviceId == EngineEditorBatchService && minVersion <= 1 && engine->editModule && engine->editModule->BatchApi().apply) return &engine->editModule->BatchApi();
         if (serviceId == ENGINE_SERVICE_VFS && minVersion <= ENGINE_VFS_API_VERSION)
             return &engine->vfsServiceApi;
         return nullptr;

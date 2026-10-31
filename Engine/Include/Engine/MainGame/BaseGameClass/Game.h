@@ -255,7 +255,8 @@ public:
     // Called by the window procedure.
     void OnWindowResized(int clientWidth, int clientHeight, bool minimized);
     void OnFocusLost();
-    void SetEditorSelection(uint64_t id) { EditorSelectedId = id; }
+    void SetEditorSelection(uint64_t id) { EditorSelectedId = id; EditorSelectedIds.clear(); }
+    void SetEditorSelections(std::vector<uint64_t> ids) { EditorSelectedIds = std::move(ids); EditorSelectedId = 0; }
     void RenderEditorSelection();
 
     ID3D11VertexShader* GetVertexShader() { return BaseVertexShader.Get(); }
@@ -553,6 +554,7 @@ protected:
     int GpuTimerSlot = 0;
     uint64_t EditorSelectedId = 0;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> SelectionVS;
+    std::vector<uint64_t> EditorSelectedIds;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> SelectionPS;
     Microsoft::WRL::ComPtr<ID3D11Buffer> SelectionCB;
 };

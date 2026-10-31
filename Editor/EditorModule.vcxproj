@@ -137,6 +137,7 @@
         <ClCompile Include="Source/FileBrowser.cpp"/>
         <ClCompile Include="Source/ViewportWidget.cpp"/>
         <ClCompile Include="Source/ObjectInspectorPanel.cpp"/>
+        <ClCompile Include="Source/ProjectProperties.cpp"/>
         <ClCompile Include="Source/SceneObjectsPanel.cpp"/>
         <ClCompile Include="Source/MaterialEditorWindow.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_MainWindow.cpp"/>

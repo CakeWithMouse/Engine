@@ -48,7 +48,7 @@ signals:
     void DuplicateRequested();
     void RemoveRequested();
 
-    void SelectionChanged(quint64 objectId);
+    void SelectionChanged(quint64 objectId, const QVector<quint64>& objectIds);
     void FocusRequested();
 
 private:

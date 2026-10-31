@@ -1,4 +1,8 @@
-# Учебный движок
+# PainEngine
+
+Актуальный цикл работы: [сохранение и восстановление, старые проекты на новом движке, экспорт и группы](docs/RELIABLE-WORKFLOW.md).
+
+Учебный движок C++17 / Windows / Direct3D 11.
 
 **Редактор:** Qt-окно показывает сцены BasicExamples, Pong, SunGame и Battle
 во встроенном D3D11 viewport. Выберите игру в лаунчере → «Редактировать».
@@ -17,7 +21,7 @@ C++17, Windows, Direct3D 11. Общие механизмы находятся в
 
 Доступные без импортёра игры: **BasicExamples, Pong, SunGame, Battle**. Сцена Battle показывает отрисовку 30000 единиц техники: [инстансинг, LOD, спрайты и тени](docs/UNIT-RENDERING.md); общий обзор графики — [техники рендера](docs/RENDERING.md). **Katamari** требует vcpkg/Assimp; после настройки VCPKG_ROOT используйте **Game/Start-With-Assimp.cmd**. Её полная сцена сохранена, а проект исключён из обычной сборки до подключения зависимости.
 
-Лаунчер запускает отдельные процессы. Старые примеры используют игровые exe; Runtime Example — общий EngineRuntime.exe с Game.dll или Editor.dll. Engine.lib остаётся библиотекой. Editor.dll содержит Qt-интерфейс и подключает viewport к рендеру host; редактирование объектов сцены пока не реализовано.
+Лаунчер запускает отдельные процессы. Старые примеры используют игровые exe; Runtime Example — общий EngineRuntime.exe с Game.dll или Editor.dll. Engine.lib остаётся библиотекой. Editor.dll содержит Qt-интерфейс и подключает viewport к рендеру host; редактор поддерживает сцены, Undo/Redo, импорт, материалы, Play и C++ Hot Reload.
 
 ## Структура
 

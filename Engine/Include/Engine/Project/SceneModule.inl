@@ -237,6 +237,12 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetEditExtension(void* contex
         *static_cast<EngineViewportInputApi*>(output) = static_cast<SceneEditSession*>(context)->GetViewportInputApi();
         return 1;
     }
+    if (std::strcmp(name, EngineAuthoringExtension)==0 && size==sizeof(EngineAuthoringApi)) {
+        *static_cast<EngineAuthoringApi*>(output)=static_cast<SceneEditSession*>(context)->GetAuthoringApi();return 1;
+    }
+    if (std::strcmp(name, EngineSceneBatchExtension) == 0 && size == sizeof(EngineSceneBatchApi)) {
+        *static_cast<EngineSceneBatchApi*>(output) = static_cast<SceneEditSession*>(context)->GetBatchApi(); return 1;
+    }
     if (std::strcmp(name, EngineSelectionExtension) == 0 && size == sizeof(EngineSelectionApi))
     {
         *static_cast<EngineSelectionApi*>(output) = static_cast<SceneEditSession*>(context)->GetSelectionApi();

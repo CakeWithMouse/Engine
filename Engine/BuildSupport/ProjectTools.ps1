@@ -85,18 +85,26 @@ if ($Action -eq 'Enable' -and !(Test-Path -LiteralPath $codeFile)) {
 #pragma once
 #include <Engine/Components/ComponentAnnotations.h>
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
+#include <Engine/Components/EditorProperties.h>
 
 ENGINE_COMPONENT("RotatingCube")
-class RotatingCube : public CubeComponent
+class RotatingCube : public CubeComponent, public EditorPropertyProvider
 {
 public:
     RotatingCube();
     void Tick(float deltaTime) override;
+    std::string SaveProjectData() const override;
+    void LoadProjectData(const std::string& data) override;
+    std::string DescribeEditorProperties() const override;
+private:
+    float speed_ = 90.0f;
+    bool enabled_ = true;
 };
 '@
     WriteNew 'Source/RotatingCube.cpp' @'
 #include "RotatingCube.h"
 #include <cmath>
+#include <nlohmann/json.hpp>
 
 RotatingCube::RotatingCube()
 {
@@ -109,8 +117,30 @@ void RotatingCube::Tick(float deltaTime)
     CubeComponent::Tick(deltaTime);
     auto rotation = GetRotation();
     // SetRotation uses degrees. deltaTime is scaled simulation time.
-    rotation.y = std::fmod(rotation.y + 90.0f * deltaTime, 360.0f);
+    if (enabled_) rotation.y = std::fmod(rotation.y + speed_ * deltaTime, 360.0f);
     SetRotation(rotation);
+}
+
+std::string RotatingCube::SaveProjectData() const
+{
+    return nlohmann::json{{"version",1},{"speed",speed_},{"enabled",enabled_}}.dump();
+}
+void RotatingCube::LoadProjectData(const std::string& data)
+{
+    if (data.empty()) return;
+    const auto json = nlohmann::json::parse(data);
+    const auto speed = json.at("speed").get<float>();
+    const auto enabled = json.at("enabled").get<bool>();
+    if (json.at("version") != 1 || !std::isfinite(speed) || speed < -720 || speed > 720)
+        throw std::runtime_error("Invalid rotation settings");
+    speed_ = speed; enabled_ = enabled;
+}
+std::string RotatingCube::DescribeEditorProperties() const
+{
+    return R"json({"version":1,"fields":[
+        {"path":"/speed","type":"number","label":"Speed (degrees/sec)","group":"Behavior/Rotation","min":-720,"max":720,"step":15},
+        {"path":"/enabled","type":"bool","label":"Enabled","group":"Behavior/Rotation"}
+    ]})json";
 }
 '@
     WriteNew 'Source/ProjectGame.h' @'
