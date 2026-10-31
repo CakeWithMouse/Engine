@@ -9,6 +9,7 @@
 #include "QtHost.h"
 #include "EditorSettings.h"
 #include "GizmoMath.h"
+#include "GizmoGeometry.h"
 
 class ViewportHeaderBar;
 
@@ -95,6 +96,10 @@ private:
 
     EditorGizmoMode gizmoMode_ = EditorGizmoTranslate;
     GizmoMath::AxisLock activeAxis_ = GizmoMath::AxisLock::All;
+    GizmoGeometry::Handle hoveredHandle_ = GizmoGeometry::Handle::None;
+    uint64_t overlayHash_ = 0;
+    EngineCameraInfo lastCameraInfo_{};
+    bool hasCameraInfo_ = false;
     float camYaw_ = -1.5707963f;
     float camPitch_ = 0.0f;
     float camPos_[3] = {0.0f, 0.0f, -5.0f};

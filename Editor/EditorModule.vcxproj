@@ -148,6 +148,8 @@
         <ClCompile Include="Source/AssetTools.cpp"/>
         <ClCompile Include="Source/FileBrowser.cpp"/>
         <ClCompile Include="Source/ViewportWidget.cpp"/>
+        <ClCompile Include="Source/ViewportWidget_Input.cpp"/>
+        <ClCompile Include="UI/ViewportOverlayHelper.cpp"/>
         <ClCompile Include="Source/ObjectInspectorPanel.cpp"/>
         <ClCompile Include="Source/SceneObjectsPanel.cpp"/>
         <ClCompile Include="Source/MaterialEditorWindow.cpp"/>
@@ -226,6 +228,7 @@
         <ClInclude Include="Host/SceneCommandHandler.h"/>
         <ClInclude Include="UI/EditorApp.h"/>
         <ClInclude Include="UI/IconProvider.h"/>
+        <ClInclude Include="UI/ViewportOverlayHelper.h"/>
         <ClInclude Include="Include/CodeClassDialog.h"/>
         <ClInclude Include="Include/FileBrowser.h"/>
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->

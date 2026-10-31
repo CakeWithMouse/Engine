@@ -157,6 +157,8 @@ private:
     QAction* actImportTexture_ = nullptr;
     QAction* actReloadShaders_ = nullptr;
     QAction* actResetLayout_ = nullptr;
+    QAction* actGrid_ = nullptr;
+    QAction* actOverlays_ = nullptr;
     QAction* actThemeDark_ = nullptr;
     QAction* actThemeLight_ = nullptr;
     QAction* actLangRu_ = nullptr;

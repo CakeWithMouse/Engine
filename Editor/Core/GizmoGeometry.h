@@ -88,6 +88,6 @@ namespace GizmoGeometry
         const EngineCameraInfo& cam,
         Handle hoverHandle,
         Handle activeHandle,
-        const Palette& palette
+        const Palette& palette = Palette()
     );
 }

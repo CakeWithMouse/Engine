@@ -168,6 +168,21 @@ void EditorMainWindow::BuildUi()
         DockLayoutManager::ResetLayout(this, ProjectPath());
         ApplyDefaultLayout();
     });
+
+    viewMenu_->addSeparator();
+    actGrid_ = viewMenu_->addAction(Tr("Сетка", "Grid"), this, [this] {
+        CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleGrid"));
+        if (actGrid_) actGrid_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool());
+    });
+    actGrid_->setCheckable(true);
+    actGrid_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool());
+
+    actOverlays_ = viewMenu_->addAction(Tr("Иконки и гизмо", "Icons and Gizmos"), this, [this] {
+        CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleOverlays"));
+        if (actOverlays_) actOverlays_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/overlays"), true).toBool());
+    });
+    actOverlays_->setCheckable(true);
+    actOverlays_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/overlays"), true).toBool());
     viewMenu_->addSeparator();
 
     QMenu* viewMenu = viewMenu_;
@@ -1292,6 +1307,8 @@ void EditorMainWindow::RetranslateUi()
     if (actThemeDark_) actThemeDark_->setText(Tr("Тёмная (Dark)", "Dark"));
     if (actThemeLight_) actThemeLight_->setText(Tr("Светлая (Light)", "Light"));
     if (actResetLayout_) actResetLayout_->setText(Tr("Сбросить раскладку окон", "Reset Window Layout"));
+    if (actGrid_) actGrid_->setText(Tr("Сетка", "Grid"));
+    if (actOverlays_) actOverlays_->setText(Tr("Иконки и гизмо", "Icons and Gizmos"));
     if (actLangRu_) actLangRu_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::Ru);
     if (actLangEn_) actLangEn_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::En);
 }

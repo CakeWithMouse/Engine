@@ -3,6 +3,7 @@
 #include "CommandRegistry.h"
 #include "ViewportWidget.h"
 #include "EditorSettings.h"
+#include "SettingsService.h"
 #include "QtHost.h"
 
 inline void RegisterViewportCommands(ViewportWidget* viewport, EditorQtHost* host)
@@ -65,6 +66,18 @@ inline void RegisterViewportCommands(ViewportWidget* viewport, EditorQtHost* hos
         EditorSettings::Instance().SetControlScheme(ControlScheme::Blender);
         return true;
     });
+
+    reg(QStringLiteral("View.ToggleGrid"), QStringLiteral("Toggle Grid"), [](const CommandContext&) {
+        bool current = SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool();
+        SettingsService::Instance().SetValue(QStringLiteral("view/grid"), !current);
+        return true;
+    });
+
+    reg(QStringLiteral("View.ToggleOverlays"), QStringLiteral("Toggle Overlays and Gizmos"), [](const CommandContext&) {
+        bool current = SettingsService::Instance().GetValue(QStringLiteral("view/overlays"), true).toBool();
+        SettingsService::Instance().SetValue(QStringLiteral("view/overlays"), !current);
+        return true;
+    });
 }
 
 inline void UnregisterViewportCommands()
@@ -78,4 +91,6 @@ inline void UnregisterViewportCommands()
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Editor.ToggleControlScheme"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Editor.SetControlSchemeUnreal"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Editor.SetControlSchemeBlender"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.ToggleGrid"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.ToggleOverlays"));
 }
