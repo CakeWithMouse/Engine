@@ -74,6 +74,11 @@
         <ClCompile Include="../Core/EditorLocale.cpp"/>
         <ClCompile Include="../Core/SettingsService.cpp"/>
         <ClCompile Include="../Core/GizmoMath.cpp"/>
+        <ClCompile Include="../Core/AssetOps.cpp"/>
+        <ClCompile Include="../Core/HlslGraphCompiler.cpp"/>
+        <ClCompile Include="../Core/MaterialGraphModel.cpp"/>
+        <ClCompile Include="../Core/SceneFile.cpp"/>
+        <ClCompile Include="../Core/Terminal.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_Logger.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_CommandRegistry.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_FileService.cpp"/>
@@ -110,6 +115,23 @@
             <Outputs>$(IntDir)moc/moc_%(Filename).cpp</Outputs>
             <AdditionalInputs>$(QtInstallDir)/bin/moc.exe</AdditionalInputs>
         </CustomBuild>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ClInclude Include="../Core/IUserPrompt.h"/>
+        <ClInclude Include="../Core/EditorLocale.h"/>
+        <ClInclude Include="../Core/SettingsService.h"/>
+        <ClInclude Include="../Core/GizmoMath.h"/>
+        <ClInclude Include="../Core/AssetOps.h"/>
+        <ClInclude Include="../Core/HlslGraphCompiler.h"/>
+        <ClInclude Include="../Core/MaterialGraphModel.h"/>
+        <ClInclude Include="../Core/SceneFile.h"/>
+        <ClInclude Include="../Core/Terminal.h"/>
+        <ClInclude Include="core/GizmoMathTests.h"/>
+        <ClInclude Include="core/MaterialGraphTests.h"/>
+        <ClInclude Include="core/SceneFileTests.h"/>
+        <ClInclude Include="core/TerminalTests.h"/>
+        <ClInclude Include="core/AssetOpsTests.h"/>
     </ItemGroup>
 
     <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets"/>
