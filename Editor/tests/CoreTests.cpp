@@ -2,10 +2,24 @@
 #include "../Core/Logger.h"
 #include "../Core/CommandRegistry.h"
 #include "../Core/FileService.h"
+#include "../Core/EditorLocale.h"
+#include "../Core/SettingsService.h"
+#include "../Core/GizmoMath.h"
+#include "core/GizmoMathTests.h"
+#include "../Core/MaterialGraphModel.h"
+#include "../Core/HlslGraphCompiler.h"
+#include "core/MaterialGraphTests.h"
+#include "../Core/SceneFile.h"
+#include "core/SceneFileTests.h"
+#include "../Core/Terminal.h"
+#include "core/TerminalTests.h"
+#include "../Core/AssetOps.h"
+#include "core/AssetOpsTests.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
 #include <cassert>
+#include <cmath>
 #include <cstdio>
 #ifdef _DEBUG
 #include <crtdbg.h>
@@ -192,13 +206,8 @@ void TestFileService()
     Check(!fs.ReadFile("../forbidden.txt", readBack, &error), "Read outside sandbox rejected");
     Check(!fs.DeleteFile("../forbidden.txt", &error), "Delete outside sandbox rejected");
 }
-} // namespace
 
-#include "EditorLocale.h"
-#include "GizmoMath.h"
-#include "SettingsService.h"
-
-static void TestGizmoMath()
+void TestGizmoMath()
 {
     // 1. Translation snap
     Check(std::abs(GizmoMath::SnapTranslation(1.35, 0.5) - 1.5) < 1e-6, "SnapTranslation 1.35 to step 0.5 is 1.5");
@@ -250,9 +259,41 @@ static void TestGizmoMath()
         lastSnapped = GizmoMath::SnapTranslation(startPos + accumulatedDelta, 1.0);
     }
     Check(lastSnapped == 1.0, "Accumulated offset reaches threshold and snaps to 1.0");
+
+    // 6. RunGizmoMathTests from rewrite/editor-v2-core
+    RunGizmoMathTests();
+    gChecks += 11;
 }
 
-static void TestEditorLocale()
+void TestMaterialGraph()
+{
+    RunMaterialGraphTests();
+    // 18 distinct checks in RunMaterialGraphTests
+    gChecks += 18;
+}
+
+void TestSceneFile()
+{
+    RunSceneFileTests();
+    // 21 distinct checks in RunSceneFileTests
+    gChecks += 21;
+}
+
+void TestTerminal()
+{
+    RunTerminalTests();
+    // 28 distinct checks in RunTerminalTests
+    gChecks += 28;
+}
+
+void TestAssetOps()
+{
+    RunAssetOpsTests();
+    // 44 distinct checks in RunAssetOpsTests
+    gChecks += 44;
+}
+
+void TestEditorLocale()
 {
     auto& loc = EditorLocale::Instance();
     loc.SetLanguage(EditorLanguage::Ru);
@@ -272,6 +313,32 @@ static void TestEditorLocale()
     Check(notified == false, "Unsubscribed callback not notified");
     Check(Tr("Файл", "File") == QStringLiteral("Файл"), "Translate Ru again");
 }
+
+void TestSettingsService()
+{
+    const QString k1 = SettingsService::ComputeProjectKey("C:/Proj1/p.painproj");
+    const QString k2 = SettingsService::ComputeProjectKey("C:/Proj2/p.painproj");
+    const QString kEmpty = SettingsService::ComputeProjectKey("");
+    Check(!k1.isEmpty(), "k1 not empty");
+    Check(!k2.isEmpty(), "k2 not empty");
+    Check(k1 != k2, "k1 != k2");
+    Check(kEmpty == QStringLiteral("default"), "kEmpty is default");
+
+    SettingsService::Instance().SaveProjectLayout("C:/Proj1/p.painproj", QByteArray("STATE1"), QByteArray("GEOM1"));
+    QByteArray s, g;
+    Check(SettingsService::Instance().RestoreProjectLayout("C:/Proj1/p.painproj", s, g), "restore layout proj1");
+    Check(s == QByteArray("STATE1"), "state proj1");
+    Check(g == QByteArray("GEOM1"), "geom proj1");
+
+    QByteArray s2, g2;
+    Check(!SettingsService::Instance().RestoreProjectLayout("C:/ProjNew/never.painproj", s2, g2), "new project gets no saved layout");
+
+    SettingsService::Instance().ResetProjectLayout("C:/Proj1/p.painproj");
+    QByteArray s3, g3;
+    Check(!SettingsService::Instance().RestoreProjectLayout("C:/Proj1/p.painproj", s3, g3), "reset layout proj1");
+}
+
+} // namespace
 
 int main(int argc, char* argv[])
 {
@@ -317,31 +384,25 @@ int main(int argc, char* argv[])
 
     std::printf("[Test] TestSettingsService...\n");
     std::fflush(stdout);
-    {
-        const QString k1 = SettingsService::ComputeProjectKey("C:/Proj1/p.painproj");
-        const QString k2 = SettingsService::ComputeProjectKey("C:/Proj2/p.painproj");
-        const QString kEmpty = SettingsService::ComputeProjectKey("");
-        Check(!k1.isEmpty(), "k1 not empty");
-        Check(!k2.isEmpty(), "k2 not empty");
-        Check(k1 != k2, "k1 != k2");
-        Check(kEmpty == QStringLiteral("default"), "kEmpty is default");
+    TestSettingsService();
 
-        SettingsService::Instance().SaveProjectLayout("C:/Proj1/p.painproj", QByteArray("STATE1"), QByteArray("GEOM1"));
-        QByteArray s, g;
-        Check(SettingsService::Instance().RestoreProjectLayout("C:/Proj1/p.painproj", s, g), "restore layout proj1");
-        Check(s == QByteArray("STATE1"), "state proj1");
-        Check(g == QByteArray("GEOM1"), "geom proj1");
+    std::printf("[Test] TestMaterialGraph...\n");
+    std::fflush(stdout);
+    TestMaterialGraph();
 
-        QByteArray s2, g2;
-        Check(!SettingsService::Instance().RestoreProjectLayout("C:/ProjNew/never.painproj", s2, g2), "new project gets no saved layout");
+    std::printf("[Test] TestSceneFile...\n");
+    std::fflush(stdout);
+    TestSceneFile();
 
-        SettingsService::Instance().ResetProjectLayout("C:/Proj1/p.painproj");
-        QByteArray s3, g3;
-        Check(!SettingsService::Instance().RestoreProjectLayout("C:/Proj1/p.painproj", s3, g3), "reset layout proj1");
-    }
+    std::printf("[Test] TestTerminal...\n");
+    std::fflush(stdout);
+    TestTerminal();
+
+    std::printf("[Test] TestAssetOps...\n");
+    std::fflush(stdout);
+    TestAssetOps();
 
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);
     return 0;
 }
-

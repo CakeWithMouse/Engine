@@ -39,13 +39,23 @@
 
 ---
 
-## Эталон тестов (Baseline S0 / S1 / S2)
+## Чек-лист среза S3 (Чистый Core без UI, ветка `rewrite/editor-v2-core`)
+
+- [x] **Шаг 3.1 (feat):** `Core/GizmoMath`: перенос из `feature/editor-ui-overhaul:Editor/Source/ViewportWidget.cpp` строк 1945–2123, дословно, без Qt-виджетов (`AxisLock`, `GizmoMode`, `NormalizeQuat`, `MulQuat`, `AxisAngleQuat`, `ApplyRotateScaleGizmo`, `ComputeSpawnPosition`). Юнит-тесты на снап и оси в `Editor/tests/core/GizmoMathTests.h` (58/58 PASS).
+- [x] **Шаг 3.2 (feat):** `Core/HlslGraphCompiler` + `Core/MaterialGraphModel`: из `CompileGraphToHlsl` в `MaterialGraphWidget.cpp`. Модель без QGraphicsItem, числа в C-локали, JSON через QJsonDocument. Тесты: граф -> HLSL эталонные строки, round-trip JSON (76/76 PASS).
+- [x] **Шаг 3.3 (feat):** `Core/SceneFile`: чтение/запись сцены через FileService. Тест на имя объекта a"b} (97/97 PASS).
+- [x] **Шаг 3.4 (feat):** `Core/Terminal`: парсер команд (help, spawn, select, deselect, pos, rot, scale, delete, duplicate, focus, play, pause, stop, clear), только маппинг текста на команды CommandRegistry. Парсер ничего не исполняет сам. Тесты на кавычки, count, x y z (125/125 PASS).
+- [x] **Шаг 3.5 (feat):** `Core/AssetOps`: создание/переименование/дублирование/удаление в песочнице корня проекта через FileService (169/169 PASS).
+
+---
+
+## Эталон тестов (Baseline S0 / S1 / S2 / S3)
 
 | Тест / Скрипт | Результат на `main` | Результат после fix(build) | Примечание |
 |---|---|---|---|
 | Сборка `Editor` (Debug) | **FAIL (LNK1104)** | **PASS** | 0 ошибок, 0 новых warnings |
 | Сборка `Editor` (Release) | **FAIL (C1083 LTCG)** | **PASS** | Собрано из пути без запятых (`Documents\GitHub\Engine`) |
-| `Editor/tests/CoreTests.exe` | — | **72/72 PASS** | Юнит-тесты Core без виджетов |
+| `Editor/tests/CoreTests.exe` | — | **194/194 PASS** | Юнит-тесты Core без виджетов (S1–S3, GizmoMath, MaterialGraph, SceneFile, Terminal, AssetOps, Locale, Settings) |
 | `Editor/tests/UiTests.exe` | — | **15/15 PASS** | Самопроверка тестового каркаса UI |
 | `Engine/tests/run.ps1` | **43/43 PASS** | **43/43 PASS** | Тесты ядра Engine |
 | `Engine/tests/component-generation/run.ps1` | **20/20 PASS** | **20/20 PASS** | Генератор компонентов и контракты |
@@ -96,6 +106,10 @@
 9. **Политика Checkpoint и coalescing жестов в `EditorHistory`:**
    - Непрерывные жесты перетаскивания гизмо обрамляются `BeginGizmoDrag` / `EndGizmoDrag`. Первый тик создает ровно 1 файл контрольной точки `N.scene.json` в `QTemporaryDir`, последующие тики в течение жеста коалесцируются (0 файлов).
    - Одно нажатие `Undo` возвращает объект в состояние до начала жеста.
+10. **Выделение Core/GizmoMath без виджетов (S3.1):**
+    - Математические операции гизмо (`ApplyRotateScaleGizmo`, кватернионы, `ComputeSpawnPosition`, `AxisLock`) изолированы в чистом слое Core без зависимостей от Qt-виджетов.
+11. **Изолированные дисковые операции Core/AssetOps (S3.5):**
+    - Операции над ассетами (создание, переименование, дублирование с авторазрешением коллизий `_Copy_N`, удаление файлов и рекурсивное удаление папок) выполняются через `FileService` с проверкой песочницы `ResolveSandboxPath`, предотвращая утечки путей и path traversal.
 
 ---
 
