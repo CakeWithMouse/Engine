@@ -1,19 +1,19 @@
 {
   "title": "PainEngine\nПрактический туториал",
-  "date": "2026-10-28",
-  "revision": 2,
-  "engineVersion": "2026.10.28.0",
+  "date": "2026-10-30",
+  "revision": 3,
+  "engineVersion": "2026.10.28.2",
   "editorialPolicy": "editorial-policy.json",
   "slides": [
     {
       "type": "cover",
       "title": "PainEngine\nПрактический туториал",
       "subtitle": "Редактор и рабочие примеры C++",
-      "image": "r2/editor.png",
+      "image": "r3/editor.jpg",
       "sources": [
         "Engine/Version.json"
       ],
-      "notes": "Реальный интерфейс PainEngine 2026.10.28.0. Скриншоты учебного проекта."
+      "notes": "Актуальный редактор и реальные снимки учебного проекта. Версия 2026.10.28.2; проверено по main на 30.10.2026, включая PR #8 и #10. Ранее удалённые пользователем разделы не восстановлены."
     },
     {
       "type": "shot",
@@ -39,7 +39,7 @@
     {
       "type": "shot",
       "title": "Окно редактора",
-      "image": "r2/editor.png",
+      "image": "r3/editor.jpg",
       "items": [
         [
           "Слева",
@@ -47,7 +47,7 @@
         ],
         [
           "Справа",
-          "Свойства выбранного объекта."
+          "Трансформация, модель, текстура и материал объекта."
         ],
         [
           "Снизу",
@@ -56,8 +56,7 @@
       ],
       "foot": "",
       "sources": [
-        "Editor/Source/MainWindow.cpp",
-        "Editor/Source/SceneTools.cpp"
+        "Editor/Source/MainWindow.cpp"
       ],
       "notes": "Панели возвращаются через меню «Вид». В центре находится реальный D3D viewport."
     },
@@ -72,7 +71,7 @@
         ],
         [
           "Выделение",
-          "ЛКМ или строка иерархии; Tab перебирает объекты, F фокусирует, Esc снимает выбор."
+          "ЛКМ — выбор; Tab — перебор; F — фокус; Esc — снять выбор."
         ],
         [
           "Перемещение",
@@ -82,34 +81,88 @@
       "foot": "Сначала щёлкните viewport. При вводе в текстовое поле горячие клавиши сцены не действуют.",
       "sources": [
         "Editor/Source/ViewportWidget.cpp",
-        "Editor/Source/SceneTools.cpp"
+        "Editor/Source/MainWindow.cpp"
       ],
       "notes": ""
     },
     {
       "type": "shot",
-      "title": "Модели и текстуры",
+      "title": "Импорт модели и текстуры",
       "image": "r2/resources-menu.png",
       "items": [
         [
           "Импорт",
-          "Сцена → Ресурсы → Импорт модели… / Импорт текстуры…"
+          "Сцена → Ресурсы → Импорт модели… или Импорт текстуры…"
         ],
         [
-          "Размещение",
-          "Добавить модель… выбирает файл из Content/Models."
+          "Добавление",
+          "Дважды щёлкните модель в Content/Models, чтобы добавить её в сцену."
         ],
         [
-          "Текстура",
-          "Выберите объект, затем «Выбрать текстуру…» в разделе «Визуал»."
+          "Назначение",
+          "Для отдельной текстуры: выберите объект и нажмите «Выбрать текстуру…»."
         ]
       ],
-      "foot": "Модели: GLB, GLTF, OBJ, FBX. Текстуры: PNG, JPG, JPEG, BMP, TGA.",
+      "foot": "Модели: GLB, glTF, OBJ, FBX, BLEND. Изображения: PNG, JPG, BMP, TGA.",
       "sources": [
         "Editor/Source/AssetTools.cpp",
-        "Editor/Source/SceneTools.cpp"
+        "Editor/Source/MainWindow.cpp",
+        "Engine/Source/Scene/ModelImport.cpp",
+        "Engine/docs/PROJECT-ASSETS.md"
       ],
-      "notes": "Импорт моделей требует Assimp; текущая сборка его включает. /Game соответствует Content проекта."
+      "notes": "Импорт сначала копирует ресурс в Content. Сам импорт не добавляет объект в сцену. FBX/BLEND создают базовые материалы автоматически; прямой GLB/glTF/OBJ пока используют ручное назначение материала. Текстуру нужно импортировать до её назначения. Изменения сцены выполняются в Edit."
+    },
+    {
+      "type": "shot",
+      "title": "FBX / BLEND: модель сразу с материалом",
+      "image": "r3/import-result.jpg",
+      "items": [
+        [
+          "Что создаётся",
+          "Модель, папки Materials и Textures, файл .import.json."
+        ],
+        [
+          "При добавлении",
+          "Материал назначится сам. BaseMap — текстура, Tint — базовый цвет."
+        ],
+        [
+          "Blender",
+          "Blender 4.2+. Переносится Image Texture из Base Color."
+        ]
+      ],
+      "foot": "Базовый opaque-материал и UV0. Normal, roughness, metallic и сложный граф узлов не переносятся.",
+      "sources": [
+        "Engine/Source/Scene/ModelImport.cpp",
+        "Engine/Source/Scene/SceneAssets.cpp",
+        "Engine/docs/PROJECT-ASSETS.md"
+      ],
+      "notes": "FBX копирует внешние и извлекает встроенные цветовые изображения. BLEND преобразуется в GLB фоновым Blender; после импорта Blender для запуска проекта не нужен. Материалы всех мешей создаются, но объект пока использует один — материал первого меша. Изображение используется через BaseMap, поэтому поле отдельной текстуры объекта остаётся пустым. В примере на скриншоте BaseMap — импортированная зелёная картинка. Внешние изображения должны существовать, упакованные поддерживаются. Процедурные материалы предварительно запеките. Повторный импорт создаёт отдельную папку. Прямые GLB/glTF/OBJ не получают этот автоматический материал."
+    },
+    {
+      "type": "shot",
+      "title": "Редактор материала",
+      "image": "r3/material-editor.jpg",
+      "items": [
+        [
+          "Открыть",
+          "Свойства → Материал → Редактировать или двойной щелчок по .mat."
+        ],
+        [
+          "Настроить",
+          "Слева — превью, Tint и BaseMap. Справа — код HLSL поверхности."
+        ],
+        [
+          "Сохранить",
+          "Параметры видны сразу. Ctrl+S в этом окне сохраняет .mat и применяет HLSL."
+        ]
+      ],
+      "foot": "Ctrl+S основного окна сохраняет сцену. F6 перечитывает материалы после внешних изменений.",
+      "sources": [
+        "Editor/Source/MaterialEditorWindow.cpp",
+        "Editor/Source/MainWindow.cpp",
+        "Engine/docs/MATERIALS.md"
+      ],
+      "notes": "Если материал ещё не назначен, «Редактировать» создаёт .mat и .hlsl в Content/Materials. «Выбрать…» назначает готовый .mat; «Убрать» возвращает материал по умолчанию. Превью: сфера, куб или плоскость; мышь вращает камеру, колесо приближает. Смешивание: opaque, masked, translucent, additive; доступны unlit, two-sided и тени. Поля параметров отражаются из HLSL: MaterialParams/b1, Texture2D/t6 и далее. Ошибки компиляции появляются под кодом, двойной щелчок ведёт к строке. «Откатить» восстанавливает файлы с диска. Назначение материала меняется в Edit, параметры самого материала можно смотреть и в Play. Один .mat разделяется между использующими его объектами."
     },
     {
       "type": "shot",
@@ -131,7 +184,7 @@
       ],
       "foot": "Параметры выбранного типа находятся ниже трансформации в правой панели.",
       "sources": [
-        "Editor/Source/SceneTools.cpp",
+        "Editor/Source/MainWindow.cpp",
         "Engine/Include/Engine/Project/StandardTypes.h"
       ],
       "notes": ""
@@ -152,7 +205,7 @@
       ],
       "foot": "",
       "sources": [
-        "Editor/Source/SceneTools.cpp"
+        "Editor/Source/MainWindow.cpp"
       ],
       "notes": "Добавьте персонажа и назначьте его в диалоге Play."
     },
@@ -176,7 +229,7 @@
       ],
       "foot": "Запуск → Настроить Play…",
       "sources": [
-        "Editor/Source/SceneTools.cpp",
+        "Editor/Source/MainWindow.cpp",
         "Engine/docs/INPUT-CHARACTER.md"
       ],
       "notes": "Начальные параметры диалога: расстояние 5, высота 2, чувствительность 0.005. Настройки сохраняются вместе со сценой."
@@ -188,7 +241,7 @@
       "items": [
         [
           "Play / Pause",
-          "Play запускает копию сцены. Pause останавливает симуляцию, Resume продолжает её."
+          "Play запускает копию сцены. Pause / Resume — пауза и продолжение."
         ],
         [
           "Stop",
@@ -196,7 +249,7 @@
         ],
         [
           "Отдельное окно",
-          "Запуск → Запустить отдельным окном использует сохранённые файлы проекта."
+          "Отдельный запуск использует сохранённые файлы проекта."
         ]
       ],
       "foot": "В viewport: Space — Play / Stop, P — Pause / Resume.",
@@ -204,7 +257,7 @@
         "Editor/Source/MainWindow.cpp",
         "Editor/Source/ViewportWidget.cpp"
       ],
-      "notes": ""
+      "notes": " Отдельный запуск: Запуск → Запустить отдельным окном."
     },
     {
       "type": "table",
@@ -227,8 +280,8 @@
           "Сцены с объектами, трансформациями и настройками Play"
         ],
         [
-          "Content/Models, Content/Textures",
-          "Ресурсы проекта"
+          "Content/Models, Textures, Materials",
+          "Модели, изображения, файлы .mat и .hlsl"
         ],
         [
           "Source и Build.ps1",
@@ -240,11 +293,11 @@
         ]
       ],
       "foot": "Ctrl+S: «Сохранить и сделать стартовой». Для переноса сохраняйте всю папку проекта.",
-      "notes": "В текущем меню сохранение делает выбранную сцену стартовой. «Сохранить как…» создаёт отдельный файл. Сцена содержит ссылки на ресурсы, поэтому одного JSON недостаточно для переноса. После успешной сборки C++ Project.json указывает на новую DLL в Binaries. Не удаляйте активную DLL. Старые сцены без персонажа продолжают открываться. Персонаж и назначения Play сохраняются в данных компонентов.",
+      "notes": "В текущем меню сохранение делает выбранную сцену стартовой. «Сохранить как…» создаёт отдельный файл. Сцена содержит ссылки на ресурсы, поэтому одного JSON недостаточно для переноса. После успешной сборки C++ Project.json указывает на новую DLL в Binaries. Не удаляйте активную DLL. Старые сцены без персонажа продолжают открываться. Персонаж и назначения Play сохраняются в данных компонентов. Ctrl+S в основном окне сохраняет сцену, но не несохранённые правки открытого материала. Сохраните материал в его собственном окне. У импортированных моделей Materials и Textures лежат внутри папки модели.",
       "sources": [
         "Engine/docs/CODE-PROJECTS.md",
         "Engine/docs/SCENE-JSON.md",
-        "Editor/Source/SceneTools.cpp"
+        "Editor/Source/MainWindow.cpp"
       ]
     },
     {
@@ -258,12 +311,12 @@
       "rows": [
         [
           "Сцена и оформление",
-          "Объекты, модели, свет, эффекты",
+          "Модели, материалы, свет, эффекты",
           "Свои компоненты и данные"
         ],
         [
           "Персонаж",
-          "Трансформация и скорость",
+          "Назначение для Play",
           "Свой Character и поведение"
         ],
         [
@@ -305,7 +358,7 @@
         ],
         [
           "Сборка",
-          "Проект → C++ → Перекомпилировать / Hot Reload или Ctrl+Alt+R. Выполняйте в Edit."
+          "Ctrl+Alt+R — сборка и Hot Reload. Выполняйте в Edit."
         ]
       ],
       "foot": "Для имени класса: латиница, цифры и _. Начинайте с буквы или _.",
@@ -331,12 +384,15 @@
         ],
         [
           "В Edit",
-          "Для размещения в рабочей сцене выберите RotatingCube в «Классы проекта»."
+          "Выберите «Классы проекта» → RotatingCube и добавьте объект."
         ]
       ],
       "foot": "Поворот вокруг Y: 90°/с. Позиция остаётся прежней.",
       "sources": [
-        "Engine/BuildSupport/ProjectTools.ps1"
+        "Engine/BuildSupport/ProjectTools.ps1",
+        "Engine/docs/tutorial/examples/ProjectGame.cpp",
+        "Engine/docs/tutorial/examples/RotatingCube.cpp",
+        "Engine/docs/tutorial/examples/RotatingCube.h"
       ],
       "notes": "ProjectGame не добавляет второй пример, если в сцене уже есть RotatingCube или его наследник. Подключение C++ не переписывает файл сохранённой сцены. Существующие C++ проекты не обновляются автоматически."
     },
@@ -350,7 +406,8 @@
         "Engine/Include/Engine/Components/SpecificComponents/CubeComponent.h"
       ],
       "foot": "",
-      "notes": ""
+      "notes": "",
+      "codeSize": 20
     },
     {
       "type": "code",
@@ -374,43 +431,48 @@
         "Engine/Include/Engine/Scene/Scene.h"
       ],
       "foot": "Полный ProjectGame.cpp дополнительно проверяет, что куб ещё не добавлен.",
-      "notes": ""
+      "notes": "Фрагмент внутри AfterInitialize пользовательского Game. В полном приложенном ProjectGame.cpp есть includes, проверка отсутствия RotatingCube и подбор свободного имени."
     },
     {
       "type": "code",
-      "title": "Модель и текстура из C++",
-      "code": "#include <Engine/Scene/SceneAssets.h>\n\nauto model = SceneAssets::CreateModel(\n    \"/Game/Models/CesiumMan.glb\");\nmodel->SetPosition({-2.0f, 0.0f, 0.0f});\nSceneAssets::Apply(*model, model->GetModelAsset(),\n                   \"/Game/Textures/1.jpg\");\n\nconst auto added = game.GetScene().AddComponent(\n    \"MyModel\", model, SceneAssets::ModelType);\nif (added.result != SceneResult::Ok &&\n    added.result != SceneResult::Deferred)\n    throw std::runtime_error(\"Cannot spawn model\");",
-      "aside": "/Game — папка Content проекта.\n\nСначала импортируйте файлы и подставьте их пути.\n\nCreateModel создаёт объект с геометрией модели. Apply назначает текстуру.",
+      "title": "Импортированная модель из C++",
+      "code": "#include <Engine/Scene/SceneAssets.h>\n\n// Файл уже импортирован через редактор.\nauto model = SceneAssets::CreateModel(\n    \"/Game/Models/blend-packed/blend-packed.glb\");\nmodel->SetPosition({-2.0f, 0.0f, 0.0f});\n\nconst auto added = game.GetScene().AddComponent(\n    \"MyModel\", model, SceneAssets::ModelType);\nif (added.result != SceneResult::Ok &&\n    added.result != SceneResult::Deferred)\n    throw std::runtime_error(\"Cannot spawn model\");",
+      "aside": "/Game — папка Content проекта.\n\nCreateModel читает .import.json и назначает материал, созданный при импорте FBX/BLEND.\n\nПодставьте путь вашей модели.",
       "sources": [
         "Engine/docs/tutorial/examples/ModelExample.cpp",
-        "Engine/Source/Scene/SceneAssets.cpp"
+        "Engine/Source/Scene/SceneAssets.cpp",
+        "Engine/Include/Engine/Scene/SceneAssets.h",
+        "Engine/docs/PROJECT-ASSETS.md"
       ],
-      "foot": "Полная функция: ModelExample.h/.cpp. В ProjectGame вызовите SpawnModel(*this, \"MyModel\").",
-      "notes": ""
+      "foot": "Полная функция в ModelExample.h/.cpp: SpawnModel(game, \"MyModel\", путь_модели).",
+      "notes": "Объект создаётся из уже импортированного файла. BLEND после импорта становится GLB. Не отделяйте модель от .import.json, Materials и Textures: это единый переносимый набор. CreateModel(path, false) отключает автоматическое назначение материала. Имя объекта должно быть свободным."
     },
     {
       "type": "code",
-      "title": "Текстура уже существующего объекта",
-      "code": "// cube — GameComponent* выбранного вами объекта\nSceneAssets::Apply(*cube, cube->GetModelAsset(),\n                   \"/Game/Textures/1.jpg\");\n\n// Для объекта, уже добавленного в сцену:\nconst auto result = game.GetScene().SetTextureAsset(\n    cube->GetComponentId(), \"/Game/Textures/1.jpg\");\nif (result != SceneResult::Ok)\n    throw std::runtime_error(\"Cannot set texture\");",
-      "aside": "Это два варианта назначения текстуры.\n\nSetTextureAsset используйте между обновлениями сцены: внутри Tick он вернёт Busy.\n\nДля новой модели используйте CreateModel, а не замену геометрии куба.",
+      "title": "Материал и текстура из C++",
+      "code": "// object — GameComponent&, ресурс уже в Content.\nconst std::string material = \"/Game/Materials/Wood.mat\";\nSceneAssets::ValidateMaterial(material);\nif (!object.SetMaterialAsset(material))\n    throw std::runtime_error(\"Material unsupported\");\n\n// Отдельная текстура объекта: материал сохраняется.\nif (!object.TrySetTexture(\"/Game/Textures/grid.png\"))\n    throw std::runtime_error(\"Cannot set texture\");\n\n// Убрать отдельную текстуру, оставив материал:\nobject.TrySetTexture(\"\");",
+      "aside": "BaseMap меняйте в редакторе материала.\n\nОтдельная текстура объекта дополнительно умножает его цвет.\n\nSetMaterialAsset назначает ссылку; шейдер компилируется при отрисовке.",
       "sources": [
-        "Engine/Include/Engine/Scene/SceneAssets.h",
+        "Engine/docs/tutorial/examples/ModelExample.cpp",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Engine/Source/Scene/SceneAssets.cpp",
         "Engine/Source/Scene/Scene.cpp"
       ],
-      "foot": "Текстура должна быть импортирована в Content. Apply проверяет файл и сообщает об ошибке исключением.",
-      "notes": ""
+      "foot": "Для новой геометрии используйте CreateModel. TrySetTexture меняет изображение, а не модель.",
+      "notes": "Сначала импортируйте grid.png, создайте Wood.mat и убедитесь, что shader и BaseMap доступны. TrySetTexture проверяет изображение и сохраняет прежнюю текстуру при ошибке. ValidateMaterial проверяет файл материала, но не успешность компиляции HLSL. В редакторском коде Scene::SetTextureAsset/SetMaterialAsset также меняют ревизию сцены, но возвращают Busy во время обновления. SceneAssets::Apply без четвёртого аргумента сбрасывает материал: для его сохранения передайте object.GetMaterialAsset(). Функции AssignMaterial и AssignTexture приведены в ModelExample.cpp."
     },
     {
       "type": "code",
       "title": "Ввод: поля и жизненный цикл",
-      "code": "// Source/InputCube.h\n#include \"RotatingCube.h\"\n#include <Engine/InputDevice/InputActions.h>\n\nENGINE_COMPONENT(\"InputCube\")\nclass InputCube : public RotatingCube {\npublic:\n    void BeginPlay() override;\n    void Tick(float deltaTime) override;\nprivate:\n    bool spinning_ = true;\n    unsigned nextCube_ = 1;\n    Input::Connection toggle_, spawn_;\n    Input::Scope inputScope_;\n    void SpawnCube();\n};",
+      "code": "#pragma once\n// Source/InputCube.h\n#include \"RotatingCube.h\"\n#include <Engine/InputDevice/InputActions.h>\n\nENGINE_COMPONENT(\"InputCube\")\nclass InputCube : public RotatingCube {\npublic:\n    void BeginPlay() override;\n    void Tick(float deltaTime) override;\nprivate:\n    bool spinning_ = true;\n    unsigned nextCube_ = 1;\n    Input::Connection toggle_, spawn_;\n    Input::Scope inputScope_;\n    void SpawnCube();\n};",
       "aside": "BeginPlay вызывается перед первым игровым вводом и Tick.\n\nConnection нужно хранить.\n\nScope объявлен последним из полей: он отключит обработчики до разрушения их состояния.",
       "sources": [
         "Engine/docs/tutorial/examples/InputCube.h",
         "Engine/Source/MainGame/BaseGameClass/Game.cpp"
       ],
       "foot": "Скопируйте InputCube.h/.cpp из примеров в Source и добавьте один InputCube в сцену после сборки.",
-      "notes": ""
+      "notes": "",
+      "codeSize": 20
     },
     {
       "type": "code",
@@ -433,7 +495,7 @@
         "Engine/docs/tutorial/examples/InputCube.cpp"
       ],
       "foot": "Новый куб появляется в копии Play. После Stop он исчезает вместе с этой копией.",
-      "notes": ""
+      "notes": "На слайде фрагменты. Полная SpawnCube в приложенном InputCube.cpp получает сцену, подбирает уникальное имя и проверяет результат AddComponent. Пример рассчитан на один InputCube: клавиши R/N зарегистрированы в общем контексте Game."
     },
     {
       "type": "code",
@@ -450,20 +512,21 @@
       "type": "code",
       "title": "Своя схема управления",
       "code": "class MyController : public CharacterController {\npublic:\n    using CharacterController::CharacterController;\n    void BindInput() override {\n        game_.GetInput().Bind({\"Go\",\n            Input::Context::Game, {Keys::I}});\n        connections_.push_back(game_.GetInput().Subscribe(\n            inputScope_, Input::Context::Game, \"Go\",\n            Input::Phase::Axis,\n            [this](const Input::Event& e) {\n                forward_ = e.value;\n            }));\n    }\n};",
-      "aside": "Этот вариант заменяет стандартные привязки: I задаёт движение вперёд.\n\nGame выбирает контроллер через CreateCharacterController().\n\nДля своей камеры переопределите UpdateCamera().",
+      "aside": "I задаёт движение вперёд и заменяет стандартные привязки.\n\nGame выбирает контроллер в методе фабрики. Пример — в README.txt.\n\nДля своей камеры переопределите UpdateCamera().",
       "notes": "Добавьте #include <Engine/MainGame/CharacterController.h>. В пользовательском Game объявите std::unique_ptr<CharacterController> CreateCharacterController() override; и реализуйте: std::unique_ptr<CharacterController> MyGame::CreateCharacterController() { return std::make_unique<MyController>(*this); }. Выберите MyGame через «Типы C++ проекта… → Выбрать Game». Персонажа по-прежнему назначьте в «Настроить Play…». Оставьте управление включённым, чтобы контроллер был активен. Здесь BindInput полностью заменяет стандартную схему, поэтому WASD и обзор ПКМ больше не зарегистрированы этим контроллером. При необходимости добавьте собственные оси, свой Tick и UpdateCamera. Character можно заменить через Possess.",
       "sources": [
         "Engine/Include/Engine/MainGame/CharacterController.h",
         "Engine/Source/MainGame/CharacterController.cpp",
         "Engine/docs/INPUT-CHARACTER.md",
-        "Editor/Source/CodeTools.cpp"
+        "Editor/Source/CodeTools.cpp",
+        "Engine/docs/tutorial/examples/MyController.h"
       ],
       "foot": "Выберите MyGame: Проект → C++ → Типы C++ проекта…; персонажа назначьте в настройках Play."
     },
     {
       "type": "shot",
       "title": "Обновление движка и проекта",
-      "image": "r2/versions.png",
+      "image": "r3/versions.jpg",
       "items": [
         [
           "Версия",
@@ -471,7 +534,7 @@
         ],
         [
           "Обновление",
-          "В лаунчере: «Добавить версию движка…», затем «Обновить копию…»."
+          "Добавьте выпуск. Затем выберите «Обновить копию проекта…»."
         ],
         [
           "Проект C++",
@@ -483,7 +546,7 @@
         "Game/Launcher/Source/Main.cpp",
         "Engine/docs/ENGINE-VERSIONS.md"
       ],
-      "notes": ""
+      "notes": "На скриншоте выбран старый учебный проект: 2026.10.28.0 — его закреплённая версия, а не текущая версия движка. Текущий выпуск — 2026.10.28.2. Команда «Закрепить версию проекта…» задаёт привязку, а «Обновить копию проекта…» сохраняет исходный проект. После перехода на SDK с материалами пересоберите C++ DLL."
     },
     {
       "type": "table",
@@ -498,12 +561,12 @@
           "Play, фокус viewport, назначение и флажок управления"
         ],
         [
-          "После Stop позиция прежняя",
-          "Это ожидаемо: Play изменяет временную копию"
+          "BLEND не импортируется",
+          "Blender 4.2+, доступные картинки или упакованные текстуры"
         ],
         [
-          "Не создаётся C++ класс",
-          "Имя начинается с буквы или _, без пробелов и .h"
+          "Материал рисуется шахматкой",
+          "Ошибки HLSL, путь .mat; после исправления нажмите F6"
         ],
         [
           "Новый класс не виден",
@@ -518,12 +581,15 @@
           "Ресурс импортирован в Content и перенесён вместе с проектом"
         ]
       ],
-      "notes": "При ошибке сборки смотрите первую ошибку в Console / CodeBuild.log. Предыдущая DLL сохраняется. При ошибке загрузки проверьте логи кандидата в Binaries.",
+      "notes": "При ошибке сборки смотрите первую ошибку в Console / CodeBuild.log. Предыдущая DLL сохраняется. При ошибке загрузки проверьте логи кандидата в Binaries. При недоступной указанной текстуре FBX/BLEND импорт отклоняется. Сложный Blender Base Color нужно запечь в изображение. Без цветовой картинки создаётся однотонный материал. Для Blender можно указать PAINENGINE_BLENDER — полный путь к blender.exe. При первом создании класса используйте корректный C++ идентификатор.",
       "sources": [
         "Engine/docs/CODE-PROJECTS.md",
         "Editor/Include/CodeClassDialog.h",
-        "Engine/docs/INPUT-CHARACTER.md"
+        "Engine/docs/INPUT-CHARACTER.md",
+        "Engine/docs/MATERIALS.md",
+        "Engine/docs/PROJECT-ASSETS.md"
       ]
     }
-  ]
+  ],
+  "sourceCommit": "eb2fed06ffc0058ad4e35876c4c55921fbb9e590"
 }
