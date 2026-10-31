@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/UI/UIElement.h>
 
@@ -58,6 +59,12 @@ public:
     void ClearMarkup();
     /** Goes up by one every time the tree is replaced, so game code knows to look its elements up again. */
     uint32_t GetMarkupRevision() const { return MarkupRevision; }
+    // These bindings belong to the component, not to a particular markup tree.
+    void BindClick(const std::string& name, std::function<void()> handler);
+    void UnbindClick(const std::string& name);
+    bool SetLabelText(const std::string& name, const std::string& text);
+    bool SetBarFill(const std::string& name, float fill);
+    const std::string& GetMarkupError() const { return MarkupError; }
     /** Off disables only the watching, not the initial load. */
     void SetMarkupHotReload(bool enabled) { bMarkupHotReload = enabled; }
 
@@ -69,6 +76,9 @@ public:
     UIElement* GetHovered() const { return Router.GetHovered(); }
 
     void Tick(float deltaTime) override;
+    void PrepareInput(); // Called by Game before gameplay input and callbacks.
+    bool WantsPointer() const { return bVisible && (Router.GetHovered() || Router.HasCapture()); }
+    void ResetInput() { Router.Reset(); }
     void CreateBuffers(ID3D11Device* Device) override;
     void Render(ID3D11DeviceContext* context) override;
 
@@ -96,6 +106,9 @@ private:
     /** Reloads when the file on disk is newer than the tree in memory. */
     void PollMarkup();
     bool ReadMarkup(const std::string& path);
+    void ApplyBindings();
+    std::map<std::string, std::function<void()>> ClickBindings;
+    std::string MarkupError;
 
     std::unique_ptr<UIElement> Root = std::make_unique<UIElement>();
     UIInputRouter Router;

@@ -8,6 +8,8 @@
 #include <fstream>
 #include <iterator>
 #include <sstream>
+#include <iomanip>
+#include <locale>
 
 namespace
 {
@@ -57,6 +59,7 @@ namespace
 
         bool ReadDocument(Node& outRoot, std::string& error)
         {
+            if (Text.compare(0, 3, "\xEF\xBB\xBF") == 0) Skip(3);
             SkipIgnorable();
             if (Peek() != '<')
             {
@@ -697,4 +700,51 @@ bool UIMarkup::Load(const std::string& path, std::unique_ptr<UIElement>& outRoot
     }
     const std::string text((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     return Parse(text, path, outRoot, error, warnings);
+}
+
+std::string UIMarkup::Serialize(const UIElement& root)
+{
+    std::ostringstream out;
+    out.imbue(std::locale::classic());
+    out << std::setprecision(9) << "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+    auto escaped = [](const std::string& value) {
+        std::string result;
+        for (char c : value) switch (c) {
+            case '&': result += "&amp;"; break;
+            case '<': result += "&lt;"; break;
+            case '>': result += "&gt;"; break;
+            case '"': result += "&quot;"; break;
+            default: result += c;
+        }
+        return result;
+    };
+    auto color = [](const glm::vec4& c) {
+        std::ostringstream s; s << '#' << std::hex << std::setfill('0');
+        for (int i=0;i<4;++i) s << std::setw(2) << static_cast<int>(std::clamp(c[i],0.0f,1.0f)*255.0f+0.5f);
+        return s.str();
+    };
+    const char* anchors[] = {"TopLeft","TopCenter","TopRight","CenterLeft","Center","CenterRight","BottomLeft","BottomCenter","BottomRight"};
+    std::function<void(const UIElement&,int)> write = [&](const UIElement& e, int depth) {
+        auto panel=dynamic_cast<const UIPanel*>(&e); auto label=dynamic_cast<const UILabel*>(&e);
+        auto bar=dynamic_cast<const UIBar*>(&e); auto button=dynamic_cast<const UIButton*>(&e);
+        const char* tag = panel?"Panel":label?"Label":bar?"Bar":button?"Button":depth?"Group":"UI";
+        out << std::string(depth*2,' ') << '<' << tag;
+        auto attr = [&](const char* key, const auto& value) { out << ' ' << key << "=\"" << value << '"'; };
+        attr("name",escaped(e.Name)); attr("anchor",anchors[static_cast<int>(e.Rect.Anchor)]);
+        out << " rect=\"" << e.Rect.X << ' ' << e.Rect.Y << ' ' << e.Rect.Width << ' ' << e.Rect.Height << '"';
+        out << " padding=\"" << e.Padding.Left << ' ' << e.Padding.Top << ' ' << e.Padding.Right << ' ' << e.Padding.Bottom << '"';
+        attr("visible",e.bVisible?"true":"false"); attr("interactive",e.bInteractive?"true":"false");
+        if(panel) { attr("color",color(panel->Color)); attr("border",panel->BorderWidth); attr("borderColor",color(panel->BorderColor)); }
+        if(label) { attr("text",escaped(label->GetText())); attr("color",color(label->Color)); attr("align",label->bAlignRight?"right":"left"); }
+        if(bar) { attr("fill",bar->Fill); attr("trackColor",color(bar->TrackColor)); attr("fillColor",color(bar->FillColor)); }
+        if(button) {
+            attr("text",escaped(button->GetText())); attr("color",color(button->Color));
+            attr("hoverColor",color(button->HoverColor)); attr("pressedColor",color(button->PressedColor));
+            attr("textColor",color(button->TextColor)); attr("border",button->BorderWidth); attr("borderColor",color(button->BorderColor));
+        }
+        if(e.GetChildren().empty()) out << "/>\n";
+        else { out << ">\n"; for(const auto& child:e.GetChildren()) write(*child,depth+1); out << std::string(depth*2,' ') << "</" << tag << ">\n"; }
+    };
+    write(root,0);
+    return out.str();
 }

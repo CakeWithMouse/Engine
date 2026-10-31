@@ -26,6 +26,7 @@ class QPushButton;
 class QAction;
 class SceneObjectsPanel;
 class MaterialEditorWindow;
+class UIEditorWindow;
 
 class EditorMainWindow : public QMainWindow
 {
@@ -50,6 +51,9 @@ public:
     void CreateMaterialForSelection();
     // F6: перекомпилировать все шейдеры и материалы с диска во всех сценах и превью.
     void ReloadShaders();
+    void OpenUIEditor(const QString& path);
+    void ShowHudSettings();
+    QString CreateUI(const QString& supplied = {});
 
 public slots:
     void AppendLine(const QString& line);
@@ -103,6 +107,7 @@ private:
     // Спрашивает о несохранённых материалах и закрывает их окна; false — закрытие отменено.
     bool CloseMaterialEditors(std::function<void()> afterSave = {});
     QHash<QString, QPointer<MaterialEditorWindow>> materialEditors_;
+    QHash<QString, QPointer<UIEditorWindow>> uiEditors_;
 
     EditorQtHost* host_ = nullptr;
 

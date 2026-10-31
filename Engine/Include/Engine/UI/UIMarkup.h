@@ -45,6 +45,8 @@
 class UIMarkup
 {
 public:
+    /** Writes all supported properties, including those not exposed by the visual inspector. */
+    static std::string Serialize(const UIElement& root);
     /** Parses markup text. sourceName only appears in messages. */
     static bool Parse(const std::string& text, const std::string& sourceName,
                       std::unique_ptr<UIElement>& outRoot, std::string& error,

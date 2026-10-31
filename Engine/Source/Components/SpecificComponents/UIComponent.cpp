@@ -21,6 +21,32 @@ UIComponent::UIComponent()
 
 UIComponent::~UIComponent() = default;
 
+void UIComponent::BindClick(const std::string& name, std::function<void()> handler)
+{
+    ClickBindings[name] = std::move(handler);
+    ApplyBindings();
+}
+void UIComponent::UnbindClick(const std::string& name)
+{
+    ClickBindings.erase(name);
+    if (auto* element = Root->Find(name)) element->OnClick = {};
+}
+void UIComponent::ApplyBindings()
+{
+    for (const auto& binding : ClickBindings)
+        if (auto* element = Root->Find(binding.first)) element->OnClick = binding.second;
+}
+bool UIComponent::SetLabelText(const std::string& name, const std::string& text)
+{
+    if (auto* label = Find<UILabel>(name)) { label->SetText(text); return true; }
+    return false;
+}
+bool UIComponent::SetBarFill(const std::string& name, float fill)
+{
+    if (auto* bar = Find<UIBar>(name)) { bar->Fill = fill; return true; }
+    return false;
+}
+
 UIPanel* UIComponent::AddPanel(const UIRect& rect, const glm::vec4& color)
 {
     auto panel = std::make_unique<UIPanel>();
@@ -90,6 +116,7 @@ bool UIComponent::ReadMarkup(const std::string& path)
     std::vector<std::string> warnings;
     if (!UIMarkup::Load(path, root, error, &warnings))
     {
+        MarkupError = error;
         if (!bMarkupErrorReported)
         {
             std::cout << "UIComponent: " << error << std::endl;
@@ -104,6 +131,8 @@ bool UIComponent::ReadMarkup(const std::string& path)
 
     Router.Reset();
     Root = std::move(root);
+    ApplyBindings();
+    MarkupError.clear();
     ++MarkupRevision;
     bMarkupErrorReported = false;
 
@@ -140,7 +169,10 @@ void UIComponent::PollMarkup()
 void UIComponent::Tick(float deltaTime)
 {
     GameComponent::Tick(deltaTime);
+}
 
+void UIComponent::PrepareInput()
+{
     PollMarkup();
 
     Game* game = GetGame();
@@ -154,14 +186,26 @@ void UIComponent::Tick(float deltaTime)
 
     // Hit-testing needs boxes, so the layout above has to run first even when nothing is drawn.
     InputDevice* input = game->GetInputDevice();
-    if (!bVisible || input == nullptr)
+    if (!bVisible || !game->GetInput().IsContextEnabled(Input::Context::Game))
     {
+        Router.Reset();
         return;
     }
     UIInputState state;
-    state.MouseX = input->MousePosition.x;
-    state.MouseY = input->MousePosition.y;
-    state.bMouseDown = input->IsKeyDown(Keys::LeftButton);
+    if (input) {
+        state.MouseX = input->MousePosition.x;
+        state.MouseY = input->MousePosition.y;
+        state.bMouseDown = input->IsPhysicalKeyDown(Keys::LeftButton);
+    } else {
+        // Embedded Play has no Raw Input device: Qt forwards keys through Input::System.
+        // Win32 client coordinates match the physical pixels of the borrowed viewport HWND.
+        POINT point{};
+        if (!GetCursorPos(&point) || !ScreenToClient(game->GetDisplay()->GetHwnd(), &point)) {
+            Router.Reset(); return;
+        }
+        state.MouseX = float(point.x); state.MouseY = float(point.y);
+        state.bMouseDown = game->GetInput().IsPhysicalKeyDown(Keys::LeftButton);
+    }
     Router.Update(*Root, state);
 }
 
@@ -307,8 +351,7 @@ bool UIComponent::UploadVertices(ID3D11DeviceContext* context, ID3D11Device* dev
 void UIComponent::Render(ID3D11DeviceContext* context)
 {
     Game* game = GetGame();
-    if (context == nullptr || game == nullptr || game->GetDisplay() == nullptr ||
-        Root->GetChildren().empty())
+    if (context == nullptr || game == nullptr || game->GetDisplay() == nullptr)
     {
         return;
     }

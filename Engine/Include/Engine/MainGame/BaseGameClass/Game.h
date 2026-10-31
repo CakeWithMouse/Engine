@@ -57,6 +57,7 @@ const char* ToString(RegisterResult result);
 class GameComponent;
 class Material;
 class PointLightComponent;
+class UIComponent;
 class FBXComponent;
 struct ComponentShaderVariant;
 
@@ -196,6 +197,7 @@ public:
     CubeMapResource* GetCubeMap(const std::string& cubeMapName) const;
 
     Player* GetPlayer() const { return FirstPlayer.get(); }
+    UIComponent* GetProjectHud() const { return ProjectHudComponent.get(); }
     Display* GetDisplay() const { return DisplayPtr.get(); }
     InputDevice* GetInputDevice() const { return InputDevicePtr.get(); }
     Input::System& GetInput() { return ActionInput; }
@@ -427,6 +429,7 @@ protected:
     Input::System ActionInput;
     std::unique_ptr<CharacterController> Controller;
     bool GameplayInitialized = false;
+    std::unique_ptr<UIComponent> ProjectHudComponent;
 
     // Scene owns components. The read-only alias preserves legacy traversal/order.
     Scene scene;

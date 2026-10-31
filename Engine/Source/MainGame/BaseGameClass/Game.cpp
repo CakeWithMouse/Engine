@@ -2,6 +2,8 @@
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/CharacterController.h>
 #include <Engine/Components/Character.h>
+#include <Engine/Components/SpecificComponents/UIComponent.h>
+#include <Engine/UI/ProjectHud.h>
 
 #include <algorithm>
 #include <array>
@@ -301,6 +303,8 @@ void Game::DestroyResources(bool preserveScene)
     }
 
     // Components first: they observe cube maps and shaders owned by the caches below.
+    ProjectHudComponent.reset();
+    GameplayInitialized = false;
     if (!preserveScene) scene.Clear();
     materialCache.clear();
     defaultMaterial.reset();
@@ -1519,16 +1523,17 @@ std::shared_ptr<Material> Game::GetErrorMaterial()
 void Game::OnShadersInvalidated()
 {
     // Resolved slots point into the erased cache entries: every component resolves again.
-    for (auto& pair : Components)
-    {
-        GameComponent* component = pair.second.get();
+    auto resetShaders = [](GameComponent* component) {
+        if (!component) return;
         for (ComponentShaderVariant& slot : component->ShaderVariants)
         {
             slot = ComponentShaderVariant{};
         }
         component->SetVertexShader(nullptr);
         component->SetPixelShader(nullptr);
-    }
+    };
+    for (auto& pair : Components) resetShaders(pair.second.get());
+    resetShaders(ProjectHudComponent.get());
 
     // The fallback pair keeps the old shaders alive until the new ones compile.
     InitShaderBuffers();
@@ -2913,10 +2918,14 @@ void Game::OnWindowResized(int clientWidth, int clientHeight, bool minimized)
 
 void Game::OnFocusLost()
 {
+    if (ProjectHudComponent) ProjectHudComponent->ResetInput();
+    for (const auto& entry : Components)
+        if (auto* ui = dynamic_cast<UIComponent*>(entry.second.get())) ui->ResetInput();
     ActionInput.ReleaseAll();
     if (InputDevicePtr)
     {
         InputDevicePtr->ClearPressedKeys();
+        InputDevicePtr->SetPointerBlocked(false);
     }
 }
 
@@ -3004,6 +3013,17 @@ void Game::UpdateSimulation(float deltaTime)
     InitializeGameplay();
     StartGameplayComponents();
     TotalTime += deltaTime;
+    bool pointerBlocked = false;
+    auto prepareUI = [&](UIComponent* ui) {
+        if (!ui) return;
+        const bool captured = ui->WantsPointer();
+        ui->PrepareInput();
+        pointerBlocked |= captured || ui->WantsPointer();
+    };
+    prepareUI(ProjectHudComponent.get());
+    for (const auto& entry : Components) prepareUI(dynamic_cast<UIComponent*>(entry.second.get()));
+    if (InputDevicePtr) InputDevicePtr->SetPointerBlocked(pointerBlocked);
+    ActionInput.SetPointerBlocked(pointerBlocked);
     PreUpdate(deltaTime);
     ActionInput.Tick(deltaTime);
     if (Controller) Controller->Tick(deltaTime);
@@ -3020,6 +3040,15 @@ void Game::SetCharacterController(std::unique_ptr<CharacterController> controlle
 void Game::InitializeGameplay()
 {
     if (GameplayInitialized) return;
+    const auto content = VfsRead::Active().Resolve("/Game");
+    if (!content.empty()) try {
+        const auto hudFile = ProjectHud::Read(std::filesystem::u8path(content));
+        if (!hudFile.empty()) {
+            ProjectHudComponent = std::make_unique<UIComponent>();
+            ProjectHudComponent->SetGame(this);
+            ProjectHudComponent->LoadMarkup(hudFile.generic_u8string());
+        }
+    } catch (const std::exception& e) { std::cout << "Project HUD: " << e.what() << std::endl; }
     PlaySettings* settings = nullptr;
     for (const auto& entry : scene.GetComponents()) if (auto* value = dynamic_cast<PlaySettings*>(entry.second.get())) {
         if (settings) throw std::runtime_error("Only one PlaySettings object is allowed per scene");
@@ -3472,6 +3501,9 @@ void Game::DispatchComputePhase()
 
 void Game::RenderUI()
 {
+    if (ProjectHudComponent && ProjectHudComponent->IsRenderable() &&
+        BindComponentShaders(ProjectHudComponent.get(), ShaderCompileVariant::Default))
+        ProjectHudComponent->Render(Context.Get());
     // Last pass of the frame: the interface sits on the finished image, with no depth of its own.
     // Each UI component sets its own blending and states, so nothing here has to be undone.
     for (auto& pair : Components)

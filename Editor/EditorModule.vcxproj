@@ -140,6 +140,11 @@
         <ClCompile Include="Source/ProjectProperties.cpp"/>
         <ClCompile Include="Source/SceneObjectsPanel.cpp"/>
         <ClCompile Include="Source/MaterialEditorWindow.cpp"/>
+        <ClCompile Include="Source/UIEditorWindow.cpp"/>
+        <ClCompile Include="Source/HudTools.cpp"/>
+        <ClCompile Include="../Engine/Source/UI/UIElement.cpp"/>
+        <ClCompile Include="../Engine/Source/UI/UIMarkup.cpp"/>
+        <ClCompile Include="../Engine/Source/UI/FontAtlas.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_MainWindow.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_ViewportWidget.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_ObjectInspectorPanel.cpp"/>

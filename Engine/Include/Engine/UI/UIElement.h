@@ -146,6 +146,11 @@ public:
     const std::vector<std::unique_ptr<UIElement>>& GetChildren() const { return Children; }
     UIElement* GetParent() const { return Parent; }
     void ClearChildren() { Children.clear(); }
+    bool RemoveChild(UIElement* child) {
+        for (auto it = Children.begin(); it != Children.end(); ++it)
+            if (it->get() == child) { Children.erase(it); return true; }
+        return false;
+    }
 
     /** Depth-first search by name, this element included. Returns nullptr when there is no match. */
     UIElement* Find(const std::string& name);
@@ -208,6 +213,7 @@ public:
     /** Forgets hover and capture, e.g. when the window loses focus or the tree is rebuilt. */
     void Reset();
     UIElement* GetHovered() const { return Hovered; }
+    bool HasCapture() const { return Captured != nullptr; }
 
 private:
     static void ClearFlags(UIElement& element);

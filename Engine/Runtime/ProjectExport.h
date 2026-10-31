@@ -1,5 +1,6 @@
 #pragma once
 #include "Project.h"
+#include <Engine/UI/ProjectHud.h>
 #include <Windows.h>
 #include <filesystem>
 #include <fstream>
@@ -51,6 +52,9 @@ inline void Export(const fs::path& file, const fs::path& destination, const fs::
     if (fs::exists(target)) throw std::runtime_error("Choose a new export folder; existing folders are never overwritten");
     if (inside(target,project.file.parent_path()) || inside(target,runtime)) throw std::runtime_error("Export folder must be outside project and runtime");
     if (project.startupScene.empty() || !inside(project.startupScene,project.content)) throw std::runtime_error("Save the startup scene inside Content before export");
+    const auto hud = ProjectHud::Read(project.content);
+    if (!hud.empty() && !fs::is_regular_file(hud)) throw std::runtime_error("Selected HUD file is missing: " + hud.u8string());
+    if (!hud.empty() && !fs::is_regular_file(runtime / "EngineContent" / "Shaders" / "UI.hlsl")) throw std::runtime_error("Runtime is missing Shaders/UI.hlsl; rebuild the engine before export");
     // Material paths must be portable. Imported /Game paths and relative paths
     // confined to Content are supported; absolute authoring paths are diagnosed.
     for (const auto& item : fs::recursive_directory_iterator(project.content)) if (item.is_regular_file() && item.path().extension()==".mat") {

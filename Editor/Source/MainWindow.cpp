@@ -4,6 +4,7 @@
 #include "ViewportWidget.h"
 #include "SceneObjectsPanel.h"
 #include "ObjectInspectorPanel.h"
+#include "UIEditorWindow.h"
 
 #include <QDockWidget>
 #include <QCloseEvent>
@@ -228,6 +229,7 @@ void EditorMainWindow::closeEvent(QCloseEvent* event)
     if (exportProcess_) { statusBar()->showMessage(QStringLiteral("Дождитесь завершения экспорта."),5000); return; }
     if (closing_ || sceneBusy_ || checkingChanges_) return;
     if (!CloseMaterialEditors([this] { close(); })) return;
+    for (auto window : uiEditors_) if (window && !window->ConfirmClose()) { event->ignore(); return; }
     QSettings("PainEngine","Editor").setValue(LayoutSettingsKey(),saveState(1));
     closing_ = true;
     // Queue a barrier after viewport edits, then inspect the authoritative dirty state.
@@ -267,6 +269,15 @@ void EditorMainWindow::BuildSceneMenu()
     sunlight->setToolTip(QStringLiteral("Выбрать единственный источник света сцены или добавить его, если он отсутствует"));
     menu->addSeparator();
     auto* playMenu = menuBar()->addMenu(QStringLiteral("Запуск"));
+    auto* hudSettings = playMenu->addAction(QStringLiteral("HUD игры…"), this, &EditorMainWindow::ShowHudSettings);
+    hudSettings->setObjectName("ProjectHudSettings");
+    auto* uiMenu = menuBar()->addMenu(QStringLiteral("UI"));
+    uiMenu->addAction(QStringLiteral("Создать интерфейс…"), this, [this]{ CreateUI(); });
+    uiMenu->addAction(QStringLiteral("Открыть редактор UI…"), this, [this]{
+        const auto file = QFileDialog::getOpenFileName(this, QStringLiteral("Интерфейс"), QString::fromUtf8(host_->host().contentRoot), "UI (*.ui)");
+        if (!file.isEmpty()) OpenUIEditor(file);
+    });
+    uiMenu->addAction(QStringLiteral("HUD игры…"), this, &EditorMainWindow::ShowHudSettings);
     playMenu->addAction(actPlay_); playMenu->addAction(actPause_); playMenu->addAction(actStop_);
     playMenu->addSeparator(); playMenu->addAction(actExternal_);
     playMenu->addAction(QStringLiteral("Настроить Play…"),this,[this]{

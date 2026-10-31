@@ -62,7 +62,7 @@ public:
         // Check LOD0 against the model contract and print a report.
         bool ValidateAssets = false;
         // On-screen panels in the corner of the scene; F7 toggles them at runtime.
-        bool Hud = true;
+        bool Hud = false; // Demo statistics are opt-in, like project HUDs.
         // Units and scenery use the material assets of GameContent/Materials; false draws them with
         // the old InstancedMesh shader (same look without mud), for comparisons.
         bool Materials = true;

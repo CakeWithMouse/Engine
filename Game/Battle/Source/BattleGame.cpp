@@ -354,10 +354,7 @@ void BattleGame::BindHud()
     }
 
     // The markup says what the button looks like; what it does stays here.
-    if (UIButton* toggle = Hud->Find<UIButton>("lodToggle"))
-    {
-        toggle->OnClick = [this]() { SetLodDebugColors(!Config.LodDebugColors); };
-    }
+    Hud->BindClick("lodToggle", [this]() { SetLodDebugColors(!Config.LodDebugColors); });
 }
 
 void BattleGame::SetLodDebugColors(bool enabled)

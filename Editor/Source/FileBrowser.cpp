@@ -152,6 +152,11 @@ void FileBrowserDock::OnDoubleClicked(const QModelIndex& proxyIndex)
         if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenScene(path);
         return;
     }
+    if (path.endsWith(QStringLiteral(".ui"), Qt::CaseInsensitive))
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenUIEditor(path);
+        return;
+    }
     if (path.endsWith(QStringLiteral(".mat"), Qt::CaseInsensitive))
     {
         if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenMaterialEditor(path);

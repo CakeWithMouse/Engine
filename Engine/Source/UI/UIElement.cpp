@@ -282,11 +282,12 @@ UIElement* UIInputRouter::Update(UIElement& root, const UIInputState& input)
         Captured = nullptr;
         if (clicked != nullptr && clicked == hit && clicked->OnClick)
         {
-            clicked->OnClick();
+            auto callback = clicked->OnClick; // A callback may replace the tree that owned it.
+            callback();
         }
     }
 
-    return hit;
+    return Hovered;
 }
 
 void UIPanel::BuildSelf(UIDrawList& drawList) const

@@ -1,20 +1,20 @@
 {
   "title": "PainEngine\nПрактический туториал",
   "date": "2026-10-31",
-  "revision": 4,
-  "engineVersion": "2026.10.31.2",
+  "revision": 6,
+  "engineVersion": "2026.10.31.3",
   "editorialPolicy": "editorial-policy.json",
   "slides": [
     {
       "type": "cover",
       "title": "PainEngine\nПрактический туториал",
-      "subtitle": "Редактор, свойства объектов\nи рабочие примеры C++",
+      "subtitle": "Редактор, игровой UI\nи рабочие примеры C++",
       "image": "r4/editor.png",
       "sources": [
         "Engine/Version.json",
         "Engine/docs/tutorial/examples/README.txt"
       ],
-      "notes": "Редакция 4, 31.10.2026. Проверено по текущему рабочему дереву, включая незакоммиченные изменения 049–051. Новые снимки сделаны в настоящем редакторе 2026.10.31.2 с D3D viewport. Сохранены сокращения пользователя. Старые иллюстрации неизменившихся сценариев остаются из r2/r3; расположение разделов инспектора теперь сворачиваемое."
+      "notes": "Редакция 6, 31.10.2026, движок 2026.10.31.3. HUD подключается через настройки проекта; добавлен визуальный редактор .ui. Снимки r6 сделаны в настоящем Qt UI-тесте. Сохранены пользовательские сокращения и прежние разделы. В фоновых сценах старых снимков r2/r4 нет D3D-изображения; они показывают интерфейс редактора."
     },
     {
       "type": "shot",
@@ -267,12 +267,41 @@
     },
     {
       "type": "shot",
-      "title": "Свет, частицы и небо",
+      "title": "Направленный свет и тени",
+      "image": "r5/directional-light.png",
+      "items": [
+        [
+          "Выбрать или добавить",
+          "Сцена → Направленный свет. В сцене может быть один такой источник."
+        ],
+        [
+          "Повернуть",
+          "Поверните источник в трансформации. Позиция и масштаб не меняют свет."
+        ],
+        [
+          "Настроить",
+          "Задайте цвет, интенсивность, флажок и дальность теней."
+        ]
+      ],
+      "foot": "Снимок показывает реальные панели. D3D-изображение viewport в этот захват не попало.",
+      "notes": "Меню выбирает существующий Light.Directional или создаёт его. Поворот можно задавать численно или гизмо поворота. Направление получается поворотом локальной оси -Z с учётом поворотов родителей. Источник освещает всю сцену, положение задаёт лишь место маркера. Для теней нужны включённый источник, ненулевая интенсивность, флажок «Тени», подходящая дальность, объект и материал, допускающие тени. На снимке флажок теней выключен намеренно во время UI-теста; это не пример результата рендеринга. В сценах проекта нет скрытого направленного и полусферического фонового света. Точечные источники и unlit-материалы могут оставаться видимыми без солнца. Ctrl+S сохраняет настройки вместе со сценой, Undo/Redo и Play/Stop их учитывают.",
+      "sources": [
+        "Editor/Source/MainWindow.cpp",
+        "Editor/Source/ObjectInspectorPanel.cpp",
+        "Engine/Include/Engine/Components/Light/DirectionalLightComponent.h",
+        "Engine/Source/Components/Light/DirectionalLightComponent.cpp",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp",
+        "Engine/Content/Shaders/Common.hlsli"
+      ]
+    },
+    {
+      "type": "shot",
+      "title": "Точечный свет, частицы и небо",
       "image": "r2/light.png",
       "items": [
         [
-          "Свет",
-          "Выберите источник. В свойствах задаются цвет, интенсивность и радиус."
+          "Точечный свет",
+          "Выберите точечный источник. Настройте цвет, интенсивность и радиус."
         ],
         [
           "Частицы",
@@ -288,7 +317,7 @@
         "Editor/Source/MainWindow.cpp",
         "Engine/Include/Engine/Project/StandardTypes.h"
       ],
-      "notes": " Иллюстрация из предыдущей редакции; расположение общих полей может отличаться в сворачиваемом инспекторе 2026.10.31.2."
+      "notes": " Иллюстрация из предыдущей редакции; расположение общих полей может отличаться в сворачиваемом инспекторе 2026.10.31.2. Этот снимок показывает точечный свет. Направленный источник описан отдельно; у него нет радиуса освещения."
     },
     {
       "type": "shot",
@@ -428,6 +457,101 @@
       "foot": "Снимок сцены создаётся каждые 30 секунд. Экспорт доступен из Release-редактора."
     },
     {
+      "type": "shot",
+      "title": "Подключить HUD без C++",
+      "image": "r6/hud-settings.png",
+      "items": [
+        [
+          "Настройки игры",
+          "Откройте «Запуск → HUD игры…». Начальное значение — «Нет»."
+        ],
+        [
+          "Выберите интерфейс",
+          "Выберите .ui или создайте новый. Подтвердите выбор кнопкой OK."
+        ],
+        [
+          "Запустите Play",
+          "HUD появится в игре. После Stop игровая копия удалится."
+        ]
+      ],
+      "foot": "Выбор относится ко всему проекту и сохраняется между запусками редактора.",
+      "notes": "Настройка хранится в Content/ProjectHud.txt переносимым путём относительно Content. Изменение выбора применяется при следующем Play или обычном запуске. Старые проекты без настройки запускаются без HUD. Для старого C++ проекта нужна пересборка SDK 2026.10.31.3. Встроенный экспорт включает настройку, разметку и UI.hlsl; отсутствующие ресурсы отклоняются.",
+      "sources": [
+        "Editor/Source/UIEditorWindow.cpp",
+        "Editor/Source/HudTools.cpp",
+        "Editor/Source/MainWindow.cpp",
+        "Editor/Source/FileBrowser.cpp",
+        "Engine/Include/Engine/UI/ProjectHud.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp",
+        "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+        "Engine/Source/UI/UIMarkup.cpp",
+        "Engine/docs/UI-EDITOR.md"
+      ]
+    },
+    {
+      "type": "shot",
+      "title": "Минимальный редактор интерфейса",
+      "image": "r6/ui-editor.png",
+      "items": [
+        [
+          "Откройте файл",
+          "Откройте .ui двойным щелчком в Content или через меню UI."
+        ],
+        [
+          "Соберите иерархию",
+          "Добавьте Panel, Label, Button и Bar. Перемещайте элементы мышью."
+        ],
+        [
+          "Настройте вид",
+          "В инспекторе меняйте текст, размеры, привязку, цвет и прозрачность."
+        ]
+      ],
+      "foot": "Холст работает без Play. Игра и предпросмотр используют одни правила вёрстки.",
+      "notes": "Слева иерархия, в центре холст, справа инспектор. Новый элемент попадает в выбранную Panel/Group или ближайший контейнер. Выделение синхронизировано. Сверху выбор разрешения: 1280×720, 1920×1080, 800×600, 720×1280. Геометрия и атлас шрифта общие с runtime; Qt композитит результат. На холсте кнопки выбираются и перемещаются, игровая логика здесь не выполняется. При перетаскивании растянутого элемента текущий размер становится фиксированным. Undo/Redo и смены родителя перетаскиванием пока нет.",
+      "sources": [
+        "Editor/Source/UIEditorWindow.cpp",
+        "Editor/Source/HudTools.cpp",
+        "Editor/Source/MainWindow.cpp",
+        "Editor/Source/FileBrowser.cpp",
+        "Engine/Include/Engine/UI/ProjectHud.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp",
+        "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+        "Engine/Source/UI/UIMarkup.cpp",
+        "Engine/docs/UI-EDITOR.md"
+      ]
+    },
+    {
+      "type": "steps",
+      "title": "Проверка HUD в Play",
+      "items": [
+        [
+          "Сохраните и запустите",
+          "Нажмите «Сохранить» в редакторе UI. Выберите этот HUD и запустите Play."
+        ],
+        [
+          "Измените внешний вид",
+          "Поменяйте цвет или положение, сохраните .ui и вернитесь в игровой viewport."
+        ],
+        [
+          "Проверьте отключение",
+          "Остановите игру, выберите «Нет» в настройках HUD и снова запустите Play."
+        ]
+      ],
+      "foot": "Сохранение разметки не требует сборки C++. Действия кнопок задаются кодом игры.",
+      "notes": "Редактор UI не является визуальным программированием: кнопка без BindClick не имеет действия. UI получает мышь раньше игрового ввода; интерактивный элемент блокирует стандартную камеру и действия мыши. При ошибке XML остаётся рабочий HUD, ошибка содержит путь и строку. Внешние изменения видны после Перечитать; редактор предупреждает о несохранённых правках. Экспорт требует Release runtime.",
+      "sources": [
+        "Editor/Source/UIEditorWindow.cpp",
+        "Editor/Source/HudTools.cpp",
+        "Editor/Source/MainWindow.cpp",
+        "Editor/Source/FileBrowser.cpp",
+        "Engine/Include/Engine/UI/ProjectHud.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp",
+        "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+        "Engine/Source/UI/UIMarkup.cpp",
+        "Engine/docs/UI-EDITOR.md"
+      ]
+    },
+    {
       "type": "table",
       "title": "Граница между редактором и C++",
       "headers": [
@@ -437,37 +561,53 @@
       ],
       "rows": [
         [
-          "Сцена и оформление",
-          "Модели, материалы, свет, эффекты",
+          "Сцена",
+          "Модели, свет, материалы",
           "Свои компоненты и данные"
         ],
         [
           "Персонаж",
-          "Назначение для Play",
-          "Свой Character и поведение"
+          "Выбор для Play",
+          "Свой Character"
         ],
         [
           "Камера Play",
-          "Слежение или отдельная камера",
-          "Свой UpdateCamera / SceneCamera"
+          "Слежение, камера сцены",
+          "Свой UpdateCamera"
         ],
         [
           "Управление",
-          "Стандартные WASD и ПКМ",
-          "Действия, сочетания, обработчики"
+          "WASD и ПКМ",
+          "Действия и обработчики"
         ],
         [
-          "Свойства объектов",
-          "Настройка объявленных полей",
-          "Описание полей и поведения"
+          "Свойства",
+          "Значения полей",
+          "Описание полей в C++"
+        ],
+        [
+          "Игровой HUD",
+          "Выбор и редактор .ui",
+          "Данные и действия кнопок"
         ]
       ],
       "foot": "Контроллер создаётся игрой и не является отдельным добавляемым объектом сцены.",
-      "notes": "Графического редактора переназначения всех действий сейчас нет. Привязки можно менять в C++ без замены обработчиков. Каталог поддерживает Component, Character как семейство компонента, Game и обычные Object через существующий адаптер. Класс Game выбирается отдельно для запуска, а компоненты и поддерживаемые Object появляются в палитре после сборки и перезапуска.",
+      "notes": "HUD выбирается через Запуск → HUD игры. По умолчанию Нет. Внешний вид редактируется без C++, поведение кнопок и игровые данные — через C++. Контроллер создаётся игрой. Общего графического редактора переназначения действий пока нет.",
       "sources": [
         "Engine/docs/INPUT-CHARACTER.md",
         "Engine/docs/CODE-PROJECTS.md",
-        "Editor/Source/CodeTools.cpp"
+        "Editor/Source/CodeTools.cpp",
+        "Engine/Include/Engine/Components/SpecificComponents/UIComponent.h",
+        "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+        "Editor/Source/UIEditorWindow.cpp",
+        "Editor/Source/HudTools.cpp",
+        "Editor/Source/MainWindow.cpp",
+        "Editor/Source/FileBrowser.cpp",
+        "Engine/Include/Engine/UI/ProjectHud.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp",
+        "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+        "Engine/Source/UI/UIMarkup.cpp",
+        "Engine/docs/UI-EDITOR.md"
       ]
     },
     {
@@ -764,6 +904,251 @@
       "foot": "Выберите MyGame: Проект → C++ → Типы C++ проекта…; персонажа назначьте в настройках Play."
     },
     {
+      "type": "steps",
+      "title": "Разметка и логика игрового UI",
+      "items": [
+        [
+          "Внешний вид",
+          "Создайте интерфейс в редакторе UI или измените XML вручную."
+        ],
+        [
+          "Подключение",
+          "Настройки проекта выбирают один HUD. Его создаёт движок при запуске игры."
+        ],
+        [
+          "Поведение",
+          "C++ обновляет показатели и назначает действия элементам по имени."
+        ]
+      ],
+      "foot": "Визуальный редактор сохраняет тот же .ui, который читает игра.",
+      "notes": "Система UI Александра расширена редактором и автоматическим подключением в 2026.10.31.3. UI и Group — контейнеры, Panel/Label/Bar/Button — элементы. HUD рисуется после сцены без глубины и теней. Имена для поиска сравниваются точно. Разметка не является Qt Designer .ui.",
+      "sources": [
+        "Engine/Include/Engine/Components/SpecificComponents/UIComponent.h",
+        "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+        "Engine/Include/Engine/UI/UIElement.h",
+        "Engine/Source/UI/UIElement.cpp",
+        "Engine/Include/Engine/UI/UIMarkup.h",
+        "Engine/Source/UI/UIMarkup.cpp",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp",
+        "Engine/Content/Shaders/UI.hlsl",
+        "Engine/Include/Engine/Project/StandardTypes.h",
+        "Editor/Source/UIEditorWindow.cpp",
+        "Editor/Source/HudTools.cpp",
+        "Editor/Source/MainWindow.cpp",
+        "Editor/Source/FileBrowser.cpp",
+        "Engine/Include/Engine/UI/ProjectHud.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp",
+        "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+        "Engine/Source/UI/UIMarkup.cpp",
+        "Engine/docs/UI-EDITOR.md"
+      ]
+    },
+    {
+      "type": "code",
+      "title": "Разметка панели HUD",
+      "code": "<UI>\n  <Panel name=\"stats\" rect=\"16 16 280 144\"\n         padding=\"12\" color=\"#101820DD\">\n    <Label name=\"clicks\" text=\"Нажатий: 0\"\n           rect=\"0 0 240 22\"/>\n    <Bar name=\"load\" rect=\"0 32 240 12\"\n         fill=\"0\" fillColor=\"#35B8CFFF\"/>\n    <Button name=\"add\" rect=\"0 64 240 32\"\n            text=\"Добавить\"/>\n  </Panel>\n</UI>",
+      "codeSize": 23,
+      "aside": "Сохраните в Content/UI/Hud.ui, кодировка UTF-8.\n\nname связывает элемент с C++.\n\npadding задаёт отступ для дочерних элементов.",
+      "foot": "Полный пример: папка UI в архиве исходников туториала.",
+      "notes": "XML-пример из UI/Content/UI/Hud.ui. У панели цвет #RRGGBBAA с альфой DD. Дочерние координаты отсчитываются от области после padding. Label и Bar обновляются из игры, Button получает OnClick в C++. Используйте уникальные name: поиск возвращает первое совпадение. Символы & и < внутри атрибутов экранируются как &amp; и &lt;.",
+      "sources": [
+        "Engine/Include/Engine/Components/SpecificComponents/UIComponent.h",
+        "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+        "Engine/Include/Engine/UI/UIElement.h",
+        "Engine/Source/UI/UIElement.cpp",
+        "Engine/Include/Engine/UI/UIMarkup.h",
+        "Engine/Source/UI/UIMarkup.cpp",
+        "Engine/docs/tutorial/examples/UI/TutorialHud.h",
+        "Engine/docs/tutorial/examples/UI/TutorialHud.cpp",
+        "Engine/docs/tutorial/examples/UI/Content/UI/Hud.ui",
+        "Engine/docs/tutorial/examples/UI/README.txt"
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Размеры и привязки UI",
+      "headers": [
+        "Атрибут",
+        "Как работает"
+      ],
+      "rows": [
+        [
+          "rect=\"x y width height\"",
+          "Смещение и размер в пикселях внутри родителя"
+        ],
+        [
+          "anchor=\"TopRight\"",
+          "Отступ от правого верхнего края внутрь панели"
+        ],
+        [
+          "anchor=\"BottomLeft\"",
+          "Отступ снизу. Для текста задайте высоту явно"
+        ],
+        [
+          "width / height = 0",
+          "Растянуть до края родительской области"
+        ],
+        [
+          "padding=\"12\"",
+          "Один отступ или четыре: слева, сверху, справа, снизу"
+        ],
+        [
+          "color=\"#RRGGBBAA\"",
+          "Цвет и прозрачность. #RRGGBB полностью непрозрачен"
+        ]
+      ],
+      "notes": "Есть девять anchor: TopLeft, TopCenter, TopRight, CenterLeft, Center, CenterRight, BottomLeft, BottomCenter, BottomRight. Размер и координаты родителя пересчитываются для текущего окна. Нулевая или пропущенная ширина/высота растягивает область, это не автоматический размер текста. rect допускает 2, 3 или 4 числа; x/y/width/height можно указать отдельно. Для подписи снизу пример Battle использует rect=\"16 16 0 18\". Дети рисуются поверх родителя в порядке дерева; последний интерактивный элемент под мышью получает событие. Сам padding не задаёт обрезку содержимого.",
+      "sources": [
+        "Engine/Include/Engine/Components/SpecificComponents/UIComponent.h",
+        "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+        "Engine/Include/Engine/UI/UIElement.h",
+        "Engine/Source/UI/UIElement.cpp",
+        "Engine/Include/Engine/UI/UIMarkup.h",
+        "Engine/Source/UI/UIMarkup.cpp"
+      ]
+    },
+    {
+      "type": "code",
+      "title": "Действия выбранного HUD в C++",
+      "code": "// В классе игры: bool hudBound_ = false;\n// unsigned clicks_ = 0;\nvoid ProjectGame::PreUpdate(float dt) {\n    auto* hud = GetProjectHud();\n    if (!hud) return;\n    if (!hudBound_) {\n        hud->BindClick(\"add\", [this] { ++clicks_; });\n        hudBound_ = true;\n    }\n    hud->SetLabelText(\"clicks\",\n        \"Нажатий: \" + std::to_string(clicks_));\n    hud->SetBarFill(\"load\", float(clicks_ % 11) / 10);\n}",
+      "codeSize": 22,
+      "aside": "Выберите .ui через настройки HUD.\n\nИмена элементов: add, clicks, load.\n\nBindClick сохраняется при обновлении.",
+      "foot": "Подключите UIComponent.h. Для собственного класса игры объявите PreUpdate как override.",
+      "notes": "GetProjectHud возвращает автоматически созданный компонент. Он появляется при InitializeGameplay, после AfterInitialize; использовать его можно в BeginPlay компонентов или PreUpdate игры. Поле hudBound_ принадлежит Game и сбрасывается при новом Play. Состояние clicks_ также принадлежит игре и переживает замену разметки. SetLabelText/SetBarFill возвращают false, если элемент отсутствует или имеет другой тип. В архиве есть также опциональный пример самостоятельного TutorialHud; для простого подключения через редактор он не нужен.",
+      "sources": [
+        "Editor/Source/UIEditorWindow.cpp",
+        "Editor/Source/HudTools.cpp",
+        "Editor/Source/MainWindow.cpp",
+        "Editor/Source/FileBrowser.cpp",
+        "Engine/Include/Engine/UI/ProjectHud.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp",
+        "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+        "Engine/Source/UI/UIMarkup.cpp",
+        "Engine/docs/UI-EDITOR.md",
+        "Engine/Include/Engine/Components/SpecificComponents/UIComponent.h"
+      ]
+    },
+    {
+      "type": "steps",
+      "title": "Горячее обновление без ручной перепривязки",
+      "items": [
+        [
+          "Назначьте по имени",
+          "BindClick хранит действие в компоненте и назначает его новой кнопке после загрузки."
+        ],
+        [
+          "Обновляйте значения",
+          "SetLabelText и SetBarFill сами находят текущий элемент. Отсутствующее имя безопасно."
+        ],
+        [
+          "Сохраняйте рабочий UI",
+          "При ошибке XML остаётся прежнее дерево. Исправьте файл и сохраните ещё раз."
+        ]
+      ],
+      "foot": "Find и прямой OnClick остаются низкоуровневым API: их указатели не переживают замену дерева.",
+      "notes": "Обычный автор HUD не работает с MarkupRevision. Поддерживаемые привязки BindClick хранятся вне дерева и переживают временное удаление и возвращение элемента. UnbindClick удаляет привязку. Сырые указатели, полученные через Find, по-прежнему требуют повторного поиска после обновления. Состояние игры следует хранить вне разметки.",
+      "sources": [
+        "Editor/Source/UIEditorWindow.cpp",
+        "Editor/Source/HudTools.cpp",
+        "Editor/Source/MainWindow.cpp",
+        "Editor/Source/FileBrowser.cpp",
+        "Engine/Include/Engine/UI/ProjectHud.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp",
+        "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+        "Engine/Source/UI/UIMarkup.cpp",
+        "Engine/docs/UI-EDITOR.md",
+        "Engine/Include/Engine/Components/SpecificComponents/UIComponent.h"
+      ]
+    },
+    {
+      "type": "steps",
+      "title": "Практика с HUD в Battle",
+      "items": [
+        [
+          "Запустите Battle",
+          "Запустите Battle с --hud: появятся время кадра, вызовы отрисовки, техника и уровни LOD."
+        ],
+        [
+          "Измените файл",
+          "Рядом с Battle.exe откройте GameContent/UI/Hud.ui. Измените color или rect и сохраните."
+        ],
+        [
+          "Проверьте результат",
+          "Раскладка обновится. Кнопка и F6 переключают раскраску LOD, F7 скрывает HUD."
+        ]
+      ],
+      "foot": "Постоянные правки сохраните также в Game/Battle/Content/UI/Hud.ui перед следующей сборкой.",
+      "notes": "Сборка из корня репозитория: .\\Engine\\build.ps1 -Target Battle -Configuration Release. Затем .\\Game\\build\\x64\\Release\\Battle\\Battle.exe --units 100 --static --hud. Требуются обычные зависимости Battle. По умолчанию HUD отключён; --hud включает демонстрационные показатели, --no-hud отключает их. Отслеживается копия в GameContent/UI рядом с исполняемым файлом, а не исходный файл в репозитории. Сборка копирует исходный Content заново. Поля frame/draws/units/load/lod0..lod3 обновляются кодом, поэтому для проверки меняйте стиль или расположение. F6 в главном редакторе перечитывает материалы; назначение здесь относится именно к Battle. При ошибке первой загрузки BuildHud возвращается без регистрации HUD: исправьте файл и перезапустите. При ошибке последующего обновления сохраняется рабочее дерево.",
+      "sources": [
+        "Game/Battle/Content/UI/Hud.ui",
+        "Game/Battle/Source/BattleGame.cpp",
+        "Game/Battle/Source/Main.cpp",
+        "Engine/build.ps1",
+        "Game/Battle/RequiredFiles.txt",
+        "Engine/Include/Engine/Components/SpecificComponents/UIComponent.h",
+        "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+        "Engine/Include/Engine/UI/UIElement.h",
+        "Engine/Source/UI/UIElement.cpp",
+        "Engine/Include/Engine/UI/UIMarkup.h",
+        "Engine/Source/UI/UIMarkup.cpp",
+        "Engine/docs/tutorial/examples/UI/README.txt"
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Если HUD не обновился",
+      "headers": [
+        "Симптом",
+        "Что проверить"
+      ],
+      "rows": [
+        [
+          "Нет HUD при запуске",
+          "Выбор в «HUD игры», файл .ui и сообщение в логе"
+        ],
+        [
+          "Старый вид после сохранения",
+          "Загруженную копию .ui и строку ошибки XML"
+        ],
+        [
+          "Изменение атрибута не видно",
+          "Неизвестный атрибут игнорируется с предупреждением"
+        ],
+        [
+          "Кнопка без действия",
+          "Уникальное name и BindClick в коде игры"
+        ],
+        [
+          "Камера реагирует на щелчок",
+          "interactive и использование игрового Input API"
+        ],
+        [
+          "Символы пропали",
+          "Атлас содержит ASCII и русские буквы А-я, Ё и ё"
+        ]
+      ],
+      "notes": "Проверьте выбранный HUD и версию SDK 2026.10.31.3. При первоначальной ошибке выбранный компонент продолжает следить за файлом. Стандартная камера и Input::System учитывают захват мыши UI; прямой ввод через ОС — ответственность пользовательского кода. Неизвестные атрибуты игнорируются с предупреждением, неизвестные теги отклоняются. Визуальный редактор не поддерживает граф событий, изображения и произвольный Unicode.",
+      "sources": [
+        "Engine/Include/Engine/Components/SpecificComponents/UIComponent.h",
+        "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+        "Engine/Include/Engine/UI/UIElement.h",
+        "Engine/Source/UI/UIElement.cpp",
+        "Engine/Include/Engine/UI/UIMarkup.h",
+        "Engine/Source/UI/UIMarkup.cpp",
+        "Engine/Include/Engine/UI/FontAtlas.h",
+        "Engine/Source/UI/FontAtlas.cpp",
+        "Editor/Source/UIEditorWindow.cpp",
+        "Editor/Source/HudTools.cpp",
+        "Editor/Source/MainWindow.cpp",
+        "Editor/Source/FileBrowser.cpp",
+        "Engine/Include/Engine/UI/ProjectHud.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp",
+        "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+        "Engine/Source/UI/UIMarkup.cpp",
+        "Engine/docs/UI-EDITOR.md"
+      ]
+    },
+    {
       "type": "shot",
       "title": "Обновление движка и проекта",
       "image": "r3/versions.jpg",
@@ -822,15 +1207,21 @@
           "Ресурс импортирован в Content и перенесён вместе с проектом"
         ]
       ],
-      "notes": "При ошибке сборки смотрите первую ошибку в Console / CodeBuild.log. Предыдущая DLL сохраняется. При ошибке загрузки проверьте логи кандидата в Binaries. При недоступной указанной текстуре FBX/BLEND импорт отклоняется. Сложный Blender Base Color нужно запечь в изображение. Без цветовой картинки создаётся однотонный материал. Для Blender можно указать PAINENGINE_BLENDER — полный путь к blender.exe. При первом создании класса используйте корректный C++ идентификатор.",
+      "notes": "При ошибке сборки смотрите первую ошибку в Console / CodeBuild.log. Предыдущая DLL сохраняется. При ошибке загрузки проверьте логи кандидата в Binaries. При недоступной указанной текстуре FBX/BLEND импорт отклоняется. Сложный Blender Base Color нужно запечь в изображение. Без цветовой картинки создаётся однотонный материал. Для Blender можно указать PAINENGINE_BLENDER — полный путь к blender.exe. При первом создании класса используйте корректный C++ идентификатор. Если обычные материалы слишком тёмные, добавьте направленный источник через меню Сцена, проверьте Включён и Интенсивность. Без него направленного света и его теней нет; точечные источники и unlit-материалы работают отдельно.",
       "sources": [
         "Engine/docs/CODE-PROJECTS.md",
         "Editor/Include/CodeClassDialog.h",
         "Engine/docs/INPUT-CHARACTER.md",
         "Engine/docs/MATERIALS.md",
-        "Engine/docs/PROJECT-ASSETS.md"
+        "Engine/docs/PROJECT-ASSETS.md",
+        "Editor/Source/MainWindow.cpp",
+        "Editor/Source/ObjectInspectorPanel.cpp",
+        "Engine/Include/Engine/Components/Light/DirectionalLightComponent.h",
+        "Engine/Source/Components/Light/DirectionalLightComponent.cpp",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp",
+        "Engine/Content/Shaders/Common.hlsli"
       ]
     }
   ],
-  "sourceCommit": "a3e05e3bd4bf3e983edffa3c2b16fca7ecdd3f48"
+  "sourceCommit": "a1519576e136aa87f4d4a30e542519d88acb5386"
 }
