@@ -677,7 +677,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
     host.getService = [](void* user, uint32_t serviceId, uint32_t minVersion) -> const void* {
         auto* engine = static_cast<BaseEngine*>(user);
         if (serviceId == EngineEditorReloadService && minVersion <= 1) return &engine->reloadServiceApi;
-        if (serviceId == EngineViewportOverlayService && minVersion <= 1 && engine->editModule && engine->editModule->ViewportOverlayApi().getCamera) return &engine->editModule->ViewportOverlayApi();
+        if (serviceId == EngineViewportOverlayService && minVersion <= 2 && engine->editModule && engine->editModule->ViewportOverlayApi().getCamera) return &engine->editModule->ViewportOverlayApi();
         if(serviceId==EngineAuthoringService && minVersion<=1 && engine->editModule && engine->editModule->AuthoringApi().describe) return &engine->editModule->AuthoringApi();
         if (serviceId == EngineEditorBatchService && minVersion <= 1 && engine->editModule && engine->editModule->BatchApi().apply) return &engine->editModule->BatchApi();
         if (serviceId == ENGINE_SERVICE_VFS && minVersion <= ENGINE_VFS_API_VERSION)

@@ -244,6 +244,8 @@ public:
     void SetOverlayBillboards(const EngineOverlayBillboard* billboards, uint32_t count);
     bool GetCameraInfo(EngineCameraInfo& info) const;
     void RenderEditorOverlay();
+    void SetAntialiasing(uint32_t mode);
+    uint32_t GetAntialiasing() const { return AntialiasingMode; }
 
     void SetStaticShadowArea(const glm::vec3& center, float extent);
     void InvalidateStaticShadow() { bStaticShadowDirty = true; }
@@ -623,4 +625,16 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> OverlayDepthReadOnlyState;
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> OverlayDepthDisabledState;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> OverlaySamplerState;
+
+    // Anti-aliasing (FXAA)
+    uint32_t AntialiasingMode = 1;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> SceneColorTexture;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> SceneColorRTV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> SceneColorSRV;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> FxaaVS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> FxaaPS;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> FxaaCB;
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> FxaaSampler;
+    bool EnsureFxaaResources(uint32_t width, uint32_t height);
+    void RenderFxaaPass();
 };

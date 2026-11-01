@@ -715,6 +715,9 @@ bool Game::CreateSwapChainResources(int width, int height)
 void Game::ReleaseSwapChainResources()
 {
     RenderTargetView.Reset();
+    SceneColorTexture.Reset();
+    SceneColorRTV.Reset();
+    SceneColorSRV.Reset();
     BackTexture.Reset();
     depthStencilView.Reset();
     depthStencilSRV.Reset();
@@ -3307,9 +3310,26 @@ bool Game::RenderViewportFrame(float deltaTime)
     Stats.Reset();
     UpdateFrame(std::clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds));
     BeginGpuTimer();
+
+    const bool useFxaa = (AntialiasingMode == 1) && Device && Context;
+    const uint32_t bbW = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetWidth()) : 0;
+    const uint32_t bbH = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetHeight()) : 0;
+
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backbufferRTV = RenderTargetView;
+    if (useFxaa && bbW > 0 && bbH > 0 && EnsureFxaaResources(bbW, bbH))
+    {
+        RenderTargetView = SceneColorRTV;
+    }
+
     RenderFrame();
     RenderEditorSelection();
     RenderEditorOverlay();
+
+    if (useFxaa && SceneColorSRV && backbufferRTV)
+    {
+        RenderTargetView = backbufferRTV;
+        RenderFxaaPass();
+    }
 
     static int sReadbackDone = 0;
     static int sFrameCounter = 0;
@@ -4121,4 +4141,114 @@ void Game::EndGpuTimer()
     Context->End(GpuTimerEnd[slot].Get());
     Context->End(GpuTimerDisjoint[slot].Get());
     GpuTimerIssued[slot] = true;
+}
+
+void Game::SetAntialiasing(uint32_t mode)
+{
+    AntialiasingMode = mode;
+    std::printf("[Info] Antialiasing mode changed to: %u (%s)\n", mode, mode == 1 ? "FXAA" : "Off");
+    std::fflush(stdout);
+}
+
+bool Game::EnsureFxaaResources(uint32_t width, uint32_t height)
+{
+    if (!Device || !Context || width == 0 || height == 0) return false;
+
+    if (!SceneColorTexture)
+    {
+        D3D11_TEXTURE2D_DESC desc{};
+        desc.Width = width;
+        desc.Height = height;
+        desc.MipLevels = 1;
+        desc.ArraySize = 1;
+        desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        desc.SampleDesc.Count = 1;
+        desc.Usage = D3D11_USAGE_DEFAULT;
+        desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+        if (FAILED(Device->CreateTexture2D(&desc, nullptr, SceneColorTexture.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreateRenderTargetView(SceneColorTexture.Get(), nullptr, SceneColorRTV.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreateShaderResourceView(SceneColorTexture.Get(), nullptr, SceneColorSRV.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create SceneColorTexture resources for FXAA\n");
+            return false;
+        }
+    }
+
+    if (!FxaaCB)
+    {
+        D3D11_BUFFER_DESC cbDesc{};
+        cbDesc.ByteWidth = sizeof(DirectX::XMFLOAT4);
+        cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        if (FAILED(Device->CreateBuffer(&cbDesc, nullptr, FxaaCB.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create FxaaCB\n");
+            return false;
+        }
+
+        D3D11_SAMPLER_DESC sampDesc{};
+        sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+        sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+        sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+        sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+        if (FAILED(Device->CreateSamplerState(&sampDesc, FxaaSampler.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create FxaaSampler\n");
+            return false;
+        }
+
+        const auto shaderFile = EnginePaths::Shader("FXAA.hlsl").wstring();
+        Microsoft::WRL::ComPtr<ID3DBlob> vsBlob, psBlob;
+        std::string errorMsg;
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "VSMain", "vs_5_0", vsBlob.ReleaseAndGetAddressOf(), &errorMsg)))
+        {
+            std::printf("[Error] FXAA VSMain compile failed: %s\n", errorMsg.c_str());
+            return false;
+        }
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "PSMain", "ps_5_0", psBlob.ReleaseAndGetAddressOf(), &errorMsg)))
+        {
+            std::printf("[Error] FXAA PSMain compile failed: %s\n", errorMsg.c_str());
+            return false;
+        }
+        if (FAILED(Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, FxaaVS.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, FxaaPS.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create FXAA shaders\n");
+            return false;
+        }
+        std::printf("[Info] FXAA pipeline and shaders compiled successfully\n");
+        std::fflush(stdout);
+    }
+
+    return true;
+}
+
+void Game::RenderFxaaPass()
+{
+    if (!Device || !Context || !FxaaVS || !FxaaPS || !SceneColorSRV || !RenderTargetView) return;
+
+    const uint32_t bbW = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetWidth()) : 0;
+    const uint32_t bbH = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetHeight()) : 0;
+    if (bbW == 0 || bbH == 0) return;
+
+    ID3D11RenderTargetView* nullRTV = nullptr;
+    Context->OMSetRenderTargets(1, &nullRTV, nullptr);
+
+    DirectX::XMFLOAT4 invSize(1.0f / static_cast<float>(bbW), 1.0f / static_cast<float>(bbH), 0.0f, 0.0f);
+    Context->UpdateSubresource(FxaaCB.Get(), 0, nullptr, &invSize, 0, 0);
+
+    SetFullViewport();
+    Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
+
+    Context->IASetInputLayout(nullptr);
+    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    Context->VSSetShader(FxaaVS.Get(), nullptr, 0);
+    Context->PSSetShader(FxaaPS.Get(), nullptr, 0);
+    Context->PSSetConstantBuffers(0, 1, FxaaCB.GetAddressOf());
+    Context->PSSetShaderResources(0, 1, SceneColorSRV.GetAddressOf());
+    Context->PSSetSamplers(0, 1, FxaaSampler.GetAddressOf());
+
+    Context->Draw(3, 0);
+
+    ID3D11ShaderResourceView* nullSRV = nullptr;
+    Context->PSSetShaderResources(0, 1, &nullSRV);
 }
