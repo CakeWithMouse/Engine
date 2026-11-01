@@ -85,10 +85,6 @@ void EditorMainWindow::BuildUi()
 
     setDockNestingEnabled(true);
     setDockOptions(AnimatedDocks | AllowNestedDocks | AllowTabbedDocks | GroupedDragging);
-    setStyleSheet(QStringLiteral(
-        "QMainWindow::separator { width: 9px; height: 9px; background: #424242; }"
-        "QMainWindow::separator:hover { background: #b67a27; }"
-        "QDockWidget::title { padding: 5px 8px; }"));
 
     setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
     setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);

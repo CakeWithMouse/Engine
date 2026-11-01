@@ -155,6 +155,26 @@ QDockWidget::title {
     height: 20px;
     text-align: left;
 }
+QMainWindow::separator {
+    width: 2px;
+    height: 2px;
+    background-color: %6;
+}
+QMainWindow::separator:hover {
+    background-color: %2;
+}
+QSplitter::handle {
+    background-color: %6;
+}
+QSplitter::handle:horizontal {
+    width: 2px;
+}
+QSplitter::handle:vertical {
+    height: 2px;
+}
+QSplitter::handle:hover {
+    background-color: %2;
+}
 QScrollBar:vertical {
     background-color: %5;
     width: 8px;
