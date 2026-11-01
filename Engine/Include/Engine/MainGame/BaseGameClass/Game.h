@@ -603,6 +603,14 @@ protected:
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
     };
 
+    struct RawOverlayIcon {
+        uint32_t width = 0;
+        uint32_t height = 0;
+        std::vector<uint8_t> pixels;
+    };
+    std::unordered_map<uint32_t, RawOverlayIcon> PendingOverlayIconData;
+    void UploadOverlayIcon(uint32_t iconId, const RawOverlayIcon& raw);
+
     std::vector<EngineOverlayLine> PendingOverlayLines;
     float OverlayLineThickness = 1.0f;
     std::unordered_map<uint32_t, CachedOverlayIcon> OverlayIcons;

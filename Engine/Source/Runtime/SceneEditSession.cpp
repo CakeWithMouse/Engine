@@ -53,6 +53,7 @@ std::unique_ptr<Game> SceneEditSession::CopyForPlay()
     candidate->SetSimulationTimeScale(1.0f);
     candidate->SetSceneLightingEnabled(true);
     candidate->SetAntialiasing(antialiasingMode_);
+    for (const auto& [id, st] : storedIcons_) candidate->SetOverlayIcon(id, st.width, st.height, st.pixels.data());
     SceneDocument::Restore(edit_->GetScene().GetSnapshot(), catalog_, candidate->GetScene());
     return candidate;
 }
@@ -375,6 +376,17 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
         },
         [](void* p, uint32_t iconId, uint32_t w, uint32_t h, const uint8_t* rgba) -> uint32_t {
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (rgba && w > 0 && h > 0)
+                {
+                    auto& st = s.storedIcons_[iconId];
+                    st.width = w;
+                    st.height = h;
+                    st.pixels.assign(rgba, rgba + (w * h * 4));
+                }
+                else
+                {
+                    s.storedIcons_.erase(iconId);
+                }
                 s.Active().SetOverlayIcon(iconId, w, h, rgba);
                 return EngineSceneOk;
             });
@@ -404,6 +416,7 @@ void SceneEditSession::ReplaceEdit(const SceneSnapshot& data)
 {
     auto candidate = EmptyGame();
     candidate->SetAntialiasing(antialiasingMode_);
+    for (const auto& [id, st] : storedIcons_) candidate->SetOverlayIcon(id, st.width, st.height, st.pixels.data());
     SceneDocument::Restore(data, catalog_, candidate->GetScene());
     if (attached_)
     {

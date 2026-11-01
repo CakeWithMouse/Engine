@@ -87,6 +87,13 @@ BillboardPSInput VSBillboard(BillboardVSInput input)
 {
     BillboardPSInput output;
     float4 clipCenter = mul(float4(input.Position, 1.0f), ViewProjection);
+    if (clipCenter.w <= 0.001f)
+    {
+        output.Position = float4(0.0f, 0.0f, -2.0f, 1.0f);
+        output.UV = float2(0.0f, 0.0f);
+        output.Tint = float4(0.0f, 0.0f, 0.0f, 0.0f);
+        return output;
+    }
     // Invert Y offset for screen coordinates (Y down in screen space, Y up in NDC)
     float2 ndcOffset = float2(input.Offset.x * 2.0f * ScreenSize.z, -input.Offset.y * 2.0f * ScreenSize.w) * clipCenter.w;
     output.Position = clipCenter + float4(ndcOffset.x, ndcOffset.y, 0.0f, 0.0f);

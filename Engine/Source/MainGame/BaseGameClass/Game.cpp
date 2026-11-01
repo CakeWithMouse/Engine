@@ -2903,13 +2903,26 @@ void Game::SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, cons
     if (!rgbaPixels || width == 0 || height == 0)
     {
         OverlayIcons.erase(iconId);
+        PendingOverlayIconData.erase(iconId);
         return;
     }
+
+    auto& raw = PendingOverlayIconData[iconId];
+    raw.width = width;
+    raw.height = height;
+    raw.pixels.assign(rgbaPixels, rgbaPixels + (width * height * 4));
+
     if (!Device) return;
+    UploadOverlayIcon(iconId, raw);
+}
+
+void Game::UploadOverlayIcon(uint32_t iconId, const RawOverlayIcon& raw)
+{
+    if (!Device || raw.pixels.empty() || raw.width == 0 || raw.height == 0) return;
 
     D3D11_TEXTURE2D_DESC desc{};
-    desc.Width = width;
-    desc.Height = height;
+    desc.Width = raw.width;
+    desc.Height = raw.height;
     desc.MipLevels = 1;
     desc.ArraySize = 1;
     desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -2918,12 +2931,12 @@ void Game::SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, cons
     desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 
     D3D11_SUBRESOURCE_DATA sub{};
-    sub.pSysMem = rgbaPixels;
-    sub.SysMemPitch = width * 4;
+    sub.pSysMem = raw.pixels.data();
+    sub.SysMemPitch = raw.width * 4;
 
     CachedOverlayIcon icon;
-    icon.width = width;
-    icon.height = height;
+    icon.width = raw.width;
+    icon.height = raw.height;
     if (SUCCEEDED(Device->CreateTexture2D(&desc, &sub, icon.texture.ReleaseAndGetAddressOf())))
     {
         D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -3321,6 +3334,14 @@ void Game::RenderEditorOverlay()
         }
     }
 
+    for (const auto& entry : PendingOverlayIconData)
+    {
+        if (OverlayIcons.find(entry.first) == OverlayIcons.end())
+        {
+            UploadOverlayIcon(entry.first, entry.second);
+        }
+    }
+
     if (!PendingOverlayBillboards.empty())
     {
         std::vector<OverlayBillboardVertex> bbVertices;
@@ -3447,72 +3468,6 @@ bool Game::RenderViewportFrame(float deltaTime)
     {
         RenderTargetView = backbufferRTV;
         RenderFxaaPass();
-    }
-
-    static int sReadbackDone = 0;
-    static int sFrameCounter = 0;
-    ++sFrameCounter;
-
-    if (sFrameCounter % 120 == 1)
-    {
-        std::printf("[Info] Frame %d: AntialiasingMode = %u (%s), bb = %ux%u\n",
-            sFrameCounter, AntialiasingMode, AntialiasingMode == 1 ? "FXAA" : "Off", bbW, bbH);
-        std::fflush(stdout);
-    }
-    const bool isSmokeEditor = (std::wcsstr(GetCommandLineW(), L"--smoke-editor") != nullptr) ||
-                               (GetEnvironmentVariableW(L"PAINENGINE_SMOKE_EDITOR", nullptr, 0) > 0);
-    const bool shouldCheck = isSmokeEditor && BackTexture && Device && Context &&
-                             ((sReadbackDone == 0 && sFrameCounter >= 30) || (sReadbackDone == 1 && sFrameCounter >= 130));
-    if (shouldCheck)
-    {
-        D3D11_TEXTURE2D_DESC desc{};
-        BackTexture->GetDesc(&desc);
-        desc.Usage = D3D11_USAGE_STAGING;
-        desc.BindFlags = 0;
-        desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-        desc.MiscFlags = 0;
-        Microsoft::WRL::ComPtr<ID3D11Texture2D> staging;
-        if (SUCCEEDED(Device->CreateTexture2D(&desc, nullptr, staging.GetAddressOf())))
-        {
-            Context->CopyResource(staging.Get(), BackTexture.Get());
-            D3D11_MAPPED_SUBRESOURCE mapped{};
-            if (SUCCEEDED(Context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped)))
-            {
-                size_t gizmoRedPixels = 0;
-                size_t gizmoGreenPixels = 0;
-                size_t gizmoBluePixels = 0;
-                size_t nonBgPixels = 0;
-                size_t intermediateEdgePixels = 0;
-                for (unsigned y = 0; y < desc.Height; ++y)
-                {
-                    const auto* row = reinterpret_cast<const uint8_t*>(mapped.pData) + y * mapped.RowPitch;
-                    for (unsigned x = 0; x < desc.Width; ++x)
-                    {
-                        const auto* p = row + x * 4;
-                        if (p[0] > 180 && p[1] < 60 && p[2] < 60) ++gizmoRedPixels;
-                        if (p[0] < 60 && p[1] > 180 && p[2] < 60) ++gizmoGreenPixels;
-                        if (p[0] < 60 && p[1] < 100 && p[2] > 180) ++gizmoBluePixels;
-                        const bool isBg = (p[0] <= 2 && p[1] <= 2 && std::abs(static_cast<int>(p[2]) - 51) <= 2);
-                        if (!isBg) ++nonBgPixels;
-                        if (x > 0)
-                        {
-                            const auto* pPrev = row + (x - 1) * 4;
-                            const int dr = std::abs(static_cast<int>(p[0]) - static_cast<int>(pPrev[0]));
-                            const int dg = std::abs(static_cast<int>(p[1]) - static_cast<int>(pPrev[1]));
-                            const int db = std::abs(static_cast<int>(p[2]) - static_cast<int>(pPrev[2]));
-                            const int maxD = std::max(dr, std::max(dg, db));
-                            // Edge gradient / intermediate color on geometry transitions
-                            if (maxD >= 8 && maxD <= 70) ++intermediateEdgePixels;
-                        }
-                    }
-                }
-                Context->Unmap(staging.Get(), 0);
-                std::printf("[Info] [D3D-Readback frame %d] FXAA=%u, Backbuffer: %ux%u, Intermediate edge pixels: %zu, Gizmo Red: %zu, Green: %zu, Blue: %zu, Non-Bg: %zu\n",
-                    sFrameCounter, AntialiasingMode, desc.Width, desc.Height, intermediateEdgePixels, gizmoRedPixels, gizmoGreenPixels, gizmoBluePixels, nonBgPixels);
-                std::fflush(stdout);
-                ++sReadbackDone;
-            }
-        }
     }
 
     EndGpuTimer();

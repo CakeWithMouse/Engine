@@ -131,57 +131,40 @@ void IconProvider::UploadIcons(IEditorHost* host, bool force)
     (void)force;
 
     auto renderSvg = [](const char* svgData, EditorIcons::IconId id, int size = 64) -> QImage {
+        (void)id;
         QImage image(size, size, QImage::Format_RGBA8888);
         image.fill(Qt::transparent);
 
+        QPainter p(&image);
+        p.setRenderHint(QPainter::Antialiasing, true);
+
+        // Circular badge plate (white, will be tinted by billboard tint in shader)
+        const QRectF plateRect(3.0, 3.0, size - 6.0, size - 6.0);
+        p.setBrush(QColor(255, 255, 255, 220));
+        p.setPen(QPen(QColor(255, 255, 255, 255), 2.5));
+        p.drawEllipse(plateRect);
+
         const char* svgStart = std::strstr(svgData, "<svg");
         QByteArray bytes(svgStart ? svgStart : svgData);
+        bytes.replace("stroke=\"#FFFFFF\"", "stroke=\"#1A1A1E\"");
+        bytes.replace("stroke=\"currentColor\"", "stroke=\"#1A1A1E\"");
+
 #ifdef ENGINE_HAS_QTSVG
         QSvgRenderer renderer(bytes);
         if (renderer.isValid())
         {
-            QPainter painter(&image);
-            renderer.render(&painter);
+            const QRectF iconRect(14.0, 14.0, size - 28.0, size - 28.0);
+            renderer.render(&p, iconRect);
         }
 #else
-        image.loadFromData(bytes, "SVG");
-        if (image.isNull()) { image = QImage(size, size, QImage::Format_RGBA8888); image.fill(Qt::transparent); }
-        else image = image.scaled(size, size).convertToFormat(QImage::Format_RGBA8888);
+        QImage glyph;
+        glyph.loadFromData(bytes, "SVG");
+        if (!glyph.isNull())
+        {
+            p.drawImage(QRect(14, 14, size - 28, size - 28), glyph);
+        }
 #endif
-        bool hasPixels = false;
-        for (int y = 0; y < size && !hasPixels; ++y)
-        {
-            const auto* line = image.constScanLine(y);
-            for (int x = 0; x < size * 4; ++x)
-            {
-                if (line[x] != 0) { hasPixels = true; break; }
-            }
-        }
-
-        if (!hasPixels)
-        {
-            QPainter p(&image);
-            p.setRenderHint(QPainter::Antialiasing, true);
-            if (id == EditorIcons::IconId::PointLight)
-            {
-                p.setBrush(QColor(255, 230, 80, 240));
-                p.setPen(QPen(QColor(255, 255, 255, 255), 2.0));
-                p.drawEllipse(size / 4, size / 4, size / 2, size / 2);
-            }
-            else if (id == EditorIcons::IconId::SunSky)
-            {
-                p.setBrush(QColor(255, 200, 50, 240));
-                p.setPen(QPen(QColor(255, 240, 150, 255), 2.0));
-                p.drawEllipse(size / 4, size / 4, size / 2, size / 2);
-            }
-            else
-            {
-                p.setBrush(QColor(80, 180, 255, 220));
-                p.setPen(QPen(Qt::white, 2.0));
-                p.drawRect(size / 4, size / 4, size / 2, size / 2);
-            }
-        }
-
+        p.end();
         return image;
     };
 
