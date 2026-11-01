@@ -11,6 +11,7 @@
 #include <Engine/Runtime/AuthoringApi.h>
 #include <Engine/Runtime/ViewportInputApi.h>
 #include <Engine/Runtime/ViewportOverlayApi.h>
+#include <Engine/Runtime/EditExtensions.h>
 
 // Host-side RAII owner of an edit-only DLL session. Must be created, called and
 // destroyed on the engine thread, before HWND destruction. Reload reconstructs scene objects from a validated checkpoint.

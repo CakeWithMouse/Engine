@@ -4384,7 +4384,7 @@ void Game::RenderFxaaPass()
 
     const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xFFFFFFFF);
-    Context->OMSetDepthStencilState(depthStencilStateDisabled.Get(), 0);
+    Context->OMSetDepthStencilState(OverlayDepthDisabledState.Get(), 0);
     Context->RSSetState(DefaultRasterState.Get());
 
     Context->IASetInputLayout(nullptr);

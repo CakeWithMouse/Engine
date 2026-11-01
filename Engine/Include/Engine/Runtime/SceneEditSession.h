@@ -11,6 +11,7 @@
 #include <Engine/Runtime/AuthoringApi.h>
 #include <Engine/Runtime/ViewportInputApi.h>
 #include <Engine/Runtime/ViewportOverlayApi.h>
+#include <Engine/Runtime/EditExtensions.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 
 // Entire object and both Games live in the module containing the generated types.

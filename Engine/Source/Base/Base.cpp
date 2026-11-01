@@ -1,4 +1,4 @@
-﻿#ifndef WIN32_LEAN_AND_MEAN
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #ifndef NOMINMAX
@@ -10,6 +10,7 @@
 #include <Engine/Runtime/ModuleApi.h>
 #include <Engine/Runtime/ViewportSession.h>
 #include <Engine/Runtime/GameEditModule.h>
+#include <Engine/Runtime/EditExtensions.h>
 #include <Engine/Runtime/GameSceneApi.h>
 #include <Engine/Runtime/GameWindowApi.h>
 #include <Engine/Resources/Paths.h>

@@ -16,6 +16,8 @@ public:
     SceneCommands(const SceneCommands&) = delete;
     SceneCommands& operator=(const SceneCommands&) = delete;
     EngineSceneApi GetApi() noexcept;
+    static uint32_t ENGINE_MODULE_CALL SetPointLightV2(void*, uint64_t, const EngineScenePointLight*, uint32_t castShadows) noexcept;
+
 private:
     Scene* scene_;
     ComponentTypeCatalog catalog_;
@@ -46,5 +48,5 @@ private:
     static uint32_t ENGINE_MODULE_CALL RenameObject(void*, uint64_t, const char*) noexcept;
     static uint32_t ENGINE_MODULE_CALL SetTransform(void*, uint64_t, const EngineSceneTransform*) noexcept;
     static uint32_t ENGINE_MODULE_CALL SetPointLight(void*, uint64_t, const EngineScenePointLight*) noexcept;
-    static uint32_t ENGINE_MODULE_CALL SetPointLightV2(void*, uint64_t, const EngineScenePointLight*, uint32_t castShadows) noexcept;
+
 };
