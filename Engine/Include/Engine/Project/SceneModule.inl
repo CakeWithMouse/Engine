@@ -233,6 +233,9 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetEditExtension(void* contex
         *static_cast<EngineEditorCameraApi*>(output) = static_cast<SceneEditSession*>(context)->GetEditorCameraApi();
         return 1;
     }
+    if(std::strcmp(name,EngineViewportCursorExtension)==0 && size==sizeof(EngineViewportCursorApi)) {
+        *static_cast<EngineViewportCursorApi*>(output)=static_cast<SceneEditSession*>(context)->GetViewportCursorApi();return 1;
+    }
     if (std::strcmp(name, EngineViewportInputExtension) == 0 && size == sizeof(EngineViewportInputApi))
     {
         *static_cast<EngineViewportInputApi*>(output) = static_cast<SceneEditSession*>(context)->GetViewportInputApi();

@@ -1,3 +1,4 @@
+#include "../Components/ComponentInternal.h"
 #define NOMINMAX
 #include <Windows.h>
 #include <Engine/Scene/SceneDocument.h>
@@ -259,13 +260,13 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
         if (o.pointLight && target.SetPointLight(added.id, *o.pointLight) != SceneResult::Ok)
             Invalid("Point light properties require a point light component: " + o.name);
         ids.emplace(o.id, added.id);
-        if (!o.parentId && !o.inheritParentScale) target.FindComponent(added.id)->SetParentWithoutScale(nullptr);
+        if (!o.parentId && !o.inheritParentScale) EngineInternal::ComponentAccess::ParentWithoutScale(*target.FindComponent(added.id), nullptr);
     }
     for (const auto& o : data.components)
         if (o.parentId && target.SetParent(ids.at(o.id), ids.at(o.parentId), o.inheritParentScale) != SceneResult::Ok)
             throw std::runtime_error("Cannot restore hierarchy");
     for (const auto& o : data.components)
-        target.FindComponent(ids.at(o.id))->RemapProjectReferences(ids);
+        EngineInternal::ComponentAccess::Remap(*target.FindComponent(ids.at(o.id)), ids);
     MigrateLegacyPlaySettings(target);
 }
 SceneSnapshot SceneDocument::Read(const std::filesystem::path& path)

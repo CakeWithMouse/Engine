@@ -1,3 +1,4 @@
+#include "../../../Engine/Source/Components/ComponentInternal.h"
 #include "KatamatiSphereComponent.h"
 #include <iostream>
 #include <algorithm>
@@ -88,11 +89,11 @@ void KatamatiSphereComponent::CheckCollisions(std::vector<GameComponent*> Compon
         {
             using namespace DirectX;
 
-            const XMFLOAT4X4 sphereWorldMatrixFloat = GetWorldMatrix();
+            const XMFLOAT4X4 sphereWorldMatrixFloat = EngineInternal::ComponentAccess::WorldMatrix(*this);
             XMMATRIX sphereWorldMatrix = XMLoadFloat4x4(&sphereWorldMatrixFloat);
             sphereWorldMatrix = RemoveScaleFromMatrixLocal(sphereWorldMatrix);
 
-            const XMFLOAT4X4 objectWorldMatrixFloat = component->GetWorldMatrix();
+            const XMFLOAT4X4 objectWorldMatrixFloat = EngineInternal::ComponentAccess::WorldMatrix(*component);
             const XMMATRIX objectWorldMatrix = XMLoadFloat4x4(&objectWorldMatrixFloat);
 
             const XMMATRIX localMatrix = objectWorldMatrix * XMMatrixInverse(nullptr, sphereWorldMatrix);
@@ -147,7 +148,7 @@ void KatamatiSphereComponent::CheckCollisions(std::vector<GameComponent*> Compon
             const glm::quat localObjectRotation = glm::normalize(glm::inverse(worldSphereRotation) * worldObjectRotation);
 
             
-            component->SetParentWithoutScale(this);
+            EngineInternal::ComponentAccess::ParentWithoutScale(*component, this);
             component->SetPosition(localPosition);
             component->SetRotationQuat(localObjectRotation);
             component->MarkTransformDirty();
@@ -197,73 +198,6 @@ void KatamatiSphereComponent::AcceptRotation(const glm::vec3& moveDirection, flo
 
     ComponentQuaternion = glm::normalize(deltaRotation * ComponentQuaternion);
     ComponentRotation = glm::degrees(glm::eulerAngles(ComponentQuaternion));
-}
-
-void KatamatiSphereComponent::GenerateSphere(float radius, int slices, int stacks)
-{
-    vertices.clear();
-    indices.clear();
-    Radius = radius;
-    
-    for (int i = 0; i <= stacks; ++i)
-    {
-        float phi = glm::pi<float>() * float(i) / float(stacks);
-        float sinPhi = sin(phi);
-        float cosPhi = cos(phi);
-        
-        float v = 1.0f - (float)i / stacks;
-        
-        for (int j = 0; j <= slices; ++j)
-        {
-            float theta = 2.0f * glm::pi<float>() * float(j) / float(slices);
-            float sinTheta = sin(theta);
-            float cosTheta = cos(theta);
-            
-            float x = radius * sinPhi * cosTheta;
-            float y = radius * cosPhi;
-            float z = radius * sinPhi * sinTheta;
-            
-            float u = (float)j / slices;
-            float t = glm::clamp(radius / 20.0f, 0.0f, 1.0f);
-            
-            float r = u;
-            float g = v;
-            float b = 0.0f;
-            
-            vertices.push_back(DirectX::XMFLOAT4(x, y, z, 1.0f));
-            vertices.push_back(DirectX::XMFLOAT4(r, g, b, 1.0f));
-        }
-    }
-    
-    for (int i = 0; i < stacks; ++i)
-    {
-        for (int j = 0; j < slices; ++j)
-        {
-            int first = i * (slices + 1) + j;
-            int second = first + slices + 1;
-            
-            indices.push_back(first);
-            indices.push_back(second);
-            indices.push_back(first + 1);
-            
-            indices.push_back(second);
-            indices.push_back(second + 1);
-            indices.push_back(first + 1);
-        }
-    }
-}
-
-void KatamatiSphereComponent::InitSphere(float radius, int slices, int stacks)
-{
-    GenerateSphere(radius, slices, stacks);
-    
-    std::vector<DirectX::XMFLOAT4> points;
-    for (const auto& v : vertices)
-    {
-        points.push_back(v);
-    }
-    
-    InitPoints(points.data(), static_cast<int>(points.size()), indices.data(), static_cast<int>(indices.size()));
 }
 
 void KatamatiSphereComponent::Tick(float deltaTime)
@@ -356,5 +290,5 @@ void KatamatiSphereComponent::Tick(float deltaTime)
     const float moveDistance = glm::length(horizontalDisplacement);
     AcceptRotation(moveDelta, moveDistance);
     MarkTransformDirty();
-    GetWorldMatrix();
+    EngineInternal::ComponentAccess::WorldMatrix(*this);
 }

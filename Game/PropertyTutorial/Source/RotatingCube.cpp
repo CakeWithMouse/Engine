@@ -4,7 +4,7 @@
 
 RotatingCube::RotatingCube()
 {
-    InitCube();
+
     SetColor({1.0f, 0.65f, 0.2f, 1.0f});
 }
 

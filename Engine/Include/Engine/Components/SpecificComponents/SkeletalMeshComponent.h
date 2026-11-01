@@ -41,6 +41,8 @@ public:
     void SetModelYawDegrees(float yaw) { modelYawDegrees = yaw; }
     float GetModelYawDegrees() const { return modelYawDegrees; }
 
+    bool SupportsExactTrace() const override {return skeletalModel && skeletalModel->Clips.empty();}
+    DirectX::XMFLOAT4X4 GetTraceMatrix() override;
     bool CastsShadow() const override { return false; }
     bool SupportsMaterials() const override { return true; }
     uint32_t GetMaterialVariant() const override;

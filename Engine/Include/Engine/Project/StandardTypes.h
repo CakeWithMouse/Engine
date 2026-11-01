@@ -36,7 +36,7 @@ public:
 class Sky final : public SkyboxComponent
 {
 public:
-    Sky() { InitCube(); const auto shader=EnginePaths::Shader("BasicSky.hlsl").u8string(); SetShaderNames(shader,shader); }
+    Sky();
     bool CastsShadow() const override { return false; }
 };
 class PointLight final : public PointLightComponent

@@ -1,3 +1,4 @@
+#include "../Components/ComponentInternal.h"
 #include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/Scene/SceneDocument.h>
 #include <Engine/Scene/SceneAssets.h>
@@ -11,7 +12,7 @@
 namespace {
 glm::mat4 Matrix(const SceneTransform& t) { return glm::translate(glm::mat4(1),t.position)*glm::mat4_cast(t.rotation)*glm::scale(glm::mat4(1),t.scale); }
 glm::mat4 World(GameComponent& object) {
-    const auto matrix=object.GetWorldMatrix(); glm::mat4 result(1);
+    const auto matrix=EngineInternal::ComponentAccess::WorldMatrix(object); glm::mat4 result(1);
     for(int r=0;r<4;++r)for(int c=0;c<4;++c)result[r][c]=matrix.m[r][c];
     return result;
 }
@@ -46,7 +47,7 @@ EngineSceneBatchApi SceneEditSession::GetBatchApi() noexcept {
                         if(o.projectData.empty())return;
                         auto object=o.typeName==SceneAssets::ModelType ? SceneAssets::CreateModel(o.modelAsset,false) : s.catalog_.Find(o.typeName)->create();
                         if(!object)throw std::runtime_error("Cannot create object for reference remapping");
-                        object->LoadProjectData(o.projectData);object->RemapProjectReferences(mapping);o.projectData=object->SaveProjectData();
+                        object->LoadProjectData(o.projectData);EngineInternal::ComponentAccess::Remap(*object, mapping);o.projectData=object->SaveProjectData();
                     };
                     if(operation==EngineBatchTransform) {
                         if(!target||!selected.count(active))return EngineSceneInvalidArgument;

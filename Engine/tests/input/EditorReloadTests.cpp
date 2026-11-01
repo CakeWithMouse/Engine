@@ -60,6 +60,9 @@ int wmain(int argc,wchar_t** argv) {
         Check(api.context!=previousContext,"session replaced without closing window");
         const auto overlay=module.ViewportOverlayApi();
         Check(overlay.context==api.context,"overlay extension follows new DLL session");
+        const auto cursor=module.ViewportCursorApi();
+        Check(cursor.context==api.context&&cursor.version==1&&cursor.set,"cursor extension follows new DLL session");
+        Check(cursor.set(cursor.context,120.25f,80.75f,320,240,1)==EngineSceneOk,"cursor callback remains callable after DLL unload");
         EngineCameraInfo cameraInfo{};
         Check(overlay.getCamera && overlay.getCamera(overlay.context,&cameraInfo)==EngineSceneOk,"camera callback remains callable after DLL unload");
         Check(cameraInfo.width==320 && cameraInfo.height==240,"overlay camera keeps viewport dimensions");

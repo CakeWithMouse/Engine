@@ -1,5 +1,5 @@
 #pragma once
-#include <Engine/Components/SpecificComponents/CubeComponent.h>
+#include <Engine/Components/GameComponents.h>
 #include <Engine/Components/PropertyMacros.h>
 
 struct CameraProperties {
@@ -21,7 +21,7 @@ struct CameraProperties {
 };
 
 // A scene object, not an input receiver. AI and controllers use the same Move API.
-class Character : public CubeComponent
+class Character : public GameComponent
 {
     float moveSpeed_ = 5;
     bool needsLegacySettings_ = true;
@@ -42,7 +42,11 @@ public:
     ComponentId camera=0;
     float cameraDistance=5, cameraHeight=2, lookSensitivity=0.005f;
     CameraProperties cameraSettings;
+    // @engine-internal-begin
+private:
     void RemapProjectReferences(const std::map<ComponentId,ComponentId>&) override;
+public:
+    // @engine-internal-end
     void ImportLegacySettings(const class PlaySettings&);
     float GetMoveSpeed() const { return moveSpeed_; }
     void SetMoveSpeed(float);
@@ -84,7 +88,11 @@ public:
     bool CastsShadow() const override { return false; }
     std::string SaveProjectData() const override;
     void LoadProjectData(const std::string&) override;
+    // @engine-internal-begin
+private:
     void RemapProjectReferences(const std::map<ComponentId,ComponentId>&) override;
+public:
+    // @engine-internal-end
 };
 
 // Reads legacy settings once; modern property values always take precedence.

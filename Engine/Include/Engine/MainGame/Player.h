@@ -22,6 +22,8 @@ class Player
 public:
     Player();
     void UpdateCamera(float deltaTime);
+    // Refresh derived matrices without processing input or advancing the camera.
+    void RefreshMatrices();
     void SetGamePointer(Game* game) { GamePtr = game; }
 
     const DirectX::XMFLOAT4X4& GetViewMatrix() const { return ViewMatrix; }
@@ -72,8 +74,8 @@ public:
     Game* GamePtr = nullptr;
 
 protected:
-    DirectX::XMFLOAT4X4 ViewMatrix;
-    DirectX::XMFLOAT4X4 ProjectionMatrix;
+    DirectX::XMFLOAT4X4 ViewMatrix{};
+    DirectX::XMFLOAT4X4 ProjectionMatrix{};
 
 private:
     glm::vec3 position{0.0f, 0.0f, -5.0f};

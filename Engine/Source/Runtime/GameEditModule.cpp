@@ -48,6 +48,8 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
             if (query && query(extensionContext, EngineSceneBatchExtension, 1, sizeof(batch_), &batch_))
                 if (batch_.version != 1 || batch_.context != extensionContext || !batch_.apply || !batch_.select)
                     throw std::runtime_error("Invalid batch API");
+            if(query&&query(extensionContext,EngineViewportCursorExtension,1,sizeof(cursor_),&cursor_))
+                if(cursor_.version!=1||cursor_.context!=extensionContext||!cursor_.set)throw std::runtime_error("Invalid cursor API");
             if (query && query(extensionContext, EngineViewportInputExtension, 1, sizeof(viewportInput_), &viewportInput_))
                 if (viewportInput_.version != 1 || viewportInput_.context != extensionContext || !viewportInput_.focus || !viewportInput_.key || !viewportInput_.pointer || !viewportInput_.objectKind)
                     throw std::runtime_error("Invalid viewport input API");
@@ -141,7 +143,7 @@ uint32_t GameEditModule::Reload(const std::filesystem::path& module, const std::
         swap(loadedModule_, candidate->loadedModule_);
         swap(library_, candidate->library_); swap(factory_, candidate->factory_); swap(api_, candidate->api_);
         swap(projectData_, candidate->projectData_); swap(selection_, candidate->selection_); swap(batch_, candidate->batch_); swap(authoring_, candidate->authoring_);
-        swap(viewportInput_, candidate->viewportInput_); swap(camera_, candidate->camera_);
+        swap(viewportInput_, candidate->viewportInput_); swap(cursor_, candidate->cursor_); swap(camera_, candidate->camera_);
         swap(overlay_, candidate->overlay_);
         swap(legacyFactory_, candidate->legacyFactory_); swap(legacy_, candidate->legacy_);
         swap(legacy5Factory_, candidate->legacy5Factory_); swap(legacy5_, candidate->legacy5_);

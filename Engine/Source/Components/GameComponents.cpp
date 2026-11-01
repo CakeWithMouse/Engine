@@ -3,6 +3,7 @@
 #include <Engine/Scene/SceneAssets.h>
 
 #include <algorithm>
+#include <climits>
 #include <cmath>
 #include <cstring>
 #include <directxmath.h>
@@ -131,6 +132,8 @@ void GameComponent::InitPoints(DirectX::XMFLOAT4* NewPoints, int pointCount, int
     points.assign(NewPoints, NewPoints + pointCount);
     indices.assign(NewIndices, NewIndices + indexCount);
     this->indexCount = indexCount;
+    TraceBoundsValid=!points.empty();TraceMinimum=glm::vec3(std::numeric_limits<float>::max());TraceMaximum=-TraceMinimum;
+    for(size_t i=0;i<points.size();i+=2){glm::vec3 p(points[i].x,points[i].y,points[i].z);if(!Trace::Finite(p)){TraceBoundsValid=false;break;}TraceMinimum=glm::min(TraceMinimum,p);TraceMaximum=glm::max(TraceMaximum,p);}
 
     // Primitive vertices are (position, colour) pairs.
     float maxRadiusSq = 0.0f;
@@ -798,13 +801,47 @@ void GameComponent::LoadProjectData(const std::string& data)
     if (!data.empty()) throw std::runtime_error("Component has no project data codec");
 }
 
+void GameComponent::SetPrimitive(MeshLodData primitive)
+{
+    if(primitive.Vertices.empty() || primitive.Indices.empty() || primitive.Indices.size()%3 != 0 ||
+       primitive.Vertices.size() > size_t(INT_MAX)/2 || primitive.Indices.size() > size_t(INT_MAX))
+        throw std::invalid_argument("Invalid primitive geometry");
+    for(const auto& v : primitive.Vertices)
+        if(!Trace::Finite({v.Position.x,v.Position.y,v.Position.z}))
+            throw std::invalid_argument("Non-finite primitive position");
+    for(auto index : primitive.Indices)
+        if(index >= primitive.Vertices.size()) throw std::invalid_argument("Invalid primitive index");
+
+    if(auto* mesh = dynamic_cast<MeshComponent*>(this)) {
+        mesh->SetMesh(std::move(primitive));
+        SetModelAsset({});
+        return;
+    }
+    auto visual = std::make_unique<MeshComponent>();
+    visual->SetMesh(std::move(primitive));
+    visual->SetParent(this);
+    visual->SetGame(GamePtr);
+    // Mirror geometry for legacy shaders, culling and instance transforms. No raw stream API
+    // is exposed to gameplay classes. The full mesh remains available to material rendering.
+    GameComponent::InitPoints(visual->points.data(), int(visual->points.size()),
+                              visual->indices.data(), int(visual->indices.size()));
+    VisualComponent = std::move(visual);
+    VisualModelAsset.clear();
+    VisualPrimitive = true;
+    if(GamePtr && GamePtr->GetDevice()) CreateBuffers(GamePtr->GetDevice());
+    if(GamePtr) GamePtr->InvalidateStaticShadow();
+}
+
 void GameComponent::SetModelAsset(const std::string& path) {
     auto candidate=path.empty()?std::unique_ptr<GameComponent>{}:SceneAssets::CreateModel(path,false);
     if(candidate) { candidate->SetParent(this); candidate->SetGame(GamePtr); }
-    VisualComponent=std::move(candidate); VisualModelAsset=path;
+    VisualComponent=std::move(candidate); VisualModelAsset=path; VisualPrimitive=false;
     if(GamePtr) GamePtr->InvalidateStaticShadow();
 }
 GameComponent* GameComponent::GetRenderComponent() {
+    // Explicit legacy shader pairs still consume the component's position/colour stream.
+    // The ready mesh is retained for materials (including its authored normals and UVs).
+    if(VisualPrimitive && MaterialAssetPath.empty() && !MaterialPtr && !VertexShaderName.empty()) return this;
     // Legacy position/color primitives are converted to the material vertex format lazily.
     if(!VisualComponent && !SupportsMaterials() && (!MaterialAssetPath.empty()||MaterialPtr) && !points.empty()) {
         MeshLodData mesh;
@@ -819,8 +856,19 @@ GameComponent* GameComponent::GetRenderComponent() {
         auto visual=std::make_unique<MeshComponent>();visual->SetMesh(std::move(mesh));visual->SetParent(this);visual->SetGame(GamePtr);VisualComponent=std::move(visual);
     }
     if(!VisualComponent)return this;
-    if(VisualModelAsset.empty() && MaterialAssetPath.empty() && !MaterialPtr) { VisualComponent.reset();return this; }
+    if(!VisualPrimitive && VisualModelAsset.empty() && MaterialAssetPath.empty() && !MaterialPtr) { VisualComponent.reset();return this; }
     auto* visual=VisualComponent.get();
+    if(VisualPrimitive) {
+        while(visual->InstanceArray.size()<InstanceArray.size())
+            visual->InstanceArray.push_back(std::make_unique<GameComponent>());
+        visual->InstanceArray.resize(InstanceArray.size());
+        for(size_t i=0;i<InstanceArray.size();++i) {
+            auto& copy=*visual->InstanceArray[i];
+            copy.SetGame(GamePtr);
+            if(copy.GetParent()!=InstanceArray[i].get()) copy.SetParent(InstanceArray[i].get());
+            copy.SetColor(InstanceArray[i]->Color);
+        }
+    }
     visual->SetColor(Color);visual->SetStaticShadowCaster(bStaticShadowCaster);
     if(visual->GetTexturePath()!=texturePath)visual->TrySetTexture(texturePath);
     if(visual->GetMaterialAsset()!=MaterialAssetPath)visual->SetMaterialAsset(MaterialAssetPath);
@@ -828,3 +876,5 @@ GameComponent* GameComponent::GetRenderComponent() {
     if(GamePtr && GamePtr->GetDevice() && visual->RenderOwner!=GamePtr) { visual->CreateBuffers(GamePtr->GetDevice());visual->RenderOwner=GamePtr; }
     return visual;
 }
+
+DirectX::XMFLOAT4X4 GameComponent::GetTraceMatrix() { return GetWorldMatrix(); }

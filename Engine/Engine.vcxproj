@@ -34,6 +34,10 @@
     <ClCompile Include="Source\Base\Base.cpp" />
     <ClCompile Include="Source\Components\Light\DirectionalLightComponent.cpp" />
     <ClCompile Include="Source\Scene\Scene.cpp" />
+    <ClCompile Include="Source\Scene\Trace.cpp" />
+    <ClCompile Include="Source\Components\ComponentTrace.cpp" />
+    <ClCompile Include="Source\Components\StandardSky.cpp" />
+    <ClCompile Include="Source\MainGame\GameTrace.cpp" />
     <ClCompile Include="Source\Scene\SceneCommands.cpp" />
     <ClCompile Include="Source\Scene\SceneDocument.cpp" />
     <ClCompile Include="Source\Scene\SceneAssets.cpp" />
@@ -139,6 +143,7 @@
     <ClInclude Include="Include\Engine\InputDevice\InputDevice.h" />
     <ClInclude Include="Include\Engine\InputDevice\Keys.h" />
     <ClInclude Include="Include\Engine\MainGame\BaseGameClass\Game.h" />
+    <ClInclude Include="Include\Engine\MainGame\GameSettings.h" />
     <ClInclude Include="Include\Engine\MainGame\Player.h" />
     <ClInclude Include="Include\Engine\Render\ImpostorAtlas.h" />
     <ClInclude Include="Include\Engine\Render\Material.h" />

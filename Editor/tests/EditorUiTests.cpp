@@ -119,11 +119,12 @@ void ReloadUiChecks(const std::filesystem::path& root, const std::filesystem::pa
         auto& c=*static_cast<Context*>(p);if(version>1)return nullptr;
         if(service==EngineEditorReloadService)return &c.service;
         if(service==EngineViewportOverlayService)return &c.module->ViewportOverlayApi();
+        if(service==EngineViewportCursorService)return &c.module->ViewportCursorApi();
         if(service==EngineEditorBatchService)return &c.module->BatchApi();
         if(service==EngineAuthoringService)return &c.module->AuthoringApi();
         return nullptr;
     };
-    EditorQtHost host(callbacks);host.SetModuleApi(module.Api());host.SetProjectDataApi(module.ProjectDataApi());host.SetSelectionApi(module.SelectionApi());host.SetViewportInputApi(module.ViewportInputApi());
+    EditorQtHost host(callbacks);host.SetModuleApi(module.Api());host.SetProjectDataApi(module.ProjectDataApi());host.SetSelectionApi(module.SelectionApi());host.SetViewportInputApi(module.ViewportInputApi());host.SetViewportCursorApi(module.ViewportCursorApi());
     struct Cleanup { EditorQtHost& host; std::unique_ptr<GameEditModule>& module; ~Cleanup(){host.SetModuleApi({});module.reset();host.Stop();} } cleanup{host,ownedModule};
     Check(host.Start(),"start reload UI");
     auto pump=[&]{host.Update(.016);Check(module.Api().frame(module.Api().context,.016)==EngineSceneOk,"reload UI render");Sleep(10);};
@@ -232,6 +233,10 @@ int wmain(int argc, wchar_t** argv)
         if (!legacy && query && query(api.context,EngineSelectionExtension,1,sizeof(selection),&selection)) host.SetSelectionApi(selection);
         EngineViewportOverlayApi overlay{};
         if (!legacy && query && query(api.context,EngineViewportOverlayExtension,1,sizeof(overlay),&overlay)) host.SetViewportOverlayApi(overlay);
+        EngineViewportCursorApi cursor{};if(!legacy&&query&&query(api.context,EngineViewportCursorExtension,1,sizeof(cursor),&cursor))host.SetViewportCursorApi(cursor);
+        if(!legacy&&cursor.set){EngineViewportCursorApi rejected{99,nullptr,nullptr};
+            Check(!query(api.context,EngineViewportCursorExtension,2,sizeof(rejected),&rejected)&&rejected.version==99,"cursor extension version rejected");
+            Check(!query(api.context,EngineViewportCursorExtension,1,sizeof(rejected)-1,&rejected)&&rejected.version==99,"cursor extension size rejected");}
         EngineViewportInputApi viewportInput{};
         if (!legacy && query && query(api.context,EngineViewportInputExtension,1,sizeof(viewportInput),&viewportInput)) host.SetViewportInputApi(viewportInput);
         struct HostCleanup

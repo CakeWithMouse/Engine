@@ -43,7 +43,7 @@ struct Probe : CubeComponent
     Probe()
     {
         if (failConstruction) throw std::runtime_error("expected constructor failure");
-        InitCube(); last = this; ++live;
+        last = this; ++live;
     }
     ~Probe() override { --live; }
     bool HasBuffers() const { return vb && ib; }

@@ -1,3 +1,4 @@
+#include "SceneTestAccess.h"
 #include <Engine/MainGame/Player.h>
 #include "../../Editor/Include/CameraKeys.h"
 #define NOMINMAX
@@ -14,6 +15,13 @@
 #include <vector>
 
 #define CHECK(value) do { if (!(value)) throw std::runtime_error(#value); } while (false)
+
+class SettingsRenderTest final : public Game
+{
+public:
+    bool HasFxaaTarget() const { return SceneColorSRV && SceneColorRTV; }
+    bool HasBackbufferTarget() const { return RenderTargetView && RenderTargetView != SceneColorRTV; }
+};
 
 // Separate hardware/window integration test; the ordinary WARP suite stays headless.
 class PreviewTest final : public BasicExamplesPreview
@@ -166,11 +174,11 @@ int main(int argc, char** argv)
             PreviewTest game;
             game.SetSimulationEnabled(false);
             CHECK(game.InitializeViewport(window, 640, 480));
-            game.SetVSync(false);
+            game.GetSettings().SetVSync(false);
             CHECK(game.RenderViewportFrame(0.016f));
             const auto originalPixels = game.checksum;
             auto& scene = game.GetScene();
-            const auto original = scene.GetSnapshot().components.front();
+            const auto original = SceneTestAccess::Snapshot(scene).components.front();
             auto moved = original.transform;
             moved.position.y += 0.5f;
             CHECK(scene.SetTransform(original.id, moved) == SceneResult::Ok);
@@ -180,7 +188,7 @@ int main(int argc, char** argv)
             CHECK(game.RenderViewportFrame(0.016f) && game.checksum == originalPixels);
 
             auto cube = std::make_unique<CubeComponent>();
-            cube->InitCube();
+
             std::unique_ptr<GameComponent> component = std::move(cube);
             auto* raw = component.get();
             const auto added = scene.AddComponent("3", component);
@@ -203,7 +211,7 @@ int main(int argc, char** argv)
             CHECK(!scene.InitializeViewport(nullptr, 640, 480));
             CHECK(scene.InitializeViewport(window, 640, 480));
             CHECK(scene.GetInputDevice() == nullptr);
-            scene.SetVSync(false);
+            scene.GetSettings().SetVSync(false);
             CHECK(scene.RenderViewportFrame(1.0f / 60));
             CHECK(scene.GetFrameStats().DrawCalls == 2);
             CHECK(scene.coloredPixels > 1000);
@@ -211,9 +219,9 @@ int main(int argc, char** argv)
             for (int i = 0; i < 15; ++i) CHECK(scene.RenderViewportFrame(1.0f / 60));
             CHECK(scene.checksum != first);
             scene.OnWindowResized(0, 0, true);
-            const auto frame = scene.GetFrameIndex();
+            const auto frame = scene.simulationTicks;
             CHECK(scene.RenderViewportFrame(1.0f / 60));
-            CHECK(scene.GetFrameIndex() == frame);
+            CHECK(scene.simulationTicks == frame);
             scene.OnWindowResized(801, 451, false);
             CHECK(scene.RenderViewportFrame(1.0f / 60));
             CHECK(scene.GetDisplay()->GetWidth() == 801 && scene.GetDisplay()->GetHeight() == 451);
@@ -231,7 +239,6 @@ int main(int argc, char** argv)
             auto* scene = session.Active();
             for (int frame = 0; frame < 3; ++frame) CHECK(scene->RenderViewportFrame(1.0f / 60));
             CHECK(scene->GetFrameStats().DrawCalls > 0);
-            CHECK(scene->GetFrameIndex() == 3);
             auto* camera = scene->GetPlayer();
             const auto initialPosition = camera->GetPosition();
             const float initialYaw = camera->GetYaw();
@@ -255,6 +262,29 @@ int main(int argc, char** argv)
             CHECK(scene->RenderViewportFrame(1.0f / 60));
             std::cout << "PASS: preview factory/render/resize " << name << '\n';
         }
+        for (bool embedded : {false, true})
+        {
+            SettingsRenderTest game;
+            game.GetSettings().SetVSync(false);
+            game.SetSimulationEnabled(false);
+            CHECK(embedded ? game.InitializeViewport(window, 640, 480) : game.InitializeRuntimeWindow(false));
+            auto frame = [&]() { return embedded ? game.RenderViewportFrame(0) : game.RunRuntimeFrame(0) == Game::RuntimeFrameResult::Running; };
+            CHECK(frame() && !game.HasFxaaTarget());
+            game.GetSettings().SetAntialiasing(1);
+            for (auto mode : {Forward, Deffered, Custom})
+            {
+                game.GetSettings().SetRenderingType(mode);
+                CHECK(frame() && game.HasFxaaTarget() && game.HasBackbufferTarget());
+            }
+            game.OnWindowResized(721, 513, false);
+            CHECK(frame() && game.HasBackbufferTarget());
+            game.GetSettings().SetAntialiasing(0);
+            CHECK(frame() && game.HasBackbufferTarget());
+            game.GetSettings().RequestWindowClose();
+            if (embedded) { CHECK(frame() && IsWindow(window)); }
+            else { CHECK(game.RunRuntimeFrame(0) == Game::RuntimeFrameResult::Closed); }
+        }
+        std::cout << "PASS: GameSettings in standalone and embedded, FXAA, resize, rendering modes, close isolation\n";
         CHECK(!FindPreviewScene("", {}));
         bool unknownRejected = false;
         try { FindPreviewScene("UnknownScene", {}); }

@@ -69,6 +69,7 @@ private:
     void SendAttach();
     void SendResize();
 
+    void SendCursor(QPointF point, bool valid);
     uint32_t PhysW() const;
     uint32_t PhysH() const;
 

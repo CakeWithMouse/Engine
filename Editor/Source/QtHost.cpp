@@ -288,6 +288,10 @@ void EditorQtHost::DrainCommands()
         {
             history_.EndGizmoDrag();
         }
+        else if(cmd.type==EditorCommand::InputCursor){
+            if(const auto* cursor=CursorApi())result=cursor->set(cursor->context,cmd.right,cmd.up,cmd.w,cmd.h,cmd.forward!=0);
+            Complete(cmd,result,error);
+        }
         else if (viewportHandler_.CanHandle(cmd.type))
         {
             ViewportCommandHandler::Context vctx{

@@ -1,6 +1,7 @@
 #pragma once
 #include <Engine/Components/ComponentAnnotations.h>
 #include <cstdint>
+#include <Engine/Scene/Trace.h>
 #include <d3d11.h>
 #include <directxmath.h>
 #include <memory>
@@ -22,8 +23,12 @@ namespace GameComponentNames
     };
 }
 
+// @engine-internal-begin
+namespace EngineInternal { struct ComponentAccess; }
+// @engine-internal-end
 class Game;
 class Material;
+struct MeshLodData;
 
 /** Shader pair of one pass variant, resolved lazily by Game::BindComponentShaders. */
 struct ComponentShaderVariant
@@ -50,11 +55,17 @@ public:
     virtual std::string GetModelAsset() const { return VisualModelAsset; }
     // Geometry is independent of the gameplay class. Empty restores its own geometry.
     void SetModelAsset(const std::string& path);
+    // Assign a ready primitive from MeshPrimitives; CPU/GPU setup belongs to the engine.
+    void SetPrimitive(MeshLodData primitive);
     GameComponent* GetRenderComponent();
     // Transactional texture assignment; also works before device creation.
     bool TrySetTexture(const std::string& path);
     void SetCubeMap(CubeMapResource* cubeMap);
+    // @engine-internal-begin
+private:
     void SetReflectionSettings(float strength, float fresnelPower = 5.0f);
+public:
+    // @engine-internal-end
     ID3D11ShaderResourceView* GetTexture() const { return textureSRV.Get(); }
     bool HasTexture() const { return textureSRV != nullptr; }
     bool HasCubeMap() const { return cubeMapSRV != nullptr; }
@@ -97,8 +108,12 @@ public:
     virtual std::string DescribeEditorProperties() const { return {}; }
     virtual std::string SaveProjectData() const { return {}; }
     virtual void LoadProjectData(const std::string& data);
+    // @engine-internal-begin
+private:
     // Called after restoring all objects. Persistent references are IDs, never pointers.
     virtual void RemapProjectReferences(const std::map<ComponentId, ComponentId>&) {}
+public:
+    // @engine-internal-end
     virtual void Render(ID3D11DeviceContext* context);
     virtual void RenderShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass);
     /** GPU work that must run once per frame independently of drawing (e.g. particle simulation). */
@@ -107,16 +122,24 @@ public:
     /** Screen-space interface: drawn in its own pass after the scene, never in a world pass. */
     virtual bool IsScreenSpaceUI() const { return false; }
     virtual bool CastsShadow() const;
+    // @engine-internal-begin
+private:
     /**
      * Objects that never move (terrain, buildings): their shadow is baked once into the static
      * shadow map instead of being redrawn into every cascade each frame.
      */
     void SetStaticShadowCaster(bool bStatic) { bStaticShadowCaster = bStatic; }
+public:
+    // @engine-internal-end
     virtual bool IsStaticShadowCaster() const { return bStaticShadowCaster && CastsShadow(); }
     virtual bool SupportsFrustumCulling() const { return InstanceArray.empty() && !bIsSkybox; }
 
     // Shaders
+    // @engine-internal-begin
+private:
     void SetShaderNames(const std::string& vertexShaderName, const std::string& pixelShaderName);
+public:
+    // @engine-internal-end
     const std::string& GetVertexShaderName() const { return VertexShaderName; }
     const std::string& GetPixelShaderName() const { return PixelShaderName; }
     ComponentShaderVariant& GetShaderVariant(ShaderCompileVariant variant);
@@ -127,7 +150,11 @@ public:
     void SetCollision(bool bNewHasCollision) { bHasCollision = bNewHasCollision; }
     /** Returns false (and keeps the old parent) if the new parent would create a cycle. */
     bool SetParent(GameComponent* parent);
+    // @engine-internal-begin
+private:
     bool SetParentWithoutScale(GameComponent* parent);
+public:
+    // @engine-internal-end
     GameComponent* GetParent() const { return Parent; }
     /** Drops references to a component that is being destroyed (self and instances). */
     void ClearParentReferences(const GameComponent* removed);
@@ -145,8 +172,12 @@ public:
     glm::vec3 GetRotation() const { return ComponentRotation; }
     glm::vec3 GetScale() const { return ComponentScale; }
     glm::quat GetLocalRotationQuat() const { return LocalRotationQuaternion; }
+    // @engine-internal-begin
+private:
     /** Cached world matrix (row-vector convention, not transposed). */
     DirectX::XMFLOAT4X4 GetWorldMatrix();
+public:
+    // @engine-internal-end
     uint64_t GetWorldVersion() const { return WorldVersion; }
 
     bool HasCollison() const { return bHasCollision; }
@@ -163,20 +194,41 @@ public:
     ID3D11Buffer* GetIndexBuffer() const { return ib.Get(); }
     ID3D11Buffer* GetVertexBuffer() const { return vb.Get(); }
 
+    // @engine-internal-begin
+private:
+    friend struct EngineInternal::ComponentAccess;
+    friend class Character;
+    friend class UIComponent;
+    friend class CubeComponent;
+    friend class SphereComponent;
+    friend class TriangleComponent;
+    friend class MeshComponent;
+    friend class InstancedMeshComponent;
+    friend class SkeletalMeshComponent;
+    friend class FBXComponent;
     virtual void InitPoints(DirectX::XMFLOAT4* NewPoints, int pointCount, int* NewIndices, int indexCount);
+public:
+    // @engine-internal-end
     virtual int GetIndexCount() { return indexCount; }
     virtual float GetRotationAngle(float totalTime) { return 0.f; }
     /** Radius in local space scaled by the local scale (used by gameplay collision). */
     virtual float GetBoundingRadius() const;
     /** Radius of the geometry around the local origin, without any scale. */
     virtual float GetLocalBoundingRadius() const { return LocalBoundingRadius; }
-    // CPU triangle picking for InitPoints primitives; distance uses the supplied world ray.
+    // CPU triangle picking for primitive geometry; distance uses the supplied world ray.
+    uint32_t traceChannels=Trace::DefaultChannel; // runtime query filter; zero disables queries
+    virtual bool SupportsExactTrace() const {return true;}
+    virtual DirectX::XMFLOAT4X4 GetTraceMatrix();
+    virtual Trace::Result RaycastGeometry(const Trace::Ray&,const Trace::Query&,Trace::Statistics&);
     bool RaycastPrimitive(const glm::vec3& origin, const glm::vec3& direction, float& distance);
     /** Conservative world-space radius around GetWorldPosition(). */
     float GetWorldBoundingRadius();
     void GetEditorBounds(glm::vec3& minimum, glm::vec3& maximum);
 
 protected:
+    Trace::Result RaycastGeometryAt(const Trace::Ray&,const Trace::Query&,Trace::Statistics&,const DirectX::XMFLOAT4X4&);
+    glm::vec3 TraceMinimum{0},TraceMaximum{0};
+    bool TraceBoundsValid=false;
     /** Local transform; override to change how rotation is built. */
     virtual DirectX::XMMATRIX GetLocalMatrix() const;
     glm::mat4 GetWorldMatrixGLM();
@@ -263,6 +315,7 @@ protected:
 private:
     std::unique_ptr<GameComponent> VisualComponent;
     std::string VisualModelAsset;
+    bool VisualPrimitive = false;
     void AssignMaterial(std::shared_ptr<Material> material);
     friend class Game;
     friend class Scene;

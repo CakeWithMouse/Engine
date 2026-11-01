@@ -14,8 +14,15 @@ const { Presentation, PresentationFile } = await import(pathToFileURL(path.join(
 const { finalizePresentation } = await import(pathToFileURL(path.join(skill, 'container_tools/artifact_tool_utils.mjs')).href);
 const data = JSON.parse(await fs.readFile(path.join(workspaceDir, 'content.json'), 'utf8'));
 const stem = `PainEngine-Tutorial-${data.date}-r${data.revision}`;
-const buildDir = path.join(workspaceDir, '.build', stem);
-const output = path.join(workspaceDir, 'releases', stem + '-final.pptx');
+let buildDir = path.join(workspaceDir, '.build', stem);
+// Finalized artifacts are immutable, including drafts not yet published in current.json.
+let output = path.join(workspaceDir, 'releases', stem + '-final.pptx');
+const exists = file => fs.access(file).then(()=>true, error=>{ if(error.code==='ENOENT')return false;throw error; });
+for (let attempt=2; process.env.TUTORIAL_PDF_ONLY !== '1'; attempt++) {
+  if(!await exists(output) && !await exists(path.join(buildDir,'final-validation.json'))) break;
+  output = path.join(workspaceDir, 'releases', stem + `-v${attempt}-final.pptx`);
+  buildDir = path.join(workspaceDir, '.build', stem + `-v${attempt}`);
+}
 await fs.mkdir(buildDir, { recursive: true });
 await fs.mkdir(path.dirname(output), { recursive: true });
 const deck = Presentation.create({ slideSize: { width: 1280, height: 720 } });

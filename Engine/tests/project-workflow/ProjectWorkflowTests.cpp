@@ -68,7 +68,7 @@ static void CheckLightPixels(HWND window, const std::filesystem::path& content)
 {
     EnginePaths::SetContentRoot(content);
     LightCaptureGame game;
-    game.SetRenderingType(Custom); game.SetSimulationEnabled(false); game.SetVSync(false);
+    game.GetSettings().SetRenderingType(Custom); game.SetSimulationEnabled(false); game.GetSettings().SetVSync(false);
     Check(game.InitializeViewport(window,640,480,true), "attach light pixel viewport");
     game.GetPlayer()->SetPosition({0,0,5});
     auto cube = SceneProject::GetComponentTypes().Find("Primitive.Cube")->create(); cube->SetColor({1,1,1,1});
@@ -122,7 +122,7 @@ static void CheckLightPixels(HWND window, const std::filesystem::path& content)
 static void CheckShadowPixels(HWND window)
 {
     LightCaptureGame game;
-    game.SetRenderingType(Custom); game.SetSimulationEnabled(false); game.SetVSync(false);
+    game.GetSettings().SetRenderingType(Custom); game.SetSimulationEnabled(false); game.GetSettings().SetVSync(false);
     game.SetSceneLightingEnabled(true);
     Check(game.InitializeViewport(window, 640, 480, true), "attach shadow pixel viewport");
     game.GetPlayer()->SetPosition({0, 3, 6});

@@ -24,7 +24,7 @@ static fs::path LegacyProject(const fs::path& fixture, const fs::path& root)
     ProjectUpgrade::WriteJson(root / "Content/Scenes/Main.scene.json",Starter());
     return root / "Project.json";
 }
-static void ExerciseModule(const fs::path& file, const fs::path& runtime, bool lights)
+static void ExerciseModule(const fs::path& file, const fs::path& runtime, bool lights, bool hasCursor=false)
 {
     const auto project = ReadRuntimeProject(file);
     const auto beforeHash = ProjectUpgrade::Hash(project.module);
@@ -32,6 +32,7 @@ static void ExerciseModule(const fs::path& file, const fs::path& runtime, bool l
     struct Window { HWND h; ~Window() { DestroyWindow(h); } } guard{window};
     GameEditModule module(project.module,runtime / "EngineContent",project.content);
     const auto& api = module.Api(); char error[2048]{}; uint64_t id = 0;
+    Check(bool(module.ViewportCursorApi().set)==hasCursor,"optional cursor capability matches module generation");
     Check(bool(api.scene.setPointLight) == lights,"legacy light capability is absent; current capability is present");
     if (module.PreferredSceneVersion() == 2)
     {
@@ -41,6 +42,9 @@ static void ExerciseModule(const fs::path& file, const fs::path& runtime, bool l
         const auto query = reinterpret_cast<EngineGetEditExtensionFn>(GetProcAddress(library,"EngineGetEditExtension"));
         EnginePointLightApi capability{99,nullptr,nullptr};
         Check(query && !query(api.context,"Unknown",1,sizeof(capability),&capability) && capability.version == 99,"unknown extension leaves output unchanged");
+        EngineViewportCursorApi cursor{99,nullptr,nullptr};
+        if(!hasCursor)Check(!query(api.context,EngineViewportCursorExtension,1,sizeof(cursor),&cursor)&&cursor.version==99,"old DLL rejects cursor extension without touching output");
+        else Check(query(api.context,EngineViewportCursorExtension,1,sizeof(cursor),&cursor)&&cursor.version==1&&cursor.set,"upgraded module supplies cursor extension");
         Check(!query(api.context,EnginePointLightExtension,2,sizeof(capability),&capability) && capability.version == 99,"unknown extension version rejected");
         Check(!query(api.context,EnginePointLightExtension,1,sizeof(capability)-1,&capability) && capability.version == 99,"extension size checked");
         Check(query(api.context,EnginePointLightExtension,1,sizeof(capability),&capability) && capability.version == 1 && capability.set,"independent light extension query");
@@ -134,7 +138,7 @@ int wmain(int argc, wchar_t** argv)
         Check(SceneDocument::Read(migrated.startupScene).documentVersion == GameEditModule(migrated.module,runtime / "EngineContent").PreferredSceneVersion(),"v1 scene migrates to target module format");
         Check(ProjectUpgrade::Hash(migrated.module) == ProjectUpgrade::Hash(runtime / "Templates/SceneProject/Game.dll"),"known template updated");
         Check(ProjectUpgrade::Hash(oldScene) == sceneHash && ProjectUpgrade::Hash(old.parent_path()/"Game.dll") == dllHash,"original preserved byte-for-byte");
-        ExerciseModule(root / "Migrated/Project.json",runtime,true);
+        ExerciseModule(root / "Migrated/Project.json",runtime,true,true);
         Reject([&] { ProjectUpgrade::Copy(old,root / "Migrated",runtime); },"never overwrite existing destination");
         Reject([&] { ProjectUpgrade::Copy(old,old.parent_path()/"Nested",runtime); },"reject destination inside source");
         auto future = Starter(); future["objects"][0]["unknown"] = 123;

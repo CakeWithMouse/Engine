@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 
         if (bench)
         {
-            game.SetVSync(false);
+            game.GetSettings().SetVSync(false);
             if (game.IsVSyncActive())
             {
                 std::cerr << "Error: VSync is enabled, benchmark invalid" << std::endl;
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
         {
             game.SetFrameLimit(frameLimit);
             // Unattended runs measure the renderer, not the display refresh rate.
-            if (frameLimit > 0) game.SetVSync(false);
+            if (frameLimit > 0) game.GetSettings().SetVSync(false);
         }
 
         game.BuildScene(settings);

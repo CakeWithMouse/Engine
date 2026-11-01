@@ -63,7 +63,11 @@ public:
     virtual void Tick(float deltaTime) override;
     virtual void Render(ID3D11DeviceContext* Context) override;
     virtual void RenderShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass) override;
+    // @engine-internal-begin
+private:
     void InitPoints(DirectX::XMFLOAT4* NewPoints, int pointCount, int* NewIndices, int indexCount) override;
+public:
+    // @engine-internal-end
     int GetIndexCount() override { return totalIndexCount; }
     float GetBoundingRadius() const override;
     float GetLocalBoundingRadius() const override { return baseBoundingRadius; }

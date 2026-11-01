@@ -1,3 +1,4 @@
+#include "../Source/Components/ComponentInternal.h"
 #include <Engine/Resources/Paths.h>
 #include <Engine/Resources/VirtualFileSystem.h>
 #include <Engine/Components/GameComponents.h>
@@ -121,7 +122,7 @@ void TransformHierarchy()
     CHECK(grandchild.SetParent(&child));
     Near(grandchild.GetWorldPosition().x, 12);
     auto version = grandchild.GetWorldVersion();
-    grandchild.GetWorldMatrix();
+    EngineInternal::ComponentAccess::WorldMatrix(grandchild);
     CHECK(version == grandchild.GetWorldVersion());
     parent.SetPosition({20, 0, 0});
     Near(grandchild.GetWorldPosition().x, 22);
@@ -130,7 +131,7 @@ void TransformHierarchy()
     CHECK(parent.GetParent() == nullptr);
     CHECK(!child.SetParent(&child));
     CHECK(child.GetParent() == &parent);
-    CHECK(child.SetParentWithoutScale(&parent));
+    CHECK(EngineInternal::ComponentAccess::ParentWithoutScale(child, &parent));
     Near(child.GetWorldPosition().x, 21);
     parent.SetRotation({0, 0, 90});
     Near(child.GetWorldPosition().x, 20);
@@ -191,7 +192,7 @@ void ShaderVariants()
     CHECK(game.SupportsDeferredGeometry(&component));
     CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::DeferredGBuffer));
     CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::Default));
-    component.SetShaderNames(EnginePaths::Shader("ReflectiveSphere.hlsl").generic_u8string(), EnginePaths::Shader("ReflectiveSphere.hlsl").generic_u8string());
+    EngineInternal::ComponentAccess::Shaders(component, EnginePaths::Shader("ReflectiveSphere.hlsl").generic_u8string(), EnginePaths::Shader("ReflectiveSphere.hlsl").generic_u8string());
     CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::Default));
     CHECK(!game.SupportsDeferredGeometry(&component));
     CHECK(!game.BindComponentShaders(&component, ShaderCompileVariant::DeferredGBuffer));
@@ -867,6 +868,38 @@ void MaterialComponentIntegration()
     CHECK(game.BindComponentShaders(plane, ShaderCompileVariant::Default));
     CHECK(game.SupportsDeferredGeometry(plane));
     CHECK(RenderOffscreen(game, *plane, D3D11_CULL_BACK)[32 * 64 + 32] == defaultPixel);
+}
+
+void AssignedPrimitiveRendering()
+{
+    TestGame game;
+    CHECK(game.CreateInputLayouts());
+    game.SetCamera({0,3,0}, {0,0,0}, {0,0,1});
+    auto object=std::make_unique<GameComponent>();
+    object->SetPrimitive(MeshPrimitives::Plane(2,2));
+    auto* owner=object.get();
+    CHECK(game.RegisterComponent("assigned",owner)==RegisterResult::Ok);
+    object.release();
+    auto* visual=owner->GetRenderComponent();
+    CHECK(visual!=owner);
+    CHECK(RenderOffscreen(game,*visual,D3D11_CULL_BACK)[32*64+32]!=0);
+    TempShaderDir dir;
+    auto material=std::make_shared<Material>(dir.Write("Assigned.hlsl",ParamsSurface));
+    MaterialRenderState state; state.bUnlit=true;
+    material->SetRenderState(state);
+    CHECK(owner->SetMaterial(material));
+    visual=owner->GetRenderComponent();
+    CHECK(game.BindComponentShaders(visual,ShaderCompileVariant::Default));
+    CHECK(material->SetParameter("Tint", {0,1,0,1}));
+    CHECK(RenderOffscreen(game,*visual,D3D11_CULL_BACK)[32*64+32]==0xff00ff00u);
+    owner->SetPrimitive(MeshPrimitives::Sphere(0.5f));
+    visual=owner->GetRenderComponent();
+    CHECK(visual->GetMaterial()==material.get());
+    CHECK(RenderOffscreen(game,*visual,D3D11_CULL_BACK)[32*64+32]==0xff00ff00u);
+    owner->CreateInstance({5,0,0},{0,0,0},{1,1,1},{1,1,1,1});
+    visual=owner->GetRenderComponent();
+    CHECK(visual->GetInstanceCount()==1);
+    CHECK(RenderOffscreen(game,*visual,D3D11_CULL_BACK)[32*64+32]==0); // Only the displaced copy draws.
 }
 
 // Shadow pass of one component into a 64x64 depth map seen from above; returns the depth values.
@@ -1747,17 +1780,30 @@ void MeshValidationRules()
     MeshLodData empty;
     CHECK(!ValidateMesh(empty).IsUsable());
 }
+void TraceMathTests();
+void TraceSceneTests();
+void TraceScreenTests();
+void TraceGameTests();
 void SceneOwnershipTests();
 void SceneHierarchyTests();
 void SceneDeferredTests();
 void SceneBatchTests();
 void AuthoringTests();
+void PrimitiveApiTests();
+void GameSettingsTests();
 
 int main()
 {
     const std::pair<const char*, std::function<void()>> tests[] = {
         // Scenario A MUST run first: depends on untouched global VFS before any BaseEngine lifecycle.
         {"vfs lifecycle A (read before engine)", VfsLifecycle_ScenarioA},
+        {"trace math", TraceMathTests},
+        {"ready primitives and hidden geometry setup", PrimitiveApiTests},
+        {"owned GameSettings and rendering dispatch", GameSettingsTests},
+        {"assigned primitives: GPU, materials and instances", AssignedPrimitiveRendering},
+        {"trace scene geometry and filters", TraceSceneTests},
+        {"trace screen coordinates and projection", TraceScreenTests},
+        {"trace Game, cursor and editor integration", TraceGameTests},
         {"scene ownership and IDs (no GPU)", SceneOwnershipTests},
         {"scene hierarchy and snapshots (no GPU)", SceneHierarchyTests},
         {"scene deferred mutations (no GPU)", SceneDeferredTests},

@@ -10,6 +10,7 @@
 #include <cmath>
 #include <algorithm>
 #include <QMouseEvent>
+#include <QCursor>
 #include <QKeyEvent>
 #include <QWheelEvent>
 #include <Engine/InputDevice/Keys.h>
@@ -31,8 +32,22 @@ uint32_t GameKey(QKeyEvent* key)
 }
 } // namespace
 
+void ViewportWidget::SendCursor(QPointF p,bool valid) {
+    if(!attached_)return;
+    EditorCommand c;c.type=EditorCommand::InputCursor;
+    c.right=float(p.x()*devicePixelRatioF());c.up=float(p.y()*devicePixelRatioF());
+    c.w=PhysW();c.h=PhysH();c.forward=valid?1.f:0.f;host_->PostCommand(c);
+}
+
 bool ViewportWidget::event(QEvent* e)
 {
+    // Forward absolute cursor samples in physical pixels, before button edges are queued.
+    if(e->type()==QEvent::MouseMove||e->type()==QEvent::MouseButtonPress||e->type()==QEvent::MouseButtonRelease){
+        if(e->type()==QEvent::MouseButtonPress)setFocus(Qt::MouseFocusReason);
+        SendCursor(static_cast<QMouseEvent*>(e)->position(),hasFocus());
+    }
+    if(e->type()==QEvent::Leave||e->type()==QEvent::FocusOut||e->type()==QEvent::Hide)SendCursor({},false);
+    if(e->type()==QEvent::Enter)SendCursor(mapFromGlobal(QCursor::pos()),hasFocus());
     if (HandleFocusEvent(e))
         return true;
 
@@ -74,6 +89,7 @@ bool ViewportWidget::HandleFocusEvent(QEvent* e)
     if (e->type() == QEvent::FocusIn || (e->type() == QEvent::WindowActivate && hasFocus()))
     {
         EditorCommand c; c.type = EditorCommand::InputFocus; c.w = 1; host_->PostCommand(c);
+        SendCursor(mapFromGlobal(QCursor::pos()),true);
         return false;
     }
     if (e->type() == QEvent::FocusOut || e->type() == QEvent::WindowDeactivate || e->type() == QEvent::Hide)

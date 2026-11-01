@@ -26,6 +26,13 @@ Player::Player()
     UpdateViewMatrix();
 }
 
+void Player::RefreshMatrices()
+{
+    if (cameraMode == CameraMode::Orbital) UpdateOrbitalCamera(0);
+    UpdateProjectionMatrix();
+    UpdateViewMatrix();
+}
+
 void Player::UpdateCamera(float deltaTime)
 {
     const bool controlled = GamePtr && GamePtr->HasGameplayController();
@@ -60,7 +67,8 @@ void Player::SetRotate(float yaw, float pitch)
     if (cameraMode == CameraMode::Free)
     {
         this->yaw = yaw;
-        this->pitch = pitch; 
+        this->pitch = pitch;
+        UpdateVectors();
     }else if (cameraMode == CameraMode::Orbital)
     {
         this->orbitYaw = yaw;

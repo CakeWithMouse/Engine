@@ -1,3 +1,4 @@
+#include "../SceneTestAccess.h"
 #define NOMINMAX
 #include <Engine/InputDevice/InputActions.h>
 #include <Engine/Components/Character.h>
@@ -80,10 +81,15 @@ static void CharacterChecks()
     }
     Game game;auto& scene=game.GetScene();auto id=Add(scene,"Gameplay.Character","Hero");auto settingsId=Add(scene,"Gameplay.PlaySettings","Play");
     auto* hero=dynamic_cast<Character*>(scene.FindComponent(id));hero->SetMoveSpeed(3);
+    const Trace::Ray centerRay{{0,0,5},{0,0,-1},10};
+    auto shapeHit=scene.Raycast(centerRay);
+    Check(bool(shapeHit)&&shapeHit.hit->componentId==id&&std::abs(shapeHit.hit->distance-4.7f)<.001f,"Character has assigned cylinder geometry");
     auto* settings=dynamic_cast<PlaySettings*>(scene.FindComponent(settingsId));settings->character=id;
-    auto json=SceneDocument::Serialize(scene.GetSnapshot());Scene restored;SceneDocument::Restore(SceneDocument::Parse(json),SceneProject::GetComponentTypes(),restored);
+    auto json=SceneDocument::Serialize(SceneTestAccess::Snapshot(scene));Scene restored;SceneDocument::Restore(SceneDocument::Parse(json),SceneProject::GetComponentTypes(),restored);
     auto* restoredHero=dynamic_cast<Character*>(restored.FindComponentByName("Hero"));auto* restoredSettings=dynamic_cast<PlaySettings*>(restored.FindComponentByName("Play"));
     Check(restoredHero&&restoredHero->GetMoveSpeed()==3&&restoredSettings->character==restoredHero->GetComponentId(),"no-code save/load settings and references");
+    shapeHit=restored.Raycast(centerRay);
+    Check(bool(shapeHit)&&shapeHit.hit->componentId==restoredHero->GetComponentId()&&std::abs(shapeHit.hit->distance-4.7f)<.001f,"Character geometry reconstructed after scene load");
     game.InitializeGameplay();auto* control=game.GetCharacterController();Check(control&&control->GetCharacter()==hero,"explicit possession");
     game.GetInput().SetKey(Keys::W,true);game.StepProjectSimulation(1);Check(std::abs(hero->GetLocalPosition().z+3)<.001,"standard movement");
     auto second=Add(scene,"Gameplay.Character","Second");control->Possess(second);game.StepProjectSimulation(1);auto* other=dynamic_cast<Character*>(scene.FindComponent(second));Check(glm::length(other->GetLocalPosition())==0,"switch suppresses held movement");
@@ -129,13 +135,13 @@ static void PlayerPropertyChecks()
     Game legacy;auto legacyId=Add(legacy.GetScene(),"Gameplay.Character","Old hero");auto settingsId=Add(legacy.GetScene(),"Gameplay.PlaySettings","Old settings");
     auto camId=Add(legacy.GetScene(),"Gameplay.Camera","Camera");auto* settings=dynamic_cast<PlaySettings*>(legacy.GetScene().FindComponent(settingsId));
     settings->character=legacyId;settings->camera=camId;settings->cameraDistance=17;settings->standardControl=false;
-    auto snapshot=legacy.GetScene().GetSnapshot();
+    auto snapshot=SceneTestAccess::Snapshot(legacy.GetScene());
     for(auto& row:snapshot.components)if(row.id==legacyId)row.projectData=R"({"version":1,"moveSpeed":9})";
     Scene migrated;SceneDocument::Restore(snapshot,SceneProject::GetComponentTypes(),migrated);
     auto* migratedHero=dynamic_cast<Character*>(migrated.FindComponentByName("Old hero"));
     Check(migratedHero->playerControlled&&!migratedHero->standardControl&&migratedHero->cameraDistance==17&&migratedHero->GetMoveSpeed()==9,"legacy Play settings migrate into player properties");
     Check(migratedHero->camera==migrated.FindComponentByName("Camera")->GetComponentId(),"migrated camera reference remapped");
-    migratedHero->cameraDistance=22;Scene again;SceneDocument::Restore(migrated.GetSnapshot(),SceneProject::GetComponentTypes(),again);
+    migratedHero->cameraDistance=22;Scene again;SceneDocument::Restore(SceneTestAccess::Snapshot(migrated),SceneProject::GetComponentTypes(),again);
     Check(dynamic_cast<Character*>(again.FindComponentByName("Old hero"))->cameraDistance==22,"legacy record cannot overwrite modern settings");
     migrated.RemoveComponent(migratedHero->camera);Check(migratedHero->camera==0,"deleting camera clears player reference");
 }

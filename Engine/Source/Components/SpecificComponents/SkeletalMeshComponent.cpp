@@ -353,3 +353,8 @@ void SkeletalMeshComponent::Render(ID3D11DeviceContext* context)
         context->PSSetShaderResources(0, 1, nullSrv);
     }
 }
+
+DirectX::XMFLOAT4X4 SkeletalMeshComponent::GetTraceMatrix() {
+        auto world=GetWorldMatrix();DirectX::XMFLOAT4X4 result;
+        DirectX::XMStoreFloat4x4(&result,DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(modelYawDegrees))*DirectX::XMLoadFloat4x4(&world));return result;
+    }

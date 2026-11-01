@@ -5,7 +5,7 @@
 class OrderedSceneGame : public Game
 {
 public:
-    OrderedSceneGame() : Game() { RenderingType = Custom; }
+    OrderedSceneGame() : Game() { GetSettings().SetRenderingType(Custom); }
 
 protected:
     virtual void Draw() override;

@@ -54,5 +54,17 @@
     "examples": "releases/PainEngine-Tutorial-2026-10-31-r6-examples.zip",
     "content": "releases/PainEngine-Tutorial-2026-10-31-r6.content.json",
     "summary": "HUD без C++ через настройки проекта, визуальный редактор .ui, проверка Play и безопасные привязки обработчиков. Реальные снимки новых окон; прежние разделы, опубликованные редакции и сокращения пользователя сохранены."
+  },
+  {
+    "revision": 7,
+    "date": "2026-11-01",
+    "engineVersion": "2026.11.01.1",
+    "sourceCommit": "a1519576e136aa87f4d4a30e542519d88acb5386",
+    "slideCount": 47,
+    "presentation": "releases/PainEngine-Tutorial-2026-11-01-r7-v3-final.pptx",
+    "pdf": "releases/PainEngine-Tutorial-2026-11-01-r7-v3-final.pdf",
+    "examples": "releases/PainEngine-Tutorial-2026-11-01-r7-examples.zip",
+    "content": "releases/PainEngine-Tutorial-2026-11-01-r7.content.json",
+    "summary": "Готовые примитивы без ручной инициализации геометрии; обновлены C++ примеры, аннотации свойств и настройка игрока/камеры через инспектор. Прежние опубликованные редакции сохранены."
   }
 ]

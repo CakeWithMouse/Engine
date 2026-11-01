@@ -1,3 +1,4 @@
+#include "SceneTestAccess.h"
 #define NOMINMAX
 #include <Windows.h>
 #include <Engine/Runtime/SceneEditSession.h>
@@ -76,7 +77,8 @@ void AuthoringTests(){
     Player player;copy.Apply(player);CHECK(player.GetForward()==glm::vec3(0,-1,0));
     Character hero; CHECK(hero.SetMaterialAsset("/Game/test.mat"));
     CHECK(hero.GetRenderComponent()!=&hero && hero.GetRenderComponent()->SupportsMaterials());
-    hero.SetMaterialAsset("");CHECK(hero.GetRenderComponent()==&hero);
+    hero.SetMaterialAsset("");
+    CHECK(hero.GetRenderComponent()->GetMaterialAsset().empty() && hero.GetRenderComponent()->GetIndexCount()>0);
 
     const ComponentType type{"Test.Settings","Settings",Make};SceneEditSession session({&type,1});
     auto api=session.GetApi();auto author=session.GetAuthoringApi();auto data=session.GetProjectDataApi();char error[2048]{};
@@ -106,6 +108,10 @@ void AuthoringTests(){
     hero.SetMoveSpeed(9);hero.SetModelAsset(model);hero.SetPosition({2,3,4});
     CHECK(hero.GetModelAsset()==model && hero.GetMoveSpeed()==9);
     CHECK(hero.GetRenderComponent()->GetWorldPosition()==hero.GetWorldPosition());
+    Trace::Statistics traceStats;auto trace=hero.RaycastGeometry({{2.2f,3.2f,9},{0,0,-1},10},{},traceStats);
+    CHECK(trace && std::abs(trace.hit->distance-5)<.001f && trace.hit->triangleIndex==0);
+    const auto originalNormal=trace.hit->normal;hero.SetScale({-2,3,1});trace=hero.RaycastGeometry({{1.6f,3.6f,9},{0,0,-1},10},{},traceStats);
+    CHECK(trace && glm::dot(trace.hit->normal,originalNormal)<-.99f);hero.SetScale({1,1,1});
     try {hero.SetModelAsset("/Game/missing.obj");CHECK(false);}catch(const std::runtime_error&){}
     CHECK(hero.GetModelAsset()==model);hero.SetModelAsset("");CHECK(hero.GetRenderComponent()==&hero);
     const ComponentType heroType{"Test.Hero","Hero",[]()->std::unique_ptr<GameComponent>{return std::make_unique<Character>();}};
@@ -113,7 +119,7 @@ void AuthoringTests(){
     std::unique_ptr<GameComponent> ownedHero=std::make_unique<Character>();
     static_cast<Character*>(ownedHero.get())->SetMoveSpeed(12);ownedHero->SetModelAsset(model);
     CHECK(savedScene.AddComponent("Hero",ownedHero,heroType.typeName).result==SceneResult::Ok);
-    auto snapshot=SceneDocument::Parse(SceneDocument::Serialize(savedScene.GetSnapshot()));
+    auto snapshot=SceneDocument::Parse(SceneDocument::Serialize(SceneTestAccess::Snapshot(savedScene)));
     SceneDocument::Restore(snapshot,{&heroType,1},restoredScene);
     auto* restoredHero=dynamic_cast<Character*>(restoredScene.FindComponentByName("Hero"));
     CHECK(restoredHero && restoredHero->GetMoveSpeed()==12 && restoredHero->GetModelAsset()==model);

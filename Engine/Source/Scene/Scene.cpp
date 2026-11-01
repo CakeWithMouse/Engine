@@ -274,3 +274,20 @@ void Scene::Tick(float dt, bool pauseNonSkybox)
     catch (...) { ticking_ = false; throw; }
     ticking_ = false;
 }
+
+#include <chrono>
+Trace::Result Scene::Raycast(const Trace::Ray& input,const Trace::Query& query){
+    const auto start=std::chrono::steady_clock::now();Trace::Result result;result.statistics.queries=1;
+    auto normalized=Trace::Normalize(input);
+    if(!Trace::Valid(query))result.status=Trace::Status::InvalidQuery;
+    else if(!normalized)result.status=normalized.status;
+    else {
+        auto ray=normalized.ray;ray.maxDistance=(std::min)(ray.maxDistance,query.maxDistance);
+        for(const auto& entry:byId_){auto* component=entry.second;
+            if(pendingRemoves_.count(entry.first)||!(component->traceChannels&query.channels)||component->IsSkybox()||component->IsScreenSpaceUI()||std::find(query.ignore.begin(),query.ignore.end(),entry.first)!=query.ignore.end())continue;
+            auto hit=component->RaycastGeometry(ray,query,result.statistics);
+            if(hit&&(!result.hit||hit.hit->distance<result.hit->distance)){hit.hit->componentId=entry.first;result.hit=hit.hit;result.status=Trace::Status::Hit;ray.maxDistance=hit.hit->distance;}
+        }
+    }
+    result.statistics.microseconds=std::chrono::duration<double,std::micro>(std::chrono::steady_clock::now()-start).count();traceStatistics_+=result.statistics;return result;
+}

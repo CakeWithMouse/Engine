@@ -2767,10 +2767,10 @@ void Game::Run()
     bRunning = true;
     auto prevTime = Clock::now();
 
-    while (bRunning)
+    while (bRunning && !Settings.closeRequested_)
     {
         // A quit request ends the loop before any further update, draw or present.
-        if (!PumpMessages())
+        if (!PumpMessages() || Settings.closeRequested_)
         {
             break;
         }
@@ -2961,7 +2961,7 @@ void Game::RenderEditorOverlay()
     ++sOverlayFrameCounter;
     const bool logPeriodic = (sOverlayFrameCounter % 120 == 1);
 
-    if (!bEmbedded)
+    if (!bEmbedded && TraceDebugLines.empty())
     {
         if (logPeriodic) { std::printf("[Info] Overlay: early return (!bEmbedded)\n"); std::fflush(stdout); }
         return;
@@ -2997,7 +2997,9 @@ void Game::RenderEditorOverlay()
         std::fflush(stdout);
     }
 
-    if (PendingOverlayLines.empty() && PendingOverlayBillboards.empty())
+    auto overlayLines=PendingOverlayLines;
+    auto debugLines=CollectTraceDebugLines();overlayLines.insert(overlayLines.end(),debugLines.begin(),debugLines.end());
+    if (overlayLines.empty() && PendingOverlayBillboards.empty())
     {
         if (logPeriodic) { std::printf("[Info] Overlay: early return (empty lines and billboards)\n"); std::fflush(stdout); }
         return;
@@ -3126,12 +3128,12 @@ void Game::RenderEditorOverlay()
     cbData.ScreenSize = XMFLOAT4(screenW, screenH, 1.0f / screenW, 1.0f / screenH);
     Context->UpdateSubresource(OverlayCB.Get(), 0, nullptr, &cbData, 0, 0);
 
-    if (!PendingOverlayLines.empty())
+    if (!overlayLines.empty())
     {
         OverlayDepthVertices.clear();
         OverlayTopVertices.clear();
 
-        for (const auto& line : PendingOverlayLines)
+        for (const auto& line : overlayLines)
         {
             const bool depthTest = (line.flags & 1) != 0 && (line.flags & 2) == 0;
             auto& target = depthTest ? OverlayDepthVertices : OverlayTopVertices;
@@ -3311,25 +3313,7 @@ bool Game::RenderViewportFrame(float deltaTime)
     UpdateFrame(std::clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds));
     BeginGpuTimer();
 
-    const bool useFxaa = (AntialiasingMode == 1) && Device && Context;
-    const uint32_t bbW = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetWidth()) : 0;
-    const uint32_t bbH = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetHeight()) : 0;
-
-    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backbufferRTV = RenderTargetView;
-    if (useFxaa && bbW > 0 && bbH > 0 && EnsureFxaaResources(bbW, bbH))
-    {
-        RenderTargetView = SceneColorRTV;
-    }
-
     RenderFrame();
-    RenderEditorSelection();
-    RenderEditorOverlay();
-
-    if (useFxaa && SceneColorSRV && backbufferRTV)
-    {
-        RenderTargetView = backbufferRTV;
-        RenderFxaaPass();
-    }
 
     static int sReadbackDone = 0;
     static int sFrameCounter = 0;
@@ -3392,9 +3376,9 @@ bool Game::RenderViewportFrame(float deltaTime)
 Game::RuntimeFrameResult Game::RunRuntimeFrame(float deltaTime)
 {
     if (!bRuntimeWindow || !bInitialized || !std::isfinite(deltaTime) || deltaTime < 0) return RuntimeFrameResult::Failed;
-    if (bWindowCloseRequested) return RuntimeFrameResult::Closed;
+    if (Settings.closeRequested_) return RuntimeFrameResult::Closed;
     bRunning = true;
-    if (!PumpMessages() || bWindowCloseRequested) return RuntimeFrameResult::Closed;
+    if (!PumpMessages() || Settings.closeRequested_) return RuntimeFrameResult::Closed;
     ApplyPendingResize();
     if (!bRunning) return RuntimeFrameResult::Failed;
     if (bMinimized) { Sleep(10); return RuntimeFrameResult::Running; }
@@ -3488,14 +3472,14 @@ void Game::ProcessHotkeys()
     const bool vsyncDown = InputDevicePtr->IsKeyDown(Keys::F4);
     if (vsyncDown && !bVSyncKeyWasDown)
     {
-        bVSync = !bVSync;
+        GetSettings().SetVSync(!GetSettings().IsVSyncEnabled());
     }
     bVSyncKeyWasDown = vsyncDown;
 
     const bool renderTypeDown = InputDevicePtr->IsKeyDown(Keys::F5);
-    if (renderTypeDown && !bRenderTypeKeyWasDown && RenderingType != Custom)
+    if (renderTypeDown && !bRenderTypeKeyWasDown && GetSettings().GetRenderingType() != Custom)
     {
-        RenderingType = RenderingType == Forward ? Deffered : Forward;
+        GetSettings().SetRenderingType(GetSettings().GetRenderingType() == Forward ? Deffered : Forward);
     }
     bRenderTypeKeyWasDown = renderTypeDown;
 }
@@ -3518,6 +3502,12 @@ void Game::UpdateSimulation(float deltaTime)
     InitializeGameplay();
     StartGameplayComponents();
     TotalTime += deltaTime;
+    // Convert client coordinate units to render-target pixels, including DPI virtualization.
+    if(!bEmbedded && DisplayPtr){POINT point{};const auto hwnd=DisplayPtr->GetHwnd();
+        const bool focused=GetForegroundWindow()==hwnd;
+        RECT client{};const bool valid=focused&&GetCursorPos(&point)&&ScreenToClient(hwnd,&point)&&GetClientRect(hwnd,&client)&&client.right>0&&client.bottom>0;
+        const float sx=valid?float(DisplayPtr->GetWidth())/client.right:1.f,sy=valid?float(DisplayPtr->GetHeight())/client.bottom:1.f;
+        ActionInput.SetCursorPosition({(float(point.x)+.5f)*sx,(float(point.y)+.5f)*sy,uint32_t(DisplayPtr->GetWidth()),uint32_t(DisplayPtr->GetHeight()),valid});}
     bool pointerBlocked = false;
     auto prepareUI = [&](UIComponent* ui) {
         if (!ui) return;
@@ -3718,7 +3708,18 @@ void Game::BuildFrameConstants()
 
 void Game::RenderFrame()
 {
-    switch (RenderingType)
+    const bool useFxaa = (GetSettings().GetAntialiasing() == 1) && Device && Context;
+    const uint32_t bbW = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetWidth()) : 0;
+    const uint32_t bbH = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetHeight()) : 0;
+
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backbufferRTV = RenderTargetView;
+    const bool fxaaReady = useFxaa && bbW > 0 && bbH > 0 && backbufferRTV && EnsureFxaaResources(bbW, bbH);
+    if (fxaaReady)
+    {
+        RenderTargetView = SceneColorRTV;
+    }
+
+    switch (GetSettings().GetRenderingType())
     {
     case Deffered:
         DrawDeffered();
@@ -3730,6 +3731,17 @@ void Game::RenderFrame()
     default:
         DrawForward();
         break;
+    }
+
+    if (bEmbedded)
+    {
+        RenderEditorSelection();
+        RenderEditorOverlay();
+    }
+    if (fxaaReady)
+    {
+        RenderTargetView = backbufferRTV;
+        RenderFxaaPass();
     }
 
     // Before Present: after it the back buffer is no longer guaranteed to hold this frame.
@@ -3747,7 +3759,7 @@ void Game::EndFrame()
         return;
     }
 
-    const HRESULT hr = SwapChain->Present(bVSync ? 1 : 0, 0);
+    const HRESULT hr = SwapChain->Present(GetSettings().IsVSyncEnabled() ? 1 : 0, 0);
     if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
     {
         const HRESULT reason = Device ? Device->GetDeviceRemovedReason() : hr;
@@ -3780,13 +3792,13 @@ void Game::UpdateWindowTitle(float realDeltaTime)
 
     const float fps = TitleFrameCount / TitleUpdateAccumulator;
     const double cpuMs = CpuFrameMsAccumulator / std::max<uint32_t>(TitleFrameCount, 1);
-    const wchar_t* renderName = RenderingType == Deffered ? L"Deferred" : (RenderingType == Custom ? L"Custom" : L"Forward");
+    const wchar_t* renderName = GetSettings().GetRenderingType() == Deffered ? L"Deferred" : (GetSettings().GetRenderingType() == Custom ? L"Custom" : L"Forward");
 
     WCHAR text[320];
     swprintf_s(text, L"%s | FPS: %.1f | CPU %.2f ms | GPU %.2f ms | Objects: %zu (+%zu inst) | Draws: %u | Drawn inst: %u | Culled: %u obj / %u inst%s",
                renderName, fps, cpuMs, LastGpuFrameMs, Components.size(), instanceCount,
                LastFrameStats.DrawCalls, LastFrameStats.InstancesDrawn,
-               LastFrameStats.CulledObjects, LastFrameStats.CulledInstances, bVSync ? L" | VSync" : L"");
+               LastFrameStats.CulledObjects, LastFrameStats.CulledInstances, GetSettings().IsVSyncEnabled() ? L" | VSync" : L"");
     SetWindowText(DisplayPtr->GetHwnd(), text);
 
     TitleUpdateAccumulator = 0.0f;
@@ -4143,12 +4155,6 @@ void Game::EndGpuTimer()
     GpuTimerIssued[slot] = true;
 }
 
-void Game::SetAntialiasing(uint32_t mode)
-{
-    AntialiasingMode = mode;
-    std::printf("[Info] Antialiasing mode changed to: %u (%s)\n", mode, mode == 1 ? "FXAA" : "Off");
-    std::fflush(stdout);
-}
 
 bool Game::EnsureFxaaResources(uint32_t width, uint32_t height)
 {

@@ -3,6 +3,12 @@
 #include <iostream>
 TriangleComponent::TriangleComponent() : GameComponent()
 {
+    DirectX::XMFLOAT4 vertices[] = {
+        {0.5f,0.5f,0,1},{1,0,0,1}, {-0.5f,-0.5f,0,1},{0,0,1,1},
+        {0.5f,-0.5f,0,1},{0,1,0,1}, {-0.5f,0.5f,0,1},{1,1,1,1}
+    };
+    int triangles[] = {0,1,2,1,0,3};
+    InitSquare(vertices, triangles);
 }
 
 void TriangleComponent::InitSquare(DirectX::XMFLOAT4 points[8], int indices[6])

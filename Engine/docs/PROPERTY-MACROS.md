@@ -12,7 +12,7 @@ class Rotator : public CubeComponent
 public:
     ENGINE_GENERATED_PROPERTIES(CubeComponent)
 
-    Rotator() { InitCube(); }
+    Rotator() { }
     void Tick(float dt) override {
         if (enabled) SetRotation(GetRotation() + glm::vec3(0, speed * dt, 0));
     }

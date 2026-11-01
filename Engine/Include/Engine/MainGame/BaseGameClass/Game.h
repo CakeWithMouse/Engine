@@ -17,18 +17,12 @@
 #include <Engine/Render/ShaderConstants.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/MainGame/Player.h>
+#include <Engine/MainGame/GameSettings.h>
 #include <Engine/Display/Display.h>
 #include <Engine/InputDevice/InputDevice.h>
 #include <Engine/InputDevice/InputActions.h>
 
 class CharacterController;
-
-enum RenderType
-{
-    Forward,
-    Deffered,
-    Custom
-};
 
 enum class ShaderCompileVariant
 {
@@ -134,6 +128,10 @@ public:
     Game(const Game&) = delete;
     Game& operator=(const Game&) = delete;
 
+    // Borrowed reference: valid for this Game lifetime.
+    GameSettings& GetSettings() { return Settings; }
+    const GameSettings& GetSettings() const { return Settings; }
+
     /** Creates window, device and base resources. Returns false (and releases everything) on failure. */
     bool Initialize();
     // Standalone window driven by a module host, without StartGame's nested loop.
@@ -141,7 +139,6 @@ public:
     enum class RuntimeFrameResult { Running, Closed, Failed };
     RuntimeFrameResult RunRuntimeFrame(float deltaTime);
     bool IsRuntimeWindow() const { return bRuntimeWindow; }
-    void RequestWindowClose() { bWindowCloseRequested = true; }
     // Embedded preview: host owns HWND and drives frames/resizes on the render thread.
     // No Raw Input registration, window procedure replacement or nested message loop.
     // preserveSceneOnFailure is for data-only edit scenes (no custom AfterInitialize).
@@ -156,9 +153,6 @@ public:
     /** Runs the frame loop until quit. Returns the process exit code. */
     int StartGame();
 
-    // Shader variants are resolved per pass, so the render type may be switched at any time.
-    void SetRenderingType(RenderType NewType) { RenderingType = NewType; }
-    RenderType GetRenderingType() const { return RenderingType; }
     void SetShadowSettings(bool enabled, float shadowDistance);
     // Scene projects use their single DirectionalLightComponent, with no implicit sun or ambient.
     void SetSceneLightingEnabled(bool enabled) { bSceneLighting = enabled; }
@@ -166,7 +160,6 @@ public:
     void SetDirectionalLightDirection(const glm::vec3& direction);
     void SetDirectionalLightColor(const glm::vec3& color);
     void SetDirectionalLightIntensity(float intensity);
-    void SetVSync(bool enabled) { bVSync = enabled; }
     void SetDeferredDebugOverlay(bool enabled) { bShowDeferredDebugOverlay = enabled; }
     /**
      * Scene time = real time * scale. The default reproduces the speeds that the scenes were tuned
@@ -198,6 +191,12 @@ public:
     bool CreateCubeMapFromFiles(const std::string& cubeMapName, const std::vector<std::string>& facePaths);
     CubeMapResource* GetCubeMap(const std::string& cubeMapName) const;
 
+    Trace::RayResult ScreenPointToRay(Trace::ViewportPoint point,float maxDistance=10000) const;
+    Trace::Result RaycastScreen(Trace::ViewportPoint point,const Trace::Query& query={});
+    Trace::Result RaycastCursor(const Trace::Query& query={});
+    void DebugDrawTrace(const Trace::Ray&,const Trace::Result&,float lifetime=1);
+    void ClearDebugTraces();
+    size_t GetDebugTraceLineCount();
     Player* GetPlayer() const { return FirstPlayer.get(); }
     UIComponent* GetProjectHud() const { return ProjectHudComponent.get(); }
     Display* GetDisplay() const { return DisplayPtr.get(); }
@@ -225,7 +224,7 @@ public:
     /**
      * Area covered by the baked shadow map of static objects (terrain, buildings). The map is
      * anchored to the world, rendered once and reused while the sun and the area do not change,
-     * so moving the camera costs nothing. Components opt in with SetStaticShadowCaster.
+     * so moving the camera costs nothing. Static-caster participation is configured internally.
      */
     /**
      * Diagnostics: writes every shadow cascade and the baked map as 24-bit BMP files
@@ -244,8 +243,6 @@ public:
     void SetOverlayBillboards(const EngineOverlayBillboard* billboards, uint32_t count);
     bool GetCameraInfo(EngineCameraInfo& info) const;
     void RenderEditorOverlay();
-    void SetAntialiasing(uint32_t mode);
-    uint32_t GetAntialiasing() const { return AntialiasingMode; }
 
     void SetStaticShadowArea(const glm::vec3& center, float extent);
     void InvalidateStaticShadow() { bStaticShadowDirty = true; }
@@ -258,7 +255,13 @@ public:
 
     /** Snapshot of camera/light/shadow data for the current frame. */
     const FrameConstants& GetFrameConstants() const { return CurrentFrame; }
+    // @engine-internal-begin
+private:
+    friend class GameComponent;
+    friend class InstancedMeshComponent;
     uint64_t GetFrameIndex() const { return FrameIndex; }
+public:
+    // @engine-internal-end
     FrameStats& GetFrameStats() { return Stats; }
     void CountDraw(uint32_t indexCount, uint32_t instanceCount = 1);
     void CountDispatch(uint32_t dispatchCount = 1) { Stats.Dispatches += dispatchCount; }
@@ -400,17 +403,21 @@ protected:
     void EndGpuTimer();
 
 protected:
-    RenderType RenderingType = Forward;
 
     float TotalTime = 0.0f;        // scene time (scaled)
     float RealTime = 0.0f;         // seconds of updated frames, unscaled (materials animate with it)
     float LastRealDeltaTime = 0.0f;
     float SimulationTimeScale = 0.13f * 60.0f;
+    // @engine-internal-begin
+private:
+    GameSettings Settings;
     uint64_t FrameIndex = 0;
+protected:
+    // @engine-internal-end
     bool bInitialized = false;
     bool bEmbedded = false;
     bool bSimulationEnabled = true; // Standalone games retain their existing behavior.
-    bool bRuntimeWindow = false, bRuntimeWindowVisible = true, bWindowCloseRequested = false;
+    bool bRuntimeWindow = false, bRuntimeWindowVisible = true;
     bool bRunning = false;
     int ExitCode = 0;
 
@@ -551,7 +558,6 @@ protected:
     FrameStats Stats;
     FrameStats LastFrameStats;
     ShaderCompileVariant CurrentPassVariant = ShaderCompileVariant::Default;
-    bool bVSync = true;
     bool bFrustumCulling = true;
     bool bOverlayKeyWasDown = false;
     bool bVSyncKeyWasDown = false;
@@ -602,6 +608,9 @@ protected:
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
     };
 
+    struct TimedTraceLine {EngineOverlayLine line;double expiry;};
+    std::vector<TimedTraceLine> TraceDebugLines;
+    std::vector<EngineOverlayLine> CollectTraceDebugLines();
     std::vector<EngineOverlayLine> PendingOverlayLines;
     float OverlayLineThickness = 1.0f;
     std::unordered_map<uint32_t, CachedOverlayIcon> OverlayIcons;
@@ -627,7 +636,6 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11SamplerState> OverlaySamplerState;
 
     // Anti-aliasing (FXAA)
-    uint32_t AntialiasingMode = 0;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> SceneColorTexture;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> SceneColorRTV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> SceneColorSRV;

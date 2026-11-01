@@ -1,35 +1,12 @@
 #include <Engine/Components/Character.h>
+#include <Engine/Render/MeshPrimitives.h>
 #include "../../ThirdParty/nlohmann/json.hpp"
 #include <cmath>
 #include <stdexcept>
 using Json=nlohmann::json;
 Character::Character()
 {
-    // Keep the existing transform and SDK class layout; only the default mesh changes.
-    // A capped unit cylinder along Y, with the same bounds as the former unit cube.
-    std::vector<DirectX::XMFLOAT4> vertices;
-    std::vector<int> triangles;
-    constexpr int segments = 32;
-    vertices.reserve(segments * 24);
-    triangles.reserve(segments * 12);
-    const auto triangle = [&](glm::vec3 a, glm::vec3 b, glm::vec3 c) {
-        const auto normal = glm::normalize(glm::cross(b - a, c - a));
-        const float shade = 0.55f + 0.45f * std::abs(glm::dot(normal, glm::normalize(glm::vec3(1, 2, 3))));
-        for (auto p : {a, b, c}) {
-            triangles.push_back(static_cast<int>(vertices.size() / 2));
-            vertices.emplace_back(p.x, p.y, p.z, 1.f);
-            vertices.emplace_back(shade, shade, shade, 1.f);
-        }
-    };
-    for (int i = 0; i < segments; ++i) {
-        const float a = i * glm::two_pi<float>() / segments, b = (i + 1) * glm::two_pi<float>() / segments;
-        const glm::vec3 p(0.5f * std::cos(a), -0.5f, 0.5f * std::sin(a));
-        const glm::vec3 q(0.5f * std::cos(b), -0.5f, 0.5f * std::sin(b));
-        const auto r = p + glm::vec3(0, 1, 0), s = q + glm::vec3(0, 1, 0);
-        triangle(p, r, s); triangle(p, s, q);
-        triangle({0, -0.5f, 0}, p, q); triangle({0, 0.5f, 0}, s, r);
-    }
-    InitPoints(vertices.data(), static_cast<int>(vertices.size()), triangles.data(), static_cast<int>(triangles.size()));
+    SetPrimitive(MeshPrimitives::Cylinder(0.5f, 1.0f, 32));
     SetScale({0.6f, 1.8f, 0.6f});
     SetColor({0.2f, 0.65f, 1, 1});
 }

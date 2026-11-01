@@ -34,9 +34,12 @@ public:
         if constexpr(HasProperties<ProjectObjectAdapter<T>>::value)return ProjectObjectAdapter<T>::DescribeEditorProperties();
         return {};
     }
+    // @engine-internal-begin
+private:
     void RemapProjectReferences(const std::map<ComponentId,ComponentId>& ids) override {
         if constexpr (HasRemap<ProjectObjectAdapter<T>>::value) ProjectObjectAdapter<T>::Remap(*value_, ids);
     }
+    // @engine-internal-end
 };
 namespace EngineComponentDetail
 {
