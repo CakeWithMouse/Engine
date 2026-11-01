@@ -19,3 +19,4 @@ namespace GizmoTriangles
         const GizmoGeometry::Palette& palette = GizmoGeometry::Palette{}
     );
 }
+
