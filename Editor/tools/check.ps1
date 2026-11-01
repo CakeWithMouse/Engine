@@ -310,7 +310,7 @@ if ($Full) {
     Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/run.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds 300 -Description "Engine/tests/run.ps1"
 
     # Component generation (20/20)
-    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/component-generation/run.ps1") + '"')) -TimeoutSeconds $TimeoutSec -Description "component-generation/run.ps1"
+    Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/component-generation/run.ps1") + '"')) -TimeoutSeconds 300 -Description "component-generation/run.ps1"
 
     # Edit session (609/609)
     Invoke-ProcessWithTimeout -FilePath "powershell.exe" -ArgumentList @('-ExecutionPolicy', 'Bypass', '-File', ('"' + (Join-Path $repo "Engine/tests/edit-session/run.ps1") + '"'), '-Configuration', 'Debug') -TimeoutSeconds $TimeoutSec -Description "edit-session/run.ps1"
