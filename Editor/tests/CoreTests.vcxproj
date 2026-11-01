@@ -76,6 +76,7 @@
         <ClCompile Include="../Core/GizmoMath.cpp"/>
         <ClCompile Include="../Core/ViewportOverlay.cpp"/>
         <ClCompile Include="../Core/GizmoGeometry.cpp"/>
+        <ClCompile Include="../Core/GizmoTriangles.cpp"/>
         <ClCompile Include="../Core/AssetOps.cpp"/>
         <ClCompile Include="../Core/HlslGraphCompiler.cpp"/>
         <ClCompile Include="../Core/MaterialGraphModel.cpp"/>

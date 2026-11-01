@@ -242,6 +242,7 @@ public:
     void SetOverlayLines(const EngineOverlayLine* lines, uint32_t count, float thickness);
     void SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels);
     void SetOverlayBillboards(const EngineOverlayBillboard* billboards, uint32_t count);
+    void SetOverlayTriangles(const EngineOverlayTriangle* triangles, uint32_t count);
     bool GetCameraInfo(EngineCameraInfo& info) const;
     void RenderEditorOverlay();
     void SetAntialiasing(uint32_t mode);
@@ -606,6 +607,12 @@ protected:
     float OverlayLineThickness = 1.0f;
     std::unordered_map<uint32_t, CachedOverlayIcon> OverlayIcons;
     std::vector<EngineOverlayBillboard> PendingOverlayBillboards;
+    std::vector<EngineOverlayTriangle> PendingOverlayTriangles;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> OverlayTriangleVS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> OverlayTrianglePS;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> OverlayTriangleLayout;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> OverlayTriangleVB;
+    size_t OverlayTriangleVBCapacity = 0;
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader> OverlayLineVS;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> OverlayLinePS;

@@ -110,14 +110,16 @@ void EditorQtHost::Update(double dt)
         }
     }
 
-    if (overlay_.setOverlayLines || overlay_.setOverlayBillboards || overlay_.setOverlayIcon)
+    if (overlay_.setOverlayLines || overlay_.setOverlayBillboards || overlay_.setOverlayIcon || (overlay_.version >= 3 && overlay_.setOverlayTriangles))
     {
         std::vector<PendingIcon> iconsToUpload;
         std::vector<EngineOverlayLine> linesToSend;
         std::vector<EngineOverlayBillboard> billboardsToSend;
+        std::vector<EngineOverlayTriangle> trianglesToSend;
         float thicknessToSend = 1.0f;
         bool sendLines = false;
         bool sendBillboards = false;
+        bool sendTriangles = false;
 
         {
             std::lock_guard lk(overlayMutex_);
@@ -138,6 +140,12 @@ void EditorQtHost::Update(double dt)
                 billboardsToSend = pendingBillboards_;
                 pendingBillboardsDirty_ = false;
                 sendBillboards = true;
+            }
+            if (pendingTrianglesDirty_)
+            {
+                trianglesToSend = pendingTriangles_;
+                pendingTrianglesDirty_ = false;
+                sendTriangles = true;
             }
         }
 
@@ -170,6 +178,10 @@ void EditorQtHost::Update(double dt)
             overlay_.setOverlayBillboards(overlay_.context, billboardsToSend.data(), static_cast<uint32_t>(billboardsToSend.size()));
             std::printf("[Info] Billboards sent: count %zu\n", billboardsToSend.size());
             std::fflush(stdout);
+        }
+        if (sendTriangles && overlay_.version >= 3 && overlay_.setOverlayTriangles)
+        {
+            overlay_.setOverlayTriangles(overlay_.context, trianglesToSend.data(), static_cast<uint32_t>(trianglesToSend.size()));
         }
     }
     if (HasScene())
@@ -467,6 +479,13 @@ void EditorQtHost::SetOverlayBillboards(const std::vector<EngineOverlayBillboard
     pendingBillboardsDirty_ = true;
 }
 
+void EditorQtHost::SetOverlayTriangles(const std::vector<EngineOverlayTriangle>& triangles)
+{
+    std::lock_guard lk(overlayMutex_);
+    pendingTriangles_ = triangles;
+    pendingTrianglesDirty_ = true;
+}
+
 void EditorQtHost::SetParent(uint64_t childId, uint64_t parentId)
 {
     EditorCommand c;
@@ -489,7 +508,7 @@ void EditorQtHost::SetViewportOverlayApi(const EngineViewportOverlayApi& api)
     overlay_ = api;
     { std::lock_guard lk(cameraMutex_); lastCameraValid_ = false; }
     InvalidateOverlays();
-    const bool found = ((overlay_.version == 1 || overlay_.version == 2) && overlay_.setOverlayLines && overlay_.getCamera);
+    const bool found = ((overlay_.version >= 1 && overlay_.version <= 3) && overlay_.setOverlayLines && overlay_.getCamera);
     std::printf("[Info] Viewport overlay service: %s (version %u)\n", found ? "FOUND" : "NOT FOUND", overlay_.version);
     std::fflush(stdout);
     if (overlay_.setAntialiasing && overlay_.context)

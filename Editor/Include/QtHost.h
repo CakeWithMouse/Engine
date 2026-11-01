@@ -59,6 +59,7 @@ public:
     void SetOverlayLines(const std::vector<EngineOverlayLine>& lines, float thickness = 1.0f) override;
     void SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels) override;
     void SetOverlayBillboards(const std::vector<EngineOverlayBillboard>& billboards) override;
+    void SetOverlayTriangles(const std::vector<EngineOverlayTriangle>& triangles) override;
 
     void RunOnUi(std::function<void()> action) override;
     void SetUiListener(IEditorUiListener* listener) override;
@@ -118,7 +119,9 @@ private:
     bool pendingLinesDirty_ = false;
 
     std::vector<EngineOverlayBillboard> pendingBillboards_;
+    std::vector<EngineOverlayTriangle> pendingTriangles_;
     bool pendingBillboardsDirty_ = false;
+    bool pendingTrianglesDirty_ = false;
 
     std::vector<PendingIcon> pendingIcons_;
     bool iconsDirty_ = false;

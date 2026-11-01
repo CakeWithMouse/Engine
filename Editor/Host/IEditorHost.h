@@ -132,6 +132,7 @@ public:
     virtual void SetOverlayLines(const std::vector<EngineOverlayLine>& lines, float thickness = 1.0f) = 0;
     virtual void SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels) = 0;
     virtual void SetOverlayBillboards(const std::vector<EngineOverlayBillboard>& billboards) = 0;
+    virtual void SetOverlayTriangles(const std::vector<EngineOverlayTriangle>& triangles) = 0;
 
     virtual void RunOnUi(std::function<void()> action) = 0;
     virtual void SetUiListener(IEditorUiListener* listener) = 0;

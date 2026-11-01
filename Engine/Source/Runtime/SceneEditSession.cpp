@@ -345,7 +345,7 @@ EngineEditorCameraApi SceneEditSession::GetEditorCameraApi() noexcept
 
 EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
 {
-    return {2, this,
+    return {3, this,
         [](void* p, EngineCameraInfo* info) -> uint32_t {
             if (!info) return EngineSceneInvalidArgument;
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
@@ -376,6 +376,12 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
         [](void* p, uint32_t mode) -> uint32_t {
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
                 s.Active().SetAntialiasing(mode);
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, const EngineOverlayTriangle* triangles, uint32_t count) -> uint32_t {
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                s.Active().SetOverlayTriangles(triangles, count);
                 return EngineSceneOk;
             });
         }

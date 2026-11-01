@@ -1,4 +1,5 @@
 #include "ViewportOverlayHelper.h"
+#include "GizmoTriangles.h"
 #include "IconProvider.h"
 #include "EditorIconData.h"
 #include "ViewportOverlay.h"
@@ -180,6 +181,25 @@ void ViewportOverlayHelper::UpdateOverlays(
 
     host->SetOverlayLines(lines, 1.0f);
     host->SetOverlayBillboards(billboards);
+
+    std::vector<EngineOverlayTriangle> triangles;
+    if (selectedObj && host->HasScene())
+    {
+        GizmoMath::GizmoMode mode = (gizmoMode == 0) ? GizmoMath::GizmoMode::Translate :
+                                    (gizmoMode == 1) ? GizmoMath::GizmoMode::Rotate :
+                                                       GizmoMath::GizmoMode::Scale;
+        const float camFwd[3] = {cam.viewMatrix[2], cam.viewMatrix[6], cam.viewMatrix[10]};
+        triangles = GizmoTriangles::BuildGizmoTriangles(
+            mode,
+            selectedObj->transform.position,
+            cam.position,
+            camFwd,
+            cam.fov,
+            static_cast<float>(cam.height),
+            (hoveredHandle != GizmoGeometry::Handle::None) ? hoveredHandle : activeHandle
+        );
+    }
+    host->SetOverlayTriangles(triangles);
 }
 
 uint64_t ViewportOverlayHelper::HitTestBillboard(

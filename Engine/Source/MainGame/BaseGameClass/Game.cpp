@@ -375,8 +375,10 @@ void Game::DestroyResources(bool preserveScene)
     OverlayBillboardVS.Reset(); OverlayBillboardPS.Reset(); OverlayBillboardLayout.Reset();
     OverlayCB.Reset(); OverlayLineVB.Reset(); OverlayLineVBCapacity = 0;
     OverlayBillboardVB.Reset(); OverlayBillboardVBCapacity = 0;
+    OverlayTriangleVS.Reset(); OverlayTrianglePS.Reset(); OverlayTriangleLayout.Reset();
+    OverlayTriangleVB.Reset(); OverlayTriangleVBCapacity = 0;
     OverlayBlendState.Reset(); OverlayDepthReadOnlyState.Reset(); OverlayDepthDisabledState.Reset(); OverlaySamplerState.Reset();
-    OverlayIcons.clear(); PendingOverlayLines.clear(); PendingOverlayBillboards.clear();
+    OverlayIcons.clear(); PendingOverlayLines.clear(); PendingOverlayBillboards.clear(); PendingOverlayTriangles.clear();
     ReleaseSwapChainResources();
 
     if (SwapChain && !bEmbedded)
@@ -2886,6 +2888,16 @@ void Game::SetOverlayLines(const EngineOverlayLine* lines, uint32_t count, float
     OverlayLineThickness = thickness;
 }
 
+void Game::SetOverlayTriangles(const EngineOverlayTriangle* triangles, uint32_t count)
+{
+    if (!triangles || count == 0)
+    {
+        PendingOverlayTriangles.clear();
+        return;
+    }
+    PendingOverlayTriangles.assign(triangles, triangles + count);
+}
+
 void Game::SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels)
 {
     if (!rgbaPixels || width == 0 || height == 0)
@@ -2997,7 +3009,7 @@ void Game::RenderEditorOverlay()
         std::fflush(stdout);
     }
 
-    if (PendingOverlayLines.empty() && PendingOverlayBillboards.empty())
+    if (PendingOverlayLines.empty() && PendingOverlayBillboards.empty() && PendingOverlayTriangles.empty())
     {
         if (logPeriodic) { std::printf("[Info] Overlay: early return (empty lines and billboards)\n"); std::fflush(stdout); }
         return;
@@ -3061,6 +3073,24 @@ void Game::RenderEditorOverlay()
             std::printf("[Error] Failed to create billboard shaders for EditorOverlay\n");
             return;
         }
+
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "VSTriangle", "vs_5_0", vsBlob.ReleaseAndGetAddressOf(), &errorMsg)) ||
+            FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "PSTriangle", "ps_5_0", psBlob.ReleaseAndGetAddressOf(), &errorMsg)))
+        {
+            std::printf("[Error] EditorOverlay triangle shader compile failed: %s\n", errorMsg.c_str());
+            return;
+        }
+        if (FAILED(Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, OverlayTriangleVS.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, OverlayTrianglePS.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create triangle shaders for EditorOverlay\n");
+            return;
+        }
+        const D3D11_INPUT_ELEMENT_DESC triLayoutDesc[] = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        };
+        Device->CreateInputLayout(triLayoutDesc, 2, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), OverlayTriangleLayout.ReleaseAndGetAddressOf());
 
         const D3D11_INPUT_ELEMENT_DESC bbLayoutDesc[] = {
             {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -3214,6 +3244,79 @@ void Game::RenderEditorOverlay()
                 Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
                 Context->OMSetDepthStencilState(OverlayDepthDisabledState.Get(), 0);
                 Context->Draw(static_cast<UINT>(OverlayTopVertices.size()), static_cast<UINT>(OverlayDepthVertices.size()));
+            }
+        }
+    }
+
+    if (!PendingOverlayTriangles.empty() && OverlayTriangleVS && OverlayTrianglePS && OverlayTriangleLayout)
+    {
+        struct TriVertex { float x, y, z; uint32_t col; };
+        std::vector<TriVertex> depthTris;
+        std::vector<TriVertex> topTris;
+
+        for (const auto& tri : PendingOverlayTriangles)
+        {
+            const bool depthTest = (tri.flags & 1) != 0 && (tri.flags & 2) == 0;
+            auto& dst = depthTest ? depthTris : topTris;
+            dst.push_back({tri.x0, tri.y0, tri.z0, tri.rgba});
+            dst.push_back({tri.x1, tri.y1, tri.z1, tri.rgba});
+            dst.push_back({tri.x2, tri.y2, tri.z2, tri.rgba});
+        }
+
+        const size_t totalTriVerts = depthTris.size() + topTris.size();
+        if (totalTriVerts > OverlayTriangleVBCapacity || !OverlayTriangleVB)
+        {
+            OverlayTriangleVBCapacity = std::max(totalTriVerts, OverlayTriangleVBCapacity * 2 + 512);
+            D3D11_BUFFER_DESC vbDesc{};
+            vbDesc.ByteWidth = static_cast<UINT>(OverlayTriangleVBCapacity * sizeof(TriVertex));
+            vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+            vbDesc.Usage = D3D11_USAGE_DYNAMIC;
+            vbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+            OverlayTriangleVB.Reset();
+            Device->CreateBuffer(&vbDesc, nullptr, OverlayTriangleVB.ReleaseAndGetAddressOf());
+        }
+
+        if (OverlayTriangleVB && totalTriVerts > 0)
+        {
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            if (SUCCEEDED(Context->Map(OverlayTriangleVB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
+            {
+                auto* dst = static_cast<TriVertex*>(mapped.pData);
+                if (!depthTris.empty())
+                {
+                    std::memcpy(dst, depthTris.data(), depthTris.size() * sizeof(TriVertex));
+                    dst += depthTris.size();
+                }
+                if (!topTris.empty())
+                {
+                    std::memcpy(dst, topTris.data(), topTris.size() * sizeof(TriVertex));
+                }
+                Context->Unmap(OverlayTriangleVB.Get(), 0);
+            }
+
+            Context->ClearState();
+            SetFullViewport();
+            Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            Context->IASetInputLayout(OverlayTriangleLayout.Get());
+            const UINT stride = sizeof(TriVertex), offset = 0;
+            Context->IASetVertexBuffers(0, 1, OverlayTriangleVB.GetAddressOf(), &stride, &offset);
+            Context->VSSetShader(OverlayTriangleVS.Get(), nullptr, 0);
+            Context->PSSetShader(OverlayTrianglePS.Get(), nullptr, 0);
+            Context->VSSetConstantBuffers(0, 1, OverlayCB.GetAddressOf());
+            Context->OMSetBlendState(OverlayBlendState.Get(), nullptr, 0xFFFFFFFF);
+            Context->RSSetState(OverlayRasterState.Get());
+
+            if (!depthTris.empty() && depthStencilView)
+            {
+                Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
+                Context->OMSetDepthStencilState(OverlayDepthReadOnlyState.Get(), 0);
+                Context->Draw(static_cast<UINT>(depthTris.size()), 0);
+            }
+            if (!topTris.empty())
+            {
+                Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
+                Context->OMSetDepthStencilState(OverlayDepthDisabledState.Get(), 0);
+                Context->Draw(static_cast<UINT>(topTris.size()), static_cast<UINT>(depthTris.size()));
             }
         }
     }
