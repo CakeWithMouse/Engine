@@ -3321,6 +3321,16 @@ bool Game::RenderViewportFrame(float deltaTime)
         RenderTargetView = SceneColorRTV;
     }
 
+    const std::array<float, 4> clearColor = GetClearColor();
+    if (backbufferRTV)
+    {
+        Context->ClearRenderTargetView(backbufferRTV.Get(), clearColor.data());
+    }
+    if (useFxaa && SceneColorRTV)
+    {
+        Context->ClearRenderTargetView(SceneColorRTV.Get(), clearColor.data());
+    }
+
     RenderFrame();
     RenderEditorSelection();
     RenderEditorOverlay();
@@ -3334,6 +3344,13 @@ bool Game::RenderViewportFrame(float deltaTime)
     static int sReadbackDone = 0;
     static int sFrameCounter = 0;
     ++sFrameCounter;
+
+    if (sFrameCounter % 120 == 1)
+    {
+        std::printf("[Info] Frame %d: AntialiasingMode = %u (%s), bb = %ux%u\n",
+            sFrameCounter, AntialiasingMode, AntialiasingMode == 1 ? "FXAA" : "Off", bbW, bbH);
+        std::fflush(stdout);
+    }
     const bool isSmokeEditor = (std::wcsstr(GetCommandLineW(), L"--smoke-editor") != nullptr) ||
                                (GetEnvironmentVariableW(L"PAINENGINE_SMOKE_EDITOR", nullptr, 0) > 0);
     const bool shouldCheck = isSmokeEditor && BackTexture && Device && Context &&
@@ -3357,26 +3374,33 @@ bool Game::RenderViewportFrame(float deltaTime)
                 size_t gizmoGreenPixels = 0;
                 size_t gizmoBluePixels = 0;
                 size_t nonBgPixels = 0;
+                size_t intermediateEdgePixels = 0;
                 for (unsigned y = 0; y < desc.Height; ++y)
                 {
                     const auto* row = reinterpret_cast<const uint8_t*>(mapped.pData) + y * mapped.RowPitch;
                     for (unsigned x = 0; x < desc.Width; ++x)
                     {
                         const auto* p = row + x * 4;
-                        // Gizmo X (Red): R > 180, G < 60, B < 60
                         if (p[0] > 180 && p[1] < 60 && p[2] < 60) ++gizmoRedPixels;
-                        // Gizmo Y (Green): R < 60, G > 180, B < 60
                         if (p[0] < 60 && p[1] > 180 && p[2] < 60) ++gizmoGreenPixels;
-                        // Gizmo Z (Blue): R < 60, G < 100, B > 180
                         if (p[0] < 60 && p[1] < 100 && p[2] > 180) ++gizmoBluePixels;
-                        // Background clear color is {0, 0, 51}
                         const bool isBg = (p[0] <= 2 && p[1] <= 2 && std::abs(static_cast<int>(p[2]) - 51) <= 2);
                         if (!isBg) ++nonBgPixels;
+                        if (x > 0)
+                        {
+                            const auto* pPrev = row + (x - 1) * 4;
+                            const int dr = std::abs(static_cast<int>(p[0]) - static_cast<int>(pPrev[0]));
+                            const int dg = std::abs(static_cast<int>(p[1]) - static_cast<int>(pPrev[1]));
+                            const int db = std::abs(static_cast<int>(p[2]) - static_cast<int>(pPrev[2]));
+                            const int maxD = std::max(dr, std::max(dg, db));
+                            // Edge gradient / intermediate color on geometry transitions
+                            if (maxD >= 8 && maxD <= 70) ++intermediateEdgePixels;
+                        }
                     }
                 }
                 Context->Unmap(staging.Get(), 0);
-                std::printf("[Info] [D3D-Readback frame %d] Backbuffer: %ux%u, Gizmo Red: %zu, Green: %zu, Blue: %zu, Non-Bg: %zu\n",
-                    sFrameCounter, desc.Width, desc.Height, gizmoRedPixels, gizmoGreenPixels, gizmoBluePixels, nonBgPixels);
+                std::printf("[Info] [D3D-Readback frame %d] FXAA=%u, Backbuffer: %ux%u, Intermediate edge pixels: %zu, Gizmo Red: %zu, Green: %zu, Blue: %zu, Non-Bg: %zu\n",
+                    sFrameCounter, AntialiasingMode, desc.Width, desc.Height, intermediateEdgePixels, gizmoRedPixels, gizmoGreenPixels, gizmoBluePixels, nonBgPixels);
                 std::fflush(stdout);
                 ++sReadbackDone;
             }
@@ -4154,6 +4178,18 @@ bool Game::EnsureFxaaResources(uint32_t width, uint32_t height)
 {
     if (!Device || !Context || width == 0 || height == 0) return false;
 
+    if (SceneColorTexture)
+    {
+        D3D11_TEXTURE2D_DESC existingDesc{};
+        SceneColorTexture->GetDesc(&existingDesc);
+        if (existingDesc.Width != width || existingDesc.Height != height)
+        {
+            SceneColorTexture.Reset();
+            SceneColorRTV.Reset();
+            SceneColorSRV.Reset();
+        }
+    }
+
     if (!SceneColorTexture)
     {
         D3D11_TEXTURE2D_DESC desc{};
@@ -4238,6 +4274,11 @@ void Game::RenderFxaaPass()
 
     SetFullViewport();
     Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
+
+    const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xFFFFFFFF);
+    Context->OMSetDepthStencilState(depthStencilStateDisabled.Get(), 0);
+    Context->RSSetState(DefaultRasterState.Get());
 
     Context->IASetInputLayout(nullptr);
     Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);

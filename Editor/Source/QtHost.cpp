@@ -501,6 +501,9 @@ void EditorQtHost::SetViewportOverlayApi(const EngineViewportOverlayApi& api)
 void EditorQtHost::SetAntialiasing(uint32_t mode)
 {
     antialiasingMode_ = mode;
+    std::printf("[Info] QtHost::SetAntialiasing: mode = %u, serviceVersion = %u, handler = %p\n",
+        mode, overlay_.version, (void*)overlay_.setAntialiasing);
+    std::fflush(stdout);
     if (overlay_.setAntialiasing && overlay_.context)
     {
         overlay_.setAntialiasing(overlay_.context, mode);
