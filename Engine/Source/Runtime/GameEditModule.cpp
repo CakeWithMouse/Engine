@@ -82,6 +82,11 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
                 if (legacy5_->context) legacy5_->scene.setPointLight = light.set;
                 else api_.scene.setPointLight = light.set;
             }
+            EnginePointLightV2Api plV2{};
+            if (query && query(extensionContext, EnginePointLightV2Extension, 1, sizeof(plV2), &plV2))
+            {
+                if (plV2.version == 1 && plV2.set) pointLightV2_ = plV2;
+            }
         }
         if (!projectContent.empty())
         {

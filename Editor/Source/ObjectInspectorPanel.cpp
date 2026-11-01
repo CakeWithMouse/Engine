@@ -203,6 +203,11 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     connect(lightEnabled_, &QCheckBox::clicked, this, emitPointLightChanged);
     lTop->addWidget(lightEnabled_);
 
+    lightShadows_ = new QCheckBox(Tr("Тени", "Shadows"), rowTop);
+    lightShadows_->setObjectName(QStringLiteral("LightShadows"));
+    connect(lightShadows_, &QCheckBox::clicked, this, emitPointLightChanged);
+    lTop->addWidget(lightShadows_);
+
     lightColor_ = new QPushButton(Tr("Выбрать цвет…", "Choose Color…"), rowTop);
     lightColor_->setObjectName(QStringLiteral("LightColor"));
     lightColor_->setFixedHeight(24);
@@ -322,6 +327,7 @@ void ObjectInspectorPanel::RetranslateUi()
     if (cardMaterial_) cardMaterial_->RetranslateUi();
 
     if (lightEnabled_) lightEnabled_->setText(Tr("Включён", "Enabled"));
+    if (lightShadows_) lightShadows_->setText(Tr("Тени", "Shadows"));
     if (lightColor_) lightColor_->setText(Tr("Выбрать цвет…", "Choose Color…"));
     if (lightRowLabels_[3]) lightRowLabels_[3]->setText(Tr("Интенсивность", "Intensity"));
     if (lightRowLabels_[4]) lightRowLabels_[4]->setText(Tr("Радиус", "Radius"));
@@ -360,6 +366,7 @@ InspectorPointLightValue ObjectInspectorPanel::CurrentPointLightValue() const
     value.intensity = lightValues_[3]->value();
     value.radius = lightValues_[4]->value();
     value.enabled = lightEnabled_->isChecked();
+    value.castShadows = lightShadows_ ? lightShadows_->isChecked() : false;
     return value;
 }
 
@@ -441,6 +448,7 @@ void ObjectInspectorPanel::Refresh(
             }
 
             lightEnabled_->setChecked(object.pointLight.enabled != 0);
+            if (lightShadows_) lightShadows_->setChecked(object.lightCastShadows);
             UpdateLightColorButton(object.pointLight.color);
         }
 

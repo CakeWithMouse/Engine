@@ -17,6 +17,14 @@ struct EnginePointLightApi
     void* context;
     uint32_t (ENGINE_MODULE_CALL *set)(void*, uint64_t id, const EngineScenePointLight*);
 };
+constexpr const char* EnginePointLightV2Extension = "Engine.Scene.PointLightV2";
+constexpr uint32_t EnginePointLightV2Service = 0x01504C32u;
+struct EnginePointLightV2Api
+{
+    uint32_t version; // 1
+    void* context;
+    uint32_t (ENGINE_MODULE_CALL *set)(void*, uint64_t id, const EngineScenePointLight*, uint32_t castShadows);
+};
 constexpr const char* EngineDocumentExtension = "Engine.Scene.Document";
 struct EngineDocumentCapabilities
 {

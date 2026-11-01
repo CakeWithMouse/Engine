@@ -188,7 +188,7 @@ SceneSnapshot Scene::GetSnapshot() const
                 glm::quat(glm::radians(c.ComponentRotation)), c.GetScale()}, c.SceneTypeName,
                 c.GetModelAsset(), c.GetTexturePath(), c.GetMaterialAsset()});
         if (const auto* light = dynamic_cast<const PointLightComponent*>(&c))
-            result.components.back().pointLight = {light->GetLightColor(), light->GetIntensity(), light->GetRadius(), light->IsEnabled()};
+            result.components.back().pointLight = {light->GetLightColor(), light->GetIntensity(), light->GetRadius(), light->IsEnabled(), light->CastsShadow()};
         result.components.back().projectData = c.SaveProjectData();
         if (!result.components.back().projectData.empty()) result.documentVersion = 3;
     }
@@ -219,6 +219,7 @@ SceneResult Scene::SetPointLight(ComponentId id, const SceneComponentSnapshot::P
     component->SetIntensity(light.intensity);
     component->SetRadius(light.radius);
     component->SetEnabled(light.enabled);
+    component->SetCastShadows(light.castShadows);
     ++revision_;
     return SceneResult::Ok;
 }

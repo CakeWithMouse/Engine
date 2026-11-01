@@ -343,6 +343,17 @@ EngineEditorCameraApi SceneEditSession::GetEditorCameraApi() noexcept
 }
 
 
+EnginePointLightV2Api SceneEditSession::GetPointLightV2Api() noexcept
+{
+    return {1, this,
+        [](void* p, uint64_t id, const EngineScenePointLight* l, uint32_t castShadows) -> uint32_t {
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                return SceneCommands::SetPointLightV2(&s.Active(), id, l, castShadows);
+            });
+        }
+    };
+}
+
 EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
 {
     return {3, this,

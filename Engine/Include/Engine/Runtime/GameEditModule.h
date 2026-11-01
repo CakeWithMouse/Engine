@@ -31,6 +31,7 @@ public:
     const EngineViewportInputApi& ViewportInputApi() const noexcept { return viewportInput_; }
     const EngineSelectionApi& SelectionApi() const noexcept { return selection_; }
     const EngineViewportOverlayApi& ViewportOverlayApi() const noexcept { return overlay_; }
+    const EnginePointLightV2Api& PointLightV2Api() const noexcept { return pointLightV2_; }
     const EngineAuthoringApi& AuthoringApi() const noexcept { return authoring_; }
     const EngineSceneBatchApi& BatchApi() const noexcept { return batch_; }
 private:
@@ -45,6 +46,7 @@ private:
     EngineAuthoringApi authoring_{};
     EngineViewportInputApi viewportInput_{};
     EngineViewportOverlayApi overlay_{};
+    EnginePointLightV2Api pointLightV2_{};
     EngineLegacyV4::Factory legacyFactory_{};
     std::unique_ptr<EngineLegacyV4::EditApi> legacy_ = std::make_unique<EngineLegacyV4::EditApi>();
     EngineLegacyV5::Factory legacy5Factory_{};

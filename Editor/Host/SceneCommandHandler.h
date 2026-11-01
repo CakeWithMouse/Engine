@@ -1,5 +1,6 @@
 #pragma once
 #include "IEditorHost.h"
+#include <Engine/Runtime/EditExtensions.h>
 #include "EditorHistory.h"
 #include <mutex>
 #include <atomic>
@@ -15,6 +16,7 @@ public:
         EngineViewportInputApi viewportInput;
         const EngineSceneBatchApi* batch = nullptr;
         const EngineAuthoringApi* authoring = nullptr;
+        const EnginePointLightV2Api* pointLightV2 = nullptr;
     };
 
     SceneCommandHandler();

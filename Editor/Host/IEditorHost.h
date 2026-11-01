@@ -47,6 +47,7 @@ struct EditorCommand
     std::vector<uint64_t> objectIds;
     EngineSceneTransform transform{{0, 0, 0}, {0, 0, 0, 1}, {1, 1, 1}};
     EngineScenePointLight pointLight{};
+    bool castShadows = false;
     EditorGizmoMode gizmo = EditorGizmoTranslate;
     QString name;
 
@@ -82,6 +83,7 @@ public:
         EngineSceneTransform transform{};
         std::string modelAsset, textureAsset;
         bool hasPointLight = false;
+        bool lightCastShadows = false;
         EngineScenePointLight pointLight{};
         std::string materialAsset;
         std::string projectData;

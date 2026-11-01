@@ -29,6 +29,7 @@ public:
     EngineAuthoringApi GetAuthoringApi() noexcept;
     EngineViewportInputApi GetViewportInputApi() noexcept;
     EngineViewportOverlayApi GetViewportOverlayApi() noexcept;
+    EnginePointLightV2Api GetPointLightV2Api() noexcept;
     SceneEditSession(const SceneEditSession&) = delete;
     SceneEditSession& operator=(const SceneEditSession&) = delete;
 private:

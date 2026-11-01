@@ -94,6 +94,10 @@ private:
         if (host_.getService) return static_cast<const EngineAuthoringApi*>(host_.getService(host_.user, EngineAuthoringService, 1));
         return authoring_.describe ? &authoring_ : nullptr;
     }
+    const EnginePointLightV2Api* PointLightV2Api() const {
+        if (host_.getService) return static_cast<const EnginePointLightV2Api*>(host_.getService(host_.user, EnginePointLightV2Service, 1));
+        return nullptr;
+    }
     RecoveryStore recovery_;
     std::chrono::steady_clock::time_point recoveryTime_{};
     void WriteRecovery();

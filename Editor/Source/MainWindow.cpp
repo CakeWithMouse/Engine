@@ -1037,11 +1037,12 @@ void EditorMainWindow::OnPointLightEdited(
         c.pointLight.intensity = static_cast<float>(value.intensity);
         c.pointLight.radius = static_cast<float>(value.radius);
         c.pointLight.enabled = value.enabled ? 1u : 0u;
-
+        c.castShadows = value.castShadows;
         changed |=
             std::abs(c.pointLight.intensity - object.pointLight.intensity) > 0.0006f ||
             std::abs(c.pointLight.radius - object.pointLight.radius) > 0.0006f ||
-            c.pointLight.enabled != object.pointLight.enabled;
+            c.pointLight.enabled != object.pointLight.enabled ||
+            c.castShadows != object.lightCastShadows;
 
         if (changed)
             host_->PostCommand(c);
