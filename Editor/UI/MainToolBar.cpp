@@ -1,3 +1,4 @@
+#include <QTimer>
 #include "MainToolBar.h"
 #include "EditorLocale.h"
 #include "EditorTheme.h"

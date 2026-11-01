@@ -141,7 +141,6 @@ void EditorMainWindow::BuildUi()
 
     fileDock_ = new FileBrowserDock(host_, this);
     fileDock_->setObjectName(QStringLiteral("ContentDock"));
-    fileDock_->installEventFilter(this);
     addDockWidget(Qt::BottomDockWidgetArea, fileDock_);
     tabifyDockWidget(consoleDock_, fileDock_);
     QTimer::singleShot(0, this, [this] {
@@ -235,8 +234,6 @@ void EditorMainWindow::BuildUi()
     for (QDockWidget* d : {static_cast<QDockWidget*>(viewportDock_), static_cast<QDockWidget*>(consoleDock_), static_cast<QDockWidget*>(fileDock_), static_cast<QDockWidget*>(sceneObjectsDock_), static_cast<QDockWidget*>(inspectorDock_)})
         if (d) viewMenu->addAction(d->toggleViewAction());
 
-    viewMenu_->addAction(Tr("Ресурсы: компактная панель", "Compact Content Panel"), this, &EditorMainWindow::CompactContentPanel);
-    viewMenu_->addAction(Tr("Ресурсы: отдельное окно", "Floating Content Panel"), this, [this] { fileDock_->show(); fileDock_->setFloating(true); fileDock_->resize(800,450); fileDock_->raise(); });
     statsLabel_ = new QLabel(this);
     statusBar()->addPermanentWidget(statsLabel_);
 
@@ -271,35 +268,14 @@ void EditorMainWindow::BuildUi()
 
     if (host_->HasScene())
         RefreshSceneUi();
-    QTimer::singleShot(0, this, [this] { panelWindowSize_ = size(); contentPanelHeight_ = fileDock_->height(); panelLayoutReady_ = true; });
     QTimer::singleShot(500, this, &EditorMainWindow::OfferRecovery);
 }
 
-void EditorMainWindow::ResizeContentPanel(int height) {
-    if (fileDock_->isFloating() || dockWidgetArea(fileDock_) != Qt::BottomDockWidgetArea) return;
-    const int upper = qMax(80, viewportDock_->height() + fileDock_->height() - height);
-    resizeDocks({viewportDock_, fileDock_}, {upper, height}, Qt::Vertical);
-    panelWindowSize_ = size(); contentPanelHeight_ = fileDock_->height();
-}
 void EditorMainWindow::resizeEvent(QResizeEvent* event) {
-    const int bottom = contentPanelHeight_;
     QMainWindow::resizeEvent(event);
-    if (panelLayoutReady_) QTimer::singleShot(0, this, [this, bottom] { ResizeContentPanel(bottom); });
 }
 bool EditorMainWindow::eventFilter(QObject* watched, QEvent* event) {
-    if (watched == fileDock_ && event->type() == QEvent::Resize && panelLayoutReady_ && panelWindowSize_ == size() && !fileDock_->isFloating())
-        contentPanelHeight_ = static_cast<QResizeEvent*>(event)->size().height();
     return QMainWindow::eventFilter(watched, event);
-}
-
-void EditorMainWindow::CompactContentPanel() {
-    fileDock_->setFloating(false);consoleDock_->setFloating(false);
-    addDockWidget(Qt::BottomDockWidgetArea,consoleDock_);
-    addDockWidget(Qt::BottomDockWidgetArea,fileDock_);
-    tabifyDockWidget(consoleDock_,fileDock_);fileDock_->show();fileDock_->raise();
-    QTimer::singleShot(0,this,[this]{
-        ResizeContentPanel(180);
-    });
 }
 void EditorMainWindow::AppendLine(const QString& line) { console_->appendPlainText(line); }
 
@@ -421,17 +397,7 @@ void EditorMainWindow::BuildSceneMenu()
     updateScheme();
     controlSchemeSubId_ = EditorSettings::Instance().SubscribeControlSchemeChanged([updateScheme](ControlScheme) { updateScheme(); });
 
-    if (viewMenu_ && !actServiceObjects_) {
-        actServiceObjects_ = viewMenu_->addAction(Tr("Служебные объекты сцены", "Scene Service Objects"));
-        actServiceObjects_->setCheckable(true);
-        connect(actServiceObjects_, &QAction::toggled, this, [this](bool visible) {
-            if (sceneObjectsPanel_) sceneObjectsPanel_->SetShowServiceObjects(visible);
-            if (!visible) for (const auto& o : host_->ReadSnapshot().objects) if (o.id == selectedId_ && o.type == "Gameplay.PlaySettings") {
-                EditorCommand c; c.type = EditorCommand::SelectObject; host_->PostCommand(c);
-            }
-            RefreshSceneUi();
-        });
-    }
+
 }
 
 void EditorMainWindow::BuildToolBar()
@@ -1376,7 +1342,6 @@ void EditorMainWindow::RetranslateUi()
     if (saveAction_) saveAction_->setText(Tr("Сохранить сцену", "Save Scene"));
     if (actSaveSceneAs_) actSaveSceneAs_->setText(Tr("Сохранить как…", "Save As…"));
     if (actExit_) actExit_->setText(Tr("Закрыть редактор", "Exit Editor"));
-    if (actServiceObjects_) actServiceObjects_->setText(Tr("Служебные объекты сцены", "Scene Service Objects"));
     if (actConfigurePlay_) actConfigurePlay_->setText(Tr("Настроить Play…", "Configure Play…"));
     if (actAddModel_) actAddModel_->setText(Tr("Добавить модель…", "Add Model…"));
     if (actImportModel_) actImportModel_->setText(Tr("Импорт модели…", "Import Model…"));

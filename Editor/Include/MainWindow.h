@@ -91,11 +91,6 @@ private:
     void RunCodeTool(const QString& action, const QStringList& extra = {});
     void ShowProjectTypes();
     void BuildUi();
-    void CompactContentPanel();
-    void ResizeContentPanel(int height);
-    int contentPanelHeight_ = 180;
-    QSize panelWindowSize_;
-    bool panelLayoutReady_ = false;
     void BuildToolBar();
     void UpdatePlayButtons();
 
@@ -171,7 +166,6 @@ private:
     QAction* actOpenScene_ = nullptr;
     QAction* actSaveSceneAs_ = nullptr;
     QAction* actExit_ = nullptr;
-    QAction* actServiceObjects_ = nullptr;
     QAction* actConfigurePlay_ = nullptr;
     QAction* actAddModel_ = nullptr;
     QAction* actImportModel_ = nullptr;
