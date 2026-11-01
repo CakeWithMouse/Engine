@@ -73,6 +73,37 @@ foreach ($target in $targetShaders) {
     Write-Host "Deployed shader: $target"
 }
 
+Write-Host "=== 5b. Synchronizing Game.dll for user projects in Documents ===" -ForegroundColor Cyan
+$templateDll = Join-Path $repoRoot "Game/build/x64/Debug/Runtime/Templates/SceneProject/Game.dll"
+if (Test-Path -LiteralPath $templateDll) {
+    $templateItem = Get-Item -LiteralPath $templateDll
+    $docsDir = [Environment]::GetFolderPath('MyDocuments')
+    $projectFiles = @()
+    $registryJson = Join-Path $env:LOCALAPPDATA "EngineLauncher\projects.json"
+    if (Test-Path -LiteralPath $registryJson) {
+        try {
+            $regProjects = Get-Content -LiteralPath $registryJson -Raw | ConvertFrom-Json
+            foreach ($p in $regProjects) { if (Test-Path -LiteralPath $p) { $projectFiles += $p } }
+        } catch {}
+    }
+    if (Test-Path -LiteralPath $docsDir) {
+        $found = Get-ChildItem -LiteralPath $docsDir -Filter "Project.json" -Recurse -Depth 2 -ErrorAction SilentlyContinue
+        foreach ($f in $found) { $projectFiles += $f.FullName }
+    }
+    $projectFiles = $projectFiles | Select-Object -Unique
+    foreach ($pJson in $projectFiles) {
+        $pDir = Split-Path -Parent $pJson
+        $pDll = Join-Path $pDir "Game.dll"
+        if (Test-Path -LiteralPath $pDll) {
+            $dllItem = Get-Item -LiteralPath $pDll
+            if ($dllItem.LastWriteTime -lt $templateItem.LastWriteTime) {
+                Copy-Item -LiteralPath $templateDll -Destination $pDll -Force
+                Write-Host "Updated outdated Game.dll in $pDir ($($dllItem.LastWriteTime) -> $($templateItem.LastWriteTime))" -ForegroundColor Yellow
+            }
+        }
+    }
+}
+
 Write-Host "=== 6. Launching EngineLauncher ===" -ForegroundColor Cyan
 $launcherPath = Join-Path $repoRoot "Game/build/x64/Debug/EngineLauncher.exe"
 if (!(Test-Path -LiteralPath $launcherPath)) { throw "Launcher not found: $launcherPath" }

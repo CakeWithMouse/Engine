@@ -49,7 +49,7 @@ namespace ViewportOverlay
 
             if (((color >> 24) & 0xFF) > 2)
             {
-                lines.push_back({x, 0.0f, centerZ - extent, x, 0.0f, centerZ + extent, color, 0});
+                lines.push_back({x, 0.0f, centerZ - extent, x, 0.0f, centerZ + extent, color, OverlayFlags::Thickness(1)});
             }
         }
 
@@ -77,12 +77,12 @@ namespace ViewportOverlay
 
             if (((color >> 24) & 0xFF) > 2)
             {
-                lines.push_back({centerX - extent, 0.0f, z, centerX + extent, 0.0f, z, color, 0});
+                lines.push_back({centerX - extent, 0.0f, z, centerX + extent, 0.0f, z, color, OverlayFlags::Thickness(1)});
             }
         }
 
         // Short Y axis at origin
-        lines.push_back({0.0f, 0.0f, 0.0f, 0.0f, 5.0f, 0.0f, palette.axisY, 0});
+        lines.push_back({0.0f, 0.0f, 0.0f, 0.0f, 5.0f, 0.0f, palette.axisY, OverlayFlags::Thickness(1)});
 
         return lines;
     }
@@ -99,6 +99,7 @@ namespace ViewportOverlay
 
         constexpr float twoPi = 6.28318530718f;
         const float step = twoPi / static_cast<float>(segments);
+        const uint32_t flags = OverlayFlags::Thickness(2);
 
         for (int i = 0; i < segments; ++i)
         {
@@ -110,11 +111,11 @@ namespace ViewportOverlay
             const float s1 = std::sin(a1) * radius;
 
             // XZ circle
-            lines.push_back({posX + c0, posY, posZ + s0, posX + c1, posY, posZ + s1, colorRgba, 0});
+            lines.push_back({posX + c0, posY, posZ + s0, posX + c1, posY, posZ + s1, colorRgba, flags});
             // XY circle
-            lines.push_back({posX + c0, posY + s0, posZ, posX + c1, posY + s1, posZ, colorRgba, 0});
+            lines.push_back({posX + c0, posY + s0, posZ, posX + c1, posY + s1, posZ, colorRgba, flags});
             // YZ circle
-            lines.push_back({posX, posY + c0, posZ + s0, posX, posY + c1, posZ + s1, colorRgba, 0});
+            lines.push_back({posX, posY + c0, posZ + s0, posX, posY + c1, posZ + s1, colorRgba, flags});
         }
 
         return lines;

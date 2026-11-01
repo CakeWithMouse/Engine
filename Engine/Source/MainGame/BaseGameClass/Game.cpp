@@ -2954,9 +2954,51 @@ bool Game::GetCameraInfo(EngineCameraInfo& info) const
 
 void Game::RenderEditorOverlay()
 {
-    if (!bEmbedded || !FirstPlayer || !Device || !Context || !RenderTargetView) return;
+    static int sOverlayFrameCounter = 0;
+    ++sOverlayFrameCounter;
+    const bool logPeriodic = (sOverlayFrameCounter % 120 == 1);
 
-    if (PendingOverlayLines.empty() && PendingOverlayBillboards.empty()) return;
+    if (!bEmbedded)
+    {
+        if (logPeriodic) { std::printf("[Info] Overlay: early return (!bEmbedded)\n"); std::fflush(stdout); }
+        return;
+    }
+    if (!FirstPlayer)
+    {
+        if (logPeriodic) { std::printf("[Info] Overlay: early return (!FirstPlayer)\n"); std::fflush(stdout); }
+        return;
+    }
+    if (!Device)
+    {
+        if (logPeriodic) { std::printf("[Info] Overlay: early return (!Device)\n"); std::fflush(stdout); }
+        return;
+    }
+    if (!Context)
+    {
+        if (logPeriodic) { std::printf("[Info] Overlay: early return (!Context)\n"); std::fflush(stdout); }
+        return;
+    }
+    if (!RenderTargetView)
+    {
+        if (logPeriodic) { std::printf("[Info] Overlay: early return (!RenderTargetView)\n"); std::fflush(stdout); }
+        return;
+    }
+
+    const uint32_t bbW = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetWidth()) : 0;
+    const uint32_t bbH = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetHeight()) : 0;
+
+    if (logPeriodic)
+    {
+        std::printf("[Info] Overlay: entered, pipelineReady=%d, lineCount=%zu, billboardCount=%zu, backbuffer %ux%u\n",
+            OverlayCB ? 1 : 0, PendingOverlayLines.size(), PendingOverlayBillboards.size(), bbW, bbH);
+        std::fflush(stdout);
+    }
+
+    if (PendingOverlayLines.empty() && PendingOverlayBillboards.empty())
+    {
+        if (logPeriodic) { std::printf("[Info] Overlay: early return (empty lines and billboards)\n"); std::fflush(stdout); }
+        return;
+    }
 
     if (!OverlayCB)
     {
@@ -2983,13 +3025,22 @@ void Game::RenderEditorOverlay()
 
         const D3D11_INPUT_ELEMENT_DESC lineLayoutDesc[] = {
             {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+            {"POSITION", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 1, DXGI_FORMAT_R32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0}
         };
-        if (FAILED(Device->CreateInputLayout(lineLayoutDesc, 2, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), OverlayLineLayout.ReleaseAndGetAddressOf())))
+        if (FAILED(Device->CreateInputLayout(lineLayoutDesc, 5, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), OverlayLineLayout.ReleaseAndGetAddressOf())))
         {
             std::printf("[Error] Failed to create line input layout for EditorOverlay\n");
             return;
         }
+
+        D3D11_RASTERIZER_DESC rastDesc{};
+        rastDesc.FillMode = D3D11_FILL_SOLID;
+        rastDesc.CullMode = D3D11_CULL_NONE;
+        rastDesc.DepthClipEnable = TRUE;
+        Device->CreateRasterizerState(&rastDesc, OverlayRasterState.ReleaseAndGetAddressOf());
 
         if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "VSBillboard", "vs_5_0", vsBlob.ReleaseAndGetAddressOf(), &errorMsg)))
         {
@@ -3074,23 +3125,37 @@ void Game::RenderEditorOverlay()
 
     if (!PendingOverlayLines.empty())
     {
-        std::vector<OverlayLineVertex> depthVertices;
-        std::vector<OverlayLineVertex> topVertices;
-        depthVertices.reserve(PendingOverlayLines.size() * 2);
-        topVertices.reserve(PendingOverlayLines.size() * 2);
+        OverlayDepthVertices.clear();
+        OverlayTopVertices.clear();
 
         for (const auto& line : PendingOverlayLines)
         {
             const bool depthTest = (line.flags & 1) != 0 && (line.flags & 2) == 0;
-            auto& target = depthTest ? depthVertices : topVertices;
-            target.push_back({line.x0, line.y0, line.z0, line.rgba});
-            target.push_back({line.x1, line.y1, line.z1, line.rgba});
+            auto& target = depthTest ? OverlayDepthVertices : OverlayTopVertices;
+
+            float thickness = static_cast<float>((line.flags >> 8) & 0xFF);
+            if (thickness < 0.5f)
+            {
+                thickness = (OverlayLineThickness > 0.5f) ? OverlayLineThickness : 1.0f;
+            }
+
+            const float x0 = line.x0, y0 = line.y0, z0 = line.z0;
+            const float x1 = line.x1, y1 = line.y1, z1 = line.z1;
+            const uint32_t col = line.rgba;
+
+            target.push_back({x0, y0, z0, x1, y1, z1, col, -1.0f, 0.0f, thickness});
+            target.push_back({x0, y0, z0, x1, y1, z1, col,  1.0f, 0.0f, thickness});
+            target.push_back({x0, y0, z0, x1, y1, z1, col, -1.0f, 1.0f, thickness});
+
+            target.push_back({x0, y0, z0, x1, y1, z1, col, -1.0f, 1.0f, thickness});
+            target.push_back({x0, y0, z0, x1, y1, z1, col,  1.0f, 0.0f, thickness});
+            target.push_back({x0, y0, z0, x1, y1, z1, col,  1.0f, 1.0f, thickness});
         }
 
-        const size_t totalVertices = depthVertices.size() + topVertices.size();
+        const size_t totalVertices = OverlayDepthVertices.size() + OverlayTopVertices.size();
         if (totalVertices > OverlayLineVBCapacity || !OverlayLineVB)
         {
-            OverlayLineVBCapacity = std::max(totalVertices, OverlayLineVBCapacity * 2 + 512);
+            OverlayLineVBCapacity = std::max(totalVertices, OverlayLineVBCapacity * 2 + 1024);
             D3D11_BUFFER_DESC vbDesc{};
             vbDesc.ByteWidth = static_cast<UINT>(OverlayLineVBCapacity * sizeof(OverlayLineVertex));
             vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -3106,21 +3171,21 @@ void Game::RenderEditorOverlay()
             if (SUCCEEDED(Context->Map(OverlayLineVB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
             {
                 auto* dst = static_cast<OverlayLineVertex*>(mapped.pData);
-                if (!depthVertices.empty())
+                if (!OverlayDepthVertices.empty())
                 {
-                    std::memcpy(dst, depthVertices.data(), depthVertices.size() * sizeof(OverlayLineVertex));
-                    dst += depthVertices.size();
+                    std::memcpy(dst, OverlayDepthVertices.data(), OverlayDepthVertices.size() * sizeof(OverlayLineVertex));
+                    dst += OverlayDepthVertices.size();
                 }
-                if (!topVertices.empty())
+                if (!OverlayTopVertices.empty())
                 {
-                    std::memcpy(dst, topVertices.data(), topVertices.size() * sizeof(OverlayLineVertex));
+                    std::memcpy(dst, OverlayTopVertices.data(), OverlayTopVertices.size() * sizeof(OverlayLineVertex));
                 }
                 Context->Unmap(OverlayLineVB.Get(), 0);
             }
 
             Context->ClearState();
             SetFullViewport();
-            Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+            Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             Context->IASetInputLayout(OverlayLineLayout.Get());
             const UINT stride = sizeof(OverlayLineVertex), offset = 0;
             Context->IASetVertexBuffers(0, 1, OverlayLineVB.GetAddressOf(), &stride, &offset);
@@ -3128,19 +3193,20 @@ void Game::RenderEditorOverlay()
             Context->PSSetShader(OverlayLinePS.Get(), nullptr, 0);
             Context->VSSetConstantBuffers(0, 1, OverlayCB.GetAddressOf());
             Context->OMSetBlendState(OverlayBlendState.Get(), nullptr, 0xFFFFFFFF);
+            Context->RSSetState(OverlayRasterState.Get());
 
-            if (!depthVertices.empty() && depthStencilView)
+            if (!OverlayDepthVertices.empty() && depthStencilView)
             {
                 Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
                 Context->OMSetDepthStencilState(OverlayDepthReadOnlyState.Get(), 0);
-                Context->Draw(static_cast<UINT>(depthVertices.size()), 0);
+                Context->Draw(static_cast<UINT>(OverlayDepthVertices.size()), 0);
             }
 
-            if (!topVertices.empty())
+            if (!OverlayTopVertices.empty())
             {
                 Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
                 Context->OMSetDepthStencilState(OverlayDepthDisabledState.Get(), 0);
-                Context->Draw(static_cast<UINT>(topVertices.size()), static_cast<UINT>(depthVertices.size()));
+                Context->Draw(static_cast<UINT>(OverlayTopVertices.size()), static_cast<UINT>(OverlayDepthVertices.size()));
             }
         }
     }
@@ -3267,27 +3333,30 @@ bool Game::RenderViewportFrame(float deltaTime)
             D3D11_MAPPED_SUBRESOURCE mapped{};
             if (SUCCEEDED(Context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped)))
             {
-                size_t redLinePixels = 0;
+                size_t gizmoRedPixels = 0;
+                size_t gizmoGreenPixels = 0;
+                size_t gizmoBluePixels = 0;
                 size_t nonBgPixels = 0;
-                size_t warmLightRadiusPixels = 0;
                 for (unsigned y = 0; y < desc.Height; ++y)
                 {
                     const auto* row = reinterpret_cast<const uint8_t*>(mapped.pData) + y * mapped.RowPitch;
                     for (unsigned x = 0; x < desc.Width; ++x)
                     {
                         const auto* p = row + x * 4;
-                        // Diagnostic red line: R > 180, G < 50, B < 50
-                        if (p[0] > 180 && p[1] < 50 && p[2] < 50) ++redLinePixels;
-                        // Warm Light radius lines: warm orange (R > 180, G between 100 and 180, B < 80)
-                        if (p[0] > 180 && p[1] >= 100 && p[1] <= 180 && p[2] < 80) ++warmLightRadiusPixels;
+                        // Gizmo X (Red): R > 180, G < 60, B < 60
+                        if (p[0] > 180 && p[1] < 60 && p[2] < 60) ++gizmoRedPixels;
+                        // Gizmo Y (Green): R < 60, G > 180, B < 60
+                        if (p[0] < 60 && p[1] > 180 && p[2] < 60) ++gizmoGreenPixels;
+                        // Gizmo Z (Blue): R < 60, G < 100, B > 180
+                        if (p[0] < 60 && p[1] < 100 && p[2] > 180) ++gizmoBluePixels;
                         // Background clear color is {0, 0, 51}
                         const bool isBg = (p[0] <= 2 && p[1] <= 2 && std::abs(static_cast<int>(p[2]) - 51) <= 2);
                         if (!isBg) ++nonBgPixels;
                     }
                 }
                 Context->Unmap(staging.Get(), 0);
-                std::printf("[Info] [D3D-Readback frame %d] Backbuffer: %ux%u, Diagnostic Red: %zu, Warm Light Radius: %zu, Non-Bg: %zu\n",
-                    sFrameCounter, desc.Width, desc.Height, redLinePixels, warmLightRadiusPixels, nonBgPixels);
+                std::printf("[Info] [D3D-Readback frame %d] Backbuffer: %ux%u, Gizmo Red: %zu, Green: %zu, Blue: %zu, Non-Bg: %zu\n",
+                    sFrameCounter, desc.Width, desc.Height, gizmoRedPixels, gizmoGreenPixels, gizmoBluePixels, nonBgPixels);
                 std::fflush(stdout);
                 ++sReadbackDone;
             }

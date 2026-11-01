@@ -4,12 +4,19 @@
 constexpr uint32_t EngineViewportOverlayService = 0x014F564Cu;
 constexpr const char* EngineViewportOverlayExtension = "Engine.Viewport.Overlay";
 
+namespace OverlayFlags
+{
+    constexpr uint32_t DepthTest   = 1u;
+    constexpr uint32_t AlwaysOnTop = 2u;
+    inline constexpr uint32_t Thickness(uint8_t px) noexcept { return static_cast<uint32_t>(px) << 8; }
+}
+
 struct EngineOverlayLine
 {
     float x0, y0, z0;
     float x1, y1, z1;
     uint32_t rgba;
-    uint32_t flags; // bit 0: depthTest, bit 1: alwaysOnTop
+    uint32_t flags; // bit 0: depthTest, bit 1: alwaysOnTop, bits 8..15: thickness in pixels
 };
 
 struct EngineOverlayBillboard

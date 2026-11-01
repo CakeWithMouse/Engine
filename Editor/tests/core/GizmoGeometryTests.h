@@ -137,4 +137,72 @@ inline void RunGizmoGeometryTests(F check)
         auto lightSphere = ViewportOverlay::GenerateLightRadiusLines(0.0f, 5.0f, 0.0f, 10.0f, 0xFFFFFFFF, 48);
         check(lightSphere.size() == 48 * 3, "Light sphere generates 3 circles of 48 segments");
     }
+
+    // 8. ClosestPointOnAxis ray projection
+    {
+        float rayOrig[3] = {2.0f, 5.0f, -10.0f};
+        float rayDir[3] = {0.0f, 0.0f, 1.0f};
+        float axisOrig[3] = {0.0f, 0.0f, 0.0f};
+        float axisDir[3] = {1.0f, 0.0f, 0.0f};
+        float hitPt[3]{};
+        float s = 0.0f;
+
+        bool ok = ClosestPointOnAxis(rayOrig, rayDir, axisOrig, axisDir, hitPt, &s);
+        check(ok, "ClosestPointOnAxis succeeds for non-parallel lines");
+        check(std::abs(s - 2.0f) < 1e-4f, "Axis coordinate s is 2.0");
+        check(std::abs(hitPt[0] - 2.0f) < 1e-4f && std::abs(hitPt[1]) < 1e-4f && std::abs(hitPt[2]) < 1e-4f,
+              "Hit point on axis is (2, 0, 0)");
+    }
+
+    // 9. ScreenToWorldRay camera unprojection
+    {
+        EngineCameraInfo cam{};
+        cam.position[0] = 0.0f; cam.position[1] = 0.0f; cam.position[2] = -10.0f;
+        cam.width = 800; cam.height = 600;
+        // View matrix identity (camera at (0,0,-10) looking down +Z)
+        cam.viewMatrix[0] = 1; cam.viewMatrix[5] = 1; cam.viewMatrix[10] = 1; cam.viewMatrix[15] = 1;
+        cam.projMatrix[0] = 1.0f; cam.projMatrix[5] = 1.0f; cam.projMatrix[10] = 1.0f; cam.projMatrix[11] = 1.0f;
+
+        float rOrig[3]{}, rDir[3]{};
+        bool ok = ScreenToWorldRay(400.0f, 300.0f, cam, rOrig, rDir);
+        check(ok, "ScreenToWorldRay succeeds at screen center");
+        check(std::abs(rDir[0]) < 1e-4f && std::abs(rDir[1]) < 1e-4f && std::abs(rDir[2] - 1.0f) < 1e-4f,
+              "Center ray points forward (0, 0, 1)");
+
+        float rDirRight[3]{};
+        ScreenToWorldRay(800.0f, 300.0f, cam, rOrig, rDirRight);
+        check(rDirRight[0] > 0.1f, "Right edge ray has positive X direction");
+    }
+
+    // 10. Signed ring angle verification
+    {
+        float center[3] = {0.0f, 0.0f, 0.0f};
+        float axisN[3] = {0.0f, 1.0f, 0.0f};
+        float refV[3] = {1.0f, 0.0f, 0.0f};
+
+        float ptPos[3] = {0.0f, 0.0f, 5.0f};
+        float aPos = ComputeRingAngle(center, axisN, refV, ptPos);
+
+        float ptNeg[3] = {0.0f, 0.0f, -5.0f};
+        float aNeg = ComputeRingAngle(center, axisN, refV, ptNeg);
+
+        check((aPos * aNeg) < 0.0f, "Opposite rotation directions have opposite signs");
+        check(std::abs(std::abs(aPos) - 1.570796f) < 1e-3f, "Magnitude is pi/2");
+    }
+
+    // 11. Accumulated gesture snap calculation
+    {
+        const double step = 0.5;
+        const float dragStartS = 1.0f;
+
+        auto snap = [&](float currentS) -> float {
+            float delta = currentS - dragStartS;
+            return static_cast<float>(std::round(delta / step) * step);
+        };
+
+        check(std::abs(snap(1.24f) - 0.0f) < 1e-4f, "Delta 0.24 snaps to 0.0");
+        check(std::abs(snap(1.26f) - 0.5f) < 1e-4f, "Delta 0.26 snaps to 0.5");
+        check(std::abs(snap(1.49f) - 0.5f) < 1e-4f, "Delta 0.49 snaps to 0.5");
+        check(std::abs(snap(1.76f) - 1.0f) < 1e-4f, "Delta 0.76 snaps to 1.0");
+    }
 }

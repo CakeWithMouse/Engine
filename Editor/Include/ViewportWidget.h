@@ -72,10 +72,10 @@ private:
     uint32_t PhysH() const;
 
     bool SelectedTransform(uint64_t& id, EngineSceneTransform& transform);
-    bool BeginObjectDrag(const QPointF& pos);
+    bool BeginGizmoDragGesture(const QPointF& pos, GizmoGeometry::Handle handle);
+    void ApplyGizmoDragGesture(const QPointF& pos);
     void EndObjectDrag();
     void CancelObjectDrag();
-    void ApplyRotateScaleGizmo(const QPointF& pos);
     void PostSelectedTransform(const EngineSceneTransform& transform);
     void updateGizmoToolTip();
 
@@ -97,6 +97,11 @@ private:
     EditorGizmoMode gizmoMode_ = EditorGizmoTranslate;
     GizmoMath::AxisLock activeAxis_ = GizmoMath::AxisLock::All;
     GizmoGeometry::Handle hoveredHandle_ = GizmoGeometry::Handle::None;
+    GizmoGeometry::Handle activeGizmoHandle_ = GizmoGeometry::Handle::None;
+    float dragStartHitPoint_[3] = {0, 0, 0};
+    float dragStartS_ = 0.0f;
+    float dragStartRefVec_[3] = {1, 0, 0};
+    float dragStartDist_ = 1.0f;
     uint64_t overlayHash_ = 0;
     EngineCameraInfo lastCameraInfo_{};
     bool hasCameraInfo_ = false;

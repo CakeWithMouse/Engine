@@ -64,7 +64,8 @@ void ViewportOverlayHelper::UpdateOverlays(
     GizmoGeometry::Handle hoveredHandle,
     int gizmoMode,
     bool localSpace,
-    uint64_t& inOutHash)
+    uint64_t& inOutHash,
+    GizmoGeometry::Handle activeHandle)
 {
     if (!host) return;
 
@@ -99,7 +100,7 @@ void ViewportOverlayHelper::UpdateOverlays(
         objPos,
         objRot,
         static_cast<int>(hoveredHandle),
-        0,
+        static_cast<int>(activeHandle),
         lightRad
     );
 
@@ -171,7 +172,7 @@ void ViewportOverlayHelper::UpdateOverlays(
                 localSpace,
                 cam,
                 hoveredHandle,
-                GizmoGeometry::Handle::None
+                activeHandle
             );
             lines.insert(lines.end(), gizmoLines.begin(), gizmoLines.end());
         }

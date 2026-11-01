@@ -47,6 +47,35 @@ namespace GizmoGeometry
         return true;
     }
 
+    bool ScreenToWorldRay(float mouseX, float mouseY, const EngineCameraInfo& cam, float rayOrigin[3], float rayDir[3])
+    {
+        if (cam.width <= 0 || cam.height <= 0 || std::abs(cam.projMatrix[0]) < 1e-6f || std::abs(cam.projMatrix[5]) < 1e-6f) return false;
+        const float vx = ((2.0f * mouseX / static_cast<float>(cam.width)) - 1.0f) / cam.projMatrix[0];
+        const float vy = (1.0f - (2.0f * mouseY / static_cast<float>(cam.height))) / cam.projMatrix[5];
+        const float dx = vx * cam.viewMatrix[0] + vy * cam.viewMatrix[4] + cam.viewMatrix[8];
+        const float dy = vx * cam.viewMatrix[1] + vy * cam.viewMatrix[5] + cam.viewMatrix[9];
+        const float dz = vx * cam.viewMatrix[2] + vy * cam.viewMatrix[6] + cam.viewMatrix[10];
+        const float len = std::sqrt(dx * dx + dy * dy + dz * dz);
+        if (len < 1e-6f) return false;
+        rayDir[0] = dx / len; rayDir[1] = dy / len; rayDir[2] = dz / len;
+        rayOrigin[0] = cam.position[0]; rayOrigin[1] = cam.position[1]; rayOrigin[2] = cam.position[2];
+        return true;
+    }
+
+    bool ClosestPointOnAxis(const float rayOrigin[3], const float rayDir[3], const float axisOrigin[3], const float axisDir[3], float outPoint[3], float* outS)
+    {
+        const float w0[3] = {rayOrigin[0] - axisOrigin[0], rayOrigin[1] - axisOrigin[1], rayOrigin[2] - axisOrigin[2]};
+        const float b = rayDir[0] * axisDir[0] + rayDir[1] * axisDir[1] + rayDir[2] * axisDir[2];
+        const float d = rayDir[0] * w0[0] + rayDir[1] * w0[1] + rayDir[2] * w0[2];
+        const float e = axisDir[0] * w0[0] + axisDir[1] * w0[1] + axisDir[2] * w0[2];
+        const float denom = 1.0f - b * b;
+        if (denom < 1e-5f) return false;
+        const float s = (e - b * d) / denom;
+        if (outS) *outS = s;
+        outPoint[0] = axisOrigin[0] + s * axisDir[0]; outPoint[1] = axisOrigin[1] + s * axisDir[1]; outPoint[2] = axisOrigin[2] + s * axisDir[2];
+        return true;
+    }
+
     float DistancePointToSegment(
         float px, float py,
         float x0, float y0,
@@ -123,7 +152,7 @@ namespace GizmoGeometry
         return sign * std::acos(clampedCos);
     }
 
-    static void GetGizmoAxes(
+    void GetGizmoAxes(
         const float objRot[4],
         bool isLocal,
         float axisX[3],
@@ -242,30 +271,19 @@ namespace GizmoGeometry
                 float prevScreen[2];
                 bool hasPrev = false;
 
-                for (int i = 0; i <= segs; ++i)
-                {
-                    const float angle = static_cast<float>(i) * step;
-                    const float p[3] = {
-                        objPos[0] + (a1[0] * std::cos(angle) + a2[0] * std::sin(angle)) * scale,
-                        objPos[1] + (a1[1] * std::cos(angle) + a2[1] * std::sin(angle)) * scale,
-                        objPos[2] + (a1[2] * std::cos(angle) + a2[2] * std::sin(angle)) * scale
-                    };
+                for (int i = 0; i <= segs; ++i) {
+                    const float ang = static_cast<float>(i) * step;
+                    const float p[3] = {objPos[0] + (a1[0]*std::cos(ang) + a2[0]*std::sin(ang))*scale,
+                                        objPos[1] + (a1[1]*std::cos(ang) + a2[1]*std::sin(ang))*scale,
+                                        objPos[2] + (a1[2]*std::cos(ang) + a2[2]*std::sin(ang))*scale};
                     float scr[2];
-                    if (ProjectPointToScreen(p, cam.viewMatrix, cam.projMatrix, w, h, scr))
-                    {
-                        if (hasPrev)
-                        {
+                    if (ProjectPointToScreen(p, cam.viewMatrix, cam.projMatrix, w, h, scr)) {
+                        if (hasPrev) {
                             const float d = DistancePointToSegment(mouseX, mouseY, prevScreen[0], prevScreen[1], scr[0], scr[1]);
-                            if (d < closestDist)
-                            {
-                                closestDist = d;
-                                bestHandle = hnd;
-                            }
+                            if (d < closestDist) { closestDist = d; bestHandle = hnd; }
                         }
-                        prevScreen[0] = scr[0]; prevScreen[1] = scr[1];
-                        hasPrev = true;
-                    }
-                    else hasPrev = false;
+                        prevScreen[0] = scr[0]; prevScreen[1] = scr[1]; hasPrev = true;
+                    } else hasPrev = false;
                 }
             };
 
@@ -314,61 +332,74 @@ namespace GizmoGeometry
         float ax[3], ay[3], az[3];
         GetGizmoAxes(objRot, isLocal, ax, ay, az);
 
-        const Handle effective = (activeHandle != Handle::None) ? activeHandle : hoverHandle;
-        auto pickColor = [&](Handle h, uint32_t normalColor) -> uint32_t {
-            if (effective == h) return palette.highlight;
-            if (effective != Handle::None)
+        auto getStyle = [&](Handle h, uint32_t normalColor, uint32_t& outCol, uint32_t& outFlags) {
+            uint8_t th = 3;
+            if (activeHandle != Handle::None)
             {
-                // Dim other handles slightly
-                const uint32_t a = ((normalColor >> 24) & 0xFF) * 2 / 3;
-                return (normalColor & 0x00FFFFFF) | (a << 24);
+                if (activeHandle == h)
+                {
+                    outCol = palette.highlight;
+                    th = 4;
+                }
+                else
+                {
+                    const uint32_t a = ((normalColor >> 24) & 0xFF) / 3;
+                    outCol = (normalColor & 0x00FFFFFF) | (a << 24);
+                    th = 2;
+                }
             }
-            return normalColor;
+            else if (hoverHandle == h)
+            {
+                outCol = palette.highlight;
+                th = 4;
+            }
+            else
+            {
+                outCol = normalColor;
+                th = 3;
+            }
+            outFlags = OverlayFlags::AlwaysOnTop | OverlayFlags::Thickness(th);
         };
-
-        constexpr uint32_t flags = 2; // alwaysOnTop
 
         if (mode == GizmoMath::GizmoMode::Translate)
         {
-            // Move axes with arrows
             auto addAxis = [&](const float a[3], const float u1[3], const float u2[3], Handle hnd, uint32_t col) {
-                const uint32_t c = pickColor(hnd, col);
+                uint32_t c, f;
+                getStyle(hnd, col, c, f);
                 const float tip[3] = {objPos[0] + a[0] * scale, objPos[1] + a[1] * scale, objPos[2] + a[2] * scale};
-                lines.push_back({objPos[0], objPos[1], objPos[2], tip[0], tip[1], tip[2], c, flags});
+                lines.push_back({objPos[0], objPos[1], objPos[2], tip[0], tip[1], tip[2], c, f});
 
-                // Arrow head cone (4 side lines from tip to base)
-                const float coneLen = scale * 0.18f;
-                const float coneR = scale * 0.05f;
+                const float coneLen = scale * 0.22f;
+                const float coneR = scale * 0.07f;
                 const float base[3] = {tip[0] - a[0] * coneLen, tip[1] - a[1] * coneLen, tip[2] - a[2] * coneLen};
-
                 const float b1[3] = {base[0] + u1[0] * coneR, base[1] + u1[1] * coneR, base[2] + u1[2] * coneR};
                 const float b2[3] = {base[0] - u1[0] * coneR, base[1] - u1[1] * coneR, base[2] - u1[2] * coneR};
                 const float b3[3] = {base[0] + u2[0] * coneR, base[1] + u2[1] * coneR, base[2] + u2[2] * coneR};
                 const float b4[3] = {base[0] - u2[0] * coneR, base[1] - u2[1] * coneR, base[2] - u2[2] * coneR};
 
-                lines.push_back({tip[0], tip[1], tip[2], b1[0], b1[1], b1[2], c, flags});
-                lines.push_back({tip[0], tip[1], tip[2], b2[0], b2[1], b2[2], c, flags});
-                lines.push_back({tip[0], tip[1], tip[2], b3[0], b3[1], b3[2], c, flags});
-                lines.push_back({tip[0], tip[1], tip[2], b4[0], b4[1], b4[2], c, flags});
-                lines.push_back({b1[0], b1[1], b1[2], b3[0], b3[1], b3[2], c, flags});
-                lines.push_back({b3[0], b3[1], b3[2], b2[0], b2[1], b2[2], c, flags});
-                lines.push_back({b2[0], b2[1], b2[2], b4[0], b4[1], b4[2], c, flags});
-                lines.push_back({b4[0], b4[1], b4[2], b1[0], b1[1], b1[2], c, flags});
+                const float* bp[4] = {b1, b2, b3, b4};
+                for (int i = 0; i < 4; ++i) {
+                    lines.push_back({tip[0], tip[1], tip[2], bp[i][0], bp[i][1], bp[i][2], c, f});
+                    lines.push_back({bp[i][0], bp[i][1], bp[i][2], bp[(i+1)%4][0], bp[(i+1)%4][1], bp[(i+1)%4][2], c, f});
+                }
             };
 
             addAxis(ax, ay, az, Handle::AxisX, palette.axisX);
             addAxis(ay, ax, az, Handle::AxisY, palette.axisY);
             addAxis(az, ax, ay, Handle::AxisZ, palette.axisZ);
 
-            // Plane quads
             auto addPlane = [&](const float a1[3], const float a2[3], Handle hnd, uint32_t col) {
-                const uint32_t c = pickColor(hnd, col);
-                const float pSize = scale * 0.3f;
+                uint32_t c, f;
+                getStyle(hnd, col, c, f);
+                const float pSize = scale * 0.32f;
                 const float p1[3] = {objPos[0] + a1[0] * pSize, objPos[1] + a1[1] * pSize, objPos[2] + a1[2] * pSize};
                 const float p2[3] = {objPos[0] + a2[0] * pSize, objPos[1] + a2[1] * pSize, objPos[2] + a2[2] * pSize};
                 const float pc[3] = {objPos[0] + (a1[0] + a2[0]) * pSize, objPos[1] + (a1[1] + a2[1]) * pSize, objPos[2] + (a1[2] + a2[2]) * pSize};
-                lines.push_back({p1[0], p1[1], p1[2], pc[0], pc[1], pc[2], c, flags});
-                lines.push_back({p2[0], p2[1], p2[2], pc[0], pc[1], pc[2], c, flags});
+                lines.push_back({objPos[0], objPos[1], objPos[2], p1[0], p1[1], p1[2], c, f});
+                lines.push_back({objPos[0], objPos[1], objPos[2], p2[0], p2[1], p2[2], c, f});
+                lines.push_back({p1[0], p1[1], p1[2], pc[0], pc[1], pc[2], c, f});
+                lines.push_back({p2[0], p2[1], p2[2], pc[0], pc[1], pc[2], c, f});
+                lines.push_back({p1[0], p1[1], p1[2], p2[0], p2[1], p2[2], c, f});
             };
 
             addPlane(ax, ay, Handle::PlaneXY, palette.planeXY);
@@ -378,7 +409,8 @@ namespace GizmoGeometry
         else if (mode == GizmoMath::GizmoMode::Rotate)
         {
             auto addRing = [&](const float a1[3], const float a2[3], Handle hnd, uint32_t col) {
-                const uint32_t c = pickColor(hnd, col);
+                uint32_t c, f;
+                getStyle(hnd, col, c, f);
                 constexpr int segs = 48;
                 constexpr float step = 6.28318530718f / static_cast<float>(segs);
                 for (int i = 0; i < segs; ++i)
@@ -395,7 +427,7 @@ namespace GizmoGeometry
                         objPos[1] + (a1[1] * std::cos(a1_ang) + a2[1] * std::sin(a1_ang)) * scale,
                         objPos[2] + (a1[2] * std::cos(a1_ang) + a2[2] * std::sin(a1_ang)) * scale
                     };
-                    lines.push_back({p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], c, flags});
+                    lines.push_back({p0[0], p0[1], p0[2], p1[0], p1[1], p1[2], c, f});
                 }
             };
 
@@ -405,47 +437,31 @@ namespace GizmoGeometry
         }
         else if (mode == GizmoMath::GizmoMode::Scale)
         {
-            auto addScaleAxis = [&](const float a[3], const float u1[3], const float u2[3], Handle hnd, uint32_t col) {
-                const uint32_t c = pickColor(hnd, col);
-                const float tip[3] = {objPos[0] + a[0] * scale, objPos[1] + a[1] * scale, objPos[2] + a[2] * scale};
-                lines.push_back({objPos[0], objPos[1], objPos[2], tip[0], tip[1], tip[2], c, flags});
-
-                // End box (12 edges)
-                const float bSize = scale * 0.05f;
-                for (int dx = -1; dx <= 1; dx += 2)
-                for (int dy = -1; dy <= 1; dy += 2)
-                {
-                    const float p1[3] = {tip[0] + (u1[0] * dx + u2[0] * dy) * bSize - a[0] * bSize,
-                                         tip[1] + (u1[1] * dx + u2[1] * dy) * bSize - a[1] * bSize,
-                                         tip[2] + (u1[2] * dx + u2[2] * dy) * bSize - a[2] * bSize};
-                    const float p2[3] = {tip[0] + (u1[0] * dx + u2[0] * dy) * bSize + a[0] * bSize,
-                                         tip[1] + (u1[1] * dx + u2[1] * dy) * bSize + a[1] * bSize,
-                                         tip[2] + (u1[2] * dx + u2[2] * dy) * bSize + a[2] * bSize};
-                    lines.push_back({p1[0], p1[1], p1[2], p2[0], p2[1], p2[2], c, flags});
-                }
+            auto addCube = [&](const float c[3], float sz, uint32_t col, uint32_t flg) {
+                const float d[2] = {-sz, sz};
+                for (int i = 0; i < 2; ++i)
+                    for (int j = 0; j < 2; ++j) {
+                        lines.push_back({c[0]+d[i], c[1]+d[j], c[2]-sz, c[0]+d[i], c[1]+d[j], c[2]+sz, col, flg});
+                        lines.push_back({c[0]+d[i], c[1]-sz, c[2]+d[j], c[0]+d[i], c[1]+sz, c[2]+d[j], col, flg});
+                        lines.push_back({c[0]-sz, c[1]+d[i], c[2]+d[j], c[0]+sz, c[1]+d[i], c[2]+d[j], col, flg});
+                    }
             };
 
-            addScaleAxis(ax, ay, az, Handle::AxisX, palette.axisX);
-            addScaleAxis(ay, ax, az, Handle::AxisY, palette.axisY);
-            addScaleAxis(az, ax, ay, Handle::AxisZ, palette.axisZ);
+            auto addScaleAxis = [&](const float a[3], Handle hnd, uint32_t col) {
+                uint32_t c, f;
+                getStyle(hnd, col, c, f);
+                const float tip[3] = {objPos[0] + a[0] * scale, objPos[1] + a[1] * scale, objPos[2] + a[2] * scale};
+                lines.push_back({objPos[0], objPos[1], objPos[2], tip[0], tip[1], tip[2], c, f});
+                addCube(tip, scale * 0.07f, c, f);
+            };
 
-            // Center uniform scale box
-            const uint32_t cc = pickColor(Handle::Center, palette.center);
-            const float cs = scale * 0.06f;
-            lines.push_back({objPos[0] - cs, objPos[1] - cs, objPos[2] - cs, objPos[0] + cs, objPos[1] - cs, objPos[2] - cs, cc, flags});
-            lines.push_back({objPos[0] + cs, objPos[1] - cs, objPos[2] - cs, objPos[0] + cs, objPos[1] + cs, objPos[2] - cs, cc, flags});
-            lines.push_back({objPos[0] + cs, objPos[1] + cs, objPos[2] - cs, objPos[0] - cs, objPos[1] + cs, objPos[2] - cs, cc, flags});
-            lines.push_back({objPos[0] - cs, objPos[1] + cs, objPos[2] - cs, objPos[0] - cs, objPos[1] - cs, objPos[2] - cs, cc, flags});
+            addScaleAxis(ax, Handle::AxisX, palette.axisX);
+            addScaleAxis(ay, Handle::AxisY, palette.axisY);
+            addScaleAxis(az, Handle::AxisZ, palette.axisZ);
 
-            lines.push_back({objPos[0] - cs, objPos[1] - cs, objPos[2] + cs, objPos[0] + cs, objPos[1] - cs, objPos[2] + cs, cc, flags});
-            lines.push_back({objPos[0] + cs, objPos[1] - cs, objPos[2] + cs, objPos[0] + cs, objPos[1] + cs, objPos[2] + cs, cc, flags});
-            lines.push_back({objPos[0] + cs, objPos[1] + cs, objPos[2] + cs, objPos[0] - cs, objPos[1] + cs, objPos[2] + cs, cc, flags});
-            lines.push_back({objPos[0] - cs, objPos[1] + cs, objPos[2] + cs, objPos[0] - cs, objPos[1] - cs, objPos[2] + cs, cc, flags});
-
-            lines.push_back({objPos[0] - cs, objPos[1] - cs, objPos[2] - cs, objPos[0] - cs, objPos[1] - cs, objPos[2] + cs, cc, flags});
-            lines.push_back({objPos[0] + cs, objPos[1] - cs, objPos[2] - cs, objPos[0] + cs, objPos[1] - cs, objPos[2] + cs, cc, flags});
-            lines.push_back({objPos[0] + cs, objPos[1] + cs, objPos[2] - cs, objPos[0] + cs, objPos[1] + cs, objPos[2] + cs, cc, flags});
-            lines.push_back({objPos[0] - cs, objPos[1] + cs, objPos[2] - cs, objPos[0] - cs, objPos[1] + cs, objPos[2] + cs, cc, flags});
+            uint32_t cc, cf;
+            getStyle(Handle::Center, palette.center, cc, cf);
+            addCube(objPos, scale * 0.08f, cc, cf);
         }
 
         return lines;
