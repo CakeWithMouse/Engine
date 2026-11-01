@@ -489,9 +489,22 @@ void EditorQtHost::SetViewportOverlayApi(const EngineViewportOverlayApi& api)
     overlay_ = api;
     { std::lock_guard lk(cameraMutex_); lastCameraValid_ = false; }
     InvalidateOverlays();
-    const bool found = (overlay_.version == 1 && overlay_.setOverlayLines && overlay_.getCamera);
+    const bool found = ((overlay_.version == 1 || overlay_.version == 2) && overlay_.setOverlayLines && overlay_.getCamera);
     std::printf("[Info] Viewport overlay service: %s (version %u)\n", found ? "FOUND" : "NOT FOUND", overlay_.version);
     std::fflush(stdout);
+    if (overlay_.setAntialiasing && overlay_.context)
+    {
+        overlay_.setAntialiasing(overlay_.context, antialiasingMode_);
+    }
+}
+
+void EditorQtHost::SetAntialiasing(uint32_t mode)
+{
+    antialiasingMode_ = mode;
+    if (overlay_.setAntialiasing && overlay_.context)
+    {
+        overlay_.setAntialiasing(overlay_.context, mode);
+    }
 }
 
 void EditorQtHost::InitializeRecovery() {

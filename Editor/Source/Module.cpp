@@ -137,7 +137,7 @@ extern "C" __declspec(dllexport) int __cdecl EngineBindViewportInput(uint32_t ve
 
 extern "C" __declspec(dllexport) int __cdecl EngineBindViewportOverlay(uint32_t version, uint32_t size, void* instance, const EngineViewportOverlayApi* api)
 {
-    if (version != 1 || size != sizeof(EngineViewportOverlayApi) || !instance) return 0;
+    if ((version != 1 && version != 2) || size < 40 || !instance) return 0;
     static_cast<EditorQtHost*>(instance)->SetViewportOverlayApi(api ? *api : EngineViewportOverlayApi{});
     return 1;
 }

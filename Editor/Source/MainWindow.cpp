@@ -206,6 +206,30 @@ void EditorMainWindow::BuildUi()
     });
     actOverlays_->setCheckable(true);
     actOverlays_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/overlays"), true).toBool());
+
+    QMenu* aaMenu = viewMenu_->addMenu(Tr("Сглаживание", "Anti-aliasing"));
+    QActionGroup* aaGroup = new QActionGroup(this);
+    aaGroup->setExclusive(true);
+    const QString curAa = SettingsService::Instance().GetValue(QStringLiteral("viewport/antialiasing"), QStringLiteral("fxaa")).toString().toLower();
+
+    auto* actOff = aaMenu->addAction(Tr("Выкл", "Off"), this, [this] {
+        QVariantMap params;
+        params.insert(QStringLiteral("mode"), QStringLiteral("off"));
+        CommandRegistry::Instance().Execute(QStringLiteral("View.SetAntialiasing"), params);
+    });
+    actOff->setCheckable(true);
+    actOff->setChecked(curAa == QStringLiteral("off") || curAa == QStringLiteral("0"));
+    aaGroup->addAction(actOff);
+
+    auto* actFxaa = aaMenu->addAction(QStringLiteral("FXAA"), this, [this] {
+        QVariantMap params;
+        params.insert(QStringLiteral("mode"), QStringLiteral("fxaa"));
+        CommandRegistry::Instance().Execute(QStringLiteral("View.SetAntialiasing"), params);
+    });
+    actFxaa->setCheckable(true);
+    actFxaa->setChecked(curAa != QStringLiteral("off") && curAa != QStringLiteral("0"));
+    aaGroup->addAction(actFxaa);
+
     viewMenu_->addSeparator();
 
     QMenu* viewMenu = viewMenu_;

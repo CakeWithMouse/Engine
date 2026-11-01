@@ -78,6 +78,18 @@ inline void RegisterViewportCommands(ViewportWidget* viewport, EditorQtHost* hos
         SettingsService::Instance().SetValue(QStringLiteral("view/overlays"), !current);
         return true;
     });
+
+    reg(QStringLiteral("View.SetAntialiasing"), QStringLiteral("Set Antialiasing Mode"), [host](const CommandContext& ctx) {
+        QString modeStr = ctx.parameters.value(QStringLiteral("mode")).toString();
+        if (modeStr.isEmpty()) modeStr = QStringLiteral("fxaa");
+        SettingsService::Instance().SetValue(QStringLiteral("viewport/antialiasing"), modeStr);
+        if (host)
+        {
+            const uint32_t mode = (modeStr.toLower() == QStringLiteral("off") || modeStr == QStringLiteral("0")) ? 0 : 1;
+            host->SetAntialiasing(mode);
+        }
+        return true;
+    });
 }
 
 inline void UnregisterViewportCommands()
@@ -93,4 +105,5 @@ inline void UnregisterViewportCommands()
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Editor.SetControlSchemeBlender"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.ToggleGrid"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.ToggleOverlays"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.SetAntialiasing"));
 }

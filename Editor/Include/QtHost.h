@@ -72,6 +72,7 @@ public:
     void SetBatchApi(const EngineSceneBatchApi& api) { batch_ = api; }
     void SetAuthoringApi(const EngineAuthoringApi& api) { authoring_ = api; }
     void SetViewportOverlayApi(const EngineViewportOverlayApi& api);
+    void SetAntialiasing(uint32_t mode);
 
 private:
     void UiThreadMain();
@@ -97,6 +98,7 @@ private:
     void WriteRecovery();
     EngineViewportInputApi viewportInput_{};
     EngineViewportOverlayApi overlay_{};
+    uint32_t antialiasingMode_ = 1;
 
     struct PendingIcon
     {
