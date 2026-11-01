@@ -17,6 +17,8 @@ struct LinePSInput
 {
     float4 Position : SV_POSITION;
     float4 Color : COLOR;
+    float DistFromCenter : TEXCOORD0;
+    float HalfWidth : TEXCOORD1;
 };
 
 LinePSInput VSLine(LineVSInput input)
@@ -30,6 +32,8 @@ LinePSInput VSLine(LineVSInput input)
     if (c0.w <= 0.001f && c1.w <= 0.001f)
     {
         output.Position = float4(0, 0, -2.0f, 1.0f);
+        output.DistFromCenter = 0.0f;
+        output.HalfWidth = 1.0f;
         return output;
     }
 
@@ -54,18 +58,23 @@ LinePSInput VSLine(LineVSInput input)
     float2 dir = len > 1e-4f ? (screenDir / len) : float2(1.0f, 0.0f);
     float2 perp = float2(-dir.y, dir.x);
 
-    float halfWidth = max(0.5f, input.Thickness * 0.5f);
+    // Expand by 0.5px margin on each side for smooth alpha falloff
+    float halfWidth = input.Thickness * 0.5f + 0.5f;
     float2 pixelOffset = perp * (input.SideDir.x * halfWidth);
     float2 ndcOffset = pixelOffset * float2(ScreenSize.z * 2.0f, ScreenSize.w * 2.0f);
 
     float4 baseClip = lerp(safeC0, safeC1, input.SideDir.y);
     output.Position = float4(baseClip.xy + ndcOffset * baseClip.w, baseClip.zw);
+    output.DistFromCenter = input.SideDir.x * halfWidth;
+    output.HalfWidth = halfWidth;
     return output;
 }
 
 float4 PSLine(LinePSInput input) : SV_Target
 {
-    return input.Color;
+    float d = abs(input.DistFromCenter);
+    float alpha = 1.0f - smoothstep(max(0.0f, input.HalfWidth - 1.0f), input.HalfWidth, d);
+    return float4(input.Color.rgb, input.Color.a * alpha);
 }
 
 struct BillboardVSInput
