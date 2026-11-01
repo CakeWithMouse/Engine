@@ -63,6 +63,7 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host "=== 5. Ensuring EditorOverlay.hlsl is deployed ===" -ForegroundColor Cyan
 $sourceShader = Join-Path $repoRoot "Engine/Content/Shaders/EditorOverlay.hlsl"
+$sourceFxaa = Join-Path $repoRoot "Engine/Content/Shaders/FXAA.hlsl"
 $targetShaders = @(
     (Join-Path $repoRoot "Game/build/x64/Debug/Runtime/EngineContent/Shaders/EditorOverlay.hlsl")
 )
@@ -71,6 +72,11 @@ foreach ($target in $targetShaders) {
     if (!(Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
     Copy-Item -LiteralPath $sourceShader -Destination $target -Force
     Write-Host "Deployed shader: $target"
+}
+$targetFxaa = Join-Path $repoRoot "Game/build/x64/Debug/Runtime/EngineContent/Shaders/FXAA.hlsl"
+if (Test-Path -LiteralPath $sourceFxaa) {
+    Copy-Item -LiteralPath $sourceFxaa -Destination $targetFxaa -Force
+    Write-Host "Deployed shader: $targetFxaa"
 }
 
 Write-Host "=== 5b. Synchronizing Game.dll for user projects in Documents ===" -ForegroundColor Cyan
