@@ -56,9 +56,9 @@ $buildArgs = @(
 )
 
 Write-Host "Invoking MSBuild on $solutionPath..."
-$proc = Start-Process -FilePath $msbuild -ArgumentList ($buildArgs -join ' ') -WorkingDirectory $repoRoot -NoNewWindow -PassThru -Wait
-if ($proc.ExitCode -ne 0) {
-    throw "Build failed with exit code $($proc.ExitCode)"
+& $msbuild @buildArgs
+if ($LASTEXITCODE -ne 0) {
+    throw "Build failed with exit code $LASTEXITCODE"
 }
 
 Write-Host "=== 5. Ensuring EditorOverlay.hlsl is deployed ===" -ForegroundColor Cyan
