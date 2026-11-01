@@ -627,7 +627,7 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11SamplerState> OverlaySamplerState;
 
     // Anti-aliasing (FXAA)
-    uint32_t AntialiasingMode = 1;
+    uint32_t AntialiasingMode = 0;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> SceneColorTexture;
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> SceneColorRTV;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> SceneColorSRV;
