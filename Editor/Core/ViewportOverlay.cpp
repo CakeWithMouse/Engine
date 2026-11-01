@@ -49,7 +49,7 @@ namespace ViewportOverlay
 
             if (((color >> 24) & 0xFF) > 2)
             {
-                lines.push_back({x, 0.0f, centerZ - extent, x, 0.0f, centerZ + extent, color, OverlayFlags::Thickness(1)});
+                lines.push_back({x, 0.0f, centerZ - extent, x, 0.0f, centerZ + extent, color, OverlayFlags::Thickness(isOriginZ ? 2 : 1)});
             }
         }
 
@@ -77,12 +77,12 @@ namespace ViewportOverlay
 
             if (((color >> 24) & 0xFF) > 2)
             {
-                lines.push_back({centerX - extent, 0.0f, z, centerX + extent, 0.0f, z, color, OverlayFlags::Thickness(1)});
+                lines.push_back({centerX - extent, 0.0f, z, centerX + extent, 0.0f, z, color, OverlayFlags::Thickness(isOriginX ? 2 : 1)});
             }
         }
 
-        // Short Y axis at origin
-        lines.push_back({0.0f, 0.0f, 0.0f, 0.0f, 5.0f, 0.0f, palette.axisY, OverlayFlags::Thickness(1)});
+
+
 
         return lines;
     }
