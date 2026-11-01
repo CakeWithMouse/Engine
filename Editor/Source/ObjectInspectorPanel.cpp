@@ -5,6 +5,7 @@
 #include "GeometryCard.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "EditorLocale.h"
+#include "IconProvider.h"
 
 #include <QApplication>
 #include <QCheckBox>
@@ -211,6 +212,7 @@ void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
     lightColor_ = new QPushButton(Tr("Выбрать цвет…", "Choose Color…"), rowTop);
     lightColor_->setObjectName(QStringLiteral("LightColor"));
     lightColor_->setFixedHeight(24);
+    lightColor_->setIcon(IconProvider::BulbIcon());
     connect(lightColor_, &QPushButton::clicked, this, [this] {
         if (refreshing_ || selectedId_ == 0) return;
         const QColor current = QColor::fromRgbF(lightValues_[0]->value(), lightValues_[1]->value(), lightValues_[2]->value());

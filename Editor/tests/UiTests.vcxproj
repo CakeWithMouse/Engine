@@ -45,17 +45,22 @@
         <QtLibSuffix Condition="'$(QtUseDebugLibraries)'!='true'"></QtLibSuffix>
     </PropertyGroup>
 
+    <PropertyGroup Condition="Exists('$(QtInstallDir)/include/QtSvg/QSvgRenderer') AND Exists('$(QtInstallDir)/lib/Qt6Svg$(QtLibSuffix).lib')">
+        <QtSvgLibrary>$(QtInstallDir)\lib\Qt6Svg$(QtLibSuffix).lib;</QtSvgLibrary>
+        <QtSvgDefine>ENGINE_HAS_QTSVG;</QtSvgDefine>
+    </PropertyGroup>
+
     <ItemDefinitionGroup>
         <ClCompile>
-            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtCore;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtWidgets;$(IntDir)moc;$(ProjectDir);$(ProjectDir)../Core;$(ProjectDir)../Include;$(ProjectDir)../UI;$(ProjectDir)../Host;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-            <PreprocessorDefinitions>QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtCore;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtWidgets;$(QtInstallDir)/include/QtSvg;$(IntDir)moc;$(ProjectDir);$(ProjectDir)../Core;$(ProjectDir)../Include;$(ProjectDir)../UI;$(ProjectDir)../Host;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <PreprocessorDefinitions>$(QtSvgDefine)QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
             <LanguageStandard>stdcpp17</LanguageStandard>
             <MultiProcessorCompilation>true</MultiProcessorCompilation>
             <AdditionalOptions>/utf-8 /Zc:__cplusplus %(AdditionalOptions)</AdditionalOptions>
         </ClCompile>
         <Link>
             <SubSystem>Console</SubSystem>
-            <AdditionalDependencies>$(QtInstallDir)\lib\Qt6Core$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Gui$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Widgets$(QtLibSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
+            <AdditionalDependencies>$(QtInstallDir)\lib\Qt6Core$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Gui$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Widgets$(QtLibSuffix).lib;$(QtSvgLibrary)%(AdditionalDependencies)</AdditionalDependencies>
         </Link>
     </ItemDefinitionGroup>
 
@@ -75,6 +80,7 @@
         <ClCompile Include="../Core/EditorSettings.cpp"/>
         <ClCompile Include="../Core/SettingsService.cpp"/>
         <ClCompile Include="../UI/EditorTheme.cpp"/>
+        <ClCompile Include="../UI/IconProvider.cpp"/>
         <ClCompile Include="../UI/EditorStyles.cpp"/>
         <ClCompile Include="../UI/MainToolBar.cpp"/>
         <ClCompile Include="../Source/SceneObjectsPanel.cpp"/>
