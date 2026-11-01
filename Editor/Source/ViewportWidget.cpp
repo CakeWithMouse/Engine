@@ -243,7 +243,7 @@ bool ViewportWidget::BeginGizmoDragGesture(const QPointF& pos, GizmoGeometry::Ha
             }
             else
             {
-                float camFwd[3] = {lastCameraInfo_.viewMatrix[8], lastCameraInfo_.viewMatrix[9], lastCameraInfo_.viewMatrix[10]};
+                float camFwd[3] = {lastCameraInfo_.viewMatrix[2], lastCameraInfo_.viewMatrix[6], lastCameraInfo_.viewMatrix[10]};
                 GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartTransform_.position, camFwd, dragStartHitPoint_);
             }
         }
@@ -361,7 +361,7 @@ void ViewportWidget::ApplyGizmoDragGesture(const QPointF& pos)
         }
         else // Center handle
         {
-            float camFwd[3] = {lastCameraInfo_.viewMatrix[8], lastCameraInfo_.viewMatrix[9], lastCameraInfo_.viewMatrix[10]};
+            float camFwd[3] = {lastCameraInfo_.viewMatrix[2], lastCameraInfo_.viewMatrix[6], lastCameraInfo_.viewMatrix[10]};
             float curPt[3];
             if (GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartTransform_.position, camFwd, curPt))
             {
@@ -388,8 +388,7 @@ void ViewportWidget::ApplyGizmoDragGesture(const QPointF& pos)
             GizmoMath::AxisAngleQuat(rotAxis[0], rotAxis[1], rotAxis[2], angle, deltaQ);
             double startQ[4] = {dragStartTransform_.rotation[0], dragStartTransform_.rotation[1], dragStartTransform_.rotation[2], dragStartTransform_.rotation[3]};
             double resQ[4];
-            if (localOrientation_) GizmoMath::MulQuat(startQ, deltaQ, resQ);
-            else GizmoMath::MulQuat(deltaQ, startQ, resQ);
+            GizmoMath::MulQuat(deltaQ, startQ, resQ);
             GizmoMath::NormalizeQuat(resQ);
 
             EngineSceneTransform t = dragStartTransform_;

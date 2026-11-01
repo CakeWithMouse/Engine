@@ -206,8 +206,8 @@ public:
         const auto p = EditorTheme::Instance().Palette();
         btnCoordSpace_->setIcon(local ? EditorTheme::CreateLocalIcon() : EditorTheme::CreateWorldIcon(p.textPrimary));
         btnCoordSpace_->setToolTip(local
-            ? Tr("Пространство координат: Local", "Coordinate Space: Local")
-            : Tr("Пространство координат: World", "Coordinate Space: World"));
+            ? Tr("Локальные оси объекта", "Object Local Axes")
+            : Tr("Глобальные оси сцены", "Scene World Axes"));
     }
 
     void SetSnapActive(bool active)
@@ -231,8 +231,8 @@ public:
         btnRotate_->setToolTip(Tr("Вращение (E/R)", "Rotate (E/R)"));
         btnScale_->setToolTip(Tr("Масштаб (R/S)", "Scale (R/S)"));
         btnCoordSpace_->setToolTip(isLocal_
-            ? Tr("Пространство координат: Local", "Coordinate Space: Local")
-            : Tr("Пространство координат: World", "Coordinate Space: World"));
+            ? Tr("Локальные оси объекта", "Object Local Axes")
+            : Tr("Глобальные оси сцены", "Scene World Axes"));
         btnSnap_->setToolTip(Tr("Привязка к сетке (Shift+S)", "Grid Snapping (Shift+S)"));
         comboSnapStep_->setToolTip(Tr("Шаг привязки перемещения", "Move Snap Step"));
         btnOverflow_->setToolTip(Tr("Дополнительно", "More"));

@@ -52,9 +52,9 @@ namespace GizmoGeometry
         if (cam.width <= 0 || cam.height <= 0 || std::abs(cam.projMatrix[0]) < 1e-6f || std::abs(cam.projMatrix[5]) < 1e-6f) return false;
         const float vx = ((2.0f * mouseX / static_cast<float>(cam.width)) - 1.0f) / cam.projMatrix[0];
         const float vy = (1.0f - (2.0f * mouseY / static_cast<float>(cam.height))) / cam.projMatrix[5];
-        const float dx = vx * cam.viewMatrix[0] + vy * cam.viewMatrix[4] + cam.viewMatrix[8];
-        const float dy = vx * cam.viewMatrix[1] + vy * cam.viewMatrix[5] + cam.viewMatrix[9];
-        const float dz = vx * cam.viewMatrix[2] + vy * cam.viewMatrix[6] + cam.viewMatrix[10];
+        const float dx = vx * cam.viewMatrix[0] + vy * cam.viewMatrix[1] + cam.viewMatrix[2];
+        const float dy = vx * cam.viewMatrix[4] + vy * cam.viewMatrix[5] + cam.viewMatrix[6];
+        const float dz = vx * cam.viewMatrix[8] + vy * cam.viewMatrix[9] + cam.viewMatrix[10];
         const float len = std::sqrt(dx * dx + dy * dy + dz * dz);
         if (len < 1e-6f) return false;
         rayDir[0] = dx / len; rayDir[1] = dy / len; rayDir[2] = dz / len;
@@ -201,9 +201,8 @@ namespace GizmoGeometry
         if (!ProjectPointToScreen(objPos, cam.viewMatrix, cam.projMatrix, w, h, centerScreen))
             return Handle::None;
 
-        // Center handle check
         const float centerDist = std::hypot(mouseX - centerScreen[0], mouseY - centerScreen[1]);
-        if (centerDist < thresholdPx * 1.5f)
+        if (mode != GizmoMath::GizmoMode::Rotate && centerDist <= 8.0f)
             return Handle::Center;
 
         float ax[3], ay[3], az[3];
@@ -214,9 +213,13 @@ namespace GizmoGeometry
 
         if (mode == GizmoMath::GizmoMode::Translate)
         {
+            float rOrig[3], rDir[3];
+            const bool hasRay = ScreenToWorldRay(mouseX, mouseY, cam, rOrig, rDir);
+
             // Test planes (XY, XZ, YZ)
-            const float planeSize = scale * 0.35f;
-            auto testPlane = [&](const float a1[3], const float a2[3], Handle hnd) {
+            const float planeSize = scale * 0.28f;
+            auto testPlane = [&](const float a1[3], const float a2[3], const float n[3], Handle hnd) {
+                if (hasRay && std::abs(rDir[0] * n[0] + rDir[1] * n[1] + rDir[2] * n[2]) < 0.05f) return;
                 float corner[3] = {objPos[0] + (a1[0] + a2[0]) * planeSize,
                                    objPos[1] + (a1[1] + a2[1]) * planeSize,
                                    objPos[2] + (a1[2] + a2[2]) * planeSize};
@@ -228,39 +231,44 @@ namespace GizmoGeometry
                     ProjectPointToScreen(p1, cam.viewMatrix, cam.projMatrix, w, h, sp1) &&
                     ProjectPointToScreen(p2, cam.viewMatrix, cam.projMatrix, w, h, sp2))
                 {
+                    const float qx[4] = {centerScreen[0], sp1[0], sc[0], sp2[0]};
+                    const float qy[4] = {centerScreen[1], sp1[1], sc[1], sp2[1]};
+                    bool inside = true; int sign = 0;
+                    for (int i = 0; i < 4; ++i) {
+                        const int next = (i + 1) % 4;
+                        const float cross = (qx[next] - qx[i]) * (mouseY - qy[i]) - (qy[next] - qy[i]) * (mouseX - qx[i]);
+                        if (cross > 1e-4f) { if (sign < 0) { inside = false; break; } sign = 1; }
+                        else if (cross < -1e-4f) { if (sign > 0) { inside = false; break; } sign = -1; }
+                    }
+                    if (inside) { bestHandle = hnd; closestDist = 0.0f; return; }
+
                     const float d1 = DistancePointToSegment(mouseX, mouseY, sp1[0], sp1[1], sc[0], sc[1]);
                     const float d2 = DistancePointToSegment(mouseX, mouseY, sp2[0], sp2[1], sc[0], sc[1]);
                     const float minD = std::min(d1, d2);
-                    if (minD < closestDist)
-                    {
-                        closestDist = minD;
-                        bestHandle = hnd;
-                    }
+                    if (minD < closestDist) { closestDist = minD; bestHandle = hnd; }
                 }
             };
 
-            testPlane(ax, ay, Handle::PlaneXY);
-            testPlane(ax, az, Handle::PlaneXZ);
-            testPlane(ay, az, Handle::PlaneYZ);
+            testPlane(ax, ay, az, Handle::PlaneXY);
+            testPlane(ax, az, ay, Handle::PlaneXZ);
+            testPlane(ay, az, ax, Handle::PlaneYZ);
 
-            // Test axis lines
-            auto testAxis = [&](const float a[3], Handle hnd) {
-                float tip[3] = {objPos[0] + a[0] * scale, objPos[1] + a[1] * scale, objPos[2] + a[2] * scale};
-                float tipScreen[2];
-                if (ProjectPointToScreen(tip, cam.viewMatrix, cam.projMatrix, w, h, tipScreen))
-                {
-                    const float d = DistancePointToSegment(mouseX, mouseY, centerScreen[0], centerScreen[1], tipScreen[0], tipScreen[1]);
-                    if (d < closestDist)
+            if (closestDist > 0.0f)
+            {
+                auto testAxis = [&](const float a[3], Handle hnd) {
+                    float tip[3] = {objPos[0] + a[0] * scale, objPos[1] + a[1] * scale, objPos[2] + a[2] * scale};
+                    float tipScreen[2];
+                    if (ProjectPointToScreen(tip, cam.viewMatrix, cam.projMatrix, w, h, tipScreen))
                     {
-                        closestDist = d;
-                        bestHandle = hnd;
+                        const float d = DistancePointToSegment(mouseX, mouseY, centerScreen[0], centerScreen[1], tipScreen[0], tipScreen[1]);
+                        if (d < closestDist) { closestDist = d; bestHandle = hnd; }
                     }
-                }
-            };
+                };
 
-            testAxis(ax, Handle::AxisX);
-            testAxis(ay, Handle::AxisY);
-            testAxis(az, Handle::AxisZ);
+                testAxis(ax, Handle::AxisX);
+                testAxis(ay, Handle::AxisY);
+                testAxis(az, Handle::AxisZ);
+            }
         }
         else if (mode == GizmoMath::GizmoMode::Rotate)
         {
@@ -312,6 +320,8 @@ namespace GizmoGeometry
             testAxis(az, Handle::AxisZ);
         }
 
+        if (bestHandle == Handle::None && mode != GizmoMath::GizmoMode::Rotate && centerDist < thresholdPx)
+            return Handle::Center;
         return bestHandle;
     }
 
@@ -343,7 +353,7 @@ namespace GizmoGeometry
                 }
                 else
                 {
-                    const uint32_t a = ((normalColor >> 24) & 0xFF) / 3;
+                    const uint32_t a = ((normalColor >> 24) & 0xFF) / 2;
                     outCol = (normalColor & 0x00FFFFFF) | (a << 24);
                     th = 2;
                 }
@@ -391,7 +401,7 @@ namespace GizmoGeometry
             auto addPlane = [&](const float a1[3], const float a2[3], Handle hnd, uint32_t col) {
                 uint32_t c, f;
                 getStyle(hnd, col, c, f);
-                const float pSize = scale * 0.32f;
+                const float pSize = scale * 0.28f;
                 const float p1[3] = {objPos[0] + a1[0] * pSize, objPos[1] + a1[1] * pSize, objPos[2] + a1[2] * pSize};
                 const float p2[3] = {objPos[0] + a2[0] * pSize, objPos[1] + a2[1] * pSize, objPos[2] + a2[2] * pSize};
                 const float pc[3] = {objPos[0] + (a1[0] + a2[0]) * pSize, objPos[1] + (a1[1] + a2[1]) * pSize, objPos[2] + (a1[2] + a2[2]) * pSize};
@@ -405,6 +415,17 @@ namespace GizmoGeometry
             addPlane(ax, ay, Handle::PlaneXY, palette.planeXY);
             addPlane(ax, az, Handle::PlaneXZ, palette.planeXZ);
             addPlane(ay, az, Handle::PlaneYZ, palette.planeYZ);
+
+            uint32_t cc, cf;
+            getStyle(Handle::Center, palette.center, cc, cf);
+            const float csz = scale * 0.07f;
+            const float cd[2] = {-csz, csz};
+            for (int i = 0; i < 2; ++i)
+                for (int j = 0; j < 2; ++j) {
+                    lines.push_back({objPos[0]+cd[i], objPos[1]+cd[j], objPos[2]-csz, objPos[0]+cd[i], objPos[1]+cd[j], objPos[2]+csz, cc, cf});
+                    lines.push_back({objPos[0]+cd[i], objPos[1]-csz, objPos[2]+cd[j], objPos[0]+cd[i], objPos[1]+csz, objPos[2]+cd[j], cc, cf});
+                    lines.push_back({objPos[0]-csz, objPos[1]+cd[i], objPos[2]+cd[j], objPos[0]+csz, objPos[1]+cd[i], objPos[2]+cd[j], cc, cf});
+                }
         }
         else if (mode == GizmoMath::GizmoMode::Rotate)
         {
