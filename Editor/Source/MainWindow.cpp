@@ -70,6 +70,8 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
 }
 
 EditorMainWindow::~EditorMainWindow() {
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("UI.Create"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("UI.OpenEditor"));
     if (host_) host_->SetUiListener(nullptr);
     EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
     EditorTheme::Instance().UnsubscribeThemeChanged(themeSubId_);
@@ -240,8 +242,14 @@ void EditorMainWindow::BuildUi()
 
     BuildSceneMenu();
     BuildCodeTools();
-    for (const auto& title : {QStringLiteral("Сцена"), QStringLiteral("Правка"), QStringLiteral("Запуск"), QStringLiteral("Проект"), QStringLiteral("Вид")})
-        for (auto* action : menuBar()->actions()) if (action->text() == title) { menuBar()->removeAction(action); menuBar()->addAction(action); break; }
+    BuildToolsMenu();
+    for (auto* menu : { sceneMenu_, editMenu_, viewMenu_, playMenu_, projectMenu_, toolsMenu_ }) {
+        if (menu) {
+            auto* action = menu->menuAction();
+            menuBar()->removeAction(action);
+            menuBar()->addAction(action);
+        }
+    }
 
     connect(viewport_, &ViewportWidget::contextMenuRequested,
             this, &EditorMainWindow::ShowViewportContextMenu);
@@ -331,12 +339,6 @@ void EditorMainWindow::BuildSceneMenu()
     sceneMenu_->addAction(Tr("Экспорт игры…", "Export Game…"), this, [this] {
         if (host_->PlayState() != EditorQtHost::Edit || !CloseMaterialEditors()) return;
         MaybeSave([this] { ExportProject(); });
-    });
-    auto* uiMenu = menuBar()->addMenu(QStringLiteral("UI"));
-    uiMenu->addAction(Tr("Создать интерфейс…", "Create UI…"), this, [this] { CreateUI(); });
-    uiMenu->addAction(Tr("Открыть редактор UI…", "Open UI Editor…"), this, [this] {
-        auto file = QFileDialog::getOpenFileName(this, Tr("Интерфейс", "Interface"), QString::fromUtf8(host_->host().contentRoot), "UI (*.ui)");
-        if (!file.isEmpty()) OpenUIEditor(file);
     });
 
     actNewScene_ = sceneMenu_->addAction(Tr("Новая сцена", "New Scene"), this, [this] {
@@ -1353,14 +1355,19 @@ void EditorMainWindow::RetranslateUi()
     if (sceneObjectsDock_) sceneObjectsDock_->setWindowTitle(Tr("Сцена / объекты", "Scene / Objects"));
     if (inspectorDock_) inspectorDock_->setWindowTitle(Tr("Инспектор", "Inspector"));
     if (sceneMenu_) sceneMenu_->setTitle(Tr("Сцена", "Scene"));
-    if (playMenu_) playMenu_->setTitle(Tr("Запуск", "Play"));
     if (editMenu_) editMenu_->setTitle(Tr("Правка", "Edit"));
-    if (schemeMenu_) schemeMenu_->setTitle(Tr("Схема управления", "Control Scheme"));
     if (viewMenu_) viewMenu_->setTitle(Tr("Вид", "View"));
+    if (playMenu_) playMenu_->setTitle(Tr("Запуск", "Play"));
+    if (projectMenu_) projectMenu_->setTitle(Tr("Проект", "Project"));
+    if (toolsMenu_) toolsMenu_->setTitle(Tr("Инструменты", "Tools"));
+    if (uiSubMenu_) uiSubMenu_->setTitle(Tr("Интерфейс (UI)", "Interface (UI)"));
+    if (schemeMenu_) schemeMenu_->setTitle(Tr("Схема управления", "Control Scheme"));
     if (resourcesSubMenu_) resourcesSubMenu_->setTitle(Tr("Ресурсы", "Assets"));
     if (themeMenu_) themeMenu_->setTitle(Tr("Тема оформления", "Theme"));
     if (langMenu_) langMenu_->setTitle(Tr("Язык", "Language"));
     if (accentMenu_) accentMenu_->setTitle(Tr("Акцентный цвет", "Accent Color"));
+    if (actCreateUI_) actCreateUI_->setText(Tr("Создать интерфейс…", "Create UI…"));
+    if (actOpenUIEditor_) actOpenUIEditor_->setText(Tr("Открыть редактор UI…", "Open UI Editor…"));
 
     if (actNewScene_) actNewScene_->setText(Tr("Новая сцена", "New Scene"));
     if (actOpenScene_) actOpenScene_->setText(Tr("Открыть сцену…", "Open Scene…"));

@@ -88,19 +88,27 @@ void EditorMainWindow::RunCodeTool(const QString& action, const QStringList& ext
 
 void EditorMainWindow::BuildCodeTools()
 {
-    auto* menu = menuBar()->addMenu(QStringLiteral("Проект"))->addMenu(QStringLiteral("C++"));
-    menu->addAction(QStringLiteral("Добавить C++ в проект…"), this, [this] { MaybeSave([this]{ RunCodeTool(QStringLiteral("Enable")); }); });
-    menu->addAction(QStringLiteral("Добавить C++ класс…"), this, [this] {
+    projectMenu_ = menuBar()->addMenu(Tr("Проект", "Project"));
+    auto* menu = projectMenu_->addMenu(QStringLiteral("C++"));
+    menu->addAction(Tr("Добавить C++ в проект…", "Add C++ to Project…"), this, [this] { MaybeSave([this]{ RunCodeTool(QStringLiteral("Enable")); }); });
+    menu->addAction(Tr("Добавить C++ класс…", "Add C++ Class…"), this, [this] {
         CodeClassDialog dialog(QFileInfo(QString::fromUtf8(host_->host().projectFile)).absolutePath(), this);
         if (dialog.exec() == QDialog::Accepted) RunCodeTool(QStringLiteral("AddClass"), dialog.Arguments());
     });
-    menu->addAction(QStringLiteral("Перекомпилировать / Hot Reload"), this, [this] { if (host_->PlayState() != EditorQtHost::Edit) { QMessageBox::information(this,"C++",QStringLiteral("Сначала остановите Play.")); return; } RunCodeTool(QStringLiteral("Build")); }, QKeySequence(QStringLiteral("Ctrl+Alt+R")));
-    menu->addAction(QStringLiteral("Типы C++ проекта…"), this, &EditorMainWindow::ShowProjectTypes);
-    menu->addAction(QStringLiteral("Данные выбранного объекта…"), this, [this] {
+    auto* actBuild = menu->addAction(Tr("Перекомпилировать / Hot Reload", "Recompile / Hot Reload"), this, [this] {
+        if (host_->PlayState() != EditorQtHost::Edit) {
+            QMessageBox::information(this, "C++", Tr("Сначала остановите Play.", "Stop Play mode first."));
+            return;
+        }
+        RunCodeTool(QStringLiteral("Build"));
+    });
+    actBuild->setShortcut(QKeySequence(QStringLiteral("Ctrl+Alt+R")));
+    menu->addAction(Tr("Типы C++ проекта…", "Project C++ Types…"), this, &EditorMainWindow::ShowProjectTypes);
+    menu->addAction(Tr("Данные выбранного объекта…", "Selected Object Data…"), this, [this] {
         auto snapshot = host_->ReadSnapshot();
         for (const auto& object : snapshot.objects) if (object.id == snapshot.selected) {
             bool ok = false;
-            auto data = QInputDialog::getMultiLineText(this, QStringLiteral("Данные объекта"), QStringLiteral("JSON объявленного кодека. Нужен LoadProjectData или ProjectObjectAdapter::Load."), QString::fromStdString(object.projectData), &ok);
+            auto data = QInputDialog::getMultiLineText(this, Tr("Данные объекта", "Object Data"), Tr("JSON объявленного кодека. Нужен LoadProjectData или ProjectObjectAdapter::Load.", "Declared codec JSON. Needs LoadProjectData or ProjectObjectAdapter::Load."), QString::fromStdString(object.projectData), &ok);
             if (ok) { EditorCommand cmd; cmd.type = EditorCommand::SetProjectData; cmd.objectId = object.id; cmd.path = data; host_->PostCommand(cmd); }
             return;
         }

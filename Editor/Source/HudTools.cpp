@@ -1,4 +1,6 @@
 #include "EditorLocale.h"
+#include "CommandRegistry.h"
+#include <QMenuBar>
 #define NOMINMAX
 #include "MainWindow.h"
 #include "QtHost.h"
@@ -58,4 +60,40 @@ void EditorMainWindow::ShowHudSettings() {
         dialog.accept();
     });
     dialog.exec();
+}
+
+void EditorMainWindow::BuildToolsMenu()
+{
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("UI.Create"),
+        QStringLiteral("Create UI"),
+        QString(),
+        QStringLiteral("Create a new game UI asset"),
+        [this](const CommandContext&) {
+            CreateUI();
+            return true;
+        },
+        nullptr
+    });
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("UI.OpenEditor"),
+        QStringLiteral("Open UI Editor"),
+        QString(),
+        QStringLiteral("Open an existing UI file in UI Editor"),
+        [this](const CommandContext&) {
+            auto file = QFileDialog::getOpenFileName(this, Tr("Интерфейс", "Interface"), QString::fromUtf8(host_->host().contentRoot), "UI (*.ui)");
+            if (!file.isEmpty()) OpenUIEditor(file);
+            return true;
+        },
+        nullptr
+    });
+
+    toolsMenu_ = menuBar()->addMenu(Tr("Инструменты", "Tools"));
+    uiSubMenu_ = toolsMenu_->addMenu(Tr("Интерфейс (UI)", "Interface (UI)"));
+    actCreateUI_ = uiSubMenu_->addAction(Tr("Создать интерфейс…", "Create UI…"), this, [this] {
+        CommandRegistry::Instance().Execute(QStringLiteral("UI.Create"));
+    });
+    actOpenUIEditor_ = uiSubMenu_->addAction(Tr("Открыть редактор UI…", "Open UI Editor…"), this, [this] {
+        CommandRegistry::Instance().Execute(QStringLiteral("UI.OpenEditor"));
+    });
 }
