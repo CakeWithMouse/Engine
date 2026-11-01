@@ -38,6 +38,10 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
     schemeSubId_ = EditorSettings::Instance().SubscribeControlSchemeChanged([this](ControlScheme s) { if (headerBar_) headerBar_->SetControlScheme(s); });
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] { RetranslateUi(); });
 
+    resizeTimer_ = new QTimer(this);
+    resizeTimer_->setSingleShot(true);
+    connect(resizeTimer_, &QTimer::timeout, this, &ViewportWidget::SendResize);
+
     auto* timer = new QTimer(this);
     auto elapsed = std::make_shared<QElapsedTimer>();
     elapsed->start();

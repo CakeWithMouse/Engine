@@ -230,6 +230,12 @@ std::array<double, 3> SceneObjectsPanel::SpawnPosition() const
     return {0.0, 0.0, 0.0};
 }
 
+static bool IsEnvironmentObject(const IEditorHost::SceneObject& object)
+{
+    return object.gameplayKind == 3 || object.type == "Gameplay.PlaySettings" ||
+           object.type == "Light.Directional" || object.type == "Environment.Sky";
+}
+
 void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
 {
     suppressSelectionChanged_ = true;
@@ -238,7 +244,6 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
     QString key;
     for (const auto& object : view.objects)
     {
-        if (!showServiceObjects_ && (object.gameplayKind == 3 || object.type == "Gameplay.PlaySettings")) continue;
         key += QString::number(object.id);
         key += QLatin1Char('/');
         key += QString::number(object.parent);
@@ -253,32 +258,73 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
     {
         hierarchy_->clear();
         std::map<quint64, QTreeWidgetItem*> items;
+        std::vector<const IEditorHost::SceneObject*> normalObjects;
+        std::vector<const IEditorHost::SceneObject*> envObjects;
 
         for (const auto& object : view.objects)
         {
-            if (!showServiceObjects_ && (object.gameplayKind == 3 || object.type == "Gameplay.PlaySettings")) continue;
-            auto* item = new QTreeWidgetItem({
-                QString::fromStdString(object.name),
-                QString::fromStdString(object.type)
+            if (IsEnvironmentObject(object))
+                envObjects.push_back(&object);
+            else
+                normalObjects.push_back(&object);
+        }
+
+        if (!envObjects.empty())
+        {
+            auto* envGroup = new QTreeWidgetItem(QStringList{Tr("Окружение", "Environment")});
+            envGroup->setIcon(0, IconProvider::GetIcon(QStringLiteral("sun")));
+            QFont f = envGroup->font(0);
+            f.setBold(true);
+            envGroup->setFont(0, f);
+            envGroup->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+            for (const auto* obj : envObjects)
+            {
+                QString label = QString::fromStdString(obj->name);
+                if (obj->type == "Light.Directional") {
+                    label = Tr("Направленный свет", "Directional Light");
+                } else if (obj->type == "Gameplay.PlaySettings" || obj->gameplayKind == 3) {
+                    label = Tr("Настройки игры", "Play Settings");
+                } else if (obj->type == "Environment.Sky") {
+                    label = Tr("Небо", "Sky");
+                }
+                auto* envItem = new QTreeWidgetItem(QStringList{label, QString::fromStdString(obj->type)});
+                QIcon ic = (obj->type == "Light.Directional") ? IconProvider::GetIcon(QStringLiteral("sun")) :
+                           (obj->type == "Environment.Sky") ? IconProvider::GetIcon(QStringLiteral("cloud")) :
+                           IconProvider::SettingsIcon();
+                envItem->setIcon(0, ic);
+                envItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+                envItem->setData(0, Qt::UserRole, QVariant::fromValue<qulonglong>(obj->id));
+                envGroup->addChild(envItem);
+                items[obj->id] = envItem;
+            }
+            hierarchy_->addTopLevelItem(envGroup);
+            envGroup->setExpanded(true);
+        }
+
+        for (const auto* object : normalObjects)
+        {
+            auto* item = new QTreeWidgetItem(QStringList{
+                QString::fromStdString(object->name),
+                QString::fromStdString(object->type)
             });
             QIcon objIcon;
-            if (object.type.find("Light") != std::string::npos) objIcon = IconProvider::BulbIcon();
-            else if (object.type.find("Camera") != std::string::npos) objIcon = IconProvider::GetIcon(QStringLiteral("camera"));
-            else if (object.type.find("Particles") != std::string::npos) objIcon = IconProvider::GetIcon(QStringLiteral("particles"));
+            if (object->type.find("Light") != std::string::npos) objIcon = IconProvider::BulbIcon();
+            else if (object->type.find("Camera") != std::string::npos) objIcon = IconProvider::GetIcon(QStringLiteral("camera"));
+            else if (object->type.find("Particles") != std::string::npos) objIcon = IconProvider::GetIcon(QStringLiteral("particles"));
             else objIcon = IconProvider::CubeIcon();
             item->setIcon(0, objIcon);
             item->setFlags(item->flags() | Qt::ItemIsEditable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
-            item->setData(0, Qt::UserRole, QVariant::fromValue<qulonglong>(object.id));
-            items[object.id] = item;
+            item->setData(0, Qt::UserRole, QVariant::fromValue<qulonglong>(object->id));
+            items[object->id] = item;
         }
 
-        for (const auto& object : view.objects)
+        for (const auto* object : normalObjects)
         {
-            if (!items.count(object.id)) continue;
-            if (object.parent && items.count(object.parent))
-                items[object.parent]->addChild(items[object.id]);
+            if (!items.count(object->id)) continue;
+            if (object->parent && items.count(object->parent))
+                items[object->parent]->addChild(items[object->id]);
             else
-                hierarchy_->addTopLevelItem(items[object.id]);
+                hierarchy_->addTopLevelItem(items[object->id]);
         }
 
         hierarchy_->expandAll();

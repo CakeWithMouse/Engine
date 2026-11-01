@@ -39,42 +39,6 @@ namespace
         EditorMainWindow window(qtHost);
         host->SetUiListener(&window);
         window.show();
-        auto logToolBarGeom = [&window](const char* label) {
-            auto* tb = window.findChild<QToolBar*>("MainToolBar");
-            auto* cont = window.findChild<QFrame*>("ToolBarContainer");
-            auto* btn = window.findChild<QToolButton*>("BtnPlay");
-            if (tb && cont && btn) {
-                const auto tbg = tb->geometry();
-                const auto cg = cont->geometry();
-                const auto bg = btn->geometry();
-                const auto cm = tb->contentsMargins();
-                const int lml = tb->layout() ? tb->layout()->contentsMargins().left() : -1;
-                const int lmt = tb->layout() ? tb->layout()->contentsMargins().top() : -1;
-                const int lmr = tb->layout() ? tb->layout()->contentsMargins().right() : -1;
-                const int lmb = tb->layout() ? tb->layout()->contentsMargins().bottom() : -1;
-                std::printf("[ToolBarGeom] %s: tb=(%d,%d %dx%d), cont=(%d,%d %dx%d), btn=(%d,%d %dx%d), tbMargins=(%d,%d,%d,%d), tbLayoutMargins=(%d,%d,%d,%d)\n",
-                    label,
-                    tbg.x(), tbg.y(), tbg.width(), tbg.height(),
-                    cg.x(), cg.y(), cg.width(), cg.height(),
-                    bg.x(), bg.y(), bg.width(), bg.height(),
-                    cm.left(), cm.top(), cm.right(), cm.bottom(),
-                    lml, lmt, lmr, lmb);
-                std::fflush(stdout);
-            }
-        };
-
-        QTimer::singleShot(100, [logToolBarGeom] {
-            logToolBarGeom("startup (100ms)");
-        });
-
-        QTimer::singleShot(300, [logToolBarGeom] {
-            EditorTheme::Instance().SetMode(ThemeMode::Light);
-            EditorTheme::Instance().SetMode(ThemeMode::Dark);
-            QTimer::singleShot(100, [logToolBarGeom] {
-                logToolBarGeom("after theme toggle settled (400ms)");
-            });
-        });
-
         ready->store(true);
 
         const bool smokeMode = qEnvironmentVariableIsSet("PAINENGINE_SMOKE_EDITOR") ||
@@ -89,31 +53,6 @@ namespace
             }
 
             
-            // Test simulated 2-second splitter drag (Task 4)
-            QTimer::singleShot(500, [&window] {
-                std::printf("[ResizeTest] Starting 2-second simulated separator drag (40 mouse moves)...\n");
-                std::fflush(stdout);
-                auto* files = window.findChild<QDockWidget*>("ContentDock");
-                if (files) {
-                    const QPoint boundary(window.width() / 2, files->mapTo(&window, QPoint()).y() - 2);
-                    QMouseEvent press(QEvent::MouseButtonPress, boundary, window.mapToGlobal(boundary), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
-                    QApplication::sendEvent(&window, &press);
-                    for (int i = 1; i <= 40; ++i) {
-                        QTimer::singleShot(i * 40, [&window, boundary, i] {
-                            const QPoint pos = boundary + QPoint(0, -i * 3);
-                            QMouseEvent move(QEvent::MouseMove, pos, window.mapToGlobal(pos), Qt::NoButton, Qt::LeftButton, Qt::NoModifier);
-                            QApplication::sendEvent(&window, &move);
-                            if (i == 40) {
-                                QMouseEvent release(QEvent::MouseButtonRelease, pos, window.mapToGlobal(pos), Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
-                                QApplication::sendEvent(&window, &release);
-                                std::printf("[ResizeTest] Finished 2-second simulated separator drag.\n");
-                                std::fflush(stdout);
-                            }
-                        });
-                    }
-                }
-            });
-
             // Step 1: Select Cube
             QTimer::singleShot(1200, [host] {
                 auto snap = host->ReadSnapshot();
