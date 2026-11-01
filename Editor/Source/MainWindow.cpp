@@ -144,11 +144,12 @@ void EditorMainWindow::BuildUi()
     fileDock_->installEventFilter(this);
     addDockWidget(Qt::BottomDockWidgetArea, fileDock_);
     tabifyDockWidget(consoleDock_, fileDock_);
-    consoleDock_->setTitleBarWidget(new QWidget(consoleDock_)); fileDock_->setTitleBarWidget(new QWidget(fileDock_));
-    auto tabFloat = [](QDockWidget* d) { connect(d, &QDockWidget::topLevelChanged, d, [d](bool f) {
-        if (f) { if (d->titleBarWidget()) { delete d->titleBarWidget(); d->setTitleBarWidget(nullptr); } }
-        else { if (!d->titleBarWidget()) d->setTitleBarWidget(new QWidget(d)); }
-    }); }; tabFloat(consoleDock_); tabFloat(fileDock_);
+    QTimer::singleShot(0, this, [this] {
+        for (auto* bar : findChildren<QTabBar*>()) {
+            bar->setElideMode(Qt::ElideNone);
+            bar->setUsesScrollButtons(true);
+        }
+    });
 
     BuildToolBar();
     BuildSceneDocks();
@@ -1352,7 +1353,7 @@ void EditorMainWindow::RetranslateUi()
 
     if (viewportDock_) viewportDock_->setWindowTitle(Tr("Вьюпорт", "Viewport"));
     if (consoleDock_) consoleDock_->setWindowTitle(Tr("Консоль", "Console"));
-    if (fileDock_) fileDock_->setWindowTitle(Tr("Контент", "Content Browser"));
+    if (fileDock_) fileDock_->setWindowTitle(Tr("Контент-браузер", "Content Browser"));
     if (sceneObjectsDock_) sceneObjectsDock_->setWindowTitle(Tr("Сцена / объекты", "Scene / Objects"));
     if (inspectorDock_) inspectorDock_->setWindowTitle(Tr("Инспектор", "Inspector"));
     if (sceneMenu_) sceneMenu_->setTitle(Tr("Сцена", "Scene"));

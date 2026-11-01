@@ -187,7 +187,7 @@ void FileBrowserDock::BuildUi()
 
 void FileBrowserDock::RetranslateUi()
 {
-    setWindowTitle(Tr("Контент", "Content Browser"));
+    setWindowTitle(Tr("Контент-браузер", "Content Browser"));
     if (imports_) imports_->setText(Tr("Импорт…", "Import…"));
     if (actImportModel_) actImportModel_->setText(Tr("Модель…", "Model…"));
     if (actImportTexture_) actImportTexture_->setText(Tr("Текстура…", "Texture…"));
