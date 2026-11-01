@@ -15,7 +15,7 @@ namespace
 {
     inline uint32_t GetBillboardIcon(const IEditorHost::SceneObject& obj, uint32_t& outColor)
     {
-        if (obj.hasPointLight)
+        if (obj.hasPointLight || obj.type == "Light.Point" || obj.name.find("Light") != std::string::npos)
         {
             uint8_t r = static_cast<uint8_t>(std::clamp(obj.pointLight.color[0] * 255.0f, 0.0f, 255.0f));
             uint8_t g = static_cast<uint8_t>(std::clamp(obj.pointLight.color[1] * 255.0f, 0.0f, 255.0f));
@@ -91,7 +91,16 @@ void ViewportOverlayHelper::UpdateOverlays(
     const float* objRot = selectedObj ? selectedObj->transform.rotation : nullptr;
     float lightRad = (selectedObj && selectedObj->hasPointLight) ? selectedObj->pointLight.radius : 0.0f;
 
-    const uint64_t hash = ViewportOverlay::ComputeOverlayHash(
+    uint64_t objectsHash = 14695981039346656037ull;
+    for (const auto& obj : snapshot.objects)
+    {
+        objectsHash ^= obj.id;
+        objectsHash *= 1099511628211ull;
+        objectsHash ^= static_cast<uint64_t>(obj.hasPointLight ? 1 : 0);
+        objectsHash *= 1099511628211ull;
+    }
+
+    const uint64_t hash = objectsHash ^ ViewportOverlay::ComputeOverlayHash(
         hasCamera ? cam.position : nullptr,
         hasCamera ? cam.viewMatrix : nullptr,
         gridEnabled,
