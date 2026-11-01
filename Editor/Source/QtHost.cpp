@@ -322,6 +322,12 @@ void EditorQtHost::DrainCommands()
             };
             uint64_t sel = sceneHandler_.SelectedId();
             viewportHandler_.Handle(cmd, vctx, viewportActive_, playState_, sel, result, error);
+            if (cmd.type == EditorCommand::ViewportResize)
+            {
+                static uint64_t s_resizeCount = 0;
+                std::printf("[ResizeDiag] ViewportResize executed: total=%llu size=%ux%u\n", ++s_resizeCount, cmd.w, cmd.h);
+                std::fflush(stdout);
+            }
             if (cmd.type == EditorCommand::ViewportAttach || cmd.type == EditorCommand::ViewportResize)
             {
                 if (overlay_.setAntialiasing && overlay_.context)

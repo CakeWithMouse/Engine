@@ -148,6 +148,7 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
         [](void* p, uint32_t w, uint32_t h) -> uint32_t {
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
                 if (!s.attached_ || w > INT_MAX || h > INT_MAX) return EngineSceneInvalidArgument;
+                if (s.width_ == w && s.height_ == h) return EngineSceneOk;
                 s.width_ = w; s.height_ = h;
                 s.Active().OnWindowResized(static_cast<int>(w), static_cast<int>(h), !w || !h);
                 return EngineSceneOk;

@@ -124,8 +124,9 @@ void ViewportWidget::hideEvent(QHideEvent* e)
 void ViewportWidget::resizeEvent(QResizeEvent* e)
 {
     QWidget::resizeEvent(e);
-    if (attached_)
-        SendResize();
+    if (!attached_) return;
+    if (PhysW() == lastSentW_ && PhysH() == lastSentH_) return;
+    resizeTimer_->start(20);
 }
 
 void ViewportWidget::AttachHeaderBar(ViewportHeaderBar* bar)
@@ -151,12 +152,16 @@ void ViewportWidget::paintEvent(QPaintEvent*)
 
 void ViewportWidget::SendAttach()
 {
-    EditorCommand c; c.type = EditorCommand::ViewportAttach; c.hwnd = (void*)winId(); c.w = PhysW(); c.h = PhysH(); host_->PostCommand(c); attached_ = true;
+    lastSentW_ = PhysW(); lastSentH_ = PhysH();
+    EditorCommand c; c.type = EditorCommand::ViewportAttach; c.hwnd = (void*)winId(); c.w = lastSentW_; c.h = lastSentH_; host_->PostCommand(c); attached_ = true;
 }
 
 void ViewportWidget::SendResize()
 {
-    EditorCommand c; c.type = EditorCommand::ViewportResize; c.w = PhysW(); c.h = PhysH(); host_->PostCommand(c);
+    const uint32_t pw = PhysW(), ph = PhysH();
+    if (pw == lastSentW_ && ph == lastSentH_) return;
+    lastSentW_ = pw; lastSentH_ = ph;
+    EditorCommand c; c.type = EditorCommand::ViewportResize; c.w = pw; c.h = ph; host_->PostCommand(c);
 }
 
 uint32_t ViewportWidget::PhysW() const { return static_cast<uint32_t>(std::lround(width() * devicePixelRatioF())); }

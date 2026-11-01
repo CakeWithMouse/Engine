@@ -80,6 +80,9 @@ private:
     void updateGizmoToolTip();
 
     EditorQtHost* host_ = nullptr;
+    QTimer* resizeTimer_ = nullptr;
+    uint32_t lastSentW_ = 0;
+    uint32_t lastSentH_ = 0;
 
     bool attached_ = false;
     int inputState_ = 0;

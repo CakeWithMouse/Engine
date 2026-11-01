@@ -1,3 +1,5 @@
+#include <QMouseEvent>
+#include "ViewportWidget.h"
 #include <QToolBar>
 #include <QToolButton>
 #include "EditorApp.h"
@@ -85,6 +87,32 @@ namespace
             {
                 screenshotPath = QStringLiteral("editor_smoke.png");
             }
+
+            
+            // Test simulated 2-second splitter drag (Task 4)
+            QTimer::singleShot(500, [&window] {
+                std::printf("[ResizeTest] Starting 2-second simulated separator drag (40 mouse moves)...\n");
+                std::fflush(stdout);
+                auto* files = window.findChild<QDockWidget*>("ContentDock");
+                if (files) {
+                    const QPoint boundary(window.width() / 2, files->mapTo(&window, QPoint()).y() - 2);
+                    QMouseEvent press(QEvent::MouseButtonPress, boundary, window.mapToGlobal(boundary), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+                    QApplication::sendEvent(&window, &press);
+                    for (int i = 1; i <= 40; ++i) {
+                        QTimer::singleShot(i * 40, [&window, boundary, i] {
+                            const QPoint pos = boundary + QPoint(0, -i * 3);
+                            QMouseEvent move(QEvent::MouseMove, pos, window.mapToGlobal(pos), Qt::NoButton, Qt::LeftButton, Qt::NoModifier);
+                            QApplication::sendEvent(&window, &move);
+                            if (i == 40) {
+                                QMouseEvent release(QEvent::MouseButtonRelease, pos, window.mapToGlobal(pos), Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
+                                QApplication::sendEvent(&window, &release);
+                                std::printf("[ResizeTest] Finished 2-second simulated separator drag.\n");
+                                std::fflush(stdout);
+                            }
+                        });
+                    }
+                }
+            });
 
             // Step 1: Select Cube
             QTimer::singleShot(1200, [host] {
