@@ -180,6 +180,8 @@ private:
     QAction* actResetLayout_ = nullptr;
     QAction* actGrid_ = nullptr;
     QAction* actOverlays_ = nullptr;
+    QAction* actGizmo_ = nullptr;
+    QAction* actIcons_ = nullptr;
     QAction* actThemeDark_ = nullptr;
     QAction* actThemeLight_ = nullptr;
     QAction* actLangRu_ = nullptr;

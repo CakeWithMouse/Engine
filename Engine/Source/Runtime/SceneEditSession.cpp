@@ -52,6 +52,7 @@ std::unique_ptr<Game> SceneEditSession::CopyForPlay()
     candidate->SetSimulationEnabled(false);
     candidate->SetSimulationTimeScale(1.0f);
     candidate->SetSceneLightingEnabled(true);
+    candidate->SetAntialiasing(antialiasingMode_);
     SceneDocument::Restore(edit_->GetScene().GetSnapshot(), catalog_, candidate->GetScene());
     return candidate;
 }
@@ -140,6 +141,7 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                     return EngineSceneFailure;
                 s.edit_->GetPlayer()->SetPosition({0.0f, 0.0f, 5.0f}); // default yaw faces -Z, toward scene origin
                 s.attached_ = true; s.width_ = w; s.height_ = h;
+                s.edit_->SetAntialiasing(s.antialiasingMode_);
                 return EngineSceneOk;
             });
         },
@@ -345,11 +347,9 @@ EngineEditorCameraApi SceneEditSession::GetEditorCameraApi() noexcept
 
 EnginePointLightV2Api SceneEditSession::GetPointLightV2Api() noexcept
 {
-    return {1, this,
+    return {1, &commands_,
         [](void* p, uint64_t id, const EngineScenePointLight* l, uint32_t castShadows) -> uint32_t {
-            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
-                return SceneCommands::SetPointLightV2(&s.Active(), id, l, castShadows);
-            });
+            return SceneCommands::SetPointLightV2(p, id, l, castShadows);
         }
     };
 }
@@ -386,6 +386,7 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
         },
         [](void* p, uint32_t mode) -> uint32_t {
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                s.antialiasingMode_ = mode;
                 s.Active().SetAntialiasing(mode);
                 return EngineSceneOk;
             });
@@ -401,6 +402,7 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
 void SceneEditSession::ReplaceEdit(const SceneSnapshot& data)
 {
     auto candidate = EmptyGame();
+    candidate->SetAntialiasing(antialiasingMode_);
     SceneDocument::Restore(data, catalog_, candidate->GetScene());
     if (attached_)
     {

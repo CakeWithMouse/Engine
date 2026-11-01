@@ -103,4 +103,5 @@ private:
 
     bool suppressSelectionChanged_ = false;
     int langSubId_ = 0;
+    int themeSubId_ = 0;
 };

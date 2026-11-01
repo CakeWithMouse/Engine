@@ -44,7 +44,7 @@ void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot
     bool references=false;for(const auto& value:fields)if(value.toObject()["type"]=="object")references=true;
     if(references)for(const auto& row:view.objects)key+=QString::number(row.id)+QString::fromStdString(row.name);
     if(key!=propertiesKey_) {
-        propertiesKey_=key;propertyRefresh_.clear();
+        propertiesKey_=key;propertyRefresh_.clear();pendingProperties_.clear();
         while(auto* item=propertiesLayout_->takeAt(0)){delete item->widget();delete item;}
         QMap<QString,PropertySection*> sections;QMap<QString,QFormLayout*> forms;
         for(const auto& value:fields) {
@@ -84,8 +84,22 @@ void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot
                 });
             } else if(type=="bool") {
                 auto* check=new QCheckBox(properties_);widget=check;
-                connect(check,&QCheckBox::clicked,this,[this,check,path]{SubmitProperty(path,check->isChecked());});
-                propertyRefresh_.push_back([check,path](const auto& data){QSignalBlocker block(check);check->setChecked(Read(data,path).toBool());});
+                connect(check,&QCheckBox::clicked,this,[this,check,path]{
+                    pendingProperties_[path] = check->isChecked();
+                    SubmitProperty(path,check->isChecked());
+                });
+                propertyRefresh_.push_back([this,check,path](const auto& data){
+                    const bool current = Read(data,path).toBool();
+                    if (pendingProperties_.contains(path)) {
+                        if (pendingProperties_[path].toBool() == current) {
+                            pendingProperties_.remove(path);
+                        } else {
+                            return; // Wait for engine to confirm submitted value
+                        }
+                    }
+                    QSignalBlocker block(check);
+                    check->setChecked(current);
+                });
             } else if(type=="enum"||type=="object") {
                 auto* combo=new QComboBox(properties_);widget=combo;
                 if(type=="enum")for(const auto& choice:field["options"].toArray()){auto option=choice.toObject();combo->addItem(option["label"].toString(),QVariant::fromValue(option.value("value")));}

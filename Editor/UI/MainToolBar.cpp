@@ -44,29 +44,34 @@ MainToolBar::MainToolBar(QWidget* parent)
     rootLayout->setSpacing(4);
     rootLayout->setAlignment(Qt::AlignCenter);
 
-    auto* btnPlay = new QToolButton(container);
-    btnPlay->setObjectName(QStringLiteral("BtnPlay"));
-    btnPlay->setFixedSize(28, 28);
-    btnPlay->setAutoRaise(true);
-    btnPlay->setFocusPolicy(Qt::NoFocus);
+    btnPlay_ = new QToolButton(container);
+    btnPlay_->setObjectName(QStringLiteral("BtnPlay"));
+    btnPlay_->setFixedSize(28, 28);
+    btnPlay_->setAutoRaise(true);
+    btnPlay_->setFocusPolicy(Qt::NoFocus);
 
-    auto* btnPause = new QToolButton(container);
-    btnPause->setObjectName(QStringLiteral("BtnPause"));
-    btnPause->setFixedSize(28, 28);
-    btnPause->setAutoRaise(true);
-    btnPause->setFocusPolicy(Qt::NoFocus);
+    btnPause_ = new QToolButton(container);
+    btnPause_->setObjectName(QStringLiteral("BtnPause"));
+    btnPause_->setFixedSize(28, 28);
+    btnPause_->setAutoRaise(true);
+    btnPause_->setFocusPolicy(Qt::NoFocus);
 
-    auto* btnStop = new QToolButton(container);
-    btnStop->setObjectName(QStringLiteral("BtnStop"));
-    btnStop->setFixedSize(28, 28);
-    btnStop->setAutoRaise(true);
-    btnStop->setFocusPolicy(Qt::NoFocus);
+    btnStop_ = new QToolButton(container);
+    btnStop_->setObjectName(QStringLiteral("BtnStop"));
+    btnStop_->setFixedSize(28, 28);
+    btnStop_->setAutoRaise(true);
+    btnStop_->setFocusPolicy(Qt::NoFocus);
 
-    auto* btnExternal = new QToolButton(container);
-    btnExternal->setObjectName(QStringLiteral("BtnExternal"));
-    btnExternal->setFixedSize(28, 28);
-    btnExternal->setAutoRaise(true);
-    btnExternal->setFocusPolicy(Qt::NoFocus);
+    btnExternal_ = new QToolButton(container);
+    btnExternal_->setObjectName(QStringLiteral("BtnExternal"));
+    btnExternal_->setFixedSize(28, 28);
+    btnExternal_->setAutoRaise(true);
+    btnExternal_->setFocusPolicy(Qt::NoFocus);
+
+    auto* btnPlay = btnPlay_;
+    auto* btnPause = btnPause_;
+    auto* btnStop = btnStop_;
+    auto* btnExternal = btnExternal_;
 
     actPlay_ = new QAction(Tr("Play", "Play"), this);
     actPlay_->setObjectName(QStringLiteral("ActPlay"));
@@ -163,6 +168,29 @@ void MainToolBar::ApplyTheme()
         "QToolBar#MainToolBar QToolButton:pressed {"
         "  background-color: %4;"
         "}"
+        "QToolBar#MainToolBar QToolButton#BtnPlay:hover {"
+        "  background-color: rgba(34, 197, 94, 0.2);"
+        "  border-color: rgba(34, 197, 94, 0.6);"
+        "}"
+        "QToolBar#MainToolBar QToolButton#BtnPlay[activeState=\"playing\"] {"
+        "  background-color: rgba(34, 197, 94, 0.28);"
+        "  border: 1px solid #22c55e;"
+        "}"
+        "QToolBar#MainToolBar QToolButton#BtnPause:hover {"
+        "  background-color: rgba(234, 179, 8, 0.2);"
+        "  border-color: rgba(234, 179, 8, 0.6);"
+        "}"
+        "QToolBar#MainToolBar QToolButton#BtnPause[activeState=\"paused\"] {"
+        "  background-color: rgba(234, 179, 8, 0.28);"
+        "  border: 1px solid #eab308;"
+        "}"
+        "QToolBar#MainToolBar QToolButton#BtnStop:hover {"
+        "  background-color: rgba(239, 68, 68, 0.2);"
+        "  border-color: rgba(239, 68, 68, 0.6);"
+        "}"
+        "QToolBar#MainToolBar QToolButton#BtnStop:pressed {"
+        "  background-color: rgba(239, 68, 68, 0.35);"
+        "}"
         "QToolBar#MainToolBar QToolButton:disabled {"
         "  background-color: transparent;"
         "  border-color: transparent;"
@@ -185,6 +213,19 @@ void MainToolBar::UpdatePlayState(int state, bool sceneBusy)
     if (actPlay_) actPlay_->setEnabled(!sceneBusy && (state == 0 || state == 2));
     if (actPause_) actPause_->setEnabled(state == 1);
     if (actStop_) actStop_->setEnabled(state != 0);
+
+    if (btnPlay_)
+    {
+        btnPlay_->setProperty("activeState", state == 1 ? "playing" : "");
+        btnPlay_->style()->unpolish(btnPlay_);
+        btnPlay_->style()->polish(btnPlay_);
+    }
+    if (btnPause_)
+    {
+        btnPause_->setProperty("activeState", state == 2 ? "paused" : "");
+        btnPause_->style()->unpolish(btnPause_);
+        btnPause_->style()->polish(btnPause_);
+    }
 }
 
 void MainToolBar::RetranslateUi()

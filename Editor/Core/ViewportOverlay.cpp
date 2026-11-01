@@ -132,6 +132,7 @@ namespace ViewportOverlay
         const float camView[16],
         bool gridEnabled,
         bool gizmoEnabled,
+        bool iconsEnabled,
         uint64_t selectedId,
         uint32_t gizmoMode,
         const float objPos[3],
@@ -154,6 +155,7 @@ namespace ViewportOverlay
         if (camView) hashBytes(camView, sizeof(float) * 16);
         hashBytes(&gridEnabled, sizeof(bool));
         hashBytes(&gizmoEnabled, sizeof(bool));
+        hashBytes(&iconsEnabled, sizeof(bool));
         hashBytes(&selectedId, sizeof(uint64_t));
         hashBytes(&gizmoMode, sizeof(uint32_t));
         if (objPos) hashBytes(objPos, sizeof(float) * 3);

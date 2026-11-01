@@ -31,6 +31,7 @@ public:
     static QIcon MoreIcon(const QColor& color = QColor());
     static QIcon EyeIcon(bool visible = true, const QColor& color = QColor());
     static QIcon LockIcon(bool locked = true, const QColor& color = QColor());
+    static QIcon ImportIcon(const QColor& color = QColor());
     static QIcon PlusIcon(const QColor& color = QColor());
     static QIcon TrashIcon(const QColor& color = QColor());
     static QIcon FolderIcon(const QColor& color = QColor());

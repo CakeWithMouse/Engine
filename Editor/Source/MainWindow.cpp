@@ -86,7 +86,8 @@ void EditorMainWindow::BuildUi()
     resize(1280, 720);
 
     setDockNestingEnabled(true);
-    setDockOptions(AnimatedDocks | AllowNestedDocks | AllowTabbedDocks | GroupedDragging);
+    setDockOptions(AnimatedDocks | AllowNestedDocks | AllowTabbedDocks);
+    setTabPosition(Qt::BottomDockWidgetArea, QTabWidget::South);
 
     setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
     setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
@@ -143,6 +144,11 @@ void EditorMainWindow::BuildUi()
     fileDock_->installEventFilter(this);
     addDockWidget(Qt::BottomDockWidgetArea, fileDock_);
     tabifyDockWidget(consoleDock_, fileDock_);
+    consoleDock_->setTitleBarWidget(new QWidget(consoleDock_)); fileDock_->setTitleBarWidget(new QWidget(fileDock_));
+    auto tabFloat = [](QDockWidget* d) { connect(d, &QDockWidget::topLevelChanged, d, [d](bool f) {
+        if (f) { if (d->titleBarWidget()) { delete d->titleBarWidget(); d->setTitleBarWidget(nullptr); } }
+        else { if (!d->titleBarWidget()) d->setTitleBarWidget(new QWidget(d)); }
+    }); }; tabFloat(consoleDock_); tabFloat(fileDock_);
 
     BuildToolBar();
     BuildSceneDocks();
@@ -153,11 +159,8 @@ void EditorMainWindow::BuildUi()
     langMenu_ = viewMenu_->addMenu(Tr("Язык", "Language"));
     actLangRu_ = langMenu_->addAction(QStringLiteral("Русский"), this, [] { EditorLocale::Instance().SetLanguage(EditorLanguage::Ru); });
     actLangEn_ = langMenu_->addAction(QStringLiteral("English"), this, [] { EditorLocale::Instance().SetLanguage(EditorLanguage::En); });
-    actLangRu_->setCheckable(true);
-    actLangEn_->setCheckable(true);
-    auto* langGroup = new QActionGroup(this);
-    langGroup->addAction(actLangRu_);
-    langGroup->addAction(actLangEn_);
+    actLangRu_->setCheckable(true); actLangEn_->setCheckable(true);
+    auto* langGroup = new QActionGroup(this); langGroup->addAction(actLangRu_); langGroup->addAction(actLangEn_);
     actLangRu_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::Ru);
     actLangEn_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::En);
 
@@ -186,47 +189,43 @@ void EditorMainWindow::BuildUi()
     });
 
     viewMenu_->addSeparator();
-    if (!SettingsService::Instance().Contains(QStringLiteral("view/grid")))
-        SettingsService::Instance().SetValue(QStringLiteral("view/grid"), true);
-    if (!SettingsService::Instance().Contains(QStringLiteral("view/overlays")))
-        SettingsService::Instance().SetValue(QStringLiteral("view/overlays"), true);
+    const bool allFalse = !SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool() &&
+                          !SettingsService::Instance().GetValue(QStringLiteral("view/gizmo"), true).toBool() &&
+                          !SettingsService::Instance().GetValue(QStringLiteral("view/icons"), true).toBool();
+    for (const auto& k : {QStringLiteral("view/grid"), QStringLiteral("view/gizmo"), QStringLiteral("view/icons"), QStringLiteral("view/overlays")})
+        if (allFalse || !SettingsService::Instance().Contains(k)) SettingsService::Instance().SetValue(k, true);
 
-    actGrid_ = viewMenu_->addAction(Tr("Сетка", "Grid"), this, [this] {
-        CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleGrid"));
+    auto addToggle = [this](const QString& text, const QString& cmd, const QString& key) {
+        auto* act = viewMenu_->addAction(text); act->setCheckable(true);
+        act->setChecked(SettingsService::Instance().GetValue(key, true).toBool());
+        connect(act, &QAction::triggered, this, [cmd, act, key] {
+            CommandRegistry::Instance().Execute(cmd);
+            act->setChecked(SettingsService::Instance().GetValue(key, true).toBool());
+        }); return act;
+    };
+    actGrid_ = addToggle(Tr("Сетка", "Grid"), QStringLiteral("View.ToggleGrid"), QStringLiteral("view/grid"));
+    actGizmo_ = addToggle(Tr("Гизмо", "Gizmo"), QStringLiteral("View.ToggleGizmo"), QStringLiteral("view/gizmo"));
+    actIcons_ = addToggle(Tr("Иконки объектов", "Object Icons"), QStringLiteral("View.ToggleIcons"), QStringLiteral("view/icons"));
+    connect(viewMenu_, &QMenu::aboutToShow, this, [this] {
         if (actGrid_) actGrid_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool());
+        if (actGizmo_) actGizmo_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/gizmo"), true).toBool());
+        if (actIcons_) actIcons_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/icons"), true).toBool());
     });
-    actGrid_->setCheckable(true);
-    actGrid_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool());
-
-    actOverlays_ = viewMenu_->addAction(Tr("Иконки и гизмо", "Icons and Gizmos"), this, [this] {
-        CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleOverlays"));
-        if (actOverlays_) actOverlays_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/overlays"), true).toBool());
-    });
-    actOverlays_->setCheckable(true);
-    actOverlays_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/overlays"), true).toBool());
 
     QMenu* aaMenu = viewMenu_->addMenu(Tr("Сглаживание", "Anti-aliasing"));
-    QActionGroup* aaGroup = new QActionGroup(this);
-    aaGroup->setExclusive(true);
+    QActionGroup* aaGroup = new QActionGroup(this); aaGroup->setExclusive(true);
     const QString curAa = SettingsService::Instance().GetValue(QStringLiteral("viewport/antialiasing"), QStringLiteral("fxaa")).toString().toLower();
-
-    auto* actOff = aaMenu->addAction(Tr("Выкл", "Off"), this, [this] {
-        QVariantMap params;
-        params.insert(QStringLiteral("mode"), QStringLiteral("off"));
-        CommandRegistry::Instance().Execute(QStringLiteral("View.SetAntialiasing"), params);
+    const bool isOff = (curAa == QStringLiteral("off") || curAa == QStringLiteral("0"));
+    auto* actOff = aaMenu->addAction(Tr("Выкл", "Off")); actOff->setCheckable(true); actOff->setChecked(isOff); aaGroup->addAction(actOff);
+    connect(actOff, &QAction::triggered, this, [this] {
+        QVariantMap p; p.insert(QStringLiteral("mode"), QStringLiteral("off")); CommandRegistry::Instance().Execute(QStringLiteral("View.SetAntialiasing"), p);
     });
-    actOff->setCheckable(true);
-    actOff->setChecked(curAa == QStringLiteral("off") || curAa == QStringLiteral("0"));
-    aaGroup->addAction(actOff);
-
-    auto* actFxaa = aaMenu->addAction(QStringLiteral("FXAA"), this, [this] {
-        QVariantMap params;
-        params.insert(QStringLiteral("mode"), QStringLiteral("fxaa"));
-        CommandRegistry::Instance().Execute(QStringLiteral("View.SetAntialiasing"), params);
+    auto* actFxaa = aaMenu->addAction(QStringLiteral("FXAA")); actFxaa->setCheckable(true); actFxaa->setChecked(!isOff); aaGroup->addAction(actFxaa);
+    connect(actFxaa, &QAction::triggered, this, [this] {
+        QVariantMap p; p.insert(QStringLiteral("mode"), QStringLiteral("fxaa")); CommandRegistry::Instance().Execute(QStringLiteral("View.SetAntialiasing"), p);
     });
-    actFxaa->setCheckable(true);
-    actFxaa->setChecked(curAa != QStringLiteral("off") && curAa != QStringLiteral("0"));
-    aaGroup->addAction(actFxaa);
+    QVariantMap aaParams; aaParams.insert(QStringLiteral("mode"), isOff ? QStringLiteral("off") : QStringLiteral("fxaa"));
+    CommandRegistry::Instance().Execute(QStringLiteral("View.SetAntialiasing"), aaParams);
 
     viewMenu_->addSeparator();
 
@@ -1390,6 +1389,8 @@ void EditorMainWindow::RetranslateUi()
     if (actResetLayout_) actResetLayout_->setText(Tr("Сбросить раскладку окон", "Reset Window Layout"));
     if (actGrid_) actGrid_->setText(Tr("Сетка", "Grid"));
     if (actOverlays_) actOverlays_->setText(Tr("Иконки и гизмо", "Icons and Gizmos"));
+    if (actGizmo_) actGizmo_->setText(Tr("Гизмо", "Gizmo"));
+    if (actIcons_) actIcons_->setText(Tr("Иконки объектов", "Object Icons"));
     if (actLangRu_) actLangRu_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::Ru);
     if (actLangEn_) actLangEn_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::En);
 }

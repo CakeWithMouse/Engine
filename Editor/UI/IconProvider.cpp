@@ -32,6 +32,7 @@ namespace
         if (name == QLatin1String("eye-off")) return EditorIcons::TABLER_EYE_OFF;
         if (name == QLatin1String("lock")) return EditorIcons::TABLER_LOCK;
         if (name == QLatin1String("lock-open")) return EditorIcons::TABLER_LOCK_OPEN;
+        if (name == QLatin1String("download") || name == QLatin1String("import")) return EditorIcons::TABLER_DOWNLOAD;
         if (name == QLatin1String("plus") || name == QLatin1String("add")) return EditorIcons::TABLER_PLUS;
         if (name == QLatin1String("trash") || name == QLatin1String("remove")) return EditorIcons::TABLER_TRASH;
         if (name == QLatin1String("folder")) return EditorIcons::TABLER_FOLDER;
@@ -95,13 +96,13 @@ QIcon IconProvider::GetIcon(const QString& name, const QColor& color, int size)
     icon.addPixmap(RenderSvgPixmap(svg, baseColor, size), QIcon::Normal, QIcon::Off);
     icon.addPixmap(RenderSvgPixmap(svg, disabledColor, size), QIcon::Disabled, QIcon::Off);
     icon.addPixmap(RenderSvgPixmap(svg, activeColor, size), QIcon::Active, QIcon::Off);
-    icon.addPixmap(RenderSvgPixmap(svg, activeColor, size), QIcon::Selected, QIcon::Off);
+    icon.addPixmap(RenderSvgPixmap(svg, QColor(0xFF, 0xFF, 0xFF), size), QIcon::Selected, QIcon::Off);
     return icon;
 }
 
 QIcon IconProvider::PlayIcon(const QColor& color) { return GetIcon(QStringLiteral("player-play"), color.isValid() ? color : QColor(0x4A, 0xDE, 0x80)); }
 QIcon IconProvider::PauseIcon(const QColor& color) { return GetIcon(QStringLiteral("player-pause"), color.isValid() ? color : QColor(0xFB, 0xBF, 0x24)); }
-QIcon IconProvider::StopIcon(const QColor& color) { return GetIcon(QStringLiteral("player-stop"), color.isValid() ? color : QColor(0xF8, 0xF1, 0x71)); }
+QIcon IconProvider::StopIcon(const QColor& color) { return GetIcon(QStringLiteral("player-stop"), color.isValid() ? color : QColor(0xEF, 0x44, 0x44)); }
 QIcon IconProvider::ExternalIcon(const QColor& color) { return GetIcon(QStringLiteral("external-link"), color.isValid() ? color : QColor(0x60, 0xA5, 0xFA)); }
 QIcon IconProvider::SettingsIcon(const QColor& color) { return GetIcon(QStringLiteral("settings"), color); }
 QIcon IconProvider::TranslateIcon(const QColor& color) { return GetIcon(QStringLiteral("arrows-move"), color); }
@@ -114,6 +115,7 @@ QIcon IconProvider::ResetIcon(const QColor& color) { return GetIcon(QStringLiter
 QIcon IconProvider::MoreIcon(const QColor& color) { return GetIcon(QStringLiteral("dots"), color); }
 QIcon IconProvider::EyeIcon(bool visible, const QColor& color) { return GetIcon(visible ? QStringLiteral("eye") : QStringLiteral("eye-off"), color); }
 QIcon IconProvider::LockIcon(bool locked, const QColor& color) { return GetIcon(locked ? QStringLiteral("lock") : QStringLiteral("lock-open"), color); }
+QIcon IconProvider::ImportIcon(const QColor& color) { return GetIcon(QStringLiteral("import"), color); }
 QIcon IconProvider::PlusIcon(const QColor& color) { return GetIcon(QStringLiteral("plus"), color); }
 QIcon IconProvider::TrashIcon(const QColor& color) { return GetIcon(QStringLiteral("trash"), color); }
 QIcon IconProvider::FolderIcon(const QColor& color) { return GetIcon(QStringLiteral("folder"), color); }

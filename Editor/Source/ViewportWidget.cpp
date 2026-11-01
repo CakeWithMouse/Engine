@@ -47,24 +47,24 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
         const float dt = std::min(0.05f, static_cast<float>(elapsed->restart()) / 1000.0f);
         const int state = host_->PlayState();
         if (inputState_ != state) { inputState_ = state; keys_.clear(); looking_ = rmbPressed_ = false; EndObjectDrag(); }
-        if (!attached_ || !hasFocus() || !isActiveWindow()) return;
-        if (state != EditorQtHost::Edit && host_->HasScene()) return;
-
-        const float speed = dt * (keys_.contains(Qt::Key_Shift) ? 4.0f : 1.0f);
-
-        if (host_->HasSelection() && !looking_)
+        if (attached_ && hasFocus() && isActiveWindow() && (state == EditorQtHost::Edit || !host_->HasScene()))
         {
-            float r = static_cast<float>(keys_.contains(Qt::Key_Right) - keys_.contains(Qt::Key_Left)) * speed;
-            float u = static_cast<float>(keys_.contains(Qt::Key_PageUp) - keys_.contains(Qt::Key_PageDown)) * speed;
-            float f = static_cast<float>(keys_.contains(Qt::Key_Up) - keys_.contains(Qt::Key_Down)) * speed;
-            if (r || u || f) host_->MoveSelectedObject(r, u, f);
-        }
-        {
-            EditorCommand c; c.type = EditorCommand::ViewportCamera;
-            c.right = static_cast<float>(keys_.contains(Qt::Key_D) - keys_.contains(Qt::Key_A)) * speed;
-            c.up = static_cast<float>(keys_.contains(Qt::Key_E) - keys_.contains(Qt::Key_Q)) * speed;
-            c.forward = static_cast<float>(keys_.contains(Qt::Key_W) - keys_.contains(Qt::Key_S)) * speed;
-            if (c.right || c.up || c.forward) host_->PostCommand(c);
+            const float speed = dt * (keys_.contains(Qt::Key_Shift) ? 4.0f : 1.0f);
+
+            if (host_->HasSelection() && !looking_)
+            {
+                float r = static_cast<float>(keys_.contains(Qt::Key_Right) - keys_.contains(Qt::Key_Left)) * speed;
+                float u = static_cast<float>(keys_.contains(Qt::Key_PageUp) - keys_.contains(Qt::Key_PageDown)) * speed;
+                float f = static_cast<float>(keys_.contains(Qt::Key_Up) - keys_.contains(Qt::Key_Down)) * speed;
+                if (r || u || f) host_->MoveSelectedObject(r, u, f);
+            }
+            {
+                EditorCommand c; c.type = EditorCommand::ViewportCamera;
+                c.right = static_cast<float>(keys_.contains(Qt::Key_D) - keys_.contains(Qt::Key_A)) * speed;
+                c.up = static_cast<float>(keys_.contains(Qt::Key_E) - keys_.contains(Qt::Key_Q)) * speed;
+                c.forward = static_cast<float>(keys_.contains(Qt::Key_W) - keys_.contains(Qt::Key_S)) * speed;
+                if (c.right || c.up || c.forward) host_->PostCommand(c);
+            }
         }
         hasCameraInfo_ = host_->GetCamera(lastCameraInfo_);
         if (hasCameraInfo_)
@@ -406,11 +406,11 @@ void ViewportWidget::ApplyGizmoDragGesture(const QPointF& pos)
                 float curDist = std::hypot(static_cast<float>(pos.x()) - cs[0], static_cast<float>(pos.y()) - cs[1]);
                 const float sDist = (dragStartDist_ > 5.0f) ? dragStartDist_ : 30.0f;
                 float ratio = curDist / sDist;
-                if (ratio < 0.01f) ratio = 0.01f;
+                if (std::abs(ratio) < 0.001f) ratio = (ratio < 0.0f) ? -0.001f : 0.001f;
                 if (snapEnabled_ && scaleSnapStep_ > 1e-4)
                 {
                     ratio = static_cast<float>(std::round(ratio / scaleSnapStep_) * scaleSnapStep_);
-                    if (ratio < 0.01f) ratio = 0.01f;
+                    if (std::abs(ratio) < 0.001f) ratio = (ratio < 0.0f) ? -0.001f : 0.001f;
                 }
                 EngineSceneTransform t = dragStartTransform_;
                 for (int i = 0; i < 3; ++i) t.scale[i] = dragStartTransform_.scale[i] * ratio;
@@ -426,11 +426,11 @@ void ViewportWidget::ApplyGizmoDragGesture(const QPointF& pos)
             {
                 const float sDist = (std::abs(dragStartS_) > 0.05f) ? dragStartS_ : 1.0f;
                 float ratio = curS / sDist;
-                if (ratio < 0.01f) ratio = 0.01f;
+                if (std::abs(ratio) < 0.001f) ratio = (ratio < 0.0f) ? -0.001f : 0.001f;
                 if (snapEnabled_ && scaleSnapStep_ > 1e-4)
                 {
                     ratio = static_cast<float>(std::round(ratio / scaleSnapStep_) * scaleSnapStep_);
-                    if (ratio < 0.01f) ratio = 0.01f;
+                    if (std::abs(ratio) < 0.001f) ratio = (ratio < 0.0f) ? -0.001f : 0.001f;
                 }
                 EngineSceneTransform t = dragStartTransform_;
                 int idx = (activeGizmoHandle_ == GizmoGeometry::Handle::AxisX) ? 0 :

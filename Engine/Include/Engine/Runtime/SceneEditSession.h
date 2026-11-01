@@ -45,6 +45,7 @@ private:
     bool attached_ = false;
     bool inputFocused_ = false;
     uint32_t width_ = 0, height_ = 0;
+    uint32_t antialiasingMode_ = 1;
     Game& Active() { return play_ ? *play_ : *edit_; }
     std::unique_ptr<Game> CopyForPlay();
     void ReplaceEdit(const SceneSnapshot& data);

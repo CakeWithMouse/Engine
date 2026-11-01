@@ -35,6 +35,10 @@ private:
     QAction* actPause_ = nullptr;
     QAction* actStop_ = nullptr;
     QAction* actExternal_ = nullptr;
+    QToolButton* btnPlay_ = nullptr;
+    QToolButton* btnPause_ = nullptr;
+    QToolButton* btnStop_ = nullptr;
+    QToolButton* btnExternal_ = nullptr;
     QToolButton* configPlayBtn_ = nullptr;
     int themeSubId_ = 0;
 };

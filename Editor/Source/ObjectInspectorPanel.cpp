@@ -8,10 +8,12 @@
 #include "IconProvider.h"
 
 #include <QApplication>
+#include <QColorDialog>
 #include <QCheckBox>
 #include <QHBoxLayout>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
@@ -49,6 +51,9 @@ ObjectInspectorPanel::ObjectInspectorPanel(QWidget* parent)
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
         RetranslateUi();
     });
+    themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
+        if (lightColor_) lightColor_->setIcon(IconProvider::BulbIcon());
+    });
 }
 
 ObjectInspectorPanel::~ObjectInspectorPanel()
@@ -57,6 +62,11 @@ ObjectInspectorPanel::~ObjectInspectorPanel()
     {
         EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
         langSubId_ = 0;
+    }
+    if (themeSubId_)
+    {
+        EditorTheme::Instance().UnsubscribeThemeChanged(themeSubId_);
+        themeSubId_ = 0;
     }
 }
 
@@ -112,17 +122,17 @@ void ObjectInspectorPanel::BuildUi()
     cardGeometry_->onClearModel = [this] { emit ClearModelRequested(); };
     cardGeometry_->onChooseTexture = [this] { emit ChooseTextureRequested(); };
     cardGeometry_->onClearTexture = [this] { emit ClearTextureRequested(); };
-    inspectorLayout->addWidget(cardGeometry_);
 
     cardMaterial_ = new MaterialCard(this);
     cardMaterial_->onEditMaterial = [this](const QString& path) { emit EditMaterialRequested(path); };
     cardMaterial_->onChooseMaterial = [this] { emit ChooseMaterialRequested(); };
     cardMaterial_->onClearMaterial = [this] { emit ClearMaterialRequested(); };
-    inspectorLayout->addWidget(cardMaterial_);
-    inspectorLayout->addWidget(properties_);
 
     BuildPointLightCard(inspectorLayout);
+    inspectorLayout->addWidget(cardGeometry_);
+    inspectorLayout->addWidget(cardMaterial_);
     BuildCharacterCard(inspectorLayout);
+    inspectorLayout->addWidget(properties_);
 
     cardGeneral_->hide();
     cardTransform_->hide();
@@ -185,107 +195,77 @@ void ObjectInspectorPanel::BuildGeneralCard(QVBoxLayout* layout)
 
 void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
 {
-    cardLight_ = new CollapsibleCard(Tr("Точечный свет", "Point Light"), this, true);
+    cardLight_ = new CollapsibleCard(Tr("Свет", "Light"), this, true);
     lightInspector_ = cardLight_;
     auto* cl = cardLight_->ContentLayout();
-
-    auto emitPointLightChanged = [this] {
+    auto emitChanged = [this] {
         if (refreshing_ || selectedId_ == 0) return;
+        if (selectedType_ == "Light.Directional") {
+            SubmitProperty(QStringLiteral("/intensity"), lightValues_[3]->value());
+            SubmitProperty(QStringLiteral("/shadowDistance"), lightValues_[4]->value());
+            return;
+        }
         emit PointLightEditingFinished(selectedId_, CurrentPointLightValue());
     };
-
-    auto* rowTop = new QWidget(cardLight_->Content());
-    auto* lTop = new QHBoxLayout(rowTop);
-    lTop->setContentsMargins(0, 0, 0, 0);
-    lTop->setSpacing(6);
-
+    auto* rowTop = new QWidget(cardLight_->Content()); auto* lTop = new QHBoxLayout(rowTop);
+    lTop->setContentsMargins(0, 0, 0, 0); lTop->setSpacing(6);
     lightEnabled_ = new QCheckBox(Tr("Включён", "Enabled"), rowTop);
-    lightEnabled_->setObjectName(QStringLiteral("LightEnabled"));
-    connect(lightEnabled_, &QCheckBox::clicked, this, emitPointLightChanged);
-    lTop->addWidget(lightEnabled_);
-
+    lightEnabled_->setObjectName(QStringLiteral("LightEnabled")); lightEnabled_->hide();
+    connect(lightEnabled_, &QCheckBox::clicked, this, emitChanged);
     lightShadows_ = new QCheckBox(Tr("Тени", "Shadows"), rowTop);
     lightShadows_->setObjectName(QStringLiteral("LightShadows"));
-    connect(lightShadows_, &QCheckBox::clicked, this, emitPointLightChanged);
+    connect(lightShadows_, &QCheckBox::clicked, this, [this, emitChanged] {
+        if (refreshing_ || selectedId_ == 0) return;
+        if (selectedType_ == "Light.Directional") { SubmitProperty(QStringLiteral("/shadows"), lightShadows_->isChecked()); return; }
+        emitChanged();
+    });
     lTop->addWidget(lightShadows_);
-
     lightColor_ = new QPushButton(Tr("Выбрать цвет…", "Choose Color…"), rowTop);
-    lightColor_->setObjectName(QStringLiteral("LightColor"));
-    lightColor_->setFixedHeight(24);
-    lightColor_->setIcon(IconProvider::BulbIcon());
+    lightColor_->setObjectName(QStringLiteral("LightColor")); lightColor_->setFixedHeight(24); lightColor_->setIcon(IconProvider::BulbIcon());
     connect(lightColor_, &QPushButton::clicked, this, [this] {
         if (refreshing_ || selectedId_ == 0) return;
-        const QColor current = QColor::fromRgbF(lightValues_[0]->value(), lightValues_[1]->value(), lightValues_[2]->value());
-        emit LightColorRequested(selectedId_, current);
+        const QColor cur = QColor::fromRgbF(lightValues_[0]->value(), lightValues_[1]->value(), lightValues_[2]->value());
+        if (selectedType_ == "Light.Directional") {
+            const auto chosen = QColorDialog::getColor(cur, this, Tr("Цвет света", "Light Color"));
+            if (chosen.isValid()) {
+                const float c[3] = {static_cast<float>(chosen.redF()), static_cast<float>(chosen.greenF()), static_cast<float>(chosen.blueF())};
+                UpdateLightColorButton(c); for (int i = 0; i < 3; ++i) lightValues_[i]->setValue(c[i]);
+                SubmitProperty(QStringLiteral("/color"), QJsonArray{c[0], c[1], c[2]});
+            } return;
+        }
+        emit LightColorRequested(selectedId_, cur);
     });
-    lTop->addWidget(lightColor_, 1);
-    cl->addWidget(rowTop);
-
-    auto* rowRgb = new QWidget(cardLight_->Content());
-    auto* lRgb = new QHBoxLayout(rowRgb);
-    lRgb->setContentsMargins(0, 0, 0, 0);
-    lRgb->setSpacing(4);
-
-    const QString rgbLetters[3] = {QStringLiteral("R"), QStringLiteral("G"), QStringLiteral("B")};
-    const QString rgbColors[3] = {QStringLiteral("#EF4444"), QStringLiteral("#22C55E"), QStringLiteral("#3B82F6")};
-
-    for (int i = 0; i < 3; ++i)
-    {
+    lTop->addWidget(lightColor_, 1); cl->addWidget(rowTop);
+    auto* rowRgb = new QWidget(cardLight_->Content()); auto* lRgb = new QHBoxLayout(rowRgb);
+    lRgb->setContentsMargins(0, 0, 0, 0); lRgb->setSpacing(4);
+    const QString rgbL[3] = {QStringLiteral("R"), QStringLiteral("G"), QStringLiteral("B")};
+    const QString rgbC[3] = {QStringLiteral("#EF4444"), QStringLiteral("#22C55E"), QStringLiteral("#3B82F6")};
+    for (int i = 0; i < 3; ++i) {
         auto* spin = lightValues_[i] = new NoWheelDoubleSpinBox(rowRgb);
-        spin->setObjectName(QStringLiteral("LightValue%1").arg(i));
-        spin->setRange(0.0, 1.0);
-        spin->setDecimals(2);
-        spin->setSingleStep(0.05);
-        spin->setKeyboardTracking(false);
-        connect(spin, &QDoubleSpinBox::editingFinished, this, emitPointLightChanged);
-        lRgb->addWidget(CreateAxisCell(spin, rgbLetters[i], rgbColors[i], rowRgb), 1);
+        spin->setObjectName(QStringLiteral("LightValue%1").arg(i)); spin->setRange(0.0, 1.0); spin->setDecimals(2); spin->setSingleStep(0.05); spin->setKeyboardTracking(false);
+        connect(spin, &QDoubleSpinBox::editingFinished, this, [this, emitChanged] {
+            if (refreshing_ || selectedId_ == 0) return;
+            if (selectedType_ == "Light.Directional") {
+                const float c[3] = {static_cast<float>(lightValues_[0]->value()), static_cast<float>(lightValues_[1]->value()), static_cast<float>(lightValues_[2]->value())};
+                UpdateLightColorButton(c); SubmitProperty(QStringLiteral("/color"), QJsonArray{c[0], c[1], c[2]}); return;
+            }
+            emitChanged();
+        });
+        lRgb->addWidget(CreateAxisCell(spin, rgbL[i], rgbC[i], rowRgb), 1);
     }
     cl->addWidget(rowRgb);
-
-    auto* rowInt = new QWidget(cardLight_->Content());
-    auto* lInt = new QHBoxLayout(rowInt);
-    lInt->setContentsMargins(0, 0, 0, 0);
-    lInt->setSpacing(6);
-
-    lightRowLabels_[3] = new QLabel(Tr("Интенсивность", "Intensity"), rowInt);
-    lightRowLabels_[3]->setObjectName(QStringLiteral("CardFieldLabel"));
-    lightRowLabels_[3]->setFixedWidth(80);
-    lInt->addWidget(lightRowLabels_[3]);
-
-    lightValues_[3] = new NoWheelDoubleSpinBox(rowInt);
-    lightValues_[3]->setObjectName("LightValue3");
-    lightValues_[3]->setFixedHeight(22);
-    lightValues_[3]->setRange(0.0, 10000.0);
-    lightValues_[3]->setDecimals(2);
-    lightValues_[3]->setSingleStep(0.5);
-    lightValues_[3]->setKeyboardTracking(false);
-    connect(lightValues_[3], &QDoubleSpinBox::editingFinished, this, emitPointLightChanged);
-    lInt->addWidget(lightValues_[3], 1);
-    cl->addWidget(rowInt);
-
-    auto* rowRad = new QWidget(cardLight_->Content());
-    auto* lRad = new QHBoxLayout(rowRad);
-    lRad->setContentsMargins(0, 0, 0, 0);
-    lRad->setSpacing(6);
-
-    lightRowLabels_[4] = new QLabel(Tr("Радиус", "Radius"), rowRad);
-    lightRowLabels_[4]->setObjectName(QStringLiteral("CardFieldLabel"));
-    lightRowLabels_[4]->setFixedWidth(80);
-    lRad->addWidget(lightRowLabels_[4]);
-
-    lightValues_[4] = new NoWheelDoubleSpinBox(rowRad);
-    lightValues_[4]->setObjectName("LightValue4");
-    lightValues_[4]->setFixedHeight(22);
-    lightValues_[4]->setRange(0.01, 10000.0);
-    lightValues_[4]->setDecimals(2);
-    lightValues_[4]->setSingleStep(0.5);
-    lightValues_[4]->setKeyboardTracking(false);
-    connect(lightValues_[4], &QDoubleSpinBox::editingFinished, this, emitPointLightChanged);
-    lRad->addWidget(lightValues_[4], 1);
-    cl->addWidget(rowRad);
-
-    layout->addWidget(cardLight_);
-    cardLight_->hide();
+    auto addFieldRow = [&](int idx, const QString& label, double minV, double maxV, double step) {
+        auto* row = new QWidget(cardLight_->Content()); auto* l = new QHBoxLayout(row);
+        l->setContentsMargins(0, 0, 0, 0); l->setSpacing(6);
+        lightRowLabels_[idx] = new QLabel(label, row); lightRowLabels_[idx]->setObjectName(QStringLiteral("CardFieldLabel")); lightRowLabels_[idx]->setFixedWidth(80);
+        l->addWidget(lightRowLabels_[idx]);
+        auto* spin = lightValues_[idx] = new NoWheelDoubleSpinBox(row);
+        spin->setObjectName(QStringLiteral("LightValue%1").arg(idx)); spin->setFixedHeight(22); spin->setRange(minV, maxV); spin->setDecimals(2); spin->setSingleStep(step); spin->setKeyboardTracking(false);
+        connect(spin, &QDoubleSpinBox::editingFinished, this, emitChanged); l->addWidget(spin, 1); cl->addWidget(row);
+    };
+    addFieldRow(3, Tr("Интенсивность", "Intensity"), 0.0, 10000.0, 0.5);
+    addFieldRow(4, Tr("Радиус", "Radius"), 0.01, 10000.0, 0.5);
+    layout->addWidget(cardLight_); cardLight_->hide();
 }
 
 void ObjectInspectorPanel::BuildCharacterCard(QVBoxLayout* layout)
@@ -322,7 +302,7 @@ void ObjectInspectorPanel::RetranslateUi()
 {
     if (noSelectionLabel_) noSelectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
     if (cardGeneral_) cardGeneral_->SetTitle(Tr("Общие", "General"));
-    if (cardLight_) cardLight_->SetTitle(Tr("Точечный свет", "Point Light"));
+    if (cardLight_) cardLight_->SetTitle(Tr("Свет", "Light"));
     if (cardCharacter_) cardCharacter_->SetTitle(Tr("Персонаж", "Character"));
     if (cardTransform_) cardTransform_->RetranslateUi();
     if (cardGeometry_) cardGeometry_->RetranslateUi();
@@ -427,39 +407,67 @@ void ObjectInspectorPanel::Refresh(
             continue;
 
         RefreshProjectProperties(view, object);
-        selectedLight = object.hasPointLight;
+        // selectedLight updated below after determining type
         typeBadgeLabel_->setText(QString::fromStdString(object.type));
         selectionLabel_->setText(QStringLiteral("%1 · ID %2").arg(QString::fromStdString(object.name)).arg(object.id));
         characterInspector_->setVisible(object.gameplayKind == 1);
         if (object.gameplayKind == 1 && canReplaceField(characterSpeed_))
             characterSpeed_->setValue(QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object()["moveSpeed"].toDouble(5));
 
-        if (object.hasPointLight)
-        {
-            for (int i = 0; i < 5; ++i)
-            {
-                if (!canReplaceField(lightValues_[i]))
-                    continue;
+        selectedType_ = object.type;
+        const std::string& type = object.type;
+        const bool isModel = (type == "Engine.Model");
+        const bool isPrimitive = (type.rfind("Primitive.", 0) == 0);
+        const bool isPointLight = object.hasPointLight || (type == "Light.Point") || (type == "Engine.PointLight");
+        const bool isDirLight = (type == "Light.Directional");
+        selectedLight = isPointLight || isDirLight;
+        const bool isCharacter = (object.gameplayKind == 1 || type == "Gameplay.Character" || type == "Character");
+        const bool isCamera = (type == "Engine.Camera" || type == "Gameplay.Camera" || type == "Camera");
+        const bool isParticles = (type == "Particles" || type.find("Particle") != std::string::npos);
 
-                if (i < 3)
-                    lightValues_[i]->setValue(object.pointLight.color[i]);
-                else if (i == 3)
-                    lightValues_[i]->setValue(object.pointLight.intensity);
-                else
-                    lightValues_[i]->setValue(object.pointLight.radius);
+        if (isDirLight) {
+            const auto data = QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object();
+            const auto colorArr = data["color"].toArray(); float col[3] = {1.0f, 1.0f, 1.0f};
+            if (colorArr.size() == 3) for (int i = 0; i < 3; ++i) col[i] = static_cast<float>(colorArr[i].toDouble(1.0));
+            for (int i = 0; i < 3; ++i) if (canReplaceField(lightValues_[i])) lightValues_[i]->setValue(col[i]);
+            UpdateLightColorButton(col);
+            if (canReplaceField(lightValues_[3])) lightValues_[3]->setValue(data["intensity"].toDouble(1.0));
+            lightShadows_->show(); lightShadows_->setChecked(data["shadows"].toBool(false));
+            lightRowLabels_[4]->setText(Tr("Дальность теней", "Shadow Distance"));
+            lightValues_[4]->setRange(100.0, 100000.0); lightValues_[4]->setSingleStep(10.0);
+            if (canReplaceField(lightValues_[4])) lightValues_[4]->setValue(data["shadowDistance"].toDouble(2000.0));
+            cardLight_->SetExpanded(true);
+            cardLight_->show();
+            std::printf("[InspectorDiag] isDirLight id=%llu cardLight visible=%d geom=%d,%d %dx%d\n",
+                (unsigned long long)object.id, cardLight_->isVisible(),
+                cardLight_->geometry().x(), cardLight_->geometry().y(),
+                cardLight_->geometry().width(), cardLight_->geometry().height());
+        } else if (isPointLight) {
+            for (int i = 0; i < 5; ++i) {
+                if (!canReplaceField(lightValues_[i])) continue;
+                if (i < 3) lightValues_[i]->setValue(object.pointLight.color[i]);
+                else if (i == 3) lightValues_[i]->setValue(object.pointLight.intensity);
+                else lightValues_[i]->setValue(object.pointLight.radius);
             }
-
             lightEnabled_->setChecked(object.pointLight.enabled != 0);
-            if (lightShadows_) lightShadows_->setChecked(object.lightCastShadows);
-            UpdateLightColorButton(object.pointLight.color);
-        }
+            lightShadows_->hide();
+            lightRowLabels_[4]->setText(Tr("Радиус", "Radius"));
+            lightValues_[4]->setRange(0.01, 10000.0); lightValues_[4]->setSingleStep(0.5);
+            UpdateLightColorButton(object.pointLight.color); cardLight_->show();
+        } else { cardLight_->hide(); }
 
-        const bool canChooseModel = (object.type == "Engine.Model" || object.type.rfind("Primitive.", 0) == 0);
-        const bool hasMesh = canChooseModel || !object.modelAsset.empty();
-        cardGeometry_->setVisible(hasMesh);
-        if (hasMesh) { cardGeometry_->SetData(QString::fromStdString(object.modelAsset), canChooseModel); cardGeometry_->SetTexture(QString::fromStdString(object.textureAsset)); }
-        cardMaterial_->SetData(QString::fromStdString(object.materialAsset), object.hasPointLight || object.type == "Light.Directional");
-        cardMaterial_->setVisible(object.type != "Light.Directional" && !object.hasPointLight);
+        const bool showGeometry = isModel;
+        const bool showMaterial = isModel || isPrimitive;
+        const bool showProperties = (!isModel && !isPrimitive && !isPointLight && !isDirLight && !isCamera && !isParticles);
+
+        cardGeometry_->setVisible(showGeometry);
+        if (showGeometry) {
+            cardGeometry_->SetData(QString::fromStdString(object.modelAsset), true);
+            cardGeometry_->SetTexture(QString::fromStdString(object.textureAsset));
+        }
+        cardMaterial_->SetData(QString::fromStdString(object.materialAsset), isPointLight || isDirLight);
+        cardMaterial_->setVisible(showMaterial);
+        properties_->setVisible(showProperties);
 
         if (canReplaceWholeInspector)
         {

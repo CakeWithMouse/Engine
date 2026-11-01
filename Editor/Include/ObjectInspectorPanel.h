@@ -101,9 +101,11 @@ private:
     InspectorPointLightValue CurrentPointLightValue() const;
     bool HasFocusedChild() const;
 
-    quint64 selectedId_ = 0;
+    quint64 selectedId_ = 0; std::string selectedType_;
     bool refreshing_ = false;
     int langSubId_ = 0;
+    int themeSubId_ = 0;
+    QMap<QString, QJsonValue> pendingProperties_;
 
     // Placeholder when no object is selected
     QLabel* noSelectionLabel_ = nullptr;

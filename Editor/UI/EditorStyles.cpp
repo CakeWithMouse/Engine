@@ -21,6 +21,8 @@ QString EditorStyles::BuildStyleSheet(ThemeMode mode, const QColor& accentColor,
     const QString textDisabled = isDark ? QStringLiteral("#5C6370") : QStringLiteral("#8C959F");
     const QString borderLight = isDark ? QStringLiteral("#2C313A") : QStringLiteral("#D0D7DE");
     const QString borderMid = isDark ? QStringLiteral("#3E4451") : QStringLiteral("#AFB8C1");
+    const QString splitterColor = isDark ? QStringLiteral("rgba(44, 49, 58, 0.5)") : QStringLiteral("rgba(208, 215, 222, 0.6)");
+    const QString splitterHover = QStringLiteral("rgba(%1, %2, %3, 0.5)").arg(accentColor.red()).arg(accentColor.green()).arg(accentColor.blue());
 
     QString qss = QString(R"QSS(
 QWidget {
@@ -126,11 +128,15 @@ QTreeView, QTreeWidget, QListView, QListWidget, QPlainTextEdit, QTextEdit {
     color: %1;
     alternate-background-color: %7;
 }
-QTreeView::item:hover, QListView::item:hover {
+QTreeView::item:hover:!selected, QListView::item:hover:!selected {
     background-color: %9;
 }
 QTreeView::item:selected, QListView::item:selected {
     background-color: %2;
+    color: #FFFFFF;
+}
+QTreeView::item:selected:hover, QListView::item:selected:hover {
+    background-color: %13;
     color: #FFFFFF;
 }
 QHeaderView::section {
@@ -139,8 +145,36 @@ QHeaderView::section {
     border: none;
     border-right: 1px solid %6;
     border-bottom: 1px solid %6;
-    padding: 4px 8px;
+    padding: 2px 8px;
+    height: 22px;
     font-weight: 600;
+}
+QTabBar::tab {
+    background-color: %7;
+    color: %4;
+    border: 1px solid %6;
+    padding: 2px 10px;
+    margin-right: 2px;
+    height: 22px;
+    font-size: 11px;
+}
+QTabBar::tab:bottom {
+    border-top: none;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+QTabBar::tab:top {
+    border-bottom: none;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+QTabBar::tab:selected {
+    background-color: %5;
+    color: %1;
+}
+QTabBar::tab:hover:!selected {
+    background-color: %9;
+    color: %1;
 }
 QDockWidget {
     titlebar-close-icon: none;
@@ -156,24 +190,24 @@ QDockWidget::title {
     text-align: left;
 }
 QMainWindow::separator {
-    width: 2px;
-    height: 2px;
-    background-color: %6;
+    width: 1px;
+    height: 1px;
+    background-color: %14;
 }
 QMainWindow::separator:hover {
-    background-color: %2;
+    background-color: %15;
 }
 QSplitter::handle {
-    background-color: %6;
+    background-color: %14;
 }
 QSplitter::handle:horizontal {
-    width: 2px;
+    width: 1px;
 }
 QSplitter::handle:vertical {
-    height: 2px;
+    height: 1px;
 }
 QSplitter::handle:hover {
-    background-color: %2;
+    background-color: %15;
 }
 QScrollBar:vertical {
     background-color: %5;
@@ -339,7 +373,9 @@ QPushButton#PrimaryActionButton:disabled {
         .arg(borderMid)       // %10
         .arg(bgButtonPressed) // %11
         .arg(textDisabled)    // %12
-        .arg(accentHover);    // %13
+        .arg(accentHover)     // %13
+        .arg(splitterColor)   // %14
+        .arg(splitterHover);  // %15
 
     if (!arrowUp.isEmpty() && !arrowDown.isEmpty()) {
         qss += QString(R"QSS(

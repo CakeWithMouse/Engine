@@ -322,6 +322,11 @@ void EditorQtHost::DrainCommands()
             };
             uint64_t sel = sceneHandler_.SelectedId();
             viewportHandler_.Handle(cmd, vctx, viewportActive_, playState_, sel, result, error);
+            if (cmd.type == EditorCommand::ViewportAttach || cmd.type == EditorCommand::ViewportResize)
+            {
+                if (overlay_.setAntialiasing && overlay_.context)
+                    overlay_.setAntialiasing(overlay_.context, antialiasingMode_);
+            }
             if (cmd.type == EditorCommand::PickObject) {
                 sceneHandler_.PickSelection(sel, cmd.name == "toggle" && BatchApi());
                 SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};

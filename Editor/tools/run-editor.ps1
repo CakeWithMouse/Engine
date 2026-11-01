@@ -187,12 +187,21 @@ if (Test-Path -LiteralPath $templateDll) {
     $projectFiles = $projectFiles | Select-Object -Unique
     foreach ($pJson in $projectFiles) {
         $pDir = Split-Path -Parent $pJson
-        $pDll = Join-Path $pDir "Game.dll"
-        if (Test-Path -LiteralPath $pDll) {
-            $dllItem = Get-Item -LiteralPath $pDll
-            if ($dllItem.LastWriteTime -lt $templateItem.LastWriteTime) {
-                Copy-Item -LiteralPath $templateDll -Destination $pDll -Force
-                Log-Step "Updated outdated Game.dll in $pDir ($($dllItem.LastWriteTime) -> $($templateItem.LastWriteTime))" "Yellow"
+        $targetDlls = @( (Join-Path $pDir "Game.dll") )
+        try {
+            $pContent = Get-Content -LiteralPath $pJson -Raw | ConvertFrom-Json
+            if ($pContent.module) {
+                $targetDlls += [System.IO.Path]::GetFullPath((Join-Path $pDir $pContent.module))
+            }
+        } catch {}
+        $targetDlls = $targetDlls | Select-Object -Unique
+        foreach ($pDll in $targetDlls) {
+            if (Test-Path -LiteralPath $pDll) {
+                $dllItem = Get-Item -LiteralPath $pDll
+                if ($dllItem.LastWriteTime -lt $templateItem.LastWriteTime) {
+                    Copy-Item -LiteralPath $templateDll -Destination $pDll -Force
+                    Log-Step "Updated outdated Game.dll in $pDll ($($dllItem.LastWriteTime) -> $($templateItem.LastWriteTime))" "Yellow"
+                }
             }
         }
     }

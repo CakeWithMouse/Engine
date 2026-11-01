@@ -3393,6 +3393,7 @@ void Game::RenderEditorOverlay()
             Context->OMSetBlendState(OverlayBlendState.Get(), nullptr, 0xFFFFFFFF);
             Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
             Context->OMSetDepthStencilState(OverlayDepthDisabledState.Get(), 0);
+            Context->RSSetState(OverlayRasterState.Get());
 
             for (const auto& batch : batches)
             {
