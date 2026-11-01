@@ -107,6 +107,7 @@ void Scene::RemoveNow(ComponentId id) noexcept
         if(settings->character==id)settings->character=0;
         if(settings->camera==id)settings->camera=0;
     }
+    for(auto& entry:components_)if(auto* character=dynamic_cast<Character*>(entry.second.get()))if(character->camera==id)character->camera=0;
     auto entry = components_.find(removed->SceneName);
     byId_.erase(it);
     components_.erase(entry);
@@ -264,8 +265,30 @@ void Scene::Tick(float dt, bool pauseNonSkybox)
     try
     {
         for (auto& entry : components_)
-            entry.second->Tick(pauseNonSkybox && !entry.second->IsSkybox() ? 0.0f : dt);
+        {
+            const float seconds=pauseNonSkybox && !entry.second->IsSkybox() ? 0.0f : dt;
+            entry.second->Tick(seconds);
+            auto* visual=entry.second->GetRenderComponent();
+            if(visual!=entry.second.get())visual->Tick(seconds);
+        }
     }
     catch (...) { ticking_ = false; throw; }
     ticking_ = false;
+}
+
+#include <chrono>
+Trace::Result Scene::Raycast(const Trace::Ray& input,const Trace::Query& query){
+    const auto start=std::chrono::steady_clock::now();Trace::Result result;result.statistics.queries=1;
+    auto normalized=Trace::Normalize(input);
+    if(!Trace::Valid(query))result.status=Trace::Status::InvalidQuery;
+    else if(!normalized)result.status=normalized.status;
+    else {
+        auto ray=normalized.ray;ray.maxDistance=(std::min)(ray.maxDistance,query.maxDistance);
+        for(const auto& entry:byId_){auto* component=entry.second;
+            if(pendingRemoves_.count(entry.first)||!(component->traceChannels&query.channels)||component->IsSkybox()||component->IsScreenSpaceUI()||std::find(query.ignore.begin(),query.ignore.end(),entry.first)!=query.ignore.end())continue;
+            auto hit=component->RaycastGeometry(ray,query,result.statistics);
+            if(hit&&(!result.hit||hit.hit->distance<result.hit->distance)){hit.hit->componentId=entry.first;result.hit=hit.hit;result.status=Trace::Status::Hit;ray.maxDistance=hit.hit->distance;}
+        }
+    }
+    result.statistics.microseconds=std::chrono::duration<double,std::micro>(std::chrono::steady_clock::now()-start).count();traceStatistics_+=result.statistics;return result;
 }

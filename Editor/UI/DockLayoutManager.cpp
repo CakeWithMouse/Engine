@@ -2,6 +2,7 @@
 #include "SettingsService.h"
 #include <QAbstractScrollArea>
 #include <QList>
+#include <QLayout>
 
 void DockLayoutManager::UnlockDockResizing(QDockWidget* dock)
 {
@@ -16,6 +17,7 @@ void DockLayoutManager::UnlockDockResizing(QDockWidget* dock)
 void DockLayoutManager::UnlockWidgetResizing(QWidget* widget)
 {
     if (!widget) return;
+    if (widget->layout()) widget->layout()->setSizeConstraint(QLayout::SetNoConstraint);
     widget->setMinimumSize(40, 30);
     widget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     for (auto* child : widget->findChildren<QAbstractScrollArea*>()) {

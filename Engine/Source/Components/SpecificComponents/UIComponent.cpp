@@ -185,27 +185,17 @@ void UIComponent::PrepareInput()
     LayoutTree(screenWidth, screenHeight);
 
     // Hit-testing needs boxes, so the layout above has to run first even when nothing is drawn.
-    InputDevice* input = game->GetInputDevice();
     if (!bVisible || !game->GetInput().IsContextEnabled(Input::Context::Game))
     {
         Router.Reset();
         return;
     }
     UIInputState state;
-    if (input) {
-        state.MouseX = input->MousePosition.x;
-        state.MouseY = input->MousePosition.y;
-        state.bMouseDown = input->IsPhysicalKeyDown(Keys::LeftButton);
-    } else {
-        // Embedded Play has no Raw Input device: Qt forwards keys through Input::System.
-        // Win32 client coordinates match the physical pixels of the borrowed viewport HWND.
-        POINT point{};
-        if (!GetCursorPos(&point) || !ScreenToClient(game->GetDisplay()->GetHwnd(), &point)) {
-            Router.Reset(); return;
-        }
-        state.MouseX = float(point.x); state.MouseY = float(point.y);
-        state.bMouseDown = game->GetInput().IsPhysicalKeyDown(Keys::LeftButton);
-    }
+    // HUD hit-testing and raycasts share physical viewport coordinates in both hosts.
+    const auto cursor=game->GetInput().GetCursorPosition();
+    if(!cursor.valid || cursor.width!=uint32_t(screenWidth) || cursor.height!=uint32_t(screenHeight)){Router.Reset();return;}
+    state.MouseX=cursor.x;state.MouseY=cursor.y;
+    state.bMouseDown=game->GetInput().IsPhysicalKeyDown(Keys::LeftButton);
     Router.Update(*Root, state);
 }
 

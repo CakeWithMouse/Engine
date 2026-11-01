@@ -73,7 +73,7 @@ namespace MyGame
     class RotatingCube final : public CubeComponent
     {
     public:
-        RotatingCube() { InitCube(); }
+        RotatingCube() { }
         void Tick(float dt) override
         {
             CubeComponent::Tick(dt);

@@ -1,3 +1,5 @@
+#include "../../../Engine/Source/Components/ComponentInternal.h"
+#include <Engine/Render/MeshPrimitives.h>
 #include "ExampleStartup.h"
 #include <Engine/Base/Config/BaseResources.h>
 #include <Engine/Base/Config/BaseGameConfig.h>
@@ -22,7 +24,7 @@ int RunScene(bool smoke, const std::filesystem::path& content)
     }
     MainGame->SetDirectionalLight(Config.SunDirectional,Config.SunLightColor,Config.SunItensity);
     MainGame->SetShadowSettings(Config.ShadowCasting, Config.ShadowDist);
-    MainGame->SetRenderingType(Config.RenderingType);
+    MainGame->GetSettings().SetRenderingType(Config.RenderingType);
     MainGame->CreateCubeMapFromFiles("MySky", {
                                          Path + "/cosy.jpg",
                                          Path +"/cosy.jpg",
@@ -34,9 +36,9 @@ int RunScene(bool smoke, const std::filesystem::path& content)
     MainGame->GetPlayer()->SetCameraMode(CameraMode::Orbital);
 
     SkyboxComponent* Skybox = new SkyboxComponent(glm::vec3(4000.0f), glm::vec4(1.0f));
-    Skybox->InitCube();
+
     Skybox->SetCubeMap(MainGame->GetCubeMap("MySky"));
-    Skybox->SetReflectionSettings(Config.SkyboxPower,100.f);
+    EngineInternal::ComponentAccess::Reflection(*Skybox, Config.SkyboxPower,100.f);
     ExampleStartup::Register(*MainGame, "Skybox", Skybox, Resources.SkyboxMaterial, Resources.SkyboxVertex);
 
     PointLightComponent* MainWarmLight = new PointLightComponent(
@@ -45,7 +47,7 @@ int RunScene(bool smoke, const std::filesystem::path& content)
         0.0f,
         5000.0f
     );
-    
+
     PointLightComponent* BlueFillLight = new PointLightComponent(
         glm::vec3(-450.0f, 80.0f, 320.0f),
         glm::vec3(0.2f, 0.45f, 1.0f),
@@ -70,7 +72,7 @@ int RunScene(bool smoke, const std::filesystem::path& content)
     glm::vec3 ComponentScale{800.2f, 1.0f, 800.f};
     CubeComponent* Cube = new
         CubeComponent(ComponentPosition, ComponentRotation, ComponentScale, Resources.White);
-    Cube->InitCube();
+
     ExampleStartup::Register(*MainGame, "1", Cube);
 
     float BallRadius = 5.f;
@@ -78,18 +80,18 @@ int RunScene(bool smoke, const std::filesystem::path& content)
     glm::vec3 BallPosition{0.0f, BallRadius, 0.0f};
     KatamatiSphereComponent* Ball = new KatamatiSphereComponent(BallPosition, ComponentRotationBall, BallScale,
                                                                 glm::vec4(1.0f, 0.9f, 0.3f, 1.0f));
-    Ball->InitSphere(BallRadius, 100, 100);
+    Ball->SetPrimitive(MeshPrimitives::Sphere(BallRadius, 100, 100));
     Ball->SetCollision(true);
     Ball->SetGame(MainGame.get());
     Ball->SetTexture(Path +"/Models/2.jpg");
     Ball->SetCubeMap(MainGame->GetCubeMap("MySky"));
-    Ball->SetReflectionSettings(0.72f, 5.5f);
+    EngineInternal::ComponentAccess::Reflection(*Ball, 0.72f, 5.5f);
     ExampleStartup::Register(*MainGame, "Ball", Ball, Resources.ReflectiveSphereMaterial, Resources.ReflectiveSphereVertex);
 
     glm::vec3 SunAtmospherePosition{0.0f, 0.f, 0.0f};
     SphereComponent* SunAtmosphere = new SphereComponent(SunAtmospherePosition, ComponentRotation, BallScale,
                                                          glm::vec4(1.0f, 0.5f, 0.1f, 0.3f));
-    SunAtmosphere->InitSphere(BallRadius + 2.f, 20, 20);
+    SunAtmosphere->SetPrimitive(MeshPrimitives::Sphere(BallRadius + 2.f, 20, 20));
     SunAtmosphere->SetParent(Ball);
     ExampleStartup::Register(*MainGame, "SunAtmosphere", SunAtmosphere, {}, Resources.SunMaterial);
 
@@ -101,7 +103,7 @@ int RunScene(bool smoke, const std::filesystem::path& content)
     TestCube->SetGame(MainGame.get());
     if (!TestCube->LoadModel(Path + "/Models/test_cube.obj")) { delete TestCube; throw std::runtime_error("Cannot load test_cube.obj"); }
     TestCube->SetCubeMap(MainGame->GetCubeMap("MySky"));
-    TestCube->SetReflectionSettings(0.45f, 4.0f);
+    EngineInternal::ComponentAccess::Reflection(*TestCube, 0.45f, 4.0f);
     ExampleStartup::Register(*MainGame, "TestCube", TestCube, Resources.ReflectiveFBXMaterial, Resources.ReflectiveFBXVertex);
 
     // Простой спавн объектов по кругу
@@ -120,7 +122,7 @@ int RunScene(bool smoke, const std::filesystem::path& content)
                 glm::vec3(11.0f, 10.0f, 10.0f),
                 glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)
             );
-            
+
             //Вывод GBuffer
             Object->SetGame(MainGame.get());
             Object->SetCollision(true);
@@ -128,7 +130,7 @@ int RunScene(bool smoke, const std::filesystem::path& content)
             if (!Object->LoadModel(Path +"/Models/" + std::to_string(ModelNum) + ".obj")) { delete Object; throw std::runtime_error("Cannot load Katamari model"); }
             Object->LoadTexture(Path + "/Models/" + std::to_string(ModelNum) + ".jpg");
             Object->SetCubeMap(MainGame->GetCubeMap("MySky"));
-            Object->SetReflectionSettings(0.08f, 1.0f);
+            EngineInternal::ComponentAccess::Reflection(*Object, 0.08f, 1.0f);
             ExampleStartup::Register(*MainGame, "Object_" + std::to_string(i) + std::to_string(indexModel), Object,
                                         Resources.FBXMaterial, Resources.FBXMaterial);
         }

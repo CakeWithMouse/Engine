@@ -172,7 +172,6 @@ private:
     QAction* actSaveSceneAs_ = nullptr;
     QAction* actExit_ = nullptr;
     QAction* actServiceObjects_ = nullptr;
-    QAction* actConfigurePlay_ = nullptr;
     QAction* actAddModel_ = nullptr;
     QAction* actImportModel_ = nullptr;
     QAction* actImportTexture_ = nullptr;

@@ -98,7 +98,7 @@ LRESULT Display::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     switch (msg)
     {
     case WM_CLOSE:
-        if (game && game->IsRuntimeWindow()) { game->RequestWindowClose(); return 0; }
+        if (game && game->IsRuntimeWindow()) { game->GetSettings().RequestWindowClose(); return 0; }
         break;
     case WM_INPUT:
     {
@@ -159,7 +159,7 @@ LRESULT Display::WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
         if (wParam == VK_ESCAPE)
         {
-            if (game && game->IsRuntimeWindow()) game->RequestWindowClose();
+            if (game && game->IsRuntimeWindow()) game->GetSettings().RequestWindowClose();
             else PostQuitMessage(0);
         }
         return DefWindowProc(hwnd, msg, wParam, lParam);

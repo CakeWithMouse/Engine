@@ -8,7 +8,7 @@ namespace RuntimeExample
     class MovingCube final : public CubeComponent
     {
     public:
-        MovingCube() { InitCube(); }
+        MovingCube() { }
         void Tick(float dt) override
         {
             elapsed += dt;

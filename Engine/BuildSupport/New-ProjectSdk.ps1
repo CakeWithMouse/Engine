@@ -13,6 +13,12 @@ Copy-Item -LiteralPath "$PSScriptRoot/ProjectSdk.props" -Destination "$sdk/Build
 Copy-Item -LiteralPath "$PSScriptRoot/ProjectSdk.targets" -Destination "$sdk/Build/ProjectSdk.targets" -Force
 $importDir = if ($Configuration -eq 'Debug') { "$engineRoot/vcpkg_installed/x64-windows/debug/lib" } else { "$engineRoot/vcpkg_installed/x64-windows/lib" }
 if (Test-Path -LiteralPath $importDir) { Copy-Item -Path "$importDir/*.lib" -Destination "$sdk/Lib" -Force }
+New-Item -ItemType Directory -Force (Join-Path $sdk 'Examples'),(Join-Path $sdk 'Docs') | Out-Null
+Copy-Item -LiteralPath "$engineRoot/examples/TraceExamples.cpp" -Destination "$sdk/Examples/TraceExamples.cpp" -Force
+Copy-Item -LiteralPath "$engineRoot/docs/TRACE-API.md" -Destination "$sdk/Docs/TRACE-API.md" -Force
+Copy-Item -LiteralPath "$engineRoot/docs/API-REFERENCE.html" -Destination "$sdk/Docs/API-REFERENCE.html" -Force
+New-Item -ItemType Directory -Force (Join-Path $sdk 'Examples/ApiReference') | Out-Null
+Copy-Item -Path "$engineRoot/docs/api-reference/examples/*" -Destination "$sdk/Examples/ApiReference" -Force
 $release = Get-Content -LiteralPath "$Runtime/EngineVersion.json" -Raw | ConvertFrom-Json
 $manifest = @{format=1;version=$release.version;configuration=$Configuration;platform='x64';toolset=$PlatformToolset;crt= $(if($Configuration -eq 'Debug'){'MDd'}else{'MD'})}
 [IO.File]::WriteAllText("$sdk/Sdk.json", ($manifest | ConvertTo-Json), [Text.UTF8Encoding]::new($false))

@@ -59,6 +59,11 @@ $timestamp = (Get-Item -LiteralPath $generated).LastWriteTimeUtc
 Generate $true
 if ((Get-Item -LiteralPath $generated).LastWriteTimeUtc -ne $timestamp) { throw 'No-op generation changed timestamp' }
 $cases = @(
+    @('ENGINE_PROPERTY("Speed") float speed;', 'direct field'),
+    @('ENGINE_COMPONENT() class A : public GameComponent { ENGINE_PROPERTY("Speed") float speed; };', 'ENGINE_GENERATED_PROPERTIES'),
+    @('ENGINE_COMPONENT() class A : public GameComponent { ENGINE_GENERATED_PROPERTIES(GameComponent) ENGINE_PROPERTY("Speed") const float speed=1; };', 'Unsupported property type'),
+    @('ENGINE_COMPONENT() class A : public GameComponent { ENGINE_GENERATED_PROPERTIES(GameComponent) ENGINE_PROPERTY("Speed") float x=1,y=2; };', 'one property'),
+    @('ENGINE_COMPONENT() class A : public GameComponent { ENGINE_GENERATED_PROPERTIES(GameComponent) void F(){ ENGINE_PROPERTY("Speed") float speed; } };', 'direct field'),
     @('ENGINE_COMPONENT() class Forward;', "Expected ':'"),
     @('ENGINE_COMPONENT(123) class Bad : public GameComponent {};', "Expected ')'"),
     @('template<class T> ENGINE_COMPONENT() class Bad : public GameComponent {};', 'non-template'),
@@ -66,7 +71,6 @@ $cases = @(
     @('class Outer { ENGINE_COMPONENT() class Bad : public GameComponent {}; };', 'named namespace'),
     @("#if 0`nENGINE_COMPONENT() class Bad : public GameComponent {};`n#endif", 'Conditional component'),
     @('ENGINE_COMPONENT() class A : public GameComponent {}; ENGINE_COMPONENT() class A : public GameComponent {};', 'Duplicate component'),
-    @('ENGINE_PROPERTY() int field;', 'not supported'),
     @('ENGINE_COMPONENT() struct Bad : public GameComponent {};', "Expected 'class'"),
     @('/* unterminated', 'Unterminated comment')
 )

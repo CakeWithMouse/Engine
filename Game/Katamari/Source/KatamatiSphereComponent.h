@@ -30,7 +30,6 @@ public:
     KatamatiSphereComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
     KatamatiSphereComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm::vec4 color);
     
-    void InitSphere(float radius = 0.5f, int slices = 20, int stacks = 20);
     void Tick(float deltaTime) override;
 protected:
     /** Rolling uses its own quaternion; parent/caching logic is inherited from GameComponent. */
@@ -47,9 +46,6 @@ public:
     void AcceptRotation(const glm::vec3& moveDirection, float moveDistance);
     
 private:
-    void GenerateSphere(float radius, int slices, int stacks);
-    std::vector<DirectX::XMFLOAT4> vertices;
-    std::vector<int> indices;
     float Speed = 1.f;
     float Radius = 1.f;
     

@@ -12,6 +12,7 @@
 #include <QLineEdit>
 #include <QGroupBox>
 #include <QAction>
+#include <QLayout>
 #include <vector>
 #include <iostream>
 #include <set>
@@ -121,8 +122,7 @@ inline void Run()
         QStringLiteral("Rotate (E/R)"),
         QStringLiteral("Scale (R/S)"),
         QStringLiteral("Grid Snapping (Shift+S)"),
-        QStringLiteral("Move Snap Step"),
-        QStringLiteral("Detailed Play Settings…")
+        QStringLiteral("Move Snap Step")
     };
 
     int cyrillicCount = 0;
@@ -144,6 +144,17 @@ inline void Run()
     toolBar.resize(800, 36);
     toolBar.show();
     QCoreApplication::processEvents();
+    for (const auto* name : {"BtnPlay", "BtnPause", "BtnStop", "BtnExternal"})
+    {
+        auto* button = toolBar.findChild<QAbstractButton*>(QString::fromLatin1(name));
+        if (!button || !button->isVisible() || !button->parentWidget()->layout() ||
+            button->parentWidget()->layout()->indexOf(button) < 0)
+            throw std::runtime_error(std::string("UiSmoke: Missing toolbar control: ") + name);
+        ++checks;
+    }
+    if (toolBar.findChild<QAbstractButton*>(QStringLiteral("ConfigPlayBtn")))
+        throw std::runtime_error("UiSmoke: Play settings belong to player properties");
+    ++checks;
     auto* playBtn = toolBar.findChild<QAbstractButton*>(QStringLiteral("BtnPlay"));
     if (playBtn)
     {

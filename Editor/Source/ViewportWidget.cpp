@@ -20,6 +20,7 @@
 #include <QKeyEvent>
 #include <QWheelEvent>
 #include <QTimer>
+#include <QCursor>
 #include <QElapsedTimer>
 #include <Engine/InputDevice/Keys.h>
 
@@ -48,6 +49,7 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
         const int state = host_->PlayState();
         if (inputState_ != state) { inputState_ = state; keys_.clear(); looking_ = rmbPressed_ = false; EndObjectDrag(); }
         if (!attached_ || !hasFocus() || !isActiveWindow()) return;
+        SendCursor(mapFromGlobal(QCursor::pos()),true); // refresh after Play/resume, resize and DPI changes
         if (state != EditorQtHost::Edit && host_->HasScene()) return;
 
         const float speed = dt * (keys_.contains(Qt::Key_Shift) ? 4.0f : 1.0f);

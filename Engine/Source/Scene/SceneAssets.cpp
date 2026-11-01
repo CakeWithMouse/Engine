@@ -136,7 +136,7 @@ void ValidateMaterial(std::string_view path)
 }
 void Apply(GameComponent& object, const std::string& model, const std::string& texture, const std::string& material)
 {
-    if (object.GetModelAsset() != model) throw std::runtime_error("Model asset does not match component type");
+    if (object.GetModelAsset() != model) object.SetModelAsset(model);
     ValidateTexture(texture);
     if (!object.TrySetTexture(texture)) throw std::runtime_error("Cannot create texture resources");
     // A missing or broken .mat does not stop the scene: the game draws the error material instead.

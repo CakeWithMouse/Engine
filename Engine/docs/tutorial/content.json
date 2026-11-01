@@ -1,8 +1,8 @@
 {
   "title": "PainEngine\nПрактический туториал",
-  "date": "2026-10-31",
-  "revision": 6,
-  "engineVersion": "2026.10.31.3",
+  "date": "2026-11-01",
+  "revision": 7,
+  "engineVersion": "2026.11.01.1",
   "editorialPolicy": "editorial-policy.json",
   "slides": [
     {
@@ -326,43 +326,44 @@
       "items": [
         [
           "Добавление",
-          "Категория «Персонажи» → «Персонаж» → «Добавить объект»."
+          "Категория «Персонажи» → «Игрок» → «Добавить объект»."
         ],
         [
           "Управление",
-          "Назначьте персонажа в настройках Play."
+          "Выберите объект. Флажок «Игрок» и стандартное управление находятся в свойствах."
         ]
       ],
       "foot": "",
       "sources": [
-        "Editor/Source/MainWindow.cpp"
+        "Editor/Source/MainWindow.cpp",
+        "Engine/Include/Engine/Components/Character.h"
       ],
-      "notes": "Добавьте персонажа и назначьте его в диалоге Play. Иллюстрация из предыдущей редакции; расположение общих полей может отличаться в сворачиваемом инспекторе 2026.10.31.2."
+      "notes": "PlayerCharacter включает роль игрока по умолчанию. У обычного Character включите флажок «Игрок». Если игрока нет, сохраняется камера редактора. Снимок исторический; поля текущего инспектора описаны на следующем слайде."
     },
     {
-      "type": "shot",
-      "title": "Назначение для Play",
-      "image": "r2/play-settings.png",
+      "type": "rows",
+      "title": "Игрок и камера: свойства объекта",
       "items": [
         [
-          "Персонаж",
-          "Выберите объект сцены в первом поле."
+          "Игрок",
+          "Включите флажок «Игрок» у персонажа. Для обычного управления включите «Стандартное управление»."
         ],
         [
           "Камера",
-          "«Следовать за персонажем» или отдельная «Камера Play»."
+          "Выберите слежение или отдельную камеру сцены. Дистанция, высота и чувствительность — в свойствах игрока."
         ],
         [
-          "Ввод",
-          "Включите WASD и обзор с ПКМ. Затем щёлкните viewport в Play."
+          "Проекция и 2D",
+          "Задайте перспективу/FOV или ортографию/высоту вида, ближнюю и дальнюю границы, плоскость XY, XZ или YZ."
         ]
       ],
-      "foot": "Запуск → Настроить Play…",
+      "foot": "Без игрока остаётся камера редактора. Отдельного меню настройки Play больше нет.",
       "sources": [
-        "Editor/Source/MainWindow.cpp",
-        "Engine/docs/INPUT-CHARACTER.md"
+        "Engine/Include/Engine/Components/Character.h",
+        "Engine/Source/Components/Character.cpp",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp"
       ],
-      "notes": "Начальные параметры диалога: расстояние 5, высота 2, чувствительность 0.005. Настройки сохраняются вместе со сценой. Иллюстрация из предыдущей редакции; расположение общих полей может отличаться в сворачиваемом инспекторе 2026.10.31.2."
+      "notes": "Свойства Character: playerControlled, standardControl, camera, cameraDistance, cameraHeight, lookSensitivity, cameraSettings. При выборе отдельного SceneCamera параметры проекции задаются у него. Старые PlaySettings используются только для миграции старых сцен."
     },
     {
       "type": "shot",
@@ -666,14 +667,16 @@
     {
       "type": "code",
       "title": "RotatingCube: минимальный класс",
-      "code": "// Source/RotatingCube.h\n#pragma once\n#include <Engine/Components/ComponentAnnotations.h>\n#include <Engine/Components/SpecificComponents/CubeComponent.h>\n\nENGINE_COMPONENT(\"RotatingCube\")\nclass RotatingCube : public CubeComponent {\npublic:\n    RotatingCube();\n    void Tick(float deltaTime) override;\n};\n\n// Source/RotatingCube.cpp\n#include \"RotatingCube.h\"\nRotatingCube::RotatingCube() {\n    InitCube();\n    SetColor({1.0f, 0.65f, 0.2f, 1.0f});\n}",
-      "aside": "ENGINE_COMPONENT добавляет класс в каталог проекта.\n\nInitCube создаёт геометрию.\n\nКонструктор задаёт исходный вид.",
+      "code": "// Source/RotatingCube.h\n#pragma once\n#include <Engine/Components/ComponentAnnotations.h>\n#include <Engine/Components/SpecificComponents/CubeComponent.h>\n\nENGINE_COMPONENT(\"RotatingCube\")\nclass RotatingCube : public CubeComponent {\npublic:\n    RotatingCube();\n    void Tick(float deltaTime) override;\n};\n\n// Source/RotatingCube.cpp\n#include \"RotatingCube.h\"\nRotatingCube::RotatingCube() {\n    SetColor({1.0f, 0.65f, 0.2f, 1.0f});\n}",
+      "aside": "ENGINE_COMPONENT добавляет класс в каталог проекта.\n\nCubeComponent уже имеет геометрию куба.\n\nКонструктор задаёт исходный вид.",
       "sources": [
         "Engine/docs/tutorial/examples/RotatingCube.h",
-        "Engine/docs/tutorial/examples/RotatingCube.cpp"
+        "Engine/docs/tutorial/examples/RotatingCube.cpp",
+        "Engine/Include/Engine/Render/MeshPrimitives.h",
+        "Engine/Source/Components/SpecificComponents/CubeComponent.cpp"
       ],
       "foot": "",
-      "notes": "",
+      "notes": "\nГотовые компоненты имеют геометрию после создания. Для замены формы используйте SetPrimitive(MeshPrimitives::Cube(2.0f)) или другой готовый примитив. Модель назначается через SetModelAsset. Конструктор остаётся безопасным без окна и GPU.",
       "codeSize": 18
     },
     {
@@ -762,44 +765,39 @@
     {
       "type": "code",
       "title": "Как поле появляется в инспекторе",
-      "notes": "Наследование показано без регистрации, методов и полей для компактности; JSON ниже — элемент массива fields, не отдельный C++ блок. Полная DescribeEditorProperties возвращает R\"json({\"version\":1,\"fields\":[...]})json\". Другие типы: integer, bool, enum, object, asset, string.",
+      "notes": "Новый код использует PropertyMacros.h и ENGINE_GENERATED_PROPERTIES(Base). Поля без аннотаций не попадают в инспектор и сохранение. Game/PropertyTutorial оставлен как совместимый пример ручного кодека для старых сцен: ключи speed/enabled/brightness и вложенные группы сохранены. В обычном новом компоненте JSON писать не нужно.",
       "sources": [
-        "Game/PropertyTutorial/Source/RotatingCube.h",
-        "Game/PropertyTutorial/Source/RotatingCube.cpp",
-        "Game/PropertyTutorial/README.md",
-        "Game/PropertyTutorial/Content/Scenes/Main.scene.json",
-        "Engine/Include/Engine/Components/EditorProperties.h"
+        "Engine/Include/Engine/Components/PropertyMacros.h",
+        "Engine/docs/PROPERTY-MACROS.md",
+        "Engine/docs/api-reference/examples/ReferenceComponent.h"
       ],
-      "code": "// RotatingCube.h: дополнительный интерфейс\n#include <Engine/Components/EditorProperties.h>\nclass RotatingCube : public CubeComponent,\n                     public EditorPropertyProvider {\n    // Остальные объявления — в полном примере.\n};\n\n// В DescribeEditorProperties(): один элемент fields\n{ \"path\": \"/speed\", \"type\": \"number\",\n  \"label\": \"Скорость, °/с\",\n  \"group\": \"Свойства туториала/Вращение\",\n  \"min\": -720, \"max\": 720, \"step\": 15,\n  \"decimals\": 1 }",
-      "aside": "path связывает поле с ключом JSON.\n\ngroup задаёт вложенные сворачиваемые разделы.\n\nСхема возвращается строкой JSON: version: 1 и массив fields.",
-      "foot": "Фрагменты сокращены. Полный класс: Game/PropertyTutorial/Source/RotatingCube.h/.cpp."
+      "code": "#include <Engine/Components/PropertyMacros.h>\n#include <Engine/Components/SpecificComponents/CubeComponent.h>\n\nENGINE_COMPONENT(\"ExampleCube\")\nclass ExampleCube : public CubeComponent {\npublic:\n    ENGINE_GENERATED_PROPERTIES(CubeComponent)\nprivate:\n    ENGINE_PROPERTY(\"Скорость, °/с\", -720, 720)\n    float speed = 90.0f;\n\n    ENGINE_PROPERTY(\"Вращение включено\")\n    bool enabled = true;\n\n    ENGINE_PROPERTY(\"Яркость\", 0.1, 1.0)\n    float brightness = 1.0f;\n};",
+      "aside": "Аннотация стоит над полем.\n\nГенератор создаёт описание и сохранение при сборке.\n\nДополнительное наследование не требуется.",
+      "foot": "Имя поля — ключ сохранённых данных. Поля без аннотаций остаются обычным состоянием C++."
     },
     {
       "type": "steps",
       "title": "Своё поле: данные → вид → поведение",
-      "notes": "Сначала проверьте весь JSON, затем меняйте поля: ошибка не должна оставлять частично применённое состояние. Новое поле требует сборки / Hot Reload в Edit. Автоматического обхода C++ полей нет. Для ссылок на объекты требуется RemapProjectReferences. Версия данных — 1, новый brightness по умолчанию 1 при чтении прежних данных.",
+      "notes": "OnPropertiesChanged вызывается после загрузки свойств. Hook должен быть детерминированным. Макрос сохраняет поля и обеспечивает описание без ручного JSON. Совместимый ручной пример PropertyTutorial продолжает работать со старыми ключами и группами.",
       "sources": [
-        "Game/PropertyTutorial/Source/RotatingCube.h",
-        "Game/PropertyTutorial/Source/RotatingCube.cpp",
-        "Game/PropertyTutorial/README.md",
-        "Game/PropertyTutorial/Content/Scenes/Main.scene.json",
-        "Engine/docs/ASSET-UPDATES-AND-PROPERTIES.md"
+        "Engine/docs/PROPERTY-MACROS.md",
+        "Engine/Include/Engine/Components/PropertyMacros.h"
       ],
       "items": [
         [
-          "Хранить и сохранять",
-          "Добавьте поле класса. SaveProjectData записывает его; LoadProjectData читает и проверяет значения."
+          "Объявить",
+          "Добавьте поле и ENGINE_PROPERTY над ним. Диапазон и подпись задаются в аннотации."
         ],
         [
-          "Описать интерфейс",
-          "Добавьте элемент fields в DescribeEditorProperties: path, тип, название и группу."
+          "Собрать",
+          "ENGINE_GENERATED_PROPERTIES(Base) объявляет методы. ComponentGenerator реализует их при сборке DLL проекта."
         ],
         [
-          "Использовать значение",
-          "В Tick меняйте поведение; в LoadProjectData — внешний вид. Затем соберите и проверьте Undo, Save и Play."
+          "Применить",
+          "В Tick используйте значение поля. Для немедленного обновления внешнего вида добавьте public OnPropertiesChanged()."
         ]
       ],
-      "foot": "В примере speed_ и enabled_ используются в Tick, brightness_ применяется к цвету сразу."
+      "foot": "Для новых полей старых сцен остаётся значение конструктора. Переименование ключа требует миграции."
     },
     {
       "type": "code",
@@ -893,7 +891,7 @@
       "title": "Своя схема управления",
       "code": "class MyController : public CharacterController {\npublic:\n    using CharacterController::CharacterController;\n    void BindInput() override {\n        game_.GetInput().Bind({\"Go\",\n            Input::Context::Game, {Keys::I}});\n        connections_.push_back(game_.GetInput().Subscribe(\n            inputScope_, Input::Context::Game, \"Go\",\n            Input::Phase::Axis,\n            [this](const Input::Event& e) {\n                forward_ = e.value;\n            }));\n    }\n};",
       "aside": "I задаёт движение вперёд и заменяет стандартные привязки.\n\nGame выбирает контроллер в методе фабрики. Пример — в README.txt.\n\nДля своей камеры переопределите UpdateCamera().",
-      "notes": "Добавьте #include <Engine/MainGame/CharacterController.h>. В пользовательском Game объявите std::unique_ptr<CharacterController> CreateCharacterController() override; и реализуйте: std::unique_ptr<CharacterController> MyGame::CreateCharacterController() { return std::make_unique<MyController>(*this); }. Выберите MyGame через «Типы C++ проекта… → Выбрать Game». Персонажа по-прежнему назначьте в «Настроить Play…». Оставьте управление включённым, чтобы контроллер был активен. Здесь BindInput полностью заменяет стандартную схему, поэтому WASD и обзор ПКМ больше не зарегистрированы этим контроллером. При необходимости добавьте собственные оси, свой Tick и UpdateCamera. Character можно заменить через Possess.",
+      "notes": "Добавьте #include <Engine/MainGame/CharacterController.h>. В пользовательском Game объявите std::unique_ptr<CharacterController> CreateCharacterController() override; и реализуйте: std::unique_ptr<CharacterController> MyGame::CreateCharacterController() { return std::make_unique<MyController>(*this); }. Выберите MyGame через «Типы C++ проекта… → Выбрать Game». У персонажа включите роль «Игрок» в свойствах. Оставьте управление включённым, чтобы контроллер был активен. Здесь BindInput полностью заменяет стандартную схему, поэтому WASD и обзор ПКМ больше не зарегистрированы этим контроллером. При необходимости добавьте собственные оси, свой Tick и UpdateCamera. Character можно заменить через Possess.",
       "sources": [
         "Engine/Include/Engine/MainGame/CharacterController.h",
         "Engine/Source/MainGame/CharacterController.cpp",
@@ -901,7 +899,7 @@
         "Editor/Source/CodeTools.cpp",
         "Engine/docs/tutorial/examples/MyController.h"
       ],
-      "foot": "Выберите MyGame: Проект → C++ → Типы C++ проекта…; персонажа назначьте в настройках Play."
+      "foot": "Выберите MyGame: Проект → C++ → Типы C++ проекта…; роль игрока включите в свойствах персонажа."
     },
     {
       "type": "steps",

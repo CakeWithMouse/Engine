@@ -10,6 +10,7 @@
 #include <Engine/Runtime/SceneBatchApi.h>
 #include <Engine/Runtime/AuthoringApi.h>
 #include <Engine/Runtime/ViewportInputApi.h>
+#include <Engine/Runtime/ViewportCursorApi.h>
 #include <Engine/Runtime/ViewportOverlayApi.h>
 #include <Engine/Runtime/EditExtensions.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
@@ -29,6 +30,7 @@ public:
     EngineSceneBatchApi GetBatchApi() noexcept;
     EngineAuthoringApi GetAuthoringApi() noexcept;
     EngineViewportInputApi GetViewportInputApi() noexcept;
+    EngineViewportCursorApi GetViewportCursorApi() noexcept;
     EngineViewportOverlayApi GetViewportOverlayApi() noexcept;
     EnginePointLightV2Api GetPointLightV2Api() noexcept;
     SceneEditSession(const SceneEditSession&) = delete;

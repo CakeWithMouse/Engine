@@ -3,13 +3,18 @@
 #include <iostream>
 TriangleComponent::TriangleComponent() : GameComponent()
 {
+    DirectX::XMFLOAT4 vertices[] = {
+        {0.5f,0.5f,0,1},{1,0,0,1}, {-0.5f,-0.5f,0,1},{0,0,1,1},
+        {0.5f,-0.5f,0,1},{0,1,0,1}, {-0.5f,0.5f,0,1},{1,1,1,1}
+    };
+    int triangles[] = {0,1,2,1,0,3};
+    InitSquare(vertices, triangles);
 }
 
 void TriangleComponent::InitSquare(DirectX::XMFLOAT4 points[8], int indices[6])
 {
     // Просто передаем данные в базовый класс
     InitPoints(points, 8, indices, 6);
-    std::cout << "Triangle initialized with 4 vertices and 6 indices\n";
 }
 
 void TriangleComponent::InitSquareWithColor(DirectX::XMFLOAT4 points[8], DirectX::XMFLOAT4 color)

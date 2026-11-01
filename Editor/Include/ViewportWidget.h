@@ -40,6 +40,7 @@ public:
 
 signals:
     void contextMenuRequested(const QPoint& globalPos);
+    void deleteRequested();
     void gizmoModeChanged(EditorGizmoMode mode);
 
 protected:
@@ -68,6 +69,7 @@ private:
     void SendAttach();
     void SendResize();
 
+    void SendCursor(QPointF point, bool valid);
     uint32_t PhysW() const;
     uint32_t PhysH() const;
 

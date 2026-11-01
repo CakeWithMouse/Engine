@@ -22,7 +22,7 @@ public:
         if (!scene) return false;
         scene->SetSimulationEnabled(false);
         if (!scene->InitializeViewport(window, width, height)) return false;
-        scene->SetVSync(false);
+        scene->GetSettings().SetVSync(false);
         edit_ = std::move(scene);
         width_ = width; height_ = height;
         return true;
@@ -52,7 +52,7 @@ public:
         {
             if (!scene->InitializePlayViewport(*edit_))
                 throw std::runtime_error("Play viewport initialization failed");
-            scene->SetVSync(false);
+            scene->GetSettings().SetVSync(false);
             *scene->GetPlayer() = *edit_->GetPlayer();
             scene->GetPlayer()->SetGamePointer(scene.get());
             play_ = std::move(scene);

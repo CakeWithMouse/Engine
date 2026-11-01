@@ -1,3 +1,4 @@
+#include "../../../Engine/Source/Components/ComponentInternal.h"
 #include "BattleGame.h"
 
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
@@ -91,7 +92,7 @@ InstancedMeshComponent* BattleGame::CreateUnitBatch(UnitMesh::VehicleType type, 
 void BattleGame::BuildScene(const Settings& settings)
 {
     Config = settings;
-    RenderingType = Config.Forward ? Forward : Deffered;
+    GetSettings().SetRenderingType(Config.Forward ? Forward : Deffered);
 
     // One sun with cascaded shadows: the light model of a strategy battlefield.
     const float sunElevation = glm::radians(std::max(5.0f, std::min(Config.SunElevation, 89.0f)));
@@ -124,8 +125,8 @@ void BattleGame::BuildScene(const Settings& settings)
     auto ground = std::make_unique<CubeComponent>(glm::vec3(0.0f, -0.5f, 0.0f), glm::vec3(0.0f),
                                                   glm::vec3(fieldSize * 1.5f, 1.0f, fieldSize * 1.5f),
                                                   glm::vec4(0.33f, 0.37f, 0.27f, 1.0f));
-    ground->InitCube();
-    ground->SetStaticShadowCaster(true);
+
+    EngineInternal::ComponentAccess::StaticShadow(*ground, true);
     Register(*this, "Ground", std::move(ground));
 
     std::mt19937 rng(1337u);
@@ -147,7 +148,7 @@ void BattleGame::BuildScene(const Settings& settings)
             }
             scenery->SetLodScreenHeights({40.0f, 10.0f});
             scenery->SetLodFadeFraction(0.06f);
-            scenery->SetStaticShadowCaster(Config.BakedShadows);
+            EngineInternal::ComponentAccess::StaticShadow(*scenery, Config.BakedShadows);
             scenery->SetMaterial(buildingMaterial);
 
             const int countForType = Config.SceneryCount / sceneryTypeCount +
@@ -382,7 +383,7 @@ void BattleGame::UpdateHud()
     // A moving average: the raw frame time jitters too much to read off the screen. The first
     // frames carry the cost of building atlases and shadow maps, and smoothing them in would keep
     // the number wrong for a hundred frames, so until the scene settles the average just follows.
-    const bool bSettled = GetFrameIndex() > 10;
+    const bool bSettled = UpdateCount > 10;
     HudFrameMs = (bSettled && HudFrameMs > 0.0) ? HudFrameMs * 0.9 + frameMs * 0.1 : frameMs;
 
     // Every element is optional: the markup is authored outside the code, and a panel someone
@@ -433,6 +434,7 @@ void BattleGame::EnableBench(uint64_t benchFrames, uint64_t warmupFrames)
 
 void BattleGame::PreUpdate(float deltaTime)
 {
+    ++UpdateCount;
     Game::PreUpdate(deltaTime);
     UpdateHotkeys();
     if (Config.Moving)
@@ -443,14 +445,14 @@ void BattleGame::PreUpdate(float deltaTime)
 
     if (Bench.IsBenchActive())
     {
-        if (bVSync)
+        if (GetSettings().IsVSyncEnabled())
         {
             std::cerr << "Error: VSync is enabled during benchmark, measurement is invalid!" << std::endl;
             PostQuitMessage(1);
             return;
         }
 
-        const int slot = static_cast<int>(GetFrameIndex() % GpuTimerLatency);
+        const int slot = (GpuTimerSlot + 1) % GpuTimerLatency;
         if (GpuTimerIssued[slot] && GpuTimerEnd[slot] && GpuTimerDisjoint[slot] && GetContext())
         {
             UINT64 end = 0;
@@ -466,7 +468,7 @@ void BattleGame::PreUpdate(float deltaTime)
         }
 
         const double now = NowMs();
-        const uint64_t frameIdx = GetFrameIndex();
+        const uint64_t frameIdx = UpdateCount;
 
         if (frameIdx <= Bench.GetWarmupFrames())
         {
@@ -491,7 +493,7 @@ void BattleGame::PreUpdate(float deltaTime)
     else
     {
         const double now = NowMs();
-        if (LastTimestampMs > 0.0 && GetFrameIndex() > WarmupFrames)
+        if (LastTimestampMs > 0.0 && UpdateCount > WarmupFrames)
         {
             ++MeasuredFrames;
             FrameMsSum += now - LastTimestampMs;
@@ -502,18 +504,18 @@ void BattleGame::PreUpdate(float deltaTime)
         LastTimestampMs = now;
     }
 
-    if (Config.DumpShadows && GetFrameIndex() == 20)
+    if (Config.DumpShadows && UpdateCount == 20)
     {
         DumpShadowMaps("shadow");
     }
 
     // Late enough that the scene has settled and the frame time on screen is the real one.
-    if (!Config.DumpFrame.empty() && GetFrameIndex() == 60)
+    if (!Config.DumpFrame.empty() && UpdateCount == 60)
     {
         RequestFrameDump(Config.DumpFrame);
     }
 
-    if (Config.DumpImpostors && GetFrameIndex() == 20)
+    if (Config.DumpImpostors && UpdateCount == 20)
     {
         for (const UnitBatch& batch : UnitBatches)
         {
@@ -521,7 +523,7 @@ void BattleGame::PreUpdate(float deltaTime)
         }
     }
 
-    if (FrameLimit > 0 && GetFrameIndex() >= FrameLimit)
+    if (FrameLimit > 0 && UpdateCount >= FrameLimit)
     {
         PostQuitMessage(0);
     }
@@ -597,7 +599,7 @@ void BattleGame::PrintBenchHeader() const
 {
     const int width = DisplayPtr ? DisplayPtr->GetWidth() : 0;
     const int height = DisplayPtr ? DisplayPtr->GetHeight() : 0;
-    Bench.PrintHeader(width, height, bVSync, Config.UnitCount, GpuTimerLatency, GetDevice());
+    Bench.PrintHeader(width, height, GetSettings().IsVSyncEnabled(), Config.UnitCount, GpuTimerLatency, GetDevice());
     std::cout << "Animated: " << (Config.Animated ? "yes (CesiumMan VAT)" : "no") << "\n"
               << "Shadows: " << (Config.Shadows ? "enabled" : "disabled") << "\n"
               << "===============================" << std::endl;

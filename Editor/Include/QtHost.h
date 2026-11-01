@@ -67,6 +67,7 @@ public:
     // Configuration / extension APIs
     void SetModuleApi(const EngineEditSessionApi& scene);
     void SetProjectDataApi(const EngineProjectDataApi& api) { projectData_ = api; }
+    void SetViewportCursorApi(const EngineViewportCursorApi& api){cursor_=api;}
     void SetViewportInputApi(const EngineViewportInputApi& api) { viewportInput_ = api; }
     void SetSelectionApi(const EngineSelectionApi& api) { selection_ = api; }
     void InitializeRecovery();
@@ -101,6 +102,11 @@ private:
     RecoveryStore recovery_;
     std::chrono::steady_clock::time_point recoveryTime_{};
     void WriteRecovery();
+    EngineViewportCursorApi cursor_{};
+    const EngineViewportCursorApi* CursorApi() const {
+        if(host_.getService){const auto* api=static_cast<const EngineViewportCursorApi*>(host_.getService(host_.user,EngineViewportCursorService,1));return api&&api->version==1&&api->set?api:nullptr;}
+        return cursor_.set?&cursor_:nullptr;
+    }
     EngineViewportInputApi viewportInput_{};
     EngineViewportOverlayApi overlay_{};
     uint32_t antialiasingMode_ = 1;

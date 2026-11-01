@@ -36,7 +36,7 @@ public:
 class Sky final : public SkyboxComponent
 {
 public:
-    Sky() { InitCube(); const auto shader=EnginePaths::Shader("BasicSky.hlsl").u8string(); SetShaderNames(shader,shader); }
+    Sky();
     bool CastsShadow() const override { return false; }
 };
 class PointLight final : public PointLightComponent
@@ -121,7 +121,8 @@ inline ComponentTypeCatalog GetComponentTypes()
         {"Environment.Sky", "Базовое небо", EngineComponentDetail::Create<Sky>},
         {"Gameplay.Character", "Персонаж", EngineComponentDetail::Create<Character>},
         {"Gameplay.Camera", "Камера Play", EngineComponentDetail::Create<SceneCamera>},
-        {"Gameplay.PlaySettings", "Настройки Play", EngineComponentDetail::Create<PlaySettings>}
+        {"Gameplay.PlaySettings", "Настройки Play", EngineComponentDetail::Create<PlaySettings>},
+        {"Gameplay.Player", "Игрок", EngineComponentDetail::Create<PlayerCharacter>}
     };
     return {types, sizeof(types) / sizeof(types[0])};
 }

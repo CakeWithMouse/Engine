@@ -38,7 +38,7 @@ int wmain(int argc,wchar_t** argv) {
         Check(api.scene.createObject(api.scene.context,"Gameplay.Character","Hero",&transform,&hero)==EngineSceneOk,"create hero");
         Check(api.scene.createObject(api.scene.context,"Gameplay.PlaySettings","Play",&transform,&settings)==EngineSceneOk,"create play settings");
         const auto data=module.ProjectDataApi();
-        Check(data.write(data.context,hero,"{\"version\":1,\"moveSpeed\":9}")==EngineSceneOk,"custom speed");
+        Check(data.write(data.context,hero,"{\"version\":1,\"moveSpeed\":9,\"playerControlled\":true}")==EngineSceneOk,"custom speed");
         const auto play="{\"version\":1,\"character\":"+std::to_string(hero)+",\"camera\":0,\"standardControl\":true,\"cameraDistance\":5,\"cameraHeight\":2,\"lookSensitivity\":0.005}";
         Check(data.write(data.context,settings,play.c_str())==EngineSceneOk,"assign Play");
         Check(api.attachViewport(api.context,window,320,240)==EngineSceneOk,"attach old viewport");
@@ -60,6 +60,9 @@ int wmain(int argc,wchar_t** argv) {
         Check(api.context!=previousContext,"session replaced without closing window");
         const auto overlay=module.ViewportOverlayApi();
         Check(overlay.context==api.context,"overlay extension follows new DLL session");
+        const auto cursor=module.ViewportCursorApi();
+        Check(cursor.context==api.context&&cursor.version==1&&cursor.set,"cursor extension follows new DLL session");
+        Check(cursor.set(cursor.context,120.25f,80.75f,320,240,1)==EngineSceneOk,"cursor callback remains callable after DLL unload");
         EngineCameraInfo cameraInfo{};
         Check(overlay.getCamera && overlay.getCamera(overlay.context,&cameraInfo)==EngineSceneOk,"camera callback remains callable after DLL unload");
         Check(cameraInfo.width==320 && cameraInfo.height==240,"overlay camera keeps viewport dimensions");

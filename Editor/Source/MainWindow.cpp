@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include <QDateTime>
 #include "QtHost.h"
 #include "FileBrowser.h"
 #include "ViewportWidget.h"
@@ -6,7 +7,6 @@
 #include "ObjectInspectorPanel.h"
 #include "MainToolBar.h"
 #include "DockLayoutManager.h"
-#include "PlaySettingsDialog.h"
 #include "ExternalGameRunner.h"
 #include "EditorTheme.h"
 #include "EditorLocale.h"
@@ -102,6 +102,7 @@ void EditorMainWindow::BuildUi()
     auto* viewportLayout = new QVBoxLayout(viewportContainer);
     viewportLayout->setContentsMargins(0, 0, 0, 0);
     viewportLayout->setSpacing(0);
+    viewportLayout->setSizeConstraint(QLayout::SetNoConstraint);
 
     auto* headerBar = new ViewportHeaderBar(viewportContainer);
     viewport_->AttachHeaderBar(headerBar);
@@ -110,6 +111,7 @@ void EditorMainWindow::BuildUi()
     viewportLayout->addWidget(viewport_, 1);
 
     RegisterViewportCommands(viewport_, host_);
+    connect(viewport_, &ViewportWidget::deleteRequested, this, [this] { SubmitObjectCommand(EditorCommand::RemoveObject); });
 
     viewportDock_ = new QDockWidget(Tr("Вьюпорт", "Viewport"), this);
     viewportDock_->setObjectName(QStringLiteral("ViewportDock"));
@@ -301,7 +303,10 @@ void EditorMainWindow::CompactContentPanel() {
         ResizeContentPanel(180);
     });
 }
-void EditorMainWindow::AppendLine(const QString& line) { console_->appendPlainText(line); }
+void EditorMainWindow::AppendLine(const QString& line) {
+    const auto time=QDateTime::currentDateTime().toString("HH:mm:ss.zzz");
+    for(const auto& part:line.split('\n')) if(!part.trimmed().isEmpty()) console_->appendPlainText("["+time+"] "+part);
+}
 
 void EditorMainWindow::closeEvent(QCloseEvent* event)
 {
@@ -386,18 +391,6 @@ void EditorMainWindow::BuildSceneMenu()
     playMenu_->addSeparator();
     if (actExternal_) playMenu_->addAction(actExternal_);
 
-    actConfigurePlay_ = playMenu_->addAction(Tr("Настроить Play…", "Configure Play…"), this, [this] {
-        if (host_->PlayState() != EditorQtHost::Edit) return;
-        const auto snapshot = host_->ReadSnapshot();
-        std::vector<PlaySettingsObjectView> views;
-        for (const auto& o : snapshot.objects) views.push_back({o.id, o.gameplayKind, o.name, o.projectData});
-        PlaySettingsDialog dialog(views, this);
-        uint64_t settingsId = 0; QString configJson;
-        if (dialog.Execute(settingsId, configJson)) {
-            EditorCommand c; c.type = EditorCommand::ConfigurePlay; c.objectId = settingsId; c.path = configJson;
-            host_->PostCommand(c);
-        }
-    });
 
     editMenu_ = menuBar()->addMenu(Tr("Правка", "Edit"));
     undoAction_ = editMenu_->addAction(Tr("Отменить", "Undo"), this, [this] { SubmitObjectCommand(EditorCommand::Undo); }, QKeySequence::Undo);
@@ -459,9 +452,6 @@ void EditorMainWindow::BuildToolBar()
         if (externalGameRunner_ && externalGameRunner_->IsRunning()) { StopExternalGame(); return; }
         if (host_->HasScene()) SaveScene(false, [this] { StartExternalGame(); });
         else StartExternalGame();
-    });
-    connect(mainToolBar_, &MainToolBar::ConfigPlayTriggered, this, [this] {
-        if (actConfigurePlay_) actConfigurePlay_->trigger();
     });
 
     UpdatePlayButtons();
@@ -1376,7 +1366,6 @@ void EditorMainWindow::RetranslateUi()
     if (actSaveSceneAs_) actSaveSceneAs_->setText(Tr("Сохранить как…", "Save As…"));
     if (actExit_) actExit_->setText(Tr("Закрыть редактор", "Exit Editor"));
     if (actServiceObjects_) actServiceObjects_->setText(Tr("Служебные объекты сцены", "Scene Service Objects"));
-    if (actConfigurePlay_) actConfigurePlay_->setText(Tr("Настроить Play…", "Configure Play…"));
     if (actAddModel_) actAddModel_->setText(Tr("Добавить модель…", "Add Model…"));
     if (actImportModel_) actImportModel_->setText(Tr("Импорт модели…", "Import Model…"));
     if (actImportTexture_) actImportTexture_->setText(Tr("Импорт текстуры…", "Import Texture…"));

@@ -1,12 +1,14 @@
 #pragma once
 #include <Engine/InputDevice/Keys.h>
 #include <functional>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace Input
 {
+struct CursorPosition { float x=0,y=0; uint32_t width=0,height=0; bool valid=false; };
 enum class Context { Game, Editor, UI };
 enum class Phase { Pressed, Held, Released, Axis };
 enum class Source { Keys, MouseX, MouseY, Wheel };
@@ -70,6 +72,9 @@ public:
     void SetKey(Keys, bool down); // repeated downs are ignored
     void AddPointer(float x, float y, float wheel = 0);
     void SetPointerBlocked(bool blocked);
+    bool IsPointerBlocked() const;
+    void SetCursorPosition(CursorPosition position);
+    CursorPosition GetCursorPosition() const;
     bool IsPhysicalKeyDown(Keys key) const;
     void Tick(float deltaTime); // drains edges, then one Held/Axis event per frame
     void Reset(); // cancel actions, suppress held keys until their physical release

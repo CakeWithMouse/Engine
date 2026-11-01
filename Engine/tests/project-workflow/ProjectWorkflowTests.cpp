@@ -68,7 +68,7 @@ static void CheckLightPixels(HWND window, const std::filesystem::path& content)
 {
     EnginePaths::SetContentRoot(content);
     LightCaptureGame game;
-    game.SetRenderingType(Custom); game.SetSimulationEnabled(false); game.SetVSync(false);
+    game.GetSettings().SetRenderingType(Custom); game.SetSimulationEnabled(false); game.GetSettings().SetVSync(false);
     Check(game.InitializeViewport(window,640,480,true), "attach light pixel viewport");
     game.GetPlayer()->SetPosition({0,0,5});
     auto cube = SceneProject::GetComponentTypes().Find("Primitive.Cube")->create(); cube->SetColor({1,1,1,1});
@@ -122,7 +122,7 @@ static void CheckLightPixels(HWND window, const std::filesystem::path& content)
 static void CheckShadowPixels(HWND window)
 {
     LightCaptureGame game;
-    game.SetRenderingType(Custom); game.SetSimulationEnabled(false); game.SetVSync(false);
+    game.GetSettings().SetRenderingType(Custom); game.SetSimulationEnabled(false); game.GetSettings().SetVSync(false);
     game.SetSceneLightingEnabled(true);
     Check(game.InitializeViewport(window, 640, 480, true), "attach shadow pixel viewport");
     game.GetPlayer()->SetPosition({0, 3, 6});
@@ -252,7 +252,7 @@ int wmain(int argc, wchar_t** argv)
             std::vector<std::string> types;
             Check(api.scene.listTypes(api.scene.context, [](void* p, const EngineSceneTypeInfo* t) {
                 static_cast<std::vector<std::string>*>(p)->push_back(t->typeName);
-            }, &types) == EngineSceneOk && types.size() == 14, "primitives, lights, particles and sky");
+            }, &types) == EngineSceneOk && types.size() == 15, "primitives, lights, particles, sky and player");
             Check(api.attachViewport(api.context, window, 640, 480) == EngineSceneOk, "attach real D3D viewport");
             Check(api.frame(api.context, 0.016) == EngineSceneOk, "initial frame");
             uint64_t picked = 0;

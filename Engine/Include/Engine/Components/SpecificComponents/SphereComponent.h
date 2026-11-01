@@ -6,11 +6,15 @@
 class SphereComponent : public GameComponent
 {
 public:
-    SphereComponent(){};
+    SphereComponent();
     SphereComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
     SphereComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm::vec4 color);
     
+    // @engine-internal-begin
+private:
     void InitSphere(float radius = 0.5f, int slices = 20, int stacks = 20);
+public:
+    // @engine-internal-end
     void Tick(float deltaTime) override;
     void SetSpeed(float speed){Speed = speed;};
     SphereComponent* CreateSphereInstance(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm::vec4 Color);
@@ -24,7 +28,9 @@ protected:
     float currentAngle = 0.0f;
     glm::vec3 orbitCenter = glm::vec3(0.0f);
 private:
+    // @engine-internal-begin
     void GenerateSphere(float radius, int slices, int stacks);
+    // @engine-internal-end
     std::vector<DirectX::XMFLOAT4> vertices;
     std::vector<int> indices;
     float Speed = 1.f;
