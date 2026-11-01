@@ -58,7 +58,7 @@ LinePSInput VSLine(LineVSInput input)
     float2 pixelOffset = perp * (input.SideDir.x * halfWidth);
     float2 ndcOffset = pixelOffset * float2(ScreenSize.z * 2.0f, ScreenSize.w * 2.0f);
 
-    float4 baseClip = lerp(c0, c1, input.SideDir.y);
+    float4 baseClip = lerp(safeC0, safeC1, input.SideDir.y);
     output.Position = float4(baseClip.xy + ndcOffset * baseClip.w, baseClip.zw);
     return output;
 }
@@ -102,4 +102,29 @@ float4 PSBillboard(BillboardPSInput input) : SV_Target
 {
     float4 texColor = IconTexture.Sample(IconSampler, input.UV);
     return texColor * input.Tint;
+}
+
+struct TriangleVSInput
+{
+    float3 Position : POSITION;
+    float4 Color : COLOR;
+};
+
+struct TrianglePSInput
+{
+    float4 Position : SV_POSITION;
+    float4 Color : COLOR;
+};
+
+TrianglePSInput VSTriangle(TriangleVSInput input)
+{
+    TrianglePSInput output;
+    output.Position = mul(float4(input.Position, 1.0f), ViewProjection);
+    output.Color = input.Color;
+    return output;
+}
+
+float4 PSTriangle(TrianglePSInput input) : SV_Target
+{
+    return input.Color;
 }

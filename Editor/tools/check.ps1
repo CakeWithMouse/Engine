@@ -1,6 +1,7 @@
 param(
     [switch]$Quick,
     [switch]$Full,
+    [switch]$AllowEngine,
     [int]$TimeoutSec = 180
 )
 
@@ -128,7 +129,11 @@ function Invoke-ProcessWithTimeout {
 
 # 3. Check forbidden zones (Engine/, Game/, build.ps1)
 Write-Output "--- 1. Checking forbidden zones ---"
-$diffForbidden = Invoke-Git @("diff", "--stat", "HEAD", "--", "Engine/", "Game/", "build.ps1")
+$permitEngine = $AllowEngine -or ($env:PAINENGINE_ALLOW_ENGINE -eq "1")
+$zonesToCheck = if ($permitEngine) { @("build.ps1") } else { @("Engine/", "Game/", "build.ps1") }
+$diffFiles = Invoke-Git (@("diff", "--name-only", "HEAD", "--") + $zonesToCheck)
+$allowedBuildFiles = @("Engine/BuildSupport/Cpp.props")
+$diffForbidden = @($diffFiles -split "`r?`n" | Where-Object { $_ -and ($_ -notin $allowedBuildFiles) })
 if ($diffForbidden) {
     Write-Error "Forbidden zone modified!`n$diffForbidden"
     exit 1

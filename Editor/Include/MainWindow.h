@@ -104,6 +104,7 @@ private:
 
     void BuildSceneDocks();
     void BuildSceneMenu();
+    void BuildToolsMenu();
     void ShowDirectionalLight();
     void ConnectPanels();
 
@@ -159,6 +160,10 @@ private:
     QMenu* langMenu_ = nullptr;
     QMenu* accentMenu_ = nullptr;
     QMenu* schemeMenu_ = nullptr;
+    QMenu* toolsMenu_ = nullptr;
+    QMenu* uiSubMenu_ = nullptr;
+    QAction* actCreateUI_ = nullptr;
+    QAction* actOpenUIEditor_ = nullptr;
     QAction* actSchemeUnreal_ = nullptr;
     QAction* actSchemeBlender_ = nullptr;
 

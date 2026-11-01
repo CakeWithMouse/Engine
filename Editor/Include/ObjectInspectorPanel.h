@@ -35,6 +35,7 @@ struct InspectorPointLightValue
     double intensity = 0.0;
     double radius = 0.0;
     bool enabled = false;
+    bool castShadows = false;
 };
 
 class ObjectInspectorPanel : public QWidget
@@ -125,6 +126,7 @@ private:
     QWidget* lightInspector_ = nullptr;
     NoWheelDoubleSpinBox* lightValues_[5]{};
     QCheckBox* lightEnabled_ = nullptr;
+    QCheckBox* lightShadows_ = nullptr;
     QPushButton* lightColor_ = nullptr;
     QLabel* lightRowLabels_[5]{};
 

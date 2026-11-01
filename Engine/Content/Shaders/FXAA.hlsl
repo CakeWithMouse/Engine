@@ -75,6 +75,7 @@ float4 PSMain(VSOutput input) : SV_TARGET
     float blendFactor = subpix * subpix * 0.75;
 
     float4 rgbBlend = SceneTexture.Sample(LinearClampSampler, uv + stepDir * (0.5 * blendFactor));
-    return lerp(rgbM, rgbBlend, 0.5);
+    float3 finalRgb = lerp(rgbM.rgb, rgbBlend.rgb, 0.5f);
+    return float4(finalRgb, 1.0f);
 }
 

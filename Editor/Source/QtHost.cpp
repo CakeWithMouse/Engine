@@ -42,7 +42,7 @@ bool EditorQtHost::Start()
 
     if (HasScene())
     {
-        SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi()};
+        SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};
         sceneHandler_.PublishScene(sctx, playState_.load());
     }
 
@@ -110,14 +110,16 @@ void EditorQtHost::Update(double dt)
         }
     }
 
-    if (overlay_.setOverlayLines || overlay_.setOverlayBillboards || overlay_.setOverlayIcon)
+    if (overlay_.setOverlayLines || overlay_.setOverlayBillboards || overlay_.setOverlayIcon || (overlay_.version >= 3 && overlay_.setOverlayTriangles))
     {
         std::vector<PendingIcon> iconsToUpload;
         std::vector<EngineOverlayLine> linesToSend;
         std::vector<EngineOverlayBillboard> billboardsToSend;
+        std::vector<EngineOverlayTriangle> trianglesToSend;
         float thicknessToSend = 1.0f;
         bool sendLines = false;
         bool sendBillboards = false;
+        bool sendTriangles = false;
 
         {
             std::lock_guard lk(overlayMutex_);
@@ -138,6 +140,12 @@ void EditorQtHost::Update(double dt)
                 billboardsToSend = pendingBillboards_;
                 pendingBillboardsDirty_ = false;
                 sendBillboards = true;
+            }
+            if (pendingTrianglesDirty_)
+            {
+                trianglesToSend = pendingTriangles_;
+                pendingTrianglesDirty_ = false;
+                sendTriangles = true;
             }
         }
 
@@ -162,6 +170,10 @@ void EditorQtHost::Update(double dt)
         if (sendBillboards && overlay_.setOverlayBillboards)
         {
             overlay_.setOverlayBillboards(overlay_.context, billboardsToSend.data(), static_cast<uint32_t>(billboardsToSend.size()));
+        }
+        if (sendTriangles && overlay_.version >= 3 && overlay_.setOverlayTriangles)
+        {
+            overlay_.setOverlayTriangles(overlay_.context, trianglesToSend.data(), static_cast<uint32_t>(trianglesToSend.size()));
         }
     }
     if (HasScene())
@@ -265,7 +277,7 @@ void EditorQtHost::DrainCommands()
             result = playState_.load() == Edit && api && api->asset ? api->asset(api->context, cmd.w, cmd.path.toUtf8().constData(), cmd.name.toUtf8().constData(), detail, sizeof(detail)) : EngineSceneReadOnly;
             if (result == EngineSceneOk) {
                 history_.Reset();
-                SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi()};
+                SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};
                 sceneHandler_.SetSelectedId(0);
                 sceneHandler_.MarkDirty();
                 sceneHandler_.PublishScene(ctx, playState_.load());
@@ -300,7 +312,7 @@ void EditorQtHost::DrainCommands()
                 viewportInput_,
                 [this](const char* msg) { Log(msg); },
                 [this] {
-                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi()};
+                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};
                     sceneHandler_.PublishScene(sctx, playState_.load());
                 }
             };
@@ -308,7 +320,7 @@ void EditorQtHost::DrainCommands()
             viewportHandler_.Handle(cmd, vctx, viewportActive_, playState_, sel, result, error);
             if (cmd.type == EditorCommand::PickObject) {
                 sceneHandler_.PickSelection(sel, cmd.name == "toggle" && BatchApi());
-                SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi()};
+                SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};
                 sceneHandler_.PublishScene(ctx, playState_.load());
             }
             if (cmd.type == EditorCommand::TogglePlay && result == EngineSceneOk) InvalidateOverlays();
@@ -333,7 +345,7 @@ void EditorQtHost::DrainCommands()
                 [this] { return sceneHandler_.GetSelectedObjectName(); },
                 [this](uint64_t id) { sceneHandler_.SetSelectedId(id); },
                 [this] {
-                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi()};
+                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};
                     sceneHandler_.PublishScene(sctx, playState_.load());
                 }
             };
@@ -346,7 +358,7 @@ void EditorQtHost::DrainCommands()
         }
         else if (sceneHandler_.CanHandle(cmd.type))
         {
-            SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi()};
+            SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};
             sceneHandler_.Handle(cmd, sctx, history_, playState_.load(), result, error);
             if (result == EngineSceneOk) {
                 if (cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene || cmd.type == EditorCommand::Undo || cmd.type == EditorCommand::Redo) InvalidateOverlays();
@@ -463,6 +475,13 @@ void EditorQtHost::SetOverlayBillboards(const std::vector<EngineOverlayBillboard
     pendingBillboardsDirty_ = true;
 }
 
+void EditorQtHost::SetOverlayTriangles(const std::vector<EngineOverlayTriangle>& triangles)
+{
+    std::lock_guard lk(overlayMutex_);
+    pendingTriangles_ = triangles;
+    pendingTrianglesDirty_ = true;
+}
+
 void EditorQtHost::SetParent(uint64_t childId, uint64_t parentId)
 {
     EditorCommand c;
@@ -485,7 +504,7 @@ void EditorQtHost::SetViewportOverlayApi(const EngineViewportOverlayApi& api)
     overlay_ = api;
     { std::lock_guard lk(cameraMutex_); lastCameraValid_ = false; }
     InvalidateOverlays();
-    const bool found = ((overlay_.version == 1 || overlay_.version == 2) && overlay_.setOverlayLines && overlay_.getCamera);
+    const bool found = ((overlay_.version >= 1 && overlay_.version <= 3) && overlay_.setOverlayLines && overlay_.getCamera);
     std::printf("[Info] Viewport overlay service: %s (version %u)\n", found ? "FOUND" : "NOT FOUND", overlay_.version);
     std::fflush(stdout);
     if (overlay_.setAntialiasing && overlay_.context)
@@ -497,6 +516,9 @@ void EditorQtHost::SetViewportOverlayApi(const EngineViewportOverlayApi& api)
 void EditorQtHost::SetAntialiasing(uint32_t mode)
 {
     antialiasingMode_ = mode;
+    std::printf("[Info] QtHost::SetAntialiasing: mode = %u, serviceVersion = %u, handler = %p\n",
+        mode, overlay_.version, (void*)overlay_.setAntialiasing);
+    std::fflush(stdout);
     if (overlay_.setAntialiasing && overlay_.context)
     {
         overlay_.setAntialiasing(overlay_.context, mode);

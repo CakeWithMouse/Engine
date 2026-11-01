@@ -47,6 +47,7 @@ struct SceneComponentSnapshot
         glm::vec3 color{1.0f};
         float intensity = 1.0f, radius = 10.0f;
         bool enabled = true;
+        bool castShadows = false;
         bool IsValid() const noexcept;
     };
     std::optional<PointLight> pointLight;

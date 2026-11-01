@@ -2,6 +2,8 @@
 #include "EditorLocale.h"
 #include "QtHost.h"
 #include "MainWindow.h"
+#include "IconProvider.h"
+#include <QAbstractFileIconProvider>
 
 #include <QClipboard>
 #include <QComboBox>
@@ -23,6 +25,21 @@
 #include <QSortFilterProxyModel>
 
 #include <string>
+
+class TablerFileIconProvider final : public QAbstractFileIconProvider
+{
+public:
+    QIcon icon(IconType type) const override
+    {
+        if (type == Folder) return IconProvider::FolderIcon();
+        return IconProvider::FileIcon();
+    }
+    QIcon icon(const QFileInfo& info) const override
+    {
+        if (info.isDir()) return IconProvider::FolderIcon();
+        return IconProvider::FileIcon();
+    }
+};
 
 class ProjectFilesFilter final : public QSortFilterProxyModel
 {
@@ -85,6 +102,7 @@ void FileBrowserDock::BuildUi()
     imports_ = new QToolButton(panel);
     imports_->setObjectName(QStringLiteral("ImportAssets"));
     imports_->setPopupMode(QToolButton::InstantPopup);
+    imports_->setIcon(IconProvider::PlusIcon());
     auto* importMenu = new QMenu(imports_);
 
     actImportModel_ = importMenu->addAction(QString());
@@ -104,6 +122,7 @@ void FileBrowserDock::BuildUi()
     // --- верхняя панель: фильтр + выбор корня ---
     auto* topBar = new QHBoxLayout;
     filterEdit_ = new QLineEdit(panel);
+    filterEdit_->addAction(IconProvider::SearchIcon(), QLineEdit::LeadingPosition);
     connect(filterEdit_, &QLineEdit::textChanged, this,
             [this](const QString& t) { ApplyFilter(t); });
     topBar->addWidget(imports_);
@@ -122,6 +141,7 @@ void FileBrowserDock::BuildUi()
     model_ = new QFileSystemModel(this);
     model_->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
     model_->setNameFilterDisables(false);
+    model_->setIconProvider(new TablerFileIconProvider());
 
     proxy_ = new ProjectFilesFilter(this);
     proxy_->project = QDir::cleanPath(projectDir_); proxy_->content = QDir::cleanPath(contentDir_);

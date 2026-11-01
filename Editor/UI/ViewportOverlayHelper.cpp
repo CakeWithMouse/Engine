@@ -1,4 +1,5 @@
 #include "ViewportOverlayHelper.h"
+#include "GizmoTriangles.h"
 #include "IconProvider.h"
 #include "EditorIconData.h"
 #include "ViewportOverlay.h"
@@ -14,7 +15,7 @@ namespace
 {
     inline uint32_t GetBillboardIcon(const IEditorHost::SceneObject& obj, uint32_t& outColor)
     {
-        if (obj.hasPointLight)
+        if (obj.hasPointLight || obj.type == "Light.Point" || obj.name.find("Light") != std::string::npos)
         {
             uint8_t r = static_cast<uint8_t>(std::clamp(obj.pointLight.color[0] * 255.0f, 0.0f, 255.0f));
             uint8_t g = static_cast<uint8_t>(std::clamp(obj.pointLight.color[1] * 255.0f, 0.0f, 255.0f));
@@ -90,7 +91,16 @@ void ViewportOverlayHelper::UpdateOverlays(
     const float* objRot = selectedObj ? selectedObj->transform.rotation : nullptr;
     float lightRad = (selectedObj && selectedObj->hasPointLight) ? selectedObj->pointLight.radius : 0.0f;
 
-    const uint64_t hash = ViewportOverlay::ComputeOverlayHash(
+    uint64_t objectsHash = 14695981039346656037ull;
+    for (const auto& obj : snapshot.objects)
+    {
+        objectsHash ^= obj.id;
+        objectsHash *= 1099511628211ull;
+        objectsHash ^= static_cast<uint64_t>(obj.hasPointLight ? 1 : 0);
+        objectsHash *= 1099511628211ull;
+    }
+
+    const uint64_t hash = objectsHash ^ ViewportOverlay::ComputeOverlayHash(
         hasCamera ? cam.position : nullptr,
         hasCamera ? cam.viewMatrix : nullptr,
         gridEnabled,
@@ -180,6 +190,25 @@ void ViewportOverlayHelper::UpdateOverlays(
 
     host->SetOverlayLines(lines, 1.0f);
     host->SetOverlayBillboards(billboards);
+
+    std::vector<EngineOverlayTriangle> triangles;
+    if (selectedObj && host->HasScene())
+    {
+        GizmoMath::GizmoMode mode = (gizmoMode == 0) ? GizmoMath::GizmoMode::Translate :
+                                    (gizmoMode == 1) ? GizmoMath::GizmoMode::Rotate :
+                                                       GizmoMath::GizmoMode::Scale;
+        const float camFwd[3] = {cam.viewMatrix[2], cam.viewMatrix[6], cam.viewMatrix[10]};
+        triangles = GizmoTriangles::BuildGizmoTriangles(
+            mode,
+            selectedObj->transform.position,
+            cam.position,
+            camFwd,
+            cam.fov,
+            static_cast<float>(cam.height),
+            (hoveredHandle != GizmoGeometry::Handle::None) ? hoveredHandle : activeHandle
+        );
+    }
+    host->SetOverlayTriangles(triangles);
 }
 
 uint64_t ViewportOverlayHelper::HitTestBillboard(

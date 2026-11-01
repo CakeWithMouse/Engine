@@ -62,7 +62,7 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
             EnginePointLightApi light{};
             EngineDocumentCapabilities document{};
             if (query && query(extensionContext, EngineViewportOverlayExtension, 1, sizeof(overlay_), &overlay_))
-                if ((overlay_.version != 1 && overlay_.version != 2) || overlay_.context != extensionContext || !overlay_.getCamera || !overlay_.setOverlayLines || !overlay_.setOverlayIcon || !overlay_.setOverlayBillboards)
+                if ((overlay_.version < 1 || overlay_.version > 3) || overlay_.context != extensionContext || !overlay_.getCamera || !overlay_.setOverlayLines || !overlay_.setOverlayIcon || !overlay_.setOverlayBillboards)
                     throw std::runtime_error("Invalid viewport overlay API");
             if (query && query(extensionContext, EngineSelectionExtension, 1, sizeof(selection_), &selection_))
                 if (selection_.version != 1 || selection_.context != extensionContext || !selection_.select)
@@ -83,6 +83,11 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
                     throw std::runtime_error("Invalid point light extension");
                 if (legacy5_->context) legacy5_->scene.setPointLight = light.set;
                 else api_.scene.setPointLight = light.set;
+            }
+            EnginePointLightV2Api plV2{};
+            if (query && query(extensionContext, EnginePointLightV2Extension, 1, sizeof(plV2), &plV2))
+            {
+                if (plV2.version == 1 && plV2.set) pointLightV2_ = plV2;
             }
         }
         if (!projectContent.empty())

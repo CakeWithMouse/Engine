@@ -1,6 +1,7 @@
 #include "SceneObjectsPanel.h"
 #include "SceneOutlinerTree.h"
 #include "EditorLocale.h"
+#include "IconProvider.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -52,11 +53,13 @@ void SceneObjectsPanel::BuildUi()
     searchEdit_->setObjectName(QStringLiteral("SceneSearchEdit"));
     searchEdit_->setPlaceholderText(Tr("Поиск объектов…", "Search objects…"));
     searchEdit_->setClearButtonEnabled(true);
+    searchEdit_->addAction(IconProvider::SearchIcon(), QLineEdit::LeadingPosition);
     connect(searchEdit_, &QLineEdit::textChanged, this, &SceneObjectsPanel::FilterHierarchy);
     topBar->addWidget(searchEdit_);
 
     addBtn_ = new QPushButton(Tr("+ Добавить", "+ Add"), this);
     addBtn_->setObjectName(QStringLiteral("SceneAddButton"));
+    addBtn_->setIcon(IconProvider::PlusIcon());
     addMenu_ = new QMenu(this);
     addBtn_->setMenu(addMenu_);
     RebuildAddMenu();
@@ -81,12 +84,14 @@ void SceneObjectsPanel::BuildUi()
     actDuplicate_ = new QAction(Tr("Дублировать объект", "Duplicate Object"), hierarchy_);
     actDuplicate_->setShortcut(QKeySequence(QStringLiteral("Ctrl+D")));
     actDuplicate_->setShortcutContext(Qt::WidgetShortcut);
+    actDuplicate_->setIcon(IconProvider::CubeIcon());
     hierarchy_->addAction(actDuplicate_);
     connect(actDuplicate_, &QAction::triggered, this, &SceneObjectsPanel::DuplicateRequested);
 
     actRemove_ = new QAction(Tr("Удалить объект", "Remove Object"), hierarchy_);
     actRemove_->setShortcut(QKeySequence::Delete);
     actRemove_->setShortcutContext(Qt::WidgetShortcut);
+    actRemove_->setIcon(IconProvider::TrashIcon());
     hierarchy_->addAction(actRemove_);
     connect(actRemove_, &QAction::triggered, this, &SceneObjectsPanel::RemoveRequested);
 
@@ -241,6 +246,12 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
                 QString::fromStdString(object.name),
                 QString::fromStdString(object.type)
             });
+            QIcon objIcon;
+            if (object.type.find("Light") != std::string::npos) objIcon = IconProvider::BulbIcon();
+            else if (object.type.find("Camera") != std::string::npos) objIcon = IconProvider::GetIcon(QStringLiteral("camera"));
+            else if (object.type.find("Particles") != std::string::npos) objIcon = IconProvider::GetIcon(QStringLiteral("particles"));
+            else objIcon = IconProvider::CubeIcon();
+            item->setIcon(0, objIcon);
             item->setFlags(item->flags() | Qt::ItemIsEditable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
             item->setData(0, Qt::UserRole, QVariant::fromValue<qulonglong>(object.id));
             items[object.id] = item;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GizmoGeometry.h"
+#include "../Core/GizmoTriangles.h"
 #include "ViewportOverlay.h"
 #include <cassert>
 #include <iostream>
@@ -348,5 +349,24 @@ inline void RunGizmoGeometryTests(F check)
                 check(std::abs(sn) < 1e-4f, "Plane drag has zero drift along normal");
             }
         }
+    }
+
+    // 17. GizmoTriangles solid primitives test
+    {
+        const float pos[3] = {0.0f, 0.0f, 0.0f};
+        const float camPos[3] = {0.0f, 0.0f, -10.0f};
+        const float camFwd[3] = {0.0f, 0.0f, 1.0f};
+        auto tTris = GizmoTriangles::BuildGizmoTriangles(GizmoMath::GizmoMode::Translate, pos, camPos, camFwd, 1.047f, 600.0f, GizmoGeometry::Handle::None);
+        check(!tTris.empty(), "Translate mode produces solid gizmo triangles for arrow tips and planes");
+        for (const auto& tri : tTris)
+        {
+            check((tri.flags & 2) != 0, "Gizmo triangles have alwaysOnTop flag set");
+        }
+
+        auto sTris = GizmoTriangles::BuildGizmoTriangles(GizmoMath::GizmoMode::Scale, pos, camPos, camFwd, 1.047f, 600.0f, GizmoGeometry::Handle::None);
+        check(!sTris.empty(), "Scale mode produces solid gizmo triangles for cubes and center");
+
+        auto rTris = GizmoTriangles::BuildGizmoTriangles(GizmoMath::GizmoMode::Rotate, pos, camPos, camFwd, 1.047f, 600.0f, GizmoGeometry::Handle::None);
+        check(rTris.empty(), "Rotate mode produces no triangles");
     }
 }

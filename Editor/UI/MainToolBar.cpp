@@ -1,6 +1,11 @@
 #include "MainToolBar.h"
 #include "EditorLocale.h"
 #include "EditorTheme.h"
+#include <QHBoxLayout>
+#include <QFrame>
+#include <QStyle>
+#include <cstdio>
+#include <cmath>
 
 MainToolBar::MainToolBar(QWidget* parent)
     : QToolBar(parent)
@@ -8,33 +13,88 @@ MainToolBar::MainToolBar(QWidget* parent)
     setObjectName(QStringLiteral("MainToolBar"));
     setMovable(false);
     setFloatable(false);
-    setFixedHeight(32);
+    setFixedHeight(36);
     setIconSize(QSize(16, 16));
     setToolButtonStyle(Qt::ToolButtonIconOnly);
 
-    auto* leftSpacer = new QWidget(this);
-    leftSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    addWidget(leftSpacer);
+    const int pmFrameWidth = style() ? style()->pixelMetric(QStyle::PM_ToolBarFrameWidth, nullptr, this) : 0;
+    const int pmItemMargin = style() ? style()->pixelMetric(QStyle::PM_ToolBarItemMargin, nullptr, this) : 0;
+    const int pmItemSpacing = style() ? style()->pixelMetric(QStyle::PM_ToolBarItemSpacing, nullptr, this) : 0;
+    const auto cm = contentsMargins();
+    const auto lm = layout() ? layout()->contentsMargins() : QMargins{};
+    std::printf("[ToolBarFacts] initial tb geom=%d,%d %dx%d, margins=(%d,%d,%d,%d), layoutMargins=(%d,%d,%d,%d), PM_ToolBarFrameWidth=%d, PM_ItemMargin=%d, PM_ItemSpacing=%d\n",
+        geometry().x(), geometry().y(), geometry().width(), geometry().height(),
+        cm.left(), cm.top(), cm.right(), cm.bottom(),
+        lm.left(), lm.top(), lm.right(), lm.bottom(),
+        pmFrameWidth, pmItemMargin, pmItemSpacing);
 
-    actPlay_ = addAction(Tr("Play", "Play"));
-    actPause_ = addAction(Tr("Пауза", "Pause"));
-    actStop_ = addAction(Tr("Стоп", "Stop"));
-    actExternal_ = addAction(Tr("Отдельное окно", "External"));
+    if (layout())
+    {
+        layout()->setContentsMargins(0, 0, 0, 0);
+        layout()->setSpacing(0);
+    }
 
+    auto* container = new QFrame(this);
+    container->setObjectName(QStringLiteral("ToolBarContainer"));
+    container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    container->setFixedHeight(36);
+
+    auto* rootLayout = new QHBoxLayout(container);
+    rootLayout->setContentsMargins(0, 0, 0, 0);
+    rootLayout->setSpacing(4);
+    rootLayout->setAlignment(Qt::AlignCenter);
+
+    auto* btnPlay = new QToolButton(container);
+    btnPlay->setObjectName(QStringLiteral("BtnPlay"));
+    btnPlay->setFixedSize(28, 28);
+    btnPlay->setAutoRaise(true);
+    btnPlay->setFocusPolicy(Qt::NoFocus);
+
+    auto* btnPause = new QToolButton(container);
+    btnPause->setObjectName(QStringLiteral("BtnPause"));
+    btnPause->setFixedSize(28, 28);
+    btnPause->setAutoRaise(true);
+    btnPause->setFocusPolicy(Qt::NoFocus);
+
+    auto* btnStop = new QToolButton(container);
+    btnStop->setObjectName(QStringLiteral("BtnStop"));
+    btnStop->setFixedSize(28, 28);
+    btnStop->setAutoRaise(true);
+    btnStop->setFocusPolicy(Qt::NoFocus);
+
+    auto* btnExternal = new QToolButton(container);
+    btnExternal->setObjectName(QStringLiteral("BtnExternal"));
+    btnExternal->setFixedSize(28, 28);
+    btnExternal->setAutoRaise(true);
+    btnExternal->setFocusPolicy(Qt::NoFocus);
+
+    actPlay_ = new QAction(Tr("Play", "Play"), this);
     actPlay_->setObjectName(QStringLiteral("ActPlay"));
+    btnPlay->setDefaultAction(actPlay_);
+
+    actPause_ = new QAction(Tr("Пауза", "Pause"), this);
     actPause_->setObjectName(QStringLiteral("ActPause"));
+    btnPause->setDefaultAction(actPause_);
+
+    actStop_ = new QAction(Tr("Стоп", "Stop"), this);
     actStop_->setObjectName(QStringLiteral("ActStop"));
+    btnStop->setDefaultAction(actStop_);
+
+    actExternal_ = new QAction(Tr("Отдельное окно", "External"), this);
     actExternal_->setObjectName(QStringLiteral("ActExternal"));
+    btnExternal->setDefaultAction(actExternal_);
 
     connect(actPlay_, &QAction::triggered, this, &MainToolBar::PlayTriggered);
     connect(actPause_, &QAction::triggered, this, &MainToolBar::PauseTriggered);
     connect(actStop_, &QAction::triggered, this, &MainToolBar::StopTriggered);
     connect(actExternal_, &QAction::triggered, this, &MainToolBar::ExternalTriggered);
 
+    rootLayout->addWidget(btnPlay);
+    rootLayout->addWidget(btnPause);
+    rootLayout->addWidget(btnStop);
+    rootLayout->addWidget(btnExternal);
 
-    auto* rightSpacer = new QWidget(this);
-    rightSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    addWidget(rightSpacer);
+    addWidget(container);
 
     ApplyTheme();
     RefreshIcons();
@@ -44,6 +104,10 @@ MainToolBar::MainToolBar(QWidget* parent)
         ApplyTheme();
         RefreshIcons();
     });
+
+    std::printf("[ToolBarFacts] configured tb height=36, btn height=28, topMargin=%d, bottomMargin=%d\n",
+        (36 - 28) / 2, 36 - 28 - (36 - 28) / 2);
+    std::fflush(stdout);
 }
 
 MainToolBar::~MainToolBar()
@@ -63,18 +127,20 @@ void MainToolBar::ApplyTheme()
         "  background-color: %1;"
         "  border: none;"
         "  border-bottom: 1px solid %2;"
-        "  spacing: 3px;"
-        "  padding: 3px 4px;"
+        "  margin: 0px;"
+        "  padding: 0px;"
+        "}"
+        "QFrame#ToolBarContainer {"
+        "  background: transparent;"
+        "  border: none;"
+        "  margin: 0px;"
+        "  padding: 0px;"
         "}"
         "QToolBar#MainToolBar QToolButton {"
         "  background-color: transparent;"
         "  border: 1px solid transparent;"
-        "  border-radius: 3px;"
+        "  border-radius: 4px;"
         "  padding: 0px;"
-        "  min-width: 24px;"
-        "  max-width: 24px;"
-        "  min-height: 24px;"
-        "  max-height: 24px;"
         "}"
         "QToolBar#MainToolBar QToolButton:hover {"
         "  background-color: %3;"
@@ -87,10 +153,9 @@ void MainToolBar::ApplyTheme()
         "  background-color: transparent;"
         "  border-color: transparent;"
         "}"
-        "QToolBar#MainToolBar::separator {"
-        "  width: 1px;"
+        "QFrame#ToolBarSep {"
         "  background-color: %2;"
-        "  margin: 4px 3px;"
+        "  border: none;"
         "}"
     ).arg(
         p.bgPanel.name(),
@@ -102,7 +167,6 @@ void MainToolBar::ApplyTheme()
 
 void MainToolBar::UpdatePlayState(int state, bool sceneBusy)
 {
-    // state: 0 = Edit, 1 = Play, 2 = Pause
     if (actExternal_) actExternal_->setEnabled(!sceneBusy);
     if (actPlay_) actPlay_->setEnabled(!sceneBusy && (state == 0 || state == 2));
     if (actPause_) actPause_->setEnabled(state == 1);

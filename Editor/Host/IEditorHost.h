@@ -48,6 +48,7 @@ struct EditorCommand
     std::vector<uint64_t> objectIds;
     EngineSceneTransform transform{{0, 0, 0}, {0, 0, 0, 1}, {1, 1, 1}};
     EngineScenePointLight pointLight{};
+    bool castShadows = false;
     EditorGizmoMode gizmo = EditorGizmoTranslate;
     QString name;
 
@@ -83,6 +84,7 @@ public:
         EngineSceneTransform transform{};
         std::string modelAsset, textureAsset;
         bool hasPointLight = false;
+        bool lightCastShadows = false;
         EngineScenePointLight pointLight{};
         std::string materialAsset;
         std::string projectData;
@@ -133,6 +135,7 @@ public:
     virtual void SetOverlayLines(const std::vector<EngineOverlayLine>& lines, float thickness = 1.0f) = 0;
     virtual void SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels) = 0;
     virtual void SetOverlayBillboards(const std::vector<EngineOverlayBillboard>& billboards) = 0;
+    virtual void SetOverlayTriangles(const std::vector<EngineOverlayTriangle>& triangles) = 0;
 
     virtual void RunOnUi(std::function<void()> action) = 0;
     virtual void SetUiListener(IEditorUiListener* listener) = 0;

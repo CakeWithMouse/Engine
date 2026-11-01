@@ -49,7 +49,10 @@ namespace ViewportOverlay
 
             if (((color >> 24) & 0xFF) > 2)
             {
-                lines.push_back({x, 0.0f, centerZ - extent, x, 0.0f, centerZ + extent, color, OverlayFlags::Thickness(isOriginZ ? 2 : 1)});
+                const uint32_t flags = isOriginZ
+                    ? (OverlayFlags::DepthTest | OverlayFlags::Thickness(1) | OverlayFlags::HalfPixel)
+                    : (OverlayFlags::DepthTest | OverlayFlags::Thickness(1));
+                lines.push_back({x, 0.0f, centerZ - extent, x, 0.0f, centerZ + extent, color, flags});
             }
         }
 
@@ -77,7 +80,10 @@ namespace ViewportOverlay
 
             if (((color >> 24) & 0xFF) > 2)
             {
-                lines.push_back({centerX - extent, 0.0f, z, centerX + extent, 0.0f, z, color, OverlayFlags::Thickness(isOriginX ? 2 : 1)});
+                const uint32_t flags = isOriginX
+                    ? (OverlayFlags::DepthTest | OverlayFlags::Thickness(1) | OverlayFlags::HalfPixel)
+                    : (OverlayFlags::DepthTest | OverlayFlags::Thickness(1));
+                lines.push_back({centerX - extent, 0.0f, z, centerX + extent, 0.0f, z, color, flags});
             }
         }
 
@@ -99,7 +105,7 @@ namespace ViewportOverlay
 
         constexpr float twoPi = 6.28318530718f;
         const float step = twoPi / static_cast<float>(segments);
-        const uint32_t flags = OverlayFlags::Thickness(2);
+        const uint32_t flags = OverlayFlags::DepthTest | OverlayFlags::Thickness(2);
 
         for (int i = 0; i < segments; ++i)
         {

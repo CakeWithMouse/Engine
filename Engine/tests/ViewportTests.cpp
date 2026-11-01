@@ -21,6 +21,35 @@ class SettingsRenderTest final : public Game
 public:
     bool HasFxaaTarget() const { return SceneColorSRV && SceneColorRTV; }
     bool HasBackbufferTarget() const { return RenderTargetView && RenderTargetView != SceneColorRTV; }
+    void Draw() override {} // An empty custom renderer must not retain the previous frame.
+    size_t RenderRedPixels()
+    {
+        RenderFrame(); // Read before Present, while the current backbuffer is still defined.
+        Microsoft::WRL::ComPtr<ID3D11Resource> source;
+        RenderTargetView->GetResource(&source);
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+        CHECK(SUCCEEDED(source.As(&texture)));
+        D3D11_TEXTURE2D_DESC desc{};
+        texture->GetDesc(&desc);
+        desc.Usage = D3D11_USAGE_STAGING;
+        desc.BindFlags = 0;
+        desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        desc.MiscFlags = 0;
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> readback;
+        CHECK(SUCCEEDED(Device->CreateTexture2D(&desc, nullptr, &readback)));
+        Context->CopyResource(readback.Get(), texture.Get());
+        D3D11_MAPPED_SUBRESOURCE mapped{};
+        CHECK(SUCCEEDED(Context->Map(readback.Get(), 0, D3D11_MAP_READ, 0, &mapped)));
+        size_t red = 0;
+        for (UINT y = 0; y < desc.Height; ++y)
+        {
+            const auto* row = static_cast<const uint8_t*>(mapped.pData) + y * mapped.RowPitch;
+            for (UINT x = 0; x < desc.Width; ++x)
+                red += row[x * 4] > 180 && row[x * 4 + 1] < 80 && row[x * 4 + 2] < 80;
+        }
+        Context->Unmap(readback.Get(), 0);
+        return red;
+    }
 };
 
 // Separate hardware/window integration test; the ordinary WARP suite stays headless.
@@ -280,6 +309,26 @@ int main(int argc, char** argv)
             CHECK(frame() && game.HasBackbufferTarget());
             game.GetSettings().SetAntialiasing(0);
             CHECK(frame() && game.HasBackbufferTarget());
+            if (embedded)
+            {
+                auto point = [&](float x, float y) {
+                    const auto ray = game.ScreenPointToRay({x, y});
+                    CHECK(ray);
+                    return ray.ray.origin + ray.ray.direction * 5.0f;
+                };
+                const auto a = point(250, 150), b = point(450, 150), c = point(350, 350);
+                const EngineOverlayTriangle triangle{a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z,
+                    0xff0000ff, OverlayFlags::AlwaysOnTop};
+                for (uint32_t aa : {0u, 1u})
+                {
+                    game.GetSettings().SetAntialiasing(aa);
+                    CHECK(game.RenderRedPixels() == 0);
+                    game.SetOverlayTriangles(&triangle, 1);
+                    CHECK(game.RenderRedPixels() > 100);
+                    game.SetOverlayTriangles(nullptr, 0);
+                    CHECK(game.RenderRedPixels() == 0);
+                }
+            }
             game.GetSettings().RequestWindowClose();
             if (embedded) { CHECK(frame() && IsWindow(window)); }
             else { CHECK(game.RunRuntimeFrame(0) == Game::RuntimeFrameResult::Closed); }

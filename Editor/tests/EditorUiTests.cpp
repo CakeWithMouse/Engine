@@ -961,9 +961,15 @@ int wmain(int argc, wchar_t** argv)
         until([&] { return !host.ReadSnapshot().dirty; });
         Ui([](auto* w) { Add(w,11); });
         until([&] { for(const auto& o:host.ReadSnapshot().objects)if(o.gameplayKind==1)return true;return false; });
+        // Closing the HUD editor/dialogs can leave the main window inactive on Windows.
+        // Establish keyboard focus before testing that an inspector refresh preserves it.
+        Ui([](auto* w) { w->activateWindow(); w->raise(); });
+        for (int i = 0; i < 10; ++i) pump();
         Ui([](auto* w) {
             auto* speed=w->findChild<QDoubleSpinBox*>("Property/moveSpeed"); Check(speed && speed->isVisible(),"character settings in inspector");
-            speed->setFocus(); speed->setValue(7); QMetaObject::invokeMethod(speed,"editingFinished",Qt::DirectConnection);
+            speed->setFocus();
+            Check(speed->hasFocus() || speed->isAncestorOf(QApplication::focusWidget()),"property focus established before refresh");
+            speed->setValue(7); QMetaObject::invokeMethod(speed,"editingFinished",Qt::DirectConnection);
         });
         until([&] { for(const auto& o:host.ReadSnapshot().objects) if(o.gameplayKind==1) return QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object()["moveSpeed"].toDouble()==7; return false; });
         Ui([](auto* w) {

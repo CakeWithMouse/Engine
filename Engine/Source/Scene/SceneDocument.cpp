@@ -151,14 +151,20 @@ SceneSnapshot SceneDocument::Parse(const std::string& text)
             if (o.contains("pointLight"))
             {
                 const auto& light = o.at("pointLight");
-                RequireFields(light, {"color", "intensity", "radius", "enabled"});
+                const bool hasCastShadows = light.contains("castShadows");
+                if (hasCastShadows)
+                    RequireFields(light, {"color", "intensity", "radius", "enabled", "castShadows"});
+                else
+                    RequireFields(light, {"color", "intensity", "radius", "enabled"});
                 SceneComponentSnapshot::PointLight value;
                 Vector(light.at("color"), &value.color.x, 3);
                 if (!light.at("intensity").is_number() || !light.at("radius").is_number() ||
-                    !light.at("enabled").is_boolean()) Invalid("Invalid point light fields");
+                    !light.at("enabled").is_boolean() || (hasCastShadows && !light.at("castShadows").is_boolean()))
+                    Invalid("Invalid point light fields");
                 value.intensity = light.at("intensity").get<float>();
                 value.radius = light.at("radius").get<float>();
                 value.enabled = light.at("enabled").get<bool>();
+                value.castShadows = hasCastShadows ? light.at("castShadows").get<bool>() : false;
                 item.pointLight = value;
             }
             if (o.contains("assets"))
@@ -212,6 +218,10 @@ std::string SceneDocument::Serialize(const SceneSnapshot& data)
             const auto& light = *o.pointLight;
             json["objects"].back()["pointLight"] = {{"color", {light.color.x, light.color.y, light.color.z}},
                 {"intensity", light.intensity}, {"radius", light.radius}, {"enabled", light.enabled}};
+            if (light.castShadows)
+            {
+                json["objects"].back()["pointLight"]["castShadows"] = true;
+            }
             if (data.documentVersion >= 2)
             {
                 auto& object = json["objects"].back();

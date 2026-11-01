@@ -70,6 +70,8 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
 }
 
 EditorMainWindow::~EditorMainWindow() {
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("UI.Create"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("UI.OpenEditor"));
     if (host_) host_->SetUiListener(nullptr);
     EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
     EditorTheme::Instance().UnsubscribeThemeChanged(themeSubId_);
@@ -85,10 +87,6 @@ void EditorMainWindow::BuildUi()
 
     setDockNestingEnabled(true);
     setDockOptions(AnimatedDocks | AllowNestedDocks | AllowTabbedDocks | GroupedDragging);
-    setStyleSheet(QStringLiteral(
-        "QMainWindow::separator { width: 9px; height: 9px; background: #424242; }"
-        "QMainWindow::separator:hover { background: #b67a27; }"
-        "QDockWidget::title { padding: 5px 8px; }"));
 
     setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
     setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
@@ -246,8 +244,14 @@ void EditorMainWindow::BuildUi()
 
     BuildSceneMenu();
     BuildCodeTools();
-    for (const auto& title : {QStringLiteral("Сцена"), QStringLiteral("Правка"), QStringLiteral("Запуск"), QStringLiteral("Проект"), QStringLiteral("Вид")})
-        for (auto* action : menuBar()->actions()) if (action->text() == title) { menuBar()->removeAction(action); menuBar()->addAction(action); break; }
+    BuildToolsMenu();
+    for (auto* menu : { sceneMenu_, editMenu_, viewMenu_, playMenu_, projectMenu_, toolsMenu_ }) {
+        if (menu) {
+            auto* action = menu->menuAction();
+            menuBar()->removeAction(action);
+            menuBar()->addAction(action);
+        }
+    }
 
     connect(viewport_, &ViewportWidget::contextMenuRequested,
             this, &EditorMainWindow::ShowViewportContextMenu);
@@ -340,12 +344,6 @@ void EditorMainWindow::BuildSceneMenu()
     sceneMenu_->addAction(Tr("Экспорт игры…", "Export Game…"), this, [this] {
         if (host_->PlayState() != EditorQtHost::Edit || !CloseMaterialEditors()) return;
         MaybeSave([this] { ExportProject(); });
-    });
-    auto* uiMenu = menuBar()->addMenu(QStringLiteral("UI"));
-    uiMenu->addAction(Tr("Создать интерфейс…", "Create UI…"), this, [this] { CreateUI(); });
-    uiMenu->addAction(Tr("Открыть редактор UI…", "Open UI Editor…"), this, [this] {
-        auto file = QFileDialog::getOpenFileName(this, Tr("Интерфейс", "Interface"), QString::fromUtf8(host_->host().contentRoot), "UI (*.ui)");
-        if (!file.isEmpty()) OpenUIEditor(file);
     });
 
     actNewScene_ = sceneMenu_->addAction(Tr("Новая сцена", "New Scene"), this, [this] {
@@ -1029,11 +1027,12 @@ void EditorMainWindow::OnPointLightEdited(
         c.pointLight.intensity = static_cast<float>(value.intensity);
         c.pointLight.radius = static_cast<float>(value.radius);
         c.pointLight.enabled = value.enabled ? 1u : 0u;
-
+        c.castShadows = value.castShadows;
         changed |=
             std::abs(c.pointLight.intensity - object.pointLight.intensity) > 0.0006f ||
             std::abs(c.pointLight.radius - object.pointLight.radius) > 0.0006f ||
-            c.pointLight.enabled != object.pointLight.enabled;
+            c.pointLight.enabled != object.pointLight.enabled ||
+            c.castShadows != object.lightCastShadows;
 
         if (changed)
             host_->PostCommand(c);
@@ -1347,14 +1346,19 @@ void EditorMainWindow::RetranslateUi()
     if (sceneObjectsDock_) sceneObjectsDock_->setWindowTitle(Tr("Сцена / объекты", "Scene / Objects"));
     if (inspectorDock_) inspectorDock_->setWindowTitle(Tr("Инспектор", "Inspector"));
     if (sceneMenu_) sceneMenu_->setTitle(Tr("Сцена", "Scene"));
-    if (playMenu_) playMenu_->setTitle(Tr("Запуск", "Play"));
     if (editMenu_) editMenu_->setTitle(Tr("Правка", "Edit"));
-    if (schemeMenu_) schemeMenu_->setTitle(Tr("Схема управления", "Control Scheme"));
     if (viewMenu_) viewMenu_->setTitle(Tr("Вид", "View"));
+    if (playMenu_) playMenu_->setTitle(Tr("Запуск", "Play"));
+    if (projectMenu_) projectMenu_->setTitle(Tr("Проект", "Project"));
+    if (toolsMenu_) toolsMenu_->setTitle(Tr("Инструменты", "Tools"));
+    if (uiSubMenu_) uiSubMenu_->setTitle(Tr("Интерфейс (UI)", "Interface (UI)"));
+    if (schemeMenu_) schemeMenu_->setTitle(Tr("Схема управления", "Control Scheme"));
     if (resourcesSubMenu_) resourcesSubMenu_->setTitle(Tr("Ресурсы", "Assets"));
     if (themeMenu_) themeMenu_->setTitle(Tr("Тема оформления", "Theme"));
     if (langMenu_) langMenu_->setTitle(Tr("Язык", "Language"));
     if (accentMenu_) accentMenu_->setTitle(Tr("Акцентный цвет", "Accent Color"));
+    if (actCreateUI_) actCreateUI_->setText(Tr("Создать интерфейс…", "Create UI…"));
+    if (actOpenUIEditor_) actOpenUIEditor_->setText(Tr("Открыть редактор UI…", "Open UI Editor…"));
 
     if (actNewScene_) actNewScene_->setText(Tr("Новая сцена", "New Scene"));
     if (actOpenScene_) actOpenScene_->setText(Tr("Открыть сцену…", "Open Scene…"));

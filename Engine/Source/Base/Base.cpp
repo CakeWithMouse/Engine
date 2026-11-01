@@ -1,4 +1,4 @@
-﻿#ifndef WIN32_LEAN_AND_MEAN
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #ifndef NOMINMAX
@@ -10,6 +10,7 @@
 #include <Engine/Runtime/ModuleApi.h>
 #include <Engine/Runtime/ViewportSession.h>
 #include <Engine/Runtime/GameEditModule.h>
+#include <Engine/Runtime/EditExtensions.h>
 #include <Engine/Runtime/GameSceneApi.h>
 #include <Engine/Runtime/GameWindowApi.h>
 #include <Engine/Resources/Paths.h>
@@ -679,6 +680,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
         if (serviceId == EngineEditorReloadService && minVersion <= 1) return &engine->reloadServiceApi;
         if (serviceId == EngineViewportOverlayService && minVersion <= 2 && engine->editModule && engine->editModule->ViewportOverlayApi().getCamera) return &engine->editModule->ViewportOverlayApi();
         if(serviceId==EngineViewportCursorService && minVersion<=1 && engine->editModule && engine->editModule->ViewportCursorApi().set)return &engine->editModule->ViewportCursorApi();
+        if (serviceId == EnginePointLightV2Service && minVersion <= 1 && engine->editModule && engine->editModule->PointLightV2Api().set) return &engine->editModule->PointLightV2Api();
         if(serviceId==EngineAuthoringService && minVersion<=1 && engine->editModule && engine->editModule->AuthoringApi().describe) return &engine->editModule->AuthoringApi();
         if (serviceId == EngineEditorBatchService && minVersion <= 1 && engine->editModule && engine->editModule->BatchApi().apply) return &engine->editModule->BatchApi();
         if (serviceId == ENGINE_SERVICE_VFS && minVersion <= ENGINE_VFS_API_VERSION)

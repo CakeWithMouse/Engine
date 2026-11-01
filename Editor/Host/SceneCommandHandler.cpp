@@ -13,31 +13,15 @@ bool SceneCommandHandler::CanHandle(EditorCommand::Type type) const
 {
     switch (type)
     {
-    case EditorCommand::FetchScene:
-    case EditorCommand::SelectObject:
-    case EditorCommand::RefreshScene:
-    case EditorCommand::UpdateObjectTransform:
-    case EditorCommand::CreateObject:
-    case EditorCommand::CreateModel:
-    case EditorCommand::SetModel:
-    case EditorCommand::SetTexture:
-    case EditorCommand::SetMaterial:
-    case EditorCommand::SetPointLight:
-    case EditorCommand::SetProperty:
-    case EditorCommand::SetProjectData:
-    case EditorCommand::ConfigurePlay:
-    case EditorCommand::RemoveObject:
-    case EditorCommand::RenameObject:
-    case EditorCommand::DuplicateObject:
-    case EditorCommand::SetParent:
-    case EditorCommand::SaveScene:
-    case EditorCommand::LoadScene:
-    case EditorCommand::NewScene:
-    case EditorCommand::Undo:
-    case EditorCommand::Redo:
+    case EditorCommand::FetchScene: case EditorCommand::SelectObject: case EditorCommand::RefreshScene:
+    case EditorCommand::UpdateObjectTransform: case EditorCommand::CreateObject: case EditorCommand::CreateModel:
+    case EditorCommand::SetModel: case EditorCommand::SetTexture: case EditorCommand::SetMaterial:
+    case EditorCommand::SetPointLight: case EditorCommand::SetProperty: case EditorCommand::SetProjectData:
+    case EditorCommand::ConfigurePlay: case EditorCommand::RemoveObject: case EditorCommand::RenameObject:
+    case EditorCommand::DuplicateObject: case EditorCommand::SetParent: case EditorCommand::SaveScene:
+    case EditorCommand::LoadScene: case EditorCommand::NewScene: case EditorCommand::Undo: case EditorCommand::Redo:
         return true;
-    default:
-        return false;
+    default: return false;
     }
 }
 
@@ -203,7 +187,9 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
         }
         else if (cmd.type == EditorCommand::SetPointLight)
         {
-            result = api.setPointLight ? api.setPointLight(api.context, cmd.objectId, &cmd.pointLight) : EngineSceneReadOnly;
+            result = (ctx.pointLightV2 && ctx.pointLightV2->set)
+                ? ctx.pointLightV2->set(ctx.pointLightV2->context, cmd.objectId, &cmd.pointLight, cmd.castShadows ? 1u : 0u)
+                : (api.setPointLight ? api.setPointLight(api.context, cmd.objectId, &cmd.pointLight) : EngineSceneReadOnly);
         }
         else if (cmd.type == EditorCommand::SetProperty)
         {
@@ -244,6 +230,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
             uint64_t parent = cmd.parentId;
             bool inherit = true;
             bool hasLight = false;
+            bool castShadows = false;
             EngineScenePointLight light{};
 
             if (cmd.type == EditorCommand::DuplicateObject)
@@ -261,6 +248,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
                 material = QString::fromStdString(found->materialAsset);
                 hasLight = found->hasPointLight;
                 light = found->pointLight;
+                castShadows = found->lightCastShadows;
                 projectData = QString::fromStdString(found->projectData);
             }
             QString name = base;
@@ -281,7 +269,9 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
                 if (result == EngineSceneOk && !material.isEmpty())
                     result = ctx.scene.setMaterial ? ctx.scene.setMaterial(ctx.scene.context, id, material.toUtf8().constData(), errorBuf, sizeof(errorBuf)) : EngineSceneReadOnly;
                 if (result == EngineSceneOk && hasLight)
-                    result = api.setPointLight ? api.setPointLight(api.context, id, &light) : EngineSceneReadOnly;
+                    result = (ctx.pointLightV2 && ctx.pointLightV2->set)
+                        ? ctx.pointLightV2->set(ctx.pointLightV2->context, id, &light, castShadows ? 1u : 0u)
+                        : (api.setPointLight ? api.setPointLight(api.context, id, &light) : EngineSceneReadOnly);
                 if (result == EngineSceneOk && !projectData.isEmpty())
                     result = ctx.projectData.write ? ctx.projectData.write(ctx.projectData.context, id, projectData.toUtf8().constData()) : EngineSceneReadOnly;
                 if (result == EngineSceneOk && !projectData.isEmpty())
@@ -388,6 +378,7 @@ void ENGINE_MODULE_CALL SceneCommandHandler::SceneVisitor(void* context, const E
         info->modelAsset ? info->modelAsset : "",
         info->textureAsset ? info->textureAsset : "",
         info->hasPointLight != 0,
+        info->hasPointLight == 2,
         info->pointLight,
         info->materialAsset ? info->materialAsset : ""
     });

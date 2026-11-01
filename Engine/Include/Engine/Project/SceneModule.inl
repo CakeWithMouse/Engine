@@ -262,9 +262,15 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetEditExtension(void* contex
         *static_cast<EngineDocumentCapabilities*>(output) = {1,1,3,SCENE_MODULE_DOCUMENT_VERSION};
         return 1;
     }
-    if (std::strcmp(name, EngineViewportOverlayExtension) == 0 && (size == sizeof(EngineViewportOverlayApi) || size == (sizeof(EngineViewportOverlayApi) - sizeof(void*))))
+    if (std::strcmp(name, EngineViewportOverlayExtension) == 0 && size >= 40 && size <= sizeof(EngineViewportOverlayApi))
     {
-        *static_cast<EngineViewportOverlayApi*>(output) = static_cast<SceneEditSession*>(context)->GetViewportOverlayApi();
+        const auto api = static_cast<SceneEditSession*>(context)->GetViewportOverlayApi();
+        std::memcpy(output, &api, size);
+        return 1;
+    }
+    if (std::strcmp(name, EnginePointLightV2Extension) == 0 && size == sizeof(EnginePointLightV2Api))
+    {
+        *static_cast<EnginePointLightV2Api*>(output) = static_cast<SceneEditSession*>(context)->GetPointLightV2Api();
         return 1;
     }
     if (std::strcmp(name, EnginePointLightExtension) != 0 || size != sizeof(EnginePointLightApi)) return 0;

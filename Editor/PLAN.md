@@ -84,6 +84,16 @@
 
 ---
 
+## Чек-лист среза S10 (Ускорение повседневной сборки, chore(build))
+
+- [x] **Шаг 10.1 (perf(engine)):** Включение параллельной компиляции `/MP` в `Engine/BuildSupport/Cpp.props` (`<MultiProcessorCompilation>true</MultiProcessorCompilation>`). Сокращение холодной сборки `Engine.vcxproj` в 8 раз (с 224.2 с до 28.3 с).
+- [x] **Шаг 10.2 (perf(editor)):** Внедрение предкомпилированных заголовков PCH для Editor (`Editor/pch.h`, `Editor/pch.cpp`) с инъекцией через `/FI"pch.h"` и исключением moc/UI файлов. Ускорение инкрементной компиляции файла редактора в 5.7 раз (с 4.75 с до 0.83 с).
+- [x] **Шаг 10.3 (perf(editor)):** Оптимизация `windeployqt` через stamp-файл (`$(IntDir)windeployqt.stamp`) и таргет `DeployQtRuntime` с проверкой зависимостей. Устранение оверхеда ~350 мс на каждом запуске сборки.
+- [x] **Шаг 10.4 (tool):** Реализация быстрого режима `-Fast` (по умолчанию) в `Editor/tools/run-editor.ps1`: сборка целевых проектов (`Engine`, `EngineRuntime`, `SceneProject`, `EditorModule`, `EngineLauncher`), пропуск игр и тестов при отсутствии изменений в их коде, вывод меток времени и 15-секундный таймер линковки.
+- [x] **Шаг 10.5 (build):** Оптимизация настроек Debug в `Cpp.props` (явный `<LinkIncremental>true</LinkIncremental>`, отключение LTCG/GL для не-Release конфигураций). Валидация через `check.ps1 -Full` (Debug + Release, все тесты PASS).
+
+---
+
 ## Эталон тестов (Baseline S0 / S1 / S2 / S3 / S9)
 
 | Тест / Скрипт | Результат на `main` | Результат после S9 | Примечание |
@@ -175,6 +185,14 @@
     - Расширен C-ABI оверлея `EngineViewportOverlayApi` до версии 2 (с обратной совместимостью v1/v2): добавлено поле `setAntialiasing(void* context, uint32_t mode)`.
     - В `Game.cpp` реализован промежуточный рендертаргет `SceneColorTexture` и проход `RenderFxaaPass()`, выполняемый перед Present.
     - В UI редактора добавлено меню `Вид -> Сглаживание` (Выкл, FXAA) с вызовом команды `View.SetAntialiasing` и сохранением в `SettingsService` под ключом `viewport/antialiasing` (по умолчанию включен FXAA).
+22. **Ускорение повседневной сборки редактора и движка (S10):**
+    - `Cpp.props` изменён архитектором-разрешён для ускорения сборки (`/MP`, `LinkIncremental`).
+    - **Параллелизм /MP:** В `Engine/BuildSupport/Cpp.props` глобально включен `<MultiProcessorCompilation>true</MultiProcessorCompilation>`, что устранило последовательную компиляцию 54 исходников движка на одном ядре CPU и сократило время холодной компиляции движка с 224.2 с до 28.3 с (в 8 раз быстрее).
+    - **PCH для Editor:** Модуль `EditorModule` теперь использует минимальный `pch.h` (включающий Windows API с `NOMINMAX`, базовые контейнеры STL, QtCore, QtGui, QtWidgets). Это устранило многократный разбор тяжелых заголовков Qt и сократило время перекомпиляции любого `.cpp` файла редактора с 4.75 с до 0.83 с (в 5.7 раз быстрее), а общее время одной правки в Editor/*.cpp — с 6.38 с до 2.07 с (в 3.1 раза быстрее).
+    - **Stamp-файл для windeployqt:** Деплой библиотек Qt переведен из безусловного `PostBuildEvent` в таргет `DeployQtRuntime` с отслеживанием зависимостей `windeployqt.stamp`. Если бинарники Qt не обновлялись, запуск `windeployqt.exe` полностью пропускается, экономя ~350 мс на каждом цикле сборки.
+    - **Режим -Fast в run-editor.ps1:** По умолчанию `run-editor.ps1` собирает через MSBuild только целевые проекты, необходимые для запуска редактора (`Engine`, `EngineRuntime`, `SceneProject`, `EditorModule`, `EngineLauncher`), пропуская игры (Pong, Battle, SunGame, BasicExamples, Katamari) и тесты, если в их каталогах нет локальных изменений.
+    - **Индикация прогресса и таймер линковки:** В `run-editor.ps1` добавлен вывод меток времени `[HH:mm:ss]`, подсветка этапов компиляции и сборки артефактов, а также периодический heartbeat-таймер раз в 15 секунд, информирующий пользователя об активном процессе линковки.
+    - PCH для Engine и динамический `Game.dll` отложены в Backlog.
 
 ---
 
@@ -255,3 +273,31 @@
 - Финальный `Editor/tools/test-regression.ps1 -Full` прошёл в Debug и Release: Core 216, Host 69, UI helpers/smoke 249, Engine 47, HUD 52, native reload 48; интеграционные UI-сценарии standard, authoring, workflow, recovery, layout и reload также прошли.
 - Логи: `Engine/build/editor-regression/Debug-e4b01f82c7b8495e8ca95f3bcd6286d1` и `Engine/build/editor-regression/Release-26821ae3fe124399a81f6da63521c493`. Дополнительно пройдено 650 проверок edit-session в Debug.
 - Команды повторного запуска и ограничения среды: `Editor/tests/README.md`.
+
+---
+
+## Чек-лист среза S11 (Полировка v2: FXAA, сетка, сплошное гизмо, тени света, центрирование тулбара, Tabler-иконки, биллборды)
+
+- [x] **Шаг 11.0 (build):** Ускорение сборки: `/MP` и инкрементальная линковка, PCH для редактора (`pch.h`/`pch.cpp`), оптимизированный `run-editor.ps1 -Fast`.
+- [x] **Шаг 11.A (ui):** Устранение толстых 9px полос между доками через токены темы `borderLight`/`bgWindow` (2px).
+- [x] **Шаг 11.Б (ui):** Реорганизация меню: вкладка "UI" перенесена в меню "Инструменты", порядок меню зафиксирован: `Сцена | Правка | Вид | Запуск | Проект | Инструменты`.
+- [x] **Шаг 11.1 (engine/render):** Устранение шлейфов оверлея: очистка `backbufferRTV` и `SceneColorRTV` каждый кадр, сброс состояний blend/depth/raster в FXAA, периодическое логирование `AntialiasingMode` каждые 120 кадров, readback-анализ промежуточных цветов.
+- [x] **Шаг 11.2 (engine/shader):** Сетка и оси с depth-тестом: `LESS_EQUAL` для сетки и осей с чтением DSV сцены, гизмо alwaysOnTop, флаг `HalfPixel` (1.5px), постоянная экранная толщина линий у горизонта (`safeC0`/`safeC1`).
+- [x] **Шаг 11.3 (engine/gizmo):** Сплошные наконечники стрелок и кубики Scale: C-ABI v3 расширение оверлея с `setOverlayTriangles`, шейдеры `VSTriangle`/`PSTriangle`, модуль `GizmoTriangles` со сплошными пирамидами, кубами и полупрозрачными плоскостями.
+- [x] **Шаг 11.4 (engine/scene):** Тени точечных источников: включены по умолчанию для новых `Light.Point`, сохранение бит-в-бит стабильности для сохранённых сцен (дефолт `false`), карточка света с чекбоксом "Тени" (`LightShadows`), расширение `EnginePointLightV2Extension`.
+- [x] **Шаг 11.5 (ui):** Вертикальное центрирование тулбара Play/Pause/Stop: контейнер `QFrame` с фиксированной высотой 36px, центрированные кнопки 28x28px, разница отступов top/bottom = 0px, проверка в `UiSmokeTests`.
+- [x] **Шаг 11.6 (ui):** Единый провайдер иконок `IconProvider`: интеграция 24 Tabler outline SVG, токенизированная палитра темы, генерация состояний `Normal`/`Disabled`/`Active`/`Selected` через tint, замена самодельных QPainter-иконок, эмодзи и системных иконок файлового браузера.
+- [x] **Шаг 11.7 (overlay):** Доставка биллбордов света и камеры: включение хеша объектов в триггер обновления оверлеев, подтверждённая доставка в проект 11 (`Billboards sent: count 2`).
+
+## Интеграция main в Engine/Scripts — 01.11.2026
+
+База PR #13: `ed209d63`; объединённый main: `5ca0abfa`.
+
+- Разрешены конфликты MainToolBar, BaseEngine и Game. Сохранены центрированные кнопки запуска из main и отсутствие настроек Play в тулбаре: настройки персонажа/камеры остаются в свойствах.
+- Одновременно доступны сервисы курсора и PointLightV2. Треугольное гизмо, биллборды и отладочные линии трассировок используют общий overlay.
+- FXAA и очистка render targets выполняются в общем RenderFrame для standalone и embedded; диагностика читает GameSettings. Повторный FXAA в RenderViewportFrame не возвращён.
+- Добавлены проверки наличия всех четырёх кнопок запуска, отсутствия ConfigPlayBtn, реальных пикселей треугольного overlay с FXAA/без него и очистки следующего кадра. UI-тест явно устанавливает фокус после закрытия диалогов перед проверкой сохранения фокуса в свойствах.
+- Release x64 с Assimp: All (движок, редактор, runtime, SDK, примеры) собран; EngineTests 54/54, CompatibilityTests 116, CoreTests 374, HostTests 69, UI helpers/smoke 239, ViewportTests пройдены. HTML API Reference пересобран и проверен.
+- Qt CoreTests запускались вне sandbox: ограниченное окружение запрещает запись в каталоги QTemporaryDir с собственными ACL (см. tests/README.md).
+- Полный стандартный Qt UI workflow с импортом CesiumMan.glb прошёл: 3123 проверки, включая свойства персонажа, сохранение фокуса, Play/Stop и настройки направленного света.
+

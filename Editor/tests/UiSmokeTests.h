@@ -12,6 +12,7 @@
 #include <QLineEdit>
 #include <QGroupBox>
 #include <QAction>
+#include <QLayout>
 #include <vector>
 #include <iostream>
 #include <set>
@@ -137,6 +138,39 @@ inline void Run()
 
     if (cyrillicCount == 0) {
         throw std::runtime_error("UiSmoke: Expected Cyrillic strings in RU mode, found 0");
+    }
+
+    // 4. Verify vertical centering of toolbar play buttons within 1px
+    toolBar.resize(800, 36);
+    toolBar.show();
+    QCoreApplication::processEvents();
+    for (const auto* name : {"BtnPlay", "BtnPause", "BtnStop", "BtnExternal"})
+    {
+        auto* button = toolBar.findChild<QAbstractButton*>(QString::fromLatin1(name));
+        if (!button || !button->isVisible() || !button->parentWidget()->layout() ||
+            button->parentWidget()->layout()->indexOf(button) < 0)
+            throw std::runtime_error(std::string("UiSmoke: Missing toolbar control: ") + name);
+        ++checks;
+    }
+    if (toolBar.findChild<QAbstractButton*>(QStringLiteral("ConfigPlayBtn")))
+        throw std::runtime_error("UiSmoke: Play settings belong to player properties");
+    ++checks;
+    auto* playBtn = toolBar.findChild<QAbstractButton*>(QStringLiteral("BtnPlay"));
+    if (playBtn)
+    {
+        const int tbHeight = toolBar.height();
+        const int btnY = playBtn->geometry().y();
+        const int btnH = playBtn->geometry().height();
+        const int topMargin = btnY;
+        const int bottomMargin = tbHeight - (btnY + btnH);
+        const int diff = std::abs(topMargin - bottomMargin);
+        if (diff > 1)
+        {
+            throw std::runtime_error("UiSmoke: Play button not vertically centered in toolbar (top=" +
+                std::to_string(topMargin) + ", bottom=" + std::to_string(bottomMargin) +
+                ", diff=" + std::to_string(diff) + " > 1px)");
+        }
+        ++checks;
     }
 
     // Restore default Ru language

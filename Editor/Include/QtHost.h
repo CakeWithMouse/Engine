@@ -59,6 +59,7 @@ public:
     void SetOverlayLines(const std::vector<EngineOverlayLine>& lines, float thickness = 1.0f) override;
     void SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels) override;
     void SetOverlayBillboards(const std::vector<EngineOverlayBillboard>& billboards) override;
+    void SetOverlayTriangles(const std::vector<EngineOverlayTriangle>& triangles) override;
 
     void RunOnUi(std::function<void()> action) override;
     void SetUiListener(IEditorUiListener* listener) override;
@@ -94,6 +95,10 @@ private:
         if (host_.getService) return static_cast<const EngineAuthoringApi*>(host_.getService(host_.user, EngineAuthoringService, 1));
         return authoring_.describe ? &authoring_ : nullptr;
     }
+    const EnginePointLightV2Api* PointLightV2Api() const {
+        if (host_.getService) return static_cast<const EnginePointLightV2Api*>(host_.getService(host_.user, EnginePointLightV2Service, 1));
+        return nullptr;
+    }
     RecoveryStore recovery_;
     std::chrono::steady_clock::time_point recoveryTime_{};
     void WriteRecovery();
@@ -124,7 +129,9 @@ private:
     bool pendingLinesDirty_ = false;
 
     std::vector<EngineOverlayBillboard> pendingBillboards_;
+    std::vector<EngineOverlayTriangle> pendingTriangles_;
     bool pendingBillboardsDirty_ = false;
+    bool pendingTrianglesDirty_ = false;
 
     std::vector<PendingIcon> pendingIcons_;
     bool iconsDirty_ = false;

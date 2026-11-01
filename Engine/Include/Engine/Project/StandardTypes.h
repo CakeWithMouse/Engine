@@ -42,7 +42,10 @@ public:
 class PointLight final : public PointLightComponent
 {
 public:
-    PointLight() : PointLightComponent(glm::vec3(0), glm::vec3(1), 2.0f, 10.0f) {}
+    PointLight() : PointLightComponent(glm::vec3(0), glm::vec3(1), 2.0f, 10.0f)
+    {
+        SetCastShadows(true);
+    }
 };
 class Mesh : public MeshComponent
 {

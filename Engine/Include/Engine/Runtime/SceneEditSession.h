@@ -12,6 +12,7 @@
 #include <Engine/Runtime/ViewportInputApi.h>
 #include <Engine/Runtime/ViewportCursorApi.h>
 #include <Engine/Runtime/ViewportOverlayApi.h>
+#include <Engine/Runtime/EditExtensions.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 
 // Entire object and both Games live in the module containing the generated types.
@@ -31,6 +32,7 @@ public:
     EngineViewportInputApi GetViewportInputApi() noexcept;
     EngineViewportCursorApi GetViewportCursorApi() noexcept;
     EngineViewportOverlayApi GetViewportOverlayApi() noexcept;
+    EnginePointLightV2Api GetPointLightV2Api() noexcept;
     SceneEditSession(const SceneEditSession&) = delete;
     SceneEditSession& operator=(const SceneEditSession&) = delete;
 private:
