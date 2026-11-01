@@ -1,3 +1,4 @@
+#include "EditorLocale.h"
 #include "MainWindow.h"
 #include "SceneObjectsPanel.h"
 #include "QtHost.h"
@@ -25,16 +26,16 @@ void EditorMainWindow::UpdateAsset(const QString& path,bool move,const QString& 
     QString argument=supplied;
     if(move && argument.isEmpty()) {
         bool ok=false;
-        argument=QInputDialog::getText(this,QStringLiteral("Переместить ресурс"),
-            QStringLiteral("Новый путь относительно Content. Для модели перемещается вся её папка; имя файла модели сохраняется.\nСсылки в сценах и материалах будут обновлены. История Undo сцены будет очищена."),QLineEdit::Normal,relative,&ok);
+        argument=QInputDialog::getText(this,Tr("Переместить ресурс", "Move Asset"),
+            Tr("Новый путь относительно Content. Для модели перемещается вся её папка; имя файла модели сохраняется.\nСсылки в сценах и материалах будут обновлены. История Undo сцены будет очищена.", "New path relative to Content. For a model, its entire folder is moved; the model file name is preserved.\nReferences in scenes and materials will be updated. Scene undo history will be cleared."),QLineEdit::Normal,relative,&ok);
         if(!ok||argument.isEmpty())return;
     } else if(!move && argument.isEmpty()) {
         const auto metadata=RecoveryStore::Read(path+".source.json");
         const auto original=metadata["source"].toString();
-        argument=QFileDialog::getOpenFileName(this,QStringLiteral("Исходный файл для переимпорта"),original,
-            QStringLiteral("Ресурсы (*.fbx *.blend *.glb *.gltf *.obj *.png *.jpg *.jpeg *.bmp *.tga)"));
+        argument=QFileDialog::getOpenFileName(this,Tr("Исходный файл для переимпорта", "Source File for Reimport"),original,
+            Tr("Ресурсы (*.fbx *.blend *.glb *.gltf *.obj *.png *.jpg *.jpeg *.bmp *.tga)", "Assets (*.fbx *.blend *.glb *.gltf *.obj *.png *.jpg *.jpeg *.bmp *.tga)"));
         if(argument.isEmpty())return;
-        if(QMessageBox::question(this,QStringLiteral("Переимпорт ресурса"),QStringLiteral("Обновить ресурс во всех сценах? Назначения и правки материалов сохранятся. История Undo сцены будет очищена. Прежние файлы останутся в .painengine/AssetBackups."))!=QMessageBox::Yes)return;
+        if(QMessageBox::question(this,Tr("Переимпорт ресурса", "Reimport Asset"),Tr("Обновить ресурс во всех сценах? Назначения и правки материалов сохранятся. История Undo сцены будет очищена. Прежние файлы останутся в .painengine/AssetBackups.", "Update asset across all scenes? Material assignments and edits will be preserved. Scene undo history will be cleared. Old files will remain in .painengine/AssetBackups."))!=QMessageBox::Yes)return;
     }
     if(move) {argument=QDir::fromNativeSeparators(argument);if(!argument.startsWith("/Game/"))argument="/Game/"+argument;}
     // Material preview detaches are queued first; the asset operation then runs
@@ -56,12 +57,12 @@ void EditorMainWindow::ImportAsset(bool texture, const QString& source)
                                   ? QFileDialog::getOpenFileNames(
                                       this,
                                       texture
-                                          ? QStringLiteral("Импорт текстур в проект")
-                                          : QStringLiteral("Импорт моделей в проект"),
+                                          ? Tr("Импорт текстур в проект", "Import Textures to Project")
+                                          : Tr("Импорт моделей в проект", "Import Models to Project"),
                                       {},
                                       texture
-                                          ? QStringLiteral("Текстуры (*.png *.jpg *.jpeg *.bmp *.tga)")
-                                          : QStringLiteral("Модели (*.glb *.gltf *.obj *.fbx *.blend)")
+                                          ? Tr("Текстуры (*.png *.jpg *.jpeg *.bmp *.tga)", "Textures (*.png *.jpg *.jpeg *.bmp *.tga)")
+                                          : Tr("Модели (*.glb *.gltf *.obj *.fbx *.blend)", "Models (*.glb *.gltf *.obj *.fbx *.blend)")
                                   )
                                   : QStringList{source};
 
@@ -91,9 +92,9 @@ void EditorMainWindow::AddModel(const QString& path)
     const QString selected = path.isEmpty()
                                  ? QFileDialog::getOpenFileName(
                                      this,
-                                     QStringLiteral("Добавить модель из проекта"),
+                                     Tr("Добавить модель из проекта", "Add Model from Project"),
                                      QString::fromUtf8(host_->host().contentRoot) + QStringLiteral("/Models"),
-                                     QStringLiteral("Модели (*.glb *.gltf *.obj *.fbx)")
+                                     Tr("Модели (*.glb *.gltf *.obj *.fbx)", "Models (*.glb *.gltf *.obj *.fbx)")
                                  )
                                  : path;
 
@@ -120,8 +121,8 @@ void EditorMainWindow::UseAsset(const QString& path)
     {
         QMessageBox::warning(
             this,
-            QStringLiteral("Ресурс вне проекта"),
-            QStringLiteral("Сначала импортируйте файл кнопкой «Импорт модели» или «Импорт текстуры».")
+            Tr("Ресурс вне проекта", "Asset Outside Project"),
+            Tr("Сначала импортируйте файл кнопкой «Импорт модели» или «Импорт текстуры».", "First import the file via Import Model or Import Texture.")
         );
 
         return;
@@ -174,9 +175,9 @@ void EditorMainWindow::UseAsset(const QString& path)
         {
             QMessageBox::information(
                 this,
-                material ? QStringLiteral("Назначение материала") : QStringLiteral("Назначение текстуры"),
-                material ? QStringLiteral("Выберите объект в сцене, затем назначьте материал.")
-                         : QStringLiteral("Выберите объект в сцене, затем откройте текстуру двойным щелчком.")
+                material ? Tr("Назначение материала", "Assign Material") : Tr("Назначение текстуры", "Assign Texture"),
+                material ? Tr("Выберите объект в сцене, затем назначьте материал.", "Select an object in the scene, then assign the material.")
+                         : Tr("Выберите объект в сцене, затем откройте текстуру двойным щелчком.", "Select an object in the scene, then double-click the texture to open.")
             );
 
             return;
@@ -240,8 +241,8 @@ void EditorMainWindow::OpenMaterialEditor(const QString& path)
         {
             QMessageBox::warning(
                 this,
-                QStringLiteral("Материал вне проекта"),
-                QStringLiteral("Редактировать можно только материалы из Content проекта.")
+                Tr("Материал вне проекта", "Material Outside Project"),
+                Tr("Редактировать можно только материалы из Content проекта.", "Only materials from the project Content folder can be edited.")
             );
 
             return;
@@ -283,8 +284,8 @@ QString EditorMainWindow::CreateMaterial(const QString& directory, const QString
         bool accepted = false;
         base = QInputDialog::getText(
             this,
-            QStringLiteral("Новый материал"),
-            QStringLiteral("Имя материала:"),
+            Tr("Новый материал", "New Material"),
+            Tr("Имя материала:", "Material Name:"),
             QLineEdit::Normal,
             QStringLiteral("NewMaterial"),
             &accepted
@@ -301,11 +302,11 @@ QString EditorMainWindow::CreateMaterial(const QString& directory, const QString
     QString problem;
 
     if (!MaterialNamePattern().match(base).hasMatch())
-        problem = QStringLiteral("Имя может содержать латинские буквы, цифры, «_», «-» и «.».");
+        problem = Tr("Имя может содержать латинские буквы, цифры, «_», «-» и «.».", "Name can contain latin letters, digits, _, - and .");
     else if (QFileInfo::exists(materialFile) || QFileInfo::exists(shaderFile))
-        problem = QStringLiteral("В каталоге уже есть %1.mat или %1.hlsl.").arg(base);
+        problem = Tr("В каталоге уже есть %1.mat или %1.hlsl.", "Directory already contains %1.mat or %1.hlsl.").arg(base);
     else if (!QDir().mkpath(target))
-        problem = QStringLiteral("Не удалось создать каталог %1.").arg(target);
+        problem = Tr("Не удалось создать каталог %1.", "Failed to create directory %1.").arg(target);
     else
     {
         QJsonObject document;
@@ -317,13 +318,13 @@ QString EditorMainWindow::CreateMaterial(const QString& directory, const QString
         if (!shader.open(QIODevice::WriteOnly) || shader.write(MaterialSurfaceTemplate) < 0 || !shader.commit() ||
             !material.open(QIODevice::WriteOnly) || material.write(QJsonDocument(document).toJson()) < 0 || !material.commit())
         {
-            problem = QStringLiteral("Не удалось записать файлы материала в %1.").arg(target);
+            problem = Tr("Не удалось записать файлы материала в %1.", "Failed to write material files to %1.").arg(target);
         }
     }
 
     if (!problem.isEmpty())
     {
-        QMessageBox::warning(this, QStringLiteral("Новый материал"), problem);
+        QMessageBox::warning(this, Tr("Новый материал", "New Material"), problem);
         return {};
     }
 
@@ -387,8 +388,8 @@ void EditorMainWindow::ReloadShaders()
         host->RunOnUi([self, status]
         {
             if (!self) return;
-            self->AppendLine(status == EngineSceneOk ? QStringLiteral("Шейдеры и материалы перекомпилированы с диска.")
-                                                     : QStringLiteral("Не удалось перекомпилировать шейдеры (код %1).").arg(status));
+            self->AppendLine(status == EngineSceneOk ? Tr("Шейдеры и материалы перекомпилированы с диска.", "Shaders and materials recompiled from disk.")
+                                                     : Tr("Не удалось перекомпилировать шейдеры (код %1).", "Failed to recompile shaders (code %1).").arg(status));
         });
     };
     host_->PostCommand(c);

@@ -1,3 +1,4 @@
+#include "EditorLocale.h"
 #define NOMINMAX
 #include "MainWindow.h"
 #include "QtHost.h"
@@ -24,28 +25,28 @@ void EditorMainWindow::OpenUIEditor(const QString& path) {
 }
 QString EditorMainWindow::CreateUI(const QString& supplied) {
     const auto root=QString::fromUtf8(host_->host().contentRoot);QDir(root).mkpath("UI");
-    QString file=supplied.isEmpty()?QFileDialog::getSaveFileName(this,QStringLiteral("Новый интерфейс"),QDir(root).filePath("UI/Hud.ui"),"UI (*.ui)"):supplied;
+    QString file=supplied.isEmpty()?QFileDialog::getSaveFileName(this,Tr("Новый интерфейс", "New Interface"),QDir(root).filePath("UI/Hud.ui"),"UI (*.ui)"):supplied;
     if(file.isEmpty())return {};if(!file.endsWith(".ui"))file+=".ui";
     try { ProjectHud::Resolve(std::filesystem::u8path(root.toStdString()),QDir(root).relativeFilePath(file).toUtf8().toStdString()); }
     catch(const std::exception& e){QMessageBox::warning(this,QStringLiteral("HUD"),QString::fromUtf8(e.what()));return {};}
-    if(QFileInfo::exists(file)){QMessageBox::warning(this,QStringLiteral("HUD"),QStringLiteral("Файл уже существует. Откройте его для редактирования."));return {};}
+    if(QFileInfo::exists(file)){QMessageBox::warning(this,QStringLiteral("HUD"),Tr("Файл уже существует. Откройте его для редактирования.", "File already exists. Open it for editing."));return {};}
     QSaveFile output(file);const QByteArray data("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<UI/>\n");
     if(!output.open(QIODevice::WriteOnly)||output.write(data)!=data.size()||!output.commit()){QMessageBox::warning(this,QStringLiteral("HUD"),output.errorString());return {};}
     OpenUIEditor(file);return file;
 }
 void EditorMainWindow::ShowHudSettings() {
     const auto root=QString::fromUtf8(host_->host().contentRoot);
-    QDialog dialog(this);dialog.setObjectName("HudSettingsDialog");dialog.setWindowTitle(QStringLiteral("HUD игры"));dialog.resize(560,220);
+    QDialog dialog(this);dialog.setObjectName("HudSettingsDialog");dialog.setWindowTitle(Tr("HUD игры", "Game HUD"));dialog.resize(560,220);
     auto* form=new QFormLayout(&dialog);auto* choice=new QComboBox(&dialog);choice->setObjectName("ProjectHudChoice");
     QFile current(QDir(root).filePath("ProjectHud.txt"));QString selected;if(current.open(QIODevice::ReadOnly))selected=QString::fromUtf8(current.readLine()).trimmed();
     // Windows cannot atomically replace the settings while this read handle is open.
     current.close();
-    auto populate=[&](const QString& chosen){choice->clear();choice->addItem(QStringLiteral("Нет"),QString());QDirIterator it(root,{"*.ui"},QDir::Files,QDirIterator::Subdirectories);while(it.hasNext()){const auto path=QDir(root).relativeFilePath(it.next());choice->addItem(path,path);}if(!chosen.isEmpty()&&choice->findData(chosen)<0)choice->addItem(chosen+QStringLiteral(" — файл отсутствует"),chosen);choice->setCurrentIndex(std::max(0,choice->findData(chosen)));};
+    auto populate=[&](const QString& chosen){choice->clear();choice->addItem(Tr("Нет", "None"),QString());QDirIterator it(root,{"*.ui"},QDir::Files,QDirIterator::Subdirectories);while(it.hasNext()){const auto path=QDir(root).relativeFilePath(it.next());choice->addItem(path,path);}if(!chosen.isEmpty()&&choice->findData(chosen)<0)choice->addItem(chosen+Tr(" — файл отсутствует", " — file missing"),chosen);choice->setCurrentIndex(std::max(0,choice->findData(chosen)));};
     populate(selected);form->addRow(QStringLiteral("HUD"),choice);
-    auto* create=new QPushButton(QStringLiteral("Создать…"),&dialog);auto* edit=new QPushButton(QStringLiteral("Открыть в редакторе UI"),&dialog);form->addRow(create,edit);
+    auto* create=new QPushButton(Tr("Создать…", "Create…"),&dialog);auto* edit=new QPushButton(Tr("Открыть в редакторе UI", "Open in UI Editor"),&dialog);form->addRow(create,edit);
     connect(create,&QPushButton::clicked,&dialog,[&]{const auto file=CreateUI();if(!file.isEmpty())populate(QDir(root).relativeFilePath(file));});
     connect(edit,&QPushButton::clicked,&dialog,[&]{if(!choice->currentData().toString().isEmpty())OpenUIEditor(QDir(root).filePath(choice->currentData().toString()));});
-    auto* hint=new QLabel(QStringLiteral("HUD создаётся при следующем запуске игры.\nИзменения сохранённой разметки видны в работающем Play."),&dialog);hint->setWordWrap(true);form->addRow(hint);
+    auto* hint=new QLabel(Tr("HUD создаётся при следующем запуске игры.\nИзменения сохранённой разметки видны в работающем Play.", "HUD is created upon next game launch.\nSaved markup changes are visible in running Play mode."),&dialog);hint->setWordWrap(true);form->addRow(hint);
     auto* buttons=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel,&dialog);form->addRow(buttons);
     connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);
     connect(buttons,&QDialogButtonBox::accepted,&dialog,[&]{

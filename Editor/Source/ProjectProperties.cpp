@@ -1,3 +1,4 @@
+#include "EditorLocale.h"
 #include "ObjectInspectorPanel.h"
 #include "PropertySection.h"
 #include <QJsonDocument>
@@ -49,7 +50,7 @@ void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot
         for(const auto& value:fields) {
             const auto field=value.toObject();const auto path=field["path"].toString(),type=field["type"].toString();
             if(!path.startsWith('/')||path=="/version")continue;
-            auto group=field["group"].toString("Свойства класса");if(group.isEmpty())group="Свойства класса";
+            auto group=field["group"].toString(Tr("Свойства класса", "Class Properties"));if(group.isEmpty())group=Tr("Свойства класса", "Class Properties");
             auto* layout=propertiesLayout_;QString prefix;
             for(const auto& part:group.split('/',Qt::SkipEmptyParts)) {
                 prefix+=(prefix.isEmpty()?QString():QString("/"))+part;
@@ -72,7 +73,7 @@ void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot
             } else if(type=="color") {
                 auto* button=new QPushButton(properties_);widget=button;
                 connect(button,&QPushButton::clicked,this,[this,button,path] {
-                    const auto color=QColorDialog::getColor(button->property("color").value<QColor>(),this,QStringLiteral("Цвет света"));
+                    const auto color=QColorDialog::getColor(button->property("color").value<QColor>(),this,Tr("Цвет света", "Light Color"));
                     if(color.isValid())SubmitProperty(path,QJsonArray{color.redF(),color.greenF(),color.blueF()});
                 });
                 propertyRefresh_.push_back([button,path](const auto& data) {
@@ -89,7 +90,7 @@ void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot
                 auto* combo=new QComboBox(properties_);widget=combo;
                 if(type=="enum")for(const auto& choice:field["options"].toArray()){auto option=choice.toObject();combo->addItem(option["label"].toString(),QVariant::fromValue(option.value("value")));}
                 else {
-                    combo->addItem(QStringLiteral("Не задано"),QVariant::fromValue(QJsonValue(qint64(0))));
+                    combo->addItem(Tr("Не задано", "Not Assigned"),QVariant::fromValue(QJsonValue(qint64(0))));
                     const auto required=field["objectType"].toString();
                     for(const auto& row:view.objects)if(required.isEmpty()||required==QString::fromStdString(row.type))combo->addItem(QString::fromStdString(row.name),QVariant::fromValue(QJsonValue(static_cast<qint64>(row.id))));
                 }
@@ -101,18 +102,18 @@ void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot
                 propertyRefresh_.push_back([line,path](const auto& data){if(!Editing(line)){QSignalBlocker block(line);line->setText(Read(data,path).toString());}});
                 if(type=="asset") {
                     line->setPlaceholderText("/Game/…");
-                    auto* pick=new QPushButton(QStringLiteral("Выбрать ресурс…"),properties_);
+                    auto* pick=new QPushButton(Tr("Выбрать ресурс…", "Select Resource…"),properties_);
                     connect(pick,&QPushButton::clicked,this,[this,line,path,field] {
                         const auto root=property("contentRoot").toString();if(root.isEmpty())return;
                         QStringList masks;for(const auto& ext:field["extensions"].toArray())masks<<"*"+ext.toString();
-                        const auto chosen=QFileDialog::getOpenFileName(this,QStringLiteral("Ресурс проекта"),root,masks.isEmpty()?QString():QString("Ресурсы (%1)").arg(masks.join(' ')));
+                        const auto chosen=QFileDialog::getOpenFileName(this,Tr("Ресурс проекта", "Project Resource"),root,masks.isEmpty()?QString():Tr("Ресурсы (%1)", "Resources (%1)").arg(masks.join(' ')));
                         if(chosen.isEmpty())return;const auto relative=QDir(root).relativeFilePath(chosen);
                         if(relative.startsWith("..")||QDir::isAbsolutePath(relative))return;
                         line->setText("/Game/"+QDir::fromNativeSeparators(relative));SubmitProperty(path,line->text());
                     });
                     form->addRow(pick);pick->setEnabled(!field["readOnly"].toBool());
                 }
-            } else {widget=new QLabel(QStringLiteral("Неподдерживаемый тип: ")+type,properties_);}
+            } else {widget=new QLabel(Tr("Неподдерживаемый тип: ", "Unsupported Type: ")+type,properties_);}
             widget->setObjectName("Property"+path);widget->setToolTip(field["description"].toString());widget->setEnabled(!field["readOnly"].toBool());
             form->addRow(label,widget);
         }

@@ -49,7 +49,7 @@ FileBrowserDock::FileBrowserDock(EditorQtHost* host, QWidget* parent)
     setObjectName(QStringLiteral("ContentDock"));
     setAllowedAreas(Qt::AllDockWidgetAreas);
     setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetClosable);
-    setToolTip(QStringLiteral("Потяните заголовок или вкладку, чтобы переместить панель. Верхняя граница меняет высоту. Команды размещения — в меню «Вид»."));
+    setToolTip(Tr("Потяните заголовок или вкладку, чтобы переместить панель. Верхняя граница меняет высоту. Команды размещения — в меню «Вид».", "Drag the title or tab to move the panel. Top edge changes height. Layout commands are in the View menu."));
     const QFileInfo projectFile(QString::fromUtf8(
         host_->host().projectFile ? host_->host().projectFile : ""));
     projectDir_ = projectFile.absoluteDir().absolutePath();
@@ -226,8 +226,8 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     QAction* copy = hasFile ? menu.addAction(Tr("Копировать путь", "Copy Path")) : nullptr;
     QAction* refresh = menu.addAction(Tr("Обновить", "Refresh"));
     const bool asset=hasFile&&!model_->isDir(index)&&QStringList{"fbx","obj","gltf","glb","png","jpg","jpeg","bmp","tga","mat"}.contains(QFileInfo(path).suffix().toLower());
-    QAction* reimport=asset&&!isMaterial&&host_->ReadSnapshot().authoring?menu.addAction(QStringLiteral("Переимпортировать…")):nullptr;
-    QAction* move=asset&&host_->ReadSnapshot().authoring?menu.addAction(QStringLiteral("Переместить / переименовать…")):nullptr;
+    QAction* reimport=asset&&!isMaterial&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переимпортировать…", "Reimport…")):nullptr;
+    QAction* move=asset&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переместить / переименовать…", "Move / Rename…")):nullptr;
 
     QAction* picked = menu.exec(view_->viewport()->mapToGlobal(pos));
     if (!picked)
