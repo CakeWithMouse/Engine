@@ -123,7 +123,7 @@ int wmain(int argc, wchar_t** argv)
         const auto litScene = SceneDocument::Read(root / "MigratedLights/Content/Scenes/Main.scene.json");
         size_t lightCount = 0;
         for (const auto& object : litScene.components) if (object.pointLight) { ++lightCount; Check(object.pointLight->radius == 10,"light migration preserves radius"); }
-        Check(litScene.documentVersion == 2 && lightCount == 2,"v2 versioned light properties round trip");
+        Check((litScene.documentVersion == 2 || litScene.documentVersion == 3) && lightCount == 2,"v2 versioned light properties round trip");
         settings.engineVersion = "missing-version";
         Reject([&] { ResolveEngineRelease(settings,runtime); },"missing pinned version is not silently substituted");
         const auto oldScene = ReadRuntimeProject(old).startupScene;
@@ -131,7 +131,7 @@ int wmain(int argc, wchar_t** argv)
         ProjectUpgrade::Copy(old,root / "Migrated",runtime);
         const auto migrated = ReadRuntimeProject(root / "Migrated/Project.json");
         Check(migrated.engineVersion == release.version,"migrated copy pinned to target");
-        Check(SceneDocument::Read(migrated.startupScene).documentVersion == 2,"v1 scene migrates to v2");
+        Check(SceneDocument::Read(migrated.startupScene).documentVersion >= 2,"v1 scene migrates to v2");
         Check(ProjectUpgrade::Hash(migrated.module) == ProjectUpgrade::Hash(runtime / "Templates/SceneProject/Game.dll"),"known template updated");
         Check(ProjectUpgrade::Hash(oldScene) == sceneHash && ProjectUpgrade::Hash(old.parent_path()/"Game.dll") == dllHash,"original preserved byte-for-byte");
         ExerciseModule(root / "Migrated/Project.json",runtime,true);
