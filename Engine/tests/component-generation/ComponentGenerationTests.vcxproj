@@ -7,7 +7,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{683EF8E7-2391-4FC0-9B47-796DAC6F460E}</ProjectGuid>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <EngineEnableAssimp>false</EngineEnableAssimp>
+    <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'==''">false</EngineEnableAssimp>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
@@ -15,10 +15,18 @@
     <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
     <UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries>
   </PropertyGroup>
+  <PropertyGroup>
+    <VcpkgEnableManifest>$(EngineEnableAssimp)</VcpkgEnableManifest>
+    <VcpkgEnabled>$(EngineEnableAssimp)</VcpkgEnabled>
+    <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\..\</VcpkgManifestRoot>
+    <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\..\vcpkg_installed\</VcpkgInstalledDir>
+  </PropertyGroup>
+  <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Import Project="..\..\BuildSupport\Cpp.props" />
   <ItemGroup><ClCompile Include="Source\main.cpp" /></ItemGroup>
   <ItemGroup><ProjectReference Include="..\..\Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project></ProjectReference></ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
   <Import Project="..\..\BuildSupport\ComponentGeneration.targets" />
 </Project>

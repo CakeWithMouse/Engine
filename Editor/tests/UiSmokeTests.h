@@ -121,8 +121,7 @@ inline void Run()
         QStringLiteral("Rotate (E/R)"),
         QStringLiteral("Scale (R/S)"),
         QStringLiteral("Grid Snapping (Shift+S)"),
-        QStringLiteral("Move Snap Step"),
-        QStringLiteral("Detailed Play Settings…")
+        QStringLiteral("Move Snap Step")
     };
 
     int cyrillicCount = 0;

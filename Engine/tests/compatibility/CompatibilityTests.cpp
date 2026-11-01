@@ -123,7 +123,7 @@ int wmain(int argc, wchar_t** argv)
         const auto litScene = SceneDocument::Read(root / "MigratedLights/Content/Scenes/Main.scene.json");
         size_t lightCount = 0;
         for (const auto& object : litScene.components) if (object.pointLight) { ++lightCount; Check(object.pointLight->radius == 10,"light migration preserves radius"); }
-        Check((litScene.documentVersion == 2 || litScene.documentVersion == 3) && lightCount == 2,"v2 versioned light properties round trip");
+        Check(litScene.documentVersion == GameEditModule(runtime / "Templates/SceneProject/Game.dll",runtime / "EngineContent").PreferredSceneVersion() && lightCount == 2,"target module format preserves light properties");
         settings.engineVersion = "missing-version";
         Reject([&] { ResolveEngineRelease(settings,runtime); },"missing pinned version is not silently substituted");
         const auto oldScene = ReadRuntimeProject(old).startupScene;
@@ -131,7 +131,7 @@ int wmain(int argc, wchar_t** argv)
         ProjectUpgrade::Copy(old,root / "Migrated",runtime);
         const auto migrated = ReadRuntimeProject(root / "Migrated/Project.json");
         Check(migrated.engineVersion == release.version,"migrated copy pinned to target");
-        Check(SceneDocument::Read(migrated.startupScene).documentVersion >= 2,"v1 scene migrates to v2");
+        Check(SceneDocument::Read(migrated.startupScene).documentVersion == GameEditModule(migrated.module,runtime / "EngineContent").PreferredSceneVersion(),"v1 scene migrates to target module format");
         Check(ProjectUpgrade::Hash(migrated.module) == ProjectUpgrade::Hash(runtime / "Templates/SceneProject/Game.dll"),"known template updated");
         Check(ProjectUpgrade::Hash(oldScene) == sceneHash && ProjectUpgrade::Hash(old.parent_path()/"Game.dll") == dllHash,"original preserved byte-for-byte");
         ExerciseModule(root / "Migrated/Project.json",runtime,true);
@@ -148,6 +148,8 @@ int wmain(int argc, wchar_t** argv)
         ProjectUpgrade::Copy(custom,root/"CustomCopy",runtime);
         Check(ProjectUpgrade::Hash(root/"CustomCopy/Game.dll") == customHash,"unrecognized custom DLL never replaced with template");
         Check(SceneDocument::Read(root/"CustomCopy/Content/Scenes/Main.scene.json").documentVersion == 1,"migration respects legacy module document capability");
+        ExerciseModule(root/"CustomCopy/Project.json",runtime,false);
+        Check(ProjectUpgrade::Hash(custom.parent_path()/"Game.dll")==customHash,"custom source module preserved after migration and editing");
         const auto v1 = SceneDocument::Parse(Starter().dump());
         const auto v2 = SceneDocument::Migrate(v1,2);
         Check(SceneDocument::Serialize(SceneDocument::Parse(SceneDocument::Serialize(v2))) == SceneDocument::Serialize(v2),"v2 round trip stable");

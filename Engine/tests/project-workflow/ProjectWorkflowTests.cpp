@@ -252,7 +252,7 @@ int wmain(int argc, wchar_t** argv)
             std::vector<std::string> types;
             Check(api.scene.listTypes(api.scene.context, [](void* p, const EngineSceneTypeInfo* t) {
                 static_cast<std::vector<std::string>*>(p)->push_back(t->typeName);
-            }, &types) == EngineSceneOk && types.size() == 14, "primitives, lights, particles and sky");
+            }, &types) == EngineSceneOk && types.size() == 15, "primitives, lights, particles, sky and player");
             Check(api.attachViewport(api.context, window, 640, 480) == EngineSceneOk, "attach real D3D viewport");
             Check(api.frame(api.context, 0.016) == EngineSceneOk, "initial frame");
             uint64_t picked = 0;

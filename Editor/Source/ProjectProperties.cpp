@@ -92,7 +92,7 @@ void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot
                 else {
                     combo->addItem(Tr("Не задано", "Not Assigned"),QVariant::fromValue(QJsonValue(qint64(0))));
                     const auto required=field["objectType"].toString();
-                    for(const auto& row:view.objects)if(required.isEmpty()||required==QString::fromStdString(row.type))combo->addItem(QString::fromStdString(row.name),QVariant::fromValue(QJsonValue(static_cast<qint64>(row.id))));
+                    for(const auto& row:view.objects)if((required.isEmpty()||required==QString::fromStdString(row.type)) && (!field.contains("objectKind")||row.gameplayKind==field["objectKind"].toInt()))combo->addItem(QString::fromStdString(row.name),QVariant::fromValue(QJsonValue(static_cast<qint64>(row.id))));
                 }
                 connect(combo,qOverload<int>(&QComboBox::activated),this,[this,combo,path](int index){SubmitProperty(path,combo->itemData(index).value<QJsonValue>());});
                 propertyRefresh_.push_back([combo,path](const auto& data){QSignalBlocker block(combo);const auto current=Read(data,path);int index=-1;for(int i=0;i<combo->count();++i)if(combo->itemData(i).value<QJsonValue>()==current){index=i;break;}combo->setCurrentIndex(index);});

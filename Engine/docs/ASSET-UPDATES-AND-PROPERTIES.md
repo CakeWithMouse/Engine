@@ -47,7 +47,7 @@
 
 ## Объявление свойств C++
 
-Добавьте компоненту независимый интерфейс `EditorPropertyProvider` из
+Переопределите у компонента метод `GameComponent::DescribeEditorProperties()`. Дополнительное наследование не требуется. Для старых исходников оставлен интерфейс `EditorPropertyProvider` из
 `Engine/Components/EditorProperties.h`. Метод `DescribeEditorProperties()`
 возвращает описание полей. Данные остаются в существующих
 `SaveProjectData()` / `LoadProjectData()`; автоматического обхода полей C++ нет.

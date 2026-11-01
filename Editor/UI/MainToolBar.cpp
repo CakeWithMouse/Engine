@@ -31,16 +31,6 @@ MainToolBar::MainToolBar(QWidget* parent)
     connect(actStop_, &QAction::triggered, this, &MainToolBar::StopTriggered);
     connect(actExternal_, &QAction::triggered, this, &MainToolBar::ExternalTriggered);
 
-    addSeparator();
-
-    configPlayBtn_ = new QToolButton(this);
-    configPlayBtn_->setObjectName(QStringLiteral("ConfigPlayBtn"));
-    configPlayBtn_->setIconSize(QSize(16, 16));
-    configPlayBtn_->setFixedSize(24, 24);
-    configPlayBtn_->setAutoRaise(true);
-    configPlayBtn_->setFocusPolicy(Qt::NoFocus);
-    connect(configPlayBtn_, &QToolButton::clicked, this, &MainToolBar::ConfigPlayTriggered);
-    addWidget(configPlayBtn_);
 
     auto* rightSpacer = new QWidget(this);
     rightSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -138,9 +128,6 @@ void MainToolBar::RetranslateUi()
         actExternal_->setText(Tr("Отдельное окно", "External"));
         actExternal_->setToolTip(Tr("Запуск в отдельном окне", "Run in External Window"));
     }
-    if (configPlayBtn_) {
-        configPlayBtn_->setToolTip(Tr("Детальные настройки Play…", "Detailed Play Settings…"));
-    }
 }
 
 void MainToolBar::RefreshIcons()
@@ -149,5 +136,4 @@ void MainToolBar::RefreshIcons()
     if (actPause_) actPause_->setIcon(EditorTheme::CreatePauseIcon());
     if (actStop_) actStop_->setIcon(EditorTheme::CreateStopIcon());
     if (actExternal_) actExternal_->setIcon(EditorTheme::CreateExternalIcon());
-    if (configPlayBtn_) configPlayBtn_->setIcon(EditorTheme::CreateSettingsIcon());
 }

@@ -824,9 +824,9 @@ void MaterialComponentIntegration()
     TempShaderDir dir;
     auto material = std::make_shared<Material>(dir.Write("Params.hlsl", ParamsSurface));
 
-    // Only Mesh-format components accept a material.
+    // Any component can retain a material before geometry is assigned.
     GameComponent primitive;
-    CHECK(!primitive.SetMaterial(material) && primitive.GetMaterial() == nullptr);
+    CHECK(primitive.SetMaterial(material) && primitive.GetMaterial() == material.get());
 
     auto* plane = new MeshComponent(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec4(1.0f));
     plane->SetMesh(MeshPrimitives::Plane(2.0f, 2.0f));

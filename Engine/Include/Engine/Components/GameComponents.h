@@ -47,7 +47,10 @@ public:
     // Material
     virtual void SetTexture(const std::string& texturePath);
     const std::string& GetTexturePath() const { return texturePath; }
-    virtual std::string GetModelAsset() const { return {}; }
+    virtual std::string GetModelAsset() const { return VisualModelAsset; }
+    // Geometry is independent of the gameplay class. Empty restores its own geometry.
+    void SetModelAsset(const std::string& path);
+    GameComponent* GetRenderComponent();
     // Transactional texture assignment; also works before device creation.
     bool TrySetTexture(const std::string& path);
     void SetCubeMap(CubeMapResource* cubeMap);
@@ -58,15 +61,15 @@ public:
 
     /**
      * Draws with a material asset instead of the shader pair: its shaders, parameters, blend
-     * mode, culling and shadow casting. Only components drawn in VertexFormat::Mesh or with
-     * skinned vertices support materials (false otherwise, nothing changes). Null returns to the
+     * mode, culling and shadow casting. Legacy primitives are converted to mesh geometry when drawn with a material.
+     * Components without geometry retain the assignment. Null returns to the
      * shader pair.
      */
     bool SetMaterial(std::shared_ptr<Material> material);
     Material* GetMaterial() const { return MaterialPtr.get(); }
     /**
      * A material asset by its /Game path (scenes store this): the game loads it, through its
-     * material cache, before the next draw. Empty clears it. False if materials are unsupported.
+     * material cache, before the next draw. Empty clears it. Can be assigned before geometry.
      */
     bool SetMaterialAsset(const std::string& path);
     const std::string& GetMaterialAsset() const { return MaterialAssetPath; }
@@ -90,6 +93,8 @@ public:
     virtual void BeginPlay() {}
     // Optional module-local codec. Return UTF-8 JSON with its own schema version.
     // Called for save, duplicate, undo and Play, never for transient gameplay state.
+    // Optional editor schema; properties are available to every component.
+    virtual std::string DescribeEditorProperties() const { return {}; }
     virtual std::string SaveProjectData() const { return {}; }
     virtual void LoadProjectData(const std::string& data);
     // Called after restoring all objects. Persistent references are IDs, never pointers.
@@ -256,6 +261,8 @@ protected:
     ID3D11PixelShader* pixelShader = nullptr;
 
 private:
+    std::unique_ptr<GameComponent> VisualComponent;
+    std::string VisualModelAsset;
     void AssignMaterial(std::shared_ptr<Material> material);
     friend class Game;
     friend class Scene;

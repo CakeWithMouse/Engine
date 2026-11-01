@@ -206,7 +206,7 @@ public:
     CharacterController* GetCharacterController() const { return Controller.get(); }
     void SetCharacterController(std::unique_ptr<CharacterController>);
     virtual std::unique_ptr<CharacterController> CreateCharacterController();
-    void InitializeGameplay(); // idempotent; resolves the optional PlaySettings object
+    void InitializeGameplay(); // idempotent; resolves the player character and its camera properties
     bool HasGameplayController() const { return Controller != nullptr; }
     ID3D11Device* GetDevice() const { return Device.Get(); }
     ID3D11DeviceContext* GetContext() const { return Context.Get(); }

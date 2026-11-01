@@ -95,13 +95,57 @@ static void CharacterChecks()
     auto* c=dynamic_cast<Character*>(ai.GetScene().FindComponent(npc));c->Move({1,0,1},1);Check(std::abs(glm::length(c->GetLocalPosition())-5)<.001,"normalized diagonal movement");
     Player camera;SceneCamera fixed;fixed.SetPosition({3,4,5});fixed.Apply(camera);Check(camera.GetPosition()==glm::vec3(3,4,5),"explicit scene camera");
 }
+static void PlayerPropertyChecks()
+{
+    Game game;auto id=Add(game.GetScene(),"Gameplay.Player","Player");
+    auto* hero=dynamic_cast<Character*>(game.GetScene().FindComponent(id));
+    Check(hero&&hero->playerControlled,"placed Player enables possession without PlaySettings");
+    hero->cameraSettings.orthographic=true;hero->cameraSettings.viewPlane=2;hero->cameraSettings.orthoHeight=23;hero->cameraSettings.fov=80;
+    const auto saved=hero->SaveProjectData();Character copy;copy.LoadProjectData(saved);
+    Check(copy.playerControlled&&copy.cameraSettings.orthographic&&copy.cameraSettings.orthoHeight==23,"player camera settings round trip");
+    auto invalid=nlohmann::json::parse(saved);invalid["nearClip"]=100;invalid["farClip"]=1;invalid["moveSpeed"]=12;
+    try{copy.LoadProjectData(invalid.dump());Check(false,"invalid clip range rejected");}catch(const std::invalid_argument&){}
+    Check(copy.SaveProjectData()==saved,"invalid player settings do not partially apply");
+    game.InitializeGameplay();Check(game.GetCharacterController()->GetCharacter()==hero,"Player auto possession");
+    Player camera;game.GetCharacterController()->UpdateCamera(camera);Check(camera.GetForward()==glm::vec3(0,-1,0),"XZ camera looks exactly down");
+    for(int plane=1;plane<=3;++plane){
+        hero->cameraSettings.viewPlane=plane;game.GetCharacterController()->UpdateCamera(camera);
+        Check(camera.GetForward()==hero->cameraSettings.Forward(),"exact 2D viewing plane");
+        const auto before=hero->GetLocalPosition();game.GetInput().SetKey(Keys::W,true);game.StepProjectSimulation(.1f);game.GetInput().SetKey(Keys::W,false);
+        Check(glm::length((hero->GetLocalPosition()-before)-hero->cameraSettings.Up()*.5f)<.001f,"movement follows 2D plane");
+    }
+    const ComponentType linkTypes[]={
+        {"Test.Player","Player",EngineComponentDetail::Create<PlayerCharacter>},
+        {"Test.Camera","Custom camera",EngineComponentDetail::Create<SceneCamera>},
+        {"Test.Other","Other",EngineComponentDetail::Create<GameComponent>}};
+    SceneEditSession links({linkTypes,3});auto linkApi=links.GetApi();auto author=links.GetAuthoringApi();uint64_t playerId=0,cameraId=0,otherId=0;char error[1024]{};
+    Check(linkApi.scene.createObject(linkApi.scene.context,"Test.Player","Player",nullptr,&playerId)==EngineSceneOk,"create property player");
+    Check(linkApi.scene.createObject(linkApi.scene.context,"Test.Camera","Camera",nullptr,&cameraId)==EngineSceneOk,"create custom camera type");
+    Check(linkApi.scene.createObject(linkApi.scene.context,"Test.Other","Other",nullptr,&otherId)==EngineSceneOk,"create non-camera");
+    Check(author.setProperty(author.context,playerId,"/camera",std::to_string(cameraId).c_str(),error,sizeof(error))==EngineSceneOk,"camera reference supports custom types");
+    Check(author.setProperty(author.context,playerId,"/camera",std::to_string(otherId).c_str(),error,sizeof(error))!=EngineSceneOk,"camera reference rejects unrelated objects");
+    Game duplicate;Add(duplicate.GetScene(),"Gameplay.Player","One");Add(duplicate.GetScene(),"Gameplay.Player","Two");
+    try{duplicate.InitializeGameplay();Check(false,"multiple players rejected");}catch(const std::runtime_error&){}
+    Game legacy;auto legacyId=Add(legacy.GetScene(),"Gameplay.Character","Old hero");auto settingsId=Add(legacy.GetScene(),"Gameplay.PlaySettings","Old settings");
+    auto camId=Add(legacy.GetScene(),"Gameplay.Camera","Camera");auto* settings=dynamic_cast<PlaySettings*>(legacy.GetScene().FindComponent(settingsId));
+    settings->character=legacyId;settings->camera=camId;settings->cameraDistance=17;settings->standardControl=false;
+    auto snapshot=legacy.GetScene().GetSnapshot();
+    for(auto& row:snapshot.components)if(row.id==legacyId)row.projectData=R"({"version":1,"moveSpeed":9})";
+    Scene migrated;SceneDocument::Restore(snapshot,SceneProject::GetComponentTypes(),migrated);
+    auto* migratedHero=dynamic_cast<Character*>(migrated.FindComponentByName("Old hero"));
+    Check(migratedHero->playerControlled&&!migratedHero->standardControl&&migratedHero->cameraDistance==17&&migratedHero->GetMoveSpeed()==9,"legacy Play settings migrate into player properties");
+    Check(migratedHero->camera==migrated.FindComponentByName("Camera")->GetComponentId(),"migrated camera reference remapped");
+    migratedHero->cameraDistance=22;Scene again;SceneDocument::Restore(migrated.GetSnapshot(),SceneProject::GetComponentTypes(),again);
+    Check(dynamic_cast<Character*>(again.FindComponentByName("Old hero"))->cameraDistance==22,"legacy record cannot overwrite modern settings");
+    migrated.RemoveComponent(migratedHero->camera);Check(migratedHero->camera==0,"deleting camera clears player reference");
+}
 static void SessionChecks()
 {
     SceneEditSession session(SceneProject::GetComponentTypes());auto api=session.GetApi();auto input=session.GetViewportInputApi();auto data=session.GetProjectDataApi();
     EngineSceneTransform t{{0,0,0},{0,0,0,1},{1,1,1}};uint64_t hero=0,settings=0;
     Check(api.scene.createObject(api.scene.context,"Gameplay.Character","Hero",&t,&hero)==EngineSceneOk,"edit create character");
     Check(api.scene.createObject(api.scene.context,"Gameplay.PlaySettings","Play",&t,&settings)==EngineSceneOk,"edit create settings");
-    PlaySettings config;config.character=hero;Check(data.write(data.context,settings,config.SaveProjectData().c_str())==EngineSceneOk,"edit assign Play");
+    Character config;config.playerControlled=true;Check(data.write(data.context,hero,config.SaveProjectData().c_str())==EngineSceneOk,"edit assign Player in properties");
     auto z=[&](bool active){float value=999;EngineSceneInfo info{};auto visitor=[](void* p,const EngineSceneObjectInfo* o){if(std::string(o->name)=="Hero")*static_cast<float*>(p)=o->transform.position[2];};
         if(active)api.readActiveScene(api.context,&info,visitor,&value);else api.scene.readScene(api.scene.context,&info,visitor,&value);return value;};
     Check(api.control(api.context,EnginePlay)==EngineSceneOk,"Play");input.key(input.context,87,1);api.frame(api.context,.1);Check(z(true)==0,"unfocused Play ignores keys");
@@ -126,8 +170,13 @@ static void CameraChecks()
         });
         auto api=session.GetApi();
         Check(clockWindow && api.attachViewport(api.context,clockWindow,320,240)==EngineSceneOk,"material clock viewport");
+        auto editorCamera=session.GetEditorCameraApi();EngineEditorCameraState authored{8,4,12,-.8f,.2f};
+        Check(editorCamera.write(editorCamera.context,&authored)==EngineSceneOk,"set editor camera before empty Play");
         Check(api.control(api.context,EnginePlay)==EngineSceneOk && observed,"material clock Play");
+        const auto emptyView=observed->GetPlayer()->GetViewMatrix();
+        Check(!observed->GetCharacterController() && observed->GetPlayer()->GetPosition()==glm::vec3(8,4,12),"without Player retain editor camera");
         Check(api.frame(api.context,.05)==EngineSceneOk && api.frame(api.context,.05)==EngineSceneOk,"material clock frames");
+        Check(memcmp(&emptyView,&observed->GetPlayer()->GetViewMatrix(),sizeof(emptyView))==0,"empty Play does not move editor view");
         Check(std::abs(observed->GetFrameConstants().TimeParams.x-.1f)<.0001f,"material real time advances in editor Play");
         Check(api.control(api.context,EngineStop)==EngineSceneOk,"material clock Stop");
     }
@@ -160,11 +209,11 @@ static void SdkChecks(const std::filesystem::path& dll,const std::filesystem::pa
     Check(api.scene.createObject(api.scene.context,"SdkHero","Hero",&transform,&hero)==EngineSceneOk,"SDK generated Character descendant in catalog");
     uint32_t kind=0;input.objectKind(input.context,hero,&kind);Check(kind==1,"SDK descendant recognized as Character");
     Check(api.scene.createObject(api.scene.context,"Gameplay.PlaySettings","Settings",&transform,&settings)==EngineSceneOk,"SDK includes no-code standard types");
-    PlaySettings config;config.character=hero;data.write(data.context,settings,config.SaveProjectData().c_str());
+    Character config;config.playerControlled=true;data.write(data.context,hero,config.SaveProjectData().c_str());
     input.focus(input.context,1);Check(api.control(api.context,EnginePlay)==EngineSceneOk,"SDK custom Game controller starts");
     auto z=[&]{float v=0;EngineSceneInfo info{};api.readActiveScene(api.context,&info,[](void* p,const EngineSceneObjectInfo* o){if(std::string(o->name)=="Hero")*static_cast<float*>(p)=o->transform.position[2];},&v);return v;};
     input.key(input.context,87,1);api.frame(api.context,.1);Check(z()==0,"custom controller replaces WASD");input.key(input.context,87,0);
     input.key(input.context,73,1);api.frame(api.context,.1);Check(z()<-.49f,"custom SDK controller moves with I");
     api.control(api.context,EngineStop);
 }
-int wmain(int argc,wchar_t** argv){try{InputChecks();CharacterChecks();SessionChecks();if(argc==3)SdkChecks(std::filesystem::absolute(argv[1]),std::filesystem::absolute(argv[2]));if(argc==2&&std::wstring(argv[1])==L"--camera")CameraChecks();std::cout<<"Input/Character: "<<checks<<" checks passed\n";return 0;}catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}
+int wmain(int argc,wchar_t** argv){try{InputChecks();CharacterChecks();PlayerPropertyChecks();SessionChecks();if(argc==3)SdkChecks(std::filesystem::absolute(argv[1]),std::filesystem::absolute(argv[2]));if(argc==2&&std::wstring(argv[1])==L"--camera")CameraChecks();std::cout<<"Input/Character: "<<checks<<" checks passed\n";return 0;}catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

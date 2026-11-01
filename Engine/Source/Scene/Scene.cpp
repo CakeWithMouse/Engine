@@ -107,6 +107,7 @@ void Scene::RemoveNow(ComponentId id) noexcept
         if(settings->character==id)settings->character=0;
         if(settings->camera==id)settings->camera=0;
     }
+    for(auto& entry:components_)if(auto* character=dynamic_cast<Character*>(entry.second.get()))if(character->camera==id)character->camera=0;
     auto entry = components_.find(removed->SceneName);
     byId_.erase(it);
     components_.erase(entry);
@@ -263,7 +264,12 @@ void Scene::Tick(float dt, bool pauseNonSkybox)
     try
     {
         for (auto& entry : components_)
-            entry.second->Tick(pauseNonSkybox && !entry.second->IsSkybox() ? 0.0f : dt);
+        {
+            const float seconds=pauseNonSkybox && !entry.second->IsSkybox() ? 0.0f : dt;
+            entry.second->Tick(seconds);
+            auto* visual=entry.second->GetRenderComponent();
+            if(visual!=entry.second.get())visual->Tick(seconds);
+        }
     }
     catch (...) { ticking_ = false; throw; }
     ticking_ = false;

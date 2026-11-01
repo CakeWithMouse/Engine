@@ -163,9 +163,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
                 auto object = objects[i].toObject();
                 if (object["id"].toInteger() != static_cast<qint64>(cmd.objectId)) continue;
                 const auto type = object["type"].toString();
-                if (type != "Engine.Model" && !type.startsWith("Primitive."))
-                    throw std::runtime_error("Only model objects and primitives support model replacement");
-                object["type"] = "Engine.Model";
+                if(type == "Engine.Model" && cmd.path.isEmpty()) object["type"] = "Primitive.Cube";
                 auto assets = object["assets"].toObject();
                 assets["model"] = cmd.path;
                 if (!assets.contains("texture")) assets["texture"] = "";

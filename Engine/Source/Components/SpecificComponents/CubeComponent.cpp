@@ -21,7 +21,6 @@ inline void CubeComponent::InitCube()
     // Инициализируем базовый компонент
     InitPoints(points, 16, cubeIndices, 36);
 
-    std::cout << "Cube initialized with " << 8 << " vertices and " << 36 << " indices\n";
 }
 
 void CubeComponent::Tick(float deltaTime)

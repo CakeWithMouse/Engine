@@ -66,8 +66,6 @@ void SphereComponent::InitSphere(float radius, int slices, int stacks)
     
     InitPoints(points.data(), static_cast<int>(points.size()), indices.data(), static_cast<int>(indices.size()));
     
-    std::cout << "Sphere initialized with " << vertices.size()/2 << " vertices and " 
-              << indices.size() << " indices\n";
 }
 
 void SphereComponent::Tick(float deltaTime)

@@ -13,8 +13,8 @@ public:
         header->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
         body=new QWidget(this);layout->addWidget(header);layout->addWidget(body);
         const auto setting="Inspector/Sections/"+key;
-        const bool open=QSettings("PainEngine","Editor").value(setting,true).toBool();
+        const bool open=QSettings(QSettings::defaultFormat(),QSettings::UserScope,"PainEngine","Editor").value(setting,true).toBool();
         header->setChecked(open);header->setArrowType(open?Qt::DownArrow:Qt::RightArrow);body->setVisible(open);
-        connect(header,&QToolButton::toggled,this,[this,header,setting](bool value){body->setVisible(value);header->setArrowType(value?Qt::DownArrow:Qt::RightArrow);QSettings("PainEngine","Editor").setValue(setting,value);});
+        connect(header,&QToolButton::toggled,this,[this,header,setting](bool value){body->setVisible(value);header->setArrowType(value?Qt::DownArrow:Qt::RightArrow);QSettings(QSettings::defaultFormat(),QSettings::UserScope,"PainEngine","Editor").setValue(setting,value);});
     }
 };

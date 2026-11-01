@@ -15,7 +15,7 @@ template<class T> struct ProjectObjectAdapter
         if (!data.empty()) throw std::runtime_error("Object has no data codec");
     }
 };
-template<class T> class ProjectObjectComponent final : public GameComponent, public EditorPropertyProvider
+template<class T> class ProjectObjectComponent final : public GameComponent
 {
     std::unique_ptr<T> value_ = ProjectObjectAdapter<T>::Create();
 public:

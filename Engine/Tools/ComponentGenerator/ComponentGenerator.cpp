@@ -17,7 +17,7 @@
 
 namespace fs = std::filesystem;
 struct Token { std::string text; int line; bool literal = false; };
-struct Type { std::string name, label; fs::path header; int line; std::string kind, base, id; };
+struct Type { std::string name, label; fs::path header; int line; std::string kind, base, id; std::string properties; bool generatedProperties = false; };
 
 static std::string Read(const fs::path& path)
 {
@@ -123,6 +123,7 @@ static void Scan(const fs::path& path, bool header, std::vector<Type>& types)
     std::vector<std::string> scopes;
     int conditional = 0;
     bool pendingTemplate = false;
+    size_t owner = size_t(-1), ownerDepth = 0;
     // A conventional leading include guard is the only allowed conditional wrapper.
     bool guard = ts.size() >= 2 && ts[0].text[0] == '#' && ts[1].text[0] == '#' &&
         Directive(ts[0]).first == "ifndef" && Directive(ts[1]).first == "define" &&
@@ -140,7 +141,42 @@ static void Scan(const fs::path& path, bool header, std::vector<Type>& types)
             if (conditional < 0) Fail(path, t.line, "Unmatched #endif");
             continue;
         }
-        if (t.text == "ENGINE_PROPERTY") Fail(path, t.line, "ENGINE_PROPERTY is not supported yet");
+        if (t.text == "ENGINE_GENERATED_PROPERTIES") {
+            if(owner==size_t(-1)||scopes.size()!=ownerDepth)Fail(path,t.line,"ENGINE_GENERATED_PROPERTIES requires an ENGINE_COMPONENT class");
+            types[owner].generatedProperties=true;
+        }
+        if (t.text == "ENGINE_PROPERTY" || t.text == "ENGINE_ENUM_PROPERTY") {
+            if(owner==size_t(-1)||scopes.size()!=ownerDepth||types[owner].kind!="Component")
+                Fail(path,t.line,"Property must be a direct field of an ENGINE_COMPONENT class");
+            if(conditional>(guard?1:0))Fail(path,t.line,"Conditional properties are unsupported");
+            size_t j=i+1;
+            if(j>=ts.size()||ts[j++].text!="(")Fail(path,t.line,"Expected property arguments");
+            const size_t argsBegin=j;int depth=1;
+            for(;j<ts.size()&&depth;++j){if(ts[j].text=="(")++depth;if(ts[j].text==")")--depth;}
+            if(depth)Fail(path,t.line,"Unclosed property annotation");
+            const size_t argsEnd=j-1;
+            if(argsBegin==argsEnd||!ts[argsBegin].literal)Fail(path,t.line,"Property label must be a string literal");
+            std::string args;for(size_t k=argsBegin;k<argsEnd;++k)args+=ts[k].text;
+            const size_t declaration=j;
+            while(j<ts.size()&&ts[j].text!="="&&ts[j].text!="{"&&ts[j].text!=";")++j;
+            if(j<=declaration+1||!Identifier(ts[j-1].text))Fail(path,t.line,"Expected a single mutable data field after property annotation");
+            const auto member=ts[j-1].text;
+            std::string fieldType;for(size_t k=declaration;k+1<j;++k)fieldType+=ts[k].text;
+            const std::set<std::string> supported={"bool","int","float","double","std::string","int32_t","uint32_t","int64_t","uint64_t"};
+            if(!supported.count(fieldType))Fail(path,t.line,"Unsupported property type: "+fieldType+"; use a mutable scalar or std::string");
+            int braces=0;
+            for(;j<ts.size();++j){const auto& token=ts[j].text;if(token=="{")++braces;if(token=="}")--braces;
+                if(token==","&&braces==0)Fail(path,t.line,"Declare one property per annotation");
+                if(token==";"&&braces==0)break;if(braces<0)Fail(path,t.line,"Missing semicolon after property");}
+            if(j==ts.size())Fail(path,t.line,"Missing semicolon after property");
+            const bool choice=t.text=="ENGINE_ENUM_PROPERTY";
+            if(choice) {
+                if(argsBegin+1>=argsEnd||ts[argsBegin+1].text!=",")Fail(path,t.line,"Enum property requires choices");
+                std::string options;for(size_t k=argsBegin+2;k<argsEnd;++k)options+=ts[k].text;
+                types[owner].properties+="visitor.Enum(\""+member+"\", this->"+member+", "+ts[argsBegin].text+", {"+options+"});\n";
+            } else types[owner].properties+="visitor.Field(\""+member+"\", this->"+member+", "+args+");\n";
+            i=j;continue;
+        }
         if (t.text == "template") pendingTemplate = true;
         if (t.text == "namespace")
         {
@@ -205,10 +241,10 @@ static void Scan(const fs::path& path, bool header, std::vector<Type>& types)
             types.push_back({name, label.empty() ? "\"" + name + "\"" : label, path, t.line,
                 t.text == "ENGINE_GAME" ? "Game" : t.text == "ENGINE_OBJECT" ? "Object" : "Component", base, stableId.empty() ? name : stableId});
             // Process the body normally: nested annotations must produce a diagnostic.
-            scopes.push_back("#"); pendingTemplate = false; i = j - 1; continue;
+            scopes.push_back("#"); owner=types.size()-1;ownerDepth=scopes.size(); pendingTemplate = false; i = j - 1; continue;
         }
         if (t.text == "{") { scopes.push_back("#"); pendingTemplate = false; }
-        if (t.text == "}") { if (!scopes.empty()) scopes.pop_back(); pendingTemplate = false; }
+        if (t.text == "}") { if (!scopes.empty()) scopes.pop_back(); if(scopes.size()<ownerDepth)owner=size_t(-1); pendingTemplate = false; }
         if (t.text == ";") pendingTemplate = false;
     }
     if (conditional != 0) Fail(path, ts.empty() ? 1 : ts.back().line, "Unclosed preprocessor conditional");
@@ -264,6 +300,8 @@ int wmain(int argc, wchar_t** argv)
         for (size_t i = 1; i < types.size(); ++i)
             if (types[i - 1].name == types[i].name)
                 Fail(types[i].header, types[i].line, "Duplicate component " + types[i].name + " (also in " + types[i - 1].header.u8string() + ")");
+        for(const auto& type:types)if(!type.properties.empty()&&!type.generatedProperties)
+            Fail(type.header,type.line,"Add ENGINE_GENERATED_PROPERTIES(BaseClass) to the public section of the class");
         const std::string banner = "// Generated by ComponentGenerator. Do not edit.\n";
         std::set<std::string> ids;
         for (const auto& t : types) if (!ids.insert(t.id).second) Fail(t.header,t.line,"Duplicate stable type ID: "+t.id);
@@ -273,6 +311,13 @@ int wmain(int argc, wchar_t** argv)
         for (const auto& type : types) includes.push_back(type.header);
         std::sort(includes.begin(), includes.end()); includes.erase(std::unique(includes.begin(), includes.end()), includes.end());
         for (const auto& include : includes) source += "#include \"" + include.generic_u8string() + "\"\n";
+        for(const auto& type:types)if(type.generatedProperties) {
+            const auto& name=type.name;const auto& fields=type.properties;
+            source+="std::string "+name+"::DescribeEditorProperties() const { auto data=EngineProperties::Schema<EnginePropertyBase>(this); EngineProperties::Visitor visitor{EngineProperties::Visitor::Schema,data};\n"+fields+"return data.dump(); }\n";
+            source+="std::string "+name+"::SaveProjectData() const { auto data=EngineProperties::Data(EnginePropertyBase::SaveProjectData()); EngineProperties::Visitor visitor{EngineProperties::Visitor::Save,data};\n"+fields+"return data.dump(); }\n";
+            source+="void "+name+"::LoadProjectData(const std::string& text) { if(text.empty())return; auto data=EngineProperties::Data(text); if(!data.is_object()||data.value(\"version\",0)!=1)throw std::invalid_argument(\"Unsupported property data version\"); EngineProperties::Visitor visitor{EngineProperties::Visitor::Validate,data};\n"+fields+
+                "const auto before=SaveProjectData();const bool baseData=!EnginePropertyBase::SaveProjectData().empty();try {if(baseData)EnginePropertyBase::LoadProjectData(text);visitor.mode=EngineProperties::Visitor::Load;\n"+fields+"EngineProperties::Notify(*this,0);}catch(...) {if(baseData)EnginePropertyBase::LoadProjectData(before);data=EngineProperties::Data(before);visitor.mode=EngineProperties::Visitor::Load;\n"+fields+"EngineProperties::Notify(*this,0);throw;} }\n";
+        }
         source += "namespace EngineGenerated::" + catalog + " {\nComponentTypeCatalog GetComponentTypes() noexcept\n{\n";
         if (std::none_of(types.begin(), types.end(), [](const Type& t) { return t.kind != "Game"; })) source += "    return {};\n";
         else

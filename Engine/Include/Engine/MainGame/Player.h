@@ -30,8 +30,9 @@ public:
     CameraMode GetCameraMode() const { return cameraMode; }
     float GetNearPlane() const { return nearPlane; }
     float GetFarPlane() const { return farPlane; }
-    float GetFovY() const { return DirectX::XMConvertToRadians(60.0f); }
+    float GetFovY() const { return DirectX::XMConvertToRadians(fovDegrees); }
 
+    void SetProjection(bool orthographic, float fov, float nearClip, float farClip, float height);
     void SetCameraMode(CameraMode mode)
     {
         cameraMode = mode;
@@ -40,6 +41,7 @@ public:
     void SetOrbitTarget(const glm::vec3& target) { orbitTarget = target; }
     void SetPosition(const glm::vec3& pos) { position = pos; }
     void SetRotate(float yaw, float pitch);
+    void SetViewDirection(const glm::vec3& forward, const glm::vec3& up);
     void StopRotate(bool yaw, bool pitch);
     void EnableWASD(bool bEnable) { bCanWASD = bEnable; };
 
@@ -76,6 +78,8 @@ protected:
 private:
     glm::vec3 position{0.0f, 0.0f, -5.0f};
 
+    bool orthographic = false;
+    float fovDegrees = 60, orthographicHeight = 10;
     float nearPlane = 0.1f;
     float farPlane = 10000.0f;
 

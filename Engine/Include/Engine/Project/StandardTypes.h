@@ -118,7 +118,8 @@ inline ComponentTypeCatalog GetComponentTypes()
         {"Environment.Sky", "Базовое небо", EngineComponentDetail::Create<Sky>},
         {"Gameplay.Character", "Персонаж", EngineComponentDetail::Create<Character>},
         {"Gameplay.Camera", "Камера Play", EngineComponentDetail::Create<SceneCamera>},
-        {"Gameplay.PlaySettings", "Настройки Play", EngineComponentDetail::Create<PlaySettings>}
+        {"Gameplay.PlaySettings", "Настройки Play", EngineComponentDetail::Create<PlaySettings>},
+        {"Gameplay.Player", "Игрок", EngineComponentDetail::Create<PlayerCharacter>}
     };
     return {types, sizeof(types) / sizeof(types[0])};
 }

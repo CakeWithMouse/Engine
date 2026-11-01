@@ -9,7 +9,6 @@ void TriangleComponent::InitSquare(DirectX::XMFLOAT4 points[8], int indices[6])
 {
     // Просто передаем данные в базовый класс
     InitPoints(points, 8, indices, 6);
-    std::cout << "Triangle initialized with 4 vertices and 6 indices\n";
 }
 
 void TriangleComponent::InitSquareWithColor(DirectX::XMFLOAT4 points[8], DirectX::XMFLOAT4 color)

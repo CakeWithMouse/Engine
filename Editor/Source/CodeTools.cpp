@@ -7,6 +7,7 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QDir>
+#include <QDockWidget>
 #include <QFile>
 #include <QFileInfo>
 #include <QInputDialog>
@@ -47,15 +48,22 @@ void EditorMainWindow::RunCodeTool(const QString& action, const QStringList& ext
     auto* process = new QProcess(this);
     process->setObjectName(QStringLiteral("projectCodeBuild"));
     process->setProcessChannelMode(QProcess::MergedChannels);
-    connect(process, &QProcess::readyReadStandardOutput, this, [this,process] { AppendLine(QString::fromLocal8Bit(process->readAllStandardOutput())); });
+    connect(process, &QProcess::readyReadStandardOutput, this, [this,process] {
+        auto pending=process->property("pendingOutput").toByteArray()+process->readAllStandardOutput();
+        int end=0;while((end=pending.indexOf('\n'))>=0) { AppendLine(QString::fromLocal8Bit(pending.left(end)));pending.remove(0,end+1); }
+        process->setProperty("pendingOutput",pending);
+    });
     connect(process, &QProcess::errorOccurred, this, [this,process](QProcess::ProcessError error) {
         AppendLine(process->errorString()); if (error == QProcess::FailedToStart) { sceneBusy_ = false; setEnabled(true); process->deleteLater(); }
     });
     connect(process, qOverload<int,QProcess::ExitStatus>(&QProcess::finished), this,
         [this,process,action,project,runtime,previousModule](int code, QProcess::ExitStatus state) {
             sceneBusy_ = false; setEnabled(true);
+            AppendLine(QString::fromLocal8Bit(process->property("pendingOutput").toByteArray()+process->readAllStandardOutput()));
             process->deleteLater();
             if (code || state != QProcess::NormalExit) {
+                AppendLine(QStringLiteral("[Ошибка C++] %1: код завершения %2. Проект: %3").arg(action).arg(code).arg(project));
+                consoleDock_->show();consoleDock_->raise();
                 QMessageBox::warning(this, QStringLiteral("C++"), QStringLiteral("Операция не завершена. Предыдущая DLL сохранена. Диагностика находится в Console.")); return;
             }
             if (action == QStringLiteral("AddClass")) {

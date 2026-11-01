@@ -25,7 +25,8 @@ public:
     virtual void Tick(float seconds);
     virtual void UpdateCamera(Player&);
     void Possess(ComponentId character, ComponentId camera = 0);
-    void Configure(const PlaySettings&);
+    void Configure(const PlaySettings&); // legacy C++ API
+    void Configure(const Character&);
     void SetEnabled(bool);
     Character* GetCharacter() const; // resolves ID on every access; never owns a raw object pointer
     ComponentId GetCharacterId() const { return character_; }

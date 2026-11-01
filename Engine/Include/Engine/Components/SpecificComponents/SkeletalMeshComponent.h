@@ -23,7 +23,7 @@ public:
     bool SetModel(std::shared_ptr<SkeletalModel> model);
     bool SetAssetModel(std::string path, std::shared_ptr<SkeletalModel> model);
     bool LoadTexture(const std::string& texturePath);
-    std::string GetModelAsset() const override { return assetPath; }
+    std::string GetModelAsset() const override { return GameComponent::GetModelAsset().empty() ? assetPath : GameComponent::GetModelAsset(); }
 
     void Tick(float deltaTime) override;
     void Render(ID3D11DeviceContext* context) override;

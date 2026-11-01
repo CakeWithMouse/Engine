@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
 
-// Opt-in, module-local interface. Does not change GameComponent or historical
-// DLL layouts. Values remain owned by SaveProjectData/LoadProjectData.
+// Legacy source compatibility only. New components override the method on
+// GameComponent directly. Keep this independent base so old multiple-inheritance
+// declarations still compile; do not alias it to GameComponent.
 class EditorPropertyProvider {
 public:
     virtual ~EditorPropertyProvider() = default;

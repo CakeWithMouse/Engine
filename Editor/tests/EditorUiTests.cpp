@@ -93,8 +93,9 @@ void Add(EditorMainWindow* window, int index) {
     auto* panel=window->findChild<SceneObjectsPanel*>();Check(panel && panel->isEnabled(), "add palette enabled");
     QList<QAction*> actions;
     for(auto* action:panel->findChildren<QAction*>()) if(action->objectName().startsWith("CreateObject.")) actions.push_back(action);
-    Check(actions.size()==13,"categorized add menu includes all placeable types");
-    Check(index>=0 && index<actions.size(),"valid object menu index");actions[index]->trigger();
+    Check(actions.size()==14,"categorized add menu includes all placeable types");
+    const QStringList types={"Primitive.Cube","Primitive.Sphere","Primitive.Plane","Primitive.Cylinder","Primitive.Cone","Primitive.Pyramid","Light.Point","Light.Directional","Particle.Sparks","Particle.Smoke","Environment.Sky","Gameplay.Character","Gameplay.Camera","Gameplay.Player"};
+    Check(index>=0 && index<types.size(),"valid object menu index");CreateAction(window,types[index])->trigger();
 }
 }
 void ReloadUiChecks(const std::filesystem::path& root, const std::filesystem::path& engineContent, bool buildCode=false)
@@ -178,6 +179,9 @@ int wmain(int argc, wchar_t** argv)
     {
         Check(argc == 3 || argc == 4, "usage: EditorUiTests <project directory> <EngineContent> [model]");
         const auto root = std::filesystem::absolute(argv[1]);
+        // Isolate persisted UI preferences from the user's registry and other test runs.
+        QSettings::setDefaultFormat(QSettings::IniFormat);
+        QSettings::setPath(QSettings::IniFormat,QSettings::UserScope,QString::fromStdWString((root/"TestSettings").wstring()));
         if(argc==4&&std::wstring(argv[3])==L"--reload"){ReloadUiChecks(root,std::filesystem::absolute(argv[2]));return 0;}
         if(argc==4&&std::wstring(argv[3])==L"--code-reload"){ReloadUiChecks(root,std::filesystem::absolute(argv[2]),true);return 0;}
         const auto manifest = (root / "Project.json").u8string(), content = (root / "Content").u8string();
@@ -338,6 +342,9 @@ int wmain(int argc, wchar_t** argv)
                 Action(w,QStringLiteral("Ресурсы: компактная панель"))->trigger();
             });for(int i=0;i<15;++i)pump();
             Ui([](auto* w){w->resize(1800,1100);});for(int i=0;i<15;++i)pump();
+            Ui([](auto* w){w->resizeDocks({w->template findChild<QDockWidget*>("SceneObjectsDock"),w->template findChild<QDockWidget*>("ViewportDock"),w->template findChild<QDockWidget*>("InspectorDock")},{80,1600,80},Qt::Horizontal);});
+            for(int i=0;i<10;++i)pump();
+            Ui([](auto* w){Check(w->template findChild<QDockWidget*>("ViewportDock")->width()>w->width()*0.75,"viewport expands beyond 75 percent of window width");});
             Ui([&](auto* w){QDockWidget* files=nullptr;for(auto* d:w->template findChildren<QDockWidget*>())if(d->objectName()==QStringLiteral("ContentDock"))files=d;
                 height=files->height();std::printf("Layout resized: content=%d\n",height);for(auto* d:w->findChildren<QDockWidget*>())std::printf("Dock %s: area=%d size=%dx%d min=%d visible=%d\n",d->objectName().toUtf8().constData(),int(w->dockWidgetArea(d)),d->width(),d->height(),d->minimumHeight(),d->isVisible());Check(height<=240,"compact panel does not consume most of the window");
                 boundary=QPoint(w->width()/2,files->mapTo(w,QPoint()).y()-w->style()->pixelMetric(QStyle::PM_DockWidgetSeparatorExtent)/2);
@@ -555,6 +562,7 @@ int wmain(int argc, wchar_t** argv)
             Check(CreateAction(w,"Particle.Sparks") && CreateAction(w,"Particle.Smoke"),"particle presets available");
             Check(CreateAction(w,"Environment.Sky"),"sky available");
             Check(!w->findChild<QAction*>("CreateObject.Gameplay.PlaySettings"),"service settings not placeable");
+            Check(w->findChild<QAction*>("CreateObject.Gameplay.Player"),"Player is available for placement");
             Check(w->findChild<QTreeWidget*>()->topLevelItemCount() == 4, "starter hierarchy"); Add(w, 0);
         });
         until([&] { return host.ReadSnapshot().objects.size() == 5; });
@@ -738,10 +746,10 @@ int wmain(int argc, wchar_t** argv)
                 EditorCommand replace; replace.type=EditorCommand::SetModel; replace.objectId=o.id;
                 replace.path=QStringLiteral("/Game/")+QString::fromStdWString(std::filesystem::relative(importedModel,root/"Content").generic_wstring()); host.PostCommand(replace);
             }
-            until([&] { for(const auto& o:host.ReadSnapshot().objects) if(o.type=="Engine.Model") return true; return false; });
+            until([&] { for(const auto& o:host.ReadSnapshot().objects) if(o.type=="Primitive.Sphere" && !o.modelAsset.empty()) return true; return false; });
             Check(host.ReadSnapshot().objects.size()==6 && host.ReadSnapshot().selected!=0,"replace primitive model preserves count and selection");
             Ui([](auto* w) { Action(w,QStringLiteral("Отменить"))->trigger(); });
-            until([&] { for(const auto& o:host.ReadSnapshot().objects) if(o.type=="Primitive.Sphere") return true; return false; });
+            until([&] { for(const auto& o:host.ReadSnapshot().objects) if(o.type=="Primitive.Sphere" && o.modelAsset.empty()) return true; return false; });
             Ui([&](auto* w) { w->AddModel(QString::fromStdWString(importedModel.wstring())); });
             until([&] { return host.ReadSnapshot().objects.size() == 7; });
             if (std::filesystem::exists(std::filesystem::path(importedModel.wstring() + L".import.json")))
@@ -949,25 +957,20 @@ int wmain(int argc, wchar_t** argv)
         Ui([](auto* w) { Add(w,11); });
         until([&] { for(const auto& o:host.ReadSnapshot().objects)if(o.gameplayKind==1)return true;return false; });
         Ui([](auto* w) {
-            auto* speed=w->findChild<QDoubleSpinBox*>("CharacterSpeed"); Check(speed && speed->isVisible(),"character settings in inspector");
+            auto* speed=w->findChild<QDoubleSpinBox*>("Property/moveSpeed"); Check(speed && speed->isVisible(),"character settings in inspector");
             speed->setFocus(); speed->setValue(7); QMetaObject::invokeMethod(speed,"editingFinished",Qt::DirectConnection);
         });
         until([&] { for(const auto& o:host.ReadSnapshot().objects) if(o.gameplayKind==1) return QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object()["moveSpeed"].toDouble()==7; return false; });
         Ui([](auto* w) {
-            auto* speed=w->findChild<QDoubleSpinBox*>("CharacterSpeed"); Check(speed->hasFocus() || speed->isAncestorOf(QApplication::focusWidget()),"refresh does not steal property focus");
-            QTimer::singleShot(50,w,[w]{
-                auto* combo=w->template findChild<QComboBox*>("PlayCharacter");Check(combo&&combo->count()==2,"Play dialog recognizes Character");combo->setCurrentIndex(1);
-                auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());Check(dialog,"Play settings dialog");dialog->accept();
-            });
-            Action(w,QStringLiteral("Настроить Play…"))->trigger();
+            auto* speed=w->findChild<QDoubleSpinBox*>("Property/moveSpeed"); Check(speed->hasFocus() || speed->isAncestorOf(QApplication::focusWidget()),"refresh does not steal property focus");
+            auto* player=w->findChild<QCheckBox*>("Property/playerControlled");
+            Check(player && w->findChild<QComboBox*>("Property/orthographic") && w->findChild<QComboBox*>("Property/viewPlane") && w->findChild<QDoubleSpinBox*>("Property/fov"),"player camera controls in properties");
+            Check(!w->findChild<QToolButton*>("ConfigPlayBtn"),"Play settings removed from toolbar");
+            for(auto* action:w->findChildren<QAction*>())Check(action->text()!=QStringLiteral("Настроить Play…"),"Play settings removed from menu");
+            player->click();
         });
-        until([&] { for(const auto& o:host.ReadSnapshot().objects)if(o.gameplayKind==3)return true;return false; });
-        Ui([](auto* w) {
-            auto hasSettings=[&]{for(int i=0;i<w->findChild<QTreeWidget*>()->topLevelItemCount();++i)if(w->findChild<QTreeWidget*>()->topLevelItem(i)->text(1)=="Gameplay.PlaySettings")return true;return false;};
-            Check(!hasSettings(),"Play settings hidden in normal hierarchy");
-            Action(w,QStringLiteral("Служебные объекты сцены"))->setChecked(true);Check(hasSettings(),"old service records remain accessible for repair");
-            Action(w,QStringLiteral("Служебные объекты сцены"))->setChecked(false);Check(!hasSettings(),"service records can be hidden again");
-        });
+        until([&] {for(const auto& o:host.ReadSnapshot().objects)if(o.gameplayKind==1)return QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object()["playerControlled"].toBool();return false;});
+        Ui([&](auto* w){w->grab().save(QString::fromStdWString((root/"player-properties.png").wstring()));});
         Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); });
         until([&] { return !host.ReadSnapshot().dirty; });
         Ui([](auto* w) { Action(w,QStringLiteral("▶ Play"))->trigger(); });until([&]{return host.PlayState()==EditorQtHost::Play;});
@@ -1027,10 +1030,22 @@ int wmain(int argc, wchar_t** argv)
         until([&] { return host.PlayState()==EditorQtHost::Edit; });
         Ui([](auto* w) { Action(w,QStringLiteral("Направленный свет"))->trigger(); });
         until([&] { return host.ReadSnapshot().selected==sunObject().id; });
-        Ui([&](auto* w) { w->grab().save(QString::fromStdWString((root / "directional-light-inspector.png").wstring())); Action(w,QStringLiteral("Удалить объект"))->trigger(); });
+        Ui([&](auto* w) { w->grab().save(QString::fromStdWString((root / "directional-light-inspector.png").wstring())); auto* viewport=w->template findChild<ViewportWidget*>();Check(viewport,"viewport exists");viewport->setFocus();
+            QKeyEvent key(QEvent::KeyPress,Qt::Key_Delete,Qt::NoModifier);QApplication::sendEvent(viewport,&key); });
         until([&] { return !sunObject().id; });
         Ui([](auto* w) { Action(w,QStringLiteral("Отменить"))->trigger(); });
         until([&] { return sunObject().id && sunSettings()["intensity"].toDouble()==2.5; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); });
+        until([&] { return !host.ReadSnapshot().dirty; });
+        Ui([](auto* w) { Add(w,12); });
+        until([&] { for(const auto& o:host.ReadSnapshot().objects)if(o.gameplayKind==2)return true;return false; });
+        Ui([](auto* w) {
+            auto* projection=w->template findChild<QComboBox*>("Property/orthographic");
+            auto* plane=w->template findChild<QComboBox*>("Property/viewPlane");
+            Check(projection && plane && projection->count()==2 && plane->count()==4,"camera projection and 2D plane choices");
+            projection->setCurrentIndex(1);QMetaObject::invokeMethod(projection,"activated",Q_ARG(int,1));
+        });
+        until([&]{for(const auto& o:host.ReadSnapshot().objects)if(o.gameplayKind==2)return QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object()["orthographic"].toBool();return false;});
         Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); });
         until([&] { return !host.ReadSnapshot().dirty; });
         Ui([](auto* w) { w->close(); });

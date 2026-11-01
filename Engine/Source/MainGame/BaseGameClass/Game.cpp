@@ -1431,7 +1431,7 @@ void Game::RetryFailedMaterialAssets()
     }
     for (auto& pair : Components)
     {
-        GameComponent* component = pair.second.get();
+        GameComponent* component = pair.second->GetRenderComponent();
         if (!component->MaterialAssetPath.empty() && component->MaterialPtr == errorMaterial)
         {
             component->bMaterialAssetLoaded = false;
@@ -1541,7 +1541,7 @@ void Game::OnShadersInvalidated()
         component->SetVertexShader(nullptr);
         component->SetPixelShader(nullptr);
     };
-    for (auto& pair : Components) resetShaders(pair.second.get());
+    for (auto& pair : Components) { resetShaders(pair.second.get()); resetShaders(pair.second->GetRenderComponent()); }
     resetShaders(ProjectHudComponent.get());
 
     // The fallback pair keeps the old shaders alive until the new ones compile.
@@ -2648,7 +2648,7 @@ void Game::RenderStaticShadowMap()
     uint32_t casterCount = 0;
     for (auto& pair : Components)
     {
-        GameComponent* component = pair.second.get();
+        GameComponent* component = pair.second->GetRenderComponent();
         if (!component->IsRenderable() || !component->IsStaticShadowCaster())
         {
             continue;
@@ -2708,7 +2708,7 @@ void Game::RenderShadowMaps()
 
         for (auto& componentPair : Components)
         {
-            GameComponent* component = componentPair.second.get();
+            GameComponent* component = componentPair.second->GetRenderComponent();
             if (!component->IsRenderable() || component->IsSkybox())
             {
                 continue;
@@ -3554,17 +3554,17 @@ void Game::InitializeGameplay()
             ProjectHudComponent->LoadMarkup(hudFile.generic_u8string());
         }
     } catch (const std::exception& e) { std::cout << "Project HUD: " << e.what() << std::endl; }
-    PlaySettings* settings = nullptr;
-    for (const auto& entry : scene.GetComponents()) if (auto* value = dynamic_cast<PlaySettings*>(entry.second.get())) {
-        if (settings) throw std::runtime_error("Only one PlaySettings object is allowed per scene");
-        settings = value;
+    MigrateLegacyPlaySettings(scene);
+    Character* player=nullptr;
+    for(const auto& entry:scene.GetComponents())if(auto* character=dynamic_cast<Character*>(entry.second.get()))if(character->playerControlled){
+        if(player)throw std::runtime_error("Only one player is allowed: disable Player on other characters");player=character;
     }
-    if (settings) {
-        if (!Controller) Controller = CreateCharacterController();
-        if (!Controller) throw std::runtime_error("Controller factory returned null");
-        Controller->Configure(*settings);
-        if (settings->standardControl) Controller->BindInput();
-        if (FirstPlayer) Controller->UpdateCamera(*FirstPlayer);
+    if(player){
+        if(!Controller)Controller=CreateCharacterController();
+        if(!Controller)throw std::runtime_error("Controller factory returned null");
+        Controller->Configure(*player);
+        if(player->standardControl)Controller->BindInput();
+        if(FirstPlayer)Controller->UpdateCamera(*FirstPlayer);
     }
     GameplayInitialized = true;
     StartGameplayComponents();
@@ -3948,7 +3948,7 @@ void Game::RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant)
 
     for (auto& pair : Components)
     {
-        GameComponent* Component = pair.second.get();
+        GameComponent* Component = pair.second->GetRenderComponent();
         if (!Component->IsRenderable() || Component->IsSkybox() || Component->HasOpacity() ||
             Component->IsScreenSpaceUI())
         {
@@ -3980,7 +3980,7 @@ void Game::RenderSkybox()
     Context->OMSetDepthStencilState(depthStencilStateSkybox.Get(), 0);
     for (auto& pair : Components)
     {
-        GameComponent* Component = pair.second.get();
+        GameComponent* Component = pair.second->GetRenderComponent();
         if (!Component->IsSkybox() || !Component->IsRenderable())
         {
             continue;
@@ -4013,7 +4013,7 @@ void Game::RenderUI()
     // Each UI component sets its own blending and states, so nothing here has to be undone.
     for (auto& pair : Components)
     {
-        GameComponent* Component = pair.second.get();
+        GameComponent* Component = pair.second->GetRenderComponent();
         if (!Component->IsRenderable() || !Component->IsScreenSpaceUI())
         {
             continue;
@@ -4042,7 +4042,7 @@ void Game::RenderTransparent()
     const glm::vec3 cameraPosition(CurrentFrame.CameraPosition.x, CurrentFrame.CameraPosition.y, CurrentFrame.CameraPosition.z);
     for (auto& pair : Components)
     {
-        GameComponent* Component = pair.second.get();
+        GameComponent* Component = pair.second->GetRenderComponent();
         if (!Component->IsRenderable() || Component->IsSkybox() || !Component->HasOpacity() ||
             Component->IsScreenSpaceUI() || !IsVisible(Component))
         {

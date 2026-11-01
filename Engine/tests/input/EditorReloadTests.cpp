@@ -38,7 +38,7 @@ int wmain(int argc,wchar_t** argv) {
         Check(api.scene.createObject(api.scene.context,"Gameplay.Character","Hero",&transform,&hero)==EngineSceneOk,"create hero");
         Check(api.scene.createObject(api.scene.context,"Gameplay.PlaySettings","Play",&transform,&settings)==EngineSceneOk,"create play settings");
         const auto data=module.ProjectDataApi();
-        Check(data.write(data.context,hero,"{\"version\":1,\"moveSpeed\":9}")==EngineSceneOk,"custom speed");
+        Check(data.write(data.context,hero,"{\"version\":1,\"moveSpeed\":9,\"playerControlled\":true}")==EngineSceneOk,"custom speed");
         const auto play="{\"version\":1,\"character\":"+std::to_string(hero)+",\"camera\":0,\"standardControl\":true,\"cameraDistance\":5,\"cameraHeight\":2,\"lookSensitivity\":0.005}";
         Check(data.write(data.context,settings,play.c_str())==EngineSceneOk,"assign Play");
         Check(api.attachViewport(api.context,window,320,240)==EngineSceneOk,"attach old viewport");

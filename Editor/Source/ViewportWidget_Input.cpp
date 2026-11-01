@@ -359,6 +359,7 @@ bool ViewportWidget::HandleKeyPress(QKeyEvent* key)
     if ((key->modifiers() & Qt::ControlModifier)) return false;
     if (key->isAutoRepeat()) return true;
 
+    if (key->key() == Qt::Key_Delete && !looking_ && !draggingSelectedObject_) { emit deleteRequested(); return true; }
     if (key->key() == Qt::Key_Escape)
     {
         if (draggingSelectedObject_)

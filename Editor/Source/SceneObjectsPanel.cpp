@@ -141,7 +141,7 @@ void SceneObjectsPanel::RebuildAddMenu()
         else if (name.startsWith("Light.")) target = menuLights;
         else if (name.startsWith("Particle.")) target = menuParticles;
         else if (name.startsWith("Environment.")) target = menuEnv;
-        else if (name.startsWith("Gameplay.Character")) target = menuCharacters;
+        else if ((name.startsWith("Gameplay.Character") || name == "Gameplay.Player")) target = menuCharacters;
         else if (name.startsWith("Gameplay.Camera")) target = menuCameras;
 
         auto* action = target->addAction(label, this, [this, name, label] {
