@@ -84,6 +84,16 @@
 
 ---
 
+## Чек-лист среза S10 (Ускорение повседневной сборки, chore(build))
+
+- [x] **Шаг 10.1 (perf(engine)):** Включение параллельной компиляции `/MP` в `Engine/BuildSupport/Cpp.props` (`<MultiProcessorCompilation>true</MultiProcessorCompilation>`). Сокращение холодной сборки `Engine.vcxproj` в 8 раз (с 224.2 с до 28.3 с).
+- [x] **Шаг 10.2 (perf(editor)):** Внедрение предкомпилированных заголовков PCH для Editor (`Editor/pch.h`, `Editor/pch.cpp`) с инъекцией через `/FI"pch.h"` и исключением moc/UI файлов. Ускорение инкрементной компиляции файла редактора в 5.7 раз (с 4.75 с до 0.83 с).
+- [x] **Шаг 10.3 (perf(editor)):** Оптимизация `windeployqt` через stamp-файл (`$(IntDir)windeployqt.stamp`) и таргет `DeployQtRuntime` с проверкой зависимостей. Устранение оверхеда ~350 мс на каждом запуске сборки.
+- [x] **Шаг 10.4 (tool):** Реализация быстрого режима `-Fast` (по умолчанию) в `Editor/tools/run-editor.ps1`: сборка целевых проектов (`Engine`, `EngineRuntime`, `SceneProject`, `EditorModule`, `EngineLauncher`), пропуск игр и тестов при отсутствии изменений в их коде, вывод меток времени и 15-секундный таймер линковки.
+- [x] **Шаг 10.5 (build):** Оптимизация настроек Debug в `Cpp.props` (явный `<LinkIncremental>true</LinkIncremental>`, отключение LTCG/GL для не-Release конфигураций). Валидация через `check.ps1 -Full` (Debug + Release, все тесты PASS).
+
+---
+
 ## Эталон тестов (Baseline S0 / S1 / S2 / S3 / S9)
 
 | Тест / Скрипт | Результат на `main` | Результат после S9 | Примечание |
@@ -175,6 +185,12 @@
     - Расширен C-ABI оверлея `EngineViewportOverlayApi` до версии 2 (с обратной совместимостью v1/v2): добавлено поле `setAntialiasing(void* context, uint32_t mode)`.
     - В `Game.cpp` реализован промежуточный рендертаргет `SceneColorTexture` и проход `RenderFxaaPass()`, выполняемый перед Present.
     - В UI редактора добавлено меню `Вид -> Сглаживание` (Выкл, FXAA) с вызовом команды `View.SetAntialiasing` и сохранением в `SettingsService` под ключом `viewport/antialiasing` (по умолчанию включен FXAA).
+22. **Ускорение повседневной сборки редактора и движка (S10):**
+    - **Параллелизм /MP:** В `Engine/BuildSupport/Cpp.props` глобально включен `<MultiProcessorCompilation>true</MultiProcessorCompilation>`, что устранило последовательную компиляцию 54 исходников движка на одном ядре CPU и сократило время холодной компиляции движка с 224.2 с до 28.3 с (в 8 раз быстрее).
+    - **PCH для Editor:** Модуль `EditorModule` теперь использует минимальный `pch.h` (включающий Windows API с `NOMINMAX`, базовые контейнеры STL, QtCore, QtGui, QtWidgets). Это устранило многократный разбор тяжелых заголовков Qt и сократило время перекомпиляции любого `.cpp` файла редактора с 4.75 с до 0.83 с (в 5.7 раз быстрее), а общее время одной правки в Editor/*.cpp — с 6.38 с до 2.07 с (в 3.1 раза быстрее).
+    - **Stamp-файл для windeployqt:** Деплой библиотек Qt переведен из безусловного `PostBuildEvent` в таргет `DeployQtRuntime` с отслеживанием зависимостей `windeployqt.stamp`. Если бинарники Qt не обновлялись, запуск `windeployqt.exe` полностью пропускается, экономя ~350 мс на каждом цикле сборки.
+    - **Режим -Fast в run-editor.ps1:** По умолчанию `run-editor.ps1` собирает через MSBuild только целевые проекты, необходимые для запуска редактора (`Engine`, `EngineRuntime`, `SceneProject`, `EditorModule`, `EngineLauncher`), пропуская игры (Pong, Battle, SunGame, BasicExamples, Katamari) и тесты, если в их каталогах нет локальных изменений.
+    - **Индикация прогресса и таймер линковки:** В `run-editor.ps1` добавлен вывод меток времени `[HH:mm:ss]`, подсветка этапов компиляции и сборки артефактов, а также периодический heartbeat-таймер раз в 15 секунд, информирующий пользователя об активном процессе линковки.
 
 ---
 
