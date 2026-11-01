@@ -273,3 +273,19 @@
 - Финальный `Editor/tools/test-regression.ps1 -Full` прошёл в Debug и Release: Core 216, Host 69, UI helpers/smoke 249, Engine 47, HUD 52, native reload 48; интеграционные UI-сценарии standard, authoring, workflow, recovery, layout и reload также прошли.
 - Логи: `Engine/build/editor-regression/Debug-e4b01f82c7b8495e8ca95f3bcd6286d1` и `Engine/build/editor-regression/Release-26821ae3fe124399a81f6da63521c493`. Дополнительно пройдено 650 проверок edit-session в Debug.
 - Команды повторного запуска и ограничения среды: `Editor/tests/README.md`.
+
+---
+
+## Чек-лист среза S11 (Полировка v2: FXAA, сетка, сплошное гизмо, тени света, центрирование тулбара, Tabler-иконки, биллборды)
+
+- [x] **Шаг 11.0 (build):** Ускорение сборки: `/MP` и инкрементальная линковка, PCH для редактора (`pch.h`/`pch.cpp`), оптимизированный `run-editor.ps1 -Fast`.
+- [x] **Шаг 11.A (ui):** Устранение толстых 9px полос между доками через токены темы `borderLight`/`bgWindow` (2px).
+- [x] **Шаг 11.Б (ui):** Реорганизация меню: вкладка "UI" перенесена в меню "Инструменты", порядок меню зафиксирован: `Сцена | Правка | Вид | Запуск | Проект | Инструменты`.
+- [x] **Шаг 11.1 (engine/render):** Устранение шлейфов оверлея: очистка `backbufferRTV` и `SceneColorRTV` каждый кадр, сброс состояний blend/depth/raster в FXAA, периодическое логирование `AntialiasingMode` каждые 120 кадров, readback-анализ промежуточных цветов.
+- [x] **Шаг 11.2 (engine/shader):** Сетка и оси с depth-тестом: `LESS_EQUAL` для сетки и осей с чтением DSV сцены, гизмо alwaysOnTop, флаг `HalfPixel` (1.5px), постоянная экранная толщина линий у горизонта (`safeC0`/`safeC1`).
+- [x] **Шаг 11.3 (engine/gizmo):** Сплошные наконечники стрелок и кубики Scale: C-ABI v3 расширение оверлея с `setOverlayTriangles`, шейдеры `VSTriangle`/`PSTriangle`, модуль `GizmoTriangles` со сплошными пирамидами, кубами и полупрозрачными плоскостями.
+- [x] **Шаг 11.4 (engine/scene):** Тени точечных источников: включены по умолчанию для новых `Light.Point`, сохранение бит-в-бит стабильности для сохранённых сцен (дефолт `false`), карточка света с чекбоксом "Тени" (`LightShadows`), расширение `EnginePointLightV2Extension`.
+- [x] **Шаг 11.5 (ui):** Вертикальное центрирование тулбара Play/Pause/Stop: контейнер `QFrame` с фиксированной высотой 36px, центрированные кнопки 28x28px, разница отступов top/bottom = 0px, проверка в `UiSmokeTests`.
+- [x] **Шаг 11.6 (ui):** Единый провайдер иконок `IconProvider`: интеграция 24 Tabler outline SVG, токенизированная палитра темы, генерация состояний `Normal`/`Disabled`/`Active`/`Selected` через tint, замена самодельных QPainter-иконок, эмодзи и системных иконок файлового браузера.
+- [x] **Шаг 11.7 (overlay):** Доставка биллбордов света и камеры: включение хеша объектов в триггер обновления оверлеев, подтверждённая доставка в проект 11 (`Billboards sent: count 2`).
+
