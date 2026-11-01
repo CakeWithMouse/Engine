@@ -58,7 +58,7 @@ LinePSInput VSLine(LineVSInput input)
     float2 pixelOffset = perp * (input.SideDir.x * halfWidth);
     float2 ndcOffset = pixelOffset * float2(ScreenSize.z * 2.0f, ScreenSize.w * 2.0f);
 
-    float4 baseClip = lerp(c0, c1, input.SideDir.y);
+    float4 baseClip = lerp(safeC0, safeC1, input.SideDir.y);
     output.Position = float4(baseClip.xy + ndcOffset * baseClip.w, baseClip.zw);
     return output;
 }

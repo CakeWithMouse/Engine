@@ -3137,6 +3137,10 @@ void Game::RenderEditorOverlay()
             auto& target = depthTest ? OverlayDepthVertices : OverlayTopVertices;
 
             float thickness = static_cast<float>((line.flags >> 8) & 0xFF);
+            if ((line.flags & 4) != 0)
+            {
+                thickness += 0.5f;
+            }
             if (thickness < 0.5f)
             {
                 thickness = (OverlayLineThickness > 0.5f) ? OverlayLineThickness : 1.0f;

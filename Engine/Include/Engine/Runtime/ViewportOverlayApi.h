@@ -8,6 +8,7 @@ namespace OverlayFlags
 {
     constexpr uint32_t DepthTest   = 1u;
     constexpr uint32_t AlwaysOnTop = 2u;
+    constexpr uint32_t HalfPixel   = 4u;
     inline constexpr uint32_t Thickness(uint8_t px) noexcept { return static_cast<uint32_t>(px) << 8; }
 }
 
