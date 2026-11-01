@@ -140,6 +140,28 @@ inline void Run()
         throw std::runtime_error("UiSmoke: Expected Cyrillic strings in RU mode, found 0");
     }
 
+    // 4. Verify vertical centering of toolbar play buttons within 1px
+    toolBar.resize(800, 36);
+    toolBar.show();
+    QCoreApplication::processEvents();
+    auto* playBtn = toolBar.findChild<QAbstractButton*>(QStringLiteral("BtnPlay"));
+    if (playBtn)
+    {
+        const int tbHeight = toolBar.height();
+        const int btnY = playBtn->geometry().y();
+        const int btnH = playBtn->geometry().height();
+        const int topMargin = btnY;
+        const int bottomMargin = tbHeight - (btnY + btnH);
+        const int diff = std::abs(topMargin - bottomMargin);
+        if (diff > 1)
+        {
+            throw std::runtime_error("UiSmoke: Play button not vertically centered in toolbar (top=" +
+                std::to_string(topMargin) + ", bottom=" + std::to_string(bottomMargin) +
+                ", diff=" + std::to_string(diff) + " > 1px)");
+        }
+        ++checks;
+    }
+
     // Restore default Ru language
     EditorLocale::Instance().SetLanguage(EditorLanguage::Ru);
 
