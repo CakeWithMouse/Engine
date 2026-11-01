@@ -1,3 +1,5 @@
+#include <QToolBar>
+#include <QToolButton>
 #include "EditorApp.h"
 #include "MainWindow.h"
 #include "IEditorHost.h"
@@ -35,6 +37,42 @@ namespace
         EditorMainWindow window(qtHost);
         host->SetUiListener(&window);
         window.show();
+        auto logToolBarGeom = [&window](const char* label) {
+            auto* tb = window.findChild<QToolBar*>("MainToolBar");
+            auto* cont = window.findChild<QFrame*>("ToolBarContainer");
+            auto* btn = window.findChild<QToolButton*>("BtnPlay");
+            if (tb && cont && btn) {
+                const auto tbg = tb->geometry();
+                const auto cg = cont->geometry();
+                const auto bg = btn->geometry();
+                const auto cm = tb->contentsMargins();
+                const int lml = tb->layout() ? tb->layout()->contentsMargins().left() : -1;
+                const int lmt = tb->layout() ? tb->layout()->contentsMargins().top() : -1;
+                const int lmr = tb->layout() ? tb->layout()->contentsMargins().right() : -1;
+                const int lmb = tb->layout() ? tb->layout()->contentsMargins().bottom() : -1;
+                std::printf("[ToolBarGeom] %s: tb=(%d,%d %dx%d), cont=(%d,%d %dx%d), btn=(%d,%d %dx%d), tbMargins=(%d,%d,%d,%d), tbLayoutMargins=(%d,%d,%d,%d)\n",
+                    label,
+                    tbg.x(), tbg.y(), tbg.width(), tbg.height(),
+                    cg.x(), cg.y(), cg.width(), cg.height(),
+                    bg.x(), bg.y(), bg.width(), bg.height(),
+                    cm.left(), cm.top(), cm.right(), cm.bottom(),
+                    lml, lmt, lmr, lmb);
+                std::fflush(stdout);
+            }
+        };
+
+        QTimer::singleShot(100, [logToolBarGeom] {
+            logToolBarGeom("startup (100ms)");
+        });
+
+        QTimer::singleShot(300, [logToolBarGeom] {
+            EditorTheme::Instance().SetMode(ThemeMode::Light);
+            EditorTheme::Instance().SetMode(ThemeMode::Dark);
+            QTimer::singleShot(100, [logToolBarGeom] {
+                logToolBarGeom("after theme toggle settled (400ms)");
+            });
+        });
+
         ready->store(true);
 
         const bool smokeMode = qEnvironmentVariableIsSet("PAINENGINE_SMOKE_EDITOR") ||

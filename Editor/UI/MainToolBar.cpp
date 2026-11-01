@@ -115,13 +115,15 @@ MainToolBar::MainToolBar(QWidget* parent)
 
     addWidget(container);
 
-    ApplyTheme();
-    RefreshIcons();
     RetranslateUi();
+    Apply();
 
     themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
-        ApplyTheme();
-        RefreshIcons();
+        Apply();
+    });
+
+    QTimer::singleShot(0, this, [this] {
+        Apply();
     });
 
     std::printf("[ToolBarFacts] configured tb height=36, btn height=28, topMargin=%d, bottomMargin=%d\n",
@@ -259,4 +261,16 @@ void MainToolBar::RefreshIcons()
     if (actStop_) actStop_->setIcon(EditorTheme::CreateStopIcon());
     if (actExternal_) actExternal_->setIcon(EditorTheme::CreateExternalIcon());
     if (configPlayBtn_) configPlayBtn_->setIcon(EditorTheme::CreateSettingsIcon());
+}
+
+void MainToolBar::Apply()
+{
+    ApplyTheme();
+    RefreshIcons();
+    setContentsMargins(0, 0, 0, 0);
+    if (layout())
+    {
+        layout()->setContentsMargins(0, 0, 0, 0);
+        layout()->setSpacing(0);
+    }
 }

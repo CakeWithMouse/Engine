@@ -65,7 +65,7 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
         if (actThemeDark_) actThemeDark_->setChecked(EditorTheme::Instance().Mode() == ThemeMode::Dark);
         if (actThemeLight_) actThemeLight_->setChecked(EditorTheme::Instance().Mode() == ThemeMode::Light);
-        if (mainToolBar_) mainToolBar_->RefreshIcons();
+        if (mainToolBar_) mainToolBar_->Apply();
     });
 }
 
@@ -438,6 +438,7 @@ void EditorMainWindow::BuildToolBar()
     mainToolBar_ = new MainToolBar(this);
     toolBar_ = mainToolBar_;
     addToolBar(mainToolBar_);
+    mainToolBar_->Apply();
 
     actPlay_ = mainToolBar_->ActPlay();
     actPause_ = mainToolBar_->ActPause();

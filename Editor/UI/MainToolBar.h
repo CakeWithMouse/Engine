@@ -22,6 +22,7 @@ public:
     void RetranslateUi();
     void RefreshIcons();
     void ApplyTheme();
+    void Apply();
 
 signals:
     void PlayTriggered();
