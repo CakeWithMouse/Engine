@@ -365,7 +365,7 @@ int main(int argc, char** argv)
                     game.SetOverlayTriangles(nullptr, 0);
                     CHECK(game.RenderRedPixels() == 0);
                 }
-                for (float dist : {3.0f, 15.0f, 60.0f})
+                for (float dist : {1.0f, 3.0f, 15.0f, 60.0f})
                 {
                     const auto r = game.ScreenPointToRay({350.0f, 250.0f});
                     const auto p = r.ray.origin + r.ray.direction * dist;
@@ -375,7 +375,7 @@ int main(int argc, char** argv)
                     const int diam = bounds.Diameter();
                     std::cout << "Billboard readback at dist " << dist << ": diameter = " << diam << " px (bounds ["
                               << bounds.minX << "," << bounds.minY << " .. " << bounds.maxX << "," << bounds.maxY << "])" << std::endl;
-                    CHECK(diam >= 14 && diam <= 34);
+                    CHECK(diam >= 18 && diam <= 22);
                     game.SetOverlayBillboards(nullptr, 0);
                 }
             }

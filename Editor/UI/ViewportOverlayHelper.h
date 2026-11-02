@@ -25,7 +25,7 @@ public:
         const EngineCameraInfo& cam,
         float screenX,
         float screenY,
-        float tolerancePixels = 16.0f
+        float tolerancePixels = 10.0f
     );
 };
 

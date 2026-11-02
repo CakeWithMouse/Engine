@@ -113,18 +113,16 @@ BillboardPSInput VSBillboard(BillboardVSInput input)
         return output;
     }
 
-    // Clamp billboard size to 16..32 px in screen pixels:
-    // Base size is 32px (half-size = 16px).
-    // On close distance (dist <= 3.0), size smoothly scales down to 16px (half-size = 8px).
-    // On distant objects (dist >= 15.0), size stays at base 32px and does NOT grow further.
+    // Clamp billboard size to 18..20 px in screen pixels:
+    // Diameter is maximum 20px (half = 10px), minimum 18px (half = 9px).
+    // Almost constant 18..20 px: scales down to 18px only when distance < 3m, clamped at 20px for dist >= 3m.
     float2 baseOffset = input.Offset;
     float currentHalf = max(abs(baseOffset.x), abs(baseOffset.y));
 
     float dist = max(0.001f, clipCenter.w);
-    float distT = saturate((dist - 3.0f) / 12.0f);
-    float scale = lerp(0.5f, 1.0f, distT);
-
-    float clampedHalf = clamp(currentHalf * scale, 8.0f, 16.0f);
+    float scaleT = saturate(dist / 3.0f);
+    float targetHalf = lerp(9.0f, 10.0f, scaleT);
+    float clampedHalf = clamp(targetHalf, 9.0f, 10.0f);
     float effectiveScale = (currentHalf > 1e-4f) ? (clampedHalf / currentHalf) : 1.0f;
     float2 pixelOffset = baseOffset * effectiveScale;
 

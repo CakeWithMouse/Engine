@@ -205,7 +205,7 @@ bool ViewportWidget::HandleMousePress(QMouseEvent* mouse)
                 lastCameraInfo_,
                 static_cast<float>(mouse->position().x()),
                 static_cast<float>(mouse->position().y()),
-                16.0f
+                10.0f
             );
             if (bbObj != 0)
             {
