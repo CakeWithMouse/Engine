@@ -190,24 +190,64 @@ QDockWidget::title {
     text-align: left;
 }
 QMainWindow::separator {
-    width: 1px;
-    height: 1px;
-    background-color: %14;
+    background: transparent;
 }
-QMainWindow::separator:hover {
+QMainWindow::separator:horizontal {
+    height: 6px;
+    border-top: 2px solid transparent;
+    border-bottom: 3px solid transparent;
+    background-color: %14;
+    background-clip: content;
+}
+QMainWindow::separator:vertical {
+    width: 6px;
+    border-left: 2px solid transparent;
+    border-right: 3px solid transparent;
+    background-color: %14;
+    background-clip: content;
+}
+QMainWindow::separator:horizontal:hover {
+    height: 6px;
+    border-top: 2px solid transparent;
+    border-bottom: 2px solid transparent;
     background-color: %15;
+    background-clip: content;
+}
+QMainWindow::separator:vertical:hover {
+    width: 6px;
+    border-left: 2px solid transparent;
+    border-right: 2px solid transparent;
+    background-color: %15;
+    background-clip: content;
 }
 QSplitter::handle {
-    background-color: %14;
+    background: transparent;
 }
 QSplitter::handle:horizontal {
-    width: 1px;
+    width: 6px;
+    border-left: 2px solid transparent;
+    border-right: 3px solid transparent;
+    background-color: %14;
+    background-clip: content;
 }
 QSplitter::handle:vertical {
-    height: 1px;
+    height: 6px;
+    border-top: 2px solid transparent;
+    border-bottom: 3px solid transparent;
+    background-color: %14;
+    background-clip: content;
 }
-QSplitter::handle:hover {
+QSplitter::handle:horizontal:hover {
+    border-left: 2px solid transparent;
+    border-right: 2px solid transparent;
     background-color: %15;
+    background-clip: content;
+}
+QSplitter::handle:vertical:hover {
+    border-top: 2px solid transparent;
+    border-bottom: 2px solid transparent;
+    background-color: %15;
+    background-clip: content;
 }
 QScrollBar:vertical {
     background-color: %5;
