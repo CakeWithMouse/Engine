@@ -1,5 +1,5 @@
 #include <Engine/Runtime/SceneEditSession.h>
-#include <Engine/Components/EditorProperties.h>
+#include <Engine/Components/Character.h>
 #include <Engine/Scene/SceneDocument.h>
 #include <Engine/Scene/SceneAssets.h>
 #include "../Scene/AssetUpdate.h"
@@ -10,9 +10,7 @@
 using Json=nlohmann::json;
 namespace {
 Json Schema(GameComponent& object) {
-    auto* provider=dynamic_cast<EditorPropertyProvider*>(&object);
-    if(!provider)return Json::object();
-    const auto text=provider->DescribeEditorProperties();if(text.empty())return Json::object();
+    const auto text=object.DescribeEditorProperties();if(text.empty())return Json::object();
     const auto schema=Json::parse(text);
     if(schema.at("version")!=1 || !schema.at("fields").is_array() || schema.at("fields").size()>256)throw std::runtime_error("Invalid editor property schema");
     return schema;
@@ -56,6 +54,8 @@ EngineAuthoringApi SceneEditSession::GetAuthoringApi() noexcept {
                         if(!value.is_number_unsigned())throw std::runtime_error("Expected object ID");
                         const auto target=value.get<uint64_t>();auto* other=s.edit_->GetScene().FindComponent(target);
                         if(target&&!other)throw std::runtime_error("Referenced object no longer exists");
+                        const auto kind=field.value("objectKind",0);
+                        if(target&&kind){const int actual=dynamic_cast<Character*>(other)?1:dynamic_cast<SceneCamera*>(other)?2:dynamic_cast<PlaySettings*>(other)?3:0;if(actual!=kind)throw std::runtime_error("Incorrect referenced object kind");}
                         const auto required=field.value("objectType",std::string{});
                         if(target&&!required.empty()) {bool match=false;for(const auto& row:s.edit_->GetScene().GetSnapshot().components)if(row.id==target&&row.typeName==required)match=true;if(!match)throw std::runtime_error("Incorrect referenced object type");}
                     } else if(type=="asset"||type=="string") {

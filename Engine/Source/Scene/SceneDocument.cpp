@@ -1,6 +1,8 @@
+#include "../Components/ComponentInternal.h"
 #define NOMINMAX
 #include <Windows.h>
 #include <Engine/Scene/SceneDocument.h>
+#include <Engine/Components/Character.h>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Scene/SceneAssets.h>
 #include "../../ThirdParty/nlohmann/json.hpp"
@@ -71,8 +73,8 @@ void Structure(const SceneSnapshot& data)
         if (!SceneAssets::ValidPath(item.modelAsset) || !SceneAssets::ValidPath(item.textureAsset) ||
             !SceneAssets::ValidPath(item.materialAsset))
             Invalid("Assets must be canonical /Game paths without traversal");
-        if ((item.typeName == SceneAssets::ModelType) != !item.modelAsset.empty())
-            Invalid("Engine.Model requires a model asset; other types cannot specify a model");
+        if (item.typeName == SceneAssets::ModelType && item.modelAsset.empty())
+            Invalid("Engine.Model requires a model asset");
         if (!item.id || !parents.emplace(item.id, item.parentId).second) Invalid("Duplicate or zero object ID");
         if (!validText(item.name) || !validText(item.typeName) || !names.insert(item.name).second)
             Invalid("Invalid type/name or duplicate object name");
@@ -268,13 +270,14 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
         if (o.pointLight && target.SetPointLight(added.id, *o.pointLight) != SceneResult::Ok)
             Invalid("Point light properties require a point light component: " + o.name);
         ids.emplace(o.id, added.id);
-        if (!o.parentId && !o.inheritParentScale) target.FindComponent(added.id)->SetParentWithoutScale(nullptr);
+        if (!o.parentId && !o.inheritParentScale) EngineInternal::ComponentAccess::ParentWithoutScale(*target.FindComponent(added.id), nullptr);
     }
     for (const auto& o : data.components)
         if (o.parentId && target.SetParent(ids.at(o.id), ids.at(o.parentId), o.inheritParentScale) != SceneResult::Ok)
             throw std::runtime_error("Cannot restore hierarchy");
     for (const auto& o : data.components)
-        target.FindComponent(ids.at(o.id))->RemapProjectReferences(ids);
+        EngineInternal::ComponentAccess::Remap(*target.FindComponent(ids.at(o.id)), ids);
+    MigrateLegacyPlaySettings(target);
 }
 SceneSnapshot SceneDocument::Read(const std::filesystem::path& path)
 {

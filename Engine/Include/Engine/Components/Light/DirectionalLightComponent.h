@@ -3,7 +3,7 @@
 #include <Engine/Components/EditorProperties.h>
 
 // One sun per Scene. World rotation turns local -Z; position and scale do not affect lighting.
-class DirectionalLightComponent final : public GameComponent, public EditorPropertyProvider
+class DirectionalLightComponent final : public GameComponent
 {
 public:
     DirectionalLightComponent();

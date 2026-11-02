@@ -10,6 +10,7 @@
 #include <Engine/Runtime/SceneBatchApi.h>
 #include <Engine/Runtime/AuthoringApi.h>
 #include <Engine/Runtime/ViewportInputApi.h>
+#include <Engine/Runtime/ViewportCursorApi.h>
 #include <Engine/Runtime/ViewportOverlayApi.h>
 #include <Engine/Runtime/EditExtensions.h>
 
@@ -29,6 +30,7 @@ public:
     const EngineEditorCameraApi& EditorCameraApi() const noexcept { return camera_; }
     uint32_t PreferredSceneVersion() const noexcept { return preferredSceneVersion_; }
     const EngineProjectDataApi& ProjectDataApi() const noexcept { return projectData_; }
+    const EngineViewportCursorApi& ViewportCursorApi() const noexcept {return cursor_;}
     const EngineViewportInputApi& ViewportInputApi() const noexcept { return viewportInput_; }
     const EngineSelectionApi& SelectionApi() const noexcept { return selection_; }
     const EngineViewportOverlayApi& ViewportOverlayApi() const noexcept { return overlay_; }
@@ -46,6 +48,7 @@ private:
     EngineSceneBatchApi batch_{};
     EngineAuthoringApi authoring_{};
     EngineViewportInputApi viewportInput_{};
+    EngineViewportCursorApi cursor_{};
     EngineViewportOverlayApi overlay_{};
     EnginePointLightV2Api pointLightV2_{};
     EngineLegacyV4::Factory legacyFactory_{};

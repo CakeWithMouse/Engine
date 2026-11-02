@@ -4,6 +4,7 @@
 #include <Engine/Runtime/ProjectDataApi.h>
 #include <Engine/Runtime/SelectionApi.h>
 #include <Engine/Runtime/ViewportInputApi.h>
+#include <Engine/Runtime/ViewportCursorApi.h>
 #include <Engine/Runtime/ViewportOverlayApi.h>
 
 #include <Engine/Runtime/SceneBatchApi.h>
@@ -27,7 +28,7 @@ struct EditorCommand
     {
         None = 0, RequestExit, ReloadProject, LoadAsset, SetModel,
         ViewportAttach, ViewportResize, ViewportDetach, ViewportCamera,
-        TogglePlay, TogglePause, InputFocus, InputKey, InputPointer, ConfigurePlay,
+        TogglePlay, TogglePause, InputFocus, InputKey, InputPointer, InputCursor, ConfigurePlay,
         FetchScene, UpdateObjectTransform, RefreshScene, SelectObject, CreateObject, RemoveObject,
         RenameObject, DuplicateObject, SaveScene, LoadScene, NewScene, Undo, Redo, PickObject, FocusObject,
         SetGizmoMode, BeginGizmoDrag, EndGizmoDrag, SetParent,

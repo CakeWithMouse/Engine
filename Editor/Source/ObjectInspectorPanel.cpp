@@ -369,7 +369,6 @@ void ObjectInspectorPanel::Refresh(
 {
     refreshing_ = true;
     selectedId_ = selectedId;
-    properties_->hide();
 
     QWidget* focus = QApplication::focusWidget();
     const bool canReplaceWholeInspector = selectionChanged || !focus || !isAncestorOf(focus);
@@ -380,6 +379,7 @@ void ObjectInspectorPanel::Refresh(
 
     if (selectedId_ == 0)
     {
+        properties_->hide();
         noSelectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
         noSelectionLabel_->show();
         cardGeneral_->hide();
@@ -410,7 +410,7 @@ void ObjectInspectorPanel::Refresh(
         // selectedLight updated below after determining type
         typeBadgeLabel_->setText(QString::fromStdString(object.type));
         selectionLabel_->setText(QStringLiteral("%1 · ID %2").arg(QString::fromStdString(object.name)).arg(object.id));
-        characterInspector_->setVisible(object.gameplayKind == 1);
+        characterInspector_->setVisible(object.gameplayKind == 1 && object.propertySchema.find("/moveSpeed") == std::string::npos);
         if (object.gameplayKind == 1 && canReplaceField(characterSpeed_))
             characterSpeed_->setValue(QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object()["moveSpeed"].toDouble(5));
 

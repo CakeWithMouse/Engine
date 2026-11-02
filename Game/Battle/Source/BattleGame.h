@@ -80,7 +80,7 @@ public:
     /** Enables robust benchmark mode with pre-allocated sample buffers. */
     void EnableBench(uint64_t benchFrames, uint64_t warmupFrames = 150);
     bool IsBenchMode() const { return Bench.IsBenchActive(); }
-    bool IsVSyncActive() const { return bVSync; }
+    bool IsVSyncActive() const { return GetSettings().IsVSyncEnabled(); }
 
     void PrintBenchHeader() const;
     std::string BuildBenchReport() const;
@@ -135,6 +135,7 @@ private:
 
     // Measurements of this run (skipping the first frames, which include resource creation).
     uint64_t FrameLimit = 0;
+    uint64_t UpdateCount = 0; // Local benchmark progress; independent of the renderer's frame index.
     uint64_t MeasuredFrames = 0;
     double FrameMsSum = 0.0;
     double GpuMsSum = 0.0;

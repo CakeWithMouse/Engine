@@ -69,3 +69,6 @@
 - [050 — Переимпорт ресурсов и сворачиваемые свойства классов](050-asset-updates-and-inspector.md).
 
 - [051 — Туториал свойств и перемещение панели контента](051-properties-tutorial-and-content-dock.md).
+
+- [053 — Игрок и камера в свойствах](053-player-camera-properties.md): реализовано, проверены migration/SDK/UI.
+- [054 — Трассировки и строительство](054-scene-traces-building-plan.md): отдельный план, реализация не начата.

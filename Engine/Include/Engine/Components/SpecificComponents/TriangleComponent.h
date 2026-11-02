@@ -6,11 +6,15 @@ class TriangleComponent : public GameComponent
 public:
     TriangleComponent();
     
+    // @engine-internal-begin
+private:
     void InitSquare(DirectX::XMFLOAT4 points[8], int indices[6]);
     void InitSquareWithColor(DirectX::XMFLOAT4 points[8], DirectX::XMFLOAT4 color);
+public:
+    // @engine-internal-end
     
     virtual float GetRotationAngle(float totalTime) override;
-    virtual int GetIndexCount() override { return 6; }
+    virtual int GetIndexCount() override { return GameComponent::GetIndexCount(); }
     
     void SetRotationSpeed(float speed) { rotationSpeed = speed; }
     void SetColor(const DirectX::XMFLOAT4& color) { objectColor = color; }
@@ -19,7 +23,9 @@ private:
     float rotationSpeed = 1.0f;
     DirectX::XMFLOAT4 objectColor = {1.0f, 1.0f, 1.0f, 1.0f};
     
+    // @engine-internal-begin
     void ConvertToInterleaved(DirectX::XMFLOAT4* sourcePoints, int pointCount, 
                               DirectX::XMFLOAT4* destPoints);
+    // @engine-internal-end
     GameComponentNames::GeometryType ObjectType =  GameComponentNames::GeometryType::Object2D;
 };

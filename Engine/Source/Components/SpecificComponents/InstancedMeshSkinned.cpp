@@ -311,7 +311,7 @@ bool InstancedMeshComponent::EnsureSkinnedShaders(ID3D11Device* device)
 
     Microsoft::WRL::ComPtr<ID3DBlob> psBlob;
     std::string psErrors;
-    const bool bDeferred = GamePtr && (GamePtr->GetRenderingType() == RenderType::Deffered);
+    const bool bDeferred = GamePtr && (GamePtr->GetSettings().GetRenderingType() == RenderType::Deffered);
     const D3D_SHADER_MACRO psDefines[] = {
         {"DEFERRED_GBUFFER", "1"},
         {nullptr, nullptr}

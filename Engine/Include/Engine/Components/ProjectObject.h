@@ -15,7 +15,7 @@ template<class T> struct ProjectObjectAdapter
         if (!data.empty()) throw std::runtime_error("Object has no data codec");
     }
 };
-template<class T> class ProjectObjectComponent final : public GameComponent, public EditorPropertyProvider
+template<class T> class ProjectObjectComponent final : public GameComponent
 {
     std::unique_ptr<T> value_ = ProjectObjectAdapter<T>::Create();
 public:
@@ -34,9 +34,12 @@ public:
         if constexpr(HasProperties<ProjectObjectAdapter<T>>::value)return ProjectObjectAdapter<T>::DescribeEditorProperties();
         return {};
     }
+    // @engine-internal-begin
+private:
     void RemapProjectReferences(const std::map<ComponentId,ComponentId>& ids) override {
         if constexpr (HasRemap<ProjectObjectAdapter<T>>::value) ProjectObjectAdapter<T>::Remap(*value_, ids);
     }
+    // @engine-internal-end
 };
 namespace EngineComponentDetail
 {

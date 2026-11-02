@@ -1,3 +1,4 @@
+#include "../Components/ComponentInternal.h"
 #include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/MainGame/Player.h>
 #include <Engine/Scene/SceneDocument.h>
@@ -37,7 +38,7 @@ std::unique_ptr<Game> EmptyGame()
 {
     auto game = std::make_unique<Game>();
     game->SetSimulationEnabled(false); // frame() is the sole simulation owner
-    game->SetVSync(false);
+    game->GetSettings().SetVSync(false);
     game->SetSceneLightingEnabled(true);
     return game;
 }
@@ -52,7 +53,7 @@ std::unique_ptr<Game> SceneEditSession::CopyForPlay()
     candidate->SetSimulationEnabled(false);
     candidate->SetSimulationTimeScale(1.0f);
     candidate->SetSceneLightingEnabled(true);
-    candidate->SetAntialiasing(antialiasingMode_);
+    candidate->GetSettings().SetAntialiasing(antialiasingMode_);
     for (const auto& [id, st] : storedIcons_) candidate->SetOverlayIcon(id, st.width, st.height, st.pixels.data());
     SceneDocument::Restore(edit_->GetScene().GetSnapshot(), catalog_, candidate->GetScene());
     return candidate;
@@ -142,7 +143,7 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                     return EngineSceneFailure;
                 s.edit_->GetPlayer()->SetPosition({0.0f, 0.0f, 5.0f}); // default yaw faces -Z, toward scene origin
                 s.attached_ = true; s.width_ = w; s.height_ = h;
-                s.edit_->SetAntialiasing(s.antialiasingMode_);
+                s.edit_->GetSettings().SetAntialiasing(s.antialiasingMode_);
                 return EngineSceneOk;
             });
         },
@@ -213,19 +214,12 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
                 if (!s.attached_ || !s.width_ || !s.height_ || !std::isfinite(x) || !std::isfinite(y) ||
                     std::abs(x) > 1 || std::abs(y) > 1) return EngineSceneInvalidArgument;
-                using namespace DirectX;
-                auto* player = s.Active().GetPlayer();
-                const auto view = XMMatrixTranspose(XMLoadFloat4x4(&player->GetViewMatrix()));
-                const auto projection = XMMatrixTranspose(XMLoadFloat4x4(&player->GetProjectionMatrix()));
-                const auto inverse = XMMatrixInverse(nullptr, view * projection);
-                XMFLOAT3 nearPoint, farPoint;
-                XMStoreFloat3(&nearPoint, XMVector3TransformCoord(XMVectorSet(x,y,0,1), inverse));
-                XMStoreFloat3(&farPoint, XMVector3TransformCoord(XMVectorSet(x,y,1,1), inverse));
-                const glm::vec3 origin(nearPoint.x, nearPoint.y, nearPoint.z);
-                const auto direction = glm::normalize(glm::vec3(farPoint.x, farPoint.y, farPoint.z) - origin);
-                float distance = std::numeric_limits<float>::max();
-                for (const auto& entry : s.Active().GetScene().GetComponents())
-                    if (!entry.second->IsSkybox() && entry.second->RaycastPrimitive(origin, direction, distance)) *id = entry.second->GetComponentId();
+                Trace::Query query;query.geometry=Trace::Geometry::EditorSelection;query.maxDistance=1e9f;
+                const float px=(std::min)((x+1)*.5f*s.width_,std::nextafter(float(s.width_),0.f));
+                const float py=(std::min)((1-y)*.5f*s.height_,std::nextafter(float(s.height_),0.f));
+                const auto hit=s.Active().RaycastScreen({px,py},query);
+                if(hit)*id=hit.hit->componentId;
+                else if(hit.status!=Trace::Status::Miss)return EngineSceneInvalidArgument;
                 return EngineSceneOk;
             });
         },
@@ -288,7 +282,7 @@ EngineProjectDataApi SceneEditSession::GetProjectDataApi() noexcept
                 if (s.state_ != EngineEditing) return EngineSceneReadOnly;
                 auto* object = s.edit_->GetScene().FindComponent(target);
                 if (!object) return EngineSceneNotFound;
-                object->RemapProjectReferences({{source,target}});
+                EngineInternal::ComponentAccess::Remap(*object, {{source,target}});
                 return EngineSceneOk;
             });
         }};
@@ -400,7 +394,7 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
         [](void* p, uint32_t mode) -> uint32_t {
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
                 s.antialiasingMode_ = mode;
-                s.Active().SetAntialiasing(mode);
+                s.Active().GetSettings().SetAntialiasing(mode);
                 return EngineSceneOk;
             });
         },
@@ -415,7 +409,7 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
 void SceneEditSession::ReplaceEdit(const SceneSnapshot& data)
 {
     auto candidate = EmptyGame();
-    candidate->SetAntialiasing(antialiasingMode_);
+    candidate->GetSettings().SetAntialiasing(antialiasingMode_);
     for (const auto& [id, st] : storedIcons_) candidate->SetOverlayIcon(id, st.width, st.height, st.pixels.data());
     SceneDocument::Restore(data, catalog_, candidate->GetScene());
     if (attached_)
@@ -436,4 +430,14 @@ void SceneEditSession::ReplaceEdit(const SceneSnapshot& data)
     }
     commands_.Rebind(candidate->GetScene());
     edit_.swap(candidate); // noexcept commit; old scene dies inside this call
+}
+
+EngineViewportCursorApi SceneEditSession::GetViewportCursorApi() noexcept {
+    return {1,this,[](void* p,float x,float y,uint32_t width,uint32_t height,uint32_t valid)->uint32_t {
+        return Invoke(p,[&](SceneEditSession& s)->uint32_t {
+            if(valid>1||!std::isfinite(x)||!std::isfinite(y))return EngineSceneInvalidArgument;
+            if(valid&&(!s.attached_||width!=s.width_||height!=s.height_))return EngineSceneInvalidArgument;
+            s.Active().GetInput().SetCursorPosition({x,y,width,height,valid!=0&&s.inputFocused_});return EngineSceneOk;
+        });
+    }};
 }

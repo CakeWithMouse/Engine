@@ -1,10 +1,9 @@
 #pragma once
 #include <Engine/Components/ComponentAnnotations.h>
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
-#include <Engine/Components/EditorProperties.h>
 
 ENGINE_COMPONENT("RotatingCube")
-class RotatingCube : public CubeComponent, public EditorPropertyProvider
+class RotatingCube : public CubeComponent
 {
 public:
     RotatingCube();

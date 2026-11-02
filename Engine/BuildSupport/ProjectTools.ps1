@@ -1,4 +1,4 @@
-﻿param(
+param(
     [ValidateSet('Enable','Build','AddClass')][string]$Action='Build',
     [Parameter(Mandatory=$true)][string]$Project,
     [string]$Runtime='', [string]$Name='',
@@ -67,7 +67,7 @@ function AddClass([string]$className,[string]$family,[string]$parent,[string]$in
     $className=$className.Trim(); $parent=$parent.Trim(); $include=$include.Trim()
     if ($family -eq 'Character') { if (!$parent) { $parent='Character' }; if (!$include) { $include='Engine/Components/Character.h' }; $family='Component' }
     if ($className -cnotmatch '^[A-Z_a-z][A-Z_a-z0-9]*$') { throw "Invalid class name '$className'. Use Latin letters, digits and underscore; do not start with a digit. Example: MyCharacter (without .h/.cpp, spaces or Cyrillic)." }
-    $reserved = 'alignas alignof and and_eq asm auto bitand bitor bool break case catch char char8_t char16_t char32_t class compl concept const consteval constexpr constinit const_cast continue co_await co_return co_yield decltype default delete do double dynamic_cast else enum explicit export extern false float for friend goto if inline int long mutable namespace new noexcept not not_eq nullptr operator or or_eq private protected public register reinterpret_cast requires return short signed sizeof static static_assert static_cast struct switch template this thread_local throw true try typedef typeid typename union unsigned using virtual void volatile wchar_t while xor xor_eq Game GameComponent Character SceneCamera PlaySettings Module'.Split(' ')
+    $reserved = 'alignas alignof and and_eq asm auto bitand bitor bool break case catch char char8_t char16_t char32_t class compl concept const consteval constexpr constinit const_cast continue co_await co_return co_yield decltype default delete do double dynamic_cast else enum explicit export extern false float for friend goto if inline int long mutable namespace new noexcept not not_eq nullptr operator or or_eq private protected public register reinterpret_cast requires return short signed sizeof static static_assert static_cast struct switch template this thread_local throw true try typedef typeid typename union unsigned using virtual void volatile wchar_t while xor xor_eq Game GameComponent Character PlayerCharacter CameraProperties SceneCamera PlaySettings Module'.Split(' ')
     if ($className -cin $reserved -or $className -match '^(CON|PRN|AUX|NUL|COM[0-9]|LPT[0-9])$') { throw "Class name '$className' is reserved. Choose a new name, for example MyCharacter." }
     if (!$parent) { $parent = if($family -eq 'Game'){'Game'}elseif($family -eq 'Component'){'GameComponent'}else{''} }
     if ($className -ceq $parent) { throw "Class '$className' cannot inherit from itself. Choose a different class name." }
@@ -104,20 +104,20 @@ if ($Action -eq 'Enable' -and !(Test-Path -LiteralPath $codeFile)) {
 #pragma once
 #include <Engine/Components/ComponentAnnotations.h>
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
-#include <Engine/Components/EditorProperties.h>
+#include <Engine/Components/PropertyMacros.h>
 
 ENGINE_COMPONENT("RotatingCube")
-class RotatingCube : public CubeComponent, public EditorPropertyProvider
+class RotatingCube : public CubeComponent
 {
 public:
     RotatingCube();
     void Tick(float deltaTime) override;
-    std::string SaveProjectData() const override;
-    void LoadProjectData(const std::string& data) override;
-    std::string DescribeEditorProperties() const override;
+    ENGINE_GENERATED_PROPERTIES(CubeComponent)
 private:
-    float speed_ = 90.0f;
-    bool enabled_ = true;
+    ENGINE_PROPERTY("Speed (degrees/sec)",-720,720)
+    float speed = 90.0f;
+    ENGINE_PROPERTY("Enabled")
+    bool enabled = true;
 };
 '@
     WriteNew 'Source/RotatingCube.cpp' @'
@@ -127,7 +127,7 @@ private:
 
 RotatingCube::RotatingCube()
 {
-    InitCube();
+
     SetColor({1.0f, 0.65f, 0.2f, 1.0f});
 }
 
@@ -136,31 +136,10 @@ void RotatingCube::Tick(float deltaTime)
     CubeComponent::Tick(deltaTime);
     auto rotation = GetRotation();
     // SetRotation uses degrees. deltaTime is scaled simulation time.
-    if (enabled_) rotation.y = std::fmod(rotation.y + speed_ * deltaTime, 360.0f);
+    if (enabled) rotation.y = std::fmod(rotation.y + speed * deltaTime, 360.0f);
     SetRotation(rotation);
 }
 
-std::string RotatingCube::SaveProjectData() const
-{
-    return nlohmann::json{{"version",1},{"speed",speed_},{"enabled",enabled_}}.dump();
-}
-void RotatingCube::LoadProjectData(const std::string& data)
-{
-    if (data.empty()) return;
-    const auto json = nlohmann::json::parse(data);
-    const auto speed = json.at("speed").get<float>();
-    const auto enabled = json.at("enabled").get<bool>();
-    if (json.at("version") != 1 || !std::isfinite(speed) || speed < -720 || speed > 720)
-        throw std::runtime_error("Invalid rotation settings");
-    speed_ = speed; enabled_ = enabled;
-}
-std::string RotatingCube::DescribeEditorProperties() const
-{
-    return R"json({"version":1,"fields":[
-        {"path":"/speed","type":"number","label":"Speed (degrees/sec)","group":"Behavior/Rotation","min":-720,"max":720,"step":15},
-        {"path":"/enabled","type":"bool","label":"Enabled","group":"Behavior/Rotation"}
-    ]})json";
-}
 '@
     WriteNew 'Source/ProjectGame.h' @'
 #pragma once
@@ -302,7 +281,11 @@ $start.Arguments='"'+(Join-Path $projectRoot 'Game.vcxproj')+'" /nologo /m:1 /nr
 $buildProcess=[Diagnostics.Process]::Start($start)
 $buildOutput=$buildProcess.StandardOutput.ReadToEndAsync(); $buildErrors=$buildProcess.StandardError.ReadToEndAsync()
 $buildProcess.WaitForExit()
-Write-Output $buildOutput.GetAwaiter().GetResult(); Write-Output $buildErrors.GetAwaiter().GetResult()
+$buildText=$buildOutput.GetAwaiter().GetResult()+[Environment]::NewLine+$buildErrors.GetAwaiter().GetResult()
+$buildLog=Join-Path $output 'build.log'
+[IO.File]::WriteAllText($buildLog,$buildText,[Text.UTF8Encoding]::new($false))
+Write-Output $buildText
+Write-Output "Full build log: $buildLog"
 if ($buildProcess.ExitCode) { throw 'Project build failed; previous module preserved' }
 Copy-Item -Path "$Runtime/Templates/SceneProject/*.dll" -Destination $output -Exclude Game.dll -Force
 $manifest = Get-Content -LiteralPath $projectFile -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -314,10 +297,10 @@ WriteJson $candidate $manifest
 try {
     $check = Start-Process -FilePath (Join-Path $Runtime 'EngineRuntime.exe') -ArgumentList @('--validate-project',('"'+$candidate+'"')) -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $output 'validate.log') -RedirectStandardError (Join-Path $output 'validate-error.log')
     if (!$check.WaitForExit(60000)) { $check.Kill(); throw 'Candidate validation timed out' }
-    if ($check.ExitCode) { throw "Candidate rejected; previous module preserved. See $output/validate-error.log" }
+    if ($check.ExitCode) { Get-Content -LiteralPath (Join-Path $output "validate.log"),(Join-Path $output "validate-error.log") -Encoding UTF8; throw "Candidate rejected; previous module preserved. See $output/validate-error.log" }
     $smoke = Start-Process -FilePath (Join-Path $Runtime 'EngineRuntime.exe') -ArgumentList @('--project',('"'+$candidate+'"'),'--mode','game','--frames','3') -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $output 'startup.log') -RedirectStandardError (Join-Path $output 'startup-error.log')
     if (!$smoke.WaitForExit(60000)) { $smoke.Kill(); throw 'Candidate startup timed out; previous module preserved' }
-    if ($smoke.ExitCode) { throw "Candidate startup failed; previous module preserved. See $output/startup-error.log" }
+    if ($smoke.ExitCode) { Get-Content -LiteralPath (Join-Path $output "startup.log"),(Join-Path $output "startup-error.log") -Encoding UTF8; throw "Candidate startup failed; previous module preserved. See $output/startup-error.log" }
     Copy-Item -LiteralPath $projectFile -Destination ($projectFile+'.before-build') -Force
     WriteJson $codeFile @{format=1;state='ready';sdk=$pin.engineVersion;configuration=$pin.engineConfiguration;buildId=$buildId;module=$relative;previousModule=$previous;fingerprint=$fingerprint}
     Copy-Item -LiteralPath (Join-Path $output 'ProjectTypes.tsv') -Destination (Join-Path $projectRoot 'ProjectTypes.tsv') -Force

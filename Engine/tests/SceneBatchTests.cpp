@@ -10,6 +10,7 @@ struct Reference : GameComponent {
     uint64_t link=0;
     std::string SaveProjectData() const override { return nlohmann::json{{"version",1},{"link",link}}.dump(); }
     void LoadProjectData(const std::string& value) override { if(!value.empty())link=nlohmann::json::parse(value).at("link").get<uint64_t>(); }
+private:
     void RemapProjectReferences(const std::map<ComponentId,ComponentId>& map) override { if(map.count(link))link=map.at(link); }
 };
 std::unique_ptr<GameComponent> Make(){return std::make_unique<Reference>();}

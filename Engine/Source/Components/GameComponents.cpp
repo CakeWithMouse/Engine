@@ -1,6 +1,9 @@
 #include <Engine/Components/GameComponents.h>
+#include <Engine/Components/SpecificComponents/MeshComponent.h>
+#include <Engine/Scene/SceneAssets.h>
 
 #include <algorithm>
+#include <climits>
 #include <cmath>
 #include <cstring>
 #include <directxmath.h>
@@ -54,6 +57,7 @@ GameComponent::~GameComponent() = default;
 
 void GameComponent::GetEditorBounds(glm::vec3& minimum, glm::vec3& maximum)
 {
+    if(auto* visual=GetRenderComponent();visual!=this) { visual->GetEditorBounds(minimum,maximum); return; }
     const auto center = GetWorldPosition();
     const float radius = IsSkybox() ? 0.4f : (std::max)(0.25f, GetWorldBoundingRadius());
     minimum = center - glm::vec3(radius); maximum = center + glm::vec3(radius);
@@ -69,6 +73,7 @@ void GameComponent::GetEditorBounds(glm::vec3& minimum, glm::vec3& maximum)
 }
 bool GameComponent::RaycastPrimitive(const glm::vec3& origin, const glm::vec3& direction, float& distance)
 {
+    if(auto* visual=GetRenderComponent();visual!=this) return visual->RaycastPrimitive(origin,direction,distance);
     if (IsSkybox()) return false;
     if (points.empty()) {
         const auto relative=origin-GetWorldPosition();
@@ -108,6 +113,7 @@ bool GameComponent::RaycastPrimitive(const glm::vec3& origin, const glm::vec3& d
 void GameComponent::SetGame(Game* game)
 {
     GamePtr = game;
+    if(VisualComponent) VisualComponent->SetGame(game);
     for (auto& instance : InstanceArray) instance->SetGame(game);
 }
 
@@ -126,6 +132,8 @@ void GameComponent::InitPoints(DirectX::XMFLOAT4* NewPoints, int pointCount, int
     points.assign(NewPoints, NewPoints + pointCount);
     indices.assign(NewIndices, NewIndices + indexCount);
     this->indexCount = indexCount;
+    TraceBoundsValid=!points.empty();TraceMinimum=glm::vec3(std::numeric_limits<float>::max());TraceMaximum=-TraceMinimum;
+    for(size_t i=0;i<points.size();i+=2){glm::vec3 p(points[i].x,points[i].y,points[i].z);if(!Trace::Finite(p)){TraceBoundsValid=false;break;}TraceMinimum=glm::min(TraceMinimum,p);TraceMaximum=glm::max(TraceMaximum,p);}
 
     // Primitive vertices are (position, colour) pairs.
     float maxRadiusSq = 0.0f;
@@ -199,6 +207,7 @@ ComponentShaderVariant& GameComponent::GetShaderVariant(ShaderCompileVariant var
 
 void GameComponent::Update()
 {
+    if(auto* visual=GetRenderComponent();visual!=this) visual->Update();
     UpdateObjectConstants();
 
     if (!InstanceArray.empty())
@@ -343,6 +352,7 @@ float GameComponent::GetBoundingRadius() const
 
 float GameComponent::GetWorldBoundingRadius()
 {
+    if(auto* visual=GetRenderComponent();visual!=this) return visual->GetWorldBoundingRadius();
     const DirectX::XMFLOAT4X4 world = GetWorldMatrix();
     const float sx = std::sqrt(world._11 * world._11 + world._12 * world._12 + world._13 * world._13);
     const float sy = std::sqrt(world._21 * world._21 + world._22 * world._22 + world._23 * world._23);
@@ -636,11 +646,6 @@ void GameComponent::UnbindMaterialResources(ID3D11DeviceContext* context)
 
 bool GameComponent::SetMaterial(std::shared_ptr<Material> material)
 {
-    if (material && !SupportsMaterials())
-    {
-        std::cout << "SetMaterial: this component type is not drawn in the Mesh vertex format, material ignored." << std::endl;
-        return false;
-    }
     MaterialAssetPath.clear();
     AssignMaterial(std::move(material));
     return true;
@@ -648,10 +653,6 @@ bool GameComponent::SetMaterial(std::shared_ptr<Material> material)
 
 bool GameComponent::SetMaterialAsset(const std::string& path)
 {
-    if (!path.empty() && !SupportsMaterials())
-    {
-        return false;
-    }
     MaterialAssetPath = path;
     bMaterialAssetLoaded = false;
     AssignMaterial(nullptr);
@@ -799,3 +800,81 @@ void GameComponent::LoadProjectData(const std::string& data)
 {
     if (!data.empty()) throw std::runtime_error("Component has no project data codec");
 }
+
+void GameComponent::SetPrimitive(MeshLodData primitive)
+{
+    if(primitive.Vertices.empty() || primitive.Indices.empty() || primitive.Indices.size()%3 != 0 ||
+       primitive.Vertices.size() > size_t(INT_MAX)/2 || primitive.Indices.size() > size_t(INT_MAX))
+        throw std::invalid_argument("Invalid primitive geometry");
+    for(const auto& v : primitive.Vertices)
+        if(!Trace::Finite({v.Position.x,v.Position.y,v.Position.z}))
+            throw std::invalid_argument("Non-finite primitive position");
+    for(auto index : primitive.Indices)
+        if(index >= primitive.Vertices.size()) throw std::invalid_argument("Invalid primitive index");
+
+    if(auto* mesh = dynamic_cast<MeshComponent*>(this)) {
+        mesh->SetMesh(std::move(primitive));
+        SetModelAsset({});
+        return;
+    }
+    auto visual = std::make_unique<MeshComponent>();
+    visual->SetMesh(std::move(primitive));
+    visual->SetParent(this);
+    visual->SetGame(GamePtr);
+    // Mirror geometry for legacy shaders, culling and instance transforms. No raw stream API
+    // is exposed to gameplay classes. The full mesh remains available to material rendering.
+    GameComponent::InitPoints(visual->points.data(), int(visual->points.size()),
+                              visual->indices.data(), int(visual->indices.size()));
+    VisualComponent = std::move(visual);
+    VisualModelAsset.clear();
+    VisualPrimitive = true;
+    if(GamePtr && GamePtr->GetDevice()) CreateBuffers(GamePtr->GetDevice());
+    if(GamePtr) GamePtr->InvalidateStaticShadow();
+}
+
+void GameComponent::SetModelAsset(const std::string& path) {
+    auto candidate=path.empty()?std::unique_ptr<GameComponent>{}:SceneAssets::CreateModel(path,false);
+    if(candidate) { candidate->SetParent(this); candidate->SetGame(GamePtr); }
+    VisualComponent=std::move(candidate); VisualModelAsset=path; VisualPrimitive=false;
+    if(GamePtr) GamePtr->InvalidateStaticShadow();
+}
+GameComponent* GameComponent::GetRenderComponent() {
+    // Explicit legacy shader pairs still consume the component's position/colour stream.
+    // The ready mesh is retained for materials (including its authored normals and UVs).
+    if(VisualPrimitive && MaterialAssetPath.empty() && !MaterialPtr && !VertexShaderName.empty()) return this;
+    // Legacy position/color primitives are converted to the material vertex format lazily.
+    if(!VisualComponent && !SupportsMaterials() && (!MaterialAssetPath.empty()||MaterialPtr) && !points.empty()) {
+        MeshLodData mesh;
+        for(size_t i=0;i+2<indices.size();i+=3) {
+            glm::vec3 p[3]; bool valid=true;
+            for(int k=0;k<3;++k) { auto index=indices[i+k];if(index<0||size_t(index)*2>=points.size()){valid=false;break;} auto v=points[size_t(index)*2];p[k]={v.x,v.y,v.z}; }
+            if(!valid)continue;
+            auto n=glm::cross(p[1]-p[0],p[2]-p[0]); if(glm::dot(n,n)<1e-12f)continue;n=glm::normalize(n);
+            for(int k=0;k<3;++k) { MeshVertex v;v.Position={p[k].x,p[k].y,p[k].z,1};v.Normal={n.x,n.y,n.z,0};const auto axis=glm::abs(n);
+                v.TexCoord=axis.x>=axis.y && axis.x>=axis.z ? DirectX::XMFLOAT4(p[k].z,p[k].y,0,0) : axis.y>=axis.z ? DirectX::XMFLOAT4(p[k].x,p[k].z,0,0) : DirectX::XMFLOAT4(p[k].x,p[k].y,0,0);mesh.Indices.push_back(static_cast<uint32_t>(mesh.Vertices.size()));mesh.Vertices.push_back(v); }
+        }
+        auto visual=std::make_unique<MeshComponent>();visual->SetMesh(std::move(mesh));visual->SetParent(this);visual->SetGame(GamePtr);VisualComponent=std::move(visual);
+    }
+    if(!VisualComponent)return this;
+    if(!VisualPrimitive && VisualModelAsset.empty() && MaterialAssetPath.empty() && !MaterialPtr) { VisualComponent.reset();return this; }
+    auto* visual=VisualComponent.get();
+    if(VisualPrimitive) {
+        while(visual->InstanceArray.size()<InstanceArray.size())
+            visual->InstanceArray.push_back(std::make_unique<GameComponent>());
+        visual->InstanceArray.resize(InstanceArray.size());
+        for(size_t i=0;i<InstanceArray.size();++i) {
+            auto& copy=*visual->InstanceArray[i];
+            copy.SetGame(GamePtr);
+            if(copy.GetParent()!=InstanceArray[i].get()) copy.SetParent(InstanceArray[i].get());
+            copy.SetColor(InstanceArray[i]->Color);
+        }
+    }
+    visual->SetColor(Color);visual->SetStaticShadowCaster(bStaticShadowCaster);
+    if(visual->GetTexturePath()!=texturePath)visual->TrySetTexture(texturePath);
+    if(visual->GetMaterialAsset()!=MaterialAssetPath)visual->SetMaterialAsset(MaterialAssetPath);
+    if(MaterialAssetPath.empty() && visual->GetMaterial()!=MaterialPtr.get())visual->SetMaterial(MaterialPtr);
+    if(GamePtr && GamePtr->GetDevice() && visual->RenderOwner!=GamePtr) { visual->CreateBuffers(GamePtr->GetDevice());visual->RenderOwner=GamePtr; }
+    return visual;
+}
+
+DirectX::XMFLOAT4X4 GameComponent::GetTraceMatrix() { return GetWorldMatrix(); }

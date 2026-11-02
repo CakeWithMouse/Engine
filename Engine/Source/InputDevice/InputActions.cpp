@@ -37,6 +37,7 @@ struct System::Impl
     unsigned epoch=0;
     bool ticking=false;
     bool pointerBlocked=false;
+    CursorPosition cursor;
     void Dispatch(bool frame, float dt)
     {
         const auto revision=epoch;
@@ -83,6 +84,9 @@ struct System::Impl
 System::System():impl_(std::make_unique<Impl>()){}
 System::~System()=default;
 bool System::IsPhysicalKeyDown(Keys key) const { return impl_->physical.count(key) != 0; }
+bool System::IsPointerBlocked() const {return impl_->pointerBlocked;}
+void System::SetCursorPosition(CursorPosition p){if(!std::isfinite(p.x)||!std::isfinite(p.y)||!p.width||!p.height)p.valid=false;impl_->cursor=p;}
+CursorPosition System::GetCursorPosition() const {return impl_->cursor;}
 void System::SetPointerBlocked(bool blocked) {
     impl_->pointerBlocked = blocked;
     if (blocked) for (auto key : {Keys::LeftButton, Keys::RightButton, Keys::MiddleButton})
@@ -136,5 +140,5 @@ void System::Reset()
     for(auto& w:snapshot){auto s=w.lock();if(!s)continue;bool was=s->active;s->active=false;
         auto owner=s->owner.lock();if(was&&s->connected&&owner&&owner->enabled&&(s->phase==Phase::Released||s->phase==Phase::Axis))s->callback({0,0,true});}
 }
-void System::ReleaseAll(){Reset();impl_->physical.clear();impl_->down.clear();impl_->blocked.clear();}
+void System::ReleaseAll(){impl_->cursor.valid=false;Reset();impl_->physical.clear();impl_->down.clear();impl_->blocked.clear();}
 }

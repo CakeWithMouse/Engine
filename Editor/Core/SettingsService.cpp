@@ -10,7 +10,7 @@ SettingsService& SettingsService::Instance()
 }
 
 SettingsService::SettingsService()
-    : settings_(QStringLiteral("PainEngine"), QStringLiteral("Editor"))
+    : settings_(QSettings::defaultFormat(), QSettings::UserScope, QStringLiteral("PainEngine"), QStringLiteral("Editor"))
 {
 }
 

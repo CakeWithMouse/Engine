@@ -40,6 +40,10 @@ bool InstancedMeshComponent::SetLod(int level, MeshLodData data)
 
     if (level == 0)
     {
+        std::vector<DirectX::XMFLOAT4> tracePoints;
+        for(const auto& vertex:Lods[0].Data.Vertices){tracePoints.push_back(vertex.Position);tracePoints.emplace_back(1,1,1,1);}
+        std::vector<int> traceIndices(Lods[0].Data.Indices.begin(),Lods[0].Data.Indices.end());
+        InitPoints(tracePoints.data(),int(tracePoints.size()),traceIndices.data(),int(traceIndices.size()));
         // Bounds and index count come from the most detailed level.
         float maxRadiusSq = 0.0f;
         for (const MeshVertex& vertex : Lods[0].Data.Vertices)
@@ -604,4 +608,16 @@ void InstancedMeshComponent::Render(ID3D11DeviceContext* context)
     ID3D11ShaderResourceView* nullSRVs[2] = {nullptr, nullptr};
     context->VSSetShaderResources(0, 2, nullSRVs);
     UnbindMaterialResources(context);
+}
+
+Trace::Result InstancedMeshComponent::RaycastGeometry(const Trace::Ray& ray,const Trace::Query& query,Trace::Statistics& stats){
+    if(VisualPrimitive || !GameComponent::GetModelAsset().empty())return GameComponent::RaycastGeometry(ray,query,stats);
+    if(!LodCount||Lods[0].VertexStride!=sizeof(MeshVertex)||HasAnimationTexture()){++stats.unsupported;return {};}
+    Trace::Result best;
+    for(size_t i=0;i<Instances.size();++i){const auto& instance=Instances[i];
+        // Instance positions are world-space in the renderer; visibility is not a query filter.
+        auto stored=MakeInstanceMatrix(instance.Position,instance.Yaw,instance.Scale);DirectX::XMFLOAT4X4 matrix;DirectX::XMStoreFloat4x4(&matrix,DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&stored)));
+        auto hit=RaycastGeometryAt(ray,query,stats,matrix);
+        if(hit&&(!best||hit.hit->distance<best.hit->distance)){best=hit;best.hit->instanceIndex=uint32_t(i);}
+    }return best;
 }

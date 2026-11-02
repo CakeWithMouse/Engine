@@ -25,7 +25,7 @@
 | Встроенный Play | Панель редактора | Пользовательский Game, одна симуляция за кадр; нейтральный Game в edit preview |
 | External / Играть | Редактор / лаунчер | Пользовательский Game, сохранённая стартовая сцена |
 | Пользовательские значения | Данные выбранного объекта | JSON через явный SaveProjectData/LoadProjectData либо Object adapter; version обязателен |
-| Undo / Redo / Duplicate / Play copy | Редактор | Используют кодек; ссылки remap-ятся объявленным автором RemapProjectReferences/Remap |
+| Undo / Redo / Duplicate / Play copy | Редактор | Используют кодек; встроенные ссылки переназначаются внутренним обработчиком; независимые типы поддерживают адаптер Remap |
 | Устойчивый ID | Второй аргумент аннотации | Например ENGINE_COMPONENT("Mover", "MyGame.Mover"); позволяет переименовать C++ класс |
 | Сборка проекта | Лаунчер / меню C++ / Build.ps1 | Только проектная DLL, готовые библиотеки SDK; отдельная папка кандидата |
 | Ошибка сборки | Console / CodeBuild.log / validate-error.log / startup-error.log | Активный module path не переключается до проверки сцен, Game factory и трёх кадров запуска |

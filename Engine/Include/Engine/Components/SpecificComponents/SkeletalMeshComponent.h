@@ -23,7 +23,7 @@ public:
     bool SetModel(std::shared_ptr<SkeletalModel> model);
     bool SetAssetModel(std::string path, std::shared_ptr<SkeletalModel> model);
     bool LoadTexture(const std::string& texturePath);
-    std::string GetModelAsset() const override { return assetPath; }
+    std::string GetModelAsset() const override { return GameComponent::GetModelAsset().empty() ? assetPath : GameComponent::GetModelAsset(); }
 
     void Tick(float deltaTime) override;
     void Render(ID3D11DeviceContext* context) override;
@@ -41,6 +41,8 @@ public:
     void SetModelYawDegrees(float yaw) { modelYawDegrees = yaw; }
     float GetModelYawDegrees() const { return modelYawDegrees; }
 
+    bool SupportsExactTrace() const override {return skeletalModel && skeletalModel->Clips.empty();}
+    DirectX::XMFLOAT4X4 GetTraceMatrix() override;
     bool CastsShadow() const override { return false; }
     bool SupportsMaterials() const override { return true; }
     uint32_t GetMaterialVariant() const override;

@@ -26,6 +26,13 @@ Player::Player()
     UpdateViewMatrix();
 }
 
+void Player::RefreshMatrices()
+{
+    if (cameraMode == CameraMode::Orbital) UpdateOrbitalCamera(0);
+    UpdateProjectionMatrix();
+    UpdateViewMatrix();
+}
+
 void Player::UpdateCamera(float deltaTime)
 {
     const bool controlled = GamePtr && GamePtr->HasGameplayController();
@@ -60,7 +67,8 @@ void Player::SetRotate(float yaw, float pitch)
     if (cameraMode == CameraMode::Free)
     {
         this->yaw = yaw;
-        this->pitch = pitch; 
+        this->pitch = pitch;
+        UpdateVectors();
     }else if (cameraMode == CameraMode::Orbital)
     {
         this->orbitYaw = yaw;
@@ -239,7 +247,7 @@ void Player::UpdateProjectionMatrix()
     if (height <= 0) { return; }
     const float aspect = GamePtr->GetDisplay()->GetWidth() / static_cast<float>(height);
 
-    const XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(GetFovY(), aspect, nearPlane, farPlane);
+    const XMMATRIX projMatrix = orthographic ? XMMatrixOrthographicLH(orthographicHeight * aspect, orthographicHeight, nearPlane, farPlane) : XMMatrixPerspectiveFovLH(GetFovY(), aspect, nearPlane, farPlane);
     const XMMATRIX projTransposed = XMMatrixTranspose(projMatrix);
     XMStoreFloat4x4(&ProjectionMatrix, projTransposed);
 }
@@ -338,4 +346,17 @@ void Player::MoveEditorCamera(float right, float up, float forward, float yawDel
         position += (-free_right * right + glm::vec3(0, up, 0) + free_forward * (forward + zoom * 0.2f)) * 5.0f;
     }
     UpdateViewMatrix();
+}
+
+void Player::SetProjection(bool ortho,float fov,float nearClip,float farClip,float height) {
+    orthographic=ortho; fovDegrees=fov; nearPlane=nearClip;
+    farPlane=(std::max)(nearClip+0.001f,farClip); orthographicHeight=height;
+    UpdateProjectionMatrix();
+}
+
+void Player::SetViewDirection(const glm::vec3& forward,const glm::vec3& up) {
+    free_forward=glm::normalize(forward);
+    free_right=glm::normalize(glm::cross(free_forward,up));
+    free_up=glm::normalize(glm::cross(free_right,free_forward));
+    UpdateProjectionMatrix();UpdateViewMatrix();
 }

@@ -166,18 +166,10 @@ void EditorQtHost::Update(double dt)
         if (sendLines && overlay_.setOverlayLines)
         {
             overlay_.setOverlayLines(overlay_.context, linesToSend.data(), static_cast<uint32_t>(linesToSend.size()), thicknessToSend);
-            uint64_t hash = 14695981039346656037ull;
-            const auto* ptr = reinterpret_cast<const uint8_t*>(linesToSend.data());
-            const size_t sz = linesToSend.size() * sizeof(EngineOverlayLine);
-            for (size_t i = 0; i < sz; ++i) { hash ^= ptr[i]; hash *= 1099511628211ull; }
-            std::printf("[Info] Overlay lines sent: count %zu, hash %llu\n", linesToSend.size(), hash);
-            std::fflush(stdout);
         }
         if (sendBillboards && overlay_.setOverlayBillboards)
         {
             overlay_.setOverlayBillboards(overlay_.context, billboardsToSend.data(), static_cast<uint32_t>(billboardsToSend.size()));
-            std::printf("[Info] Billboards sent: count %zu\n", billboardsToSend.size());
-            std::fflush(stdout);
         }
         if (sendTriangles && overlay_.version >= 3 && overlay_.setOverlayTriangles)
         {
@@ -314,6 +306,10 @@ void EditorQtHost::DrainCommands()
         else if (cmd.type == EditorCommand::EndGizmoDrag)
         {
             history_.EndGizmoDrag();
+        }
+        else if(cmd.type==EditorCommand::InputCursor){
+            if(const auto* cursor=CursorApi())result=cursor->set(cursor->context,cmd.right,cmd.up,cmd.w,cmd.h,cmd.forward!=0);
+            Complete(cmd,result,error);
         }
         else if (viewportHandler_.CanHandle(cmd.type))
         {

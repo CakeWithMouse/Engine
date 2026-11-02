@@ -1,3 +1,4 @@
+#include "../SceneTestAccess.h"
 #include <Engine/MainGame/Player.h>
 static void ExerciseRuntimeRender(const std::filesystem::path& content)
 {
@@ -6,13 +7,13 @@ static void ExerciseRuntimeRender(const std::filesystem::path& content)
     {
         Game game;
         game.SetSimulationTimeScale(1);
-        game.SetVSync(false);
+        game.GetSettings().SetVSync(false);
         const auto data = SceneDocument::Parse(R"({"version":1,"name":"Render test","objects":[
             {"id":1,"type":"Probe","name":"visible","parent":0,"inheritParentScale":true,
             "transform":{"position":[0,0,0],"rotation":[0,0,0,1],"scale":[1,1,1]}}]})");
         SceneDocument::Restore(data, {types, 1}, game.GetScene());
         auto* original = game.GetScene().FindComponentByName("visible");
-        const auto id = game.GetScene().GetSnapshot().components.front().id;
+        const auto id = SceneTestAccess::Snapshot(game.GetScene()).components.front().id;
         Check(original != nullptr, "runtime JSON scene before graphics");
         Check(game.InitializeRuntimeWindow(false), "hidden runtime window initialized");
         window = game.GetDisplay()->GetHwnd();

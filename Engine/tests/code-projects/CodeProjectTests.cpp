@@ -1,3 +1,4 @@
+#include "../SceneTestAccess.h"
 #include <Engine/Components/ProjectObject.h>
 #include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/Scene/SceneDocument.h>
@@ -20,6 +21,7 @@ struct Counter : ParentComponent {
         amount=json.at("amount").get<int>();
         reference=json.value("reference",ComponentId{0});
     }
+private:
     void RemapProjectReferences(const std::map<ComponentId,ComponentId>& ids) override {
         auto found=ids.find(reference); if(found!=ids.end()) reference=found->second;
     }
@@ -79,7 +81,7 @@ int main() {
     Scene source;
     auto object=EngineComponentDetail::Create<Counter>(); static_cast<Counter*>(object.get())->amount=123;
     Check(source.AddComponent("Stored",object,"Counter").result==SceneResult::Ok,"scene owns object");
-    const auto snapshot=source.GetSnapshot(); Check(snapshot.documentVersion==3,"custom payload uses explicit format 3");
+    const auto snapshot=SceneTestAccess::Snapshot(source); Check(snapshot.documentVersion==3,"custom payload uses explicit format 3");
     const auto parsed=SceneDocument::Parse(SceneDocument::Serialize(snapshot)); Scene restored;
     SceneDocument::Restore(parsed,catalog,restored);
     Check(dynamic_cast<Counter*>(restored.FindComponentByName("Stored"))->amount==123,"codec round trip");

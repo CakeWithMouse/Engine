@@ -41,6 +41,7 @@ public:
     static constexpr int MaxLodCount = 4;
 
     InstancedMeshComponent();
+    Trace::Result RaycastGeometry(const Trace::Ray&,const Trace::Query&,Trace::Statistics&) override;
     InstancedMeshComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
 
     /** Sets the geometry of one detail level (0 = most detailed). Levels must be filled in order. */

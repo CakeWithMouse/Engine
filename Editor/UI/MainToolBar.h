@@ -29,7 +29,6 @@ signals:
     void PauseTriggered();
     void StopTriggered();
     void ExternalTriggered();
-    void ConfigPlayTriggered();
 
 private:
     QAction* actPlay_ = nullptr;
@@ -40,6 +39,5 @@ private:
     QToolButton* btnPause_ = nullptr;
     QToolButton* btnStop_ = nullptr;
     QToolButton* btnExternal_ = nullptr;
-    QToolButton* configPlayBtn_ = nullptr;
     int themeSubId_ = 0;
 };

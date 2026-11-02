@@ -103,8 +103,13 @@ static void ExerciseGameStartup(const std::filesystem::path& module)
         "runtime loads before start and updates once per frame");
     // The actual shipped JSON must be deployed beside the project and load its visible type.
     options.startupScene = module.parent_path() / "Content/Scenes/Main.scene.json";
+    const auto shippedScene = SceneDocument::Read(options.startupScene);
+    bool hasMovingCube = false;
+    for (const auto& object : shippedScene.components)
+        hasMovingCube |= object.typeName == "RuntimeExample::MovingCube";
+    Check(hasMovingCube, "shipped scene contains the visible cube type");
     result = CaptureGameRun(options);
-    Check(result.first == 0 && result.second.find("Cube initialized") != std::string::npos &&
+    Check(result.first == 0 && result.second.find("GameSceneLoaded") != std::string::npos &&
         result.second.find("EngineFrame (game window)") != std::string::npos, "shipped visible scene starts");
     options.frames = 0;
     const auto threadId = GetCurrentThreadId();

@@ -381,3 +381,18 @@
 - [x] **Пункт 3 (viewport/resize):** Устранение дергания при ресайзе сплиттеров: коалесцирование через debounce таймер 120мс (`resizeTimer_->start(120)`), заморозка пересоздания swapchain/ресурсов во время активного драга (`QGuiApplication::mouseButtons() & Qt::LeftButton`), пропуск опроса инспектора и дерева сцены во время драга (`viewport_->IsResizing()`), подтверждено тестом: ровно 1 вызов `viewportResize` (diff=1 <= 2) за 2-секундный непрерывный драг (50 перемещений за 2000мс).
 - [x] **Пункт 4 (ui/separators):** Разделители окон: `QMainWindow::separator` и `QSplitter::handle` ширина/высота 6px (увеличенная зона захвата), визуальная линия 1px по центру (`border transparent` + `background-clip: content`), цвет через токен темы `%14` (`splitterColor`), при наведении `:hover` 2px акцентная линия с альфой `%15` (`splitterHover`).
 - [x] **Пункт 5 (ui/menu):** Меню «Сцена»: удалён пункт «Направленный свет» из верхнего меню `BuildSceneMenu()`, удалена проверка `SceneDirectionalLight` из `RefreshSceneUi()`, метод `ShowDirectionalLight()` перенесён в `public:` интерфейса `EditorMainWindow` для вызова из иерархии и тестов, в `EditorUiTests.cpp` вызовы `Action(w, "Направленный свет")->trigger()` заменены на `w->ShowDirectionalLight()`, имя дока «Иерархия» сохранено без изменений.
+
+---
+
+## Интеграция main в Engine/Scripts — 01.11.2026
+
+База PR #13: `ed209d63`; объединённый main: `5ca0abfa`.
+
+- Разрешены конфликты MainToolBar, BaseEngine и Game. Сохранены центрированные кнопки запуска из main и отсутствие настроек Play в тулбаре: настройки персонажа/камеры остаются в свойствах.
+- Одновременно доступны сервисы курсора и PointLightV2. Треугольное гизмо, биллборды и отладочные линии трассировок используют общий overlay.
+- FXAA и очистка render targets выполняются в общем RenderFrame для standalone и embedded; диагностика читает GameSettings. Повторный FXAA в RenderViewportFrame не возвращён.
+- Добавлены проверки наличия всех четырёх кнопок запуска, отсутствия ConfigPlayBtn, реальных пикселей треугольного overlay с FXAA/без него и очистки следующего кадра. UI-тест явно устанавливает фокус после закрытия диалогов перед проверкой сохранения фокуса в свойствах.
+- Release x64 с Assimp: All (движок, редактор, runtime, SDK, примеры) собран; EngineTests 54/54, CompatibilityTests 116, CoreTests 374, HostTests 69, UI helpers/smoke 239, ViewportTests пройдены. HTML API Reference пересобран и проверен.
+- Qt CoreTests запускались вне sandbox: ограниченное окружение запрещает запись в каталоги QTemporaryDir с собственными ACL (см. tests/README.md).
+- Полный стандартный Qt UI workflow с импортом CesiumMan.glb прошёл: 3123 проверки, включая свойства персонажа, сохранение фокуса, Play/Stop и настройки направленного света.
+

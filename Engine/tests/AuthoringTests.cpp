@@ -1,8 +1,12 @@
+#include "SceneTestAccess.h"
 #define NOMINMAX
 #include <Windows.h>
 #include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/Components/EditorProperties.h>
+#include <Engine/Components/PropertyMacros.h>
+#include <Engine/Components/Character.h>
 #include <Engine/Scene/SceneAssets.h>
+#include <Engine/Scene/SceneDocument.h>
 #include "../ThirdParty/nlohmann/json.hpp"
 #include <fstream>
 #include <stdexcept>
@@ -10,6 +14,18 @@ using Json=nlohmann::json;
 namespace fs=std::filesystem;
 #define CHECK(v) do {if(!(v))throw std::runtime_error(#v);}while(false)
 namespace {
+struct MacroSettings : GameComponent {
+    float speed=3; bool enabled=true; std::string title="hello";
+    ENGINE_PROPERTIES(GameComponent,
+        ENGINE_PROPERTY_FIELD(speed,"Speed",0,20)
+        ENGINE_PROPERTY_FIELD(enabled,"Enabled")
+        ENGINE_PROPERTY_FIELD(title,"Title")
+    )
+};
+struct DerivedSettings : MacroSettings {
+    int count=2;
+    ENGINE_PROPERTIES(MacroSettings, ENGINE_PROPERTY_FIELD(count,"Count",0,10))
+};
 struct Settings : GameComponent, EditorPropertyProvider {
     Json data={{"version",1},{"speed",1},{"enabled",true},{"mode","walk"},{"target",0},{"asset",""},{"readonly",1}};
     std::string SaveProjectData() const override{return data.dump();}
@@ -27,6 +43,43 @@ struct Row{uint64_t id;std::string name,model,material;float x;};
 std::vector<Row> Rows(const EngineEditSessionApi& api){std::vector<Row> rows;EngineSceneInfo info{};CHECK(api.readActiveScene(api.context,&info,[](void* p,const EngineSceneObjectInfo* o){static_cast<std::vector<Row>*>(p)->push_back({o->id,o->name,o->modelAsset,o->materialAsset,o->transform.position[0]});},&rows)==EngineSceneOk);return rows;}
 }
 void AuthoringTests(){
+    GameComponent plain; CHECK(plain.DescribeEditorProperties().empty());
+    Settings legacy; GameComponent& legacyBase=legacy;
+    CHECK(legacyBase.DescribeEditorProperties()==legacy.DescribeEditorProperties());
+    CHECK(dynamic_cast<EditorPropertyProvider*>(&legacyBase)->DescribeEditorProperties()==legacy.DescribeEditorProperties());
+    DerivedSettings macro; CHECK(Json::parse(macro.DescribeEditorProperties())["fields"].size()==4);
+    macro.LoadProjectData(R"({"version":1,"speed":7,"enabled":false,"title":"saved","count":4})");
+    CHECK(macro.speed==7 && !macro.enabled && macro.title=="saved" && macro.count==4);
+    const auto original=macro.SaveProjectData();
+    try { macro.LoadProjectData(R"({"version":1,"speed":8,"count":99})");CHECK(false); } catch(const std::invalid_argument&) {}
+    CHECK(macro.SaveProjectData()==original);
+    macro.LoadProjectData(R"({"version":1,"speed":2})"); CHECK(macro.count==4);
+    // Modern components use only GameComponent, including editor dispatch and Play restore.
+    const ComponentType modernType{"Test.Modern","Modern",[]()->std::unique_ptr<GameComponent>{return std::make_unique<DerivedSettings>();}};
+    SceneEditSession modernSession({&modernType,1});
+    auto modernApi=modernSession.GetApi();auto modernAuthor=modernSession.GetAuthoringApi();
+    EngineSceneTransform modernTransform{{0,0,0},{0,0,0,1},{1,1,1}};uint64_t modernId=0;char modernError[1024]{};
+    CHECK(modernApi.scene.createObject(modernApi.scene.context,modernType.typeName,"Modern",&modernTransform,&modernId)==EngineSceneOk);
+    std::string modernSchema;
+    CHECK(modernAuthor.describe(modernAuthor.context,modernId,[](void* p,const char* text){*static_cast<std::string*>(p)=text;},&modernSchema)==EngineSceneOk);
+    CHECK(Json::parse(modernSchema)["fields"].size()==4);
+    CHECK(modernAuthor.setProperty(modernAuthor.context,modernId,"/speed","8",modernError,sizeof(modernError))==EngineSceneOk);
+    CHECK(modernApi.control(modernApi.context,EnginePlay)==EngineSceneOk);
+    CHECK(modernApi.control(modernApi.context,EngineStop)==EngineSceneOk);
+    auto modernData=modernSession.GetProjectDataApi();std::string modernSaved;
+    CHECK(modernData.read(modernData.context,modernId,[](void* p,const char* text){*static_cast<std::string*>(p)=text;},&modernSaved)==EngineSceneOk);
+    CHECK(Json::parse(modernSaved)["speed"]==8);
+    SceneCamera camera; camera.orthographic=true;camera.viewPlane=2;camera.fov=80;
+    SceneCamera copy;copy.LoadProjectData(camera.SaveProjectData());CHECK(copy.orthographic && copy.viewPlane==2 && copy.fov==80);
+    const auto cameraBefore=copy.SaveProjectData();auto invalidCamera=Json::parse(cameraBefore);invalidCamera["farClip"]=0.05;
+    try {copy.LoadProjectData(invalidCamera.dump());CHECK(false);}catch(const std::invalid_argument&){}
+    CHECK(copy.SaveProjectData()==cameraBefore);
+    Player player;copy.Apply(player);CHECK(player.GetForward()==glm::vec3(0,-1,0));
+    Character hero; CHECK(hero.SetMaterialAsset("/Game/test.mat"));
+    CHECK(hero.GetRenderComponent()!=&hero && hero.GetRenderComponent()->SupportsMaterials());
+    hero.SetMaterialAsset("");
+    CHECK(hero.GetRenderComponent()->GetMaterialAsset().empty() && hero.GetRenderComponent()->GetIndexCount()>0);
+
     const ComponentType type{"Test.Settings","Settings",Make};SceneEditSession session({&type,1});
     auto api=session.GetApi();auto author=session.GetAuthoringApi();auto data=session.GetProjectDataApi();char error[2048]{};
     EngineSceneTransform t{{3,0,0},{0,0,0,1},{1,1,1}};uint64_t id=0,target=0;
@@ -52,6 +105,24 @@ void AuthoringTests(){
     CHECK(set("/asset",Json(texture).dump())==EngineSceneOk);CHECK(set("/asset","\"/Game/Missing.bmp\"")!=EngineSceneOk);CHECK(set("/asset","\"/Game/../pixel.bmp\"")!=EngineSceneOk);
     Write(root/"mesh.obj","v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n");
     const auto model=SceneAssets::Import(content,root/"mesh.obj",SceneAssets::Model);const auto modelFile=content/fs::u8path(model.substr(6));
+    hero.SetMoveSpeed(9);hero.SetModelAsset(model);hero.SetPosition({2,3,4});
+    CHECK(hero.GetModelAsset()==model && hero.GetMoveSpeed()==9);
+    CHECK(hero.GetRenderComponent()->GetWorldPosition()==hero.GetWorldPosition());
+    Trace::Statistics traceStats;auto trace=hero.RaycastGeometry({{2.2f,3.2f,9},{0,0,-1},10},{},traceStats);
+    CHECK(trace && std::abs(trace.hit->distance-5)<.001f && trace.hit->triangleIndex==0);
+    const auto originalNormal=trace.hit->normal;hero.SetScale({-2,3,1});trace=hero.RaycastGeometry({{1.6f,3.6f,9},{0,0,-1},10},{},traceStats);
+    CHECK(trace && glm::dot(trace.hit->normal,originalNormal)<-.99f);hero.SetScale({1,1,1});
+    try {hero.SetModelAsset("/Game/missing.obj");CHECK(false);}catch(const std::runtime_error&){}
+    CHECK(hero.GetModelAsset()==model);hero.SetModelAsset("");CHECK(hero.GetRenderComponent()==&hero);
+    const ComponentType heroType{"Test.Hero","Hero",[]()->std::unique_ptr<GameComponent>{return std::make_unique<Character>();}};
+    Scene savedScene("Visual test"),restoredScene("Restore");
+    std::unique_ptr<GameComponent> ownedHero=std::make_unique<Character>();
+    static_cast<Character*>(ownedHero.get())->SetMoveSpeed(12);ownedHero->SetModelAsset(model);
+    CHECK(savedScene.AddComponent("Hero",ownedHero,heroType.typeName).result==SceneResult::Ok);
+    auto snapshot=SceneDocument::Parse(SceneDocument::Serialize(SceneTestAccess::Snapshot(savedScene)));
+    SceneDocument::Restore(snapshot,{&heroType,1},restoredScene);
+    auto* restoredHero=dynamic_cast<Character*>(restoredScene.FindComponentByName("Hero"));
+    CHECK(restoredHero && restoredHero->GetMoveSpeed()==12 && restoredHero->GetModelAsset()==model);
     const auto mat=modelFile.parent_path()/"Custom.mat";const auto shader=modelFile.parent_path()/"Custom.hlsl";
     Write(mat,R"({"shader":"Custom.hlsl","params":{"Value":0.4}})");Write(shader,"void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = float3(1,0,0); }");
     uint64_t mesh=0;CHECK(api.createModel(api.context,model.c_str(),"Mesh",&t,&mesh,error,sizeof(error))==EngineSceneOk);

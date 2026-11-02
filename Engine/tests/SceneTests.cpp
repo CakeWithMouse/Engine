@@ -1,8 +1,20 @@
+#include "SceneTestAccess.h"
 #include <Engine/Scene/Scene.h>
 #include <Engine/Components/GameComponents.h>
 #include <functional>
 #include <limits>
 #include <stdexcept>
+#include <type_traits>
+
+// Access remains private even when the test-only inspector is included.
+#define PRIVATE_SCENE_METHOD(Name) \
+template<class T, class = void> struct HasPublic##Name : std::false_type {}; \
+template<class T> struct HasPublic##Name<T, std::void_t<decltype(&T::Name)>> : std::true_type {}; \
+static_assert(!HasPublic##Name<Scene>::value);
+PRIVATE_SCENE_METHOD(RenameComponent)
+PRIVATE_SCENE_METHOD(GetSnapshot)
+PRIVATE_SCENE_METHOD(GetRevision)
+#undef PRIVATE_SCENE_METHOD
 
 #define CHECK(value) do { if (!(value)) throw std::runtime_error(#value); } while (false)
 namespace
@@ -35,17 +47,17 @@ void SceneOwnershipTests()
     const auto rejected = other.AddComponent("Alias", alias);
     alias.release();
     CHECK(rejected.result == SceneResult::AlreadyOwned && raw->GetScene() == &scene);
-    const auto before = scene.GetSnapshot();
-    CHECK(scene.RenameComponent(added.id, "Renamed") == SceneResult::Ok);
+    const auto before = SceneTestAccess::Snapshot(scene);
+    CHECK(SceneTestAccess::Rename(scene, added.id, "Renamed") == SceneResult::Ok);
     CHECK(!scene.FindComponentByName("Cube") && scene.FindComponentByName("Renamed") == raw);
     CHECK(before.components[0].name == "Cube");
-    CHECK(scene.GetSnapshot().components[0].id == added.id && scene.GetRevision() > before.revision);
+    CHECK(SceneTestAccess::Snapshot(scene).components[0].id == added.id && SceneTestAccess::Revision(scene) > before.revision);
     CHECK(scene.RemoveComponent(added.id) == SceneResult::Ok && !scene.FindComponent(added.id));
     CHECK(scene.RemoveComponent(added.id) == SceneResult::NotFound);
     CHECK(scene.AddComponent("Cube", duplicate).id > added.id);
     CHECK(scene.SetName("") == SceneResult::EmptyName);
-    CHECK(scene.SetName("Level") == SceneResult::Ok && scene.GetSnapshot().name == "Level");
-    CHECK(other.GetSnapshot().components.empty());
+    CHECK(scene.SetName("Level") == SceneResult::Ok && SceneTestAccess::Snapshot(scene).name == "Level");
+    CHECK(SceneTestAccess::Snapshot(other).components.empty());
 }
 
 void SceneHierarchyTests()
@@ -68,16 +80,16 @@ void SceneHierarchyTests()
     transform.position = {1, 0, 0}; transform.scale = {1, 1, 1};
     CHECK(scene.SetTransform(child, transform) == SceneResult::Ok);
     CHECK(std::abs(ch->GetWorldPosition().x - 11) < 0.0001f);
-    const auto snapshot = scene.GetSnapshot();
+    const auto snapshot = SceneTestAccess::Snapshot(scene);
     CHECK(snapshot.components[1].parentId == parent && !snapshot.components[1].inheritParentScale);
-    const auto revision = scene.GetRevision();
+    const auto revision = SceneTestAccess::Revision(scene);
     transform.scale.x = 0;
     CHECK(scene.SetTransform(child, transform) == SceneResult::InvalidTransform);
     transform.scale.x = 1; transform.position.x = std::numeric_limits<float>::quiet_NaN();
     CHECK(scene.SetTransform(child, transform) == SceneResult::InvalidTransform);
     transform.position.x = 1; transform.rotation = {0, 0, 0, 0};
     CHECK(scene.SetTransform(child, transform) == SceneResult::InvalidTransform);
-    CHECK(scene.GetRevision() == revision && ch->GetLocalPosition().x == 1);
+    CHECK(SceneTestAccess::Revision(scene) == revision && ch->GetLocalPosition().x == 1);
     auto* instance = ch->CreateInstance({0, 0, 0}, {0, 0, 0}, {1, 1, 1}, {1, 1, 1, 1});
     CHECK(instance->SetParent(p));
     CHECK(scene.RemoveComponent(parent) == SceneResult::Ok);
@@ -103,10 +115,10 @@ void SceneDeferredTests()
         const auto added = scene.AddComponent("B", next);
         CHECK(added.result == SceneResult::Deferred && !next);
         created = added.id;
-        CHECK(!scene.FindComponent(created) && scene.GetSnapshot().components.size() == 1);
+        CHECK(!scene.FindComponent(created) && SceneTestAccess::Snapshot(scene).components.size() == 1);
         auto duplicate = Component();
         CHECK(scene.AddComponent("B", duplicate).result == SceneResult::DuplicateName && duplicate);
-        CHECK(scene.RenameComponent(original, "Changed") == SceneResult::Busy);
+        CHECK(SceneTestAccess::Rename(scene, original, "Changed") == SceneResult::Busy);
         CHECK(scene.RemoveComponent(original) == SceneResult::Deferred);
         CHECK(scene.FindComponent(original) && deaths == 0);
     };
