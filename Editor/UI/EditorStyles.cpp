@@ -139,14 +139,23 @@ QTreeView::item:selected:hover, QListView::item:selected:hover {
     background-color: %13;
     color: #FFFFFF;
 }
+QHeaderView {
+    background-color: %7;
+    border: none;
+    min-height: 20px;
+    max-height: 20px;
+}
 QHeaderView::section {
     background-color: %7;
     color: %4;
     border: none;
     border-right: 1px solid %6;
     border-bottom: 1px solid %6;
-    padding: 2px 8px;
-    height: 22px;
+    padding: 0px 6px;
+    height: 20px;
+    min-height: 20px;
+    max-height: 20px;
+    font-size: 11px;
     font-weight: 600;
 }
 QTabBar::tab {

@@ -172,6 +172,11 @@ void FileBrowserDock::BuildUi()
     view_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
     view_->setMinimumSize(40, 20);
     view_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    view_->header()->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    view_->header()->setFixedHeight(20);
+    QFont fileHeaderFont = view_->header()->font();
+    fileHeaderFont.setPixelSize(11);
+    view_->header()->setFont(fileHeaderFont);
     view_->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     for (int c = 1; c < 3; ++c)
         view_->header()->setSectionResizeMode(c, QHeaderView::ResizeToContents);

@@ -10,6 +10,7 @@
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QPushButton>
+#include <QHeaderView>
 #include <QTreeWidget>
 #include <QAction>
 #include <QKeySequence>
@@ -91,6 +92,14 @@ void SceneObjectsPanel::BuildUi()
     hierarchy_->setMinimumSize(80, 60);
     hierarchy_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
     hierarchy_->setHeaderLabels({Tr("Объект", "Object"), Tr("Тип", "Type")});
+    if (hierarchy_->header())
+    {
+        hierarchy_->header()->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        hierarchy_->header()->setFixedHeight(20);
+        QFont treeHeaderFont = hierarchy_->header()->font();
+        treeHeaderFont.setPixelSize(11);
+        hierarchy_->header()->setFont(treeHeaderFont);
+    }
     hierarchy_->setSelectionMode(QAbstractItemView::ExtendedSelection);
     hierarchy_->setIndentation(13);
     hierarchy_->setContextMenuPolicy(Qt::CustomContextMenu);

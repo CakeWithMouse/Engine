@@ -7,6 +7,8 @@
 #include "EditorLocale.h"
 
 #include <QWidget>
+#include <QHeaderView>
+#include <QTreeWidget>
 #include <QLabel>
 #include <QAbstractButton>
 #include <QLineEdit>
@@ -172,6 +174,14 @@ inline void Run()
         }
         ++checks;
     }
+
+    // 5. Verify compact 20px header height
+    auto* hierTree = sceneObjects.findChild<QTreeWidget*>(QStringLiteral("SceneHierarchy"));
+    if (!hierTree || !hierTree->header() || hierTree->header()->maximumHeight() != 20)
+    {
+        throw std::runtime_error("UiSmoke: SceneHierarchy header height is not 20px");
+    }
+    ++checks;
 
     // Restore default Ru language
     EditorLocale::Instance().SetLanguage(EditorLanguage::Ru);
