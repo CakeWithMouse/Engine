@@ -65,6 +65,36 @@ $buildArgs = @(
     "/verbosity:minimal"
 )
 
+$vcpkgRoot = $env:VCPKG_ROOT
+if (!$vcpkgRoot -and (Test-Path -LiteralPath $vswhere)) {
+    $installations = & $vswhere -products '*' -property installationPath
+    foreach ($inst in $installations) {
+        $candidate = Join-Path $inst 'VC\vcpkg'
+        if (Test-Path -LiteralPath (Join-Path $candidate 'scripts\buildsystems\msbuild\vcpkg.props')) {
+            $vcpkgRoot = $candidate
+            break
+        }
+    }
+}
+if (!$vcpkgRoot) {
+    foreach ($c in @('C:\vcpkg', 'D:\vcpkg', (Join-Path $env:USERPROFILE 'vcpkg'))) {
+        if ($c -and (Test-Path -LiteralPath (Join-Path $c 'scripts\buildsystems\msbuild\vcpkg.props'))) {
+            $vcpkgRoot = $c
+            break
+        }
+    }
+}
+$assimpHeader = Join-Path $repoRoot 'Engine/vcpkg_installed/x64-windows/include/assimp/scene.h'
+if (Test-Path -LiteralPath $assimpHeader) {
+    $buildArgs += '/p:EngineEnableAssimp=true'
+    if ($vcpkgRoot) {
+        $vcpkgClean = $vcpkgRoot.TrimEnd('\')
+        $buildArgs += ('/p:VcpkgRoot="' + $vcpkgClean + '\\"')
+        $env:VCPKG_ROOT = $vcpkgClean
+    }
+    Log-Step "Assimp detected in Engine/vcpkg_installed: building with EngineEnableAssimp=true" "Green"
+}
+
 if ($Fast) {
     $fastProjects = @("Engine", "EngineRuntime", "SceneProject", "EditorModule", "EngineLauncher")
     
@@ -176,7 +206,16 @@ foreach ($destDir in $shaderDestDirs) {
 
 Log-Step "=== 5a. Synchronizing binaries to LocalAppData Engines ===" "Cyan"
 if (Test-Path -LiteralPath $engineCacheDir) {
-    $syncFiles = @("Editor.dll", "EngineRuntime.exe")
+    $vcpkgBinDir = Join-Path $repoRoot "Engine/vcpkg_installed/x64-windows/debug/bin"
+    if (Test-Path -LiteralPath $vcpkgBinDir) {
+        Get-ChildItem -LiteralPath $vcpkgBinDir -Filter "*.dll" | ForEach-Object {
+            $dest = Join-Path $runtimeDir $_.Name
+            if (!(Test-Path -LiteralPath $dest) -or ($_.LastWriteTime -gt (Get-Item $dest).LastWriteTime)) {
+                Copy-Item -LiteralPath $_.FullName -Destination $dest -Force
+            }
+        }
+    }
+    $syncFiles = @("Editor.dll", "EngineRuntime.exe", "assimp-vc143-mtd.dll", "assimp-vc143-mt.dll", "kubazip.dll", "minizipd.dll", "minizip.dll", "poly2tri.dll", "pugixml.dll", "zd.dll", "z.dll")
     foreach ($sf in $syncFiles) {
         $srcPath = Join-Path $runtimeDir $sf
         if (Test-Path -LiteralPath $srcPath) {

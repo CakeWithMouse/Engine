@@ -396,3 +396,16 @@
 - Qt CoreTests запускались вне sandbox: ограниченное окружение запрещает запись в каталоги QTemporaryDir с собственными ACL (см. tests/README.md).
 - Полный стандартный Qt UI workflow с импортом CesiumMan.glb прошёл: 3123 проверки, включая свойства персонажа, сохранение фокуса, Play/Stop и настройки направленного света.
 
+
+
+---
+
+## Чек-лист среза S15: Задачи 0-6 (Git merge, Assimp, Clamping биллбордов, Спинбоксы/карточки инспектора, Заголовки таблиц, Сплиттеры, Локализация)
+
+- [x] **Шаг 15.0 (git):** Проверка `branch -vv`, настройка `git config push.default simple`, снятие случайного upstream `origin/main` с `feature/editor-v2-final`, слияние `origin/main` в ветку `feature/editor-v2-final` объединением веток (11 файлов), валидация через `check.ps1 -Quick` (коммит `1a38a825`).
+- [x] **Шаг 15.1 (fix(model)):** Устранение "Can't load model, Assimp not enabled": автоопределение `EngineEnableAssimp=true` и `VcpkgRoot` в `Engine.vcxproj`, `EngineRuntime.vcxproj`, `SceneProject.vcxproj`, `RuntimeExample.vcxproj` при наличии `vcpkg_installed\x64-windows\include\assimp\scene.h`; проброс путей vcpkg и синхронизация dll в `run-editor.ps1`; информативное сообщение об ошибке в `SceneAssets.cpp`. Проверена живая загрузка `CesiumMan.glb` в Проекте 14 (Debug runtime, 20 кадров, exit code 0).
+- [ ] **Шаг 15.2 (fix(viewport)):** Ограничение экранного размера билбордов во вьюпорте: ограничение 16..32 px (базовый 32 px, уменьшается до 16 px при приближении, не растет при удалении). Readback на дистанциях 3, 15, 60.
+- [ ] **Шаг 15.3 (fix(ui)):** Визуальное оформление инспектора: стрелки спинбоксов цветом текста темы (SVG Tabler chevron-up/down), унификация стрелок сворачивания карточек (Tabler chevron-down/chevron-right).
+- [ ] **Шаг 15.4 (style(ui)):** Заголовки колонок таблиц в Контенте и Иерархии: компактная высота 20 px, шрифт 11 px, вертикальное центрирование.
+- [ ] **Шаг 15.5 (style(ui)):** Разделители доков: зона захвата 4 px, линия 1 px, сохранение плавности (viewportResize count <= 2).
+- [ ] **Шаг 15.6 (fix(localization)):** Перевод интерфейса на английский: "Окружение", группы иерархии, окна UI Editor, HudTools, ProjectProperties через `Tr()` и `RetranslateUi()`.
