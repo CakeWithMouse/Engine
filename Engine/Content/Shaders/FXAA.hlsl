@@ -41,7 +41,7 @@ float4 PSMain(VSOutput input) : SV_TARGET
     float lumaMax = max(lumaM, max(max(lumaN, lumaS), max(lumaW, lumaE)));
     float range = lumaMax - lumaMin;
 
-    if (range < max(0.05, lumaMax * 0.125))
+    if (range < max(0.02, lumaMax * 0.08))
     {
         return rgbM;
     }
@@ -72,10 +72,10 @@ float4 PSMain(VSOutput input) : SV_TARGET
 
     float subpix = (2.0 * (lumaN + lumaS + lumaW + lumaE) + (lumaNW + lumaNE + lumaSW + lumaSE)) * (1.0 / 12.0);
     subpix = clamp(abs(subpix - lumaM) / range, 0.0, 1.0);
-    float blendFactor = subpix * subpix * 0.75;
+    float blendFactor = subpix * subpix * 0.85;
 
     float4 rgbBlend = SceneTexture.Sample(LinearClampSampler, uv + stepDir * (0.5 * blendFactor));
-    float3 finalRgb = lerp(rgbM.rgb, rgbBlend.rgb, 0.5f);
+    float3 finalRgb = lerp(rgbM.rgb, rgbBlend.rgb, blendFactor);
     return float4(finalRgb, 1.0f);
 }
 
