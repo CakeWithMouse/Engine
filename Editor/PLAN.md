@@ -361,3 +361,23 @@
 - [x] **Задача 6 (fix(viewport)):** Отображение иконок-билбордов источников света: буферизация `PendingOverlayIconData` и отложенная выгрузка `UploadOverlayIcon` при готовности D3D11 `Device`, проброс `storedIcons_` через сессию редактирования `SceneEditSession`, контрастные круглые плашки Tabler-иконок в `IconProvider.cpp`, корректная отсечка near-plane в `EditorOverlay.hlsl` (`15877e0`).
 - [x] **Задача 7 (feat(renderer)):** Сглаживание линий оверлея: субпиксельный спад альфы через `smoothstep` по расстоянию от центра линии в `EditorOverlay.hlsl` (0.5px margin), полноэкранный проход FXAA после оверлеев (`bc8eeee`).
 - [x] **Задача 8 (docs(plan)):** Фиксация архитектурных ограничений теней точечного света в плане и беклоге; подтверждено скрытие чекбокса «Тени» в инспекторе для `Light.Point`.
+
+---
+
+## Чек-лист среза S14: Реальная приёмка вьюпорта (Синхронизация рантайма, иконки D3D, сглаживание FXAA, ресайз и меню)
+
+- [x] **Пункт 0 (tool(sync)):** Верификация запуска проекта 14 через Launcher и синхронизация рантайма:
+  - Факты запущенного процесса `EngineRuntime` (PID 54724):
+    - `EngineRuntime.exe`: `C:\Users\Yuri\AppData\Local\PainEngine\Engines\2026.10.31.3\Debug\EngineRuntime.exe`
+    - `Editor_*.dll`: `C:\Users\Yuri\AppData\Local\PainEngine\Engines\2026.10.31.3\Debug\.shadow_cache\Editor_379748371667100.dll`
+    - `Game.dll`: `C:\Users\Yuri\Documents\14\Binaries\Debug\ef9d7f4c85404d8ab34ca49abe81de91\Game.dll`
+    - Корневой каталог EngineContent для шейдеров: `%LOCALAPPDATA%\PainEngine\Engines\2026.10.31.3\Debug\EngineContent`
+  - Сравнение дат и хешей:
+    - `EditorOverlay.hlsl` и `FXAA.hlsl`: SHA256 совпадают между репозиторием (`Engine/Content/Shaders`), сборкой (`Game/build/.../Runtime/EngineContent`) и кэшем лаунчера (`Engines/2026.10.31.3/Debug/EngineContent`).
+    - `Game.dll`: SHA256 совпадает во всех проектах `Documents` (включая корень и `Binaries/Debug/*`).
+  - В `Editor/tools/run-editor.ps1` добавлена гарантированная синхронизация после сборки: деплой шейдеров в оба каталога `EngineContent`, синхронизация бинарников (`Editor.dll`, `EngineRuntime.exe`, `Game.dll`) в кэш лаунчера, очистка `.shadow_cache`, рекурсивная синхронизация `Game.dll` по всем подкаталогам `Binaries` пользовательских проектов.
+- [ ] **Пункт 1 (viewport/icons):** Отображение иконок объектов во вьюпорте: исправление сбоя `CreateInputLayout` для билбордов (сигнатура `VSBillboard` vs `VSTriangle`), readback backbuffer вьюпорта в BMP/PNG с подтверждением видимости Warm Light и Cool Light.
+- [ ] **Пункт 2 (renderer/antialiasing):** Сглаживание FXAA: два readback кадра с FXAA 0 и 1, сравнение краевых пикселей и линий сетки.
+- [ ] **Пункт 3 (viewport/resize):** Устранение дергания при ресайзе сплиттеров: коалесцирование, заморозка пересоздания swapchain/ресурсов во время активного драга сплиттера (число `viewportResize` <= 2 за 2 секунды).
+- [ ] **Пункт 4 (ui/separators):** Разделители окон: QMainWindow::separator ширина/высота 6px, видимая линия 1px по центру, подсветка hover 2px акцентом с альфой.
+- [ ] **Пункт 5 (ui/menu):** Меню "Сцена": удаление только пункта "Направленный свет", сохранение "Иерархия" без лишних доков "Окружение".

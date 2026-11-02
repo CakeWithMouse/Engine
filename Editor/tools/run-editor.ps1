@@ -149,22 +149,54 @@ if ($proc.ExitCode -ne 0) {
 $buildTimeSec = [math]::Round($sw.Elapsed.TotalSeconds, 2)
 Log-Step "Build finished successfully in $buildTimeSec сек." "Green"
 
-Log-Step "=== 5. Ensuring EditorOverlay.hlsl is deployed ===" "Cyan"
+Log-Step "=== 5. Ensuring Shaders are deployed to Runtime and LocalAppData Engines ===" "Cyan"
 $sourceShader = Join-Path $repoRoot "Engine/Content/Shaders/EditorOverlay.hlsl"
 $sourceFxaa = Join-Path $repoRoot "Engine/Content/Shaders/FXAA.hlsl"
-$targetShaders = @(
-    (Join-Path $repoRoot "Game/build/x64/Debug/Runtime/EngineContent/Shaders/EditorOverlay.hlsl")
+$runtimeDir = Join-Path $repoRoot "Game/build/x64/Debug/Runtime"
+$engineCacheDir = Join-Path $env:LOCALAPPDATA "PainEngine\Engines\$version\Debug"
+
+$shaderDestDirs = @(
+    (Join-Path $runtimeDir "EngineContent/Shaders")
 )
-foreach ($target in $targetShaders) {
-    $dir = Split-Path -Parent $target
-    if (!(Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
-    Copy-Item -LiteralPath $sourceShader -Destination $target -Force
-    Log-Step "Deployed shader: $target" "DarkGray"
+if (Test-Path -LiteralPath $engineCacheDir) {
+    $shaderDestDirs += (Join-Path $engineCacheDir "EngineContent/Shaders")
 }
-$targetFxaa = Join-Path $repoRoot "Game/build/x64/Debug/Runtime/EngineContent/Shaders/FXAA.hlsl"
-if (Test-Path -LiteralPath $sourceFxaa) {
-    Copy-Item -LiteralPath $sourceFxaa -Destination $targetFxaa -Force
-    Log-Step "Deployed shader: $targetFxaa" "DarkGray"
+
+foreach ($destDir in $shaderDestDirs) {
+    if (!(Test-Path -LiteralPath $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
+    if (Test-Path -LiteralPath $sourceShader) {
+        Copy-Item -LiteralPath $sourceShader -Destination (Join-Path $destDir "EditorOverlay.hlsl") -Force
+        Log-Step "Deployed shader: $(Join-Path $destDir 'EditorOverlay.hlsl')" "DarkGray"
+    }
+    if (Test-Path -LiteralPath $sourceFxaa) {
+        Copy-Item -LiteralPath $sourceFxaa -Destination (Join-Path $destDir "FXAA.hlsl") -Force
+        Log-Step "Deployed shader: $(Join-Path $destDir 'FXAA.hlsl')" "DarkGray"
+    }
+}
+
+Log-Step "=== 5a. Synchronizing binaries to LocalAppData Engines ===" "Cyan"
+if (Test-Path -LiteralPath $engineCacheDir) {
+    $syncFiles = @("Editor.dll", "EngineRuntime.exe")
+    foreach ($sf in $syncFiles) {
+        $srcPath = Join-Path $runtimeDir $sf
+        if (Test-Path -LiteralPath $srcPath) {
+            Copy-Item -LiteralPath $srcPath -Destination (Join-Path $engineCacheDir $sf) -Force
+            Log-Step "Updated engine cache file: $(Join-Path $engineCacheDir $sf)" "DarkGray"
+        }
+    }
+    $tplSrc = Join-Path $runtimeDir "Templates/SceneProject/Game.dll"
+    $tplDst = Join-Path $engineCacheDir "Templates/SceneProject/Game.dll"
+    if (Test-Path -LiteralPath $tplSrc) {
+        $tplDstDir = Split-Path -Parent $tplDst
+        if (!(Test-Path -LiteralPath $tplDstDir)) { New-Item -ItemType Directory -Path $tplDstDir -Force | Out-Null }
+        Copy-Item -LiteralPath $tplSrc -Destination $tplDst -Force
+        Log-Step "Updated engine cache template: $tplDst" "DarkGray"
+    }
+    $shadowCache = Join-Path $engineCacheDir ".shadow_cache"
+    if (Test-Path -LiteralPath $shadowCache) {
+        Remove-Item -LiteralPath $shadowCache -Recurse -Force -ErrorAction SilentlyContinue
+        Log-Step "Cleared stale shadow cache: $shadowCache" "DarkGray"
+    }
 }
 
 Log-Step "=== 5b. Synchronizing Game.dll for user projects in Documents ===" "Cyan"
@@ -187,7 +219,9 @@ if (Test-Path -LiteralPath $templateDll) {
     $projectFiles = $projectFiles | Select-Object -Unique
     foreach ($pJson in $projectFiles) {
         $pDir = Split-Path -Parent $pJson
-        $targetDlls = @( (Join-Path $pDir "Game.dll") )
+        $targetDlls = @()
+        $foundDlls = Get-ChildItem -LiteralPath $pDir -Filter "Game.dll" -Recurse -ErrorAction SilentlyContinue
+        foreach ($d in $foundDlls) { $targetDlls += $d.FullName }
         try {
             $pContent = Get-Content -LiteralPath $pJson -Raw | ConvertFrom-Json
             if ($pContent.module) {
@@ -198,9 +232,9 @@ if (Test-Path -LiteralPath $templateDll) {
         foreach ($pDll in $targetDlls) {
             if (Test-Path -LiteralPath $pDll) {
                 $dllItem = Get-Item -LiteralPath $pDll
-                if ($dllItem.LastWriteTime -lt $templateItem.LastWriteTime) {
+                if ($dllItem.LastWriteTime -ne $templateItem.LastWriteTime -or $dllItem.Length -ne $templateItem.Length) {
                     Copy-Item -LiteralPath $templateDll -Destination $pDll -Force
-                    Log-Step "Updated outdated Game.dll in $pDll ($($dllItem.LastWriteTime) -> $($templateItem.LastWriteTime))" "Yellow"
+                    Log-Step "Updated Game.dll in $pDll" "Yellow"
                 }
             }
         }
