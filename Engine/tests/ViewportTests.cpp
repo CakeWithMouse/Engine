@@ -22,6 +22,43 @@ public:
     bool HasFxaaTarget() const { return SceneColorSRV && SceneColorRTV; }
     bool HasBackbufferTarget() const { return RenderTargetView && RenderTargetView != SceneColorRTV; }
     void Draw() override {} // An empty custom renderer must not retain the previous frame.
+    struct Bounds { int minX = 9999, maxX = -1, minY = 9999, maxY = -1; int Diameter() const { return (maxX >= minX && maxY >= minY) ? std::max(maxX - minX + 1, maxY - minY + 1) : 0; } };
+    Bounds MeasureBillboardBounds()
+    {
+        RenderFrame();
+        Microsoft::WRL::ComPtr<ID3D11Resource> source;
+        RenderTargetView->GetResource(&source);
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+        CHECK(SUCCEEDED(source.As(&texture)));
+        D3D11_TEXTURE2D_DESC desc{};
+        texture->GetDesc(&desc);
+        desc.Usage = D3D11_USAGE_STAGING;
+        desc.BindFlags = 0;
+        desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        desc.MiscFlags = 0;
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> readback;
+        CHECK(SUCCEEDED(Device->CreateTexture2D(&desc, nullptr, &readback)));
+        Context->CopyResource(readback.Get(), texture.Get());
+        D3D11_MAPPED_SUBRESOURCE mapped{};
+        CHECK(SUCCEEDED(Context->Map(readback.Get(), 0, D3D11_MAP_READ, 0, &mapped)));
+        Bounds b;
+        for (UINT y = 0; y < desc.Height; ++y)
+        {
+            const auto* row = static_cast<const uint8_t*>(mapped.pData) + y * mapped.RowPitch;
+            for (UINT x = 0; x < desc.Width; ++x)
+            {
+                if (row[x * 4] > 25 && row[x * 4 + 1] > 25 && row[x * 4 + 2] > 25)
+                {
+                    b.minX = std::min(b.minX, static_cast<int>(x));
+                    b.maxX = std::max(b.maxX, static_cast<int>(x));
+                    b.minY = std::min(b.minY, static_cast<int>(y));
+                    b.maxY = std::max(b.maxY, static_cast<int>(y));
+                }
+            }
+        }
+        Context->Unmap(readback.Get(), 0);
+        return b;
+    }
     size_t RenderRedPixels()
     {
         RenderFrame(); // Read before Present, while the current backbuffer is still defined.
@@ -327,6 +364,19 @@ int main(int argc, char** argv)
                     CHECK(game.RenderRedPixels() > 100);
                     game.SetOverlayTriangles(nullptr, 0);
                     CHECK(game.RenderRedPixels() == 0);
+                }
+                for (float dist : {3.0f, 15.0f, 60.0f})
+                {
+                    const auto r = game.ScreenPointToRay({350.0f, 250.0f});
+                    const auto p = r.ray.origin + r.ray.direction * dist;
+                    const EngineOverlayBillboard bb{1, p.x, p.y, p.z, 32.0f, 0xFF0000FF, 0};
+                    game.SetOverlayBillboards(&bb, 1);
+                    const auto bounds = game.MeasureBillboardBounds();
+                    const int diam = bounds.Diameter();
+                    std::cout << "Billboard readback at dist " << dist << ": diameter = " << diam << " px (bounds ["
+                              << bounds.minX << "," << bounds.minY << " .. " << bounds.maxX << "," << bounds.maxY << "])" << std::endl;
+                    CHECK(diam >= 14 && diam <= 34);
+                    game.SetOverlayBillboards(nullptr, 0);
                 }
             }
             game.GetSettings().RequestWindowClose();

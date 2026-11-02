@@ -103,8 +103,24 @@ BillboardPSInput VSBillboard(BillboardVSInput input)
         output.Tint = float4(0.0f, 0.0f, 0.0f, 0.0f);
         return output;
     }
+
+    // Clamp billboard size to 16..32 px in screen pixels:
+    // Base size is 32px (half-size = 16px).
+    // On close distance (dist <= 3.0), size smoothly scales down to 16px (half-size = 8px).
+    // On distant objects (dist >= 15.0), size stays at base 32px and does NOT grow further.
+    float2 baseOffset = input.Offset;
+    float currentHalf = max(abs(baseOffset.x), abs(baseOffset.y));
+
+    float dist = max(0.001f, clipCenter.w);
+    float distT = saturate((dist - 3.0f) / 12.0f);
+    float scale = lerp(0.5f, 1.0f, distT);
+
+    float clampedHalf = clamp(currentHalf * scale, 8.0f, 16.0f);
+    float effectiveScale = (currentHalf > 1e-4f) ? (clampedHalf / currentHalf) : 1.0f;
+    float2 pixelOffset = baseOffset * effectiveScale;
+
     // Invert Y offset for screen coordinates (Y down in screen space, Y up in NDC)
-    float2 ndcOffset = float2(input.Offset.x * 2.0f * ScreenSize.z, -input.Offset.y * 2.0f * ScreenSize.w) * clipCenter.w;
+    float2 ndcOffset = float2(pixelOffset.x * 2.0f * ScreenSize.z, -pixelOffset.y * 2.0f * ScreenSize.w) * clipCenter.w;
     output.Position = clipCenter + float4(ndcOffset.x, ndcOffset.y, 0.0f, 0.0f);
     output.UV = input.UV;
     output.Tint = input.Tint;
