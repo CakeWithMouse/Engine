@@ -188,11 +188,16 @@ namespace
         "    float4 Tint = float4(1.0f, 1.0f, 1.0f, 1.0f);\n"
         "    float Gloss = 0.5f;\n"
         "};\n"
+        "Texture2D BaseMap : register(t6);\n"
         "\n"
         "void Surface(MaterialInput i, inout MaterialOutput o)\n"
         "{\n"
         "    o.Albedo *= Tint.rgb;\n"
+        "    o.Alpha *= Tint.a;\n"
         "    o.SpecularWeight = Gloss;\n"
+        "    float4 baseMapColor = BaseMap.Sample(MaterialSampler, i.UV);\n"
+        "    o.Albedo *= baseMapColor.rgb;\n"
+        "    o.Alpha *= baseMapColor.a;\n"
         "}\n";
 }
 

@@ -30,6 +30,8 @@ public:
     bool full = false;
     using QSortFilterProxyModel::QSortFilterProxyModel;
     void ShowFull(bool value) { full = value; invalidateFilter(); }
+    // Перетаскивание только копирует: файл проекта не должен уехать в проводник.
+    Qt::DropActions supportedDragActions() const override { return Qt::CopyAction; }
 protected:
     bool filterAcceptsRow(int row, const QModelIndex& parent) const override {
         const auto* files = static_cast<QFileSystemModel*>(sourceModel());
@@ -107,6 +109,8 @@ void FileBrowserDock::BuildUi()
     view_->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     for (int c = 1; c < 3; ++c)
         view_->header()->setSectionResizeMode(c, QHeaderView::ResizeToContents);
+    view_->setDragEnabled(true);            // текстуры бросают на слоты редактора материала
+    view_->setDragDropMode(QAbstractItemView::DragOnly);
     view_->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(view_, &QTreeView::doubleClicked, this,
             [this](const QModelIndex& i) { OnDoubleClicked(i); });

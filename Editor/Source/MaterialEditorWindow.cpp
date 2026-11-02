@@ -1,4 +1,5 @@
 #include "MaterialEditorWindow.h"
+#include "MaterialTextureTools.h"
 
 #include <QAction>
 #include <QCheckBox>
@@ -25,12 +26,14 @@
 #include <QRegularExpression>
 #include <QSaveFile>
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QSet>
 #include <QSignalBlocker>
 #include <QSplitter>
 #include <QStatusBar>
 #include <QSyntaxHighlighter>
 #include <QTextBlock>
+#include <QTimer>
 #include <QToolBar>
 #include <QVBoxLayout>
 #include <QWheelEvent>
@@ -78,6 +81,24 @@ QString StatusText(uint32_t status, const char* error)
     return status == EngineSceneNotFound
                ? QStringLiteral("Материал не загружен ни в одной сцене")
                : QStringLiteral("Операция с материалом не выполнена (код %1)").arg(status);
+}
+
+// Поток движка. outside: файл вне проекта, сначала копируется в Content/Textures.
+QString SetTexture(const EngineEditSessionApi& api, const QByteArray& material, const QByteArray& slot,
+                   const QByteArray& path, const QByteArray& outside)
+{
+    QByteArray texture = path;
+    char error[4096]{};
+    if (!outside.isEmpty())
+    {
+        char imported[4096]{};
+        const uint32_t status = api.importAsset(api.context, outside.constData(), 1, imported, sizeof(imported), error, sizeof(error));
+        if (status == EngineSceneReadOnly) return QStringLiteral("Импорт текстуры недоступен во время Play");
+        if (status != EngineSceneOk) return StatusText(status, error);
+        texture = imported;
+    }
+    return StatusText(api.setMaterialTexture(api.context, material.constData(), slot.constData(), texture.constData(),
+                                             error, sizeof(error)), error);
 }
 
 QColor ToColor(const std::array<float, 4>& value, uint32_t components)
@@ -369,7 +390,7 @@ void MaterialEditorWindow::BuildUi()
     parameters_ = new QWidget(settings);
     parameterForm_ = new QFormLayout(parameters_);
     parameterForm_->setContentsMargins(0, 0, 0, 0);
-    auto* parametersTitle = new QLabel(QStringLiteral("<b>Параметры и текстуры</b>"), settings);
+    auto* parametersTitle = new QLabel(QStringLiteral("<b>Текстуры и параметры</b>"), settings);
     settingsForm->addRow(parametersTitle);
     settingsForm->addRow(parameters_);
 
@@ -386,8 +407,9 @@ void MaterialEditorWindow::BuildUi()
     auto* left = new QSplitter(Qt::Vertical, this);
     left->addWidget(preview_);
     left->addWidget(scroll);
-    left->setStretchFactor(0, 3);
-    left->setStretchFactor(1, 2);
+    left->setStretchFactor(0, 1);
+    left->setStretchFactor(1, 1);
+    left->setSizes({300, 400}); // слоты текстур видны без прокрутки
     auto* right = new QSplitter(Qt::Vertical, this);
     right->addWidget(source_);
     right->addWidget(errors_);
@@ -489,6 +511,7 @@ void MaterialEditorWindow::Apply(const MaterialEditorState& state, bool valid, b
     if (valid)
     {
         const bool first = !loaded_;
+        const QVector<MaterialEditorState::Texture> previous = state_.textures;
         state_ = state;
         loaded_ = true;
         if (!state_.modified) edited_ = false;
@@ -497,7 +520,10 @@ void MaterialEditorWindow::Apply(const MaterialEditorState& state, bool valid, b
             shaderFile_ = PhysicalPath(state_.shader);
             LoadShaderText();
         }
-        if (first || rebuild) RebuildSettings();
+        // Смена режима смешивания тоже меняет слоты: компилятор выбрасывает то, что режим не читает.
+        const bool slotsChanged = !std::equal(previous.begin(), previous.end(), state_.textures.begin(), state_.textures.end(),
+            [](const auto& a, const auto& b) { return a.name == b.name; });
+        if (first || rebuild || slotsChanged) RebuildSettings();
         ShowErrors();
     }
     else if (!loaded_)
@@ -541,6 +567,24 @@ void MaterialEditorWindow::RebuildSettings()
     alphaClip_->setEnabled(state_.render.blend == EngineMaterialMasked);
 
     while (parameterForm_->rowCount()) parameterForm_->removeRow(0);
+
+    for (const auto& texture : state_.textures)
+    {
+        const QString name = texture.name;
+        auto* row = new MaterialTextureSlot(name, texture.path, PhysicalPath(texture.path), parameters_);
+        // Диалоги открываются из очереди: ответ движка может пересоздать эту строку под ними.
+        row->choose = [this, name] { QTimer::singleShot(0, this, [this, name] { PickTexture(name); }); };
+        row->remove = [this, name] { QTimer::singleShot(0, this, [this, name] { RequestRemoveTexture(name); }); };
+        row->clear = [this, name] { AssignTexture(name, {}); };
+        row->dropped = [this, name](const QString& file) { AssignTexture(name, file); };
+        parameterForm_->addRow(name, row);
+    }
+
+    auto* add = new QPushButton(QStringLiteral("Добавить текстуру…"), parameters_);
+    add->setObjectName(QStringLiteral("MaterialAddTextureButton"));
+    add->setEnabled(!source_->isReadOnly());
+    connect(add, &QPushButton::clicked, this, [this] { QTimer::singleShot(0, this, [this] { RequestAddTexture(); }); });
+    parameterForm_->addRow(add);
 
     for (int index = 0; index < state_.parameters.size(); ++index)
     {
@@ -635,32 +679,6 @@ void MaterialEditorWindow::RebuildSettings()
         parameterForm_->addRow(parameter.name, row);
     }
 
-    for (int index = 0; index < state_.textures.size(); ++index)
-    {
-        const auto& texture = state_.textures[index];
-        auto* row = new QWidget(parameters_);
-        auto* layout = new QHBoxLayout(row);
-        layout->setContentsMargins(0, 0, 0, 0);
-        auto* path = new QLineEdit(texture.path, row);
-        path->setObjectName(QStringLiteral("MaterialTexture_%1").arg(texture.name));
-        path->setReadOnly(true);
-        path->setPlaceholderText(QStringLiteral("белая"));
-        auto* choose = new QPushButton(QStringLiteral("…"), row);
-        choose->setFixedWidth(28);
-        choose->setToolTip(QStringLiteral("Выбрать текстуру проекта"));
-        auto* clear = new QPushButton(QStringLiteral("×"), row);
-        clear->setFixedWidth(28);
-        clear->setToolTip(QStringLiteral("Белая текстура"));
-        layout->addWidget(path, 1);
-        layout->addWidget(choose);
-        layout->addWidget(clear);
-        connect(choose, &QPushButton::clicked, this, [this, index] { ChooseTexture(index, false); });
-        connect(clear, &QPushButton::clicked, this, [this, index] { ChooseTexture(index, true); });
-        parameterForm_->addRow(texture.name, row);
-    }
-
-    if (state_.parameters.isEmpty() && state_.textures.isEmpty())
-        parameterForm_->addRow(new QLabel(QStringLiteral("В HLSL нет cbuffer MaterialParams и текстур t6+"), parameters_));
     parameters_->parentWidget()->setEnabled(true);
 }
 
@@ -737,50 +755,137 @@ void MaterialEditorWindow::SetParameter(int index, const std::array<float, 4>& v
     }, false);
 }
 
-void MaterialEditorWindow::ChooseTexture(int index, bool clear)
+QString MaterialEditorWindow::VirtualPath(const QString& file) const
 {
-    QString texture;
-    if (!clear)
-    {
-        const QString content = QString::fromUtf8(host_->host().contentRoot);
-        const QString file = QFileDialog::getOpenFileName(this, QStringLiteral("Текстура для %1").arg(state_.textures[index].name),
-                                                          content, QStringLiteral("Текстуры (*.png *.jpg *.jpeg *.bmp *.tga)"));
-        if (file.isEmpty()) return;
-        const QString relative = QDir(content).relativeFilePath(QFileInfo(file).absoluteFilePath());
-        if (relative.startsWith(QStringLiteral("..")) || QDir::isAbsolutePath(relative))
-        {
-            QMessageBox::warning(this, QStringLiteral("Текстура вне проекта"),
-                                 QStringLiteral("Сначала импортируйте текстуру в проект кнопкой «Импорт текстуры»."));
-            return;
-        }
-        texture = QStringLiteral("/Game/") + QDir::fromNativeSeparators(relative);
-    }
+    if (file.startsWith(QStringLiteral("/Game/"))) return file;
+    const QDir content(QString::fromUtf8(host_->host().contentRoot));
+    const QString relative = content.relativeFilePath(QFileInfo(file).absoluteFilePath());
+    if (relative == QStringLiteral("..") || relative.startsWith(QStringLiteral("../")) || QDir::isAbsolutePath(relative))
+        return {};
+    return QStringLiteral("/Game/") + relative;
+}
+
+void MaterialEditorWindow::AssignTexture(const QString& slot, const QString& file)
+{
+    const QString texture = file.isEmpty() ? QString() : VirtualPath(file);
     edited_ = true;
     UpdateTitle();
-    const QByteArray material = material_.toUtf8(), name = state_.textures[index].name.toUtf8(), path = texture.toUtf8();
-    EngineThenRead([material, name, path](const EngineEditSessionApi& api)
+    const QByteArray material = material_.toUtf8(), name = slot.toUtf8(), path = texture.toUtf8(),
+                     outside = !file.isEmpty() && texture.isEmpty() ? file.toUtf8() : QByteArray();
+    EngineThenRead([material, name, path, outside](const EngineEditSessionApi& api)
     {
-        char error[4096]{};
-        return StatusText(api.setMaterialTexture(api.context, material.constData(), name.constData(), path.constData(),
-                                                 error, sizeof(error)), error);
+        return SetTexture(api, material, name, path, outside);
     }, true);
+}
+
+void MaterialEditorWindow::PickTexture(const QString& slot)
+{
+    QString current;
+    for (const auto& texture : state_.textures)
+        if (texture.name == slot) current = PhysicalPath(texture.path);
+    MaterialTexturePicker picker(QString::fromUtf8(host_->host().contentRoot), current, slot, this);
+    if (picker.exec() == QDialog::Accepted) AssignTexture(slot, picker.Selected());
+}
+
+void MaterialEditorWindow::RequestAddTexture()
+{
+    MaterialAddTextureDialog dialog(source_->toPlainText(), this);
+    if (dialog.exec() != QDialog::Accepted) return;
+    MaterialTexturePicker picker(QString::fromUtf8(host_->host().contentRoot), {}, dialog.Name(), this);
+    if (picker.exec() == QDialog::Accepted) AddTextureSlot(dialog.Name(), static_cast<int>(dialog.Role()), picker.Selected());
+}
+
+void MaterialEditorWindow::RequestRemoveTexture(const QString& slot)
+{
+    if (QMessageBox::question(this, QStringLiteral("Удалить слот"),
+                              QStringLiteral("Убрать текстуру %1 из HLSL? Файл текстуры останется в проекте.").arg(slot)) == QMessageBox::Yes)
+        RemoveTextureSlot(slot);
+}
+
+void MaterialEditorWindow::AddTextureSlot(const QString& name, int role, const QString& file)
+{
+    if (!loaded_ || saving_ || source_->isReadOnly()) return;
+    const auto slotRole = static_cast<MaterialTextures::Role>(role);
+    QString text = source_->toPlainText(), error;
+    if (!MaterialTextures::AddSlot(text, name, slotRole, error))
+    {
+        QMessageBox::warning(this, QStringLiteral("Новая текстура"), error);
+        return;
+    }
+    ReplaceSource(text);
+    if (!WriteSource()) return;
+
+    // Непрозрачный материал не читает альфу: компилятор выбросил бы текстуру вместе со слотом.
+    const bool mask = slotRole == MaterialTextures::Role::Opacity && state_.render.blend == EngineMaterialOpaque;
+    EngineMaterialRenderState render = state_.render;
+    if (mask) render.blend = EngineMaterialMasked;
+    if (mask || !file.isEmpty()) edited_ = true;
+    UpdateTitle();
+
+    const QString texture = file.isEmpty() ? QString() : VirtualPath(file);
+    const QByteArray material = material_.toUtf8(), shader = shaderFile_.toUtf8(), slot = name.toUtf8(), path = texture.toUtf8(),
+                     outside = !file.isEmpty() && texture.isEmpty() ? file.toUtf8() : QByteArray();
+    const bool assign = !file.isEmpty();
+    EngineThenRead([material, shader, slot, path, outside, assign, mask, render](const EngineEditSessionApi& api)
+    {
+        if (mask) api.setMaterialRenderState(api.context, material.constData(), &render);
+        api.reloadShaderFile(api.context, shader.constData()); // компиляция во всех играх, слот готов сразу
+        return assign ? SetTexture(api, material, slot, path, outside) : QString();
+    }, true, [this, name](bool)
+    {
+        const bool found = std::any_of(state_.textures.begin(), state_.textures.end(),
+                                       [&](const MaterialEditorState::Texture& texture) { return texture.name == name; });
+        if (!found && state_.errors.isEmpty())
+            statusBar()->showMessage(QStringLiteral("Шейдер не читает %1 при текущих настройках материала").arg(name));
+    });
+}
+
+void MaterialEditorWindow::RemoveTextureSlot(const QString& name)
+{
+    if (!loaded_ || saving_ || source_->isReadOnly()) return;
+    QString text = source_->toPlainText(), error;
+    if (!MaterialTextures::RemoveSlot(text, name, error))
+    {
+        QMessageBox::warning(this, QStringLiteral("Удалить слот"), error);
+        return;
+    }
+    ReplaceSource(text);
+    if (!WriteSource()) return;
+    const QByteArray shader = shaderFile_.toUtf8();
+    EngineThenRead([shader](const EngineEditSessionApi& api)
+    {
+        api.reloadShaderFile(api.context, shader.constData());
+        return QString();
+    }, true);
+}
+
+void MaterialEditorWindow::ReplaceSource(const QString& text)
+{
+    const int scroll = source_->verticalScrollBar()->value();
+    QTextCursor cursor(source_->document());
+    cursor.select(QTextCursor::Document);
+    cursor.insertText(text);
+    source_->verticalScrollBar()->setValue(scroll);
+}
+
+bool MaterialEditorWindow::WriteSource()
+{
+    QSaveFile file(shaderFile_);
+    if (!file.open(QIODevice::WriteOnly) || file.write(source_->toPlainText().toUtf8()) < 0 || !file.commit())
+    {
+        QMessageBox::warning(this, QStringLiteral("HLSL не сохранён"),
+                             QStringLiteral("Не удалось записать %1: %2").arg(shaderFile_, file.errorString()));
+        return false;
+    }
+    source_->document()->setModified(false);
+    return true;
 }
 
 bool MaterialEditorWindow::Save(std::function<void(bool)> completion)
 {
     if (!loaded_ || saving_) return false;
     const bool sourceChanged = source_->document()->isModified();
-    if (sourceChanged)
-    {
-        QSaveFile file(shaderFile_);
-        if (!file.open(QIODevice::WriteOnly) || file.write(source_->toPlainText().toUtf8()) < 0 || !file.commit())
-        {
-            QMessageBox::warning(this, QStringLiteral("HLSL не сохранён"),
-                                 QStringLiteral("Не удалось записать %1: %2").arg(shaderFile_, file.errorString()));
-            return false;
-        }
-        source_->document()->setModified(false);
-    }
+    if (sourceChanged && !WriteSource()) return false;
     saving_ = true;
     setEnabled(false);
     const QByteArray material = material_.toUtf8(), shader = shaderFile_.toUtf8();

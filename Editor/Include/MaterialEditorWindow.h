@@ -62,6 +62,12 @@ public:
     // Перечитывает состояние материала из движка (после F6): ошибки и параметры, текст HLSL не трогает.
     void Refresh();
 
+    // file: файл на диске или /Game путь, пустой — белая текстура. Файл вне Content импортируется.
+    void AssignTexture(const QString& slot, const QString& file);
+    // Слот — это правка HLSL: файл записывается и компилируется сразу, .mat остаётся на «Сохранить».
+    void AddTextureSlot(const QString& name, int role, const QString& file);
+    void RemoveTextureSlot(const QString& name);
+
 protected:
     void closeEvent(QCloseEvent* event) override;
 
@@ -83,10 +89,18 @@ private:
     void UpdateTitle();
     void SendRenderState();
     void SetParameter(int index, const std::array<float, 4>& value);
-    void ChooseTexture(int index, bool clear);
+    void PickTexture(const QString& slot);
+    void RequestAddTexture();
+    void RequestRemoveTexture(const QString& slot);
     void GoToError(int line, int column);
 
+    bool WriteSource();
+    // Заменяет текст через курсор: Ctrl+Z работает, позиция прокрутки сохраняется.
+    void ReplaceSource(const QString& text);
+
     QString PhysicalPath(const QString& virtualPath) const;
+    // /Game путь файла; пустой, если файл вне Content.
+    QString VirtualPath(const QString& file) const;
 
     EditorQtHost* host_ = nullptr;
     QString material_, shaderFile_;

@@ -3,12 +3,18 @@
 #include "QtHost.h"
 #include "MainWindow.h"
 #include "MaterialEditorWindow.h"
+#include "MaterialTextureTools.h"
 #include "CodeClassDialog.h"
 #include <Engine/Runtime/LegacyEditApi.h>
 #include <Engine/Runtime/EditExtensions.h>
 #include <Engine/Runtime/ProjectDataApi.h>
 #include <Engine/Runtime/GameEditModule.h>
 #include <QDialog>
+#include <QDialogButtonBox>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QMimeData>
+#include <QUrl>
 #include <QTimer>
 #include <QApplication>
 #include <QListWidget>
@@ -415,7 +421,7 @@ int wmain(int argc, wchar_t** argv)
             });
             return errorLine != 0;
         });
-        Check(errorLine == 11, "compile error points at the surface line");
+        Check(errorLine == 13, "compile error points at the surface line");
         Check(std::abs(materialText().value(QStringLiteral("params")).toObject().value(QStringLiteral("Gloss")).toDouble() - 0.9) < 1e-4, "save writes edited parameter");
         Ui([&](auto* w) {
             auto* source = static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")));
@@ -463,6 +469,139 @@ int wmain(int argc, wchar_t** argv)
         Ui([](auto*) { qobject_cast<QMessageBox*>(QApplication::activeModalWidget())->button(QMessageBox::Save)->click(); });
         until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
         Check(std::abs(materialText().value(QStringLiteral("params")).toObject().value(QStringLiteral("Gloss")).toDouble() - 0.6) < 1e-4, "close waits for successful material save");
+
+        // Texture slots: HLSL edits, drag and drop, import, the picker, add and remove from the UI.
+        {
+            namespace Tex = MaterialTextures;
+            QString text = QStringLiteral("void Surface(MaterialInput input, inout MaterialOutput output) { /* } */ output.Albedo = 1; }\n"), problem;
+            Check(Tex::AddSlot(text, QStringLiteral("A"), Tex::Role::Color, problem) && text.contains(QStringLiteral("A.Sample(MaterialSampler, input.UV)")) &&
+                  text.contains(QStringLiteral("output.Albedo *= aColor.rgb;")) && text.contains(QStringLiteral("Texture2D A : register(t6);")), "slot uses the surface's own argument names");
+            Check(text.indexOf(QStringLiteral("output.Albedo *= aColor.rgb;")) > text.indexOf(QStringLiteral("output.Albedo = 1;")), "slot is read after the surface code");
+            Check(Tex::AddSlot(text, QStringLiteral("B"), Tex::Role::Emissive, problem) && text.contains(QStringLiteral("register(t7)")) &&
+                  text.contains(QStringLiteral("#define MATERIAL_EMISSIVE")), "next register and emissive define");
+            Check(!Tex::AddSlot(text, QStringLiteral("B"), Tex::Role::Color, problem), "taken slot name rejected");
+            Check(!Tex::RemoveSlot(text, QStringLiteral("output"), problem), "shared line is not cut");
+            Check(Tex::RemoveSlot(text, QStringLiteral("A"), problem) && !text.contains(QStringLiteral("aColor")) && !text.contains(QStringLiteral("A.Sample")), "removal drops the slot and its local");
+            QString mixed = QStringLiteral("Texture2D C : register(t6);\nvoid Surface(MaterialInput i, inout MaterialOutput o)\n{\n    float4 color = C.Sample(MaterialSampler, i.UV) * Tint;\n    o.Albedo *= color.rgb;\n}\n");
+            const QString untouched = mixed;
+            Check(!Tex::RemoveSlot(mixed, QStringLiteral("C"), problem) && mixed == untouched, "expression with other logic is not cut");
+            QString noSurface = QStringLiteral("float4 Other() { return 0; }\n");
+            Check(!Tex::AddSlot(noSurface, QStringLiteral("A"), Tex::Role::Color, problem), "no Surface function");
+        }
+        const auto paintFile = root / "Content/Materials/Paint.mat", redSource = root / L"outside-red.bmp";
+        auto textureField = [&](const QString& slot) { QString value; Ui([&](auto* w) { if (auto* field = qobject_cast<QLineEdit*>(editorWidget(w, QStringLiteral("MaterialTexture_") + slot))) value = field->text(); }); return value; };
+        auto dropTexture = [](QWidget* slot, const QString& file, bool accepted) {
+            QMimeData mime;
+            mime.setUrls({QUrl::fromLocalFile(file)});
+            QDragEnterEvent enter(QPoint(4, 4), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
+            QApplication::sendEvent(slot, &enter);
+            Check(enter.isAccepted() == accepted, "slot filters dragged files");
+            if (!accepted) return;
+            QDropEvent drop(QPointF(4, 4), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
+            QApplication::sendEvent(slot, &drop);
+        };
+        auto previewCenter = [&] {
+            QColor color;
+            Ui([&](auto* w) {
+                auto* preview = editorWidget(w, QStringLiteral("MaterialPreview"));
+                const QImage frame = preview->screen()->grabWindow(preview->winId()).toImage();
+                color = frame.pixelColor(frame.width() / 2, frame.height() / 2);
+            });
+            return color;
+        };
+        auto modalIs = [&](const QString& name) { bool found = false; Ui([&](auto*) { auto* modal = QApplication::activeModalWidget(); found = modal && modal->objectName() == name; }); return found; };
+        auto pickTexture = [&](const QString& file) {
+            Ui([&](auto*) {
+                auto* dialog = QApplication::activeModalWidget();
+                auto* list = dialog->template findChild<QListWidget*>(QStringLiteral("MaterialTextureList"));
+                for (int i = 0; i < list->count(); ++i) if (list->item(i)->text() == file) list->setCurrentRow(i);
+                Check(list->currentItem() && list->currentItem()->text() == file, "picker lists project texture");
+                dialog->template findChild<QDialogButtonBox*>()->button(QDialogButtonBox::Ok)->click();
+            });
+        };
+        Ui([&](auto* w) {
+            Check(w->template findChild<QTreeView*>(QStringLiteral("ProjectFiles"))->dragEnabled(), "files can be dragged");
+            QImage image(4, 4, QImage::Format_RGB32); image.fill(Qt::red); Check(image.save(QString::fromStdWString(redSource.wstring())), "write outside texture fixture");
+            Check(!w->CreateMaterial({}, QStringLiteral("Paint")).isEmpty(), "create textured material");
+        });
+        until([&] { return inEditor(QStringLiteral("MaterialSlot_BaseMap")) && inEditor(QStringLiteral("MaterialAddTextureButton")); });
+        const QString greenFile = QString::fromStdWString(importedImage.wstring()), redFile = QString::fromStdWString(redSource.wstring());
+        Ui([&](auto* w) {
+            auto* slot = editorWidget(w, QStringLiteral("MaterialSlot_BaseMap"));
+            dropTexture(slot, QStringLiteral("C:/Windows/notes.txt"), false);
+            dropTexture(slot, greenFile, true);
+        });
+        until([&] { return textureField(QStringLiteral("BaseMap")) == QStringLiteral("/Game/Textures/outside.bmp"); });
+        until([&] { const QColor c = previewCenter(); return c.green() > c.red() + 40 && c.green() > c.blue() + 40; });
+        Ui([&](auto* w) { dropTexture(editorWidget(w, QStringLiteral("MaterialSlot_BaseMap")), redFile, true); });
+        until([&] { return textureField(QStringLiteral("BaseMap")) == QStringLiteral("/Game/Textures/outside-red.bmp"); });
+        Check(std::filesystem::exists(root / "Content/Textures/outside-red.bmp"), "file from outside the project is imported");
+        until([&] { const QColor c = previewCenter(); return c.red() > c.green() + 40 && c.red() > c.blue() + 40; });
+        Ui([&](auto* w) { static_cast<QPushButton*>(editorWidget(w, QStringLiteral("MaterialTextureChoose_BaseMap")))->click(); });
+        until([&] { return modalIs(QStringLiteral("MaterialTexturePicker")); });
+        Ui([&](auto*) {
+            auto* dialog = QApplication::activeModalWidget();
+            auto* list = dialog->template findChild<QListWidget*>(QStringLiteral("MaterialTextureList"));
+            Check(list->count() == 3 && list->currentItem()->text() == QStringLiteral("outside-red.bmp"), "picker shows None, project textures and the current one");
+            dialog->template findChild<QLineEdit*>(QStringLiteral("MaterialTextureSearch"))->setText(QStringLiteral("RED"));
+            Check(!list->item(0)->isHidden() && list->findItems(QStringLiteral("outside.bmp"), Qt::MatchExactly).first()->isHidden(), "picker search");
+            Check(dialog->grab().save(QString::fromStdWString((root / "editor-material-picker.png").wstring())), "save texture picker");
+            dialog->template findChild<QLineEdit*>(QStringLiteral("MaterialTextureSearch"))->clear();
+        });
+        pickTexture(QStringLiteral("outside.bmp"));
+        until([&] { return textureField(QStringLiteral("BaseMap")) == QStringLiteral("/Game/Textures/outside.bmp"); });
+        Ui([&](auto* w) { static_cast<QPushButton*>(editorWidget(w, QStringLiteral("MaterialAddTextureButton")))->click(); });
+        until([&] { return modalIs(QStringLiteral("MaterialAddTexture")); });
+        Ui([&](auto*) {
+            auto* dialog = QApplication::activeModalWidget();
+            auto* name = dialog->template findChild<QLineEdit*>(QStringLiteral("MaterialAddTextureName"));
+            Check(name->text() == QStringLiteral("BaseMap2"), "free default slot name");
+            auto* ok = dialog->template findChild<QDialogButtonBox*>()->button(QDialogButtonBox::Ok);
+            name->setText(QStringLiteral("Tint"));
+            Check(!ok->isEnabled(), "name taken by a parameter rejected");
+            name->setText(QStringLiteral("BaseMap2"));
+            dialog->template findChild<QComboBox*>(QStringLiteral("MaterialAddTextureRole"))->setCurrentIndex(3);
+            Check(name->text() == QStringLiteral("EmissiveMap") && ok->isEnabled(), "default name follows the purpose");
+            ok->click();
+        });
+        until([&] { return modalIs(QStringLiteral("MaterialTexturePicker")); });
+        pickTexture(QStringLiteral("outside-red.bmp"));
+        until([&] { return textureField(QStringLiteral("EmissiveMap")) == QStringLiteral("/Game/Textures/outside-red.bmp"); });
+        Ui([&](auto* w) {
+            const QString source = static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")))->toPlainText();
+            Check(source.contains(QStringLiteral("Texture2D EmissiveMap : register(t7);")) && source.contains(QStringLiteral("#define MATERIAL_EMISSIVE")), "slot written to HLSL");
+            Check(static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")))->count() == 0, "added slot compiles");
+            Check(!static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")))->document()->isModified(), "added slot is written to disk");
+            w->template findChild<MaterialEditorWindow*>()->AddTextureSlot(QStringLiteral("MaskMap"), 1, {});
+        });
+        until([&] { return inEditor(QStringLiteral("MaterialSlot_MaskMap")); });
+        Ui([&](auto* w) {
+            Check(static_cast<QComboBox*>(editorWidget(w, QStringLiteral("MaterialBlend")))->currentIndex() == 1, "opacity map switches an opaque material to masked");
+            w->template findChild<MaterialEditorWindow*>()->RemoveTextureSlot(QStringLiteral("EmissiveMap"));
+        });
+        until([&] { return !inEditor(QStringLiteral("MaterialSlot_EmissiveMap")); });
+        Ui([&](auto* w) {
+            const QString cleaned = static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")))->toPlainText();
+            Check(!cleaned.contains(QStringLiteral("EmissiveMap")) && !cleaned.contains(QStringLiteral("MATERIAL_EMISSIVE")), "removed slot leaves HLSL");
+            Check(static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")))->count() == 0, "HLSL compiles after removal");
+            Check(w->template findChild<MaterialEditorWindow*>()->grab().save(QString::fromStdWString((root / "editor-material-textures.png").wstring())), "save texture slots preview");
+            Check(editorWidget(w, QStringLiteral("MaterialSlot_BaseMap"))->parentWidget()->grab().save(QString::fromStdWString((root / "editor-material-slots.png").wstring())), "save texture slots");
+            saveMaterial(w);
+        });
+        until([&] { bool saved = false; Ui([&](auto* w) { auto* e = w->template findChild<MaterialEditorWindow*>(); saved = e->isEnabled() && !e->HasUnsavedChanges(); }); return saved; });
+        {
+            QFile saved(QString::fromStdWString(paintFile.wstring())); Check(saved.open(QIODevice::ReadOnly), "saved material readable");
+            const auto document = QJsonDocument::fromJson(saved.readAll()).object();
+            Check(document.value(QStringLiteral("textures")).toObject().value(QStringLiteral("BaseMap")).toString() == QStringLiteral("../Textures/outside.bmp"), "texture written relative to the .mat");
+            Check(document.value(QStringLiteral("render")).toObject().value(QStringLiteral("blend")).toString() == QStringLiteral("masked"), "blend change saved");
+        }
+        Ui([](auto* w) { QMetaObject::invokeMethod(w->template findChild<MaterialEditorWindow*>(), "close", Qt::QueuedConnection); });
+        until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
+        Ui([&](auto* w) { w->OpenMaterialEditor(QString::fromStdWString(paintFile.wstring())); });
+        until([&] { return textureField(QStringLiteral("BaseMap")) == QStringLiteral("/Game/Textures/outside.bmp"); });
+        Ui([](auto* w) { QMetaObject::invokeMethod(w->template findChild<MaterialEditorWindow*>(), "close", Qt::QueuedConnection); });
+        until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
+        Ui([](auto* w) { w->activateWindow(); });
 
         // "Редактировать" on the default material: a new material is created, assigned and opened.
         Ui([](auto* w) {
