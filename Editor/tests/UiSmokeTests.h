@@ -4,6 +4,7 @@
 #include "SceneObjectsPanel.h"
 #include "MainToolBar.h"
 #include "ViewportHeaderBar.h"
+#include <QTreeWidgetItemIterator>
 #include "EditorLocale.h"
 
 #include <QWidget>
@@ -75,16 +76,52 @@ inline void Run()
 
     // 2. Test English mode: ensure no visible/tooltip texts contain Cyrillic
     EditorLocale::Instance().SetLanguage(EditorLanguage::En);
+
+    EditorQtHost::Snapshot snap;
+    EditorQtHost::SceneObject dirLight;
+    dirLight.id = 1; dirLight.type = "Light.Directional"; dirLight.name = "DirectionalLight";
+    EditorQtHost::SceneObject sky;
+    sky.id = 2; sky.type = "Environment.Sky"; sky.name = "Sky";
+    EditorQtHost::SceneObject cube;
+    cube.id = 3; cube.type = "Primitive.Cube"; cube.name = "Cube";
+    snap.objects = {dirLight, sky, cube};
+    snap.types = {
+        {"Primitive.Cube", "Куб"},
+        {"Light.Directional", "Направленный свет"},
+        {"Environment.Sky", "Базовое небо"}
+    };
+    const QVector<std::pair<QString, QString>> primTypes = {
+        {QStringLiteral("Куб"), QStringLiteral("Primitive.Cube")},
+        {QStringLiteral("Направленный свет"), QStringLiteral("Light.Directional")},
+        {QStringLiteral("Базовое небо"), QStringLiteral("Environment.Sky")}
+    };
+    sceneObjects.SetPrimitiveTypes(primTypes);
+    sceneObjects.RefreshHierarchy(snap);
+    inspector.Refresh(snap, 1, true);
+
     inspector.RetranslateUi();
     sceneObjects.RetranslateUi();
     toolBar.RetranslateUi();
     headerBar.RetranslateUi();
+
+
 
     std::vector<QString> enTexts;
     CollectTexts(&inspector, enTexts);
     CollectTexts(&sceneObjects, enTexts);
     CollectTexts(&toolBar, enTexts);
     CollectTexts(&headerBar, enTexts);
+
+    auto* hierCheckTree = sceneObjects.findChild<QTreeWidget*>(QStringLiteral("SceneHierarchy"));
+    if (hierCheckTree) {
+        for (QTreeWidgetItemIterator it(hierCheckTree); *it; ++it) {
+            QString itemText = (*it)->text(0);
+            if (HasCyrillic(itemText)) {
+                throw std::runtime_error("UiSmoke: Hierarchy item text has Cyrillic in EN mode: '" + itemText.toStdString() + "'");
+            }
+            ++checks;
+        }
+    }
 
     if (enTexts.empty()) {
         throw std::runtime_error("UiSmoke: No UI texts found in instantiated panels");

@@ -318,6 +318,10 @@ void ObjectInspectorPanel::RetranslateUi()
 
     if (selectedId_ == 0 && selectionLabel_)
         selectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
+
+    propertiesKey_.clear();
+    if (selectedId_ != 0 && !lastSnapshot_.objects.empty())
+        Refresh(lastSnapshot_, selectedId_, true);
 }
 
 void ObjectInspectorPanel::ClearFocusIfInside()
@@ -367,6 +371,7 @@ void ObjectInspectorPanel::Refresh(
     bool selectionChanged
 )
 {
+    lastSnapshot_ = view;
     refreshing_ = true;
     selectedId_ = selectedId;
 
@@ -382,12 +387,8 @@ void ObjectInspectorPanel::Refresh(
         properties_->hide();
         noSelectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
         noSelectionLabel_->show();
-        cardGeneral_->hide();
-        cardTransform_->hide();
-        cardGeometry_->hide();
-        cardMaterial_->hide();
-        lightInspector_->hide();
-        characterInspector_->hide();
+        cardGeneral_->hide(); cardTransform_->hide(); cardGeometry_->hide();
+        cardMaterial_->hide(); lightInspector_->hide(); characterInspector_->hide();
         refreshing_ = false;
         return;
     }
@@ -438,10 +439,7 @@ void ObjectInspectorPanel::Refresh(
             if (canReplaceField(lightValues_[4])) lightValues_[4]->setValue(data["shadowDistance"].toDouble(2000.0));
             cardLight_->SetExpanded(true);
             cardLight_->show();
-            std::printf("[InspectorDiag] isDirLight id=%llu cardLight visible=%d geom=%d,%d %dx%d\n",
-                (unsigned long long)object.id, cardLight_->isVisible(),
-                cardLight_->geometry().x(), cardLight_->geometry().y(),
-                cardLight_->geometry().width(), cardLight_->geometry().height());
+
         } else if (isPointLight) {
             for (int i = 0; i < 5; ++i) {
                 if (!canReplaceField(lightValues_[i])) continue;

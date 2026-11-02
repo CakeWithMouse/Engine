@@ -146,6 +146,26 @@ void SceneObjectsPanel::BuildUi()
     mainLayout->addWidget(hierarchy_, 1);
 }
 
+static QString LocalizedTypeLabel(const QString& name, const QString& fallbackLabel)
+{
+    if (name == "Primitive.Cube") return Tr("Куб", "Cube");
+    if (name == "Primitive.Sphere") return Tr("Сфера", "Sphere");
+    if (name == "Primitive.Plane") return Tr("Плоскость", "Plane");
+    if (name == "Primitive.Cylinder") return Tr("Цилиндр", "Cylinder");
+    if (name == "Primitive.Cone") return Tr("Конус", "Cone");
+    if (name == "Primitive.Pyramid") return Tr("Пирамида", "Pyramid");
+    if (name == "Light.Point") return Tr("Точечный свет", "Point Light");
+    if (name == "Light.Directional") return Tr("Направленный свет", "Directional Light");
+    if (name == "Particle.Sparks") return Tr("Искры", "Sparks");
+    if (name == "Particle.Smoke") return Tr("Дым", "Smoke");
+    if (name == "Environment.Sky") return Tr("Базовое небо", "Basic Sky");
+    if (name == "Gameplay.Character") return Tr("Персонаж", "Character");
+    if (name == "Gameplay.Camera") return Tr("Камера Play", "Play Camera");
+    if (name == "Gameplay.PlaySettings") return Tr("Настройки Play", "Play Settings");
+    if (name == "Gameplay.Player") return Tr("Игрок", "Player");
+    return fallbackLabel;
+}
+
 void SceneObjectsPanel::RebuildAddMenu()
 {
     if (!addMenu_) return;
@@ -162,7 +182,7 @@ void SceneObjectsPanel::RebuildAddMenu()
 
     for (const auto& type : types_) {
         const auto& name = type.second;
-        const auto& label = type.first;
+        const auto label = LocalizedTypeLabel(name, type.first);
         if (name == "Gameplay.PlaySettings") continue;
 
         QMenu* target = menuProject;
@@ -247,10 +267,13 @@ static bool IsEnvironmentObject(const IEditorHost::SceneObject& object)
 
 void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
 {
+    lastSnapshot_ = view;
     suppressSelectionChanged_ = true;
     hierarchy_->setSelectionMode(view.batchEditing ? QAbstractItemView::ExtendedSelection : QAbstractItemView::SingleSelection);
 
     QString key;
+    key += QString::number(static_cast<int>(EditorLocale::Instance().Language()));
+    key += QLatin1Char(';');
     for (const auto& object : view.objects)
     {
         key += QString::number(object.id);
@@ -370,7 +393,7 @@ void SceneObjectsPanel::ShowTreeContextMenu(const QPoint& pos)
         auto* addChildMenu = menu.addMenu(Tr("Создать внутри…", "Add Child…"));
         for (const auto& type : types_) {
             const auto& name = type.second;
-            const auto& label = type.first;
+            const auto label = LocalizedTypeLabel(name, type.first);
             if (name == "Gameplay.PlaySettings") continue;
             addChildMenu->addAction(label, this, [this, selectedId, name, label] {
                 emit AddChildPrimitiveRequested(selectedId, name, label, SpawnPosition());
@@ -453,4 +476,9 @@ void SceneObjectsPanel::RetranslateUi()
     if (actDuplicate_) actDuplicate_->setText(Tr("Дублировать объект", "Duplicate Object"));
     if (actRemove_) actRemove_->setText(Tr("Удалить объект", "Remove Object"));
     RebuildAddMenu();
+    hierarchyKey_.clear();
+    if (!lastSnapshot_.objects.empty())
+    {
+        RefreshHierarchy(lastSnapshot_);
+    }
 }

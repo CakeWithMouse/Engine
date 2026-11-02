@@ -102,6 +102,7 @@ private:
     bool HasFocusedChild() const;
 
     quint64 selectedId_ = 0; std::string selectedType_;
+    EditorQtHost::Snapshot lastSnapshot_;
     bool refreshing_ = false;
     int langSubId_ = 0;
     int themeSubId_ = 0;
