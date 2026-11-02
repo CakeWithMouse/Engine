@@ -16,6 +16,7 @@
 #include <d3dcompiler.h>
 #include <directxmath.h>
 #include <iostream>
+#include <fstream>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/Light/DirectionalLightComponent.h>
@@ -377,6 +378,7 @@ void Game::DestroyResources(bool preserveScene)
     OverlayBillboardVB.Reset(); OverlayBillboardVBCapacity = 0;
     OverlayTriangleVS.Reset(); OverlayTrianglePS.Reset(); OverlayTriangleLayout.Reset();
     OverlayTriangleVB.Reset(); OverlayTriangleVBCapacity = 0;
+    FallbackIconSRV.Reset();
     OverlayBlendState.Reset(); OverlayDepthReadOnlyState.Reset(); OverlayDepthDisabledState.Reset(); OverlaySamplerState.Reset();
     OverlayIcons.clear(); PendingOverlayLines.clear(); PendingOverlayBillboards.clear(); PendingOverlayTriangles.clear();
     ReleaseSwapChainResources();
@@ -3087,6 +3089,18 @@ void Game::RenderEditorOverlay()
             return;
         }
 
+        const D3D11_INPUT_ELEMENT_DESC bbLayoutDesc[] = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        };
+        if (FAILED(Device->CreateInputLayout(bbLayoutDesc, 4, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), OverlayBillboardLayout.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create billboard input layout for EditorOverlay\n");
+            return;
+        }
+
         if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "VSTriangle", "vs_5_0", vsBlob.ReleaseAndGetAddressOf(), &errorMsg)) ||
             FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "PSTriangle", "ps_5_0", psBlob.ReleaseAndGetAddressOf(), &errorMsg)))
         {
@@ -3104,18 +3118,6 @@ void Game::RenderEditorOverlay()
             {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
         };
         Device->CreateInputLayout(triLayoutDesc, 2, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), OverlayTriangleLayout.ReleaseAndGetAddressOf());
-
-        const D3D11_INPUT_ELEMENT_DESC bbLayoutDesc[] = {
-            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0}
-        };
-        if (FAILED(Device->CreateInputLayout(bbLayoutDesc, 4, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), OverlayBillboardLayout.ReleaseAndGetAddressOf())))
-        {
-            std::printf("[Error] Failed to create billboard input layout for EditorOverlay\n");
-            return;
-        }
 
         D3D11_BUFFER_DESC cbDesc{};
         cbDesc.ByteWidth = sizeof(OverlayConstantsData);
@@ -3416,18 +3418,91 @@ void Game::RenderEditorOverlay()
             Context->OMSetDepthStencilState(OverlayDepthDisabledState.Get(), 0);
             Context->RSSetState(OverlayRasterState.Get());
 
+            if (!FallbackIconSRV && Device)
+            {
+                D3D11_TEXTURE2D_DESC desc{};
+                desc.Width = 1; desc.Height = 1; desc.MipLevels = 1; desc.ArraySize = 1;
+                desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+                desc.SampleDesc.Count = 1; desc.Usage = D3D11_USAGE_DEFAULT;
+                desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+                uint32_t white = 0xFFFFFFFF;
+                D3D11_SUBRESOURCE_DATA sub{ &white, 4, 0 };
+                Microsoft::WRL::ComPtr<ID3D11Texture2D> tex;
+                if (SUCCEEDED(Device->CreateTexture2D(&desc, &sub, tex.GetAddressOf())))
+                {
+                    Device->CreateShaderResourceView(tex.Get(), nullptr, FallbackIconSRV.ReleaseAndGetAddressOf());
+                }
+            }
+
             for (const auto& batch : batches)
             {
                 auto it = OverlayIcons.find(batch.iconId);
-                if (it != OverlayIcons.end() && it->second.srv)
+                ID3D11ShaderResourceView* srv = (it != OverlayIcons.end() && it->second.srv) ? it->second.srv.Get() : FallbackIconSRV.Get();
+                if (srv)
                 {
-                    Context->PSSetShaderResources(0, 1, it->second.srv.GetAddressOf());
+                    Context->PSSetShaderResources(0, 1, &srv);
                     Context->Draw(batch.vertexCount, batch.startVertex);
+                }
+                else
+                {
+                    std::printf("[Warn] Billboard batch icon %u has no SRV and no FallbackIconSRV!\n", batch.iconId);
                 }
             }
         }
     }
 }
+static void SaveBackbufferToBmp(ID3D11Device* device, ID3D11DeviceContext* context, ID3D11Texture2D* backTexture, const char* filePath)
+{
+    if (!device || !context || !backTexture || !filePath || filePath[0] == '\0') return;
+    D3D11_TEXTURE2D_DESC desc{};
+    backTexture->GetDesc(&desc);
+    desc.BindFlags = 0;
+    desc.Usage = D3D11_USAGE_STAGING;
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    desc.MiscFlags = 0;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> staging;
+    if (FAILED(device->CreateTexture2D(&desc, nullptr, staging.GetAddressOf()))) return;
+    context->CopyResource(staging.Get(), backTexture);
+    D3D11_MAPPED_SUBRESOURCE mapped{};
+    if (FAILED(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped))) return;
+
+    BITMAPFILEHEADER bfh{};
+    bfh.bfType = 0x4D42;
+    bfh.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+    bfh.bfSize = bfh.bfOffBits + desc.Width * desc.Height * 4;
+
+    BITMAPINFOHEADER bih{};
+    bih.biSize = sizeof(BITMAPINFOHEADER);
+    bih.biWidth = static_cast<LONG>(desc.Width);
+    bih.biHeight = -static_cast<LONG>(desc.Height);
+    bih.biPlanes = 1;
+    bih.biBitCount = 32;
+    bih.biCompression = BI_RGB;
+
+    std::ofstream out(filePath, std::ios::binary);
+    if (out)
+    {
+        out.write(reinterpret_cast<const char*>(&bfh), sizeof(bfh));
+        out.write(reinterpret_cast<const char*>(&bih), sizeof(bih));
+        std::vector<uint8_t> rowBuf(desc.Width * 4);
+        for (UINT y = 0; y < desc.Height; ++y)
+        {
+            const uint8_t* row = static_cast<const uint8_t*>(mapped.pData) + y * mapped.RowPitch;
+            for (UINT x = 0; x < desc.Width; ++x)
+            {
+                rowBuf[x * 4 + 0] = row[x * 4 + 2]; // B
+                rowBuf[x * 4 + 1] = row[x * 4 + 1]; // G
+                rowBuf[x * 4 + 2] = row[x * 4 + 0]; // R
+                rowBuf[x * 4 + 3] = row[x * 4 + 3]; // A
+            }
+            out.write(reinterpret_cast<const char*>(rowBuf.data()), desc.Width * 4);
+        }
+        std::printf("[Info] D3D backbuffer screenshot saved: %s (%ux%u)\n", filePath, desc.Width, desc.Height);
+        std::fflush(stdout);
+    }
+    context->Unmap(staging.Get(), 0);
+}
+
 bool Game::RenderViewportFrame(float deltaTime)
 {
     if (!bEmbedded || !bInitialized || ExitCode != 0) return false;
@@ -3440,6 +3515,11 @@ bool Game::RenderViewportFrame(float deltaTime)
     UpdateFrame(std::clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds));
     BeginGpuTimer();
 
+    char forceFxaa[16]{};
+    if (GetEnvironmentVariableA("PAINENGINE_FORCE_FXAA", forceFxaa, 16) > 0)
+    {
+        AntialiasingMode = static_cast<uint32_t>(std::atoi(forceFxaa));
+    }
     const bool useFxaa = (AntialiasingMode == 1) && Device && Context;
     const uint32_t bbW = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetWidth()) : 0;
     const uint32_t bbH = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetHeight()) : 0;
@@ -3468,6 +3548,31 @@ bool Game::RenderViewportFrame(float deltaTime)
     {
         RenderTargetView = backbufferRTV;
         RenderFxaaPass();
+    }
+
+    {
+        char shotPath[MAX_PATH]{};
+        if (GetEnvironmentVariableA("PAINENGINE_D3D_SCREENSHOT", shotPath, MAX_PATH) > 0)
+        {
+            char frameBuf[32]{};
+            int targetFrame = 40;
+            if (GetEnvironmentVariableA("PAINENGINE_D3D_SCREENSHOT_FRAME", frameBuf, 32) > 0) targetFrame = std::atoi(frameBuf);
+            if (static_cast<int>(FrameIndex) == targetFrame)
+            {
+                SaveBackbufferToBmp(Device.Get(), Context.Get(), BackTexture.Get(), shotPath);
+            }
+        }
+        char shotPath2[MAX_PATH]{};
+        if (GetEnvironmentVariableA("PAINENGINE_D3D_SCREENSHOT_2", shotPath2, MAX_PATH) > 0)
+        {
+            char frameBuf2[32]{};
+            int targetFrame2 = 80;
+            if (GetEnvironmentVariableA("PAINENGINE_D3D_SCREENSHOT_FRAME_2", frameBuf2, 32) > 0) targetFrame2 = std::atoi(frameBuf2);
+            if (static_cast<int>(FrameIndex) == targetFrame2)
+            {
+                SaveBackbufferToBmp(Device.Get(), Context.Get(), BackTexture.Get(), shotPath2);
+            }
+        }
     }
 
     EndGpuTimer();

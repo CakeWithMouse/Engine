@@ -615,6 +615,7 @@ protected:
     float OverlayLineThickness = 1.0f;
     std::unordered_map<uint32_t, CachedOverlayIcon> OverlayIcons;
     std::vector<EngineOverlayBillboard> PendingOverlayBillboards;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> FallbackIconSRV;
     std::vector<EngineOverlayTriangle> PendingOverlayTriangles;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> OverlayTriangleVS;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> OverlayTrianglePS;

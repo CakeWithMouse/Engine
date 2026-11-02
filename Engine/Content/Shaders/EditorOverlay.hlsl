@@ -116,8 +116,42 @@ SamplerState IconSampler : register(s0);
 
 float4 PSBillboard(BillboardPSInput input) : SV_Target
 {
+    float2 centered = input.UV - float2(0.5f, 0.5f);
+    float dist = length(centered);
+    if (dist > 0.5f)
+    {
+        discard;
+    }
+
     float4 texColor = IconTexture.Sample(IconSampler, input.UV);
-    return texColor * input.Tint;
+    
+    // Contrast circular plate with antialiased edge
+    float edgeAlpha = 1.0f - smoothstep(0.47f, 0.50f, dist);
+    
+    // Background badge plate: tinted light body with dark outer ring
+    float3 plateColor = input.Tint.rgb;
+    if (dist > 0.44f)
+    {
+        // Dark contrast rim for visibility against any background
+        plateColor = float3(0.12f, 0.12f, 0.14f);
+    }
+    
+    // If texture has glyph content (alpha > 0.1), blend it over the plate
+    float3 finalRgb = plateColor;
+    if (texColor.a > 0.1f)
+    {
+        finalRgb = lerp(plateColor, texColor.rgb, texColor.a);
+    }
+    else
+    {
+        // Procedural inner bulb / point symbol if texture alpha is zero
+        if (dist < 0.22f)
+        {
+            finalRgb = float3(1.0f, 1.0f, 1.0f);
+        }
+    }
+
+    return float4(finalRgb, edgeAlpha * input.Tint.a);
 }
 
 struct TriangleVSInput
