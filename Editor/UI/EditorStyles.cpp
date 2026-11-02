@@ -304,13 +304,13 @@ QStatusBar {
 }
 
 /* Collapsible cards and inspector tokens */
-QFrame#CollapsibleCard {
+QFrame#CollapsibleCard, QWidget#CollapsibleCard {
     background-color: %7;
     border: 1px solid %6;
     border-radius: 4px;
     margin-bottom: 4px;
 }
-QPushButton#CardHeaderBtn {
+QPushButton#CardHeaderBtn, QToolButton[objectName^="Section."] {
     background-color: %8;
     color: %1;
     font-weight: 600;
@@ -324,7 +324,7 @@ QPushButton#CardHeaderBtn {
     border-top-left-radius: 3px;
     border-top-right-radius: 3px;
 }
-QPushButton#CardHeaderBtn:hover {
+QPushButton#CardHeaderBtn:hover, QToolButton[objectName^="Section."]:hover {
     background-color: %9;
     color: %1;
 }

@@ -40,4 +40,7 @@ public:
     static QIcon BulbIcon(const QColor& color = QColor());
     static QIcon CubeIcon(const QColor& color = QColor());
     static QIcon AdjustmentsIcon(const QColor& color = QColor());
+    static QIcon ChevronUpIcon(const QColor& color = QColor());
+    static QIcon ChevronDownIcon(const QColor& color = QColor());
+    static QIcon ChevronRightIcon(const QColor& color = QColor());
 };

@@ -39,6 +39,9 @@ namespace
         if (name == QLatin1String("file")) return EditorIcons::TABLER_FILE;
         if (name == QLatin1String("search")) return EditorIcons::TABLER_SEARCH;
         if (name == QLatin1String("bulb") || name == QLatin1String("light")) return EditorIcons::TABLER_BULB;
+        if (name == QLatin1String("chevron-up") || name == QLatin1String("arrow-up")) return EditorIcons::TABLER_CHEVRON_UP;
+        if (name == QLatin1String("chevron-down") || name == QLatin1String("arrow-down")) return EditorIcons::TABLER_CHEVRON_DOWN;
+        if (name == QLatin1String("chevron-right") || name == QLatin1String("arrow-right")) return EditorIcons::TABLER_CHEVRON_RIGHT;
         if (name == QLatin1String("camera")) return EditorIcons::SVG_CAMERA;
         if (name == QLatin1String("particles")) return EditorIcons::SVG_PARTICLES;
         return nullptr;
@@ -124,6 +127,9 @@ QIcon IconProvider::SearchIcon(const QColor& color) { return GetIcon(QStringLite
 QIcon IconProvider::BulbIcon(const QColor& color) { return GetIcon(QStringLiteral("bulb"), color); }
 QIcon IconProvider::CubeIcon(const QColor& color) { return GetIcon(QStringLiteral("cube"), color); }
 QIcon IconProvider::AdjustmentsIcon(const QColor& color) { return GetIcon(QStringLiteral("adjustments"), color); }
+QIcon IconProvider::ChevronUpIcon(const QColor& color) { return GetIcon(QStringLiteral("chevron-up"), color); }
+QIcon IconProvider::ChevronDownIcon(const QColor& color) { return GetIcon(QStringLiteral("chevron-down"), color); }
+QIcon IconProvider::ChevronRightIcon(const QColor& color) { return GetIcon(QStringLiteral("chevron-right"), color); }
 
 void IconProvider::UploadIcons(IEditorHost* host, bool force)
 {
