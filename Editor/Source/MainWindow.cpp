@@ -308,8 +308,6 @@ void EditorMainWindow::BuildSceneMenu()
 {
     sceneMenu_ = menuBar()->addMenu(Tr("Сцена", "Scene"));
     sceneMenu_->setEnabled(host_->HasScene());
-    auto* sunlight = sceneMenu_->addAction(Tr("Направленный свет", "Directional Light"), this, &EditorMainWindow::ShowDirectionalLight);
-    sunlight->setObjectName("SceneDirectionalLight");
     sceneMenu_->addAction(Tr("Восстановить несохранённую сцену…", "Recover Unsaved Scene…"), this, &EditorMainWindow::OfferRecovery);
     sceneMenu_->addAction(Tr("Сделать стартовой сценой", "Set Startup Scene"), this, [this] { SaveScene(false, [this] { SetStartupScene(); }); });
     sceneMenu_->addAction(Tr("Экспорт игры…", "Export Game…"), this, [this] {
@@ -780,8 +778,6 @@ void EditorMainWindow::RefreshSceneUi()
     const bool edit =
         host_->PlayState() == EditorQtHost::EditorState::Edit &&
         !sceneBusy_;
-    if (auto* action = findChild<QAction*>("SceneDirectionalLight"))
-        action->setEnabled(edit && std::any_of(view.types.begin(), view.types.end(), [](const auto& type) { return type.name == "Light.Directional"; }));
 
     if (sceneObjectsPanel_)
     {

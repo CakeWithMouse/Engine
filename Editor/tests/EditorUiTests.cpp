@@ -984,7 +984,7 @@ int wmain(int argc, wchar_t** argv)
             return EditorQtHost::SceneObject{};
         };
         auto sunSettings = [&] { return QJsonDocument::fromJson(QByteArray::fromStdString(sunObject().projectData)).object(); };
-        Ui([](auto* w) { Action(w,QStringLiteral("Направленный свет"))->trigger(); });
+        Ui([](auto* w) { w->ShowDirectionalLight(); });
         until([&] { return sunObject().id && host.ReadSnapshot().selected==sunObject().id; });
         const auto withSun = host.ReadSnapshot().objects.size();
         Ui([](auto* w) {
@@ -998,7 +998,7 @@ int wmain(int argc, wchar_t** argv)
         until([&] { return sunSettings()["intensity"].toDouble()==1; });
         Ui([](auto* w) { Action(w,QStringLiteral("Повторить"))->trigger(); });
         until([&] { return sunSettings()["intensity"].toDouble()==2.5; });
-        Ui([](auto* w) { Action(w,QStringLiteral("Направленный свет"))->trigger(); });
+        Ui([](auto* w) { w->ShowDirectionalLight(); });
         until([&] { return host.ReadSnapshot().selected==sunObject().id; });
         Check(host.ReadSnapshot().objects.size()==withSun,"global sun action selects existing singleton");
         Ui([](auto* w) {
@@ -1024,7 +1024,7 @@ int wmain(int argc, wchar_t** argv)
         Check(sunSettings()["intensity"].toDouble()==2.5,"Play keeps authored sun");
         Ui([](auto* w) { Action(w,QStringLiteral("⏹ Stop"))->trigger(); });
         until([&] { return host.PlayState()==EditorQtHost::Edit; });
-        Ui([](auto* w) { Action(w,QStringLiteral("Направленный свет"))->trigger(); });
+        Ui([](auto* w) { w->ShowDirectionalLight(); });
         until([&] { return host.ReadSnapshot().selected==sunObject().id; });
         Ui([&](auto* w) { w->grab().save(QString::fromStdWString((root / "directional-light-inspector.png").wstring())); Action(w,QStringLiteral("Удалить объект"))->trigger(); });
         until([&] { return !sunObject().id; });

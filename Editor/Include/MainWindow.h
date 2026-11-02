@@ -58,6 +58,7 @@ public:
     void UpdateAsset(const QString& path, bool move, const QString& supplied = {});
     void ImportAsset(bool texture, const QString& source = {});
     void AddModel(const QString& path = {});
+    void ShowDirectionalLight();
     void UseAsset(const QString& path);
 
     // path: файл .mat или его /Game путь. Одно окно на материал.
@@ -100,7 +101,6 @@ private:
     void BuildSceneDocks();
     void BuildSceneMenu();
     void BuildToolsMenu();
-    void ShowDirectionalLight();
     void ConnectPanels();
 
     void ApplyDefaultLayout();
