@@ -39,7 +39,7 @@ static QWidget* CreateAxisCell(NoWheelDoubleSpinBox* spin, const QString& axisLe
 
     spin->setParent(cell);
     spin->setFixedHeight(22);
-    spin->setStyleSheet(QStringLiteral("border-left: none; border-top-left-radius: 0px; border-bottom-left-radius: 0px;"));
+    spin->setProperty("axisCell", true);
     layout->addWidget(spin, 1);
     return cell;
 }

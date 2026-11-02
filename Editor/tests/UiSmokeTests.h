@@ -220,6 +220,56 @@ inline void Run()
     }
     ++checks;
 
+    // Diagnostic: inspect spinbox grab in dark and light
+    {
+        
+        EditorTheme::Instance().SetMode(ThemeMode::Dark);
+        QDoubleSpinBox spin;
+        spin.resize(100, 22);
+        spin.show();
+        QCoreApplication::processEvents();
+        QImage imgDark = spin.grab().toImage();
+        imgDark.save(QDir::tempPath() + "/diag_spin_dark.png");
+
+        std::cout << "[SpinDiag] Dark grab size: " << imgDark.width() << "x" << imgDark.height() << std::endl;
+        int darkContrasting = 0;
+        QRgb bgDark = imgDark.pixel(imgDark.width() - 8, 1);
+        for (int x = imgDark.width() - 16; x < imgDark.width(); ++x) {
+            for (int y = 0; y < imgDark.height(); ++y) {
+                QRgb p = imgDark.pixel(x, y);
+                int dr = std::abs(qRed(p) - qRed(bgDark));
+                int dg = std::abs(qGreen(p) - qGreen(bgDark));
+                int db = std::abs(qBlue(p) - qBlue(bgDark));
+                if (dr + dg + db > 60) ++darkContrasting;
+            }
+        }
+        std::cout << "[SpinDiag] Dark contrasting pixels in button zone: " << darkContrasting << std::endl;
+
+        EditorTheme::Instance().SetMode(ThemeMode::Light);
+        QCoreApplication::processEvents();
+        QImage imgLight = spin.grab().toImage();
+        imgLight.save(QDir::tempPath() + "/diag_spin_light.png");
+
+        std::cout << "[SpinDiag] Light grab size: " << imgLight.width() << "x" << imgLight.height() << std::endl;
+        int lightContrasting = 0;
+        QRgb bgLight = imgLight.pixel(imgLight.width() - 8, 1);
+        for (int x = imgLight.width() - 16; x < imgLight.width(); ++x) {
+            for (int y = 0; y < imgLight.height(); ++y) {
+                QRgb p = imgLight.pixel(x, y);
+                int dr = std::abs(qRed(p) - qRed(bgLight));
+                int dg = std::abs(qGreen(p) - qGreen(bgLight));
+                int db = std::abs(qBlue(p) - qBlue(bgLight));
+                if (dr + dg + db > 60) ++lightContrasting;
+            }
+        }
+        std::cout << "[SpinDiag] Light contrasting pixels in button zone: " << lightContrasting << std::endl;
+        if (darkContrasting >= 20 && lightContrasting >= 20)
+        {
+            ++checks;
+        }
+        EditorTheme::Instance().SetMode(ThemeMode::Dark);
+    }
+
     // Restore default Ru language
     EditorLocale::Instance().SetLanguage(EditorLanguage::Ru);
 

@@ -286,6 +286,7 @@
         <ClInclude Include="UI/EditorApp.h"/>
         <ClInclude Include="UI/IconProvider.h"/>
         <ClInclude Include="UI/ViewportOverlayHelper.h"/>
+        <ClInclude Include="UI/SpinBoxArrowStyle.h"/>
         <ClInclude Include="Include/CodeClassDialog.h"/>
         <ClInclude Include="Include/FileBrowser.h"/>
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->

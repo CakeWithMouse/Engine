@@ -449,13 +449,16 @@ QSpinBox::down-button, QDoubleSpinBox::down-button {
 QSpinBox::down-button:hover, QDoubleSpinBox::down-button:hover {
     background-color: %3;
 }
+QDoubleSpinBox[axisCell="true"], QSpinBox[axisCell="true"] {
+    border-left: none;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
 QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {
-    image: url("%4");
     width: 8px;
     height: 8px;
 }
 QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {
-    image: url("%5");
     width: 8px;
     height: 8px;
 }

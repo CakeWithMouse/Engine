@@ -1,5 +1,6 @@
 #include "EditorTheme.h"
 #include "EditorStyles.h"
+#include "SpinBoxArrowStyle.h" 
 #include "SettingsService.h"
 #include "IconProvider.h"
 
@@ -40,7 +41,8 @@ void EditorTheme::Apply(QApplication& app)
 void EditorTheme::Initialize(QApplication& app)
 {
     app_ = &app;
-    app.setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
+    auto* base = QStyleFactory::create(QStringLiteral("Fusion"));
+    app.setStyle(new SpinBoxArrowStyle(base));
 
     QFont defaultFont(QStringLiteral("Segoe UI"), 9);
     defaultFont.setStyleHint(QFont::SansSerif);
