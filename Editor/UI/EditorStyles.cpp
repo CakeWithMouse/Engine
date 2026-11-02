@@ -202,30 +202,30 @@ QMainWindow::separator {
     background: transparent;
 }
 QMainWindow::separator:horizontal {
-    height: 6px;
-    border-top: 2px solid transparent;
-    border-bottom: 3px solid transparent;
+    height: 4px;
+    border-top: 1px solid transparent;
+    border-bottom: 2px solid transparent;
     background-color: %14;
     background-clip: content;
 }
 QMainWindow::separator:vertical {
-    width: 6px;
-    border-left: 2px solid transparent;
-    border-right: 3px solid transparent;
+    width: 4px;
+    border-left: 1px solid transparent;
+    border-right: 2px solid transparent;
     background-color: %14;
     background-clip: content;
 }
 QMainWindow::separator:horizontal:hover {
-    height: 6px;
-    border-top: 2px solid transparent;
-    border-bottom: 2px solid transparent;
+    height: 4px;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
     background-color: %15;
     background-clip: content;
 }
 QMainWindow::separator:vertical:hover {
-    width: 6px;
-    border-left: 2px solid transparent;
-    border-right: 2px solid transparent;
+    width: 4px;
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
     background-color: %15;
     background-clip: content;
 }
@@ -233,28 +233,28 @@ QSplitter::handle {
     background: transparent;
 }
 QSplitter::handle:horizontal {
-    width: 6px;
-    border-left: 2px solid transparent;
-    border-right: 3px solid transparent;
+    width: 4px;
+    border-left: 1px solid transparent;
+    border-right: 2px solid transparent;
     background-color: %14;
     background-clip: content;
 }
 QSplitter::handle:vertical {
-    height: 6px;
-    border-top: 2px solid transparent;
-    border-bottom: 3px solid transparent;
+    height: 4px;
+    border-top: 1px solid transparent;
+    border-bottom: 2px solid transparent;
     background-color: %14;
     background-clip: content;
 }
 QSplitter::handle:horizontal:hover {
-    border-left: 2px solid transparent;
-    border-right: 2px solid transparent;
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
     background-color: %15;
     background-clip: content;
 }
 QSplitter::handle:vertical:hover {
-    border-top: 2px solid transparent;
-    border-bottom: 2px solid transparent;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
     background-color: %15;
     background-clip: content;
 }
