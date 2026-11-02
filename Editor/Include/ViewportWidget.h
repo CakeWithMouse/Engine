@@ -34,6 +34,7 @@ public:
 
     void RetranslateUi();
     void AttachHeaderBar(ViewportHeaderBar* bar);
+    bool IsResizing() const { return isResizing_; }
 
     QSize minimumSizeHint() const override { return QSize(80, 60); }
     QSize sizeHint() const override { return QSize(800, 600); }
@@ -81,6 +82,7 @@ private:
 
     EditorQtHost* host_ = nullptr;
     QTimer* resizeTimer_ = nullptr;
+    bool isResizing_ = false;
     uint32_t lastSentW_ = 0;
     uint32_t lastSentH_ = 0;
 

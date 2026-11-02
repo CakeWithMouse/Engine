@@ -13,6 +13,7 @@
 #include <QShowEvent>
 #include <QHideEvent>
 #include <QResizeEvent>
+#include <QGuiApplication>
 #include <cmath>
 #include <memory>
 #include <algorithm>
@@ -79,16 +80,19 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
             if (len > 1e-4f) { camPitch_ = std::asin(std::clamp(fy / len, -1.0f, 1.0f)); camYaw_ = std::atan2(fz / len, fx / len); }
         }
 
-        ViewportOverlayHelper::UpdateOverlays(
-            host_,
-            lastCameraInfo_,
-            hasCameraInfo_,
-            hoveredHandle_,
-            static_cast<int>(gizmoMode_),
-            localOrientation_,
-            overlayHash_,
-            activeGizmoHandle_
-        );
+        if (!isResizing_)
+        {
+            ViewportOverlayHelper::UpdateOverlays(
+                host_,
+                lastCameraInfo_,
+                hasCameraInfo_,
+                hoveredHandle_,
+                static_cast<int>(gizmoMode_),
+                localOrientation_,
+                overlayHash_,
+                activeGizmoHandle_
+            );
+        }
     });
     timer->start(16);
     setMinimumSize(80, 60);
@@ -115,6 +119,8 @@ void ViewportWidget::showEvent(QShowEvent* e)
 
 void ViewportWidget::hideEvent(QHideEvent* e)
 {
+    if (resizeTimer_) resizeTimer_->stop();
+    isResizing_ = false;
     if (attached_)
     {
         EditorCommand c;
@@ -130,7 +136,8 @@ void ViewportWidget::resizeEvent(QResizeEvent* e)
     QWidget::resizeEvent(e);
     if (!attached_) return;
     if (PhysW() == lastSentW_ && PhysH() == lastSentH_) return;
-    resizeTimer_->start(20);
+    isResizing_ = true;
+    resizeTimer_->start(120);
 }
 
 void ViewportWidget::AttachHeaderBar(ViewportHeaderBar* bar)
@@ -162,6 +169,13 @@ void ViewportWidget::SendAttach()
 
 void ViewportWidget::SendResize()
 {
+    const bool mouseHeld = (QGuiApplication::mouseButtons() & Qt::LeftButton) != 0;
+    if (mouseHeld)
+    {
+        resizeTimer_->start(120);
+        return;
+    }
+    isResizing_ = false;
     const uint32_t pw = PhysW(), ph = PhysH();
     if (pw == lastSentW_ && ph == lastSentH_) return;
     lastSentW_ = pw; lastSentH_ = ph;

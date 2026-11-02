@@ -452,6 +452,9 @@ void EditorMainWindow::StopExternalGame()
 
 void EditorMainWindow::RefreshStats()
 {
+    if (viewport_ && viewport_->IsResizing())
+        return;
+
     RefreshSceneUi();
 
     const double dt = host_->LastDt();

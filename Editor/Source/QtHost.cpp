@@ -243,6 +243,13 @@ void EditorQtHost::PostCommand(const EditorCommand& cmd)
     commands_.push_back(cmd);
 }
 
+static std::atomic<uint64_t> s_resizeCount{0};
+
+uint64_t EditorQtHost::ViewportResizeCount() const
+{
+    return s_resizeCount.load();
+}
+
 void EditorQtHost::DrainCommands()
 {
     std::deque<EditorCommand> pending;
@@ -324,8 +331,8 @@ void EditorQtHost::DrainCommands()
             viewportHandler_.Handle(cmd, vctx, viewportActive_, playState_, sel, result, error);
             if (cmd.type == EditorCommand::ViewportResize)
             {
-                static uint64_t s_resizeCount = 0;
-                std::printf("[ResizeDiag] ViewportResize executed: total=%llu size=%ux%u\n", ++s_resizeCount, cmd.w, cmd.h);
+                uint64_t curCount = ++s_resizeCount;
+                std::printf("[ResizeDiag] ViewportResize executed: total=%llu size=%ux%u\n", curCount, cmd.w, cmd.h);
                 std::fflush(stdout);
             }
             if (cmd.type == EditorCommand::ViewportAttach || cmd.type == EditorCommand::ViewportResize)
