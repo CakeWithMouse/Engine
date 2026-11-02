@@ -26,10 +26,19 @@ LinePSInput VSLine(LineVSInput input)
     LinePSInput output;
     output.Color = input.Color;
 
+    if (ScreenSize.x <= 1.0f || ScreenSize.y <= 1.0f)
+    {
+        output.Position = float4(0, 0, -2.0f, 1.0f);
+        output.DistFromCenter = 0.0f;
+        output.HalfWidth = 1.0f;
+        return output;
+    }
+
     float4 c0 = mul(float4(input.Pos0, 1.0f), ViewProjection);
     float4 c1 = mul(float4(input.Pos1, 1.0f), ViewProjection);
 
-    if (c0.w <= 0.001f && c1.w <= 0.001f)
+    const float nearW = 0.1f;
+    if (c0.w <= nearW && c1.w <= nearW)
     {
         output.Position = float4(0, 0, -2.0f, 1.0f);
         output.DistFromCenter = 0.0f;
@@ -39,14 +48,14 @@ LinePSInput VSLine(LineVSInput input)
 
     float4 safeC0 = c0;
     float4 safeC1 = c1;
-    if (safeC0.w < 0.001f)
+    if (safeC0.w < nearW)
     {
-        float t = (0.001f - safeC0.w) / max(1e-5f, (safeC1.w - safeC0.w));
+        float t = (nearW - safeC0.w) / max(1e-5f, (safeC1.w - safeC0.w));
         safeC0 = lerp(safeC0, safeC1, t);
     }
-    else if (safeC1.w < 0.001f)
+    else if (safeC1.w < nearW)
     {
-        float t = (0.001f - safeC1.w) / max(1e-5f, (safeC0.w - safeC1.w));
+        float t = (nearW - safeC1.w) / max(1e-5f, (safeC0.w - safeC1.w));
         safeC1 = lerp(safeC1, safeC0, t);
     }
 

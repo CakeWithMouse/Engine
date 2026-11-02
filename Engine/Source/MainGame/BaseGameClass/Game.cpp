@@ -3016,6 +3016,7 @@ void Game::RenderEditorOverlay()
 
     const uint32_t bbW = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetWidth()) : 0;
     const uint32_t bbH = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetHeight()) : 0;
+    if (bbW == 0 || bbH == 0) return;
 
     if (logPeriodic)
     {
@@ -3961,6 +3962,7 @@ void Game::RenderFrame()
     const bool useFxaa = (GetSettings().GetAntialiasing() == 1) && Device && Context;
     const uint32_t bbW = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetWidth()) : 0;
     const uint32_t bbH = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetHeight()) : 0;
+    if (bbW == 0 || bbH == 0) return;
 
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backbufferRTV = RenderTargetView;
     const bool fxaaReady = useFxaa && bbW > 0 && bbH > 0 && backbufferRTV && EnsureFxaaResources(bbW, bbH);
@@ -4506,6 +4508,7 @@ void Game::RenderFxaaPass()
 
     const uint32_t bbW = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetWidth()) : 0;
     const uint32_t bbH = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetHeight()) : 0;
+    if (bbW == 0 || bbH == 0) return;
     if (bbW == 0 || bbH == 0) return;
 
     ID3D11RenderTargetView* nullRTV = nullptr;

@@ -138,7 +138,13 @@ void ViewportWidget::hideEvent(QHideEvent* e)
 void ViewportWidget::resizeEvent(QResizeEvent* e)
 {
     QWidget::resizeEvent(e);
-    if (!attached_) return;
+    if (!attached_)
+    {
+        if (host_->HasViewport() && PhysW() > 0 && PhysH() > 0)
+            SendAttach();
+        return;
+    }
+    if (PhysW() == 0 || PhysH() == 0) return;
     if (PhysW() == lastSentW_ && PhysH() == lastSentH_) return;
     isResizing_ = true;
     resizeTimer_->start(120);
@@ -167,12 +173,15 @@ void ViewportWidget::paintEvent(QPaintEvent*)
 
 void ViewportWidget::SendAttach()
 {
-    lastSentW_ = PhysW(); lastSentH_ = PhysH();
+    const uint32_t pw = PhysW(), ph = PhysH();
+    if (pw == 0 || ph == 0) return;
+    lastSentW_ = pw; lastSentH_ = ph;
     EditorCommand c; c.type = EditorCommand::ViewportAttach; c.hwnd = (void*)winId(); c.w = lastSentW_; c.h = lastSentH_; host_->PostCommand(c); attached_ = true;
 }
 
 void ViewportWidget::SendResize()
 {
+    if (!attached_) return;
     const bool mouseHeld = (QGuiApplication::mouseButtons() & Qt::LeftButton) != 0;
     if (mouseHeld)
     {
@@ -181,6 +190,7 @@ void ViewportWidget::SendResize()
     }
     isResizing_ = false;
     const uint32_t pw = PhysW(), ph = PhysH();
+    if (pw == 0 || ph == 0) return;
     if (pw == lastSentW_ && ph == lastSentH_) return;
     lastSentW_ = pw; lastSentH_ = ph;
     EditorCommand c; c.type = EditorCommand::ViewportResize; c.w = pw; c.h = ph; host_->PostCommand(c);

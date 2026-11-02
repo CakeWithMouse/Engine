@@ -1047,6 +1047,19 @@ void EditorMainWindow::OnLightColorRequested(quint64 objectId, const QColor& cur
     dialog->open();
 }
 
+static bool IsUserFacingCommand(EditorCommand::Type t)
+{
+    switch (t) {
+    case EditorCommand::CreateObject: case EditorCommand::RemoveObject: case EditorCommand::RenameObject:
+    case EditorCommand::DuplicateObject: case EditorCommand::SetParent: case EditorCommand::SetProperty:
+    case EditorCommand::SetModel: case EditorCommand::SetTexture: case EditorCommand::SetMaterial:
+    case EditorCommand::SetPointLight: case EditorCommand::SetProjectData: case EditorCommand::UpdateAsset:
+    case EditorCommand::ImportModel: case EditorCommand::ImportTexture: case EditorCommand::SaveScene:
+    case EditorCommand::LoadScene: case EditorCommand::NewScene: return true;
+    default: return false;
+    }
+}
+
 void EditorMainWindow::CommandFinished(
     const EditorCommand& command,
     uint32_t status,
@@ -1148,6 +1161,17 @@ void EditorMainWindow::CommandFinished(
         afterSave_ = {};
         closing_ = false;
 
+        const QString cmdLog = QStringLiteral("[Error] CommandFinished failed: type=%1 id=%2 path='%3' name='%4' status=%5 (%6)")
+                                  .arg(static_cast<int>(command.type))
+                                  .arg(command.objectId)
+                                  .arg(command.path)
+                                  .arg(command.name)
+                                  .arg(status)
+                                  .arg(error);
+        AppendLine(cmdLog);
+        std::fprintf(stderr, "%s\n", cmdLog.toUtf8().constData());
+        std::fflush(stderr);
+
         const QString message = error.isEmpty()
                                     ? QStringLiteral(
                                         "Операция не выполнена (код %1). Проверьте имя объекта, остановите Play и повторите."
@@ -1156,11 +1180,26 @@ void EditorMainWindow::CommandFinished(
 
         AppendLine(message);
 
-        QMessageBox::warning(
-            this,
-            QStringLiteral("Ошибка сцены"),
-            message
-        );
+        if (IsUserFacingCommand(command.type))
+        {
+            static bool s_isShowingErrorDialog = false;
+            static QString s_lastErrorMessage;
+            static qint64 s_lastErrorTimeMs = 0;
+
+            const qint64 now = QDateTime::currentMSecsSinceEpoch();
+            if (!s_isShowingErrorDialog && (message != s_lastErrorMessage || (now - s_lastErrorTimeMs) >= 2000))
+            {
+                s_lastErrorMessage = message;
+                s_lastErrorTimeMs = now;
+                s_isShowingErrorDialog = true;
+
+                QMessageBox msgBox(QMessageBox::Warning, Tr("Ошибка сцены", "Scene Error"), message, QMessageBox::Ok, this);
+                msgBox.setStyleSheet(styleSheet());
+                msgBox.exec();
+
+                s_isShowingErrorDialog = false;
+            }
+        }
 
         return;
     }
@@ -1370,7 +1409,7 @@ void EditorMainWindow::SetStartupScene()
 }
 void EditorMainWindow::OfferRecovery()
 {
-    if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+    if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit || qEnvironmentVariableIsSet("PAIN_EDITOR_TEST_MODE") || qApp->applicationFilePath().contains(QStringLiteral("Tests"), Qt::CaseInsensitive)) return;
     const auto candidates = RecoveryStore::Candidates(QString::fromUtf8(host_->host().projectFile));
     if (candidates.isEmpty()) return;
     const auto record = candidates.front(); const auto info = RecoveryStore::Read(record);

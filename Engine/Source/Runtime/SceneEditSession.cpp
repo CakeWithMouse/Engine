@@ -149,7 +149,8 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
         },
         [](void* p, uint32_t w, uint32_t h) -> uint32_t {
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
-                if (!s.attached_ || w > INT_MAX || h > INT_MAX) return EngineSceneInvalidArgument;
+                if (w > INT_MAX || h > INT_MAX) return EngineSceneInvalidArgument;
+                if (!s.attached_) return EngineSceneOk;
                 if (s.width_ == w && s.height_ == h) return EngineSceneOk;
                 s.width_ = w; s.height_ = h;
                 s.Active().OnWindowResized(static_cast<int>(w), static_cast<int>(h), !w || !h);
@@ -436,7 +437,7 @@ EngineViewportCursorApi SceneEditSession::GetViewportCursorApi() noexcept {
     return {1,this,[](void* p,float x,float y,uint32_t width,uint32_t height,uint32_t valid)->uint32_t {
         return Invoke(p,[&](SceneEditSession& s)->uint32_t {
             if(valid>1||!std::isfinite(x)||!std::isfinite(y))return EngineSceneInvalidArgument;
-            if(valid&&(!s.attached_||width!=s.width_||height!=s.height_))return EngineSceneInvalidArgument;
+            if(valid&&(!s.attached_||width!=s.width_||height!=s.height_))return EngineSceneOk;
             s.Active().GetInput().SetCursorPosition({x,y,width,height,valid!=0&&s.inputFocused_});return EngineSceneOk;
         });
     }};
