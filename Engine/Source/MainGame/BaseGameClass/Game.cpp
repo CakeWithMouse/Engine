@@ -2,6 +2,8 @@
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/CharacterController.h>
 #include <Engine/Components/Character.h>
+#include <Engine/Components/SpecificComponents/UIComponent.h>
+#include <Engine/UI/ProjectHud.h>
 
 #include <algorithm>
 #include <array>
@@ -16,6 +18,7 @@
 #include <iostream>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
+#include <Engine/Components/Light/DirectionalLightComponent.h>
 #include <Engine/Render/Material.h>
 #include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/ShaderCompiler.h>
@@ -300,6 +303,8 @@ void Game::DestroyResources(bool preserveScene)
     }
 
     // Components first: they observe cube maps and shaders owned by the caches below.
+    ProjectHudComponent.reset();
+    GameplayInitialized = false;
     if (!preserveScene) scene.Clear();
     materialCache.clear();
     defaultMaterial.reset();
@@ -366,6 +371,14 @@ void Game::DestroyResources(bool preserveScene)
     DefaultRasterState.Reset();
     CullBackRasterState.Reset();
     SelectionVS.Reset(); SelectionPS.Reset(); SelectionCB.Reset();
+    OverlayLineVS.Reset(); OverlayLinePS.Reset(); OverlayLineLayout.Reset();
+    OverlayBillboardVS.Reset(); OverlayBillboardPS.Reset(); OverlayBillboardLayout.Reset();
+    OverlayCB.Reset(); OverlayLineVB.Reset(); OverlayLineVBCapacity = 0;
+    OverlayBillboardVB.Reset(); OverlayBillboardVBCapacity = 0;
+    OverlayTriangleVS.Reset(); OverlayTrianglePS.Reset(); OverlayTriangleLayout.Reset();
+    OverlayTriangleVB.Reset(); OverlayTriangleVBCapacity = 0;
+    OverlayBlendState.Reset(); OverlayDepthReadOnlyState.Reset(); OverlayDepthDisabledState.Reset(); OverlaySamplerState.Reset();
+    OverlayIcons.clear(); PendingOverlayLines.clear(); PendingOverlayBillboards.clear(); PendingOverlayTriangles.clear();
     ReleaseSwapChainResources();
 
     if (SwapChain && !bEmbedded)
@@ -660,8 +673,24 @@ bool Game::CreateDeviceAndSwapChain()
         return false;
     }
 
+    // Which adapter the device landed on. On a laptop with two GPUs the default adapter is
+    // usually the integrated one, so without this line every measurement is of an unknown
+    // machine: the same scene can differ several times over between the two.
+    AdapterName = "unknown adapter";
+    Microsoft::WRL::ComPtr<IDXGIDevice> dxgiDevice;
+    Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;
+    DXGI_ADAPTER_DESC adapterDesc = {};
+    if (SUCCEEDED(Device.As(&dxgiDevice)) && SUCCEEDED(dxgiDevice->GetAdapter(adapter.GetAddressOf())) &&
+        SUCCEEDED(adapter->GetDesc(&adapterDesc)))
+    {
+        const std::wstring wide(adapterDesc.Description);
+        AdapterName.assign(wide.begin(), wide.end());
+        AdapterDedicatedMemoryMb = static_cast<int>(adapterDesc.DedicatedVideoMemory / (1024 * 1024));
+    }
+
     std::cout << "Created device with feature level "
-              << (selectedFeatureLevel == D3D_FEATURE_LEVEL_11_1 ? "11.1" : "11.0") << std::endl;
+              << (selectedFeatureLevel == D3D_FEATURE_LEVEL_11_1 ? "11.1" : "11.0")
+              << " on " << AdapterName << " (" << AdapterDedicatedMemoryMb << " MB dedicated)" << std::endl;
     return true;
 }
 
@@ -688,6 +717,9 @@ bool Game::CreateSwapChainResources(int width, int height)
 void Game::ReleaseSwapChainResources()
 {
     RenderTargetView.Reset();
+    SceneColorTexture.Reset();
+    SceneColorRTV.Reset();
+    SceneColorSRV.Reset();
     BackTexture.Reset();
     depthStencilView.Reset();
     depthStencilSRV.Reset();
@@ -946,7 +978,13 @@ RegisterResult Game::RegisterComponent(const std::string& Name, GameComponent* C
     PointLightComponent* pointLight = dynamic_cast<PointLightComponent*>(Component);
     if (pointLight == nullptr)
     {
-        Component->SetShaderNames(VShaderName, PShaderName);
+        // Empty names mean "keep what the component chose for itself". Overwriting them would
+        // silently hand a component the default 3D material, which is not a material it can be
+        // drawn with: a screen-space component would come out as huge triangles over the frame.
+        if (!VShaderName.empty() || !PShaderName.empty() || Component->GetVertexShaderName().empty())
+        {
+            Component->SetShaderNames(VShaderName, PShaderName);
+        }
         Component->CreateBuffers(Device.Get());
         // Compile the forward variant now instead of on the first frame.
         BindComponentShaders(Component, ShaderCompileVariant::Default);
@@ -1395,7 +1433,7 @@ void Game::RetryFailedMaterialAssets()
     }
     for (auto& pair : Components)
     {
-        GameComponent* component = pair.second.get();
+        GameComponent* component = pair.second->GetRenderComponent();
         if (!component->MaterialAssetPath.empty() && component->MaterialPtr == errorMaterial)
         {
             component->bMaterialAssetLoaded = false;
@@ -1496,16 +1534,17 @@ std::shared_ptr<Material> Game::GetErrorMaterial()
 void Game::OnShadersInvalidated()
 {
     // Resolved slots point into the erased cache entries: every component resolves again.
-    for (auto& pair : Components)
-    {
-        GameComponent* component = pair.second.get();
+    auto resetShaders = [](GameComponent* component) {
+        if (!component) return;
         for (ComponentShaderVariant& slot : component->ShaderVariants)
         {
             slot = ComponentShaderVariant{};
         }
         component->SetVertexShader(nullptr);
         component->SetPixelShader(nullptr);
-    }
+    };
+    for (auto& pair : Components) { resetShaders(pair.second.get()); resetShaders(pair.second->GetRenderComponent()); }
+    resetShaders(ProjectHudComponent.get());
 
     // The fallback pair keeps the old shaders alive until the new ones compile.
     InitShaderBuffers();
@@ -2319,6 +2358,99 @@ namespace
         fclose(file);
         return true;
     }
+
+    /** The same writer for colour, used by the frame dump. Source rows are RGBA, top down. */
+    bool WriteColorBmp(const std::string& path, const uint8_t* pixels, size_t rowPitch, int width, int height)
+    {
+        FILE* file = nullptr;
+        if (fopen_s(&file, path.c_str(), "wb") != 0 || file == nullptr)
+        {
+            return false;
+        }
+
+        const int rowSize = ((width * 3 + 3) / 4) * 4;
+        const int imageSize = rowSize * height;
+        const int fileSize = 54 + imageSize;
+        uint8_t header[54] = {};
+        header[0] = 'B'; header[1] = 'M';
+        std::memcpy(&header[2], &fileSize, 4);
+        const int dataOffset = 54;
+        std::memcpy(&header[10], &dataOffset, 4);
+        const int headerSize = 40;
+        std::memcpy(&header[14], &headerSize, 4);
+        std::memcpy(&header[18], &width, 4);
+        std::memcpy(&header[22], &height, 4);
+        const uint16_t planes = 1;
+        const uint16_t bits = 24;
+        std::memcpy(&header[26], &planes, 2);
+        std::memcpy(&header[28], &bits, 2);
+        std::memcpy(&header[34], &imageSize, 4);
+        fwrite(header, 1, sizeof(header), file);
+
+        std::vector<uint8_t> row(static_cast<size_t>(rowSize), 0);
+        for (int y = height - 1; y >= 0; --y)
+        {
+            const uint8_t* source = pixels + static_cast<size_t>(y) * rowPitch;
+            for (int x = 0; x < width; ++x)
+            {
+                // BMP stores blue first; the back buffer is R8G8B8A8.
+                row[static_cast<size_t>(x) * 3 + 0] = source[x * 4 + 2];
+                row[static_cast<size_t>(x) * 3 + 1] = source[x * 4 + 1];
+                row[static_cast<size_t>(x) * 3 + 2] = source[x * 4 + 0];
+            }
+            fwrite(row.data(), 1, row.size(), file);
+        }
+        fclose(file);
+        return true;
+    }
+}
+
+bool Game::DumpFrame(const std::string& path)
+{
+    // Reads the finished image back from the GPU. The only way to look at a frame without
+    // photographing the screen, which also means it can run unattended.
+    if (!Device || !Context || !RenderTargetView)
+    {
+        return false;
+    }
+
+    Microsoft::WRL::ComPtr<ID3D11Resource> backBufferResource;
+    RenderTargetView->GetResource(backBufferResource.GetAddressOf());
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> backBuffer;
+    if (FAILED(backBufferResource.As(&backBuffer)))
+    {
+        return false;
+    }
+
+    D3D11_TEXTURE2D_DESC desc = {};
+    backBuffer->GetDesc(&desc);
+    D3D11_TEXTURE2D_DESC stagingDesc = desc;
+    stagingDesc.Usage = D3D11_USAGE_STAGING;
+    stagingDesc.BindFlags = 0;
+    stagingDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    stagingDesc.MiscFlags = 0;
+    stagingDesc.SampleDesc.Count = 1;
+
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> staging;
+    if (FAILED(Device->CreateTexture2D(&stagingDesc, nullptr, staging.GetAddressOf())))
+    {
+        return false;
+    }
+    Context->CopyResource(staging.Get(), backBuffer.Get());
+
+    D3D11_MAPPED_SUBRESOURCE mapped = {};
+    if (FAILED(Context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped)))
+    {
+        return false;
+    }
+
+    const bool written = WriteColorBmp(path, static_cast<const uint8_t*>(mapped.pData), mapped.RowPitch,
+                                       static_cast<int>(desc.Width), static_cast<int>(desc.Height));
+    Context->Unmap(staging.Get(), 0);
+
+    std::cout << "frame-dump " << path << " written=" << (written ? 1 : 0)
+              << " size=" << desc.Width << "x" << desc.Height << std::endl;
+    return written;
 }
 
 bool Game::DumpShadowMaps(const std::string& pathPrefix)
@@ -2518,7 +2650,7 @@ void Game::RenderStaticShadowMap()
     uint32_t casterCount = 0;
     for (auto& pair : Components)
     {
-        GameComponent* component = pair.second.get();
+        GameComponent* component = pair.second->GetRenderComponent();
         if (!component->IsRenderable() || !component->IsStaticShadowCaster())
         {
             continue;
@@ -2578,7 +2710,7 @@ void Game::RenderShadowMaps()
 
         for (auto& componentPair : Components)
         {
-            GameComponent* component = componentPair.second.get();
+            GameComponent* component = componentPair.second->GetRenderComponent();
             if (!component->IsRenderable() || component->IsSkybox())
             {
                 continue;
@@ -2637,10 +2769,10 @@ void Game::Run()
     bRunning = true;
     auto prevTime = Clock::now();
 
-    while (bRunning)
+    while (bRunning && !Settings.closeRequested_)
     {
         // A quit request ends the loop before any further update, draw or present.
-        if (!PumpMessages())
+        if (!PumpMessages() || Settings.closeRequested_)
         {
             break;
         }
@@ -2692,8 +2824,9 @@ void Game::Run()
 
 void Game::RenderEditorSelection()
 {
-    auto* object = scene.FindComponent(EditorSelectedId);
-    if (!bEmbedded || !object || !FirstPlayer) return;
+    if (!bEmbedded || !FirstPlayer) return;
+    auto ids = EditorSelectedIds; if (ids.empty() && EditorSelectedId) ids.push_back(EditorSelectedId);
+    if (ids.empty()) return;
     if (!SelectionCB) {
         Microsoft::WRL::ComPtr<ID3DBlob> vs, ps;
         const auto file=EnginePaths::Shader("EditorSelection.hlsl").wstring();
@@ -2705,20 +2838,575 @@ void Game::RenderEditorSelection()
         if (FAILED(Device->CreateBuffer(&desc,nullptr,SelectionCB.ReleaseAndGetAddressOf()))) return;
     }
     using namespace DirectX;
-    glm::vec3 lo,hi; object->GetEditorBounds(lo,hi);
-    const auto matrix=XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetViewMatrix())) * XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetProjectionMatrix()));
-    XMFLOAT4 projected[8], lines[24];
-    for (int i=0;i<8;++i) XMStoreFloat4(&projected[i],XMVector4Transform(XMVectorSet(i&1?hi.x:lo.x,i&2?hi.y:lo.y,i&4?hi.z:lo.z,1),matrix));
-    const int edges[]={0,1,0,2,0,4,1,3,1,5,2,3,2,6,3,7,4,5,4,6,5,7,6,7};
-    for(int i=0;i<24;++i)lines[i]=projected[edges[i]];
-    Context->UpdateSubresource(SelectionCB.Get(),0,nullptr,lines,0,0);
-    // Final editor-only pass; no depth attachment, so the selected object stays identifiable behind geometry.
-    Context->ClearState(); SetFullViewport();
-    Context->OMSetRenderTargets(1,RenderTargetView.GetAddressOf(),nullptr);
-    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-    Context->VSSetShader(SelectionVS.Get(),nullptr,0); Context->PSSetShader(SelectionPS.Get(),nullptr,0);
-    Context->VSSetConstantBuffers(0,1,SelectionCB.GetAddressOf());
-    Context->Draw(24,0);
+    for (auto id : ids) {
+        auto* object = scene.FindComponent(id); if (!object) continue;
+        glm::vec3 lo,hi; object->GetEditorBounds(lo,hi);
+        const auto matrix=XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetViewMatrix())) * XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetProjectionMatrix()));
+        XMFLOAT4 projected[8], lines[24];
+        for (int i=0;i<8;++i) XMStoreFloat4(&projected[i],XMVector4Transform(XMVectorSet(i&1?hi.x:lo.x,i&2?hi.y:lo.y,i&4?hi.z:lo.z,1),matrix));
+        const int edges[]={0,1,0,2,0,4,1,3,1,5,2,3,2,6,3,7,4,5,4,6,5,7,6,7};
+        for(int i=0;i<24;++i)lines[i]=projected[edges[i]];
+        if (auto* sun = dynamic_cast<DirectionalLightComponent*>(object))
+        {
+            const auto origin = sun->GetWorldPosition();
+            const auto rotation = sun->GetLightRotation();
+            const auto right = rotation * glm::vec3(1,0,0), up = rotation * glm::vec3(0,1,0);
+            const auto direction = sun->GetDirection(), tip = origin + direction * 2.0f;
+            auto line = [&](int i, glm::vec3 a, glm::vec3 b) {
+                XMStoreFloat4(&lines[i*2], XMVector4Transform(XMVectorSet(a.x,a.y,a.z,1),matrix));
+                XMStoreFloat4(&lines[i*2+1], XMVector4Transform(XMVectorSet(b.x,b.y,b.z,1),matrix));
+            };
+            for (int i=0;i<8;++i) {
+                const float angle = i * glm::pi<float>() / 4;
+                const auto radial = right * std::cos(angle) + up * std::sin(angle);
+                line(i, origin + radial * 0.15f, origin + radial * 0.35f);
+            }
+            line(8, origin, tip);
+            line(9, tip, tip - direction * 0.4f + right * 0.2f);
+            line(10, tip, tip - direction * 0.4f - right * 0.2f);
+            line(11, tip, tip - direction * 0.4f + up * 0.2f);
+        }
+        Context->UpdateSubresource(SelectionCB.Get(),0,nullptr,lines,0,0);
+        // Final editor-only pass; no depth attachment, so the selected object stays identifiable behind geometry.
+        Context->ClearState(); SetFullViewport();
+        Context->OMSetRenderTargets(1,RenderTargetView.GetAddressOf(),nullptr);
+        Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+        Context->VSSetShader(SelectionVS.Get(),nullptr,0); Context->PSSetShader(SelectionPS.Get(),nullptr,0);
+        Context->VSSetConstantBuffers(0,1,SelectionCB.GetAddressOf());
+        Context->Draw(24,0);
+    }
+}
+
+void Game::SetOverlayLines(const EngineOverlayLine* lines, uint32_t count, float thickness)
+{
+    if (!lines || count == 0)
+    {
+        PendingOverlayLines.clear();
+        return;
+    }
+    PendingOverlayLines.assign(lines, lines + count);
+    OverlayLineThickness = thickness;
+}
+
+void Game::SetOverlayTriangles(const EngineOverlayTriangle* triangles, uint32_t count)
+{
+    if (!triangles || count == 0)
+    {
+        PendingOverlayTriangles.clear();
+        return;
+    }
+    PendingOverlayTriangles.assign(triangles, triangles + count);
+}
+
+void Game::SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels)
+{
+    if (!rgbaPixels || width == 0 || height == 0)
+    {
+        OverlayIcons.erase(iconId);
+        return;
+    }
+    if (!Device) return;
+
+    D3D11_TEXTURE2D_DESC desc{};
+    desc.Width = width;
+    desc.Height = height;
+    desc.MipLevels = 1;
+    desc.ArraySize = 1;
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+    D3D11_SUBRESOURCE_DATA sub{};
+    sub.pSysMem = rgbaPixels;
+    sub.SysMemPitch = width * 4;
+
+    CachedOverlayIcon icon;
+    icon.width = width;
+    icon.height = height;
+    if (SUCCEEDED(Device->CreateTexture2D(&desc, &sub, icon.texture.ReleaseAndGetAddressOf())))
+    {
+        D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+        srvDesc.Format = desc.Format;
+        srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MipLevels = 1;
+        if (SUCCEEDED(Device->CreateShaderResourceView(icon.texture.Get(), &srvDesc, icon.srv.ReleaseAndGetAddressOf())))
+        {
+            OverlayIcons[iconId] = std::move(icon);
+        }
+    }
+}
+
+void Game::SetOverlayBillboards(const EngineOverlayBillboard* billboards, uint32_t count)
+{
+    if (!billboards || count == 0)
+    {
+        PendingOverlayBillboards.clear();
+        return;
+    }
+    PendingOverlayBillboards.assign(billboards, billboards + count);
+}
+
+bool Game::GetCameraInfo(EngineCameraInfo& info) const
+{
+    if (!FirstPlayer || !DisplayPtr) return false;
+    const auto pos = FirstPlayer->GetPosition();
+    info.position[0] = pos.x;
+    info.position[1] = pos.y;
+    info.position[2] = pos.z;
+    const auto view = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&FirstPlayer->GetViewMatrix()));
+    DirectX::XMStoreFloat4x4(reinterpret_cast<DirectX::XMFLOAT4X4*>(info.viewMatrix), view);
+    const auto proj = DirectX::XMMatrixTranspose(DirectX::XMLoadFloat4x4(&FirstPlayer->GetProjectionMatrix()));
+    DirectX::XMStoreFloat4x4(reinterpret_cast<DirectX::XMFLOAT4X4*>(info.projMatrix), proj);
+    info.fov = FirstPlayer->GetFovY();
+    const uint32_t w = static_cast<uint32_t>(std::max(DisplayPtr->GetWidth(), 1));
+    const uint32_t h = static_cast<uint32_t>(std::max(DisplayPtr->GetHeight(), 1));
+    info.width = w;
+    info.height = h;
+    info.aspect = h > 0 ? static_cast<float>(w) / static_cast<float>(h) : 1.0f;
+    return true;
+}
+
+void Game::RenderEditorOverlay()
+{
+    static int sOverlayFrameCounter = 0;
+    ++sOverlayFrameCounter;
+    const bool logPeriodic = (sOverlayFrameCounter % 120 == 1);
+
+    if (!bEmbedded && TraceDebugLines.empty())
+    {
+        if (logPeriodic) { std::printf("[Info] Overlay: early return (!bEmbedded)\n"); std::fflush(stdout); }
+        return;
+    }
+    if (!FirstPlayer)
+    {
+        if (logPeriodic) { std::printf("[Info] Overlay: early return (!FirstPlayer)\n"); std::fflush(stdout); }
+        return;
+    }
+    if (!Device)
+    {
+        if (logPeriodic) { std::printf("[Info] Overlay: early return (!Device)\n"); std::fflush(stdout); }
+        return;
+    }
+    if (!Context)
+    {
+        if (logPeriodic) { std::printf("[Info] Overlay: early return (!Context)\n"); std::fflush(stdout); }
+        return;
+    }
+    if (!RenderTargetView)
+    {
+        if (logPeriodic) { std::printf("[Info] Overlay: early return (!RenderTargetView)\n"); std::fflush(stdout); }
+        return;
+    }
+
+    const uint32_t bbW = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetWidth()) : 0;
+    const uint32_t bbH = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetHeight()) : 0;
+
+    if (logPeriodic)
+    {
+        std::printf("[Info] Overlay: entered, pipelineReady=%d, lineCount=%zu, billboardCount=%zu, backbuffer %ux%u\n",
+            OverlayCB ? 1 : 0, PendingOverlayLines.size(), PendingOverlayBillboards.size(), bbW, bbH);
+        std::fflush(stdout);
+    }
+
+    auto overlayLines=PendingOverlayLines;
+    auto debugLines=CollectTraceDebugLines();overlayLines.insert(overlayLines.end(),debugLines.begin(),debugLines.end());
+    if (overlayLines.empty() && PendingOverlayBillboards.empty() && PendingOverlayTriangles.empty())
+    {
+        if (logPeriodic) { std::printf("[Info] Overlay: early return (empty lines and billboards)\n"); std::fflush(stdout); }
+        return;
+    }
+
+    if (!OverlayCB)
+    {
+        const auto shaderFile = EnginePaths::Shader("EditorOverlay.hlsl").wstring();
+        Microsoft::WRL::ComPtr<ID3DBlob> vsBlob, psBlob;
+        std::string errorMsg;
+
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "VSLine", "vs_5_0", vsBlob.ReleaseAndGetAddressOf(), &errorMsg)))
+        {
+            std::printf("[Error] EditorOverlay VSLine compile failed: %s\n", errorMsg.c_str());
+            return;
+        }
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "PSLine", "ps_5_0", psBlob.ReleaseAndGetAddressOf(), &errorMsg)))
+        {
+            std::printf("[Error] EditorOverlay PSLine compile failed: %s\n", errorMsg.c_str());
+            return;
+        }
+        if (FAILED(Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, OverlayLineVS.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, OverlayLinePS.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create line shaders for EditorOverlay\n");
+            return;
+        }
+
+        const D3D11_INPUT_ELEMENT_DESC lineLayoutDesc[] = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"POSITION", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 1, DXGI_FORMAT_R32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        };
+        if (FAILED(Device->CreateInputLayout(lineLayoutDesc, 5, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), OverlayLineLayout.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create line input layout for EditorOverlay\n");
+            return;
+        }
+
+        D3D11_RASTERIZER_DESC rastDesc{};
+        rastDesc.FillMode = D3D11_FILL_SOLID;
+        rastDesc.CullMode = D3D11_CULL_NONE;
+        rastDesc.DepthClipEnable = TRUE;
+        Device->CreateRasterizerState(&rastDesc, OverlayRasterState.ReleaseAndGetAddressOf());
+
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "VSBillboard", "vs_5_0", vsBlob.ReleaseAndGetAddressOf(), &errorMsg)))
+        {
+            std::printf("[Error] EditorOverlay VSBillboard compile failed: %s\n", errorMsg.c_str());
+            return;
+        }
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "PSBillboard", "ps_5_0", psBlob.ReleaseAndGetAddressOf(), &errorMsg)))
+        {
+            std::printf("[Error] EditorOverlay PSBillboard compile failed: %s\n", errorMsg.c_str());
+            return;
+        }
+        if (FAILED(Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, OverlayBillboardVS.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, OverlayBillboardPS.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create billboard shaders for EditorOverlay\n");
+            return;
+        }
+
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "VSTriangle", "vs_5_0", vsBlob.ReleaseAndGetAddressOf(), &errorMsg)) ||
+            FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "PSTriangle", "ps_5_0", psBlob.ReleaseAndGetAddressOf(), &errorMsg)))
+        {
+            std::printf("[Error] EditorOverlay triangle shader compile failed: %s\n", errorMsg.c_str());
+            return;
+        }
+        if (FAILED(Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, OverlayTriangleVS.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, OverlayTrianglePS.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create triangle shaders for EditorOverlay\n");
+            return;
+        }
+        const D3D11_INPUT_ELEMENT_DESC triLayoutDesc[] = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        };
+        Device->CreateInputLayout(triLayoutDesc, 2, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), OverlayTriangleLayout.ReleaseAndGetAddressOf());
+
+        const D3D11_INPUT_ELEMENT_DESC bbLayoutDesc[] = {
+            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 28, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        };
+        if (FAILED(Device->CreateInputLayout(bbLayoutDesc, 4, vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), OverlayBillboardLayout.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create billboard input layout for EditorOverlay\n");
+            return;
+        }
+
+        D3D11_BUFFER_DESC cbDesc{};
+        cbDesc.ByteWidth = sizeof(OverlayConstantsData);
+        cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        cbDesc.Usage = D3D11_USAGE_DEFAULT;
+        if (FAILED(Device->CreateBuffer(&cbDesc, nullptr, OverlayCB.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create constant buffer for EditorOverlay\n");
+            return;
+        }
+
+        D3D11_BLEND_DESC blendDesc{};
+        blendDesc.RenderTarget[0].BlendEnable = TRUE;
+        blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+        blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+        blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+        blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+        blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+        blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+        blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        Device->CreateBlendState(&blendDesc, OverlayBlendState.ReleaseAndGetAddressOf());
+
+        D3D11_DEPTH_STENCIL_DESC depthDesc{};
+        depthDesc.DepthEnable = TRUE;
+        depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+        depthDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+        Device->CreateDepthStencilState(&depthDesc, OverlayDepthReadOnlyState.ReleaseAndGetAddressOf());
+
+        depthDesc.DepthEnable = FALSE;
+        Device->CreateDepthStencilState(&depthDesc, OverlayDepthDisabledState.ReleaseAndGetAddressOf());
+
+        D3D11_SAMPLER_DESC sampDesc{};
+        sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+        sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+        sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+        sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+        Device->CreateSamplerState(&sampDesc, OverlaySamplerState.ReleaseAndGetAddressOf());
+
+        std::printf("[Info] EditorOverlay pipeline and shaders compiled successfully (%ls)\n", shaderFile.c_str());
+        std::fflush(stdout);
+    }
+
+    using namespace DirectX;
+    OverlayConstantsData cbData{};
+    const auto view = XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetViewMatrix()));
+    const auto proj = XMMatrixTranspose(XMLoadFloat4x4(&FirstPlayer->GetProjectionMatrix()));
+    const auto vp = XMMatrixMultiply(view, proj);
+    XMStoreFloat4x4(&cbData.ViewProjection, XMMatrixTranspose(vp));
+    const float screenW = static_cast<float>(std::max(DisplayPtr->GetWidth(), 1));
+    const float screenH = static_cast<float>(std::max(DisplayPtr->GetHeight(), 1));
+    cbData.ScreenSize = XMFLOAT4(screenW, screenH, 1.0f / screenW, 1.0f / screenH);
+    Context->UpdateSubresource(OverlayCB.Get(), 0, nullptr, &cbData, 0, 0);
+
+    if (!overlayLines.empty())
+    {
+        OverlayDepthVertices.clear();
+        OverlayTopVertices.clear();
+
+        for (const auto& line : overlayLines)
+        {
+            const bool depthTest = (line.flags & 1) != 0 && (line.flags & 2) == 0;
+            auto& target = depthTest ? OverlayDepthVertices : OverlayTopVertices;
+
+            float thickness = static_cast<float>((line.flags >> 8) & 0xFF);
+            if ((line.flags & 4) != 0)
+            {
+                thickness += 0.5f;
+            }
+            if (thickness < 0.5f)
+            {
+                thickness = (OverlayLineThickness > 0.5f) ? OverlayLineThickness : 1.0f;
+            }
+
+            const float x0 = line.x0, y0 = line.y0, z0 = line.z0;
+            const float x1 = line.x1, y1 = line.y1, z1 = line.z1;
+            const uint32_t col = line.rgba;
+
+            target.push_back({x0, y0, z0, x1, y1, z1, col, -1.0f, 0.0f, thickness});
+            target.push_back({x0, y0, z0, x1, y1, z1, col,  1.0f, 0.0f, thickness});
+            target.push_back({x0, y0, z0, x1, y1, z1, col, -1.0f, 1.0f, thickness});
+
+            target.push_back({x0, y0, z0, x1, y1, z1, col, -1.0f, 1.0f, thickness});
+            target.push_back({x0, y0, z0, x1, y1, z1, col,  1.0f, 0.0f, thickness});
+            target.push_back({x0, y0, z0, x1, y1, z1, col,  1.0f, 1.0f, thickness});
+        }
+
+        const size_t totalVertices = OverlayDepthVertices.size() + OverlayTopVertices.size();
+        if (totalVertices > OverlayLineVBCapacity || !OverlayLineVB)
+        {
+            OverlayLineVBCapacity = std::max(totalVertices, OverlayLineVBCapacity * 2 + 1024);
+            D3D11_BUFFER_DESC vbDesc{};
+            vbDesc.ByteWidth = static_cast<UINT>(OverlayLineVBCapacity * sizeof(OverlayLineVertex));
+            vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+            vbDesc.Usage = D3D11_USAGE_DYNAMIC;
+            vbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+            OverlayLineVB.Reset();
+            Device->CreateBuffer(&vbDesc, nullptr, OverlayLineVB.ReleaseAndGetAddressOf());
+        }
+
+        if (OverlayLineVB && totalVertices > 0)
+        {
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            if (SUCCEEDED(Context->Map(OverlayLineVB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
+            {
+                auto* dst = static_cast<OverlayLineVertex*>(mapped.pData);
+                if (!OverlayDepthVertices.empty())
+                {
+                    std::memcpy(dst, OverlayDepthVertices.data(), OverlayDepthVertices.size() * sizeof(OverlayLineVertex));
+                    dst += OverlayDepthVertices.size();
+                }
+                if (!OverlayTopVertices.empty())
+                {
+                    std::memcpy(dst, OverlayTopVertices.data(), OverlayTopVertices.size() * sizeof(OverlayLineVertex));
+                }
+                Context->Unmap(OverlayLineVB.Get(), 0);
+            }
+
+            Context->ClearState();
+            SetFullViewport();
+            Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            Context->IASetInputLayout(OverlayLineLayout.Get());
+            const UINT stride = sizeof(OverlayLineVertex), offset = 0;
+            Context->IASetVertexBuffers(0, 1, OverlayLineVB.GetAddressOf(), &stride, &offset);
+            Context->VSSetShader(OverlayLineVS.Get(), nullptr, 0);
+            Context->PSSetShader(OverlayLinePS.Get(), nullptr, 0);
+            Context->VSSetConstantBuffers(0, 1, OverlayCB.GetAddressOf());
+            Context->OMSetBlendState(OverlayBlendState.Get(), nullptr, 0xFFFFFFFF);
+            Context->RSSetState(OverlayRasterState.Get());
+
+            if (!OverlayDepthVertices.empty() && depthStencilView)
+            {
+                Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
+                Context->OMSetDepthStencilState(OverlayDepthReadOnlyState.Get(), 0);
+                Context->Draw(static_cast<UINT>(OverlayDepthVertices.size()), 0);
+            }
+
+            if (!OverlayTopVertices.empty())
+            {
+                Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
+                Context->OMSetDepthStencilState(OverlayDepthDisabledState.Get(), 0);
+                Context->Draw(static_cast<UINT>(OverlayTopVertices.size()), static_cast<UINT>(OverlayDepthVertices.size()));
+            }
+        }
+    }
+
+    if (!PendingOverlayTriangles.empty() && OverlayTriangleVS && OverlayTrianglePS && OverlayTriangleLayout)
+    {
+        struct TriVertex { float x, y, z; uint32_t col; };
+        std::vector<TriVertex> depthTris;
+        std::vector<TriVertex> topTris;
+
+        for (const auto& tri : PendingOverlayTriangles)
+        {
+            const bool depthTest = (tri.flags & 1) != 0 && (tri.flags & 2) == 0;
+            auto& dst = depthTest ? depthTris : topTris;
+            dst.push_back({tri.x0, tri.y0, tri.z0, tri.rgba});
+            dst.push_back({tri.x1, tri.y1, tri.z1, tri.rgba});
+            dst.push_back({tri.x2, tri.y2, tri.z2, tri.rgba});
+        }
+
+        const size_t totalTriVerts = depthTris.size() + topTris.size();
+        if (totalTriVerts > OverlayTriangleVBCapacity || !OverlayTriangleVB)
+        {
+            OverlayTriangleVBCapacity = std::max(totalTriVerts, OverlayTriangleVBCapacity * 2 + 512);
+            D3D11_BUFFER_DESC vbDesc{};
+            vbDesc.ByteWidth = static_cast<UINT>(OverlayTriangleVBCapacity * sizeof(TriVertex));
+            vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+            vbDesc.Usage = D3D11_USAGE_DYNAMIC;
+            vbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+            OverlayTriangleVB.Reset();
+            Device->CreateBuffer(&vbDesc, nullptr, OverlayTriangleVB.ReleaseAndGetAddressOf());
+        }
+
+        if (OverlayTriangleVB && totalTriVerts > 0)
+        {
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            if (SUCCEEDED(Context->Map(OverlayTriangleVB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
+            {
+                auto* dst = static_cast<TriVertex*>(mapped.pData);
+                if (!depthTris.empty())
+                {
+                    std::memcpy(dst, depthTris.data(), depthTris.size() * sizeof(TriVertex));
+                    dst += depthTris.size();
+                }
+                if (!topTris.empty())
+                {
+                    std::memcpy(dst, topTris.data(), topTris.size() * sizeof(TriVertex));
+                }
+                Context->Unmap(OverlayTriangleVB.Get(), 0);
+            }
+
+            Context->ClearState();
+            SetFullViewport();
+            Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            Context->IASetInputLayout(OverlayTriangleLayout.Get());
+            const UINT stride = sizeof(TriVertex), offset = 0;
+            Context->IASetVertexBuffers(0, 1, OverlayTriangleVB.GetAddressOf(), &stride, &offset);
+            Context->VSSetShader(OverlayTriangleVS.Get(), nullptr, 0);
+            Context->PSSetShader(OverlayTrianglePS.Get(), nullptr, 0);
+            Context->VSSetConstantBuffers(0, 1, OverlayCB.GetAddressOf());
+            Context->OMSetBlendState(OverlayBlendState.Get(), nullptr, 0xFFFFFFFF);
+            Context->RSSetState(OverlayRasterState.Get());
+
+            if (!depthTris.empty() && depthStencilView)
+            {
+                Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
+                Context->OMSetDepthStencilState(OverlayDepthReadOnlyState.Get(), 0);
+                Context->Draw(static_cast<UINT>(depthTris.size()), 0);
+            }
+            if (!topTris.empty())
+            {
+                Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
+                Context->OMSetDepthStencilState(OverlayDepthDisabledState.Get(), 0);
+                Context->Draw(static_cast<UINT>(topTris.size()), static_cast<UINT>(depthTris.size()));
+            }
+        }
+    }
+
+    if (!PendingOverlayBillboards.empty())
+    {
+        std::vector<OverlayBillboardVertex> bbVertices;
+        bbVertices.reserve(PendingOverlayBillboards.size() * 6);
+
+        struct DrawBatch { uint32_t iconId; UINT startVertex; UINT vertexCount; };
+        std::vector<DrawBatch> batches;
+
+        std::vector<EngineOverlayBillboard> sortedBB = PendingOverlayBillboards;
+        std::sort(sortedBB.begin(), sortedBB.end(), [](const auto& a, const auto& b) {
+            return a.iconId < b.iconId;
+        });
+
+        uint32_t currentIcon = 0xFFFFFFFF;
+        for (const auto& bb : sortedBB)
+        {
+            if (bb.iconId != currentIcon)
+            {
+                currentIcon = bb.iconId;
+                batches.push_back({currentIcon, static_cast<UINT>(bbVertices.size()), 0});
+            }
+
+            const float half = bb.sizePixels * 0.5f;
+            const float x = bb.x, y = bb.y, z = bb.z;
+            const uint32_t tint = bb.rgbaTint;
+
+            bbVertices.push_back({x, y, z, -half, -half, 0.0f, 0.0f, tint});
+            bbVertices.push_back({x, y, z,  half, -half, 1.0f, 0.0f, tint});
+            bbVertices.push_back({x, y, z, -half,  half, 0.0f, 1.0f, tint});
+
+            bbVertices.push_back({x, y, z, -half,  half, 0.0f, 1.0f, tint});
+            bbVertices.push_back({x, y, z,  half, -half, 1.0f, 0.0f, tint});
+            bbVertices.push_back({x, y, z,  half,  half, 1.0f, 1.0f, tint});
+
+            batches.back().vertexCount += 6;
+        }
+
+        const size_t totalBBVertices = bbVertices.size();
+        if (totalBBVertices > OverlayBillboardVBCapacity || !OverlayBillboardVB)
+        {
+            OverlayBillboardVBCapacity = std::max(totalBBVertices, OverlayBillboardVBCapacity * 2 + 256);
+            D3D11_BUFFER_DESC vbDesc{};
+            vbDesc.ByteWidth = static_cast<UINT>(OverlayBillboardVBCapacity * sizeof(OverlayBillboardVertex));
+            vbDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+            vbDesc.Usage = D3D11_USAGE_DYNAMIC;
+            vbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+            OverlayBillboardVB.Reset();
+            Device->CreateBuffer(&vbDesc, nullptr, OverlayBillboardVB.ReleaseAndGetAddressOf());
+        }
+
+        if (OverlayBillboardVB && totalBBVertices > 0)
+        {
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            if (SUCCEEDED(Context->Map(OverlayBillboardVB.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped)))
+            {
+                std::memcpy(mapped.pData, bbVertices.data(), bbVertices.size() * sizeof(OverlayBillboardVertex));
+                Context->Unmap(OverlayBillboardVB.Get(), 0);
+            }
+
+            Context->ClearState();
+            SetFullViewport();
+            Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            Context->IASetInputLayout(OverlayBillboardLayout.Get());
+            const UINT stride = sizeof(OverlayBillboardVertex), offset = 0;
+            Context->IASetVertexBuffers(0, 1, OverlayBillboardVB.GetAddressOf(), &stride, &offset);
+            Context->VSSetShader(OverlayBillboardVS.Get(), nullptr, 0);
+            Context->PSSetShader(OverlayBillboardPS.Get(), nullptr, 0);
+            Context->VSSetConstantBuffers(0, 1, OverlayCB.GetAddressOf());
+            Context->PSSetSamplers(0, 1, OverlaySamplerState.GetAddressOf());
+            Context->OMSetBlendState(OverlayBlendState.Get(), nullptr, 0xFFFFFFFF);
+            Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
+            Context->OMSetDepthStencilState(OverlayDepthDisabledState.Get(), 0);
+
+            for (const auto& batch : batches)
+            {
+                auto it = OverlayIcons.find(batch.iconId);
+                if (it != OverlayIcons.end() && it->second.srv)
+                {
+                    Context->PSSetShaderResources(0, 1, it->second.srv.GetAddressOf());
+                    Context->Draw(batch.vertexCount, batch.startVertex);
+                }
+            }
+        }
+    }
 }
 bool Game::RenderViewportFrame(float deltaTime)
 {
@@ -2731,8 +3419,78 @@ bool Game::RenderViewportFrame(float deltaTime)
     Stats.Reset();
     UpdateFrame(std::clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds));
     BeginGpuTimer();
+
     RenderFrame();
-    RenderEditorSelection();
+
+    static int sReadbackDone = 0;
+    static int sFrameCounter = 0;
+    ++sFrameCounter;
+
+    if (sFrameCounter % 120 == 1)
+    {
+        const auto antialiasing = GetSettings().GetAntialiasing();
+        const uint32_t bbW = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetWidth()) : 0;
+        const uint32_t bbH = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetHeight()) : 0;
+        std::printf("[Info] Frame %d: AntialiasingMode = %u (%s), bb = %ux%u\n",
+            sFrameCounter, antialiasing, antialiasing == 1 ? "FXAA" : "Off", bbW, bbH);
+        std::fflush(stdout);
+    }
+    const bool isSmokeEditor = (std::wcsstr(GetCommandLineW(), L"--smoke-editor") != nullptr) ||
+                               (GetEnvironmentVariableW(L"PAINENGINE_SMOKE_EDITOR", nullptr, 0) > 0);
+    const bool shouldCheck = isSmokeEditor && BackTexture && Device && Context &&
+                             ((sReadbackDone == 0 && sFrameCounter >= 30) || (sReadbackDone == 1 && sFrameCounter >= 130));
+    if (shouldCheck)
+    {
+        D3D11_TEXTURE2D_DESC desc{};
+        BackTexture->GetDesc(&desc);
+        desc.Usage = D3D11_USAGE_STAGING;
+        desc.BindFlags = 0;
+        desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        desc.MiscFlags = 0;
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> staging;
+        if (SUCCEEDED(Device->CreateTexture2D(&desc, nullptr, staging.GetAddressOf())))
+        {
+            Context->CopyResource(staging.Get(), BackTexture.Get());
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            if (SUCCEEDED(Context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped)))
+            {
+                size_t gizmoRedPixels = 0;
+                size_t gizmoGreenPixels = 0;
+                size_t gizmoBluePixels = 0;
+                size_t nonBgPixels = 0;
+                size_t intermediateEdgePixels = 0;
+                for (unsigned y = 0; y < desc.Height; ++y)
+                {
+                    const auto* row = reinterpret_cast<const uint8_t*>(mapped.pData) + y * mapped.RowPitch;
+                    for (unsigned x = 0; x < desc.Width; ++x)
+                    {
+                        const auto* p = row + x * 4;
+                        if (p[0] > 180 && p[1] < 60 && p[2] < 60) ++gizmoRedPixels;
+                        if (p[0] < 60 && p[1] > 180 && p[2] < 60) ++gizmoGreenPixels;
+                        if (p[0] < 60 && p[1] < 100 && p[2] > 180) ++gizmoBluePixels;
+                        const bool isBg = (p[0] <= 2 && p[1] <= 2 && std::abs(static_cast<int>(p[2]) - 51) <= 2);
+                        if (!isBg) ++nonBgPixels;
+                        if (x > 0)
+                        {
+                            const auto* pPrev = row + (x - 1) * 4;
+                            const int dr = std::abs(static_cast<int>(p[0]) - static_cast<int>(pPrev[0]));
+                            const int dg = std::abs(static_cast<int>(p[1]) - static_cast<int>(pPrev[1]));
+                            const int db = std::abs(static_cast<int>(p[2]) - static_cast<int>(pPrev[2]));
+                            const int maxD = std::max(dr, std::max(dg, db));
+                            // Edge gradient / intermediate color on geometry transitions
+                            if (maxD >= 8 && maxD <= 70) ++intermediateEdgePixels;
+                        }
+                    }
+                }
+                Context->Unmap(staging.Get(), 0);
+                std::printf("[Info] [D3D-Readback frame %d] FXAA=%u, Backbuffer: %ux%u, Intermediate edge pixels: %zu, Gizmo Red: %zu, Green: %zu, Blue: %zu, Non-Bg: %zu\n",
+                    sFrameCounter, GetSettings().GetAntialiasing(), desc.Width, desc.Height, intermediateEdgePixels, gizmoRedPixels, gizmoGreenPixels, gizmoBluePixels, nonBgPixels);
+                std::fflush(stdout);
+                ++sReadbackDone;
+            }
+        }
+    }
+
     EndGpuTimer();
     EndFrame();
     LastFrameStats = Stats;
@@ -2742,9 +3500,9 @@ bool Game::RenderViewportFrame(float deltaTime)
 Game::RuntimeFrameResult Game::RunRuntimeFrame(float deltaTime)
 {
     if (!bRuntimeWindow || !bInitialized || !std::isfinite(deltaTime) || deltaTime < 0) return RuntimeFrameResult::Failed;
-    if (bWindowCloseRequested) return RuntimeFrameResult::Closed;
+    if (Settings.closeRequested_) return RuntimeFrameResult::Closed;
     bRunning = true;
-    if (!PumpMessages() || bWindowCloseRequested) return RuntimeFrameResult::Closed;
+    if (!PumpMessages() || Settings.closeRequested_) return RuntimeFrameResult::Closed;
     ApplyPendingResize();
     if (!bRunning) return RuntimeFrameResult::Failed;
     if (bMinimized) { Sleep(10); return RuntimeFrameResult::Running; }
@@ -2773,10 +3531,14 @@ void Game::OnWindowResized(int clientWidth, int clientHeight, bool minimized)
 
 void Game::OnFocusLost()
 {
+    if (ProjectHudComponent) ProjectHudComponent->ResetInput();
+    for (const auto& entry : Components)
+        if (auto* ui = dynamic_cast<UIComponent*>(entry.second.get())) ui->ResetInput();
     ActionInput.ReleaseAll();
     if (InputDevicePtr)
     {
         InputDevicePtr->ClearPressedKeys();
+        InputDevicePtr->SetPointerBlocked(false);
     }
 }
 
@@ -2834,14 +3596,14 @@ void Game::ProcessHotkeys()
     const bool vsyncDown = InputDevicePtr->IsKeyDown(Keys::F4);
     if (vsyncDown && !bVSyncKeyWasDown)
     {
-        bVSync = !bVSync;
+        GetSettings().SetVSync(!GetSettings().IsVSyncEnabled());
     }
     bVSyncKeyWasDown = vsyncDown;
 
     const bool renderTypeDown = InputDevicePtr->IsKeyDown(Keys::F5);
-    if (renderTypeDown && !bRenderTypeKeyWasDown && RenderingType != Custom)
+    if (renderTypeDown && !bRenderTypeKeyWasDown && GetSettings().GetRenderingType() != Custom)
     {
-        RenderingType = RenderingType == Forward ? Deffered : Forward;
+        GetSettings().SetRenderingType(GetSettings().GetRenderingType() == Forward ? Deffered : Forward);
     }
     bRenderTypeKeyWasDown = renderTypeDown;
 }
@@ -2864,6 +3626,23 @@ void Game::UpdateSimulation(float deltaTime)
     InitializeGameplay();
     StartGameplayComponents();
     TotalTime += deltaTime;
+    // Convert client coordinate units to render-target pixels, including DPI virtualization.
+    if(!bEmbedded && DisplayPtr){POINT point{};const auto hwnd=DisplayPtr->GetHwnd();
+        const bool focused=GetForegroundWindow()==hwnd;
+        RECT client{};const bool valid=focused&&GetCursorPos(&point)&&ScreenToClient(hwnd,&point)&&GetClientRect(hwnd,&client)&&client.right>0&&client.bottom>0;
+        const float sx=valid?float(DisplayPtr->GetWidth())/client.right:1.f,sy=valid?float(DisplayPtr->GetHeight())/client.bottom:1.f;
+        ActionInput.SetCursorPosition({(float(point.x)+.5f)*sx,(float(point.y)+.5f)*sy,uint32_t(DisplayPtr->GetWidth()),uint32_t(DisplayPtr->GetHeight()),valid});}
+    bool pointerBlocked = false;
+    auto prepareUI = [&](UIComponent* ui) {
+        if (!ui) return;
+        const bool captured = ui->WantsPointer();
+        ui->PrepareInput();
+        pointerBlocked |= captured || ui->WantsPointer();
+    };
+    prepareUI(ProjectHudComponent.get());
+    for (const auto& entry : Components) prepareUI(dynamic_cast<UIComponent*>(entry.second.get()));
+    if (InputDevicePtr) InputDevicePtr->SetPointerBlocked(pointerBlocked);
+    ActionInput.SetPointerBlocked(pointerBlocked);
     PreUpdate(deltaTime);
     ActionInput.Tick(deltaTime);
     if (Controller) Controller->Tick(deltaTime);
@@ -2880,17 +3659,26 @@ void Game::SetCharacterController(std::unique_ptr<CharacterController> controlle
 void Game::InitializeGameplay()
 {
     if (GameplayInitialized) return;
-    PlaySettings* settings = nullptr;
-    for (const auto& entry : scene.GetComponents()) if (auto* value = dynamic_cast<PlaySettings*>(entry.second.get())) {
-        if (settings) throw std::runtime_error("Only one PlaySettings object is allowed per scene");
-        settings = value;
+    const auto content = VfsRead::Active().Resolve("/Game");
+    if (!content.empty()) try {
+        const auto hudFile = ProjectHud::Read(std::filesystem::u8path(content));
+        if (!hudFile.empty()) {
+            ProjectHudComponent = std::make_unique<UIComponent>();
+            ProjectHudComponent->SetGame(this);
+            ProjectHudComponent->LoadMarkup(hudFile.generic_u8string());
+        }
+    } catch (const std::exception& e) { std::cout << "Project HUD: " << e.what() << std::endl; }
+    MigrateLegacyPlaySettings(scene);
+    Character* player=nullptr;
+    for(const auto& entry:scene.GetComponents())if(auto* character=dynamic_cast<Character*>(entry.second.get()))if(character->playerControlled){
+        if(player)throw std::runtime_error("Only one player is allowed: disable Player on other characters");player=character;
     }
-    if (settings) {
-        if (!Controller) Controller = CreateCharacterController();
-        if (!Controller) throw std::runtime_error("Controller factory returned null");
-        Controller->Configure(*settings);
-        if (settings->standardControl) Controller->BindInput();
-        if (FirstPlayer) Controller->UpdateCamera(*FirstPlayer);
+    if(player){
+        if(!Controller)Controller=CreateCharacterController();
+        if(!Controller)throw std::runtime_error("Controller factory returned null");
+        Controller->Configure(*player);
+        if(player->standardControl)Controller->BindInput();
+        if(FirstPlayer)Controller->UpdateCamera(*FirstPlayer);
     }
     GameplayInitialized = true;
     StartGameplayComponents();
@@ -2909,6 +3697,19 @@ void Game::StartGameplayComponents()
 void Game::PrepareRenderFrame()
 {
     SynchronizeSceneResources(); // Includes additions committed after gameplay callbacks.
+    DirectionalLightComponent* sun = nullptr;
+    for (const auto& entry : scene.GetComponents())
+        if ((sun = dynamic_cast<DirectionalLightComponent*>(entry.second.get()))) break;
+    if (bSceneLighting || sun)
+    {
+        const bool lit = sun && sun->IsEnabled() && sun->GetIntensity() > 0;
+        if (sun) SetDirectionalLight(sun->GetDirection(), sun->GetLightColor(), lit ? sun->GetIntensity() : 0);
+        else SetDirectionalLightIntensity(0);
+        const bool shadows = lit && sun->HasShadows();
+        const float distance = sun ? sun->GetShadowDistance() : ShadowDistance;
+        if (shadows != bShadowsEnabled || distance != ShadowDistance)
+            SetShadowSettings(shadows, distance);
+    }
     if (bShadowsEnabled && !bShadowResourcesReady && !bShadowInitFailed)
     {
         bShadowResourcesReady = InitShadowResources();
@@ -2992,7 +3793,8 @@ void Game::BuildFrameConstants()
         frame.LightColors[i] = XMFLOAT4(light.Color.x, light.Color.y, light.Color.z, 1.0f);
         frame.LightParams[i] = XMFLOAT4(light.Intensity, light.Radius, light.bEnabled ? 1.0f : 0.0f, 0.0f);
     }
-    frame.LightMeta = XMFLOAT4(static_cast<float>(lightCount), AmbientIntensity, SpecularShininess, 0.0f);
+    frame.LightMeta = XMFLOAT4(static_cast<float>(lightCount), bSceneLighting ? 0.0f : AmbientIntensity,
+        SpecularShininess, bSceneLighting ? 1.0f : 0.0f);
 
     // The directional light does not depend on shadows; shadow data does.
     frame.LightDirection = DirectionalLightDirection;
@@ -3030,7 +3832,28 @@ void Game::BuildFrameConstants()
 
 void Game::RenderFrame()
 {
-    switch (RenderingType)
+    const bool useFxaa = (GetSettings().GetAntialiasing() == 1) && Device && Context;
+    const uint32_t bbW = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetWidth()) : 0;
+    const uint32_t bbH = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetHeight()) : 0;
+
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backbufferRTV = RenderTargetView;
+    const bool fxaaReady = useFxaa && bbW > 0 && bbH > 0 && backbufferRTV && EnsureFxaaResources(bbW, bbH);
+    if (fxaaReady)
+    {
+        RenderTargetView = SceneColorRTV;
+    }
+
+    const std::array<float, 4> clearColor = GetClearColor();
+    if (backbufferRTV)
+    {
+        Context->ClearRenderTargetView(backbufferRTV.Get(), clearColor.data());
+    }
+    if (fxaaReady)
+    {
+        Context->ClearRenderTargetView(SceneColorRTV.Get(), clearColor.data());
+    }
+
+    switch (GetSettings().GetRenderingType())
     {
     case Deffered:
         DrawDeffered();
@@ -3043,6 +3866,24 @@ void Game::RenderFrame()
         DrawForward();
         break;
     }
+
+    if (bEmbedded)
+    {
+        RenderEditorSelection();
+        RenderEditorOverlay();
+    }
+    if (fxaaReady)
+    {
+        RenderTargetView = backbufferRTV;
+        RenderFxaaPass();
+    }
+
+    // Before Present: after it the back buffer is no longer guaranteed to hold this frame.
+    if (!PendingFrameDump.empty())
+    {
+        DumpFrame(PendingFrameDump);
+        PendingFrameDump.clear();
+    }
 }
 
 void Game::EndFrame()
@@ -3052,7 +3893,7 @@ void Game::EndFrame()
         return;
     }
 
-    const HRESULT hr = SwapChain->Present(bVSync ? 1 : 0, 0);
+    const HRESULT hr = SwapChain->Present(GetSettings().IsVSyncEnabled() ? 1 : 0, 0);
     if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
     {
         const HRESULT reason = Device ? Device->GetDeviceRemovedReason() : hr;
@@ -3085,13 +3926,13 @@ void Game::UpdateWindowTitle(float realDeltaTime)
 
     const float fps = TitleFrameCount / TitleUpdateAccumulator;
     const double cpuMs = CpuFrameMsAccumulator / std::max<uint32_t>(TitleFrameCount, 1);
-    const wchar_t* renderName = RenderingType == Deffered ? L"Deferred" : (RenderingType == Custom ? L"Custom" : L"Forward");
+    const wchar_t* renderName = GetSettings().GetRenderingType() == Deffered ? L"Deferred" : (GetSettings().GetRenderingType() == Custom ? L"Custom" : L"Forward");
 
     WCHAR text[320];
     swprintf_s(text, L"%s | FPS: %.1f | CPU %.2f ms | GPU %.2f ms | Objects: %zu (+%zu inst) | Draws: %u | Drawn inst: %u | Culled: %u obj / %u inst%s",
                renderName, fps, cpuMs, LastGpuFrameMs, Components.size(), instanceCount,
                LastFrameStats.DrawCalls, LastFrameStats.InstancesDrawn,
-               LastFrameStats.CulledObjects, LastFrameStats.CulledInstances, bVSync ? L" | VSync" : L"");
+               LastFrameStats.CulledObjects, LastFrameStats.CulledInstances, GetSettings().IsVSyncEnabled() ? L" | VSync" : L"");
     SetWindowText(DisplayPtr->GetHwnd(), text);
 
     TitleUpdateAccumulator = 0.0f;
@@ -3150,6 +3991,7 @@ void Game::DrawForward()
     RenderSkybox();
     DispatchComputePhase();
     RenderTransparent();
+    RenderUI();
 }
 
 void Game::DrawDeffered()
@@ -3207,6 +4049,7 @@ void Game::DrawDeffered()
     RenderSkybox();
     DispatchComputePhase();
     RenderTransparent();
+    RenderUI();
 
     if (bShowDeferredDebugOverlay)
     {
@@ -3251,8 +4094,9 @@ void Game::RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant)
 
     for (auto& pair : Components)
     {
-        GameComponent* Component = pair.second.get();
-        if (!Component->IsRenderable() || Component->IsSkybox() || Component->HasOpacity())
+        GameComponent* Component = pair.second->GetRenderComponent();
+        if (!Component->IsRenderable() || Component->IsSkybox() || Component->HasOpacity() ||
+            Component->IsScreenSpaceUI())
         {
             continue;
         }
@@ -3282,7 +4126,7 @@ void Game::RenderSkybox()
     Context->OMSetDepthStencilState(depthStencilStateSkybox.Get(), 0);
     for (auto& pair : Components)
     {
-        GameComponent* Component = pair.second.get();
+        GameComponent* Component = pair.second->GetRenderComponent();
         if (!Component->IsSkybox() || !Component->IsRenderable())
         {
             continue;
@@ -3306,6 +4150,32 @@ void Game::DispatchComputePhase()
     Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
 }
 
+void Game::RenderUI()
+{
+    if (ProjectHudComponent && ProjectHudComponent->IsRenderable() &&
+        BindComponentShaders(ProjectHudComponent.get(), ShaderCompileVariant::Default))
+        ProjectHudComponent->Render(Context.Get());
+    // Last pass of the frame: the interface sits on the finished image, with no depth of its own.
+    // Each UI component sets its own blending and states, so nothing here has to be undone.
+    for (auto& pair : Components)
+    {
+        GameComponent* Component = pair.second->GetRenderComponent();
+        if (!Component->IsRenderable() || !Component->IsScreenSpaceUI())
+        {
+            continue;
+        }
+        if (BindComponentShaders(Component, ShaderCompileVariant::Default))
+        {
+            Component->Render(Context.Get());
+        }
+    }
+
+    const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
+    Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
+    Context->RSSetState(DefaultRasterState.Get());
+}
+
 void Game::RenderTransparent()
 {
     struct SortedDraw
@@ -3318,8 +4188,9 @@ void Game::RenderTransparent()
     const glm::vec3 cameraPosition(CurrentFrame.CameraPosition.x, CurrentFrame.CameraPosition.y, CurrentFrame.CameraPosition.z);
     for (auto& pair : Components)
     {
-        GameComponent* Component = pair.second.get();
-        if (!Component->IsRenderable() || Component->IsSkybox() || !Component->HasOpacity() || !IsVisible(Component))
+        GameComponent* Component = pair.second->GetRenderComponent();
+        if (!Component->IsRenderable() || Component->IsSkybox() || !Component->HasOpacity() ||
+            Component->IsScreenSpaceUI() || !IsVisible(Component))
         {
             continue;
         }
@@ -3416,4 +4287,125 @@ void Game::EndGpuTimer()
     Context->End(GpuTimerEnd[slot].Get());
     Context->End(GpuTimerDisjoint[slot].Get());
     GpuTimerIssued[slot] = true;
+}
+
+
+bool Game::EnsureFxaaResources(uint32_t width, uint32_t height)
+{
+    if (!Device || !Context || width == 0 || height == 0) return false;
+
+    if (SceneColorTexture)
+    {
+        D3D11_TEXTURE2D_DESC existingDesc{};
+        SceneColorTexture->GetDesc(&existingDesc);
+        if (existingDesc.Width != width || existingDesc.Height != height)
+        {
+            SceneColorTexture.Reset();
+            SceneColorRTV.Reset();
+            SceneColorSRV.Reset();
+        }
+    }
+
+    if (!SceneColorTexture)
+    {
+        D3D11_TEXTURE2D_DESC desc{};
+        desc.Width = width;
+        desc.Height = height;
+        desc.MipLevels = 1;
+        desc.ArraySize = 1;
+        desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        desc.SampleDesc.Count = 1;
+        desc.Usage = D3D11_USAGE_DEFAULT;
+        desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+        if (FAILED(Device->CreateTexture2D(&desc, nullptr, SceneColorTexture.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreateRenderTargetView(SceneColorTexture.Get(), nullptr, SceneColorRTV.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreateShaderResourceView(SceneColorTexture.Get(), nullptr, SceneColorSRV.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create SceneColorTexture resources for FXAA\n");
+            return false;
+        }
+    }
+
+    if (!FxaaCB)
+    {
+        D3D11_BUFFER_DESC cbDesc{};
+        cbDesc.ByteWidth = sizeof(DirectX::XMFLOAT4);
+        cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        if (FAILED(Device->CreateBuffer(&cbDesc, nullptr, FxaaCB.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create FxaaCB\n");
+            return false;
+        }
+
+        D3D11_SAMPLER_DESC sampDesc{};
+        sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+        sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+        sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+        sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+        if (FAILED(Device->CreateSamplerState(&sampDesc, FxaaSampler.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create FxaaSampler\n");
+            return false;
+        }
+
+        const auto shaderFile = EnginePaths::Shader("FXAA.hlsl").wstring();
+        Microsoft::WRL::ComPtr<ID3DBlob> vsBlob, psBlob;
+        std::string errorMsg;
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "VSMain", "vs_5_0", vsBlob.ReleaseAndGetAddressOf(), &errorMsg)))
+        {
+            std::printf("[Error] FXAA VSMain compile failed: %s\n", errorMsg.c_str());
+            return false;
+        }
+        if (FAILED(ShaderCompiler::CompileFromFile(shaderFile, nullptr, "PSMain", "ps_5_0", psBlob.ReleaseAndGetAddressOf(), &errorMsg)))
+        {
+            std::printf("[Error] FXAA PSMain compile failed: %s\n", errorMsg.c_str());
+            return false;
+        }
+        if (FAILED(Device->CreateVertexShader(vsBlob->GetBufferPointer(), vsBlob->GetBufferSize(), nullptr, FxaaVS.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreatePixelShader(psBlob->GetBufferPointer(), psBlob->GetBufferSize(), nullptr, FxaaPS.ReleaseAndGetAddressOf())))
+        {
+            std::printf("[Error] Failed to create FXAA shaders\n");
+            return false;
+        }
+        std::printf("[Info] FXAA pipeline and shaders compiled successfully\n");
+        std::fflush(stdout);
+    }
+
+    return true;
+}
+
+void Game::RenderFxaaPass()
+{
+    if (!Device || !Context || !FxaaVS || !FxaaPS || !SceneColorSRV || !RenderTargetView) return;
+
+    const uint32_t bbW = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetWidth()) : 0;
+    const uint32_t bbH = DisplayPtr ? static_cast<uint32_t>(DisplayPtr->GetHeight()) : 0;
+    if (bbW == 0 || bbH == 0) return;
+
+    ID3D11RenderTargetView* nullRTV = nullptr;
+    Context->OMSetRenderTargets(1, &nullRTV, nullptr);
+
+    DirectX::XMFLOAT4 invSize(1.0f / static_cast<float>(bbW), 1.0f / static_cast<float>(bbH), 0.0f, 0.0f);
+    Context->UpdateSubresource(FxaaCB.Get(), 0, nullptr, &invSize, 0, 0);
+
+    SetFullViewport();
+    Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), nullptr);
+
+    const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xFFFFFFFF);
+    Context->OMSetDepthStencilState(OverlayDepthDisabledState.Get(), 0);
+    Context->RSSetState(DefaultRasterState.Get());
+
+    Context->IASetInputLayout(nullptr);
+    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    Context->VSSetShader(FxaaVS.Get(), nullptr, 0);
+    Context->PSSetShader(FxaaPS.Get(), nullptr, 0);
+    Context->PSSetConstantBuffers(0, 1, FxaaCB.GetAddressOf());
+    Context->PSSetShaderResources(0, 1, SceneColorSRV.GetAddressOf());
+    Context->PSSetSamplers(0, 1, FxaaSampler.GetAddressOf());
+
+    Context->Draw(3, 0);
+
+    ID3D11ShaderResourceView* nullSRV = nullptr;
+    Context->PSSetShaderResources(0, 1, &nullSRV);
 }

@@ -1,4 +1,5 @@
-﻿#include <Engine/Runtime/SceneEditSession.h>
+#include "../Components/ComponentInternal.h"
+#include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/MainGame/Player.h>
 #include <Engine/Scene/SceneDocument.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
@@ -37,7 +38,8 @@ std::unique_ptr<Game> EmptyGame()
 {
     auto game = std::make_unique<Game>();
     game->SetSimulationEnabled(false); // frame() is the sole simulation owner
-    game->SetVSync(false);
+    game->GetSettings().SetVSync(false);
+    game->SetSceneLightingEnabled(true);
     return game;
 }
 }
@@ -50,6 +52,7 @@ std::unique_ptr<Game> SceneEditSession::CopyForPlay()
     if (!candidate) throw std::runtime_error("Game factory returned null");
     candidate->SetSimulationEnabled(false);
     candidate->SetSimulationTimeScale(1.0f);
+    candidate->SetSceneLightingEnabled(true);
     SceneDocument::Restore(edit_->GetScene().GetSnapshot(), catalog_, candidate->GetScene());
     return candidate;
 }
@@ -196,26 +199,7 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                 if (s.attached_ && (!s.width_ || !s.height_)) return EngineSceneBusy;
                 return DocumentCall(path, error, capacity, [&](const std::filesystem::path& file) {
                     auto data = SceneDocument::Read(file);
-                    auto candidate = EmptyGame();
-                    SceneDocument::Restore(data, s.catalog_, candidate->GetScene());
-                    if (s.attached_)
-                    {
-                        s.edit_->SuspendViewportTargets();
-                        try
-                        {
-                            if (!candidate->InitializePlayViewport(*s.edit_)) throw std::runtime_error("Loaded scene viewport failed");
-                            *candidate->GetPlayer() = *s.edit_->GetPlayer();
-                            candidate->GetPlayer()->SetGamePointer(candidate.get());
-                        }
-                        catch (...)
-                        {
-                            candidate.reset();
-                            s.edit_->RestoreViewportTargets();
-                            throw;
-                        }
-                    }
-                    s.commands_.Rebind(candidate->GetScene());
-                    s.edit_.swap(candidate); // noexcept commit; old scene dies inside this call
+                    s.ReplaceEdit(data);
                     *newId = s.edit_->GetScene().GetId();
                 });
             });
@@ -226,19 +210,12 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
                 if (!s.attached_ || !s.width_ || !s.height_ || !std::isfinite(x) || !std::isfinite(y) ||
                     std::abs(x) > 1 || std::abs(y) > 1) return EngineSceneInvalidArgument;
-                using namespace DirectX;
-                auto* player = s.Active().GetPlayer();
-                const auto view = XMMatrixTranspose(XMLoadFloat4x4(&player->GetViewMatrix()));
-                const auto projection = XMMatrixTranspose(XMLoadFloat4x4(&player->GetProjectionMatrix()));
-                const auto inverse = XMMatrixInverse(nullptr, view * projection);
-                XMFLOAT3 nearPoint, farPoint;
-                XMStoreFloat3(&nearPoint, XMVector3TransformCoord(XMVectorSet(x,y,0,1), inverse));
-                XMStoreFloat3(&farPoint, XMVector3TransformCoord(XMVectorSet(x,y,1,1), inverse));
-                const glm::vec3 origin(nearPoint.x, nearPoint.y, nearPoint.z);
-                const auto direction = glm::normalize(glm::vec3(farPoint.x, farPoint.y, farPoint.z) - origin);
-                float distance = std::numeric_limits<float>::max();
-                for (const auto& entry : s.Active().GetScene().GetComponents())
-                    if (!entry.second->IsSkybox() && entry.second->RaycastPrimitive(origin, direction, distance)) *id = entry.second->GetComponentId();
+                Trace::Query query;query.geometry=Trace::Geometry::EditorSelection;query.maxDistance=1e9f;
+                const float px=(std::min)((x+1)*.5f*s.width_,std::nextafter(float(s.width_),0.f));
+                const float py=(std::min)((1-y)*.5f*s.height_,std::nextafter(float(s.height_),0.f));
+                const auto hit=s.Active().RaycastScreen({px,py},query);
+                if(hit)*id=hit.hit->componentId;
+                else if(hit.status!=Trace::Status::Miss)return EngineSceneInvalidArgument;
                 return EngineSceneOk;
             });
         },
@@ -301,7 +278,7 @@ EngineProjectDataApi SceneEditSession::GetProjectDataApi() noexcept
                 if (s.state_ != EngineEditing) return EngineSceneReadOnly;
                 auto* object = s.edit_->GetScene().FindComponent(target);
                 if (!object) return EngineSceneNotFound;
-                object->RemapProjectReferences({{source,target}});
+                EngineInternal::ComponentAccess::Remap(*object, {{source,target}});
                 return EngineSceneOk;
             });
         }};
@@ -357,4 +334,94 @@ EngineEditorCameraApi SceneEditSession::GetEditorCameraApi() noexcept
                 return EngineSceneOk;
             });
         }};
+}
+
+
+EnginePointLightV2Api SceneEditSession::GetPointLightV2Api() noexcept
+{
+    return {1, this,
+        [](void* p, uint64_t id, const EngineScenePointLight* l, uint32_t castShadows) -> uint32_t {
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                return SceneCommands::SetPointLightV2(&s.Active(), id, l, castShadows);
+            });
+        }
+    };
+}
+
+EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
+{
+    return {3, this,
+        [](void* p, EngineCameraInfo* info) -> uint32_t {
+            if (!info) return EngineSceneInvalidArgument;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (!s.attached_) return EngineSceneFailure;
+                auto& game = s.Active();
+                if (!game.GetCameraInfo(*info)) return EngineSceneFailure;
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, const EngineOverlayLine* lines, uint32_t count, float thickness) -> uint32_t {
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                s.Active().SetOverlayLines(lines, count, thickness);
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, uint32_t iconId, uint32_t w, uint32_t h, const uint8_t* rgba) -> uint32_t {
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                s.Active().SetOverlayIcon(iconId, w, h, rgba);
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, const EngineOverlayBillboard* billboards, uint32_t count) -> uint32_t {
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                s.Active().SetOverlayBillboards(billboards, count);
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, uint32_t mode) -> uint32_t {
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                s.Active().GetSettings().SetAntialiasing(mode);
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, const EngineOverlayTriangle* triangles, uint32_t count) -> uint32_t {
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                s.Active().SetOverlayTriangles(triangles, count);
+                return EngineSceneOk;
+            });
+        }
+    };
+}
+void SceneEditSession::ReplaceEdit(const SceneSnapshot& data)
+{
+    auto candidate = EmptyGame();
+    SceneDocument::Restore(data, catalog_, candidate->GetScene());
+    if (attached_)
+    {
+        edit_->SuspendViewportTargets();
+        try
+        {
+            if (!candidate->InitializePlayViewport(*edit_)) throw std::runtime_error("Loaded scene viewport failed");
+            *candidate->GetPlayer() = *edit_->GetPlayer();
+            candidate->GetPlayer()->SetGamePointer(candidate.get());
+        }
+        catch (...)
+        {
+            candidate.reset();
+            edit_->RestoreViewportTargets();
+            throw;
+        }
+    }
+    commands_.Rebind(candidate->GetScene());
+    edit_.swap(candidate); // noexcept commit; old scene dies inside this call
+}
+
+EngineViewportCursorApi SceneEditSession::GetViewportCursorApi() noexcept {
+    return {1,this,[](void* p,float x,float y,uint32_t width,uint32_t height,uint32_t valid)->uint32_t {
+        return Invoke(p,[&](SceneEditSession& s)->uint32_t {
+            if(valid>1||!std::isfinite(x)||!std::isfinite(y))return EngineSceneInvalidArgument;
+            if(valid&&(!s.attached_||width!=s.width_||height!=s.height_))return EngineSceneInvalidArgument;
+            s.Active().GetInput().SetCursorPosition({x,y,width,height,valid!=0&&s.inputFocused_});return EngineSceneOk;
+        });
+    }};
 }

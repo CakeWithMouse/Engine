@@ -36,6 +36,8 @@ struct System::Impl
     float x=0,y=0,wheel=0;
     unsigned epoch=0;
     bool ticking=false;
+    bool pointerBlocked=false;
+    CursorPosition cursor;
     void Dispatch(bool frame, float dt)
     {
         const auto revision=epoch;
@@ -52,6 +54,10 @@ struct System::Impl
         std::map<std::pair<Context,std::string>,float> values;
         for (const auto& b : candidates)
         {
+            if (pointerBlocked && b.context != Context::UI && (b.source != Source::Keys ||
+                std::any_of(b.chord.begin(), b.chord.end(), [](Keys k) {
+                    return k == Keys::LeftButton || k == Keys::RightButton || k == Keys::MiddleButton;
+                }))) continue;
             if (std::any_of(b.chord.begin(),b.chord.end(),[&](Keys k){return consumed.count(k)!=0;}) ||
                 (b.source!=Source::Keys && pointers.count(b.source))) continue;
             float value=b.source==Source::Keys ? 1 : !frame ? 0 : b.source==Source::MouseX ? x : b.source==Source::MouseY ? y : wheel;
@@ -77,6 +83,15 @@ struct System::Impl
 };
 System::System():impl_(std::make_unique<Impl>()){}
 System::~System()=default;
+bool System::IsPhysicalKeyDown(Keys key) const { return impl_->physical.count(key) != 0; }
+bool System::IsPointerBlocked() const {return impl_->pointerBlocked;}
+void System::SetCursorPosition(CursorPosition p){if(!std::isfinite(p.x)||!std::isfinite(p.y)||!p.width||!p.height)p.valid=false;impl_->cursor=p;}
+CursorPosition System::GetCursorPosition() const {return impl_->cursor;}
+void System::SetPointerBlocked(bool blocked) {
+    impl_->pointerBlocked = blocked;
+    if (blocked) for (auto key : {Keys::LeftButton, Keys::RightButton, Keys::MiddleButton})
+        if (impl_->physical.count(key)) impl_->blocked.insert(key);
+}
 Connection System::Subscribe(Scope& owner, Context context, std::string action, Phase phase, std::function<void(const Event&)> callback)
 {
     if(action.empty()||!callback)throw std::invalid_argument("Input subscription needs action and handler");
@@ -125,5 +140,5 @@ void System::Reset()
     for(auto& w:snapshot){auto s=w.lock();if(!s)continue;bool was=s->active;s->active=false;
         auto owner=s->owner.lock();if(was&&s->connected&&owner&&owner->enabled&&(s->phase==Phase::Released||s->phase==Phase::Axis))s->callback({0,0,true});}
 }
-void System::ReleaseAll(){Reset();impl_->physical.clear();impl_->down.clear();impl_->blocked.clear();}
+void System::ReleaseAll(){impl_->cursor.valid=false;Reset();impl_->physical.clear();impl_->down.clear();impl_->blocked.clear();}
 }

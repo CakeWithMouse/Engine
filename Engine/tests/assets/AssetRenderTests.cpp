@@ -49,11 +49,11 @@ void RunAssetRenderTests(HWND hwnd, const std::filesystem::path& engineContent,
     EnginePaths::SetContentRoot(engineContent);
     VfsRead::GetVFS().Mount("/Game",content);
     CaptureGame game;
-    game.SetRenderingType(Custom);
-    game.SetSimulationEnabled(false); game.SetVSync(false);
+    game.GetSettings().SetRenderingType(Custom);
+    game.SetSimulationEnabled(false); game.GetSettings().SetVSync(false);
     Check(game.InitializeViewport(hwnd,640,480,true), "initialize asset pixel test");
     game.GetPlayer()->SetPosition({0,0,5});
-    auto cube = std::make_unique<CubeComponent>(); cube->InitCube(); cube->SetColor({1,1,1,1});
+    auto cube = std::make_unique<CubeComponent>(); cube->SetColor({1,1,1,1});
     std::unique_ptr<GameComponent> object = std::move(cube);
     auto added = game.GetScene().AddComponent("cube",object,"Primitive.Cube");
     Check(added.result == SceneResult::Ok, "add pixel-test cube");

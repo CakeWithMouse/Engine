@@ -57,17 +57,15 @@ Scene не копируется и не перемещается. Срок жи�
 | Метод | Результат и правила |
 |---|---|
 | `Scene(name)` | Создаёт пустую сцену; пустое имя вызывает invalid_argument |
-| `GetId/GetName/GetRevision` | Идентификатор, имя, счётчик изменений API |
+| `GetId/GetName` | Идентификатор и имя сцены |
 | `SetName(name)` | Ok или EmptyName; одинаковое имя не меняет revision |
 | `AddComponent(name, unique_ptr<GameComponent>&, typeName={})` | Возвращает `{result, id}`; Ok/Deferred передают владение сцене и обнуляют аргумент; копирует ключ типа, пустой для прежних вызовов |
 | `RemoveComponent(id)` | Ok, Deferred или NotFound; удаляет также компонент, ожидающий добавления |
 | `FindComponent(id)` | Указатель на существующий компонент или nullptr; const-перегрузка read-only |
 | `FindComponentByName(name)` | Совместимость с нынешними играми; поиск регистрозависимый |
-| `RenameComponent(id, name)` | ID сохраняется; NotFound, EmptyName, DuplicateName, Busy или Ok |
 | `SetTransform(id, transform)` | Меняет локальные position/rotation/scale; Ok, NotFound или InvalidTransform |
 | `SetParent(child, parent, inheritScale=true)` | Только существующие компоненты этой сцены; Ok, NotFound, InvalidParent или ParentCycle |
 | `ClearParent(child)` | Ok или NotFound; локальный transform остаётся прежним |
-| `GetSnapshot()` | Независимая копия метаданных; изменение копии не меняет Scene |
 | `BeginUpdate()` | RAII-граница отложенных изменений для нестандартного игрового обновления |
 | `Tick(dt, pauseNonSkybox=false)` | Вызывает Tick компонентов; сам по себе не проверяет режим редактора |
 
@@ -92,7 +90,7 @@ NaN/Infinity и quaternion с квадратом длины меньше 1e-12 �
 не меняется ни transform, ни revision. Quaternion по умолчанию единичный.
 
 SetParent не пересчитывает локальный transform, поэтому мировое положение может
-измениться. `inheritScale=false` использует существующий SetParentWithoutScale.
+измениться. `inheritScale=false` отключает наследование масштаба через внутреннюю операцию компонента.
 Цикл, включая самого себя, запрещён. Зарегистрированный GameComponent также
 отклоняет прямой SetParent на компонент чужой сцены.
 
@@ -101,7 +99,15 @@ SetParent не пересчитывает локальный transform, поэт
 затем установить связи. Удаление родителя отсоединяет его непосредственных детей
 и очищает ссылки внутренних инстансов; дети не удаляются, локальные transforms сохраняются.
 
-## Снимки и revision
+## Внутренние операции редактора
+
+С SDK 2026.11.01.4 методы Scene::RenameComponent, Scene::GetSnapshot и
+Scene::GetRevision закрыты в private. Они доступны службам SceneCommands,
+SceneEditSession и рендеру Game; игровой код их не вызывает. Редактор продолжает
+переименовывать объекты и читать снимки через существующие таблицы Scene/Edit API.
+Таблицы C ABI и формат сохранённых сцен не менялись.
+
+## Снимки и revision (внутренний контракт)
 
 ```text
 SceneSnapshot: id, name, revision, components[]
@@ -205,8 +211,7 @@ if (added.result == SceneResult::Ok) {
     SceneTransform transform;
     transform.position = {1.0f, 2.0f, 3.0f};
     const auto result = scene.SetTransform(added.id, transform);
-    const SceneSnapshot snapshot = scene.GetSnapshot();
-    // Скопировать snapshot в UI через будущий адаптер; candidate уже пуст.
+    // candidate уже пуст; для дальнейшей игровой логики сохраняйте added.id.
 }
 ```
 

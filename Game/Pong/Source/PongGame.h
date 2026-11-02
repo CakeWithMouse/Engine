@@ -5,7 +5,7 @@
 class PongGame : public Game
 {
 public:
-    PongGame() : Game() { RenderingType = Custom; }
+    PongGame() : Game() { GetSettings().SetRenderingType(Custom); }
     void AddScore(glm::vec2 ScoreAdded);
     void BuildScene();
 

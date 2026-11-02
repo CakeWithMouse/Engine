@@ -1,6 +1,8 @@
+#include "../Components/ComponentInternal.h"
 #define NOMINMAX
 #include <Windows.h>
 #include <Engine/Scene/SceneDocument.h>
+#include <Engine/Components/Character.h>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Scene/SceneAssets.h>
 #include "../../ThirdParty/nlohmann/json.hpp"
@@ -52,8 +54,14 @@ void Structure(const SceneSnapshot& data)
     if (!validText(data.name) || data.components.size() > 100000) Invalid("Invalid scene name or too many objects");
     std::map<uint64_t, uint64_t> parents;
     std::set<std::string> names;
+    bool hasDirectionalLight = false;
     for (const auto& item : data.components)
     {
+        if (item.typeName == "Light.Directional")
+        {
+            if (hasDirectionalLight) Invalid("Only one directional light is allowed per scene");
+            hasDirectionalLight = true;
+        }
         if (!item.projectData.empty())
         {
             if (data.documentVersion < 3) Invalid("Custom data requires scene format 3");
@@ -65,8 +73,8 @@ void Structure(const SceneSnapshot& data)
         if (!SceneAssets::ValidPath(item.modelAsset) || !SceneAssets::ValidPath(item.textureAsset) ||
             !SceneAssets::ValidPath(item.materialAsset))
             Invalid("Assets must be canonical /Game paths without traversal");
-        if ((item.typeName == SceneAssets::ModelType) != !item.modelAsset.empty())
-            Invalid("Engine.Model requires a model asset; other types cannot specify a model");
+        if (item.typeName == SceneAssets::ModelType && item.modelAsset.empty())
+            Invalid("Engine.Model requires a model asset");
         if (!item.id || !parents.emplace(item.id, item.parentId).second) Invalid("Duplicate or zero object ID");
         if (!validText(item.name) || !validText(item.typeName) || !names.insert(item.name).second)
             Invalid("Invalid type/name or duplicate object name");
@@ -143,14 +151,20 @@ SceneSnapshot SceneDocument::Parse(const std::string& text)
             if (o.contains("pointLight"))
             {
                 const auto& light = o.at("pointLight");
-                RequireFields(light, {"color", "intensity", "radius", "enabled"});
+                const bool hasCastShadows = light.contains("castShadows");
+                if (hasCastShadows)
+                    RequireFields(light, {"color", "intensity", "radius", "enabled", "castShadows"});
+                else
+                    RequireFields(light, {"color", "intensity", "radius", "enabled"});
                 SceneComponentSnapshot::PointLight value;
                 Vector(light.at("color"), &value.color.x, 3);
                 if (!light.at("intensity").is_number() || !light.at("radius").is_number() ||
-                    !light.at("enabled").is_boolean()) Invalid("Invalid point light fields");
+                    !light.at("enabled").is_boolean() || (hasCastShadows && !light.at("castShadows").is_boolean()))
+                    Invalid("Invalid point light fields");
                 value.intensity = light.at("intensity").get<float>();
                 value.radius = light.at("radius").get<float>();
                 value.enabled = light.at("enabled").get<bool>();
+                value.castShadows = hasCastShadows ? light.at("castShadows").get<bool>() : false;
                 item.pointLight = value;
             }
             if (o.contains("assets"))
@@ -204,6 +218,10 @@ std::string SceneDocument::Serialize(const SceneSnapshot& data)
             const auto& light = *o.pointLight;
             json["objects"].back()["pointLight"] = {{"color", {light.color.x, light.color.y, light.color.z}},
                 {"intensity", light.intensity}, {"radius", light.radius}, {"enabled", light.enabled}};
+            if (light.castShadows)
+            {
+                json["objects"].back()["pointLight"]["castShadows"] = true;
+            }
             if (data.documentVersion >= 2)
             {
                 auto& object = json["objects"].back();
@@ -252,13 +270,14 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
         if (o.pointLight && target.SetPointLight(added.id, *o.pointLight) != SceneResult::Ok)
             Invalid("Point light properties require a point light component: " + o.name);
         ids.emplace(o.id, added.id);
-        if (!o.parentId && !o.inheritParentScale) target.FindComponent(added.id)->SetParentWithoutScale(nullptr);
+        if (!o.parentId && !o.inheritParentScale) EngineInternal::ComponentAccess::ParentWithoutScale(*target.FindComponent(added.id), nullptr);
     }
     for (const auto& o : data.components)
         if (o.parentId && target.SetParent(ids.at(o.id), ids.at(o.parentId), o.inheritParentScale) != SceneResult::Ok)
             throw std::runtime_error("Cannot restore hierarchy");
     for (const auto& o : data.components)
-        target.FindComponent(ids.at(o.id))->RemapProjectReferences(ids);
+        EngineInternal::ComponentAccess::Remap(*target.FindComponent(ids.at(o.id)), ids);
+    MigrateLegacyPlaySettings(target);
 }
 SceneSnapshot SceneDocument::Read(const std::filesystem::path& path)
 {

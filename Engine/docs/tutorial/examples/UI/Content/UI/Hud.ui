@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UI>
+  <Panel name="stats" rect="16 16 280 144"
+         padding="12" color="#101820DD">
+    <Label name="clicks" text="Нажатий: 0"
+           rect="0 0 240 22"/>
+    <Bar name="load" rect="0 32 240 12"
+         fill="0" fillColor="#35B8CFFF"/>
+    <Button name="add" rect="0 64 240 32"
+            text="Добавить"/>
+  </Panel>
+</UI>

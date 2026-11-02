@@ -1,3 +1,4 @@
+#include "../Source/Components/ComponentInternal.h"
 #include <Engine/Resources/Paths.h>
 #include <Engine/Resources/VirtualFileSystem.h>
 #include <Engine/Components/GameComponents.h>
@@ -5,6 +6,8 @@
 #include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
 #include <Engine/Components/SpecificComponents/MeshComponent.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
+#include <Engine/Render/MeshSimplifier.h>
+#include <Engine/Render/MeshValidation.h>
 #include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
 #include <Engine/Render/Material.h>
 #include <Engine/Render/MaterialAsset.h>
@@ -12,6 +15,7 @@
 #include <Engine/Render/ShaderCompiler.h>
 #include "../Source/Resources/VfsRead.h"
 #include "VfsLifecycleTests.h"
+#include <algorithm>
 #include "VfsServiceTests.h"
 #include "VfsProxyLifecycleTests.h"
 #include <cmath>
@@ -118,7 +122,7 @@ void TransformHierarchy()
     CHECK(grandchild.SetParent(&child));
     Near(grandchild.GetWorldPosition().x, 12);
     auto version = grandchild.GetWorldVersion();
-    grandchild.GetWorldMatrix();
+    EngineInternal::ComponentAccess::WorldMatrix(grandchild);
     CHECK(version == grandchild.GetWorldVersion());
     parent.SetPosition({20, 0, 0});
     Near(grandchild.GetWorldPosition().x, 22);
@@ -127,7 +131,7 @@ void TransformHierarchy()
     CHECK(parent.GetParent() == nullptr);
     CHECK(!child.SetParent(&child));
     CHECK(child.GetParent() == &parent);
-    CHECK(child.SetParentWithoutScale(&parent));
+    CHECK(EngineInternal::ComponentAccess::ParentWithoutScale(child, &parent));
     Near(child.GetWorldPosition().x, 21);
     parent.SetRotation({0, 0, 90});
     Near(child.GetWorldPosition().x, 20);
@@ -188,7 +192,7 @@ void ShaderVariants()
     CHECK(game.SupportsDeferredGeometry(&component));
     CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::DeferredGBuffer));
     CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::Default));
-    component.SetShaderNames(EnginePaths::Shader("ReflectiveSphere.hlsl").generic_u8string(), EnginePaths::Shader("ReflectiveSphere.hlsl").generic_u8string());
+    EngineInternal::ComponentAccess::Shaders(component, EnginePaths::Shader("ReflectiveSphere.hlsl").generic_u8string(), EnginePaths::Shader("ReflectiveSphere.hlsl").generic_u8string());
     CHECK(game.BindComponentShaders(&component, ShaderCompileVariant::Default));
     CHECK(!game.SupportsDeferredGeometry(&component));
     CHECK(!game.BindComponentShaders(&component, ShaderCompileVariant::DeferredGBuffer));
@@ -821,9 +825,9 @@ void MaterialComponentIntegration()
     TempShaderDir dir;
     auto material = std::make_shared<Material>(dir.Write("Params.hlsl", ParamsSurface));
 
-    // Only Mesh-format components accept a material.
+    // Any component can retain a material before geometry is assigned.
     GameComponent primitive;
-    CHECK(!primitive.SetMaterial(material) && primitive.GetMaterial() == nullptr);
+    CHECK(primitive.SetMaterial(material) && primitive.GetMaterial() == material.get());
 
     auto* plane = new MeshComponent(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f), glm::vec4(1.0f));
     plane->SetMesh(MeshPrimitives::Plane(2.0f, 2.0f));
@@ -864,6 +868,38 @@ void MaterialComponentIntegration()
     CHECK(game.BindComponentShaders(plane, ShaderCompileVariant::Default));
     CHECK(game.SupportsDeferredGeometry(plane));
     CHECK(RenderOffscreen(game, *plane, D3D11_CULL_BACK)[32 * 64 + 32] == defaultPixel);
+}
+
+void AssignedPrimitiveRendering()
+{
+    TestGame game;
+    CHECK(game.CreateInputLayouts());
+    game.SetCamera({0,3,0}, {0,0,0}, {0,0,1});
+    auto object=std::make_unique<GameComponent>();
+    object->SetPrimitive(MeshPrimitives::Plane(2,2));
+    auto* owner=object.get();
+    CHECK(game.RegisterComponent("assigned",owner)==RegisterResult::Ok);
+    object.release();
+    auto* visual=owner->GetRenderComponent();
+    CHECK(visual!=owner);
+    CHECK(RenderOffscreen(game,*visual,D3D11_CULL_BACK)[32*64+32]!=0);
+    TempShaderDir dir;
+    auto material=std::make_shared<Material>(dir.Write("Assigned.hlsl",ParamsSurface));
+    MaterialRenderState state; state.bUnlit=true;
+    material->SetRenderState(state);
+    CHECK(owner->SetMaterial(material));
+    visual=owner->GetRenderComponent();
+    CHECK(game.BindComponentShaders(visual,ShaderCompileVariant::Default));
+    CHECK(material->SetParameter("Tint", {0,1,0,1}));
+    CHECK(RenderOffscreen(game,*visual,D3D11_CULL_BACK)[32*64+32]==0xff00ff00u);
+    owner->SetPrimitive(MeshPrimitives::Sphere(0.5f));
+    visual=owner->GetRenderComponent();
+    CHECK(visual->GetMaterial()==material.get());
+    CHECK(RenderOffscreen(game,*visual,D3D11_CULL_BACK)[32*64+32]==0xff00ff00u);
+    owner->CreateInstance({5,0,0},{0,0,0},{1,1,1},{1,1,1,1});
+    visual=owner->GetRenderComponent();
+    CHECK(visual->GetInstanceCount()==1);
+    CHECK(RenderOffscreen(game,*visual,D3D11_CULL_BACK)[32*64+32]==0); // Only the displaced copy draws.
 }
 
 // Shadow pass of one component into a 64x64 depth map seen from above; returns the depth values.
@@ -1600,18 +1636,179 @@ void VirtualFileSystemTests()
     // fixtureGuard automatically unmounts /TestFixture and removes fixtureRoot on exit
 }
 
+/** A sphere of quads: enough vertices to simplify, and every normal must point away from the centre. */
+MeshLodData MakeTestSphere(int segments, float radius)
+{
+    MeshLodData mesh;
+    for (int ring = 0; ring <= segments; ++ring)
+    {
+        const float v = static_cast<float>(ring) / static_cast<float>(segments);
+        const float phi = v * 3.14159265f;
+        for (int slice = 0; slice <= segments; ++slice)
+        {
+            const float u = static_cast<float>(slice) / static_cast<float>(segments);
+            const float theta = u * 6.2831853f;
+            const float x = std::sin(phi) * std::cos(theta);
+            const float y = std::cos(phi);
+            const float z = std::sin(phi) * std::sin(theta);
+            MeshVertex vertex;
+            vertex.Position = XMFLOAT4(x * radius, y * radius + radius, z * radius, 1.0f);
+            vertex.Normal = XMFLOAT4(x, y, z, 0.0f);
+            vertex.TexCoord = XMFLOAT4(u, v, 0.0f, 0.0f);
+            mesh.Vertices.push_back(vertex);
+        }
+    }
+    const uint32_t stride = static_cast<uint32_t>(segments + 1);
+    for (int ring = 0; ring < segments; ++ring)
+    {
+        for (int slice = 0; slice < segments; ++slice)
+        {
+            const uint32_t topLeft = static_cast<uint32_t>(ring) * stride + static_cast<uint32_t>(slice);
+            const uint32_t bottomLeft = topLeft + stride;
+            mesh.Indices.insert(mesh.Indices.end(),
+                                {topLeft, bottomLeft, topLeft + 1, topLeft + 1, bottomLeft, bottomLeft + 1});
+        }
+    }
+    return mesh;
+}
+
+void MeshSimplification()
+{
+    const MeshLodData source = MakeTestSphere(24, 2.0f);
+    const int sourceTriangles = static_cast<int>(source.Indices.size() / 3);
+
+    MeshSimplifySettings settings;
+    settings.TargetRatio = 0.2f;
+    settings.TargetError = 0.2f;
+    MeshSimplifyResult result;
+    const MeshLodData simplified = SimplifyMesh(source, settings, &result);
+
+    CHECK(!simplified.Indices.empty());
+    CHECK(simplified.Indices.size() % 3 == 0);
+    CHECK(result.SourceTriangles == sourceTriangles);
+    // Simplifying must actually remove triangles, and never add any.
+    CHECK(result.ResultTriangles < sourceTriangles / 2);
+    CHECK(result.ResultTriangles > 0);
+
+    for (uint32_t index : simplified.Indices)
+    {
+        CHECK(index < simplified.Vertices.size());
+    }
+
+    // The rebuilt normals must still point outwards: a sign error here turns a model black.
+    const MeshBounds bounds = ComputeMeshBounds(simplified);
+    int outward = 0;
+    for (const MeshVertex& vertex : simplified.Vertices)
+    {
+        const float dx = vertex.Position.x - bounds.Center.x;
+        const float dy = vertex.Position.y - bounds.Center.y;
+        const float dz = vertex.Position.z - bounds.Center.z;
+        const float length = std::sqrt(dx * dx + dy * dy + dz * dz);
+        CHECK(length > 0.0001f);
+        const float normalLength = std::sqrt(vertex.Normal.x * vertex.Normal.x +
+                                             vertex.Normal.y * vertex.Normal.y +
+                                             vertex.Normal.z * vertex.Normal.z);
+        Near(normalLength, 1.0f);
+        if ((vertex.Normal.x * dx + vertex.Normal.y * dy + vertex.Normal.z * dz) / length > 0.5f)
+        {
+            ++outward;
+        }
+    }
+    CHECK(outward > static_cast<int>(simplified.Vertices.size()) * 9 / 10);
+
+    // The engine draws with culling off, so nothing forces a model to wind every face the same
+    // way - the procedural vehicles do not. Normals must come out of the model's own normals,
+    // not out of the winding, or half the mesh ends up lit from the inside and renders black.
+    MeshLodData mixedWinding = source;
+    for (size_t triangle = 0; triangle * 3 + 2 < mixedWinding.Indices.size(); triangle += 2)
+    {
+        std::swap(mixedWinding.Indices[triangle * 3 + 1], mixedWinding.Indices[triangle * 3 + 2]);
+    }
+    const MeshLodData mixedResult = SimplifyMesh(mixedWinding, settings);
+    CHECK(!mixedResult.Vertices.empty());
+
+    const MeshBounds mixedBounds = ComputeMeshBounds(mixedResult);
+    int mixedOutward = 0;
+    for (const MeshVertex& vertex : mixedResult.Vertices)
+    {
+        const float dx = vertex.Position.x - mixedBounds.Center.x;
+        const float dy = vertex.Position.y - mixedBounds.Center.y;
+        const float dz = vertex.Position.z - mixedBounds.Center.z;
+        if (vertex.Normal.x * dx + vertex.Normal.y * dy + vertex.Normal.z * dz > 0.0f)
+        {
+            ++mixedOutward;
+        }
+    }
+    CHECK(mixedOutward > static_cast<int>(mixedResult.Vertices.size()) * 9 / 10);
+
+    // A mesh that cannot be simplified must come back empty rather than broken.
+    MeshLodData broken;
+    broken.Vertices.resize(3);
+    broken.Indices = {0, 1};
+    CHECK(SimplifyMesh(broken, settings).Indices.empty());
+}
+
+void MeshValidationRules()
+{
+    const MeshLodData good = MakeTestSphere(8, 1.6f);
+    const MeshValidationReport report = ValidateMesh(good);
+    CHECK(report.IsUsable());
+    CHECK(report.Triangles > 0);
+    CHECK(report.bHasTexCoords);
+    CHECK(!report.ToText("sphere").empty());
+
+    // A model exported in centimetres and left hanging above the ground.
+    MeshLodData wrongScale = good;
+    for (MeshVertex& vertex : wrongScale.Vertices)
+    {
+        vertex.Position.x *= 100.0f;
+        vertex.Position.y = vertex.Position.y * 100.0f + 50.0f;
+        vertex.Position.z *= 100.0f;
+    }
+    const MeshValidationReport scaleReport = ValidateMesh(wrongScale);
+    CHECK(!scaleReport.IsUsable());
+    CHECK(scaleReport.Problems.size() >= 2); // size and pivot
+
+    // Missing normals must be reported, not silently drawn black.
+    MeshLodData noNormals = good;
+    for (MeshVertex& vertex : noNormals.Vertices)
+    {
+        vertex.Normal = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+    }
+    CHECK(!ValidateMesh(noNormals).IsUsable());
+
+    MeshLodData empty;
+    CHECK(!ValidateMesh(empty).IsUsable());
+}
+void TraceMathTests();
+void TraceSceneTests();
+void TraceScreenTests();
+void TraceGameTests();
 void SceneOwnershipTests();
 void SceneHierarchyTests();
 void SceneDeferredTests();
+void SceneBatchTests();
+void AuthoringTests();
+void PrimitiveApiTests();
+void GameSettingsTests();
 
 int main()
 {
     const std::pair<const char*, std::function<void()>> tests[] = {
         // Scenario A MUST run first: depends on untouched global VFS before any BaseEngine lifecycle.
         {"vfs lifecycle A (read before engine)", VfsLifecycle_ScenarioA},
+        {"trace math", TraceMathTests},
+        {"ready primitives and hidden geometry setup", PrimitiveApiTests},
+        {"owned GameSettings and rendering dispatch", GameSettingsTests},
+        {"assigned primitives: GPU, materials and instances", AssignedPrimitiveRendering},
+        {"trace scene geometry and filters", TraceSceneTests},
+        {"trace screen coordinates and projection", TraceScreenTests},
+        {"trace Game, cursor and editor integration", TraceGameTests},
         {"scene ownership and IDs (no GPU)", SceneOwnershipTests},
         {"scene hierarchy and snapshots (no GPU)", SceneHierarchyTests},
         {"scene deferred mutations (no GPU)", SceneDeferredTests},
+        {"atomic group transforms, references and deletion (no GPU)", SceneBatchTests},
+        {"typed properties and transactional asset updates", AuthoringTests},
         {"registry ownership", RegistryOwnership}, {"registration failure ownership", RegistryFailures},
         {"transform hierarchy and cache", TransformHierarchy}, {"unregister hierarchy and instances", UnregisterHierarchyAndInstances},
         {"frame light snapshot", LightSnapshot}, {"forward/deferred shader variants", ShaderVariants},
@@ -1633,6 +1830,7 @@ int main()
         {"vfs mounts preserved after stop", VfsLifecycle_PreserveMountSet},
         {"vfs project content unmounted after stop", VfsLifecycle_ContentRootReverted},
         {"vfs premounted game restored after stop", VfsLifecycle_PreMountedGameReverted},
+        {"mesh simplification", MeshSimplification}, {"mesh validation rules", MeshValidationRules},
         {"vfs service: resolve and toVirtual", VfsService_ResolveAndToVirtual},
         {"vfs service: exists and stat", VfsService_ExistsAndStat},
         {"vfs service: readFile and allocator", VfsService_ReadFileAndAllocator},

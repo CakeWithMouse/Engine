@@ -1,4 +1,4 @@
-﻿param(
+param(
     [ValidateSet('Enable','Build','AddClass')][string]$Action='Build',
     [Parameter(Mandatory=$true)][string]$Project,
     [string]$Runtime='', [string]$Name='',
@@ -13,20 +13,23 @@ using System.Runtime.InteropServices;
 public static class ProjectFileCommit {
  [DllImport("kernel32.dll", CharSet=CharSet.Unicode, SetLastError=true)]
  public static extern bool MoveFileEx(string source, string destination, uint flags);
+ public static int Commit(string source, string destination) {
+  return MoveFileEx(source, destination, 9) ? 0 : Marshal.GetLastWin32Error();
+ }
 }
 '@
 }
 $encoding = [Text.UTF8Encoding]::new($false)
 $projectFile = [IO.Path]::GetFullPath($Project)
 $projectRoot = Split-Path $projectFile
-$pin = Get-Content -LiteralPath (Join-Path $projectRoot 'Engine.lock.json') -Raw | ConvertFrom-Json
+$pin = Get-Content -LiteralPath (Join-Path $projectRoot 'Engine.lock.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 if (!$Runtime) {
     $store = if ($env:PAINENGINE_ENGINE_STORE) { $env:PAINENGINE_ENGINE_STORE } else { Join-Path $env:LOCALAPPDATA 'PainEngine/Engines' }
     $Runtime = Join-Path $store ($pin.engineVersion+'/'+$pin.engineConfiguration)
 }
 $Runtime = [IO.Path]::GetFullPath($Runtime)
 $sdk = Join-Path $Runtime 'SDK'
-$sdkInfo = Get-Content -LiteralPath (Join-Path $sdk 'Sdk.json') -Raw | ConvertFrom-Json
+$sdkInfo = Get-Content -LiteralPath (Join-Path $sdk 'Sdk.json') -Raw -Encoding UTF8 | ConvertFrom-Json
 if ($sdkInfo.version -ne $pin.engineVersion -or $sdkInfo.configuration -ne $pin.engineConfiguration -or $sdkInfo.platform -ne 'x64') { throw 'SDK does not match Engine.lock.json. Upgrade a project copy explicitly.' }
 $buildLock = $null
 try { $buildLock = [IO.File]::Open((Join-Path $projectRoot '.project-build.lock'),[IO.FileMode]::OpenOrCreate,[IO.FileAccess]::ReadWrite,[IO.FileShare]::None) }
@@ -41,14 +44,30 @@ function WriteNew([string]$relative, [string]$text) {
 }
 function WriteJson([string]$file, $data) {
     $temp = $file+'.tmp.'+[guid]::NewGuid().ToString('N')
-    [IO.File]::WriteAllText($temp,($data | ConvertTo-Json -Depth 20),$encoding)
-    if (![ProjectFileCommit]::MoveFileEx($temp,$file,9)) { throw "Cannot commit project metadata (Windows error $([Runtime.InteropServices.Marshal]::GetLastWin32Error())). Previous file preserved." }
+    try {
+        [IO.File]::WriteAllText($temp,($data | ConvertTo-Json -Depth 20),$encoding)
+        # A file watcher/indexer can briefly open the new temporary file without
+        # FILE_SHARE_DELETE. Replacing an open target can also report ACCESS_DENIED.
+        # Retry these errors briefly; never truncate
+        # the destination or delete the last working project metadata.
+        $timer = [Diagnostics.Stopwatch]::StartNew()
+        do {
+            $commitError = [ProjectFileCommit]::Commit($temp,$file)
+            if (!$commitError) { return }
+            if ($commitError -notin @(5,32,33) -or $timer.ElapsedMilliseconds -ge 5000) {
+                throw "Cannot commit project metadata '$file' from '$temp' (Windows error $commitError). Previous file preserved. Close the program holding this file and retry."
+            }
+            Start-Sleep -Milliseconds 50
+        } while ($true)
+    } finally {
+        if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp -Force -ErrorAction SilentlyContinue }
+    }
 }
 function AddClass([string]$className,[string]$family,[string]$parent,[string]$include) {
     $className=$className.Trim(); $parent=$parent.Trim(); $include=$include.Trim()
     if ($family -eq 'Character') { if (!$parent) { $parent='Character' }; if (!$include) { $include='Engine/Components/Character.h' }; $family='Component' }
     if ($className -cnotmatch '^[A-Z_a-z][A-Z_a-z0-9]*$') { throw "Invalid class name '$className'. Use Latin letters, digits and underscore; do not start with a digit. Example: MyCharacter (without .h/.cpp, spaces or Cyrillic)." }
-    $reserved = 'alignas alignof and and_eq asm auto bitand bitor bool break case catch char char8_t char16_t char32_t class compl concept const consteval constexpr constinit const_cast continue co_await co_return co_yield decltype default delete do double dynamic_cast else enum explicit export extern false float for friend goto if inline int long mutable namespace new noexcept not not_eq nullptr operator or or_eq private protected public register reinterpret_cast requires return short signed sizeof static static_assert static_cast struct switch template this thread_local throw true try typedef typeid typename union unsigned using virtual void volatile wchar_t while xor xor_eq Game GameComponent Character SceneCamera PlaySettings Module'.Split(' ')
+    $reserved = 'alignas alignof and and_eq asm auto bitand bitor bool break case catch char char8_t char16_t char32_t class compl concept const consteval constexpr constinit const_cast continue co_await co_return co_yield decltype default delete do double dynamic_cast else enum explicit export extern false float for friend goto if inline int long mutable namespace new noexcept not not_eq nullptr operator or or_eq private protected public register reinterpret_cast requires return short signed sizeof static static_assert static_cast struct switch template this thread_local throw true try typedef typeid typename union unsigned using virtual void volatile wchar_t while xor xor_eq Game GameComponent Character PlayerCharacter CameraProperties SceneCamera PlaySettings Module'.Split(' ')
     if ($className -cin $reserved -or $className -match '^(CON|PRN|AUX|NUL|COM[0-9]|LPT[0-9])$') { throw "Class name '$className' is reserved. Choose a new name, for example MyCharacter." }
     if (!$parent) { $parent = if($family -eq 'Game'){'Game'}elseif($family -eq 'Component'){'GameComponent'}else{''} }
     if ($className -ceq $parent) { throw "Class '$className' cannot inherit from itself. Choose a different class name." }
@@ -73,18 +92,19 @@ function AddClass([string]$className,[string]$family,[string]$parent,[string]$in
 }
 $codeFile = Join-Path $projectRoot 'Project.code.json'
 if ($Action -eq 'Enable' -and !(Test-Path -LiteralPath $codeFile)) {
-    $manifest = Get-Content -LiteralPath $projectFile -Raw | ConvertFrom-Json
+    $manifest = Get-Content -LiteralPath $projectFile -Raw -Encoding UTF8 | ConvertFrom-Json
     $original = [IO.Path]::GetFullPath((Join-Path $projectRoot $manifest.module))
     $hash = (Get-FileHash -LiteralPath $original -Algorithm SHA256).Hash
     $known = @((Get-FileHash -LiteralPath (Join-Path $Runtime 'Templates/SceneProject/Game.dll') -Algorithm SHA256).Hash)
     $compat = Join-Path $Runtime 'TemplateCompatibility.json'
-    if (Test-Path -LiteralPath $compat) { $known += (Get-Content -LiteralPath $compat -Raw | ConvertFrom-Json).SceneProject }
+    if (Test-Path -LiteralPath $compat) { $known += (Get-Content -LiteralPath $compat -Raw -Encoding UTF8 | ConvertFrom-Json).SceneProject }
     if ($hash -notin $known) { throw 'Custom DLL detected. Attach its existing sources; conversion cannot recover C++ from a DLL.' }
     foreach($path in @('Source','Game.vcxproj','Game.sln','Build.ps1')) { if(Test-Path -LiteralPath (Join-Path $projectRoot $path)){throw "Conversion would overwrite $path"} }
     WriteNew 'Source/RotatingCube.h' @'
 #pragma once
 #include <Engine/Components/ComponentAnnotations.h>
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
+#include <Engine/Components/PropertyMacros.h>
 
 ENGINE_COMPONENT("RotatingCube")
 class RotatingCube : public CubeComponent
@@ -92,15 +112,22 @@ class RotatingCube : public CubeComponent
 public:
     RotatingCube();
     void Tick(float deltaTime) override;
+    ENGINE_GENERATED_PROPERTIES(CubeComponent)
+private:
+    ENGINE_PROPERTY("Speed (degrees/sec)",-720,720)
+    float speed = 90.0f;
+    ENGINE_PROPERTY("Enabled")
+    bool enabled = true;
 };
 '@
     WriteNew 'Source/RotatingCube.cpp' @'
 #include "RotatingCube.h"
 #include <cmath>
+#include <nlohmann/json.hpp>
 
 RotatingCube::RotatingCube()
 {
-    InitCube();
+
     SetColor({1.0f, 0.65f, 0.2f, 1.0f});
 }
 
@@ -109,9 +136,10 @@ void RotatingCube::Tick(float deltaTime)
     CubeComponent::Tick(deltaTime);
     auto rotation = GetRotation();
     // SetRotation uses degrees. deltaTime is scaled simulation time.
-    rotation.y = std::fmod(rotation.y + 90.0f * deltaTime, 360.0f);
+    if (enabled) rotation.y = std::fmod(rotation.y + speed * deltaTime, 360.0f);
     SetRotation(rotation);
 }
+
 '@
     WriteNew 'Source/ProjectGame.h' @'
 #pragma once
@@ -210,7 +238,7 @@ EndGlobal
     WriteNew 'Build.ps1' @'
 param([string]$Runtime='')
 $ErrorActionPreference='Stop'
-$pin=Get-Content -LiteralPath "$PSScriptRoot/Engine.lock.json" -Raw | ConvertFrom-Json
+$pin=Get-Content -LiteralPath "$PSScriptRoot/Engine.lock.json" -Raw -Encoding UTF8 | ConvertFrom-Json
 if(!$Runtime){
  $store=if($env:PAINENGINE_ENGINE_STORE){$env:PAINENGINE_ENGINE_STORE}else{Join-Path $env:LOCALAPPDATA 'PainEngine/Engines'}
  $Runtime=Join-Path $store ($pin.engineVersion+'/'+$pin.engineConfiguration)
@@ -228,8 +256,8 @@ foreach($source in (Get-ChildItem -LiteralPath (Join-Path $projectRoot 'Source')
 }
 $fingerprintParts += (Get-FileHash -LiteralPath (Join-Path $projectRoot 'Game.vcxproj')).Hash
 $fingerprint = [Convert]::ToBase64String([Security.Cryptography.SHA256]::Create().ComputeHash($encoding.GetBytes(($fingerprintParts -join "`n"))))
-$codeState = Get-Content -LiteralPath $codeFile -Raw | ConvertFrom-Json
-$currentManifest = Get-Content -LiteralPath $projectFile -Raw | ConvertFrom-Json
+$codeState = Get-Content -LiteralPath $codeFile -Raw -Encoding UTF8 | ConvertFrom-Json
+$currentManifest = Get-Content -LiteralPath $projectFile -Raw -Encoding UTF8 | ConvertFrom-Json
 if ($codeState.state -eq 'ready' -and $codeState.module -eq $currentManifest.module -and $codeState.fingerprint -eq $fingerprint -and (Test-Path -LiteralPath (Join-Path $projectRoot $currentManifest.module))) { Write-Output 'Project is already up to date'; return }
 
 $vswhere = Join-Path ([Environment]::GetEnvironmentVariable('ProgramFiles(x86)')) 'Microsoft Visual Studio/Installer/vswhere.exe'
@@ -253,10 +281,14 @@ $start.Arguments='"'+(Join-Path $projectRoot 'Game.vcxproj')+'" /nologo /m:1 /nr
 $buildProcess=[Diagnostics.Process]::Start($start)
 $buildOutput=$buildProcess.StandardOutput.ReadToEndAsync(); $buildErrors=$buildProcess.StandardError.ReadToEndAsync()
 $buildProcess.WaitForExit()
-Write-Output $buildOutput.GetAwaiter().GetResult(); Write-Output $buildErrors.GetAwaiter().GetResult()
+$buildText=$buildOutput.GetAwaiter().GetResult()+[Environment]::NewLine+$buildErrors.GetAwaiter().GetResult()
+$buildLog=Join-Path $output 'build.log'
+[IO.File]::WriteAllText($buildLog,$buildText,[Text.UTF8Encoding]::new($false))
+Write-Output $buildText
+Write-Output "Full build log: $buildLog"
 if ($buildProcess.ExitCode) { throw 'Project build failed; previous module preserved' }
 Copy-Item -Path "$Runtime/Templates/SceneProject/*.dll" -Destination $output -Exclude Game.dll -Force
-$manifest = Get-Content -LiteralPath $projectFile -Raw | ConvertFrom-Json
+$manifest = Get-Content -LiteralPath $projectFile -Raw -Encoding UTF8 | ConvertFrom-Json
 $previous = $manifest.module
 $relative = 'Binaries/'+$pin.engineConfiguration+'/'+$buildId+'/Game.dll'
 $candidate = Join-Path $projectRoot ('Project.candidate.'+$buildId+'.json')
@@ -265,10 +297,10 @@ WriteJson $candidate $manifest
 try {
     $check = Start-Process -FilePath (Join-Path $Runtime 'EngineRuntime.exe') -ArgumentList @('--validate-project',('"'+$candidate+'"')) -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $output 'validate.log') -RedirectStandardError (Join-Path $output 'validate-error.log')
     if (!$check.WaitForExit(60000)) { $check.Kill(); throw 'Candidate validation timed out' }
-    if ($check.ExitCode) { throw "Candidate rejected; previous module preserved. See $output/validate-error.log" }
+    if ($check.ExitCode) { Get-Content -LiteralPath (Join-Path $output "validate.log"),(Join-Path $output "validate-error.log") -Encoding UTF8; throw "Candidate rejected; previous module preserved. See $output/validate-error.log" }
     $smoke = Start-Process -FilePath (Join-Path $Runtime 'EngineRuntime.exe') -ArgumentList @('--project',('"'+$candidate+'"'),'--mode','game','--frames','3') -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $output 'startup.log') -RedirectStandardError (Join-Path $output 'startup-error.log')
     if (!$smoke.WaitForExit(60000)) { $smoke.Kill(); throw 'Candidate startup timed out; previous module preserved' }
-    if ($smoke.ExitCode) { throw "Candidate startup failed; previous module preserved. See $output/startup-error.log" }
+    if ($smoke.ExitCode) { Get-Content -LiteralPath (Join-Path $output "startup.log"),(Join-Path $output "startup-error.log") -Encoding UTF8; throw "Candidate startup failed; previous module preserved. See $output/startup-error.log" }
     Copy-Item -LiteralPath $projectFile -Destination ($projectFile+'.before-build') -Force
     WriteJson $codeFile @{format=1;state='ready';sdk=$pin.engineVersion;configuration=$pin.engineConfiguration;buildId=$buildId;module=$relative;previousModule=$previous;fingerprint=$fingerprint}
     Copy-Item -LiteralPath (Join-Path $output 'ProjectTypes.tsv') -Destination (Join-Path $projectRoot 'ProjectTypes.tsv') -Force

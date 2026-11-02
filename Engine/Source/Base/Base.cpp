@@ -1,4 +1,4 @@
-﻿#ifndef WIN32_LEAN_AND_MEAN
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
 #ifndef NOMINMAX
@@ -10,6 +10,7 @@
 #include <Engine/Runtime/ModuleApi.h>
 #include <Engine/Runtime/ViewportSession.h>
 #include <Engine/Runtime/GameEditModule.h>
+#include <Engine/Runtime/EditExtensions.h>
 #include <Engine/Runtime/GameSceneApi.h>
 #include <Engine/Runtime/GameWindowApi.h>
 #include <Engine/Resources/Paths.h>
@@ -115,10 +116,12 @@ class BaseEngine::LoadedSession
     EngineModuleApi api{};
     EngineSceneApi sceneApi{};
     EngineLegacyV4::SceneApi legacyScene{};
+    EngineLegacyV5::SceneApi legacy5Scene{};
     EngineBindEditSessionFn bindEdit = nullptr;
     EngineBindProjectDataFn bindProjectData = nullptr;
     EngineBindSelectionFn bindSelection = nullptr;
     EngineBindViewportInputFn bindViewportInput = nullptr;
+    EngineBindViewportOverlayFn bindViewportOverlay = nullptr;
     std::function<void()> releaseEdit;
     void* session = nullptr;
     bool started = false;
@@ -203,7 +206,7 @@ class BaseEngine::LoadedSession
     }
 
     void LoadAndInitialize(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host,
-        const EngineEditSessionApi* editApi = nullptr, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr)
+        const EngineEditSessionApi* editApi = nullptr, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr, const EngineViewportOverlayApi* overlay = nullptr)
     {
         originalPath = path;
         moduleKind = kind;
@@ -253,6 +256,9 @@ class BaseEngine::LoadedSession
             bindViewportInput = reinterpret_cast<EngineBindViewportInputFn>(GetProcAddress(library, "EngineBindViewportInput"));
             if (bindViewportInput && viewportInput && !bindViewportInput(1, sizeof(*viewportInput), session, viewportInput))
                 throw std::runtime_error("Cannot bind viewport input API");
+            bindViewportOverlay = reinterpret_cast<EngineBindViewportOverlayFn>(GetProcAddress(library, "EngineBindViewportOverlay"));
+            if (bindViewportOverlay && overlay && !bindViewportOverlay(1, sizeof(*overlay), session, overlay))
+                throw std::runtime_error("Cannot bind viewport overlay API");
             bindSelection = reinterpret_cast<EngineBindSelectionFn>(GetProcAddress(library, "EngineBindSelection"));
             if (bindSelection && selection && !bindSelection(1, sizeof(*selection), session, selection))
                 throw std::runtime_error("Cannot bind selection API");
@@ -304,8 +310,11 @@ class BaseEngine::LoadedSession
             const auto getSceneApi = reinterpret_cast<EngineGetSceneApiFn>(GetProcAddress(library, "EngineGetSceneApi"));
             if (getSceneApi && !getSceneApi(ENGINE_SCENE_API_VERSION, sizeof(sceneApi), session, &sceneApi))
             {
+                const auto lightsGet = reinterpret_cast<EngineLegacyV5::GetScene>(getSceneApi);
                 const auto oldGet = reinterpret_cast<EngineLegacyV4::GetScene>(getSceneApi);
-                if (oldGet(2, sizeof(legacyScene), session, &legacyScene) && EngineLegacyV4::Complete(legacyScene))
+                if (lightsGet(3, sizeof(legacy5Scene), session, &legacy5Scene) && EngineLegacyV5::Complete(legacy5Scene))
+                    sceneApi = EngineLegacyV5::Adapt(legacy5Scene);
+                else if (oldGet(2, sizeof(legacyScene), session, &legacyScene) && EngineLegacyV4::Complete(legacyScene))
                     sceneApi = EngineLegacyV4::Adapt(legacyScene);
             }
             if (getSceneApi && !IsCompleteSceneApi(sceneApi))
@@ -323,11 +332,11 @@ public:
 
     void Open(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host,
         const EngineEditSessionApi* editApi = nullptr, std::function<void()> cleanup = {},
-        const std::filesystem::path& startupScene = {}, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr)
+        const std::filesystem::path& startupScene = {}, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr, const EngineViewportOverlayApi* overlay = nullptr)
     {
         startupScenePath = startupScene;
         releaseEdit = std::move(cleanup);
-        LoadAndInitialize(path, kind, host, editApi, projectData, selection, viewportInput);
+        LoadAndInitialize(path, kind, host, editApi, projectData, selection, viewportInput, overlay);
     }
 
     bool Reload()
@@ -380,9 +389,12 @@ public:
     {
         sceneApi = {}; // No callable pointers survive session destruction/unloading.
         legacyScene = {};
+        legacy5Scene = {};
         continuousFrames = false;
         if (session && bindProjectData) bindProjectData(1, sizeof(EngineProjectDataApi), session, nullptr);
         bindProjectData = nullptr;
+        if (session && bindViewportOverlay) bindViewportOverlay(1, sizeof(EngineViewportOverlayApi), session, nullptr);
+        bindViewportOverlay = nullptr;
         if (session && bindViewportInput) bindViewportInput(1, sizeof(EngineViewportInputApi), session, nullptr);
         bindViewportInput = nullptr;
         if (session && bindSelection) bindSelection(1, sizeof(EngineSelectionApi), session, nullptr);
@@ -666,6 +678,11 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
     host.getService = [](void* user, uint32_t serviceId, uint32_t minVersion) -> const void* {
         auto* engine = static_cast<BaseEngine*>(user);
         if (serviceId == EngineEditorReloadService && minVersion <= 1) return &engine->reloadServiceApi;
+        if (serviceId == EngineViewportOverlayService && minVersion <= 2 && engine->editModule && engine->editModule->ViewportOverlayApi().getCamera) return &engine->editModule->ViewportOverlayApi();
+        if(serviceId==EngineViewportCursorService && minVersion<=1 && engine->editModule && engine->editModule->ViewportCursorApi().set)return &engine->editModule->ViewportCursorApi();
+        if (serviceId == EnginePointLightV2Service && minVersion <= 1 && engine->editModule && engine->editModule->PointLightV2Api().set) return &engine->editModule->PointLightV2Api();
+        if(serviceId==EngineAuthoringService && minVersion<=1 && engine->editModule && engine->editModule->AuthoringApi().describe) return &engine->editModule->AuthoringApi();
+        if (serviceId == EngineEditorBatchService && minVersion <= 1 && engine->editModule && engine->editModule->BatchApi().apply) return &engine->editModule->BatchApi();
         if (serviceId == ENGINE_SERVICE_VFS && minVersion <= ENGINE_VFS_API_VERSION)
             return &engine->vfsServiceApi;
         return nullptr;
@@ -749,7 +766,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
     {
         activeSession->Open(options.module, options.mode == RuntimeMode::Game ? ENGINE_MODULE_GAME : ENGINE_MODULE_EDITOR, host,
             editModule ? &editModule->Api() : nullptr, [this] { editModule.reset(); }, options.startupScene,
-            editModule ? &editModule->ProjectDataApi() : nullptr, editModule ? &editModule->SelectionApi() : nullptr, editModule ? &editModule->ViewportInputApi() : nullptr);
+            editModule ? &editModule->ProjectDataApi() : nullptr, editModule ? &editModule->SelectionApi() : nullptr, editModule ? &editModule->ViewportInputApi() : nullptr, editModule ? &editModule->ViewportOverlayApi() : nullptr);
         state = State::Playing;
         if (!options.frames && options.mode != RuntimeMode::Editor) std::puts("Interactive stub: Enter = frame, r = reload, b = build, br = build+reload, ls, find, import, info, mkdir, rm/del, mv, cp, cat, q = exit.");
         auto previous = std::chrono::steady_clock::now();

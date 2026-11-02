@@ -12,7 +12,7 @@ uint32_t Status(SceneResult result)
     case SceneResult::NotFound: return EngineSceneNotFound;
     case SceneResult::DuplicateName: return EngineSceneDuplicateName;
     case SceneResult::Busy: return EngineSceneBusy;
-    case SceneResult::EmptyName: case SceneResult::InvalidTransform: return EngineSceneInvalidArgument;
+    case SceneResult::EmptyName: case SceneResult::InvalidTransform: case SceneResult::DuplicateSingleton: return EngineSceneInvalidArgument;
     default: return EngineSceneFailure;
     }
 }
@@ -83,7 +83,7 @@ uint32_t SceneCommands::ReadScene(void* context, EngineSceneInfo* info, EngineSc
             if (object.pointLight)
             {
                 const auto& light = *object.pointLight;
-                value.hasPointLight = 1;
+                value.hasPointLight = light.castShadows ? 2u : 1u;
                 value.pointLight = {{light.color.x, light.color.y, light.color.z}, light.intensity, light.radius, light.enabled ? 1u : 0u};
             }
             visit(user, &value);
@@ -137,5 +137,13 @@ uint32_t SceneCommands::SetPointLight(void* context, uint64_t id, const EngineSc
     return Invoke(context, [&](SceneCommands& self) {
         return self.readOnly_ ? EngineSceneReadOnly : Status(self.scene_->SetPointLight(id,
             {{light->color[0], light->color[1], light->color[2]}, light->intensity, light->radius, light->enabled != 0}));
+    });
+}
+uint32_t SceneCommands::SetPointLightV2(void* context, uint64_t id, const EngineScenePointLight* light, uint32_t castShadows) noexcept
+{
+    if (!light || light->enabled > 1) return EngineSceneInvalidArgument;
+    return Invoke(context, [&](SceneCommands& self) {
+        return self.readOnly_ ? EngineSceneReadOnly : Status(self.scene_->SetPointLight(id,
+            {{light->color[0], light->color[1], light->color[2]}, light->intensity, light->radius, light->enabled != 0, castShadows != 0}));
     });
 }

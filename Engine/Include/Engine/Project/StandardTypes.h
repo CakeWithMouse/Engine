@@ -1,6 +1,7 @@
 #pragma once
 #include <Engine/Components/ComponentType.h>
 #include <Engine/Components/Light/PointLightComponent.h>
+#include <Engine/Components/Light/DirectionalLightComponent.h>
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
 #include <Engine/Components/SpecificComponents/MeshComponent.h>
 #include <Engine/Render/MeshPrimitives.h>
@@ -35,13 +36,16 @@ public:
 class Sky final : public SkyboxComponent
 {
 public:
-    Sky() { InitCube(); const auto shader=EnginePaths::Shader("BasicSky.hlsl").u8string(); SetShaderNames(shader,shader); }
+    Sky();
     bool CastsShadow() const override { return false; }
 };
 class PointLight final : public PointLightComponent
 {
 public:
-    PointLight() : PointLightComponent(glm::vec3(0), glm::vec3(1), 2.0f, 10.0f) {}
+    PointLight() : PointLightComponent(glm::vec3(0), glm::vec3(1), 2.0f, 10.0f)
+    {
+        SetCastShadows(true);
+    }
 };
 class Mesh : public MeshComponent
 {
@@ -111,12 +115,14 @@ inline ComponentTypeCatalog GetComponentTypes()
         {"Primitive.Cone", "Конус", EngineComponentDetail::Create<Cone>},
         {"Primitive.Pyramid", "Пирамида", EngineComponentDetail::Create<Pyramid>},
         {"Light.Point", "Точечный свет", EngineComponentDetail::Create<PointLight>},
+        {"Light.Directional", "Направленный свет", EngineComponentDetail::Create<DirectionalLightComponent>},
         {"Particle.Sparks", "Искры", EngineComponentDetail::Create<Sparks>},
         {"Particle.Smoke", "Дым", EngineComponentDetail::Create<Smoke>},
         {"Environment.Sky", "Базовое небо", EngineComponentDetail::Create<Sky>},
         {"Gameplay.Character", "Персонаж", EngineComponentDetail::Create<Character>},
         {"Gameplay.Camera", "Камера Play", EngineComponentDetail::Create<SceneCamera>},
-        {"Gameplay.PlaySettings", "Настройки Play", EngineComponentDetail::Create<PlaySettings>}
+        {"Gameplay.PlaySettings", "Настройки Play", EngineComponentDetail::Create<PlaySettings>},
+        {"Gameplay.Player", "Игрок", EngineComponentDetail::Create<PlayerCharacter>}
     };
     return {types, sizeof(types) / sizeof(types[0])};
 }

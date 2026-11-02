@@ -1,0 +1,130 @@
+cbuffer OverlayConstants : register(b0)
+{
+    float4x4 ViewProjection;
+    float4 ScreenSize; // x: width, y: height, z: 1/width, w: 1/height
+};
+
+struct LineVSInput
+{
+    float3 Pos0 : POSITION0;
+    float3 Pos1 : POSITION1;
+    float4 Color : COLOR;
+    float2 SideDir : TEXCOORD0; // x: -1 or +1, y: 0.0 (start) or 1.0 (end)
+    float Thickness : TEXCOORD1; // width in pixels
+};
+
+struct LinePSInput
+{
+    float4 Position : SV_POSITION;
+    float4 Color : COLOR;
+};
+
+LinePSInput VSLine(LineVSInput input)
+{
+    LinePSInput output;
+    output.Color = input.Color;
+
+    float4 c0 = mul(float4(input.Pos0, 1.0f), ViewProjection);
+    float4 c1 = mul(float4(input.Pos1, 1.0f), ViewProjection);
+
+    if (c0.w <= 0.001f && c1.w <= 0.001f)
+    {
+        output.Position = float4(0, 0, -2.0f, 1.0f);
+        return output;
+    }
+
+    float4 safeC0 = c0;
+    float4 safeC1 = c1;
+    if (safeC0.w < 0.001f)
+    {
+        float t = (0.001f - safeC0.w) / max(1e-5f, (safeC1.w - safeC0.w));
+        safeC0 = lerp(safeC0, safeC1, t);
+    }
+    else if (safeC1.w < 0.001f)
+    {
+        float t = (0.001f - safeC1.w) / max(1e-5f, (safeC0.w - safeC1.w));
+        safeC1 = lerp(safeC1, safeC0, t);
+    }
+
+    float2 ndc0 = safeC0.xy / safeC0.w;
+    float2 ndc1 = safeC1.xy / safeC1.w;
+
+    float2 screenDir = (ndc1 - ndc0) * float2(ScreenSize.x * 0.5f, ScreenSize.y * 0.5f);
+    float len = length(screenDir);
+    float2 dir = len > 1e-4f ? (screenDir / len) : float2(1.0f, 0.0f);
+    float2 perp = float2(-dir.y, dir.x);
+
+    float halfWidth = max(0.5f, input.Thickness * 0.5f);
+    float2 pixelOffset = perp * (input.SideDir.x * halfWidth);
+    float2 ndcOffset = pixelOffset * float2(ScreenSize.z * 2.0f, ScreenSize.w * 2.0f);
+
+    float4 baseClip = lerp(safeC0, safeC1, input.SideDir.y);
+    output.Position = float4(baseClip.xy + ndcOffset * baseClip.w, baseClip.zw);
+    return output;
+}
+
+float4 PSLine(LinePSInput input) : SV_Target
+{
+    return input.Color;
+}
+
+struct BillboardVSInput
+{
+    float3 Position : POSITION;
+    float2 Offset : TEXCOORD0; // offset in screen pixels
+    float2 UV : TEXCOORD1;
+    float4 Tint : COLOR;
+};
+
+struct BillboardPSInput
+{
+    float4 Position : SV_POSITION;
+    float2 UV : TEXCOORD0;
+    float4 Tint : COLOR;
+};
+
+BillboardPSInput VSBillboard(BillboardVSInput input)
+{
+    BillboardPSInput output;
+    float4 clipCenter = mul(float4(input.Position, 1.0f), ViewProjection);
+    // Invert Y offset for screen coordinates (Y down in screen space, Y up in NDC)
+    float2 ndcOffset = float2(input.Offset.x * 2.0f * ScreenSize.z, -input.Offset.y * 2.0f * ScreenSize.w) * clipCenter.w;
+    output.Position = clipCenter + float4(ndcOffset.x, ndcOffset.y, 0.0f, 0.0f);
+    output.UV = input.UV;
+    output.Tint = input.Tint;
+    return output;
+}
+
+Texture2D IconTexture : register(t0);
+SamplerState IconSampler : register(s0);
+
+float4 PSBillboard(BillboardPSInput input) : SV_Target
+{
+    float4 texColor = IconTexture.Sample(IconSampler, input.UV);
+    return texColor * input.Tint;
+}
+
+struct TriangleVSInput
+{
+    float3 Position : POSITION;
+    float4 Color : COLOR;
+};
+
+struct TrianglePSInput
+{
+    float4 Position : SV_POSITION;
+    float4 Color : COLOR;
+};
+
+TrianglePSInput VSTriangle(TriangleVSInput input)
+{
+    TrianglePSInput output;
+    output.Position = mul(float4(input.Position, 1.0f), ViewProjection);
+    output.Color = input.Color;
+    return output;
+}
+
+float4 PSTriangle(TrianglePSInput input) : SV_Target
+{
+    return input.Color;
+}

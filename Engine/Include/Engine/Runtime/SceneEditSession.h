@@ -7,7 +7,12 @@
 #include <Engine/Scene/SceneCommands.h>
 #include <Engine/Runtime/ProjectDataApi.h>
 #include <Engine/Runtime/SelectionApi.h>
+#include <Engine/Runtime/SceneBatchApi.h>
+#include <Engine/Runtime/AuthoringApi.h>
 #include <Engine/Runtime/ViewportInputApi.h>
+#include <Engine/Runtime/ViewportCursorApi.h>
+#include <Engine/Runtime/ViewportOverlayApi.h>
+#include <Engine/Runtime/EditExtensions.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 
 // Entire object and both Games live in the module containing the generated types.
@@ -22,7 +27,12 @@ public:
     EngineProjectDataApi GetProjectDataApi() noexcept;
     EngineEditorCameraApi GetEditorCameraApi() noexcept;
     EngineSelectionApi GetSelectionApi() noexcept;
+    EngineSceneBatchApi GetBatchApi() noexcept;
+    EngineAuthoringApi GetAuthoringApi() noexcept;
     EngineViewportInputApi GetViewportInputApi() noexcept;
+    EngineViewportCursorApi GetViewportCursorApi() noexcept;
+    EngineViewportOverlayApi GetViewportOverlayApi() noexcept;
+    EnginePointLightV2Api GetPointLightV2Api() noexcept;
     SceneEditSession(const SceneEditSession&) = delete;
     SceneEditSession& operator=(const SceneEditSession&) = delete;
 private:
@@ -39,6 +49,7 @@ private:
     uint32_t width_ = 0, height_ = 0;
     Game& Active() { return play_ ? *play_ : *edit_; }
     std::unique_ptr<Game> CopyForPlay();
+    void ReplaceEdit(const SceneSnapshot& data);
     uint32_t Control(uint32_t command);
     std::filesystem::path contentRoot_, previousGameRoot_;
     bool ownsGameMount_ = false;

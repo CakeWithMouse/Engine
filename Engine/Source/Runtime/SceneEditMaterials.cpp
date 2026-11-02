@@ -46,7 +46,7 @@ public:
     void Setup()
     {
         SetSimulationEnabled(false); // time still runs for animated materials
-        SetVSync(false);
+        GetSettings().SetVSync(false);
         SetDirectionalLight({-0.45f, -1.0f, 0.6f}, {1.0f, 0.97f, 0.92f}, 1.0f);
         SetShadowSettings(false, 10.0f);
         GetPlayer()->SetCameraMode(CameraMode::Orbital);

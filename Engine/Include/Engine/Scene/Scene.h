@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <Engine/Scene/Trace.h>
 #include <map>
 #include <memory>
 #include <optional>
@@ -19,7 +20,7 @@ using ComponentId = uint64_t;
 enum class SceneResult
 {
     Ok, Deferred, NullComponent, EmptyName, DuplicateName, AlreadyOwned,
-    NotFound, InvalidParent, ParentCycle, InvalidTransform, Busy
+    NotFound, InvalidParent, ParentCycle, InvalidTransform, Busy, DuplicateSingleton
 };
 struct AddComponentResult
 {
@@ -46,6 +47,7 @@ struct SceneComponentSnapshot
         glm::vec3 color{1.0f};
         float intensity = 1.0f, radius = 10.0f;
         bool enabled = true;
+        bool castShadows = false;
         bool IsValid() const noexcept;
     };
     std::optional<PointLight> pointLight;
@@ -72,10 +74,12 @@ public:
     Scene(Scene&&) = delete;
     Scene& operator=(Scene&&) = delete;
 
+    Trace::Result Raycast(const Trace::Ray&,const Trace::Query& query={});
+    const Trace::Statistics& GetTraceStatistics() const {return traceStatistics_;}
+    void ResetTraceStatistics(){traceStatistics_={};}
     SceneId GetId() const noexcept { return id_; }
     const std::string& GetName() const noexcept { return name_; }
     SceneResult SetName(std::string name);
-    uint64_t GetRevision() const noexcept { return revision_; }
 
     // Ok/Deferred transfer ownership and clear component; all failures retain it.
     // Deferred additions have a reserved ID/name but are not visible until EndUpdate.
@@ -86,14 +90,12 @@ public:
     const GameComponent* FindComponent(ComponentId id) const;
     GameComponent* FindComponentByName(std::string_view name);
     const GameComponent* FindComponentByName(std::string_view name) const;
-    SceneResult RenameComponent(ComponentId id, std::string name);
     SceneResult SetTransform(ComponentId id, const SceneTransform& transform);
     SceneResult SetParent(ComponentId child, ComponentId parent, bool inheritScale = true);
     SceneResult ClearParent(ComponentId child);
     SceneResult SetTextureAsset(ComponentId id, const std::string& path);
     SceneResult SetMaterialAsset(ComponentId id, const std::string& path);
     SceneResult SetPointLight(ComponentId id, const SceneComponentSnapshot::PointLight& light);
-    SceneSnapshot GetSnapshot() const;
     void SetDocumentVersion(uint32_t version);
 
     // Covers custom game update order too. The outermost scope commits pending edits,
@@ -118,11 +120,21 @@ public:
     const std::map<ComponentId, GameComponent*>& GetComponentsById() const noexcept { return byId_; }
 
 private:
+    // @engine-internal-begin
+    // Scene bookkeeping belongs to the renderer and editor/module services.
+    friend class SceneCommands;
+    friend class SceneEditSession;
+    friend struct SceneTestAccess; // Definition exists only under tests/, never in the SDK.
+    uint64_t GetRevision() const noexcept { return revision_; }
+    SceneResult RenameComponent(ComponentId id, std::string name);
+    SceneSnapshot GetSnapshot() const;
+    // @engine-internal-end
     friend class Game;
     SceneResult ValidateAddition(std::string_view name, const GameComponent* component) const;
     void EndUpdate() noexcept;
     void RemoveNow(ComponentId id) noexcept;
     void Clear() noexcept;
+    Trace::Statistics traceStatistics_;
     SceneId id_;
     std::string name_;
     uint64_t revision_ = 0;

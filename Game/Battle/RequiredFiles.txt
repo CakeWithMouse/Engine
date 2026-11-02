@@ -14,6 +14,7 @@ EngineContent/Shaders/ReflectiveSphere.hlsl
 EngineContent/Shaders/RotatedFigure.hlsl
 EngineContent/Shaders/ShadowDepth.hlsl
 EngineContent/Shaders/Skybox.hlsl
+EngineContent/Shaders/UI.hlsl
 EngineContent/Shaders/Material/MaterialCommon.hlsli
 EngineContent/Shaders/Material/MaterialTemplate.hlsl
 EngineContent/Shaders/Material/DefaultSurface.hlsl
@@ -21,3 +22,4 @@ EngineContent/Shaders/Material/ErrorSurface.hlsl
 GameContent/Materials/Vehicle.mat
 GameContent/Materials/Vehicle.hlsl
 GameContent/Materials/Building.mat
+GameContent/UI/Hud.ui

@@ -2,6 +2,7 @@
 #include <Engine/Components/Character.h>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
+#include <Engine/Components/Light/DirectionalLightComponent.h>
 #include <atomic>
 #include <cmath>
 #include <stdexcept>
@@ -34,6 +35,13 @@ SceneResult Scene::ValidateAddition(std::string_view name, const GameComponent* 
     if (name.empty()) return SceneResult::EmptyName;
     if (components_.count(name) || pendingAdds_.count(name)) return SceneResult::DuplicateName;
     if (component->RegisteredScene) return SceneResult::AlreadyOwned;
+    if (dynamic_cast<const DirectionalLightComponent*>(component))
+    {
+        for (const auto* entries : {&components_, &pendingAdds_})
+            for (const auto& entry : *entries)
+                if (dynamic_cast<const DirectionalLightComponent*>(entry.second.get()))
+                    return SceneResult::DuplicateSingleton;
+    }
     const auto* parent = component->GetParent();
     if (parent && (parent->RegisteredScene != this || !byId_.count(parent->SceneComponentId)))
         return SceneResult::InvalidParent;
@@ -99,6 +107,7 @@ void Scene::RemoveNow(ComponentId id) noexcept
         if(settings->character==id)settings->character=0;
         if(settings->camera==id)settings->camera=0;
     }
+    for(auto& entry:components_)if(auto* character=dynamic_cast<Character*>(entry.second.get()))if(character->camera==id)character->camera=0;
     auto entry = components_.find(removed->SceneName);
     byId_.erase(it);
     components_.erase(entry);
@@ -180,7 +189,7 @@ SceneSnapshot Scene::GetSnapshot() const
                 glm::quat(glm::radians(c.ComponentRotation)), c.GetScale()}, c.SceneTypeName,
                 c.GetModelAsset(), c.GetTexturePath(), c.GetMaterialAsset()});
         if (const auto* light = dynamic_cast<const PointLightComponent*>(&c))
-            result.components.back().pointLight = {light->GetLightColor(), light->GetIntensity(), light->GetRadius(), light->IsEnabled()};
+            result.components.back().pointLight = {light->GetLightColor(), light->GetIntensity(), light->GetRadius(), light->IsEnabled(), light->CastsShadow()};
         result.components.back().projectData = c.SaveProjectData();
         if (!result.components.back().projectData.empty()) result.documentVersion = 3;
     }
@@ -211,6 +220,7 @@ SceneResult Scene::SetPointLight(ComponentId id, const SceneComponentSnapshot::P
     component->SetIntensity(light.intensity);
     component->SetRadius(light.radius);
     component->SetEnabled(light.enabled);
+    component->SetCastShadows(light.castShadows);
     ++revision_;
     return SceneResult::Ok;
 }
@@ -255,8 +265,30 @@ void Scene::Tick(float dt, bool pauseNonSkybox)
     try
     {
         for (auto& entry : components_)
-            entry.second->Tick(pauseNonSkybox && !entry.second->IsSkybox() ? 0.0f : dt);
+        {
+            const float seconds=pauseNonSkybox && !entry.second->IsSkybox() ? 0.0f : dt;
+            entry.second->Tick(seconds);
+            auto* visual=entry.second->GetRenderComponent();
+            if(visual!=entry.second.get())visual->Tick(seconds);
+        }
     }
     catch (...) { ticking_ = false; throw; }
     ticking_ = false;
+}
+
+#include <chrono>
+Trace::Result Scene::Raycast(const Trace::Ray& input,const Trace::Query& query){
+    const auto start=std::chrono::steady_clock::now();Trace::Result result;result.statistics.queries=1;
+    auto normalized=Trace::Normalize(input);
+    if(!Trace::Valid(query))result.status=Trace::Status::InvalidQuery;
+    else if(!normalized)result.status=normalized.status;
+    else {
+        auto ray=normalized.ray;ray.maxDistance=(std::min)(ray.maxDistance,query.maxDistance);
+        for(const auto& entry:byId_){auto* component=entry.second;
+            if(pendingRemoves_.count(entry.first)||!(component->traceChannels&query.channels)||component->IsSkybox()||component->IsScreenSpaceUI()||std::find(query.ignore.begin(),query.ignore.end(),entry.first)!=query.ignore.end())continue;
+            auto hit=component->RaycastGeometry(ray,query,result.statistics);
+            if(hit&&(!result.hit||hit.hit->distance<result.hit->distance)){hit.hit->componentId=entry.first;result.hit=hit.hit;result.status=Trace::Status::Hit;ray.maxDistance=hit.hit->distance;}
+        }
+    }
+    result.statistics.microseconds=std::chrono::duration<double,std::micro>(std::chrono::steady_clock::now()-start).count();traceStatistics_+=result.statistics;return result;
 }

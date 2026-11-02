@@ -1,7 +1,9 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <vector>
+#include <string>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Render/ImpostorAtlas.h>
 #include <Engine/Render/MeshData.h>
@@ -39,6 +41,7 @@ public:
     static constexpr int MaxLodCount = 4;
 
     InstancedMeshComponent();
+    Trace::Result RaycastGeometry(const Trace::Ray&,const Trace::Query&,Trace::Statistics&) override;
     InstancedMeshComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
 
     /** Sets the geometry of one detail level (0 = most detailed). Levels must be filled in order. */
@@ -59,6 +62,21 @@ public:
      * flattens mesh into CrowdSkinnedVertex LOD0, and sets animation texture.
      */
     bool SetAnimatedModel(ID3D11Device* device, const SkeletalModel& model, float sampleFps = 30.0f);
+
+    /**
+     * Builds the levels the designer did not supply out of LOD0, so a single model is enough to
+     * get a working set. One ratio per generated level, as a fraction of the LOD0 triangle count,
+     * descending; an empty list turns generation off.
+     *
+     * Levels set by hand are never replaced: a designer who ships LOD1 keeps their own LOD1.
+     * Generation runs once, when the GPU buffers are created, so the call order does not matter.
+     */
+    void SetAutoLod(const std::vector<float>& triangleRatios);
+    /**
+     * Checks LOD0 against the contract for unit models (scale, pivot, orientation, UV, budget)
+     * and writes a report to the log. Off by default: it walks the whole mesh.
+     */
+    void SetAssetValidation(bool enabled, const std::string& modelName = std::string());
 
     /**
      * Distance from the camera at which the next LOD starts, in world units and ascending.
@@ -84,8 +102,18 @@ public:
     void SetShadowCascadeLimit(int cascadeCount) { ShadowCascadeLimit = cascadeCount; }
     /** How far above a cascade a caster can still be and reach it with its shadow. */
     void SetShadowCasterExtrusion(float distance) { ShadowCasterExtrusion = distance; }
-    /** Instances further than this from the camera do not cast shadows (0 disables the limit). */
-    void SetShadowDistance(float distance) { ShadowDistance = distance; }
+    /**
+     * Instances further than this from the camera do not cast shadows (0 disables the limit).
+     * The limit is a circle around the camera, so switching it on at one distance paints a ring
+     * of brighter ground across a dense field. Casters are therefore thinned out over the last
+     * fadeFraction of the distance instead: which of them still cast is decided per instance, so
+     * the shadows get sparser with distance rather than ending at a line.
+     */
+    void SetShadowDistance(float distance, float fadeFraction = 0.3f)
+    {
+        ShadowDistance = distance;
+        ShadowDistanceFade = std::max(0.0f, std::min(fadeFraction, 1.0f));
+    }
     /** Tints instances by their LOD so switching can be seen. Diagnostic only. */
     void SetLodDebugColors(bool enabled) { bLodDebugColors = enabled; }
     /**
@@ -95,6 +123,8 @@ public:
      */
     void SetImpostorEnabled(bool enabled, const ImpostorAtlasSettings& settings = ImpostorAtlasSettings{});
     bool HasImpostor() const { return bImpostorEnabled && Impostor.IsValid(); }
+    /** Diagnostics: writes the baked sprite atlas to BMP files next to the executable. */
+    bool DumpImpostorAtlas(const std::string& pathPrefix);
     /**
      * Width of the dithered cross-fade around a switch, as a fraction of the threshold
      * (0.15 = +-15%). 0 switches instantly.
@@ -191,6 +221,8 @@ private:
     int GetLevelCount() const;
     int GetImpostorLevelIndex() const;
     void BuildImpostorAtlas();
+    /** Fills the levels nobody supplied, from LOD0. Runs once. */
+    void BuildAutoLods();
     void DrawImpostors(ID3D11DeviceContext* context);
     /** Full set of instances for the baked shadow map, built once and reused between frames. */
     bool EnsureStaticShadowData(ID3D11DeviceContext* context);
@@ -223,6 +255,10 @@ private:
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> ImpostorRasterState;
     bool bImpostorEnabled = false;
     bool bImpostorBuildFailed = false;
+    std::vector<float> AutoLodRatios;
+    bool bAutoLodBuilt = false;
+    bool bValidateAsset = false;
+    std::string AssetName;
     // The material (and its revision) the atlas was baked with; a change triggers a rebake.
     const Material* BakedMaterial = nullptr;
     uint64_t BakedMaterialRevision = 0;
@@ -232,6 +268,7 @@ private:
     std::vector<float> LodScreenHeights;
     float DrawDistance = 0.0f;
     float ShadowDistance = 0.0f;
+    float ShadowDistanceFade = 0.3f;
     int ShadowLodBias = 1;
     int ShadowCascadeLimit = 0;
     float ShadowCasterExtrusion = 200.0f;

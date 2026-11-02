@@ -21,11 +21,11 @@ public:
     {
     }
     
-    // A light has no geometry: it is never drawn and never casts a shadow.
+    // A light has no geometry: it is never drawn.
     void CreateBuffers(ID3D11Device* Device) override {}
     void Render(ID3D11DeviceContext* context) override {}
     bool IsRenderable() const override { return false; }
-    bool CastsShadow() const override { return false; }
+    bool CastsShadow() const override { return bCastShadows; }
     
     glm::vec3 GetLightColor() const { return LightColor; }
     float GetIntensity() const { return Intensity; }
@@ -36,10 +36,12 @@ public:
     void SetIntensity(float intensity) { Intensity = intensity; }
     void SetRadius(float radius) { Radius = radius; }
     void SetEnabled(bool bInEnabled) { bEnabled = bInEnabled; }
+    void SetCastShadows(bool bInCastShadows) { bCastShadows = bInCastShadows; }
     
 private:
     glm::vec3 LightColor{1.0f, 1.0f, 1.0f};
     float Intensity{1.0f};
     float Radius{50.0f};
     bool bEnabled{true};
+    bool bCastShadows{false};
 };

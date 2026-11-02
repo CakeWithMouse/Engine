@@ -1,7 +1,9 @@
 param([ValidateSet('Debug','Release')][string]$Configuration = 'Release', [switch]$SkipBuild, [switch]$IncludeUi)
 $ErrorActionPreference = 'Stop'
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
-$work = Join-Path $repo ('Engine/build/compatibility/' + [guid]::NewGuid().ToString('N'))
+# Keep the fixture prefix short: the bundled importer has deeply nested Python
+# files and this test also installs a second copy of that runtime.
+$work = Join-Path $repo ('Engine/build/compat/' + [guid]::NewGuid().ToString('N').Substring(0,8))
 New-Item -ItemType Directory -Path $work -Force | Out-Null
 $env:PAINENGINE_ENGINE_STORE = Join-Path $work 'Engines'
 $env:TEMP = $work

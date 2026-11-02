@@ -5,6 +5,7 @@
 #include <Engine/Resources/Paths.h>
 #include <Engine/Base/Base.h>
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
+#include <Engine/Components/Light/DirectionalLightComponent.h>
 #include <cmath>
 #include <iostream>
 #include <limits>
@@ -42,7 +43,7 @@ struct Probe : CubeComponent
     Probe()
     {
         if (failConstruction) throw std::runtime_error("expected constructor failure");
-        InitCube(); last = this; ++live;
+        last = this; ++live;
     }
     ~Probe() override { --live; }
     bool HasBuffers() const { return vb && ib; }
@@ -52,7 +53,39 @@ struct Probe : CubeComponent
         ++ticks; SetPosition(GetLocalPosition() + glm::vec3(dt, 0, 0));
     }
 };
-static const ComponentType types[] = {{"Probe", "Probe", EngineComponentDetail::Create<Probe>, {}}};
+static const ComponentType types[] = {
+    {"Probe", "Probe", EngineComponentDetail::Create<Probe>, {}},
+    {"Light.Directional", "Sun", EngineComponentDetail::Create<DirectionalLightComponent>, {}}};
+
+static void CheckShadowDepth(Game& game)
+{
+    Check(game.AreShadowsActive() && game.GetFrameConstants().ShadowParams.x > 0,
+        "scene enables shadows in frame constants");
+    Microsoft::WRL::ComPtr<ID3D11Resource> resource;
+    game.GetShadowMapSRV()->GetResource(&resource);
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> texture, staging;
+    Check(SUCCEEDED(resource.As(&texture)), "shadow texture exists");
+    D3D11_TEXTURE2D_DESC desc{};
+    texture->GetDesc(&desc);
+    desc.Usage = D3D11_USAGE_STAGING; desc.BindFlags = 0;
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ; desc.MiscFlags = 0;
+    Check(SUCCEEDED(game.GetDevice()->CreateTexture2D(&desc, nullptr, &staging)), "shadow readback texture");
+    game.GetContext()->CopyResource(staging.Get(), texture.Get());
+    bool hasCaster = false;
+    for (UINT cascade = 0; cascade < desc.ArraySize; ++cascade)
+    {
+        D3D11_MAPPED_SUBRESOURCE mapped{};
+        Check(SUCCEEDED(game.GetContext()->Map(staging.Get(), cascade, D3D11_MAP_READ, 0, &mapped)), "read shadow cascade");
+        for (UINT y = 0; y < desc.Height && !hasCaster; ++y)
+        {
+            const auto* row = reinterpret_cast<const float*>(static_cast<const char*>(mapped.pData) + y * mapped.RowPitch);
+            for (UINT x = 0; x < desc.Width; ++x)
+                if (row[x] < 1.0f) { hasCaster = true; break; }
+        }
+        game.GetContext()->Unmap(staging.Get(), cascade);
+    }
+    Check(hasCaster, "edited geometry writes actual GPU shadow depth");
+}
 
 static void Exercise(const EngineEditSessionApi& api, const char* type)
 {
@@ -146,7 +179,9 @@ int wmain(int argc, wchar_t** argv)
         Check(window != nullptr, "test HWND (no editor)");
         try
         {
-            SceneEditSession session({types, 1}); auto api = session.GetApi();
+            SceneEditSession session({types, 2}); auto api = session.GetApi();
+            uint64_t sunId;
+            Check(api.scene.createObject(api.scene.context, "Light.Directional", "Sun", nullptr, &sunId) == EngineSceneOk, "explicit scene sun");
             uint64_t id;
             Check(api.scene.createObject(api.scene.context, "Probe", "Visible", nullptr, &id) == EngineSceneOk, "create before attach");
             auto* editObject = last;
@@ -156,10 +191,23 @@ int wmain(int argc, wchar_t** argv)
             Check(Read(api).info.id == sceneId && live == 1, "failed attach preserves scene objects");
             EnginePaths::SetContentRoot(content);
             Check(api.attachViewport(api.context, window, 320, 240) == EngineSceneOk, "attach same edit Scene");
+            auto overlay = session.GetViewportOverlayApi();
+            EngineCameraInfo camInfo{};
+            Check(overlay.getCamera(overlay.context, &camInfo) == EngineSceneOk && camInfo.width == 320 && camInfo.height == 240, "getCamera returns valid camera state");
+            Check(overlay.setOverlayLines(overlay.context, nullptr, 0, 1.0f) == EngineSceneOk, "empty setOverlayLines");
+            EngineOverlayLine testLine{0,0,0, 1,1,1, 0xFFFFFFFF, 0};
+            Check(overlay.setOverlayLines(overlay.context, &testLine, 1, 1.0f) == EngineSceneOk, "setOverlayLines with line");
+            uint8_t rgba[16] = {255,255,255,255, 255,255,255,255, 255,255,255,255, 255,255,255,255};
+            Check(overlay.setOverlayIcon(overlay.context, 1, 2, 2, rgba) == EngineSceneOk, "setOverlayIcon");
+            EngineOverlayBillboard testBb{1, 0,0,0, 24.0f, 0xFFFFFFFF, 1};
+            Check(overlay.setOverlayBillboards(overlay.context, &testBb, 1) == EngineSceneOk, "setOverlayBillboards");
+            Check(overlay.setOverlayBillboards(overlay.context, nullptr, 0) == EngineSceneOk, "clear setOverlayBillboards");
+            Check(overlay.setOverlayLines(overlay.context, nullptr, 0, 1.0f) == EngineSceneOk, "clear setOverlayLines");
             const auto beforeTicks = ticks;
             Check(api.frame(api.context, 0.05) == EngineSceneOk && ticks == beforeTicks, "render Edit without Tick");
             Check(editObject->GetGame() && editObject->GetGame()->GetScene().FindComponent(id) == editObject, "renderer uses exact edited instance");
             Check(static_cast<Probe*>(editObject)->HasBuffers() && editObject->GetGame()->GetFrameStats().DrawCalls > 0, "existing geometry rendered");
+            CheckShadowDepth(*editObject->GetGame());
             EnginePaths::SetContentRoot(content / "missing-play-root");
             Check(api.control(api.context, EnginePlay) == EngineSceneFailure, "failed Play viewport rolls back");
             EnginePaths::SetContentRoot(content);
@@ -169,12 +217,18 @@ int wmain(int argc, wchar_t** argv)
             Check(playObject != editObject, "distinct play instance");
             Check(api.frame(api.context, 0.05) == EngineSceneOk && ticks == beforeTicks + 1, "render has no duplicate Tick");
             Check(playObject->GetGame()->GetScene().GetId() == Read(api, true).info.id, "active renderer uses play Scene");
+            CheckShadowDepth(*playObject->GetGame());
             Check(api.control(api.context, EnginePause) == EngineSceneOk, "viewport pause");
             Check(api.resizeViewport(api.context, 400, 300) == EngineSceneOk && api.frame(api.context, 0.05) == EngineSceneOk, "paused resize/render");
             Check(ticks == beforeTicks + 1, "paused render has no Tick");
             Check(api.control(api.context, EngineStop) == EngineSceneOk && api.frame(api.context, 0.05) == EngineSceneOk, "restore edit targets");
             Check(editObject->GetGame()->GetScene().FindComponent(id) == editObject && live == 1, "original edit object retained");
+            CheckShadowDepth(*editObject->GetGame());
             ExerciseJson(api, "Probe", true, content); // same HWND across JSON replacements and Play
+            Check(api.scene.createObject(api.scene.context, "Light.Directional", "Sun", nullptr, &sunId) == EngineSceneOk, "sun after empty scene load");
+            Check(api.scene.createObject(api.scene.context, "Probe", "After load", nullptr, &id) == EngineSceneOk, "caster after scene replacement");
+            Check(api.frame(api.context, 0.01) == EngineSceneOk, "loaded edit scene renders shadows");
+            CheckShadowDepth(*last->GetGame());
         }
         catch (...) { DestroyWindow(window); throw; }
         try
@@ -184,6 +238,7 @@ int wmain(int argc, wchar_t** argv)
             uint64_t id;
             Check(api.scene.createObject(api.scene.context, "RuntimeExample::Mover", "DLL viewport", nullptr, &id) == EngineSceneOk, "DLL viewport object");
             Check(api.attachViewport(api.context, window, 320, 240) == EngineSceneOk, "DLL viewport attach");
+            Check(dll.ViewportOverlayApi().getCamera != nullptr, "DLL exposes overlay extension");
             Check(api.frame(api.context, 0.05) == EngineSceneOk, "DLL edit frame");
             Check(api.control(api.context, EnginePlay) == EngineSceneOk && api.frame(api.context, 0.05) == EngineSceneOk, "DLL play viewport");
             Check(api.control(api.context, EngineStop) == EngineSceneOk && api.frame(api.context, 0.05) == EngineSceneOk, "DLL restore viewport");

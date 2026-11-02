@@ -1,3 +1,4 @@
+#include "../SceneTestAccess.h"
 #define NOMINMAX
 #include <Windows.h>
 #include <Engine/Base/Base.h>
@@ -58,16 +59,16 @@ void LocalTests()
         uint64_t id = 42;
         Check(api.createObject(api.context, "Throws", "bad", nullptr, &id) == EngineSceneFailure && id == 0, "factory exception contained");
         Check(api.createObject(api.context, "Null", "bad", nullptr, &id) == EngineSceneFailure, "null factory contained");
-        Check(scene.GetRevision() == 0 && Read(api).objects.empty(), "failed factories leave scene unchanged");
+        Check(SceneTestAccess::Revision(scene) == 0 && Read(api).objects.empty(), "failed factories leave scene unchanged");
         Check(api.createObject(api.context, "Tracked", "one", nullptr, &id) == EngineSceneOk && live == 1, "tracked create");
         const auto first = id;
-        const auto revision = scene.GetRevision();
+        const auto revision = SceneTestAccess::Revision(scene);
         Check(api.createObject(api.context, "Tracked", "one", nullptr, &id) == EngineSceneDuplicateName && constructed == 1, "duplicate checked before constructor");
         auto invalid = Identity(); invalid.scale[1] = 0;
         Check(api.createObject(api.context, "Tracked", "bad", &invalid, &id) == EngineSceneInvalidArgument && constructed == 1, "invalid transform before constructor");
         invalid = Identity(); invalid.position[0] = std::numeric_limits<float>::quiet_NaN();
         Check(api.setTransform(api.context, first, &invalid) == EngineSceneInvalidArgument, "NaN rejected");
-        Check(scene.GetRevision() == revision, "rejections preserve revision");
+        Check(SceneTestAccess::Revision(scene) == revision, "rejections preserve revision");
         {
             auto scope = scene.BeginUpdate();
             Check(api.removeObject(api.context, first) == EngineSceneBusy, "no command during update");

@@ -5,7 +5,7 @@
 void BuildCube(Game& game)
 {
     CubeComponent* Cube = new CubeComponent();
-    Cube->InitCube();
+
     ExampleStartup::Register(game, "1", Cube);
 
 }

@@ -18,7 +18,7 @@ cbuffer ConstantBuffer : register(b0)
     float4 LightPositions[8];
     float4 LightColors[8];
     float4 LightParams[8];
-    float4 LightMeta;            // x light count, y ambient, z shininess
+    float4 LightMeta;            // x light count, y ambient, z shininess, w explicit scene lighting (no implicit ambient)
     float4 ReflectionData;       // x has cube map, y strength, z fresnel power, w is skybox
     float4x4 LightViewProjection[3];
     float4 CascadeSplits;
@@ -166,7 +166,7 @@ float3 ComputeSceneLighting(float3 albedo, float3 normal, float3 worldPos, Mater
     float3 viewDir = normalize(CameraPosition.xyz - worldPos);
 
     float ambient = LightMeta.y;
-    if (material.AmbientModel > 0.5f)
+    if (material.AmbientModel > 0.5f && LightMeta.w < 0.5f)
     {
         ambient = max(LightMeta.y, 0.18f) + lerp(0.10f, 0.32f, saturate(normal.y * 0.5f + 0.5f));
     }

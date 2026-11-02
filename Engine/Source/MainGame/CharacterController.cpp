@@ -12,6 +12,7 @@ void CharacterController::Possess(ComponentId character,ComponentId camera)
     if(auto* c=GetCharacter()){auto f=c->GetLocalRotationQuat()*glm::vec3(0,0,-1);yaw_=std::atan2(f.z,f.x);pitch_=0;}
 }
 void CharacterController::Configure(const PlaySettings& s){distance_=s.cameraDistance;height_=s.cameraHeight;sensitivity_=s.lookSensitivity;Possess(s.character,s.camera);}
+void CharacterController::Configure(const Character& c){distance_=c.cameraDistance;height_=c.cameraHeight;sensitivity_=c.lookSensitivity;Possess(c.GetComponentId(),c.camera);}
 void CharacterController::SetEnabled(bool v){enabled_=v;inputScope_.SetEnabled(v);right_=forward_=0;game_.GetInput().Reset();}
 void CharacterController::BindInput()
 {
@@ -30,14 +31,25 @@ void CharacterController::BindInput()
 void CharacterController::Tick(float seconds)
 {
     if(enabled_&&game_.GetInput().IsContextEnabled(Input::Context::Game))
-        if(auto* c=GetCharacter())c->Move(glm::vec3(std::cos(yaw_),0,std::sin(yaw_))*forward_+glm::vec3(std::sin(yaw_),0,-std::cos(yaw_))*right_,seconds);
+        if(auto* c=GetCharacter()) {
+            const auto* fixed=dynamic_cast<SceneCamera*>(game_.GetScene().FindComponent(camera_));
+            const auto& view=fixed?static_cast<const CameraProperties&>(*fixed):c->cameraSettings;
+            if(view.viewPlane) c->Move(view.Up()*forward_+glm::cross(view.Forward(),view.Up())*right_,seconds);
+            else c->Move(glm::vec3(std::cos(yaw_),0,std::sin(yaw_))*forward_+glm::vec3(std::sin(yaw_),0,-std::cos(yaw_))*right_,seconds);
+        }
     right_=forward_=0;
 }
 void CharacterController::UpdateCamera(Player& camera)
 {
+    if(!GetCharacter())return;
     if(auto* fixed=dynamic_cast<SceneCamera*>(game_.GetScene().FindComponent(camera_))){fixed->Apply(camera);return;}
     if(camera_)return; // deleted explicit camera: retain last view, never silently choose another
     if(auto* c=GetCharacter()){
+        c->cameraSettings.ApplyProjection(camera);
+        if(c->cameraSettings.viewPlane){
+            const auto forward=c->cameraSettings.Forward(),up=c->cameraSettings.Up();
+            camera.SetCameraMode(CameraMode::Free);camera.SetPosition(c->GetWorldPosition()+up*height_-forward*distance_);camera.SetViewDirection(forward,up);return;
+        }
         camera.SetCameraMode(CameraMode::Free);camera.SetRotate(yaw_,pitch_);
         glm::vec3 forward(std::cos(yaw_)*std::cos(pitch_),std::sin(pitch_),std::sin(yaw_)*std::cos(pitch_));
         camera.SetPosition(c->GetWorldPosition()+glm::vec3(0,height_,0)-forward*distance_);camera.MoveEditorCamera(0,0,0,0,0,0);

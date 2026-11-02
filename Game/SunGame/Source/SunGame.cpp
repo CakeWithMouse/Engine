@@ -1,3 +1,5 @@
+#include "../../../Engine/Source/Components/ComponentInternal.h"
+#include <Engine/Render/MeshPrimitives.h>
 #include "SunGame.h"
 #include <Engine/Components/SpecificComponents/SphereComponent.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
@@ -23,7 +25,7 @@ void SunGame::BuildScene(const std::filesystem::path& contentRoot)
     } Resources;
     this->SetDirectionalLight(Config.SunDirectional,Config.SunLightColor,Config.SunItensity);
     //this->SetShadowSettings(Config.ShadowCasting, Config.ShadowDist);
-    this->SetRenderingType(Config.RenderingType);
+    this->GetSettings().SetRenderingType(Config.RenderingType);
     this->CreateCubeMapFromFiles("MySky", {
                                          Path + "/cosy.jpg",
                                          Path +"/cosy.jpg",
@@ -35,9 +37,9 @@ void SunGame::BuildScene(const std::filesystem::path& contentRoot)
 
     auto Skybox = std::make_unique<SkyboxComponent>(glm::vec3(9000.0f), glm::vec4(1.0f));
 
-    Skybox->InitCube();
+
     Skybox->SetCubeMap(this->GetCubeMap("MySky"));
-    Skybox->SetReflectionSettings(Config.SkyboxPower, 100.0f);
+    EngineInternal::ComponentAccess::Reflection(*Skybox, Config.SkyboxPower, 100.0f);
     //this->RegisterComponent("Skybox", Skybox, Resources.SkyboxMaterial, Resources.SkyboxVertex);
 
     PointLightComponent* MainWarmLight = new PointLightComponent(
@@ -97,20 +99,20 @@ void SunGame::BuildScene(const std::filesystem::path& contentRoot)
     float sunRadius2 = 1.5f;
     glm::vec3 sunScale2{sunRadius2, sunRadius2, sunRadius2};
     SphereComponent* Sun = new SphereComponent(sunPos, sunRot, sunScale2, glm::vec4(200.0f, 100.8f, 100.6f, 100.0f));
-    Sun->InitSphere(60.0f, 100, 100);
+    Sun->SetPrimitive(MeshPrimitives::Sphere(60.0f, 100, 100));
     Sun->SetOrbitSpeed(0.0f);
     this->RegisterComponent("Sun", Sun, {}, Resources.SunMaterial);
 
     //float sunRadius2 = 1.5f;
     //glm::vec3 sunScale2{sunRadius2, sunRadius2, sunRadius2};
     /*SphereComponent* Sky = new SphereComponent(sunPos, sunRot, sunScale2, glm::vec4(0.0f, 0.1f, 0.6f, 1.0f));
-    Sky->InitSphere(9000.0f, 100, 100);
+    Sky->SetPrimitive(MeshPrimitives::Sphere(9000.0f, 100, 100));
     Sky->SetOrbitSpeed(0.0f);
     this->RegisterComponent("Sky", Sky, {}, Resources.SunMaterial);*/
 
     SphereComponent* SunAtmosphere = new SphereComponent(sunPos, sunRot, glm::vec3(sunRadius + 0.5f),
                                                          glm::vec4(1.0f, 0.5f, 0.1f, 0.3f));
-    SunAtmosphere->InitSphere(65.0f, 80, 80);
+    SunAtmosphere->SetPrimitive(MeshPrimitives::Sphere(65.0f, 80, 80));
     SunAtmosphere->SetOrbitSpeed(0.0f);
     this->RegisterComponent("SunAtmosphere", SunAtmosphere, {}, Resources.SunMaterial);
 
@@ -157,7 +159,7 @@ void SunGame::BuildScene(const std::filesystem::path& contentRoot)
             asteroidScale.y *= 60;
             SphereComponent* Asteroid = new SphereComponent(asteroidPos, sunRot, asteroidScale,
                                                             glm::vec4(0.3f, 0.25f, 0.2f, 1.0f));
-            Asteroid->InitSphere(asteroidSize * 8.0f, 15, 15);
+            Asteroid->SetPrimitive(MeshPrimitives::Sphere(asteroidSize * 8.0f, 15, 15));
             Asteroid->SetOrbitSpeed((1.f + (rand() % 300) / 100.f) * OrbitSpeed_mul);
             Asteroid->SetOrbitDistance(distance);
             Asteroid->SetOrbitCenter(sunPos);
@@ -169,7 +171,7 @@ void SunGame::BuildScene(const std::filesystem::path& contentRoot)
         }
         SphereComponent* NewInstance = FirstAsteroid->CreateSphereInstance(
             asteroidPos, sunRot, asteroidScale, glm::vec4(0.48f, 0.40f, 0.33f, 1.0f));
-        NewInstance->InitSphere(asteroidSize * 8.0f, 15, 15);
+        NewInstance->SetPrimitive(MeshPrimitives::Sphere(asteroidSize * 8.0f, 15, 15));
         NewInstance->SetOrbitSpeed((1.f + (rand() % 300) / 100.f) * OrbitSpeed_mul);
         NewInstance->SetOrbitDistance(distance);
         NewInstance->SetOrbitCenter(sunPos);
@@ -201,7 +203,7 @@ void SunGame::BuildScene(const std::filesystem::path& contentRoot)
             asteroidScale.y *= 60;
             SphereComponent* Asteroid = new SphereComponent(asteroidPos, sunRot, asteroidScale,
                                                             glm::vec4(0.3f, 0.25f, 0.2f, 1.0f));
-            Asteroid->InitSphere(asteroidSize * 8.0f, 15, 15);
+            Asteroid->SetPrimitive(MeshPrimitives::Sphere(asteroidSize * 8.0f, 15, 15));
             Asteroid->SetOrbitSpeed((1.f + (rand() % 300) / 100.f) * OrbitSpeed_mul);
             Asteroid->SetOrbitDistance(distance);
             Asteroid->SetOrbitCenter(sunPos);
@@ -213,7 +215,7 @@ void SunGame::BuildScene(const std::filesystem::path& contentRoot)
         }
         SphereComponent* NewInstance = FirstAsteroid->CreateSphereInstance(
             asteroidPos, sunRot, asteroidScale, glm::vec4(0.48f, 0.40f, 0.33f, 1.0f));
-        NewInstance->InitSphere(asteroidSize * 8.0f, 15, 15);
+        NewInstance->SetPrimitive(MeshPrimitives::Sphere(asteroidSize * 8.0f, 15, 15));
         NewInstance->SetOrbitSpeed((1.f + (rand() % 300) / 100.f) * OrbitSpeed_mul);
         NewInstance->SetOrbitDistance(distance);
         NewInstance->SetOrbitCenter(sunPos);
@@ -236,12 +238,12 @@ void SunGame::BuildScene(const std::filesystem::path& contentRoot)
         glm::vec3 planetScale{data.radius, data.radius, data.radius};
 
         SphereComponent* Planet = new SphereComponent(planetPos, sunRot, planetScale, data.color);
-        Planet->InitSphere(data.radius * 15.0f, 80, 80);
+        Planet->SetPrimitive(MeshPrimitives::Sphere(data.radius * 15.0f, 80, 80));
         Planet->SetOrbitSpeed(data.speed);
         Planet->SetOrbitDistance(data.distance);
         Planet->SetOrbitCenter(sunPos);
         Planet->SetCubeMap(this->GetCubeMap("MySky"));
-        Planet->SetReflectionSettings(0.88f, 1.2f);
+        EngineInternal::ComponentAccess::Reflection(*Planet, 0.88f, 1.2f);
         if (data.name == "Uranus")
         {
             Uranus = Planet;
@@ -254,7 +256,7 @@ void SunGame::BuildScene(const std::filesystem::path& contentRoot)
             SphereComponent* Atmosphere = new SphereComponent(planetPos, sunRot,
                                                               glm::vec3(data.radius + 0.1f),
                                                               glm::vec4(1.0f, 1.0f, 1.0f, 0.25f));
-            Atmosphere->InitSphere((data.radius + 0.1f) * 15.0f, 60, 60);
+            Atmosphere->SetPrimitive(MeshPrimitives::Sphere((data.radius + 0.1f) * 15.0f, 60, 60));
             Atmosphere->SetOrbitSpeed(data.speed);
             Atmosphere->SetOrbitDistance(data.distance);
             Atmosphere->SetOrbitCenter(sunPos);
@@ -284,7 +286,7 @@ void SunGame::BuildScene(const std::filesystem::path& contentRoot)
         {
             UranusAsteroids = new SphereComponent(asteroidPos, sunRot, asteroidScale,
                                                   glm::vec4(0.6f, 0.5f, 0.4f, 1.0f));
-            UranusAsteroids->InitSphere(asteroidSize * 8.0f, 15, 15);
+            UranusAsteroids->SetPrimitive(MeshPrimitives::Sphere(asteroidSize * 8.0f, 15, 15));
             UranusAsteroids->SetParent(Uranus);
             this->RegisterComponent("UranusAsteroids", UranusAsteroids, Resources.InstanceSphereVertex, Resources.InstanceMaterial);
             continue;
@@ -330,7 +332,7 @@ void SunGame::BuildScene(const std::filesystem::path& contentRoot)
 
     glm::vec3 firstStarScale{RandomFloat(0.5f, 1.8f), RandomFloat(0.5f, 1.8f), RandomFloat(0.5f, 1.8f)};
     SphereComponent* StarFieldAnchor = new SphereComponent(firstStarPos, sunRot, firstStarScale, RandomStarColor());
-    StarFieldAnchor->InitSphere(1.1f, 6, 6);
+    StarFieldAnchor->SetPrimitive(MeshPrimitives::Sphere(1.1f, 6, 6));
     this->RegisterComponent("StarFieldAnchor", StarFieldAnchor, Resources.InstanceSphereVertex, Resources.InstanceMaterial);
 
     for (int i = 1; i < StarCount; ++i)

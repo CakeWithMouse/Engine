@@ -86,6 +86,7 @@ class InputDevice
     Game* game;
 
     std::unordered_set<Keys> keys;
+    bool pointerBlocked = false;
 
 public:
     struct MouseMoveEventArgs
@@ -112,6 +113,9 @@ public:
     void AddPressedKey(Keys key);
     void RemovePressedKey(Keys key);
     bool IsKeyDown(Keys key) const;
+    bool IsPhysicalKeyDown(Keys key) const { return keys.count(key) != 0; }
+    void SetPointerBlocked(bool blocked) { pointerBlocked = blocked; }
+    bool IsPointerBlocked() const { return pointerBlocked; }
     /** Releases every key, e.g. when the window loses focus. */
     void ClearPressedKeys();
     /** Called by the game loop after the frame was simulated and drawn. */

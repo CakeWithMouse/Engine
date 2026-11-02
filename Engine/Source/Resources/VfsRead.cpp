@@ -127,6 +127,9 @@ namespace VfsRead
 
         // Check physical paths against existing mount points
         std::error_code ec;
+        // The narrow path constructor would read the string in the system code page, so a
+        // repository under a non-ASCII directory stops resolving: every lookup falls through to
+        // the unmounted-root branch and the engine finds none of its own shaders.
         std::filesystem::path p = std::filesystem::u8path(path.begin(), path.end()); // UTF-8, not the ANSI code page
         if (!p.is_absolute())
         {

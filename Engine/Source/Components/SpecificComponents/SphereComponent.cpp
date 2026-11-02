@@ -1,10 +1,11 @@
 #include <Engine/Components/SpecificComponents/SphereComponent.h>
 #include <iostream>
+SphereComponent::SphereComponent() { InitSphere(); }
 SphereComponent::SphereComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale) 
-    : GameComponent(pos, rot, scale) {}
+    : GameComponent(pos, rot, scale) { InitSphere(); }
 
 SphereComponent::SphereComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm::vec4 color) 
-    : GameComponent(pos, rot, scale, color) {}
+    : GameComponent(pos, rot, scale, color) { InitSphere(); }
 
 void SphereComponent::GenerateSphere(float radius, int slices, int stacks)
 {
@@ -66,8 +67,6 @@ void SphereComponent::InitSphere(float radius, int slices, int stacks)
     
     InitPoints(points.data(), static_cast<int>(points.size()), indices.data(), static_cast<int>(indices.size()));
     
-    std::cout << "Sphere initialized with " << vertices.size()/2 << " vertices and " 
-              << indices.size() << " indices\n";
 }
 
 void SphereComponent::Tick(float deltaTime)

@@ -1,6 +1,7 @@
 #pragma once
 #include <Engine/Components/ComponentType.h>
 #include <stdexcept>
+#include <Engine/Components/EditorProperties.h>
 
 // Specialize for an independent hierarchy. The actual T never crosses the DLL
 // boundary. A non-rendering scene-owned adapter gives it explicit lifetime.
@@ -27,9 +28,18 @@ public:
     void LoadProjectData(const std::string& data) override { ProjectObjectAdapter<T>::Load(*value_, data); }
     template<class A, class = void> struct HasRemap : std::false_type {};
     template<class A> struct HasRemap<A, std::void_t<decltype(A::Remap(std::declval<T&>(), std::declval<const std::map<ComponentId,ComponentId>&>()))>> : std::true_type {};
+    template<class A,class=void> struct HasProperties : std::false_type {};
+    template<class A> struct HasProperties<A,std::void_t<decltype(A::DescribeEditorProperties())>> : std::true_type {};
+    std::string DescribeEditorProperties() const override {
+        if constexpr(HasProperties<ProjectObjectAdapter<T>>::value)return ProjectObjectAdapter<T>::DescribeEditorProperties();
+        return {};
+    }
+    // @engine-internal-begin
+private:
     void RemapProjectReferences(const std::map<ComponentId,ComponentId>& ids) override {
         if constexpr (HasRemap<ProjectObjectAdapter<T>>::value) ProjectObjectAdapter<T>::Remap(*value_, ids);
     }
+    // @engine-internal-end
 };
 namespace EngineComponentDetail
 {

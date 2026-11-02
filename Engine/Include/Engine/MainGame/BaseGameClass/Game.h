@@ -9,24 +9,20 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <Engine/Runtime/ViewportOverlayApi.h>
 #include <wrl/client.h>
 #include <glm/vec3.hpp>
 
 #include <Engine/Render/ShaderConstants.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/MainGame/Player.h>
+#include <Engine/MainGame/GameSettings.h>
 #include <Engine/Display/Display.h>
 #include <Engine/InputDevice/InputDevice.h>
 #include <Engine/InputDevice/InputActions.h>
 
 class CharacterController;
-
-enum RenderType
-{
-    Forward,
-    Deffered,
-    Custom
-};
 
 enum class ShaderCompileVariant
 {
@@ -57,6 +53,7 @@ const char* ToString(RegisterResult result);
 class GameComponent;
 class Material;
 class PointLightComponent;
+class UIComponent;
 class FBXComponent;
 struct ComponentShaderVariant;
 
@@ -131,6 +128,10 @@ public:
     Game(const Game&) = delete;
     Game& operator=(const Game&) = delete;
 
+    // Borrowed reference: valid for this Game lifetime.
+    GameSettings& GetSettings() { return Settings; }
+    const GameSettings& GetSettings() const { return Settings; }
+
     /** Creates window, device and base resources. Returns false (and releases everything) on failure. */
     bool Initialize();
     // Standalone window driven by a module host, without StartGame's nested loop.
@@ -138,7 +139,6 @@ public:
     enum class RuntimeFrameResult { Running, Closed, Failed };
     RuntimeFrameResult RunRuntimeFrame(float deltaTime);
     bool IsRuntimeWindow() const { return bRuntimeWindow; }
-    void RequestWindowClose() { bWindowCloseRequested = true; }
     // Embedded preview: host owns HWND and drives frames/resizes on the render thread.
     // No Raw Input registration, window procedure replacement or nested message loop.
     // preserveSceneOnFailure is for data-only edit scenes (no custom AfterInitialize).
@@ -153,15 +153,13 @@ public:
     /** Runs the frame loop until quit. Returns the process exit code. */
     int StartGame();
 
-    // Shader variants are resolved per pass, so the render type may be switched at any time.
-    void SetRenderingType(RenderType NewType) { RenderingType = NewType; }
-    RenderType GetRenderingType() const { return RenderingType; }
     void SetShadowSettings(bool enabled, float shadowDistance);
+    // Scene projects use their single DirectionalLightComponent, with no implicit sun or ambient.
+    void SetSceneLightingEnabled(bool enabled) { bSceneLighting = enabled; }
     void SetDirectionalLight(const glm::vec3& direction, const glm::vec3& color, float intensity);
     void SetDirectionalLightDirection(const glm::vec3& direction);
     void SetDirectionalLightColor(const glm::vec3& color);
     void SetDirectionalLightIntensity(float intensity);
-    void SetVSync(bool enabled) { bVSync = enabled; }
     void SetDeferredDebugOverlay(bool enabled) { bShowDeferredDebugOverlay = enabled; }
     /**
      * Scene time = real time * scale. The default reproduces the speeds that the scenes were tuned
@@ -193,14 +191,21 @@ public:
     bool CreateCubeMapFromFiles(const std::string& cubeMapName, const std::vector<std::string>& facePaths);
     CubeMapResource* GetCubeMap(const std::string& cubeMapName) const;
 
+    Trace::RayResult ScreenPointToRay(Trace::ViewportPoint point,float maxDistance=10000) const;
+    Trace::Result RaycastScreen(Trace::ViewportPoint point,const Trace::Query& query={});
+    Trace::Result RaycastCursor(const Trace::Query& query={});
+    void DebugDrawTrace(const Trace::Ray&,const Trace::Result&,float lifetime=1);
+    void ClearDebugTraces();
+    size_t GetDebugTraceLineCount();
     Player* GetPlayer() const { return FirstPlayer.get(); }
+    UIComponent* GetProjectHud() const { return ProjectHudComponent.get(); }
     Display* GetDisplay() const { return DisplayPtr.get(); }
     InputDevice* GetInputDevice() const { return InputDevicePtr.get(); }
     Input::System& GetInput() { return ActionInput; }
     CharacterController* GetCharacterController() const { return Controller.get(); }
     void SetCharacterController(std::unique_ptr<CharacterController>);
     virtual std::unique_ptr<CharacterController> CreateCharacterController();
-    void InitializeGameplay(); // idempotent; resolves the optional PlaySettings object
+    void InitializeGameplay(); // idempotent; resolves the player character and its camera properties
     bool HasGameplayController() const { return Controller != nullptr; }
     ID3D11Device* GetDevice() const { return Device.Get(); }
     ID3D11DeviceContext* GetContext() const { return Context.Get(); }
@@ -219,13 +224,26 @@ public:
     /**
      * Area covered by the baked shadow map of static objects (terrain, buildings). The map is
      * anchored to the world, rendered once and reused while the sun and the area do not change,
-     * so moving the camera costs nothing. Components opt in with SetStaticShadowCaster.
+     * so moving the camera costs nothing. Static-caster participation is configured internally.
      */
     /**
      * Diagnostics: writes every shadow cascade and the baked map as 24-bit BMP files
      * (<prefix>-cascade0.bmp, ...). Depth is remapped so that occupied texels are visible.
      */
     bool DumpShadowMaps(const std::string& pathPrefix);
+    /** Writes the finished frame to a BMP: lets a render be inspected without a screenshot. */
+    bool DumpFrame(const std::string& path);
+    /** Name of the GPU the device was created on: every measurement is of a specific adapter. */
+    const std::string& GetAdapterName() const { return AdapterName; }
+    /** Dumps the next finished frame, before it is presented. */
+    void RequestFrameDump(const std::string& path) { PendingFrameDump = path; }
+
+    void SetOverlayLines(const EngineOverlayLine* lines, uint32_t count, float thickness);
+    void SetOverlayIcon(uint32_t iconId, uint32_t width, uint32_t height, const uint8_t* rgbaPixels);
+    void SetOverlayBillboards(const EngineOverlayBillboard* billboards, uint32_t count);
+    void SetOverlayTriangles(const EngineOverlayTriangle* triangles, uint32_t count);
+    bool GetCameraInfo(EngineCameraInfo& info) const;
+    void RenderEditorOverlay();
 
     void SetStaticShadowArea(const glm::vec3& center, float extent);
     void InvalidateStaticShadow() { bStaticShadowDirty = true; }
@@ -238,7 +256,13 @@ public:
 
     /** Snapshot of camera/light/shadow data for the current frame. */
     const FrameConstants& GetFrameConstants() const { return CurrentFrame; }
+    // @engine-internal-begin
+private:
+    friend class GameComponent;
+    friend class InstancedMeshComponent;
     uint64_t GetFrameIndex() const { return FrameIndex; }
+public:
+    // @engine-internal-end
     FrameStats& GetFrameStats() { return Stats; }
     void CountDraw(uint32_t indexCount, uint32_t instanceCount = 1);
     void CountDispatch(uint32_t dispatchCount = 1) { Stats.Dispatches += dispatchCount; }
@@ -249,7 +273,8 @@ public:
     // Called by the window procedure.
     void OnWindowResized(int clientWidth, int clientHeight, bool minimized);
     void OnFocusLost();
-    void SetEditorSelection(uint64_t id) { EditorSelectedId = id; }
+    void SetEditorSelection(uint64_t id) { EditorSelectedId = id; EditorSelectedIds.clear(); }
+    void SetEditorSelections(std::vector<uint64_t> ids) { EditorSelectedIds = std::move(ids); EditorSelectedId = 0; }
     void RenderEditorSelection();
 
     ID3D11VertexShader* GetVertexShader() { return BaseVertexShader.Get(); }
@@ -356,6 +381,8 @@ protected:
     void RenderSkybox();
     void DispatchComputePhase();
     void RenderTransparent();
+    /** Screen-space interface, after everything else in the frame. */
+    void RenderUI();
     void RenderDeferredLightingPass();
     void RenderDeferredDebugOverlay();
     void FillFrameConstantBuffer(ConstantBufferData& data) const;
@@ -377,17 +404,21 @@ protected:
     void EndGpuTimer();
 
 protected:
-    RenderType RenderingType = Forward;
 
     float TotalTime = 0.0f;        // scene time (scaled)
     float RealTime = 0.0f;         // seconds of updated frames, unscaled (materials animate with it)
     float LastRealDeltaTime = 0.0f;
     float SimulationTimeScale = 0.13f * 60.0f;
+    // @engine-internal-begin
+private:
+    GameSettings Settings;
     uint64_t FrameIndex = 0;
+protected:
+    // @engine-internal-end
     bool bInitialized = false;
     bool bEmbedded = false;
     bool bSimulationEnabled = true; // Standalone games retain their existing behavior.
-    bool bRuntimeWindow = false, bRuntimeWindowVisible = true, bWindowCloseRequested = false;
+    bool bRuntimeWindow = false, bRuntimeWindowVisible = true;
     bool bRunning = false;
     int ExitCode = 0;
 
@@ -416,6 +447,7 @@ protected:
     Input::System ActionInput;
     std::unique_ptr<CharacterController> Controller;
     bool GameplayInitialized = false;
+    std::unique_ptr<UIComponent> ProjectHudComponent;
 
     // Scene owns components. The read-only alias preserves legacy traversal/order.
     Scene scene;
@@ -472,6 +504,7 @@ protected:
 
     // Lighting
     float AmbientIntensity = 0.06f;
+    bool bSceneLighting = false;
     float SpecularShininess = 32.0f;
 
     // Shadows (created lazily when enabled)
@@ -479,6 +512,9 @@ protected:
     bool bShadowResourcesReady = false;
     bool bShadowInitFailed = false;
     float ShadowDistance = 1200.0f;
+    std::string PendingFrameDump;
+    std::string AdapterName;
+    int AdapterDedicatedMemoryMb = 0;
     int ShadowMapSize = 2048;
     DirectX::XMFLOAT4 CascadeSplits = DirectX::XMFLOAT4(80.0f, 260.0f, 900.0f, 0.0f);
     DirectX::XMFLOAT4 ShadowParams = DirectX::XMFLOAT4(0.0f, static_cast<float>(MaxShadowCascades), 0.0012f, 1.0f / 2048.0f);
@@ -523,7 +559,6 @@ protected:
     FrameStats Stats;
     FrameStats LastFrameStats;
     ShaderCompileVariant CurrentPassVariant = ShaderCompileVariant::Default;
-    bool bVSync = true;
     bool bFrustumCulling = true;
     bool bOverlayKeyWasDown = false;
     bool bVSyncKeyWasDown = false;
@@ -542,6 +577,79 @@ protected:
     int GpuTimerSlot = 0;
     uint64_t EditorSelectedId = 0;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> SelectionVS;
+    std::vector<uint64_t> EditorSelectedIds;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> SelectionPS;
     Microsoft::WRL::ComPtr<ID3D11Buffer> SelectionCB;
+
+    struct OverlayLineVertex {
+        float x0, y0, z0;
+        float x1, y1, z1;
+        uint32_t color;
+        float sideX, sideY;
+        float thickness;
+    };
+    std::vector<OverlayLineVertex> OverlayDepthVertices;
+    std::vector<OverlayLineVertex> OverlayTopVertices;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> OverlayRasterState;
+    struct OverlayBillboardVertex {
+        float x, y, z;
+        float offsetX, offsetY;
+        float u, v;
+        uint32_t tint;
+    };
+    struct OverlayConstantsData {
+        DirectX::XMFLOAT4X4 ViewProjection;
+        DirectX::XMFLOAT4 ScreenSize;
+    };
+
+    struct CachedOverlayIcon {
+        uint32_t width = 0;
+        uint32_t height = 0;
+        Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
+    };
+
+    struct TimedTraceLine {EngineOverlayLine line;double expiry;};
+    std::vector<TimedTraceLine> TraceDebugLines;
+    std::vector<EngineOverlayLine> CollectTraceDebugLines();
+    std::vector<EngineOverlayLine> PendingOverlayLines;
+    float OverlayLineThickness = 1.0f;
+    std::unordered_map<uint32_t, CachedOverlayIcon> OverlayIcons;
+    std::vector<EngineOverlayBillboard> PendingOverlayBillboards;
+    std::vector<EngineOverlayTriangle> PendingOverlayTriangles;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> OverlayTriangleVS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> OverlayTrianglePS;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> OverlayTriangleLayout;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> OverlayTriangleVB;
+    size_t OverlayTriangleVBCapacity = 0;
+
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> OverlayLineVS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> OverlayLinePS;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> OverlayLineLayout;
+
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> OverlayBillboardVS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> OverlayBillboardPS;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> OverlayBillboardLayout;
+
+    Microsoft::WRL::ComPtr<ID3D11Buffer> OverlayCB;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> OverlayLineVB;
+    size_t OverlayLineVBCapacity = 0;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> OverlayBillboardVB;
+    size_t OverlayBillboardVBCapacity = 0;
+
+    Microsoft::WRL::ComPtr<ID3D11BlendState> OverlayBlendState;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> OverlayDepthReadOnlyState;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> OverlayDepthDisabledState;
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> OverlaySamplerState;
+
+    // Anti-aliasing (FXAA)
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> SceneColorTexture;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> SceneColorRTV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> SceneColorSRV;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> FxaaVS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> FxaaPS;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> FxaaCB;
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> FxaaSampler;
+    bool EnsureFxaaResources(uint32_t width, uint32_t height);
+    void RenderFxaaPass();
 };

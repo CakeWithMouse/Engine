@@ -1,96 +1,346 @@
 {
   "title": "PainEngine — Практический туториал",
-  "engineVersion": "2026.10.27.0",
-  "date": "2026-10-27",
-  "revision": 1,
-  "slideCount": 23,
-  "presentation": "releases/PainEngine-Tutorial-2026-10-27-r1-final.pptx",
+  "engineVersion": "2026.11.01.1",
+  "date": "2026-11-01",
+  "revision": 7,
+  "sourceCommit": "a1519576e136aa87f4d4a30e542519d88acb5386",
+  "slideCount": 47,
+  "presentation": "releases/PainEngine-Tutorial-2026-11-01-r7-v3-final.pptx",
+  "pdf": "releases/PainEngine-Tutorial-2026-11-01-r7-v3-final.pdf",
   "content": "content.json",
   "builder": "build.mjs",
+  "editorialPolicy": "editorial-policy.json",
   "sources": [
     {
       "path": "Engine/Version.json",
-      "sha256": "d78527c0f10c364e6e39be28428b699607d99ff6c829c13f5abdfff16958b198"
+      "sha256": "c609db38df2124897b66603b9005c11bb8e01cde5a6fa919aa4fb6f725887be5"
     },
     {
-      "path": "Engine/Source/Components/Character.cpp",
-      "sha256": "3c08a6661d45b077f7f5dcb22442a76a42c58632acb18c0020be4df920f93a1b"
-    },
-    {
-      "path": "Engine/docs/INPUT-CHARACTER.md",
-      "sha256": "e49967c5cf37901c074bb98d97a41b96c344a042aa6bbb0ff3b88cbe70198aef"
+      "path": "Engine/docs/tutorial/examples/README.txt",
+      "sha256": "7fe8039d5c25f65e980f7e95dabfe2a69198c3858bad6d9fd744494aa706e18a"
     },
     {
       "path": "Game/Launcher/Source/Main.cpp",
-      "sha256": "720bd5a6dfc7f2df44367f68143d2946941e1e2415b32884da69821943711a77"
-    },
-    {
-      "path": "Engine/docs/CODE-PROJECTS.md",
-      "sha256": "55804cedb2f2e881ebcc876dd88822b1273812b974c337946e1d6b887da42ac4"
-    },
-    {
-      "path": "Engine/docs/USER-PROJECTS.md",
-      "sha256": "2fde22ff3649375667ae48fc1bd0461b235f91c4ef59bb76531a58e51010bf6a"
-    },
-    {
-      "path": "Editor/Source/MainWindow.cpp",
-      "sha256": "929601e19b0be20f044072fc3c0cad959923d1bc4cfb24a954aaf863d503cf64"
-    },
-    {
-      "path": "Editor/Source/SceneTools.cpp",
-      "sha256": "31f3bd5f55c87a229d9bb1c4dab9bff123eca856da780c9b0359a5d715bab218"
-    },
-    {
-      "path": "Editor/Source/FileBrowser.cpp",
-      "sha256": "fb5433ccbdfc0d757099da2f54978ecac5e3f76b74b71e3a37a4e74a967cd416"
-    },
-    {
-      "path": "Editor/Source/ViewportWidget.cpp",
-      "sha256": "83bf1ce8a5d0678acb1cc7a5aac15bd77ba90880d9f6b11944cf77a851b858a6"
-    },
-    {
-      "path": "Engine/Include/Engine/Project/StandardTypes.h",
-      "sha256": "361e9f25c36114187fdfe3e542deb90f87cf47f0b014735474715851557589ed"
-    },
-    {
-      "path": "Editor/Source/AssetTools.cpp",
-      "sha256": "010bc6e9a36ecbd8d8ddd70f22a1b07049df2795ecef0d5fdac6bad8b209eafc"
-    },
-    {
-      "path": "Engine/docs/SCENE-JSON.md",
-      "sha256": "366fc73de2a45d8b69ae56c7fcc7ff679ce5d6c6c50f5724082fe81c0a9b42c2"
-    },
-    {
-      "path": "Editor/Source/CodeTools.cpp",
-      "sha256": "1fd6b61408a54d3b24d75a61d8374e05e4aa0d0a758b728e93b16af6c45acfd1"
-    },
-    {
-      "path": "Editor/Include/CodeClassDialog.h",
-      "sha256": "e8cad4c2d3a6e727028ada8a4d8a1881f46452378d1d4815615b9298e9c1d403"
+      "sha256": "109a7fdbaef0cef9a7c43cfeea76b9cd27b2fb905778ad3524d0ef5526e3bb00"
     },
     {
       "path": "Engine/BuildSupport/ProjectTools.ps1",
-      "sha256": "99fd6fc26ea6c4d6b48d38dcf948d41e8fdf8d39f50bb476bedd5995c6146ea6"
+      "sha256": "94501c7d4f1222df8fe4ceb3e786e478c7ae6bfa6e37f46eb9a5b6664aae4606"
+    },
+    {
+      "path": "Editor/Source/MainWindow.cpp",
+      "sha256": "198a28e9a9abf6dab644fce5a5c213fc4921967d72409a2df73b43b1d67f16a4"
+    },
+    {
+      "path": "Editor/Source/FileBrowser.cpp",
+      "sha256": "cd7e4bbe472bd6d61ae80a5223c4d8f181270a93328b53331e8cdc493805629f"
+    },
+    {
+      "path": "Editor/Source/ViewportWidget.cpp",
+      "sha256": "58327426b9407f8dbad6494f7536a7c4dc292e573b96ef676d330fa24a3dbeb0"
+    },
+    {
+      "path": "Editor/Source/SceneObjectsPanel.cpp",
+      "sha256": "75aa356f4b098ca88c2b80441e285ee7b7fe528dc54ede182e62040aef6df58c"
+    },
+    {
+      "path": "Engine/docs/RELIABLE-WORKFLOW.md",
+      "sha256": "cb3d4244e4d1d564692b570226d8bf230c6ebeab626953d9a67d57bf4ede8250"
+    },
+    {
+      "path": "Editor/Source/AssetTools.cpp",
+      "sha256": "cb986092ca953465662973c909fb50d5f5d391043ec7540f377ec49ab4d28212"
+    },
+    {
+      "path": "Engine/Source/Scene/ModelImport.cpp",
+      "sha256": "52617ad01ae3a6de4db1a7076b3959a019041145c993ece962a128f5b739a84e"
+    },
+    {
+      "path": "Engine/docs/PROJECT-ASSETS.md",
+      "sha256": "3e4b17977b7e9c78cc5d79206d3cff9c5ef1b5fb38433d790543067ea75acc51"
+    },
+    {
+      "path": "Engine/Source/Scene/SceneAssets.cpp",
+      "sha256": "696d35ccc5b5c6f37db36c8d30901b04429d32586e0c63b0dc8a48447ddb7162"
+    },
+    {
+      "path": "Engine/Source/Scene/AssetUpdate.cpp",
+      "sha256": "3ec04803d29c9a807c75a187a63f1630b4a4bf64d43a7aacf32f20fee19fa390"
+    },
+    {
+      "path": "Engine/docs/ASSET-UPDATES-AND-PROPERTIES.md",
+      "sha256": "2d940970bbf22bbcf3abb1f0248adc3092ed15a3c3d661bc439b68d4b7bc03cf"
+    },
+    {
+      "path": "Editor/Source/MaterialEditorWindow.cpp",
+      "sha256": "dee0bf49c240d6f0122a35f656b3194df618db6f597925a8f8edad60338be5ca"
+    },
+    {
+      "path": "Engine/docs/MATERIALS.md",
+      "sha256": "15caf7e7a875d7b160cfdef0787dcbe5a785eb5d5ac3987fae55498271d7a0f7"
+    },
+    {
+      "path": "Editor/Source/ObjectInspectorPanel.cpp",
+      "sha256": "a8b9fc8b56477082b9435b5d940c3d1f3dfc9712b32790c25b450cb28151fe05"
+    },
+    {
+      "path": "Engine/Include/Engine/Components/Light/DirectionalLightComponent.h",
+      "sha256": "cd22364f161b648c8e1847e34511126ce817737c1acaa81e3e08a81aa5b071ca"
+    },
+    {
+      "path": "Engine/Source/Components/Light/DirectionalLightComponent.cpp",
+      "sha256": "34ddabfe47846956788fdac11722acfc6ea118f25c7f5612aada2c47f84853cc"
+    },
+    {
+      "path": "Engine/Source/MainGame/BaseGameClass/Game.cpp",
+      "sha256": "10dd672aad183627a8d62177847babc07699315ba700c7c01c71efcef24a50e3"
+    },
+    {
+      "path": "Engine/Content/Shaders/Common.hlsli",
+      "sha256": "56cdd6e2d5aa7221fa9d8828e00012edeafafbc57986105870f910c432996447"
+    },
+    {
+      "path": "Engine/Include/Engine/Project/StandardTypes.h",
+      "sha256": "3d6fd6945be82949c5b166b07978550750b5c35460ff8f0cd833a11c970a78b6"
+    },
+    {
+      "path": "Engine/Include/Engine/Components/Character.h",
+      "sha256": "53c870da7e0050fb998ed3556388aa0b15db6c7264afd135a3a3b0a7f54a83d7"
+    },
+    {
+      "path": "Engine/Source/Components/Character.cpp",
+      "sha256": "75981422c81aa216d9026be13c2ea2988de8002faa84327607ec9b08469d3e14"
+    },
+    {
+      "path": "Engine/docs/CODE-PROJECTS.md",
+      "sha256": "daecc45367ac3ae23da72230a28a3c3aa6250f19111c93f6ff7455081f12f9b1"
+    },
+    {
+      "path": "Engine/docs/SCENE-JSON.md",
+      "sha256": "87dfd3db935d737bcaec8da9b4fb2928270cb59ce6846cbd05bc3a62594e8d75"
+    },
+    {
+      "path": "Editor/Include/RecoveryStore.h",
+      "sha256": "fe766a00440998753932ed1ab97982ed628d25445dc2ba2f5e04ec60e36e6a53"
+    },
+    {
+      "path": "Engine/Runtime/ProjectExport.h",
+      "sha256": "4c5f5f22ef9ac0589c091dd306704990aa3b40d12bc2ded998e874d78c01eb4e"
+    },
+    {
+      "path": "Editor/Source/UIEditorWindow.cpp",
+      "sha256": "acd5a818e5749e365eb09082315b1abe787f1a699fe8cc606c76c1abe705ef27"
+    },
+    {
+      "path": "Editor/Source/HudTools.cpp",
+      "sha256": "cb0a8e273ba1985454c1fdc7218b933ca5f36193efb14dc890c27b23c81ff3bf"
+    },
+    {
+      "path": "Engine/Include/Engine/UI/ProjectHud.h",
+      "sha256": "5047a9ae6cb4a6f80295b9615c78cb972da3422fe246ea90e684cb99eced18bc"
+    },
+    {
+      "path": "Engine/Source/Components/SpecificComponents/UIComponent.cpp",
+      "sha256": "1fb0613a227caf01c0191475ac522f2b89c63838229449b3f414b24a1d5d1f8c"
+    },
+    {
+      "path": "Engine/Source/UI/UIMarkup.cpp",
+      "sha256": "289024739c0129676b9b60cfc7b8196b36d05d51d986426e9a48431fec597335"
+    },
+    {
+      "path": "Engine/docs/UI-EDITOR.md",
+      "sha256": "a18ed8cae4a7544515426da74e5a6c2ed2d87968183b8d86de2d14176e39aa11"
+    },
+    {
+      "path": "Engine/docs/INPUT-CHARACTER.md",
+      "sha256": "4a331006ed49e388ceff403d2b7d368527e7f545d39f88d1fabf2856c75a1f96"
+    },
+    {
+      "path": "Editor/Source/CodeTools.cpp",
+      "sha256": "350fd4c3151af230463bfe989d44afdc3f0176d9ad7dcf5e1c70a1370386cc5d"
+    },
+    {
+      "path": "Engine/Include/Engine/Components/SpecificComponents/UIComponent.h",
+      "sha256": "f3f360006d96e918e974551ac1103b181f99248ca639d5716d178c633e981c94"
+    },
+    {
+      "path": "Editor/Include/CodeClassDialog.h",
+      "sha256": "6392f4c1d85eb19ecdde43d0f6cb062829ee73f2909d602f924fdc4857d19fd0"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/ProjectGame.cpp",
+      "sha256": "40ff2e4d13a0e5b55ffa61f7c2bb007647b436a9e1bc85bf6755810b6b61e8b8"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/RotatingCube.cpp",
+      "sha256": "dac043d9da15e06eed1eb0067a6ff83cefb92253a139c0b19741e14d36195028"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/RotatingCube.h",
+      "sha256": "00c1386a2d4eb15c26bbbcfbba5ed68de8ccef2d091d502d26669e4578ba78c1"
+    },
+    {
+      "path": "Engine/Include/Engine/Render/MeshPrimitives.h",
+      "sha256": "d3360b8720c56ca06fcd1dcabc3b61a87cad5ed33d511053850be1caea7e2d54"
+    },
+    {
+      "path": "Engine/Source/Components/SpecificComponents/CubeComponent.cpp",
+      "sha256": "3f2178ade4df34525081546462f0e7b93f82d5736a340788300e1776217344e8"
     },
     {
       "path": "Engine/Source/Components/GameComponents.cpp",
-      "sha256": "394f29f7e79606e73c91cb3cd31841c75d93754b010cae1ccb88c2ba094b8271"
+      "sha256": "8d9bd0d83a41f884588ee36a8dee6566872d6fcedd467b9412c6ec42fd274f49"
+    },
+    {
+      "path": "Game/PropertyTutorial/Source/RotatingCube.h",
+      "sha256": "dac186d097eacab5d40076fcc51b1877bcfd8979b2b85bcc0c6aa9bcaef4ad47"
+    },
+    {
+      "path": "Game/PropertyTutorial/Source/RotatingCube.cpp",
+      "sha256": "be9a59775c0a9d9acd8cdad9999a82cb4cdca10043a7eeef73a35e86e861e6b9"
+    },
+    {
+      "path": "Game/PropertyTutorial/README.md",
+      "sha256": "6841367e2c3ce91b840e58b9dc7f46606ebb71360a4d90880b898ba9cbe749a3"
+    },
+    {
+      "path": "Game/PropertyTutorial/Content/Scenes/Main.scene.json",
+      "sha256": "3a3adabbf0b66897359af09d9ae47c184fc166642d19d397f735a88fffc06b96"
+    },
+    {
+      "path": "Game/PropertyTutorial/OpenEditor.ps1",
+      "sha256": "2b276495e47c087baef8f4c70851e1725e4cdc896cc56b5813ed76762f563def"
+    },
+    {
+      "path": "Game/PropertyTutorial/Create.ps1",
+      "sha256": "3707c00c1332217fdfcf5d825f43c136cabb63cfdc811dce6c4c88e31917d0ee"
+    },
+    {
+      "path": "Engine/Include/Engine/Components/PropertyMacros.h",
+      "sha256": "a69469330a11aad469f154881cc22abf2279bf4f5ce7896d2e5bd7344e4490ec"
+    },
+    {
+      "path": "Engine/docs/PROPERTY-MACROS.md",
+      "sha256": "7e979370ffa60de91941ae1bb50b69136190cb28627c7b7a50ea6100b88a91c5"
+    },
+    {
+      "path": "Engine/docs/api-reference/examples/ReferenceComponent.h",
+      "sha256": "46e7b576417fb8d5aa2df65fa7a32d6a51f551a1952bfcaca63c71f9c8612943"
+    },
+    {
+      "path": "Engine/Include/Engine/Scene/Scene.h",
+      "sha256": "f9eeae6e39b7aae6ba19fbd39fbca946b8320a27362d3127d6fa35a8654e0e46"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/ModelExample.cpp",
+      "sha256": "e123a70ff59eefd27a61e3159b4aea1358e93200b9afc8e5bd40bc3e4f66f250"
+    },
+    {
+      "path": "Engine/Include/Engine/Scene/SceneAssets.h",
+      "sha256": "fbf60094f59e2383ed10bc7e5b3235c1a9b0ae137ea4a51338da0d19a4a0189c"
+    },
+    {
+      "path": "Engine/Include/Engine/Components/GameComponents.h",
+      "sha256": "9bcdd6e3a378cfc8c14c00614d16c9905ca1287c590f33079615e321032b2a58"
+    },
+    {
+      "path": "Engine/Source/Scene/Scene.cpp",
+      "sha256": "35e60ae9ef2a6f7ffb455fbf44d9b76da75e19b5afb80f1af342fb0c83b1c2a3"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/InputCube.h",
+      "sha256": "a5034f432bfbc1260bc2e7efbf752d321dfe274a4ba1cafdb9b0b801fe475c6e"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/InputCube.cpp",
+      "sha256": "a4c673aa6cec61e5a67b82596985cb621a87199a887e864b8c4a540c55ab6451"
     },
     {
       "path": "Engine/Include/Engine/InputDevice/InputActions.h",
-      "sha256": "e5105eb0e0323dff23b24c8c7cee0297f5b9b80294dd0b9cc77c9ef3e44ab963"
+      "sha256": "6dcd488022185b36cf5f3721d87720dcc338eed3c2c13c610b70f0b195184f2b"
     },
     {
       "path": "Engine/Include/Engine/MainGame/CharacterController.h",
-      "sha256": "0bf6530db1b8e1bb4b5f03470b31fd67fd7b4da7db6d1ed6d7bc90bc111fbc19"
+      "sha256": "09407ac50a8cfc6ac0e2de322ea8edfbe1f9ec28dcab82485cf04494ed162404"
     },
     {
       "path": "Engine/Source/MainGame/CharacterController.cpp",
-      "sha256": "e0e478b2cd8ef14b1ca7afe3a9bbd86f83e698103f934db1c31bc3cf58dc459e"
+      "sha256": "542c53ef88821830199f412d903da31a7bcf8255140ac1765c83a02e6c129d7c"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/MyController.h",
+      "sha256": "fe29d5a06462e002889d594b4fac91f960b5479bb3e64c81b009d54de9d685c2"
+    },
+    {
+      "path": "Engine/Include/Engine/UI/UIElement.h",
+      "sha256": "cd569afac41a4aa15deb9a8bbafe972858228a428ec0b11a5757a49336e7f3f8"
+    },
+    {
+      "path": "Engine/Source/UI/UIElement.cpp",
+      "sha256": "6ed6f375078fb37c0bd367d25585672d7b148845b408f29c9caefef3cafd49b1"
+    },
+    {
+      "path": "Engine/Include/Engine/UI/UIMarkup.h",
+      "sha256": "094b360c4f1ef67984252c478efda2ebe60e24b8bed30963f20c7609f7119bae"
+    },
+    {
+      "path": "Engine/Content/Shaders/UI.hlsl",
+      "sha256": "f6518d4116afce7eea6fa11eae5c314f5afc35f6c89a04238ec9120a41edfc2f"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/UI/TutorialHud.h",
+      "sha256": "40c398acf69d2ba4379c11eed60ed1253749dcc718024e9c678f9263b0cd4669"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/UI/TutorialHud.cpp",
+      "sha256": "dabc59a65111d6715993e794676925d0361ea0ddb5dafa298be328259830bd9e"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/UI/Content/UI/Hud.ui",
+      "sha256": "7cfd77e8d849b79e07a26f727b3eec54f80aee19f5472aa4dcd62ac2b8219c65"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/UI/README.txt",
+      "sha256": "cd9fe7bc6f4ac351e833c92d985045c26e020f8f28c9f8611b613a0a97639108"
+    },
+    {
+      "path": "Game/Battle/Content/UI/Hud.ui",
+      "sha256": "d63abee6064a7d9a5120eaf79169f8565bbd44195af973854b107076e1840dbf"
+    },
+    {
+      "path": "Game/Battle/Source/BattleGame.cpp",
+      "sha256": "4c0ba07f139db84f16a5681aebd6edefb68868f326f95779696941d5ca977366"
+    },
+    {
+      "path": "Game/Battle/Source/Main.cpp",
+      "sha256": "8ed028d85132c795367563acba060974444eb2c4c5e3bb87de617aeeab6907f1"
+    },
+    {
+      "path": "Engine/build.ps1",
+      "sha256": "49409bf58e7c08e7fd7db424b046597cf0485ae40c9834c6bf01c63473d1fac6"
+    },
+    {
+      "path": "Game/Battle/RequiredFiles.txt",
+      "sha256": "23efa8a5f7d135564c32d4707b3ea8906af1e4f2ff06bddc989eca03f168560c"
+    },
+    {
+      "path": "Engine/Include/Engine/UI/FontAtlas.h",
+      "sha256": "53469bb85bc4e27219f6ed79cf73ac3701c403bd22658d8ea443f8f342ce294b"
+    },
+    {
+      "path": "Engine/Source/UI/FontAtlas.cpp",
+      "sha256": "8356648a6c43edac94422b7f393a36c9e1e0b3a5a18c0506ff9231c2f5a1bd76"
     },
     {
       "path": "Engine/docs/ENGINE-VERSIONS.md",
-      "sha256": "7dd610ec7aaae0a869c4417d3fa0fa90f8c098e04f9d7ef375da40e216048b56"
+      "sha256": "afe46edb7f98f628ed147f69a6d0f0fe152eda344cd75130cdf9191cf85916b6"
+    },
+    {
+      "path": "Game/Launcher/Source/ProjectVersion.h",
+      "sha256": "b3d677e37014aafbc31ab40ac79eb7746d7e871fc43cf744c9d4534e18bfe8f8"
     }
-  ]
+  ],
+  "examples": "releases/PainEngine-Tutorial-2026-11-01-r7-examples.zip",
+  "contentSnapshot": "releases/PainEngine-Tutorial-2026-11-01-r7.content.json",
+  "sourceState": "working-tree-including-uncommitted-changes"
 }
