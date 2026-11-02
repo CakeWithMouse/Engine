@@ -145,12 +145,7 @@ void EditorMainWindow::BuildUi()
     fileDock_->setObjectName(QStringLiteral("ContentDock"));
     addDockWidget(Qt::BottomDockWidgetArea, fileDock_);
     tabifyDockWidget(consoleDock_, fileDock_);
-    QTimer::singleShot(0, this, [this] {
-        for (auto* bar : findChildren<QTabBar*>()) {
-            bar->setElideMode(Qt::ElideNone);
-            bar->setUsesScrollButtons(true);
-        }
-    });
+    DockLayoutManager::ConfigureTabBars(this);
 
     BuildToolBar();
     BuildSceneDocks();

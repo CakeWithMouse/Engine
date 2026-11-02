@@ -47,13 +47,17 @@
 #include "ViewportWidget.h"
 #include "SceneObjectsPanel.h"
 #include "CollapsibleCard.h"
+#ifndef QT_WIDGETS_LIB
+#define QT_WIDGETS_LIB
+#endif
+#include <qtestmouse.h>
+#include <QTabBar>
 #include <QMenu>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <cstdio>
 #include <stdexcept>
-
 namespace
 {
 int checks = 0;
@@ -80,7 +84,6 @@ QAction* Action(EditorMainWindow* window, const QString& label)
     if(label==QStringLiteral("⏸ Pause")) id="ActPause";
     if(!id.isEmpty()) if(auto* a=window->findChild<QAction*>(id)) return a;
     QString text=label;
-
     if(text==QStringLiteral("Сбросить расположение панелей")) text=QStringLiteral("Сбросить раскладку окон");
     for (auto* action : window->findChildren<QAction*>()) if (action->text() == text) return action;
     throw std::runtime_error("Action not found: " + label.toStdString());
@@ -173,7 +176,6 @@ void ReloadUiChecks(const std::filesystem::path& root, const std::filesystem::pa
     host.SetModuleApi({}); ownedModule.reset(); host.Stop();
     std::printf("Reload EditorUiTests: %d checks passed\n",checks);
 }
-
 int wmain(int argc, wchar_t** argv)
 {
     try
@@ -336,15 +338,18 @@ int wmain(int argc, wchar_t** argv)
             {ObjectInspectorPanel restored(w);restored.Refresh(view,123,true);Check(!restored.findChild<QToolButton*>("Section.UiProbe/Behavior/Movement")->isChecked(),"collapsed hierarchy persists across inspector recreation");}
             header->setChecked(wasOpen);
         });
-
-
         if(argc==4&&std::wstring(argv[3])==L"--layout") {
-            int height=0;QPoint boundary;
-            Ui([&](auto* w){
+            int height=0;QPoint boundary; Ui([&](auto* w){
                 QDockWidget* files=nullptr;for(auto* d:w->template findChildren<QDockWidget*>())if(d->objectName()==QStringLiteral("ContentDock"))files=d;
                 Check(files!=nullptr,"content dock exists");files->raise();w->resize(1600,950);
-                std::printf("Layout before: content=%d min=%d max=%d features=%d area=%d\n",files->height(),files->minimumHeight(),files->maximumHeight(),int(files->features()),int(w->dockWidgetArea(files)));
-                            });for(int i=0;i<15;++i)pump();
+                for (auto* bar : w->findChildren<QTabBar*>()) {
+                    if (!bar->isVisible() || bar->count() < 2) continue;
+                    for (int c = 0; c < 5; ++c) {
+                        QTest::mouseClick(bar, Qt::LeftButton, Qt::KeyboardModifiers(), bar->tabRect(0).center()); Check(bar->currentIndex() == 0, "tab switched to Console");
+                        QTest::mouseClick(bar, Qt::LeftButton, Qt::KeyboardModifiers(), bar->tabRect(1).center()); Check(bar->currentIndex() == 1, "tab switched to Content");
+                    }
+                    std::printf("[TabDiag] 5 consecutive switch cycles succeeded!\n"); }
+            });for(int i=0;i<15;++i)pump();
             Ui([](auto* w){w->resize(1800,1100);});for(int i=0;i<15;++i)pump();
             Ui([](auto* w){w->resizeDocks({w->template findChild<QDockWidget*>("SceneObjectsDock"),w->template findChild<QDockWidget*>("ViewportDock"),w->template findChild<QDockWidget*>("InspectorDock")},{80,1600,80},Qt::Horizontal);});
             for(int i=0;i<10;++i)pump();
@@ -411,7 +416,6 @@ int wmain(int argc, wchar_t** argv)
             host.SetModuleApi({});factory.destroy(api.context);sessionGuard.context=nullptr;host.Stop();
             std::printf("Authoring EditorUiTests: %d checks passed\n",checks);return 0;
         }
-
         if (argc == 4 && std::wstring(argv[3]) == L"--workflow") {
             for(int i=0;i<3;++i){EditorCommand add;add.type=EditorCommand::CreateObject;add.path="Primitive.Cube";add.name=QString("Batch %1").arg(i);host.PostCommand(add);}
             until([&]{return host.ReadSnapshot().objects.size()==7;});
@@ -460,7 +464,6 @@ int wmain(int argc, wchar_t** argv)
             std::puts("Group UI and save checks passed; simulating process crash"); std::fflush(stdout);
             TerminateProcess(GetCurrentProcess(),0); return 0;
         }
-
         Ui([&](auto* w) {
             CodeClassDialog dialog(QString::fromStdWString(root.wstring()), w);
             auto* name = dialog.findChild<QLineEdit*>("ClassName");
@@ -615,7 +618,6 @@ int wmain(int argc, wchar_t** argv)
         until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.textureAsset.empty()) return false; return true; });
         Ui([](auto* w) { Action(w, QStringLiteral("Повторить"))->trigger(); });
         until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.textureAsset.empty()) return true; return false; });
-
         // Material editor: template from Files, live parameter, HLSL errors, recompiled parameters, save and discard.
         const auto materialFile = root / "Content/Materials/Tint.mat", surfaceFile = root / "Content/Materials/Tint.hlsl";
         auto editorWidget = [](auto* w, const QString& name) -> QWidget* {
@@ -715,7 +717,6 @@ int wmain(int argc, wchar_t** argv)
         Ui([](auto*) { qobject_cast<QMessageBox*>(QApplication::activeModalWidget())->button(QMessageBox::Save)->click(); });
         until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
         Check(std::abs(materialText().value(QStringLiteral("params")).toObject().value(QStringLiteral("Gloss")).toDouble() - 0.6) < 1e-4, "close waits for successful material save");
-
         // "Редактировать" on the default material: a new material is created, assigned and opened.
         Ui([](auto* w) {
             auto* tree = w->findChild<QTreeWidget*>();
@@ -745,7 +746,6 @@ int wmain(int argc, wchar_t** argv)
         until([&] { bool done = false; Ui([&](auto* w) {
             done = w->template findChild<QPlainTextEdit*>(QStringLiteral("Console"))->toPlainText().contains(QStringLiteral("перекомпилированы")); }); return done; });
         Ui([](auto* w) { w->activateWindow(); }); // focused-field checks below need the main window active
-
         if (argc == 4)
         {
             const auto modelSource = std::filesystem::absolute(argv[3]);

@@ -164,7 +164,7 @@ QTabBar::tab {
     border: 1px solid %6;
     padding: 2px 10px;
     margin-right: 2px;
-    height: 22px;
+    min-height: 24px;
     font-size: 11px;
 }
 QTabBar::tab:bottom {
