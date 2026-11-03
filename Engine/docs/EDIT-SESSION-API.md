@@ -289,3 +289,7 @@ Play-копия и превью. Файл пишет только `saveMaterial`
 выполняйте до уничтожения HWND. Строки и массивы `EngineMaterialInfo` копируйте внутри visitor.
 Пример потребителя — `Editor/Source/MaterialEditorWindow.cpp`, проверки — `CheckMaterialEditing`
 в `Engine/tests/assets/AssetTests.cpp`.
+
+## Игровые подсистемы
+
+`ENGINE_SUBSYSTEM()` в заголовке Source автоматически добавляет класс в каталог при обычной сборке. Подсистемы принадлежат GameSession, сохраняются между сценами и при Pause, уничтожаются при Stop. Edit и preview не создают их. Получение: `game.GetSubsystem<T>()`; тик включается только полем `bTickEnabled`. Подробнее: [создание, lifecycle, SDK и переходы между сценами](GAME-SUBSYSTEMS.md).

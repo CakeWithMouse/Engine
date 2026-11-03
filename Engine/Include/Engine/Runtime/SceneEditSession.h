@@ -40,9 +40,12 @@ private:
     GameFactory gameFactory_ = nullptr;
     std::thread::id thread_ = std::this_thread::get_id();
     bool busy_ = false;
+    bool pendingStop_ = false;
     uint32_t state_ = EngineEditing;
     std::unique_ptr<Game> edit_;
     SceneCommands commands_;
+    std::unique_ptr<GameSession> gameSession_;
+    GameSession* startingSession_ = nullptr; // borrowed only while Control(Play) is on the stack
     std::unique_ptr<Game> play_; // destroy before edit (shared viewport device)
     bool attached_ = false;
     bool inputFocused_ = false;
@@ -74,6 +77,11 @@ private:
         self.busy_ = true;
         uint32_t result;
         try { result = action(self); } catch (...) { result = EngineSceneFailure; }
+        if (self.pendingStop_) {
+            self.pendingStop_ = false;
+            try { self.Control(EngineStop); } catch (...) { result = EngineSceneFailure; }
+            self.pendingStop_ = false;
+        }
         self.busy_ = false;
         return result;
     }

@@ -165,3 +165,7 @@ template<> struct ProjectObjectAdapter<Rules>
 автоматически не переписываются. Полный пример ввода R/N и назначения модели
 находится в `docs/tutorial/examples`.
 
+
+## Игровые подсистемы
+
+`ENGINE_SUBSYSTEM()` в заголовке Source автоматически добавляет класс в каталог при обычной сборке. Подсистемы принадлежат GameSession, сохраняются между сценами и при Pause, уничтожаются при Stop. Edit и preview не создают их. Получение: `game.GetSubsystem<T>()`; тик включается только полем `bTickEnabled`. Подробнее: [создание, lifecycle, SDK и переходы между сценами](GAME-SUBSYSTEMS.md).

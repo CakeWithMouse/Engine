@@ -17,6 +17,7 @@
 #include <Engine/Render/ShaderConstants.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/MainGame/Player.h>
+#include <Engine/MainGame/GameSession.h>
 #include <Engine/MainGame/GameSettings.h>
 #include <Engine/Display/Display.h>
 #include <Engine/InputDevice/InputDevice.h>
@@ -124,6 +125,11 @@ class Game
 {
 public:
     Game();
+    // External session must outlive this Game; attach before InitializeGameplay.
+    void AttachSession(GameSession& session);
+    void CloseGameplayScene() noexcept;
+    template<class T> T* GetSubsystem() const { return Session ? Session->GetSubsystem<T>() : nullptr; }
+    GameSession* GetSession() const { return Session; }
     virtual ~Game();
     Game(const Game&) = delete;
     Game& operator=(const Game&) = delete;
@@ -447,6 +453,8 @@ protected:
     Input::System ActionInput;
     std::unique_ptr<CharacterController> Controller;
     bool GameplayInitialized = false;
+    std::unique_ptr<GameSession> OwnedSession;
+    GameSession* Session = nullptr;
     std::unique_ptr<UIComponent> ProjectHudComponent;
 
     // Scene owns components. The read-only alias preserves legacy traversal/order.
