@@ -190,7 +190,7 @@ static void Scan(const fs::path& path, bool header, std::vector<Type>& types)
             if (j < ts.size() && ts[j].text == "{")
             { scopes.push_back(name.empty() ? "#" : name); i = j; continue; }
         }
-        if (t.text == "ENGINE_COMPONENT" || t.text == "ENGINE_GAME" || t.text == "ENGINE_OBJECT")
+        if (t.text == "ENGINE_COMPONENT" || t.text == "ENGINE_GAME" || t.text == "ENGINE_OBJECT" || t.text == "ENGINE_SUBSYSTEM")
         {
             if (!header) Fail(path, t.line, "ENGINE_COMPONENT must be in a header under a component source root");
             if (conditional > (guard ? 1 : 0)) Fail(path, t.line, "Conditional component declarations are unsupported; move the class outside #if");
@@ -203,6 +203,8 @@ static void Scan(const fs::path& path, bool header, std::vector<Type>& types)
                 ++j;
             };
             expect("("); std::string label;
+            if (t.text == "ENGINE_SUBSYSTEM" && (j >= ts.size() || ts[j].text != ")"))
+                Fail(path, t.line, "ENGINE_SUBSYSTEM takes no arguments");
             if (j < ts.size() && ts[j].literal)
             {
                 label = ts[j++].text;
@@ -228,7 +230,7 @@ static void Scan(const fs::path& path, bool header, std::vector<Type>& types)
             name += ts[j++].text;
             if (j < ts.size() && ts[j].text == "final") ++j;
             std::string base;
-            if (t.text == "ENGINE_COMPONENT") expect(":");
+            if (t.text == "ENGINE_COMPONENT" || t.text == "ENGINE_SUBSYSTEM") expect(":");
             else if (j < ts.size() && ts[j].text == ":") ++j;
             while (j < ts.size() && ts[j].text != "{" && ts[j].text != ";")
             {
@@ -239,7 +241,7 @@ static void Scan(const fs::path& path, bool header, std::vector<Type>& types)
             }
             expect("{");
             types.push_back({name, label.empty() ? "\"" + name + "\"" : label, path, t.line,
-                t.text == "ENGINE_GAME" ? "Game" : t.text == "ENGINE_OBJECT" ? "Object" : "Component", base, stableId.empty() ? name : stableId});
+                t.text == "ENGINE_SUBSYSTEM" ? "Subsystem" : t.text == "ENGINE_GAME" ? "Game" : t.text == "ENGINE_OBJECT" ? "Object" : "Component", base, stableId.empty() ? name : stableId});
             // Process the body normally: nested annotations must produce a diagnostic.
             scopes.push_back("#"); owner=types.size()-1;ownerDepth=scopes.size(); pendingTemplate = false; i = j - 1; continue;
         }
@@ -319,12 +321,12 @@ int wmain(int argc, wchar_t** argv)
                 "const auto before=SaveProjectData();const bool baseData=!EnginePropertyBase::SaveProjectData().empty();try {if(baseData)EnginePropertyBase::LoadProjectData(text);visitor.mode=EngineProperties::Visitor::Load;\n"+fields+"EngineProperties::Notify(*this,0);}catch(...) {if(baseData)EnginePropertyBase::LoadProjectData(before);data=EngineProperties::Data(before);visitor.mode=EngineProperties::Visitor::Load;\n"+fields+"EngineProperties::Notify(*this,0);throw;} }\n";
         }
         source += "namespace EngineGenerated::" + catalog + " {\nComponentTypeCatalog GetComponentTypes() noexcept\n{\n";
-        if (std::none_of(types.begin(), types.end(), [](const Type& t) { return t.kind != "Game"; })) source += "    return {};\n";
+        if (std::none_of(types.begin(), types.end(), [](const Type& t) { return t.kind != "Game" && t.kind != "Subsystem"; })) source += "    return {};\n";
         else
         {
             source += "    static const ComponentType types[] = {\n";
             for (const auto& type : types)
-                if (type.kind != "Game") source += "        {\"" + type.id + "\", " + (type.kind == "Object" ? "\"[Object] \" " : "") + type.label + ", &EngineComponentDetail::" +
+                if (type.kind != "Game" && type.kind != "Subsystem") source += "        {\"" + type.id + "\", " + (type.kind == "Object" ? "\"[Object] \" " : "") + type.label + ", &EngineComponentDetail::" +
                     (type.kind == "Object" ? "CreateObject" : "Create") + "<::" + type.name + ">, {}},\n";
             source += "    };\n    return {types, sizeof(types) / sizeof(types[0])};\n";
         }
@@ -337,6 +339,15 @@ int wmain(int argc, wchar_t** argv)
             source += "}; return {types, sizeof(types)/sizeof(types[0])};\n";
         }
         source += "}\n}\n";
+        source += "#include <Engine/MainGame/GameSubsystem.h>\nextern \"C\" GameSubsystemCatalog EngineGeneratedSubsystemCatalog() noexcept {\n";
+        if (std::none_of(types.begin(), types.end(), [](const Type& t) { return t.kind == "Subsystem"; })) source += "return {};\n";
+        else {
+            source += "static const GameSubsystemType types[] = {\n";
+            for (const auto& t : types) if (t.kind == "Subsystem")
+                source += "{\"" + t.name + "\", &CreateGameSubsystem<::" + t.name + ">},\n";
+            source += "}; return {types, sizeof(types)/sizeof(types[0])};\n";
+        }
+        source += "}\n";
         fs::create_directories(argv[2]);
         WriteChanged(fs::path(argv[2]) / "GeneratedComponents.h", header);
         WriteChanged(fs::path(argv[2]) / "GeneratedComponents.cpp", source);

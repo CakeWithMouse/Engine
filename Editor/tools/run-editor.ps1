@@ -238,47 +238,8 @@ if (Test-Path -LiteralPath $engineCacheDir) {
     }
 }
 
-Log-Step "=== 5b. Synchronizing Game.dll for user projects in Documents ===" "Cyan"
-$templateDll = Join-Path $repoRoot "Game/build/x64/Debug/Runtime/Templates/SceneProject/Game.dll"
-if (Test-Path -LiteralPath $templateDll) {
-    $templateItem = Get-Item -LiteralPath $templateDll
-    $docsDir = [Environment]::GetFolderPath('MyDocuments')
-    $projectFiles = @()
-    $registryJson = Join-Path $env:LOCALAPPDATA "EngineLauncher\projects.json"
-    if (Test-Path -LiteralPath $registryJson) {
-        try {
-            $regProjects = Get-Content -LiteralPath $registryJson -Raw | ConvertFrom-Json
-            foreach ($p in $regProjects) { if (Test-Path -LiteralPath $p) { $projectFiles += $p } }
-        } catch {}
-    }
-    if (Test-Path -LiteralPath $docsDir) {
-        $found = Get-ChildItem -LiteralPath $docsDir -Filter "Project.json" -Recurse -Depth 2 -ErrorAction SilentlyContinue
-        foreach ($f in $found) { $projectFiles += $f.FullName }
-    }
-    $projectFiles = $projectFiles | Select-Object -Unique
-    foreach ($pJson in $projectFiles) {
-        $pDir = Split-Path -Parent $pJson
-        $targetDlls = @()
-        $foundDlls = Get-ChildItem -LiteralPath $pDir -Filter "Game.dll" -Recurse -ErrorAction SilentlyContinue
-        foreach ($d in $foundDlls) { $targetDlls += $d.FullName }
-        try {
-            $pContent = Get-Content -LiteralPath $pJson -Raw | ConvertFrom-Json
-            if ($pContent.module) {
-                $targetDlls += [System.IO.Path]::GetFullPath((Join-Path $pDir $pContent.module))
-            }
-        } catch {}
-        $targetDlls = $targetDlls | Select-Object -Unique
-        foreach ($pDll in $targetDlls) {
-            if (Test-Path -LiteralPath $pDll) {
-                $dllItem = Get-Item -LiteralPath $pDll
-                if ($dllItem.LastWriteTime -ne $templateItem.LastWriteTime -or $dllItem.Length -ne $templateItem.Length) {
-                    Copy-Item -LiteralPath $templateDll -Destination $pDll -Force
-                    Log-Step "Updated Game.dll in $pDll" "Yellow"
-                }
-            }
-        }
-    }
-}
+# User project modules are built and upgraded by the launcher/ProjectTools.
+# Never replace custom C++ DLLs or historical build outputs with SceneProject.
 
 Log-Step "=== 6. Launching EngineLauncher ===" "Cyan"
 $launcherPath = Join-Path $repoRoot "Game/build/x64/Debug/EngineLauncher.exe"

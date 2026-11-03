@@ -63,7 +63,13 @@ uint32_t SceneEditSession::Control(uint32_t command)
     if (command == EnginePlay)
     {
         if (state_ != EngineEditing) return EngineSceneBusy;
-        auto candidate = CopyForPlay(); // failure leaves edit state/viewport untouched
+        auto session = std::make_unique<GameSession>();
+        startingSession_ = session.get();
+        struct StartupScope { GameSession*& slot; ~StartupScope() { slot = nullptr; } } startup{startingSession_};
+        std::string error;
+        if (!session->Initialize(error)) throw std::runtime_error(error);
+        auto candidate = CopyForPlay();
+        candidate->AttachSession(*session); // failure leaves edit state/viewport untouched
         if (attached_)
         {
             if (!width_ || !height_) return EngineSceneBusy;
@@ -84,6 +90,7 @@ uint32_t SceneEditSession::Control(uint32_t command)
         }
         candidate->InitializeGameplay();
         candidate->GetInput().SetContextEnabled(Input::Context::Game, inputFocused_);
+        gameSession_ = std::move(session);
         play_ = std::move(candidate);
         state_ = EnginePlaying;
         commands_.SetReadOnly(true);
@@ -92,7 +99,9 @@ uint32_t SceneEditSession::Control(uint32_t command)
     if (command == EngineStop)
     {
         if (state_ == EngineEditing) return EngineSceneOk;
+        gameSession_->Stop();
         play_.reset();
+        gameSession_.reset();
         state_ = EngineEditing;
         commands_.SetReadOnly(false);
         if (attached_)
@@ -110,6 +119,16 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
 {
     EngineEditSessionApi api{ENGINE_EDIT_API_VERSION, this, commands_.GetApi(),
         [](void* p, uint32_t command) -> uint32_t {
+            if (p && command == EngineStop) {
+                auto& s = *static_cast<SceneEditSession*>(p);
+                if (s.thread_ != std::this_thread::get_id()) return EngineSceneWrongThread;
+                if (s.busy_) {
+                    s.pendingStop_ = true;
+                    if (s.gameSession_) s.gameSession_->Stop();
+                    else if (s.startingSession_) s.startingSession_->Stop();
+                    return EngineSceneOk;
+                }
+            }
             return Invoke(p, [&](SceneEditSession& s) { return s.Control(command); });
         },
         [](void* p, uint32_t* state) -> uint32_t {
@@ -174,6 +193,7 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                     for (const auto& item : s.play_->GetScene().GetComponents()) item.second->SetGame(s.play_.get());
                     try { s.play_->StepProjectSimulation(static_cast<float>(dt)); }
                     catch (...) { s.state_ = EnginePaused; return EngineSceneSimulationFailed; }
+                    if (s.pendingStop_) return EngineSceneOk;
                 }
                 if (s.state_ == EngineEditing && s.attached_)
                     for (const auto& item : s.edit_->GetScene().GetComponents())
@@ -437,7 +457,7 @@ EngineViewportCursorApi SceneEditSession::GetViewportCursorApi() noexcept {
     return {1,this,[](void* p,float x,float y,uint32_t width,uint32_t height,uint32_t valid)->uint32_t {
         return Invoke(p,[&](SceneEditSession& s)->uint32_t {
             if(valid>1||!std::isfinite(x)||!std::isfinite(y))return EngineSceneInvalidArgument;
-            if(valid&&(!s.attached_||width!=s.width_||height!=s.height_))return EngineSceneOk;
+            if(valid&&(!s.attached_||width!=s.width_||height!=s.height_))return EngineSceneInvalidArgument;
             s.Active().GetInput().SetCursorPosition({x,y,width,height,valid!=0&&s.inputFocused_});return EngineSceneOk;
         });
     }};

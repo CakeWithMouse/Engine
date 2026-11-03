@@ -1,11 +1,7 @@
 #include "DockLayoutManager.h"
 #include "SettingsService.h"
-#include "Logger.h"
 #include <QAbstractScrollArea>
 #include <QTabBar>
-#include <QApplication>
-#include <QMouseEvent>
-#include <QTimer>
 #include <QList>
 #include <QLayout>
 
@@ -116,55 +112,4 @@ void DockLayoutManager::ConfigureTabBars(QMainWindow* window)
         bar->setExpanding(false);
         bar->setFocusPolicy(Qt::NoFocus);
     }
-
-    QTimer::singleShot(400, window, [window] {
-        Logger::Instance().Info(QStringLiteral("=== TAB DIAGNOSTIC START ==="));
-        for (auto* bar : window->findChildren<QTabBar*>()) {
-            if (!bar->isVisible() || bar->count() < 2) continue;
-            Logger::Instance().Info(QStringLiteral("[TabDiag] Bar: parent=%1 name='%2' geom=(%3,%4 %5x%6) vis=%7 count=%8 cur=%9")
-                .arg(bar->parent() ? bar->parent()->metaObject()->className() : "null")
-                .arg(bar->objectName())
-                .arg(bar->x()).arg(bar->y()).arg(bar->width()).arg(bar->height())
-                .arg(bar->isVisible() ? 1 : 0).arg(bar->count()).arg(bar->currentIndex()));
-            for (int t = 0; t < bar->count(); ++t) {
-                QRect r = bar->tabRect(t);
-                QPoint center = r.center();
-                QPoint gCenter = bar->mapToGlobal(center);
-                QWidget* wAtCenter = QApplication::widgetAt(gCenter);
-                Logger::Instance().Info(QStringLiteral("[TabDiag] tab %1 '%2': rect=(%3,%4 %5x%6) tabAtCenter=%7 wAtCenter=%8 en=%9")
-                    .arg(t).arg(bar->tabText(t))
-                    .arg(r.x()).arg(r.y()).arg(r.width()).arg(r.height())
-                    .arg(bar->tabAt(center))
-                    .arg(wAtCenter ? wAtCenter->metaObject()->className() : "null")
-                    .arg(bar->isTabEnabled(t) ? 1 : 0));
-            }
-            // Execute synthetic clicks to test both tabs
-            for (int cycle = 0; cycle < 3; ++cycle) {
-                QPoint c0 = bar->tabRect(0).center();
-                QWidget* target0 = QApplication::widgetAt(bar->mapToGlobal(c0));
-                if (target0) {
-                    QPoint localPt = target0->mapFromGlobal(bar->mapToGlobal(c0));
-                    QMouseEvent press(QEvent::MouseButtonPress, localPt, bar->mapToGlobal(c0), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
-                    QApplication::sendEvent(target0, &press);
-                    QMouseEvent release(QEvent::MouseButtonRelease, localPt, bar->mapToGlobal(c0), Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
-                    QApplication::sendEvent(target0, &release);
-                }
-                Logger::Instance().Info(QStringLiteral("[TabDiag] Cycle %1: click tab 0 -> tabAt=%2 cur=%3")
-                    .arg(cycle).arg(bar->tabAt(c0)).arg(bar->currentIndex()));
-
-                QPoint c1 = bar->tabRect(1).center();
-                QWidget* target1 = QApplication::widgetAt(bar->mapToGlobal(c1));
-                if (target1) {
-                    QPoint localPt = target1->mapFromGlobal(bar->mapToGlobal(c1));
-                    QMouseEvent press(QEvent::MouseButtonPress, localPt, bar->mapToGlobal(c1), Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
-                    QApplication::sendEvent(target1, &press);
-                    QMouseEvent release(QEvent::MouseButtonRelease, localPt, bar->mapToGlobal(c1), Qt::LeftButton, Qt::NoButton, Qt::NoModifier);
-                    QApplication::sendEvent(target1, &release);
-                }
-                Logger::Instance().Info(QStringLiteral("[TabDiag] Cycle %1: click tab 1 -> tabAt=%2 cur=%3")
-                    .arg(cycle).arg(bar->tabAt(c1)).arg(bar->currentIndex()));
-            }
-        }
-        Logger::Instance().Info(QStringLiteral("=== TAB DIAGNOSTIC END ==="));
-    });
 }

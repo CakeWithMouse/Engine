@@ -6,6 +6,11 @@
 #include "ViewportHeaderBar.h"
 #include <QTreeWidgetItemIterator>
 #include "EditorLocale.h"
+#include "DockLayoutManager.h"
+#include <QMainWindow>
+#include <QTabBar>
+#include <QEventLoop>
+#include <QTimer>
 
 #include <QWidget>
 #include <QHeaderView>
@@ -67,6 +72,24 @@ inline void Run()
 {
     std::cout << "[Test] Running UiSmokeTests..." << std::endl;
     int checks = 0;
+    {
+        QMainWindow window;
+        auto* tabs = new QTabBar(&window);
+        tabs->addTab("First"); tabs->addTab("Second");
+        window.setCentralWidget(tabs);
+        window.resize(320, 100);
+        window.show();
+        QCoreApplication::processEvents();
+        int changes = 0;
+        QObject::connect(tabs, &QTabBar::currentChanged, &window, [&](int) { ++changes; });
+        DockLayoutManager::ConfigureTabBars(&window);
+        QEventLoop loop;
+        QTimer::singleShot(550, &loop, &QEventLoop::quit);
+        loop.exec();
+        if (tabs->currentIndex() != 0 || changes != 0)
+            throw std::runtime_error("Dock configuration must not click or switch user tabs");
+        ++checks;
+    }
 
     // 1. Instantiate panels
     ObjectInspectorPanel inspector;

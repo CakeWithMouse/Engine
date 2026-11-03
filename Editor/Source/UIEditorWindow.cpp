@@ -146,7 +146,7 @@ UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindo
     for(int i=0;i<4;++i){
         rect_[i]=new QDoubleSpinBox(props);rect_[i]->setObjectName(QString("UIRect%1").arg(i));rect_[i]->setRange(i<2?-100000:0,100000);rect_[i]->setDecimals(2);rect_[i]->setKeyboardTracking(false);
         labelRect_[i]=new QLabel(labels[i],props);form->addRow(labelRect_[i],rect_[i]);
-        connect(rect_[i],&QDoubleSpinBox::editingFinished,this,[this]{ApplyInspector();});
+        connect(rect_[i],&QDoubleSpinBox::valueChanged,this,[this]{ApplyInspector();});
     }
     anchor_=new QComboBox(props);anchor_->setObjectName("UIAnchor");anchor_->addItems({"TopLeft","TopCenter","TopRight","CenterLeft","Center","CenterRight","BottomLeft","BottomCenter","BottomRight"});
     labelAnchor_=new QLabel(Tr("Привязка", "Anchor"),props);form->addRow(labelAnchor_,anchor_);

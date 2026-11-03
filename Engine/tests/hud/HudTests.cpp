@@ -21,8 +21,9 @@ public:
     RenderTest(){Check(window!=nullptr,"hidden borrowed viewport");Check(SUCCEEDED(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_WARP,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&Device,nullptr,&Context)),"WARP device");DisplayPtr=std::make_unique<Display>(window,320,240);Check(CreateInputLayouts(),"UI vertex layout");}
     ~RenderTest(){DestroyWindow(window);}
     void EmbeddedClick(){
-        auto* hud=GetProjectHud();POINT point{};Check(GetCursorPos(&point)!=0,"desktop cursor available for embedded input test");Check(ScreenToClient(window,&point)!=0,"borrowed window client coordinates");
-        auto* button=hud->AddButton({UIAnchor::TopLeft,float(point.x-5000),float(point.y-5000),10000,10000},"click",{});button->Name="embedded";int clicks=0;hud->BindClick("embedded",[&]{++clicks;});
+        auto* hud=GetProjectHud();
+        GetInput().SetCursorPosition({20,20,320,240,true});
+        auto* button=hud->AddButton({UIAnchor::TopLeft,10,10,100,100},"click",{});button->Name="embedded";int clicks=0;hud->BindClick("embedded",[&]{++clicks;});
         Check(GetInputDevice()==nullptr,"embedded viewport has no Raw Input device");GetInput().SetKey(Keys::LeftButton,true);hud->PrepareInput();Check(hud->WantsPointer(),"embedded UI captures mouse");GetInput().SetKey(Keys::LeftButton,false);hud->PrepareInput();Check(clicks==1,"Qt forwarded key drives HUD click");
         GetInput().SetKey(Keys::LeftButton,true);hud->PrepareInput();OnFocusLost();hud->PrepareInput();Check(clicks==1,"focus loss cancels captured click");
     }

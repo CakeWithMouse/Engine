@@ -152,3 +152,10 @@ Debug: 13/13 тестов ядра, 22/22 runtime, viewport и Qt Play/Pause/Sto
 
 - [x] [045 — Создание проекта, редактирование и запуск](045-user-projects.md): готовый scene-модуль, отдельные пользовательские ресурсы, UI сцены, JSON, Undo/Redo, picking/focus, Play и standalone.
 - Проверено x64: Debug/Release project-workflow (по 59 проверок) + launcher game/editor smoke; Debug edit-session regression (575), Debug/Release Qt UI workflow.
+
+### Игровые подсистемы — 02.11.2026
+
+- [x] [058 — GameSubsystem и GameSession](058-game-subsystems.md): автоматический каталог
+  при сборке, сессия между сценами, Play/Pause/Stop, отложенная остановка и откат,
+  SDK без C++ объектов через host/DLL. Release: core 56/56, runtime 18,
+  scene-module 109, edit-session 651, viewport и внешний SDK-проект прошли.

@@ -935,6 +935,7 @@ int wmain(int argc, wchar_t** argv)
             Check(label->GetText()=="Здоровье & энергия"&&label->Rect.X==24&&label->Rect.Anchor==UIAnchor::TopRight,"inspector changes label");
             ui->Select(panel);ui->AddElement("Button");Check(dynamic_cast<UIButton*>(ui->Selected()),"add button");
             ui->findChild<QDoubleSpinBox*>("UIRect1")->setValue(80);
+            Check(ui->Selected()->Rect.Y==80,"UI rectangle value change updates the model without losing focus");
             QTimer::singleShot(60,ui,[]{auto* dialog=qobject_cast<QColorDialog*>(QApplication::activeModalWidget());Check(dialog,"UI color dialog");dialog->setCurrentColor(QColor(32,180,210,128));dialog->accept();});
             ui->findChild<QPushButton*>("UIColor")->click();
             Check(std::abs(dynamic_cast<UIButton*>(ui->Selected())->Color.a-128.0f/255)<0.01,"UI color alpha");
