@@ -7,6 +7,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{90A42B03-FDD9-4E98-834D-49B44E58C029}</ProjectGuid>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion><PreferredToolArchitecture>x64</PreferredToolArchitecture>
+    <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'=='' and Exists('$(MSBuildThisFileDirectory)vcpkg_installed\x64-windows\include\assimp\scene.h')">true</EngineEnableAssimp>
     <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'==''">false</EngineEnableAssimp>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -19,6 +20,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VCPKG_ROOT)'!=''">$(VCPKG_ROOT)\</VcpkgRoot>
+    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VsInstallRoot)'!='' and Exists('$(VsInstallRoot)\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">$(VsInstallRoot)\VC\vcpkg\</VcpkgRoot>
+    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\</VcpkgRoot>
+    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\</VcpkgRoot>
     <VcpkgRoot Condition="'$(VcpkgRoot)'==''">C:\vcpkg\</VcpkgRoot>
     <VcpkgEnableManifest>$(EngineEnableAssimp)</VcpkgEnableManifest>
     <VcpkgEnabled>$(EngineEnableAssimp)</VcpkgEnabled>
@@ -90,6 +94,7 @@
     <ClInclude Include="Include\Engine\InputDevice\InputActions.h" />
     <ClInclude Include="Include\Engine\Components\Character.h" />
     <ClInclude Include="Include\Engine\MainGame\CharacterController.h" />
+    <ClCompile Include="Source\MainGame\GameSession.cpp" />
     <ClCompile Include="Source\MainGame\BaseGameClass\Game.cpp" />
     <ClCompile Include="Source\MainGame\Player.cpp" />
     <ClCompile Include="Source\Render\ImpostorAtlas.cpp" />

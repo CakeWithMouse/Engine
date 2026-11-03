@@ -1,6 +1,7 @@
 #include "DockLayoutManager.h"
 #include "SettingsService.h"
 #include <QAbstractScrollArea>
+#include <QTabBar>
 #include <QList>
 #include <QLayout>
 
@@ -99,5 +100,16 @@ void DockLayoutManager::ApplyDefaultLayout(QMainWindow* window,
     }
     if (sceneObjectsDock && viewportDock && inspectorDock) {
         window->resizeDocks({sceneObjectsDock, viewportDock, inspectorDock}, {240, 720, 320}, Qt::Horizontal);
+    }
+}
+
+void DockLayoutManager::ConfigureTabBars(QMainWindow* window)
+{
+    if (!window) return;
+    for (auto* bar : window->findChildren<QTabBar*>()) {
+        bar->setElideMode(Qt::ElideNone);
+        bar->setUsesScrollButtons(false);
+        bar->setExpanding(false);
+        bar->setFocusPolicy(Qt::NoFocus);
     }
 }

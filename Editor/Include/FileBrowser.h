@@ -39,6 +39,7 @@ private:
     QAction* actImportModel_ = nullptr;
     QAction* actImportTexture_ = nullptr;
     int langSubId_ = 0;
+    int themeSubId_ = 0;
     QString projectDir_;
     QString contentDir_;
 };

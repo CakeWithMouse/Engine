@@ -110,7 +110,15 @@ std::unique_ptr<GameComponent> CreateModel(const std::string& path, bool useImpo
 {
     if (path.empty() || !ValidPath(path)) throw std::runtime_error("Expected a model path inside /Game");
     auto model = LoadSkeletalModelFromVfs(path);
-    if (!model.Success || !model.Model) throw std::runtime_error("Cannot load model '" + path + "': " + model.ErrorMessage);
+    if (!model.Success || !model.Model)
+    {
+        std::string err = model.ErrorMessage;
+        if (err == "Assimp not enabled")
+        {
+            err += " (Сборка выполнена без поддержки Assimp. Установите зависимости в Engine/vcpkg_installed и соберите с Assimp / Build with -EnableAssimp)";
+        }
+        throw std::runtime_error("Cannot load model '" + path + "': " + err);
+    }
     auto object = std::make_unique<SkeletalMeshComponent>();
     // Keep the asset reference and the loaded CPU model without importing twice.
     if (!object->SetAssetModel(path, std::move(model.Model))) throw std::runtime_error("Invalid model");

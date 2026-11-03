@@ -75,6 +75,7 @@ public:
     void SetAuthoringApi(const EngineAuthoringApi& api) { authoring_ = api; }
     void SetViewportOverlayApi(const EngineViewportOverlayApi& api);
     void SetAntialiasing(uint32_t mode);
+    uint64_t ViewportResizeCount() const;
 
 private:
     void UiThreadMain();

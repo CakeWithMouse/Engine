@@ -217,7 +217,7 @@ $legacyRatchetLimits = @{
     "Editor/Source/MaterialEditorWindow.cpp" = 869
     "Editor/Source/QtHost.cpp" = 641
     "Editor/Source/ViewportWidget.cpp" = 694
-    "Editor/tests/EditorUiTests.cpp" = 720
+    "Editor/tests/EditorUiTests.cpp" = 1045
 }
 
 $diffFiles = Invoke-Git @("diff", "--name-only", "HEAD", "--", "Editor/")

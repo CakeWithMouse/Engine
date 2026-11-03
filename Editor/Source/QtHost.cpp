@@ -235,6 +235,13 @@ void EditorQtHost::PostCommand(const EditorCommand& cmd)
     commands_.push_back(cmd);
 }
 
+static std::atomic<uint64_t> s_resizeCount{0};
+
+uint64_t EditorQtHost::ViewportResizeCount() const
+{
+    return s_resizeCount.load();
+}
+
 void EditorQtHost::DrainCommands()
 {
     std::deque<EditorCommand> pending;
@@ -318,6 +325,17 @@ void EditorQtHost::DrainCommands()
             };
             uint64_t sel = sceneHandler_.SelectedId();
             viewportHandler_.Handle(cmd, vctx, viewportActive_, playState_, sel, result, error);
+            if (cmd.type == EditorCommand::ViewportResize)
+            {
+                uint64_t curCount = ++s_resizeCount;
+                std::printf("[ResizeDiag] ViewportResize executed: total=%llu size=%ux%u\n", curCount, cmd.w, cmd.h);
+                std::fflush(stdout);
+            }
+            if (cmd.type == EditorCommand::ViewportAttach || cmd.type == EditorCommand::ViewportResize)
+            {
+                if (overlay_.setAntialiasing && overlay_.context)
+                    overlay_.setAntialiasing(overlay_.context, antialiasingMode_);
+            }
             if (cmd.type == EditorCommand::PickObject) {
                 sceneHandler_.PickSelection(sel, cmd.name == "toggle" && BatchApi());
                 SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};

@@ -1,3 +1,4 @@
+#include "EditorTheme.h"
 #include "FileBrowser.h"
 #include "EditorLocale.h"
 #include "QtHost.h"
@@ -91,6 +92,10 @@ FileBrowserDock::~FileBrowserDock()
         EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
         langSubId_ = 0;
     }
+    if (themeSubId_) {
+        EditorTheme::Instance().UnsubscribeThemeChanged(themeSubId_);
+        themeSubId_ = 0;
+    }
 }
 
 void FileBrowserDock::BuildUi()
@@ -104,7 +109,8 @@ void FileBrowserDock::BuildUi()
     imports_ = new QToolButton(panel);
     imports_->setObjectName(QStringLiteral("ImportAssets"));
     imports_->setPopupMode(QToolButton::InstantPopup);
-    imports_->setIcon(IconProvider::PlusIcon());
+    imports_->setIcon(IconProvider::ImportIcon());
+    imports_->setFixedHeight(24);
     auto* importMenu = new QMenu(imports_);
 
     actImportModel_ = importMenu->addAction(QString());
@@ -123,7 +129,10 @@ void FileBrowserDock::BuildUi()
 
     // --- верхняя панель: фильтр + выбор корня ---
     auto* topBar = new QHBoxLayout;
+    topBar->setContentsMargins(4, 4, 4, 4);
+    topBar->setSpacing(6);
     filterEdit_ = new QLineEdit(panel);
+    filterEdit_->setFixedHeight(24);
     filterEdit_->addAction(IconProvider::SearchIcon(), QLineEdit::LeadingPosition);
     connect(filterEdit_, &QLineEdit::textChanged, this,
             [this](const QString& t) { ApplyFilter(t); });
@@ -132,12 +141,22 @@ void FileBrowserDock::BuildUi()
 
     rootCombo_ = new QComboBox(panel);
     rootCombo_->setObjectName("FileVisibility");
+    rootCombo_->setFixedHeight(24);
     rootCombo_->addItem(QString(), projectDir_);
     rootCombo_->addItem(QString(), projectDir_);
     connect(rootCombo_, &QComboBox::currentIndexChanged, this,
             [this](int) { SetRootPath(rootCombo_->currentData().toString()); });
     topBar->addWidget(rootCombo_);
     layout->addLayout(topBar);
+
+    themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
+        if (imports_) imports_->setIcon(IconProvider::ImportIcon());
+        if (filterEdit_) {
+            for (auto* a : filterEdit_->actions()) filterEdit_->removeAction(a);
+            filterEdit_->addAction(IconProvider::SearchIcon(), QLineEdit::LeadingPosition);
+        }
+        if (view_) view_->viewport()->update();
+    });
 
     // --- модель и дерево ---
     model_ = new QFileSystemModel(this);
@@ -155,6 +174,11 @@ void FileBrowserDock::BuildUi()
     view_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
     view_->setMinimumSize(40, 20);
     view_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    view_->header()->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    view_->header()->setFixedHeight(20);
+    QFont fileHeaderFont = view_->header()->font();
+    fileHeaderFont.setPixelSize(11);
+    view_->header()->setFont(fileHeaderFont);
     view_->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     for (int c = 1; c < 3; ++c)
         view_->header()->setSectionResizeMode(c, QHeaderView::ResizeToContents);
@@ -172,7 +196,7 @@ void FileBrowserDock::BuildUi()
 
 void FileBrowserDock::RetranslateUi()
 {
-    setWindowTitle(Tr("Контент", "Content Browser"));
+    setWindowTitle(Tr("Контент-браузер", "Content Browser"));
     if (imports_) imports_->setText(Tr("Импорт…", "Import…"));
     if (actImportModel_) actImportModel_->setText(Tr("Модель…", "Model…"));
     if (actImportTexture_) actImportTexture_->setText(Tr("Текстура…", "Texture…"));

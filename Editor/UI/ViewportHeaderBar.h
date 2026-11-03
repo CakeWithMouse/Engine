@@ -64,6 +64,12 @@ public:
         });
         layout_->addWidget(btnScale_);
 
+        auto* sep1 = new QFrame(this);
+        sep1->setFrameShape(QFrame::VLine);
+        sep1->setFixedSize(1, 16);
+        sep1->setObjectName(QStringLiteral("HeaderSep1"));
+        layout_->addWidget(sep1);
+
         btnCoordSpace_ = new QPushButton(this);
         btnCoordSpace_->setObjectName(QStringLiteral("btnGizmoCoordSpace"));
         btnCoordSpace_->setIconSize(QSize(16, 16));
@@ -74,6 +80,12 @@ public:
             CommandRegistry::Instance().Execute(QStringLiteral("Gizmo.ToggleCoordinateSpace"));
         });
         layout_->addWidget(btnCoordSpace_);
+
+        auto* sep2 = new QFrame(this);
+        sep2->setFrameShape(QFrame::VLine);
+        sep2->setFixedSize(1, 16);
+        sep2->setObjectName(QStringLiteral("HeaderSep2"));
+        layout_->addWidget(sep2);
 
         btnSnap_ = new QPushButton(this);
         btnSnap_->setObjectName(QStringLiteral("btnGizmoSnap"));
@@ -89,11 +101,16 @@ public:
 
         comboSnapStep_ = new QComboBox(this);
         comboSnapStep_->setObjectName(QStringLiteral("comboGizmoSnapStep"));
+        comboSnapStep_->setEditable(true);
         comboSnapStep_->addItems({QStringLiteral("0.1"), QStringLiteral("0.25"), QStringLiteral("0.5"), QStringLiteral("1.0"), QStringLiteral("5.0")});
         comboSnapStep_->setCurrentIndex(2); // 0.5
-        comboSnapStep_->setFocusPolicy(Qt::NoFocus);
         comboSnapStep_->setFixedHeight(22);
-        comboSnapStep_->setFixedWidth(52);
+        comboSnapStep_->setFixedWidth(58);
+        auto* val = new QDoubleValidator(0.001, 1000.0, 3, comboSnapStep_);
+        val->setLocale(QLocale::c());
+        comboSnapStep_->setValidator(val);
+        comboSnapStep_->setInsertPolicy(QComboBox::NoInsert);
+
         layout_->addWidget(comboSnapStep_);
 
         btnOverflow_ = new QToolButton(this);

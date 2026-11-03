@@ -4,9 +4,17 @@
 #include "SceneObjectsPanel.h"
 #include "MainToolBar.h"
 #include "ViewportHeaderBar.h"
+#include <QTreeWidgetItemIterator>
 #include "EditorLocale.h"
+#include "DockLayoutManager.h"
+#include <QMainWindow>
+#include <QTabBar>
+#include <QEventLoop>
+#include <QTimer>
 
 #include <QWidget>
+#include <QHeaderView>
+#include <QTreeWidget>
 #include <QLabel>
 #include <QAbstractButton>
 #include <QLineEdit>
@@ -64,6 +72,24 @@ inline void Run()
 {
     std::cout << "[Test] Running UiSmokeTests..." << std::endl;
     int checks = 0;
+    {
+        QMainWindow window;
+        auto* tabs = new QTabBar(&window);
+        tabs->addTab("First"); tabs->addTab("Second");
+        window.setCentralWidget(tabs);
+        window.resize(320, 100);
+        window.show();
+        QCoreApplication::processEvents();
+        int changes = 0;
+        QObject::connect(tabs, &QTabBar::currentChanged, &window, [&](int) { ++changes; });
+        DockLayoutManager::ConfigureTabBars(&window);
+        QEventLoop loop;
+        QTimer::singleShot(550, &loop, &QEventLoop::quit);
+        loop.exec();
+        if (tabs->currentIndex() != 0 || changes != 0)
+            throw std::runtime_error("Dock configuration must not click or switch user tabs");
+        ++checks;
+    }
 
     // 1. Instantiate panels
     ObjectInspectorPanel inspector;
@@ -73,16 +99,52 @@ inline void Run()
 
     // 2. Test English mode: ensure no visible/tooltip texts contain Cyrillic
     EditorLocale::Instance().SetLanguage(EditorLanguage::En);
+
+    EditorQtHost::Snapshot snap;
+    EditorQtHost::SceneObject dirLight;
+    dirLight.id = 1; dirLight.type = "Light.Directional"; dirLight.name = "DirectionalLight";
+    EditorQtHost::SceneObject sky;
+    sky.id = 2; sky.type = "Environment.Sky"; sky.name = "Sky";
+    EditorQtHost::SceneObject cube;
+    cube.id = 3; cube.type = "Primitive.Cube"; cube.name = "Cube";
+    snap.objects = {dirLight, sky, cube};
+    snap.types = {
+        {"Primitive.Cube", "Куб"},
+        {"Light.Directional", "Направленный свет"},
+        {"Environment.Sky", "Базовое небо"}
+    };
+    const QVector<std::pair<QString, QString>> primTypes = {
+        {QStringLiteral("Куб"), QStringLiteral("Primitive.Cube")},
+        {QStringLiteral("Направленный свет"), QStringLiteral("Light.Directional")},
+        {QStringLiteral("Базовое небо"), QStringLiteral("Environment.Sky")}
+    };
+    sceneObjects.SetPrimitiveTypes(primTypes);
+    sceneObjects.RefreshHierarchy(snap);
+    inspector.Refresh(snap, 1, true);
+
     inspector.RetranslateUi();
     sceneObjects.RetranslateUi();
     toolBar.RetranslateUi();
     headerBar.RetranslateUi();
+
+
 
     std::vector<QString> enTexts;
     CollectTexts(&inspector, enTexts);
     CollectTexts(&sceneObjects, enTexts);
     CollectTexts(&toolBar, enTexts);
     CollectTexts(&headerBar, enTexts);
+
+    auto* hierCheckTree = sceneObjects.findChild<QTreeWidget*>(QStringLiteral("SceneHierarchy"));
+    if (hierCheckTree) {
+        for (QTreeWidgetItemIterator it(hierCheckTree); *it; ++it) {
+            QString itemText = (*it)->text(0);
+            if (HasCyrillic(itemText)) {
+                throw std::runtime_error("UiSmoke: Hierarchy item text has Cyrillic in EN mode: '" + itemText.toStdString() + "'");
+            }
+            ++checks;
+        }
+    }
 
     if (enTexts.empty()) {
         throw std::runtime_error("UiSmoke: No UI texts found in instantiated panels");
@@ -171,6 +233,64 @@ inline void Run()
                 ", diff=" + std::to_string(diff) + " > 1px)");
         }
         ++checks;
+    }
+
+    // 5. Verify compact 20px header height
+    auto* hierTree = sceneObjects.findChild<QTreeWidget*>(QStringLiteral("SceneHierarchy"));
+    if (!hierTree || !hierTree->header() || hierTree->header()->maximumHeight() != 20)
+    {
+        throw std::runtime_error("UiSmoke: SceneHierarchy header height is not 20px");
+    }
+    ++checks;
+
+    // Diagnostic: inspect spinbox grab in dark and light
+    {
+        
+        EditorTheme::Instance().SetMode(ThemeMode::Dark);
+        QDoubleSpinBox spin;
+        spin.resize(100, 22);
+        spin.show();
+        QCoreApplication::processEvents();
+        QImage imgDark = spin.grab().toImage();
+        imgDark.save(QDir::tempPath() + "/diag_spin_dark.png");
+
+        std::cout << "[SpinDiag] Dark grab size: " << imgDark.width() << "x" << imgDark.height() << std::endl;
+        int darkContrasting = 0;
+        QRgb bgDark = imgDark.pixel(imgDark.width() - 8, 1);
+        for (int x = imgDark.width() - 16; x < imgDark.width(); ++x) {
+            for (int y = 0; y < imgDark.height(); ++y) {
+                QRgb p = imgDark.pixel(x, y);
+                int dr = std::abs(qRed(p) - qRed(bgDark));
+                int dg = std::abs(qGreen(p) - qGreen(bgDark));
+                int db = std::abs(qBlue(p) - qBlue(bgDark));
+                if (dr + dg + db > 60) ++darkContrasting;
+            }
+        }
+        std::cout << "[SpinDiag] Dark contrasting pixels in button zone: " << darkContrasting << std::endl;
+
+        EditorTheme::Instance().SetMode(ThemeMode::Light);
+        QCoreApplication::processEvents();
+        QImage imgLight = spin.grab().toImage();
+        imgLight.save(QDir::tempPath() + "/diag_spin_light.png");
+
+        std::cout << "[SpinDiag] Light grab size: " << imgLight.width() << "x" << imgLight.height() << std::endl;
+        int lightContrasting = 0;
+        QRgb bgLight = imgLight.pixel(imgLight.width() - 8, 1);
+        for (int x = imgLight.width() - 16; x < imgLight.width(); ++x) {
+            for (int y = 0; y < imgLight.height(); ++y) {
+                QRgb p = imgLight.pixel(x, y);
+                int dr = std::abs(qRed(p) - qRed(bgLight));
+                int dg = std::abs(qGreen(p) - qGreen(bgLight));
+                int db = std::abs(qBlue(p) - qBlue(bgLight));
+                if (dr + dg + db > 60) ++lightContrasting;
+            }
+        }
+        std::cout << "[SpinDiag] Light contrasting pixels in button zone: " << lightContrasting << std::endl;
+        if (darkContrasting >= 20 && lightContrasting >= 20)
+        {
+            ++checks;
+        }
+        EditorTheme::Instance().SetMode(ThemeMode::Dark);
     }
 
     // Restore default Ru language

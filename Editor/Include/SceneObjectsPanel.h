@@ -102,5 +102,7 @@ private:
     QString primitiveKey_;
 
     bool suppressSelectionChanged_ = false;
+    EditorQtHost::Snapshot lastSnapshot_;
     int langSubId_ = 0;
+    int themeSubId_ = 0;
 };

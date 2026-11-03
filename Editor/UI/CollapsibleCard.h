@@ -5,6 +5,8 @@
 #include <QVBoxLayout>
 #include <QWidget>
 #include <QString>
+#include "EditorTheme.h"
+#include "IconProvider.h"
 
 class CollapsibleCard : public QFrame
 {
@@ -36,6 +38,19 @@ public:
         mainLayout->addWidget(content_);
 
         content_->setVisible(expanded_);
+
+        subId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
+            UpdateHeaderText();
+        });
+    }
+
+    ~CollapsibleCard() override
+    {
+        if (subId_ > 0)
+        {
+            EditorTheme::Instance().UnsubscribeThemeChanged(subId_);
+            subId_ = 0;
+        }
     }
 
     void SetTitle(const QString& title)
@@ -59,8 +74,11 @@ public:
 private:
     void UpdateHeaderText()
     {
-        const QString arrow = expanded_ ? QString::fromUtf8("\xE2\x96\xBC ") : QString::fromUtf8("\xE2\x96\xB6 ");
-        headerBtn_->setText(arrow + titleText_);
+        const auto& theme = EditorTheme::Instance();
+        const QColor iconColor = theme.TextPrimary();
+        headerBtn_->setIcon(IconProvider::GetIcon(expanded_ ? QStringLiteral("chevron-down") : QStringLiteral("chevron-right"), iconColor, 12));
+        headerBtn_->setIconSize(QSize(12, 12));
+        headerBtn_->setText(titleText_);
     }
 
     bool expanded_ = true;
@@ -68,4 +86,5 @@ private:
     QPushButton* headerBtn_ = nullptr;
     QWidget* content_ = nullptr;
     QVBoxLayout* contentLayout_ = nullptr;
+    int subId_ = 0;
 };

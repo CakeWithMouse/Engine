@@ -65,7 +65,7 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
         if (actThemeDark_) actThemeDark_->setChecked(EditorTheme::Instance().Mode() == ThemeMode::Dark);
         if (actThemeLight_) actThemeLight_->setChecked(EditorTheme::Instance().Mode() == ThemeMode::Light);
-        if (mainToolBar_) mainToolBar_->RefreshIcons();
+        if (mainToolBar_) mainToolBar_->Apply();
     });
 }
 
@@ -86,7 +86,8 @@ void EditorMainWindow::BuildUi()
     resize(1280, 720);
 
     setDockNestingEnabled(true);
-    setDockOptions(AnimatedDocks | AllowNestedDocks | AllowTabbedDocks | GroupedDragging);
+    setDockOptions(AnimatedDocks | AllowNestedDocks | AllowTabbedDocks);
+    setTabPosition(Qt::BottomDockWidgetArea, QTabWidget::South);
 
     setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
     setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
@@ -142,9 +143,9 @@ void EditorMainWindow::BuildUi()
 
     fileDock_ = new FileBrowserDock(host_, this);
     fileDock_->setObjectName(QStringLiteral("ContentDock"));
-    fileDock_->installEventFilter(this);
     addDockWidget(Qt::BottomDockWidgetArea, fileDock_);
     tabifyDockWidget(consoleDock_, fileDock_);
+    DockLayoutManager::ConfigureTabBars(this);
 
     BuildToolBar();
     BuildSceneDocks();
@@ -155,11 +156,8 @@ void EditorMainWindow::BuildUi()
     langMenu_ = viewMenu_->addMenu(Tr("Язык", "Language"));
     actLangRu_ = langMenu_->addAction(QStringLiteral("Русский"), this, [] { EditorLocale::Instance().SetLanguage(EditorLanguage::Ru); });
     actLangEn_ = langMenu_->addAction(QStringLiteral("English"), this, [] { EditorLocale::Instance().SetLanguage(EditorLanguage::En); });
-    actLangRu_->setCheckable(true);
-    actLangEn_->setCheckable(true);
-    auto* langGroup = new QActionGroup(this);
-    langGroup->addAction(actLangRu_);
-    langGroup->addAction(actLangEn_);
+    actLangRu_->setCheckable(true); actLangEn_->setCheckable(true);
+    auto* langGroup = new QActionGroup(this); langGroup->addAction(actLangRu_); langGroup->addAction(actLangEn_);
     actLangRu_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::Ru);
     actLangEn_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::En);
 
@@ -188,47 +186,43 @@ void EditorMainWindow::BuildUi()
     });
 
     viewMenu_->addSeparator();
-    if (!SettingsService::Instance().Contains(QStringLiteral("view/grid")))
-        SettingsService::Instance().SetValue(QStringLiteral("view/grid"), true);
-    if (!SettingsService::Instance().Contains(QStringLiteral("view/overlays")))
-        SettingsService::Instance().SetValue(QStringLiteral("view/overlays"), true);
+    const bool allFalse = !SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool() &&
+                          !SettingsService::Instance().GetValue(QStringLiteral("view/gizmo"), true).toBool() &&
+                          !SettingsService::Instance().GetValue(QStringLiteral("view/icons"), true).toBool();
+    for (const auto& k : {QStringLiteral("view/grid"), QStringLiteral("view/gizmo"), QStringLiteral("view/icons"), QStringLiteral("view/overlays")})
+        if (allFalse || !SettingsService::Instance().Contains(k)) SettingsService::Instance().SetValue(k, true);
 
-    actGrid_ = viewMenu_->addAction(Tr("Сетка", "Grid"), this, [this] {
-        CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleGrid"));
+    auto addToggle = [this](const QString& text, const QString& cmd, const QString& key) {
+        auto* act = viewMenu_->addAction(text); act->setCheckable(true);
+        act->setChecked(SettingsService::Instance().GetValue(key, true).toBool());
+        connect(act, &QAction::triggered, this, [cmd, act, key] {
+            CommandRegistry::Instance().Execute(cmd);
+            act->setChecked(SettingsService::Instance().GetValue(key, true).toBool());
+        }); return act;
+    };
+    actGrid_ = addToggle(Tr("Сетка", "Grid"), QStringLiteral("View.ToggleGrid"), QStringLiteral("view/grid"));
+    actGizmo_ = addToggle(Tr("Гизмо", "Gizmo"), QStringLiteral("View.ToggleGizmo"), QStringLiteral("view/gizmo"));
+    actIcons_ = addToggle(Tr("Иконки объектов", "Object Icons"), QStringLiteral("View.ToggleIcons"), QStringLiteral("view/icons"));
+    connect(viewMenu_, &QMenu::aboutToShow, this, [this] {
         if (actGrid_) actGrid_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool());
+        if (actGizmo_) actGizmo_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/gizmo"), true).toBool());
+        if (actIcons_) actIcons_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/icons"), true).toBool());
     });
-    actGrid_->setCheckable(true);
-    actGrid_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool());
-
-    actOverlays_ = viewMenu_->addAction(Tr("Иконки и гизмо", "Icons and Gizmos"), this, [this] {
-        CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleOverlays"));
-        if (actOverlays_) actOverlays_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/overlays"), true).toBool());
-    });
-    actOverlays_->setCheckable(true);
-    actOverlays_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/overlays"), true).toBool());
 
     QMenu* aaMenu = viewMenu_->addMenu(Tr("Сглаживание", "Anti-aliasing"));
-    QActionGroup* aaGroup = new QActionGroup(this);
-    aaGroup->setExclusive(true);
+    QActionGroup* aaGroup = new QActionGroup(this); aaGroup->setExclusive(true);
     const QString curAa = SettingsService::Instance().GetValue(QStringLiteral("viewport/antialiasing"), QStringLiteral("fxaa")).toString().toLower();
-
-    auto* actOff = aaMenu->addAction(Tr("Выкл", "Off"), this, [this] {
-        QVariantMap params;
-        params.insert(QStringLiteral("mode"), QStringLiteral("off"));
-        CommandRegistry::Instance().Execute(QStringLiteral("View.SetAntialiasing"), params);
+    const bool isOff = (curAa == QStringLiteral("off") || curAa == QStringLiteral("0"));
+    auto* actOff = aaMenu->addAction(Tr("Выкл", "Off")); actOff->setCheckable(true); actOff->setChecked(isOff); aaGroup->addAction(actOff);
+    connect(actOff, &QAction::triggered, this, [this] {
+        QVariantMap p; p.insert(QStringLiteral("mode"), QStringLiteral("off")); CommandRegistry::Instance().Execute(QStringLiteral("View.SetAntialiasing"), p);
     });
-    actOff->setCheckable(true);
-    actOff->setChecked(curAa == QStringLiteral("off") || curAa == QStringLiteral("0"));
-    aaGroup->addAction(actOff);
-
-    auto* actFxaa = aaMenu->addAction(QStringLiteral("FXAA"), this, [this] {
-        QVariantMap params;
-        params.insert(QStringLiteral("mode"), QStringLiteral("fxaa"));
-        CommandRegistry::Instance().Execute(QStringLiteral("View.SetAntialiasing"), params);
+    auto* actFxaa = aaMenu->addAction(QStringLiteral("FXAA")); actFxaa->setCheckable(true); actFxaa->setChecked(!isOff); aaGroup->addAction(actFxaa);
+    connect(actFxaa, &QAction::triggered, this, [this] {
+        QVariantMap p; p.insert(QStringLiteral("mode"), QStringLiteral("fxaa")); CommandRegistry::Instance().Execute(QStringLiteral("View.SetAntialiasing"), p);
     });
-    actFxaa->setCheckable(true);
-    actFxaa->setChecked(curAa != QStringLiteral("off") && curAa != QStringLiteral("0"));
-    aaGroup->addAction(actFxaa);
+    QVariantMap aaParams; aaParams.insert(QStringLiteral("mode"), isOff ? QStringLiteral("off") : QStringLiteral("fxaa"));
+    CommandRegistry::Instance().Execute(QStringLiteral("View.SetAntialiasing"), aaParams);
 
     viewMenu_->addSeparator();
 
@@ -237,8 +231,6 @@ void EditorMainWindow::BuildUi()
     for (QDockWidget* d : {static_cast<QDockWidget*>(viewportDock_), static_cast<QDockWidget*>(consoleDock_), static_cast<QDockWidget*>(fileDock_), static_cast<QDockWidget*>(sceneObjectsDock_), static_cast<QDockWidget*>(inspectorDock_)})
         if (d) viewMenu->addAction(d->toggleViewAction());
 
-    viewMenu_->addAction(Tr("Ресурсы: компактная панель", "Compact Content Panel"), this, &EditorMainWindow::CompactContentPanel);
-    viewMenu_->addAction(Tr("Ресурсы: отдельное окно", "Floating Content Panel"), this, [this] { fileDock_->show(); fileDock_->setFloating(true); fileDock_->resize(800,450); fileDock_->raise(); });
     statsLabel_ = new QLabel(this);
     statusBar()->addPermanentWidget(statsLabel_);
 
@@ -273,39 +265,21 @@ void EditorMainWindow::BuildUi()
 
     if (host_->HasScene())
         RefreshSceneUi();
-    QTimer::singleShot(0, this, [this] { panelWindowSize_ = size(); contentPanelHeight_ = fileDock_->height(); panelLayoutReady_ = true; });
     QTimer::singleShot(500, this, &EditorMainWindow::OfferRecovery);
 }
 
-void EditorMainWindow::ResizeContentPanel(int height) {
-    if (fileDock_->isFloating() || dockWidgetArea(fileDock_) != Qt::BottomDockWidgetArea) return;
-    const int upper = qMax(80, viewportDock_->height() + fileDock_->height() - height);
-    resizeDocks({viewportDock_, fileDock_}, {upper, height}, Qt::Vertical);
-    panelWindowSize_ = size(); contentPanelHeight_ = fileDock_->height();
-}
 void EditorMainWindow::resizeEvent(QResizeEvent* event) {
-    const int bottom = contentPanelHeight_;
     QMainWindow::resizeEvent(event);
-    if (panelLayoutReady_) QTimer::singleShot(0, this, [this, bottom] { ResizeContentPanel(bottom); });
 }
 bool EditorMainWindow::eventFilter(QObject* watched, QEvent* event) {
-    if (watched == fileDock_ && event->type() == QEvent::Resize && panelLayoutReady_ && panelWindowSize_ == size() && !fileDock_->isFloating())
-        contentPanelHeight_ = static_cast<QResizeEvent*>(event)->size().height();
     return QMainWindow::eventFilter(watched, event);
 }
-
-void EditorMainWindow::CompactContentPanel() {
-    fileDock_->setFloating(false);consoleDock_->setFloating(false);
-    addDockWidget(Qt::BottomDockWidgetArea,consoleDock_);
-    addDockWidget(Qt::BottomDockWidgetArea,fileDock_);
-    tabifyDockWidget(consoleDock_,fileDock_);fileDock_->show();fileDock_->raise();
-    QTimer::singleShot(0,this,[this]{
-        ResizeContentPanel(180);
-    });
-}
 void EditorMainWindow::AppendLine(const QString& line) {
-    const auto time=QDateTime::currentDateTime().toString("HH:mm:ss.zzz");
-    for(const auto& part:line.split('\n')) if(!part.trimmed().isEmpty()) console_->appendPlainText("["+time+"] "+part);
+    const auto time = QDateTime::currentDateTime().toString("HH:mm:ss.zzz");
+    for (const auto& part : line.split('\n')) {
+        if (!part.trimmed().isEmpty())
+            console_->appendPlainText("[" + time + "] " + part);
+    }
 }
 
 void EditorMainWindow::closeEvent(QCloseEvent* event)
@@ -337,8 +311,6 @@ void EditorMainWindow::BuildSceneMenu()
 {
     sceneMenu_ = menuBar()->addMenu(Tr("Сцена", "Scene"));
     sceneMenu_->setEnabled(host_->HasScene());
-    auto* sunlight = sceneMenu_->addAction(Tr("Направленный свет", "Directional Light"), this, &EditorMainWindow::ShowDirectionalLight);
-    sunlight->setObjectName("SceneDirectionalLight");
     sceneMenu_->addAction(Tr("Восстановить несохранённую сцену…", "Recover Unsaved Scene…"), this, &EditorMainWindow::OfferRecovery);
     sceneMenu_->addAction(Tr("Сделать стартовой сценой", "Set Startup Scene"), this, [this] { SaveScene(false, [this] { SetStartupScene(); }); });
     sceneMenu_->addAction(Tr("Экспорт игры…", "Export Game…"), this, [this] {
@@ -414,17 +386,7 @@ void EditorMainWindow::BuildSceneMenu()
     updateScheme();
     controlSchemeSubId_ = EditorSettings::Instance().SubscribeControlSchemeChanged([updateScheme](ControlScheme) { updateScheme(); });
 
-    if (viewMenu_ && !actServiceObjects_) {
-        actServiceObjects_ = viewMenu_->addAction(Tr("Служебные объекты сцены", "Scene Service Objects"));
-        actServiceObjects_->setCheckable(true);
-        connect(actServiceObjects_, &QAction::toggled, this, [this](bool visible) {
-            if (sceneObjectsPanel_) sceneObjectsPanel_->SetShowServiceObjects(visible);
-            if (!visible) for (const auto& o : host_->ReadSnapshot().objects) if (o.id == selectedId_ && o.type == "Gameplay.PlaySettings") {
-                EditorCommand c; c.type = EditorCommand::SelectObject; host_->PostCommand(c);
-            }
-            RefreshSceneUi();
-        });
-    }
+
 }
 
 void EditorMainWindow::BuildToolBar()
@@ -432,6 +394,7 @@ void EditorMainWindow::BuildToolBar()
     mainToolBar_ = new MainToolBar(this);
     toolBar_ = mainToolBar_;
     addToolBar(mainToolBar_);
+    mainToolBar_->Apply();
 
     actPlay_ = mainToolBar_->ActPlay();
     actPause_ = mainToolBar_->ActPause();
@@ -475,6 +438,9 @@ void EditorMainWindow::StopExternalGame()
 
 void EditorMainWindow::RefreshStats()
 {
+    if (viewport_ && viewport_->IsResizing())
+        return;
+
     RefreshSceneUi();
 
     const double dt = host_->LastDt();
@@ -800,8 +766,6 @@ void EditorMainWindow::RefreshSceneUi()
     const bool edit =
         host_->PlayState() == EditorQtHost::EditorState::Edit &&
         !sceneBusy_;
-    if (auto* action = findChild<QAction*>("SceneDirectionalLight"))
-        action->setEnabled(edit && std::any_of(view.types.begin(), view.types.end(), [](const auto& type) { return type.name == "Light.Directional"; }));
 
     if (sceneObjectsPanel_)
     {
@@ -1078,6 +1042,19 @@ void EditorMainWindow::OnLightColorRequested(quint64 objectId, const QColor& cur
     dialog->open();
 }
 
+static bool IsUserFacingCommand(EditorCommand::Type t)
+{
+    switch (t) {
+    case EditorCommand::CreateObject: case EditorCommand::RemoveObject: case EditorCommand::RenameObject:
+    case EditorCommand::DuplicateObject: case EditorCommand::SetParent: case EditorCommand::SetProperty:
+    case EditorCommand::SetModel: case EditorCommand::SetTexture: case EditorCommand::SetMaterial:
+    case EditorCommand::SetPointLight: case EditorCommand::SetProjectData: case EditorCommand::UpdateAsset:
+    case EditorCommand::ImportModel: case EditorCommand::ImportTexture: case EditorCommand::SaveScene:
+    case EditorCommand::LoadScene: case EditorCommand::NewScene: case EditorCommand::ReloadProject: return true;
+    default: return false;
+    }
+}
+
 void EditorMainWindow::CommandFinished(
     const EditorCommand& command,
     uint32_t status,
@@ -1179,6 +1156,17 @@ void EditorMainWindow::CommandFinished(
         afterSave_ = {};
         closing_ = false;
 
+        const QString cmdLog = QStringLiteral("[Error] CommandFinished failed: type=%1 id=%2 path='%3' name='%4' status=%5 (%6)")
+                                  .arg(static_cast<int>(command.type))
+                                  .arg(command.objectId)
+                                  .arg(command.path)
+                                  .arg(command.name)
+                                  .arg(status)
+                                  .arg(error);
+        AppendLine(cmdLog);
+        std::fprintf(stderr, "%s\n", cmdLog.toUtf8().constData());
+        std::fflush(stderr);
+
         const QString message = error.isEmpty()
                                     ? QStringLiteral(
                                         "Операция не выполнена (код %1). Проверьте имя объекта, остановите Play и повторите."
@@ -1187,11 +1175,26 @@ void EditorMainWindow::CommandFinished(
 
         AppendLine(message);
 
-        QMessageBox::warning(
-            this,
-            QStringLiteral("Ошибка сцены"),
-            message
-        );
+        if (IsUserFacingCommand(command.type))
+        {
+            static bool s_isShowingErrorDialog = false;
+            static QString s_lastErrorMessage;
+            static qint64 s_lastErrorTimeMs = 0;
+
+            const qint64 now = QDateTime::currentMSecsSinceEpoch();
+            if (!s_isShowingErrorDialog && (message != s_lastErrorMessage || (now - s_lastErrorTimeMs) >= 2000))
+            {
+                s_lastErrorMessage = message;
+                s_lastErrorTimeMs = now;
+                s_isShowingErrorDialog = true;
+
+                QMessageBox msgBox(QMessageBox::Warning, Tr("Ошибка сцены", "Scene Error"), message, QMessageBox::Ok, this);
+                msgBox.setStyleSheet(styleSheet());
+                msgBox.exec();
+
+                s_isShowingErrorDialog = false;
+            }
+        }
 
         return;
     }
@@ -1342,7 +1345,7 @@ void EditorMainWindow::RetranslateUi()
 
     if (viewportDock_) viewportDock_->setWindowTitle(Tr("Вьюпорт", "Viewport"));
     if (consoleDock_) consoleDock_->setWindowTitle(Tr("Консоль", "Console"));
-    if (fileDock_) fileDock_->setWindowTitle(Tr("Контент", "Content Browser"));
+    if (fileDock_) fileDock_->setWindowTitle(Tr("Контент-браузер", "Content Browser"));
     if (sceneObjectsDock_) sceneObjectsDock_->setWindowTitle(Tr("Сцена / объекты", "Scene / Objects"));
     if (inspectorDock_) inspectorDock_->setWindowTitle(Tr("Инспектор", "Inspector"));
     if (sceneMenu_) sceneMenu_->setTitle(Tr("Сцена", "Scene"));
@@ -1365,7 +1368,6 @@ void EditorMainWindow::RetranslateUi()
     if (saveAction_) saveAction_->setText(Tr("Сохранить сцену", "Save Scene"));
     if (actSaveSceneAs_) actSaveSceneAs_->setText(Tr("Сохранить как…", "Save As…"));
     if (actExit_) actExit_->setText(Tr("Закрыть редактор", "Exit Editor"));
-    if (actServiceObjects_) actServiceObjects_->setText(Tr("Служебные объекты сцены", "Scene Service Objects"));
     if (actAddModel_) actAddModel_->setText(Tr("Добавить модель…", "Add Model…"));
     if (actImportModel_) actImportModel_->setText(Tr("Импорт модели…", "Import Model…"));
     if (actImportTexture_) actImportTexture_->setText(Tr("Импорт текстуры…", "Import Texture…"));
@@ -1379,6 +1381,8 @@ void EditorMainWindow::RetranslateUi()
     if (actResetLayout_) actResetLayout_->setText(Tr("Сбросить раскладку окон", "Reset Window Layout"));
     if (actGrid_) actGrid_->setText(Tr("Сетка", "Grid"));
     if (actOverlays_) actOverlays_->setText(Tr("Иконки и гизмо", "Icons and Gizmos"));
+    if (actGizmo_) actGizmo_->setText(Tr("Гизмо", "Gizmo"));
+    if (actIcons_) actIcons_->setText(Tr("Иконки объектов", "Object Icons"));
     if (actLangRu_) actLangRu_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::Ru);
     if (actLangEn_) actLangEn_->setChecked(EditorLocale::Instance().Language() == EditorLanguage::En);
 }
@@ -1400,7 +1404,7 @@ void EditorMainWindow::SetStartupScene()
 }
 void EditorMainWindow::OfferRecovery()
 {
-    if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
+    if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit || qEnvironmentVariableIsSet("PAIN_EDITOR_TEST_MODE") || qApp->applicationFilePath().contains(QStringLiteral("Tests"), Qt::CaseInsensitive)) return;
     const auto candidates = RecoveryStore::Candidates(QString::fromUtf8(host_->host().projectFile));
     if (candidates.isEmpty()) return;
     const auto record = candidates.front(); const auto info = RecoveryStore::Read(record);

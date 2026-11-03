@@ -65,6 +65,36 @@ $buildArgs = @(
     "/verbosity:minimal"
 )
 
+$vcpkgRoot = $env:VCPKG_ROOT
+if (!$vcpkgRoot -and (Test-Path -LiteralPath $vswhere)) {
+    $installations = & $vswhere -products '*' -property installationPath
+    foreach ($inst in $installations) {
+        $candidate = Join-Path $inst 'VC\vcpkg'
+        if (Test-Path -LiteralPath (Join-Path $candidate 'scripts\buildsystems\msbuild\vcpkg.props')) {
+            $vcpkgRoot = $candidate
+            break
+        }
+    }
+}
+if (!$vcpkgRoot) {
+    foreach ($c in @('C:\vcpkg', 'D:\vcpkg', (Join-Path $env:USERPROFILE 'vcpkg'))) {
+        if ($c -and (Test-Path -LiteralPath (Join-Path $c 'scripts\buildsystems\msbuild\vcpkg.props'))) {
+            $vcpkgRoot = $c
+            break
+        }
+    }
+}
+$assimpHeader = Join-Path $repoRoot 'Engine/vcpkg_installed/x64-windows/include/assimp/scene.h'
+if (Test-Path -LiteralPath $assimpHeader) {
+    $buildArgs += '/p:EngineEnableAssimp=true'
+    if ($vcpkgRoot) {
+        $vcpkgClean = $vcpkgRoot.TrimEnd('\')
+        $buildArgs += ('/p:VcpkgRoot="' + $vcpkgClean + '\\"')
+        $env:VCPKG_ROOT = $vcpkgClean
+    }
+    Log-Step "Assimp detected in Engine/vcpkg_installed: building with EngineEnableAssimp=true" "Green"
+}
+
 if ($Fast) {
     $fastProjects = @("Engine", "EngineRuntime", "SceneProject", "EditorModule", "EngineLauncher")
     
@@ -149,54 +179,67 @@ if ($proc.ExitCode -ne 0) {
 $buildTimeSec = [math]::Round($sw.Elapsed.TotalSeconds, 2)
 Log-Step "Build finished successfully in $buildTimeSec сек." "Green"
 
-Log-Step "=== 5. Ensuring EditorOverlay.hlsl is deployed ===" "Cyan"
+Log-Step "=== 5. Ensuring Shaders are deployed to Runtime and LocalAppData Engines ===" "Cyan"
 $sourceShader = Join-Path $repoRoot "Engine/Content/Shaders/EditorOverlay.hlsl"
 $sourceFxaa = Join-Path $repoRoot "Engine/Content/Shaders/FXAA.hlsl"
-$targetShaders = @(
-    (Join-Path $repoRoot "Game/build/x64/Debug/Runtime/EngineContent/Shaders/EditorOverlay.hlsl")
+$runtimeDir = Join-Path $repoRoot "Game/build/x64/Debug/Runtime"
+$engineCacheDir = Join-Path $env:LOCALAPPDATA "PainEngine\Engines\$version\Debug"
+
+$shaderDestDirs = @(
+    (Join-Path $runtimeDir "EngineContent/Shaders")
 )
-foreach ($target in $targetShaders) {
-    $dir = Split-Path -Parent $target
-    if (!(Test-Path -LiteralPath $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
-    Copy-Item -LiteralPath $sourceShader -Destination $target -Force
-    Log-Step "Deployed shader: $target" "DarkGray"
-}
-$targetFxaa = Join-Path $repoRoot "Game/build/x64/Debug/Runtime/EngineContent/Shaders/FXAA.hlsl"
-if (Test-Path -LiteralPath $sourceFxaa) {
-    Copy-Item -LiteralPath $sourceFxaa -Destination $targetFxaa -Force
-    Log-Step "Deployed shader: $targetFxaa" "DarkGray"
+if (Test-Path -LiteralPath $engineCacheDir) {
+    $shaderDestDirs += (Join-Path $engineCacheDir "EngineContent/Shaders")
 }
 
-Log-Step "=== 5b. Synchronizing Game.dll for user projects in Documents ===" "Cyan"
-$templateDll = Join-Path $repoRoot "Game/build/x64/Debug/Runtime/Templates/SceneProject/Game.dll"
-if (Test-Path -LiteralPath $templateDll) {
-    $templateItem = Get-Item -LiteralPath $templateDll
-    $docsDir = [Environment]::GetFolderPath('MyDocuments')
-    $projectFiles = @()
-    $registryJson = Join-Path $env:LOCALAPPDATA "EngineLauncher\projects.json"
-    if (Test-Path -LiteralPath $registryJson) {
-        try {
-            $regProjects = Get-Content -LiteralPath $registryJson -Raw | ConvertFrom-Json
-            foreach ($p in $regProjects) { if (Test-Path -LiteralPath $p) { $projectFiles += $p } }
-        } catch {}
+foreach ($destDir in $shaderDestDirs) {
+    if (!(Test-Path -LiteralPath $destDir)) { New-Item -ItemType Directory -Path $destDir -Force | Out-Null }
+    if (Test-Path -LiteralPath $sourceShader) {
+        Copy-Item -LiteralPath $sourceShader -Destination (Join-Path $destDir "EditorOverlay.hlsl") -Force
+        Log-Step "Deployed shader: $(Join-Path $destDir 'EditorOverlay.hlsl')" "DarkGray"
     }
-    if (Test-Path -LiteralPath $docsDir) {
-        $found = Get-ChildItem -LiteralPath $docsDir -Filter "Project.json" -Recurse -Depth 2 -ErrorAction SilentlyContinue
-        foreach ($f in $found) { $projectFiles += $f.FullName }
+    if (Test-Path -LiteralPath $sourceFxaa) {
+        Copy-Item -LiteralPath $sourceFxaa -Destination (Join-Path $destDir "FXAA.hlsl") -Force
+        Log-Step "Deployed shader: $(Join-Path $destDir 'FXAA.hlsl')" "DarkGray"
     }
-    $projectFiles = $projectFiles | Select-Object -Unique
-    foreach ($pJson in $projectFiles) {
-        $pDir = Split-Path -Parent $pJson
-        $pDll = Join-Path $pDir "Game.dll"
-        if (Test-Path -LiteralPath $pDll) {
-            $dllItem = Get-Item -LiteralPath $pDll
-            if ($dllItem.LastWriteTime -lt $templateItem.LastWriteTime) {
-                Copy-Item -LiteralPath $templateDll -Destination $pDll -Force
-                Log-Step "Updated outdated Game.dll in $pDir ($($dllItem.LastWriteTime) -> $($templateItem.LastWriteTime))" "Yellow"
+}
+
+Log-Step "=== 5a. Synchronizing binaries to LocalAppData Engines ===" "Cyan"
+if (Test-Path -LiteralPath $engineCacheDir) {
+    $vcpkgBinDir = Join-Path $repoRoot "Engine/vcpkg_installed/x64-windows/debug/bin"
+    if (Test-Path -LiteralPath $vcpkgBinDir) {
+        Get-ChildItem -LiteralPath $vcpkgBinDir -Filter "*.dll" | ForEach-Object {
+            $dest = Join-Path $runtimeDir $_.Name
+            if (!(Test-Path -LiteralPath $dest) -or ($_.LastWriteTime -gt (Get-Item $dest).LastWriteTime)) {
+                Copy-Item -LiteralPath $_.FullName -Destination $dest -Force
             }
         }
     }
+    $syncFiles = @("Editor.dll", "EngineRuntime.exe", "assimp-vc143-mtd.dll", "assimp-vc143-mt.dll", "kubazip.dll", "minizipd.dll", "minizip.dll", "poly2tri.dll", "pugixml.dll", "zd.dll", "z.dll")
+    foreach ($sf in $syncFiles) {
+        $srcPath = Join-Path $runtimeDir $sf
+        if (Test-Path -LiteralPath $srcPath) {
+            Copy-Item -LiteralPath $srcPath -Destination (Join-Path $engineCacheDir $sf) -Force
+            Log-Step "Updated engine cache file: $(Join-Path $engineCacheDir $sf)" "DarkGray"
+        }
+    }
+    $tplSrc = Join-Path $runtimeDir "Templates/SceneProject/Game.dll"
+    $tplDst = Join-Path $engineCacheDir "Templates/SceneProject/Game.dll"
+    if (Test-Path -LiteralPath $tplSrc) {
+        $tplDstDir = Split-Path -Parent $tplDst
+        if (!(Test-Path -LiteralPath $tplDstDir)) { New-Item -ItemType Directory -Path $tplDstDir -Force | Out-Null }
+        Copy-Item -LiteralPath $tplSrc -Destination $tplDst -Force
+        Log-Step "Updated engine cache template: $tplDst" "DarkGray"
+    }
+    $shadowCache = Join-Path $engineCacheDir ".shadow_cache"
+    if (Test-Path -LiteralPath $shadowCache) {
+        Remove-Item -LiteralPath $shadowCache -Recurse -Force -ErrorAction SilentlyContinue
+        Log-Step "Cleared stale shadow cache: $shadowCache" "DarkGray"
+    }
 }
+
+# User project modules are built and upgraded by the launcher/ProjectTools.
+# Never replace custom C++ DLLs or historical build outputs with SceneProject.
 
 Log-Step "=== 6. Launching EngineLauncher ===" "Cyan"
 $launcherPath = Join-Path $repoRoot "Game/build/x64/Debug/EngineLauncher.exe"

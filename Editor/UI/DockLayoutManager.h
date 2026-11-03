@@ -18,4 +18,5 @@ public:
                                   QDockWidget* inspectorDock,
                                   QDockWidget* fileDock,
                                   QDockWidget* consoleDock);
+    static void ConfigureTabBars(QMainWindow* window);
 };

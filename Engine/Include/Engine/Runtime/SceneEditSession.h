@@ -40,13 +40,23 @@ private:
     GameFactory gameFactory_ = nullptr;
     std::thread::id thread_ = std::this_thread::get_id();
     bool busy_ = false;
+    bool pendingStop_ = false;
     uint32_t state_ = EngineEditing;
     std::unique_ptr<Game> edit_;
     SceneCommands commands_;
+    std::unique_ptr<GameSession> gameSession_;
+    GameSession* startingSession_ = nullptr; // borrowed only while Control(Play) is on the stack
     std::unique_ptr<Game> play_; // destroy before edit (shared viewport device)
     bool attached_ = false;
     bool inputFocused_ = false;
     uint32_t width_ = 0, height_ = 0;
+    uint32_t antialiasingMode_ = 1;
+    struct StoredOverlayIcon {
+        uint32_t width = 0;
+        uint32_t height = 0;
+        std::vector<uint8_t> pixels;
+    };
+    std::unordered_map<uint32_t, StoredOverlayIcon> storedIcons_;
     Game& Active() { return play_ ? *play_ : *edit_; }
     std::unique_ptr<Game> CopyForPlay();
     void ReplaceEdit(const SceneSnapshot& data);
@@ -74,6 +84,11 @@ private:
         self.busy_ = true;
         uint32_t result;
         try { result = action(self); } catch (...) { result = EngineSceneFailure; }
+        if (self.pendingStop_) {
+            self.pendingStop_ = false;
+            try { self.Control(EngineStop); } catch (...) { result = EngineSceneFailure; }
+            self.pendingStop_ = false;
+        }
         self.busy_ = false;
         return result;
     }

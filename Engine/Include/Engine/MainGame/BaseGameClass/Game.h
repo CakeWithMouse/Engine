@@ -17,6 +17,7 @@
 #include <Engine/Render/ShaderConstants.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/MainGame/Player.h>
+#include <Engine/MainGame/GameSession.h>
 #include <Engine/MainGame/GameSettings.h>
 #include <Engine/Display/Display.h>
 #include <Engine/InputDevice/InputDevice.h>
@@ -124,6 +125,11 @@ class Game
 {
 public:
     Game();
+    // External session must outlive this Game; attach before InitializeGameplay.
+    void AttachSession(GameSession& session);
+    void CloseGameplayScene() noexcept;
+    template<class T> T* GetSubsystem() const { return Session ? Session->GetSubsystem<T>() : nullptr; }
+    GameSession* GetSession() const { return Session; }
     virtual ~Game();
     Game(const Game&) = delete;
     Game& operator=(const Game&) = delete;
@@ -447,6 +453,8 @@ protected:
     Input::System ActionInput;
     std::unique_ptr<CharacterController> Controller;
     bool GameplayInitialized = false;
+    std::unique_ptr<GameSession> OwnedSession;
+    GameSession* Session = nullptr;
     std::unique_ptr<UIComponent> ProjectHudComponent;
 
     // Scene owns components. The read-only alias preserves legacy traversal/order.
@@ -609,6 +617,14 @@ protected:
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
     };
 
+    struct RawOverlayIcon {
+        uint32_t width = 0;
+        uint32_t height = 0;
+        std::vector<uint8_t> pixels;
+    };
+    std::unordered_map<uint32_t, RawOverlayIcon> PendingOverlayIconData;
+    void UploadOverlayIcon(uint32_t iconId, const RawOverlayIcon& raw);
+
     struct TimedTraceLine {EngineOverlayLine line;double expiry;};
     std::vector<TimedTraceLine> TraceDebugLines;
     std::vector<EngineOverlayLine> CollectTraceDebugLines();
@@ -616,6 +632,7 @@ protected:
     float OverlayLineThickness = 1.0f;
     std::unordered_map<uint32_t, CachedOverlayIcon> OverlayIcons;
     std::vector<EngineOverlayBillboard> PendingOverlayBillboards;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> FallbackIconSRV;
     std::vector<EngineOverlayTriangle> PendingOverlayTriangles;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> OverlayTriangleVS;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> OverlayTrianglePS;

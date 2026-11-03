@@ -66,7 +66,7 @@
     <ItemDefinitionGroup>
         <ClCompile>
             <!-- %(AdditionalIncludeDirectories) берёт include-пути из Cpp.props, сверху кладём Qt -->
-            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtWidgets;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtCore;$(QtInstallDir)/include/QtSvg;$(IntDir)moc;$(ProjectDir)Core;$(ProjectDir)Host;$(ProjectDir)UI;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+            <AdditionalIncludeDirectories>$(QtInstallDir)/include;$(QtInstallDir)/include/QtWidgets;$(QtInstallDir)/include/QtGui;$(QtInstallDir)/include/QtCore;$(QtInstallDir)/include/QtSvg;$(QtInstallDir)/include/QtTest;$(IntDir)moc;$(ProjectDir)Core;$(ProjectDir)Host;$(ProjectDir)UI;$(ProjectDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
             <PreprocessorDefinitions>$(QtSvgDefine)QT_WIDGETS_LIB;QT_GUI_LIB;QT_CORE_LIB;QT_SVG_LIB;UNICODE;_UNICODE;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
             <LanguageStandard>stdcpp17</LanguageStandard>
             <ExceptionHandling>Sync</ExceptionHandling>
@@ -79,7 +79,7 @@
         <Link>
             <AdditionalLibraryDirectories>$(QtInstallDir)/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
             <!-- %(AdditionalDependencies) сохраняет всё, что дал Cpp.props -->
-            <AdditionalDependencies>$(QtInstallDir)\lib\Qt6Widgets$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Gui$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Core$(QtLibSuffix).lib;$(QtSvgLibrary)%(AdditionalDependencies)</AdditionalDependencies>
+            <AdditionalDependencies>$(QtInstallDir)\lib\Qt6Widgets$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Gui$(QtLibSuffix).lib;$(QtInstallDir)\lib\Qt6Core$(QtLibSuffix).lib;$(QtSvgLibrary)$(QtInstallDir)\lib\Qt6Test$(QtLibSuffix).lib;%(AdditionalDependencies)</AdditionalDependencies>
         </Link>
     </ItemDefinitionGroup>
 
@@ -287,6 +287,7 @@
         <ClInclude Include="UI/EditorApp.h"/>
         <ClInclude Include="UI/IconProvider.h"/>
         <ClInclude Include="UI/ViewportOverlayHelper.h"/>
+        <ClInclude Include="UI/SpinBoxArrowStyle.h"/>
         <ClInclude Include="Include/CodeClassDialog.h"/>
         <ClInclude Include="Include/FileBrowser.h"/>
         <ClInclude Include="Include/MaterialTextureTools.h"/>

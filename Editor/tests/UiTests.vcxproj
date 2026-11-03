@@ -73,6 +73,7 @@
 
     <ItemGroup>
         <ClCompile Include="UiTestRunner.cpp"/>
+        <ClCompile Include="../UI/DockLayoutManager.cpp"/>
         <ClCompile Include="../Core/Logger.cpp"/>
         <ClCompile Include="../Core/CommandRegistry.cpp"/>
         <ClCompile Include="../Core/FileService.cpp"/>

@@ -31,6 +31,7 @@ public:
     static QIcon MoreIcon(const QColor& color = QColor());
     static QIcon EyeIcon(bool visible = true, const QColor& color = QColor());
     static QIcon LockIcon(bool locked = true, const QColor& color = QColor());
+    static QIcon ImportIcon(const QColor& color = QColor());
     static QIcon PlusIcon(const QColor& color = QColor());
     static QIcon TrashIcon(const QColor& color = QColor());
     static QIcon FolderIcon(const QColor& color = QColor());
@@ -39,4 +40,7 @@ public:
     static QIcon BulbIcon(const QColor& color = QColor());
     static QIcon CubeIcon(const QColor& color = QColor());
     static QIcon AdjustmentsIcon(const QColor& color = QColor());
+    static QIcon ChevronUpIcon(const QColor& color = QColor());
+    static QIcon ChevronDownIcon(const QColor& color = QColor());
+    static QIcon ChevronRightIcon(const QColor& color = QColor());
 };

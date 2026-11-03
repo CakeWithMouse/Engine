@@ -32,13 +32,14 @@ namespace
 struct Session
 {
     EngineModuleHost host;
+    GameSession gameSession;
     std::unique_ptr<Game> game = SCENE_MODULE_CREATE_GAME();
     SceneCommands commands{game->GetScene(), ProjectComponentTypes()};
     uint64_t updates = 0;
     bool started = false, sceneLoaded = false;
     bool startCalled = false, loading = false;
     std::thread::id thread = std::this_thread::get_id();
-    explicit Session(const EngineModuleHost& value) : host(value) { game->SetSceneLightingEnabled(true); }
+    explicit Session(const EngineModuleHost& value) : host(value) { game->AttachSession(gameSession); game->SetSceneLightingEnabled(true); }
 };
 void Log(Session* s, const char* text) { s->host.log(s->host.user, text); }
 void* __cdecl Create(const EngineModuleHost* host)
@@ -102,17 +103,20 @@ int __cdecl Start(void* instance)
     Log(s, s->host.projectName);
     try
     {
+        std::string error;
+        if (!s->gameSession.Initialize(error)) { Log(s, error.c_str()); return 0; }
         if (s->sceneLoaded)
         {
             s->game->SetSimulationTimeScale(1.0f);
-            if (!s->game->InitializeRuntimeWindow()) { Log(s, "Game window initialization failed"); return 0; }
+            if (!s->game->InitializeRuntimeWindow()) { s->gameSession.Stop(); Log(s, "Game window initialization failed"); return 0; }
             s->game->GetPlayer()->SetPosition({0, 0, 5});
 #if defined(SCENE_MODULE_START_SCENE)
             SCENE_MODULE_START_SCENE(*s->game);
 #endif
         }
+        s->game->InitializeGameplay();
     }
-    catch (...) { Log(s, "Game start failed"); return 0; }
+    catch (...) { s->gameSession.Stop(); Log(s, "Game start failed"); return 0; }
     s->started = true;
     return 1;
 }
@@ -129,7 +133,7 @@ int __cdecl Update(void* instance, double dt)
             if (result == Game::RuntimeFrameResult::Failed) { Log(s, "Game frame failed"); return 0; }
             if (result == Game::RuntimeFrameResult::Closed) s->host.requestExit(s->host.user);
         }
-        else s->game->GetScene().Tick(static_cast<float>(dt));
+        else s->game->StepProjectSimulation(static_cast<float>(dt));
     }
     catch (...) { Log(s, "Game scene update failed"); return 0; }
     return 1;
@@ -141,6 +145,7 @@ void __cdecl Stop(void* instance)
     std::snprintf(count, sizeof(count), "GameUpdates=%llu", static_cast<unsigned long long>(s->updates));
     Log(s, count);
     Log(s, "GameStop");
+    s->gameSession.Stop();
     s->started = false;
 }
 void __cdecl Destroy(void* instance)

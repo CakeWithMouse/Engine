@@ -79,6 +79,18 @@ inline void RegisterViewportCommands(ViewportWidget* viewport, EditorQtHost* hos
         return true;
     });
 
+    reg(QStringLiteral("View.ToggleGizmo"), QStringLiteral("Toggle Gizmo"), [](const CommandContext&) {
+        bool current = SettingsService::Instance().GetValue(QStringLiteral("view/gizmo"), true).toBool();
+        SettingsService::Instance().SetValue(QStringLiteral("view/gizmo"), !current);
+        return true;
+    });
+
+    reg(QStringLiteral("View.ToggleIcons"), QStringLiteral("Toggle Object Icons"), [](const CommandContext&) {
+        bool current = SettingsService::Instance().GetValue(QStringLiteral("view/icons"), true).toBool();
+        SettingsService::Instance().SetValue(QStringLiteral("view/icons"), !current);
+        return true;
+    });
+
     reg(QStringLiteral("View.SetAntialiasing"), QStringLiteral("Set Antialiasing Mode"), [host](const CommandContext& ctx) {
         QString modeStr = ctx.parameters.value(QStringLiteral("mode")).toString();
         if (modeStr.isEmpty()) modeStr = QStringLiteral("fxaa");
@@ -105,5 +117,7 @@ inline void UnregisterViewportCommands()
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Editor.SetControlSchemeBlender"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.ToggleGrid"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.ToggleOverlays"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.ToggleGizmo"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.ToggleIcons"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("View.SetAntialiasing"));
 }

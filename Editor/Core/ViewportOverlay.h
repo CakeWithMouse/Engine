@@ -47,6 +47,7 @@ namespace ViewportOverlay
         const float camView[16],
         bool gridEnabled,
         bool gizmoEnabled,
+        bool iconsEnabled,
         uint64_t selectedId,
         uint32_t gizmoMode,
         const float objPos[3],

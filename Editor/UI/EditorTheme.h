@@ -65,9 +65,9 @@ public:
     QString CurrentStyleSheet() const;
 
     // Vector icons (without emoji)
-    static QIcon CreatePlayIcon(const QColor& color = QColor(0x4A, 0xDE, 0x80));
-    static QIcon CreatePauseIcon(const QColor& color = QColor(0xFB, 0xBF, 0x24));
-    static QIcon CreateStopIcon(const QColor& color = QColor(0xF8, 0xF1, 0x71));
+    static QIcon CreatePlayIcon(const QColor& color = QColor(0x22, 0xC5, 0x5E));
+    static QIcon CreatePauseIcon(const QColor& color = QColor(0xEA, 0xB3, 0x08));
+    static QIcon CreateStopIcon(const QColor& color = QColor(0xEF, 0x44, 0x44));
     static QIcon CreateExternalIcon(const QColor& color = QColor(0x60, 0xA5, 0xFA));
     static QIcon CreateSettingsIcon(const QColor& color = QColor(0x94, 0xA3, 0xB8));
     static QIcon CreateTranslateIcon(const QColor& color = QColor(0xCB, 0xD5, 0xE1));

@@ -13,6 +13,7 @@
 #include <QShowEvent>
 #include <QHideEvent>
 #include <QResizeEvent>
+#include <QGuiApplication>
 #include <cmath>
 #include <memory>
 #include <algorithm>
@@ -39,6 +40,10 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
     schemeSubId_ = EditorSettings::Instance().SubscribeControlSchemeChanged([this](ControlScheme s) { if (headerBar_) headerBar_->SetControlScheme(s); });
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] { RetranslateUi(); });
 
+    resizeTimer_ = new QTimer(this);
+    resizeTimer_->setSingleShot(true);
+    connect(resizeTimer_, &QTimer::timeout, this, &ViewportWidget::SendResize);
+
     auto* timer = new QTimer(this);
     auto elapsed = std::make_shared<QElapsedTimer>();
     elapsed->start();
@@ -49,24 +54,26 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
         const int state = host_->PlayState();
         if (inputState_ != state) { inputState_ = state; keys_.clear(); looking_ = rmbPressed_ = false; EndObjectDrag(); }
         if (!attached_ || !hasFocus() || !isActiveWindow()) return;
-        SendCursor(mapFromGlobal(QCursor::pos()),true); // refresh after Play/resume, resize and DPI changes
+        SendCursor(mapFromGlobal(QCursor::pos()), true); // refresh after Play/resume, resize and DPI changes
         if (state != EditorQtHost::Edit && host_->HasScene()) return;
 
-        const float speed = dt * (keys_.contains(Qt::Key_Shift) ? 4.0f : 1.0f);
+        {
+            const float speed = dt * (keys_.contains(Qt::Key_Shift) ? 4.0f : 1.0f);
 
-        if (host_->HasSelection() && !looking_)
-        {
-            float r = static_cast<float>(keys_.contains(Qt::Key_Right) - keys_.contains(Qt::Key_Left)) * speed;
-            float u = static_cast<float>(keys_.contains(Qt::Key_PageUp) - keys_.contains(Qt::Key_PageDown)) * speed;
-            float f = static_cast<float>(keys_.contains(Qt::Key_Up) - keys_.contains(Qt::Key_Down)) * speed;
-            if (r || u || f) host_->MoveSelectedObject(r, u, f);
-        }
-        {
-            EditorCommand c; c.type = EditorCommand::ViewportCamera;
-            c.right = static_cast<float>(keys_.contains(Qt::Key_D) - keys_.contains(Qt::Key_A)) * speed;
-            c.up = static_cast<float>(keys_.contains(Qt::Key_E) - keys_.contains(Qt::Key_Q)) * speed;
-            c.forward = static_cast<float>(keys_.contains(Qt::Key_W) - keys_.contains(Qt::Key_S)) * speed;
-            if (c.right || c.up || c.forward) host_->PostCommand(c);
+            if (host_->HasSelection() && !looking_)
+            {
+                float r = static_cast<float>(keys_.contains(Qt::Key_Right) - keys_.contains(Qt::Key_Left)) * speed;
+                float u = static_cast<float>(keys_.contains(Qt::Key_PageUp) - keys_.contains(Qt::Key_PageDown)) * speed;
+                float f = static_cast<float>(keys_.contains(Qt::Key_Up) - keys_.contains(Qt::Key_Down)) * speed;
+                if (r || u || f) host_->MoveSelectedObject(r, u, f);
+            }
+            {
+                EditorCommand c; c.type = EditorCommand::ViewportCamera;
+                c.right = static_cast<float>(keys_.contains(Qt::Key_D) - keys_.contains(Qt::Key_A)) * speed;
+                c.up = static_cast<float>(keys_.contains(Qt::Key_E) - keys_.contains(Qt::Key_Q)) * speed;
+                c.forward = static_cast<float>(keys_.contains(Qt::Key_W) - keys_.contains(Qt::Key_S)) * speed;
+                if (c.right || c.up || c.forward) host_->PostCommand(c);
+            }
         }
         hasCameraInfo_ = host_->GetCamera(lastCameraInfo_);
         if (hasCameraInfo_)
@@ -77,16 +84,19 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
             if (len > 1e-4f) { camPitch_ = std::asin(std::clamp(fy / len, -1.0f, 1.0f)); camYaw_ = std::atan2(fz / len, fx / len); }
         }
 
-        ViewportOverlayHelper::UpdateOverlays(
-            host_,
-            lastCameraInfo_,
-            hasCameraInfo_,
-            hoveredHandle_,
-            static_cast<int>(gizmoMode_),
-            localOrientation_,
-            overlayHash_,
-            activeGizmoHandle_
-        );
+        if (!isResizing_)
+        {
+            ViewportOverlayHelper::UpdateOverlays(
+                host_,
+                lastCameraInfo_,
+                hasCameraInfo_,
+                hoveredHandle_,
+                static_cast<int>(gizmoMode_),
+                localOrientation_,
+                overlayHash_,
+                activeGizmoHandle_
+            );
+        }
     });
     timer->start(16);
     setMinimumSize(80, 60);
@@ -113,6 +123,8 @@ void ViewportWidget::showEvent(QShowEvent* e)
 
 void ViewportWidget::hideEvent(QHideEvent* e)
 {
+    if (resizeTimer_) resizeTimer_->stop();
+    isResizing_ = false;
     if (attached_)
     {
         EditorCommand c;
@@ -126,8 +138,16 @@ void ViewportWidget::hideEvent(QHideEvent* e)
 void ViewportWidget::resizeEvent(QResizeEvent* e)
 {
     QWidget::resizeEvent(e);
-    if (attached_)
-        SendResize();
+    if (!attached_)
+    {
+        if (host_->HasViewport() && PhysW() > 0 && PhysH() > 0)
+            SendAttach();
+        return;
+    }
+    if (PhysW() == 0 || PhysH() == 0) return;
+    if (PhysW() == lastSentW_ && PhysH() == lastSentH_) return;
+    isResizing_ = true;
+    resizeTimer_->start(120);
 }
 
 void ViewportWidget::AttachHeaderBar(ViewportHeaderBar* bar)
@@ -153,12 +173,27 @@ void ViewportWidget::paintEvent(QPaintEvent*)
 
 void ViewportWidget::SendAttach()
 {
-    EditorCommand c; c.type = EditorCommand::ViewportAttach; c.hwnd = (void*)winId(); c.w = PhysW(); c.h = PhysH(); host_->PostCommand(c); attached_ = true;
+    const uint32_t pw = PhysW(), ph = PhysH();
+    if (pw == 0 || ph == 0) return;
+    lastSentW_ = pw; lastSentH_ = ph;
+    EditorCommand c; c.type = EditorCommand::ViewportAttach; c.hwnd = (void*)winId(); c.w = lastSentW_; c.h = lastSentH_; host_->PostCommand(c); attached_ = true;
 }
 
 void ViewportWidget::SendResize()
 {
-    EditorCommand c; c.type = EditorCommand::ViewportResize; c.w = PhysW(); c.h = PhysH(); host_->PostCommand(c);
+    if (!attached_) return;
+    const bool mouseHeld = (QGuiApplication::mouseButtons() & Qt::LeftButton) != 0;
+    if (mouseHeld)
+    {
+        resizeTimer_->start(120);
+        return;
+    }
+    isResizing_ = false;
+    const uint32_t pw = PhysW(), ph = PhysH();
+    if (pw == 0 || ph == 0) return;
+    if (pw == lastSentW_ && ph == lastSentH_) return;
+    lastSentW_ = pw; lastSentH_ = ph;
+    EditorCommand c; c.type = EditorCommand::ViewportResize; c.w = pw; c.h = ph; host_->PostCommand(c);
 }
 
 uint32_t ViewportWidget::PhysW() const { return static_cast<uint32_t>(std::lround(width() * devicePixelRatioF())); }
@@ -408,11 +443,11 @@ void ViewportWidget::ApplyGizmoDragGesture(const QPointF& pos)
                 float curDist = std::hypot(static_cast<float>(pos.x()) - cs[0], static_cast<float>(pos.y()) - cs[1]);
                 const float sDist = (dragStartDist_ > 5.0f) ? dragStartDist_ : 30.0f;
                 float ratio = curDist / sDist;
-                if (ratio < 0.01f) ratio = 0.01f;
+                if (std::abs(ratio) < 0.001f) ratio = (ratio < 0.0f) ? -0.001f : 0.001f;
                 if (snapEnabled_ && scaleSnapStep_ > 1e-4)
                 {
                     ratio = static_cast<float>(std::round(ratio / scaleSnapStep_) * scaleSnapStep_);
-                    if (ratio < 0.01f) ratio = 0.01f;
+                    if (std::abs(ratio) < 0.001f) ratio = (ratio < 0.0f) ? -0.001f : 0.001f;
                 }
                 EngineSceneTransform t = dragStartTransform_;
                 for (int i = 0; i < 3; ++i) t.scale[i] = dragStartTransform_.scale[i] * ratio;
@@ -428,11 +463,11 @@ void ViewportWidget::ApplyGizmoDragGesture(const QPointF& pos)
             {
                 const float sDist = (std::abs(dragStartS_) > 0.05f) ? dragStartS_ : 1.0f;
                 float ratio = curS / sDist;
-                if (ratio < 0.01f) ratio = 0.01f;
+                if (std::abs(ratio) < 0.001f) ratio = (ratio < 0.0f) ? -0.001f : 0.001f;
                 if (snapEnabled_ && scaleSnapStep_ > 1e-4)
                 {
                     ratio = static_cast<float>(std::round(ratio / scaleSnapStep_) * scaleSnapStep_);
-                    if (ratio < 0.01f) ratio = 0.01f;
+                    if (std::abs(ratio) < 0.001f) ratio = (ratio < 0.0f) ? -0.001f : 0.001f;
                 }
                 EngineSceneTransform t = dragStartTransform_;
                 int idx = (activeGizmoHandle_ == GizmoGeometry::Handle::AxisX) ? 0 :

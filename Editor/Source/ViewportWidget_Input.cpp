@@ -33,10 +33,10 @@ uint32_t GameKey(QKeyEvent* key)
 } // namespace
 
 void ViewportWidget::SendCursor(QPointF p,bool valid) {
-    if(!attached_)return;
+    if(!attached_||isResizing_||lastSentW_==0||lastSentH_==0)return;
     EditorCommand c;c.type=EditorCommand::InputCursor;
     c.right=float(p.x()*devicePixelRatioF());c.up=float(p.y()*devicePixelRatioF());
-    c.w=PhysW();c.h=PhysH();c.forward=valid?1.f:0.f;host_->PostCommand(c);
+    c.w=lastSentW_;c.h=lastSentH_;c.forward=valid?1.f:0.f;host_->PostCommand(c);
 }
 
 bool ViewportWidget::event(QEvent* e)
@@ -205,7 +205,7 @@ bool ViewportWidget::HandleMousePress(QMouseEvent* mouse)
                 lastCameraInfo_,
                 static_cast<float>(mouse->position().x()),
                 static_cast<float>(mouse->position().y()),
-                16.0f
+                10.0f
             );
             if (bbObj != 0)
             {

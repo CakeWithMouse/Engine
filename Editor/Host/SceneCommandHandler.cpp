@@ -190,6 +190,11 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
             result = (ctx.pointLightV2 && ctx.pointLightV2->set)
                 ? ctx.pointLightV2->set(ctx.pointLightV2->context, cmd.objectId, &cmd.pointLight, cmd.castShadows ? 1u : 0u)
                 : (api.setPointLight ? api.setPointLight(api.context, cmd.objectId, &cmd.pointLight) : EngineSceneReadOnly);
+            if (result == EngineSceneOk)
+            {
+                std::printf("[Info] SetPointLight ok id=%llu castShadows=%u\n", cmd.objectId, cmd.castShadows ? 1u : 0u);
+                std::fflush(stdout);
+            }
         }
         else if (cmd.type == EditorCommand::SetProperty)
         {

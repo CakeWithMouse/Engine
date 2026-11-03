@@ -14,6 +14,8 @@ Copy-Item -LiteralPath "$PSScriptRoot/ProjectSdk.targets" -Destination "$sdk/Bui
 $importDir = if ($Configuration -eq 'Debug') { "$engineRoot/vcpkg_installed/x64-windows/debug/lib" } else { "$engineRoot/vcpkg_installed/x64-windows/lib" }
 if (Test-Path -LiteralPath $importDir) { Copy-Item -Path "$importDir/*.lib" -Destination "$sdk/Lib" -Force }
 New-Item -ItemType Directory -Force (Join-Path $sdk 'Examples'),(Join-Path $sdk 'Docs') | Out-Null
+Copy-Item -LiteralPath "$engineRoot/../Game/BasicExamples/Source/SessionCounterSubsystem.h" -Destination "$sdk/Examples/SessionCounterSubsystem.h" -Force
+Copy-Item -LiteralPath "$engineRoot/docs/GAME-SUBSYSTEMS.md" -Destination "$sdk/Docs/GAME-SUBSYSTEMS.md" -Force
 Copy-Item -LiteralPath "$engineRoot/examples/TraceExamples.cpp" -Destination "$sdk/Examples/TraceExamples.cpp" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/TRACE-API.md" -Destination "$sdk/Docs/TRACE-API.md" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/API-REFERENCE.html" -Destination "$sdk/Docs/API-REFERENCE.html" -Force

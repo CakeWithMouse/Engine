@@ -52,13 +52,17 @@
 #include "ViewportWidget.h"
 #include "SceneObjectsPanel.h"
 #include "CollapsibleCard.h"
+#ifndef QT_WIDGETS_LIB
+#define QT_WIDGETS_LIB
+#endif
+#include <qtestmouse.h>
+#include <QTabBar>
 #include <QMenu>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <cstdio>
 #include <stdexcept>
-
 namespace
 {
 int checks = 0;
@@ -85,7 +89,6 @@ QAction* Action(EditorMainWindow* window, const QString& label)
     if(label==QStringLiteral("⏸ Pause")) id="ActPause";
     if(!id.isEmpty()) if(auto* a=window->findChild<QAction*>(id)) return a;
     QString text=label;
-
     if(text==QStringLiteral("Сбросить расположение панелей")) text=QStringLiteral("Сбросить раскладку окон");
     for (auto* action : window->findChildren<QAction*>()) if (action->text() == text) return action;
     throw std::runtime_error("Action not found: " + label.toStdString());
@@ -178,7 +181,6 @@ void ReloadUiChecks(const std::filesystem::path& root, const std::filesystem::pa
     host.SetModuleApi({}); ownedModule.reset(); host.Stop();
     std::printf("Reload EditorUiTests: %d checks passed\n",checks);
 }
-
 int wmain(int argc, wchar_t** argv)
 {
     try
@@ -341,31 +343,43 @@ int wmain(int argc, wchar_t** argv)
             {ObjectInspectorPanel restored(w);restored.Refresh(view,123,true);Check(!restored.findChild<QToolButton*>("Section.UiProbe/Behavior/Movement")->isChecked(),"collapsed hierarchy persists across inspector recreation");}
             header->setChecked(wasOpen);
         });
-
-
         if(argc==4&&std::wstring(argv[3])==L"--layout") {
-            int height=0;QPoint boundary;
-            Ui([&](auto* w){
+            int height=0;QPoint boundary; Ui([&](auto* w){
                 QDockWidget* files=nullptr;for(auto* d:w->template findChildren<QDockWidget*>())if(d->objectName()==QStringLiteral("ContentDock"))files=d;
                 Check(files!=nullptr,"content dock exists");files->raise();w->resize(1600,950);
-                std::printf("Layout before: content=%d min=%d max=%d features=%d area=%d\n",files->height(),files->minimumHeight(),files->maximumHeight(),int(files->features()),int(w->dockWidgetArea(files)));
-                Action(w,QStringLiteral("Ресурсы: компактная панель"))->trigger();
+                for (auto* bar : w->findChildren<QTabBar*>()) {
+                    if (!bar->isVisible() || bar->count() < 2) continue;
+                    for (int c = 0; c < 5; ++c) {
+                        QTest::mouseClick(bar, Qt::LeftButton, Qt::KeyboardModifiers(), bar->tabRect(0).center()); Check(bar->currentIndex() == 0, "tab switched to Console");
+                        QTest::mouseClick(bar, Qt::LeftButton, Qt::KeyboardModifiers(), bar->tabRect(1).center()); Check(bar->currentIndex() == 1, "tab switched to Content");
+                    }
+                    std::printf("[TabDiag] 5 consecutive switch cycles succeeded!\n"); }
             });for(int i=0;i<15;++i)pump();
             Ui([](auto* w){w->resize(1800,1100);});for(int i=0;i<15;++i)pump();
             Ui([](auto* w){w->resizeDocks({w->template findChild<QDockWidget*>("SceneObjectsDock"),w->template findChild<QDockWidget*>("ViewportDock"),w->template findChild<QDockWidget*>("InspectorDock")},{80,1600,80},Qt::Horizontal);});
             for(int i=0;i<10;++i)pump();
             Ui([](auto* w){Check(w->template findChild<QDockWidget*>("ViewportDock")->width()>w->width()*0.75,"viewport expands beyond 75 percent of window width");});
             Ui([&](auto* w){QDockWidget* files=nullptr;for(auto* d:w->template findChildren<QDockWidget*>())if(d->objectName()==QStringLiteral("ContentDock"))files=d;
-                height=files->height();std::printf("Layout resized: content=%d\n",height);for(auto* d:w->findChildren<QDockWidget*>())std::printf("Dock %s: area=%d size=%dx%d min=%d visible=%d\n",d->objectName().toUtf8().constData(),int(w->dockWidgetArea(d)),d->width(),d->height(),d->minimumHeight(),d->isVisible());Check(height<=240,"compact panel does not consume most of the window");
-                boundary=QPoint(w->width()/2,files->mapTo(w,QPoint()).y()-w->style()->pixelMetric(QStyle::PM_DockWidgetSeparatorExtent)/2);
+                height=files->height();std::printf("Layout resized: content=%d\n",height);for(auto* d:w->findChildren<QDockWidget*>())std::printf("Dock %s: area=%d size=%dx%d min=%d visible=%d\n",d->objectName().toUtf8().constData(),int(w->dockWidgetArea(d)),d->width(),d->height(),d->minimumHeight(),d->isVisible());                boundary=QPoint(w->width()/2,files->mapTo(w,QPoint()).y()-w->style()->pixelMetric(QStyle::PM_DockWidgetSeparatorExtent)/2);
                 QMouseEvent press(QEvent::MouseButtonPress,boundary,w->mapToGlobal(boundary),Qt::LeftButton,Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(w,&press);
             });for(int i=0;i<3;++i)pump();
-            Ui([&](auto* w){const auto end=boundary+QPoint(0,-90);QMouseEvent move(QEvent::MouseMove,end,w->mapToGlobal(end),Qt::NoButton,Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(w,&move);});for(int i=0;i<10;++i)pump();
-            Ui([&](auto* w){const auto end=boundary+QPoint(0,-90);QMouseEvent release(QEvent::MouseButtonRelease,end,w->mapToGlobal(end),Qt::LeftButton,Qt::NoButton,Qt::NoModifier);QApplication::sendEvent(w,&release);});for(int i=0;i<10;++i)pump();
+            const uint64_t beforeDrag = host.ViewportResizeCount();
+            for (int s = 1; s <= 50; ++s) { Ui([&](auto* w) { const auto pt = boundary + QPoint(0, -std::min(90, s * 2)); QMouseEvent move(QEvent::MouseMove, pt, w->mapToGlobal(pt), Qt::NoButton, Qt::LeftButton, Qt::NoModifier); QApplication::sendEvent(w, &move); }); Sleep(40); pump(); }
+            Ui([&](auto* w) { const auto end = boundary + QPoint(0, -90); QMouseEvent rel(QEvent::MouseButtonRelease, end, w->mapToGlobal(end), Qt::LeftButton, Qt::NoButton, Qt::NoModifier); QApplication::sendEvent(w, &rel); }); for (int i = 0; i < 15; ++i) pump();
+            const uint64_t diff = host.ViewportResizeCount() - beforeDrag;
+            std::printf("ResizeDiag during 2s drag: diff=%llu\n", diff); Check(diff >= 1 && diff <= 2, "viewportResize called <= 2 times during continuous 2s splitter drag");
             Ui([&](auto* w){QDockWidget* files=nullptr;for(auto* d:w->template findChildren<QDockWidget*>())if(d->objectName()==QStringLiteral("ContentDock"))files=d;std::printf("Layout dragged: content=%d (before %d)\n",files->height(),height);Check(files->height()>height+40,"content separator drag resizes panel");
-                Action(w,QStringLiteral("Ресурсы: отдельное окно"))->trigger();Check(files->isFloating(),"content floats");w->addDockWidget(Qt::LeftDockWidgetArea,files);files->setFloating(false);Check(w->dockWidgetArea(files)==Qt::LeftDockWidgetArea,"content can dock at side");
+                files->setFloating(true);Check(files->isFloating(),"content floats");w->addDockWidget(Qt::LeftDockWidgetArea,files);files->setFloating(false);Check(w->dockWidgetArea(files)==Qt::LeftDockWidgetArea,"content can dock at side");
                 const auto layout=w->saveState(1);Action(w,QStringLiteral("Сбросить расположение панелей"))->trigger();Check(!files->isFloating()&&w->dockWidgetArea(files)==Qt::BottomDockWidgetArea,"reset returns content below viewport");
                 Check(w->restoreState(layout,1)&&w->dockWidgetArea(files)==Qt::LeftDockWidgetArea,"panel layout restores by stable names");
+            });
+            Ui([](auto* w){w->showMaximized();});for(int i=0;i<5;++i)pump();
+            Ui([](auto* w){w->showNormal();});for(int i=0;i<5;++i)pump();
+            Ui([](auto* w){auto* vpDock=w->template findChild<QDockWidget*>("ViewportDock");Check(vpDock!=nullptr,"viewport dock exists");vpDock->setFloating(true);});for(int i=0;i<5;++i)pump();
+            Ui([](auto* w){auto* vpDock=w->template findChild<QDockWidget*>("ViewportDock");w->addDockWidget(Qt::TopDockWidgetArea,vpDock);vpDock->setFloating(false);});for(int i=0;i<5;++i)pump();
+            Ui([&](auto* w){auto* modal=QApplication::activeModalWidget();bool isError=false;
+                if(auto* box=qobject_cast<QMessageBox*>(modal))if(box->icon()==QMessageBox::Critical||box->icon()==QMessageBox::Warning||box->windowTitle().contains(QStringLiteral("Ошибка"))||box->text().contains(QStringLiteral("код 1")))isError=true;
+                Check(!isError&&modal==nullptr,"no error modal dialog during maximize/restore/drag/undock");
                 Action(w,QStringLiteral("Сбросить расположение панелей"))->trigger();w->grab().save(QString::fromStdWString((root/"editor-layout.png").wstring()));w->close();});until([&]{return exit;});host.SetModuleApi({});factory.destroy(api.context);sessionGuard.context=nullptr;host.Stop();
             std::printf("Layout EditorUiTests: %d checks passed\n",checks);return 0;
         }
@@ -407,7 +421,6 @@ int wmain(int argc, wchar_t** argv)
             host.SetModuleApi({});factory.destroy(api.context);sessionGuard.context=nullptr;host.Stop();
             std::printf("Authoring EditorUiTests: %d checks passed\n",checks);return 0;
         }
-
         if (argc == 4 && std::wstring(argv[3]) == L"--workflow") {
             for(int i=0;i<3;++i){EditorCommand add;add.type=EditorCommand::CreateObject;add.path="Primitive.Cube";add.name=QString("Batch %1").arg(i);host.PostCommand(add);}
             until([&]{return host.ReadSnapshot().objects.size()==7;});
@@ -456,7 +469,6 @@ int wmain(int argc, wchar_t** argv)
             std::puts("Group UI and save checks passed; simulating process crash"); std::fflush(stdout);
             TerminateProcess(GetCurrentProcess(),0); return 0;
         }
-
         Ui([&](auto* w) {
             CodeClassDialog dialog(QString::fromStdWString(root.wstring()), w);
             auto* name = dialog.findChild<QLineEdit*>("ClassName");
@@ -611,7 +623,6 @@ int wmain(int argc, wchar_t** argv)
         until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.textureAsset.empty()) return false; return true; });
         Ui([](auto* w) { Action(w, QStringLiteral("Повторить"))->trigger(); });
         until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.textureAsset.empty()) return true; return false; });
-
         // Material editor: template from Files, live parameter, HLSL errors, recompiled parameters, save and discard.
         const auto materialFile = root / "Content/Materials/Tint.mat", surfaceFile = root / "Content/Materials/Tint.hlsl";
         auto editorWidget = [](auto* w, const QString& name) -> QWidget* {
@@ -874,7 +885,6 @@ int wmain(int argc, wchar_t** argv)
         until([&] { bool done = false; Ui([&](auto* w) {
             done = w->template findChild<QPlainTextEdit*>(QStringLiteral("Console"))->toPlainText().contains(QStringLiteral("перекомпилированы")); }); return done; });
         Ui([](auto* w) { w->activateWindow(); }); // focused-field checks below need the main window active
-
         if (argc == 4)
         {
             const auto modelSource = std::filesystem::absolute(argv[3]);
@@ -1064,6 +1074,7 @@ int wmain(int argc, wchar_t** argv)
             Check(label->GetText()=="Здоровье & энергия"&&label->Rect.X==24&&label->Rect.Anchor==UIAnchor::TopRight,"inspector changes label");
             ui->Select(panel);ui->AddElement("Button");Check(dynamic_cast<UIButton*>(ui->Selected()),"add button");
             ui->findChild<QDoubleSpinBox*>("UIRect1")->setValue(80);
+            Check(ui->Selected()->Rect.Y==80,"UI rectangle value change updates the model without losing focus");
             QTimer::singleShot(60,ui,[]{auto* dialog=qobject_cast<QColorDialog*>(QApplication::activeModalWidget());Check(dialog,"UI color dialog");dialog->setCurrentColor(QColor(32,180,210,128));dialog->accept();});
             ui->findChild<QPushButton*>("UIColor")->click();
             Check(std::abs(dynamic_cast<UIButton*>(ui->Selected())->Color.a-128.0f/255)<0.01,"UI color alpha");
@@ -1120,8 +1131,7 @@ int wmain(int argc, wchar_t** argv)
         });
         until([&] {for(const auto& o:host.ReadSnapshot().objects)if(o.gameplayKind==1)return QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object()["playerControlled"].toBool();return false;});
         Ui([&](auto* w){w->grab().save(QString::fromStdWString((root/"player-properties.png").wstring()));});
-        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); });
-        until([&] { return !host.ReadSnapshot().dirty; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); }); until([&] { return !host.ReadSnapshot().dirty; });
         Ui([](auto* w) { Action(w,QStringLiteral("▶ Play"))->trigger(); });until([&]{return host.PlayState()==EditorQtHost::Play;});
         auto heroZ=[&]{float z=999;EngineSceneInfo info{};api.readActiveScene(api.context,&info,[](void* p,const EngineSceneObjectInfo* o){if(std::string(o->typeName)=="Gameplay.Character")*static_cast<float*>(p)=o->transform.position[2];},&z);return z;};
         auto key=[&](QEvent::Type type,int value){Ui([&](auto* w){auto* viewport=w->template findChild<ViewportWidget*>();Check(viewport,"viewport widget");QKeyEvent event(type,value,Qt::NoModifier);QApplication::sendEvent(viewport,&event);});};
@@ -1132,71 +1142,38 @@ int wmain(int argc, wchar_t** argv)
         for(int i=0;i<10;++i)pump();Check(heroZ()==stopped,"typing in editor does not move character");
         Ui([](auto* w){delete w->template findChild<QLineEdit*>("InputTextProbe");Action(w,QStringLiteral("⏹ Stop"))->trigger();});until([&]{return host.PlayState()==EditorQtHost::Edit;});
         Check(heroZ()==0,"Stop restores authored character");
-        auto sunObject = [&] {
-            for (const auto& object : host.ReadSnapshot().objects) if(object.type=="Light.Directional") return object;
-            return EditorQtHost::SceneObject{};
-        };
+        auto sunObject = [&] { for (const auto& object : host.ReadSnapshot().objects) if(object.type=="Light.Directional") return object; return EditorQtHost::SceneObject{}; };
         auto sunSettings = [&] { return QJsonDocument::fromJson(QByteArray::fromStdString(sunObject().projectData)).object(); };
-        Ui([](auto* w) { Action(w,QStringLiteral("Направленный свет"))->trigger(); });
-        until([&] { return sunObject().id && host.ReadSnapshot().selected==sunObject().id; });
+        Ui([](auto* w) { w->ShowDirectionalLight(); }); until([&] { return sunObject().id && host.ReadSnapshot().selected==sunObject().id; });
         const auto withSun = host.ReadSnapshot().objects.size();
-        Ui([](auto* w) {
-            auto* intensity=w->template findChild<QDoubleSpinBox*>("Property/intensity");
-            auto* color=w->template findChild<QPushButton*>("Property/color");
-            Check(intensity && color && w->template findChild<QCheckBox*>("Property/shadows"),"directional light inspector controls");
-            intensity->setValue(2.5);QMetaObject::invokeMethod(intensity,"editingFinished",Qt::DirectConnection);
-        });
+        Ui([](auto* w) { auto* intensity=w->template findChild<QDoubleSpinBox*>("Property/intensity"); auto* color=w->template findChild<QPushButton*>("Property/color"); Check(intensity && color && w->template findChild<QCheckBox*>("Property/shadows"),"directional light inspector controls"); intensity->setValue(2.5); QMetaObject::invokeMethod(intensity,"editingFinished",Qt::DirectConnection); });
         until([&] { return sunSettings()["intensity"].toDouble()==2.5; });
-        Ui([](auto* w) { Action(w,QStringLiteral("Отменить"))->trigger(); });
-        until([&] { return sunSettings()["intensity"].toDouble()==1; });
-        Ui([](auto* w) { Action(w,QStringLiteral("Повторить"))->trigger(); });
-        until([&] { return sunSettings()["intensity"].toDouble()==2.5; });
-        Ui([](auto* w) { Action(w,QStringLiteral("Направленный свет"))->trigger(); });
-        until([&] { return host.ReadSnapshot().selected==sunObject().id; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Отменить"))->trigger(); }); until([&] { return sunSettings()["intensity"].toDouble()==1; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Повторить"))->trigger(); }); until([&] { return sunSettings()["intensity"].toDouble()==2.5; });
+        Ui([](auto* w) { w->ShowDirectionalLight(); }); until([&] { return host.ReadSnapshot().selected==sunObject().id; });
         Check(host.ReadSnapshot().objects.size()==withSun,"global sun action selects existing singleton");
-        Ui([](auto* w) {
-            auto* yaw=w->template findChild<QDoubleSpinBox*>("Transform4");yaw->setValue(65);
-            QMetaObject::invokeMethod(yaw,"editingFinished",Qt::DirectConnection);
-            w->template findChild<QCheckBox*>("Property/shadows")->click();
-        });
+        Ui([](auto* w) { auto* yaw=w->template findChild<QDoubleSpinBox*>("Transform4"); yaw->setValue(65); QMetaObject::invokeMethod(yaw,"editingFinished",Qt::DirectConnection); w->template findChild<QCheckBox*>("Property/shadows")->click(); });
         until([&] { return !sunSettings()["shadows"].toBool(); });
         const auto sunRotation = sunObject().transform;
         Check(std::abs(sunRotation.rotation[1])>0.1f,"inspector rotates directional light");
-        Ui([](auto* w) {
-            QTimer::singleShot(80,w,[]{
-                auto* dialog=qobject_cast<QColorDialog*>(QApplication::activeModalWidget());Check(dialog,"sun color dialog");
-                dialog->setCurrentColor(QColor::fromRgbF(0.2,0.6,1));dialog->accept();
-            });
-            w->template findChild<QPushButton*>("Property/color")->click();
-        });
+        Ui([](auto* w) { QTimer::singleShot(80,w,[]{ auto* dialog=qobject_cast<QColorDialog*>(QApplication::activeModalWidget());Check(dialog,"sun color dialog"); dialog->setCurrentColor(QColor::fromRgbF(0.2,0.6,1));dialog->accept(); }); w->template findChild<QPushButton*>("Property/color")->click(); });
         until([&] { return std::abs(sunSettings()["color"].toArray()[0].toDouble()-0.2)<0.01; });
-        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); });
-        until([&] { return !host.ReadSnapshot().dirty; });
-        Ui([](auto* w) { Action(w,QStringLiteral("▶ Play"))->trigger(); });
-        until([&] { return host.PlayState()==EditorQtHost::Play; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); }); until([&] { return !host.ReadSnapshot().dirty; });
+        Ui([](auto* w) { Action(w,QStringLiteral("▶ Play"))->trigger(); }); until([&] { return host.PlayState()==EditorQtHost::Play; });
         Check(sunSettings()["intensity"].toDouble()==2.5,"Play keeps authored sun");
-        Ui([](auto* w) { Action(w,QStringLiteral("⏹ Stop"))->trigger(); });
-        until([&] { return host.PlayState()==EditorQtHost::Edit; });
-        Ui([](auto* w) { Action(w,QStringLiteral("Направленный свет"))->trigger(); });
+        Ui([](auto* w) { Action(w,QStringLiteral("⏹ Stop"))->trigger(); }); until([&] { return host.PlayState()==EditorQtHost::Edit; });
+        Ui([](auto* w) { w->ShowDirectionalLight(); });
         until([&] { return host.ReadSnapshot().selected==sunObject().id; });
         Ui([&](auto* w) { w->grab().save(QString::fromStdWString((root / "directional-light-inspector.png").wstring())); auto* viewport=w->template findChild<ViewportWidget*>();Check(viewport,"viewport exists");viewport->setFocus();
             QKeyEvent key(QEvent::KeyPress,Qt::Key_Delete,Qt::NoModifier);QApplication::sendEvent(viewport,&key); });
         until([&] { return !sunObject().id; });
-        Ui([](auto* w) { Action(w,QStringLiteral("Отменить"))->trigger(); });
-        until([&] { return sunObject().id && sunSettings()["intensity"].toDouble()==2.5; });
-        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); });
-        until([&] { return !host.ReadSnapshot().dirty; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Отменить"))->trigger(); }); until([&] { return sunObject().id && sunSettings()["intensity"].toDouble()==2.5; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); }); until([&] { return !host.ReadSnapshot().dirty; });
         Ui([](auto* w) { Add(w,12); });
         until([&] { for(const auto& o:host.ReadSnapshot().objects)if(o.gameplayKind==2)return true;return false; });
-        Ui([](auto* w) {
-            auto* projection=w->template findChild<QComboBox*>("Property/orthographic");
-            auto* plane=w->template findChild<QComboBox*>("Property/viewPlane");
-            Check(projection && plane && projection->count()==2 && plane->count()==4,"camera projection and 2D plane choices");
-            projection->setCurrentIndex(1);QMetaObject::invokeMethod(projection,"activated",Q_ARG(int,1));
-        });
+        Ui([](auto* w) { auto* projection=w->template findChild<QComboBox*>("Property/orthographic"); auto* plane=w->template findChild<QComboBox*>("Property/viewPlane"); Check(projection && plane && projection->count()==2 && plane->count()==4,"camera projection and 2D plane choices"); projection->setCurrentIndex(1); QMetaObject::invokeMethod(projection,"activated",Q_ARG(int,1)); });
         until([&]{for(const auto& o:host.ReadSnapshot().objects)if(o.gameplayKind==2)return QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object()["orthographic"].toBool();return false;});
-        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); });
-        until([&] { return !host.ReadSnapshot().dirty; });
+        Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); }); until([&] { return !host.ReadSnapshot().dirty; });
         Ui([](auto* w) { w->close(); });
         until([&] { return exit; });
         host.SetModuleApi({}); factory.destroy(api.context); sessionGuard.context = nullptr; host.Stop();

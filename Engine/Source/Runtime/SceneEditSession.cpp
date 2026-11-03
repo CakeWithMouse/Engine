@@ -53,6 +53,8 @@ std::unique_ptr<Game> SceneEditSession::CopyForPlay()
     candidate->SetSimulationEnabled(false);
     candidate->SetSimulationTimeScale(1.0f);
     candidate->SetSceneLightingEnabled(true);
+    candidate->GetSettings().SetAntialiasing(antialiasingMode_);
+    for (const auto& [id, st] : storedIcons_) candidate->SetOverlayIcon(id, st.width, st.height, st.pixels.data());
     SceneDocument::Restore(edit_->GetScene().GetSnapshot(), catalog_, candidate->GetScene());
     return candidate;
 }
@@ -61,7 +63,13 @@ uint32_t SceneEditSession::Control(uint32_t command)
     if (command == EnginePlay)
     {
         if (state_ != EngineEditing) return EngineSceneBusy;
-        auto candidate = CopyForPlay(); // failure leaves edit state/viewport untouched
+        auto session = std::make_unique<GameSession>();
+        startingSession_ = session.get();
+        struct StartupScope { GameSession*& slot; ~StartupScope() { slot = nullptr; } } startup{startingSession_};
+        std::string error;
+        if (!session->Initialize(error)) throw std::runtime_error(error);
+        auto candidate = CopyForPlay();
+        candidate->AttachSession(*session); // failure leaves edit state/viewport untouched
         if (attached_)
         {
             if (!width_ || !height_) return EngineSceneBusy;
@@ -82,6 +90,7 @@ uint32_t SceneEditSession::Control(uint32_t command)
         }
         candidate->InitializeGameplay();
         candidate->GetInput().SetContextEnabled(Input::Context::Game, inputFocused_);
+        gameSession_ = std::move(session);
         play_ = std::move(candidate);
         state_ = EnginePlaying;
         commands_.SetReadOnly(true);
@@ -90,7 +99,9 @@ uint32_t SceneEditSession::Control(uint32_t command)
     if (command == EngineStop)
     {
         if (state_ == EngineEditing) return EngineSceneOk;
+        gameSession_->Stop();
         play_.reset();
+        gameSession_.reset();
         state_ = EngineEditing;
         commands_.SetReadOnly(false);
         if (attached_)
@@ -108,6 +119,16 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
 {
     EngineEditSessionApi api{ENGINE_EDIT_API_VERSION, this, commands_.GetApi(),
         [](void* p, uint32_t command) -> uint32_t {
+            if (p && command == EngineStop) {
+                auto& s = *static_cast<SceneEditSession*>(p);
+                if (s.thread_ != std::this_thread::get_id()) return EngineSceneWrongThread;
+                if (s.busy_) {
+                    s.pendingStop_ = true;
+                    if (s.gameSession_) s.gameSession_->Stop();
+                    else if (s.startingSession_) s.startingSession_->Stop();
+                    return EngineSceneOk;
+                }
+            }
             return Invoke(p, [&](SceneEditSession& s) { return s.Control(command); });
         },
         [](void* p, uint32_t* state) -> uint32_t {
@@ -141,12 +162,15 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                     return EngineSceneFailure;
                 s.edit_->GetPlayer()->SetPosition({0.0f, 0.0f, 5.0f}); // default yaw faces -Z, toward scene origin
                 s.attached_ = true; s.width_ = w; s.height_ = h;
+                s.edit_->GetSettings().SetAntialiasing(s.antialiasingMode_);
                 return EngineSceneOk;
             });
         },
         [](void* p, uint32_t w, uint32_t h) -> uint32_t {
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
-                if (!s.attached_ || w > INT_MAX || h > INT_MAX) return EngineSceneInvalidArgument;
+                if (w > INT_MAX || h > INT_MAX) return EngineSceneInvalidArgument;
+                if (!s.attached_) return EngineSceneOk;
+                if (s.width_ == w && s.height_ == h) return EngineSceneOk;
                 s.width_ = w; s.height_ = h;
                 s.Active().OnWindowResized(static_cast<int>(w), static_cast<int>(h), !w || !h);
                 return EngineSceneOk;
@@ -169,6 +193,7 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                     for (const auto& item : s.play_->GetScene().GetComponents()) item.second->SetGame(s.play_.get());
                     try { s.play_->StepProjectSimulation(static_cast<float>(dt)); }
                     catch (...) { s.state_ = EnginePaused; return EngineSceneSimulationFailed; }
+                    if (s.pendingStop_) return EngineSceneOk;
                 }
                 if (s.state_ == EngineEditing && s.attached_)
                     for (const auto& item : s.edit_->GetScene().GetComponents())
@@ -339,11 +364,9 @@ EngineEditorCameraApi SceneEditSession::GetEditorCameraApi() noexcept
 
 EnginePointLightV2Api SceneEditSession::GetPointLightV2Api() noexcept
 {
-    return {1, this,
+    return {1, &commands_,
         [](void* p, uint64_t id, const EngineScenePointLight* l, uint32_t castShadows) -> uint32_t {
-            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
-                return SceneCommands::SetPointLightV2(&s.Active(), id, l, castShadows);
-            });
+            return SceneCommands::SetPointLightV2(p, id, l, castShadows);
         }
     };
 }
@@ -368,6 +391,17 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
         },
         [](void* p, uint32_t iconId, uint32_t w, uint32_t h, const uint8_t* rgba) -> uint32_t {
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (rgba && w > 0 && h > 0)
+                {
+                    auto& st = s.storedIcons_[iconId];
+                    st.width = w;
+                    st.height = h;
+                    st.pixels.assign(rgba, rgba + (w * h * 4));
+                }
+                else
+                {
+                    s.storedIcons_.erase(iconId);
+                }
                 s.Active().SetOverlayIcon(iconId, w, h, rgba);
                 return EngineSceneOk;
             });
@@ -380,6 +414,7 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
         },
         [](void* p, uint32_t mode) -> uint32_t {
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                s.antialiasingMode_ = mode;
                 s.Active().GetSettings().SetAntialiasing(mode);
                 return EngineSceneOk;
             });
@@ -395,6 +430,8 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
 void SceneEditSession::ReplaceEdit(const SceneSnapshot& data)
 {
     auto candidate = EmptyGame();
+    candidate->GetSettings().SetAntialiasing(antialiasingMode_);
+    for (const auto& [id, st] : storedIcons_) candidate->SetOverlayIcon(id, st.width, st.height, st.pixels.data());
     SceneDocument::Restore(data, catalog_, candidate->GetScene());
     if (attached_)
     {

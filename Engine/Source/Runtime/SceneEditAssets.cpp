@@ -23,7 +23,8 @@ bool Text(const char* value)
 }
 SceneEditSession::~SceneEditSession()
 {
-    previews_.clear(); play_.reset(); edit_.reset();
+    if (gameSession_) gameSession_->Stop();
+    previews_.clear(); play_.reset(); gameSession_.reset(); edit_.reset();
     if (ownsGameMount_)
     {
         auto& vfs = VfsRead::GetVFS();
