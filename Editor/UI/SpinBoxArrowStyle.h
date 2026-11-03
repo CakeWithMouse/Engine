@@ -75,3 +75,4 @@ public:
         QProxyStyle::drawPrimitive(pe, opt, p, w);
     }
 };
+
