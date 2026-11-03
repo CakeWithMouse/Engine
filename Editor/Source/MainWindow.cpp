@@ -1050,7 +1050,7 @@ static bool IsUserFacingCommand(EditorCommand::Type t)
     case EditorCommand::SetModel: case EditorCommand::SetTexture: case EditorCommand::SetMaterial:
     case EditorCommand::SetPointLight: case EditorCommand::SetProjectData: case EditorCommand::UpdateAsset:
     case EditorCommand::ImportModel: case EditorCommand::ImportTexture: case EditorCommand::SaveScene:
-    case EditorCommand::LoadScene: case EditorCommand::NewScene: return true;
+    case EditorCommand::LoadScene: case EditorCommand::NewScene: case EditorCommand::ReloadProject: return true;
     default: return false;
     }
 }
