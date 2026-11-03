@@ -296,6 +296,10 @@ Game::~Game()
 
 void Game::DestroyResources(bool preserveScene)
 {
+    CloseGameplayScene();
+    if (OwnedSession) OwnedSession->Stop();
+    Session = nullptr;
+    OwnedSession.reset();
     if (Context)
     {
         Context->ClearState();
@@ -451,6 +455,7 @@ bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int reque
     auto fail = [this, preserveSceneOnFailure](const char* reason) -> bool
     {
         std::cout << "Initialization failed: " << reason << std::endl;
+        if (Session) Session->Stop();
         DestroyResources(preserveSceneOnFailure);
         return false;
     };
@@ -3624,7 +3629,9 @@ void Game::UpdateSimulation(float deltaTime)
 {
     auto sceneUpdate = scene.BeginUpdate(); // Covers custom PreUpdate/TickComponents too.
     InitializeGameplay();
+    if (!Session || !Session->IsRunning()) return;
     StartGameplayComponents();
+    if (!Session->IsRunning()) return;
     TotalTime += deltaTime;
     // Convert client coordinate units to render-target pixels, including DPI virtualization.
     if(!bEmbedded && DisplayPtr){POINT point{};const auto hwnd=DisplayPtr->GetHwnd();
@@ -3644,7 +3651,10 @@ void Game::UpdateSimulation(float deltaTime)
     if (InputDevicePtr) InputDevicePtr->SetPointerBlocked(pointerBlocked);
     ActionInput.SetPointerBlocked(pointerBlocked);
     PreUpdate(deltaTime);
+    if (!Session->IsRunning()) return;
     ActionInput.Tick(deltaTime);
+    Session->Tick(deltaTime);
+    if (!Session->IsRunning()) return;
     if (Controller) Controller->Tick(deltaTime);
     if (FirstPlayer) FirstPlayer->UpdateCamera(deltaTime);
     TickComponents(deltaTime);
@@ -3656,9 +3666,25 @@ void Game::SetCharacterController(std::unique_ptr<CharacterController> controlle
 {
     ActionInput.Reset(); Controller = std::move(controller);
 }
+void Game::AttachSession(GameSession& session)
+{
+    if (Session || GameplayInitialized) throw std::logic_error("Game already has a session");
+    Session = &session;
+}
+void Game::CloseGameplayScene() noexcept
+{
+    if (Session) Session->SceneClosing(scene);
+    GameplayInitialized = false;
+}
 void Game::InitializeGameplay()
 {
     if (GameplayInitialized) return;
+    if (!Session) { OwnedSession = std::make_unique<GameSession>(); Session = OwnedSession.get(); }
+    if (!Session->IsRunning()) {
+        std::string error;
+        if (!Session->Initialize(error)) throw std::runtime_error(error);
+    }
+    try {
     const auto content = VfsRead::Active().Resolve("/Game");
     if (!content.empty()) try {
         const auto hudFile = ProjectHud::Read(std::filesystem::u8path(content));
@@ -3680,8 +3706,11 @@ void Game::InitializeGameplay()
         if(player->standardControl)Controller->BindInput();
         if(FirstPlayer)Controller->UpdateCamera(*FirstPlayer);
     }
+    Session->SceneReady(scene);
+    if (!Session->IsRunning()) throw std::runtime_error("Session stopped during scene startup");
     GameplayInitialized = true;
     StartGameplayComponents();
+    } catch (...) { Session->Stop(); GameplayInitialized = false; throw; }
 }
 
 void Game::StartGameplayComponents()
@@ -3691,6 +3720,7 @@ void Game::StartGameplayComponents()
         auto& component=*entry.second;
         if(component.GameplayStarted)continue;
         component.SetGame(this);component.GameplayStarted=true;component.BeginPlay();
+        if (Session && !Session->IsRunning()) break;
     }
 }
 

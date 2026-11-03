@@ -90,6 +90,7 @@
     <ClInclude Include="Include\Engine\InputDevice\InputActions.h" />
     <ClInclude Include="Include\Engine\Components\Character.h" />
     <ClInclude Include="Include\Engine\MainGame\CharacterController.h" />
+    <ClCompile Include="Source\MainGame\GameSession.cpp" />
     <ClCompile Include="Source\MainGame\BaseGameClass\Game.cpp" />
     <ClCompile Include="Source\MainGame\Player.cpp" />
     <ClCompile Include="Source\Render\ImpostorAtlas.cpp" />

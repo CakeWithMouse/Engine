@@ -52,4 +52,5 @@
     <Copy SourceFiles="RequiredFiles.txt" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(GameContent)" DestinationFiles="@(GameContent->'$(OutDir)GameContent\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
+  <Import Project="..\..\Engine\BuildSupport\ComponentGeneration.targets" />
 </Project>
