@@ -373,59 +373,16 @@ namespace GizmoGeometry
 
         if (mode == GizmoMath::GizmoMode::Translate)
         {
-            auto addAxis = [&](const float a[3], const float u1[3], const float u2[3], Handle hnd, uint32_t col) {
+            auto addAxis = [&](const float a[3], Handle hnd, uint32_t col) {
                 uint32_t c, f;
                 getStyle(hnd, col, c, f);
                 const float tip[3] = {objPos[0] + a[0] * scale, objPos[1] + a[1] * scale, objPos[2] + a[2] * scale};
                 lines.push_back({objPos[0], objPos[1], objPos[2], tip[0], tip[1], tip[2], c, f});
-
-                const float coneLen = scale * 0.22f;
-                const float coneR = scale * 0.07f;
-                const float base[3] = {tip[0] - a[0] * coneLen, tip[1] - a[1] * coneLen, tip[2] - a[2] * coneLen};
-                const float b1[3] = {base[0] + u1[0] * coneR, base[1] + u1[1] * coneR, base[2] + u1[2] * coneR};
-                const float b2[3] = {base[0] - u1[0] * coneR, base[1] - u1[1] * coneR, base[2] - u1[2] * coneR};
-                const float b3[3] = {base[0] + u2[0] * coneR, base[1] + u2[1] * coneR, base[2] + u2[2] * coneR};
-                const float b4[3] = {base[0] - u2[0] * coneR, base[1] - u2[1] * coneR, base[2] - u2[2] * coneR};
-
-                const float* bp[4] = {b1, b2, b3, b4};
-                for (int i = 0; i < 4; ++i) {
-                    lines.push_back({tip[0], tip[1], tip[2], bp[i][0], bp[i][1], bp[i][2], c, f});
-                    lines.push_back({bp[i][0], bp[i][1], bp[i][2], bp[(i+1)%4][0], bp[(i+1)%4][1], bp[(i+1)%4][2], c, f});
-                }
             };
 
-            addAxis(ax, ay, az, Handle::AxisX, palette.axisX);
-            addAxis(ay, ax, az, Handle::AxisY, palette.axisY);
-            addAxis(az, ax, ay, Handle::AxisZ, palette.axisZ);
-
-            auto addPlane = [&](const float a1[3], const float a2[3], Handle hnd, uint32_t col) {
-                uint32_t c, f;
-                getStyle(hnd, col, c, f);
-                const float pSize = scale * 0.28f;
-                const float p1[3] = {objPos[0] + a1[0] * pSize, objPos[1] + a1[1] * pSize, objPos[2] + a1[2] * pSize};
-                const float p2[3] = {objPos[0] + a2[0] * pSize, objPos[1] + a2[1] * pSize, objPos[2] + a2[2] * pSize};
-                const float pc[3] = {objPos[0] + (a1[0] + a2[0]) * pSize, objPos[1] + (a1[1] + a2[1]) * pSize, objPos[2] + (a1[2] + a2[2]) * pSize};
-                lines.push_back({objPos[0], objPos[1], objPos[2], p1[0], p1[1], p1[2], c, f});
-                lines.push_back({objPos[0], objPos[1], objPos[2], p2[0], p2[1], p2[2], c, f});
-                lines.push_back({p1[0], p1[1], p1[2], pc[0], pc[1], pc[2], c, f});
-                lines.push_back({p2[0], p2[1], p2[2], pc[0], pc[1], pc[2], c, f});
-                lines.push_back({p1[0], p1[1], p1[2], p2[0], p2[1], p2[2], c, f});
-            };
-
-            addPlane(ax, ay, Handle::PlaneXY, palette.planeXY);
-            addPlane(ax, az, Handle::PlaneXZ, palette.planeXZ);
-            addPlane(ay, az, Handle::PlaneYZ, palette.planeYZ);
-
-            uint32_t cc, cf;
-            getStyle(Handle::Center, palette.center, cc, cf);
-            const float csz = scale * 0.07f;
-            const float cd[2] = {-csz, csz};
-            for (int i = 0; i < 2; ++i)
-                for (int j = 0; j < 2; ++j) {
-                    lines.push_back({objPos[0]+cd[i], objPos[1]+cd[j], objPos[2]-csz, objPos[0]+cd[i], objPos[1]+cd[j], objPos[2]+csz, cc, cf});
-                    lines.push_back({objPos[0]+cd[i], objPos[1]-csz, objPos[2]+cd[j], objPos[0]+cd[i], objPos[1]+csz, objPos[2]+cd[j], cc, cf});
-                    lines.push_back({objPos[0]-csz, objPos[1]+cd[i], objPos[2]+cd[j], objPos[0]+csz, objPos[1]+cd[i], objPos[2]+cd[j], cc, cf});
-                }
+            addAxis(ax, Handle::AxisX, palette.axisX);
+            addAxis(ay, Handle::AxisY, palette.axisY);
+            addAxis(az, Handle::AxisZ, palette.axisZ);
         }
         else if (mode == GizmoMath::GizmoMode::Rotate)
         {
@@ -458,31 +415,16 @@ namespace GizmoGeometry
         }
         else if (mode == GizmoMath::GizmoMode::Scale)
         {
-            auto addCube = [&](const float c[3], float sz, uint32_t col, uint32_t flg) {
-                const float d[2] = {-sz, sz};
-                for (int i = 0; i < 2; ++i)
-                    for (int j = 0; j < 2; ++j) {
-                        lines.push_back({c[0]+d[i], c[1]+d[j], c[2]-sz, c[0]+d[i], c[1]+d[j], c[2]+sz, col, flg});
-                        lines.push_back({c[0]+d[i], c[1]-sz, c[2]+d[j], c[0]+d[i], c[1]+sz, c[2]+d[j], col, flg});
-                        lines.push_back({c[0]-sz, c[1]+d[i], c[2]+d[j], c[0]+sz, c[1]+d[i], c[2]+d[j], col, flg});
-                    }
-            };
-
             auto addScaleAxis = [&](const float a[3], Handle hnd, uint32_t col) {
                 uint32_t c, f;
                 getStyle(hnd, col, c, f);
                 const float tip[3] = {objPos[0] + a[0] * scale, objPos[1] + a[1] * scale, objPos[2] + a[2] * scale};
                 lines.push_back({objPos[0], objPos[1], objPos[2], tip[0], tip[1], tip[2], c, f});
-                addCube(tip, scale * 0.07f, c, f);
             };
 
             addScaleAxis(ax, Handle::AxisX, palette.axisX);
             addScaleAxis(ay, Handle::AxisY, palette.axisY);
             addScaleAxis(az, Handle::AxisZ, palette.axisZ);
-
-            uint32_t cc, cf;
-            getStyle(Handle::Center, palette.center, cc, cf);
-            addCube(objPos, scale * 0.08f, cc, cf);
         }
 
         return lines;

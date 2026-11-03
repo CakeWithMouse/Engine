@@ -58,6 +58,7 @@ public:
     void UpdateAsset(const QString& path, bool move, const QString& supplied = {});
     void ImportAsset(bool texture, const QString& source = {});
     void AddModel(const QString& path = {});
+    void ShowDirectionalLight();
     void UseAsset(const QString& path);
 
     // path: файл .mat или его /Game путь. Одно окно на материал.
@@ -91,11 +92,6 @@ private:
     void RunCodeTool(const QString& action, const QStringList& extra = {});
     void ShowProjectTypes();
     void BuildUi();
-    void CompactContentPanel();
-    void ResizeContentPanel(int height);
-    int contentPanelHeight_ = 180;
-    QSize panelWindowSize_;
-    bool panelLayoutReady_ = false;
     void BuildToolBar();
     void UpdatePlayButtons();
 
@@ -105,7 +101,6 @@ private:
     void BuildSceneDocks();
     void BuildSceneMenu();
     void BuildToolsMenu();
-    void ShowDirectionalLight();
     void ConnectPanels();
 
     void ApplyDefaultLayout();
@@ -171,7 +166,7 @@ private:
     QAction* actOpenScene_ = nullptr;
     QAction* actSaveSceneAs_ = nullptr;
     QAction* actExit_ = nullptr;
-    QAction* actServiceObjects_ = nullptr;
+
     QAction* actAddModel_ = nullptr;
     QAction* actImportModel_ = nullptr;
     QAction* actImportTexture_ = nullptr;
@@ -179,6 +174,8 @@ private:
     QAction* actResetLayout_ = nullptr;
     QAction* actGrid_ = nullptr;
     QAction* actOverlays_ = nullptr;
+    QAction* actGizmo_ = nullptr;
+    QAction* actIcons_ = nullptr;
     QAction* actThemeDark_ = nullptr;
     QAction* actThemeLight_ = nullptr;
     QAction* actLangRu_ = nullptr;

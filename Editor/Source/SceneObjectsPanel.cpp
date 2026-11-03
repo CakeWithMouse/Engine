@@ -1,3 +1,4 @@
+#include "EditorTheme.h"
 #include "SceneObjectsPanel.h"
 #include "SceneOutlinerTree.h"
 #include "EditorLocale.h"
@@ -9,6 +10,7 @@
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QPushButton>
+#include <QHeaderView>
 #include <QTreeWidget>
 #include <QAction>
 #include <QKeySequence>
@@ -28,6 +30,15 @@ SceneObjectsPanel::SceneObjectsPanel(QWidget* parent)
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
         RetranslateUi();
     });
+    themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
+        if (searchEdit_) {
+            for (auto* a : searchEdit_->actions()) searchEdit_->removeAction(a);
+            searchEdit_->addAction(IconProvider::SearchIcon(), QLineEdit::LeadingPosition);
+        }
+        if (addBtn_) addBtn_->setIcon(IconProvider::PlusIcon());
+        hierarchyKey_.clear();
+        hierarchy_->viewport()->update();
+    });
 }
 
 SceneObjectsPanel::~SceneObjectsPanel()
@@ -35,6 +46,10 @@ SceneObjectsPanel::~SceneObjectsPanel()
     if (langSubId_) {
         EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
         langSubId_ = 0;
+    }
+    if (themeSubId_) {
+        EditorTheme::Instance().UnsubscribeThemeChanged(themeSubId_);
+        themeSubId_ = 0;
     }
 }
 
@@ -57,7 +72,7 @@ void SceneObjectsPanel::BuildUi()
     connect(searchEdit_, &QLineEdit::textChanged, this, &SceneObjectsPanel::FilterHierarchy);
     topBar->addWidget(searchEdit_);
 
-    addBtn_ = new QPushButton(Tr("+ Добавить", "+ Add"), this);
+    addBtn_ = new QPushButton(Tr("Добавить", "Add"), this);
     addBtn_->setObjectName(QStringLiteral("SceneAddButton"));
     addBtn_->setIcon(IconProvider::PlusIcon());
     addMenu_ = new QMenu(this);
@@ -77,7 +92,16 @@ void SceneObjectsPanel::BuildUi()
     hierarchy_->setMinimumSize(80, 60);
     hierarchy_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
     hierarchy_->setHeaderLabels({Tr("Объект", "Object"), Tr("Тип", "Type")});
+    if (hierarchy_->header())
+    {
+        hierarchy_->header()->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+        hierarchy_->header()->setFixedHeight(20);
+        QFont treeHeaderFont = hierarchy_->header()->font();
+        treeHeaderFont.setPixelSize(11);
+        hierarchy_->header()->setFont(treeHeaderFont);
+    }
     hierarchy_->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    hierarchy_->setIndentation(13);
     hierarchy_->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(hierarchy_, &QTreeWidget::customContextMenuRequested, this, &SceneObjectsPanel::ShowTreeContextMenu);
 
@@ -122,6 +146,26 @@ void SceneObjectsPanel::BuildUi()
     mainLayout->addWidget(hierarchy_, 1);
 }
 
+static QString LocalizedTypeLabel(const QString& name, const QString& fallbackLabel)
+{
+    if (name == "Primitive.Cube") return Tr("Куб", "Cube");
+    if (name == "Primitive.Sphere") return Tr("Сфера", "Sphere");
+    if (name == "Primitive.Plane") return Tr("Плоскость", "Plane");
+    if (name == "Primitive.Cylinder") return Tr("Цилиндр", "Cylinder");
+    if (name == "Primitive.Cone") return Tr("Конус", "Cone");
+    if (name == "Primitive.Pyramid") return Tr("Пирамида", "Pyramid");
+    if (name == "Light.Point") return Tr("Точечный свет", "Point Light");
+    if (name == "Light.Directional") return Tr("Направленный свет", "Directional Light");
+    if (name == "Particle.Sparks") return Tr("Искры", "Sparks");
+    if (name == "Particle.Smoke") return Tr("Дым", "Smoke");
+    if (name == "Environment.Sky") return Tr("Базовое небо", "Basic Sky");
+    if (name == "Gameplay.Character") return Tr("Персонаж", "Character");
+    if (name == "Gameplay.Camera") return Tr("Камера Play", "Play Camera");
+    if (name == "Gameplay.PlaySettings") return Tr("Настройки Play", "Play Settings");
+    if (name == "Gameplay.Player") return Tr("Игрок", "Player");
+    return fallbackLabel;
+}
+
 void SceneObjectsPanel::RebuildAddMenu()
 {
     if (!addMenu_) return;
@@ -138,7 +182,7 @@ void SceneObjectsPanel::RebuildAddMenu()
 
     for (const auto& type : types_) {
         const auto& name = type.second;
-        const auto& label = type.first;
+        const auto label = LocalizedTypeLabel(name, type.first);
         if (name == "Gameplay.PlaySettings") continue;
 
         QMenu* target = menuProject;
@@ -215,15 +259,23 @@ std::array<double, 3> SceneObjectsPanel::SpawnPosition() const
     return {0.0, 0.0, 0.0};
 }
 
+static bool IsEnvironmentObject(const IEditorHost::SceneObject& object)
+{
+    return object.gameplayKind == 3 || object.type == "Gameplay.PlaySettings" ||
+           object.type == "Light.Directional" || object.type == "Environment.Sky";
+}
+
 void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
 {
+    lastSnapshot_ = view;
     suppressSelectionChanged_ = true;
     hierarchy_->setSelectionMode(view.batchEditing ? QAbstractItemView::ExtendedSelection : QAbstractItemView::SingleSelection);
 
     QString key;
+    key += QString::number(static_cast<int>(EditorLocale::Instance().Language()));
+    key += QLatin1Char(';');
     for (const auto& object : view.objects)
     {
-        if (!showServiceObjects_ && (object.gameplayKind == 3 || object.type == "Gameplay.PlaySettings")) continue;
         key += QString::number(object.id);
         key += QLatin1Char('/');
         key += QString::number(object.parent);
@@ -238,32 +290,73 @@ void SceneObjectsPanel::RefreshHierarchy(const EditorQtHost::Snapshot& view)
     {
         hierarchy_->clear();
         std::map<quint64, QTreeWidgetItem*> items;
+        std::vector<const IEditorHost::SceneObject*> normalObjects;
+        std::vector<const IEditorHost::SceneObject*> envObjects;
 
         for (const auto& object : view.objects)
         {
-            if (!showServiceObjects_ && (object.gameplayKind == 3 || object.type == "Gameplay.PlaySettings")) continue;
-            auto* item = new QTreeWidgetItem({
-                QString::fromStdString(object.name),
-                QString::fromStdString(object.type)
+            if (IsEnvironmentObject(object))
+                envObjects.push_back(&object);
+            else
+                normalObjects.push_back(&object);
+        }
+
+        if (!envObjects.empty())
+        {
+            auto* envGroup = new QTreeWidgetItem(QStringList{Tr("Окружение", "Environment")});
+            envGroup->setIcon(0, IconProvider::GetIcon(QStringLiteral("sun")));
+            QFont f = envGroup->font(0);
+            f.setBold(true);
+            envGroup->setFont(0, f);
+            envGroup->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+            for (const auto* obj : envObjects)
+            {
+                QString label = QString::fromStdString(obj->name);
+                if (obj->type == "Light.Directional") {
+                    label = Tr("Направленный свет", "Directional Light");
+                } else if (obj->type == "Gameplay.PlaySettings" || obj->gameplayKind == 3) {
+                    label = Tr("Настройки игры", "Play Settings");
+                } else if (obj->type == "Environment.Sky") {
+                    label = Tr("Небо", "Sky");
+                }
+                auto* envItem = new QTreeWidgetItem(QStringList{label, QString::fromStdString(obj->type)});
+                QIcon ic = (obj->type == "Light.Directional") ? IconProvider::GetIcon(QStringLiteral("sun")) :
+                           (obj->type == "Environment.Sky") ? IconProvider::GetIcon(QStringLiteral("cloud")) :
+                           IconProvider::SettingsIcon();
+                envItem->setIcon(0, ic);
+                envItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+                envItem->setData(0, Qt::UserRole, QVariant::fromValue<qulonglong>(obj->id));
+                envGroup->addChild(envItem);
+                items[obj->id] = envItem;
+            }
+            hierarchy_->addTopLevelItem(envGroup);
+            envGroup->setExpanded(true);
+        }
+
+        for (const auto* object : normalObjects)
+        {
+            auto* item = new QTreeWidgetItem(QStringList{
+                QString::fromStdString(object->name),
+                QString::fromStdString(object->type)
             });
             QIcon objIcon;
-            if (object.type.find("Light") != std::string::npos) objIcon = IconProvider::BulbIcon();
-            else if (object.type.find("Camera") != std::string::npos) objIcon = IconProvider::GetIcon(QStringLiteral("camera"));
-            else if (object.type.find("Particles") != std::string::npos) objIcon = IconProvider::GetIcon(QStringLiteral("particles"));
+            if (object->type.find("Light") != std::string::npos) objIcon = IconProvider::BulbIcon();
+            else if (object->type.find("Camera") != std::string::npos) objIcon = IconProvider::GetIcon(QStringLiteral("camera"));
+            else if (object->type.find("Particles") != std::string::npos) objIcon = IconProvider::GetIcon(QStringLiteral("particles"));
             else objIcon = IconProvider::CubeIcon();
             item->setIcon(0, objIcon);
             item->setFlags(item->flags() | Qt::ItemIsEditable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
-            item->setData(0, Qt::UserRole, QVariant::fromValue<qulonglong>(object.id));
-            items[object.id] = item;
+            item->setData(0, Qt::UserRole, QVariant::fromValue<qulonglong>(object->id));
+            items[object->id] = item;
         }
 
-        for (const auto& object : view.objects)
+        for (const auto* object : normalObjects)
         {
-            if (!items.count(object.id)) continue;
-            if (object.parent && items.count(object.parent))
-                items[object.parent]->addChild(items[object.id]);
+            if (!items.count(object->id)) continue;
+            if (object->parent && items.count(object->parent))
+                items[object->parent]->addChild(items[object->id]);
             else
-                hierarchy_->addTopLevelItem(items[object.id]);
+                hierarchy_->addTopLevelItem(items[object->id]);
         }
 
         hierarchy_->expandAll();
@@ -300,7 +393,7 @@ void SceneObjectsPanel::ShowTreeContextMenu(const QPoint& pos)
         auto* addChildMenu = menu.addMenu(Tr("Создать внутри…", "Add Child…"));
         for (const auto& type : types_) {
             const auto& name = type.second;
-            const auto& label = type.first;
+            const auto label = LocalizedTypeLabel(name, type.first);
             if (name == "Gameplay.PlaySettings") continue;
             addChildMenu->addAction(label, this, [this, selectedId, name, label] {
                 emit AddChildPrimitiveRequested(selectedId, name, label, SpawnPosition());
@@ -333,20 +426,44 @@ void SceneObjectsPanel::ShowTreeContextMenu(const QPoint& pos)
         menu.addSeparator();
     }
 
-    auto* actFoc = menu.addAction(Tr("Фокус на объекте (F)", "Focus Selected (F)"), this, &SceneObjectsPanel::FocusRequested);
-    actFoc->setEnabled(selectedId != 0);
+    if (selectedId == 0)
+    {
+        auto* addSubMenu = menu.addMenu(Tr("Добавить", "Add"));
+        addSubMenu->setIcon(IconProvider::PlusIcon());
+        for (auto* act : addMenu_->actions())
+        {
+            if (act->menu())
+            {
+                auto* sub = addSubMenu->addMenu(act->icon(), act->text());
+                for (auto* subAct : act->menu()->actions())
+                    sub->addAction(subAct);
+            }
+            else
+            {
+                addSubMenu->addAction(act);
+            }
+        }
+        menu.addSeparator();
+        menu.addAction(Tr("Развернуть всё", "Expand All"), hierarchy_, &QTreeWidget::expandAll);
+        menu.addAction(Tr("Свернуть всё", "Collapse All"), hierarchy_, &QTreeWidget::collapseAll);
+    }
+    else
+    {
+        auto* actFoc = menu.addAction(Tr("Фокус на объекте (F)", "Focus Selected (F)"), this, &SceneObjectsPanel::FocusRequested);
+        actFoc->setEnabled(true);
 
-    auto* actDup = menu.addAction(Tr("Дублировать (Ctrl+D)", "Duplicate (Ctrl+D)"), this, &SceneObjectsPanel::DuplicateRequested);
-    actDup->setEnabled(selectedId != 0);
+        auto* actDup = menu.addAction(Tr("Дублировать (Ctrl+D)", "Duplicate (Ctrl+D)"), this, &SceneObjectsPanel::DuplicateRequested);
+        actDup->setEnabled(true);
 
-    auto* actRen = menu.addAction(Tr("Переименовать (F2)", "Rename (F2)"), this, [this, item] {
-        if (item) hierarchy_->editItem(item, 0);
-    });
-    actRen->setEnabled(selectedId != 0);
+        auto* actRen = menu.addAction(Tr("Переименовать (F2)", "Rename (F2)"), this, [this, item] {
+            if (item) hierarchy_->editItem(item, 0);
+        });
+        actRen->setEnabled(true);
 
-    menu.addSeparator();
-    auto* actDel = menu.addAction(Tr("Удалить (Delete)", "Delete (Delete)"), this, &SceneObjectsPanel::RemoveRequested);
-    actDel->setEnabled(selectedId != 0);
+        menu.addSeparator();
+        auto* actDel = menu.addAction(Tr("Удалить (Delete)", "Delete (Delete)"), this, &SceneObjectsPanel::RemoveRequested);
+        actDel->setEnabled(true);
+    }
 
     menu.exec(hierarchy_->viewport()->mapToGlobal(pos));
 }
@@ -354,9 +471,14 @@ void SceneObjectsPanel::ShowTreeContextMenu(const QPoint& pos)
 void SceneObjectsPanel::RetranslateUi()
 {
     if (searchEdit_) searchEdit_->setPlaceholderText(Tr("Поиск объектов…", "Search objects…"));
-    if (addBtn_) addBtn_->setText(Tr("+ Добавить", "+ Add"));
+    if (addBtn_) addBtn_->setText(Tr("Добавить", "Add"));
     if (hierarchy_) hierarchy_->setHeaderLabels({Tr("Объект", "Object"), Tr("Тип", "Type")});
     if (actDuplicate_) actDuplicate_->setText(Tr("Дублировать объект", "Duplicate Object"));
     if (actRemove_) actRemove_->setText(Tr("Удалить объект", "Remove Object"));
     RebuildAddMenu();
+    hierarchyKey_.clear();
+    if (!lastSnapshot_.objects.empty())
+    {
+        RefreshHierarchy(lastSnapshot_);
+    }
 }

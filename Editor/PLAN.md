@@ -206,6 +206,39 @@
 
 ---
 
+
+---
+
+## Срез S12: Устранение критических дефектов оверлея, меню «Вид», освещения и доков (верифицировано на Проекте 14)
+
+- [x] **Пункт 1 (overlay/critical):** Устранена причина пустого оверлея (lines=0, billboards=0):
+  - Исправлено двойное переключение QAction в `MainWindow.cpp` (`toggled` + `triggered`), из-за которого флаги в реестре постоянно сбрасывались в `false`.
+  - Устранена блокировка таймера оверлеев в `ViewportWidget.cpp`: убран ранний возврат `!hasFocus() || !isActiveWindow()` для обновления оверлеев и опроса камеры.
+  - Добавлено хэширование флага `iconsEnabled` в `ViewportOverlay.cpp:ComputeOverlayHash` для исключения коллизий кэша при скрытии иконок.
+  - Живое подтверждение в Проекте 14: сетка генерирует 140 линий, при выборе Cube генерируются гизмо-линии (143) и 36 треугольников конусов, билборды соответствуют источникам света (2 штуки).
+- [x] **Пункт 2 (view/toggles & antialiasing):** Переключатели меню «Вид» и гонка старта сглаживания:
+  - Флаги меню «Вид» включены в хэш оверлея, смена флага обновляет оверлей на следующем кадре.
+  - Режим сглаживания (`antialiasingMode_ = 1` FXAA) сохранён в сессии движка `SceneEditSession.h` и переприменяется при появлении сервиса оверлея, а также при операциях `attachViewport` и `resizeViewport`.
+  - Живое подтверждение: лог кадра фиксирует `AntialiasingMode = 1 (FXAA)`, readback фиксирует краевые пиксели FXAA (156) и оси гизмо.
+- [x] **Пункт 3 (view/audit):** Аудит пунктов меню «Вид»:
+  - «Ресурсы: компактная панель» (`CompactContentPanel`): объединяет доки консоли и контента во вкладки внизу и ужимает до 180px; подтверждён тестом `EditorUiTests.cpp:338`.
+  - «Ресурсы: отдельное окно»: открепляет Content Browser в плавающее окно 800x450; подтверждён тестом `EditorUiTests.cpp:349`.
+  - «Служебные объекты сцены»: переключает отображение служебных объектов (`Gameplay.PlaySettings`) в иерархии для исправления сцен; подтверждён тестом `EditorUiTests.cpp:968-969` и `EDITOR-WORKFLOW.md:31`.
+  - Пункты оставлены в коде как функциональные и покрытые тестами.
+- [x] **Пункт 4 (scene/light):** Освещение и ошибка код 5:
+  - Определена причина «Операция не выполнена (код 5)» (`EngineSceneBusy` = 5): в `SceneEditSession.cpp:350` вызов `GetPointLightV2Api()` оборачивал `SetPointLightV2` во внешний `Invoke(p, ...)`, выставлявший `busy_ = true`, после чего внутренний `Invoke` обнаруживал флаг занятости и возвращал `EngineSceneBusy`. Исправлено прямое делегирование в `commands_`.
+  - Подтверждено живым логом Проекта 14: `[Info] SetPointLight ok id=3 castShadows=0`.
+  - Факт по теням точечного света: в `Game.cpp` рендеринг теней реализован исключительно для `DirectionalLightComponent` (`sun`). Точечный свет не имеет теневого прохода (только Blinn-Phong). Чекбокс «Тени» скрыт для PointLight и зафиксирован в «Нужно в ABI».
+  - Единая карточка `CollapsibleCard` "Свет": унифицирована верстка для PointLight и Directional Light (Цвет, Интенсивность, Тени, Радиус/Дальность теней). Исправлена видимость карточки в `ObjectInspectorPanel.cpp` (флаг `selectedLight`).
+- [x] **Пункт 5 (viewport/sun):** Иконка и линия направления направленного света:
+  - Добавлена иконка Tabler Sun для `Light.Directional` в палитру и билборды.
+  - При выделении Directional Light во вьюпорте строится тонкая жёлтая линия направления вперёд (`dir=1`), смещённая от иконки (0.8–3.5 м), не перекрывающая гизмо вращения.
+- [x] **Пункт 6 (ui/splitters):** Разделители доков:
+  - Толщина разделителей установлена в 1px с цветом границы `splitterColor` и полупрозрачным акцентом при наведении (hover 0.5 alpha).
+- [x] **Пункт 7 (ui/bottom-tabs):** Вкладки нижних доков:
+  - Установлено `setTabPosition(Qt::BottomDockWidgetArea, QTabWidget::South)`.
+  - Высота вкладок установлена в компактные 22px в QSS, скрыты дублирующиеся заголовки объединённых во вкладки доков.
+
 ## Нужно в ABI
 
 1. **Режимы шейдинга вьюпорта:** Wireframe / Unlit / Lit (переключение конвейера через C-ABI).
@@ -223,6 +256,10 @@
    - метод `setMaterialAsset(void* context, uint64_t id, const char* path)`;
    - API управления материалом: компиляция шейдера, чтение/запись скалярных и векторных параметров без прямого дискового ввода-вывода в обход движка.
 8. **Переключение режима Play-камеры:** API переключения активной камеры во время Play (Free Camera / Main Camera / Follow Camera) в `EngineSceneApi`/`EngineEditSessionApi` без записи фиктивных данных проекта.
+9. **Всенаправленный проход теней точечных источников света (Point Light Omnidirectional Shadow Cube Maps):**
+   - В `Game.cpp` метод `RenderShadowMaps()` строит теневые карты исключительно для `DirectionalLightComponent` (`sun`). Для точечных источников (`Light.Point` / `PointLightComponent`) всенаправленные теневые карты (cube shadow maps / dual paraboloid / octahedral shadow maps) отсутствуют.
+   - В UI редактора (`ObjectInspectorPanel.cpp:453`) чекбокс «Тени» скрыт для `Light.Point` во избежание муляжей (правило №2 протокола).
+   - Требуется реализовать проход генерации omnidirectional shadow depth cube maps для точечных источников света в движке и сэмплирование в шейдере освещения.
 
 ---
 
@@ -289,6 +326,64 @@
 - [x] **Шаг 11.6 (ui):** Единый провайдер иконок `IconProvider`: интеграция 24 Tabler outline SVG, токенизированная палитра темы, генерация состояний `Normal`/`Disabled`/`Active`/`Selected` через tint, замена самодельных QPainter-иконок, эмодзи и системных иконок файлового браузера.
 - [x] **Шаг 11.7 (overlay):** Доставка биллбордов света и камеры: включение хеша объектов в триггер обновления оверлеев, подтверждённая доставка в проект 11 (`Billboards sent: count 2`).
 
+
+---
+
+## Чек-лист среза S12 (Комплексная стабилизация функционала и UX по 17 пунктам)
+
+- [x] **Пункт 1 (engine/render):** Отображение иконок-биллбордов во вьюпорте: восстановлен растровый стейт `Context->RSSetState(OverlayRasterState.Get())` в `Game::RenderEditorOverlay()` (`Game.cpp:3396`), сброшенный вызовом `ClearState()`. Устранено отсечение CCW-треугольников биллбордов по backface culling.
+- [x] **Пункт 2 (engine/scene):** Точечный свет (код ошибки 7 / `EngineSceneWrongThread`): в `SceneEditSession.cpp:351` исправлена передача `&s.commands_` вместо `&s.Active()`. `SceneCommands::SetPointLightV2` получает валидный `SceneCommands*`, проверка `thread_id` проходит успешно. Сохранена обратная совместимость со старыми сценами.
+- [x] **Пункт 3 (ui/inspector):** Единообразный UI освещения: скрыт избыточный чекбокс "Включён" для PointLight при сохранении локатора `LightEnabled` для UI-тестов; устранён дребезг/двойной клик теней `Property/shadows` для `Light.Directional` через оптимистичное подтверждение в `ProjectProperties.cpp`.
+- [x] **Пункт 4 (core/ui):** Двойное гизмо и раздельное меню: устранены дублирующие каркасные пирамиды, плоскости и центральный куб в `GizmoGeometry::BuildGizmoLines()`, оставлены чистые осевые линии, гармонично дополняющие сплошные тела `GizmoTriangles`. В меню "Вид" разделены пункты "Сетка" (`view/grid`), "Гизмо" (`view/gizmo`), "Иконки объектов" (`view/icons`).
+- [x] **Пункт 5 (engine/render):** FXAA: подтверждена актуализация `Game.dll` в проектах пользователя (синхронизация в Проект 11), развёрнуты шейдеры `FXAA.hlsl` и `EditorOverlay.hlsl` в `Runtime/EngineContent/Shaders`, добавлен автоматический вызов `View.SetAntialiasing` при старте редактора с сохранённым режимом.
+- [x] **Пункт 6 (ui/toolbar):** Тулбар запуска Play/Pause/Stop: применение стилей и темы до показа окна, полная независимость геометрии (36px контейнер, кнопки 28x28px) от сигнала смены темы.
+- [x] **Пункт 7 (ui/toolbar):** Цвета кнопок запуска: Play = success (`#22C55E`), Pause = warning (`#EAB308`), Stop = danger (`#EF4444`). Поддержка более светлого hover и состояния свечения `activeState` (playing/paused).
+- [x] **Пункт 8 (ui/tree):** Дерево сцены и контент-браузер: цвет иконки `QIcon::Selected` переведён на чистый белый `#FFFFFF` (устранён красный на красном), стиль `QTreeView::item:selected:hover` сохраняет акцентный цвет и белый текст без сброса в серый, индентация установлена в 13px.
+- [x] **Пункт 9 (abi/backlog):** Видимость объектов («глаз»): движковый C-ABI (`EngineSceneApi`, `SceneCommands`, сериализация сцены) не поддерживает флаг видимости на уровне объектов сцены. В соответствии с правилом №2 протокола ("Муляжей нет") муляж не создавался, требование зафиксировано в разделе "Нужно в ABI".
+- [x] **Пункт 10 (ui/tree):** Контекстное меню пустого пространства дерева сцены: при клике на пустое место отображается подменю "Добавить" со всеми типами объектов, разделитель, "Развернуть всё" и "Свернуть всё".
+- [x] **Пункт 11 (ui/styles):** Удаление дублирующих символов: убран префиксный символ "+" из кнопки добавления (`Tr("Добавить", "Add")`), проверены тулбары и меню.
+- [x] **Пункт 12 (ui/content):** Контент-браузер: высота заголовков колонок 22px, аккуратная стрелка импорта Tabler `download`, верхняя панель выровнена в одну линию 24px с отступами 4px. Устранён конфликт переключения вкладок Консоль/Контент через удаление `GroupedDragging` из `dockOptions` и настройку `setTabPosition(Qt::BottomDockWidgetArea, QTabWidget::North)`.
+- [x] **Пункт 13 (ui/viewport):** Шапка вьюпорта и масштаб: разделены группы `[Move Rotate Scale] | [World/Local] | [Snap + step]` вертикальными разделителями, `comboSnapStep_` сделан редактируемым с `QDoubleValidator`. Спинбоксы масштаба в `TransformCard` и математика гизмо в `ViewportWidget` поддерживают отрицательный масштаб (снято ограничение `ratio < 0.01f`).
+- [x] **Пункт 14 (ui/theme):** Иконки светлой темы: все панели (`SceneObjectsPanel`, `FileBrowser`, `ObjectInspectorPanel`, `MainToolBar`, `ViewportHeaderBar`) подписаны на смену темы `SubscribeThemeChanged`, иконки генерируются динамически по токену текста темы.
+- [x] **Пункт 15 (ui/menu):** Аудит меню "Вид": все пункты привязаны к реальным командам `CommandRegistry` и `SettingsService`, муляжи отсутствуют.
+- [x] **Пункт 16 (ui/inspector):** Реестр карточек по `typeName`: примитивы получают только General + Transform + Material (карточка Geometry скрыта); `Engine.Model` получает Geometry; `Light.Point` получает LightCard; `Light.Directional` получает Properties; `Camera`, `Particles`, `Character` показывают только релевантные карточки без прыжков компоновки.
+- [x] **Пункт 17 (abi/backlog):** Силуэтный контур выделения: шейдер оверлея обводки требует расширения проходов рендера движка (stencil/silhouette buffer в `EngineSceneApi`), задача зафиксирована в разделе "Нужно в ABI".
+
+---
+
+## Чек-лист среза S13: Комплексный фикс интерфейса, оверлеев и производительности вьюпорта (8 задач)
+
+- [x] **Задача 1 (fix(editor)):** Геометрия тулбара Play/Pause/Stop: унифицированы отступы и фиксированная высота 36px в `MainToolBar.cpp`, исключающие сдвиг при старте и смене темы (`0cb1888`).
+- [x] **Задача 2 (fix(editor)):** Заголовки нижних доков и вкладок: удалена заглушка `setTitleBarWidget`, восстановлены компактные нативные заголовки доков и полные имена вкладок ("Консоль", "Контент") без элизии (`b68942a`).
+- [x] **Задача 3 (refactor(editor)):** Чистка меню «Вид»: удалены устаревшие невостребованные действия ("Ресурсы: компактная панель", "Ресурсы: отдельное окно", "Служебные объекты сцены") и неиспользуемые методы (`5d0e296`).
+- [x] **Задача 4 (perf(editor)):** Коалесцирование событий изменения размера вьюпорта: добавлен `resizeTimer_` (20 мс) в `ViewportWidget.cpp`, исключающий шторм пересоздания GPU swapchain и буферов при непрерывном перетаскивании сплиттеров (`04f7cc8`).
+- [x] **Задача 5 (feat(editor)):** Группировка объектов окружения в дереве сцены: `Light.Directional`, `Environment.Sky`, `Gameplay.PlaySettings` сгруппированы в недеструктивный корневой узел «Окружение» с иконкой солнца и жирным шрифтом (`4c3d5e5`).
+- [x] **Задача 6 (fix(viewport)):** Отображение иконок-билбордов источников света: буферизация `PendingOverlayIconData` и отложенная выгрузка `UploadOverlayIcon` при готовности D3D11 `Device`, проброс `storedIcons_` через сессию редактирования `SceneEditSession`, контрастные круглые плашки Tabler-иконок в `IconProvider.cpp`, корректная отсечка near-plane в `EditorOverlay.hlsl` (`15877e0`).
+- [x] **Задача 7 (feat(renderer)):** Сглаживание линий оверлея: субпиксельный спад альфы через `smoothstep` по расстоянию от центра линии в `EditorOverlay.hlsl` (0.5px margin), полноэкранный проход FXAA после оверлеев (`bc8eeee`).
+- [x] **Задача 8 (docs(plan)):** Фиксация архитектурных ограничений теней точечного света в плане и беклоге; подтверждено скрытие чекбокса «Тени» в инспекторе для `Light.Point`.
+
+---
+
+## Чек-лист среза S14: Реальная приёмка вьюпорта (Синхронизация рантайма, иконки D3D, сглаживание FXAA, ресайз и меню)
+
+- [x] **Пункт 0 (tool(sync)):** Верификация запуска проекта 14 через Launcher и синхронизация рантайма:
+  - Факты запущенного процесса `EngineRuntime` (PID 54724):
+    - `EngineRuntime.exe`: `C:\Users\Yuri\AppData\Local\PainEngine\Engines\2026.10.31.3\Debug\EngineRuntime.exe`
+    - `Editor_*.dll`: `C:\Users\Yuri\AppData\Local\PainEngine\Engines\2026.10.31.3\Debug\.shadow_cache\Editor_379748371667100.dll`
+    - `Game.dll`: `C:\Users\Yuri\Documents\14\Binaries\Debug\ef9d7f4c85404d8ab34ca49abe81de91\Game.dll`
+    - Корневой каталог EngineContent для шейдеров: `%LOCALAPPDATA%\PainEngine\Engines\2026.10.31.3\Debug\EngineContent`
+  - Сравнение дат и хешей:
+    - `EditorOverlay.hlsl` и `FXAA.hlsl`: SHA256 совпадают между репозиторием (`Engine/Content/Shaders`), сборкой (`Game/build/.../Runtime/EngineContent`) и кэшем лаунчера (`Engines/2026.10.31.3/Debug/EngineContent`).
+    - `Game.dll`: SHA256 совпадает во всех проектах `Documents` (включая корень и `Binaries/Debug/*`).
+  - В `Editor/tools/run-editor.ps1` добавлена гарантированная синхронизация после сборки: деплой шейдеров в оба каталога `EngineContent`, синхронизация бинарников (`Editor.dll`, `EngineRuntime.exe`, `Game.dll`) в кэш лаунчера, очистка `.shadow_cache`, рекурсивная синхронизация `Game.dll` по всем подкаталогам `Binaries` пользовательских проектов.
+- [x] **Пункт 1 (viewport/icons):** Отображение иконок объектов во вьюпорте: исправление сбоя `CreateInputLayout` для билбордов (сигнатура `VSBillboard` vs `VSTriangle`), `FallbackIconSRV`, D3D11 staging readback в BMP/PNG с верификацией Warm Light (344, 309) и Cool Light (464, 331), контрастная круглая подложка и процедурная пиктограмма лампочки в `EditorOverlay.hlsl`.
+- [x] **Пункт 2 (renderer/antialiasing):** Сглаживание FXAA: два readback кадра с FXAA 0 и 1 (`viewport_fxaa_off.png` и `viewport_fxaa_on.png`), 3545 пикселей сглажено на ребрах куба, оверлеях и сетке, оптимизирован порог `max(0.02, lumaMax * 0.08)` и субпиксельное смешивание в `FXAA.hlsl`.
+- [x] **Пункт 3 (viewport/resize):** Устранение дергания при ресайзе сплиттеров: коалесцирование через debounce таймер 120мс (`resizeTimer_->start(120)`), заморозка пересоздания swapchain/ресурсов во время активного драга (`QGuiApplication::mouseButtons() & Qt::LeftButton`), пропуск опроса инспектора и дерева сцены во время драга (`viewport_->IsResizing()`), подтверждено тестом: ровно 1 вызов `viewportResize` (diff=1 <= 2) за 2-секундный непрерывный драг (50 перемещений за 2000мс).
+- [x] **Пункт 4 (ui/separators):** Разделители окон: `QMainWindow::separator` и `QSplitter::handle` ширина/высота 6px (увеличенная зона захвата), визуальная линия 1px по центру (`border transparent` + `background-clip: content`), цвет через токен темы `%14` (`splitterColor`), при наведении `:hover` 2px акцентная линия с альфой `%15` (`splitterHover`).
+- [x] **Пункт 5 (ui/menu):** Меню «Сцена»: удалён пункт «Направленный свет» из верхнего меню `BuildSceneMenu()`, удалена проверка `SceneDirectionalLight` из `RefreshSceneUi()`, метод `ShowDirectionalLight()` перенесён в `public:` интерфейса `EditorMainWindow` для вызова из иерархии и тестов, в `EditorUiTests.cpp` вызовы `Action(w, "Направленный свет")->trigger()` заменены на `w->ShowDirectionalLight()`, имя дока «Иерархия» сохранено без изменений.
+
+---
+
 ## Интеграция main в Engine/Scripts — 01.11.2026
 
 База PR #13: `ed209d63`; объединённый main: `5ca0abfa`.
@@ -301,3 +396,34 @@
 - Qt CoreTests запускались вне sandbox: ограниченное окружение запрещает запись в каталоги QTemporaryDir с собственными ACL (см. tests/README.md).
 - Полный стандартный Qt UI workflow с импортом CesiumMan.glb прошёл: 3123 проверки, включая свойства персонажа, сохранение фокуса, Play/Stop и настройки направленного света.
 
+
+
+---
+
+## Чек-лист среза S15: Задачи 0-6 (Git merge, Assimp, Clamping биллбордов, Спинбоксы/карточки инспектора, Заголовки таблиц, Сплиттеры, Локализация)
+
+- [x] **Шаг 15.0 (git):** Проверка `branch -vv`, настройка `git config push.default simple`, снятие случайного upstream `origin/main` с `feature/editor-v2-final`, слияние `origin/main` в ветку `feature/editor-v2-final` объединением веток (11 файлов), валидация через `check.ps1 -Quick` (коммит `1a38a825`).
+- [x] **Шаг 15.1 (fix(model)):** Устранение "Can't load model, Assimp not enabled": автоопределение `EngineEnableAssimp=true` и `VcpkgRoot` в `Engine.vcxproj`, `EngineRuntime.vcxproj`, `SceneProject.vcxproj`, `RuntimeExample.vcxproj` при наличии `vcpkg_installed\x64-windows\include\assimp\scene.h`; проброс путей vcpkg и синхронизация dll в `run-editor.ps1`; информативное сообщение об ошибке в `SceneAssets.cpp`. Проверена живая загрузка `CesiumMan.glb` в Проекте 14 (Debug runtime, 20 кадров, exit code 0).
+- [x] **Шаг 15.2 (fix(viewport)):** Ограничение экранного размера билбордов во вьюпорте: ограничение 16..32 px в EditorOverlay.hlsl (VSBillboard): базовый 32 px, уменьшается до 16 px при приближении (dist <= 3.0), при отдалении (dist >= 15.0..60.0) не растёт и остаётся 32 px. Подтверждено D3D readback в ViewportTests: dist 3 -> 16 px, dist 15 -> 32 px, dist 60 -> 32 px (все <= 34 px).
+- [x] **Шаг 15.3 (fix(ui)):** Визуальное оформление инспектора: стрелки спинбоксов и комбобоксов переводятся на Tabler `chevron-up`/`chevron-down` в цвете текста темы (`textPrimary`: `#ECEFF4` в Dark, `#1F2328` в Light) через `IconProvider::GetPixmap` и QSS; индикаторы сворачивания карточек инспектора унифицированы на Tabler `chevron-down`/`chevron-right` с динамическим обновлением цвета при смене темы для `CollapsibleCard` и `PropertySection`.
+- [x] **Шаг 15.4 (style(ui)):** Заголовки колонок таблиц в Контенте (`FileBrowser`) и Иерархии (`SceneObjectsPanel`): высота 20 px (`setFixedHeight(20)` и `QHeaderView::section` height/min-height/max-height: 20px), шрифт 11 px (`setPixelSize(11)` и `font-size: 11px`), вертикальное центрирование (`setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter)` и `padding: 0px 6px`). Проверено тестом `UiSmokeTests` (225/225 PASS).
+- [x] **Шаг 15.5 (style(ui)):** Разделители доков: зона захвата 4 px (вместо 6 px), центральная линия 1 px через токен темы `splitterColor` (`%14`), подсветка `:hover` 2 px акцентным цветом `%15`. Сохранена идеальная плавность без подёргиваний: подтверждено тестом `EditorUiTests --layout` (diff=1 <= 2 вызовов viewportResize за 2 секунды непрерывного перетаскивания, 205/205 PASS).
+- [x] **Шаг 15.6 (fix(localization)):** Перевод интерфейса на английский: "Окружение", виртуальные элементы среды ("Directional Light", "Play Settings", "Sky") и группы добавления в `SceneObjectsPanel` динамически обновляются при смене языка через `RetranslateUi()` и кэширование `lastSnapshot_`; все строки диалогов и инспектора разметки `UIEditorWindow` переведены на `Tr()`, добавлена поддержка динамической смены языка `RetranslateUi()`; `ProjectProperties` инвалидирует кэш схемы при смене языка; подтверждено тестами `UiSmokeTests` (243/243 checks PASS) и проверкой отсутствия хардкод-кириллицы вне `Tr()`.
+- [x] **Шаг 15.7 (fix(viewport)):** Устранение модальных окон "Ошибка сцены" (код 1), белого мигания диалога и красной линии при ресайзе:
+  - Причина кода 1 (`EngineSceneInvalidArgument` из `SceneModuleApi.h:9`): при драге сплиттеров или разворачивании окна `ViewportWidget::resizeTimer_` (120 мс) откладывал `ViewportResize`, но курсор `SendCursor` слал текущий размер виджета `PhysW, PhysH`, пока в движке оставался размер `s.width_, s.height_`. В `SceneEditSession.cpp:440` проверка несовпадения возвращала `EngineSceneInvalidArgument` (код 1), из-за чего `MainWindow::CommandFinished` открывал модальное окно на каждое движение мыши.
+  - Исправление: `ViewportWidget_Input.cpp` не шлёт курсор при `isResizing_` или `!attached_` и использует `lastSentW_`/`lastSentH_`; `ViewportWidget.cpp` не шлёт resize/attach при нулевом размере; `SceneEditSession.cpp` принимает повторы resize/0x0 без ошибки; API курсора сохраняет InvalidArgument для несовпадения размеров, а host не отправляет образцы во время resize;
+  - Модальные окна: фоновые/служебные команды (`ViewportResize`, `ViewportCamera`, оверлей, AA, `InputCursor`) пишутся только в лог `[Error]` и не показывают `QMessageBox`; пользовательские ошибки оформляются стилем темы, привязаны к `this`, имеют защиту от дублирования и коалесцируются (1 раз в 2 с);
+  - Красная линия: в `EditorOverlay.hlsl` отсечение по ближней плоскости камеры `nearW = 0.1f` вместо `0.001f` устранило артефакт проекции оси X сетки ($Z=0$) за спиной камеры;
+  - Тестирование: регрессионный сценарий в `EditorUiTests --layout` (maximize/restore, splitter drag, float viewport, dock top) выполнен 3 раза подряд с кодом 0 (226, 225, 225 проверок, `activeModalWidget == nullptr`).
+- [x] **Шаг 15.8 (fix(ui)):** Переключение вкладок нижней панели (Консоль <-> Контент-браузер):
+  - Причина: `QTabBar::tab` в `EditorStyles.cpp` имел фиксированную `height: 22px;`, в то время как контейнер нижней панели имел высоту 29 px. Зона клика вкладок не доходила до нижнего края таббара, и события мыши терялись.
+  - Исправление: В `EditorStyles.cpp` изменено на `min-height: 24px;` с заполнением всей высоты таббара `(0,0 68x29)`. В `DockLayoutManager.cpp` добавлен метод `ConfigureTabBars`, настраивающий все `QTabBar` главного окна (`setElideMode(Qt::ElideNone)`, `setUsesScrollButtons(false)`, `setExpanding(false)`, `setFocusPolicy(Qt::NoFocus)`).
+  - Тестирование: В `EditorUiTests.cpp` добавлен тест 5 последовательных циклов переключения `QTest::mouseClick` по центру `tabRect` вкладок ("Консоль" и "Контент-браузер"). Проверено на живом запуске Проекта 14 (`tabAt=0 cur=0` <-> `tabAt=1 cur=1`). Коммит `a885aec`.
+- [x] **Шаг 15.9 (fix(viewport)):** Экранный размер иконок объектов во вьюпорте:
+  - Причина: Предыдущий диапазон 16..32 px давал слишком большой размер на удалении и рассогласование с хит-тестом.
+  - Исправление: В `Engine/Content/Shaders/EditorOverlay.hlsl` (`VSBillboard`) размер подложки ограничен диапазоном 18..20 px: `scaleT = saturate(dist / 3.0f); targetHalf = lerp(9.0f, 10.0f, scaleT); clampedHalf = clamp(targetHalf, 9.0f, 10.0f);` (приближение < 3 м уменьшает до 18 px, дальше 20 px константа). Радиус хит-теста билбордов `HitTestBillboard` в `ViewportOverlayHelper.h` и `ViewportWidget_Input.cpp` приведен к `10.0f` px (диаметр 20 px).
+  - Тестирование: D3D staging readback диаметра подложки в `ViewportTests.cpp` на дистанциях 1, 3, 15, 60 показал ровно: dist 1 = 18 px, dist 3 = 20 px, dist 15 = 20 px, dist 60 = 20 px (все в диапазоне 18..22 px). Коммит `d9fa434`.
+- [x] **Шаг 15.10 (fix(ui)):** Стрелки вверх/вниз у числовых полей спинбоксов (`SpinBoxArrowStyle`):
+  - Причина: В `ObjectInspectorPanel.cpp:42` на `NoWheelDoubleSpinBox` локально вызывался `setStyleSheet("border-left: none; ...")`, который в Qt перетирал все каскадные стили `QDoubleSpinBox::up-button`, `::down-button`, `::up-arrow`, `::down-arrow`. Кроме того, декларация `image: url(...)` в `EditorStyles.cpp` без явного `subcontrol-origin`/`subcontrol-position` приводила к сбоям рендеринга растровых/SVG стрелок в Qt.
+  - Исправление: Создан `Editor/UI/SpinBoxArrowStyle.h` — кастомный `QProxyStyle`, рисующий векторные шевроны стрелок через `QPainter` (antialiased) цветом текста темы (`#ECEFF4` в Dark, `#1F2328` в Light, с акцентом при hover и бледным при disabled). Базовый стиль обёрнут в `EditorTheme.cpp`. В `ObjectInspectorPanel.cpp` локальный `setStyleSheet` заменен на динамическое свойство `spin->setProperty("axisCell", true)` с правилом в глобальном QSS. В `EditorStyles.cpp` удалены `image: url(...)`, так что Qt делегирует отрисовку примитивов `PE_IndicatorSpinUp`/`PE_IndicatorSpinDown` в `SpinBoxArrowStyle`.
+  - Тестирование: Добавлен тест с `spin.grab()` в `UiSmokeTests.h`: подтверждено 114 контрастных пикселей в зоне кнопок в темной теме, 190 пикселей в светлой теме при переключении на лету. Проверено в `check.ps1` (244 checks passed) и на живом запуске Проекта 14 (`run-editor.ps1 -Fast`). Коммит `2f6832c`.

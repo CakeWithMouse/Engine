@@ -1,5 +1,6 @@
 #include "EditorTheme.h"
 #include "EditorStyles.h"
+#include "SpinBoxArrowStyle.h" 
 #include "SettingsService.h"
 #include "IconProvider.h"
 
@@ -40,7 +41,8 @@ void EditorTheme::Apply(QApplication& app)
 void EditorTheme::Initialize(QApplication& app)
 {
     app_ = &app;
-    app.setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
+    auto* base = QStyleFactory::create(QStringLiteral("Fusion"));
+    app.setStyle(new SpinBoxArrowStyle(base));
 
     QFont defaultFont(QStringLiteral("Segoe UI"), 9);
     defaultFont.setStyleHint(QFont::SansSerif);
@@ -214,26 +216,9 @@ static void EnsureArrowIcons(ThemeMode mode, QString& outUp, QString& outDown, Q
 
     const QColor arrowColor = isDark ? QColor(0xEC, 0xEF, 0xF4) : QColor(0x1F, 0x23, 0x28);
 
-    auto renderTriangle = [&](const QString& path, const QPointF pts[3]) {
-        QPixmap pix(12, 12);
-        pix.fill(Qt::transparent);
-        {
-            QPainter p(&pix);
-            p.setRenderHint(QPainter::Antialiasing);
-            p.setPen(Qt::NoPen);
-            p.setBrush(arrowColor);
-            p.drawPolygon(pts, 3);
-        }
-        pix.save(path, "PNG");
-    };
-
-    const QPointF upPts[3] = { QPointF(2.0, 8.5), QPointF(6.0, 3.5), QPointF(10.0, 8.5) };
-    const QPointF downPts[3] = { QPointF(2.0, 3.5), QPointF(10.0, 3.5), QPointF(6.0, 8.5) };
-    const QPointF rightPts[3] = { QPointF(3.5, 2.0), QPointF(8.5, 6.0), QPointF(3.5, 10.0) };
-
-    renderTriangle(outUp, upPts);
-    renderTriangle(outDown, downPts);
-    renderTriangle(outRight, rightPts);
+    IconProvider::GetPixmap(QStringLiteral("chevron-up"), arrowColor, 12).save(outUp, "PNG");
+    IconProvider::GetPixmap(QStringLiteral("chevron-down"), arrowColor, 12).save(outDown, "PNG");
+    IconProvider::GetPixmap(QStringLiteral("chevron-right"), arrowColor, 12).save(outRight, "PNG");
 }
 
 QString EditorTheme::CurrentStyleSheet() const

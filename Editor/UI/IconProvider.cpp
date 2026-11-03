@@ -32,12 +32,16 @@ namespace
         if (name == QLatin1String("eye-off")) return EditorIcons::TABLER_EYE_OFF;
         if (name == QLatin1String("lock")) return EditorIcons::TABLER_LOCK;
         if (name == QLatin1String("lock-open")) return EditorIcons::TABLER_LOCK_OPEN;
+        if (name == QLatin1String("download") || name == QLatin1String("import")) return EditorIcons::TABLER_DOWNLOAD;
         if (name == QLatin1String("plus") || name == QLatin1String("add")) return EditorIcons::TABLER_PLUS;
         if (name == QLatin1String("trash") || name == QLatin1String("remove")) return EditorIcons::TABLER_TRASH;
         if (name == QLatin1String("folder")) return EditorIcons::TABLER_FOLDER;
         if (name == QLatin1String("file")) return EditorIcons::TABLER_FILE;
         if (name == QLatin1String("search")) return EditorIcons::TABLER_SEARCH;
         if (name == QLatin1String("bulb") || name == QLatin1String("light")) return EditorIcons::TABLER_BULB;
+        if (name == QLatin1String("chevron-up") || name == QLatin1String("arrow-up")) return EditorIcons::TABLER_CHEVRON_UP;
+        if (name == QLatin1String("chevron-down") || name == QLatin1String("arrow-down")) return EditorIcons::TABLER_CHEVRON_DOWN;
+        if (name == QLatin1String("chevron-right") || name == QLatin1String("arrow-right")) return EditorIcons::TABLER_CHEVRON_RIGHT;
         if (name == QLatin1String("camera")) return EditorIcons::SVG_CAMERA;
         if (name == QLatin1String("particles")) return EditorIcons::SVG_PARTICLES;
         return nullptr;
@@ -95,13 +99,13 @@ QIcon IconProvider::GetIcon(const QString& name, const QColor& color, int size)
     icon.addPixmap(RenderSvgPixmap(svg, baseColor, size), QIcon::Normal, QIcon::Off);
     icon.addPixmap(RenderSvgPixmap(svg, disabledColor, size), QIcon::Disabled, QIcon::Off);
     icon.addPixmap(RenderSvgPixmap(svg, activeColor, size), QIcon::Active, QIcon::Off);
-    icon.addPixmap(RenderSvgPixmap(svg, activeColor, size), QIcon::Selected, QIcon::Off);
+    icon.addPixmap(RenderSvgPixmap(svg, QColor(0xFF, 0xFF, 0xFF), size), QIcon::Selected, QIcon::Off);
     return icon;
 }
 
 QIcon IconProvider::PlayIcon(const QColor& color) { return GetIcon(QStringLiteral("player-play"), color.isValid() ? color : QColor(0x4A, 0xDE, 0x80)); }
 QIcon IconProvider::PauseIcon(const QColor& color) { return GetIcon(QStringLiteral("player-pause"), color.isValid() ? color : QColor(0xFB, 0xBF, 0x24)); }
-QIcon IconProvider::StopIcon(const QColor& color) { return GetIcon(QStringLiteral("player-stop"), color.isValid() ? color : QColor(0xF8, 0xF1, 0x71)); }
+QIcon IconProvider::StopIcon(const QColor& color) { return GetIcon(QStringLiteral("player-stop"), color.isValid() ? color : QColor(0xEF, 0x44, 0x44)); }
 QIcon IconProvider::ExternalIcon(const QColor& color) { return GetIcon(QStringLiteral("external-link"), color.isValid() ? color : QColor(0x60, 0xA5, 0xFA)); }
 QIcon IconProvider::SettingsIcon(const QColor& color) { return GetIcon(QStringLiteral("settings"), color); }
 QIcon IconProvider::TranslateIcon(const QColor& color) { return GetIcon(QStringLiteral("arrows-move"), color); }
@@ -114,6 +118,7 @@ QIcon IconProvider::ResetIcon(const QColor& color) { return GetIcon(QStringLiter
 QIcon IconProvider::MoreIcon(const QColor& color) { return GetIcon(QStringLiteral("dots"), color); }
 QIcon IconProvider::EyeIcon(bool visible, const QColor& color) { return GetIcon(visible ? QStringLiteral("eye") : QStringLiteral("eye-off"), color); }
 QIcon IconProvider::LockIcon(bool locked, const QColor& color) { return GetIcon(locked ? QStringLiteral("lock") : QStringLiteral("lock-open"), color); }
+QIcon IconProvider::ImportIcon(const QColor& color) { return GetIcon(QStringLiteral("import"), color); }
 QIcon IconProvider::PlusIcon(const QColor& color) { return GetIcon(QStringLiteral("plus"), color); }
 QIcon IconProvider::TrashIcon(const QColor& color) { return GetIcon(QStringLiteral("trash"), color); }
 QIcon IconProvider::FolderIcon(const QColor& color) { return GetIcon(QStringLiteral("folder"), color); }
@@ -122,6 +127,9 @@ QIcon IconProvider::SearchIcon(const QColor& color) { return GetIcon(QStringLite
 QIcon IconProvider::BulbIcon(const QColor& color) { return GetIcon(QStringLiteral("bulb"), color); }
 QIcon IconProvider::CubeIcon(const QColor& color) { return GetIcon(QStringLiteral("cube"), color); }
 QIcon IconProvider::AdjustmentsIcon(const QColor& color) { return GetIcon(QStringLiteral("adjustments"), color); }
+QIcon IconProvider::ChevronUpIcon(const QColor& color) { return GetIcon(QStringLiteral("chevron-up"), color); }
+QIcon IconProvider::ChevronDownIcon(const QColor& color) { return GetIcon(QStringLiteral("chevron-down"), color); }
+QIcon IconProvider::ChevronRightIcon(const QColor& color) { return GetIcon(QStringLiteral("chevron-right"), color); }
 
 void IconProvider::UploadIcons(IEditorHost* host, bool force)
 {
@@ -129,57 +137,40 @@ void IconProvider::UploadIcons(IEditorHost* host, bool force)
     (void)force;
 
     auto renderSvg = [](const char* svgData, EditorIcons::IconId id, int size = 64) -> QImage {
+        (void)id;
         QImage image(size, size, QImage::Format_RGBA8888);
         image.fill(Qt::transparent);
 
+        QPainter p(&image);
+        p.setRenderHint(QPainter::Antialiasing, true);
+
+        // Circular badge plate (white, will be tinted by billboard tint in shader)
+        const QRectF plateRect(3.0, 3.0, size - 6.0, size - 6.0);
+        p.setBrush(QColor(255, 255, 255, 220));
+        p.setPen(QPen(QColor(255, 255, 255, 255), 2.5));
+        p.drawEllipse(plateRect);
+
         const char* svgStart = std::strstr(svgData, "<svg");
         QByteArray bytes(svgStart ? svgStart : svgData);
+        bytes.replace("stroke=\"#FFFFFF\"", "stroke=\"#1A1A1E\"");
+        bytes.replace("stroke=\"currentColor\"", "stroke=\"#1A1A1E\"");
+
 #ifdef ENGINE_HAS_QTSVG
         QSvgRenderer renderer(bytes);
         if (renderer.isValid())
         {
-            QPainter painter(&image);
-            renderer.render(&painter);
+            const QRectF iconRect(14.0, 14.0, size - 28.0, size - 28.0);
+            renderer.render(&p, iconRect);
         }
 #else
-        image.loadFromData(bytes, "SVG");
-        if (image.isNull()) { image = QImage(size, size, QImage::Format_RGBA8888); image.fill(Qt::transparent); }
-        else image = image.scaled(size, size).convertToFormat(QImage::Format_RGBA8888);
+        QImage glyph;
+        glyph.loadFromData(bytes, "SVG");
+        if (!glyph.isNull())
+        {
+            p.drawImage(QRect(14, 14, size - 28, size - 28), glyph);
+        }
 #endif
-        bool hasPixels = false;
-        for (int y = 0; y < size && !hasPixels; ++y)
-        {
-            const auto* line = image.constScanLine(y);
-            for (int x = 0; x < size * 4; ++x)
-            {
-                if (line[x] != 0) { hasPixels = true; break; }
-            }
-        }
-
-        if (!hasPixels)
-        {
-            QPainter p(&image);
-            p.setRenderHint(QPainter::Antialiasing, true);
-            if (id == EditorIcons::IconId::PointLight)
-            {
-                p.setBrush(QColor(255, 230, 80, 240));
-                p.setPen(QPen(QColor(255, 255, 255, 255), 2.0));
-                p.drawEllipse(size / 4, size / 4, size / 2, size / 2);
-            }
-            else if (id == EditorIcons::IconId::SunSky)
-            {
-                p.setBrush(QColor(255, 200, 50, 240));
-                p.setPen(QPen(QColor(255, 240, 150, 255), 2.0));
-                p.drawEllipse(size / 4, size / 4, size / 2, size / 2);
-            }
-            else
-            {
-                p.setBrush(QColor(80, 180, 255, 220));
-                p.setPen(QPen(Qt::white, 2.0));
-                p.drawRect(size / 4, size / 4, size / 2, size / 2);
-            }
-        }
-
+        p.end();
         return image;
     };
 

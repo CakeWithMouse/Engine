@@ -1,5 +1,6 @@
 #include "UiTestHelperTests.h"
 #include "UiSmokeTests.h"
+#include "EditorTheme.h"
 #include <QApplication>
 #include <iostream>
 
@@ -7,6 +8,7 @@ int main(int argc, char* argv[])
 {
     int appArgc = argc;
     QApplication app(appArgc, argv);
+    EditorTheme::Apply(app);
 
     try
     {

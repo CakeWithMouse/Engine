@@ -1,11 +1,18 @@
+#include <QMouseEvent>
+#include "ViewportWidget.h"
+#include <QToolBar>
+#include <QToolButton>
 #include "EditorApp.h"
 #include "MainWindow.h"
 #include "IEditorHost.h"
 #include "QtHost.h"
 #include "EditorTheme.h"
+#include "../Core/CommandRegistry.h"
+#include "../Core/EditorLocale.h"
 #include <QApplication>
 #include <QTimer>
 #include <QPixmap>
+#include <QQuaternion>
 #include <functional>
 #include <cstdio>
 #include <cwchar>
@@ -45,43 +52,124 @@ namespace
                 screenshotPath = QStringLiteral("editor_smoke.png");
             }
 
-            QTimer::singleShot(1500, [&window, host, screenshotPath] {
+            
+            // Step 1: Select Cube
+            QTimer::singleShot(1200, [host] {
                 auto snap = host->ReadSnapshot();
-                uint64_t targetId = 2;
+                uint64_t cubeId = 0;
                 for (const auto& obj : snap.objects) {
-                    if (obj.id != 0) { targetId = obj.id; break; }
+                    if (obj.name == "Cube" || obj.type == "Primitive.Cube") { cubeId = obj.id; break; }
                 }
-                std::printf("[Info] SmokeEditor: selecting object (id %llu)\n", targetId);
+                if (cubeId == 0 && snap.objects.size() > 1) cubeId = snap.objects[1].id;
+                std::printf("[SmokeTest] Step 1: Selecting Cube (id %llu)\n", cubeId);
                 std::fflush(stdout);
-                EditorCommand c1;
-                c1.type = EditorCommand::SelectObject;
-                c1.objectId = targetId;
-                host->PostCommand(c1);
+                EditorCommand c;
+                c.type = EditorCommand::SelectObject;
+                c.objectId = cubeId;
+                host->PostCommand(c);
+            });
 
-                uint64_t secondId = 0;
+            // Step 2: Test View menu toggles
+            QTimer::singleShot(2000, [] {
+                std::printf("[SmokeTest] Step 2: Testing View menu toggles (Grid=off, Gizmo=off, Icons=off, AA=off)\n");
+                std::fflush(stdout);
+                CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleGrid"));
+                CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleGizmo"));
+                CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleIcons"));
+                QVariantMap pOff; pOff.insert(QStringLiteral("mode"), QStringLiteral("off"));
+                CommandRegistry::Instance().Execute(QStringLiteral("View.SetAntialiasing"), pOff);
+            });
+
+            // Step 3: Restore View menu toggles
+            QTimer::singleShot(2600, [] {
+                std::printf("[SmokeTest] Step 3: Restoring View menu toggles (Grid=on, Gizmo=on, Icons=on, AA=fxaa)\n");
+                std::fflush(stdout);
+                CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleGrid"));
+                CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleGizmo"));
+                CommandRegistry::Instance().Execute(QStringLiteral("View.ToggleIcons"));
+                QVariantMap pFxaa; pFxaa.insert(QStringLiteral("mode"), QStringLiteral("fxaa"));
+                CommandRegistry::Instance().Execute(QStringLiteral("View.SetAntialiasing"), pFxaa);
+            });
+
+            // Step 4: Select PointLight and modify parameters
+            QTimer::singleShot(3200, [host] {
+                auto snap = host->ReadSnapshot();
+                uint64_t lightId = 0;
                 for (const auto& obj : snap.objects) {
-                    if (obj.id != targetId && obj.id != 0) { secondId = obj.id; break; }
+                    if (obj.hasPointLight || obj.type == "Light.Point" || obj.name.find("Light") != std::string::npos) {
+                        lightId = obj.id;
+                        break;
+                    }
                 }
-                if (secondId != 0)
+                if (lightId != 0)
                 {
-                    QTimer::singleShot(600, [host, secondId] {
-                        std::printf("[Info] SmokeEditor: selecting second object (id %llu)\n", secondId);
-                        std::fflush(stdout);
-                        EditorCommand c2;
-                        c2.type = EditorCommand::SelectObject;
-                        c2.objectId = secondId;
-                        host->PostCommand(c2);
-                    });
-                }
-
-                QTimer::singleShot(1400, [&window, screenshotPath] {
-                    QPixmap grab = window.grab();
-                    grab.save(screenshotPath);
-                    std::printf("[Info] SmokeEditor: screenshot saved to %s (%dx%d)\n",
-                        screenshotPath.toUtf8().constData(), grab.width(), grab.height());
+                    std::printf("[SmokeTest] Step 4: Selecting PointLight (id %llu) and modifying parameters\n", lightId);
                     std::fflush(stdout);
-                    QApplication::quit();
-                });
+                    EditorCommand cSel;
+                    cSel.type = EditorCommand::SelectObject;
+                    cSel.objectId = lightId;
+                    host->PostCommand(cSel);
+
+                    EditorCommand cLight;
+                    cLight.type = EditorCommand::SetPointLight;
+                    cLight.objectId = lightId;
+                    cLight.pointLight.color[0] = 0.9f;
+                    cLight.pointLight.color[1] = 0.7f;
+                    cLight.pointLight.color[2] = 0.4f;
+                    cLight.pointLight.intensity = 3.5f;
+                    cLight.pointLight.radius = 12.0f;
+                    cLight.pointLight.enabled = 1;
+                    cLight.castShadows = false;
+                    host->PostCommand(cLight);
+                }
+            });
+
+            // Step 5: Show / Create Directional Light and select it
+            QTimer::singleShot(3400, [host] {
+                std::printf("[SmokeTest] Step 5: Creating and Selecting Directional Light\n");
+                std::fflush(stdout);
+                auto snap = host->ReadSnapshot();
+                uint64_t dirId = 0;
+                for (const auto& obj : snap.objects) {
+                    if (obj.type == "Light.Directional") { dirId = obj.id; break; }
+                }
+                if (dirId != 0)
+                {
+                    EditorCommand cSel; cSel.type = EditorCommand::SelectObject; cSel.objectId = dirId;
+                    host->PostCommand(cSel);
+                }
+                else
+                {
+                    EditorCommand c; c.type = EditorCommand::CreateObject;
+                    c.path = "Light.Directional"; c.name = Tr("Направленный свет", "Directional Light");
+                    const auto rotation = QQuaternion::fromEulerAngles(-55, -30, 0);
+                    c.transform.rotation[0] = rotation.x(); c.transform.rotation[1] = rotation.y();
+                    c.transform.rotation[2] = rotation.z(); c.transform.rotation[3] = rotation.scalar();
+                    c.transform.position[0] = 0.0f; c.transform.position[1] = 5.0f; c.transform.position[2] = 0.0f;
+                    host->PostCommand(c);
+                }
+            });
+
+            // Step 6: Save screenshot and exit
+            QTimer::singleShot(4800, [&window, screenshotPath] {
+                auto* dock = window.findChild<QDockWidget*>("InspectorDock");
+                if (dock) {
+                    for (auto* c : dock->findChildren<QWidget*>()) {
+                        if (c->isVisible() && (c->inherits("QFrame") || c->inherits("QPushButton") || c->inherits("QLabel") || c->inherits("QCheckBox"))) {
+                            std::printf("[InspectorChild] %s '%s' geom=%d,%d %dx%d map=%d,%d\n",
+                                c->metaObject()->className(), c->objectName().toUtf8().constData(),
+                                c->geometry().x(), c->geometry().y(), c->geometry().width(), c->geometry().height(),
+                                c->mapTo(&window, QPoint(0, 0)).x(), c->mapTo(&window, QPoint(0, 0)).y());
+                        }
+                    }
+                }
+                QPixmap grab = window.grab();
+                grab.save(screenshotPath);
+                std::printf("[Info] SmokeEditor: screenshot saved to %s (%dx%d)\n",
+                    screenshotPath.toUtf8().constData(), grab.width(), grab.height());
+                std::fflush(stdout);
+                QApplication::quit();
+                ExitProcess(0);
             });
         }
 

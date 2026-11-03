@@ -17,6 +17,8 @@ struct LinePSInput
 {
     float4 Position : SV_POSITION;
     float4 Color : COLOR;
+    float DistFromCenter : TEXCOORD0;
+    float HalfWidth : TEXCOORD1;
 };
 
 LinePSInput VSLine(LineVSInput input)
@@ -24,25 +26,36 @@ LinePSInput VSLine(LineVSInput input)
     LinePSInput output;
     output.Color = input.Color;
 
+    if (ScreenSize.x <= 1.0f || ScreenSize.y <= 1.0f)
+    {
+        output.Position = float4(0, 0, -2.0f, 1.0f);
+        output.DistFromCenter = 0.0f;
+        output.HalfWidth = 1.0f;
+        return output;
+    }
+
     float4 c0 = mul(float4(input.Pos0, 1.0f), ViewProjection);
     float4 c1 = mul(float4(input.Pos1, 1.0f), ViewProjection);
 
-    if (c0.w <= 0.001f && c1.w <= 0.001f)
+    const float nearW = 0.1f;
+    if (c0.w <= nearW && c1.w <= nearW)
     {
         output.Position = float4(0, 0, -2.0f, 1.0f);
+        output.DistFromCenter = 0.0f;
+        output.HalfWidth = 1.0f;
         return output;
     }
 
     float4 safeC0 = c0;
     float4 safeC1 = c1;
-    if (safeC0.w < 0.001f)
+    if (safeC0.w < nearW)
     {
-        float t = (0.001f - safeC0.w) / max(1e-5f, (safeC1.w - safeC0.w));
+        float t = (nearW - safeC0.w) / max(1e-5f, (safeC1.w - safeC0.w));
         safeC0 = lerp(safeC0, safeC1, t);
     }
-    else if (safeC1.w < 0.001f)
+    else if (safeC1.w < nearW)
     {
-        float t = (0.001f - safeC1.w) / max(1e-5f, (safeC0.w - safeC1.w));
+        float t = (nearW - safeC1.w) / max(1e-5f, (safeC0.w - safeC1.w));
         safeC1 = lerp(safeC1, safeC0, t);
     }
 
@@ -54,18 +67,23 @@ LinePSInput VSLine(LineVSInput input)
     float2 dir = len > 1e-4f ? (screenDir / len) : float2(1.0f, 0.0f);
     float2 perp = float2(-dir.y, dir.x);
 
-    float halfWidth = max(0.5f, input.Thickness * 0.5f);
+    // Expand by 0.5px margin on each side for smooth alpha falloff
+    float halfWidth = input.Thickness * 0.5f + 0.5f;
     float2 pixelOffset = perp * (input.SideDir.x * halfWidth);
     float2 ndcOffset = pixelOffset * float2(ScreenSize.z * 2.0f, ScreenSize.w * 2.0f);
 
     float4 baseClip = lerp(safeC0, safeC1, input.SideDir.y);
     output.Position = float4(baseClip.xy + ndcOffset * baseClip.w, baseClip.zw);
+    output.DistFromCenter = input.SideDir.x * halfWidth;
+    output.HalfWidth = halfWidth;
     return output;
 }
 
 float4 PSLine(LinePSInput input) : SV_Target
 {
-    return input.Color;
+    float d = abs(input.DistFromCenter);
+    float alpha = 1.0f - smoothstep(max(0.0f, input.HalfWidth - 1.0f), input.HalfWidth, d);
+    return float4(input.Color.rgb, input.Color.a * alpha);
 }
 
 struct BillboardVSInput
@@ -87,8 +105,29 @@ BillboardPSInput VSBillboard(BillboardVSInput input)
 {
     BillboardPSInput output;
     float4 clipCenter = mul(float4(input.Position, 1.0f), ViewProjection);
+    if (clipCenter.w <= 0.001f)
+    {
+        output.Position = float4(0.0f, 0.0f, -2.0f, 1.0f);
+        output.UV = float2(0.0f, 0.0f);
+        output.Tint = float4(0.0f, 0.0f, 0.0f, 0.0f);
+        return output;
+    }
+
+    // Clamp billboard size to 18..20 px in screen pixels:
+    // Diameter is maximum 20px (half = 10px), minimum 18px (half = 9px).
+    // Almost constant 18..20 px: scales down to 18px only when distance < 3m, clamped at 20px for dist >= 3m.
+    float2 baseOffset = input.Offset;
+    float currentHalf = max(abs(baseOffset.x), abs(baseOffset.y));
+
+    float dist = max(0.001f, clipCenter.w);
+    float scaleT = saturate(dist / 3.0f);
+    float targetHalf = lerp(9.0f, 10.0f, scaleT);
+    float clampedHalf = clamp(targetHalf, 9.0f, 10.0f);
+    float effectiveScale = (currentHalf > 1e-4f) ? (clampedHalf / currentHalf) : 1.0f;
+    float2 pixelOffset = baseOffset * effectiveScale;
+
     // Invert Y offset for screen coordinates (Y down in screen space, Y up in NDC)
-    float2 ndcOffset = float2(input.Offset.x * 2.0f * ScreenSize.z, -input.Offset.y * 2.0f * ScreenSize.w) * clipCenter.w;
+    float2 ndcOffset = float2(pixelOffset.x * 2.0f * ScreenSize.z, -pixelOffset.y * 2.0f * ScreenSize.w) * clipCenter.w;
     output.Position = clipCenter + float4(ndcOffset.x, ndcOffset.y, 0.0f, 0.0f);
     output.UV = input.UV;
     output.Tint = input.Tint;
@@ -100,8 +139,42 @@ SamplerState IconSampler : register(s0);
 
 float4 PSBillboard(BillboardPSInput input) : SV_Target
 {
+    float2 centered = input.UV - float2(0.5f, 0.5f);
+    float dist = length(centered);
+    if (dist > 0.5f)
+    {
+        discard;
+    }
+
     float4 texColor = IconTexture.Sample(IconSampler, input.UV);
-    return texColor * input.Tint;
+    
+    // Contrast circular plate with antialiased edge
+    float edgeAlpha = 1.0f - smoothstep(0.47f, 0.50f, dist);
+    
+    // Background badge plate: tinted light body with dark outer ring
+    float3 plateColor = input.Tint.rgb;
+    if (dist > 0.44f)
+    {
+        // Dark contrast rim for visibility against any background
+        plateColor = float3(0.12f, 0.12f, 0.14f);
+    }
+    
+    // If texture has glyph content (alpha > 0.1), blend it over the plate
+    float3 finalRgb = plateColor;
+    if (texColor.a > 0.1f)
+    {
+        finalRgb = lerp(plateColor, texColor.rgb, texColor.a);
+    }
+    else
+    {
+        // Procedural inner bulb / point symbol if texture alpha is zero
+        if (dist < 0.22f)
+        {
+            finalRgb = float3(1.0f, 1.0f, 1.0f);
+        }
+    }
+
+    return float4(finalRgb, edgeAlpha * input.Tint.a);
 }
 
 struct TriangleVSInput

@@ -53,6 +53,8 @@ std::unique_ptr<Game> SceneEditSession::CopyForPlay()
     candidate->SetSimulationEnabled(false);
     candidate->SetSimulationTimeScale(1.0f);
     candidate->SetSceneLightingEnabled(true);
+    candidate->GetSettings().SetAntialiasing(antialiasingMode_);
+    for (const auto& [id, st] : storedIcons_) candidate->SetOverlayIcon(id, st.width, st.height, st.pixels.data());
     SceneDocument::Restore(edit_->GetScene().GetSnapshot(), catalog_, candidate->GetScene());
     return candidate;
 }
@@ -160,12 +162,15 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                     return EngineSceneFailure;
                 s.edit_->GetPlayer()->SetPosition({0.0f, 0.0f, 5.0f}); // default yaw faces -Z, toward scene origin
                 s.attached_ = true; s.width_ = w; s.height_ = h;
+                s.edit_->GetSettings().SetAntialiasing(s.antialiasingMode_);
                 return EngineSceneOk;
             });
         },
         [](void* p, uint32_t w, uint32_t h) -> uint32_t {
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
-                if (!s.attached_ || w > INT_MAX || h > INT_MAX) return EngineSceneInvalidArgument;
+                if (w > INT_MAX || h > INT_MAX) return EngineSceneInvalidArgument;
+                if (!s.attached_) return EngineSceneOk;
+                if (s.width_ == w && s.height_ == h) return EngineSceneOk;
                 s.width_ = w; s.height_ = h;
                 s.Active().OnWindowResized(static_cast<int>(w), static_cast<int>(h), !w || !h);
                 return EngineSceneOk;
@@ -359,11 +364,9 @@ EngineEditorCameraApi SceneEditSession::GetEditorCameraApi() noexcept
 
 EnginePointLightV2Api SceneEditSession::GetPointLightV2Api() noexcept
 {
-    return {1, this,
+    return {1, &commands_,
         [](void* p, uint64_t id, const EngineScenePointLight* l, uint32_t castShadows) -> uint32_t {
-            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
-                return SceneCommands::SetPointLightV2(&s.Active(), id, l, castShadows);
-            });
+            return SceneCommands::SetPointLightV2(p, id, l, castShadows);
         }
     };
 }
@@ -388,6 +391,17 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
         },
         [](void* p, uint32_t iconId, uint32_t w, uint32_t h, const uint8_t* rgba) -> uint32_t {
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (rgba && w > 0 && h > 0)
+                {
+                    auto& st = s.storedIcons_[iconId];
+                    st.width = w;
+                    st.height = h;
+                    st.pixels.assign(rgba, rgba + (w * h * 4));
+                }
+                else
+                {
+                    s.storedIcons_.erase(iconId);
+                }
                 s.Active().SetOverlayIcon(iconId, w, h, rgba);
                 return EngineSceneOk;
             });
@@ -400,6 +414,7 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
         },
         [](void* p, uint32_t mode) -> uint32_t {
             return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                s.antialiasingMode_ = mode;
                 s.Active().GetSettings().SetAntialiasing(mode);
                 return EngineSceneOk;
             });
@@ -415,6 +430,8 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
 void SceneEditSession::ReplaceEdit(const SceneSnapshot& data)
 {
     auto candidate = EmptyGame();
+    candidate->GetSettings().SetAntialiasing(antialiasingMode_);
+    for (const auto& [id, st] : storedIcons_) candidate->SetOverlayIcon(id, st.width, st.height, st.pixels.data());
     SceneDocument::Restore(data, catalog_, candidate->GetScene());
     if (attached_)
     {

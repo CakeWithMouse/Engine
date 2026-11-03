@@ -180,7 +180,7 @@ private:
         {
             auto* spin = transform_[i] = new NoWheelDoubleSpinBox(rowScale);
             spin->setObjectName(QStringLiteral("Transform%1").arg(i));
-            spin->setRange(0.001, 10000.0);
+            spin->setRange(-10000.0, 10000.0);
             spin->setDecimals(3);
             spin->setSingleStep(0.25);
             spin->setKeyboardTracking(false);

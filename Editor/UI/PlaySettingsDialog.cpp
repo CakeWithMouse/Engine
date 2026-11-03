@@ -26,8 +26,7 @@ bool PlaySettingsDialog::Execute(uint64_t& outSettingsId, QString& outConfigJson
         if (o.gameplayKind == 3) {
             if (settingsId) {
                 QMessageBox::warning(this, Tr("Настройки Play", "Play Settings"),
-                    Tr("Включите «Вид → Служебные объекты сцены» и удалите лишние записи «Настройки Play». Для сцены нужна одна запись.",
-                       "Enable «View -> Scene Service Objects» and remove duplicate «Play Settings» entries. Only one entry is needed for the scene."));
+                    Tr("Обнаружены лишние записи «Настройки Play». Для сцены нужна одна запись.", "Duplicate «Play Settings» entries detected. Only one entry is needed for the scene."));
                 return false;
             }
             settingsId = o.id;

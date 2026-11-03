@@ -10,11 +10,14 @@ class QDoubleSpinBox;
 class QComboBox;
 class QCheckBox;
 class QLabel;
+class QPushButton;
+class QAction;
 class UICanvas;
 
 class UIEditorWindow : public QMainWindow {
 public:
     explicit UIEditorWindow(const QString& file, QWidget* parent = nullptr);
+    ~UIEditorWindow() override;
     bool Save();
     bool Reload();
     bool ConfirmClose();
@@ -26,6 +29,7 @@ public:
     QString FilePath() const { return file_; }
     void Changed();
     void RebuildTree();
+    void RetranslateUi();
 protected:
     void closeEvent(QCloseEvent* event) override;
 private:
@@ -44,4 +48,17 @@ private:
     QComboBox* colorProperty_ = nullptr;
     QCheckBox* visible_ = nullptr;
     QLabel* status_ = nullptr;
+
+    QAction* saveAction_ = nullptr;
+    QAction* reloadAction_ = nullptr;
+    QAction* deleteAction_ = nullptr;
+    QLabel* labelName_ = nullptr;
+    QLabel* labelText_ = nullptr;
+    QLabel* labelRect_[4]{};
+    QLabel* labelAnchor_ = nullptr;
+    QLabel* labelVisible_ = nullptr;
+    QLabel* labelColorProperty_ = nullptr;
+    QPushButton* colorBtn_ = nullptr;
+    QLabel* hintLabel_ = nullptr;
+    int langSubId_ = 0;
 };
