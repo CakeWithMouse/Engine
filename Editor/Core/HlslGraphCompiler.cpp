@@ -3,6 +3,7 @@
 #include <QColor>
 #include <QLocale>
 #include <QStringList>
+#include <algorithm>
 #include <functional>
 
 namespace EditorCore
@@ -18,6 +19,16 @@ QString F4(double val)
 QString F2(double val)
 {
     return QLocale::c().toString(val, 'f', 2);
+}
+
+bool IsTextureNode(const QString& type)
+{
+    return type == QStringLiteral("Texture2D") || type == QStringLiteral("NormalMap");
+}
+
+QString DefaultTextureName(const QString& type)
+{
+    return type == QStringLiteral("NormalMap") ? QStringLiteral("NormalMap") : QStringLiteral("BaseMap");
 }
 } // namespace
 
@@ -50,18 +61,25 @@ QString HlslGraphCompiler::CompileGraphToHlsl(const MaterialGraphModel& model)
             double val = n.properties.value(QStringLiteral("value"), 0.5).toDouble();
             cbufferParams << QStringLiteral("    float %1 = %2f;").arg(name).arg(F4(val));
         }
-        else if (n.type == QStringLiteral("Texture2D"))
-        {
-            QString texName = n.properties.value(QStringLiteral("textureName"), QStringLiteral("BaseMap")).toString();
-            int slot = n.properties.value(QStringLiteral("slot"), 6).toInt();
-            textureDecls << QStringLiteral("Texture2D %1 : register(t%2);").arg(texName).arg(slot);
-        }
-        else if (n.type == QStringLiteral("ORMTexture"))
-        {
-            QString texName = n.properties.value(QStringLiteral("textureName"), QStringLiteral("OrmMap")).toString();
-            int slot = n.properties.value(QStringLiteral("slot"), 7).toInt();
-            textureDecls << QStringLiteral("Texture2D %1 : register(t%2);").arg(texName).arg(slot);
-        }
+    }
+
+    // Текстуры: ноды с одним именем читают одну текстуру; занятый регистр заменяется
+    // следующим свободным (t0-t5 принадлежат движку).
+    QStringList declaredTextures;
+    QList<int> usedSlots;
+    for (const auto& n : nodes)
+    {
+        if (!IsTextureNode(n.type))
+            continue;
+        const QString texName = n.properties.value(QStringLiteral("textureName"), DefaultTextureName(n.type)).toString();
+        if (declaredTextures.contains(texName))
+            continue;
+        int slot = std::max(6, n.properties.value(QStringLiteral("slot"), 6).toInt());
+        while (usedSlots.contains(slot))
+            ++slot;
+        declaredTextures << texName;
+        usedSlots << slot;
+        textureDecls << QStringLiteral("Texture2D %1 : register(t%2);").arg(texName).arg(slot);
     }
 
     // Рекурсивный генератор выражений для пина
@@ -111,9 +129,22 @@ QString HlslGraphCompiler::CompileGraphToHlsl(const MaterialGraphModel& model)
                     if (pinName == QStringLiteral("A")) return sampleExpr + QStringLiteral(".a");
                     return sampleExpr;
                 }
-                if (n.type == QStringLiteral("ORMTexture"))
+                if (n.type == QStringLiteral("NormalMap"))
                 {
-                    QString texName = n.properties.value(QStringLiteral("textureName"), QStringLiteral("OrmMap")).toString();
+                    QString texName = n.properties.value(QStringLiteral("textureName"), QStringLiteral("NormalMap")).toString();
+                    QString uvExpr = QStringLiteral("i.UV"), strength = QStringLiteral("1.0f");
+                    for (const auto& c : connections)
+                    {
+                        if (c.toNode == nodeId && c.toPin == QStringLiteral("UV")) uvExpr = evalPin(c.fromNode, c.fromPin);
+                        if (c.toNode == nodeId && c.toPin == QStringLiteral("Strength")) strength = evalPin(c.fromNode, c.fromPin);
+                    }
+                    // Мировая нормаль: базис касательных из производных, тангенты в вершинах не нужны.
+                    return QStringLiteral("NormalFromMap(i, %1.Sample(MaterialSampler, %2).xyz, %3)").arg(texName, uvExpr, strength);
+                }
+                if (n.type == QStringLiteral("Panner"))
+                {
+                    double sx = n.properties.value(QStringLiteral("speedX"), 0.5).toDouble();
+                    double sy = n.properties.value(QStringLiteral("speedY"), 0.0).toDouble();
                     QString uvExpr = QStringLiteral("i.UV");
                     for (const auto& c : connections)
                     {
@@ -123,11 +154,7 @@ QString HlslGraphCompiler::CompileGraphToHlsl(const MaterialGraphModel& model)
                             break;
                         }
                     }
-                    QString sampleExpr = QStringLiteral("%1.Sample(MaterialSampler, %2)").arg(texName, uvExpr);
-                    if (pinName == QStringLiteral("AO")) return sampleExpr + QStringLiteral(".r");
-                    if (pinName == QStringLiteral("Roughness")) return sampleExpr + QStringLiteral(".g");
-                    if (pinName == QStringLiteral("Metallic")) return sampleExpr + QStringLiteral(".b");
-                    return sampleExpr;
+                    return QStringLiteral("(%1 + i.Time * float2(%2f, %3f))").arg(uvExpr, F2(sx), F2(sy));
                 }
                 if (n.type == QStringLiteral("Multiply"))
                 {
@@ -193,43 +220,39 @@ QString HlslGraphCompiler::CompileGraphToHlsl(const MaterialGraphModel& model)
         return QStringLiteral("0.0f");
     };
 
-    // Находим Master Node
-    int masterId = 0;
+    // Выход материала: входы — поля MaterialOutput освещения движка (Блинн-Фонг).
+    // Неподключённый вход не пишется: поле сохраняет значение шаблона (цвет и текстура компонента и т.д.).
+    struct OutputPin
+    {
+        const char* pin;
+        const char* field;
+        bool saturate;
+    };
+    static const OutputPin outputs[] = {
+        {"Albedo", "Albedo", true}, {"Alpha", "Alpha", true}, {"Specular", "SpecularWeight", true},
+        {"AmbientModel", "AmbientModel", true}, {"Emissive", "Emissive", false}, {"Normal", "Normal", false}};
+
+    int outputId = 0;
     for (const auto& n : nodes)
     {
-        if (n.type == QStringLiteral("PBRMasterOutput"))
+        if (n.type == QStringLiteral("MaterialOutput"))
         {
-            masterId = n.id;
+            outputId = n.id;
             break;
         }
     }
 
-    QString baseColorExpr = QStringLiteral("float3(0.8, 0.8, 0.8)");
-    QString metallicExpr = QStringLiteral("0.0f");
-    QString roughnessExpr = QStringLiteral("0.5f");
-    QString normalExpr;
-    QString emissiveExpr;
-    QString aoExpr = QStringLiteral("1.0f");
-    QString alphaExpr = QStringLiteral("1.0f");
-
-    if (masterId != 0)
+    QStringList assignments;
+    for (const auto& output : outputs)
     {
         for (const auto& c : connections)
         {
-            if (c.toNode == masterId)
-            {
-                if (c.toPin == QStringLiteral("BaseColor")) baseColorExpr = evalPin(c.fromNode, c.fromPin);
-                else if (c.toPin == QStringLiteral("Metallic")) metallicExpr = evalPin(c.fromNode, c.fromPin);
-                else if (c.toPin == QStringLiteral("Roughness")) roughnessExpr = evalPin(c.fromNode, c.fromPin);
-                else if (c.toPin == QStringLiteral("Normal")) normalExpr = evalPin(c.fromNode, c.fromPin);
-                else if (c.toPin == QStringLiteral("Emissive"))
-                {
-                    emissiveExpr = evalPin(c.fromNode, c.fromPin);
-                    hasEmissive = true;
-                }
-                else if (c.toPin == QStringLiteral("AO")) aoExpr = evalPin(c.fromNode, c.fromPin);
-                else if (c.toPin == QStringLiteral("Alpha")) alphaExpr = evalPin(c.fromNode, c.fromPin);
-            }
+            if (outputId == 0 || c.toNode != outputId || c.toPin != QLatin1String(output.pin))
+                continue;
+            const QString expr = evalPin(c.fromNode, c.fromPin);
+            assignments << (output.saturate ? QStringLiteral("    o.%1 = saturate(%2);").arg(QLatin1String(output.field), expr)
+                                            : QStringLiteral("    o.%1 = %2;").arg(QLatin1String(output.field), expr));
+            hasEmissive = hasEmissive || QLatin1String(output.pin) == QLatin1String("Emissive");
         }
     }
 
@@ -256,20 +279,8 @@ QString HlslGraphCompiler::CompileGraphToHlsl(const MaterialGraphModel& model)
     }
 
     hlsl += QStringLiteral("void Surface(MaterialInput i, inout MaterialOutput o)\n{\n");
-    hlsl += QStringLiteral("    o.Albedo = saturate(%1);\n").arg(baseColorExpr);
-    hlsl += QStringLiteral("    o.SpecularWeight = saturate(1.0f - (%1));\n").arg(roughnessExpr);
-    hlsl += QStringLiteral("    o.AmbientModel = saturate(%1);\n").arg(aoExpr);
-    hlsl += QStringLiteral("    o.Alpha = saturate(%1);\n").arg(alphaExpr);
-
-    if (!normalExpr.isEmpty())
-    {
-        hlsl += QStringLiteral("    o.Normal = %1;\n").arg(normalExpr);
-    }
-    if (!emissiveExpr.isEmpty())
-    {
-        hlsl += QStringLiteral("    o.Emissive = %1;\n").arg(emissiveExpr);
-    }
-
+    for (const QString& line : assignments)
+        hlsl += line + QLatin1Char('\n');
     hlsl += QStringLiteral("}\n");
 
     return hlsl;

@@ -1,5 +1,7 @@
 #include "MaterialEditorWindow.h"
 #include "MaterialTextureTools.h"
+#include "MaterialGraphWidget.h"
+#include "HlslGraphCompiler.h"
 #include "EditorTheme.h"
 
 #include <QAction>
@@ -31,6 +33,7 @@
 #include <QSet>
 #include <QSignalBlocker>
 #include <QSplitter>
+#include <QTabWidget>
 #include <QStatusBar>
 #include <QSyntaxHighlighter>
 #include <QTextBlock>
@@ -84,9 +87,10 @@ QString StatusText(uint32_t status, const char* error)
                : QStringLiteral("Операция с материалом не выполнена (код %1)").arg(status);
 }
 
-// Поток движка. outside: файл вне проекта, сначала копируется в Content/Textures.
+// Поток движка. outside: файл вне проекта, сначала копируется в Content/Textures, его /Game путь
+// пишется в importedPath. apply = false: только импорт (слота у материала пока нет).
 QString SetTexture(const EngineEditSessionApi& api, const QByteArray& material, const QByteArray& slot,
-                   const QByteArray& path, const QByteArray& outside)
+                   const QByteArray& path, const QByteArray& outside, bool apply = true, QByteArray* importedPath = nullptr)
 {
     QByteArray texture = path;
     char error[4096]{};
@@ -97,7 +101,9 @@ QString SetTexture(const EngineEditSessionApi& api, const QByteArray& material, 
         if (status == EngineSceneReadOnly) return QStringLiteral("Импорт текстуры недоступен во время Play");
         if (status != EngineSceneOk) return StatusText(status, error);
         texture = imported;
+        if (importedPath) *importedPath = texture;
     }
+    if (!apply) return {};
     return StatusText(api.setMaterialTexture(api.context, material.constData(), slot.constData(), texture.constData(),
                                              error, sizeof(error)), error);
 }
@@ -361,6 +367,20 @@ void MaterialEditorWindow::BuildUi()
     shape_->setObjectName(QStringLiteral("MaterialPreviewShape"));
     shape_->addItems({QStringLiteral("Сфера"), QStringLiteral("Куб"), QStringLiteral("Плоскость")});
     tools->addWidget(shape_);
+    tools->addSeparator();
+    graphAction_ = tools->addAction(QStringLiteral("Нодовый граф"), this, [this] {
+        const bool toCode = graphMode_;
+        const QString question = toCode
+            ? QStringLiteral("Удалить граф? HLSL останется как есть и будет правиться руками.")
+            : QStringLiteral("Создать нодовый граф? HLSL будет генерироваться из графа, текущий код заменится.");
+        if (QMessageBox::question(this, QStringLiteral("Нодовый граф"), question +
+                QStringLiteral("\nДо сохранения это отменяется кнопкой «Откатить».")) != QMessageBox::Yes)
+            return;
+        if (toCode) DisableGraph();
+        else EnableGraph();
+    });
+    graphAction_->setObjectName(QStringLiteral("MaterialGraphToggle"));
+    graphAction_->setEnabled(false); // до загрузки HLSL
 
     preview_ = new MaterialPreviewWidget(this);
     preview_->setObjectName(QStringLiteral("MaterialPreview"));
@@ -411,8 +431,33 @@ void MaterialEditorWindow::BuildUi()
     left->setStretchFactor(0, 1);
     left->setStretchFactor(1, 1);
     left->setSizes({300, 400}); // слоты текстур видны без прокрутки
+    graph_ = new MaterialGraphWidget(this);
+    graphPage_ = graph_;
+    sourceTabs_ = new QTabWidget(this);
+    sourceTabs_->setObjectName(QStringLiteral("MaterialSourceTabs"));
+    sourceTabs_->addTab(source_, QStringLiteral("HLSL"));
+    graph_->hide(); // вкладка появляется в режиме графа
+
+    // Правки графа копятся 250 мс: перетаскивание связи не пересобирает шейдер на каждом шаге.
+    graphApply_ = new QTimer(this);
+    graphApply_->setSingleShot(true);
+    graphApply_->setInterval(250);
+    connect(graphApply_, &QTimer::timeout, this, [this] { ApplyGraph(); });
+    graph_->structureChanged = [this] {
+        BackupGraphFiles();
+        graphApply_->start();
+        UpdateTitle();
+    };
+    graph_->layoutChanged = [this] {
+        BackupGraphFiles();
+        WriteGraphFile();
+        UpdateTitle();
+    };
+    graph_->parameterEdited = [this](const QString& name, const std::array<float, 4>& value) { SetParameterByName(name, value); };
+    graph_->textureRequested = [this](const QString& name) { PickTexture(name); };
+
     auto* right = new QSplitter(Qt::Vertical, this);
-    right->addWidget(source_);
+    right->addWidget(sourceTabs_);
     right->addWidget(errors_);
     right->setStretchFactor(0, 4);
     right->setStretchFactor(1, 1);
@@ -520,7 +565,9 @@ void MaterialEditorWindow::Apply(const MaterialEditorState& state, bool valid, b
         {
             shaderFile_ = PhysicalPath(state_.shader);
             LoadShaderText();
+            LoadGraph();
         }
+        if (graphMode_) SyncGraphTextures();
         // Смена режима смешивания тоже меняет слоты: компилятор выбрасывает то, что режим не читает.
         const bool slotsChanged = !std::equal(previous.begin(), previous.end(), state_.textures.begin(), state_.textures.end(),
             [](const auto& a, const auto& b) { return a.name == b.name; });
@@ -542,16 +589,161 @@ void MaterialEditorWindow::Apply(const MaterialEditorState& state, bool valid, b
 void MaterialEditorWindow::LoadShaderText()
 {
     QFile file(shaderFile_);
-    if (shaderFile_.isEmpty() || !file.open(QIODevice::ReadOnly))
+    sourceLoaded_ = !shaderFile_.isEmpty() && file.open(QIODevice::ReadOnly);
+    graphAction_->setEnabled(sourceLoaded_);
+    if (!sourceLoaded_)
     {
         source_->setPlainText({});
         source_->setReadOnly(true);
         statusBar()->showMessage(QStringLiteral("Не удалось открыть HLSL: %1").arg(shaderFile_));
         return;
     }
-    source_->setReadOnly(false);
+    source_->setReadOnly(graphMode_);
     source_->setPlainText(QString::fromUtf8(file.readAll()));
     source_->document()->setModified(false);
+}
+
+QString MaterialEditorWindow::GraphFile() const
+{
+    const QString material = PhysicalPath(material_);
+    return material.isEmpty() ? QString() : material + QStringLiteral(".graph.json");
+}
+
+void MaterialEditorWindow::LoadGraph()
+{
+    QFile file(GraphFile());
+    if (!sourceLoaded_ || !file.exists())
+    {
+        SetGraphMode(false);
+        return;
+    }
+    EditorCore::MaterialGraphModel model;
+    if (!file.open(QIODevice::ReadOnly) || !model.ImportFromJson(QString::fromUtf8(file.readAll())))
+    {
+        // Битый граф не трогаем: HLSL остаётся последним скомпилированным, правится руками.
+        SetGraphMode(false);
+        statusBar()->showMessage(QStringLiteral("Граф %1 не читается, материал открыт как код").arg(GraphFile()));
+        return;
+    }
+    graph_->SetModel(model);
+    SetGraphMode(true);
+}
+
+void MaterialEditorWindow::SetGraphMode(bool on)
+{
+    graphMode_ = on;
+    const int index = sourceTabs_->indexOf(graphPage_);
+    if (on && index < 0) sourceTabs_->insertTab(0, graphPage_, QStringLiteral("Граф"));
+    if (!on && index >= 0) sourceTabs_->removeTab(index);
+    graphPage_->setVisible(on);
+    if (on) sourceTabs_->setCurrentWidget(graphPage_);
+    sourceTabs_->setTabText(sourceTabs_->indexOf(source_), on ? QStringLiteral("HLSL (из графа)") : QStringLiteral("HLSL"));
+    source_->setReadOnly(on || !sourceLoaded_);
+    graphAction_->setText(on ? QStringLiteral("Перейти на код") : QStringLiteral("Нодовый граф"));
+    if (loaded_) RebuildSettings();
+}
+
+void MaterialEditorWindow::BackupGraphFiles()
+{
+    if (graphBackup_.active) return;
+    QFile shader(shaderFile_), graph(GraphFile());
+    graphBackup_.hlsl = shader.open(QIODevice::ReadOnly) ? shader.readAll() : QByteArray();
+    graphBackup_.hadGraph = graph.open(QIODevice::ReadOnly);
+    graphBackup_.graph = graphBackup_.hadGraph ? graph.readAll() : QByteArray();
+    graphBackup_.active = true;
+}
+
+bool MaterialEditorWindow::RestoreGraphFiles()
+{
+    if (!graphBackup_.active) return false;
+    graphApply_->stop();
+    graphBackup_.active = false;
+    QSaveFile shader(shaderFile_);
+    if (shader.open(QIODevice::WriteOnly)) { shader.write(graphBackup_.hlsl); shader.commit(); }
+    if (graphBackup_.hadGraph)
+    {
+        QSaveFile graph(GraphFile());
+        if (graph.open(QIODevice::WriteOnly)) { graph.write(graphBackup_.graph); graph.commit(); }
+    }
+    else
+        QFile::remove(GraphFile());
+    return true;
+}
+
+bool MaterialEditorWindow::WriteGraphFile()
+{
+    if (!graphMode_) return true;
+    QSaveFile file(GraphFile());
+    if (!file.open(QIODevice::WriteOnly) || file.write(graph_->Model().ExportToJson().toUtf8()) < 0 || !file.commit())
+    {
+        QMessageBox::warning(this, QStringLiteral("Граф не сохранён"),
+                             QStringLiteral("Не удалось записать %1: %2").arg(GraphFile(), file.errorString()));
+        return false;
+    }
+    return true;
+}
+
+void MaterialEditorWindow::EnableGraph()
+{
+    if (!loaded_ || graphMode_ || !sourceLoaded_ || saving_) return;
+    BackupGraphFiles();
+    EditorCore::MaterialGraphModel model;
+    model.SetupDefaultMasterNode();
+    graph_->SetModel(model);
+    SetGraphMode(true);
+    ApplyGraph();
+}
+
+void MaterialEditorWindow::DisableGraph()
+{
+    if (!graphMode_ || saving_) return;
+    ApplyGraph(); // HLSL должен соответствовать последнему виду графа
+    BackupGraphFiles();
+    QFile::remove(GraphFile());
+    SetGraphMode(false);
+    UpdateTitle();
+}
+
+void MaterialEditorWindow::ApplyGraph()
+{
+    graphApply_->stop();
+    if (!graphMode_ || !loaded_) return;
+    BackupGraphFiles();
+    if (!WriteGraphFile()) return;
+    const QString hlsl = EditorCore::HlslGraphCompiler::CompileGraphToHlsl(graph_->Model());
+    if (hlsl != source_->toPlainText())
+    {
+        ReplaceSource(hlsl);
+        if (!WriteSource()) return;
+        const QByteArray shader = shaderFile_.toUtf8();
+        EngineThenRead([shader](const EngineEditSessionApi& api)
+        {
+            api.reloadShaderFile(api.context, shader.constData());
+            return QString();
+        }, true);
+    }
+    UpdateTitle();
+}
+
+void MaterialEditorWindow::SetParameterByName(const QString& name, const std::array<float, 4>& value)
+{
+    const auto parameter = std::find_if(state_.parameters.begin(), state_.parameters.end(),
+                                        [&](const MaterialEditorState::Parameter& p) { return p.name == name; });
+    if (parameter == state_.parameters.end())
+    {
+        // Параметр ещё не скомпилирован: значение уйдёт в HLSL как значение по умолчанию.
+        if (graph_->structureChanged) graph_->structureChanged();
+        return;
+    }
+    BackupGraphFiles();
+    WriteGraphFile();
+    edited_ = true;
+    UpdateTitle();
+    const QByteArray material = material_.toUtf8(), parameterName = name.toUtf8();
+    EngineThenRead([material, parameterName, value](const EngineEditSessionApi& api)
+    {
+        return StatusText(api.setMaterialParameter(api.context, material.constData(), parameterName.constData(), value.data()), nullptr);
+    }, true);
 }
 
 void MaterialEditorWindow::RebuildSettings()
@@ -578,14 +770,20 @@ void MaterialEditorWindow::RebuildSettings()
         row->remove = [this, name] { QTimer::singleShot(0, this, [this, name] { RequestRemoveTexture(name); }); };
         row->clear = [this, name] { AssignTexture(name, {}); };
         row->dropped = [this, name](const QString& file) { AssignTexture(name, file); };
+        // У материала из графа HLSL правит граф: слоты добавляются и удаляются нодами.
+        if (auto* remove = row->findChild<QPushButton*>(QStringLiteral("MaterialTextureRemove_%1").arg(name)))
+            remove->setVisible(!graphMode_);
         parameterForm_->addRow(name, row);
     }
 
-    auto* add = new QPushButton(QStringLiteral("Добавить текстуру…"), parameters_);
-    add->setObjectName(QStringLiteral("MaterialAddTextureButton"));
-    add->setEnabled(!source_->isReadOnly());
-    connect(add, &QPushButton::clicked, this, [this] { QTimer::singleShot(0, this, [this] { RequestAddTexture(); }); });
-    parameterForm_->addRow(add);
+    if (!graphMode_)
+    {
+        auto* add = new QPushButton(QStringLiteral("Добавить текстуру…"), parameters_);
+        add->setObjectName(QStringLiteral("MaterialAddTextureButton"));
+        add->setEnabled(!source_->isReadOnly());
+        connect(add, &QPushButton::clicked, this, [this] { QTimer::singleShot(0, this, [this] { RequestAddTexture(); }); });
+        parameterForm_->addRow(add);
+    }
 
     for (int index = 0; index < state_.parameters.size(); ++index)
     {
@@ -721,7 +919,7 @@ void MaterialEditorWindow::UpdateTitle()
 
 bool MaterialEditorWindow::HasUnsavedChanges() const
 {
-    return edited_ || state_.modified || (source_ && source_->document()->isModified());
+    return edited_ || state_.modified || graphBackup_.active || (source_ && source_->document()->isModified());
 }
 
 void MaterialEditorWindow::SendRenderState()
@@ -744,6 +942,13 @@ void MaterialEditorWindow::SendRenderState()
 
 void MaterialEditorWindow::SetParameter(int index, const std::array<float, 4>& value)
 {
+    if (graphMode_)
+    {
+        // Значение в ноде графа: при следующей сборке оно станет значением по умолчанию в HLSL.
+        BackupGraphFiles();
+        graph_->SetParameterValue(state_.parameters[index].name, value);
+        WriteGraphFile();
+    }
     edited_ = true;
     UpdateTitle();
     const QByteArray material = material_.toUtf8(), name = state_.parameters[index].name.toUtf8();
@@ -766,14 +971,60 @@ QString MaterialEditorWindow::VirtualPath(const QString& file) const
 void MaterialEditorWindow::AssignTexture(const QString& slot, const QString& file)
 {
     const QString texture = file.isEmpty() ? QString() : VirtualPath(file);
-    edited_ = true;
+    const bool outside = !file.isEmpty() && texture.isEmpty();
+    const bool compiled = std::any_of(state_.textures.begin(), state_.textures.end(),
+                                      [&](const MaterialEditorState::Texture& t) { return t.name == slot; });
+    if (graphMode_)
+    {
+        BackupGraphFiles();
+        if (!outside)
+        {
+            graph_->SetNodeTexture(slot, texture);
+            WriteGraphFile();
+        }
+        if (!compiled && !outside)
+        {
+            SyncGraphTextures();
+            statusBar()->showMessage(QStringLiteral("Текстура %1 запомнена в графе и назначится, когда нода будет подключена к выходу").arg(slot));
+            UpdateTitle();
+            return;
+        }
+    }
+    // У материала из графа неподключённая нода не имеет слота: файл только импортируется и запоминается в ноде.
+    const bool apply = compiled || !graphMode_;
+    if (apply) edited_ = true;
     UpdateTitle();
     const QByteArray material = material_.toUtf8(), name = slot.toUtf8(), path = texture.toUtf8(),
-                     outside = !file.isEmpty() && texture.isEmpty() ? file.toUtf8() : QByteArray();
-    EngineThenRead([material, name, path, outside](const EngineEditSessionApi& api)
+                     source = outside ? file.toUtf8() : QByteArray();
+    auto imported = std::make_shared<QByteArray>();
+    EngineThenRead([material, name, path, source, apply, imported](const EngineEditSessionApi& api)
     {
-        return SetTexture(api, material, name, path, outside);
-    }, true);
+        return SetTexture(api, material, name, path, source, apply, imported.get());
+    }, true, [this, slot, imported](bool)
+    {
+        if (!graphMode_ || imported->isEmpty()) return;
+        graph_->SetNodeTexture(slot, QString::fromUtf8(*imported));
+        WriteGraphFile();
+        SyncGraphTextures();
+    });
+}
+
+void MaterialEditorWindow::SyncGraphTextures()
+{
+    const QHash<QString, QString> stored = graph_->NodeTextures();
+    QHash<QString, QString> files;
+    for (auto it = stored.begin(); it != stored.end(); ++it) files.insert(it.key(), PhysicalPath(it.value()));
+    for (const auto& texture : state_.textures)
+    {
+        if (!texture.path.isEmpty()) files.insert(texture.name, PhysicalPath(texture.path));
+        // Текстуру выбрали, пока нода не была подключена: слот появился — назначаем, один раз на файл.
+        const QString wanted = stored.value(texture.name);
+        const QString attempt = texture.name + QLatin1Char('|') + wanted;
+        if (wanted.isEmpty() || wanted.compare(texture.path, Qt::CaseInsensitive) == 0 || autoAssigned_.contains(attempt)) continue;
+        autoAssigned_.insert(attempt);
+        QTimer::singleShot(0, this, [this, name = texture.name, wanted] { AssignTexture(name, wanted); });
+    }
+    graph_->SetTextures(files);
 }
 
 void MaterialEditorWindow::PickTexture(const QString& slot)
@@ -781,6 +1032,7 @@ void MaterialEditorWindow::PickTexture(const QString& slot)
     QString current;
     for (const auto& texture : state_.textures)
         if (texture.name == slot) current = PhysicalPath(texture.path);
+    if (current.isEmpty() && graphMode_) current = PhysicalPath(graph_->NodeTextures().value(slot));
     MaterialTexturePicker picker(QString::fromUtf8(host_->host().contentRoot), current, slot, this);
     if (picker.exec() == QDialog::Accepted) AssignTexture(slot, picker.Selected());
 }
@@ -882,6 +1134,11 @@ bool MaterialEditorWindow::WriteSource()
 bool MaterialEditorWindow::Save(std::function<void(bool)> completion)
 {
     if (!loaded_ || saving_) return false;
+    if (graphMode_ && (graphApply_->isActive() || graphBackup_.active))
+    {
+        ApplyGraph(); // перекомпиляция встаёт в очередь раньше сохранения .mat
+        if (!WriteGraphFile()) return false;
+    }
     const bool sourceChanged = source_->document()->isModified();
     if (sourceChanged && !WriteSource()) return false;
     saving_ = true;
@@ -900,6 +1157,8 @@ bool MaterialEditorWindow::Save(std::function<void(bool)> completion)
     }, sourceChanged, [this, completion](bool saved) {
         saving_ = false;
         setEnabled(true);
+        if (saved) graphBackup_.active = false; // граф и HLSL на диске теперь сохранённые
+        UpdateTitle();
         if (completion) completion(saved);
     });
     statusBar()->showMessage(QStringLiteral("Сохранение…"));
@@ -912,11 +1171,14 @@ void MaterialEditorWindow::Revert()
     if (QMessageBox::question(this, QStringLiteral("Откатить материал"),
                               QStringLiteral("Отменить все несохранённые изменения материала и HLSL?")) != QMessageBox::Yes)
         return;
+    const bool restored = RestoreGraphFiles();
     LoadShaderText();
+    LoadGraph();
     edited_ = false;
-    const QByteArray material = material_.toUtf8();
-    EngineThenRead([material](const EngineEditSessionApi& api)
+    const QByteArray material = material_.toUtf8(), shader = shaderFile_.toUtf8();
+    EngineThenRead([material, shader, restored](const EngineEditSessionApi& api)
     {
+        if (restored) api.reloadShaderFile(api.context, shader.constData());
         char error[4096]{};
         return StatusText(api.revertMaterial(api.context, material.constData(), error, sizeof(error)), error);
     }, true);
@@ -950,14 +1212,17 @@ void MaterialEditorWindow::Shutdown()
 {
     if (shuttingDown_) return;
     shuttingDown_ = true;
-    const bool revert = discard_ && (edited_ || state_.modified);
+    graphApply_->stop();
+    const bool restored = discard_ && RestoreGraphFiles();
+    const bool revert = discard_ && (edited_ || state_.modified || restored);
     hide(); // нативное окно живо, пока движок не отпустит превью
     QPointer<MaterialEditorWindow> self(this);
     EditorQtHost* host = host_;
-    const QByteArray material = material_.toUtf8();
+    const QByteArray material = material_.toUtf8(), shader = shaderFile_.toUtf8();
     auto engine = engine_;
-    Engine([self, host, material, engine, revert](const EngineEditSessionApi& api)
+    Engine([self, host, material, shader, engine, revert, restored](const EngineEditSessionApi& api)
     {
+        if (restored) api.reloadShaderFile(api.context, shader.constData());
         if (revert) api.revertMaterial(api.context, material.constData(), nullptr, 0);
         if (engine->preview) api.detachMaterialPreview(api.context, engine->preview);
         engine->preview = 0;

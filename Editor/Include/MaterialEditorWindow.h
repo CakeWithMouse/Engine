@@ -2,6 +2,7 @@
 
 #include <QMainWindow>
 #include <QString>
+#include <QSet>
 #include <QVector>
 #include <array>
 #include <memory>
@@ -14,6 +15,10 @@ class QDoubleSpinBox;
 class QFormLayout;
 class QListWidget;
 class QWidget;
+class QTabWidget;
+class QTimer;
+class QAction;
+class MaterialGraphWidget;
 class MaterialPreviewWidget;
 class MaterialSourceEditor;
 
@@ -68,6 +73,15 @@ public:
     void AddTextureSlot(const QString& name, int role, const QString& file);
     void RemoveTextureSlot(const QString& name);
 
+    // Нодовый граф: файл <имя>.mat.graph.json рядом с .mat. Пока он есть, HLSL генерируется из графа
+    // и руками не правится. Граф и HLSL пишутся на диск сразу (иначе их не скомпилировать), а прежние
+    // файлы хранятся до «Сохранить»: «Откатить» и закрытие без сохранения возвращают их.
+    bool HasGraph() const { return graphMode_; }
+    MaterialGraphWidget* Graph() const { return graph_; }
+    void EnableGraph();  // HLSL заменяется кодом из нового графа
+    void DisableGraph(); // граф удаляется, текущий HLSL остаётся и правится руками
+    void ApplyGraph();   // пересобрать HLSL из графа сразу, не дожидаясь паузы в правках
+
 protected:
     void closeEvent(QCloseEvent* event) override;
 
@@ -101,6 +115,31 @@ private:
     QString PhysicalPath(const QString& virtualPath) const;
     // /Game путь файла; пустой, если файл вне Content.
     QString VirtualPath(const QString& file) const;
+
+    QString GraphFile() const;
+    void LoadGraph();
+    void SetGraphMode(bool on);
+    bool WriteGraphFile();
+    void BackupGraphFiles();
+    // false: резерва не было, файлы не трогались.
+    bool RestoreGraphFiles();
+    void SetParameterByName(const QString& name, const std::array<float, 4>& value);
+    // Миниатюры нод и назначение текстур, выбранных до того, как у материала появился слот.
+    void SyncGraphTextures();
+    QSet<QString> autoAssigned_; // "слот|путь": каждое такое назначение пробуется один раз
+
+    struct GraphBackup
+    {
+        bool active = false, hadGraph = false;
+        QByteArray hlsl, graph;
+    };
+    GraphBackup graphBackup_;
+    bool graphMode_ = false, sourceLoaded_ = false;
+    MaterialGraphWidget* graph_ = nullptr;
+    QWidget* graphPage_ = nullptr;
+    QTabWidget* sourceTabs_ = nullptr;
+    QAction* graphAction_ = nullptr;
+    QTimer* graphApply_ = nullptr;
 
     EditorQtHost* host_ = nullptr;
     QString material_, shaderFile_;
