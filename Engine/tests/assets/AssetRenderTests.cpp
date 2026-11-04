@@ -100,7 +100,8 @@ void RunAssetRenderTests(HWND hwnd, const std::filesystem::path& engineContent,
     Check(added.result == SceneResult::Ok && game.RenderViewportFrame(0), "draw imported mesh");
     Check(game.GetScene().FindComponent(added.id)->HasTexture() && game.greenPixels > 100,
         "static model shader renders real textured pixels without bones");
-    for (const auto* imported : {"auto-external/auto-external.fbx", "auto-embedded/auto-embedded.fbx", "blend-packed/blend-packed.glb",
+    Check(game.DumpFrame((content.parent_path()/"imported-model.bmp").u8string()), "save imported model render evidence");
+    for (const auto* imported : {"auto-external/auto-external.fbx", "auto-embedded/auto-embedded.fbx", "blend-external/blend-external.glb", "blend-packed/blend-packed.glb",
                                 "blender-external/blender-external.fbx", "blender-packed/blender-packed.fbx"})
     {
         if (!std::filesystem::exists(content / "Models" / imported)) continue;
@@ -115,6 +116,9 @@ void RunAssetRenderTests(HWND hwnd, const std::filesystem::path& engineContent,
         Check(added.result == SceneResult::Ok && game.RenderViewportFrame(0), "render automatic material");
         Check(game.greenPixels > 100 && game.magentaPixels == 0,
               "automatic FBX/BLEND material renders real green pixels after project move");
+        if (std::filesystem::path(imported).extension() == ".glb")
+            Check(game.DumpFrame((content.parent_path() / (std::filesystem::path(imported).stem().string()+".bmp")).u8string()),
+                  "save BLEND render evidence after project move");
     }
 #endif
 }

@@ -1,0 +1,788 @@
+Project: TiredBomber
+Mode: game
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Game/build/x64/Release/Runtime/EngineContent'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Content'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+GameCreate
+GameSceneLoaded
+GameStart
+TiredBomber
+[TiredBomber] subsystem initialized
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsService] first read via module: /Engine/Shaders/RotatedFigure.hlsl
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[TiredBomber] subsystem initialized
+[TiredBomber] subsystem scene ready: SessionProbe.First
+[TiredBomber] subsystem scene closing: SessionProbe.First
+[TiredBomber] subsystem scene ready: SessionProbe.Second
+[TiredBomberProbe] session scene switch same=1 ticks=1 ready=2 closed=1 persisted=1
+[TiredBomber] subsystem scene closing: SessionProbe.Second
+[TiredBomber] settings vsync=0 aa=1 mode=0 adapter=NVIDIA GeForce RTX 4070 Laptop GPU
+[TiredBomberProbe] host VFS scene resolved=1 readable=1 bytes=1692
+[TiredBomberProbe] skeletal import/load failed; see loader diagnostic above
+[TiredBomber] mesh check usable=0 triangles=12 configured=1 lowLOD=12 error=0
+asset-check procedural cube (default unit profile): 12 triangles, 24 vertices, size 1.00 x 1.00 x 1.00 m, pivot y -0.50, uv yes, NOT USABLE
+  problem: Pivot is not on the ground: the lowest point is at y = -0.50 m. Move the model so that its tracks or wheels touch y = 0.
+[TiredBomber] trace filter channel=1 -> ground
+[TiredBomber] trace filter channel=2 -> unit
+[TiredBomber] scene ready: 4 moving units, orthographic XZ camera, W/A/S/D controller, B drops a bomb
+[TiredBomber] subsystem initialized
+[TiredBomber] subsystem scene ready: Main
+GameUpdate
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+auto-lod mesh LOD1: 12 -> 12 triangles (target 6, error 0, silhouette drift 0%)
+auto-lod mesh LOD2: 12 -> 12 triangles (target 3, error 0, silhouette drift 0%)
+[TiredBomber] GetSubsystem after startup=available
+[TiredBomber] marker instances drawn=0 total=13 LODs=3 lod0=0 lod1=0 lod2=0
+[Info] FXAA pipeline and shaders compiled successfully
+frame-dump E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Content/tired-bomber-frame.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] marker instances drawn=11 total=13 LODs=3 lod0=0 lod1=0 lod2=11
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomberProbe] live settings phase 1: Deferred, AA=0, VSync=1
+[TiredBomber] bomb released at t=1.01667s
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+frame-dump E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Content/tired-bomber-live-deferred.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] HIT unit id=4 t=1.95s trace=Hit queries=58 triangles=28
+[TiredBomber] GPU spark burst started (256, depth collision, sorting)
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+frame-dump E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Content/tired-bomber-hit-1.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomberProbe] live settings phase 2: Custom, AA=1, VSync=0
+frame-dump E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Content/tired-bomber-live-custom.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+[TiredBomber] bomb released at t=3.83333s
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdates=240
+GameStop
+GameDestroy
+[TiredBomber] subsystem scene closing: Main
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped

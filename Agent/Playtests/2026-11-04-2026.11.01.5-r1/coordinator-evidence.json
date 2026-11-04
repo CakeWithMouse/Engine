@@ -1,0 +1,661 @@
+[
+  {
+    "role": 1,
+    "feature": "camera-perspective",
+    "status": "passed",
+    "action": "Observe standalone city over time",
+    "actual": "Perspective camera shows quarter, moving red car and child wheels, sun shadows; scene layout corrected in project",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png",
+      "Engine/build/playtests/20261104-r1/calm-city/build-camera-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "external",
+    "status": "passed",
+    "action": "Observe standalone city over time",
+    "actual": "Perspective camera shows quarter, moving red car and child wheels, sun shadows; scene layout corrected in project",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png",
+      "Engine/build/playtests/20261104-r1/calm-city/build-camera-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "project-game",
+    "status": "passed",
+    "action": "Observe standalone city over time",
+    "actual": "Perspective camera shows quarter, moving red car and child wheels, sun shadows; scene layout corrected in project",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png",
+      "Engine/build/playtests/20261104-r1/calm-city/build-camera-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-transform",
+    "status": "passed",
+    "action": "Observe standalone city over time",
+    "actual": "Perspective camera shows quarter, moving red car and child wheels, sun shadows; scene layout corrected in project",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png",
+      "Engine/build/playtests/20261104-r1/calm-city/build-camera-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "shadows",
+    "status": "passed",
+    "action": "Observe standalone city over time",
+    "actual": "Perspective camera shows quarter, moving red car and child wheels, sun shadows; scene layout corrected in project",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png",
+      "Engine/build/playtests/20261104-r1/calm-city/build-camera-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "light-sun",
+    "status": "passed",
+    "action": "Observe standalone city over time",
+    "actual": "Perspective camera shows quarter, moving red car and child wheels, sun shadows; scene layout corrected in project",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png",
+      "Engine/build/playtests/20261104-r1/calm-city/build-camera-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-hierarchy",
+    "status": "passed",
+    "action": "Observe standalone city over time",
+    "actual": "Perspective camera shows quarter, moving red car and child wheels, sun shadows; scene layout corrected in project",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png",
+      "Engine/build/playtests/20261104-r1/calm-city/build-camera-02.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-undo",
+    "status": "passed",
+    "action": "Duplicate Cube, Undo, Redo, Undo, CtrlS",
+    "actual": "Object count 4в†’5в†’4в†’5в†’4; original Main saved",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-duplicated.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-undo.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-redo.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-saved.png"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-clone",
+    "status": "passed",
+    "action": "Duplicate Cube, Undo, Redo, Undo, CtrlS",
+    "actual": "Object count 4в†’5в†’4в†’5в†’4; original Main saved",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-duplicated.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-undo.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-redo.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-saved.png"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-save-load",
+    "status": "passed",
+    "action": "Duplicate Cube, Undo, Redo, Undo, CtrlS",
+    "actual": "Object count 4в†’5в†’4в†’5в†’4; original Main saved",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-duplicated.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-undo.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-redo.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-saved.png"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-properties",
+    "status": "passed",
+    "action": "Palette Р”РѕРј; inspector Р’С‹СЃРѕС‚Р°=2.5 Enter",
+    "actual": "Scale Y and bounds changed; temporary unsaved edit discarded during project-path restoration",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-height.png"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "hud-editor",
+    "status": "partial",
+    "action": "Open CityHud.ui, edit status text, Save",
+    "actual": "Save while field editing ignored text BUG003; Enter+Save persisted Cyrillic XML",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-ui-editor-cyrillic.png",
+      "Engine/build/playtests/20261104-r1/curious-city/Project/Content/UI/CityHud.ui"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "hud-events",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "input",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "trace-screen",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "trace-debug",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "trace-filter",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "hud-project",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "hud-elements",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "play",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "time",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "camera-perspective",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "light-sun",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "shadows",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "sky",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "play",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hud-events",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "input",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hud-project",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hud-elements",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "trace-world",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hud-editor",
+    "status": "passed",
+    "action": "UI Editor set throw label Р‘СЂРѕСЃРёС‚СЊ [T], Enter+Save",
+    "actual": "Cyrillic label rendered and persisted",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-ui-editor.png",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Content/UI/Hud.ui"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hud-layout",
+    "status": "passed",
+    "action": "UI Editor set throw label Р‘СЂРѕСЃРёС‚СЊ [T], Enter+Save",
+    "actual": "Cyrillic label rendered and persisted",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-ui-editor.png",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Content/UI/Hud.ui"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hot-reload",
+    "status": "passed",
+    "action": "CtrlAltR after engine exception fixes; user-code failure then repair+CtrlAltR",
+    "actual": "C2665 kept previous DLL; corrected code activated4c74a... and loaded same window. Initial failures BUG004/005 retained",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-ui-build-user-error.txt",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hotreload-fixed.txt",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hotreload-fixed.png",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Project.code.json"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "build-activate",
+    "status": "passed",
+    "action": "CtrlAltR after engine exception fixes; user-code failure then repair+CtrlAltR",
+    "actual": "C2665 kept previous DLL; corrected code activated4c74a... and loaded same window. Initial failures BUG004/005 retained",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-ui-build-user-error.txt",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hotreload-fixed.txt",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hotreload-fixed.png",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Project.code.json"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "failed-build-rollback",
+    "status": "passed",
+    "action": "CtrlAltR after engine exception fixes; user-code failure then repair+CtrlAltR",
+    "actual": "C2665 kept previous DLL; corrected code activated4c74a... and loaded same window. Initial failures BUG004/005 retained",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-ui-build-user-error.txt",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hotreload-fixed.txt",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hotreload-fixed.png",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Project.code.json"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "skeletal",
+    "status": "blocked",
+    "action": "Authoring lab import CesiumMan.glb",
+    "actual": "Assimp not enabled, cannot instantiate animated model",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/authoring-probe.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "model-blend",
+    "status": "blocked",
+    "action": "Attempt model imports OBJ/GLB/FBX for material blend workflow",
+    "actual": "All import attempts reject Assimp not enabled; model material blend cannot proceed",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "model-blend",
+    "status": "blocked",
+    "action": "Attempt model imports OBJ/GLB/FBX for material blend workflow",
+    "actual": "All import attempts reject Assimp not enabled; model material blend cannot proceed",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/authoring-probe.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "create-cpp",
+    "status": "passed",
+    "action": "Launcher Create Project checkbox C++",
+    "actual": "Original GUI failed Get-FileHash; fixed launcher --enable-code retry exit0 module076dd01, previous source preserved",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/launcher-create-cpp-error.txt",
+      "Engine/build/playtests/20261104-r1/curious-city/direct-cpp-original-build-error.log",
+      "Engine/build/playtests/20261104-r1/curious-city/DirectCpp/CodeBuild.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "create-cpp",
+    "status": "passed",
+    "action": "Launcher Create Project checkbox C++",
+    "actual": "Fresh GUI checked C++ creation compiled activated25926d689385464580ec0aeffcaa0c67 and opened visible editor",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/DirectCpp/CodeBuild.log",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-direct-cpp-created.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-undo",
+    "status": "passed",
+    "action": "Move cube, CtrlZ, Edit Redo",
+    "actual": "Cube x0 -> -1.638 ->0 -> -1.638; observed inspector and viewport",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-undo-position.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-redo-position.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-snapping",
+    "status": "partial",
+    "action": "Enable snap0.5, center drag then X-axis drag",
+    "actual": "Center delta-1.638 ignores snap; axis delta-1.5 quantized; BUG008",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-snap-center-nonquantized.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-snap-axis.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-recovery",
+    "status": "passed",
+    "action": "Unsaved cube edits, wait recovery autosave, controlled termination PID17396, reopen, Yes",
+    "actual": "Recovered x=-3.1378729 while original Main.scene remains x=0; dirty new scene; discarded test copy after verification",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-recovery-prompt.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-recovered-position.png"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-snapping",
+    "status": "passed",
+    "action": "Native Editor workflow",
+    "actual": "West block x-5 -> -7.5 using X gizmo, snap0.5",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-snap-axis.png"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "hot-reload",
+    "status": "passed",
+    "action": "Native Editor workflow",
+    "actual": "CtrlAltR cached reload then source comment forces new8d5c3a DLL compiled/activated; same window unsaved West block x-7.5 preserved; no crash",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/ui-final-workflows.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/8d5c3a289a5e4abb95d34a4f513dd1eb/build.log",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-new-dll-gizmo-lines-only.png"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "particles",
+    "status": "passed",
+    "action": "Review runtime frame at first actual hit",
+    "actual": "HUD hits1 misses0; orange/yellow particle burst visible beside running units",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-hit-1.bmp"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-recovery",
+    "status": "passed",
+    "action": "Unsaved West block after new DLL HotReload; autosave; controlled crash; reopen Yes",
+    "actual": "Recovered project-defined CalmCity.Building at x-7.5; original file x-5; metadata new DLL identity",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-recovery-prompt.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-recovered-position.png",
+      "Engine/build/playtests/20261104-r1/calm-city/ui-recovery.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "controller",
+    "status": "partial",
+    "action": "Standalone game focus, native W and D short key presses",
+    "actual": "Character present; coordinates unchanged after short taps. Tool has no held-key API; continuous held movement remains unverified, not diagnosed as engine bug.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/controller-input-observation.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "controller",
+    "status": "partial",
+    "action": "Standalone game focus, native W and D short key presses",
+    "actual": "Character present; coordinates unchanged after short taps. Tool has no held-key API; continuous held movement remains unverified, not diagnosed as engine bug.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/tired-bomber/controller-ui.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "character",
+    "status": "passed",
+    "action": "Player-controlled Character with StandardController in actual game",
+    "actual": "Character white square visible, position(-10,0.5,5) logged; movement separately partial",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/tired-bomber/controller-ui.log",
+      "Engine/build/playtests/20261104-r1/ui-evidence/bomber-controller-input-attempt.png"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "input",
+    "status": "passed",
+    "action": "Native B in focused game",
+    "actual": "input B: request bomb drop appears in log; additional bomb, repeated hit particles visible",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/tired-bomber/controller-ui.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-editor",
+    "status": "passed",
+    "action": "Inspector Edit material in independent AuthoringLab copy",
+    "actual": "Native material sphere preview, lit->unlit visible, Save stores lighting=unlit, toggle lit then Revert Yes restores saved unlit and removes dirty star",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-material-reverted.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-editor",
+    "status": "passed",
+    "action": "Inspector Edit material in independent AuthoringLab copy",
+    "actual": "Native material sphere preview, Tint.x spinner0.9->0.95, Save removes star and .mat confirms0.95; shader compiled",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-material-saved.png"
+    ]
+  }
+]

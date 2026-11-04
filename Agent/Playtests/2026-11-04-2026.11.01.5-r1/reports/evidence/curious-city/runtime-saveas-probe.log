@@ -1,0 +1,11 @@
+event=scene_document_saveas_reopen objects=3
+event=template_cube_removed elapsed=0.0s balance=500 houses=0
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_1
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_2
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_3
+event=city_hud_configured elapsed=0.0s balance=200 houses=3
+event=city_started elapsed=0.0s balance=200 houses=3
+event=hud_attached elapsed=0.0s balance=200 houses=3
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.000000
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.350000
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.700000

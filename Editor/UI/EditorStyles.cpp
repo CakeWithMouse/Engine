@@ -357,7 +357,7 @@ QFrame#CollapsibleCard QComboBox {
     font-size: 11px;
     color: %1;
 }
-QFrame#CollapsibleCard QPushButton:not(#CardHeaderBtn) {
+QFrame#CollapsibleCard QWidget#CardContent QPushButton {
     min-height: 24px;
     max-height: 24px;
     padding: 3px 8px;
@@ -455,10 +455,12 @@ QDoubleSpinBox[axisCell="true"], QSpinBox[axisCell="true"] {
     border-bottom-left-radius: 0px;
 }
 QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {
+    image: url("%4");
     width: 8px;
     height: 8px;
 }
 QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {
+    image: url("%5");
     width: 8px;
     height: 8px;
 }

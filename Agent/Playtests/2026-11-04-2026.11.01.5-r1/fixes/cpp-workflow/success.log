@@ -1,0 +1,34 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(4,4,4,4), PM_ToolBarFrameWidth=2, PM_ItemMargin=2, PM_ItemSpacing=1
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 3, handler = 00007FFAD6D5FC50
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 640x480
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "buildSucceeded": true,
+    "console": "[18:54:09.091] C++: Build\n[18:54:13.914]   ComponentGenerator: 3 component(s), Project\n\n[18:54:13.914]   ProjectComponent.cpp\n\n[18:54:13.914]      Создается библиотека E:\\Engine\\Agent\\Playtests\\2026-11-04-2026.11.01.5-r1\\fixes\\cpp-workflow\\Project\\Binaries\\Release\\ed4dcab75c1e4292bbc8ba1ec1de5070\\Game.lib и объект E:\\Engine\\Agent\\Playtests\\2026-11-04-2026.11.01.5-r1\\fixes\\cpp-workflow\\Project\\Binaries\\Release\\ed4dcab75c1e4292bbc8ba1ec1de5070\\Game.exp\n\n[18:54:13.914]   Game.vcxproj -> E:\\Engine\\Agent\\Playtests\\2026-11-04-2026.11.01.5-r1\\fixes\\cpp-workflow\\Project\\Binaries\\Release\\ed4dcab75c1e4292bbc8ba1ec1de5070\\Game.dll\n\n[18:54:13.914] Full build log: E:\\Engine\\Agent\\Playtests\\2026-11-04-2026.11.01.5-r1\\fixes\\cpp-workflow\\Project\\Binaries\\Release\\ed4dcab75c1e4292bbc8ba1ec1de5070\\build.log\n\n[18:54:15.731] Build validated and activated. Use Hot Reload in the editor, or reopen the project.\n\n[18:54:16.022] Hot reload: DLL заменена. Сцена, выбор и камера сохранены; история отмены очищена.",
+    "dialogs": [
+    ],
+    "ok": true,
+    "replaced": true,
+    "windowEnabled": true
+}

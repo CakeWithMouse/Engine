@@ -17,6 +17,7 @@
 #include <directxmath.h>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/Light/DirectionalLightComponent.h>
@@ -2326,7 +2327,7 @@ namespace
     bool WriteGrayscaleBmp(const std::string& path, const std::vector<uint8_t>& gray, int width, int height)
     {
         FILE* file = nullptr;
-        if (fopen_s(&file, path.c_str(), "wb") != 0 || file == nullptr)
+        if (_wfopen_s(&file, std::filesystem::u8path(path).c_str(), L"wb") != 0 || file == nullptr)
         {
             return false;
         }
@@ -2370,7 +2371,7 @@ namespace
     bool WriteColorBmp(const std::string& path, const uint8_t* pixels, size_t rowPitch, int width, int height)
     {
         FILE* file = nullptr;
-        if (fopen_s(&file, path.c_str(), "wb") != 0 || file == nullptr)
+        if (_wfopen_s(&file, std::filesystem::u8path(path).c_str(), L"wb") != 0 || file == nullptr)
         {
             return false;
         }

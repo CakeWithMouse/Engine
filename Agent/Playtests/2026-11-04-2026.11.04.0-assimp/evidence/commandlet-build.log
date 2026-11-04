@@ -1,0 +1,73 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  pch.cpp
+  EngineCommandlets.cpp
+  moc_Logger.cpp
+  moc_CommandRegistry.cpp
+  moc_FileService.cpp
+  UIElement.cpp
+  UIMarkup.cpp
+  FontAtlas.cpp
+  moc_MainWindow.cpp
+  moc_ViewportWidget.cpp
+  moc_ObjectInspectorPanel.cpp
+  moc_SceneObjectsPanel.cpp
+  moc_MaterialEditorWindow.cpp
+  moc_MainToolBar.cpp
+  Module.cpp
+  QtHost.cpp
+  EditorHistory.cpp
+  ViewportCommandHandler.cpp
+  AssetCommandHandler.cpp
+  SceneCommandHandler.cpp
+  EditorApp.cpp
+  EditorTheme.cpp
+  EditorStyles.cpp
+  DockLayoutManager.cpp
+  MainToolBar.cpp
+  IconProvider.cpp
+  PlaySettingsDialog.cpp
+  ExternalGameRunner.cpp
+  MainWindow.cpp
+  AssetTools.cpp
+  FileBrowser.cpp
+  ViewportWidget.cpp
+  ViewportWidget_Input.cpp
+  ViewportOverlayHelper.cpp
+  ObjectInspectorPanel.cpp
+  ProjectProperties.cpp
+  SceneObjectsPanel.cpp
+  MaterialEditorWindow.cpp
+  Logger.cpp
+  CommandRegistry.cpp
+  FileService.cpp
+  EditorLocale.cpp
+  GizmoMath.cpp
+  ViewportOverlay.cpp
+  GizmoGeometry.cpp
+  GizmoTriangles.cpp
+  EditorSettings.cpp
+  SettingsService.cpp
+  AssetOps.cpp
+  HlslGraphCompiler.cpp
+  MaterialGraphModel.cpp
+  SceneFile.cpp
+  Terminal.cpp
+  UIEditorWindow.cpp
+  HudTools.cpp
+  CodeTools.cpp
+E:\Engine\Editor\Source\MainWindow.cpp(321,32): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(329,33): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(333,31): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(337,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(348,37): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(368,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(369,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(370,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineCommandlets.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineCommandlets.exp
+  Создание кода
+  Создание кода завершено
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\EngineCommandlets.exe
+

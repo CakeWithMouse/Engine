@@ -1,0 +1,15 @@
+WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x0000022BC85E05C0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')': /simple/pyyaml/
+WARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x0000022BC7A29D30>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')': /simple/pyyaml/
+WARNING: Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x0000022BC86DE6F0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')': /simple/pyyaml/
+WARNING: Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x0000022BC86DE900>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')': /simple/pyyaml/
+WARNING: Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x0000022BC86DEAE0>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')': /simple/pyyaml/
+ERROR: Could not find a version that satisfies the requirement PyYAML (from versions: none)
+ERROR: No matching distribution found for PyYAML
+WARNING: Failed to remove contents in a temporary directory 'C:\Users\serge\AppData\Local\Packages\sandbox.{db13e145-693f-4e95-9696-912e4d9710df}\AC\Temp\pip-build-tracker-jod1gy10'.
+You can safely remove it manually.
+WARNING: Failed to remove contents in a temporary directory 'C:\Users\serge\AppData\Local\Packages\sandbox.{db13e145-693f-4e95-9696-912e4d9710df}\AC\Temp\pip-target-r24v04ip'.
+You can safely remove it manually.
+WARNING: Failed to remove contents in a temporary directory 'C:\Users\serge\AppData\Local\Packages\sandbox.{db13e145-693f-4e95-9696-912e4d9710df}\AC\Temp\pip-ephem-wheel-cache-zoie0fkc'.
+You can safely remove it manually.
+WARNING: Failed to remove contents in a temporary directory 'C:\Users\serge\AppData\Local\Packages\sandbox.{db13e145-693f-4e95-9696-912e4d9710df}\AC\Temp\pip-install-0vrhx42u'.
+You can safely remove it manually.

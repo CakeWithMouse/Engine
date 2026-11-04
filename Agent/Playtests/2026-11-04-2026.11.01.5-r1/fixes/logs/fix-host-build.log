@@ -1,0 +1,10 @@
+Using installed platform toolset: v143
+
+  HostTests.cpp
+  QtHost.cpp
+  ViewportCommandHandler.cpp
+  AssetCommandHandler.cpp
+  EditorHistory.cpp
+  SceneCommandHandler.cpp
+  HostTests.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\HostTests.exe
+

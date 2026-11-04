@@ -162,6 +162,8 @@ UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindo
     connect(size,&QComboBox::currentIndexChanged,this,[this](int index){const QSize sizes[]={{1280,720},{1920,1080},{800,600},{720,1280}};canvas_->resolution=sizes[index];canvas_->update();});
     connect(tree_,&QTreeWidget::currentItemChanged,this,[this](QTreeWidgetItem* item){if(!refreshing_&&item)Select(reinterpret_cast<UIElement*>(item->data(0,Qt::UserRole).value<quintptr>()));});
     connect(name_,&QLineEdit::editingFinished,this,[this]{ApplyInspector();});connect(text_,&QLineEdit::editingFinished,this,[this]{ApplyInspector();});
+    connect(name_,&QLineEdit::textEdited,this,[this]{Changed();});
+    connect(text_,&QLineEdit::textEdited,this,[this]{Changed();});
     connect(anchor_,&QComboBox::currentIndexChanged,this,[this]{ApplyInspector();});connect(visible_,&QCheckBox::toggled,this,[this]{ApplyInspector();});
     connect(colorBtn_,&QPushButton::clicked,this,[this]{
         auto* c=Color(selected_,colorProperty_->currentIndex());if(!c)return;
@@ -175,6 +177,13 @@ UIEditorWindow::UIEditorWindow(const QString& file,QWidget* parent) : QMainWindo
 }
 
 UIEditorWindow::~UIEditorWindow() {
+    // A focused line edit can emit editingFinished while QMainWindow destroys
+    // its children, after our root_/selected_ members have already been freed.
+    // Teardown must never re-enter the inspector or rebuild its tree.
+    refreshing_ = true;
+    selected_ = nullptr;
+    for (auto* child : findChildren<QObject*>())
+        QObject::disconnect(child, nullptr, this, nullptr);
     if (langSubId_) {
         EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
         langSubId_ = 0;
@@ -209,6 +218,7 @@ bool UIEditorWindow::Reload() {
 }
 bool UIEditorWindow::Save() {
     if(!root_)return false;
+    if(!ApplyInspector())return false;
     const auto text=UIMarkup::Serialize(*root_);std::unique_ptr<UIElement> check;std::string error;
     if(!UIMarkup::Parse(text,file_.toStdString(),check,error)){status_->setText(QString::fromStdString(error));return false;}
     QSaveFile file(file_);if(!file.open(QIODevice::WriteOnly)||file.write(text.data(),qint64(text.size()))!=qint64(text.size())||!file.commit()){status_->setText(file.errorString());return false;}
@@ -235,13 +245,15 @@ void UIEditorWindow::RefreshInspector(){
         if(dynamic_cast<UIBar*>(selected_))colorProperty_->addItems({Tr("Заполнение", "Fill"),Tr("Фон", "Background")});
     }refreshing_=false;
 }
-void UIEditorWindow::ApplyInspector(){
-    if(refreshing_||!selected_)return;
+bool UIEditorWindow::ApplyInspector(){
+    if(refreshing_||!selected_)return true;
     const auto name=name_->text().toUtf8().toStdString();auto* existing=root_->Find(name);
-    if(!name.empty()&&existing&&existing!=selected_){status_->setText(Tr("Имя уже используется: ", "Name already in use: ")+name_->text());RefreshInspector();return;}
+    if(!name.empty()&&existing&&existing!=selected_){status_->setText(Tr("Имя уже используется: ", "Name already in use: ")+name_->text());return false;}
+    const auto before=UIMarkup::Serialize(*selected_);
     selected_->Name=name;selected_->Rect={UIAnchor(anchor_->currentIndex()),float(rect_[0]->value()),float(rect_[1]->value()),float(rect_[2]->value()),float(rect_[3]->value())};selected_->bVisible=visible_->isChecked();
     if(auto* p=dynamic_cast<UILabel*>(selected_))p->SetText(text_->text().toUtf8().toStdString());if(auto* p=dynamic_cast<UIButton*>(selected_))p->SetText(text_->text().toUtf8().toStdString());
-    Changed();RebuildTree();
+    if(before!=UIMarkup::Serialize(*selected_)){Changed();RebuildTree();}
+    return true;
 }
 void UIEditorWindow::AddElement(const QString& type){
     if(!root_)return;std::unique_ptr<UIElement> next;

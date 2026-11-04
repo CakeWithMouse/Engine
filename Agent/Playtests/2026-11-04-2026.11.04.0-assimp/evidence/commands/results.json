@@ -1,0 +1,28 @@
+[
+  {
+    "passed": true,
+    "exit": 0,
+    "indices": 3,
+    "format": "OBJ",
+    "clips": 0
+  },
+  {
+    "passed": true,
+    "exit": 0,
+    "indices": 3,
+    "format": "FBX",
+    "clips": 0
+  },
+  {
+    "passed": true,
+    "exit": 0,
+    "indices": 14016,
+    "format": "GLB",
+    "clips": 1
+  },
+  {
+    "passed": true,
+    "exit": 2,
+    "format": "Corrupt"
+  }
+]

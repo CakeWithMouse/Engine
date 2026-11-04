@@ -1,0 +1,22 @@
+[
+  {
+    "file": "EngineCommandlets.exe",
+    "sha256": "B450D1AD01FF0B8C6D673D03FB90A7016763030B26EEACC3DB1023E40AE1A8FA",
+    "matches": true
+  },
+  {
+    "file": "EngineRuntime.exe",
+    "sha256": "3AE87F82B2D7FFE0D75C5123593442D0F01C6B48165E3B345D4DFD4A33D16D2B",
+    "matches": true
+  },
+  {
+    "file": "EngineVersion.json",
+    "sha256": "51FD00821DE31281E43DC36B4DE0DBABCD7C58F67DBF4BE6AD4F5226175FBAA5",
+    "matches": true
+  },
+  {
+    "file": "EngineContent/Tools/ImportBlend.py",
+    "sha256": "FC35C2ECF7048A612E8C97C7B3546785DE7B7C3CD6C6020EF937704F94BC995C",
+    "matches": true
+  }
+]

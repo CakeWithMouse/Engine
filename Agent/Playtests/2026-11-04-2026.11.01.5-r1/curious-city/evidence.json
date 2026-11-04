@@ -1,0 +1,306 @@
+[
+  {
+    "feature_id": "create-nocode",
+    "action": "EngineLauncher --create-project по новому Project-каталогу",
+    "expected": "создать проект без C++",
+    "fact": "Launcher exit 0 создал scaffold и manifest; последующий отдельный ProjectTools Enable включил C++",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/Project/Project.json"
+  },
+  {
+    "feature_id": "create-cpp",
+    "action": "EngineLauncher --create-code-project на отдельном новом CreateCppCliProbe",
+    "expected": "CLI создаёт сразу C++ проект",
+    "fact": "Exit 2; каталог не появился; stdout/stderr пусты. В Launcher доступны --create-project и --enable-code, флага --create-code-project нет. Прямое создание C++ через UI checkbox не проверено координатором",
+    "status": "not-tested",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/create-code-project.stdout.log; Engine/build/playtests/20261104-r1/curious-city/create-code-project.stderr.log"
+  },
+  {
+    "feature_id": "enable-cpp",
+    "action": "ProjectTools.ps1 -Action Enable -Project Project.json -Runtime <Release Runtime>",
+    "expected": "включить C++ на штатном проекте",
+    "fact": "созданы Game.sln, Game.vcxproj, Source и Build.ps1; последующая сборка возможна",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/Project/Source"
+  },
+  {
+    "feature_id": "build-activate",
+    "action": "ProjectTools.ps1 -Action Build -Project Project.json -Runtime <Release Runtime>",
+    "expected": "собрать, провалидировать и активировать DLL",
+    "fact": "первая сборка выявила C2664 в нашем коде, после исправления Build #2 прошёл; Build #3 после изменения журнала прошёл и активирован build ID 436fb5f3f98c47cb9111eebe80bf331e",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/build-001.log; Engine/build/playtests/20261104-r1/curious-city/build-002.log; Engine/build/playtests/20261104-r1/curious-city/build-003.log"
+  },
+  {
+    "feature_id": "project-game",
+    "action": "Standalone smoke с DLL и ProjectGame; проверить custom subsystem log",
+    "expected": "используется игровой модуль проекта",
+    "fact": "лог содержит city_started и runtime доход",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/runtime-results.log"
+  },
+  {
+    "feature_id": "scene-create-delete",
+    "action": "CityEconomySubsystem::OnSceneReady трижды вызывает Scene::AddComponent",
+    "expected": "в сцену добавлены 3 дома",
+    "fact": "все три вызова приняты, итоговый счётчик houses=3, баланс уменьшен до 200",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/Project/Source/CityEconomySubsystem.cpp; Engine/build/playtests/20261104-r1/curious-city/runtime-results.log"
+  },
+  {
+    "feature_id": "subsystem",
+    "action": "GameSubsystem enabled; OnSceneReady + Tick",
+    "expected": "подсистема спавнит и сохраняет состояние одной игровой сессии",
+    "fact": "три дома созданы при старте, Tick начислил доход; между smoke сеансами каждый старт сбрасывает баланс к 500 и покупает три дома",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/runtime-results.log"
+  },
+  {
+    "feature_id": "time",
+    "action": "запустить standalone игру на ~2.7 с",
+    "expected": "по 10 денег на дом начисляется за симуляционную секунду",
+    "fact": "elapsed=1.0 balance=230 houses=3; elapsed=2.0 balance=260 houses=3; процесс закрыт WM_CLOSE, exit 0",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/runtime-results.log"
+  },
+  {
+    "feature_id": "scene-save-load",
+    "action": "сравнить сцену до/после двух launcher smoke и повторно запустить один manifest",
+    "expected": "данные проекта/сцены сохраняются при повторном запуске",
+    "fact": "Main.scene.json SHA-256 не изменился; оба повторных запуска успешно загрузили проект. Ручное Ctrl+S и повторное открытие через UI не выполнены",
+    "status": "blocked-ui-pending",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/smoke-001.stdout.log; Engine/build/playtests/20261104-r1/curious-city/smoke-002.stdout.log; Agent/Playtests/2026-11-04-2026.11.01.5-r1/curious-city/diary.md"
+  },
+  {
+    "feature_id": "hud-elements",
+    "action": "ProjectHud назначен на CityHud.ui; runtime привязал кнопку",
+    "expected": "баланс, доход, индикатор и кнопка дохода видны в HUD",
+    "fact": "Координатор визуально подтвердил панель Balance/Income/Bar/button; Pause остановил баланс на 740, Resume возобновил +30/с",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/Project/Content/UI/CityHud.ui; Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log; Engine/build/playtests/20261104-r1/ui-evidence/curious-hud-before.png; Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png"
+  },
+  {
+    "feature_id": "session",
+    "action": "CURIOUS_CITY_SESSION_PROBE: две Game сцены в одной GameSession",
+    "expected": "тот же subsystem и баланс переживают смену сцены, тик продолжается",
+    "fact": "Smoke exit 0; session_reused elapsed=2.0 balance=260 houses=3 detail=same subsystem; scenes=2",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/runtime-deep-probes-fixed.log"
+  },
+  {
+    "feature_id": "vfs",
+    "action": "ReferenceExamples::ReadGameLine читает /Game/Config/message.txt",
+    "expected": "пользовательский Game VFS путь разрешается и читается",
+    "fact": "Smoke exit 0; vfs_read detail=A three-house city earns 30 per second.",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/runtime-deep-probes-fixed.log; Engine/build/playtests/20261104-r1/curious-city/Project/Content/Config/message.txt"
+  },
+  {
+    "feature_id": "scene-properties",
+    "action": "Загрузить PropertiesProbe.scene.json с projectData для House и Rules",
+    "expected": "сериализованные свойства восстановятся в компонентах",
+    "fact": "Smoke exit 0; лог содержит house_property_loaded detail=1.800000 и project_object_tick maxHouses=12",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/runtime-saveas-probe.log; Engine/build/playtests/20261104-r1/curious-city/Project/Content/Scenes/PropertiesProbe.scene.json"
+  },
+  {
+    "feature_id": "scene-new-save-as",
+    "action": "SceneDocument::Read -> Write SaveAs -> Read",
+    "expected": "новый scene document сохраняется и снова загружается вместе с custom data",
+    "fact": "Smoke exit 0; scene_document_saveas_reopen objects=3; обе проверки custom property и object data прошли",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/runtime-saveas-probe.log; Engine/build/playtests/20261104-r1/curious-city/Project/Content/Scenes/PropertiesProbe.SaveAs.scene.json"
+  },
+  {
+    "feature_id": "character",
+    "action": "Загрузить CharacterProbe.scene.json с PlayerCharacter и controller config",
+    "expected": "конфигурация playerControlled и камера доступна после загрузки",
+    "fact": "Smoke exit 0; character_probe_loaded ... player=1 camera=3 plane=2",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/runtime-character-camera-probe.log; Engine/build/playtests/20261104-r1/curious-city/Project/Content/Scenes/CharacterProbe.scene.json"
+  },
+  {
+    "feature_id": "camera-orthographic",
+    "action": "CharacterProbe: SceneCamera orthographic, viewPlane=2, height=12",
+    "expected": "загружаются ортографические параметры камеры",
+    "fact": "Smoke exit 0; orthographic_camera_loaded orthographic=1 plane=2 height=12.000000; визуальный результат отдельно не утверждается",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/runtime-character-camera-probe.log"
+  },
+  {
+    "feature_id": "asset-paths",
+    "action": "Разрешить /Game/ImportSource/CesiumMan.glb, затем выполнить SceneAssets::Import",
+    "expected": "переносимая ссылка /Game и импорт модели",
+    "fact": "Путь находится в /Game, но Import блокируется текущей сборкой Runtime без Assimp; ошибка: Assimp not enabled. Импорт не подтверждён",
+    "status": "blocked-environment",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/runtime-assets-probe-diagnosed.log; Engine/build/playtests/20261104-r1/curious-city/Project/Content/ImportSource/CesiumMan.glb"
+  },
+  {
+    "feature_id": "export",
+    "action": "Экспортировать Release в ExportedFinal и запустить packaged Runtime на 5 кадрах",
+    "expected": "пакетный проект запускается из собственных EngineContent/Game Content mount",
+    "fact": "Export и portable runtime завершились exit 0; лог подтвердил /Engine и /Game mounts и 5 кадров",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/export-final.log; Engine/build/playtests/20261104-r1/curious-city/portable-final.log"
+  },
+  {
+    "feature_id": "sdk-examples",
+    "action": "Скомпилировать ReferenceComponent.h и ReferenceExamples.cpp в проектном SDK",
+    "expected": "примеры API Reference совместимы с проектным SDK",
+    "fact": "ProjectTools Build прошёл после добавления примеров; runtime VFS пример также прочитал файл",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/build-008-reference-examples.log; Engine/build/playtests/20261104-r1/curious-city/runtime-deep-probes-fixed.log"
+  },
+  {
+    "feature_id": "move-incident",
+    "action": "Попытка переместить открытый проект для portability check",
+    "expected": "перенести каталог проекта без изменения структуры",
+    "fact": "PowerShell переместил nested project items после ошибки lock; агент восстановил структуру без перезаписи, два .painengine сохранены отдельно. Это ошибка процедуры агента, не Engine bug",
+    "status": "procedure-error-recovered",
+    "evidence": "Agent/Playtests/2026-11-04-2026.11.01.5-r1/curious-city/diary.md"
+  },
+  {
+    "feature_id": "scene-transform",
+    "action": "Поменять высоту House reflected property и посмотреть на обновление transform/bounds",
+    "expected": "OnPropertiesChanged обновляет scale и видимые bounds",
+    "fact": "Координатор ввёл height=2.5; scale/bounds обновились в Inspector, screenshot curious-height.png",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/ui-evidence/curious-height.png; Engine/build/playtests/20261104-r1/curious-city/Project/Source/HouseComponent.cpp"
+  },
+  {
+    "feature_id": "scene-codec",
+    "action": "Загрузить сохранённый House property codec и ProjectObjectAdapter для CuriousCity.Rules",
+    "expected": "House height и Rules.maxHouses переживают сериализацию и повторную загрузку",
+    "fact": "Runtime probe восстановила height=1.8 и maxHouses=12; Rules tick прошёл",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/runtime-saveas-probe.log; Engine/build/playtests/20261104-r1/curious-city/Project/Source/CityRules.cpp"
+  },
+  {
+    "feature_id": "scene-object",
+    "action": "Добавить ENGINE_OBJECT CuriousCity.Rules с ProjectObjectAdapter",
+    "expected": "пользовательский object type регистрируется и обрабатывает projectData",
+    "fact": "SDK сборка и runtime прошли; project_object_tick maxHouses=12",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/build-009-object-codec.log; Engine/build/playtests/20261104-r1/curious-city/runtime-saveas-probe.log"
+  },
+  {
+    "feature_id": "scene-startup",
+    "action": "Временно выбрать CharacterProbe и PropertiesProbe как startupScene, затем вернуть Main",
+    "expected": "manifest загружает указанные probe scenes",
+    "fact": "Обе сцены smoke запускались успешно; manifest восстановлен на Main.scene.json",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/smoke-character-camera.stdout.log; Engine/build/playtests/20261104-r1/curious-city/smoke-saveas-probe.stdout.log; Engine/build/playtests/20261104-r1/curious-city/Project/Project.json"
+  },
+  {
+    "feature_id": "play",
+    "action": "Координатор проверил editor Play, Pause, Resume, Stop",
+    "expected": "игра запускается, при Pause время стоит, Resume продолжает, Stop закрывает gameplay",
+    "fact": "Координатор подтвердил Play/Pause/Resume/Stop в Editor; runtime HUD pause остановил баланс на 740 и возобновил доход",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log; Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png"
+  },
+  {
+    "feature_id": "input",
+    "action": "Input::System binding на левый клик в CityInteractionComponent",
+    "expected": "нажатие доходит до пользовательского компонента",
+    "fact": "Координатор нажал по дому; HUD и лог получили событие выбора House6",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log; Engine/build/playtests/20261104-r1/curious-city/Project/Source/CityInteractionComponent.cpp"
+  },
+  {
+    "feature_id": "trace-world",
+    "action": "Мировой raycast по нажатию на дом",
+    "expected": "луч проверяет сценовую геометрию, сохраняет имя выбранного дома",
+    "fact": "Координатор увидел house_selected=House6 в диагностическом логе",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+  },
+  {
+    "feature_id": "trace-filter",
+    "action": "Raycast с channel 2 и исключениями",
+    "expected": "лог отражает результат заданного фильтра",
+    "fact": "Координатор зафиксировал trace_channel_filter=Miss; выбранный объект также записан отдельно как House6",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+  },
+  {
+    "feature_id": "trace-screen",
+    "action": "Клик использует RaycastCursor и ScreenPointToRay",
+    "expected": "screen coordinate преобразуется в мировой trace",
+    "fact": "По наблюдению координатора клик по центральному дому дошёл до сценария выбора; код содержит обе API точки",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/Project/Source/CityInteractionComponent.cpp; Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+  },
+  {
+    "feature_id": "hud-project",
+    "action": "Назначить Content/UI/CityHud.ui проектным HUD",
+    "expected": "runtime находит и прикрепляет заданный HUD",
+    "fact": "Координатор визуально подтвердил панель; runtime записал hud_attached",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/Project/Content/ProjectHud.txt; Engine/build/playtests/20261104-r1/curious-city/runtime-layout-ui.log"
+  },
+  {
+    "feature_id": "hud-events",
+    "action": "Кнопка HUD меняет bTickEnabled у экономики",
+    "expected": "Pause останавливает доход, Resume продолжает",
+    "fact": "Координатор нажал кнопку; balance 740 остановился, затем снова вырос по +30/с",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log; Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png"
+  },
+  {
+    "feature_id": "hud-layout",
+    "action": "Показать Balance/Income/Bar/Button и кириллический заголовок",
+    "expected": "элементы читаемы в игровой панели",
+    "fact": "Координатор подтвердил панель и кириллическую надпись после commit Enter в редакторе",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/ui-evidence/curious-hud-before.png; Engine/build/playtests/20261104-r1/ui-evidence/curious-ui-editor-cyrillic.png"
+  },
+  {
+    "feature_id": "hud-editor",
+    "action": "Редактировать status.text и сохранить UI asset",
+    "expected": "новое значение сохраняется после commit field",
+    "fact": "Enter затем Save сохранил кириллическое значение; Save пока поле редактировалось сохранил старый Income (BUG003, UI coordinator observation)",
+    "status": "passed-with-bug",
+    "evidence": "Engine/build/playtests/20261104-r1/ui-evidence/curious-ui-editor-cyrillic.png; Agent/Playtests/2026-11-04-2026.11.01.5-r1/curious-city/feedback.md"
+  },
+  {
+    "feature_id": "diagnostics",
+    "action": "Писать детальные игровые результаты в CURIOUS_CITY_LOG",
+    "expected": "лог позволяет восстановить последовательность экономики и diagnostic probes",
+    "fact": "Зафиксированы покупка/спавн, баланс/доход, свойства, HUD, GameSession, VFS, SaveAs и причины неуспешного импорта",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/runtime-deep-probes-fixed.log; Engine/build/playtests/20261104-r1/curious-city/runtime-assets-probe-diagnosed.log"
+  },
+  {
+    "feature_id": "trace-debug",
+    "action": "Runtime env probe: Scene::Raycast, Game::DebugDrawTrace, GetDebugTraceLineCount, GetTraceStatistics, ClearDebugTraces",
+    "expected": "результат и счётчики трассировки отражаются в runtime состоянии; очистка убирает линии",
+    "fact": "Smoke exit 0: status=Hit lines=5 queries=1 bounds=4 triangles=16 unsupported=0 hit=6 normal_y=1; после ClearDebugTraces lines=0",
+    "status": "passed",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/runtime-trace-debug-probe.log; Engine/build/playtests/20261104-r1/curious-city/build-021-trace-controller-escalated.log"
+  },
+  {
+    "feature_id": "controller",
+    "action": "CharacterProbe с ProjectGame логгером каждый 15 frames; отдельный clone, standalone 60 frames",
+    "expected": "логи показывают координаты Character и физическое состояние W/D, пригодные для ручного движения",
+    "fact": "Runtime exit 0, baseline frames 15/30/45/60: position (0,0,0), key_w=0, key_d=0. Логгер и CharacterController доступны; ручное удержание W/D остаётся для координатора",
+    "status": "partial",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/ControllerProbe/Project.json; Engine/build/playtests/20261104-r1/curious-city/controller-input-observation.log; Engine/build/playtests/20261104-r1/curious-city/Project/Source/ProjectGame.cpp"
+  },
+  {
+    "feature_id": "host-services",
+    "action": "Текущий runtime через SceneModule host.getService запрашивает ENGINE_SERVICE_VFS v1; runtime /Game read probe",
+    "expected": "поддерживаемая host service bind/read работает; неподдержанная minimum version или отсутствующий callback возвращает nullptr и включает fallback",
+    "fact": "VFS runtime read прошёл через /Game. Host fallback/v2 rejection видны в SDK-коде, но вызываемый BaseEngine callback нельзя подменить из ProjectGame; direct version fallback не выполнен",
+    "status": "partial",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/runtime-deep-probes-fixed.log; Engine/Include/Engine/Project/SceneModule.inl; Engine/Source/Base/Base.cpp"
+  },
+  {
+    "feature_id": "scene-recovery",
+    "action": "Проверить crash-recovery workflow на RecoveryProbe копии",
+    "expected": "после dirty scene checkpoint остаётся metadata+snapshot; следующая сессия восстанавливает объекты",
+    "fact": "Рабочий Project не тронут. EditorUiTests.exe --workflow из общего Runtime оказался бинарником от 2026-10-23 и отклонил аргумент usage; новый EditorUiTests/Runtime собирать запрещено. Editor открыт на копии RecoveryProbe, сцена Main не редактировалась, snapshot ещё не создан. UI проверку продолжает координатор после закрытия окна",
+    "status": "blocked-tool-version",
+    "evidence": "Engine/build/playtests/20261104-r1/curious-city/recovery-workflow-002.stderr.log; Engine/build/playtests/20261104-r1/curious-city/RecoveryProbe/.painengine/Recovery; Engine/build/playtests/20261104-r1/curious-city/recovery-editor-launch.stderr.log"
+  }
+]

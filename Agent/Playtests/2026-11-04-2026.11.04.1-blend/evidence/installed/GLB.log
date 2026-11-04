@@ -1,0 +1,11 @@
+[VfsRead] using local VFS (no host service)
+{
+    "asset": "/Game/Models/CesiumMan/CesiumMan.glb",
+    "clips": 1,
+    "indices": 14016,
+    "material": "",
+    "meshes": 1,
+    "ok": true,
+    "placed": true,
+    "type": "Engine.Model"
+}

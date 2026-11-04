@@ -1,0 +1,18 @@
+id,area,command,contract,evidence,status
+BUG-001,Inspector,ui.inspector,All nine fields reachable at 310px; real theme and PNG,after/BUG001.result.json,fixed
+BUG-002,QSS,ui.style,No QString arg or stylesheet parse warnings with real EditorTheme,after/BUG002.result.json,fixed
+BUG-003,UI Save,ui.edit-text,Active Unicode text saved without Enter; safe destruction and pending close,after/BUG003.result.json,fixed
+BUG-004,Qt build crash,project.build,Build failure and success preserve enabled window and old/new DLL respectively,cpp-workflow/results.json,fixed
+BUG-005,PS module path,EngineLauncher --enable-code and project.build,Fresh C++ project and compiler execution under inherited PS7 module path,cpp-workflow/results.json,fixed
+BUG-006,Compiler encoding,project.build,Cyrillic compiler error arrives intact in real Editor Console,cpp-workflow/failed.result.json,fixed
+BUG-007,Reload input,input.rebind and project.reload-input,Focus true/false propagated; T and HUD create 0 to 1 to 2 projectiles after DLL replacement,reload-input/results.json,fixed
+BUG-008,Center snap,gizmo.center,World/local 0.5 grid; negative motion; disabled and zero step,after/BUG008.result.json,fixed
+Camera,Player camera properties,scene.property and camera.screen-ray,Valid/invalid FOV plus perspective and orthographic XZ rays,after/results.json,passed
+Trace,Raycast,trace.raycast,Hit distance normal and miss; invalid vectors rejected,after/results.json,passed
+Subsystem,GameSession and GameSubsystem,session.lifecycle,Same session across scenes; tick enabled/disabled; Stop,after/results.json,passed
+Settings,Owned GameSettings,game.settings,Per-Game rendering VSync and antialiasing values,after/GameSettings.result.json,passed
+Primitives,MeshPrimitives,mesh.primitive,Dimensions bounds and triangle counts,after/results.json,passed
+Existing,Engine regressions,Engine/tests/run.ps1,53 passed; optional imported model transaction scenario skipped,logs/fix-engine-suite.log,53 passed 1 dependency skip
+Existing,Input and camera,Engine/tests/input/run.ps1,82 input/controller checks and 101 camera/D3D checks,logs/fix-input.log,passed
+Existing,Subsystem contracts,Engine/tests/subsystems/run.ps1,Lifecycle rollback pause resume and scene/session ownership,logs/fix-subsystems.log,passed
+Existing,Editor core and host,CoreTests.exe and HostTests.exe,374 core and 69 host checks,logs/fix-core.log and logs/fix-host.log,passed

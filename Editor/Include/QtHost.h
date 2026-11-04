@@ -68,7 +68,12 @@ public:
     void SetModuleApi(const EngineEditSessionApi& scene);
     void SetProjectDataApi(const EngineProjectDataApi& api) { projectData_ = api; }
     void SetViewportCursorApi(const EngineViewportCursorApi& api){cursor_=api;}
-    void SetViewportInputApi(const EngineViewportInputApi& api) { viewportInput_ = api; }
+    void SetViewportInputApi(const EngineViewportInputApi& api) {
+        viewportInput_ = api;
+        // A replacement session has no focus history. The widget can retain focus
+        // across reload, so no new Qt focusIn event is guaranteed to arrive.
+        if (api.focus) api.focus(api.context, viewportFocused_ ? 1u : 0u);
+    }
     void SetSelectionApi(const EngineSelectionApi& api) { selection_ = api; }
     void InitializeRecovery();
     void SetBatchApi(const EngineSceneBatchApi& api) { batch_ = api; }
@@ -109,6 +114,7 @@ private:
         return cursor_.set?&cursor_:nullptr;
     }
     EngineViewportInputApi viewportInput_{};
+    bool viewportFocused_ = false;
     EngineViewportOverlayApi overlay_{};
     uint32_t antialiasingMode_ = 1;
 

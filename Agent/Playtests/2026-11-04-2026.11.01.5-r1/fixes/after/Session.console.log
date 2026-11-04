@@ -1,0 +1,9 @@
+[VfsRead] using local VFS (no host service)
+{
+    "closing": 2,
+    "elapsed": 0.6000000238418579,
+    "ok": true,
+    "ready": 2,
+    "running": false,
+    "ticks": 6
+}

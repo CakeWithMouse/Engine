@@ -1,0 +1,47 @@
+[
+  {
+    "clips": 0,
+    "indices": 3,
+    "format": "OBJ",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "clips": 0,
+    "indices": 3,
+    "format": "FBX",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "clips": 1,
+    "indices": 14016,
+    "format": "GLB",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "clips": 0,
+    "indices": 36,
+    "format": "blend-external",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "clips": 0,
+    "indices": 36,
+    "format": "blend-packed",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "format": "Corrupt",
+    "passed": true,
+    "exit": 2
+  },
+  {
+    "format": "BlendMissing",
+    "passed": true,
+    "exit": 2
+  }
+]

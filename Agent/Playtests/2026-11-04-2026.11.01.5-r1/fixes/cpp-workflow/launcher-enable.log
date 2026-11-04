@@ -1,0 +1,13 @@
+
+  ComponentGenerator: 3 component(s), Project
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Agent\Playtests\2026-11-04-2026.11.01.5-r1\fixes\cpp-workflow\Project\Binaries\Release\5ec122c62aeb4979bbdedc2803a9f2e4\Game.lib и объект E:\Engine\Agent\Playtests\2026-11-04-2026.11.01.5-r1\fixes\cpp-workflow\Project\Binaries\Release\5ec122c62aeb4979bbdedc2803a9f2e4\Game.exp
+  Game.vcxproj -> E:\Engine\Agent\Playtests\2026-11-04-2026.11.01.5-r1\fixes\cpp-workflow\Project\Binaries\Release\5ec122c62aeb4979bbdedc2803a9f2e4\Game.dll
+
+Full build log: E:\Engine\Agent\Playtests\2026-11-04-2026.11.01.5-r1\fixes\cpp-workflow\Project\Binaries\Release\5ec122c62aeb4979bbdedc2803a9f2e4\build.log
+Build validated and activated. Use Hot Reload in the editor, or reopen the project.

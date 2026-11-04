@@ -1,0 +1,10 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Templates/SceneProject/Game.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Templates/SceneProject/Game.exp
+  SceneProject.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Templates\SceneProject\Game.dll
+  AssetRenderTests.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\AssetTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\AssetTests.exp
+  AssetTests.vcxproj -> E:\Engine\Engine\build\x64\Release\AssetTests.exe
+

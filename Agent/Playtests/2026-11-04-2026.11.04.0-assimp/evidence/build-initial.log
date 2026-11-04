@@ -1,0 +1,511 @@
+Using installed platform toolset: v143
+
+  Installing vcpkg dependencies to E:\Engine\Engine\..\Engine\vcpkg_installed\
+  "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\vcpkg.exe" install  --x-wait-for-lock --triplet "x64-windows" --vcpkg-root "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\\" "--x-manifest-root=E:\Engine\Engine\..\Engine\\" "--x-install-root=E:\Engine\Engine\..\Engine\vcpkg_installed\\" 
+  Fetching registry information from https://github.com/microsoft/vcpkg (HEAD)...
+  A suitable version of cmake was not found (required v3.30.1).
+  Downloading https://github.com/Kitware/CMake/releases/download/v3.30.1/cmake-3.30.1-windows-i386.zip -> cmake-3.30.1-windows-i386.zip
+  Successfully downloaded cmake-3.30.1-windows-i386.zip
+  Extracting cmake...
+  A suitable version of 7zip was not found (required v25.1.0).
+  Downloading https://github.com/ip7z/7zip/releases/download/25.01/7z2501.exe -> 7z2501.7z.exe
+  Successfully downloaded 7z2501.7z.exe
+  Extracting 7zip...
+  A suitable version of 7zr was not found (required v25.1.0).
+  Downloading https://github.com/ip7z/7zip/releases/download/25.01/7zr.exe -> 7d84fcad-7zr.exe
+  Successfully downloaded 7d84fcad-7zr.exe
+  Detecting compiler hash for triplet x64-windows...
+  Compiler found: C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx64/x64/cl.exe
+  The following packages will be built and installed:
+      assimp:x64-windows@6.0.4#3 -- git+https://github.com/microsoft/vcpkg@327397e12c4348d0a3637b297501126c3d715b68
+    * jhasse-poly2tri:x64-windows@2023-12-27#2 -- git+https://github.com/microsoft/vcpkg@d94a24dde4173f85d1aaeb16b3eecc71b100b5be
+    * kubazip:x64-windows@0.3.15 -- git+https://github.com/microsoft/vcpkg@ca5503c1bd9dd8d574ddf6010ff0a88ccbd1cf29
+    * minizip:x64-windows@1.3.2 -- git+https://github.com/microsoft/vcpkg@b485c18ad5b9ce53d790be6875324577d308e8b1
+    * polyclipping:x64-windows@6.4.2#13 -- git+https://github.com/microsoft/vcpkg@2388298c7ad673550c7492454666dd3a34ada895
+    * pugixml:x64-windows@1.16 -- git+https://github.com/microsoft/vcpkg@57dda7f8da9461a690dbc3c09363436215230838
+    * rapidjson:x64-windows@2025-02-26 -- git+https://github.com/microsoft/vcpkg@4297a243aa0e3ed6c3a4c307579914593da5751d
+    * stb:x64-windows@2024-07-29#1 -- git+https://github.com/microsoft/vcpkg@c362152d1d02973e7b1ce777960f8a6876656560
+    * utfcpp:x64-windows@4.2.0 -- git+https://github.com/microsoft/vcpkg@b3e22f2df71f470ef2a2efd61514b5823061ad00
+    * vcpkg-cmake:x64-windows@2025-08-07 -- git+https://github.com/microsoft/vcpkg@16b9390dfeaca6df7288ba3f827e40e48e5fc942
+    * vcpkg-cmake-config:x64-windows@2026-07-21 -- git+https://github.com/microsoft/vcpkg@51befcb03097f8d19c1c59f9ec3625e69d85322a
+    * vcpkg-cmake-get-vars:x64-windows@2025-05-29 -- git+https://github.com/microsoft/vcpkg@d6510f888dd526c7828f6b973349e7f30be51254
+    * zlib:x64-windows@1.3.2#2 -- git+https://github.com/microsoft/vcpkg@f4f43a5a505cda1a0d1ff056be1fdba9e566242e
+  Additional packages (*) will be modified to complete this operation.
+  Restored 0 package(s) from C:\Users\serge\AppData\Local\vcpkg\archives in 2.78 ms. Use --debug to see more details.
+  Installing 1/13 vcpkg-cmake-config:x64-windows@2026-07-21...
+  Building vcpkg-cmake-config:x64-windows@2026-07-21...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\51befcb03097f8d19c1c59f9ec3625e69d85322a: info: installing from git registry git+https://github.com/microsoft/vcpkg@51befcb03097f8d19c1c59f9ec3625e69d85322a
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake-config_x64-windows/share/vcpkg-cmake-config/vcpkg_cmake_config_fixup.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake-config_x64-windows/share/vcpkg-cmake-config/vcpkg-port-config.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake-config_x64-windows/share/vcpkg-cmake-config/copyright
+  -- Skipping post-build validation due to VCPKG_POLICY_EMPTY_PACKAGE
+  Starting submission of vcpkg-cmake-config:x64-windows@2026-07-21 to 1 binary cache(s) in the background
+  Elapsed time to handle vcpkg-cmake-config:x64-windows: 115 ms
+  vcpkg-cmake-config:x64-windows package ABI: b2a610e3ec822ccd42ddcf6ffff0bd02d257e2ec6cea9af8fe57fba1c5c003a3
+  Installing 2/13 vcpkg-cmake:x64-windows@2025-08-07...
+  Building vcpkg-cmake:x64-windows@2025-08-07...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\16b9390dfeaca6df7288ba3f827e40e48e5fc942: info: installing from git registry git+https://github.com/microsoft/vcpkg@16b9390dfeaca6df7288ba3f827e40e48e5fc942
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake_x64-windows/share/vcpkg-cmake/vcpkg_cmake_configure.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake_x64-windows/share/vcpkg-cmake/vcpkg_cmake_build.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake_x64-windows/share/vcpkg-cmake/vcpkg_cmake_install.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake_x64-windows/share/vcpkg-cmake/vcpkg-port-config.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake_x64-windows/share/vcpkg-cmake/copyright
+  -- Performing post-build validation
+  Starting submission of vcpkg-cmake:x64-windows@2025-08-07 to 1 binary cache(s) in the background
+  Elapsed time to handle vcpkg-cmake:x64-windows: 129 ms
+  vcpkg-cmake:x64-windows package ABI: 6788b117db32176f065ae645a06f7f3ff694359120c5eadf821f95587f1d956e
+  Completed submission of vcpkg-cmake-config:x64-windows@2026-07-21 to 1 binary cache(s) in 62.5 ms
+  Installing 3/13 zlib:x64-windows@1.3.2#2...
+  Building zlib:x64-windows@1.3.2#2...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\f4f43a5a505cda1a0d1ff056be1fdba9e566242e: info: installing from git registry git+https://github.com/microsoft/vcpkg@f4f43a5a505cda1a0d1ff056be1fdba9e566242e
+  Downloading https://github.com/madler/zlib/archive/v1.3.2.tar.gz -> madler-zlib-v1.3.2.tar.gz
+  Successfully downloaded madler-zlib-v1.3.2.tar.gz
+  -- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/madler-zlib-v1.3.2.tar.gz
+  -- Applying patch 0001-no-version-script-on-ohos.patch
+  -- Using source at E:/Engine/Engine/vcpkg_installed/vcpkg/blds/zlib/src/v1.3.2-c19a0bfd23.clean
+  -- Configuring x64-windows
+  -- Building x64-windows-dbg
+  -- Building x64-windows-rel
+  -- Fixing pkgconfig file: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/zlib_x64-windows/lib/pkgconfig/zlib.pc
+  Downloading msys2-mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst, trying https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst
+  Successfully downloaded msys2-mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst
+  Downloading msys2-msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst, trying https://mirror.msys2.org/msys/x86_64/msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst
+  Successfully downloaded msys2-msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst
+  -- Using msys root at C:/Users/serge/AppData/Local/vcpkg/downloads/tools/msys2/9272adbcaf19caef
+  -- Fixing pkgconfig file: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/zlib_x64-windows/debug/lib/pkgconfig/zlib.pc
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/zlib_x64-windows/share/zlib/vcpkg-cmake-wrapper.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/zlib_x64-windows/share/zlib/copyright
+  -- Performing post-build validation
+  Starting submission of zlib:x64-windows@1.3.2#2 to 1 binary cache(s) in the background
+  Elapsed time to handle zlib:x64-windows: 30 s
+  zlib:x64-windows package ABI: 8cd395d91b88a555735d09cc81fd1071b1f6e5d2771abaea18ae68dc2e47a075
+  Completed submission of vcpkg-cmake:x64-windows@2025-08-07 to 1 binary cache(s) in 55.6 ms
+  Installing 4/13 utfcpp:x64-windows@4.2.0...
+  Building utfcpp:x64-windows@4.2.0...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\b3e22f2df71f470ef2a2efd61514b5823061ad00: info: installing from git registry git+https://github.com/microsoft/vcpkg@b3e22f2df71f470ef2a2efd61514b5823061ad00
+  Downloading https://github.com/nemtrif/utfcpp/archive/v4.2.0.tar.gz -> nemtrif-utfcpp-v4.2.0.tar.gz
+  Successfully downloaded nemtrif-utfcpp-v4.2.0.tar.gz
+  -- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/nemtrif-utfcpp-v4.2.0.tar.gz
+  -- Using source at E:/Engine/Engine/vcpkg_installed/vcpkg/blds/utfcpp/src/v4.2.0-5064610e27.clean
+  -- Configuring x64-windows
+  -- Building x64-windows-rel
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/utfcpp_x64-windows/share/utfcpp/copyright
+  -- Performing post-build validation
+  Starting submission of utfcpp:x64-windows@4.2.0 to 1 binary cache(s) in the background
+  Elapsed time to handle utfcpp:x64-windows: 4.7 s
+  utfcpp:x64-windows package ABI: a28b9407adfb4b885ba24aed76cf00f7c9a171dda73a34070116e1c7afac7ca4
+  Completed submission of zlib:x64-windows@1.3.2#2 to 1 binary cache(s) in 141 ms
+  Installing 5/13 stb:x64-windows@2024-07-29#1...
+  Building stb:x64-windows@2024-07-29#1...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\c362152d1d02973e7b1ce777960f8a6876656560: info: installing from git registry git+https://github.com/microsoft/vcpkg@c362152d1d02973e7b1ce777960f8a6876656560
+  Downloading https://github.com/nothings/stb/archive/f75e8d1cad7d90d72ef7a4661f1b994ef78b4e31.tar.gz -> nothings-stb-f75e8d1cad7d90d72ef7a4661f1b994ef78b4e31.tar.gz
+  Successfully downloaded nothings-stb-f75e8d1cad7d90d72ef7a4661f1b994ef78b4e31.tar.gz
+  -- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/nothings-stb-f75e8d1cad7d90d72ef7a4661f1b994ef78b4e31.tar.gz
+  -- Using source at E:/Engine/Engine/vcpkg_installed/vcpkg/blds/stb/src/4ef78b4e31-bf024d35de.clean
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/stb_x64-windows/share/stb/FindStb.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/stb_x64-windows/share/stb/vcpkg-cmake-wrapper.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/stb_x64-windows/share/stb/usage
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/stb_x64-windows/share/stb/copyright
+  -- Performing post-build validation
+  Starting submission of stb:x64-windows@2024-07-29#1 to 1 binary cache(s) in the background
+  Elapsed time to handle stb:x64-windows: 6.7 s
+  stb:x64-windows package ABI: fa1ca6af5bb3d2a40aab1f980fe18bb7a7a6d55a70120b244a305b1492a33997
+  Completed submission of utfcpp:x64-windows@4.2.0 to 1 binary cache(s) in 56.6 ms
+  Installing 6/13 rapidjson:x64-windows@2025-02-26...
+  Building rapidjson:x64-windows@2025-02-26...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\4297a243aa0e3ed6c3a4c307579914593da5751d: info: installing from git registry git+https://github.com/microsoft/vcpkg@4297a243aa0e3ed6c3a4c307579914593da5751d
+  Downloading https://github.com/Tencent/rapidjson/archive/24b5e7a8b27f42fa16b96fc70aade9106cf7102f.tar.gz -> Tencent-rapidjson-24b5e7a8b27f42fa16b96fc70aade9106cf7102f-2.tar.gz
+  Successfully downloaded Tencent-rapidjson-24b5e7a8b27f42fa16b96fc70aade9106cf7102f-2.tar.gz
+  -- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/Tencent-rapidjson-24b5e7a8b27f42fa16b96fc70aade9106cf7102f-2.tar.gz
+  -- Using source at E:/Engine/Engine/vcpkg_installed/vcpkg/blds/rapidjson/src/106cf7102f-b0877c68bd.clean
+  -- Configuring x64-windows
+  -- Building x64-windows-dbg
+  -- Building x64-windows-rel
+  -- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst
+  -- Using cached msys2-msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst
+  -- Using msys root at C:/Users/serge/AppData/Local/vcpkg/downloads/tools/msys2/9272adbcaf19caef
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/rapidjson_x64-windows/share/rapidjson/copyright
+  -- Performing post-build validation
+  Starting submission of rapidjson:x64-windows@2025-02-26 to 1 binary cache(s) in the background
+  Elapsed time to handle rapidjson:x64-windows: 6.8 s
+  rapidjson:x64-windows package ABI: 44359524c6ca5a9b9e924888294fdce945b93012e17171a25f3ce4eff82d00d2
+  Completed submission of stb:x64-windows@2024-07-29#1 to 1 binary cache(s) in 101 ms
+  Installing 7/13 pugixml:x64-windows@1.16...
+  Building pugixml:x64-windows@1.16...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\57dda7f8da9461a690dbc3c09363436215230838: info: installing from git registry git+https://github.com/microsoft/vcpkg@57dda7f8da9461a690dbc3c09363436215230838
+  Downloading https://github.com/zeux/pugixml/archive/v1.16.tar.gz -> zeux-pugixml-v1.16.tar.gz
+  Successfully downloaded zeux-pugixml-v1.16.tar.gz
+  -- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/zeux-pugixml-v1.16.tar.gz
+  -- Using source at E:/Engine/Engine/vcpkg_installed/vcpkg/blds/pugixml/src/v1.16-22f15b704a.clean
+  -- Configuring x64-windows
+  -- Building x64-windows-dbg
+  -- Building x64-windows-rel
+  -- Fixing pkgconfig file: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/pugixml_x64-windows/lib/pkgconfig/pugixml.pc
+  -- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst
+  -- Using cached msys2-msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst
+  -- Using msys root at C:/Users/serge/AppData/Local/vcpkg/downloads/tools/msys2/9272adbcaf19caef
+  -- Fixing pkgconfig file: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/pugixml_x64-windows/debug/lib/pkgconfig/pugixml.pc
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/pugixml_x64-windows/share/pugixml/copyright
+  -- Performing post-build validation
+  Starting submission of pugixml:x64-windows@1.16 to 1 binary cache(s) in the background
+  Elapsed time to handle pugixml:x64-windows: 9.4 s
+  pugixml:x64-windows package ABI: 81f59a800d68ddafde0d9b934fb1d25b23c254945c9e9805e8c52a06a788a3ae
+  Completed submission of rapidjson:x64-windows@2025-02-26 to 1 binary cache(s) in 76.1 ms
+  Installing 8/13 polyclipping:x64-windows@6.4.2#13...
+  Building polyclipping:x64-windows@6.4.2#13...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\2388298c7ad673550c7492454666dd3a34ada895: info: installing from git registry git+https://github.com/microsoft/vcpkg@2388298c7ad673550c7492454666dd3a34ada895
+  -- Note: polyclipping only supports static library linkage. Building static library.
+  Downloading clipper_ver6.4.2.zip, trying https://sourceforge.net/projects/polyclipping/files/clipper_ver6.4.2.zip/download
+  Successfully downloaded clipper_ver6.4.2.zip
+  -- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/clipper_ver6.4.2.zip
+  -- Applying patch fix_targets.patch
+  -- Using source at E:/Engine/Engine/vcpkg_installed/vcpkg/blds/polyclipping/src/ipper_ver6-06b887c850.clean
+  -- Configuring x64-windows
+  -- Building x64-windows-dbg
+  -- Building x64-windows-rel
+  -- Fixing pkgconfig file: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/polyclipping_x64-windows/lib/pkgconfig/polyclipping.pc
+  -- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst
+  -- Using cached msys2-msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst
+  -- Using msys root at C:/Users/serge/AppData/Local/vcpkg/downloads/tools/msys2/9272adbcaf19caef
+  -- Fixing pkgconfig file: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/polyclipping_x64-windows/debug/lib/pkgconfig/polyclipping.pc
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/polyclipping_x64-windows/share/clipper/FindCLIPPER.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/polyclipping_x64-windows/share/clipper/vcpkg-cmake-wrapper.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/polyclipping_x64-windows/share/polyclipping/copyright
+  -- Fixing pkgconfig file: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/polyclipping_x64-windows/lib/pkgconfig/polyclipping.pc
+  -- Fixing pkgconfig file: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/polyclipping_x64-windows/debug/lib/pkgconfig/polyclipping.pc
+  -- Performing post-build validation
+  Starting submission of polyclipping:x64-windows@6.4.2#13 to 1 binary cache(s) in the background
+  Elapsed time to handle polyclipping:x64-windows: 18 s
+  polyclipping:x64-windows package ABI: bdb9f79833cd222277755ae081184e58b1b52dfae97393bf9693dfe342ab95b5
+  Completed submission of pugixml:x64-windows@1.16 to 1 binary cache(s) in 229 ms
+  Installing 9/13 vcpkg-cmake-get-vars:x64-windows@2025-05-29...
+  Building vcpkg-cmake-get-vars:x64-windows@2025-05-29...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\d6510f888dd526c7828f6b973349e7f30be51254: info: installing from git registry git+https://github.com/microsoft/vcpkg@d6510f888dd526c7828f6b973349e7f30be51254
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/vcpkg_cmake_get_vars.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/cmake_get_vars
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/cmake_get_vars/CMakeLists.txt
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/cmake-get-vars.cmake.in
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/vcpkg-port-config.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/vcpkg-cmake-get-vars_x64-windows/share/vcpkg-cmake-get-vars/copyright
+  -- Performing post-build validation
+  Starting submission of vcpkg-cmake-get-vars:x64-windows@2025-05-29 to 1 binary cache(s) in the background
+  Elapsed time to handle vcpkg-cmake-get-vars:x64-windows: 80.9 ms
+  vcpkg-cmake-get-vars:x64-windows package ABI: f79528f5a0981a67ad5038aa748e4422f49d082e7d253b1b31ae1fde6601de0b
+  Installing 10/13 minizip:x64-windows@1.3.2...
+  Building minizip:x64-windows@1.3.2...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\b485c18ad5b9ce53d790be6875324577d308e8b1: info: installing from git registry git+https://github.com/microsoft/vcpkg@b485c18ad5b9ce53d790be6875324577d308e8b1
+  -- Using cached madler-zlib-v1.3.2.tar.gz
+  -- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/madler-zlib-v1.3.2.tar.gz
+  -- Applying patch pkgconfig.patch
+  -- Applying patch install-tools.diff
+  -- Applying patch restore-32bit.diff
+  -- Applying patch unofficial-iowin32.diff
+  -- Applying patch header-destination.diff
+  -- Using source at E:/Engine/Engine/vcpkg_installed/vcpkg/blds/minizip/src/v1.3.2-355bf577a0.clean
+  -- Configuring x64-windows
+  -- Building x64-windows-dbg
+  -- Building x64-windows-rel
+  -- Fixing pkgconfig file: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/minizip_x64-windows/lib/pkgconfig/minizip.pc
+  -- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst
+  -- Using cached msys2-msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst
+  -- Using msys root at C:/Users/serge/AppData/Local/vcpkg/downloads/tools/msys2/9272adbcaf19caef
+  -- Fixing pkgconfig file: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/minizip_x64-windows/debug/lib/pkgconfig/minizip.pc
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/minizip_x64-windows/share/minizip/copyright
+  -- Performing post-build validation
+  Starting submission of minizip:x64-windows@1.3.2 to 1 binary cache(s) in the background
+  Elapsed time to handle minizip:x64-windows: 11 s
+  minizip:x64-windows package ABI: e83f7c2b703caae04ff3e0afe119b5878746d4c7a7471577a1ba789c1a206592
+  Completed submission of polyclipping:x64-windows@6.4.2#13 to 1 binary cache(s) in 287 ms
+  Completed submission of vcpkg-cmake-get-vars:x64-windows@2025-05-29 to 1 binary cache(s) in 42.2 ms
+  Installing 11/13 kubazip:x64-windows@0.3.15...
+  Building kubazip:x64-windows@0.3.15...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\ca5503c1bd9dd8d574ddf6010ff0a88ccbd1cf29: info: installing from git registry git+https://github.com/microsoft/vcpkg@ca5503c1bd9dd8d574ddf6010ff0a88ccbd1cf29
+  Downloading https://github.com/kuba--/zip/archive/v0.3.15.tar.gz -> kuba---zip-v0.3.15.tar.gz
+  Successfully downloaded kuba---zip-v0.3.15.tar.gz
+  -- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/kuba---zip-v0.3.15.tar.gz
+  -- Applying patch fix-name-conflict.diff
+  -- Applying patch disable-werror.patch
+  -- Applying patch fix-project-version.patch
+  -- Using source at E:/Engine/Engine/vcpkg_installed/vcpkg/blds/kubazip/src/v0.3.15-3d1fad8ad9.clean
+  -- Configuring x64-windows
+  -- Building x64-windows-dbg
+  -- Building x64-windows-rel
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/kubazip_x64-windows/share/kubazip/kubazipConfig.cmake
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/kubazip_x64-windows/share/kubazip/usage
+  -- Performing post-build validation
+  Starting submission of kubazip:x64-windows@0.3.15 to 1 binary cache(s) in the background
+  Elapsed time to handle kubazip:x64-windows: 11 s
+  kubazip:x64-windows package ABI: 2dba0fa68c739ab7eac294d705140a2604dd1f7a1bc28f9f2c6097c9b127de46
+  Completed submission of minizip:x64-windows@1.3.2 to 1 binary cache(s) in 125 ms
+  Installing 12/13 jhasse-poly2tri:x64-windows@2023-12-27#2...
+  Building jhasse-poly2tri:x64-windows@2023-12-27#2...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\d94a24dde4173f85d1aaeb16b3eecc71b100b5be: info: installing from git registry git+https://github.com/microsoft/vcpkg@d94a24dde4173f85d1aaeb16b3eecc71b100b5be
+  Downloading https://github.com/jhasse/poly2tri/archive/0171f030bd3d5c6747c29d93403546eed668a1b6.tar.gz -> jhasse-poly2tri-0171f030bd3d5c6747c29d93403546eed668a1b6.tar.gz
+  Successfully downloaded jhasse-poly2tri-0171f030bd3d5c6747c29d93403546eed668a1b6.tar.gz
+  -- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/jhasse-poly2tri-0171f030bd3d5c6747c29d93403546eed668a1b6.tar.gz
+  -- Applying patch cmake.patch
+  -- Using source at E:/Engine/Engine/vcpkg_installed/vcpkg/blds/jhasse-poly2tri/src/eed668a1b6-2f597c27ae.clean
+  -- Configuring x64-windows
+  -- Building x64-windows-dbg
+  -- Building x64-windows-rel
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/jhasse-poly2tri_x64-windows/share/jhasse-poly2tri/usage
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/jhasse-poly2tri_x64-windows/share/jhasse-poly2tri/copyright
+  -- Performing post-build validation
+  Starting submission of jhasse-poly2tri:x64-windows@2023-12-27#2 to 1 binary cache(s) in the background
+  Elapsed time to handle jhasse-poly2tri:x64-windows: 14 s
+  jhasse-poly2tri:x64-windows package ABI: 440db848c41bec6cd51f4d2852691025f3b2da720c8648050c2d90dbfaeab2df
+  Completed submission of kubazip:x64-windows@0.3.15 to 1 binary cache(s) in 90.7 ms
+  Installing 13/13 assimp:x64-windows@6.0.4#3...
+  Building assimp:x64-windows@6.0.4#3...
+  C:\Users\serge\AppData\Local\vcpkg\registries\git-trees\327397e12c4348d0a3637b297501126c3d715b68: info: installing from git registry git+https://github.com/microsoft/vcpkg@327397e12c4348d0a3637b297501126c3d715b68
+  Downloading https://github.com/assimp/assimp/archive/v6.0.4.tar.gz -> assimp-assimp-v6.0.4.tar.gz
+  Successfully downloaded assimp-assimp-v6.0.4.tar.gz
+  -- Extracting source C:/Users/serge/AppData/Local/vcpkg/downloads/assimp-assimp-v6.0.4.tar.gz
+  -- Applying patch build_fixes.patch
+  -- Using source at E:/Engine/Engine/vcpkg_installed/vcpkg/blds/assimp/src/v6.0.4-ae4a96b033.clean
+  -- Configuring x64-windows
+  -- Building x64-windows-dbg
+  -- Building x64-windows-rel
+  -- Fixing pkgconfig file: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/assimp_x64-windows/lib/pkgconfig/assimp.pc
+  -- Using cached msys2-mingw-w64-x86_64-pkgconf-1~2.4.3-1-any.pkg.tar.zst
+  -- Using cached msys2-msys2-runtime-3.6.2-2-x86_64.pkg.tar.zst
+  -- Using msys root at C:/Users/serge/AppData/Local/vcpkg/downloads/tools/msys2/9272adbcaf19caef
+  -- Fixing pkgconfig file: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/assimp_x64-windows/debug/lib/pkgconfig/assimp.pc
+  -- Installing: E:/Engine/Engine/vcpkg_installed/vcpkg/pkgs/assimp_x64-windows/share/assimp/copyright
+  -- Performing post-build validation
+  Starting submission of assimp:x64-windows@6.0.4#3 to 1 binary cache(s) in the background
+  Elapsed time to handle assimp:x64-windows: 2.9 min
+  assimp:x64-windows package ABI: 75bf3532ad54b92cadd535785c54a4807bb7b09b21b8f46b1e19f8a8e47147d6
+  Installed contents are licensed to you by owners. Microsoft is not responsible for, nor does it grant any licenses to, third-party packages.
+  Packages installed in this vcpkg installation declare the following licenses:
+  (MIT OR CC-PDDC)
+  BSD-3-Clause
+  BSL-1.0
+  MIT
+  Zlib
+  assimp provides CMake targets:
+  
+    # this is heuristically generated, and may not be correct
+    find_package(assimp CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE assimp::assimp)
+  
+  assimp provides pkg-config modules:
+  
+    # Import various well-known 3D model formats in an uniform manner.
+    assimp
+  
+  Completed submission of jhasse-poly2tri:x64-windows@2023-12-27#2 to 1 binary cache(s) in 68.3 ms
+  Waiting for 1 remaining binary cache submissions...
+  Completed submission of assimp:x64-windows@6.0.4#3 to 1 binary cache(s) in 11 s (1/1)
+  All requested installations completed successfully in: 4.8 min
+  Base.cpp
+  DirectionalLightComponent.cpp
+  Scene.cpp
+  Trace.cpp
+  ComponentTrace.cpp
+  StandardSky.cpp
+  GameTrace.cpp
+  SceneCommands.cpp
+  SceneDocument.cpp
+  SceneAssets.cpp
+  ModelImport.cpp
+  BlendImport.cpp
+  SceneEditAssets.cpp
+  SceneEditMaterials.cpp
+  SceneEditSession.cpp
+  SceneEditBatch.cpp
+  SceneAuthoring.cpp
+  AssetUpdate.cpp
+  GameEditModule.cpp
+  BaseResources.cpp
+  BaseGameConfig.cpp
+  GameComponents.cpp
+  CubeMap.cpp
+E:\Engine\Engine\Source\Base\Base.cpp(736,26): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [E:\Engine\Engine\Engine.vcxproj]
+  CubeComponent.cpp
+  FBXComponent.cpp
+  InstancedMeshComponent.cpp
+  MeshComponent.cpp
+  InstancedMeshSkinned.cpp
+  InstancedMeshImpostor.cpp
+  InstancedMeshShadows.cpp
+  ParticleSystemComponent.cpp
+  SphereComponent.cpp
+  TriangleComponent.cpp
+  UIComponent.cpp
+  Display.cpp
+  Delegates.cpp
+  InputDevice.cpp
+  InputActions.cpp
+  Character.cpp
+  CharacterController.cpp
+  GameSession.cpp
+  Game.cpp
+  Player.cpp
+  ImpostorAtlas.cpp
+  Material.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(388,82): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(388,82): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp) [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Components\SpecificComponents\InstancedMeshComponent.cpp(44,106): message : выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 &std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::emplace_back<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(858,24): message : выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(776,20): message : выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(791,13): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Construct_in_place<DirectX::XMFLOAT4,_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 &,_Ty &&,_Ty &&,_Ty &&,_Ty &&) noexcept" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xmemory(700,103): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xmemory(700,103): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp) [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(779,17): message : выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 *std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::_Emplace_reallocate<_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 *const ,_Ty &&,_Ty &&,_Ty &&,_Ty &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(830,23): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Default_allocator_traits<_Alloc>::construct<_Ty,int,int,int,int>(_Alloc &,_Objty *const ,int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Alloc=std::allocator<DirectX::XMFLOAT4>,
+              _Ty=DirectX::XMFLOAT4,
+              _Objty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+  MaterialAsset.cpp
+  MeshPrimitives.cpp
+  MeshSimplifier.cpp
+  MeshValidation.cpp
+  FontAtlas.cpp
+  UIElement.cpp
+  UIMarkup.cpp
+  allocator.cpp
+  indexgenerator.cpp
+  simplifier.cpp
+  spatialorder.cpp
+  vcacheoptimizer.cpp
+  vfetchoptimizer.cpp
+  TextureLoader.cpp
+  ShaderCompiler.cpp
+  SkeletalAnimation.cpp
+  SkeletalBaker.cpp
+  SkeletalLoaderAssimp.cpp
+  SkeletalMeshComponent.cpp
+  Paths.cpp
+  VirtualFileSystem.cpp
+  VfsRead.cpp
+  LocalVfs.cpp
+  HostVfsProxy.cpp
+  VfsService.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(388,82): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(388,82): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp) [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Components\SpecificComponents\SkeletalMeshComponent.cpp(81,49): message : выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 &std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::emplace_back<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(858,24): message : выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(776,20): message : выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(791,13): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Construct_in_place<DirectX::XMFLOAT4,_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 &,_Ty &&,_Ty &&,_Ty &&,_Ty &&) noexcept" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xmemory(700,103): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xmemory(700,103): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp) [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(779,17): message : выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 *std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::_Emplace_reallocate<_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 *const ,_Ty &&,_Ty &&,_Ty &&,_Ty &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(830,23): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Default_allocator_traits<_Alloc>::construct<_Ty,int,int,int,int>(_Alloc &,_Objty *const ,int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Alloc=std::allocator<DirectX::XMFLOAT4>,
+              _Ty=DirectX::XMFLOAT4,
+              _Objty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(4672,18): warning C4244: =: преобразование "const wchar_t" в "char", возможна потеря данных (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp) [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(4672,18): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp) [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\MainGame\BaseGameClass\Game.cpp(694,21): message : выполняется компиляция ссылки на экземпляр шаблон функции "std::basic_string<char,std::char_traits<char>,std::allocator<char>> &std::basic_string<char,std::char_traits<char>,std::allocator<char>>::assign<std::_String_const_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(const _Iter,const _Iter)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Elem=wchar_t,
+              _Iter=std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t>>>
+          ]
+E:\Engine\Engine\Source\MainGame\BaseGameClass\Game.cpp(694,27): message : см. первую ссылку на "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::assign" в "Game::CreateDeviceAndSwapChain" [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xstring(3466,32): message : выполняется компиляция ссылки на экземпляр шаблон функции "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<const wchar_t*,0>(_Iter,_Iter,const _Alloc &)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Iter=const wchar_t *,
+              _Alloc=std::allocator<char>
+          ] (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xstring(2603,17): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<const wchar_t*,const wchar_t*,_Size_type>(_Iter,const _Sent,_Size)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Size_type=unsigned __int64,
+              _Iter=const wchar_t *,
+              _Sent=const wchar_t *,
+              _Size=unsigned __int64
+          ] (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xstring(2759,18): message : выполняется компиляция ссылки на экземпляр шаблон функции "_OutIt *std::_Copy_n_unchecked4<const wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _OutIt=char *,
+              _Size=unsigned __int64,
+              _InIt=const wchar_t *,
+              _SizeTy=unsigned __int64
+          ] (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp)
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Editor.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator.vcxproj -> E:\Engine\Engine\build\x64\Release\ComponentGenerator.exe
+  ComponentGenerator: 2 component(s), RuntimeExample
+  Module.cpp
+  GeneratedComponents.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Projects/RuntimeExample/Game.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Projects/RuntimeExample/Game.exp
+  RuntimeExample.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Projects\RuntimeExample\Game.dll
+  Module.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Templates/SceneProject/Game.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Templates/SceneProject/Game.exp
+  SceneProject.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Templates\SceneProject\Game.dll
+  Main.cpp
+  Project.cpp
+  PreviewScenes.cpp
+  OrderedSceneGame.cpp
+  TrianglesScene.cpp
+  PongGame.cpp
+  PongScene.cpp
+  Ball.cpp
+  Rocket.cpp
+  Wall.cpp
+  SunGame.cpp
+  BattleGame.cpp
+  BattleBench.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineRuntime.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineRuntime.exp
+  EngineRuntime.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\EngineRuntime.exe
+  EngineLauncher.vcxproj -> E:\Engine\Game\build\x64\Release\EngineLauncher.exe
+

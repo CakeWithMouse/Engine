@@ -1,0 +1,10 @@
+{
+    "buildSucceeded": false,
+    "console": "[20:53:27.374] C++: Build\n[20:53:29.800]   The vcpkg manifest was disabled, but we found a manifest file in E:\\Engine\\Engine\\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.\n\n[20:53:29.800]   ComponentGenerator: 3 component(s), Project\n\n[20:53:29.800]   ProjectComponent.cpp\n\n[20:53:29.800] E:\\Engine\\Engine\\build\\assimp-enable\\cpp-final\\Project\\Source\\ProjectComponent.cpp(5,1): error C1189: #error:  Кириллица_проверка_сборки [E:\\Engine\\Engine\\build\\assimp-enable\\cpp-final\\Project\\Game.vcxproj]\n\n[20:53:29.800] Full build log: E:\\Engine\\Engine\\build\\assimp-enable\\cpp-final\\Project\\Binaries\\Release\\a2524377a87a49c49e69888e4072038d\\build.log\n\n[20:53:29.895] Project build failed; previous module preserved\n\n[20:53:29.895] E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\SDK\\ProjectTools.ps1:294 знак:31\n\n[20:53:29.895] + ... ExitCode) { throw 'Project build failed; previous module preserved' } ...\n\n[20:53:29.895] +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n[20:53:29.895]     + CategoryInfo          : OperationStopped: (Project build f...odule preserved:String) [], RuntimeException\n\n[20:53:29.895]     + FullyQualifiedErrorId : Project build failed; previous module preserved\n\n[20:53:29.960] [Ошибка C++] Build: код завершения 1. Проект: E:/Engine/Engine/build/assimp-enable/cpp-final/Project/Project.json",
+    "dialogs": [
+        "Операция не завершена. Предыдущая DLL сохранена. Диагностика находится в Console."
+    ],
+    "ok": false,
+    "replaced": false,
+    "windowEnabled": true
+}

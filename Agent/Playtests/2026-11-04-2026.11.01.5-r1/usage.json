@@ -1,0 +1,39 @@
+{
+  "startedAt": "2026-11-04T09:54:08.727Z",
+  "baseline": {
+    "usedPercent": 0,
+    "windowDurationMins": 10080,
+    "resetsAt": 1794317816
+  },
+  "checkpoints": [
+    {
+      "usedPercent": 1,
+      "phase": "preparation"
+    },
+    {
+      "usedPercent": 6,
+      "phase": "four-games-ui-and-build-blockers",
+      "observedAt": "2026-11-04T10:42:39.2854851Z"
+    },
+    {
+      "usedPercent": 10,
+      "phase": "remaining-user-workflows"
+    },
+    {
+      "usedPercent": 12,
+      "phase": "final",
+      "observedAt": "2026-11-04T11:28:06.797054+00:00"
+    },
+    {
+      "usedPercent": 13,
+      "phase": "delivery-after-clean-archive-builds",
+      "observedAt": "2026-11-04T11:31:41.086966+00:00"
+    }
+  ],
+  "maxDeltaPercentagePoints": 30,
+  "stopNewWorkAtDelta": 25,
+  "note": "Account-wide rounded metric; not exact per-chat attribution.",
+  "finalUsedPercent": 13,
+  "observedDeltaPercentagePoints": 13,
+  "stoppedForBudget": false
+}

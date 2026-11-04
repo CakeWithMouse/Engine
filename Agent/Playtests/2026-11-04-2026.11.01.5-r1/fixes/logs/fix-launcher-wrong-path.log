@@ -1,0 +1,4 @@
+Using installed platform toolset: v143
+MSBUILD : error MSB1009: файл проекта не существует.
+Ключ: Game/Launcher/Launcher.vcxproj
+

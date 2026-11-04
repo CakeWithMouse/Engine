@@ -1,0 +1,67 @@
+[
+  {
+    "role": 3,
+    "feature": "scene-select",
+    "status": "passed",
+    "action": "Select Cube in hierarchy",
+    "actual": "Row highlighted, gold bounds, inspector reports Cube ID2",
+    "evidence": "ui-evidence/bomber-selected-clipped-inspector.png"
+  },
+  {
+    "role": 3,
+    "feature": "scene-properties",
+    "status": "failed",
+    "action": "Inspect default-window transforms",
+    "actual": "Z fields clipped; maximize reveals them",
+    "issue": "BUG-001",
+    "evidence": "ui-evidence/bomber-selected-clipped-inspector.png"
+  },
+  {
+    "role": 3,
+    "feature": "render-resize",
+    "status": "passed",
+    "action": "Maximize editor 1282x752 → 1920x1032",
+    "actual": "D3D viewport resized and continued rendering",
+    "evidence": "ui-evidence/bomber-maximized.png"
+  },
+  {
+    "role": 3,
+    "feature": "play",
+    "status": "passed",
+    "action": "Play, Pause, wait, resume Play, Stop",
+    "actual": "Moving units and misses counter stop at 6 during pause, resume to 14, Stop restores original 4 objects",
+    "evidence": "ui-evidence/bomber-play.png;ui-evidence/bomber-paused.png;ui-evidence/bomber-resumed.png;ui-evidence/bomber-stopped.png;tired-bomber/ui-editor-gameplay.log"
+  },
+  {
+    "role": 3,
+    "feature": "camera-orthographic",
+    "status": "passed",
+    "action": "Play project orthographic XZ scene",
+    "actual": "Top-down arena and moving units displayed",
+    "evidence": "ui-evidence/bomber-play.png"
+  },
+  {
+    "role": 3,
+    "feature": "hud-elements",
+    "status": "passed-partial",
+    "action": "Read UI panel/label during Play",
+    "actual": "HUD readable, counter updates; Bar/Button not yet exercised",
+    "evidence": "ui-evidence/bomber-play.png"
+  },
+  {
+    "role": 2,
+    "feature": "subsystem",
+    "status": "passed-partial",
+    "action": "Run economy standalone",
+    "actual": "Three houses created; income increases balance by30 each simulated second; no cross-scene test",
+    "evidence": "curious-city/runtime-observed.log"
+  },
+  {
+    "role": 2,
+    "feature": "external",
+    "status": "passed",
+    "action": "Run standalone and close normally",
+    "actual": "3 coloured houses rendered; exit0",
+    "evidence": "ui-evidence/curious-game-initial.png;curious-city/ui-game.log"
+  }
+]

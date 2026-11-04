@@ -4,6 +4,8 @@
 #include "Catalog.h"
 #include "../../Common/Deployment.h"
 #include <iostream>
+#include <cwchar>
+#include <vector>
 #include <shobjidl.h>
 #include <shlobj.h>
 #include <wrl/client.h>
@@ -34,6 +36,17 @@ void RunProjectCodeTool(const std::filesystem::path& project, const wchar_t* act
     auto command = std::wstring(L"powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"") + script.wstring() +
         L"\" -Action " + action + L" -Project \"" + project.wstring() + L"\" -Runtime \"" + release.runtime.wstring() + L"\"";
     const auto logPath = project.parent_path() / "CodeBuild.log";
+    // A launcher started by PowerShell 7 inherits its module search path.
+    // Let Windows PowerShell discover compatible modules (including Get-FileHash).
+    auto* inherited = GetEnvironmentStringsW();
+    if (!inherited) throw std::runtime_error("Cannot read environment for C++ project tools");
+    std::vector<wchar_t> environment;
+    for (const wchar_t* entry = inherited; *entry; entry += std::wcslen(entry) + 1) {
+        if (_wcsnicmp(entry, L"PSModulePath=", 13) != 0)
+            environment.insert(environment.end(), entry, entry + std::wcslen(entry) + 1);
+    }
+    FreeEnvironmentStringsW(inherited);
+    environment.push_back(L'\0');
     SECURITY_ATTRIBUTES attributes{sizeof(attributes), nullptr, TRUE};
     HANDLE log = CreateFileW(logPath.c_str(), GENERIC_WRITE, FILE_SHARE_READ, &attributes, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (log == INVALID_HANDLE_VALUE) throw std::runtime_error("Cannot create CodeBuild.log");
@@ -41,7 +54,8 @@ void RunProjectCodeTool(const std::filesystem::path& project, const wchar_t* act
     startup.hStdOutput = startup.hStdError = log;
     startup.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
     PROCESS_INFORMATION process{};
-    const auto started = CreateProcessW(nullptr, command.data(), nullptr, nullptr, TRUE, CREATE_NO_WINDOW, nullptr, project.parent_path().c_str(), &startup, &process);
+    const auto started = CreateProcessW(nullptr, command.data(), nullptr, nullptr, TRUE,
+        CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, environment.data(), project.parent_path().c_str(), &startup, &process);
     CloseHandle(log);
     if (!started) throw std::runtime_error("Cannot start C++ project tools");
     const auto wait = WaitForSingleObject(process.hProcess, 600000);

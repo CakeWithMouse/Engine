@@ -1,0 +1,26 @@
+[
+  {
+    "archive": "reports/sideprobes/calm-city-final.zip",
+    "result": "clean-build-passed",
+    "module": "Binaries/Release/a9684902ef50470e8f50bfd5705e8313/Game.dll",
+    "log": "reports/evidence/archive-restore/calm-city-final-build.log"
+  },
+  {
+    "archive": "reports/sideprobes/curious-city-final.zip",
+    "result": "clean-build-passed",
+    "module": "Binaries/Release/c1265ccb5256464b9a03537affbdd012/Game.dll",
+    "log": "reports/evidence/archive-restore/curious-city-final-build.log"
+  },
+  {
+    "archive": "reports/sideprobes/tired-bomber-final.zip",
+    "result": "clean-build-passed",
+    "module": "Binaries/Release/7f96878b0f3e423f8f5ac58ae53c96f7/Game.dll",
+    "log": "reports/evidence/archive-restore/tired-bomber-final-build.log"
+  },
+  {
+    "archive": "reports/sideprobes/ai-trash-final.zip",
+    "result": "clean-build-passed",
+    "module": "Binaries/Release/da25ea54f609482f97eee480acfc49f1/Game.dll",
+    "log": "reports/evidence/archive-restore/ai-trash-final-build.log"
+  }
+]

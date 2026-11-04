@@ -1,0 +1,30 @@
+[
+  {
+    "editor": true,
+    "project": "calm-city-final",
+    "game": true,
+    "build": true,
+    "version": "2026.11.04.0"
+  },
+  {
+    "editor": true,
+    "project": "curious-city-final",
+    "game": true,
+    "build": true,
+    "version": "2026.11.04.0"
+  },
+  {
+    "editor": true,
+    "project": "tired-bomber-final",
+    "game": true,
+    "build": true,
+    "version": "2026.11.04.0"
+  },
+  {
+    "editor": true,
+    "project": "ai-trash-final",
+    "game": true,
+    "build": true,
+    "version": "2026.11.04.0"
+  }
+]

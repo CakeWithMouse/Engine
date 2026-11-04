@@ -1,0 +1,56 @@
+Project: TrashGame
+Mode: editor
+PreviewScene: none
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Game/build/x64/Release/Runtime/EngineContent'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Content'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+EditorCreate
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 0, handler = 0000000000000000
+EditorStart
+TrashGame
+E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Project.json
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=0 | snapObjs=11 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=3 | tris=0
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+EditorSceneViewportAttach ok
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=11 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=3 | tris=0
+Successfully registered shader: E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=138, billboardCount=3, backbuffer 713x423
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 713x423
+EngineFrame (edit scene API)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=11 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=3 | tris=0
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=3, backbuffer 713x423
+[Info] Frame 121: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=3, backbuffer 713x423
+[Info] Frame 241: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=3, backbuffer 713x423
+[Info] Frame 361: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=3, backbuffer 713x423
+[Info] Frame 481: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=3, backbuffer 713x423
+[Info] Frame 601: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=3, backbuffer 713x423
+[Info] Frame 721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=3, backbuffer 713x423
+[Info] Frame 841: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=3, backbuffer 713x423
+[Info] Frame 961: AntialiasingMode = 1 (FXAA), bb = 713x423

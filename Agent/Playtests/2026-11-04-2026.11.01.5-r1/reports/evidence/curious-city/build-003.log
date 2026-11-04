@@ -1,0 +1,10 @@
+
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 5 component(s), Project
+  CityEconomySubsystem.cpp
+     Создается библиотека E:\Engine\Engine\build\playtests\20261104-r1\curious-city\Project\Binaries\Release\436fb5f3f98c47cb9111eebe80bf331e\Game.lib и объект E:\Engine\Engine\build\playtests\20261104-r1\curious-city\Project\Binaries\Release\436fb5f3f98c47cb9111eebe80bf331e\Game.exp
+  Game.vcxproj -> E:\Engine\Engine\build\playtests\20261104-r1\curious-city\Project\Binaries\Release\436fb5f3f98c47cb9111eebe80bf331e\Game.dll
+
+
+Full build log: E:\Engine\Engine\build\playtests\20261104-r1\curious-city\Project\Binaries\Release\436fb5f3f98c47cb9111eebe80bf331e\build.log
+Build validated and activated. Use Hot Reload in the editor, or reopen the project.

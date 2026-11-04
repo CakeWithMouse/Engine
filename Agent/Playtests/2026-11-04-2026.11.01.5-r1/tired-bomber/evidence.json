@@ -1,0 +1,431 @@
+{
+  "role": "3-tired-bomber",
+  "engine_version": "2026.11.01.5",
+  "configuration": "Release v143",
+  "project": "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber",
+  "engine_store": "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/EngineStore",
+  "evidence": [
+    {
+      "feature_id": "create-nocode",
+      "status": "passed",
+      "action": "EngineLauncher --create-project <project> TiredBomber",
+      "expected": "Create a normal user project with an editable Main scene",
+      "actual": "Created Project.json, Engine.lock.json and Content/Scenes/Main.scene.json",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Project.json",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/Scenes/Main.scene.json"
+      ]
+    },
+    {
+      "feature_id": "enable-cpp",
+      "status": "passed",
+      "action": "ProjectTools.ps1 -Action Enable",
+      "expected": "Add the release SDK and generated game/component scaffold",
+      "actual": "Source, Game.sln, Game.vcxproj, Build.ps1, Project.code.json and candidate build directory were created",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Project.code.json",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source"
+      ]
+    },
+    {
+      "feature_id": "build-activate",
+      "status": "passed",
+      "action": "ProjectTools.ps1 -Action Build; final candidate cd9dd... later 039df... activated",
+      "expected": "Build candidate, validate startup and activate the custom Game",
+      "actual": "Final build 039df3748af84482bb5a7b3301b68f50 validated and activated",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Build-attempt-10.log",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Project.code.json"
+      ]
+    },
+    {
+      "feature_id": "project-game",
+      "status": "passed",
+      "action": "Selected annotated TiredBomber.Game via generated catalog/default; launched game and editor smoke",
+      "expected": "Project Game is used by saved project runtime",
+      "actual": "Logs include GameStart and TiredBomber initialization; game/editor smoke both exit 0",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Binaries/Release/039df3748af84482bb5a7b3301b68f50/startup.log",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Smoke-final-game.log",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Smoke-final-editor.log"
+      ]
+    },
+    {
+      "feature_id": "camera-orthographic",
+      "status": "passed",
+      "action": "SceneCamera orthographic=true, viewPlane=2 XZ, orthoHeight=24; requested frame dump",
+      "expected": "Top-down flat viewport and visible arena",
+      "actual": "1000x500 frame shows the ground plane and four target units",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-frame.bmp",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-07.log"
+      ]
+    },
+    {
+      "feature_id": "trace-world",
+      "status": "passed",
+      "action": "Each falling bomb makes Scene::Raycast with Trace::Geometry::Exact and ignores its own ComponentId",
+      "expected": "Hit a target CPU primitive during the descent",
+      "actual": "Long runtime produced five confirmed unit hits; latest short run hit unit ID 4 at t=1.95s",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-05.log",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-09.log"
+      ]
+    },
+    {
+      "feature_id": "trace-filter",
+      "status": "passed",
+      "action": "Query same vertical ray with channels 1 and 2",
+      "expected": "Default floor responds to channel 1; unit set to channel 2 responds to channel 2",
+      "actual": "Logs report channel=1 -> ground and channel=2 -> unit",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-05.log"
+      ]
+    },
+    {
+      "feature_id": "trace-debug",
+      "status": "partial",
+      "action": "Call DebugDrawTrace(ray,result,0.15f) on each bomb query and inspect hit dump",
+      "expected": "Render ray and hit marker in the game view",
+      "actual": "API call executes alongside valid Hit results; vertical ray overlaps the top-down view and is not visibly separable in the saved frame",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.cpp",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-hit-1.bmp"
+      ]
+    },
+    {
+      "feature_id": "scene-create-delete",
+      "status": "passed",
+      "action": "Create floor-adjacent runtime components, bomb and particles; remove bomb and expire particles",
+      "expected": "Game can create, look up and remove temporary scene components",
+      "actual": "Bomb components resolve by returned ID, hit, then are removed; 150-frame run exits normally",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.cpp",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-09.log"
+      ]
+    },
+    {
+      "feature_id": "scene-save-load",
+      "status": "passed",
+      "action": "Save Main.scene.json with one floor and two lights, then reload via game/editor smoke",
+      "expected": "Saved static scene opens again with the project DLL",
+      "actual": "Both final CLI smoke modes exit 0; startup/validate error logs are empty",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/Scenes/Main.scene.json",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Smoke-final-game.error.log",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Smoke-final-editor.error.log"
+      ]
+    },
+    {
+      "feature_id": "play",
+      "status": "passed",
+      "action": "Coordinator used editor Play/Pause/Resume/Stop on the bomber scene",
+      "expected": "Simulation stops on Pause, continues on Resume and returns to edit scene on Stop",
+      "actual": "Coordinator reported counter/positions froze at 6 during Pause, then continued to 14 and Stop restored the four saved template objects",
+      "evidence": [
+        "Coordinator observation reported in chat; reference screenshot names bomber-play.png, bomber-paused.png, bomber-resumed.png and bomber-stopped.png"
+      ]
+    },
+    {
+      "feature_id": "input",
+      "status": "not-tested",
+      "action": "Bound B in Game context to request an immediate drop",
+      "expected": "Press B and observe the action event and earlier bomb",
+      "actual": "Binding compiled and runtime launched, but no confirmed key event was recorded",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.cpp"
+      ]
+    },
+    {
+      "feature_id": "character",
+      "status": "not-tested",
+      "action": "Added controlled Character at (-10,0.5,5), fixed SceneCamera reference",
+      "expected": "PlayerCharacter can be possessed and controlled",
+      "actual": "Character constructed and scene startup succeeded; no keyboard motion observation recorded",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.cpp"
+      ]
+    },
+    {
+      "feature_id": "controller",
+      "status": "not-tested",
+      "action": "Enabled standard CharacterController W/A/S/D mapping",
+      "expected": "Press movement keys and see Character position change",
+      "actual": "Controller initialized in smoke/runtime but actual keys were not confirmed",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.cpp"
+      ]
+    },
+    {
+      "feature_id": "instances",
+      "status": "passed",
+      "action": "Create 13 MeshInstance values; one bVisible=false and one outside the camera frustum within draw distance",
+      "expected": "Count differs from total as visibility/frustum filters remove instances",
+      "actual": "Runtime logs 11 drawn from 13 total",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-05.log"
+      ]
+    },
+    {
+      "feature_id": "lod",
+      "status": "partial",
+      "action": "SetAutoLod ratios 0.5/0.25, distances 9/17 and LOD debug colors",
+      "expected": "Three levels generated and selected by camera distance",
+      "actual": "Three levels exist; simplifier emitted 12→12 triangles at each level and all visible markers selected LOD2 in overhead camera",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-05.log"
+      ]
+    },
+    {
+      "feature_id": "mesh-tools",
+      "status": "partial",
+      "action": "Run default and adjusted ValidateMesh plus SimplifyMesh on procedural cube",
+      "expected": "Read contract failures and evaluate a generated coarse mesh",
+      "actual": "Default unit profile rejects pivot y=-0.50m; adjusted cube profile is usable; simplification does not reduce already minimal 12-triangle cube",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-05.log"
+      ]
+    },
+    {
+      "feature_id": "particles",
+      "status": "passed",
+      "action": "On actual hit, add 256 GPU sparks for 1.4 seconds",
+      "expected": "Visible short burst at impact",
+      "actual": "Delayed hit dump visibly shows orange burst; runtime exit 0",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-hit-1.bmp",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-09.log"
+      ]
+    },
+    {
+      "feature_id": "particle-collision",
+      "status": "partial",
+      "action": "Configure depth collision, bounce=0.25, friction=0.2, sorting enabled",
+      "expected": "Observe particles reacting to world depth and sorted alpha",
+      "actual": "Burst renders; collision/sort response was not isolated or observed separately",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.cpp",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-hit-1.bmp"
+      ]
+    },
+    {
+      "feature_id": "hud-elements",
+      "status": "passed",
+      "action": "Add Panel and named Label and update text each game tick",
+      "expected": "HUD displays hit/miss count",
+      "actual": "Frame dump shows legible HUD and after hit reads hits=1",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-hit-1.bmp"
+      ]
+    },
+    {
+      "feature_id": "hud-layout",
+      "status": "passed",
+      "action": "Pin panel/label TopLeft; enlarge width after clipped first capture",
+      "expected": "Whole counter readable in 1000x500 viewport",
+      "actual": "Final dump displays the complete counter",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-frame.bmp",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/frame-before-light-tuning.bmp"
+      ]
+    },
+    {
+      "feature_id": "game-settings",
+      "status": "passed",
+      "action": "Set VSync=false, AA=1 and Forward; print settings and adapter",
+      "expected": "Read back values and identify graphics adapter",
+      "actual": "In one running session switched VSync 0→1→0, AA 1→0→1 and Forward→Deferred→Custom; both changes and frame dumps were logged, with Deferred shaders compiled.",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-live-settings-runtime.log"
+      ]
+    },
+    {
+      "feature_id": "diagnostics",
+      "status": "partial",
+      "action": "Request frame dump and read Game::GetFrameStats in PreUpdate",
+      "expected": "Write image and expose frame work counters",
+      "actual": "Dump succeeds at 1000x500; counters remain zero at this pre-render hook even while frames draw",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-05.log",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-frame.bmp"
+      ]
+    },
+    {
+      "feature_id": "session",
+      "status": "passed",
+      "action": "Register BomberSessionDiagnostics, query after startup; record lifecycle/ticks",
+      "expected": "Subsystem initializes, becomes accessible, ticks and sees scene closing",
+      "actual": "CPU GameSession probe closed Scene First, attached Scene Second, and observed the same subsystem instance/state (ticks=1, ready=2, closed=1).",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-session-runtime.log E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-build-session.log"
+      ]
+    },
+    {
+      "feature_id": "render-modes",
+      "status": "passed",
+      "action": "Built and launched three isolated variants selecting Forward, Deferred and Custom; also enabled Deferred G-buffer debug overlay",
+      "expected": "Compare documented render modes",
+      "actual": "Forward, Deferred and Custom completed; runtime also switched Forward→Deferred (with G-buffer debug)→Custom at 1s/2s in one 240-frame session without reload. Deferred shaders registered and dumps written.",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-live-settings-runtime.log",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Content/tired-bomber-live-deferred.bmp",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Content/tired-bomber-live-custom.bmp",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-deferred-frame.bmp",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-custom-frame.bmp"
+      ]
+    },
+    {
+      "feature_id": "skeletal",
+      "status": "blocked",
+      "action": "Copied CesiumMan.glb into this project copy and called SkeletalMeshComponent::LoadFromVfs(/Game/Models/CesiumMan.glb)",
+      "expected": "Load model and inspect playback/trace limitation",
+      "actual": "Actual loader returned \"Assimp not enabled\"; model and animation could not be created in this Release runtime.",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Content/Models/CesiumMan.glb E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-deferred-vfs-skeletal.log E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-custom-vfs-skeletal.log"
+      ]
+    },
+    {
+      "feature_id": "light-sun",
+      "status": "not-tested",
+      "action": "Used two Point Lights; no directional light experiment",
+      "expected": "Compare directional lighting",
+      "actual": "Not tested",
+      "evidence": []
+    },
+    {
+      "feature_id": "shadows",
+      "status": "not-tested",
+      "action": "Disabled shadows for this flat test scene",
+      "expected": "Compare shadow distance/cache behavior",
+      "actual": "Not tested",
+      "evidence": []
+    },
+    {
+      "feature_id": "failed-build-rollback",
+      "status": "passed",
+      "action": "Changed valid ProjectGame.cpp, injected IntentionalBuildFailure.cpp, ran SDK Build, compared active DLL hash/path, removed bad file and rebuilt",
+      "expected": "Failed candidate does not replace the previously validated module; deleting error permits a later build",
+      "actual": "C4430/C2146 rejected the invalid file; Project.json.module remained Binaries/Release/90ac519f641e40438e0299383bbbb907/Game.dll and hash was identical; after removing file, build activated 946e31ea4b01407fa71cedb6542c0565/Game.dll.",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-build-intentional-failure.log E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-build-recovery.log E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Project.json E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Project.code.json"
+      ]
+    },
+    {
+      "feature_id": "class-wizard",
+      "status": "passed",
+      "action": "ProjectTools AddClass -Name FeatureProbeComponent -Kind Component -Base ProjectComponent -BaseHeader ProjectComponent.h, then Release Build",
+      "expected": "Create new component subclass with immediate parent calls and catalog registration",
+      "actual": "Wizard generated header and cpp with ProjectComponent::BeginPlay/Tick calls; build passed with ComponentGenerator count 5.",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Source/FeatureProbeComponent.h E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Source/FeatureProbeComponent.cpp E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-build-class.log"
+      ]
+    },
+    {
+      "feature_id": "host-services",
+      "status": "partial",
+      "action": "Observed project-module startup binding and used EngineModuleVfs::Resolve on the copy scene; also read host-generated shader through VFS",
+      "expected": "Obtain host services through broker and use project/engine VFS paths",
+      "actual": "SceneModule adapter queried ENGINE_SERVICE_VFS v1 and bound the host VFS. Game-side EngineModuleVfs resolved/read /Game/Scenes/Main.scene.json (1692 bytes); runtime also read /Engine shader. No direct Game-level host context/getService or generic GetCapabilities accessor exists in the public Game API, so that surface remains an adapter-only capability.",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-session-runtime.log",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-live-settings-runtime.log",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Source/Module.cpp",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Source/ProjectGame.cpp"
+      ]
+    },
+    {
+      "feature_id": "editor-hot-reload-crash-diagnosis",
+      "status": "probable-unconfirmed",
+      "action": "Read-only inspect of qt-crash-stack-scan.log and CodeTools/MainWindow Qt patterns",
+      "expected": "Identify likely safe UI mitigation without editing Engine",
+      "actual": "Partial frames show QAction activate → menu triggered → RunCodeTool → root QWidget::setEnabled(false) → recursive setEnabled_helper → QMenu::changeEvent → QAction::setEnabled fault. QObject parent ownership observed; no proven dangling action. Recommend sceneBusy plus targeted scene-action gating, avoid root disable.",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/qt-crash-stack-scan.log",
+        "E:/Engine/Editor/Source/CodeTools.cpp",
+        "E:/Engine/Editor/Source/MainWindow.cpp"
+      ],
+      "notes": "Diagnosis only, partial unwind; no repro or engine edits by role 3."
+    },
+    {
+      "feature_id": "scene-startup",
+      "status": "passed",
+      "action": "Runtime launch using project startupScene manifest",
+      "expected": "Load configured Main scene and start project Game",
+      "actual": "Project.json startupScene is Content/Scenes/Main.scene.json; runtime log records GameSceneLoaded, GameStart, scene ready: Main, and GetSubsystem after startup=available.",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Project.json",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-09.log"
+      ],
+      "notes": "Runtime-attempt-09 is a real launch log. Final smoke log files are empty and were not used."
+    },
+    {
+      "feature_id": "subsystem",
+      "status": "passed",
+      "action": "Actual GameSession scene lifecycle probe across two scenes",
+      "expected": "Subsystem persists across scene replacement and receives lifecycle/tick notifications",
+      "actual": "Probe log: initialized; SceneReady First; SceneClosing First; SceneReady Second; same=1 ticks=1 ready=2 closed=1 persisted=1; SceneClosing Second.",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-session-runtime.log",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-build-session.log"
+      ],
+      "notes": "This adds subsystem lifecycle coverage alongside the already recorded session feature."
+    },
+    {
+      "feature_id": "input-baseline-coordinates",
+      "status": "built-awaiting-interactive-check",
+      "action": "Add player local-position log every one second for parent UI input run",
+      "expected": "W/D movement yields changed x/z and B requests bomb drop",
+      "actual": "Player-position sampling added and main project Release module build succeeded; no input press/runtime window run by role 3. B subscriber remains present and should print its request event.",
+      "evidence": [
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.cpp",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.h",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-frame.bmp",
+        "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Build-input-baseline.log"
+      ],
+      "notes": "Initial position (-10,0.5,5), white square in saved dump; B listener already logs request. Does not claim keyboard input passed."
+    }
+  ],
+  "unexpected_errors": [
+    {
+      "category": "user-code-error",
+      "action": "First ProjectTools Build",
+      "expected": "Compile ProjectGame.cpp",
+      "actual": "C2013 missing > at include line 7",
+      "resolution": "Fixed <cmath> include; subsequent builds passed",
+      "log": "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Build-attempt-01.log"
+    },
+    {
+      "category": "environment-blocker",
+      "action": "Second ProjectTools Build link step",
+      "expected": "Link candidate DLL",
+      "actual": "LNK1101 wrong MSPDB140.DLL version inside sandbox; exact retry outside sandbox succeeded",
+      "resolution": "No Engine/SDK change; outside-sandbox Build-attempt-03.log succeeded",
+      "log": "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Build-attempt-02.log"
+    },
+    {
+      "category": "user-code-error",
+      "action": "First 900-frame gameplay pass",
+      "expected": "Bombs hit runners",
+      "actual": "Five bombs hit floor because bomb z=0 while target lanes were z≈±2",
+      "resolution": "Choose a unit, start above its current position and follow target XZ during descent; subsequent runs produced five hits",
+      "log": "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-01.log"
+    },
+    {
+      "category": "user-code-visual",
+      "action": "First Game DumpFrame capture",
+      "expected": "Readable flat colored arena/HUD",
+      "actual": "Overexposed floor and truncated HUD",
+      "resolution": "Lowered point light intensity, enlarged floor and HUD; final frame dump readable",
+      "log": "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/frame-before-light-tuning.bmp"
+    }
+  ],
+  "intentional_negative_tests": [
+    {
+      "feature_id": "failed-build-rollback",
+      "action": "In FeatureProbeCopy, add deliberately invalid C++ file and run SDK Build",
+      "expected": "Compiler rejects candidate without activating it",
+      "actual": "C4430 and C2146; active project module path and DLL hash unchanged; valid recovery build later succeeded",
+      "log": "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-build-intentional-failure.log"
+    }
+  ]
+}

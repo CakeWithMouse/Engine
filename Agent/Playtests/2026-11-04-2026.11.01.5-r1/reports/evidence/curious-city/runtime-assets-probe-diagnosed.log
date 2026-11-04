@@ -1,0 +1,1 @@
+event=asset_import_failed detail=Cannot load model '/Game/Models/CesiumMan/CesiumMan.glb': Assimp not enabled (Сборка выполнена без поддержки Assimp. Установите зависимости в Engine/vcpkg_installed и соберите с Assimp / Build with -EnableAssimp)

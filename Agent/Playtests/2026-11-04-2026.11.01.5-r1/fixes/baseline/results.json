@@ -1,0 +1,50 @@
+[
+  {
+    "id": "BUG001",
+    "command": "ui.inspector",
+    "passed": false,
+    "exit": 0
+  },
+  {
+    "id": "BUG002",
+    "command": "ui.style",
+    "passed": false,
+    "exit": 0
+  },
+  {
+    "id": "BUG003",
+    "command": "ui.edit-text",
+    "passed": false,
+    "exit": 0
+  },
+  {
+    "id": "BUG007",
+    "command": "input.rebind",
+    "passed": false,
+    "exit": 0
+  },
+  {
+    "id": "FocusOff",
+    "command": "input.rebind",
+    "passed": false,
+    "exit": 0
+  },
+  {
+    "id": "TraceHit",
+    "command": "trace.raycast",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "TraceMiss",
+    "command": "trace.raycast",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "Snap",
+    "command": "gizmo.snap",
+    "passed": true,
+    "exit": 0
+  }
+]

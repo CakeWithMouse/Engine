@@ -1,0 +1,101 @@
+Window: "Main.scene.json — TiredBomber — Engine Editor", App: EngineRuntime.exe.
+	0 окно (settable, string) Main.scene.json — TiredBomber — Engine Editor Secondary Actions: Raise
+		1 название (settable, string) Value: Main.scene.json — TiredBomber — Engine Editor
+			2 строка меню Система ID: MenuBar
+				3 элемент меню Система
+			4 кнопка Свернуть
+			5 кнопка Развернуть
+			6 кнопка Закрыть
+		7 окно (settable, string) Вьюпорт Secondary Actions: Raise ID: ViewportDock
+			8 группа (settable, string) ID: ViewportDock.ViewportContainer
+				9 особый (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar
+					10 флажок (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar.btnGizmoTranslate
+					11 флажок (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar.btnGizmoRotate
+					12 флажок (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar.btnGizmoScale
+					13 особый (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar.HeaderSep1
+					14 кнопка (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar.btnGizmoCoordSpace
+					15 особый (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar.HeaderSep2
+					16 флажок (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar.btnGizmoSnap
+					17 поле со списком (settable, string) Value: 0.5 ID: ViewportDock.ViewportContainer.ViewportHeaderBar.comboGizmoSnapStep
+						18 поле (settable, string) Value: 0.5
+				19 группа (settable, string)
+			20 кнопка (settable, string) Close ID: ViewportDock.qt_dockwidget_closebutton
+			21 кнопка (settable, string) Float ID: ViewportDock.qt_dockwidget_floatbutton
+		22 окно (settable, string) Консоль Secondary Actions: Raise ID: ConsoleDock
+			23 поле Value: [12:57:39.884] EditorStart [12:57:39.884] TiredBomber [12:57:39.884] E:\Engine\Engine\build\playtests\20261104-r1\tired-bomber\Tired Bomber\Project.json [12:57:39.962] EditorSceneViewportAttach ok ID: ConsoleDock.Console
+				24 группа (settable, string) ID: ConsoleDock.Console.qt_scrollarea_viewport
+			25 кнопка (settable, string) Close ID: ConsoleDock.qt_dockwidget_closebutton
+			26 кнопка (settable, string) Float ID: ConsoleDock.qt_dockwidget_floatbutton
+		27 вкладка (settable, string) Контент-браузер
+			28 элемент вкладки (selectable, settable, string) Консоль
+			29 элемент вкладки (selectable, settable, string) Контент-браузер
+		30 панель инструментов (settable, string) Запуск ID: MainToolBar
+			31 особый (settable, string) ID: MainToolBar.ToolBarContainer
+				32 кнопка (settable, string) Play ID: MainToolBar.ToolBarContainer.BtnPlay
+				33 кнопка (disabled, settable, string) Пауза ID: MainToolBar.ToolBarContainer.BtnPause
+				34 кнопка (disabled, settable, string) Стоп ID: MainToolBar.ToolBarContainer.BtnStop
+				35 кнопка (settable, string) Отдельное окно ID: MainToolBar.ToolBarContainer.BtnExternal
+		36 окно (settable, string) Сцена / объекты Secondary Actions: Raise ID: SceneObjectsDock
+			37 группа (settable, string)
+				38 поле (settable, string) ID: SceneSearchEdit
+					39 кнопка (settable, string)
+				40 кнопка (settable, string) Добавить ID: SceneAddButton
+				41 дерево (settable, string) ID: SceneHierarchy
+					42 заголовок (selectable, settable, string) Объект
+					43 заголовок (selectable, settable, string) Тип
+					44 элемент дерева (selectable, settable, string) Ground
+					45 элемент дерева (selectable, settable, string) Primitive.Plane
+					46 элемент дерева (selectable, settable, string) Cube
+					47 элемент дерева (selectable, settable, string) Primitive.Cube
+					48 элемент дерева (selectable, settable, string) Warm Light
+					49 элемент дерева (selectable, settable, string) Light.Point
+					50 элемент дерева (selectable, settable, string) Cool Light
+					51 элемент дерева (selectable, settable, string) Light.Point
+			52 кнопка (settable, string) Close ID: SceneObjectsDock.qt_dockwidget_closebutton
+			53 кнопка (settable, string) Float ID: SceneObjectsDock.qt_dockwidget_floatbutton
+		54 окно (settable, string) Инспектор Secondary Actions: Raise ID: InspectorDock
+			55 группа (disabled, settable, string)
+				56 группа (disabled, settable, string) ID: InspectorScrollArea
+					57 группа (disabled, settable, string) ID: InspectorScrollArea.qt_scrollarea_viewport
+						58 группа (disabled, settable, string) ID: InspectorScrollArea.qt_scrollarea_viewport.InspectorScrollContent
+							59 текстовый (disabled) Объект не выбран ID: InspectorScrollArea.qt_scrollarea_viewport.InspectorScrollContent.NoSelectionLabel
+			60 кнопка (settable, string) Close ID: InspectorDock.qt_dockwidget_closebutton
+			61 кнопка (settable, string) Float ID: InspectorDock.qt_dockwidget_floatbutton
+		62 окно (settable, string) Контент-браузер Secondary Actions: Raise ID: ContentDock
+			63 группа (settable, string)
+				64 кнопка (settable, string) Импорт… ID: ImportAssets
+				65 поле (settable, string)
+					66 кнопка (settable, string)
+				67 поле со списком (settable, string) Value: Content и Source ID: FileVisibility
+				68 дерево (settable, string) ID: ProjectFiles
+					69 заголовок (selectable, settable, string) Name
+					70 заголовок (selectable, settable, string) Size
+					71 заголовок (selectable, settable, string) Type
+					72 заголовок (selectable, settable, string) Date Modified
+					73 элемент дерева (selectable, settable, string) Content
+					74 элемент дерева (selectable, settable, string)
+					75 элемент дерева (selectable, settable, string) File Folder
+					76 элемент дерева (selectable, settable, string) Source
+					77 элемент дерева (selectable, settable, string)
+					78 элемент дерева (selectable, settable, string) File Folder
+			79 кнопка (settable, string) Close ID: ContentDock.qt_dockwidget_closebutton
+			80 кнопка (settable, string) Float ID: ContentDock.qt_dockwidget_floatbutton
+		81 строка меню (settable, string)
+			82 элемент меню (settable, string) Сцена
+			83 элемент меню (settable, string) Правка
+			84 элемент меню (settable, string) Вид
+			85 элемент меню (settable, string) Запуск
+			86 элемент меню (settable, string) Проект
+			87 элемент меню (settable, string) Инструменты
+		88 строка состояния
+			89 бегунок (settable, string)
+			90 текстовый Edit | Space: Play/Stop | P: Pause/Resume | updates: 1110 | fps: 58.5 | vp: on
+			91 текстовый EDIT
+			92 текстовый TiredBomber | E:\Engine\Engine\build\playtests\20261104-r1\tired-bomber\Tired Bomber\Project.json
+
+Document text: ```
+[12:57:39.884] EditorStart
+[12:57:39.884] TiredBomber
+[12:57:39.884] E:\Engine\Engine\build\playtests\20261104-r1\tired-bomber\Tired Bomber\Project.json
+[12:57:39.962] EditorSceneViewportAttach ok
+```
