@@ -1,180 +1,672 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|x64"><Configuration>Debug</Configuration><Platform>x64</Platform></ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x64"><Configuration>Release</Configuration><Platform>x64</Platform></ProjectConfiguration>
-  </ItemGroup>
-  <PropertyGroup Label="Globals">
-    <ProjectGuid>{90A42B03-FDD9-4E98-834D-49B44E58C029}</ProjectGuid>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion><PreferredToolArchitecture>x64</PreferredToolArchitecture>
-    <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'=='' and Exists('$(MSBuildThisFileDirectory)vcpkg_installed\x64-windows\include\assimp\scene.h')">true</EngineEnableAssimp>
-    <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'==''">false</EngineEnableAssimp>
-  </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
-    <PlatformToolset>v145</PlatformToolset>
-    <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
-    <UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup>
-    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VCPKG_ROOT)'!=''">$(VCPKG_ROOT)\</VcpkgRoot>
-    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VsInstallRoot)'!='' and Exists('$(VsInstallRoot)\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">$(VsInstallRoot)\VC\vcpkg\</VcpkgRoot>
-    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\</VcpkgRoot>
-    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\</VcpkgRoot>
-    <VcpkgRoot Condition="'$(VcpkgRoot)'==''">C:\vcpkg\</VcpkgRoot>
-    <VcpkgEnableManifest>$(EngineEnableAssimp)</VcpkgEnableManifest>
-    <VcpkgEnabled>$(EngineEnableAssimp)</VcpkgEnabled>
-    <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\Engine\</VcpkgManifestRoot>
-    <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\Engine\vcpkg_installed\</VcpkgInstalledDir>
-  </PropertyGroup>
-  <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <Import Project="BuildSupport\Cpp.props" />
-  <ItemDefinitionGroup><ClCompile><AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)ThirdParty\stb;$(MSBuildThisFileDirectory)ThirdParty\meshoptimizer\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories></ClCompile></ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(EngineEnableAssimp)'=='true'"><ClCompile><PreprocessorDefinitions>ENGINE_ENABLE_ASSIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile></ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Source\Base\Base.cpp" />
-    <ClCompile Include="Source\Components\Light\DirectionalLightComponent.cpp" />
-    <ClCompile Include="Source\Scene\Scene.cpp" />
-    <ClCompile Include="Source\Scene\Trace.cpp" />
-    <ClCompile Include="Source\Components\ComponentTrace.cpp" />
-    <ClCompile Include="Source\Components\StandardSky.cpp" />
-    <ClCompile Include="Source\MainGame\GameTrace.cpp" />
-    <ClCompile Include="Source\Scene\SceneCommands.cpp" />
-    <ClCompile Include="Source\Scene\SceneDocument.cpp" />
-    <ClCompile Include="Source\Scene\SceneAssets.cpp" />
-    <ClCompile Include="Source\Scene\ModelImport.cpp" />
-    <ClCompile Include="Source\Scene\BlendImport.cpp" />
-    <ClCompile Include="Source\Runtime\SceneEditAssets.cpp" />
-    <ClCompile Include="Source\Runtime\SceneEditMaterials.cpp" />
-    <ClInclude Include="Include\Engine\Scene\SceneDocument.h" />
-    <ClCompile Include="Source\Runtime\SceneEditSession.cpp" />
-    <ClCompile Include="Source\Runtime\SceneEditBatch.cpp" />
-    <ClCompile Include="Source\Runtime\SceneAuthoring.cpp" />
-    <ClCompile Include="Source\Scene\AssetUpdate.cpp" />
-    <ClCompile Include="Source\Runtime\GameEditModule.cpp" />
-    <ClInclude Include="Include\Engine\Runtime\EditSessionApi.h" />
-    <ClInclude Include="Include\Engine\Runtime\GameSceneApi.h" />
-    <ClInclude Include="Include\Engine\Runtime\GameWindowApi.h" />
-    <ClInclude Include="Include\Engine\Runtime\SceneEditSession.h" />
-    <ClInclude Include="Include\Engine\Runtime\GameEditModule.h" />
-    <ClInclude Include="Include\Engine\Scene\SceneCommands.h" />
-    <ClInclude Include="Include\Engine\Runtime\SceneModuleApi.h" />
-    <ClInclude Include="Include\Engine\Scene\Scene.h" />
-    <ClCompile Include="Source\Base\Config\BaseResources.cpp" />
-    <ClCompile Include="Source\Base\Config\BaseGameConfig.cpp" />
-    <ClInclude Include="Include\Engine\Base\Base.h" />
-    <ClInclude Include="Include\Engine\Runtime\ModuleApi.h" />
-    <ClInclude Include="Include\Engine\Runtime\ViewportSession.h" />
-    <ClInclude Include="Include\Engine\Runtime\LaunchOptions.h" />
-    <ClInclude Include="Include\Engine\Base\Config\BaseResources.h" />
-    <ClInclude Include="Include\Engine\Base\Config\BaseGameConfig.h" />
-    <ClCompile Include="Source\Components\GameComponents.cpp" />
-    <ClCompile Include="Source\Components\Light\CubeMap.cpp" />
-    <ClCompile Include="Source\Components\SpecificComponents\CubeComponent.cpp" />
-    <ClCompile Include="Source\Components\SpecificComponents\FBXComponent.cpp" Condition="'$(EngineEnableAssimp)'=='true'" />
-    <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshComponent.cpp" />
-    <ClCompile Include="Source\Components\SpecificComponents\MeshComponent.cpp" />
-    <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshSkinned.cpp" />
-    <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshImpostor.cpp" />
-    <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshShadows.cpp" />
-    <ClCompile Include="Source\Components\SpecificComponents\ParticleSystemComponent.cpp" />
-    <ClInclude Include="Source\Components\SpecificComponents\InstancedMeshInternal.h" />
-    <ClCompile Include="Source\Components\SpecificComponents\SphereComponent.cpp" />
-    <ClCompile Include="Source\Components\SpecificComponents\TriangleComponent.cpp" />
-    <ClCompile Include="Source\Components\SpecificComponents\UIComponent.cpp" />
-    <ClCompile Include="Source\Display\Display.cpp" />
-    <ClCompile Include="Source\InputDevice\Delegates.cpp" />
-    <ClCompile Include="Source\InputDevice\InputDevice.cpp" />
-    <ClCompile Include="Source\InputDevice\InputActions.cpp" />
-    <ClCompile Include="Source\Components\Character.cpp" />
-    <ClCompile Include="Source\MainGame\CharacterController.cpp" />
-    <ClInclude Include="Include\Engine\InputDevice\InputActions.h" />
-    <ClInclude Include="Include\Engine\Components\Character.h" />
-    <ClInclude Include="Include\Engine\MainGame\CharacterController.h" />
-    <ClCompile Include="Source\MainGame\GameSession.cpp" />
-    <ClCompile Include="Source\MainGame\BaseGameClass\Game.cpp" />
-    <ClCompile Include="Source\MainGame\Player.cpp" />
-    <ClCompile Include="Source\Render\ImpostorAtlas.cpp" />
-    <ClCompile Include="Source\Render\Material.cpp" />
-    <ClCompile Include="Source\Render\MaterialAsset.cpp" />
-    <ClCompile Include="Source\Render\MeshPrimitives.cpp" />
-    <ClCompile Include="Source\Render\MeshSimplifier.cpp" />
-    <ClCompile Include="Source\Render\MeshValidation.cpp" />
-    <ClCompile Include="Source\UI\FontAtlas.cpp" />
-    <ClCompile Include="Source\UI\UIElement.cpp" />
-    <ClCompile Include="Source\UI\UIMarkup.cpp" />
-    <ClCompile Include="ThirdParty\meshoptimizer\src\allocator.cpp" />
-    <ClCompile Include="ThirdParty\meshoptimizer\src\indexgenerator.cpp" />
-    <ClCompile Include="ThirdParty\meshoptimizer\src\simplifier.cpp" />
-    <ClCompile Include="ThirdParty\meshoptimizer\src\spatialorder.cpp" />
-    <ClCompile Include="ThirdParty\meshoptimizer\src\vcacheoptimizer.cpp" />
-    <ClCompile Include="ThirdParty\meshoptimizer\src\vfetchoptimizer.cpp" />
-    <ClCompile Include="Source\Render\TextureLoader.cpp" />
-    <ClCompile Include="Source\Render\ShaderCompiler.cpp" />
-    <ClCompile Include="Source\Render\SkeletalAnimation.cpp" />
-    <ClCompile Include="Source\Render\SkeletalBaker.cpp" />
-    <ClCompile Include="Source\Render\SkeletalLoaderStub.cpp" Condition="'$(EngineEnableAssimp)'!='true'" />
-    <ClCompile Include="Source\Render\SkeletalLoaderAssimp.cpp" Condition="'$(EngineEnableAssimp)'=='true'" />
-    <ClCompile Include="Source\Components\SpecificComponents\SkeletalMeshComponent.cpp" />
-    <ClCompile Include="Source\Resources\Paths.cpp" />
-    <ClCompile Include="Source\Resources\VirtualFileSystem.cpp" />
-    <ClCompile Include="Source\Resources\VfsRead.cpp" />
-    <ClCompile Include="Source\Resources\LocalVfs.cpp" />
-    <ClCompile Include="Source\Resources\HostVfsProxy.cpp" />
-    <ClCompile Include="Source\Runtime\VfsService.cpp" />
-    <ClInclude Include="Source\Resources\IVfs.h" />
-    <ClInclude Include="Source\Resources\LocalVfs.h" />
-    <ClInclude Include="Source\Resources\HostVfsProxy.h" />
-    <ClInclude Include="Source\Resources\VfsRead.h" />
-    <ClInclude Include="Include\Engine\Components\GameComponents.h" />
-    <ClInclude Include="Include\Engine\Components\ComponentAnnotations.h" />
-    <ClInclude Include="Include\Engine\Components\ComponentType.h" />
-    <ClInclude Include="Include\Engine\Components\Light\CubeMap.h" />
-    <ClInclude Include="Include\Engine\Components\Light\PointLightComponent.h" />
-    <ClInclude Include="Include\Engine\Components\SpecificComponents\CubeComponent.h" />
-    <ClInclude Include="Include\Engine\Components\SpecificComponents\FBXComponent.h" />
-    <ClInclude Include="Include\Engine\Components\SpecificComponents\InstancedMeshComponent.h" />
-    <ClInclude Include="Include\Engine\Components\SpecificComponents\MeshComponent.h" />
-    <ClInclude Include="Include\Engine\Components\SpecificComponents\ParticleSystemComponent.h" />
-    <ClInclude Include="Include\Engine\Components\SpecificComponents\SkeletalMeshComponent.h" />
-    <ClInclude Include="Include\Engine\Components\SpecificComponents\SphereComponent.h" />
-    <ClInclude Include="Include\Engine\Components\SpecificComponents\TriangleComponent.h" />
-    <ClInclude Include="Include\Engine\Components\SpecificComponents\UIComponent.h" />
-    <ClInclude Include="Include\Engine\Display\Display.h" />
-    <ClInclude Include="Include\Engine\InputDevice\Delegates.h" />
-    <ClInclude Include="Include\Engine\InputDevice\InputDevice.h" />
-    <ClInclude Include="Include\Engine\InputDevice\Keys.h" />
-    <ClInclude Include="Include\Engine\MainGame\BaseGameClass\Game.h" />
-    <ClInclude Include="Include\Engine\MainGame\GameSettings.h" />
-    <ClInclude Include="Include\Engine\MainGame\Player.h" />
-    <ClInclude Include="Include\Engine\Render\ImpostorAtlas.h" />
-    <ClInclude Include="Include\Engine\Render\Material.h" />
-    <ClInclude Include="Include\Engine\Render\MaterialAsset.h" />
-    <ClInclude Include="Include\Engine\Render\MeshSimplifier.h" />
-    <ClInclude Include="Include\Engine\Render\MeshValidation.h" />
-    <ClInclude Include="Include\Engine\UI\FontAtlas.h" />
-    <ClInclude Include="Include\Engine\UI\UIElement.h" />
-    <ClInclude Include="Include\Engine\UI\UIMarkup.h" />
-    <ClInclude Include="Include\Engine\Render\MeshData.h" />
-    <ClInclude Include="Include\Engine\Render\MeshPrimitives.h" />
-    <ClInclude Include="Include\Engine\Render\ShaderCompiler.h" />
-    <ClInclude Include="Include\Engine\Render\ShaderConstants.h" />
-    <ClInclude Include="Include\Engine\Render\SkeletalData.h" />
-    <ClInclude Include="Include\Engine\Render\SkeletalAnimation.h" />
-    <ClInclude Include="Include\Engine\Render\SkeletalBaker.h" />
-    <ClInclude Include="Include\Engine\Render\SkeletalLoader.h" />
-    <ClInclude Include="Include\Engine\Render\TextureLoader.h" />
-    <ClInclude Include="Include\Engine\Resources\Paths.h" />
-    <ClInclude Include="Include\Engine\Resources\VirtualFileSystem.h" />
-    <ClInclude Include="Include\Engine\Runtime\VfsApi.h" />
-    <ClInclude Include="Source\Runtime\VfsService.h" />
-  </ItemGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
-  <Target Name="RequireAssimpDependencies" BeforeTargets="PrepareForBuild" Condition="'$(EngineEnableAssimp)'=='true'">
-    <Error Condition="!Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" Text="EngineEnableAssimp requires vcpkg. Set VCPKG_ROOT or /p:VcpkgRoot to the installed vcpkg directory." />
-  </Target>
+    <ItemGroup Label="ProjectConfigurations">
+        <ProjectConfiguration Include="Debug|x64">
+            <Configuration>Debug</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+        <ProjectConfiguration Include="Release|x64">
+            <Configuration>Release</Configuration>
+            <Platform>x64</Platform>
+        </ProjectConfiguration>
+    </ItemGroup>
+    <PropertyGroup Label="Globals">
+        <ProjectGuid>{90A42B03-FDD9-4E98-834D-49B44E58C029}</ProjectGuid>
+        <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+        <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+        <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'=='' and Exists('$(MSBuildThisFileDirectory)vcpkg_installed\x64-windows\include\assimp\scene.h')">true</EngineEnableAssimp>
+        <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'==''">false</EngineEnableAssimp>
+    </PropertyGroup>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
+    <PropertyGroup Label="Configuration">
+        <ConfigurationType>StaticLibrary</ConfigurationType>
+        <PlatformToolset>v145</PlatformToolset>
+        <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
+        <UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries>
+        <CharacterSet>Unicode</CharacterSet>
+    </PropertyGroup>
+    <PropertyGroup>
+        <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VCPKG_ROOT)'!=''">$(VCPKG_ROOT)\</VcpkgRoot>
+        <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VsInstallRoot)'!='' and Exists('$(VsInstallRoot)\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">$(VsInstallRoot)\VC\vcpkg\</VcpkgRoot>
+        <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\</VcpkgRoot>
+        <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\</VcpkgRoot>
+        <VcpkgRoot Condition="'$(VcpkgRoot)'==''">C:\vcpkg\</VcpkgRoot>
+        <VcpkgEnableManifest>$(EngineEnableAssimp)</VcpkgEnableManifest>
+        <VcpkgEnabled>$(EngineEnableAssimp)</VcpkgEnabled>
+        <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\Engine\</VcpkgManifestRoot>
+        <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\Engine\vcpkg_installed\</VcpkgInstalledDir>
+    </PropertyGroup>
+    <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')"/>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
+    <Import Project="BuildSupport\Cpp.props"/>
+    <ItemDefinitionGroup>
+        <ClCompile>
+            <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)ThirdParty\stb;$(MSBuildThisFileDirectory)ThirdParty\meshoptimizer\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+        </ClCompile>
+    </ItemDefinitionGroup>
+    <ItemDefinitionGroup Condition="'$(EngineEnableAssimp)'=='true'">
+        <ClCompile>
+            <PreprocessorDefinitions>ENGINE_ENABLE_ASSIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+        </ClCompile>
+    </ItemDefinitionGroup>
+    <ItemGroup>
+        <ClCompile Include="Source\Base\Base.cpp"/>
+        <ClCompile Include="Source\Components\Light\DirectionalLightComponent.cpp"/>
+        <ClCompile Include="Source\Scene\Scene.cpp"/>
+        <ClCompile Include="Source\Scene\Trace.cpp"/>
+        <ClCompile Include="Source\Components\ComponentTrace.cpp"/>
+        <ClCompile Include="Source\Components\StandardSky.cpp"/>
+        <ClCompile Include="Source\MainGame\GameTrace.cpp"/>
+        <ClCompile Include="Source\Scene\SceneCommands.cpp"/>
+        <ClCompile Include="Source\Scene\SceneDocument.cpp"/>
+        <ClCompile Include="Source\Scene\SceneAssets.cpp"/>
+        <ClCompile Include="Source\Scene\ModelImport.cpp"/>
+        <ClCompile Include="Source\Scene\BlendImport.cpp"/>
+        <ClCompile Include="Source\Runtime\SceneEditAssets.cpp"/>
+        <ClCompile Include="Source\Runtime\SceneEditMaterials.cpp"/>
+        <ClInclude Include="Include\Engine\Scene\SceneDocument.h"/>
+        <ClCompile Include="Source\Runtime\SceneEditSession.cpp"/>
+        <ClCompile Include="Source\Runtime\SceneEditBatch.cpp"/>
+        <ClCompile Include="Source\Runtime\SceneAuthoring.cpp"/>
+        <ClCompile Include="Source\Scene\AssetUpdate.cpp"/>
+        <ClCompile Include="Source\Runtime\GameEditModule.cpp"/>
+        <ClInclude Include="Include\Engine\Runtime\EditSessionApi.h"/>
+        <ClInclude Include="Include\Engine\Runtime\GameSceneApi.h"/>
+        <ClInclude Include="Include\Engine\Runtime\GameWindowApi.h"/>
+        <ClInclude Include="Include\Engine\Runtime\SceneEditSession.h"/>
+        <ClInclude Include="Include\Engine\Runtime\GameEditModule.h"/>
+        <ClInclude Include="Include\Engine\Scene\SceneCommands.h"/>
+        <ClInclude Include="Include\Engine\Runtime\SceneModuleApi.h"/>
+        <ClInclude Include="Include\Engine\Scene\Scene.h"/>
+        <ClCompile Include="Source\Base\Config\BaseResources.cpp"/>
+        <ClCompile Include="Source\Base\Config\BaseGameConfig.cpp"/>
+        <ClInclude Include="Include\Engine\Base\Base.h"/>
+        <ClInclude Include="Include\Engine\Runtime\ModuleApi.h"/>
+        <ClInclude Include="Include\Engine\Runtime\ViewportSession.h"/>
+        <ClInclude Include="Include\Engine\Runtime\LaunchOptions.h"/>
+        <ClInclude Include="Include\Engine\Base\Config\BaseResources.h"/>
+        <ClInclude Include="Include\Engine\Base\Config\BaseGameConfig.h"/>
+        <ClCompile Include="Source\Components\GameComponents.cpp"/>
+        <ClCompile Include="Source\Components\Light\CubeMap.cpp"/>
+        <ClCompile Include="Source\Components\SpecificComponents\CubeComponent.cpp"/>
+        <ClCompile Include="Source\Components\SpecificComponents\FBXComponent.cpp" Condition="'$(EngineEnableAssimp)'=='true'"/>
+        <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshComponent.cpp"/>
+        <ClCompile Include="Source\Components\SpecificComponents\MeshComponent.cpp"/>
+        <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshSkinned.cpp"/>
+        <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshImpostor.cpp"/>
+        <ClCompile Include="Source\Components\SpecificComponents\InstancedMeshShadows.cpp"/>
+        <ClCompile Include="Source\Components\SpecificComponents\ParticleSystemComponent.cpp"/>
+        <ClInclude Include="Include\Engine\Sound\Audio3D.h"/>
+        <ClInclude Include="Include\Engine\Sound\AudioEngine.h"/>
+        <ClInclude Include="Include\Engine\Sound\AudioStream.h"/>
+        <ClInclude Include="Include\Engine\Sound\AudioTypes.h"/>
+        <ClInclude Include="Include\Engine\Sound\DecoderFactory.h"/>
+        <ClInclude Include="Include\Engine\Sound\IAudioDecoder.h"/>
+        <ClInclude Include="Include\Engine\Sound\MediaFoundationDecoder.h"/>
+        <ClInclude Include="Include\Engine\Sound\VoicePool.h"/>
+        <ClInclude Include="Include\Engine\Sound\WavDecoder.h"/>
+        <ClInclude Include="Source\Components\SpecificComponents\InstancedMeshInternal.h"/>
+        <ClCompile Include="Source\Components\SpecificComponents\SphereComponent.cpp"/>
+        <ClCompile Include="Source\Components\SpecificComponents\TriangleComponent.cpp"/>
+        <ClCompile Include="Source\Components\SpecificComponents\UIComponent.cpp"/>
+        <ClCompile Include="Source\Display\Display.cpp"/>
+        <ClCompile Include="Source\InputDevice\Delegates.cpp"/>
+        <ClCompile Include="Source\InputDevice\InputDevice.cpp"/>
+        <ClCompile Include="Source\InputDevice\InputActions.cpp"/>
+        <ClCompile Include="Source\Components\Character.cpp"/>
+        <ClCompile Include="Source\MainGame\CharacterController.cpp"/>
+        <ClInclude Include="Include\Engine\InputDevice\InputActions.h"/>
+        <ClInclude Include="Include\Engine\Components\Character.h"/>
+        <ClInclude Include="Include\Engine\MainGame\CharacterController.h"/>
+        <ClCompile Include="Source\MainGame\GameSession.cpp"/>
+        <ClCompile Include="Source\MainGame\BaseGameClass\Game.cpp"/>
+        <ClCompile Include="Source\MainGame\Player.cpp"/>
+        <ClCompile Include="Source\Render\ImpostorAtlas.cpp"/>
+        <ClCompile Include="Source\Render\Material.cpp"/>
+        <ClCompile Include="Source\Render\MaterialAsset.cpp"/>
+        <ClCompile Include="Source\Render\MeshPrimitives.cpp"/>
+        <ClCompile Include="Source\Render\MeshSimplifier.cpp"/>
+        <ClCompile Include="Source\Render\MeshValidation.cpp"/>
+        <ClCompile Include="Source\Sound\AudioEngine.cpp">
+            <AssemblerOutput>NoListing</AssemblerOutput>
+            <AssemblerListingLocation>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Release\Engine\</AssemblerListingLocation>
+            <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+            <BrowseInformation>false</BrowseInformation>
+            <BrowseInformationFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Release\Engine\</BrowseInformationFile>
+            <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+            <CompileAs>Default</CompileAs>
+            <UseDynamicDebugging>false</UseDynamicDebugging>
+            <ConformanceMode>true</ConformanceMode>
+            <DiagnosticsFormat>Column</DiagnosticsFormat>
+            <DisableLanguageExtensions>false</DisableLanguageExtensions>
+            <ErrorReporting>Prompt</ErrorReporting>
+            <ExpandAttributedSource>false</ExpandAttributedSource>
+            <ExceptionHandling>Sync</ExceptionHandling>
+            <EnableASAN>false</EnableASAN>
+            <EnableFuzzer>false</EnableFuzzer>
+            <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+            <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+            <EnableVectorLength>NotSet</EnableVectorLength>
+            <FloatingPointModel>Precise</FloatingPointModel>
+            <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+            <GenerateModuleDependencies>false</GenerateModuleDependencies>
+            <GenerateSourceDependencies>false</GenerateSourceDependencies>
+            <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+            <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+            <IntrinsicFunctions>false</IntrinsicFunctions>
+            <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+            <LanguageStandard>stdcpp17</LanguageStandard>
+            <LanguageStandard_C>Default</LanguageStandard_C>
+            <MinimalRebuild>false</MinimalRebuild>
+            <ModuleDependenciesFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Release\Engine\</ModuleDependenciesFile>
+            <ModuleOutputFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Release\Engine\</ModuleOutputFile>
+            <OmitDefaultLibName>false</OmitDefaultLibName>
+            <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+            <WholeProgramOptimization>false</WholeProgramOptimization>
+            <Optimization>MaxSpeed</Optimization>
+            <ObjectFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Release\Engine\</ObjectFileName>
+            <CallingConvention>Cdecl</CallingConvention>
+            <ProgramDataBaseFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\Engine.pdb</ProgramDataBaseFileName>
+            <PrecompiledHeader>NotUsing</PrecompiledHeader>
+            <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+            <PrecompiledHeaderOutputFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Release\Engine\Engine.pch</PrecompiledHeaderOutputFile>
+            <PreprocessToFile>false</PreprocessToFile>
+            <PreprocessKeepComments>false</PreprocessKeepComments>
+            <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+            <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+            <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+            <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+            <ShowIncludes>false</ShowIncludes>
+            <SourceDependenciesFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Release\Engine\</SourceDependenciesFile>
+            <SuppressStartupBanner>true</SuppressStartupBanner>
+            <BufferSecurityCheck>true</BufferSecurityCheck>
+            <SmallerTypeCheck>false</SmallerTypeCheck>
+            <SpectreMitigation>false</SpectreMitigation>
+            <StructMemberAlignment>Default</StructMemberAlignment>
+            <SupportJustMyCode>false</SupportJustMyCode>
+            <TrackerLogDirectory>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Release\Engine\Engine.tlog\</TrackerLogDirectory>
+            <TranslateIncludes>false</TranslateIncludes>
+            <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+            <TreatWarningAsError>false</TreatWarningAsError>
+            <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+            <UseFullPaths>true</UseFullPaths>
+            <WarningLevel>Level3</WarningLevel>
+            <XMLDocumentationFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Release\Engine\</XMLDocumentationFileName>
+            <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+            <IntelJCCErratum>false</IntelJCCErratum>
+            <BuildStlModules>false</BuildStlModules>
+            <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+            <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+            <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+            <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+            <PreprocessorDefinitions>NDEBUG;UNICODE;_UNICODE;_UNICODE;UNICODE;</PreprocessorDefinitions>
+            <AdditionalIncludeDirectories>A:\Clion\Engine\Engine\ThirdParty\stb;A:\Clion\Engine\Engine\ThirdParty\meshoptimizer\src;A:\Clion\Engine\Engine\Include;A:\Clion\Engine\Engine\ThirdParty\GLM-master;A:\Clion\Engine\Engine\ThirdParty;</AdditionalIncludeDirectories>
+            <MultiProcessorCompilation>true</MultiProcessorCompilation>
+            <AdditionalOptions>/utf-8</AdditionalOptions>
+            <LibCompiled>true</LibCompiled>
+        </ClCompile>
+        <ClCompile Include="Source\Sound\AudioStream.cpp">
+            <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+            <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+            <Optimization>Disabled</Optimization>
+            <SupportJustMyCode>true</SupportJustMyCode>
+            <AssemblerOutput>NoListing</AssemblerOutput>
+            <AssemblerListingLocation>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</AssemblerListingLocation>
+            <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+            <BrowseInformation>false</BrowseInformation>
+            <BrowseInformationFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</BrowseInformationFile>
+            <CompileAs>Default</CompileAs>
+            <UseDynamicDebugging>false</UseDynamicDebugging>
+            <ConformanceMode>true</ConformanceMode>
+            <DiagnosticsFormat>Column</DiagnosticsFormat>
+            <DisableLanguageExtensions>false</DisableLanguageExtensions>
+            <ErrorReporting>Prompt</ErrorReporting>
+            <ExpandAttributedSource>false</ExpandAttributedSource>
+            <ExceptionHandling>Sync</ExceptionHandling>
+            <EnableASAN>false</EnableASAN>
+            <EnableFuzzer>false</EnableFuzzer>
+            <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+            <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+            <EnableVectorLength>NotSet</EnableVectorLength>
+            <FloatingPointModel>Precise</FloatingPointModel>
+            <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+            <GenerateModuleDependencies>false</GenerateModuleDependencies>
+            <GenerateSourceDependencies>false</GenerateSourceDependencies>
+            <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+            <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+            <IntrinsicFunctions>false</IntrinsicFunctions>
+            <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+            <LanguageStandard>stdcpp17</LanguageStandard>
+            <LanguageStandard_C>Default</LanguageStandard_C>
+            <MinimalRebuild>false</MinimalRebuild>
+            <ModuleDependenciesFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ModuleDependenciesFile>
+            <ModuleOutputFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ModuleOutputFile>
+            <OmitDefaultLibName>false</OmitDefaultLibName>
+            <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+            <WholeProgramOptimization>false</WholeProgramOptimization>
+            <ObjectFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ObjectFileName>
+            <CallingConvention>Cdecl</CallingConvention>
+            <ProgramDataBaseFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Debug\Engine.pdb</ProgramDataBaseFileName>
+            <PrecompiledHeader>NotUsing</PrecompiledHeader>
+            <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+            <PrecompiledHeaderOutputFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\Engine.pch</PrecompiledHeaderOutputFile>
+            <PreprocessToFile>false</PreprocessToFile>
+            <PreprocessKeepComments>false</PreprocessKeepComments>
+            <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+            <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+            <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+            <ShowIncludes>false</ShowIncludes>
+            <SourceDependenciesFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</SourceDependenciesFile>
+            <SuppressStartupBanner>true</SuppressStartupBanner>
+            <BufferSecurityCheck>true</BufferSecurityCheck>
+            <SmallerTypeCheck>false</SmallerTypeCheck>
+            <SpectreMitigation>false</SpectreMitigation>
+            <StructMemberAlignment>Default</StructMemberAlignment>
+            <TrackerLogDirectory>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\Engine.tlog\</TrackerLogDirectory>
+            <TranslateIncludes>false</TranslateIncludes>
+            <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+            <TreatWarningAsError>false</TreatWarningAsError>
+            <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+            <UseFullPaths>true</UseFullPaths>
+            <WarningLevel>Level3</WarningLevel>
+            <XMLDocumentationFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</XMLDocumentationFileName>
+            <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+            <IntelJCCErratum>false</IntelJCCErratum>
+            <BuildStlModules>false</BuildStlModules>
+            <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+            <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+            <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+            <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+            <PreprocessorDefinitions>_DEBUG;UNICODE;_UNICODE;_UNICODE;UNICODE;</PreprocessorDefinitions>
+            <AdditionalIncludeDirectories>A:\Clion\Engine\Engine\ThirdParty\stb;A:\Clion\Engine\Engine\ThirdParty\meshoptimizer\src;A:\Clion\Engine\Engine\Include;A:\Clion\Engine\Engine\ThirdParty\GLM-master;A:\Clion\Engine\Engine\ThirdParty;</AdditionalIncludeDirectories>
+            <MultiProcessorCompilation>true</MultiProcessorCompilation>
+            <AdditionalOptions>/utf-8</AdditionalOptions>
+            <LibCompiled>true</LibCompiled>
+        </ClCompile>
+        <ClCompile Include="Source\Sound\DecoderFactory.cpp">
+            <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+            <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+            <Optimization>Disabled</Optimization>
+            <SupportJustMyCode>true</SupportJustMyCode>
+            <AssemblerOutput>NoListing</AssemblerOutput>
+            <AssemblerListingLocation>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</AssemblerListingLocation>
+            <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+            <BrowseInformation>false</BrowseInformation>
+            <BrowseInformationFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</BrowseInformationFile>
+            <CompileAs>Default</CompileAs>
+            <UseDynamicDebugging>false</UseDynamicDebugging>
+            <ConformanceMode>true</ConformanceMode>
+            <DiagnosticsFormat>Column</DiagnosticsFormat>
+            <DisableLanguageExtensions>false</DisableLanguageExtensions>
+            <ErrorReporting>Prompt</ErrorReporting>
+            <ExpandAttributedSource>false</ExpandAttributedSource>
+            <ExceptionHandling>Sync</ExceptionHandling>
+            <EnableASAN>false</EnableASAN>
+            <EnableFuzzer>false</EnableFuzzer>
+            <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+            <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+            <EnableVectorLength>NotSet</EnableVectorLength>
+            <FloatingPointModel>Precise</FloatingPointModel>
+            <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+            <GenerateModuleDependencies>false</GenerateModuleDependencies>
+            <GenerateSourceDependencies>false</GenerateSourceDependencies>
+            <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+            <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+            <IntrinsicFunctions>false</IntrinsicFunctions>
+            <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+            <LanguageStandard>stdcpp17</LanguageStandard>
+            <LanguageStandard_C>Default</LanguageStandard_C>
+            <MinimalRebuild>false</MinimalRebuild>
+            <ModuleDependenciesFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ModuleDependenciesFile>
+            <ModuleOutputFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ModuleOutputFile>
+            <OmitDefaultLibName>false</OmitDefaultLibName>
+            <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+            <WholeProgramOptimization>false</WholeProgramOptimization>
+            <ObjectFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ObjectFileName>
+            <CallingConvention>Cdecl</CallingConvention>
+            <ProgramDataBaseFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Debug\Engine.pdb</ProgramDataBaseFileName>
+            <PrecompiledHeader>NotUsing</PrecompiledHeader>
+            <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+            <PrecompiledHeaderOutputFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\Engine.pch</PrecompiledHeaderOutputFile>
+            <PreprocessToFile>false</PreprocessToFile>
+            <PreprocessKeepComments>false</PreprocessKeepComments>
+            <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+            <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+            <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+            <ShowIncludes>false</ShowIncludes>
+            <SourceDependenciesFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</SourceDependenciesFile>
+            <SuppressStartupBanner>true</SuppressStartupBanner>
+            <BufferSecurityCheck>true</BufferSecurityCheck>
+            <SmallerTypeCheck>false</SmallerTypeCheck>
+            <SpectreMitigation>false</SpectreMitigation>
+            <StructMemberAlignment>Default</StructMemberAlignment>
+            <TrackerLogDirectory>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\Engine.tlog\</TrackerLogDirectory>
+            <TranslateIncludes>false</TranslateIncludes>
+            <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+            <TreatWarningAsError>false</TreatWarningAsError>
+            <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+            <UseFullPaths>true</UseFullPaths>
+            <WarningLevel>Level3</WarningLevel>
+            <XMLDocumentationFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</XMLDocumentationFileName>
+            <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+            <IntelJCCErratum>false</IntelJCCErratum>
+            <BuildStlModules>false</BuildStlModules>
+            <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+            <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+            <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+            <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+            <PreprocessorDefinitions>_DEBUG;UNICODE;_UNICODE;_UNICODE;UNICODE;</PreprocessorDefinitions>
+            <AdditionalIncludeDirectories>A:\Clion\Engine\Engine\ThirdParty\stb;A:\Clion\Engine\Engine\ThirdParty\meshoptimizer\src;A:\Clion\Engine\Engine\Include;A:\Clion\Engine\Engine\ThirdParty\GLM-master;A:\Clion\Engine\Engine\ThirdParty;</AdditionalIncludeDirectories>
+            <MultiProcessorCompilation>true</MultiProcessorCompilation>
+            <AdditionalOptions>/utf-8</AdditionalOptions>
+            <LibCompiled>true</LibCompiled>
+        </ClCompile>
+        <ClCompile Include="Source\Sound\MediaFoundationDecoder.cpp">
+            <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+            <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+            <Optimization>Disabled</Optimization>
+            <SupportJustMyCode>true</SupportJustMyCode>
+            <AssemblerOutput>NoListing</AssemblerOutput>
+            <AssemblerListingLocation>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</AssemblerListingLocation>
+            <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+            <BrowseInformation>false</BrowseInformation>
+            <BrowseInformationFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</BrowseInformationFile>
+            <CompileAs>Default</CompileAs>
+            <UseDynamicDebugging>false</UseDynamicDebugging>
+            <ConformanceMode>true</ConformanceMode>
+            <DiagnosticsFormat>Column</DiagnosticsFormat>
+            <DisableLanguageExtensions>false</DisableLanguageExtensions>
+            <ErrorReporting>Prompt</ErrorReporting>
+            <ExpandAttributedSource>false</ExpandAttributedSource>
+            <ExceptionHandling>Sync</ExceptionHandling>
+            <EnableASAN>false</EnableASAN>
+            <EnableFuzzer>false</EnableFuzzer>
+            <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+            <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+            <EnableVectorLength>NotSet</EnableVectorLength>
+            <FloatingPointModel>Precise</FloatingPointModel>
+            <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+            <GenerateModuleDependencies>false</GenerateModuleDependencies>
+            <GenerateSourceDependencies>false</GenerateSourceDependencies>
+            <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+            <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+            <IntrinsicFunctions>false</IntrinsicFunctions>
+            <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+            <LanguageStandard>stdcpp17</LanguageStandard>
+            <LanguageStandard_C>Default</LanguageStandard_C>
+            <MinimalRebuild>false</MinimalRebuild>
+            <ModuleDependenciesFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ModuleDependenciesFile>
+            <ModuleOutputFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ModuleOutputFile>
+            <OmitDefaultLibName>false</OmitDefaultLibName>
+            <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+            <WholeProgramOptimization>false</WholeProgramOptimization>
+            <ObjectFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ObjectFileName>
+            <CallingConvention>Cdecl</CallingConvention>
+            <ProgramDataBaseFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Debug\Engine.pdb</ProgramDataBaseFileName>
+            <PrecompiledHeader>NotUsing</PrecompiledHeader>
+            <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+            <PrecompiledHeaderOutputFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\Engine.pch</PrecompiledHeaderOutputFile>
+            <PreprocessToFile>false</PreprocessToFile>
+            <PreprocessKeepComments>false</PreprocessKeepComments>
+            <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+            <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+            <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+            <ShowIncludes>false</ShowIncludes>
+            <SourceDependenciesFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</SourceDependenciesFile>
+            <SuppressStartupBanner>true</SuppressStartupBanner>
+            <BufferSecurityCheck>true</BufferSecurityCheck>
+            <SmallerTypeCheck>false</SmallerTypeCheck>
+            <SpectreMitigation>false</SpectreMitigation>
+            <StructMemberAlignment>Default</StructMemberAlignment>
+            <TrackerLogDirectory>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\Engine.tlog\</TrackerLogDirectory>
+            <TranslateIncludes>false</TranslateIncludes>
+            <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+            <TreatWarningAsError>false</TreatWarningAsError>
+            <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+            <UseFullPaths>true</UseFullPaths>
+            <WarningLevel>Level3</WarningLevel>
+            <XMLDocumentationFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</XMLDocumentationFileName>
+            <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+            <IntelJCCErratum>false</IntelJCCErratum>
+            <BuildStlModules>false</BuildStlModules>
+            <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+            <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+            <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+            <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+            <PreprocessorDefinitions>_DEBUG;UNICODE;_UNICODE;_UNICODE;UNICODE;</PreprocessorDefinitions>
+            <AdditionalIncludeDirectories>A:\Clion\Engine\Engine\ThirdParty\stb;A:\Clion\Engine\Engine\ThirdParty\meshoptimizer\src;A:\Clion\Engine\Engine\Include;A:\Clion\Engine\Engine\ThirdParty\GLM-master;A:\Clion\Engine\Engine\ThirdParty;</AdditionalIncludeDirectories>
+            <MultiProcessorCompilation>true</MultiProcessorCompilation>
+            <AdditionalOptions>/utf-8</AdditionalOptions>
+            <LibCompiled>true</LibCompiled>
+        </ClCompile>
+        <ClCompile Include="Source\Sound\VoicePool.cpp">
+            <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+            <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+            <Optimization>Disabled</Optimization>
+            <SupportJustMyCode>true</SupportJustMyCode>
+            <AssemblerOutput>NoListing</AssemblerOutput>
+            <AssemblerListingLocation>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</AssemblerListingLocation>
+            <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+            <BrowseInformation>false</BrowseInformation>
+            <BrowseInformationFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</BrowseInformationFile>
+            <CompileAs>Default</CompileAs>
+            <UseDynamicDebugging>false</UseDynamicDebugging>
+            <ConformanceMode>true</ConformanceMode>
+            <DiagnosticsFormat>Column</DiagnosticsFormat>
+            <DisableLanguageExtensions>false</DisableLanguageExtensions>
+            <ErrorReporting>Prompt</ErrorReporting>
+            <ExpandAttributedSource>false</ExpandAttributedSource>
+            <ExceptionHandling>Sync</ExceptionHandling>
+            <EnableASAN>false</EnableASAN>
+            <EnableFuzzer>false</EnableFuzzer>
+            <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+            <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+            <EnableVectorLength>NotSet</EnableVectorLength>
+            <FloatingPointModel>Precise</FloatingPointModel>
+            <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+            <GenerateModuleDependencies>false</GenerateModuleDependencies>
+            <GenerateSourceDependencies>false</GenerateSourceDependencies>
+            <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+            <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+            <IntrinsicFunctions>false</IntrinsicFunctions>
+            <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+            <LanguageStandard>stdcpp17</LanguageStandard>
+            <LanguageStandard_C>Default</LanguageStandard_C>
+            <MinimalRebuild>false</MinimalRebuild>
+            <ModuleDependenciesFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ModuleDependenciesFile>
+            <ModuleOutputFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ModuleOutputFile>
+            <OmitDefaultLibName>false</OmitDefaultLibName>
+            <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+            <WholeProgramOptimization>false</WholeProgramOptimization>
+            <ObjectFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ObjectFileName>
+            <CallingConvention>Cdecl</CallingConvention>
+            <ProgramDataBaseFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Debug\Engine.pdb</ProgramDataBaseFileName>
+            <PrecompiledHeader>NotUsing</PrecompiledHeader>
+            <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+            <PrecompiledHeaderOutputFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\Engine.pch</PrecompiledHeaderOutputFile>
+            <PreprocessToFile>false</PreprocessToFile>
+            <PreprocessKeepComments>false</PreprocessKeepComments>
+            <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+            <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+            <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+            <ShowIncludes>false</ShowIncludes>
+            <SourceDependenciesFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</SourceDependenciesFile>
+            <SuppressStartupBanner>true</SuppressStartupBanner>
+            <BufferSecurityCheck>true</BufferSecurityCheck>
+            <SmallerTypeCheck>false</SmallerTypeCheck>
+            <SpectreMitigation>false</SpectreMitigation>
+            <StructMemberAlignment>Default</StructMemberAlignment>
+            <TrackerLogDirectory>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\Engine.tlog\</TrackerLogDirectory>
+            <TranslateIncludes>false</TranslateIncludes>
+            <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+            <TreatWarningAsError>false</TreatWarningAsError>
+            <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+            <UseFullPaths>true</UseFullPaths>
+            <WarningLevel>Level3</WarningLevel>
+            <XMLDocumentationFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</XMLDocumentationFileName>
+            <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+            <IntelJCCErratum>false</IntelJCCErratum>
+            <BuildStlModules>false</BuildStlModules>
+            <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+            <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+            <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+            <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+            <PreprocessorDefinitions>_DEBUG;UNICODE;_UNICODE;_UNICODE;UNICODE;</PreprocessorDefinitions>
+            <AdditionalIncludeDirectories>A:\Clion\Engine\Engine\ThirdParty\stb;A:\Clion\Engine\Engine\ThirdParty\meshoptimizer\src;A:\Clion\Engine\Engine\Include;A:\Clion\Engine\Engine\ThirdParty\GLM-master;A:\Clion\Engine\Engine\ThirdParty;</AdditionalIncludeDirectories>
+            <MultiProcessorCompilation>true</MultiProcessorCompilation>
+            <AdditionalOptions>/utf-8</AdditionalOptions>
+            <LibCompiled>true</LibCompiled>
+        </ClCompile>
+        <ClCompile Include="Source\Sound\WavDecoder.cpp">
+            <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+            <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+            <Optimization>Disabled</Optimization>
+            <SupportJustMyCode>true</SupportJustMyCode>
+            <AssemblerOutput>NoListing</AssemblerOutput>
+            <AssemblerListingLocation>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</AssemblerListingLocation>
+            <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+            <BrowseInformation>false</BrowseInformation>
+            <BrowseInformationFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</BrowseInformationFile>
+            <CompileAs>Default</CompileAs>
+            <UseDynamicDebugging>false</UseDynamicDebugging>
+            <ConformanceMode>true</ConformanceMode>
+            <DiagnosticsFormat>Column</DiagnosticsFormat>
+            <DisableLanguageExtensions>false</DisableLanguageExtensions>
+            <ErrorReporting>Prompt</ErrorReporting>
+            <ExpandAttributedSource>false</ExpandAttributedSource>
+            <ExceptionHandling>Sync</ExceptionHandling>
+            <EnableASAN>false</EnableASAN>
+            <EnableFuzzer>false</EnableFuzzer>
+            <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
+            <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+            <EnableVectorLength>NotSet</EnableVectorLength>
+            <FloatingPointModel>Precise</FloatingPointModel>
+            <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+            <GenerateModuleDependencies>false</GenerateModuleDependencies>
+            <GenerateSourceDependencies>false</GenerateSourceDependencies>
+            <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+            <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+            <IntrinsicFunctions>false</IntrinsicFunctions>
+            <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
+            <LanguageStandard>stdcpp17</LanguageStandard>
+            <LanguageStandard_C>Default</LanguageStandard_C>
+            <MinimalRebuild>false</MinimalRebuild>
+            <ModuleDependenciesFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ModuleDependenciesFile>
+            <ModuleOutputFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ModuleOutputFile>
+            <OmitDefaultLibName>false</OmitDefaultLibName>
+            <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+            <WholeProgramOptimization>false</WholeProgramOptimization>
+            <ObjectFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</ObjectFileName>
+            <CallingConvention>Cdecl</CallingConvention>
+            <ProgramDataBaseFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Debug\Engine.pdb</ProgramDataBaseFileName>
+            <PrecompiledHeader>NotUsing</PrecompiledHeader>
+            <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+            <PrecompiledHeaderOutputFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\Engine.pch</PrecompiledHeaderOutputFile>
+            <PreprocessToFile>false</PreprocessToFile>
+            <PreprocessKeepComments>false</PreprocessKeepComments>
+            <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+            <RemoveUnreferencedCodeData>true</RemoveUnreferencedCodeData>
+            <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+            <ShowIncludes>false</ShowIncludes>
+            <SourceDependenciesFile>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</SourceDependenciesFile>
+            <SuppressStartupBanner>true</SuppressStartupBanner>
+            <BufferSecurityCheck>true</BufferSecurityCheck>
+            <SmallerTypeCheck>false</SmallerTypeCheck>
+            <SpectreMitigation>false</SpectreMitigation>
+            <StructMemberAlignment>Default</StructMemberAlignment>
+            <TrackerLogDirectory>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\Engine.tlog\</TrackerLogDirectory>
+            <TranslateIncludes>false</TranslateIncludes>
+            <MinimalRebuildFromTracking>true</MinimalRebuildFromTracking>
+            <TreatWarningAsError>false</TreatWarningAsError>
+            <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+            <UseFullPaths>true</UseFullPaths>
+            <WarningLevel>Level3</WarningLevel>
+            <XMLDocumentationFileName>A:\Clion\Engine\Engine\BuildSupport\..\..\Engine\build\obj\x64\Debug\Engine\</XMLDocumentationFileName>
+            <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+            <IntelJCCErratum>false</IntelJCCErratum>
+            <BuildStlModules>false</BuildStlModules>
+            <TreatAngleIncludeAsExternal>false</TreatAngleIncludeAsExternal>
+            <ExternalWarningLevel>InheritWarningLevel</ExternalWarningLevel>
+            <TreatExternalTemplatesAsInternal>true</TreatExternalTemplatesAsInternal>
+            <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
+            <PreprocessorDefinitions>_DEBUG;UNICODE;_UNICODE;_UNICODE;UNICODE;</PreprocessorDefinitions>
+            <AdditionalIncludeDirectories>A:\Clion\Engine\Engine\ThirdParty\stb;A:\Clion\Engine\Engine\ThirdParty\meshoptimizer\src;A:\Clion\Engine\Engine\Include;A:\Clion\Engine\Engine\ThirdParty\GLM-master;A:\Clion\Engine\Engine\ThirdParty;</AdditionalIncludeDirectories>
+            <MultiProcessorCompilation>true</MultiProcessorCompilation>
+            <AdditionalOptions>/utf-8</AdditionalOptions>
+            <LibCompiled>true</LibCompiled>
+        </ClCompile>
+        <ClCompile Include="Source\UI\FontAtlas.cpp"/>
+        <ClCompile Include="Source\UI\UIElement.cpp"/>
+        <ClCompile Include="Source\UI\UIMarkup.cpp"/>
+        <ClCompile Include="ThirdParty\meshoptimizer\src\allocator.cpp"/>
+        <ClCompile Include="ThirdParty\meshoptimizer\src\indexgenerator.cpp"/>
+        <ClCompile Include="ThirdParty\meshoptimizer\src\simplifier.cpp"/>
+        <ClCompile Include="ThirdParty\meshoptimizer\src\spatialorder.cpp"/>
+        <ClCompile Include="ThirdParty\meshoptimizer\src\vcacheoptimizer.cpp"/>
+        <ClCompile Include="ThirdParty\meshoptimizer\src\vfetchoptimizer.cpp"/>
+        <ClCompile Include="Source\Render\TextureLoader.cpp"/>
+        <ClCompile Include="Source\Render\ShaderCompiler.cpp"/>
+        <ClCompile Include="Source\Render\SkeletalAnimation.cpp"/>
+        <ClCompile Include="Source\Render\SkeletalBaker.cpp"/>
+        <ClCompile Include="Source\Render\SkeletalLoaderStub.cpp" Condition="'$(EngineEnableAssimp)'!='true'"/>
+        <ClCompile Include="Source\Render\SkeletalLoaderAssimp.cpp" Condition="'$(EngineEnableAssimp)'=='true'"/>
+        <ClCompile Include="Source\Components\SpecificComponents\SkeletalMeshComponent.cpp"/>
+        <ClCompile Include="Source\Resources\Paths.cpp"/>
+        <ClCompile Include="Source\Resources\VirtualFileSystem.cpp"/>
+        <ClCompile Include="Source\Resources\VfsRead.cpp"/>
+        <ClCompile Include="Source\Resources\LocalVfs.cpp"/>
+        <ClCompile Include="Source\Resources\HostVfsProxy.cpp"/>
+        <ClCompile Include="Source\Runtime\VfsService.cpp"/>
+        <ClInclude Include="Source\Resources\IVfs.h"/>
+        <ClInclude Include="Source\Resources\LocalVfs.h"/>
+        <ClInclude Include="Source\Resources\HostVfsProxy.h"/>
+        <ClInclude Include="Source\Resources\VfsRead.h"/>
+        <ClInclude Include="Include\Engine\Components\GameComponents.h"/>
+        <ClInclude Include="Include\Engine\Components\ComponentAnnotations.h"/>
+        <ClInclude Include="Include\Engine\Components\ComponentType.h"/>
+        <ClInclude Include="Include\Engine\Components\Light\CubeMap.h"/>
+        <ClInclude Include="Include\Engine\Components\Light\PointLightComponent.h"/>
+        <ClInclude Include="Include\Engine\Components\SpecificComponents\CubeComponent.h"/>
+        <ClInclude Include="Include\Engine\Components\SpecificComponents\FBXComponent.h"/>
+        <ClInclude Include="Include\Engine\Components\SpecificComponents\InstancedMeshComponent.h"/>
+        <ClInclude Include="Include\Engine\Components\SpecificComponents\MeshComponent.h"/>
+        <ClInclude Include="Include\Engine\Components\SpecificComponents\ParticleSystemComponent.h"/>
+        <ClInclude Include="Include\Engine\Components\SpecificComponents\SkeletalMeshComponent.h"/>
+        <ClInclude Include="Include\Engine\Components\SpecificComponents\SphereComponent.h"/>
+        <ClInclude Include="Include\Engine\Components\SpecificComponents\TriangleComponent.h"/>
+        <ClInclude Include="Include\Engine\Components\SpecificComponents\UIComponent.h"/>
+        <ClInclude Include="Include\Engine\Display\Display.h"/>
+        <ClInclude Include="Include\Engine\InputDevice\Delegates.h"/>
+        <ClInclude Include="Include\Engine\InputDevice\InputDevice.h"/>
+        <ClInclude Include="Include\Engine\InputDevice\Keys.h"/>
+        <ClInclude Include="Include\Engine\MainGame\BaseGameClass\Game.h"/>
+        <ClInclude Include="Include\Engine\MainGame\GameSettings.h"/>
+        <ClInclude Include="Include\Engine\MainGame\Player.h"/>
+        <ClInclude Include="Include\Engine\Render\ImpostorAtlas.h"/>
+        <ClInclude Include="Include\Engine\Render\Material.h"/>
+        <ClInclude Include="Include\Engine\Render\MaterialAsset.h"/>
+        <ClInclude Include="Include\Engine\Render\MeshSimplifier.h"/>
+        <ClInclude Include="Include\Engine\Render\MeshValidation.h"/>
+        <ClInclude Include="Include\Engine\UI\FontAtlas.h"/>
+        <ClInclude Include="Include\Engine\UI\UIElement.h"/>
+        <ClInclude Include="Include\Engine\UI\UIMarkup.h"/>
+        <ClInclude Include="Include\Engine\Render\MeshData.h"/>
+        <ClInclude Include="Include\Engine\Render\MeshPrimitives.h"/>
+        <ClInclude Include="Include\Engine\Render\ShaderCompiler.h"/>
+        <ClInclude Include="Include\Engine\Render\ShaderConstants.h"/>
+        <ClInclude Include="Include\Engine\Render\SkeletalData.h"/>
+        <ClInclude Include="Include\Engine\Render\SkeletalAnimation.h"/>
+        <ClInclude Include="Include\Engine\Render\SkeletalBaker.h"/>
+        <ClInclude Include="Include\Engine\Render\SkeletalLoader.h"/>
+        <ClInclude Include="Include\Engine\Render\TextureLoader.h"/>
+        <ClInclude Include="Include\Engine\Resources\Paths.h"/>
+        <ClInclude Include="Include\Engine\Resources\VirtualFileSystem.h"/>
+        <ClInclude Include="Include\Engine\Runtime\VfsApi.h"/>
+        <ClInclude Include="Source\Runtime\VfsService.h"/>
+    </ItemGroup>
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
+    <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')"/>
+    <Target Name="RequireAssimpDependencies" BeforeTargets="PrepareForBuild" Condition="'$(EngineEnableAssimp)'=='true'">
+        <Error Condition="!Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" Text="EngineEnableAssimp requires vcpkg. Set VCPKG_ROOT or /p:VcpkgRoot to the installed vcpkg directory."/>
+    </Target>
 </Project>
