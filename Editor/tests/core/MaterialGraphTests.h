@@ -111,6 +111,65 @@ inline void RunMaterialGraphTests()
         CheckMatGraph(hlsl.contains(QStringLiteral("o.Normal = NormalFromMap(i, NormalMap.Sample(MaterialSampler, i.UV).xyz, 1.0f);")), "Normal map goes through the tangent frame helper");
     }
 
+    // 2c. Pin types are converted, so any link gives valid HLSL; new input, channel and math nodes
+    {
+        auto compile = [](const MaterialGraphModel& m) { return HlslGraphCompiler::CompileGraphToHlsl(m); };
+        MaterialGraphModel model;
+        const int out = model.AddNode(QStringLiteral("MaterialOutput"), QStringLiteral("Out"), QPointF(), {});
+        const int color = model.AddNode(QStringLiteral("ColorParam"), QStringLiteral("Tint"), QPointF(),
+                                        {{QStringLiteral("name"), QStringLiteral("Tint")}, {QStringLiteral("color"), QColor(Qt::white)}});
+        const int constant = model.AddNode(QStringLiteral("Constant"), QStringLiteral("Two"), QPointF(), {{QStringLiteral("value"), 2.0}});
+        const int uvScale = model.AddNode(QStringLiteral("Vector2Param"), QStringLiteral("UvScale"), QPointF(),
+                                          {{QStringLiteral("name"), QStringLiteral("UvScale")}, {QStringLiteral("value"), QVariantList{2.0, 3.0}}});
+        const int dir = model.AddNode(QStringLiteral("Vector3Param"), QStringLiteral("Dir"), QPointF(),
+                                      {{QStringLiteral("name"), QStringLiteral("Dir")}, {QStringLiteral("value"), QVariantList{0.0, 1.0, 0.0}}});
+        const int add = model.AddNode(QStringLiteral("Add"), QStringLiteral("Add"), QPointF(), {});
+        const int split = model.AddNode(QStringLiteral("Split"), QStringLiteral("Split"), QPointF(), {});
+        const int combine = model.AddNode(QStringLiteral("Combine"), QStringLiteral("Combine"), QPointF(), {});
+        const int defaults = model.AddNode(QStringLiteral("SurfaceDefaults"), QStringLiteral("Defaults"), QPointF(), {});
+        const int instance = model.AddNode(QStringLiteral("InstanceData"), QStringLiteral("Instance"), QPointF(), {});
+        model.AddConnection(color, QStringLiteral("RGB"), add, QStringLiteral("A"));
+        model.AddConnection(constant, QStringLiteral("Value"), add, QStringLiteral("B"));
+        model.AddConnection(add, QStringLiteral("Out"), out, QStringLiteral("Albedo"));
+        model.AddConnection(color, QStringLiteral("RGB"), out, QStringLiteral("Alpha"));
+        model.AddConnection(uvScale, QStringLiteral("Value"), out, QStringLiteral("Emissive"));
+        model.AddConnection(color, QStringLiteral("RGB"), split, QStringLiteral("In"));
+        model.AddConnection(split, QStringLiteral("A"), combine, QStringLiteral("R"));
+        model.AddConnection(instance, QStringLiteral("X"), combine, QStringLiteral("G"));
+        model.AddConnection(combine, QStringLiteral("RGB"), out, QStringLiteral("Normal"));
+        model.AddConnection(defaults, QStringLiteral("Alpha"), out, QStringLiteral("Specular"));
+        model.AddConnection(dir, QStringLiteral("Value"), out, QStringLiteral("AmbientModel"));
+        const QString hlsl = compile(model);
+        CheckMatGraph(hlsl.contains(QStringLiteral("o.Albedo = saturate((Tint.rgb + ((float3)(2.0000f))));")), "Math takes the largest input size and broadcasts scalars");
+        CheckMatGraph(hlsl.contains(QStringLiteral("o.Alpha = saturate((Tint.rgb).x);")), "A vector feeding a scalar input keeps its first component");
+        CheckMatGraph(hlsl.contains(QStringLiteral("o.Emissive = float3(UvScale, 0.0f);")), "A shorter vector is padded with zeros");
+        CheckMatGraph(hlsl.contains(QStringLiteral("o.Normal = float3(1.0f, i.InstanceData.x, 0.0f);")), "Split pads alpha with 1 and Combine builds a vector");
+        CheckMatGraph(hlsl.contains(QStringLiteral("float2 UvScale = float2(2.0000f, 3.0000f);")) &&
+                      hlsl.contains(QStringLiteral("float3 Dir = float3(0.0000f, 1.0000f, 0.0000f);")), "Vector parameters are declared in the cbuffer");
+        CheckMatGraph(hlsl.contains(QStringLiteral("{\n    const MaterialOutput defaults = o;\n")) &&
+                      hlsl.contains(QStringLiteral("o.SpecularWeight = saturate(defaults.Alpha);")), "SurfaceDefaults reads the template values before any write");
+        CheckMatGraph(hlsl.contains(QStringLiteral("o.AmbientModel = saturate((Dir).x);")), "Vector parameter converted for a scalar input");
+
+        // Every node type is known to the compiler and has pins.
+        for (const QString& type : {QStringLiteral("ObjectColor"), QStringLiteral("WorldPosition"), QStringLiteral("SurfaceNormal"),
+                                    QStringLiteral("ViewDirection"), QStringLiteral("FrontFace"), QStringLiteral("Subtract"), QStringLiteral("Divide"),
+                                    QStringLiteral("Power"), QStringLiteral("Min"), QStringLiteral("Max"), QStringLiteral("Clamp"), QStringLiteral("Saturate"),
+                                    QStringLiteral("Abs"), QStringLiteral("Frac"), QStringLiteral("Normalize"), QStringLiteral("Step"),
+                                    QStringLiteral("Smoothstep"), QStringLiteral("Dot")})
+            CheckMatGraph(HlslGraphCompiler::IsKnownNode(type) && !HlslGraphCompiler::NodePins(type).isEmpty(), "Node type has pins");
+        CheckMatGraph(!HlslGraphCompiler::IsKnownNode(QStringLiteral("PBRMasterOutput")), "PBR output is gone");
+
+        // A cycle from a damaged file ends in 0 instead of endless recursion.
+        MaterialGraphModel cycle;
+        const int cycleOut = cycle.AddNode(QStringLiteral("MaterialOutput"), QStringLiteral("Out"), QPointF(), {});
+        const int a = cycle.AddNode(QStringLiteral("Add"), QStringLiteral("A"), QPointF(), {});
+        const int b = cycle.AddNode(QStringLiteral("Add"), QStringLiteral("B"), QPointF(), {});
+        cycle.AddConnection(a, QStringLiteral("Out"), b, QStringLiteral("A"));
+        cycle.AddConnection(b, QStringLiteral("Out"), a, QStringLiteral("A"));
+        cycle.AddConnection(a, QStringLiteral("Out"), cycleOut, QStringLiteral("Alpha"));
+        CheckMatGraph(compile(cycle).contains(QStringLiteral("o.Alpha = saturate(((0.0f + 0.0f) + 0.0f));")), "Cycles compile to zero");
+    }
+
     // 3. Round-trip JSON test
     {
         MaterialGraphModel original;
@@ -150,6 +209,66 @@ inline void RunMaterialGraphTests()
         CheckMatGraph(color && color->properties.value(QStringLiteral("name")).toString() == QStringLiteral("BaseColor"), "Parameter name survives JSON");
         CheckMatGraph(color->properties.value(QStringLiteral("color")).value<QColor>() == QColor(220, 220, 225), "Color survives JSON");
         CheckMatGraph(!jsonStr.contains(QStringLiteral("\"name\": [")), "Names are not written as colors");
+    }
+
+    // Every HLSL line knows the nodes it came from: compiler errors are shown on nodes.
+    {
+        MaterialGraphModel model;
+        const int output = model.AddNode(QStringLiteral("MaterialOutput"), QStringLiteral("Material Output"), {});
+        const int tint = model.AddNode(QStringLiteral("ColorParam"), QStringLiteral("Tint"), {},
+                                       {{QStringLiteral("name"), QStringLiteral("Tint")}, {QStringLiteral("color"), QColor(Qt::red)}});
+        const int map = model.AddNode(QStringLiteral("Texture2D"), QStringLiteral("BaseMap"), {}, {{QStringLiteral("textureName"), QStringLiteral("BaseMap")}});
+        const int again = model.AddNode(QStringLiteral("Texture2D"), QStringLiteral("BaseMap"), {}, {{QStringLiteral("textureName"), QStringLiteral("BaseMap")}});
+        const int multiply = model.AddNode(QStringLiteral("Multiply"), QStringLiteral("Multiply"), {});
+        const int unused = model.AddNode(QStringLiteral("Fresnel"), QStringLiteral("Fresnel"), {});
+        model.AddConnection(tint, QStringLiteral("RGB"), multiply, QStringLiteral("A"));
+        model.AddConnection(map, QStringLiteral("RGB"), multiply, QStringLiteral("B"));
+        model.AddConnection(multiply, QStringLiteral("Out"), output, QStringLiteral("Albedo"));
+        model.AddConnection(again, QStringLiteral("R"), output, QStringLiteral("Emissive"));
+
+        const GraphCompileResult result = HlslGraphCompiler::Compile(model);
+        CheckMatGraph(result.hlsl == HlslGraphCompiler::CompileGraphToHlsl(model), "Compile and CompileGraphToHlsl give the same HLSL");
+        CheckMatGraph(result.problems.isEmpty(), "A valid graph has no problems");
+        const QStringList lines = result.hlsl.split(QLatin1Char('\n'));
+        auto lineOf = [&](const QString& text) {
+            for (int i = 0; i < lines.size(); ++i)
+                if (lines[i].contains(text)) return i + 1;
+            return 0;
+        };
+        const int tintLine = lineOf(QStringLiteral("float4 Tint ="));
+        const int textureLine = lineOf(QStringLiteral("Texture2D BaseMap"));
+        const int albedoLine = lineOf(QStringLiteral("o.Albedo ="));
+        const int emissiveDefine = lineOf(QStringLiteral("#define MATERIAL_EMISSIVE"));
+        CheckMatGraph(tintLine > 0 && result.lineNodes.value(tintLine) == QList<int>{tint}, "Parameter line maps to its node");
+        CheckMatGraph(result.lineNodes.value(textureLine) == (QList<int>{map, again}), "Texture line maps to every node reading it");
+        const QList<int> albedo = result.lineNodes.value(albedoLine);
+        CheckMatGraph(!albedo.isEmpty() && albedo.first() == output && albedo.contains(multiply) && albedo.contains(tint) && albedo.contains(map) &&
+                      !albedo.contains(unused), "Assignment line maps to the output and its chain");
+        CheckMatGraph(result.lineOutputs.value(albedoLine) == QStringLiteral("Albedo"), "Assignment line knows the output pin");
+        CheckMatGraph(result.lineOutputs.value(emissiveDefine) == QStringLiteral("Emissive"), "Emissive define belongs to the Emissive pin");
+        CheckMatGraph(result.lineNodes.value(lineOf(QStringLiteral("void Surface"))).isEmpty(), "Template lines map to no node");
+    }
+
+    // Names: HLSL words and engine names are refused before they reach the shader compiler.
+    {
+        CheckMatGraph(HlslGraphCompiler::NameProblem(QStringLiteral("BaseColor")).isEmpty(), "Ordinary name is accepted");
+        CheckMatGraph(HlslGraphCompiler::NameProblem(QStringLiteral("_Detail2")).isEmpty(), "Underscore and digits are accepted");
+        for (const char* bad : {"2Fast", "with space", "", "float3", "int2x2", "return", "sin", "lerp", "Texture2D", "i", "o",
+                                "defaults", "TimeParams", "ObjectColor", "MaterialSampler", "MATERIAL_EMISSIVE", "SV_Target"})
+            CheckMatGraph(!HlslGraphCompiler::NameProblem(QString::fromLatin1(bad)).isEmpty(), bad);
+
+        MaterialGraphModel model;
+        model.AddNode(QStringLiteral("MaterialOutput"), QStringLiteral("Material Output"), {});
+        const int first = model.AddNode(QStringLiteral("ScalarParam"), QStringLiteral("Gloss"), {}, {{QStringLiteral("name"), QStringLiteral("Gloss")}});
+        const int twin = model.AddNode(QStringLiteral("ScalarParam"), QStringLiteral("Gloss"), {}, {{QStringLiteral("name"), QStringLiteral("Gloss")}});
+        const int clash = model.AddNode(QStringLiteral("Texture2D"), QStringLiteral("Gloss"), {}, {{QStringLiteral("textureName"), QStringLiteral("Gloss")}});
+        const int engine = model.AddNode(QStringLiteral("ColorParam"), QStringLiteral("TimeParams"), {}, {{QStringLiteral("name"), QStringLiteral("TimeParams")}});
+        const int unknown = model.AddNode(QStringLiteral("Teleport"), QStringLiteral("Teleport"), {});
+        const GraphCompileResult result = HlslGraphCompiler::Compile(model);
+        CheckMatGraph(!result.problems.contains(first), "The first owner of a name is fine");
+        CheckMatGraph(result.problems.contains(twin) && result.problems.contains(clash), "Repeated parameter and texture names are problems");
+        CheckMatGraph(result.problems.value(engine).contains(QStringLiteral("TimeParams")), "Engine name is a problem of its node");
+        CheckMatGraph(result.problems.value(unknown).contains(QStringLiteral("Teleport")), "Unknown node type is a problem");
     }
 }
 

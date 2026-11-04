@@ -456,6 +456,7 @@ void MaterialEditorWindow::BuildUi()
     };
     graph_->parameterEdited = [this](const QString& name, const std::array<float, 4>& value) { SetParameterByName(name, value); };
     graph_->textureRequested = [this](const QString& name) { PickTexture(name); };
+    graph_->textureRestored = [this](const QString& name, const QString& gamePath) { AssignTexture(name, gamePath); };
 
     auto* right = new QSplitter(Qt::Vertical, this);
     right->addWidget(sourceTabs_);
@@ -517,6 +518,13 @@ void MaterialEditorWindow::BuildUi()
     connect(source_->document(), &QTextDocument::modificationChanged, this, [this] { UpdateTitle(); });
     connect(errors_, &QListWidget::itemActivated, this, [this](QListWidgetItem* item)
     {
+        // Ошибка графа ведёт к ноде, ошибка кода — к строке HLSL.
+        if (const int node = item->data(Qt::UserRole + 2).toInt(); node > 0 && graphMode_)
+        {
+            sourceTabs_->setCurrentWidget(graphPage_);
+            graph_->FocusNode(node);
+            return;
+        }
         const int line = item->data(Qt::UserRole).toInt();
         if (line > 0) GoToError(line, item->data(Qt::UserRole + 1).toInt());
     });
@@ -583,7 +591,7 @@ void MaterialEditorWindow::Apply(const MaterialEditorState& state, bool valid, b
 
     if (!error.isEmpty()) statusBar()->showMessage(error);
     else statusBar()->showMessage(state_.errors.isEmpty() ? QStringLiteral("Шейдер скомпилирован")
-                                                          : QStringLiteral("Ошибки компиляции: см. список под текстом"));
+                                                          : QStringLiteral("Ошибки компиляции: см. список ошибок (двойной щелчок — к месту ошибки)"));
     UpdateTitle();
 }
 
@@ -884,21 +892,61 @@ void MaterialEditorWindow::ShowErrors()
     errors_->clear();
     QSet<int> lines;
     const QString surface = QFileInfo(shaderFile_).absoluteFilePath();
-    static const QRegularExpression location(QStringLiteral(R"(^(.*)\((\d+),(\d+)(?:-\d+)?\):)"));
+    static const QRegularExpression location(QStringLiteral(R"(^(.*)\((\d+),(\d+)(?:-\d+)?\):\s*)"));
+
+    // В режиме графа ошибка показывается на ноде: строки HLSL знают, из каких нод собраны.
+    // Карта верна, только пока HLSL на диске — это HLSL текущего графа.
+    EditorCore::GraphCompileResult compiled;
+    const bool graph = graphMode_ && (compiled = EditorCore::HlslGraphCompiler::Compile(graph_->Model())).hlsl == source_->toPlainText();
+    QHash<int, QString> nodeProblems;
+    auto describe = [this](int nodeId) {
+        const EditorCore::GraphNodeData* node = graph_->Model().FindNode(nodeId);
+        if (!node) return QStringLiteral("Нода");
+        const QString kind = MaterialGraphWidget::NodeDisplayName(node->type);
+        return node->title.isEmpty() || node->title == node->type ? QStringLiteral("Нода «%1»").arg(kind)
+                                                                   : QStringLiteral("Нода «%1» (%2)").arg(node->title, kind);
+    };
+    auto addNodeItem = [&](int nodeId, const QString& text, const QString& tip) {
+        auto* item = new QListWidgetItem(text, errors_);
+        item->setData(Qt::UserRole + 2, nodeId);
+        item->setToolTip(tip.isEmpty() ? QStringLiteral("Двойной щелчок — показать ноду") : tip + QStringLiteral("\n\nДвойной щелчок — показать ноду"));
+        if (!nodeProblems.contains(nodeId)) nodeProblems.insert(nodeId, text);
+        return item;
+    };
+    if (graph)
+        for (auto it = compiled.problems.begin(); it != compiled.problems.end(); ++it)
+            addNodeItem(it.key(), QStringLiteral("%1: %2").arg(describe(it.key()), it.value()), {});
+
     for (const QString& text : state_.errors.split(QLatin1Char('\n'), Qt::SkipEmptyParts))
     {
-        auto* item = new QListWidgetItem(text.trimmed(), errors_);
         const auto match = location.match(text);
-        if (!match.hasMatch() || surface.isEmpty()) continue;
-        const QString file = QFileInfo(match.captured(1).trimmed()).absoluteFilePath();
-        if (file.compare(surface, Qt::CaseInsensitive) != 0) continue;
-        const int line = match.captured(2).toInt();
+        const QString file = match.hasMatch() ? QFileInfo(match.captured(1).trimmed()).absoluteFilePath() : QString();
+        const bool inSurface = match.hasMatch() && !surface.isEmpty() && file.compare(surface, Qt::CaseInsensitive) == 0;
+        const int line = inSurface ? match.captured(2).toInt() : 0;
+        if (graph && line > 0 && compiled.lineNodes.contains(line))
+        {
+            // Без пути и номера строки: дизайнеру нужна нода, а не координаты в сгенерированном коде.
+            QString message = text.mid(match.capturedLength()).trimmed();
+            if (message.contains(QStringLiteral("redefinition")))
+                message += QStringLiteral(" — имя уже занято, переименуйте ноду");
+            const QList<int> nodes = compiled.lineNodes.value(line);
+            const QString pin = compiled.lineOutputs.value(line);
+            const QString where = pin.isEmpty() ? describe(nodes.first()) : QStringLiteral("Выход материала, вход %1").arg(pin);
+            auto* item = addNodeItem(nodes.first(), QStringLiteral("%1: %2").arg(where, message), text.trimmed());
+            item->setData(Qt::UserRole, line);
+            item->setData(Qt::UserRole + 1, match.captured(3).toInt());
+            lines.insert(line);
+            continue;
+        }
+        auto* item = new QListWidgetItem(text.trimmed(), errors_);
+        if (line <= 0) continue;
         item->setData(Qt::UserRole, line);
         item->setData(Qt::UserRole + 1, match.captured(3).toInt());
         item->setToolTip(QStringLiteral("Двойной щелчок — перейти к строке %1").arg(line));
         lines.insert(line);
     }
     source_->SetErrorLines(lines);
+    if (graphMode_) graph_->SetNodeProblems(nodeProblems);
 }
 
 void MaterialEditorWindow::GoToError(int line, int column)

@@ -5,6 +5,7 @@
 #include "MaterialEditorWindow.h"
 #include "MaterialTextureTools.h"
 #include "MaterialGraphWidget.h"
+#include "HlslGraphCompiler.h"
 #include "UIEditorWindow.h"
 #include <Engine/UI/UIMarkup.h>
 #include <QDialogButtonBox>
@@ -46,6 +47,10 @@
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QGraphicsItem>
+#include <QClipboard>
+#include <QFrame>
 #include <QStyle>
 #include <QLineEdit>
 #include <QToolButton>
@@ -998,8 +1003,229 @@ int wmain(int argc, wchar_t** argv)
                 editor(w)->ApplyGraph();
             });
             for (int i = 0; i < 20; ++i) pump();
+
+            // Undo and redo: graph edits, a dragged slider as one step, values and textures go back to the material too.
+            QList<int> kept;
+            auto key = [](QWidget* target, int code, Qt::KeyboardModifiers modifiers) {
+                QKeyEvent shortcut(QEvent::ShortcutOverride, code, modifiers);
+                QApplication::sendEvent(target, &shortcut);
+                QKeyEvent press(QEvent::KeyPress, code, modifiers);
+                QApplication::sendEvent(target, &press);
+            };
+            auto specular = [&] { double v = 0; Ui([&](auto* w) { v = static_cast<QDoubleSpinBox*>(editorWidget(w, QStringLiteral("MaterialParam_Specular_0")))->value(); }); return v; };
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                for (const auto& n : g->Model().Nodes()) kept << n.id;
+                const int nodes = static_cast<int>(g->Model().Nodes().size());
+                const int add = g->AddNode(QStringLiteral("Add"), QPointF(600, 1100));
+                Check(g->CanUndo() && !g->CanRedo(), "an edit can be undone");
+                g->Undo();
+                Check(!g->Model().FindNode(add) && static_cast<int>(g->Model().Nodes().size()) == nodes && g->CanRedo(), "undo removes the added node");
+                g->Redo();
+                Check(g->Model().FindNode(add) && g->Model().FindNode(add)->type == QStringLiteral("Add"), "redo brings it back with its id");
+                Check(g->Connect(add, QStringLiteral("Out"), masterId(g), QStringLiteral("AmbientModel")), "connect for undo");
+                g->Undo();
+                Check(!hasLink(g, add, QStringLiteral("Out"), masterId(g), QStringLiteral("AmbientModel")) && g->Model().FindNode(add), "undo removes only the link");
+                g->View()->setFocus();
+                key(g->View(), Qt::Key_Z, Qt::ControlModifier);
+                Check(!g->Model().FindNode(add), "Ctrl+Z on the canvas undoes");
+                key(g->View(), Qt::Key_Y, Qt::ControlModifier);
+                Check(g->Model().FindNode(add) != nullptr, "Ctrl+Y on the canvas redoes");
+                g->RemoveNodes({add});
+
+                auto* spin = static_cast<QDoubleSpinBox*>(editorWidget(w, QStringLiteral("MaterialParam_Specular_0")));
+                for (const double v : {0.31, 0.32, 0.33}) spin->setValue(v);
+                g->Undo();
+                for (const auto& n : g->Model().Nodes())
+                    if (n.properties.value(QStringLiteral("name")).toString() == QStringLiteral("Specular"))
+                        Check(std::abs(n.properties.value(QStringLiteral("value")).toDouble() - 0.8) < 1e-4, "a dragged value is one undo step");
+                editor(w)->AssignTexture(QStringLiteral("Detail"), tiltFile);
+            });
+            until([&] { return std::abs(specular() - 0.8) < 1e-4; });
+            until([&] { return textureField(QStringLiteral("Detail")) == QStringLiteral("/Game/Textures/tilt-normal.png"); });
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                Check(g->NodeTextures().value(QStringLiteral("Detail")) == QStringLiteral("/Game/Textures/tilt-normal.png"), "texture choice reaches the node");
+                g->Undo();
+                Check(g->NodeTextures().value(QStringLiteral("Detail")) == QStringLiteral("/Game/Textures/flat-normal.png"), "undo restores the node texture");
+            });
+            until([&] { return textureField(QStringLiteral("Detail")) == QStringLiteral("/Game/Textures/flat-normal.png"); });
+            Check(std::abs(specular() - 0.8) < 1e-4, "undone value reaches the material settings");
+
+            // Copy, paste and duplicate: links inside the selection come along, names stay unique, textures are shared.
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                Check(!g->CopyNodes({masterId(g)}), "the material output is not copied");
+                Check(g->CopyNodes({texture, multiply}) && QGuiApplication::clipboard()->text().contains(QStringLiteral("materialGraphNodes")) && g->CanPaste(),
+                      "selection copied as graph JSON");
+                const QList<int> pasted = g->PasteNodes(QPointF(700, 1200));
+                Check(pasted.size() == 2 && g->SelectedNodes() == pasted, "paste selects the new nodes");
+                int newTexture = 0, newMultiply = 0;
+                for (const int id : pasted)
+                    (g->Model().FindNode(id)->type == QStringLiteral("Texture2D") ? newTexture : newMultiply) = id;
+                Check(newTexture && newMultiply && hasLink(g, newTexture, QStringLiteral("RGB"), newMultiply, QStringLiteral("A")), "link inside the selection is pasted");
+                Check(g->Model().FindNode(newTexture)->properties.value(QStringLiteral("textureName")).toString() == QStringLiteral("BaseMap"),
+                      "pasted texture node reads the same texture");
+                Check(std::none_of(g->Model().Connections().begin(), g->Model().Connections().end(),
+                                   [&](const auto& c) { return c.toNode == newMultiply && c.toPin == QStringLiteral("B"); }), "links from outside the selection stay behind");
+                const QList<int> twin = g->DuplicateNodes({scalar});
+                Check(twin.size() == 1 && g->Model().FindNode(twin.first())->properties.value(QStringLiteral("name")).toString() != g->Model().FindNode(scalar)->properties.value(QStringLiteral("name")).toString(),
+                      "a duplicated parameter gets its own name");
+                const QPointF offset = g->Model().FindNode(twin.first())->pos - g->Model().FindNode(scalar)->pos;
+                Check(offset.x() > 0 && offset.y() > 0, "duplicate is placed next to the original");
+                g->Undo();
+                g->Undo();
+                Check(!g->Model().FindNode(twin.first()) && !g->Model().FindNode(newTexture), "paste and duplicate are undone");
+
+                // Keyboard: select, copy, paste, delete.
+                g->SelectNodes({scalar});
+                g->View()->setFocus();
+                key(g->View(), Qt::Key_C, Qt::ControlModifier);
+                key(g->View(), Qt::Key_V, Qt::ControlModifier);
+                const QList<int> keyed = g->SelectedNodes();
+                Check(keyed.size() == 1 && keyed.first() != scalar && g->Model().FindNode(keyed.first())->type == QStringLiteral("ScalarParam"), "Ctrl+C, Ctrl+V");
+                key(g->View(), Qt::Key_Delete, Qt::NoModifier);
+                Check(!g->Model().FindNode(keyed.first()), "Delete removes the pasted node");
+                key(g->View(), Qt::Key_D, Qt::ControlModifier);
+                Check(g->SelectedNodes().isEmpty() || !kept.contains(g->SelectedNodes().first()), "Ctrl+D without a selection adds nothing old");
+                key(g->View(), Qt::Key_A, Qt::ControlModifier);
+                Check(g->SelectedNodes().size() == static_cast<int>(g->Model().Nodes().size()), "Ctrl+A selects every node");
+                key(g->View(), Qt::Key_F, Qt::NoModifier);
+                g->SelectNodes({});
+            });
+
+            // Node search: Russian and English names, synonyms; Enter adds the first match where the list was opened.
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                auto search = [&](const QString& text) {
+                    g->ShowNodeSearch(QPoint(200, 200), QPointF(900, 1300));
+                    auto* popup = g->template findChild<QFrame*>(QStringLiteral("MaterialGraphNodeSearch"));
+                    auto* field = popup ? popup->template findChild<QLineEdit*>(QStringLiteral("MaterialGraphNodeSearchText")) : nullptr;
+                    auto* list = popup ? popup->template findChild<QListWidget*>(QStringLiteral("MaterialGraphNodeSearchList")) : nullptr;
+                    Check(field && list && popup->isVisible(), "search opens as a popup");
+                    field->setText(text);
+                    if (text == QStringLiteral("умнож"))
+                        Check(popup->grab().save(QString::fromStdWString((root / "editor-material-graph-search.png").wstring())), "save node search");
+                    QString first = list->currentItem() ? list->currentItem()->data(Qt::UserRole).toString() : QString();
+                    popup->setObjectName({}); // закрытое окно удаляется позже: следующий поиск найдёт новое
+                    return std::make_pair(first, field);
+                };
+                auto [byRussian, field] = search(QStringLiteral("умнож"));
+                Check(byRussian == QStringLiteral("Multiply"), "Russian name finds Multiply");
+                const int before = static_cast<int>(g->Model().Nodes().size());
+                key(field, Qt::Key_Return, Qt::NoModifier);
+                Check(static_cast<int>(g->Model().Nodes().size()) == before + 1 && g->Model().Nodes().last().type == QStringLiteral("Multiply") &&
+                      g->Model().Nodes().last().pos == QPointF(900, 1300), "Enter adds the node where the list was opened");
+                Check(g->SelectedNodes() == QList<int>{g->Model().Nodes().last().id}, "the added node is selected");
+                g->RemoveNodes(g->SelectedNodes());
+                auto [byEnglish, englishField] = search(QStringLiteral("fresnel"));
+                Check(byEnglish == QStringLiteral("Fresnel"), "English type name works");
+                key(englishField, Qt::Key_Escape, Qt::NoModifier);
+                auto [bySynonym, synonymField] = search(QStringLiteral("край"));
+                Check(bySynonym == QStringLiteral("Fresnel"), "a synonym finds the node");
+                key(synonymField, Qt::Key_Escape, Qt::NoModifier);
+                auto [nothing, nothingField] = search(QStringLiteral("телепорт"));
+                Check(nothing.isEmpty(), "unknown words find nothing");
+                key(nothingField, Qt::Key_Return, Qt::NoModifier);
+                Check(static_cast<int>(g->Model().Nodes().size()) == before, "Enter on no match adds nothing");
+                key(nothingField, Qt::Key_Escape, Qt::NoModifier);
+            });
+
+            // A compile error is shown on its node: the list names the node, a double click selects it, undo fixes it.
+            int clash = 0;
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                clash = g->AddNode(QStringLiteral("ScalarParam"), QPointF(600, 1300), {{QStringLiteral("name"), QStringLiteral("TimeParams")}});
+                Check(!g->RenameNode(scalar, QStringLiteral("TimeParams")) && !g->RenameNode(scalar, QStringLiteral("float3")), "rename refuses engine names and HLSL words");
+                Check(g->Connect(clash, QStringLiteral("Value"), masterId(g), QStringLiteral("AmbientModel")), "connect the clashing parameter");
+                editor(w)->ApplyGraph();
+            });
+            QListWidgetItem* clashItem = nullptr;
+            until([&] {
+                Ui([&](auto* w) {
+                    auto* errors = static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")));
+                    clashItem = nullptr;
+                    for (int i = 0; i < errors->count(); ++i)
+                        if (errors->item(i)->data(Qt::UserRole + 2).toInt() == clash && errors->item(i)->text().contains(QStringLiteral("redefinition"))) clashItem = errors->item(i);
+                });
+                return clashItem != nullptr;
+            });
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                auto* errors = static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")));
+                Check(clashItem->text().contains(QStringLiteral("TimeParams")) && !clashItem->text().contains(QStringLiteral(".hlsl(")), "error names the node, not the generated file");
+                bool marked = false;
+                for (auto* item : g->View()->scene()->items()) marked = marked || item->toolTip().contains(QStringLiteral("TimeParams"));
+                Check(marked, "the node shows the error");
+                g->SelectNodes({});
+                emit errors->itemActivated(clashItem);
+                Check(g->SelectedNodes() == QList<int>{clash}, "double click on the error selects the node");
+                g->SelectNodes({});
+                Check(editor(w)->grab().save(QString::fromStdWString((root / "editor-material-graph-error.png").wstring())), "save graph error");
+                g->Undo(); // связь
+                g->Undo(); // нода
+                Check(!g->Model().FindNode(clash), "undo removes the clashing node");
+                editor(w)->ApplyGraph();
+            });
+            until([&] { int count = -1; Ui([&](auto* w) { count = static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")))->count(); }); return count == 0; });
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                bool marked = false;
+                for (auto* item : g->View()->scene()->items()) marked = marked || item->toolTip().contains(QStringLiteral("TimeParams"));
+                Check(!marked, "fixed error leaves the nodes");
+                QList<int> extra;
+                for (const auto& n : g->Model().Nodes()) if (!kept.contains(n.id)) extra << n.id;
+                g->RemoveNodes(extra);
+                editor(w)->ApplyGraph();
+            });
+            for (int i = 0; i < 20; ++i) pump();
+
+            // Every node type at once, every input fed a float3: the engine must compile whatever the links are.
+            QList<int> sink;
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                const int source = g->AddNode(QStringLiteral("Vector3Param"), QPointF(-400, 1400), {{QStringLiteral("value"), QVariantList{0.2, 0.4, 0.6}}});
+                sink << source;
+                int sum = 0;
+                QString sumPin;
+                const QStringList types{
+                    "ColorParam", "ScalarParam", "Vector2Param", "Vector3Param", "Constant", "Split", "Combine", "ObjectColor",
+                    "SurfaceDefaults", "InstanceData", "WorldPosition", "SurfaceNormal", "ViewDirection", "FrontFace", "Texture2D",
+                    "NormalMap", "UVCoord", "Panner", "Time", "Add", "Subtract", "Multiply", "Divide", "Power", "Min", "Max", "Lerp",
+                    "Clamp", "Saturate", "OneMinus", "Abs", "Frac", "Sine", "Normalize", "Step", "Smoothstep", "Dot", "Fresnel"};
+                for (const QString& type : types)
+                {
+                    const int node = g->AddNode(type, QPointF(0, 1400 + 40 * sink.size()));
+                    sink << node;
+                    for (const auto& pin : EditorCore::HlslGraphCompiler::NodePins(type))
+                    {
+                        if (pin.isInput) { Check(g->Connect(source, QStringLiteral("Value"), node, pin.name), "feed every input"); continue; }
+                        if (!sum) { sum = node; sumPin = pin.name; continue; }
+                        const int add = g->AddNode(QStringLiteral("Add"), QPointF(300, 1400 + 40 * sink.size()));
+                        sink << add;
+                        Check(g->Connect(sum, sumPin, add, QStringLiteral("A")) && g->Connect(node, pin.name, add, QStringLiteral("B")), "sum every output");
+                        sum = add;
+                        sumPin = QStringLiteral("Out");
+                    }
+                }
+                Check(g->Connect(sum, sumPin, masterId(g), QStringLiteral("AmbientModel")), "connect the sum");
+                editor(w)->ApplyGraph();
+                const QString generated = static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")))->toPlainText();
+                Check(generated.contains(QStringLiteral("smoothstep(")) && generated.contains(QStringLiteral("defaults.Albedo")) &&
+                      generated.contains(QStringLiteral("i.InstanceData")), "every node is in the HLSL");
+            });
+            for (int i = 0; i < 40; ++i) pump();
+            Ui([&](auto* w) {
+                auto* errors = static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")));
+                Check(errors->count() == 0, errors->count() ? qPrintable(QStringLiteral("graph with every node compiles: ") + errors->item(0)->text())
+                                                            : "graph with every node compiles");
+                editor(w)->Graph()->RemoveNodes(sink);
+                editor(w)->ApplyGraph();
+            });
+            for (int i = 0; i < 20; ++i) pump();
             Ui([&](auto* w) {
                 Check(static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")))->count() == 0, "normal map HLSL compiles");
+                editor(w)->Graph()->FrameNodes();
                 Check(editor(w)->grab().save(QString::fromStdWString((root / "editor-material-graph.png").wstring())), "save graph editor");
                 saveMaterial(w);
             });

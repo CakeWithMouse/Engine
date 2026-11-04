@@ -13,6 +13,7 @@
 class QGraphicsPathItem;
 class QGraphicsScene;
 class QGraphicsView;
+class QToolButton;
 
 // Нодовый редактор материала: ноды на сетке, связи кривыми, HLSL генерирует EditorCore::HlslGraphCompiler.
 // Перенесён из ветки feature/editor-ui-overhaul на модель EditorCore. Без Q_OBJECT: о правках сообщает
@@ -26,6 +27,8 @@ public:
     std::function<void()> layoutChanged;    // ноды сдвинуты: сохранить граф, HLSL прежний
     std::function<void(const QString& name, const std::array<float, 4>& value)> parameterEdited;
     std::function<void(const QString& textureName)> textureRequested;
+    // Отмена вернула ноде другую текстуру (/Game путь, пустой — без текстуры): её надо вернуть и материалу.
+    std::function<void(const QString& textureName, const QString& gamePath)> textureRestored;
 
     void SetModel(const EditorCore::MaterialGraphModel& model);
     const EditorCore::MaterialGraphModel& Model() const { return model_; }
@@ -46,6 +49,31 @@ public:
     void RemoveNodes(const QList<int>& ids);
     bool RenameNode(int nodeId, const QString& name);
     void LoadPreset(int index);
+
+    // История правок графа (Ctrl+Z, Ctrl+Y). Значения из настроек материала тоже попадают в неё.
+    // SetModel начинает историю заново: это загрузка, а не правка.
+    void Undo();
+    void Redo();
+    bool CanUndo() const { return !undo_.isEmpty(); }
+    bool CanRedo() const { return !redo_.isEmpty(); }
+
+    // Выделение и буфер обмена: ноды со связями между ними, JSON в буфере обмена системы,
+    // так что ноды переносятся и между окнами материалов. Выход материала не копируется.
+    QList<int> SelectedNodes() const;
+    void SelectNodes(const QList<int>& ids);
+    bool CopyNodes(const QList<int>& ids) const;
+    bool CanPaste() const;
+    QList<int> PasteNodes(const QPointF& topLeft); // id вставленных нод
+    QList<int> DuplicateNodes(const QList<int>& ids);
+    void FrameNodes(); // выделенные, а без выделения — весь граф
+
+    // Ошибки на нодах: красная рамка, текст в подсказке. Ключ — id ноды.
+    void SetNodeProblems(const QHash<int, QString>& problems);
+    void FocusNode(int nodeId);
+
+    // Список нод с поиском (ПКМ по холсту, Tab, «+ Нода»): выбранная нода встаёт в scenePos.
+    void ShowNodeSearch(const QPoint& screenPos, const QPointF& scenePos);
+    static QString NodeDisplayName(const QString& type);
 
     // Готовые графы проекта: <folder>/<имя>.graph.json (обычно Content/MaterialGraphs, общий через git).
     void SetPresetFolder(const QString& folder) { presetFolder_ = folder; }
@@ -86,6 +114,16 @@ private:
     QString UserPresetFile(const QString& name) const;
     void RequestSaveUserPreset();
     void NodeMoved(int nodeId, const QPointF& pos);
+    void ReplaceModel(const EditorCore::MaterialGraphModel& model); // без сброса истории
+    // Снимок до правки. Правки с одинаковым ключом подряд (тянущийся ползунок) — один шаг отмены.
+    void Checkpoint(const QString& mergeKey = {});
+    void PushSnapshot(const QString& snapshot, const QString& mergeKey);
+    void RestoreSnapshot(const QString& snapshot);
+    void UpdateHistoryButtons();
+    QString ClipboardJson(const QList<int>& ids) const;
+    QString ClipboardGraph() const;
+    QList<int> InsertNodes(const QString& json, const QPointF& topLeft);
+    QPointF CursorScenePos() const;
 
     EditorCore::MaterialGraphModel model_;
     QHash<QString, QString> textures_;
@@ -103,4 +141,13 @@ private:
 
     bool panning_ = false, panMoved_ = false, moved_ = false;
     QPoint panStart_, panLast_;
+
+    QStringList undo_, redo_;     // JSON графа до правки / до отмены
+    QString undoKey_;             // ключ последнего снимка, см. Checkpoint
+    QString pressSnapshot_;       // граф на нажатии ЛКМ: перетаскивание нод — один шаг отмены
+    QString linkKey_;             // снятие связи со входа и её новое подключение — один шаг
+    int linkSerial_ = 0;
+    QHash<int, QString> problems_;
+    QToolButton* undoButton_ = nullptr;
+    QToolButton* redoButton_ = nullptr;
 };
