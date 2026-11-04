@@ -976,6 +976,28 @@ int wmain(int argc, wchar_t** argv)
                 editor(w)->ApplyGraph();
             });
             until([&] { return textureField(QStringLiteral("Detail")) == QStringLiteral("/Game/Textures/flat-normal.png"); });
+
+            // Project presets: the current graph is saved as a file in Content/MaterialGraphs and listed in the menu.
+            const auto presetFile = root / L"Content/MaterialGraphs/Мой вид.graph.json";
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                QString problem;
+                Check(!g->SaveUserPreset(QStringLiteral("../escape"), problem) && !problem.isEmpty(), "preset name cannot leave the folder");
+                Check(g->SaveUserPreset(QStringLiteral("Мой вид"), problem), "save the current graph as a preset");
+                Check(std::filesystem::exists(presetFile) && g->UserPresets() == QStringList{QStringLiteral("Мой вид")}, "preset file in the project");
+                auto* menu = g->template findChild<QMenu*>(QStringLiteral("MaterialGraphPresetMenu"));
+                QMetaObject::invokeMethod(menu, "aboutToShow", Qt::DirectConnection);
+                bool listed = false;
+                for (auto* action : menu->actions()) listed = listed || action->text() == QStringLiteral("Мой вид");
+                Check(listed, "preset listed in the menu");
+                const int nodes = static_cast<int>(g->Model().Nodes().size());
+                g->RemoveNodes({multiply});
+                Check(g->LoadUserPreset(QStringLiteral("Мой вид"), problem) && static_cast<int>(g->Model().Nodes().size()) == nodes &&
+                      g->Model().FindNode(multiply) != nullptr, "loading the preset restores the graph");
+                Check(g->RemoveUserPreset(QStringLiteral("Мой вид")) && !std::filesystem::exists(presetFile) && g->UserPresets().isEmpty(), "preset deleted");
+                editor(w)->ApplyGraph();
+            });
+            for (int i = 0; i < 20; ++i) pump();
             Ui([&](auto* w) {
                 Check(static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")))->count() == 0, "normal map HLSL compiles");
                 Check(editor(w)->grab().save(QString::fromStdWString((root / "editor-material-graph.png").wstring())), "save graph editor");

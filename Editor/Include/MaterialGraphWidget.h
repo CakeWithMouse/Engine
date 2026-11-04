@@ -47,6 +47,13 @@ public:
     bool RenameNode(int nodeId, const QString& name);
     void LoadPreset(int index);
 
+    // Готовые графы проекта: <folder>/<имя>.graph.json (обычно Content/MaterialGraphs, общий через git).
+    void SetPresetFolder(const QString& folder) { presetFolder_ = folder; }
+    QStringList UserPresets() const;
+    bool SaveUserPreset(const QString& name, QString& error);
+    bool LoadUserPreset(const QString& name, QString& error);
+    bool RemoveUserPreset(const QString& name);
+
     QString AiPrompt() const;
     // Текст ответа: JSON графа, можно внутри блока ```json. false: не граф с выходом материала.
     bool PasteFromAi(const QString& text);
@@ -76,10 +83,13 @@ private:
     void DeleteSelected();
     QString UniqueName(const QString& base) const;
     void NotifyStructure();
+    QString UserPresetFile(const QString& name) const;
+    void RequestSaveUserPreset();
     void NodeMoved(int nodeId, const QPointF& pos);
 
     EditorCore::MaterialGraphModel model_;
     QHash<QString, QString> textures_;
+    QString presetFolder_;
     QGraphicsScene* scene_ = nullptr;
     QGraphicsView* view_ = nullptr;
     QList<QGraphicsPathItem*> links_;

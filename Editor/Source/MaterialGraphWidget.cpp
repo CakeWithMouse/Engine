@@ -8,7 +8,9 @@
 #include <QColorDialog>
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QDir>
 #include <QDoubleSpinBox>
+#include <QFile>
 #include <QFileInfo>
 #include <QFormLayout>
 #include <QGraphicsItem>
@@ -28,6 +30,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QRegularExpression>
+#include <QSaveFile>
 #include <QScrollBar>
 #include <QTimer>
 #include <QToolButton>
@@ -382,15 +385,48 @@ void MaterialGraphWidget::BuildUi()
     bar->addWidget(add);
 
     auto* presets = new QToolButton(this);
+    presets->setObjectName(QStringLiteral("MaterialGraphPresets"));
     presets->setText(Tr("Готовые графы", "Presets"));
     presets->setPopupMode(QToolButton::InstantPopup);
     auto* presetMenu = new QMenu(presets);
-    for (int i = 0; i < PresetNames().size(); ++i)
-        presetMenu->addAction(PresetNames()[i], this, [this, i] {
-            if (QMessageBox::question(this, Tr("Готовый граф", "Preset"),
-                                      Tr("Заменить текущий граф готовым?", "Replace the current graph with the preset?")) == QMessageBox::Yes)
-                LoadPreset(i);
-        });
+    presetMenu->setObjectName(QStringLiteral("MaterialGraphPresetMenu"));
+    // Список собирается при каждом открытии: свои графы могли добавить другие окна или git.
+    connect(presetMenu, &QMenu::aboutToShow, this, [this, presetMenu] {
+        presetMenu->clear();
+        auto confirm = [this] {
+            return QMessageBox::question(this, Tr("Готовый граф", "Preset"),
+                Tr("Заменить текущий граф готовым?", "Replace the current graph with the preset?")) == QMessageBox::Yes;
+        };
+        presetMenu->addSection(Tr("Встроенные", "Built-in"));
+        for (int i = 0; i < PresetNames().size(); ++i)
+            presetMenu->addAction(PresetNames()[i], this, [this, i, confirm] { if (confirm()) LoadPreset(i); });
+
+        const QStringList own = UserPresets();
+        presetMenu->addSection(Tr("Проекта", "Project"));
+        if (own.isEmpty())
+            presetMenu->addAction(Tr("пока нет: сохраните текущий граф", "none yet: save the current graph"))->setEnabled(false);
+        for (const QString& name : own)
+            presetMenu->addAction(name, this, [this, name, confirm] {
+                QString error;
+                if (confirm() && !LoadUserPreset(name, error))
+                    QMessageBox::warning(this, Tr("Готовый граф", "Preset"), error);
+            });
+        presetMenu->addSeparator();
+        presetMenu->addAction(Tr("Сохранить текущий как готовый…", "Save current as preset…"), this, [this] {
+            // Диалог после закрытия меню, а не из его цикла событий.
+            QTimer::singleShot(0, this, [this] { RequestSaveUserPreset(); });
+        })->setEnabled(!presetFolder_.isEmpty());
+        if (!own.isEmpty())
+        {
+            auto* remove = presetMenu->addMenu(Tr("Удалить", "Delete"));
+            for (const QString& name : own)
+                remove->addAction(name, this, [this, name] {
+                    if (QMessageBox::question(this, Tr("Удалить готовый граф", "Delete preset"),
+                            Tr("Удалить «%1» из проекта?", "Delete \"%1\" from the project?").arg(name)) == QMessageBox::Yes)
+                        RemoveUserPreset(name);
+                });
+        }
+    });
     presets->setMenu(presetMenu);
     bar->addWidget(presets);
 
@@ -977,6 +1013,73 @@ void MaterialGraphWidget::LoadPreset(int index)
     }
     SetModel(model);
     NotifyStructure();
+}
+
+QString MaterialGraphWidget::UserPresetFile(const QString& name) const
+{
+    return presetFolder_.isEmpty() ? QString() : QDir(presetFolder_).filePath(name + QStringLiteral(".graph.json"));
+}
+
+QStringList MaterialGraphWidget::UserPresets() const
+{
+    QStringList names;
+    if (presetFolder_.isEmpty()) return names;
+    for (const QFileInfo& file : QDir(presetFolder_).entryInfoList({QStringLiteral("*.graph.json")}, QDir::Files, QDir::Name | QDir::IgnoreCase))
+        names << file.fileName().chopped(static_cast<int>(QStringLiteral(".graph.json").size()));
+    return names;
+}
+
+bool MaterialGraphWidget::SaveUserPreset(const QString& name, QString& error)
+{
+    // Имя становится именем файла: буквы любого алфавита, цифры, пробел, «_», «-», «.».
+    static const QRegularExpression valid(QStringLiteral(R"(^[\w][\w .\-]*$)"), QRegularExpression::UseUnicodePropertiesOption);
+    if (presetFolder_.isEmpty())
+        error = Tr("Папка готовых графов проекта не задана.", "The project preset folder is not set.");
+    else if (!valid.match(name).hasMatch() || name.endsWith(QLatin1Char('.')) || name.size() > 64)
+        error = Tr("Имя: буквы, цифры, пробел, «_», «-» и «.», до 64 символов.", "Name: letters, digits, space, _, - and ., up to 64 characters.");
+    else if (!QDir().mkpath(presetFolder_))
+        error = Tr("Не удалось создать папку %1.", "Cannot create the folder %1.").arg(presetFolder_);
+    else
+    {
+        QSaveFile file(UserPresetFile(name));
+        if (file.open(QIODevice::WriteOnly) && file.write(model_.ExportToJson().toUtf8()) >= 0 && file.commit()) return true;
+        error = Tr("Не удалось записать %1: %2", "Cannot write %1: %2").arg(file.fileName(), file.errorString());
+    }
+    return false;
+}
+
+bool MaterialGraphWidget::LoadUserPreset(const QString& name, QString& error)
+{
+    QFile file(UserPresetFile(name));
+    EditorCore::MaterialGraphModel model;
+    if (!file.open(QIODevice::ReadOnly) || !model.ImportFromJson(QString::fromUtf8(file.readAll())))
+    {
+        error = Tr("Готовый граф «%1» не читается.", "Cannot read the preset \"%1\".").arg(name);
+        return false;
+    }
+    SetModel(model);
+    NotifyStructure();
+    return true;
+}
+
+bool MaterialGraphWidget::RemoveUserPreset(const QString& name)
+{
+    return QFile::remove(UserPresetFile(name));
+}
+
+void MaterialGraphWidget::RequestSaveUserPreset()
+{
+    bool accepted = false;
+    const QString name = QInputDialog::getText(this, Tr("Сохранить готовый граф", "Save preset"),
+        Tr("Имя (файл в Content/MaterialGraphs, виден всем через git):", "Name (a file in Content/MaterialGraphs, shared through git):"),
+        QLineEdit::Normal, {}, &accepted).trimmed();
+    if (!accepted || name.isEmpty()) return;
+    if (QFile::exists(UserPresetFile(name)) &&
+        QMessageBox::question(this, Tr("Сохранить готовый граф", "Save preset"),
+            Tr("«%1» уже есть. Заменить?", "\"%1\" exists. Replace it?").arg(name)) != QMessageBox::Yes)
+        return;
+    QString error;
+    if (!SaveUserPreset(name, error)) QMessageBox::warning(this, Tr("Готовый граф не сохранён", "Preset not saved"), error);
 }
 
 QString MaterialGraphWidget::AiPrompt() const

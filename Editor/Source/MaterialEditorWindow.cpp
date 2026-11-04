@@ -432,6 +432,7 @@ void MaterialEditorWindow::BuildUi()
     left->setStretchFactor(1, 1);
     left->setSizes({300, 400}); // слоты текстур видны без прокрутки
     graph_ = new MaterialGraphWidget(this);
+    graph_->SetPresetFolder(QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(QStringLiteral("MaterialGraphs")));
     graphPage_ = graph_;
     sourceTabs_ = new QTabWidget(this);
     sourceTabs_->setObjectName(QStringLiteral("MaterialSourceTabs"));
