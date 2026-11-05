@@ -59,7 +59,8 @@ public:
     // Спрашивает о несохранённых изменениях; false — пользователь продолжает редактирование.
     bool ConfirmClose(std::function<void()> afterSave = {});
     // Отпускает превью в потоке движка и удаляет окно; правки, от которых отказались, откатываются.
-    void Shutdown();
+    // false — откат файлов не удался; окно и резервная копия остаются для повторной попытки.
+    bool Shutdown();
 
     // Ctrl+S queues the engine save; completion reports whether both files were saved.
     bool Save(std::function<void(bool)> completion = {});
@@ -121,7 +122,7 @@ private:
     void SetGraphMode(bool on);
     bool WriteGraphFile();
     void BackupGraphFiles();
-    // false: резерва не было, файлы не трогались.
+    // false: ошибка записи/удаления; резерв сохранён. Без резерва возвращает true.
     bool RestoreGraphFiles();
     void SetParameterByName(const QString& name, const std::array<float, 4>& value);
     // Миниатюры нод и назначение текстур, выбранных до того, как у материала появился слот.

@@ -123,6 +123,8 @@ private:
     // @engine-internal-begin
     // Scene bookkeeping belongs to the renderer and editor/module services.
     friend class SceneCommands;
+    friend class SaveGame;
+    void ExchangeSavedContents(Scene& candidate) noexcept;
     friend class SceneEditSession;
     friend struct SceneTestAccess; // Definition exists only under tests/, never in the SDK.
     uint64_t GetRevision() const noexcept { return revision_; }

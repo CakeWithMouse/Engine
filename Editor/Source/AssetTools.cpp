@@ -416,7 +416,8 @@ bool EditorMainWindow::CloseMaterialEditors(std::function<void()> afterSave)
             return false;
 
     for (auto* editor : open)
-        editor->Shutdown();
+        if (!editor->Shutdown())
+            return false;
 
     return true;
 }

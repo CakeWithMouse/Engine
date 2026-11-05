@@ -39,7 +39,7 @@ bool GameSession::Initialize(GameSubsystemCatalog catalog, std::string& error)
         for (const auto& type : types) {
             auto object = type.create();
             if (!object) throw std::runtime_error("Null subsystem factory result");
-            entries_.push_back({std::move(object)});
+            entries_.push_back({std::move(object), false, false, type.key});
             if (stopping_) throw std::runtime_error("Session stopped during creation");
         }
         for (auto& entry : entries_) {

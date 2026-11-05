@@ -1,4 +1,5 @@
 #include <Engine/Resources/Paths.h>
+#include <Engine/SaveGame/SaveGame.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/CharacterController.h>
 #include <Engine/Components/Character.h>
@@ -472,7 +473,7 @@ bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int reque
     }
     DisplayPtr->SetGamePointer(this);
 
-    FirstPlayer = std::make_unique<Player>();
+    if(!FirstPlayer) FirstPlayer = std::make_unique<Player>();
     FirstPlayer->SetGamePointer(this);
     if (!bEmbedded) InputDevicePtr = std::make_unique<InputDevice>(this);
 
@@ -3750,11 +3751,15 @@ void Game::UpdateFrame(float realDeltaTime)
     ProcessHotkeys();
     if (bSimulationEnabled) UpdateSimulation(deltaTime);
     else FirstPlayer->UpdateCamera(0.0f);
+    if(saveGame_) saveGame_->ProcessPending();
     PrepareRenderFrame();
 }
 
 void Game::UpdateSimulation(float deltaTime)
 {
+    // Declared before UpdateScope: executes only after pending scene edits are committed.
+    struct SaveBoundary { Game& game; int exceptions=std::uncaught_exceptions();
+        ~SaveBoundary() { if(std::uncaught_exceptions()==exceptions) game.Saves().ProcessPending(); } } saveBoundary{*this};
     auto sceneUpdate = scene.BeginUpdate(); // Covers custom PreUpdate/TickComponents too.
     InitializeGameplay();
     if (!Session || !Session->IsRunning()) return;
@@ -3816,7 +3821,7 @@ void Game::InitializeGameplay()
     const auto content = VfsRead::Active().Resolve("/Game");
     if (!content.empty()) try {
         const auto hudFile = ProjectHud::Read(std::filesystem::u8path(content));
-        if (!hudFile.empty()) {
+        if (!hudFile.empty() && !ProjectHudComponent) {
             ProjectHudComponent = std::make_unique<UIComponent>();
             ProjectHudComponent->SetGame(this);
             ProjectHudComponent->LoadMarkup(hudFile.generic_u8string());
@@ -3828,15 +3833,17 @@ void Game::InitializeGameplay()
         if(player)throw std::runtime_error("Only one player is allowed: disable Player on other characters");player=character;
     }
     if(player){
-        if(!Controller)Controller=CreateCharacterController();
+        const bool newController=!Controller;
+        if(newController)Controller=CreateCharacterController();
         if(!Controller)throw std::runtime_error("Controller factory returned null");
-        Controller->Configure(*player);
+        if(newController||!loadedFromSaveGame_)Controller->Configure(*player);
         if(player->standardControl)Controller->BindInput();
         if(FirstPlayer)Controller->UpdateCamera(*FirstPlayer);
     }
     Session->SceneReady(scene);
     if (!Session->IsRunning()) throw std::runtime_error("Session stopped during scene startup");
     GameplayInitialized = true;
+    if(loadedFromSaveGame_){Session->NotifySaveGameLoaded(scene);OnSaveGameLoaded();}
     StartGameplayComponents();
     } catch (...) { Session->Stop(); GameplayInitialized = false; throw; }
 }

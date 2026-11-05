@@ -76,4 +76,4 @@
 - [058: GameSubsystem и GameSession](058-game-subsystems.md) — реализованы, проверены lifecycle, генерация и внешний SDK.
 
 - [059: CLI-диагностика launcher](059-launcher-cli-diagnostics.md) — реализована, проверены справка, ошибки и создание C++-проекта.
-- [SaveGame: проект архитектуры](../../Engine/docs/SAVEGAME-DESIGN.md) — план, реализация не начата; [HTML-схема](../../Engine/docs/SAVEGAME-DESIGN.html).
+- [060: SaveGame сцены и базовых классов](060-savegame.md) — реализация и проверка; [руководство](../../Engine/docs/SAVEGAME.md), [HTML-схема](../../Engine/docs/SAVEGAME.html).

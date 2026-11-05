@@ -6,6 +6,7 @@
 
 class Scene;
 class GameSession;
+class SaveArchive;
 struct SubsystemContext
 {
     GameSession& session;
@@ -23,6 +24,9 @@ public:
     virtual void OnSceneReady(Scene&) {}
     virtual void OnSceneClosing(Scene&) {}
     virtual void Tick(float) {}
+    virtual void SerializeSaveGame(SaveArchive& archive);
+    // Resolve cached scene pointers again here; input/UI bindings are not serialized.
+    virtual void OnSaveGameLoaded(Scene&) {}
     virtual void Deinitialize() noexcept {}
 };
 

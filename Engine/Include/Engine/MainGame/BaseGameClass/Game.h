@@ -24,6 +24,8 @@
 #include <Engine/InputDevice/InputActions.h>
 
 class CharacterController;
+class SaveGame;
+class SaveArchive;
 
 enum class ShaderCompileVariant
 {
@@ -125,6 +127,10 @@ class Game
 {
 public:
     Game();
+    SaveGame& Saves();
+    virtual void SerializeSaveGame(SaveArchive& archive);
+    virtual void OnSaveGameLoaded() {}
+    bool WasLoadedFromSaveGame() const { return loadedFromSaveGame_; }
     // External session must outlive this Game; attach before InitializeGameplay.
     void AttachSession(GameSession& session);
     void CloseGameplayScene() noexcept;
@@ -418,6 +424,9 @@ protected:
     // @engine-internal-begin
 private:
     GameSettings Settings;
+    friend class SaveGame;
+    std::unique_ptr<SaveGame> saveGame_;
+    bool loadedFromSaveGame_ = false;
     uint64_t FrameIndex = 0;
 protected:
     // @engine-internal-end

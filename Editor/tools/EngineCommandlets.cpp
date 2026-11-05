@@ -10,6 +10,8 @@
 #include <Engine/InputDevice/Keys.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/GameSession.h>
+#include <Engine/SaveGame/SaveGame.h>
+#include <Engine/Scene/SceneDocument.h>
 #include <Engine/Project/StandardTypes.h>
 #include <Engine/Runtime/EditorReloadApi.h>
 #include <Engine/Runtime/GameEditModule.h>
@@ -297,6 +299,27 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
   return result;
 }
 QJsonObject Run(const QString &command, const QJsonObject &in) {
+  if(command.startsWith("savegame.")) {
+    Game game;
+    game.Saves().SetCatalog(SceneProject::GetComponentTypes());
+    const auto root=in["root"].toString();
+    Require(!root.isEmpty(),"savegame commands require an explicit scratch root");
+    game.Saves().Configure(in["gameId"].toString("commandlet").toStdString(),std::filesystem::path(root.toStdWString()));
+    const auto slot=in["slot"].toString("manual-1").toStdString();
+    if(command=="savegame.list") {QJsonArray slotNames;for(const auto& name:game.Saves().ListSlots())slotNames.append(QString::fromStdString(name));return {{"slots",slotNames}};}
+    if(command=="savegame.delete") {game.Saves().DeleteSlot(slot);return {{"deleted",QString::fromStdString(slot)}};}
+    if(command=="savegame.save") {
+      Require(in["scene"].isObject(),"scene document required");
+      auto data=SceneDocument::Parse(QJsonDocument(in["scene"].toObject()).toJson().toStdString());
+      SceneDocument::Restore(data,SceneProject::GetComponentTypes(),game.GetScene());
+      game.Saves().RequestSave(slot);game.Saves().ProcessPending();
+      Require(game.Saves().LastResult().Succeeded(),game.Saves().LastResult().message.c_str());
+    } else if(command=="savegame.load" || command=="savegame.validate") {
+      game.Saves().RequestLoad(slot);game.Saves().ProcessPending();
+      Require(game.Saves().LastResult().Succeeded(),game.Saves().LastResult().message.c_str());
+    } else throw std::runtime_error("unknown savegame command");
+    return {{"state",QJsonDocument::fromJson(QByteArray::fromStdString(game.Saves().Capture())).object()}};
+  }
   if (command == "asset.import") {
     namespace fs = std::filesystem;
     const auto source = QFileInfo(in["source"].toString()).absoluteFilePath();
@@ -689,7 +712,7 @@ int main(int argc, char **argv) {
     std::puts("ui.style\nui.inspector\nui.edit-text\ninput.rebind\ntrace."
               "raycast\ngizmo.snap\ngizmo.center\ncamera.screen-ray\nscene."
               "property\nsession.lifecycle\nproject.build\nproject.reload-"
-              "input\nmesh.primitive\ngame.settings\nasset.import");
+              "input\nmesh.primitive\ngame.settings\nasset.import\nsavegame.save\nsavegame.load\nsavegame.validate\nsavegame.list\nsavegame.delete");
     return 0;
   }
   QJsonObject result;

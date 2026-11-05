@@ -38,6 +38,7 @@ static_assert(sizeof(MeshInstance) == 60, "MeshInstance must be 60 bytes");
 class InstancedMeshComponent : public GameComponent
 {
 public:
+    void SerializeSaveGame(SaveArchive& archive) override;
     static constexpr int MaxLodCount = 4;
 
     InstancedMeshComponent();

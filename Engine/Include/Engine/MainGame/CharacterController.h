@@ -17,6 +17,7 @@ protected:
     std::vector<Input::Connection> connections_;
     Input::Scope inputScope_; // destroyed first: no callback can reach dead state
 public:
+    virtual void SerializeSaveGame(class SaveArchive& archive);
     explicit CharacterController(Game&);
     virtual ~CharacterController() = default;
     CharacterController(const CharacterController&) = delete;

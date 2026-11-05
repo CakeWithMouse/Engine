@@ -20,6 +20,7 @@ enum class CameraMode
 class Player
 {
 public:
+    void SerializeSaveGame(class SaveArchive& archive);
     Player();
     void UpdateCamera(float deltaTime);
     // Refresh derived matrices without processing input or advancing the camera.
