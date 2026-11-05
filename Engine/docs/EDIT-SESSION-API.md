@@ -290,6 +290,26 @@ Play-копия и превью. Файл пишет только `saveMaterial`
 Пример потребителя — `Editor/Source/MaterialEditorWindow.cpp`, проверки — `CheckMaterialEditing`
 в `Engine/tests/assets/AssetTests.cpp`.
 
+## Дополнение: расширение Engine.Scene.AudioPreview (звук)
+
+Базовая таблица `ENGINE_EDIT_API_VERSION = 6` и её layout заморожены (`static_assert` в
+`EditExtensions.h`); аудио добавлено именованным расширением, а не новой версией базового ABI.
+Игровой модуль (через `EngineGetEditExtension`) и host (`GameEditModule`) обмениваются
+`EngineAudioPreviewApi` version 1; Editor.dll получает её опциональным экспортом
+`EngineBindAudioPreview` (тот же механизм, что у Selection/ProjectData). Расширение
+протягивается и через hot reload — поле `audio` в `EngineEditorReloadBindings`.
+
+| Функция | Назначение |
+|---|---|
+| play(context, virtualPath, error, capacity) | Декодирует и проигрывает `/Game`-путь `.wav/.ogg/.mp3/.flac` через аудиодвижок редактируемой сцены (2D). Только Edit; в Play/Pause — ReadOnly. Плохой путь — InvalidArgument, ошибка декодирования — Failure с текстом |
+| stop(context) | Останавливает все звуки, запущенные предпрослушкой |
+
+Воспроизведение выполняется на потоке сессии сцены (для редактора — через команду на потоке
+движка, см. `EditorCommand::PlayAudio/StopAudio` и `AssetCommandHandler`). Если игровой модуль
+не реализует расширение, таблица нулевая: редактор показывает пункты предпрослушки только при
+наличии `audio.play`. Реализация — `SceneEditSession::GetAudioPreviewApi`
+(`Source/Runtime/SceneEditAudio.cpp`), экспорт — `SceneModule.inl`.
+
 ## Игровые подсистемы
 
 `ENGINE_SUBSYSTEM()` в заголовке Source автоматически добавляет класс в каталог при обычной сборке. Подсистемы принадлежат GameSession, сохраняются между сценами и при Pause, уничтожаются при Stop. Edit и preview не создают их. Получение: `game.GetSubsystem<T>()`; тик включается только полем `bTickEnabled`. Подробнее: [создание, lifecycle, SDK и переходы между сценами](GAME-SUBSYSTEMS.md).

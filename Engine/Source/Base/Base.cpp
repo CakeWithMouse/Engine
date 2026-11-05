@@ -122,6 +122,7 @@ class BaseEngine::LoadedSession
     EngineBindSelectionFn bindSelection = nullptr;
     EngineBindViewportInputFn bindViewportInput = nullptr;
     EngineBindViewportOverlayFn bindViewportOverlay = nullptr;
+    EngineBindAudioPreviewFn bindAudioPreview = nullptr;
     std::function<void()> releaseEdit;
     void* session = nullptr;
     bool started = false;
@@ -206,7 +207,7 @@ class BaseEngine::LoadedSession
     }
 
     void LoadAndInitialize(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host,
-        const EngineEditSessionApi* editApi = nullptr, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr, const EngineViewportOverlayApi* overlay = nullptr)
+        const EngineEditSessionApi* editApi = nullptr, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr, const EngineViewportOverlayApi* overlay = nullptr, const EngineAudioPreviewApi* audioPreview = nullptr)
     {
         originalPath = path;
         moduleKind = kind;
@@ -265,6 +266,10 @@ class BaseEngine::LoadedSession
             bindProjectData = reinterpret_cast<EngineBindProjectDataFn>(GetProcAddress(library, "EngineBindProjectData"));
             if (bindProjectData && projectData && !bindProjectData(1, sizeof(*projectData), session, projectData))
                 throw std::runtime_error("Cannot bind project data API");
+            bindAudioPreview = reinterpret_cast<EngineBindAudioPreviewFn>(GetProcAddress(library, "EngineBindAudioPreview"));
+            if (bindAudioPreview && audioPreview && audioPreview->play &&
+                !bindAudioPreview(1, sizeof(*audioPreview), session, audioPreview))
+                throw std::runtime_error("Cannot bind audio preview API");
             bindEdit = reinterpret_cast<EngineBindEditSessionFn>(GetProcAddress(library, "EngineBindEditSession"));
             if (kind != ENGINE_MODULE_EDITOR || !bindEdit ||
                 !bindEdit(ENGINE_EDIT_API_VERSION, sizeof(*editApi), session, editApi))
@@ -332,11 +337,11 @@ public:
 
     void Open(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host,
         const EngineEditSessionApi* editApi = nullptr, std::function<void()> cleanup = {},
-        const std::filesystem::path& startupScene = {}, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr, const EngineViewportOverlayApi* overlay = nullptr)
+        const std::filesystem::path& startupScene = {}, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr, const EngineViewportOverlayApi* overlay = nullptr, const EngineAudioPreviewApi* audioPreview = nullptr)
     {
         startupScenePath = startupScene;
         releaseEdit = std::move(cleanup);
-        LoadAndInitialize(path, kind, host, editApi, projectData, selection, viewportInput, overlay);
+        LoadAndInitialize(path, kind, host, editApi, projectData, selection, viewportInput, overlay, audioPreview);
     }
 
     bool Reload()
@@ -393,6 +398,8 @@ public:
         continuousFrames = false;
         if (session && bindProjectData) bindProjectData(1, sizeof(EngineProjectDataApi), session, nullptr);
         bindProjectData = nullptr;
+        if (session && bindAudioPreview) bindAudioPreview(1, sizeof(EngineAudioPreviewApi), session, nullptr);
+        bindAudioPreview = nullptr;
         if (session && bindViewportOverlay) bindViewportOverlay(1, sizeof(EngineViewportOverlayApi), session, nullptr);
         bindViewportOverlay = nullptr;
         if (session && bindViewportInput) bindViewportInput(1, sizeof(EngineViewportInputApi), session, nullptr);
@@ -669,7 +676,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
             const auto result = engine->editModule->Reload(std::filesystem::u8path(module), std::filesystem::u8path(checkpoint), hwnd, width, height, error, capacity);
             if (result == EngineSceneOk) {
                 auto& current = *engine->editModule;
-                *output = {current.Api(), current.ProjectDataApi(), current.SelectionApi(), current.ViewportInputApi()};
+                *output = {current.Api(), current.ProjectDataApi(), current.SelectionApi(), current.ViewportInputApi(), current.AudioPreviewApi()};
                 std::puts("EditorHotReloadSuccess");
             }
             return result;
@@ -766,7 +773,8 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
     {
         activeSession->Open(options.module, options.mode == RuntimeMode::Game ? ENGINE_MODULE_GAME : ENGINE_MODULE_EDITOR, host,
             editModule ? &editModule->Api() : nullptr, [this] { editModule.reset(); }, options.startupScene,
-            editModule ? &editModule->ProjectDataApi() : nullptr, editModule ? &editModule->SelectionApi() : nullptr, editModule ? &editModule->ViewportInputApi() : nullptr, editModule ? &editModule->ViewportOverlayApi() : nullptr);
+            editModule ? &editModule->ProjectDataApi() : nullptr, editModule ? &editModule->SelectionApi() : nullptr, editModule ? &editModule->ViewportInputApi() : nullptr, editModule ? &editModule->ViewportOverlayApi() : nullptr,
+            editModule ? &editModule->AudioPreviewApi() : nullptr);
         state = State::Playing;
         if (!options.frames && options.mode != RuntimeMode::Editor) std::puts("Interactive stub: Enter = frame, r = reload, b = build, br = build+reload, ls, find, import, info, mkdir, rm/del, mv, cp, cat, q = exit.");
         auto previous = std::chrono::steady_clock::now();

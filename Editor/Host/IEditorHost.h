@@ -8,6 +8,7 @@
 #include <Engine/Runtime/ViewportOverlayApi.h>
 
 #include <Engine/Runtime/SceneBatchApi.h>
+#include <Engine/Runtime/EditExtensions.h>
 #include <Engine/Runtime/AuthoringApi.h>
 #include <cstdint>
 #include <string>
@@ -32,7 +33,8 @@ struct EditorCommand
         FetchScene, UpdateObjectTransform, RefreshScene, SelectObject, CreateObject, RemoveObject,
         RenameObject, DuplicateObject, SaveScene, LoadScene, NewScene, Undo, Redo, PickObject, FocusObject,
         SetGizmoMode, BeginGizmoDrag, EndGizmoDrag, SetParent,
-        ImportModel, ImportTexture, CreateModel, SetTexture, SetPointLight, SetMaterial, SetProjectData,
+        ImportModel, ImportTexture, ImportAudio, CreateModel, SetTexture, SetPointLight, SetMaterial, SetProjectData,
+        PlayAudio, StopAudio,
         RunTask, WriteRecovery, DiscardRecovery, SetProperty, UpdateAsset,
     };
 

@@ -3,6 +3,7 @@
 #include <Engine/Runtime/ProjectDataApi.h>
 #include <Engine/Runtime/SelectionApi.h>
 #include <Engine/Runtime/ViewportInputApi.h>
+#include <Engine/Runtime/EditExtensions.h>
 
 // Optional host service, exchanged by runtime/editor built against the same Edit API.
 constexpr uint32_t EngineEditorReloadService = 0x01524445u;
@@ -11,6 +12,7 @@ struct EngineEditorReloadBindings {
     EngineProjectDataApi data;
     EngineSelectionApi selection;
     EngineViewportInputApi input;
+    EngineAudioPreviewApi audio;
 };
 struct EngineEditorReloadApi {
     uint32_t version;

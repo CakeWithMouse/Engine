@@ -31,3 +31,16 @@ struct EngineDocumentCapabilities
     uint32_t version; // 1
     uint32_t minReadVersion, maxReadVersion, preferredWriteVersion;
 };
+
+// Audio asset preview: decodes and plays a /Game audio file through the edit scene's
+// audio engine. Edit state only — Play owns its game audio.
+constexpr const char* EngineAudioPreviewExtension = "Engine.Scene.AudioPreview";
+struct EngineAudioPreviewApi
+{
+    uint32_t version; // 1
+    void* context;
+    uint32_t (ENGINE_MODULE_CALL *play)(void*, const char* virtualPath, char* error, uint32_t capacity);
+    uint32_t (ENGINE_MODULE_CALL *stop)(void*);
+};
+// Optional Editor export; nullptr unbinds before stop/destroy. Editor must copy the table.
+typedef int (ENGINE_MODULE_CALL *EngineBindAudioPreviewFn)(uint32_t, uint32_t, void* editorSession, const EngineAudioPreviewApi*);

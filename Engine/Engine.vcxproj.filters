@@ -16,6 +16,7 @@
     <ClCompile Include="Source\Scene\SceneCommands.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Source\Scene\SceneDocument.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Source\Runtime\SceneEditSession.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Source\Runtime\SceneEditAudio.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Source\Runtime\GameEditModule.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Source\Resources\Paths.cpp">
       <Filter>Source Files\Resources</Filter>

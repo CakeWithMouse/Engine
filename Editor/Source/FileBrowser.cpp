@@ -120,7 +120,13 @@ void FileBrowserDock::BuildUi()
     actImportTexture_ = importMenu->addAction(QString());
     actImportTexture_->setEnabled(host_->HasScene());
     connect(actImportTexture_, &QAction::triggered, this, [this] {
-        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(true);
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(1);
+    });
+
+    actImportAudio_ = importMenu->addAction(QString());
+    actImportAudio_->setEnabled(host_->HasScene());
+    connect(actImportAudio_, &QAction::triggered, this, [this] {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(2);
     });
 
     imports_->setMenu(importMenu);
@@ -196,6 +202,7 @@ void FileBrowserDock::RetranslateUi()
     if (imports_) imports_->setText(Tr("Импорт…", "Import…"));
     if (actImportModel_) actImportModel_->setText(Tr("Модель…", "Model…"));
     if (actImportTexture_) actImportTexture_->setText(Tr("Текстура…", "Texture…"));
+    if (actImportAudio_) actImportAudio_->setText(Tr("Аудио…", "Audio…"));
     if (filterEdit_) filterEdit_->setPlaceholderText(Tr("Фильтр: *.json;*.png ...", "Filter: *.json;*.png ..."));
     if (rootCombo_) {
         const int cur = rootCombo_->currentIndex();
@@ -264,6 +271,12 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     QAction* use = hasFile && !model_->isDir(index) ? menu.addAction(isMaterial ? Tr("Назначить материал", "Assign Material")
                                                                                : Tr("Добавить модель / назначить текстуру", "Add Model / Assign Texture")) : nullptr;
     QAction* editMaterial = isMaterial && host_->HasMaterials() ? menu.addAction(Tr("Редактировать материал", "Edit Material")) : nullptr;
+    const bool isAudio = hasFile && !model_->isDir(index) &&
+        QStringList{"wav", "ogg", "mp3", "flac"}.contains(QFileInfo(path).suffix().toLower());
+    const bool contentAudio = isAudio && !contentDir_.isEmpty() &&
+        QDir::cleanPath(path).startsWith(QDir::cleanPath(contentDir_));
+    QAction* playAudio = contentAudio && host_->AudioApi() ? menu.addAction(Tr("Прослушать", "Play Audio Preview")) : nullptr;
+    QAction* stopAudio = host_->AudioApi() ? menu.addAction(Tr("Остановить звук", "Stop Audio Preview")) : nullptr;
     QAction* newMaterial = host_->HasMaterials() ? menu.addAction(Tr("Новый материал…", "New Material…")) : nullptr;
     QAction* open = hasFile ? menu.addAction(Tr("Открыть в приложении", "Open in External App")) : nullptr;
     QAction* reveal = hasFile ? menu.addAction(Tr("Показать в проводнике", "Reveal in Explorer")) : nullptr;
@@ -277,7 +290,15 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     if (!picked)
         return;
 
-    if(picked==reimport || picked==move) {
+    if (picked == playAudio || picked == stopAudio)
+    {
+        const QString relative = QDir(contentDir_).relativeFilePath(path);
+        EditorCommand c;
+        c.type = picked == playAudio ? EditorCommand::PlayAudio : EditorCommand::StopAudio;
+        c.path = QStringLiteral("/Game/") + QDir::fromNativeSeparators(relative);
+        host_->PostCommand(c);
+    }
+    else if(picked==reimport || picked==move) {
         if(auto* editor=qobject_cast<EditorMainWindow*>(parentWidget()))editor->UpdateAsset(path,picked==move);
     }
     else if (picked == use)

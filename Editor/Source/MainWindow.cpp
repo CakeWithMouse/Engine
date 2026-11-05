@@ -342,8 +342,9 @@ void EditorMainWindow::BuildSceneMenu()
 
     resourcesSubMenu_ = sceneMenu_->addMenu(Tr("Ресурсы", "Assets"));
     actAddModel_ = resourcesSubMenu_->addAction(Tr("Добавить модель…", "Add Model…"), this, [this] { AddModel(); });
-    actImportModel_ = resourcesSubMenu_->addAction(Tr("Импорт модели…", "Import Model…"), this, [this] { ImportAsset(false); });
-    actImportTexture_ = resourcesSubMenu_->addAction(Tr("Импорт текстуры…", "Import Texture…"), this, [this] { ImportAsset(true); });
+    actImportModel_ = resourcesSubMenu_->addAction(Tr("Импорт модели…", "Import Model…"), this, [this] { ImportAsset(0); });
+    actImportTexture_ = resourcesSubMenu_->addAction(Tr("Импорт текстуры…", "Import Texture…"), this, [this] { ImportAsset(1); });
+    actImportAudio_ = resourcesSubMenu_->addAction(Tr("Импорт аудио…", "Import Audio…"), this, [this] { ImportAsset(2); });
 
     actReloadShaders_ = sceneMenu_->addAction(Tr("Перекомпилировать шейдеры", "Reload Shaders"), this, [this] {
         ReloadShaders();
@@ -609,7 +610,7 @@ void EditorMainWindow::ConnectPanels()
             });
 
     connect(sceneObjectsPanel_, &SceneObjectsPanel::AddModelRequested, this, [this] { AddModel(); });
-    connect(sceneObjectsPanel_, &SceneObjectsPanel::ImportModelRequested, this, [this] { ImportAsset(false); });
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::ImportModelRequested, this, [this] { ImportAsset(0); });
     connect(sceneObjectsPanel_, &SceneObjectsPanel::DuplicateRequested, this, [this] { SubmitObjectCommand(EditorCommand::DuplicateObject); });
     connect(sceneObjectsPanel_, &SceneObjectsPanel::RemoveRequested, this, [this] { SubmitObjectCommand(EditorCommand::RemoveObject); });
 
@@ -1049,7 +1050,8 @@ static bool IsUserFacingCommand(EditorCommand::Type t)
     case EditorCommand::DuplicateObject: case EditorCommand::SetParent: case EditorCommand::SetProperty:
     case EditorCommand::SetModel: case EditorCommand::SetTexture: case EditorCommand::SetMaterial:
     case EditorCommand::SetPointLight: case EditorCommand::SetProjectData: case EditorCommand::UpdateAsset:
-    case EditorCommand::ImportModel: case EditorCommand::ImportTexture: case EditorCommand::SaveScene:
+    case EditorCommand::ImportModel: case EditorCommand::ImportTexture: case EditorCommand::ImportAudio:
+    case EditorCommand::SaveScene:
     case EditorCommand::LoadScene: case EditorCommand::NewScene: case EditorCommand::ReloadProject: return true;
     default: return false;
     }
@@ -1200,7 +1202,8 @@ void EditorMainWindow::CommandFinished(
     }
 
     if (command.type == EditorCommand::ImportModel ||
-        command.type == EditorCommand::ImportTexture)
+        command.type == EditorCommand::ImportTexture ||
+        command.type == EditorCommand::ImportAudio)
     {
         AppendLine(QStringLiteral(
             "Импортировано: %1. Двойной щелчок в Files: добавить модель или назначить текстуру выбранному объекту."
@@ -1371,6 +1374,7 @@ void EditorMainWindow::RetranslateUi()
     if (actAddModel_) actAddModel_->setText(Tr("Добавить модель…", "Add Model…"));
     if (actImportModel_) actImportModel_->setText(Tr("Импорт модели…", "Import Model…"));
     if (actImportTexture_) actImportTexture_->setText(Tr("Импорт текстуры…", "Import Texture…"));
+    if (actImportAudio_) actImportAudio_->setText(Tr("Импорт аудио…", "Import Audio…"));
     if (actReloadShaders_) actReloadShaders_->setText(Tr("Перекомпилировать шейдеры", "Reload Shaders"));
     if (undoAction_) undoAction_->setText(Tr("Отменить", "Undo"));
     if (redoAction_) redoAction_->setText(Tr("Повторить", "Redo"));

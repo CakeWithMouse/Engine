@@ -89,6 +89,11 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
             {
                 if (plV2.version == 1 && plV2.set) pointLightV2_ = plV2;
             }
+            EngineAudioPreviewApi audio{};
+            if (query && query(extensionContext, EngineAudioPreviewExtension, 1, sizeof(audio), &audio))
+            {
+                if (audio.version == 1 && audio.context && audio.play && audio.stop) audio_ = audio;
+            }
         }
         if (!projectContent.empty())
         {
@@ -149,7 +154,7 @@ uint32_t GameEditModule::Reload(const std::filesystem::path& module, const std::
         swap(library_, candidate->library_); swap(factory_, candidate->factory_); swap(api_, candidate->api_);
         swap(projectData_, candidate->projectData_); swap(selection_, candidate->selection_); swap(batch_, candidate->batch_); swap(authoring_, candidate->authoring_);
         swap(viewportInput_, candidate->viewportInput_); swap(cursor_, candidate->cursor_); swap(camera_, candidate->camera_);
-        swap(overlay_, candidate->overlay_);
+        swap(overlay_, candidate->overlay_); swap(audio_, candidate->audio_);
         swap(legacyFactory_, candidate->legacyFactory_); swap(legacy_, candidate->legacy_);
         swap(legacy5Factory_, candidate->legacy5Factory_); swap(legacy5_, candidate->legacy5_);
         // Heap-owned adapter tables move with their DLL, preserving session identity.

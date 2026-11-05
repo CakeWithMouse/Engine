@@ -13,8 +13,9 @@ public:
         EngineProjectDataApi projectData;
         EngineSelectionApi selection;
         EngineViewportInputApi viewportInput;
+        EngineAudioPreviewApi audio;
         std::function<void(const char*)> log;
-        std::function<void(const EngineEditSessionApi&, const EngineProjectDataApi&, const EngineSelectionApi&, const EngineViewportInputApi&)> onReloadBindings;
+        std::function<void(const EngineEditSessionApi&, const EngineProjectDataApi&, const EngineSelectionApi&, const EngineViewportInputApi&, const EngineAudioPreviewApi&)> onReloadBindings;
         std::function<std::string()> getSelectedObjectName;
         std::function<void(uint64_t)> setSelectedId;
         std::function<void()> publishScene;

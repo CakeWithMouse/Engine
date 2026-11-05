@@ -44,7 +44,7 @@ void EditorMainWindow::UpdateAsset(const QString& path,bool move,const QString& 
     sceneBusy_=true;host_->PostCommand(c);
 }
 
-void EditorMainWindow::ImportAsset(bool texture, const QString& source)
+void EditorMainWindow::ImportAsset(int kind, const QString& source)
 {
     if (!host_->HasScene() ||
         sceneBusy_ ||
@@ -53,26 +53,31 @@ void EditorMainWindow::ImportAsset(bool texture, const QString& source)
         return;
     }
 
+    const QString title = kind == 1
+        ? Tr("Импорт текстур в проект", "Import Textures to Project")
+        : kind == 2
+            ? Tr("Импорт аудио в проект", "Import Audio to Project")
+            : Tr("Импорт моделей в проект", "Import Models to Project");
+
+    const QString filter = kind == 1
+        ? Tr("Текстуры (*.png *.jpg *.jpeg *.bmp *.tga)", "Textures (*.png *.jpg *.jpeg *.bmp *.tga)")
+        : kind == 2
+            ? Tr("Аудио (*.wav *.ogg *.mp3 *.flac)", "Audio (*.wav *.ogg *.mp3 *.flac)")
+            : Tr("Модели (*.glb *.gltf *.obj *.fbx *.blend)", "Models (*.glb *.gltf *.obj *.fbx *.blend)");
+
     const QStringList paths = source.isEmpty()
-                                  ? QFileDialog::getOpenFileNames(
-                                      this,
-                                      texture
-                                          ? Tr("Импорт текстур в проект", "Import Textures to Project")
-                                          : Tr("Импорт моделей в проект", "Import Models to Project"),
-                                      {},
-                                      texture
-                                          ? Tr("Текстуры (*.png *.jpg *.jpeg *.bmp *.tga)", "Textures (*.png *.jpg *.jpeg *.bmp *.tga)")
-                                          : Tr("Модели (*.glb *.gltf *.obj *.fbx *.blend)", "Models (*.glb *.gltf *.obj *.fbx *.blend)")
-                                  )
+                                  ? QFileDialog::getOpenFileNames(this, title, {}, filter)
                                   : QStringList{source};
 
     for (const auto& path : paths)
     {
         EditorCommand c;
 
-        c.type = texture
+        c.type = kind == 1
                      ? EditorCommand::ImportTexture
-                     : EditorCommand::ImportModel;
+                     : kind == 2
+                         ? EditorCommand::ImportAudio
+                         : EditorCommand::ImportModel;
 
         c.path = path;
 

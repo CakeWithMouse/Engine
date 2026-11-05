@@ -52,6 +52,7 @@
     <ItemGroup>
         <ClCompile Include="Source\Base\Base.cpp"/>
         <ClCompile Include="Source\Components\Light\DirectionalLightComponent.cpp"/>
+        <ClCompile Include="Source\Runtime\SceneEditAudio.cpp" />
         <ClCompile Include="Source\Scene\Scene.cpp"/>
         <ClCompile Include="Source\Scene\Trace.cpp"/>
         <ClCompile Include="Source\Components\ComponentTrace.cpp"/>
@@ -63,6 +64,7 @@
         <ClCompile Include="Source\Scene\ModelImport.cpp"/>
         <ClCompile Include="Source\Scene\BlendImport.cpp"/>
         <ClCompile Include="Source\Runtime\SceneEditAssets.cpp"/>
+        <ClCompile Include="Source\Runtime\SceneEditAudio.cpp"/>
         <ClCompile Include="Source\Runtime\SceneEditMaterials.cpp"/>
         <ClInclude Include="Include\Engine\Scene\SceneDocument.h"/>
         <ClCompile Include="Source\Runtime\SceneEditSession.cpp"/>
