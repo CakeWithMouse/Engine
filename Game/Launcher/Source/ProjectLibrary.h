@@ -40,7 +40,8 @@ inline std::filesystem::path Create(const std::filesystem::path& directory, cons
     if (!std::filesystem::is_regular_file(templateModule)) throw std::runtime_error("SceneProject template is missing. Build EngineLauncher first.");
     const auto root = std::filesystem::absolute(directory).lexically_normal();
     // Never adopt or overwrite an existing directory, even an empty one.
-    if (!std::filesystem::create_directory(root)) throw std::runtime_error("Choose a NEW project folder; this folder already exists");
+    if (std::filesystem::exists(root) || !std::filesystem::create_directory(root))
+        throw std::runtime_error("Choose a NEW project folder; this path already exists: " + root.u8string());
     try
     {
         std::filesystem::create_directories(root / "Content" / "Scenes");

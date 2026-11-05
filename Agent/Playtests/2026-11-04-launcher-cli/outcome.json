@@ -1,0 +1,13 @@
+{
+  "prompt": "Agent/Prompts/launcher-cli-diagnostics.md",
+  "cliChecksPassed": 16,
+  "cppWorkflowPassed": 8,
+  "htmlLogic": "checked",
+  "status": "complete",
+  "releaseBuild": "passed",
+  "versionChanged": false,
+  "apiReference": "checked",
+  "saveGameStatus": "design-only",
+  "sdkGuideHashMatches": true,
+  "htmlBrowserRender": "blocked-file-protocol"
+}

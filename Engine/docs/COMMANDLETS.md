@@ -1,5 +1,7 @@
 # Проверки без интерактивного редактора
 
+Создание/сборка проектов также доступны через [EngineLauncher CLI](LAUNCHER-CLI.md). Его интеграционные регрессии: `Game/Launcher/Tests/CliTests.ps1` (PowerShell 7).
+
 `EngineCommandlets.exe` — локальные параметризованные вызовы существующего Engine/Editor API. Отдельная DLL редактора и процесс EngineRuntime в режиме editor не запускаются. Для UI создаются настоящие Qt-виджеты на offscreen backend; для игровых команд используется скрытый HWND и настоящее D3D11 устройство. Это не обещание работы без GPU. Аналогичный принцип отдельных служебных запусков используется в [UE Commandlets](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Engine/UCommandlet).
 
 ## Сборка и протокол

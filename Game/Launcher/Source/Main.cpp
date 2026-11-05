@@ -12,6 +12,7 @@
 #include "ProjectLibrary.h"
 #include "ProjectVersion.h"
 #include "LaunchSplash.h"
+#include "Cli.h"
 #include "../../../Engine/Runtime/ProjectExport.h"
 
 namespace
@@ -62,7 +63,7 @@ void RunProjectCodeTool(const std::filesystem::path& project, const wchar_t* act
     if (wait != WAIT_OBJECT_0) { TerminateProcess(process.hProcess, 1); WaitForSingleObject(process.hProcess, 5000); }
     DWORD code = 1; GetExitCodeProcess(process.hProcess, &code);
     CloseHandle(process.hThread); CloseHandle(process.hProcess);
-    if (code || wait != WAIT_OBJECT_0) throw std::runtime_error("C++ build failed. Existing project preserved. See CodeBuild.log in the project folder.");
+    if (code || wait != WAIT_OBJECT_0) throw std::runtime_error("C++ build failed. Existing project preserved. See " + logPath.u8string());
 }
 
 std::filesystem::path Pick(HWND owner, bool folder)
@@ -523,11 +524,26 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
     LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc);
     if (!argv) return 2;
     bool diagnostic = argc > 1;
+    if (diagnostic) LauncherCli::InitializeStreams();
     try
     {
         if (diagnostic)
         {
             const std::wstring option = argv[1];
+            const LauncherCli::Command* command = nullptr;
+            for (const auto& candidate : LauncherCli::Commands)
+                if (option == candidate.name) { command = &candidate; break; }
+            if (!command || argc != command->argc) {
+                LauncherCli::Write(true, command ? std::string("Invalid arguments. Usage: EngineLauncher.exe ")+command->usage+"\n"
+                    : "Unknown command: " + Utf8(option) + "\n");
+                if (option == L"--create-code-project")
+                    LauncherCli::Write(true, "Use --create-project <NEW-folder> <name>, then --enable-code <Project.json>.\n");
+                LauncherCli::Write(true, "Run EngineLauncher.exe --help for supported commands.\n");
+                LocalFree(argv); return 2;
+            }
+            if (option == L"--help" || option == L"-h" || option == L"/?") {
+                LauncherCli::Help(); LocalFree(argv); return 0;
+            }
             if(argc==3 && (option==L"--smoke-project-prompt" || option==L"--smoke-project-editor-prompt")) {
                 const std::filesystem::path file=argv[2];LocalFree(argv);argv=nullptr;
                 return LaunchProject(file,option==L"--smoke-project-editor-prompt",true,false,true);
@@ -582,6 +598,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
                     return smoke ? Launch(entry, true, editor) : 0;
                 }
             }
+            LauncherCli::Write(true, "Unknown example: " + Utf8(name) + ". Use a launcher example name or --check-project <Project.json>.\n");
             return 2;
         }
         LocalFree(argv); argv = nullptr;
@@ -607,6 +624,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
     {
         if (argv) LocalFree(argv);
         if (!diagnostic) MessageBoxW(nullptr, ExampleDeployment::Wide(error.what()).c_str(), L"Engine Launcher", MB_OK | MB_ICONERROR);
+        else LauncherCli::Write(true, std::string("EngineLauncher: ") + error.what() + "\n");
         OutputDebugStringW(ExampleDeployment::Wide(error.what()).c_str());
         return 1;
     }

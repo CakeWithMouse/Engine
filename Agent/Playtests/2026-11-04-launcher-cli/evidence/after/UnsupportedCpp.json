@@ -1,0 +1,5 @@
+{
+  "exit": 2,
+  "stderr": "Unknown command: --create-code-project\nUse --create-project <NEW-folder> <name>, then --enable-code <Project.json>.\nRun EngineLauncher.exe --help for supported commands.\n",
+  "stdout": ""
+}

@@ -1,0 +1,5 @@
+{
+  "stdout": "",
+  "stderr": "Invalid arguments. Usage: EngineLauncher.exe --create-project <NEW-folder> <name>\nRun EngineLauncher.exe --help for supported commands.\n",
+  "exit": 2
+}
