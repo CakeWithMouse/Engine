@@ -1,0 +1,126 @@
+{
+  "name": "Main",
+  "objects": [
+    {
+      "id": 1,
+      "inheritParentScale": true,
+      "name": "Ground",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0,
+          -0.5,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          20,
+          1,
+          20
+        ]
+      },
+      "type": "Primitive.Plane"
+    },
+    {
+      "id": 2,
+      "inheritParentScale": true,
+      "name": "Cube",
+      "parent": 0,
+      "transform": {
+        "position": [
+          0,
+          0,
+          0
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "type": "Primitive.Cube"
+    },
+    {
+      "id": 3,
+      "inheritParentScale": true,
+      "name": "Warm Light",
+      "parent": 0,
+      "pointLight": {
+        "color": [
+          1.0,
+          0.65,
+          0.35
+        ],
+        "enabled": true,
+        "intensity": 2.0,
+        "radius": 10.0
+      },
+      "transform": {
+        "position": [
+          2,
+          3,
+          2
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "type": "Light.Point"
+    },
+    {
+      "id": 4,
+      "inheritParentScale": true,
+      "name": "Cool Light",
+      "parent": 0,
+      "pointLight": {
+        "color": [
+          0.3,
+          0.55,
+          1.0
+        ],
+        "enabled": true,
+        "intensity": 2.0,
+        "radius": 10.0
+      },
+      "transform": {
+        "position": [
+          -3,
+          2,
+          1
+        ],
+        "rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          1,
+          1
+        ]
+      },
+      "type": "Light.Point"
+    }
+  ],
+  "version": 1
+}

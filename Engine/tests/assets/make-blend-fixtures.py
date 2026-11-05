@@ -3,6 +3,9 @@ import os
 import sys
 import bpy
 
+if bpy.app.version < (4, 2, 0):
+    raise RuntimeError("BLEND integration fixtures require Blender 4.2 or newer")
+
 folder = os.path.abspath(sys.argv[sys.argv.index("--") + 1])
 os.makedirs(folder, exist_ok=True)
 bpy.ops.object.select_all(action="SELECT")

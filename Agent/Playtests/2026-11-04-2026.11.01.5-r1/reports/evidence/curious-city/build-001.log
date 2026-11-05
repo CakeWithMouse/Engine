@@ -1,0 +1,27 @@
+
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 5 component(s), Project
+  CityEconomySubsystem.cpp
+  HouseComponent.cpp
+E:\Engine\Engine\build\playtests\20261104-r1\curious-city\Project\Source\CityEconomySubsystem.cpp(50,34): error C2664: "AddComponentResult Scene::AddComponent(std::string,std::unique_ptr<GameComponent,std::default_delete<GameComponent>> &,std::string)": невозможно преобразовать аргумент 2 из "std::unique_ptr<HouseComponent,std::default_delete<HouseComponent>>" в "std::unique_ptr<GameComponent,std::default_delete<GameComponent>> &" [E:\Engine\Engine\build\playtests\20261104-r1\curious-city\Project\Game.vcxproj]
+      E:\Engine\Game\build\x64\Release\Runtime\SDK\Include\Engine\Scene\Scene.h(86,24):
+       см. объявление "Scene::AddComponent"
+      E:\Engine\Engine\build\playtests\20261104-r1\curious-city\Project\Source\CityEconomySubsystem.cpp(50,34):
+      при попытке сопоставить список аргументов "(const std::string, std::unique_ptr<HouseComponent,std::default_delete<HouseComponent>>, const char [18])"
+  
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+
+
+Full build log: E:\Engine\Engine\build\playtests\20261104-r1\curious-city\Project\Binaries\Release\554944923f624a5d9caf4a0ecd8b2bf2\build.log
+Exception: E:\Engine\Game\build\x64\Release\Runtime\SDK\ProjectTools.ps1:289
+Line |
+ 289 |  … ExitCode) { throw 'Project build failed; previous module preserved' } …
+     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Project build failed; previous module preserved
+
+

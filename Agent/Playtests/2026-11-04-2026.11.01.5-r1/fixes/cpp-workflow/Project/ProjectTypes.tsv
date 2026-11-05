@@ -1,0 +1,4 @@
+Kind	Type	Base	Source	CppClass
+Component	ProjectComponent	public GameComponent	E:\Engine\Agent\Playtests\2026-11-04-2026.11.01.5-r1\fixes\cpp-workflow\Project\Source\ProjectComponent.h	ProjectComponent
+Game	ProjectGame	public Game	E:\Engine\Agent\Playtests\2026-11-04-2026.11.01.5-r1\fixes\cpp-workflow\Project\Source\ProjectGame.h	ProjectGame
+Component	RotatingCube	public CubeComponent	E:\Engine\Agent\Playtests\2026-11-04-2026.11.01.5-r1\fixes\cpp-workflow\Project\Source\RotatingCube.h	RotatingCube

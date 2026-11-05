@@ -1,0 +1,293 @@
+Window: "Main.scene.json — TrashGame — Engine Editor", App: EngineRuntime.exe.
+	0 окно (settable, string) Main.scene.json — TrashGame — Engine Editor Secondary Actions: Raise
+		1 название (settable, string) Value: Main.scene.json — TrashGame — Engine Editor
+			2 строка меню Система ID: MenuBar
+				3 элемент меню Система
+			4 кнопка Свернуть
+			5 кнопка Развернуть
+			6 кнопка Закрыть
+		7 окно (settable, string) Вьюпорт Secondary Actions: Raise ID: ViewportDock
+			8 группа (settable, string) ID: ViewportDock.ViewportContainer
+				9 особый (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar
+					10 флажок (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar.btnGizmoTranslate
+					11 флажок (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar.btnGizmoRotate
+					12 флажок (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar.btnGizmoScale
+					13 особый (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar.HeaderSep1
+					14 кнопка (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar.btnGizmoCoordSpace
+					15 особый (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar.HeaderSep2
+					16 флажок (settable, string) ID: ViewportDock.ViewportContainer.ViewportHeaderBar.btnGizmoSnap
+					17 поле со списком (settable, string) Value: 0.5 ID: ViewportDock.ViewportContainer.ViewportHeaderBar.comboGizmoSnapStep
+						18 поле (settable, string) Value: 0.5
+				19 группа (settable, string)
+			20 кнопка (settable, string) Close ID: ViewportDock.qt_dockwidget_closebutton
+			21 кнопка (settable, string) Float ID: ViewportDock.qt_dockwidget_floatbutton
+		27 окно (settable, string) Контент-браузер Secondary Actions: Raise ID: ContentDock
+			28 группа (settable, string)
+				29 кнопка (settable, string) Импорт… ID: ImportAssets
+				30 поле (settable, string)
+					31 кнопка (settable, string)
+				32 поле со списком (settable, string) Value: Content и Source ID: FileVisibility
+				33 дерево (settable, string) ID: ProjectFiles
+					5034 заголовок (selectable, settable, string) Name
+					5035 заголовок (selectable, settable, string) Size
+					5036 заголовок (selectable, settable, string) Type
+					5037 заголовок (selectable, settable, string) Date Modified
+			38 кнопка (settable, string) Close ID: ContentDock.qt_dockwidget_closebutton
+			39 кнопка (settable, string) Float ID: ContentDock.qt_dockwidget_floatbutton
+		40 панель инструментов (settable, string) Запуск ID: MainToolBar
+			41 особый (settable, string) ID: MainToolBar.ToolBarContainer
+				42 кнопка (settable, string) Play ID: MainToolBar.ToolBarContainer.BtnPlay
+				43 кнопка (disabled, settable, string) Пауза ID: MainToolBar.ToolBarContainer.BtnPause
+				44 кнопка (disabled, settable, string) Стоп ID: MainToolBar.ToolBarContainer.BtnStop
+				45 кнопка (settable, string) Отдельное окно ID: MainToolBar.ToolBarContainer.BtnExternal
+		46 окно (settable, string) Сцена / объекты Secondary Actions: Raise ID: SceneObjectsDock
+			47 группа (settable, string)
+				48 поле (settable, string) ID: SceneSearchEdit
+					49 кнопка (settable, string)
+				50 кнопка (settable, string) Добавить ID: SceneAddButton
+				51 дерево (settable, string) ID: SceneHierarchy
+					5038 заголовок (selectable, settable, string) Объект
+					5039 заголовок (selectable, settable, string) Тип
+					5040 элемент дерева (selectable, settable, string) Окружение
+					5041 элемент дерева (selectable, settable, string)
+					5042 элемент дерева (selectable, settable, string) Небо
+					5043 элемент дерева (selectable, settable, string) Environment.Sky
+					5044 элемент дерева (selectable, settable, string) Ground
+					5045 элемент дерева (selectable, settable, string) Primitive.Plane
+					5046 элемент дерева (selectable, settable, string) Warm Light
+					5047 элемент дерева (selectable, settable, string) Light.Point
+					5048 элемент дерева (selectable, settable, string) Cool Light
+					5049 элемент дерева (selectable, settable, string) Light.Point
+					5050 элемент дерева (selectable, settable, string) Throw lane
+					5051 элемент дерева (selectable, settable, string) Trash.ThrowLane
+					5052 элемент дерева (selectable, settable, string) Bucket base
+					5053 элемент дерева (selectable, settable, string) Trash.BucketBase
+					5054 элемент дерева (selectable, settable, string) Bucket left wall
+					5055 элемент дерева (selectable, settable, string) Trash.BucketWall
+					5056 элемент дерева (selectable, settable, string) Bucket right wall
+					5057 элемент дерева (selectable, settable, string) Trash.BucketWall
+					5058 элемент дерева (selectable, settable, string) Bucket front wall
+					5059 элемент дерева (selectable, settable, string) Trash.BucketWall
+					5060 элемент дерева (selectable, settable, string) Bucket back wall
+					5061 элемент дерева (selectable, settable, string) Trash.BucketWall
+					5062 элемент дерева (selectable, settable, string) Throw ledger
+					5063 элемент дерева (selectable, settable, string) ThrowLedger
+			78 кнопка (settable, string) Close ID: SceneObjectsDock.qt_dockwidget_closebutton
+			79 кнопка (settable, string) Float ID: SceneObjectsDock.qt_dockwidget_floatbutton
+		80 окно (settable, string) Инспектор Secondary Actions: Raise ID: InspectorDock
+			81 группа (disabled, settable, string)
+				82 группа (disabled, settable, string) ID: InspectorScrollArea
+					83 группа (disabled, settable, string) ID: InspectorScrollArea.qt_scrollarea_viewport
+						84 группа (disabled, settable, string) ID: InspectorScrollArea.qt_scrollarea_viewport.InspectorScrollContent
+							85 текстовый (disabled) Объект не выбран ID: InspectorScrollArea.qt_scrollarea_viewport.InspectorScrollContent.NoSelectionLabel
+			86 кнопка (settable, string) Close ID: InspectorDock.qt_dockwidget_closebutton
+			87 кнопка (settable, string) Float ID: InspectorDock.qt_dockwidget_floatbutton
+		88 вкладка (settable, string) Консоль
+			89 элемент вкладки (selectable, settable, string) Консоль
+			90 элемент вкладки (selectable, settable, string) Контент-браузер
+		91 строка меню (settable, string)
+			92 элемент меню (settable, string) Сцена
+			93 элемент меню (settable, string) Правка
+			94 элемент меню (settable, string) Вид
+			95 элемент меню (settable, string) Запуск
+			96 элемент меню (settable, string) Проект
+			97 элемент меню (settable, string) Инструменты
+		98 строка состояния
+			99 бегунок (settable, string)
+			100 текстовый Edit | Space: Play/Stop | P: Pause/Resume | updates: 7433 | fps: 59.7 | vp: on
+			101 текстовый EDIT
+			102 текстовый TrashGame | E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Project.json
+		22 окно (settable, string) Консоль Secondary Actions: Raise ID: ConsoleDock
+			23 поле Value: [13:45:15.750] EditorStart [13:45:15.750] TrashGame [13:45:15.750] E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Project.json [13:45:15.805] EditorSceneViewportAttach ok [13:45:32.422] C++: Build [13:45:35.438] The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation. [13:45:35.438] ComponentGenerator: 8 component(s), Project [13:45:35.439] TrashProjectile.cpp [13:45:35.439] E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,30): error C2665: "std::vector<uint64_t,std::allocator<uint64_t>>::push_back": РЅРё РѕРґРЅР° РїРµСЂРµРіСЂСѓР¶РµРЅРЅР°СЏ С„СѓРЅРєС†РёСЏ РЅРµ РјРѕР¶РµС‚ РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ РІСЃРµ С‚РёРїС‹ Р°СЂРіСѓРјРµРЅС‚РѕРІ [E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Game.vcxproj] [13:45:35.440] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(870,23): [13:45:35.440] РјРѕР¶РµС‚ Р±С‹С‚СЊ "void std::vector<uint64_t,std::allocator<uint64_t>>::push_back(_Ty &&)" [13:45:35.440] with [13:45:35.441] [ [13:45:35.441] _Ty=uint64_t [13:45:35.441] ] [13:45:35.441] E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,30): [13:45:35.442] "void std::vector<uint64_t,std::allocator<uint64_t>>::push_back(_Ty &&)": РЅРµРІРѕР·РјРѕР¶РЅРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ Р°СЂРіСѓРјРµРЅС‚ 1 РёР· "_Ty1" РІ "_Ty &&" [13:45:35.442] with [13:45:35.443] [ [13:45:35.443] _Ty=uint64_t [13:45:35.443] ] [13:45:35.443] and [13:45:35.443] [ [13:45:35.444] _Ty1=const std::string [13:45:35.444] ] [13:45:35.444] and [13:45:35.444] [ [13:45:35.444] _Ty=uint64_t [13:45:35.445] ] [13:45:35.445] E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,45): [13:45:35.445] РџСЂРёС‡РёРЅР°: РЅРµРІРѕР·РјРѕР¶РЅРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ "_Ty1" РІ "_Ty" [13:45:35.445] with [13:45:35.446] [ [13:45:35.446] _Ty1=const std::string [13:45:35.446] ] [13:45:35.446] and [13:45:35.446] [ [13:45:35.447] _Ty=uint64_t [13:45:35.447] ] [13:45:35.448] E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,45): [13:45:35.448] Р”Р»СЏ РІС‹РїРѕР»РЅРµРЅРёСЏ РґР°РЅРЅРѕРіРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ РЅРµС‚ РґРѕСЃС‚СѓРїРЅРѕРіРѕ РѕРїРµСЂР°С‚РѕСЂР° РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ, РѕРїСЂРµРґРµР»РµРЅРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј, РёР»Рё РІС‹Р·РѕРІ РѕРїРµСЂР°С‚РѕСЂР° РЅРµРІРѕР·РјРѕР¶РµРЅ [13:45:35.448] C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(866,23): [13:45:35.448] РёР»Рё "void std::vector<uint64_t,std::allocator<uint64_t>>::push_back(const _Ty &)" [13:45:35.449] with [13:45:35.449] [ [13:45:35.449] _Ty=uint64_t [13:45:35.449] ] [13:45:35.449] E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,30): [13:45:35.450] "void std::vector<uint64_t,std::allocator<uint64_t>>::push_back(const _Ty &)": РЅРµРІРѕР·РјРѕР¶РЅРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ Р°СЂРіСѓРјРµРЅС‚ 1 РёР· "_Ty1" РІ "const _Ty &" [13:45:35.450] with [13:45:35.450] [ [13:45:35.450] _Ty=uint64_t [13:45:35.450] ] [13:45:35.451] and [13:45:35.451] [ [13:45:35.451] _Ty1=const std::string [13:45:35.451] ] [13:45:35.451] and [13:45:35.452] [ [13:45:35.452] _Ty=uint64_t [13:45:35.452] ] [13:45:35.452] E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,45): [13:45:35.453] РџСЂРёС‡РёРЅР°: РЅРµРІРѕР·РјРѕР¶РЅРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ "_Ty1" РІ "const _Ty" [13:45:35.453] with [13:45:35.453] [ [13:45:35.453] _Ty1=const std::string [13:45:35.453] ] [13:45:35.453] and [13:45:35.454] [ [13:45:35.454] _Ty=uint64_t [13:45:35.455] ] [13:45:35.455] E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,45): [13:45:35.455] Р”Р»СЏ РІС‹РїРѕР»РЅРµРЅРёСЏ РґР°РЅРЅРѕРіРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ РЅРµС‚ РґРѕСЃС‚СѓРїРЅРѕРіРѕ РѕРїРµСЂР°С‚РѕСЂР° РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ, РѕРїСЂРµРґРµР»РµРЅРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј, РёР»Рё РІС‹Р·РѕРІ РѕРїРµСЂР°С‚РѕСЂР° РЅРµРІРѕР·РјРѕР¶РµРЅ [13:45:35.455] E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,30): [13:45:35.456] РїСЂРё РїРѕРїС‹С‚РєРµ СЃРѕРїРѕСЃС‚Р°РІРёС‚СЊ СЃРїРёСЃРѕРє Р°СЂРіСѓРјРµРЅС‚РѕРІ "(_Ty1)" [13:45:35.456] with [13:45:35.456] [ [13:45:35.456] _Ty1=const std::string [13:45:35.456] ] [13:45:35.457] Full build log: E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Binaries\Release\ed38389df95048f5871f76caaba12980\build.log [13:45:35.481] Project build failed; previous module preserved [13:45:35.482] E:\Engine\Game\build\x64\Release\Runtime\SDK\ProjectTools.ps1:289 §­ Є:31 [13:45:35.482] + ... ExitCode) { throw 'Project build failed; previous module preserved' } ... [13:45:35.483] + ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ [13:45:35.483] + CategoryInfo : OperationStopped: (Project build f...odule preserved:String) [], RuntimeException [13:45:35.483] + FullyQualifiedErrorId : Project build failed; previous module preserved [13:45:35.550] [Ошибка C++] Build: код завершения 1. Проект: E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Project.json [13:46:54.686] C++: Build [13:47:00.325] The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation. [13:47:00.326] ComponentGenerator: 8 component(s), Project [13:47:00.327] TrashProjectile.cpp [13:47:00.327] РЎРѕР·РґР°РµС‚СЃСЏ Р±РёР±Р»РёРѕС‚РµРєР° E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Binaries\Release\4c74a1b450764b5a9aaa2df6f3a1fc42\Game.lib Рё РѕР±СЉРµРєС‚ E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Binaries\Release\4c74a1b450764b5a9aaa2df6f3a1fc42\Game.exp [13:47:00.328] Game.vcxproj -> E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Binaries\Release\4c74a1b450764b5a9aaa2df6f3a1fc42\Game.dll [13:47:00.328] Full build log: E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Binaries\Release\4c74a1b450764b5a9aaa2df6f3a1fc42\build.log [13:47:02.128] Build validated and activated. Use Hot Reload in the editor, or reopen the project. [13:47:02.387] Hot reload: DLL заменена. Сцена, выбор и камера сохранены; история отмены очищена. ID: ConsoleDock.Console
+				24 группа (settable, string) ID: ConsoleDock.Console.qt_scrollarea_viewport
+				1153 группа (settable, string) ID: ConsoleDock.Console.qt_scrollarea_vcontainer
+					1154 полоса прокрутки (settable, float) Value: 180
+			25 кнопка (settable, string) Close ID: ConsoleDock.qt_dockwidget_closebutton
+			26 кнопка (settable, string) Float ID: ConsoleDock.qt_dockwidget_floatbutton
+
+Document text: ```
+[13:45:15.750] EditorStart
+[13:45:15.750] TrashGame
+[13:45:15.750] E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Project.json
+[13:45:15.805] EditorSceneViewportAttach ok
+[13:45:32.422] C++: Build
+[13:45:35.438]   The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+
+[13:45:35.438]   ComponentGenerator: 8 component(s), Project
+
+[13:45:35.439]   TrashProjectile.cpp
+
+[13:45:35.439] E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,30): error C2665: "std::vector<uint64_t,std::allocator<uint64_t>>::push_back": РЅРё РѕРґРЅР° РїРµСЂРµРіСЂСѓР¶РµРЅРЅР°СЏ С„СѓРЅРєС†РёСЏ РЅРµ РјРѕР¶РµС‚ РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ РІСЃРµ С‚РёРїС‹ Р°СЂРіСѓРјРµРЅС‚РѕРІ [E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Game.vcxproj]
+
+[13:45:35.440]       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(870,23):
+
+[13:45:35.440]       РјРѕР¶РµС‚ Р±С‹С‚СЊ "void std::vector<uint64_t,std::allocator<uint64_t>>::push_back(_Ty &&)"
+
+[13:45:35.440]           with
+
+[13:45:35.441]           [
+
+[13:45:35.441]               _Ty=uint64_t
+
+[13:45:35.441]           ]
+
+[13:45:35.441]           E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,30):
+
+[13:45:35.442]           "void std::vector<uint64_t,std::allocator<uint64_t>>::push_back(_Ty &&)": РЅРµРІРѕР·РјРѕР¶РЅРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ Р°СЂРіСѓРјРµРЅС‚ 1 РёР· "_Ty1" РІ "_Ty &&"
+
+[13:45:35.442]           with
+
+[13:45:35.443]           [
+
+[13:45:35.443]               _Ty=uint64_t
+
+[13:45:35.443]           ]
+
+[13:45:35.443]           and
+
+[13:45:35.443]           [
+
+[13:45:35.444]               _Ty1=const std::string
+
+[13:45:35.444]           ]
+
+[13:45:35.444]           and
+
+[13:45:35.444]           [
+
+[13:45:35.444]               _Ty=uint64_t
+
+[13:45:35.445]           ]
+
+[13:45:35.445]               E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,45):
+
+[13:45:35.445]               РџСЂРёС‡РёРЅР°: РЅРµРІРѕР·РјРѕР¶РЅРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ "_Ty1" РІ "_Ty"
+
+[13:45:35.445]           with
+
+[13:45:35.446]           [
+
+[13:45:35.446]               _Ty1=const std::string
+
+[13:45:35.446]           ]
+
+[13:45:35.446]           and
+
+[13:45:35.446]           [
+
+[13:45:35.447]               _Ty=uint64_t
+
+[13:45:35.447]           ]
+
+[13:45:35.448]               E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,45):
+
+[13:45:35.448]               Р”Р»СЏ РІС‹РїРѕР»РЅРµРЅРёСЏ РґР°РЅРЅРѕРіРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ РЅРµС‚ РґРѕСЃС‚СѓРїРЅРѕРіРѕ РѕРїРµСЂР°С‚РѕСЂР° РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ, РѕРїСЂРµРґРµР»РµРЅРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј, РёР»Рё РІС‹Р·РѕРІ РѕРїРµСЂР°С‚РѕСЂР° РЅРµРІРѕР·РјРѕР¶РµРЅ
+
+[13:45:35.448]       C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(866,23):
+
+[13:45:35.448]       РёР»Рё       "void std::vector<uint64_t,std::allocator<uint64_t>>::push_back(const _Ty &)"
+
+[13:45:35.449]           with
+
+[13:45:35.449]           [
+
+[13:45:35.449]               _Ty=uint64_t
+
+[13:45:35.449]           ]
+
+[13:45:35.449]           E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,30):
+
+[13:45:35.450]           "void std::vector<uint64_t,std::allocator<uint64_t>>::push_back(const _Ty &)": РЅРµРІРѕР·РјРѕР¶РЅРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ Р°СЂРіСѓРјРµРЅС‚ 1 РёР· "_Ty1" РІ "const _Ty &"
+
+[13:45:35.450]           with
+
+[13:45:35.450]           [
+
+[13:45:35.450]               _Ty=uint64_t
+
+[13:45:35.450]           ]
+
+[13:45:35.451]           and
+
+[13:45:35.451]           [
+
+[13:45:35.451]               _Ty1=const std::string
+
+[13:45:35.451]           ]
+
+[13:45:35.451]           and
+
+[13:45:35.452]           [
+
+[13:45:35.452]               _Ty=uint64_t
+
+[13:45:35.452]           ]
+
+[13:45:35.452]               E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,45):
+
+[13:45:35.453]               РџСЂРёС‡РёРЅР°: РЅРµРІРѕР·РјРѕР¶РЅРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ "_Ty1" РІ "const _Ty"
+
+[13:45:35.453]           with
+
+[13:45:35.453]           [
+
+[13:45:35.453]               _Ty1=const std::string
+
+[13:45:35.453]           ]
+
+[13:45:35.453]           and
+
+[13:45:35.454]           [
+
+[13:45:35.454]               _Ty=uint64_t
+
+[13:45:35.455]           ]
+
+[13:45:35.455]               E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,45):
+
+[13:45:35.455]               Р”Р»СЏ РІС‹РїРѕР»РЅРµРЅРёСЏ РґР°РЅРЅРѕРіРѕ РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ РЅРµС‚ РґРѕСЃС‚СѓРїРЅРѕРіРѕ РѕРїРµСЂР°С‚РѕСЂР° РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёСЏ, РѕРїСЂРµРґРµР»РµРЅРЅРѕРіРѕ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј, РёР»Рё РІС‹Р·РѕРІ РѕРїРµСЂР°С‚РѕСЂР° РЅРµРІРѕР·РјРѕР¶РµРЅ
+
+[13:45:35.455]       E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Source\TrashProjectile.cpp(68,30):
+
+[13:45:35.456]       РїСЂРё РїРѕРїС‹С‚РєРµ СЃРѕРїРѕСЃС‚Р°РІРёС‚СЊ СЃРїРёСЃРѕРє Р°СЂРіСѓРјРµРЅС‚РѕРІ "(_Ty1)"
+
+[13:45:35.456]           with
+
+[13:45:35.456]           [
+
+[13:45:35.456]               _Ty1=const std::string
+
+[13:45:35.456]           ]
+
+[13:45:35.457] Full build log: E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Binaries\Release\ed38389df95048f5871f76caaba12980\build.log
+
+[13:45:35.481] Project build failed; previous module preserved
+
+[13:45:35.482] E:\Engine\Game\build\x64\Release\Runtime\SDK\ProjectTools.ps1:289 §­ Є:31
+
+[13:45:35.482] + ... ExitCode) { throw 'Project build failed; previous module preserved' } ...
+
+[13:45:35.483] +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[13:45:35.483]     + CategoryInfo          : OperationStopped: (Project build f...odule preserved:String) [], RuntimeException
+
+[13:45:35.483]     + FullyQualifiedErrorId : Project build failed; previous module preserved
+
+[13:45:35.550] [Ошибка C++] Build: код завершения 1. Проект: E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Project.json
+[13:46:54.686] C++: Build
+[13:47:00.325]   The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+
+[13:47:00.326]   ComponentGenerator: 8 component(s), Project
+
+[13:47:00.327]   TrashProjectile.cpp
+
+[13:47:00.327]      РЎРѕР·РґР°РµС‚СЃСЏ Р±РёР±Р»РёРѕС‚РµРєР° E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Binaries\Release\4c74a1b450764b5a9aaa2df6f3a1fc42\Game.lib Рё РѕР±СЉРµРєС‚ E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Binaries\Release\4c74a1b450764b5a9aaa2df6f3a1fc42\Game.exp
+
+[13:47:00.328]   Game.vcxproj -> E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Binaries\Release\4c74a1b450764b5a9aaa2df6f3a1fc42\Game.dll
+
+[13:47:00.328] Full build log: E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGame\Binaries\Release\4c74a1b450764b5a9aaa2df6f3a1fc42\build.log
+
+[13:47:02.128] Build validated and activated. Use Hot Reload in the editor, or reopen the project.
+
+[13:47:02.387] Hot reload: DLL заменена. Сцена, выбор и камера сохранены; история отмены очищена.
+```

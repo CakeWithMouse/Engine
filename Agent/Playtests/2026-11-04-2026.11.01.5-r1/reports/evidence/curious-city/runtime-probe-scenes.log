@@ -1,0 +1,19 @@
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_1
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_2
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_3
+event=city_hud_configured elapsed=0.0s balance=200 houses=3
+event=city_started elapsed=0.0s balance=200 houses=3
+event=hud_attached elapsed=0.0s balance=200 houses=3
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.000000
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.350000
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.700000
+event=income elapsed=1.0s balance=230 houses=3
+event=house_spawned elapsed=1.0s balance=230 houses=3 detail=House_1
+event=house_spawned elapsed=1.0s balance=230 houses=3 detail=House_2
+event=house_spawned elapsed=1.0s balance=230 houses=3 detail=House_3
+event=city_hud_configured elapsed=1.0s balance=230 houses=3
+event=city_started elapsed=1.0s balance=230 houses=3
+event=hud_attached elapsed=1.0s balance=230 houses=3
+event=house_property_loaded elapsed=1.0s balance=230 houses=3 detail=1.000000
+event=house_property_loaded elapsed=1.0s balance=230 houses=3 detail=1.350000
+event=house_property_loaded elapsed=1.0s balance=230 houses=3 detail=1.700000

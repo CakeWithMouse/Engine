@@ -1,0 +1,55 @@
+QString::arg: 1 argument(s) missing in 
+QSpinBox::up-button, QDoubleSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 16px;
+    border-left: 1px solid %1;
+    border-bottom: 1px solid %1;
+    background-color: %2;
+}
+QSpinBox::up-button:hover, QDoubleSpinBox::up-button:hover {
+    background-color: %3;
+}
+QSpinBox::down-button, QDoubleSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    width: 16px;
+    border-left: 1px solid %1;
+    background-color: %2;
+}
+QSpinBox::down-button:hover, QDoubleSpinBox::down-button:hover {
+    background-color: %3;
+}
+QDoubleSpinBox[axisCell="true"], QSpinBox[axisCell="true"] {
+    border-left: none;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
+QSpinBox::up-arrow, QDoubleSpinBox::up-arrow {
+    width: 8px;
+    height: 8px;
+}
+QSpinBox::down-arrow, QDoubleSpinBox::down-arrow {
+    width: 8px;
+    height: 8px;
+}
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px;
+    border-left: 1px solid %1;
+    background-color: %2;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+QComboBox::drop-down:hover {
+    background-color: %3;
+}
+QComboBox::down-arrow {
+    image: url("%5");
+    width: 8px;
+    height: 8px;
+}
+
+Could not parse application stylesheet
+QTemporaryDir: Unable to remove "C:\\Users\\serge\\AppData\\Local\\Packages\\sandbox.{0e36c38c-f202-4d4e-bca3-3d897c618803}\\AC\\Temp\\qt_temp-BhdZAy" most likely due to the presence of read-only files.

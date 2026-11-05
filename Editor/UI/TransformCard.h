@@ -81,6 +81,10 @@ private:
 
         spin->setParent(cell);
         spin->setFixedHeight(22);
+        // Large numeric ranges must not force every axis to reserve the width of
+        // its longest possible value. Long values remain editable in the field.
+        spin->setMinimumWidth(48);
+        spin->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Fixed);
         spin->setStyleSheet(QStringLiteral("border-left: none; border-top-left-radius: 0px; border-bottom-left-radius: 0px;"));
         layout->addWidget(spin, 1);
         return cell;

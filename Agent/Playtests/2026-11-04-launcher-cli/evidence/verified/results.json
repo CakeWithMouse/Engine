@@ -1,0 +1,66 @@
+[
+  {
+    "passed": true,
+    "id": "Help"
+  },
+  {
+    "passed": true,
+    "id": "HelpAlias"
+  },
+  {
+    "passed": true,
+    "id": "HelpArguments"
+  },
+  {
+    "passed": true,
+    "id": "Unknown"
+  },
+  {
+    "passed": true,
+    "id": "UnsupportedCpp"
+  },
+  {
+    "passed": true,
+    "id": "--create-project arguments"
+  },
+  {
+    "passed": true,
+    "id": "--enable-code arguments"
+  },
+  {
+    "passed": true,
+    "id": "--build-project arguments"
+  },
+  {
+    "passed": true,
+    "id": "Missing"
+  },
+  {
+    "passed": true,
+    "id": "Existing"
+  },
+  {
+    "passed": true,
+    "id": "Empty"
+  },
+  {
+    "passed": true,
+    "id": "Create"
+  },
+  {
+    "passed": true,
+    "id": "Enable"
+  },
+  {
+    "passed": true,
+    "id": "FailedBuild"
+  },
+  {
+    "passed": true,
+    "id": "Build"
+  },
+  {
+    "passed": true,
+    "id": "Smoke"
+  }
+]

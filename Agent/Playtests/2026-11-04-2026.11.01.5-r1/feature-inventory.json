@@ -1,0 +1,513 @@
+[
+  {
+    "id": "create-nocode",
+    "name": "Создать проект без кода",
+    "assigned": "1,2,3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "enable-cpp",
+    "name": "Добавить C++ к проекту",
+    "assigned": "1,2,3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "create-cpp",
+    "name": "Создать сразу C++ проект",
+    "assigned": "2,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "class-wizard",
+    "name": "Мастер классов Game/Component/Object/Character",
+    "assigned": "2,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "build-activate",
+    "name": "Сборка кандидата и активация DLL",
+    "assigned": "1,2,3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "failed-build-rollback",
+    "name": "Отказ сборки сохраняет рабочую DLL",
+    "assigned": "2,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "hot-reload",
+    "name": "C++ Hot Reload с сохранением edit-сцены",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "project-game",
+    "name": "Выбор пользовательского Game",
+    "assigned": "1,2,3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-primitives",
+    "name": "Шесть примитивов",
+    "assigned": "1,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-create-delete",
+    "name": "Создание/удаление/поиск объектов",
+    "assigned": "2,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-hierarchy",
+    "name": "Родители и локальные/мировые transform",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-transform",
+    "name": "Перемещение/поворот/масштаб",
+    "assigned": "1,2,3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-properties",
+    "name": "Редактирование отражённых свойств",
+    "assigned": "1,2",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-codec",
+    "name": "Пользовательский кодек и восстановление",
+    "assigned": "1,2",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-object",
+    "name": "Произвольный ENGINE_OBJECT и адаптер",
+    "assigned": "2,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-clone",
+    "name": "Дублирование и ремап ссылок",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-save-load",
+    "name": "Сохранение и повторное открытие",
+    "assigned": "1,2,3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-startup",
+    "name": "Отдельное назначение стартовой сцены",
+    "assigned": "2,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-new-save-as",
+    "name": "Новая сцена и Save As",
+    "assigned": "1,2",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-undo",
+    "name": "Undo/Redo",
+    "assigned": "1,2",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-groups",
+    "name": "Группы и групповые transform",
+    "assigned": "1,2",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-snapping",
+    "name": "Привязка позиции/угла",
+    "assigned": "1,2",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-select",
+    "name": "Picking/иерархия/рамка/фокус",
+    "assigned": "1,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "scene-recovery",
+    "name": "Автовосстановление после аварии",
+    "assigned": "2,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "play",
+    "name": "Play/Pause/Resume/Stop и копия сцены",
+    "assigned": "1,2,3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "external",
+    "name": "Отдельный запуск",
+    "assigned": "1,2,3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "time",
+    "name": "Tick/deltaTime/масштаб времени",
+    "assigned": "1,2,3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "subsystem",
+    "name": "GameSubsystem lifecycle/tick",
+    "assigned": "2,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "session",
+    "name": "Сохранение subsystem между сценами сессии",
+    "assigned": "2,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "input",
+    "name": "Actions/bindings/subscriptions/contexts",
+    "assigned": "2,3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "character",
+    "name": "Character/PlayerCharacter",
+    "assigned": "2,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "controller",
+    "name": "CharacterController",
+    "assigned": "2,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "camera-perspective",
+    "name": "SceneCamera и перспектива",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "camera-orthographic",
+    "name": "Ортографика и viewPlane",
+    "assigned": "2,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "trace-world",
+    "name": "Raycast/SegmentCast мировой геометрии",
+    "assigned": "2,3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "trace-screen",
+    "name": "RaycastCursor/Screen и viewport",
+    "assigned": "2,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "trace-filter",
+    "name": "Фильтры/маски/исключения trace",
+    "assigned": "2,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "trace-debug",
+    "name": "Отладочный луч/нормаль/статистика",
+    "assigned": "2,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "model-import",
+    "name": "Импорт OBJ/glTF/GLB/FBX",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "model-blend",
+    "name": "Конверсия BLEND при наличии Blender",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "texture-import",
+    "name": "Импорт и назначение текстуры",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "asset-reimport",
+    "name": "Переимпорт и обновление ресурсов",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "asset-paths",
+    "name": "Переносимые /Game ссылки",
+    "assigned": "1,2,3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "skeletal",
+    "name": "Скелетная модель и клипы анимации",
+    "assigned": "3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "instances",
+    "name": "Инстансинг",
+    "assigned": "1,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "lod",
+    "name": "LOD/culling/impostor",
+    "assigned": "1,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "mesh-tools",
+    "name": "Проверка мешей и упрощение CPU LOD",
+    "assigned": "1,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "material-assign",
+    "name": "Назначение/снятие .mat",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "material-params",
+    "name": "Параметры/текстуры материала",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "material-editor",
+    "name": "Редактор HLSL/preview/сохранение/откат",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "material-errors",
+    "name": "Ошибка шейдера/fallback/восстановление",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "material-blends",
+    "name": "Прозрачность/masked/two-sided",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "light-point",
+    "name": "Точечный свет/радиус/интенсивность",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "light-sun",
+    "name": "Направленный свет",
+    "assigned": "1,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "shadows",
+    "name": "Тени/дальность/cache",
+    "assigned": "1,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "sky",
+    "name": "Небо/cubemap/отражения",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "particles",
+    "name": "Искры/дым и пауза",
+    "assigned": "1,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "particle-collision",
+    "name": "GPU particles depth collision/sorting",
+    "assigned": "1,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "hud-project",
+    "name": "Назначение .ui HUD проекта",
+    "assigned": "2,3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "hud-elements",
+    "name": "Panel/Label/Bar/Button",
+    "assigned": "2,3,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "hud-events",
+    "name": "События кнопок и input capture",
+    "assigned": "2,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "hud-layout",
+    "name": "Якоря/layout/resize/кириллица",
+    "assigned": "2,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "hud-editor",
+    "name": "Редактор UI/сохранение/Hot Reload",
+    "assigned": "2,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "game-settings",
+    "name": "GameSettings VSync/render/AA",
+    "assigned": "1,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "render-modes",
+    "name": "Forward/Deferred/G-buffer",
+    "assigned": "1,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "render-resize",
+    "name": "Изменение размера viewport",
+    "assigned": "1,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "diagnostics",
+    "name": "Счётчики кадра/профилирование/дамп",
+    "assigned": "2,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "vfs",
+    "name": "VFS чтение/запись/mount через host API",
+    "assigned": "2,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "export",
+    "name": "Экспорт Release и переносимый запуск",
+    "assigned": "2,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "compatibility",
+    "name": "Закрепление версии/обновление копии/старый ABI",
+    "assigned": "1,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "sdk-examples",
+    "name": "Компиляция примеров API Reference",
+    "assigned": "2,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "render-host",
+    "name": "Публичные D3D/render hooks пользовательского компонента",
+    "assigned": "1,3",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  },
+  {
+    "id": "host-services",
+    "name": "Сервисы BaseEngine: lifecycle/VFS/active session",
+    "assigned": "2,4",
+    "status": "planned",
+    "source": "Engine/docs/API-REFERENCE.html; Engine/docs/PROJECT-CAPABILITIES.md; Engine/docs/EDITOR-WORKFLOW.md"
+  }
+]

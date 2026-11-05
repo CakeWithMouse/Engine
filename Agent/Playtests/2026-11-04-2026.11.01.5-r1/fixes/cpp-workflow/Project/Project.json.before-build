@@ -1,0 +1,6 @@
+{
+    "content":  "Content",
+    "module":  "Binaries/Release/5ec122c62aeb4979bbdedc2803a9f2e4/Game.dll",
+    "name":  "CppRegression",
+    "startupScene":  "Content/Scenes/Main.scene.json"
+}

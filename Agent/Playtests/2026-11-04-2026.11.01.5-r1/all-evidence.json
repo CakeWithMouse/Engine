@@ -1,0 +1,3337 @@
+[
+  {
+    "role": 1,
+    "feature": "asset-paths",
+    "status": "not-tested",
+    "action": "Переносимые /Game ссылки",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "asset-reimport",
+    "status": "not-tested",
+    "action": "Переимпорт и обновление ресурсов",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "build-activate",
+    "status": "passed",
+    "action": "Сборка кандидата и активация DLL",
+    "actual": "Release candidate built, validated, startup-smoked and activated.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "camera-perspective",
+    "status": "not-tested",
+    "action": "SceneCamera и перспектива",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "compatibility",
+    "status": "passed",
+    "action": "Headless smoke a copy of frozen lights fixture",
+    "actual": "Frozen lights fixture (SHA256 verified) passed Launcher --check-project and --smoke-project-current on current runtime, both exit 0; DLL SHA256 stayed 59E5932B978BC8200CACAC806B63CA1307962C1D548613C9A2C6B14B301637EF. Direct runtime rejects the old pin as expected; prompt/upgrade/full harness not tested.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/FrozenCompatibility/result.txt",
+      "Engine/build/playtests/20261104-r1/calm-city/FrozenCompatibility/sha256-verified.txt",
+      "Engine/build/playtests/20261104-r1/calm-city/FrozenCompatibility/runtime.stderr.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "create-nocode",
+    "status": "passed",
+    "action": "Создать проект без кода",
+    "actual": "Launcher created the no-code project, then SDK Enable converted it.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "enable-cpp",
+    "status": "passed",
+    "action": "Добавить C++ к проекту",
+    "actual": "SDK ProjectTools Enable created scaffold pinned to Release 2026.11.01.5.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "external",
+    "status": "not-tested",
+    "action": "Отдельный запуск",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "game-settings",
+    "status": "partial",
+    "action": "GameSettings VSync/render/AA",
+    "actual": "Game startup sets VSync off, Forward and FXAA; smoke logged FXAA pipeline/shader compilation. No on-screen settings/performance check.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Source/ProjectGame.cpp"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "hot-reload",
+    "status": "not-tested",
+    "action": "C++ Hot Reload с сохранением edit-сцены",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "instances",
+    "status": "partial",
+    "action": "Инстансинг",
+    "actual": "ParkingRow configures nine tinted MeshInstance entries and ReserveInstances(9); project built and runtime smoke passed. No viewport screenshot for this separate probe.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Source/ParkingRow.cpp"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "light-point",
+    "status": "not-tested",
+    "action": "Точечный свет/радиус/интенсивность",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "light-sun",
+    "status": "passed",
+    "action": "Направленный свет",
+    "actual": "Coordinator added directional sun; screenshots show lit block and shadows.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "lod",
+    "status": "passed",
+    "action": "LOD/culling/impostor",
+    "actual": "Runtime generated LOD1 344→188 triangles (target 189) and LOD2 344→86 (target 86), each reporting 0% silhouette drift.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-assign",
+    "status": "not-tested",
+    "action": "Назначение/снятие .mat",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "material-blends",
+    "status": "not-tested",
+    "action": "Прозрачность/masked/two-sided",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "material-editor",
+    "status": "not-tested",
+    "action": "Редактор HLSL/preview/сохранение/откат",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "material-errors",
+    "status": "not-tested",
+    "action": "Ошибка шейдера/fallback/восстановление",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "material-params",
+    "status": "not-tested",
+    "action": "Параметры/текстуры материала",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "mesh-tools",
+    "status": "passed",
+    "action": "Проверка мешей и упрощение CPU LOD",
+    "actual": "ValidateMesh reported 344 tris, 392 vertices, bounds 1.72×1.12×2.60m, pivot y=0, UV yes, ok. SimplifyMesh returned 188 triangles.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "model-blend",
+    "status": "not-tested",
+    "action": "Конверсия BLEND при наличии Blender",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "model-import",
+    "status": "not-tested",
+    "action": "Импорт OBJ/glTF/GLB/FBX",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "particle-collision",
+    "status": "partial",
+    "action": "Compile and start a ParticleSystemComponent with depth collision configured",
+    "actual": "The public configuration setters compiled; candidate activated and three-frame smoke exited 0. No individual GPU collision response was observed.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "particles",
+    "status": "not-tested",
+    "action": "Искры/дым и пауза",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "play",
+    "status": "not-tested",
+    "action": "Play/Pause/Resume/Stop и копия сцены",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "project-game",
+    "status": "not-tested",
+    "action": "Выбор пользовательского Game",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "render-host",
+    "status": "not-tested",
+    "action": "Публичные D3D/render hooks пользовательского компонента",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "render-modes",
+    "status": "partial",
+    "action": "Forward/Deferred/G-buffer",
+    "actual": "Probe requested Forward rendering and completed three runtime frames with FXAA pipeline compiled; no comparison against Deferred or rendered viewport evidence.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "render-resize",
+    "status": "not-tested",
+    "action": "Изменение размера viewport",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "scene-clone",
+    "status": "not-tested",
+    "action": "Дублирование и ремап ссылок",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "scene-codec",
+    "status": "not-tested",
+    "action": "Пользовательский кодек и восстановление",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "scene-groups",
+    "status": "not-tested",
+    "action": "Группы и групповые transform",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "scene-hierarchy",
+    "status": "passed",
+    "action": "Родители и локальные/мировые transform",
+    "actual": "Roof and four wheels refer to car ID as parent; editor smoke loaded the scene.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-new-save-as",
+    "status": "not-tested",
+    "action": "Новая сцена и Save As",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "scene-primitives",
+    "status": "partial",
+    "action": "Шесть примитивов",
+    "actual": "Plane, cube-derived geometry and cylinder wheels are present; not all six primitives tested.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-properties",
+    "status": "passed",
+    "action": "Редактирование отражённых свойств",
+    "actual": "CarMover speed/moving are annotated generated fields with values in projectData; inspector edit/save round-trip not observed.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-save-load",
+    "status": "not-tested",
+    "action": "Сохранение и повторное открытие",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "scene-select",
+    "status": "not-tested",
+    "action": "Picking/иерархия/рамка/фокус",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "scene-snapping",
+    "status": "not-tested",
+    "action": "Привязка позиции/угла",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "scene-transform",
+    "status": "passed",
+    "action": "Перемещение/поворот/масштаб",
+    "actual": "Scene has transformed buildings/street/car; actual viewport image not observed.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-undo",
+    "status": "not-tested",
+    "action": "Undo/Redo",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "shadows",
+    "status": "not-tested",
+    "action": "Тени/дальность/cache",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "sky",
+    "status": "not-tested",
+    "action": "Небо/cubemap/отражения",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "texture-import",
+    "status": "not-tested",
+    "action": "Импорт и назначение текстуры",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 1,
+    "feature": "time",
+    "status": "passed",
+    "action": "Tick/deltaTime/масштаб времени",
+    "actual": "Coordinator observed car movement in Play; CarMover uses Tick and reverses at road endpoints.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "create-nocode",
+    "status": "passed",
+    "action": "EngineLauncher --create-project по новому Project-каталогу",
+    "actual": "Launcher exit 0 создал scaffold и manifest; последующий отдельный ProjectTools Enable включил C++",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/Project/Project.json"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "create-cpp",
+    "status": "not-tested",
+    "action": "EngineLauncher --create-code-project на отдельном новом CreateCppCliProbe",
+    "actual": "Exit 2; каталог не появился; stdout/stderr пусты. В Launcher доступны --create-project и --enable-code, флага --create-code-project нет. Прямое создание C++ через UI checkbox не проверено координатором",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/create-code-project.stdout.log; Engine/build/playtests/20261104-r1/curious-city/create-code-project.stderr.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "enable-cpp",
+    "status": "passed",
+    "action": "ProjectTools.ps1 -Action Enable -Project Project.json -Runtime <Release Runtime>",
+    "actual": "созданы Game.sln, Game.vcxproj, Source и Build.ps1; последующая сборка возможна",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/Project/Source"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "build-activate",
+    "status": "passed",
+    "action": "ProjectTools.ps1 -Action Build -Project Project.json -Runtime <Release Runtime>",
+    "actual": "первая сборка выявила C2664 в нашем коде, после исправления Build #2 прошёл; Build #3 после изменения журнала прошёл и активирован build ID 436fb5f3f98c47cb9111eebe80bf331e",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/build-001.log; Engine/build/playtests/20261104-r1/curious-city/build-002.log; Engine/build/playtests/20261104-r1/curious-city/build-003.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "project-game",
+    "status": "passed",
+    "action": "Standalone smoke с DLL и ProjectGame; проверить custom subsystem log",
+    "actual": "лог содержит city_started и runtime доход",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/runtime-results.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-create-delete",
+    "status": "passed",
+    "action": "CityEconomySubsystem::OnSceneReady трижды вызывает Scene::AddComponent",
+    "actual": "все три вызова приняты, итоговый счётчик houses=3, баланс уменьшен до 200",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/Project/Source/CityEconomySubsystem.cpp; Engine/build/playtests/20261104-r1/curious-city/runtime-results.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "subsystem",
+    "status": "passed",
+    "action": "GameSubsystem enabled; OnSceneReady + Tick",
+    "actual": "три дома созданы при старте, Tick начислил доход; между smoke сеансами каждый старт сбрасывает баланс к 500 и покупает три дома",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/runtime-results.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "time",
+    "status": "passed",
+    "action": "запустить standalone игру на ~2.7 с",
+    "actual": "elapsed=1.0 balance=230 houses=3; elapsed=2.0 balance=260 houses=3; процесс закрыт WM_CLOSE, exit 0",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/runtime-results.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-save-load",
+    "status": "not-tested",
+    "action": "сравнить сцену до/после двух launcher smoke и повторно запустить один manifest",
+    "actual": "Main.scene.json SHA-256 не изменился; оба повторных запуска успешно загрузили проект. Ручное Ctrl+S и повторное открытие через UI не выполнены",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/smoke-001.stdout.log; Engine/build/playtests/20261104-r1/curious-city/smoke-002.stdout.log; Agent/Playtests/2026-11-04-2026.11.01.5-r1/curious-city/diary.md"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "hud-elements",
+    "status": "passed",
+    "action": "ProjectHud назначен на CityHud.ui; runtime привязал кнопку",
+    "actual": "Координатор визуально подтвердил панель Balance/Income/Bar/button; Pause остановил баланс на 740, Resume возобновил +30/с",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/Project/Content/UI/CityHud.ui; Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log; Engine/build/playtests/20261104-r1/ui-evidence/curious-hud-before.png; Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "session",
+    "status": "passed",
+    "action": "CURIOUS_CITY_SESSION_PROBE: две Game сцены в одной GameSession",
+    "actual": "Smoke exit 0; session_reused elapsed=2.0 balance=260 houses=3 detail=same subsystem; scenes=2",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/runtime-deep-probes-fixed.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "vfs",
+    "status": "passed",
+    "action": "ReferenceExamples::ReadGameLine читает /Game/Config/message.txt",
+    "actual": "Smoke exit 0; vfs_read detail=A three-house city earns 30 per second.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/runtime-deep-probes-fixed.log; Engine/build/playtests/20261104-r1/curious-city/Project/Content/Config/message.txt"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-properties",
+    "status": "passed",
+    "action": "Загрузить PropertiesProbe.scene.json с projectData для House и Rules",
+    "actual": "Smoke exit 0; лог содержит house_property_loaded detail=1.800000 и project_object_tick maxHouses=12",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/runtime-saveas-probe.log; Engine/build/playtests/20261104-r1/curious-city/Project/Content/Scenes/PropertiesProbe.scene.json"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-new-save-as",
+    "status": "passed",
+    "action": "SceneDocument::Read -> Write SaveAs -> Read",
+    "actual": "Smoke exit 0; scene_document_saveas_reopen objects=3; обе проверки custom property и object data прошли",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/runtime-saveas-probe.log; Engine/build/playtests/20261104-r1/curious-city/Project/Content/Scenes/PropertiesProbe.SaveAs.scene.json"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "character",
+    "status": "passed",
+    "action": "Загрузить CharacterProbe.scene.json с PlayerCharacter и controller config",
+    "actual": "Smoke exit 0; character_probe_loaded ... player=1 camera=3 plane=2",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/runtime-character-camera-probe.log; Engine/build/playtests/20261104-r1/curious-city/Project/Content/Scenes/CharacterProbe.scene.json"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "camera-orthographic",
+    "status": "passed",
+    "action": "CharacterProbe: SceneCamera orthographic, viewPlane=2, height=12",
+    "actual": "Smoke exit 0; orthographic_camera_loaded orthographic=1 plane=2 height=12.000000; визуальный результат отдельно не утверждается",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/runtime-character-camera-probe.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "asset-paths",
+    "status": "blocked-environment",
+    "action": "Разрешить /Game/ImportSource/CesiumMan.glb, затем выполнить SceneAssets::Import",
+    "actual": "Путь находится в /Game, но Import блокируется текущей сборкой Runtime без Assimp; ошибка: Assimp not enabled. Импорт не подтверждён",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/runtime-assets-probe-diagnosed.log; Engine/build/playtests/20261104-r1/curious-city/Project/Content/ImportSource/CesiumMan.glb"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "export",
+    "status": "passed",
+    "action": "Экспортировать Release в ExportedFinal и запустить packaged Runtime на 5 кадрах",
+    "actual": "Export и portable runtime завершились exit 0; лог подтвердил /Engine и /Game mounts и 5 кадров",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/export-final.log; Engine/build/playtests/20261104-r1/curious-city/portable-final.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "sdk-examples",
+    "status": "passed",
+    "action": "Скомпилировать ReferenceComponent.h и ReferenceExamples.cpp в проектном SDK",
+    "actual": "ProjectTools Build прошёл после добавления примеров; runtime VFS пример также прочитал файл",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/build-008-reference-examples.log; Engine/build/playtests/20261104-r1/curious-city/runtime-deep-probes-fixed.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "move-incident",
+    "status": "partial",
+    "action": "Попытка переместить открытый проект для portability check",
+    "actual": "PowerShell переместил nested project items после ошибки lock; агент восстановил структуру без перезаписи, два .painengine сохранены отдельно. Это ошибка процедуры агента, не Engine bug",
+    "evidence": [
+      "Agent/Playtests/2026-11-04-2026.11.01.5-r1/curious-city/diary.md"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-transform",
+    "status": "passed",
+    "action": "Поменять высоту House reflected property и посмотреть на обновление transform/bounds",
+    "actual": "Координатор ввёл height=2.5; scale/bounds обновились в Inspector, screenshot curious-height.png",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-height.png; Engine/build/playtests/20261104-r1/curious-city/Project/Source/HouseComponent.cpp"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-codec",
+    "status": "passed",
+    "action": "Загрузить сохранённый House property codec и ProjectObjectAdapter для CuriousCity.Rules",
+    "actual": "Runtime probe восстановила height=1.8 и maxHouses=12; Rules tick прошёл",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/runtime-saveas-probe.log; Engine/build/playtests/20261104-r1/curious-city/Project/Source/CityRules.cpp"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-object",
+    "status": "passed",
+    "action": "Добавить ENGINE_OBJECT CuriousCity.Rules с ProjectObjectAdapter",
+    "actual": "SDK сборка и runtime прошли; project_object_tick maxHouses=12",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/build-009-object-codec.log; Engine/build/playtests/20261104-r1/curious-city/runtime-saveas-probe.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-startup",
+    "status": "passed",
+    "action": "Временно выбрать CharacterProbe и PropertiesProbe как startupScene, затем вернуть Main",
+    "actual": "Обе сцены smoke запускались успешно; manifest восстановлен на Main.scene.json",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/smoke-character-camera.stdout.log; Engine/build/playtests/20261104-r1/curious-city/smoke-saveas-probe.stdout.log; Engine/build/playtests/20261104-r1/curious-city/Project/Project.json"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "play",
+    "status": "passed",
+    "action": "Координатор проверил editor Play, Pause, Resume, Stop",
+    "actual": "Координатор подтвердил Play/Pause/Resume/Stop в Editor; runtime HUD pause остановил баланс на 740 и возобновил доход",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log; Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "input",
+    "status": "passed",
+    "action": "Input::System binding на левый клик в CityInteractionComponent",
+    "actual": "Координатор нажал по дому; HUD и лог получили событие выбора House6",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log; Engine/build/playtests/20261104-r1/curious-city/Project/Source/CityInteractionComponent.cpp"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "trace-world",
+    "status": "passed",
+    "action": "Мировой raycast по нажатию на дом",
+    "actual": "Координатор увидел house_selected=House6 в диагностическом логе",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "trace-filter",
+    "status": "passed",
+    "action": "Raycast с channel 2 и исключениями",
+    "actual": "Координатор зафиксировал trace_channel_filter=Miss; выбранный объект также записан отдельно как House6",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "trace-screen",
+    "status": "passed",
+    "action": "Клик использует RaycastCursor и ScreenPointToRay",
+    "actual": "По наблюдению координатора клик по центральному дому дошёл до сценария выбора; код содержит обе API точки",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/Project/Source/CityInteractionComponent.cpp; Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "hud-project",
+    "status": "passed",
+    "action": "Назначить Content/UI/CityHud.ui проектным HUD",
+    "actual": "Координатор визуально подтвердил панель; runtime записал hud_attached",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/Project/Content/ProjectHud.txt; Engine/build/playtests/20261104-r1/curious-city/runtime-layout-ui.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "hud-events",
+    "status": "passed",
+    "action": "Кнопка HUD меняет bTickEnabled у экономики",
+    "actual": "Координатор нажал кнопку; balance 740 остановился, затем снова вырос по +30/с",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log; Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "hud-layout",
+    "status": "passed",
+    "action": "Показать Balance/Income/Bar/Button и кириллический заголовок",
+    "actual": "Координатор подтвердил панель и кириллическую надпись после commit Enter в редакторе",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-hud-before.png; Engine/build/playtests/20261104-r1/ui-evidence/curious-ui-editor-cyrillic.png"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "hud-editor",
+    "status": "partial",
+    "action": "Редактировать status.text и сохранить UI asset",
+    "actual": "Enter затем Save сохранил кириллическое значение; Save пока поле редактировалось сохранил старый Income (BUG003, UI coordinator observation)",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-ui-editor-cyrillic.png; Agent/Playtests/2026-11-04-2026.11.01.5-r1/curious-city/feedback.md"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "diagnostics",
+    "status": "passed",
+    "action": "Писать детальные игровые результаты в CURIOUS_CITY_LOG",
+    "actual": "Зафиксированы покупка/спавн, баланс/доход, свойства, HUD, GameSession, VFS, SaveAs и причины неуспешного импорта",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/runtime-deep-probes-fixed.log; Engine/build/playtests/20261104-r1/curious-city/runtime-assets-probe-diagnosed.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "trace-debug",
+    "status": "passed",
+    "action": "Runtime env probe: Scene::Raycast, Game::DebugDrawTrace, GetDebugTraceLineCount, GetTraceStatistics, ClearDebugTraces",
+    "actual": "Smoke exit 0: status=Hit lines=5 queries=1 bounds=4 triangles=16 unsupported=0 hit=6 normal_y=1; после ClearDebugTraces lines=0",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/runtime-trace-debug-probe.log; Engine/build/playtests/20261104-r1/curious-city/build-021-trace-controller-escalated.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "controller",
+    "status": "partial",
+    "action": "CharacterProbe с ProjectGame логгером каждый 15 frames; отдельный clone, standalone 60 frames",
+    "actual": "Runtime exit 0, baseline frames 15/30/45/60: position (0,0,0), key_w=0, key_d=0. Логгер и CharacterController доступны; ручное удержание W/D остаётся для координатора",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/ControllerProbe/Project.json; Engine/build/playtests/20261104-r1/curious-city/controller-input-observation.log; Engine/build/playtests/20261104-r1/curious-city/Project/Source/ProjectGame.cpp"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "host-services",
+    "status": "partial",
+    "action": "Текущий runtime через SceneModule host.getService запрашивает ENGINE_SERVICE_VFS v1; runtime /Game read probe",
+    "actual": "VFS runtime read прошёл через /Game. Host fallback/v2 rejection видны в SDK-коде, но вызываемый BaseEngine callback нельзя подменить из ProjectGame; direct version fallback не выполнен",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/runtime-deep-probes-fixed.log; Engine/Include/Engine/Project/SceneModule.inl; Engine/Source/Base/Base.cpp"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-recovery",
+    "status": "blocked-tool-version",
+    "action": "Проверить crash-recovery workflow на RecoveryProbe копии",
+    "actual": "Рабочий Project не тронут. EditorUiTests.exe --workflow из общего Runtime оказался бинарником от 2026-10-23 и отклонил аргумент usage; новый EditorUiTests/Runtime собирать запрещено. Editor открыт на копии RecoveryProbe, сцена Main не редактировалась, snapshot ещё не создан. UI проверку продолжает координатор после закрытия окна",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/recovery-workflow-002.stderr.log; Engine/build/playtests/20261104-r1/curious-city/RecoveryProbe/.painengine/Recovery; Engine/build/playtests/20261104-r1/curious-city/recovery-editor-launch.stderr.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "create-nocode",
+    "status": "passed",
+    "action": "EngineLauncher --create-project <project> TiredBomber",
+    "actual": "Created Project.json, Engine.lock.json and Content/Scenes/Main.scene.json",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Project.json",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/Scenes/Main.scene.json"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "enable-cpp",
+    "status": "passed",
+    "action": "ProjectTools.ps1 -Action Enable",
+    "actual": "Source, Game.sln, Game.vcxproj, Build.ps1, Project.code.json and candidate build directory were created",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Project.code.json",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "build-activate",
+    "status": "passed",
+    "action": "ProjectTools.ps1 -Action Build; final candidate cd9dd... later 039df... activated",
+    "actual": "Final build 039df3748af84482bb5a7b3301b68f50 validated and activated",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Build-attempt-10.log",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Project.code.json"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "project-game",
+    "status": "passed",
+    "action": "Selected annotated TiredBomber.Game via generated catalog/default; launched game and editor smoke",
+    "actual": "Logs include GameStart and TiredBomber initialization; game/editor smoke both exit 0",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Binaries/Release/039df3748af84482bb5a7b3301b68f50/startup.log",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Smoke-final-game.log",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Smoke-final-editor.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "camera-orthographic",
+    "status": "passed",
+    "action": "SceneCamera orthographic=true, viewPlane=2 XZ, orthoHeight=24; requested frame dump",
+    "actual": "1000x500 frame shows the ground plane and four target units",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-frame.bmp",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-07.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "trace-world",
+    "status": "passed",
+    "action": "Each falling bomb makes Scene::Raycast with Trace::Geometry::Exact and ignores its own ComponentId",
+    "actual": "Long runtime produced five confirmed unit hits; latest short run hit unit ID 4 at t=1.95s",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-05.log",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-09.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "trace-filter",
+    "status": "passed",
+    "action": "Query same vertical ray with channels 1 and 2",
+    "actual": "Logs report channel=1 -> ground and channel=2 -> unit",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-05.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "trace-debug",
+    "status": "partial",
+    "action": "Call DebugDrawTrace(ray,result,0.15f) on each bomb query and inspect hit dump",
+    "actual": "API call executes alongside valid Hit results; vertical ray overlaps the top-down view and is not visibly separable in the saved frame",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.cpp",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-hit-1.bmp"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "scene-create-delete",
+    "status": "passed",
+    "action": "Create floor-adjacent runtime components, bomb and particles; remove bomb and expire particles",
+    "actual": "Bomb components resolve by returned ID, hit, then are removed; 150-frame run exits normally",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.cpp",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-09.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "scene-save-load",
+    "status": "passed",
+    "action": "Save Main.scene.json with one floor and two lights, then reload via game/editor smoke",
+    "actual": "Both final CLI smoke modes exit 0; startup/validate error logs are empty",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/Scenes/Main.scene.json",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Smoke-final-game.error.log",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Smoke-final-editor.error.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "play",
+    "status": "passed",
+    "action": "Coordinator used editor Play/Pause/Resume/Stop on the bomber scene",
+    "actual": "Coordinator reported counter/positions froze at 6 during Pause, then continued to 14 and Stop restored the four saved template objects",
+    "evidence": [
+      "Coordinator observation reported in chat; reference screenshot names bomber-play.png, bomber-paused.png, bomber-resumed.png and bomber-stopped.png"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "input",
+    "status": "not-tested",
+    "action": "Bound B in Game context to request an immediate drop",
+    "actual": "Binding compiled and runtime launched, but no confirmed key event was recorded",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.cpp"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "character",
+    "status": "not-tested",
+    "action": "Added controlled Character at (-10,0.5,5), fixed SceneCamera reference",
+    "actual": "Character constructed and scene startup succeeded; no keyboard motion observation recorded",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.cpp"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "controller",
+    "status": "not-tested",
+    "action": "Enabled standard CharacterController W/A/S/D mapping",
+    "actual": "Controller initialized in smoke/runtime but actual keys were not confirmed",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.cpp"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "instances",
+    "status": "passed",
+    "action": "Create 13 MeshInstance values; one bVisible=false and one outside the camera frustum within draw distance",
+    "actual": "Runtime logs 11 drawn from 13 total",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-05.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "lod",
+    "status": "partial",
+    "action": "SetAutoLod ratios 0.5/0.25, distances 9/17 and LOD debug colors",
+    "actual": "Three levels exist; simplifier emitted 12→12 triangles at each level and all visible markers selected LOD2 in overhead camera",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-05.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "mesh-tools",
+    "status": "partial",
+    "action": "Run default and adjusted ValidateMesh plus SimplifyMesh on procedural cube",
+    "actual": "Default unit profile rejects pivot y=-0.50m; adjusted cube profile is usable; simplification does not reduce already minimal 12-triangle cube",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-05.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "particles",
+    "status": "passed",
+    "action": "On actual hit, add 256 GPU sparks for 1.4 seconds",
+    "actual": "Delayed hit dump visibly shows orange burst; runtime exit 0",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-hit-1.bmp",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-09.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "particle-collision",
+    "status": "partial",
+    "action": "Configure depth collision, bounce=0.25, friction=0.2, sorting enabled",
+    "actual": "Burst renders; collision/sort response was not isolated or observed separately",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.cpp",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-hit-1.bmp"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "hud-elements",
+    "status": "passed",
+    "action": "Add Panel and named Label and update text each game tick",
+    "actual": "Frame dump shows legible HUD and after hit reads hits=1",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-hit-1.bmp"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "hud-layout",
+    "status": "passed",
+    "action": "Pin panel/label TopLeft; enlarge width after clipped first capture",
+    "actual": "Final dump displays the complete counter",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-frame.bmp",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/frame-before-light-tuning.bmp"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "game-settings",
+    "status": "passed",
+    "action": "Set VSync=false, AA=1 and Forward; print settings and adapter",
+    "actual": "In one running session switched VSync 0→1→0, AA 1→0→1 and Forward→Deferred→Custom; both changes and frame dumps were logged, with Deferred shaders compiled.",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-live-settings-runtime.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "diagnostics",
+    "status": "partial",
+    "action": "Request frame dump and read Game::GetFrameStats in PreUpdate",
+    "actual": "Dump succeeds at 1000x500; counters remain zero at this pre-render hook even while frames draw",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-05.log",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-frame.bmp"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "session",
+    "status": "passed",
+    "action": "Register BomberSessionDiagnostics, query after startup; record lifecycle/ticks",
+    "actual": "CPU GameSession probe closed Scene First, attached Scene Second, and observed the same subsystem instance/state (ticks=1, ready=2, closed=1).",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-session-runtime.log E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-build-session.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "render-modes",
+    "status": "passed",
+    "action": "Built and launched three isolated variants selecting Forward, Deferred and Custom; also enabled Deferred G-buffer debug overlay",
+    "actual": "Forward, Deferred and Custom completed; runtime also switched Forward→Deferred (with G-buffer debug)→Custom at 1s/2s in one 240-frame session without reload. Deferred shaders registered and dumps written.",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-live-settings-runtime.log",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Content/tired-bomber-live-deferred.bmp",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Content/tired-bomber-live-custom.bmp",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-deferred-frame.bmp",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-custom-frame.bmp"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "skeletal",
+    "status": "blocked",
+    "action": "Copied CesiumMan.glb into this project copy and called SkeletalMeshComponent::LoadFromVfs(/Game/Models/CesiumMan.glb)",
+    "actual": "Actual loader returned \"Assimp not enabled\"; model and animation could not be created in this Release runtime.",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Content/Models/CesiumMan.glb E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-deferred-vfs-skeletal.log E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-custom-vfs-skeletal.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "light-sun",
+    "status": "not-tested",
+    "action": "Used two Point Lights; no directional light experiment",
+    "actual": "Not tested",
+    "evidence": []
+  },
+  {
+    "role": 3,
+    "feature": "shadows",
+    "status": "not-tested",
+    "action": "Disabled shadows for this flat test scene",
+    "actual": "Not tested",
+    "evidence": []
+  },
+  {
+    "role": 3,
+    "feature": "failed-build-rollback",
+    "status": "passed",
+    "action": "Changed valid ProjectGame.cpp, injected IntentionalBuildFailure.cpp, ran SDK Build, compared active DLL hash/path, removed bad file and rebuilt",
+    "actual": "C4430/C2146 rejected the invalid file; Project.json.module remained Binaries/Release/90ac519f641e40438e0299383bbbb907/Game.dll and hash was identical; after removing file, build activated 946e31ea4b01407fa71cedb6542c0565/Game.dll.",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-build-intentional-failure.log E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-build-recovery.log E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Project.json E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Project.code.json"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "class-wizard",
+    "status": "passed",
+    "action": "ProjectTools AddClass -Name FeatureProbeComponent -Kind Component -Base ProjectComponent -BaseHeader ProjectComponent.h, then Release Build",
+    "actual": "Wizard generated header and cpp with ProjectComponent::BeginPlay/Tick calls; build passed with ComponentGenerator count 5.",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Source/FeatureProbeComponent.h E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Source/FeatureProbeComponent.cpp E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-build-class.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "host-services",
+    "status": "partial",
+    "action": "Observed project-module startup binding and used EngineModuleVfs::Resolve on the copy scene; also read host-generated shader through VFS",
+    "actual": "SceneModule adapter queried ENGINE_SERVICE_VFS v1 and bound the host VFS. Game-side EngineModuleVfs resolved/read /Game/Scenes/Main.scene.json (1692 bytes); runtime also read /Engine shader. No direct Game-level host context/getService or generic GetCapabilities accessor exists in the public Game API, so that surface remains an adapter-only capability.",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-session-runtime.log",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-live-settings-runtime.log",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Source/Module.cpp",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Source/ProjectGame.cpp"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "editor-hot-reload-crash-diagnosis",
+    "status": "partial",
+    "action": "Read-only inspect of qt-crash-stack-scan.log and CodeTools/MainWindow Qt patterns",
+    "actual": "Partial frames show QAction activate → menu triggered → RunCodeTool → root QWidget::setEnabled(false) → recursive setEnabled_helper → QMenu::changeEvent → QAction::setEnabled fault. QObject parent ownership observed; no proven dangling action. Recommend sceneBusy plus targeted scene-action gating, avoid root disable.",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/qt-crash-stack-scan.log",
+      "E:/Engine/Editor/Source/CodeTools.cpp",
+      "E:/Engine/Editor/Source/MainWindow.cpp"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "scene-startup",
+    "status": "passed",
+    "action": "Runtime launch using project startupScene manifest",
+    "actual": "Project.json startupScene is Content/Scenes/Main.scene.json; runtime log records GameSceneLoaded, GameStart, scene ready: Main, and GetSubsystem after startup=available.",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Project.json",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Runtime-attempt-09.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "subsystem",
+    "status": "passed",
+    "action": "Actual GameSession scene lifecycle probe across two scenes",
+    "actual": "Probe log: initialized; SceneReady First; SceneClosing First; SceneReady Second; same=1 ticks=1 ready=2 closed=1 persisted=1; SceneClosing Second.",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-session-runtime.log",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/FeatureProbeCopy/Probe-build-session.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "input-baseline-coordinates",
+    "status": "built-awaiting-interactive-check",
+    "action": "Add player local-position log every one second for parent UI input run",
+    "actual": "Player-position sampling added and main project Release module build succeeded; no input press/runtime window run by role 3. B subscriber remains present and should print its request event.",
+    "evidence": [
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.cpp",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Source/ProjectGame.h",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-frame.bmp",
+      "E:/Engine/Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Build-input-baseline.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "asset-paths",
+    "status": "not-tested",
+    "action": "Переносимые /Game ссылки",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "asset-reimport",
+    "status": "not-tested",
+    "action": "Переимпорт и обновление ресурсов",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "build-activate",
+    "status": "passed",
+    "action": "Сборка кандидата и активация DLL",
+    "actual": "Release candidate built, validated, startup-smoked and active.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "camera-perspective",
+    "status": "passed",
+    "action": "SceneCamera и перспектива",
+    "actual": "Coordinator observed camera framing the bucket correctly.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "class-wizard",
+    "status": "passed",
+    "action": "Мастер классов Game/Component/Object/Character",
+    "actual": "ProjectTools AddClass generated ThrowLedger with ENGINE_OBJECT.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "compatibility",
+    "status": "passed",
+    "action": "Закрепление версии/обновление копии/старый ABI",
+    "actual": "Frozen pre-lights fixture SHA256 verified; current runtime smoke via Launcher --smoke-project-current exited 0 and copied DLL remained unchanged at 0B26410EF32692CAD532CAB3FA6AE8265B702FA5C89534DA8D58B78CC88F1500. Upgrade prompt/old-runtime flow not tested.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/FrozenCompatibility/result.txt",
+      "Engine/build/playtests/20261104-r1/ai-trash/FrozenCompatibility/sha256-verified.txt"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "create-cpp",
+    "status": "partial",
+    "action": "Создать сразу C++ проект",
+    "actual": "Direct C++ checkbox flow is UI-only in this pass; no UI used by role agent.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "create-nocode",
+    "status": "passed",
+    "action": "Создать проект без кода",
+    "actual": "Launcher CLI project creation exit 0.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "enable-cpp",
+    "status": "passed",
+    "action": "Добавить C++ к проекту",
+    "actual": "SDK ProjectTools Enable created C++ scaffold.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "export",
+    "status": "passed",
+    "action": "Экспорт Release и переносимый запуск",
+    "actual": "Final Release export validation succeeded; portable Start.cmd --frames 3 exited 0 from TrashGameExportFinal.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGameExportFinal/ExportReport.json",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGameExportFinal/final-start.stdout.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "external",
+    "status": "not-tested",
+    "action": "Отдельный запуск",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "failed-build-rollback",
+    "status": "partial",
+    "action": "Отказ сборки сохраняет рабочую DLL",
+    "actual": "Next non-UI pass; wait until coordinator closes project UI.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "host-services",
+    "status": "partial",
+    "action": "Сервисы BaseEngine: lifecycle/VFS/active session",
+    "actual": "Template bound host VFS service v1; SDK module bridge resolved host-mounted /Game and read marker. Other BaseEngine host services were not exercised.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/startup.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hot-reload",
+    "status": "partial",
+    "action": "C++ Hot Reload с сохранением edit-сцены",
+    "actual": "New module 4c74a1b450764b5a9aaa2df6f3a1fc42 activated; immediate post-reload gameplay input did not respond. Fresh reopen restored it.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hud-editor",
+    "status": "partial",
+    "action": "Редактор UI/сохранение/Hot Reload",
+    "actual": "Hot Reload activated new DLL, but button/T input became unresponsive until project fresh reopen (BUG007).",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hud-elements",
+    "status": "passed",
+    "action": "Panel/Label/Bar/Button",
+    "actual": "Panel, labels and button rendered; short success text fit after change.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hud-events",
+    "status": "passed",
+    "action": "События кнопок и input capture",
+    "actual": "Button callback and T action each triggered throws on fresh reopen.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hud-project",
+    "status": "passed",
+    "action": "Назначение .ui HUD проекта",
+    "actual": "Project HUD displayed and score updated to Hits 3 / Throws 3 on fresh reopen.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "input",
+    "status": "passed",
+    "action": "Actions/bindings/subscriptions/contexts",
+    "actual": "Fresh reopen: T launched the next trash item; UI button and T both exercised across three throws.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "light-point",
+    "status": "passed",
+    "action": "Точечный свет/радиус/интенсивность",
+    "actual": "Coordinator observed adequate lighting in Play view.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-assign",
+    "status": "not-tested",
+    "action": "Назначение/снятие .mat",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "material-blends",
+    "status": "not-tested",
+    "action": "Прозрачность/masked/two-sided",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "material-editor",
+    "status": "not-tested",
+    "action": "Редактор HLSL/preview/сохранение/откат",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "material-errors",
+    "status": "not-tested",
+    "action": "Ошибка шейдера/fallback/восстановление",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "material-params",
+    "status": "not-tested",
+    "action": "Параметры/текстуры материала",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "model-blend",
+    "status": "not-tested",
+    "action": "Конверсия BLEND при наличии Blender",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "model-import",
+    "status": "not-tested",
+    "action": "Импорт OBJ/glTF/GLB/FBX",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "play",
+    "status": "not-tested",
+    "action": "Play/Pause/Resume/Stop и копия сцены",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "project-game",
+    "status": "passed",
+    "action": "Выбор пользовательского Game",
+    "actual": "Content/ProjectGame.txt selects ProjectGame; candidate startup succeeded.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-clone",
+    "status": "not-tested",
+    "action": "Дублирование и ремап ссылок",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "scene-hierarchy",
+    "status": "not-tested",
+    "action": "Родители и локальные/мировые transform",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "scene-object",
+    "status": "passed",
+    "action": "Произвольный ENGINE_OBJECT и адаптер",
+    "actual": "ThrowLedger Object adapter codec registered and scene candidate with projectData validated.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-recovery",
+    "status": "not-tested",
+    "action": "Автовосстановление после аварии",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "scene-save-load",
+    "status": "passed",
+    "action": "Сохранение и повторное открытие",
+    "actual": "Scene and ThrowLedger projectData loaded by candidate validation and editor smoke; direct JSON authoring, no manual editor save.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-startup",
+    "status": "not-tested",
+    "action": "Отдельное назначение стартовой сцены",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "scene-transform",
+    "status": "not-tested",
+    "action": "Перемещение/поворот/масштаб",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "sdk-examples",
+    "status": "passed",
+    "action": "Компиляция примеров API Reference",
+    "actual": "Shipped ReferenceExamples.cpp and ReferenceComponent.h compiled in the SDK C++ project; VFS ReadGameLine example ran at startup.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/build.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/startup.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "skeletal",
+    "status": "not-tested",
+    "action": "Скелетная модель и клипы анимации",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "sky",
+    "status": "passed",
+    "action": "Небо/cubemap/отражения",
+    "actual": "Environment.Sky and BasicSky shader loaded at startup.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "texture-import",
+    "status": "not-tested",
+    "action": "Импорт и назначение текстуры",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "time",
+    "status": "not-tested",
+    "action": "Tick/deltaTime/масштаб времени",
+    "actual": "No recorded attempt in this role pass.",
+    "evidence": []
+  },
+  {
+    "role": 4,
+    "feature": "trace-screen",
+    "status": "passed",
+    "action": "RaycastCursor/Screen и viewport",
+    "actual": "AIProbe runtime: ScreenPointToRay(Pixel(640,360)) Success; RaycastScreen center Hit and fractional logical coordinate Hit, 4 triangles.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Binaries/Release/5ed0fedab505437b8f23ed61f6803b01/startup.log",
+      "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Source/ProjectGame.cpp"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "trace-world",
+    "status": "passed",
+    "action": "Raycast/SegmentCast мировой геометрии",
+    "actual": "On fresh reopen all three tossed forms registered target hits; Hits 3 / Throws 3 after the component-ID filtering correction.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "vfs",
+    "status": "passed",
+    "action": "VFS чтение/запись/mount через host API",
+    "actual": "AIProbe runtime resolved /Game/Config/message.txt and SDK ReadGameLine returned exact host Content marker.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/startup.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "scene-select",
+    "status": "passed",
+    "action": "Select Cube in hierarchy",
+    "actual": "Row highlighted, gold bounds, inspector reports Cube ID2",
+    "evidence": [
+      "ui-evidence/bomber-selected-clipped-inspector.png"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "scene-properties",
+    "status": "failed",
+    "action": "Inspect default-window transforms",
+    "actual": "Z fields clipped; maximize reveals them",
+    "evidence": [
+      "ui-evidence/bomber-selected-clipped-inspector.png"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "render-resize",
+    "status": "passed",
+    "action": "Maximize editor 1282x752 → 1920x1032",
+    "actual": "D3D viewport resized and continued rendering",
+    "evidence": [
+      "ui-evidence/bomber-maximized.png"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "play",
+    "status": "passed",
+    "action": "Play, Pause, wait, resume Play, Stop",
+    "actual": "Moving units and misses counter stop at 6 during pause, resume to 14, Stop restores original 4 objects",
+    "evidence": [
+      "ui-evidence/bomber-play.png;ui-evidence/bomber-paused.png;ui-evidence/bomber-resumed.png;ui-evidence/bomber-stopped.png;tired-bomber/ui-editor-gameplay.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "camera-orthographic",
+    "status": "passed",
+    "action": "Play project orthographic XZ scene",
+    "actual": "Top-down arena and moving units displayed",
+    "evidence": [
+      "ui-evidence/bomber-play.png"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "hud-elements",
+    "status": "passed-partial",
+    "action": "Read UI panel/label during Play",
+    "actual": "HUD readable, counter updates; Bar/Button not yet exercised",
+    "evidence": [
+      "ui-evidence/bomber-play.png"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "subsystem",
+    "status": "passed-partial",
+    "action": "Run economy standalone",
+    "actual": "Three houses created; income increases balance by30 each simulated second; no cross-scene test",
+    "evidence": [
+      "curious-city/runtime-observed.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "external",
+    "status": "passed",
+    "action": "Run standalone and close normally",
+    "actual": "3 coloured houses rendered; exit0",
+    "evidence": [
+      "ui-evidence/curious-game-initial.png;curious-city/ui-game.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "camera-perspective",
+    "status": "passed",
+    "action": "Observe standalone city over time",
+    "actual": "Perspective camera shows quarter, moving red car and child wheels, sun shadows; scene layout corrected in project",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png",
+      "Engine/build/playtests/20261104-r1/calm-city/build-camera-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "external",
+    "status": "passed",
+    "action": "Observe standalone city over time",
+    "actual": "Perspective camera shows quarter, moving red car and child wheels, sun shadows; scene layout corrected in project",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png",
+      "Engine/build/playtests/20261104-r1/calm-city/build-camera-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "project-game",
+    "status": "passed",
+    "action": "Observe standalone city over time",
+    "actual": "Perspective camera shows quarter, moving red car and child wheels, sun shadows; scene layout corrected in project",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png",
+      "Engine/build/playtests/20261104-r1/calm-city/build-camera-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-transform",
+    "status": "passed",
+    "action": "Observe standalone city over time",
+    "actual": "Perspective camera shows quarter, moving red car and child wheels, sun shadows; scene layout corrected in project",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png",
+      "Engine/build/playtests/20261104-r1/calm-city/build-camera-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "shadows",
+    "status": "passed",
+    "action": "Observe standalone city over time",
+    "actual": "Perspective camera shows quarter, moving red car and child wheels, sun shadows; scene layout corrected in project",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png",
+      "Engine/build/playtests/20261104-r1/calm-city/build-camera-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "light-sun",
+    "status": "passed",
+    "action": "Observe standalone city over time",
+    "actual": "Perspective camera shows quarter, moving red car and child wheels, sun shadows; scene layout corrected in project",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png",
+      "Engine/build/playtests/20261104-r1/calm-city/build-camera-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-hierarchy",
+    "status": "passed",
+    "action": "Observe standalone city over time",
+    "actual": "Perspective camera shows quarter, moving red car and child wheels, sun shadows; scene layout corrected in project",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png",
+      "Engine/build/playtests/20261104-r1/calm-city/build-camera-02.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-undo",
+    "status": "passed",
+    "action": "Duplicate Cube, Undo, Redo, Undo, CtrlS",
+    "actual": "Object count 4в†’5в†’4в†’5в†’4; original Main saved",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-duplicated.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-undo.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-redo.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-saved.png"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-clone",
+    "status": "passed",
+    "action": "Duplicate Cube, Undo, Redo, Undo, CtrlS",
+    "actual": "Object count 4в†’5в†’4в†’5в†’4; original Main saved",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-duplicated.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-undo.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-redo.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-saved.png"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-save-load",
+    "status": "passed",
+    "action": "Duplicate Cube, Undo, Redo, Undo, CtrlS",
+    "actual": "Object count 4в†’5в†’4в†’5в†’4; original Main saved",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-duplicated.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-undo.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-redo.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-saved.png"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "scene-properties",
+    "status": "passed",
+    "action": "Palette Р”РѕРј; inspector Р’С‹СЃРѕС‚Р°=2.5 Enter",
+    "actual": "Scale Y and bounds changed; temporary unsaved edit discarded during project-path restoration",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-height.png"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "hud-editor",
+    "status": "partial",
+    "action": "Open CityHud.ui, edit status text, Save",
+    "actual": "Save while field editing ignored text BUG003; Enter+Save persisted Cyrillic XML",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-ui-editor-cyrillic.png",
+      "Engine/build/playtests/20261104-r1/curious-city/Project/Content/UI/CityHud.ui"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "hud-events",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "input",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "trace-screen",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "trace-debug",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "trace-filter",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "hud-project",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "hud-elements",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "play",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "time",
+    "status": "passed",
+    "action": "Click Pause income, central house, resume; engine Pause/Resume/Stop",
+    "actual": "Balance paused740; selectedHouse6; filter Miss; engine pause920 stable then1280; Stop restores edit scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-income-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-house-selected.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-paused.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/curious-engine-resumed.png",
+      "Engine/build/playtests/20261104-r1/curious-city/ui-interaction-events.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "camera-perspective",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "light-sun",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "shadows",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "sky",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "play",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hud-events",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "input",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hud-project",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hud-elements",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "trace-world",
+    "status": "passed",
+    "action": "Play, HUD throw, T twice, Stop",
+    "actual": "Three distinct projectile shapes visible; first Hits1; later projectile obstacle was game-code error; Stop restores scene",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hud-editor",
+    "status": "passed",
+    "action": "UI Editor set throw label Р‘СЂРѕСЃРёС‚СЊ [T], Enter+Save",
+    "actual": "Cyrillic label rendered and persisted",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-ui-editor.png",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Content/UI/Hud.ui"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hud-layout",
+    "status": "passed",
+    "action": "UI Editor set throw label Р‘СЂРѕСЃРёС‚СЊ [T], Enter+Save",
+    "actual": "Cyrillic label rendered and persisted",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-ui-editor.png",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Content/UI/Hud.ui"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "hot-reload",
+    "status": "passed",
+    "action": "CtrlAltR after engine exception fixes; user-code failure then repair+CtrlAltR",
+    "actual": "C2665 kept previous DLL; corrected code activated4c74a... and loaded same window. Initial failures BUG004/005 retained",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-ui-build-user-error.txt",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hotreload-fixed.txt",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hotreload-fixed.png",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Project.code.json"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "build-activate",
+    "status": "passed",
+    "action": "CtrlAltR after engine exception fixes; user-code failure then repair+CtrlAltR",
+    "actual": "C2665 kept previous DLL; corrected code activated4c74a... and loaded same window. Initial failures BUG004/005 retained",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-ui-build-user-error.txt",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hotreload-fixed.txt",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hotreload-fixed.png",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Project.code.json"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "failed-build-rollback",
+    "status": "passed",
+    "action": "CtrlAltR after engine exception fixes; user-code failure then repair+CtrlAltR",
+    "actual": "C2665 kept previous DLL; corrected code activated4c74a... and loaded same window. Initial failures BUG004/005 retained",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-ui-build-user-error.txt",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hotreload-fixed.txt",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-hotreload-fixed.png",
+      "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Project.code.json"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "skeletal",
+    "status": "blocked",
+    "action": "Authoring lab import CesiumMan.glb",
+    "actual": "Assimp not enabled, cannot instantiate animated model",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/authoring-probe.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "model-blend",
+    "status": "blocked",
+    "action": "Attempt model imports OBJ/GLB/FBX for material blend workflow",
+    "actual": "All import attempts reject Assimp not enabled; model material blend cannot proceed",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "model-blend",
+    "status": "blocked",
+    "action": "Attempt model imports OBJ/GLB/FBX for material blend workflow",
+    "actual": "All import attempts reject Assimp not enabled; model material blend cannot proceed",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/authoring-probe.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "create-cpp",
+    "status": "passed",
+    "action": "Launcher Create Project checkbox C++",
+    "actual": "Original GUI failed Get-FileHash; fixed launcher --enable-code retry exit0 module076dd01, previous source preserved",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/launcher-create-cpp-error.txt",
+      "Engine/build/playtests/20261104-r1/curious-city/direct-cpp-original-build-error.log",
+      "Engine/build/playtests/20261104-r1/curious-city/DirectCpp/CodeBuild.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "create-cpp",
+    "status": "passed",
+    "action": "Launcher Create Project checkbox C++",
+    "actual": "Fresh GUI checked C++ creation compiled activated25926d689385464580ec0aeffcaa0c67 and opened visible editor",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ai-trash/DirectCpp/CodeBuild.log",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-direct-cpp-created.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-undo",
+    "status": "passed",
+    "action": "Move cube, CtrlZ, Edit Redo",
+    "actual": "Cube x0 -> -1.638 ->0 -> -1.638; observed inspector and viewport",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-undo-position.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-redo-position.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-snapping",
+    "status": "partial",
+    "action": "Enable snap0.5, center drag then X-axis drag",
+    "actual": "Center delta-1.638 ignores snap; axis delta-1.5 quantized; BUG008",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-snap-center-nonquantized.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-snap-axis.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-recovery",
+    "status": "passed",
+    "action": "Unsaved cube edits, wait recovery autosave, controlled termination PID17396, reopen, Yes",
+    "actual": "Recovered x=-3.1378729 while original Main.scene remains x=0; dirty new scene; discarded test copy after verification",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-recovery-prompt.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-recovered-position.png"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-snapping",
+    "status": "passed",
+    "action": "Native Editor workflow",
+    "actual": "West block x-5 -> -7.5 using X gizmo, snap0.5",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-snap-axis.png"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "hot-reload",
+    "status": "passed",
+    "action": "Native Editor workflow",
+    "actual": "CtrlAltR cached reload then source comment forces new8d5c3a DLL compiled/activated; same window unsaved West block x-7.5 preserved; no crash",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/calm-city/ui-final-workflows.log",
+      "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/8d5c3a289a5e4abb95d34a4f513dd1eb/build.log",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-new-dll-gizmo-lines-only.png"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "particles",
+    "status": "passed",
+    "action": "Review runtime frame at first actual hit",
+    "actual": "HUD hits1 misses0; orange/yellow particle burst visible beside running units",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/tired-bomber/Tired Bomber/Content/tired-bomber-hit-1.bmp"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-recovery",
+    "status": "passed",
+    "action": "Unsaved West block after new DLL HotReload; autosave; controlled crash; reopen Yes",
+    "actual": "Recovered project-defined CalmCity.Building at x-7.5; original file x-5; metadata new DLL identity",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-recovery-prompt.png",
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-recovered-position.png",
+      "Engine/build/playtests/20261104-r1/calm-city/ui-recovery.log"
+    ]
+  },
+  {
+    "role": 2,
+    "feature": "controller",
+    "status": "partial",
+    "action": "Standalone game focus, native W and D short key presses",
+    "actual": "Character present; coordinates unchanged after short taps. Tool has no held-key API; continuous held movement remains unverified, not diagnosed as engine bug.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/curious-city/controller-input-observation.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "controller",
+    "status": "partial",
+    "action": "Standalone game focus, native W and D short key presses",
+    "actual": "Character present; coordinates unchanged after short taps. Tool has no held-key API; continuous held movement remains unverified, not diagnosed as engine bug.",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/tired-bomber/controller-ui.log"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "character",
+    "status": "passed",
+    "action": "Player-controlled Character with StandardController in actual game",
+    "actual": "Character white square visible, position(-10,0.5,5) logged; movement separately partial",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/tired-bomber/controller-ui.log",
+      "Engine/build/playtests/20261104-r1/ui-evidence/bomber-controller-input-attempt.png"
+    ]
+  },
+  {
+    "role": 3,
+    "feature": "input",
+    "status": "passed",
+    "action": "Native B in focused game",
+    "actual": "input B: request bomb drop appears in log; additional bomb, repeated hit particles visible",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/tired-bomber/controller-ui.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-editor",
+    "status": "passed",
+    "action": "Inspector Edit material in independent AuthoringLab copy",
+    "actual": "Native material sphere preview, lit->unlit visible, Save stores lighting=unlit, toggle lit then Revert Yes restores saved unlit and removes dirty star",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/calm-material-reverted.png"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-editor",
+    "status": "passed",
+    "action": "Inspector Edit material in independent AuthoringLab copy",
+    "actual": "Native material sphere preview, Tint.x spinner0.9->0.95, Save removes star and .mat confirms0.95; shader compiled",
+    "evidence": [
+      "Engine/build/playtests/20261104-r1/ui-evidence/trash-material-saved.png"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "asset-paths",
+    "status": "passed",
+    "action": "set project Content",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-save-load",
+    "status": "passed",
+    "action": "reopen persona scene",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "render-host",
+    "status": "passed",
+    "action": "attach hidden D3D viewport",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "render-host",
+    "status": "passed",
+    "action": "render loaded project",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "render-resize",
+    "status": "passed",
+    "action": "resize to 1024x512",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-primitives",
+    "status": "passed",
+    "action": "Primitive.Cube",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-primitives",
+    "status": "passed",
+    "action": "Primitive.Sphere",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-primitives",
+    "status": "passed",
+    "action": "Primitive.Plane",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-primitives",
+    "status": "passed",
+    "action": "Primitive.Cylinder",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-primitives",
+    "status": "passed",
+    "action": "Primitive.Cone",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-primitives",
+    "status": "passed",
+    "action": "Primitive.Pyramid",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "light-point",
+    "status": "passed",
+    "action": "Light.Point",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "light-sun",
+    "status": "passed",
+    "action": "Light.Directional",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "particles",
+    "status": "passed",
+    "action": "Particle.Sparks",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "particles",
+    "status": "passed",
+    "action": "Particle.Smoke",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "sky",
+    "status": "passed",
+    "action": "Environment.Sky",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-hierarchy",
+    "status": "passed",
+    "action": "parent sphere to cube with scale inheritance",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-transform",
+    "status": "passed",
+    "action": "translate rotate scale parent",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-select",
+    "status": "passed",
+    "action": "focus selected parent",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-select",
+    "status": "passed",
+    "action": "pick centre of focused viewport",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-hierarchy",
+    "status": "passed",
+    "action": "reject hierarchy cycle",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-groups",
+    "status": "passed",
+    "action": "select parent and child",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-groups",
+    "status": "passed",
+    "action": "group transform",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-clone",
+    "status": "passed",
+    "action": "duplicate parent subtree",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-create-delete",
+    "status": "passed",
+    "action": "delete duplicated group",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-assign",
+    "status": "passed",
+    "action": "assign custom material",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-params",
+    "status": "passed",
+    "action": "compile/read reflected material",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-params",
+    "status": "passed",
+    "action": "change Tint",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-blends",
+    "status": "passed",
+    "action": "set blend 0 twoSided",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-blends",
+    "status": "passed",
+    "action": "set blend 1 twoSided",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-blends",
+    "status": "passed",
+    "action": "set blend 2 twoSided",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-blends",
+    "status": "passed",
+    "action": "set blend 3 twoSided",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-editor",
+    "status": "partial",
+    "action": "save material through public authoring API",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-editor",
+    "status": "partial",
+    "action": "revert unsaved parameter",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-errors",
+    "status": "passed",
+    "action": "invalid HLSL reports diagnostic",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-errors",
+    "status": "passed",
+    "action": "repair HLSL and reload",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "texture-import",
+    "status": "passed",
+    "action": "import BMP",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "texture-import",
+    "status": "passed",
+    "action": "assign imported texture",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "material-params",
+    "status": "passed",
+    "action": "assign material texture slot",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "asset-reimport",
+    "status": "passed",
+    "action": "reimport BMP from recorded source",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "model-import",
+    "status": "blocked",
+    "action": "import triangle.obj",
+    "actual": "Cannot load model '/Game/Models/triangle/triangle.obj': Assimp not enabled (Сборка выполнена без поддержки Assimp. Установите зависимости в Engine/vcpkg_installed и соберите с Assimp / Build with -EnableAssimp); public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "model-import",
+    "status": "blocked",
+    "action": "import CesiumMan.glb",
+    "actual": "Cannot load model '/Game/Models/CesiumMan/CesiumMan.glb': Assimp not enabled (Сборка выполнена без поддержки Assimp. Установите зависимости в Engine/vcpkg_installed и соберите с Assimp / Build with -EnableAssimp); public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "model-import",
+    "status": "blocked",
+    "action": "import auto-color.fbx",
+    "actual": "Cannot load model '/Game/Models/auto-color/auto-color.fbx': Assimp not enabled (Сборка выполнена без поддержки Assimp. Установите зависимости в Engine/vcpkg_installed и соберите с Assimp / Build with -EnableAssimp); public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-properties",
+    "status": "passed",
+    "action": "set saved car speed 3.25",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-codec",
+    "status": "passed",
+    "action": "read saved speed",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-new-save-as",
+    "status": "passed",
+    "action": "save authoring lab as new scene",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "scene-save-load",
+    "status": "passed",
+    "action": "reopen saved lab",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "play",
+    "status": "passed",
+    "action": "Play saved lab",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "play",
+    "status": "passed",
+    "action": "Pause",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "play",
+    "status": "passed",
+    "action": "Resume",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 1,
+    "feature": "play",
+    "status": "passed",
+    "action": "Stop",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\authoring-probe-02.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "asset-paths",
+    "status": "passed",
+    "action": "set project Content",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-save-load",
+    "status": "passed",
+    "action": "reopen persona scene",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "render-host",
+    "status": "passed",
+    "action": "attach hidden D3D viewport",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "render-host",
+    "status": "passed",
+    "action": "render loaded project",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "render-resize",
+    "status": "passed",
+    "action": "resize to 1024x512",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-primitives",
+    "status": "passed",
+    "action": "Primitive.Cube",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-primitives",
+    "status": "passed",
+    "action": "Primitive.Sphere",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-primitives",
+    "status": "passed",
+    "action": "Primitive.Plane",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-primitives",
+    "status": "passed",
+    "action": "Primitive.Cylinder",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-primitives",
+    "status": "passed",
+    "action": "Primitive.Cone",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-primitives",
+    "status": "passed",
+    "action": "Primitive.Pyramid",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "light-point",
+    "status": "passed",
+    "action": "Light.Point",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "light-sun",
+    "status": "passed",
+    "action": "Light.Directional",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "particles",
+    "status": "passed",
+    "action": "Particle.Sparks",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "particles",
+    "status": "passed",
+    "action": "Particle.Smoke",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "sky",
+    "status": "passed",
+    "action": "Environment.Sky",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-hierarchy",
+    "status": "passed",
+    "action": "parent sphere to cube with scale inheritance",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-transform",
+    "status": "passed",
+    "action": "translate rotate scale parent",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-select",
+    "status": "passed",
+    "action": "focus selected parent",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-select",
+    "status": "passed",
+    "action": "pick centre of focused viewport",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-hierarchy",
+    "status": "passed",
+    "action": "reject hierarchy cycle",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-groups",
+    "status": "passed",
+    "action": "select parent and child",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-groups",
+    "status": "passed",
+    "action": "group transform",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-clone",
+    "status": "passed",
+    "action": "duplicate parent subtree",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-create-delete",
+    "status": "passed",
+    "action": "delete duplicated group",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-assign",
+    "status": "passed",
+    "action": "assign custom material",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-params",
+    "status": "passed",
+    "action": "compile/read reflected material",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-params",
+    "status": "passed",
+    "action": "change Tint",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-blends",
+    "status": "passed",
+    "action": "set blend 0 twoSided",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-blends",
+    "status": "passed",
+    "action": "set blend 1 twoSided",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-blends",
+    "status": "passed",
+    "action": "set blend 2 twoSided",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-blends",
+    "status": "passed",
+    "action": "set blend 3 twoSided",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-editor",
+    "status": "partial",
+    "action": "save material through public authoring API",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-editor",
+    "status": "partial",
+    "action": "revert unsaved parameter",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-errors",
+    "status": "passed",
+    "action": "invalid HLSL reports diagnostic",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-errors",
+    "status": "passed",
+    "action": "repair HLSL and reload",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "texture-import",
+    "status": "passed",
+    "action": "import BMP",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "texture-import",
+    "status": "passed",
+    "action": "assign imported texture",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "material-params",
+    "status": "passed",
+    "action": "assign material texture slot",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "asset-reimport",
+    "status": "passed",
+    "action": "reimport BMP from recorded source",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "model-import",
+    "status": "blocked",
+    "action": "import triangle.obj",
+    "actual": "Cannot load model '/Game/Models/triangle/triangle.obj': Assimp not enabled (Сборка выполнена без поддержки Assimp. Установите зависимости в Engine/vcpkg_installed и соберите с Assimp / Build with -EnableAssimp); public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "model-import",
+    "status": "blocked",
+    "action": "import CesiumMan.glb",
+    "actual": "Cannot load model '/Game/Models/CesiumMan/CesiumMan.glb': Assimp not enabled (Сборка выполнена без поддержки Assimp. Установите зависимости в Engine/vcpkg_installed и соберите с Assimp / Build with -EnableAssimp); public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "model-import",
+    "status": "blocked",
+    "action": "import auto-color.fbx",
+    "actual": "Cannot load model '/Game/Models/auto-color/auto-color.fbx': Assimp not enabled (Сборка выполнена без поддержки Assimp. Установите зависимости в Engine/vcpkg_installed и соберите с Assimp / Build with -EnableAssimp); public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-new-save-as",
+    "status": "passed",
+    "action": "save authoring lab as new scene",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "scene-save-load",
+    "status": "passed",
+    "action": "reopen saved lab",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "play",
+    "status": "passed",
+    "action": "Play saved lab",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "play",
+    "status": "passed",
+    "action": "Pause",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "play",
+    "status": "passed",
+    "action": "Resume",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  },
+  {
+    "role": 4,
+    "feature": "play",
+    "status": "passed",
+    "action": "Stop",
+    "actual": "; public authoring API, no visual assertion",
+    "evidence": [
+      "E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\ai-trash\\authoring-probe.log"
+    ]
+  }
+]

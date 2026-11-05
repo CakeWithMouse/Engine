@@ -90,7 +90,7 @@ void ObjectInspectorPanel::BuildUi()
     scrollArea->setWidgetResizable(true);
     scrollArea->setFrameShape(QFrame::NoFrame);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     scrollArea->setObjectName(QStringLiteral("InspectorScrollArea"));
 
     auto* content = new QWidget(scrollArea);

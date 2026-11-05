@@ -1,0 +1,4 @@
+interface:
+  display_name: "Анализ функционала к улучшению"
+  short_description: "Разбор отзывов о UI/UX и возможностях движка"
+  default_prompt: "Используй $analyze-engine-improvements: составь по каждой персоне список улучшений PainEngine из последнего прогона."

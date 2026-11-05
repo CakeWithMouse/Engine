@@ -1,0 +1,10 @@
+{
+    "asset": "/Game/Models/auto-color/auto-color.fbx",
+    "clips": 0,
+    "indices": 3,
+    "material": "/Game/Models/auto-color/Materials/Material_0.mat",
+    "meshes": 1,
+    "ok": true,
+    "placed": true,
+    "type": "Engine.Model"
+}

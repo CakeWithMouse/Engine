@@ -1,4 +1,5 @@
 #include "SceneTestAccess.h"
+#include "TestSkipped.h"
 #define NOMINMAX
 #include <Windows.h>
 #include <Engine/Runtime/SceneEditSession.h>
@@ -104,8 +105,14 @@ void AuthoringTests(){
     Write(root/"pixel.bmp",bmp);const auto texture=SceneAssets::Import(content,root/"pixel.bmp",SceneAssets::Texture);
     CHECK(set("/asset",Json(texture).dump())==EngineSceneOk);CHECK(set("/asset","\"/Game/Missing.bmp\"")!=EngineSceneOk);CHECK(set("/asset","\"/Game/../pixel.bmp\"")!=EngineSceneOk);
     Write(root/"mesh.obj","v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 3\n");
+#ifndef ENGINE_ENABLE_ASSIMP
+    bool unavailable=false;try{const auto probe=SceneAssets::Import(content,root/"mesh.obj",SceneAssets::Model);hero.SetModelAsset(probe);}catch(const std::runtime_error& e){unavailable=std::string(e.what()).find("Assimp not enabled")!=std::string::npos;}
+    CHECK(unavailable);
+    throw TestSkipped("typed properties/texture checks passed; model transaction checks require -EnableAssimp");
+#endif
     const auto model=SceneAssets::Import(content,root/"mesh.obj",SceneAssets::Model);const auto modelFile=content/fs::u8path(model.substr(6));
-    hero.SetMoveSpeed(9);hero.SetModelAsset(model);hero.SetPosition({2,3,4});
+    hero.SetMoveSpeed(9);
+    hero.SetModelAsset(model);hero.SetPosition({2,3,4});
     CHECK(hero.GetModelAsset()==model && hero.GetMoveSpeed()==9);
     CHECK(hero.GetRenderComponent()->GetWorldPosition()==hero.GetWorldPosition());
     Trace::Statistics traceStats;auto trace=hero.RaycastGeometry({{2.2f,3.2f,9},{0,0,-1},10},{},traceStats);

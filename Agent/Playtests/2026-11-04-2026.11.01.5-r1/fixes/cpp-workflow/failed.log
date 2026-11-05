@@ -1,0 +1,24 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(4,4,4,4), PM_ToolBarFrameWidth=2, PM_ItemMargin=2, PM_ItemSpacing=1
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 3, handler = 00007FFAD6D5FC50
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "buildSucceeded": false,
+    "console": "[18:54:05.666] C++: Build\n[18:54:08.300]   ComponentGenerator: 3 component(s), Project\n\n[18:54:08.300]   ProjectComponent.cpp\n\n[18:54:08.300] E:\\Engine\\Agent\\Playtests\\2026-11-04-2026.11.01.5-r1\\fixes\\cpp-workflow\\Project\\Source\\ProjectComponent.cpp(5,1): error C1189: #error:  Кириллица_проверка_сборки [E:\\Engine\\Agent\\Playtests\\2026-11-04-2026.11.01.5-r1\\fixes\\cpp-workflow\\Project\\Game.vcxproj]\n\n[18:54:08.300] Full build log: E:\\Engine\\Agent\\Playtests\\2026-11-04-2026.11.01.5-r1\\fixes\\cpp-workflow\\Project\\Binaries\\Release\\652be85f01db425e9a8274353d1901c1\\build.log\n\n[18:54:08.364] Project build failed; previous module preserved\n\n[18:54:08.364] E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\SDK\\ProjectTools.ps1:294 знак:31\n\n[18:54:08.364] + ... ExitCode) { throw 'Project build failed; previous module preserved' } ...\n\n[18:54:08.364] +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n[18:54:08.364]     + CategoryInfo          : OperationStopped: (Project build f...odule preserved:String) [], RuntimeException\n\n[18:54:08.364]     + FullyQualifiedErrorId : Project build failed; previous module preserved\n\n[18:54:08.429] [Ошибка C++] Build: код завершения 1. Проект: E:/Engine/Agent/Playtests/2026-11-04-2026.11.01.5-r1/fixes/cpp-workflow/Project/Project.json",
+    "dialogs": [
+        "Операция не завершена. Предыдущая DLL сохранена. Диагностика находится в Console."
+    ],
+    "ok": false,
+    "replaced": false,
+    "windowEnabled": true
+}

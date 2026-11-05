@@ -1,0 +1,18 @@
+
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 6 component(s), Project
+  CarMover.cpp
+  CityBuilding.cpp
+  CityRoad.cpp
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\20261104-r1\calm-city\CalmCityProject\Binaries\Release\316b3468662647ea97c3edb2cc7f4194\Game.lib и объект E:\Engine\Engine\build\playtests\20261104-r1\calm-city\CalmCityProject\Binaries\Release\316b3468662647ea97c3edb2cc7f4194\Game.exp
+  Game.vcxproj -> E:\Engine\Engine\build\playtests\20261104-r1\calm-city\CalmCityProject\Binaries\Release\316b3468662647ea97c3edb2cc7f4194\Game.dll
+
+
+Full build log: E:\Engine\Engine\build\playtests\20261104-r1\calm-city\CalmCityProject\Binaries\Release\316b3468662647ea97c3edb2cc7f4194\build.log
+LaunchError: Candidate scene rejected: v2 uses versioned properties, not pointLight

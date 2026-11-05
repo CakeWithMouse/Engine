@@ -34,7 +34,7 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 private:
     void RefreshInspector();
-    void ApplyInspector();
+    bool ApplyInspector();
     QString file_;
     std::unique_ptr<UIElement> root_;
     UIElement* selected_ = nullptr;

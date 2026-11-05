@@ -1,8 +1,9 @@
-param([ValidateSet('Debug','Release')][string]$Configuration='Release',[switch]$SkipBuild,[switch]$Sdk)
+param([ValidateSet('Debug','Release')][string]$Configuration='Release',[switch]$SkipBuild,[switch]$Sdk,[switch]$EnableAssimp)
 $ErrorActionPreference='Stop'
 $repo=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
+$assimpArgs=@{};if($PSBoundParameters.ContainsKey('EnableAssimp')){$assimpArgs.EnableAssimp=$EnableAssimp}
 if(!$SkipBuild){
- & "$repo/Engine/BuildSupport/Invoke-MSBuild.ps1" -Project "$PSScriptRoot/InputCharacterTests.vcxproj" -Configuration $Configuration -EnableAssimp
+ & "$repo/Engine/BuildSupport/Invoke-MSBuild.ps1" -Project "$PSScriptRoot/InputCharacterTests.vcxproj" -Configuration $Configuration @assimpArgs
 }
 & "$repo/Engine/build/x64/$Configuration/InputCharacterTests.exe"
 if($LASTEXITCODE){throw 'Input and character tests failed'}

@@ -143,11 +143,12 @@ AssetTests использует настоящий игровой DLL и D3D vie
 Дополнительная проверка BLEND (остальные asset-тесты не требуют Blender):
 
 ```powershell
-$env:PAINENGINE_BLENDER = 'C:/Program Files/Blender Foundation/Blender 4.5/blender.exe'
-$env:PAINENGINE_BLEND_FIXTURES = "$PWD/Engine/build/blend-fixtures"
-& $env:PAINENGINE_BLENDER --background --factory-startup --python-exit-code 1 --python Engine/tests/assets/make-blend-fixtures.py -- $env:PAINENGINE_BLEND_FIXTURES
-./Engine/tests/assets/run.ps1 -Configuration Release -EnableAssimp
+./Engine/tests/assets/run-blend.ps1
+# При нестандартном расположении:
+# ./Engine/tests/assets/run-blend.ps1 -Blender 'D:/Tools/Blender/blender.exe'
 ```
+
+Runner генерирует настоящие `.blend` с внешней, упакованной и отсутствующей текстурой, проверяет импорт, перенос проекта и GPU-рендер, затем консольную диагностику `asset.import`. Логи и снимки сохраняются; исходные проекты не используются. Проверено с Blender 5.2.3 LTS.
 
 ## Обновление ресурсов и свойства классов
 

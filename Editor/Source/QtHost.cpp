@@ -313,6 +313,7 @@ void EditorQtHost::DrainCommands()
         }
         else if (viewportHandler_.CanHandle(cmd.type))
         {
+            if (cmd.type == EditorCommand::InputFocus) viewportFocused_ = cmd.w != 0;
             ViewportCommandHandler::Context vctx{
                 host_,
                 scene_,

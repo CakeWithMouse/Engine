@@ -1,0 +1,458 @@
+{
+  "release": "2026.11.01.5",
+  "role": 1,
+  "project": "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject",
+  "runtime": "Game/build/x64/Release/Runtime",
+  "buildId": "b53bf9d623d9478e89353842ce057bed",
+  "projectStatus": "built-validated-activated",
+  "visualStatus": "coordinator-ui-confirmed-main-scene",
+  "attempts": [
+    {
+      "action": "EngineLauncher --create-project",
+      "expected": "Project scaffold created",
+      "actual": "First call exit 2 due two argv name tokens; corrected call exit 0",
+      "status": "passed-after-command-correction",
+      "log": "Engine/build/playtests/20261104-r1/calm-city/launcher-create.stderr.log"
+    },
+    {
+      "action": "ProjectTools Enable",
+      "expected": "Pinned C++ scaffold",
+      "actual": "prepared scaffold, SDK 2026.11.01.5",
+      "status": "passed",
+      "log": "Engine/build/playtests/20261104-r1/calm-city/sdk-enable.log"
+    },
+    {
+      "action": "Release build",
+      "expected": "Compile, validate, activate",
+      "actual": "Final build succeeded; candidate validated; three startup frames; module active",
+      "status": "passed",
+      "log": "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log"
+    },
+    {
+      "action": "Launcher --smoke-project",
+      "expected": "Project game starts",
+      "actual": "exit 0",
+      "status": "passed",
+      "log": "Engine/build/playtests/20261104-r1/calm-city/smoke-game.stdout.log"
+    },
+    {
+      "action": "Launcher --smoke-project-editor",
+      "expected": "Persisted scene opens in editor smoke",
+      "actual": "exit 0",
+      "status": "passed",
+      "log": "Engine/build/playtests/20261104-r1/calm-city/smoke-editor.stdout.log"
+    },
+    {
+      "action": "Visual Play pass",
+      "expected": "Car visibly moves and reverses on road",
+      "actual": "Not inspected; no screenshot",
+      "status": "visual-unverified",
+      "log": ""
+    }
+  ],
+  "features": [
+    {
+      "feature_id": "asset-paths",
+      "status": "not-tested",
+      "action": "Переносимые /Game ссылки",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "asset-reimport",
+      "status": "not-tested",
+      "action": "Переимпорт и обновление ресурсов",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "build-activate",
+      "status": "passed",
+      "action": "Сборка кандидата и активация DLL",
+      "actual": "Release candidate built, validated, startup-smoked and activated.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log"
+      ]
+    },
+    {
+      "feature_id": "camera-perspective",
+      "status": "not-tested",
+      "action": "SceneCamera и перспектива",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "compatibility",
+      "status": "passed",
+      "action": "Headless smoke a copy of frozen lights fixture",
+      "actual": "Frozen lights fixture (SHA256 verified) passed Launcher --check-project and --smoke-project-current on current runtime, both exit 0; DLL SHA256 stayed 59E5932B978BC8200CACAC806B63CA1307962C1D548613C9A2C6B14B301637EF. Direct runtime rejects the old pin as expected; prompt/upgrade/full harness not tested.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/calm-city/FrozenCompatibility/result.txt",
+        "Engine/build/playtests/20261104-r1/calm-city/FrozenCompatibility/sha256-verified.txt",
+        "Engine/build/playtests/20261104-r1/calm-city/FrozenCompatibility/runtime.stderr.log"
+      ]
+    },
+    {
+      "feature_id": "create-nocode",
+      "status": "passed",
+      "action": "Создать проект без кода",
+      "actual": "Launcher created the no-code project, then SDK Enable converted it.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log"
+      ]
+    },
+    {
+      "feature_id": "enable-cpp",
+      "status": "passed",
+      "action": "Добавить C++ к проекту",
+      "actual": "SDK ProjectTools Enable created scaffold pinned to Release 2026.11.01.5.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log"
+      ]
+    },
+    {
+      "feature_id": "external",
+      "status": "not-tested",
+      "action": "Отдельный запуск",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "game-settings",
+      "status": "partial",
+      "action": "GameSettings VSync/render/AA",
+      "actual": "Game startup sets VSync off, Forward and FXAA; smoke logged FXAA pipeline/shader compilation. No on-screen settings/performance check.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Source/ProjectGame.cpp"
+      ]
+    },
+    {
+      "feature_id": "hot-reload",
+      "status": "not-tested",
+      "action": "C++ Hot Reload с сохранением edit-сцены",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "instances",
+      "status": "partial",
+      "action": "Инстансинг",
+      "actual": "ParkingRow configures nine tinted MeshInstance entries and ReserveInstances(9); project built and runtime smoke passed. No viewport screenshot for this separate probe.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Source/ParkingRow.cpp"
+      ]
+    },
+    {
+      "feature_id": "light-point",
+      "status": "not-tested",
+      "action": "Точечный свет/радиус/интенсивность",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "light-sun",
+      "status": "passed",
+      "action": "Направленный свет",
+      "actual": "Coordinator added directional sun; screenshots show lit block and shadows.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png"
+      ]
+    },
+    {
+      "feature_id": "lod",
+      "status": "passed",
+      "action": "LOD/culling/impostor",
+      "actual": "Runtime generated LOD1 344→188 triangles (target 189) and LOD2 344→86 (target 86), each reporting 0% silhouette drift.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup.log"
+      ]
+    },
+    {
+      "feature_id": "material-assign",
+      "status": "not-tested",
+      "action": "Назначение/снятие .mat",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "material-blends",
+      "status": "not-tested",
+      "action": "Прозрачность/masked/two-sided",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "material-editor",
+      "status": "not-tested",
+      "action": "Редактор HLSL/preview/сохранение/откат",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "material-errors",
+      "status": "not-tested",
+      "action": "Ошибка шейдера/fallback/восстановление",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "material-params",
+      "status": "not-tested",
+      "action": "Параметры/текстуры материала",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "mesh-tools",
+      "status": "passed",
+      "action": "Проверка мешей и упрощение CPU LOD",
+      "actual": "ValidateMesh reported 344 tris, 392 vertices, bounds 1.72×1.12×2.60m, pivot y=0, UV yes, ok. SimplifyMesh returned 188 triangles.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup.log"
+      ]
+    },
+    {
+      "feature_id": "model-blend",
+      "status": "not-tested",
+      "action": "Конверсия BLEND при наличии Blender",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "model-import",
+      "status": "not-tested",
+      "action": "Импорт OBJ/glTF/GLB/FBX",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "particle-collision",
+      "status": "partial",
+      "action": "Compile and start a ParticleSystemComponent with depth collision configured",
+      "actual": "The public configuration setters compiled; candidate activated and three-frame smoke exited 0. No individual GPU collision response was observed.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup.log"
+      ]
+    },
+    {
+      "feature_id": "particles",
+      "status": "not-tested",
+      "action": "Искры/дым и пауза",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "play",
+      "status": "not-tested",
+      "action": "Play/Pause/Resume/Stop и копия сцены",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "project-game",
+      "status": "not-tested",
+      "action": "Выбор пользовательского Game",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "render-host",
+      "status": "not-tested",
+      "action": "Публичные D3D/render hooks пользовательского компонента",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "render-modes",
+      "status": "partial",
+      "action": "Forward/Deferred/G-buffer",
+      "actual": "Probe requested Forward rendering and completed three runtime frames with FXAA pipeline compiled; no comparison against Deferred or rendered viewport evidence.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup.log"
+      ]
+    },
+    {
+      "feature_id": "render-resize",
+      "status": "not-tested",
+      "action": "Изменение размера viewport",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "scene-clone",
+      "status": "not-tested",
+      "action": "Дублирование и ремап ссылок",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "scene-codec",
+      "status": "not-tested",
+      "action": "Пользовательский кодек и восстановление",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "scene-groups",
+      "status": "not-tested",
+      "action": "Группы и групповые transform",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "scene-hierarchy",
+      "status": "passed",
+      "action": "Родители и локальные/мировые transform",
+      "actual": "Roof and four wheels refer to car ID as parent; editor smoke loaded the scene.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log"
+      ]
+    },
+    {
+      "feature_id": "scene-new-save-as",
+      "status": "not-tested",
+      "action": "Новая сцена и Save As",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "scene-primitives",
+      "status": "partial",
+      "action": "Шесть примитивов",
+      "actual": "Plane, cube-derived geometry and cylinder wheels are present; not all six primitives tested.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log"
+      ]
+    },
+    {
+      "feature_id": "scene-properties",
+      "status": "passed",
+      "action": "Редактирование отражённых свойств",
+      "actual": "CarMover speed/moving are annotated generated fields with values in projectData; inspector edit/save round-trip not observed.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log"
+      ]
+    },
+    {
+      "feature_id": "scene-save-load",
+      "status": "not-tested",
+      "action": "Сохранение и повторное открытие",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "scene-select",
+      "status": "not-tested",
+      "action": "Picking/иерархия/рамка/фокус",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "scene-snapping",
+      "status": "not-tested",
+      "action": "Привязка позиции/угла",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "scene-transform",
+      "status": "passed",
+      "action": "Перемещение/поворот/масштаб",
+      "actual": "Scene has transformed buildings/street/car; actual viewport image not observed.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+        "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log"
+      ]
+    },
+    {
+      "feature_id": "scene-undo",
+      "status": "not-tested",
+      "action": "Undo/Redo",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "shadows",
+      "status": "not-tested",
+      "action": "Тени/дальность/cache",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "sky",
+      "status": "not-tested",
+      "action": "Небо/cubemap/отражения",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "texture-import",
+      "status": "not-tested",
+      "action": "Импорт и назначение текстуры",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "time",
+      "status": "passed",
+      "action": "Tick/deltaTime/масштаб времени",
+      "actual": "Coordinator observed car movement in Play; CarMover uses Tick and reverses at road endpoints.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+        "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png"
+      ]
+    }
+  ],
+  "apiFacts": [
+    {
+      "featureId": "api.mesh-primitives",
+      "status": "read-confirmed",
+      "fact": "Plane lies in XZ and faces +Y."
+    },
+    {
+      "featureId": "api.transforms-parenting",
+      "status": "read-confirmed",
+      "fact": "Transforms are local; SetParent rejects invalid parents/cycles."
+    },
+    {
+      "featureId": "api.component-tick",
+      "status": "read-confirmed",
+      "fact": "Tick(float) gets simulation delta; derived overrides should call immediate base; GetLocalPosition is the available getter."
+    }
+  ],
+  "screenshots": [
+    "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-a.png",
+    "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-b.png",
+    "Engine/build/playtests/20261104-r1/ui-evidence/calm-game-c.png"
+  ],
+  "archive": "Agent/Playtests/2026-11-04-2026.11.01.5-r1/calm-city/calm-city-source.zip",
+  "logs": [
+    "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+    "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+    "Engine/build/playtests/20261104-r1/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log",
+    "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e708dc254632461baa7aaec84f6d0b48/build.log",
+    "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e708dc254632461baa7aaec84f6d0b48/startup.log",
+    "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e708dc254632461baa7aaec84f6d0b48/validate.log",
+    "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/build.log",
+    "Engine/build/playtests/20261104-r1/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup.log",
+    "Engine/build/playtests/20261104-r1/calm-city/FrozenCompatibility/smoke.log",
+    "Engine/build/playtests/20261104-r1/calm-city/FrozenCompatibility/result.txt",
+    "Engine/build/playtests/20261104-r1/calm-city/FrozenCompatibility/sha256-verified.txt",
+    "Engine/build/playtests/20261104-r1/calm-city/FrozenCompatibility/runtime.stderr.log"
+  ]
+}

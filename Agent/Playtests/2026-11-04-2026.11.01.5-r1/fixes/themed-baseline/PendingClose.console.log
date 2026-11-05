@@ -1,0 +1,6 @@
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+{
+    "closeAccepted": false,
+    "ok": true,
+    "pending": "Не терять ввод"
+}

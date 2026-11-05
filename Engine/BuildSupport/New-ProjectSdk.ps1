@@ -19,6 +19,7 @@ Copy-Item -LiteralPath "$engineRoot/docs/GAME-SUBSYSTEMS.md" -Destination "$sdk/
 Copy-Item -LiteralPath "$engineRoot/examples/TraceExamples.cpp" -Destination "$sdk/Examples/TraceExamples.cpp" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/TRACE-API.md" -Destination "$sdk/Docs/TRACE-API.md" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/API-REFERENCE.html" -Destination "$sdk/Docs/API-REFERENCE.html" -Force
+Copy-Item -LiteralPath "$engineRoot/docs/LAUNCHER-CLI.md" -Destination "$sdk/Docs/LAUNCHER-CLI.md" -Force
 New-Item -ItemType Directory -Force (Join-Path $sdk 'Examples/ApiReference') | Out-Null
 Copy-Item -Path "$engineRoot/docs/api-reference/examples/*" -Destination "$sdk/Examples/ApiReference" -Force
 $release = Get-Content -LiteralPath "$Runtime/EngineVersion.json" -Raw | ConvertFrom-Json

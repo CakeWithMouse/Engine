@@ -1,0 +1,18 @@
+
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 5 component(s), Project
+  IntentionalBuildFailure.cpp
+  ProjectGame.cpp
+E:\Engine\Engine\build\playtests\20261104-r1\tired-bomber\FeatureProbeCopy\Source\IntentionalBuildFailure.cpp(1,1): error C4430: отсутствует спецификатор типа - предполагается int. Примечание. C++ не поддерживает int по умолчанию [E:\Engine\Engine\build\playtests\20261104-r1\tired-bomber\FeatureProbeCopy\Game.vcxproj]
+E:\Engine\Engine\build\playtests\20261104-r1\tired-bomber\FeatureProbeCopy\Source\IntentionalBuildFailure.cpp(1,6): error C2146: синтаксическая ошибка: отсутствие ";" перед идентификатором "IS" [E:\Engine\Engine\build\playtests\20261104-r1\tired-bomber\FeatureProbeCopy\Game.vcxproj]
+  Создание кода...
+
+
+Full build log: E:\Engine\Engine\build\playtests\20261104-r1\tired-bomber\FeatureProbeCopy\Binaries\Release\94c74c497d0a4a8f881a8133e4baf6f6\build.log
+Exception: E:\Engine\Game\build\x64\Release\Runtime\SDK\ProjectTools.ps1:289
+Line |
+ 289 |  … ExitCode) { throw 'Project build failed; previous module preserved' } …
+     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Project build failed; previous module preserved
+
+

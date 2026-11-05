@@ -1,0 +1,16 @@
+E:\Engine\Engine\tests\assets\make-blend-fixtures.py:16: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  material.use_nodes = True
+00:01.687  reports          | WARNING Path 'C:\Program Files\Blender Foundation\Blender 5.2\5.2\datafiles\assets\brushes\essentials_brushes-gp_draw.blend' cannot be made relative for Material 'Dots Stroke'
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+00:01.687  reports          | WARNING Path 'C:\Program Files\Blender Foundation\Blender 5.2\5.2\datafiles\assets\brushes\essentials_brushes-gp_draw.blend' cannot be made relative for Material 'Material'
+Info: Saved as "blend-external.blend"
+
+FBX export starting... 'E:\\Engine\\Engine\\build\\blend-enable\\final\\Исходники моделей\\blender-external.fbx'
+export finished in 0.0040 sec.
+Info: Saved as "blend-packed.blend"
+
+FBX export starting... 'E:\\Engine\\Engine\\build\\blend-enable\\final\\Исходники моделей\\blender-packed.fbx'
+export finished in 0.0039 sec.
+Info: Saved as "blend-missing.blend"
+
+Blender quit

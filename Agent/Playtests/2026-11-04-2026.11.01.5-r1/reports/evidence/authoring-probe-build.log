@@ -1,0 +1,8 @@
+Using installed platform toolset: v143
+
+  AuthoringProbe.cpp
+E:\Engine\Agent\Playtests\2026-11-04-2026.11.01.5-r1\authoring-probe\AuthoringProbe.cpp(39,27): error C2039: "detachViewport": не является членом "EngineEditSessionApi". [E:\Engine\Agent\Playtests\2026-11-04-2026.11.01.5-r1\authoring-probe\AuthoringProbe.vcxproj]
+E:\Engine\Engine\Include\Engine\Runtime\EditSessionApi.h(48,8): message : см. объявление "EngineEditSessionApi" [E:\Engine\Agent\Playtests\2026-11-04-2026.11.01.5-r1\authoring-probe\AuthoringProbe.vcxproj]
+E:\Engine\Agent\Playtests\2026-11-04-2026.11.01.5-r1\authoring-probe\AuthoringProbe.cpp(39,27): error C2039: "__this": не является членом "EngineEditSessionApi". [E:\Engine\Agent\Playtests\2026-11-04-2026.11.01.5-r1\authoring-probe\AuthoringProbe.vcxproj]
+E:\Engine\Engine\Include\Engine\Runtime\EditSessionApi.h(48,8): message : см. объявление "EngineEditSessionApi" [E:\Engine\Agent\Playtests\2026-11-04-2026.11.01.5-r1\authoring-probe\AuthoringProbe.vcxproj]
+

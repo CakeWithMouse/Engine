@@ -1,0 +1,32 @@
+[
+  {
+    "sha256": "F8C74AA32E962170793557E47F76C68C603A7A9218E888FAFD581D14416E698C",
+    "file": "assimp-vc143-mt.dll",
+    "matches": true
+  },
+  {
+    "sha256": "92F4CD115035D02C0F45C0FFA2CF14262C5BF7695BC05E79B18F43FBA2B6EE90",
+    "file": "EngineRuntime.exe",
+    "matches": true
+  },
+  {
+    "sha256": "543FF695D617E3C51F8073F72F6FF65622E4284641A07F590E524FBD7F845342",
+    "file": "Templates/SceneProject/Game.dll",
+    "matches": true
+  },
+  {
+    "sha256": "421506D8E218568C9A364071F288B2E3797E82477E02F36A86E13BCABB663527",
+    "file": "EngineCommandlets.exe",
+    "matches": true
+  },
+  {
+    "sha256": "00D01A7349FE77C5E906C675F69304BF4E64C2CF89A0F2DFF8FCFB1863626432",
+    "file": "SDK/Lib/Engine.lib",
+    "matches": true
+  },
+  {
+    "sha256": "2DC9F447C641E576C0367EBBFAE32DD97C2881BD869FF76F9653EA7ADEF18E10",
+    "file": "SDK/Lib/assimp-vc143-mt.lib",
+    "matches": true
+  }
+]

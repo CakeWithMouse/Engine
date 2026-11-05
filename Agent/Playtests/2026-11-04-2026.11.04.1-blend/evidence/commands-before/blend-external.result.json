@@ -1,0 +1,8 @@
+{
+    "asset": "/Game/Models/blend-external/blend-external.glb",
+    "material": "/Game/Models/blend-external/Materials/Material_0.mat",
+    "memoryLoadError": "BLEND: BLENDER magic bytes are missing, couldn't find GZIP header either",
+    "ok": true,
+    "placed": true,
+    "type": "Engine.Model"
+}

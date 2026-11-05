@@ -1,0 +1,40 @@
+Project: TrashGame
+Mode: game
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/build/playtests/20261104-r1/ai-trash/TrashGameExportFinal/Runtime/EngineContent'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/playtests/20261104-r1/ai-trash/TrashGameExportFinal/Game/Content'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+GameCreate
+GameSceneLoaded
+GameStart
+TrashGame
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsService] first read via module: /Engine/Shaders/RotatedFigure.hlsl
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261104-r1/ai-trash/TrashGameExportFinal/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261104-r1/ai-trash/TrashGameExportFinal/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+GameUpdate
+Successfully registered shader: E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGameExportFinal\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:\Engine\Engine\build\playtests\20261104-r1\ai-trash\TrashGameExportFinal\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261104-r1/ai-trash/TrashGameExportFinal/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261104-r1/ai-trash/TrashGameExportFinal/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdates=3
+GameStop
+GameDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped

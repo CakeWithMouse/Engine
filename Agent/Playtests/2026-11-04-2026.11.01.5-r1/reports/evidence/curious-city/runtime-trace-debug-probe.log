@@ -1,0 +1,12 @@
+event=template_cube_removed elapsed=0.0s balance=500 houses=0
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_1
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_2
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_3
+event=city_hud_configured elapsed=0.0s balance=200 houses=3
+event=city_started elapsed=0.0s balance=200 houses=3
+event=hud_attached elapsed=0.0s balance=200 houses=3
+event=trace_debug_runtime_state elapsed=0.0s balance=200 houses=3 detail=status=Hit lines=5 queries=1 bounds=4 triangles=16 unsupported=0 microseconds=14.2 hit=6 normal_y=1
+event=trace_debug_cleared elapsed=0.0s balance=200 houses=3 detail=lines=0
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.000000
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.350000
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.700000

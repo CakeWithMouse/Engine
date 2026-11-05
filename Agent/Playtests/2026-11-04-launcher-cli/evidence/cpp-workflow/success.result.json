@@ -1,0 +1,9 @@
+{
+    "buildSucceeded": true,
+    "console": "[23:15:07.670] C++: Build\n[23:15:11.500]   The vcpkg manifest was disabled, but we found a manifest file in E:\\Engine\\Engine\\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.\n\n[23:15:11.500]   ComponentGenerator: 3 component(s), Project\n\n[23:15:11.500]   ProjectComponent.cpp\n\n[23:15:11.500]      Создается библиотека E:\\Engine\\Engine\\build\\launcher-cli\\cpp-regression\\Project\\Binaries\\Release\\73070d713f9243868615e5fcee1274f9\\Game.lib и объект E:\\Engine\\Engine\\build\\launcher-cli\\cpp-regression\\Project\\Binaries\\Release\\73070d713f9243868615e5fcee1274f9\\Game.exp\n\n[23:15:11.500]   Game.vcxproj -> E:\\Engine\\Engine\\build\\launcher-cli\\cpp-regression\\Project\\Binaries\\Release\\73070d713f9243868615e5fcee1274f9\\Game.dll\n\n[23:15:11.500] Full build log: E:\\Engine\\Engine\\build\\launcher-cli\\cpp-regression\\Project\\Binaries\\Release\\73070d713f9243868615e5fcee1274f9\\build.log\n\n[23:15:13.145] Build validated and activated. Use Hot Reload in the editor, or reopen the project.\n\n[23:15:13.377] Hot reload: DLL заменена. Сцена, выбор и камера сохранены; история отмены очищена.",
+    "dialogs": [
+    ],
+    "ok": true,
+    "replaced": true,
+    "windowEnabled": true
+}

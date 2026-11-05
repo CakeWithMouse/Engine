@@ -5,7 +5,8 @@ param([Parameter(Mandatory=$true)][string]$Project,
     # Builds this project alone. Used when a referenced project cannot be built here, which is
     # the editor without Qt: everything else still has to come out.
     [switch]$SkipProjectReferences,
-    [switch]$EditorUiTest)
+    [switch]$EditorUiTest,
+    [switch]$EngineCommandlet)
 $ErrorActionPreference = 'Stop'
 $vswhere = Join-Path ([Environment]::GetEnvironmentVariable('ProgramFiles(x86)')) 'Microsoft Visual Studio\Installer\vswhere.exe'
 if (!(Test-Path -LiteralPath $vswhere)) { throw 'Visual Studio with C++ tools and Windows SDK is required (vswhere.exe not found).' }
@@ -63,12 +64,21 @@ $start.EnvironmentVariables.Clear()
 foreach ($entry in [Environment]::GetEnvironmentVariables().GetEnumerator()) {
     $start.EnvironmentVariables[$entry.Key.ToUpperInvariant()] = $entry.Value
 }
-$assimp = $EnableAssimp.IsPresent.ToString().ToLowerInvariant()
+$useAssimp = if ($PSBoundParameters.ContainsKey('EnableAssimp')) {
+    $EnableAssimp.IsPresent
+} else {
+    # Keep installed capabilities when building a single target (including tests
+    # and commandlets). An omitted switch must not rebuild Engine.lib as a stub.
+    Test-Path -LiteralPath (Join-Path $PSScriptRoot '../vcpkg_installed/x64-windows/include/assimp/scene.h')
+}
+$assimp = $useAssimp.ToString().ToLowerInvariant()
+Write-Output "Assimp enabled: $assimp"
 $vcpkgClean = if ($env:VCPKG_ROOT) { $env:VCPKG_ROOT.TrimEnd('\') } else { $null }
 $vcpkgParam = if ($vcpkgClean) { ' "/p:VcpkgRoot=' + $vcpkgClean + '\\"' } else { '' }
 $start.Arguments = '"' + $Project + '" /nologo /verbosity:minimal /m:1 /nr:false /p:UseStructuredOutput=false /p:PreferredToolArchitecture=x64 /p:Platform=x64 /p:Configuration=' + $Configuration + ' /p:PlatformToolset=' + $PlatformToolset + ' /p:EngineEnableAssimp=' + $assimp + $vcpkgParam
 if ($SkipProjectReferences) { $start.Arguments += ' /p:BuildProjectReferences=false' }
 if ($EditorUiTest) { $start.Arguments += ' /p:EditorUiTest=true' }
+if ($EngineCommandlet) { $start.Arguments += ' /p:EngineCommandlet=true' }
 $process = [Diagnostics.Process]::Start($start)
 $output = $process.StandardOutput.ReadToEndAsync()
 $errors = $process.StandardError.ReadToEndAsync()
