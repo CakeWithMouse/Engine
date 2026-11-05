@@ -1,0 +1,142 @@
+{
+    "ok": true,
+    "steps": [
+        {
+            "action": "select",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                }
+            ],
+            "selected": [
+                1,
+                2
+            ],
+            "status": 0
+        },
+        {
+            "action": "move",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "Cannot create temporary scene file 'C:/Users/serge/AppData/Local/Packages/sandbox.{1b18585a-72c0-4b53-ad45-e9e199f0d4c1}/AC/Temp/EngineCommandlets-DlCfDx/1.scene.json.tmp.29348.1' (Windows error 5)",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                }
+            ],
+            "selected": [
+                1,
+                2
+            ],
+            "status": 6
+        },
+        {
+            "action": "select",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                }
+            ],
+            "selected": [
+                3
+            ],
+            "status": 0
+        }
+    ]
+}

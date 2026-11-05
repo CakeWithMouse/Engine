@@ -1,0 +1,437 @@
+{
+  "release": "2026.11.05.3",
+  "features": [
+    {
+      "status": "passed",
+      "actual": "Создал чистый проект через штатный launcher CLI.",
+      "feature_id": "create-nocode",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Создал чистый проект через штатный launcher CLI.",
+      "evidence": "evidence/fresh-create.log"
+    },
+    {
+      "status": "passed",
+      "actual": "Выполнил --enable-code; SDK создал C++ проект и первую DLL.",
+      "feature_id": "enable-cpp",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Выполнил --enable-code; SDK создал C++ проект и первую DLL.",
+      "evidence": "evidence/fresh-enable.log"
+    },
+    {
+      "status": "passed",
+      "actual": "Повторно собрал обновлённую копию CalmCity через launcher.",
+      "feature_id": "build-activate",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Повторно собрал обновлённую копию CalmCity через launcher.",
+      "evidence": "evidence/project-build.log"
+    },
+    {
+      "status": "passed",
+      "actual": "Новая DLL успешно заменена в работающем процессе; CarMover продолжал тикать после замены, x=-5.48→-5.28.",
+      "feature_id": "hot-reload",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Новая DLL успешно заменена в работающем процессе; CarMover продолжал тикать после замены, x=-5.48→-5.28.",
+      "evidence": "evidence/r3/reload-r3.result.json"
+    },
+    {
+      "status": "passed",
+      "actual": "ProjectGame выбран через ENGINE_GAME/ProjectGameFactory; реальный .3 runtime создал город, а CarMover изменил позицию между снимками.",
+      "feature_id": "project-game",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "ProjectGame выбран через ENGINE_GAME/ProjectGameFactory; реальный .3 runtime создал город, а CarMover изменил позицию между снимками.",
+      "evidence": "evidence/r3/calmcity-frame-r3.log"
+    },
+    {
+      "status": "passed",
+      "actual": "В штатном project.scene созданы Cube, Sphere, Plane, Cylinder, Cone, Pyramid; 8 операций сохранения/создания завершились status=0.",
+      "feature_id": "scene-primitives",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "В штатном project.scene созданы Cube, Sphere, Plane, Cylinder, Cone, Pyramid; 8 операций сохранения/создания завершились status=0.",
+      "evidence": "evidence/r3/city-primitives-r3.result.json"
+    },
+    {
+      "status": "passed",
+      "actual": "На сцене города создан и удалён Temporary plaza; Undo вернул удалённый клон. Все 21 операции status=0.",
+      "feature_id": "scene-create-delete",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "На сцене города создан и удалён Temporary plaza; Undo вернул удалённый клон. Все 21 операции status=0.",
+      "evidence": "evidence/r3/city-scene-r3.result.json"
+    },
+    {
+      "status": "passed",
+      "actual": "West/East block назначены детьми Central block; сериализованные parent IDs проверены после Save As/Load.",
+      "feature_id": "scene-hierarchy",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "West/East block назначены детьми Central block; сериализованные parent IDs проверены после Save As/Load.",
+      "evidence": "evidence/r3/city-scene-r3.result.json"
+    },
+    {
+      "status": "passed",
+      "actual": "Групповой nudge двух блоков по X/Z измерен до/после; Undo восстановил исходные позиции, Redo повторил шаг.",
+      "feature_id": "scene-transform",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Групповой nudge двух блоков по X/Z измерен до/после; Undo восстановил исходные позиции, Redo повторил шаг.",
+      "evidence": "evidence/r3/city-scene-r3.result.json"
+    },
+    {
+      "status": "passed",
+      "actual": "Commandlet scene.property изменил Gameplay.Camera /fov на 72 и вернул сериализованные свойства.",
+      "feature_id": "scene-properties",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Commandlet scene.property изменил Gameplay.Camera /fov на 72 и вернул сериализованные свойства.",
+      "evidence": "evidence/commandlets/scene.property.result.json"
+    },
+    {
+      "status": "passed",
+      "actual": "Custom CarMover projectData speed=3.5/moving/version сериализованы и прочитаны у оригинала и дубликата.",
+      "feature_id": "scene-codec",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Custom CarMover projectData speed=3.5/moving/version сериализованы и прочитаны у оригинала и дубликата.",
+      "evidence": "evidence/r3/city-scene-r3.result.json"
+    },
+    {
+      "status": "passed",
+      "actual": "Дубликат Moving car сохранил пользовательские данные CarMover и получил новый ID/имя.",
+      "feature_id": "scene-clone",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Дубликат Moving car сохранил пользовательские данные CarMover и получил новый ID/имя.",
+      "evidence": "evidence/r3/city-scene-r3.result.json"
+    },
+    {
+      "status": "passed",
+      "actual": "Город сохранён через Save As, затем New и Load; сериализованная сцена восстановила 20 объектов и custom data.",
+      "feature_id": "scene-save-load",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Город сохранён через Save As, затем New и Load; сериализованная сцена восстановила 20 объектов и custom data.",
+      "evidence": "evidence/r3/city-scene-r3.result.json"
+    },
+    {
+      "status": "passed",
+      "actual": "Создана новая сцена, сохранена под новым путём, после чего загружена отдельной операцией.",
+      "feature_id": "scene-new-save-as",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Создана новая сцена, сохранена под новым путём, после чего загружена отдельной операцией.",
+      "evidence": "evidence/r3/city-scene-r3.result.json"
+    },
+    {
+      "status": "passed",
+      "actual": "Выбрана пара городских блоков, групповое перемещение и Undo/Redo проверены по точным позициям объектов.",
+      "feature_id": "scene-groups",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Выбрана пара городских блоков, групповое перемещение и Undo/Redo проверены по точным позициям объектов.",
+      "evidence": "evidence/r3/city-scene-r3.result.json"
+    },
+    {
+      "status": "partial",
+      "actual": "Проверен векторный шаг gizmo.snap=0.5; углы и UI drag не проверялись.",
+      "feature_id": "scene-snapping",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Проверен векторный шаг gizmo.snap=0.5; углы и UI drag не проверялись.",
+      "evidence": "evidence/commandlets/gizmo.snap.result.json"
+    },
+    {
+      "status": "passed",
+      "actual": "Командлет выбрал West/Central и отдельную группу West/East; возвращённый selected ID список соответствует запросу.",
+      "feature_id": "scene-select",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Командлет выбрал West/Central и отдельную группу West/East; возвращённый selected ID список соответствует запросу.",
+      "evidence": "evidence/r3/city-scene-r3.result.json"
+    },
+    {
+      "status": "passed",
+      "actual": "На свежем no-code CLI проекте нативный UI workflow создал группу, выполнил batch move/duplicate/undo/redo, сохранил сцену и startupScene, записал unsaved recovery, затем завершился через TerminateProcess. Новый процесс нашёл recovery record, восстановил сцену из 7 объектов и проверил moduleSha256.",
+      "feature_id": "scene-recovery",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "На свежем no-code CLI проекте нативный UI workflow создал группу, выполнил batch move/duplicate/undo/redo, сохранил сцену и startupScene, записал unsaved recovery, затем завершился через TerminateProcess. Новый процесс нашёл recovery record, восстановил сцену из 7 объектов и проверил moduleSha256.",
+      "evidence": [
+        "evidence/r3/scene-recovery/workflow.log",
+        "evidence/r3/scene-recovery/recovery-check.log"
+      ]
+    },
+    {
+      "status": "partial",
+      "actual": "Игра запущена во внешнем runtime; editor Play/Pause/Resume/Stop не проверялись.",
+      "feature_id": "play",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Игра запущена во внешнем runtime; editor Play/Pause/Resume/Stop не проверялись.",
+      "evidence": "evidence/save-process.log"
+    },
+    {
+      "status": "passed",
+      "actual": "Запустил EngineRuntime напрямую с --mode game, завершил 7 кадров с exit 0.",
+      "feature_id": "external",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Запустил EngineRuntime напрямую с --mode game, завершил 7 кадров с exit 0.",
+      "evidence": "evidence/save-process.log"
+    },
+    {
+      "status": "partial",
+      "actual": "В тестовом игровом сценарии CarMover.Tick изменил x 5.6 -> 3.1 и продолжил после load до 5.35; живой delta-time не измерялся.",
+      "feature_id": "time",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "В тестовом игровом сценарии CarMover.Tick изменил x 5.6 -> 3.1 и продолжил после load до 5.35; живой delta-time не измерялся.",
+      "evidence": "evidence/SaveGameSelfTest.log"
+    },
+    {
+      "status": "passed",
+      "actual": "Камера города отрисовала перспективный кадр; screen-ray в центре вернул направление -Z.",
+      "feature_id": "camera-perspective",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Камера города отрисовала перспективный кадр; screen-ray в центре вернул направление -Z.",
+      "evidence": "evidence/commandlets/camera.screen-ray.result.json"
+    },
+    {
+      "status": "not-tested",
+      "actual": "Не проверялось в этой порции.",
+      "feature_id": "model-import",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Отдельное действие не запускалось в ограниченной порции роли 1.",
+      "evidence": null
+    },
+    {
+      "status": "not-tested",
+      "actual": "Не проверялось в этой порции.",
+      "feature_id": "model-blend",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Отдельное действие не запускалось в ограниченной порции роли 1.",
+      "evidence": null
+    },
+    {
+      "status": "not-tested",
+      "actual": "Не проверялось в этой порции.",
+      "feature_id": "texture-import",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Отдельное действие не запускалось в ограниченной порции роли 1.",
+      "evidence": null
+    },
+    {
+      "status": "not-tested",
+      "actual": "Не проверялось в этой порции.",
+      "feature_id": "asset-reimport",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Отдельное действие не запускалось в ограниченной порции роли 1.",
+      "evidence": null
+    },
+    {
+      "status": "passed",
+      "actual": "Материал по /Game/Materials/WarmStone.mat разрешился и загружен для West block.",
+      "feature_id": "asset-paths",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Материал по /Game/Materials/WarmStone.mat разрешился и загружен для West block.",
+      "evidence": null
+    },
+    {
+      "status": "passed",
+      "actual": "Release .3 before-fix: bare CubeComponent::CreateInstance без материала дал некорректный визуальный вывод (BUG-R2-006); независимая clean CLI копия, пересобранная замороженным .4 SDK без обхода API, после 30 кадров визуально показывает три раздельные копии X=-3/0/3. MeshComponent контроль также показывает три. Оба .4 процесса exit0, 1000x500 BMP written=1.",
+      "feature_id": "instances",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "A/B на одинаковых positions/scale/colors и orthographic top-down SceneCamera: .3 fail сохранён, .4 post-fix Cube и Mesh оба pass; два новых .4 BMP визуально проверены.",
+      "evidence": [
+        "evidence/r3/instance-legacy-topdown-r3.bmp",
+        "evidence/r3/instance-mesh-topdown-r3.bmp",
+        "evidence/r4/instance-legacy-topdown-r4.bmp",
+        "evidence/r4/instance-mesh-topdown-r4.bmp",
+        "evidence/r4/instance-legacy-r4.log",
+        "evidence/r4/instance-mesh-r4.log"
+      ]
+    },
+    {
+      "status": "partial",
+      "actual": "Автогенерация сократила сферический LOD с 528 до 264 треугольников; кадр распределил 5 объектов по двум LOD.",
+      "feature_id": "lod",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Автогенерация сократила сферический LOD с 528 до 264 треугольников; кадр распределил 5 объектов по двум LOD.",
+      "evidence": "evidence/LodPanel.log"
+    },
+    {
+      "status": "partial",
+      "actual": "На сфере автогенератор создал LOD1: 528→264 треугольника (target 264), error=0.0236867, silhouette drift=0%; прочие mesh tools не проверялись.",
+      "feature_id": "mesh-tools",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "На сфере автогенератор создал LOD1: 528→264 треугольника (target 264), error=0.0236867, silhouette drift=0%; прочие mesh tools не проверялись.",
+      "evidence": "evidence/final-frame.log"
+    },
+    {
+      "status": "passed",
+      "actual": "West block получил /Game/Materials/WarmStone.mat; LodPanel.log фиксирует loaded=1.",
+      "feature_id": "material-assign",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "West block получил /Game/Materials/WarmStone.mat; LodPanel.log фиксирует loaded=1.",
+      "evidence": "evidence/LodPanel.log"
+    },
+    {
+      "status": "partial",
+      "actual": "Tint/Gloss заданы в WarmStone.mat, но отдельное редактирование параметров не проверялось.",
+      "feature_id": "material-params",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Tint/Gloss заданы в WarmStone.mat, но отдельное редактирование параметров не проверялось.",
+      "evidence": "evidence/../calm-city-source.zip"
+    },
+    {
+      "status": "passed",
+      "actual": "На настоящем Qt UI material editor открыт; сняты UI кадры редактора параметров/texture slots.",
+      "feature_id": "material-editor",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "На настоящем Qt UI material editor открыт; сняты UI кадры редактора параметров/texture slots.",
+      "evidence": "evidence/r3/ui-editor-material.png"
+    },
+    {
+      "status": "passed",
+      "actual": "UI suite открыл graph с намеренной ошибкой и показал diagnostics; 5029 checks завершились успешно.",
+      "feature_id": "material-errors",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "UI suite открыл graph с намеренной ошибкой и показал diagnostics; 5029 checks завершились успешно.",
+      "evidence": "evidence/r3/ui-editor-material-graph-error.png"
+    },
+    {
+      "status": "partial",
+      "actual": "UI suite выполнил настройки материала/opacity map; mask path проверен, но отдельный D3D blend comparison не сохранён.",
+      "feature_id": "material-blends",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "UI suite выполнил настройки материала/opacity map; mask path проверен, но отдельный D3D blend comparison не сохранён.",
+      "evidence": "evidence/r3/ui-editor-material.png"
+    },
+    {
+      "status": "passed",
+      "actual": "Warm Light получил новый цвет, интенсивность 1.25 и радиус 13; визуальный кадр создан.",
+      "feature_id": "light-point",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Warm Light получил новый цвет, интенсивность 1.25 и радиус 13; визуальный кадр создан.",
+      "evidence": "evidence/calm-city-lod.bmp"
+    },
+    {
+      "status": "partial",
+      "actual": "Настройки directional light/shadows изменялись и отображались в native inspector; собственный D3D кадр сохраняет исходное состояние города.",
+      "feature_id": "light-sun",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Настройки directional light/shadows изменялись и отображались в native inspector; собственный D3D кадр сохраняет исходное состояние города.",
+      "evidence": "evidence/r3/ui-directional-light-inspector.png"
+    },
+    {
+      "status": "partial",
+      "actual": "Directional light shadow UI проверен; количественная оценка cache/range и сравнимый кадр до/после отсутствуют.",
+      "feature_id": "shadows",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Directional light shadow UI проверен; количественная оценка cache/range и сравнимый кадр до/после отсутствуют.",
+      "evidence": "evidence/r3/ui-directional-light-inspector.png"
+    },
+    {
+      "status": "not-tested",
+      "actual": "Не проверялось в этой порции.",
+      "feature_id": "sky",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Отдельное действие не запускалось в ограниченной порции роли 1.",
+      "evidence": null
+    },
+    {
+      "status": "not-tested",
+      "actual": "Не проверялось в этой порции.",
+      "feature_id": "particles",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Отдельное действие не запускалось в ограниченной порции роли 1.",
+      "evidence": null
+    },
+    {
+      "status": "not-tested",
+      "actual": "Не проверялось в этой порции.",
+      "feature_id": "particle-collision",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Отдельное действие не запускалось в ограниченной порции роли 1.",
+      "evidence": null
+    },
+    {
+      "status": "passed",
+      "actual": "Commandlet изменил/read-back Forward, VSync off, AA=0.",
+      "feature_id": "game-settings",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Commandlet изменил/read-back Forward, VSync off, AA=0.",
+      "evidence": "evidence/commandlets/game.settings.result.json"
+    },
+    {
+      "status": "not-tested",
+      "actual": "Не проверялось в этой порции.",
+      "feature_id": "render-modes",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Отдельное действие не запускалось в ограниченной порции роли 1.",
+      "evidence": null
+    },
+    {
+      "status": "not-tested",
+      "actual": "Не проверялось в этой порции.",
+      "feature_id": "render-resize",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Отдельное действие не запускалось в ограниченной порции роли 1.",
+      "evidence": null
+    },
+    {
+      "status": "partial",
+      "actual": "Изолированная копия проекта версии .0 обновлена до .1 и собрана; старый ABI не проверялся.",
+      "feature_id": "compatibility",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Изолированная копия проекта версии .0 обновлена до .1 и собрана; старый ABI не проверялся.",
+      "evidence": "evidence/project-upgrade.log"
+    },
+    {
+      "status": "not-tested",
+      "actual": "Не проверялось в этой порции.",
+      "feature_id": "render-host",
+      "expected": "Повторить реальный пользовательский сценарий и измерить эффект",
+      "action": "Отдельное действие не запускалось в ограниченной порции роли 1.",
+      "evidence": null
+    },
+    {
+      "status": "passed",
+      "actual": "SaveGame записал всю runtime-сцену; после Load автомобиль восстановился с x=5.6.",
+      "feature_id": "savegame-scene",
+      "expected": "Штатный API/редактор; сравнить сохраненное состояние или кадр до/после",
+      "action": "SaveGame записал всю runtime-сцену; после Load автомобиль восстановился с x=5.6.",
+      "evidence": "evidence/SaveGameSelfTest.log"
+    },
+    {
+      "status": "passed",
+      "actual": "Второй новый процесс загрузил тот же слот и продолжил движение до x=5.35.",
+      "feature_id": "savegame-restart",
+      "expected": "Штатный API/редактор; сравнить сохраненное состояние или кадр до/после",
+      "action": "Второй новый процесс загрузил тот же слот и продолжил движение до x=5.35.",
+      "evidence": "evidence/manual-1.save.json"
+    },
+    {
+      "status": "passed",
+      "actual": "D3D BMP визуально просмотрен; панель: visible 8/8, hidden/distance/frustum=0, LOD0=5, LOD1=5.",
+      "feature_id": "lod-panel",
+      "expected": "Штатный API/редактор; сравнить сохраненное состояние или кадр до/после",
+      "action": "D3D BMP визуально просмотрен; панель: visible 8/8, hidden/distance/frustum=0, LOD0=5, LOD1=5.",
+      "evidence": "evidence/calm-city-lod.bmp"
+    },
+    {
+      "status": "passed",
+      "actual": "На настоящем Qt окне AI paste вставил Warm Stone graph, Undo/Redo восстановили состояния, Apply/Save сохранили sidecar и HLSL.",
+      "feature_id": "material-graph",
+      "expected": "Штатный API/редактор; сравнить сохраненное состояние или кадр до/после",
+      "action": "На настоящем Qt окне AI paste вставил Warm Stone graph, Undo/Redo восстановили состояния, Apply/Save сохранили sidecar и HLSL.",
+      "evidence": "evidence/r3/material-graph-r3.png"
+    },
+    {
+      "status": "passed",
+      "actual": "Блокировка sidecar дала ожидаемое save accepted=false/dirty=true и access denied; Revert очистил dirty, следующий Save прошёл.",
+      "feature_id": "material-graph-write-failure",
+      "expected": "Штатный API/редактор; сравнить сохраненное состояние или кадр до/после",
+      "action": "Блокировка sidecar дала ожидаемое save accepted=false/dirty=true и access denied; Revert очистил dirty, следующий Save прошёл.",
+      "evidence": "evidence/r3/material-graph-write-failure-r3.result.json"
+    },
+    {
+      "status": "partial",
+      "actual": "Native-window EditorUiTests assertions проверили отказ invalid names, сохранение отклонённого ввода, Character default parent/header, self-inheritance/duplicate rejection и корректное отсутствие -Base в Object режиме. Suite exit0, 5029 checks; не все четыре kind созданы в UI.",
+      "feature_id": "class-wizard",
+      "expected": "Проверить UX проверки имени/родителя в мастере классов",
+      "action": "Те же проверки выполнены в штатном CodeClassDialog через EditorUiTests",
+      "evidence": [
+        "evidence/r3/class-wizard-checks.md",
+        "evidence/r3/editor-ui-r3.log"
+      ]
+    }
+  ],
+  "runtime": "E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime",
+  "project": "E:/Engine/Engine/build/playtests/20261105-r2/calm-city/CalmCityR3",
+  "role": "1 calm-city"
+}

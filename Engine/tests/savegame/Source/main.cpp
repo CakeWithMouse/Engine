@@ -9,6 +9,7 @@
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/Light/DirectionalLightComponent.h>
 #include <Engine/Components/Character.h>
+#include <Engine/MainGame/CharacterController.h>
 #include <Engine/Render/MeshPrimitives.h>
 #include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/Resources/Paths.h>
@@ -72,6 +73,27 @@ int wmain(int argc,wchar_t** argv){try{
         std::cout<<"SaveGame cross-process read passed\n";return 0;
     }
     GameSession session;TestGame game;Configure(game,session,root);
+    // BUG-R2-002: a restored disabled controller must ignore both movement and look.
+    {
+        GameSession inputSession;TestGame inputGame;Configure(inputGame,inputSession,root);
+        std::unique_ptr<GameComponent> actor=std::make_unique<Character>();
+        auto* character=static_cast<Character*>(actor.get());character->standardControl=true;
+        const auto added=inputGame.GetScene().AddComponent("Controlled",actor,"Character");
+        inputGame.SetCharacterController(std::make_unique<CharacterController>(inputGame));
+        auto* control=inputGame.GetCharacterController();control->Possess(added.id);control->BindInput();
+        for(bool enabled:{false,true}){
+            control->SetEnabled(enabled);const auto saved=inputGame.Saves().Capture();
+            inputGame.Saves().Restore(saved);control=inputGame.GetCharacterController();
+            Player camera;control->UpdateCamera(camera);const auto beforeYaw=camera.GetYaw();
+            const auto beforePosition=control->GetCharacter()->GetLocalPosition();
+            auto& input=inputGame.GetInput();input.ReleaseAll();input.SetContextEnabled(Input::Context::Game,true);
+            input.SetKey(Keys::W,true);input.SetKey(Keys::RightButton,true);input.AddPointer(60,0);input.Tick(.1f);
+            control->Tick(.1f);control->UpdateCamera(camera);
+            Check(enabled ? std::abs(camera.GetYaw()-beforeYaw)>.01f : camera.GetYaw()==beforeYaw,"restored controller enabled state gates look");
+            Check(enabled ? control->GetCharacter()->GetLocalPosition()!=beforePosition : control->GetCharacter()->GetLocalPosition()==beforePosition,"restored controller enabled state gates movement");
+            input.ReleaseAll();
+        }
+    }
     std::unique_ptr<GameComponent> unused=std::make_unique<Probe>();auto hole=game.GetScene().AddComponent("removed",unused,"Probe");game.GetScene().RemoveComponent(hole.id);
     std::unique_ptr<GameComponent> parent=std::make_unique<Probe>(),child=std::make_unique<Probe>();
     const auto p=game.GetScene().AddComponent("Parent",parent,"Probe"),c=game.GetScene().AddComponent("Child",child,"Probe");

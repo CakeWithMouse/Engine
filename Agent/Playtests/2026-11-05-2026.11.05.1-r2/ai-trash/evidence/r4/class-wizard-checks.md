@@ -1,0 +1,3 @@
+# Supplemental class-wizard evidence
+
+The fresh native Windows Qt UI run used the role4 `TrashUiProbeFresh` project and frozen Engine UI test binary, and completed with exit 0: `EditorUiTests: 5028 checks passed` (`editor-ui-probe-5028.log`). In `Editor/tests/EditorUiTests.cpp` near line 480, `CodeClassDialog` was exercised for empty and invalid class names (spaces, suffix `.h`, leading digit, keyword, reserved device name), inline validation with rejected input preserved, trimmed `Character` name/default parent/header, self-inheritance rejection, `Object` mode omitting an empty `-Base`, and duplicate-source rejection. This is a partial class-wizard result; it does not claim all four class kinds were created through the UI.

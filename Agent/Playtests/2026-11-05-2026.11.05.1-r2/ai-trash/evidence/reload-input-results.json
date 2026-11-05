@@ -1,0 +1,38 @@
+[
+  {
+    "passed": true,
+    "count": 0,
+    "step": "before",
+    "phase": "original"
+  },
+  {
+    "passed": true,
+    "count": 1,
+    "step": "afterKey",
+    "phase": "original"
+  },
+  {
+    "passed": true,
+    "count": 2,
+    "step": "afterClick",
+    "phase": "original"
+  },
+  {
+    "passed": true,
+    "count": 0,
+    "step": "before",
+    "phase": "reloaded"
+  },
+  {
+    "passed": true,
+    "count": 1,
+    "step": "afterKey",
+    "phase": "reloaded"
+  },
+  {
+    "passed": true,
+    "count": 2,
+    "step": "afterClick",
+    "phase": "reloaded"
+  }
+]

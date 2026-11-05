@@ -44,6 +44,7 @@
     <ClCompile Include="Source\MainGame\GameTrace.cpp" />
     <ClCompile Include="Source\MainGame\SaveGame.cpp" />
     <ClCompile Include="Source\MainGame\SaveState.cpp" />
+    <ClCompile Include="Source\MainGame\RenderDiagnostics.cpp" />
     <ClCompile Include="Source\Scene\SceneCommands.cpp" />
     <ClCompile Include="Source\Scene\SceneDocument.cpp" />
     <ClCompile Include="Source\Scene\SceneAssets.cpp" />

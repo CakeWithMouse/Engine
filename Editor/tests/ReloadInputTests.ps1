@@ -7,7 +7,14 @@ if(Test-Path $Output){throw 'Use a new output directory'}
 $Project=[IO.Path]::GetFullPath($Project);$manifest=Get-Content $Project -Raw|ConvertFrom-Json
 Copy-Item -LiteralPath (Join-Path (Split-Path $Project) $manifest.module) -Destination "$Output/Candidate.dll"
 @{project=$Project;candidate="$Output/Candidate.dll";key=84;clickX=95;clickY=131}|ConvertTo-Json|Set-Content "$Output/request.json" -Encoding utf8
-& "$repo/Game/build/x64/Release/Runtime/EngineCommandlets.exe" project.reload-input "$Output/request.json" "$Output/result.json" *> "$Output/console.log"
+$previousTemp=$env:TEMP;$previousTmp=$env:TMP
+[IO.Directory]::CreateDirectory("$Output/Temp")|Out-Null
+try {
+    # Qt history and Engine atomic scene writes must share a writable directory,
+    # including restricted Windows hosts whose default AppContainer temp denies IO.
+    $env:TEMP="$Output/Temp";$env:TMP=$env:TEMP
+    & "$repo/Game/build/x64/Release/Runtime/EngineCommandlets.exe" project.reload-input "$Output/request.json" "$Output/result.json" *> "$Output/console.log"
+} finally {$env:TEMP=$previousTemp;$env:TMP=$previousTmp}
 if($LASTEXITCODE){throw 'Reload command failed'}
 $value=Get-Content "$Output/result.json" -Raw|ConvertFrom-Json
 $checks=@()

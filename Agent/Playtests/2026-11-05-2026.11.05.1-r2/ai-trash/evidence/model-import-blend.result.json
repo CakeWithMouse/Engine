@@ -1,0 +1,10 @@
+{
+    "asset": "/Game/Models/blend-packed_1/blend-packed.glb",
+    "clips": 0,
+    "indices": 36,
+    "material": "/Game/Models/blend-packed_1/Materials/Material_0.mat",
+    "meshes": 1,
+    "ok": true,
+    "placed": true,
+    "type": "Engine.Model"
+}

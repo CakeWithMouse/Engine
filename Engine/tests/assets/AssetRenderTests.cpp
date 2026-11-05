@@ -3,12 +3,15 @@
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
 #include <Engine/Components/SpecificComponents/MeshComponent.h>
+#include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
+#include <Engine/Components/SpecificComponents/FBXComponent.h>
 #include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
 #include <Engine/Render/MeshPrimitives.h>
 #include <Engine/Scene/SceneAssets.h>
 #include <Engine/Resources/Paths.h>
 #include "../../Source/Resources/VfsRead.h"
 #include <fstream>
+#include <iostream>
 
 void Check(bool, const char*);
 namespace
@@ -63,9 +66,29 @@ void RunAssetRenderTests(HWND hwnd, const std::filesystem::path& engineContent,
     Check(game.GetScene().SetTextureAsset(added.id,"") == SceneResult::Ok, "clear GPU texture");
     Check(game.RenderViewportFrame(0) && game.greenPixels == before, "clearing restores untextured pixels");
 
+    // SceneDocument assigns texture paths before there is a Game/device. All
+    // mesh types must realize that pending texture during resource attachment.
+    game.GetScene().RemoveComponent(added.id);
+    bool pendingTexturesLoaded=true;
+    for(int kind=0;kind<3;++kind){
+        if(kind==0){auto mesh=std::make_unique<MeshComponent>();mesh->SetMesh(MeshPrimitives::Cube());object=std::move(mesh);}
+        else if(kind==1){auto mesh=std::make_unique<InstancedMeshComponent>();Check(mesh->SetLod(0,MeshPrimitives::Cube()),"pending texture LOD");mesh->AddInstance(MeshInstance{});object=std::move(mesh);}
+        else object=std::make_unique<FBXComponent>();
+        object->SetColor({1,1,1,1});
+        Check(object->TrySetTexture(texture)&&!object->HasTexture(),"texture queued before device");
+        added=game.GetScene().AddComponent("pending texture",object);
+        Check(added.result==SceneResult::Ok&&game.RenderViewportFrame(0),"render pending texture");
+        const bool loaded=game.GetScene().FindComponent(added.id)->HasTexture();
+        const bool visible=kind==2||game.greenPixels>100;
+        std::cout<<"PendingTexture kind="<<kind<<" loaded="<<loaded<<" visible="<<visible<<'\n';
+        pendingTexturesLoaded&=loaded&&visible;
+        if(kind<2)Check(game.DumpFrame((content.parent_path()/("pending-texture-"+std::to_string(kind)+".bmp")).u8string()),"pending texture screenshot");
+        game.GetScene().RemoveComponent(added.id);
+    }
+    Check(pendingTexturesLoaded,"textures assigned before attachment become GPU resources and visible pixels");
+
     // Scene primitives are meshes drawn by materials: the default one shows the object's texture and a
     // material asset (here unlit green, in a project path with Cyrillic letters) replaces the look.
-    game.GetScene().RemoveComponent(added.id);
     auto meshCube = std::make_unique<MeshComponent>(); meshCube->SetMesh(MeshPrimitives::Cube()); meshCube->SetColor({1,1,1,1});
     object = std::move(meshCube);
     added = game.GetScene().AddComponent("mesh cube",object,"Primitive.Cube");

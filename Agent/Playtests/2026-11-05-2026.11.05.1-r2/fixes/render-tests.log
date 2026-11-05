@@ -1,0 +1,80 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator.vcxproj -> E:\Engine\Engine\build\x64\Release\ComponentGenerator.exe
+  ComponentGenerator: 0 component(s), RenderDiagnosticsTests
+  GeneratedComponents.cpp
+  main.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\RenderDiagnosticsTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\RenderDiagnosticsTests.exp
+  RenderDiagnosticsTests.vcxproj -> E:\Engine\Engine\build\x64\Release\RenderDiagnosticsTests.exe
+
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 640x480
+FontAtlas: 161 glyphs at 14 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+frame-dump E:\Engine\Engine\build\render-diagnostics-bad35adb3cb84ef8b7a2b6016d207740\embedded-near.bmp written=1 size=640x480
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Invalidated all 4 cached shader(s)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+RENDER / LOD    F7 hide | F8 next
+Frame 5 | CPU submission counters
+Draws 1  instances 1  dispatch 0
+Indices 36 (all passes)
+Component 1/1  Units
+Color visible 1 / 4
+Hidden 1  distance 1  frustum 1
+Camera distance 30.0..1000.4
+Draw limit 100.0 | LOD by distance
+LOD0 mesh: 0 | next >= 15.0 units
+LOD1 mesh: 1
+Buckets may overlap during LOD fade
+Color selection only; shadows counted separately
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+frame-dump E:\Engine\Engine\build\render-diagnostics-bad35adb3cb84ef8b7a2b6016d207740\embedded-small.bmp written=1 size=320x240
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+FontAtlas: 161 glyphs at 14 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+frame-dump E:\Engine\Engine\build\render-diagnostics-bad35adb3cb84ef8b7a2b6016d207740\runtime-near.bmp written=1 size=1000x500
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Invalidated all 4 cached shader(s)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+RENDER / LOD    F7 hide | F8 next
+Frame 5 | CPU submission counters
+Draws 1  instances 1  dispatch 0
+Indices 36 (all passes)
+Component 1/1  Units
+Color visible 1 / 4
+Hidden 1  distance 1  frustum 1
+Camera distance 30.0..1000.4
+Draw limit 100.0 | LOD by distance
+LOD0 mesh: 0 | next >= 15.0 units
+LOD1 mesh: 1
+Buckets may overlap during LOD fade
+Color selection only; shadows counted separately
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+frame-dump E:\Engine\Engine\build\render-diagnostics-bad35adb3cb84ef8b7a2b6016d207740\runtime-small.bmp written=1 size=320x240
+RenderDiagnosticsTests: 82 checks passed
+Evidence: E:\Engine\Engine\build\render-diagnostics-bad35adb3cb84ef8b7a2b6016d207740

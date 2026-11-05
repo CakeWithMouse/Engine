@@ -77,3 +77,5 @@
 
 - [059: CLI-диагностика launcher](059-launcher-cli-diagnostics.md) — реализована, проверены справка, ошибки и создание C++-проекта.
 - [060: SaveGame сцены и базовых классов](060-savegame.md) — реализация и проверка; [руководство](../../Engine/docs/SAVEGAME.md), [HTML-схема](../../Engine/docs/SAVEGAME.html).
+- [061: Статистика завершённого кадра и панель LOD](061-render-diagnostics.md) — API, F7/F8 и проверка автором бомбардировки.
+- [062: Повторный круг разработчиков и исправления .5](062-developer-round-2-fixes.md) — LOD, instancing, текстуры, SaveGame/input, консольные сценарии и повторные игровые проверки.

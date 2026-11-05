@@ -1,0 +1,397 @@
+{
+    "ok": true,
+    "steps": [
+        {
+            "action": "new",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "City plaza cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                1
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "City plaza cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "Plaza fountain sphere",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Sphere"
+                }
+            ],
+            "selected": [
+                2
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "City plaza cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "Plaza fountain sphere",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Sphere"
+                },
+                {
+                    "id": 3,
+                    "name": "Plaza pavement",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                }
+            ],
+            "selected": [
+                3
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "City plaza cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "Plaza fountain sphere",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Sphere"
+                },
+                {
+                    "id": 3,
+                    "name": "Plaza pavement",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 4,
+                    "name": "Lamp cylinder",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cylinder"
+                }
+            ],
+            "selected": [
+                4
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "City plaza cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "Plaza fountain sphere",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Sphere"
+                },
+                {
+                    "id": 3,
+                    "name": "Plaza pavement",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 4,
+                    "name": "Lamp cylinder",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 5,
+                    "name": "Tree canopy cone",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cone"
+                }
+            ],
+            "selected": [
+                5
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "City plaza cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "Plaza fountain sphere",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Sphere"
+                },
+                {
+                    "id": 3,
+                    "name": "Plaza pavement",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 4,
+                    "name": "Lamp cylinder",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 5,
+                    "name": "Tree canopy cone",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cone"
+                },
+                {
+                    "id": 6,
+                    "name": "Roof pyramid",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Pyramid"
+                }
+            ],
+            "selected": [
+                6
+            ],
+            "status": 0
+        },
+        {
+            "action": "save",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "City plaza cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "Plaza fountain sphere",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Sphere"
+                },
+                {
+                    "id": 3,
+                    "name": "Plaza pavement",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 4,
+                    "name": "Lamp cylinder",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 5,
+                    "name": "Tree canopy cone",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cone"
+                },
+                {
+                    "id": 6,
+                    "name": "Roof pyramid",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Pyramid"
+                }
+            ],
+            "selected": [
+                6
+            ],
+            "status": 0
+        }
+    ]
+}

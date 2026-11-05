@@ -90,6 +90,11 @@ void CharacterController::SerializeSaveGame(SaveArchive& a)
         s.Field("yaw",yaw_);s.Field("pitch",pitch_);s.Field("distance",distance_);s.Field("height",height_);
         s.Field("sensitivity",sensitivity_);s.Field("enabled",enabled_);
     });
+    if(a.IsReading()){
+        // Restore local input gating without resetting the live game's input while
+        // a candidate controller is still being prepared transactionally.
+        inputScope_.SetEnabled(enabled_);right_=forward_=0;
+    }
 }
 void GameSubsystem::SerializeSaveGame(SaveArchive& a)
 { a.Section("GameSubsystem",[&](SaveArchive& s){s.Version(1);s.Field("tickEnabled",bTickEnabled);}); }

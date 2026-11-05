@@ -1,0 +1,343 @@
+{
+    "frames": 7,
+    "ok": true,
+    "steps": [
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "CityControls",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "CityControls",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ]
+        },
+        {
+            "kind": "focus",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "CityControls",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ]
+        },
+        {
+            "kind": "cursor",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "CityControls",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "CityControls",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "CityControls",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "CityControls",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "CuriousCity.Interaction"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "CityControls",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "CuriousCity.Interaction"
+                },
+                {
+                    "name": "House_1",
+                    "position": [
+                        -4,
+                        0.75,
+                        -2
+                    ],
+                    "type": "CuriousCity.House"
+                }
+            ]
+        }
+    ]
+}

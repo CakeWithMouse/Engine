@@ -15,6 +15,7 @@
 #include <glm/vec3.hpp>
 
 #include <Engine/Render/ShaderConstants.h>
+#include <Engine/Render/LodDiagnostics.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/MainGame/Player.h>
 #include <Engine/MainGame/GameSession.h>
@@ -113,6 +114,17 @@ struct FrameStats
     uint64_t IndicesDrawn = 0;
 
     void Reset() { *this = FrameStats{}; }
+};
+
+/** Published after all main render passes; valid=false before first render/after shutdown.
+ * Read on the game thread. PreUpdate sees the previous rendered frame, including paused renders.
+ * Snapshot excludes the engine diagnostics panel and does not promise successful Present.
+ */
+struct CompletedFrameStats {
+    bool valid=false;
+    uint64_t frameIndex=0;
+    FrameStats counters;
+    std::vector<LodDiagnostics> lodComponents;
 };
 
 /**
@@ -276,6 +288,12 @@ private:
 public:
     // @engine-internal-end
     FrameStats& GetFrameStats() { return Stats; }
+    const CompletedFrameStats& GetCompletedFrameStats() const { return CompletedStats; }
+    void SetRenderDiagnosticsVisible(bool visible) { bRenderDiagnostics=visible; }
+    bool IsRenderDiagnosticsVisible() const { return bRenderDiagnostics; }
+    // Zero selects the first instanced component. F8 cycles while the panel is visible.
+    void SetLodDiagnosticsTarget(uint64_t id) { DiagnosticsTarget=id; }
+    std::vector<std::string> GetRenderDiagnosticsLines() const;
     void CountDraw(uint32_t indexCount, uint32_t instanceCount = 1);
     void CountDispatch(uint32_t dispatchCount = 1) { Stats.Dispatches += dispatchCount; }
     void CountCulledInstances(uint32_t count) { Stats.CulledInstances += count; }
@@ -575,6 +593,12 @@ protected:
     FrameConstants CurrentFrame{};
     FrameStats Stats;
     FrameStats LastFrameStats;
+    CompletedFrameStats CompletedStats;
+    bool bRenderDiagnostics=false, bDiagnosticsKeyWasDown=false, bDiagnosticsNextWasDown=false;
+    uint64_t DiagnosticsTarget=0;
+    std::unique_ptr<UIComponent> DiagnosticsHud;
+    void PublishFrameStats();
+    void RenderDiagnosticsPanel();
     ShaderCompileVariant CurrentPassVariant = ShaderCompileVariant::Default;
     bool bFrustumCulling = true;
     bool bOverlayKeyWasDown = false;

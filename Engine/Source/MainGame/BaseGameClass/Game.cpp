@@ -4,6 +4,7 @@
 #include <Engine/MainGame/CharacterController.h>
 #include <Engine/Components/Character.h>
 #include <Engine/Components/SpecificComponents/UIComponent.h>
+#include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
 #include <Engine/UI/ProjectHud.h>
 
 #include <algorithm>
@@ -311,6 +312,7 @@ void Game::DestroyResources(bool preserveScene)
 
     // Components first: they observe cube maps and shaders owned by the caches below.
     ProjectHudComponent.reset();
+    DiagnosticsHud.reset();CompletedStats={};LastFrameStats={};
     GameplayInitialized = false;
     if (!preserveScene) scene.Clear();
     materialCache.clear();
@@ -1233,7 +1235,10 @@ ComponentShaderVariant& Game::ResolveComponentShaders(GameComponent* Component, 
         return slot;
     }
 
-    const std::string defaultPath = DefaultShaderPath();
+    // The generic shader has no SV_InstanceID and would draw every copy at the
+    // component origin. Empty shader names must resolve to this component's stream.
+    const std::string defaultPath = dynamic_cast<InstancedMeshComponent*>(Component)
+        ? EnginePaths::Shader("InstancedMesh.hlsl").generic_u8string() : DefaultShaderPath();
     const std::string& vsName = Component->GetVertexShaderName().empty() ? defaultPath : Component->GetVertexShaderName();
     const std::string& psName = Component->GetPixelShaderName().empty() ? defaultPath : Component->GetPixelShaderName();
 
@@ -1554,6 +1559,7 @@ void Game::OnShadersInvalidated()
     };
     for (auto& pair : Components) { resetShaders(pair.second.get()); resetShaders(pair.second->GetRenderComponent()); }
     resetShaders(ProjectHudComponent.get());
+    resetShaders(DiagnosticsHud.get());
 
     // The fallback pair keeps the old shaders alive until the new ones compile.
     InitShaderBuffers();
@@ -3714,6 +3720,18 @@ void Game::ApplyPendingResize()
 
 void Game::ProcessHotkeys()
 {
+    // Both standalone Raw Input and embedded viewport input feed ActionInput.
+    const bool diagnosticsDown=ActionInput.IsPhysicalKeyDown(Keys::F7);
+    if(diagnosticsDown&&!bDiagnosticsKeyWasDown)bRenderDiagnostics=!bRenderDiagnostics;
+    bDiagnosticsKeyWasDown=diagnosticsDown;
+    const bool nextDown=ActionInput.IsPhysicalKeyDown(Keys::F8);
+    if(nextDown&&!bDiagnosticsNextWasDown&&bRenderDiagnostics&&!CompletedStats.lodComponents.empty()){
+        const auto& list=CompletedStats.lodComponents;size_t next=0;
+        for(size_t i=0;i<list.size();++i)if(list[i].componentId==DiagnosticsTarget){next=(i+1)%list.size();break;}
+        if(!DiagnosticsTarget&&list.size()>1)next=1;
+        DiagnosticsTarget=list[next].componentId;
+    }
+    bDiagnosticsNextWasDown=nextDown;
     if (!InputDevicePtr)
     {
         return;
@@ -4044,6 +4062,8 @@ void Game::RenderFrame()
         RenderFxaaPass();
     }
 
+    PublishFrameStats();
+    RenderDiagnosticsPanel();
     // Before Present: after it the back buffer is no longer guaranteed to hold this frame.
     if (!PendingFrameDump.empty())
     {

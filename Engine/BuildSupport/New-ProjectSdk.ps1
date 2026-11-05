@@ -27,6 +27,8 @@ New-Item -ItemType Directory -Force (Join-Path $sdk 'Examples'),(Join-Path $sdk 
 Copy-Item -LiteralPath "$engineRoot/../Game/BasicExamples/Source/SessionCounterSubsystem.h" -Destination "$sdk/Examples/SessionCounterSubsystem.h" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/GAME-SUBSYSTEMS.md" -Destination "$sdk/Docs/GAME-SUBSYSTEMS.md" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/SAVEGAME.md" -Destination "$sdk/Docs/SAVEGAME.md" -Force
+Copy-Item -LiteralPath "$engineRoot/docs/RENDER-DIAGNOSTICS.md" -Destination "$sdk/Docs/RENDER-DIAGNOSTICS.md" -Force
+Copy-Item -LiteralPath "$engineRoot/docs/COMMANDLETS.md" -Destination "$sdk/Docs/COMMANDLETS.md" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/SAVEGAME.html" -Destination "$sdk/Docs/SAVEGAME.html" -Force
 Copy-Item -LiteralPath "$engineRoot/examples/TraceExamples.cpp" -Destination "$sdk/Examples/TraceExamples.cpp" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/TRACE-API.md" -Destination "$sdk/Docs/TRACE-API.md" -Force

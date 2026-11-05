@@ -1,0 +1,13 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator.vcxproj -> E:\Engine\Engine\build\x64\Release\ComponentGenerator.exe
+  ComponentGenerator: 0 component(s), SaveGameTests
+  main.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\SaveGameTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\SaveGameTests.exp
+  SaveGameTests.vcxproj -> E:\Engine\Engine\build\x64\Release\SaveGameTests.exe
+
+[VfsRead] using local VFS (no host service)
+SaveGameTests: restored controller enabled state gates look

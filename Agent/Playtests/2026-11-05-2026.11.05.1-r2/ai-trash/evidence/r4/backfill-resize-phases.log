@@ -1,0 +1,3 @@
+backfill resize requested=640x480
+backfill resize-capture target=640x480 preceding-frame=1 upcoming-frame=2 hud-score=0/0
+backfill resize-capture target=320x240 preceding-frame=2 upcoming-frame=3 hud-score=0/0

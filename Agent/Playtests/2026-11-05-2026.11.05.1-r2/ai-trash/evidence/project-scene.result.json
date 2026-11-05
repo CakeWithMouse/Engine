@@ -1,0 +1,488 @@
+{
+    "ok": true,
+    "steps": [
+        {
+            "action": "new",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "TrashProbeA",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                1
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "TrashProbeA",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "TrashProbeB",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                2
+            ],
+            "status": 0
+        },
+        {
+            "action": "select",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "TrashProbeA",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "TrashProbeB",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                1,
+                2
+            ],
+            "status": 0
+        },
+        {
+            "action": "move",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "TrashProbeA",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "TrashProbeB",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                1,
+                2
+            ],
+            "status": 0
+        },
+        {
+            "action": "undo",
+            "canRedo": true,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "TrashProbeA",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "TrashProbeB",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "redo",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "TrashProbeA",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "TrashProbeB",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "select",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "TrashProbeA",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "TrashProbeB",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                1
+            ],
+            "status": 0
+        },
+        {
+            "action": "parent",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "TrashProbeA",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "TrashProbeB",
+                    "parent": 1,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                1
+            ],
+            "status": 0
+        },
+        {
+            "action": "save",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "TrashProbeA",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "TrashProbeB",
+                    "parent": 1,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                1
+            ],
+            "status": 0
+        },
+        {
+            "action": "duplicate",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "TrashProbeA",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "TrashProbeB",
+                    "parent": 1,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 3,
+                    "name": "TrashProbeA 2",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                3
+            ],
+            "status": 0
+        },
+        {
+            "action": "undo",
+            "canRedo": true,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "TrashProbeA",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "TrashProbeB",
+                    "parent": 1,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "new",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "load",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "TrashProbeA",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "TrashProbeB",
+                    "parent": 1,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "delete",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "TrashProbeA",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "undo",
+            "canRedo": true,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "TrashProbeA",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "TrashProbeB",
+                    "parent": 1,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        }
+    ]
+}

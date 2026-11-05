@@ -1,0 +1,51 @@
+{
+  "panel": false,
+  "height": 480,
+  "image": "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\tired-bomber\\api-probes\\final-render-deferred.bmp",
+  "width": 640,
+  "instances": [
+    {
+      "scale": 1,
+      "visible": true,
+      "position": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "scale": 0.6,
+      "visible": true,
+      "position": [
+        -2,
+        0,
+        0
+      ]
+    },
+    {
+      "scale": 0.6,
+      "visible": true,
+      "position": [
+        2,
+        0,
+        0
+      ]
+    }
+  ],
+  "views": [
+    {
+      "orthographic": true,
+      "orthoHeight": 24,
+      "position": [
+        0,
+        8,
+        0
+      ]
+    }
+  ],
+  "screenHeights": [
+    50,
+    20
+  ],
+  "rendering": 1
+}

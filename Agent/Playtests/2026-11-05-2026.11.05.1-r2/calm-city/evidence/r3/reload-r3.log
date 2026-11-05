@@ -1,0 +1,1027 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+auto-lod mesh LOD1: 528 -> 264 triangles (target 264, error 0.0236867, silhouette drift 0%)
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+FontAtlas: 161 glyphs at 14 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 640x480
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 640x480
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: FOUND (version 3)
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+auto-lod mesh LOD1: 528 -> 264 triangles (target 264, error 0.0236867, silhouette drift 0%)
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+FontAtlas: 161 glyphs at 14 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "ok": true,
+    "original": {
+        "afterKey": [
+            {
+                "id": 1,
+                "name": "Ground",
+                "parent": 0,
+                "position": [
+                    0,
+                    -0.5,
+                    0
+                ],
+                "type": "Primitive.Plane"
+            },
+            {
+                "id": 2,
+                "name": "Warm Light",
+                "parent": 0,
+                "position": [
+                    2,
+                    3,
+                    2
+                ],
+                "type": "Light.Point"
+            },
+            {
+                "id": 3,
+                "name": "Cool Light",
+                "parent": 0,
+                "position": [
+                    -3,
+                    2,
+                    1
+                ],
+                "type": "Light.Point"
+            },
+            {
+                "id": 4,
+                "name": "West block",
+                "parent": 0,
+                "position": [
+                    -5,
+                    1.7999999523162842,
+                    -4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 5,
+                "name": "Central block",
+                "parent": 0,
+                "position": [
+                    0,
+                    1.25,
+                    -4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 6,
+                "name": "East block",
+                "parent": 0,
+                "position": [
+                    5,
+                    2.0999999046325684,
+                    -4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 7,
+                "name": "West corner",
+                "parent": 0,
+                "position": [
+                    -5,
+                    1.4500000476837158,
+                    4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 8,
+                "name": "Central corner",
+                "parent": 0,
+                "position": [
+                    0,
+                    1.850000023841858,
+                    4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 9,
+                "name": "East corner",
+                "parent": 0,
+                "position": [
+                    5,
+                    1.350000023841858,
+                    4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 10,
+                "name": "Main street",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.02500000037252903,
+                    0
+                ],
+                "type": "CalmCity.Street"
+            },
+            {
+                "id": 11,
+                "name": "Moving car",
+                "parent": 0,
+                "position": [
+                    -5.28000020980835,
+                    0.550000011920929,
+                    0
+                ],
+                "type": "CalmCity.CarMover"
+            },
+            {
+                "id": 12,
+                "name": "Car roof",
+                "parent": 11,
+                "position": [
+                    0,
+                    0.6499999761581421,
+                    0
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 13,
+                "name": "Front left wheel",
+                "parent": 11,
+                "position": [
+                    0.44999998807907104,
+                    -0.30000001192092896,
+                    -0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 14,
+                "name": "Front right wheel",
+                "parent": 11,
+                "position": [
+                    0.44999998807907104,
+                    -0.30000001192092896,
+                    0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 15,
+                "name": "Rear left wheel",
+                "parent": 11,
+                "position": [
+                    -0.44999998807907104,
+                    -0.30000001192092896,
+                    -0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 16,
+                "name": "Rear right wheel",
+                "parent": 11,
+                "position": [
+                    -0.44999998807907104,
+                    -0.30000001192092896,
+                    0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 17,
+                "name": "North lane stripe",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.05700000002980232,
+                    -0.5
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 18,
+                "name": "South lane stripe",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.05700000002980232,
+                    0.5
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 19,
+                "name": "City overview",
+                "parent": 0,
+                "position": [
+                    14,
+                    12,
+                    18
+                ],
+                "type": ""
+            },
+            {
+                "id": 20,
+                "name": "City viewer",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "type": ""
+            },
+            {
+                "id": 21,
+                "name": "City sun",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "type": "Light.Directional"
+            },
+            {
+                "id": 22,
+                "name": "Street lamp LOD row",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "type": "CalmCity.LodRow"
+            }
+        ],
+        "before": [
+            {
+                "id": 1,
+                "name": "Ground",
+                "parent": 0,
+                "position": [
+                    0,
+                    -0.5,
+                    0
+                ],
+                "type": "Primitive.Plane"
+            },
+            {
+                "id": 2,
+                "name": "Warm Light",
+                "parent": 0,
+                "position": [
+                    2,
+                    3,
+                    2
+                ],
+                "type": "Light.Point"
+            },
+            {
+                "id": 3,
+                "name": "Cool Light",
+                "parent": 0,
+                "position": [
+                    -3,
+                    2,
+                    1
+                ],
+                "type": "Light.Point"
+            },
+            {
+                "id": 4,
+                "name": "West block",
+                "parent": 0,
+                "position": [
+                    -5,
+                    1.7999999523162842,
+                    -4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 5,
+                "name": "Central block",
+                "parent": 0,
+                "position": [
+                    0,
+                    1.25,
+                    -4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 6,
+                "name": "East block",
+                "parent": 0,
+                "position": [
+                    5,
+                    2.0999999046325684,
+                    -4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 7,
+                "name": "West corner",
+                "parent": 0,
+                "position": [
+                    -5,
+                    1.4500000476837158,
+                    4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 8,
+                "name": "Central corner",
+                "parent": 0,
+                "position": [
+                    0,
+                    1.850000023841858,
+                    4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 9,
+                "name": "East corner",
+                "parent": 0,
+                "position": [
+                    5,
+                    1.350000023841858,
+                    4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 10,
+                "name": "Main street",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.02500000037252903,
+                    0
+                ],
+                "type": "CalmCity.Street"
+            },
+            {
+                "id": 11,
+                "name": "Moving car",
+                "parent": 0,
+                "position": [
+                    -5.480000019073486,
+                    0.550000011920929,
+                    0
+                ],
+                "type": "CalmCity.CarMover"
+            },
+            {
+                "id": 12,
+                "name": "Car roof",
+                "parent": 11,
+                "position": [
+                    0,
+                    0.6499999761581421,
+                    0
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 13,
+                "name": "Front left wheel",
+                "parent": 11,
+                "position": [
+                    0.44999998807907104,
+                    -0.30000001192092896,
+                    -0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 14,
+                "name": "Front right wheel",
+                "parent": 11,
+                "position": [
+                    0.44999998807907104,
+                    -0.30000001192092896,
+                    0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 15,
+                "name": "Rear left wheel",
+                "parent": 11,
+                "position": [
+                    -0.44999998807907104,
+                    -0.30000001192092896,
+                    -0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 16,
+                "name": "Rear right wheel",
+                "parent": 11,
+                "position": [
+                    -0.44999998807907104,
+                    -0.30000001192092896,
+                    0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 17,
+                "name": "North lane stripe",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.05700000002980232,
+                    -0.5
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 18,
+                "name": "South lane stripe",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.05700000002980232,
+                    0.5
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 19,
+                "name": "City overview",
+                "parent": 0,
+                "position": [
+                    14,
+                    12,
+                    18
+                ],
+                "type": ""
+            },
+            {
+                "id": 20,
+                "name": "City viewer",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "type": ""
+            },
+            {
+                "id": 21,
+                "name": "City sun",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "type": "Light.Directional"
+            },
+            {
+                "id": 22,
+                "name": "Street lamp LOD row",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "type": "CalmCity.LodRow"
+            }
+        ]
+    },
+    "reloaded": {
+        "afterKey": [
+            {
+                "id": 1,
+                "name": "Ground",
+                "parent": 0,
+                "position": [
+                    0,
+                    -0.5,
+                    0
+                ],
+                "type": "Primitive.Plane"
+            },
+            {
+                "id": 2,
+                "name": "Warm Light",
+                "parent": 0,
+                "position": [
+                    2,
+                    3,
+                    2
+                ],
+                "type": "Light.Point"
+            },
+            {
+                "id": 3,
+                "name": "Cool Light",
+                "parent": 0,
+                "position": [
+                    -3,
+                    2,
+                    1
+                ],
+                "type": "Light.Point"
+            },
+            {
+                "id": 4,
+                "name": "West block",
+                "parent": 0,
+                "position": [
+                    -5,
+                    1.7999999523162842,
+                    -4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 5,
+                "name": "Central block",
+                "parent": 0,
+                "position": [
+                    0,
+                    1.25,
+                    -4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 6,
+                "name": "East block",
+                "parent": 0,
+                "position": [
+                    5,
+                    2.0999999046325684,
+                    -4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 7,
+                "name": "West corner",
+                "parent": 0,
+                "position": [
+                    -5,
+                    1.4500000476837158,
+                    4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 8,
+                "name": "Central corner",
+                "parent": 0,
+                "position": [
+                    0,
+                    1.850000023841858,
+                    4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 9,
+                "name": "East corner",
+                "parent": 0,
+                "position": [
+                    5,
+                    1.350000023841858,
+                    4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 10,
+                "name": "Main street",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.02500000037252903,
+                    0
+                ],
+                "type": "CalmCity.Street"
+            },
+            {
+                "id": 11,
+                "name": "Moving car",
+                "parent": 0,
+                "position": [
+                    -5.28000020980835,
+                    0.550000011920929,
+                    0
+                ],
+                "type": "CalmCity.CarMover"
+            },
+            {
+                "id": 12,
+                "name": "Car roof",
+                "parent": 11,
+                "position": [
+                    0,
+                    0.6499999761581421,
+                    0
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 13,
+                "name": "Front left wheel",
+                "parent": 11,
+                "position": [
+                    0.44999998807907104,
+                    -0.30000001192092896,
+                    -0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 14,
+                "name": "Front right wheel",
+                "parent": 11,
+                "position": [
+                    0.44999998807907104,
+                    -0.30000001192092896,
+                    0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 15,
+                "name": "Rear left wheel",
+                "parent": 11,
+                "position": [
+                    -0.44999998807907104,
+                    -0.30000001192092896,
+                    -0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 16,
+                "name": "Rear right wheel",
+                "parent": 11,
+                "position": [
+                    -0.44999998807907104,
+                    -0.30000001192092896,
+                    0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 17,
+                "name": "North lane stripe",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.05700000002980232,
+                    -0.5
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 18,
+                "name": "South lane stripe",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.05700000002980232,
+                    0.5
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 19,
+                "name": "City overview",
+                "parent": 0,
+                "position": [
+                    14,
+                    12,
+                    18
+                ],
+                "type": ""
+            },
+            {
+                "id": 20,
+                "name": "City viewer",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "type": ""
+            },
+            {
+                "id": 21,
+                "name": "City sun",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "type": "Light.Directional"
+            },
+            {
+                "id": 22,
+                "name": "Street lamp LOD row",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "type": "CalmCity.LodRow"
+            }
+        ],
+        "before": [
+            {
+                "id": 1,
+                "name": "Ground",
+                "parent": 0,
+                "position": [
+                    0,
+                    -0.5,
+                    0
+                ],
+                "type": "Primitive.Plane"
+            },
+            {
+                "id": 2,
+                "name": "Warm Light",
+                "parent": 0,
+                "position": [
+                    2,
+                    3,
+                    2
+                ],
+                "type": "Light.Point"
+            },
+            {
+                "id": 3,
+                "name": "Cool Light",
+                "parent": 0,
+                "position": [
+                    -3,
+                    2,
+                    1
+                ],
+                "type": "Light.Point"
+            },
+            {
+                "id": 4,
+                "name": "West block",
+                "parent": 0,
+                "position": [
+                    -5,
+                    1.7999999523162842,
+                    -4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 5,
+                "name": "Central block",
+                "parent": 0,
+                "position": [
+                    0,
+                    1.25,
+                    -4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 6,
+                "name": "East block",
+                "parent": 0,
+                "position": [
+                    5,
+                    2.0999999046325684,
+                    -4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 7,
+                "name": "West corner",
+                "parent": 0,
+                "position": [
+                    -5,
+                    1.4500000476837158,
+                    4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 8,
+                "name": "Central corner",
+                "parent": 0,
+                "position": [
+                    0,
+                    1.850000023841858,
+                    4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 9,
+                "name": "East corner",
+                "parent": 0,
+                "position": [
+                    5,
+                    1.350000023841858,
+                    4
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 10,
+                "name": "Main street",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.02500000037252903,
+                    0
+                ],
+                "type": "CalmCity.Street"
+            },
+            {
+                "id": 11,
+                "name": "Moving car",
+                "parent": 0,
+                "position": [
+                    -5.480000019073486,
+                    0.550000011920929,
+                    0
+                ],
+                "type": "CalmCity.CarMover"
+            },
+            {
+                "id": 12,
+                "name": "Car roof",
+                "parent": 11,
+                "position": [
+                    0,
+                    0.6499999761581421,
+                    0
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 13,
+                "name": "Front left wheel",
+                "parent": 11,
+                "position": [
+                    0.44999998807907104,
+                    -0.30000001192092896,
+                    -0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 14,
+                "name": "Front right wheel",
+                "parent": 11,
+                "position": [
+                    0.44999998807907104,
+                    -0.30000001192092896,
+                    0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 15,
+                "name": "Rear left wheel",
+                "parent": 11,
+                "position": [
+                    -0.44999998807907104,
+                    -0.30000001192092896,
+                    -0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 16,
+                "name": "Rear right wheel",
+                "parent": 11,
+                "position": [
+                    -0.44999998807907104,
+                    -0.30000001192092896,
+                    0.550000011920929
+                ],
+                "type": "Primitive.Cylinder"
+            },
+            {
+                "id": 17,
+                "name": "North lane stripe",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.05700000002980232,
+                    -0.5
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 18,
+                "name": "South lane stripe",
+                "parent": 0,
+                "position": [
+                    0,
+                    0.05700000002980232,
+                    0.5
+                ],
+                "type": "CalmCity.Building"
+            },
+            {
+                "id": 19,
+                "name": "City overview",
+                "parent": 0,
+                "position": [
+                    14,
+                    12,
+                    18
+                ],
+                "type": ""
+            },
+            {
+                "id": 20,
+                "name": "City viewer",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "type": ""
+            },
+            {
+                "id": 21,
+                "name": "City sun",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "type": "Light.Directional"
+            },
+            {
+                "id": 22,
+                "name": "Street lamp LOD row",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "type": "CalmCity.LodRow"
+            }
+        ]
+    },
+    "replaced": true
+}
+

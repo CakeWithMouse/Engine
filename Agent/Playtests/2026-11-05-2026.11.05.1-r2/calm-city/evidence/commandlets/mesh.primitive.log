@@ -1,0 +1,16 @@
+{
+    "maximum": [
+        1,
+        1,
+        1
+    ],
+    "minimum": [
+        -1,
+        -1,
+        -1
+    ],
+    "ok": true,
+    "triangles": 12,
+    "vertices": 24
+}
+exit:0

@@ -1,0 +1,462 @@
+{
+  "persona": "tired-bomber",
+  "version": "PainEngine 2026.11.05.3 final retests; baseline and .2 evidence retained",
+  "runtime": "E:/Engine/Engine/build/playtests/20261105-r2/final/Runtime",
+  "usage": {
+    "start_percent": 28,
+    "latest_percent": 35,
+    "credits_reset_or_purchased": false
+  },
+  "project": "Engine/build/playtests/20261105-r2/tired-bomber/final-copy/Project.json",
+  "source_archive": "final-source.zip",
+  "evidence": [
+    {
+      "feature_id": "class-wizard",
+      "action": "Ran fixed SDK ProjectTools AddClass CLI generator, built project, created BomberTarget in runtime and verified it via project.input.",
+      "expected": "Create a component from the project editor wizard.",
+      "actual": "Fixed SDK ProjectTools AddClass CLI generated registered BomberTarget and runtime instance; editor UI wizard remains unverified.",
+      "status": "partial",
+      "evidence_paths": [
+        "evidence/classwizard-probe.result.json",
+        "evidence/classwizard-probe.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "failed-build-rollback",
+      "action": "Injected syntax #error in rollback-copy scratch source, attempted official launcher build, then ran prior module and restored source.",
+      "expected": "A failed candidate leaves the last good DLL active.",
+      "actual": "Intentional syntax-error rollback in rollback-copy exited 1, preserved last-good DLL/module hash, and old DLL ran. A separate scratch probe then hit a PowerShell-induced C2001 newline-in-literal compile error; captured and classified as probe authoring, not engine bug. Clean .3 probe source built successfully via apply_patch edits.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/fixed-failed-build-result.txt",
+        "evidence/fixed-failed-build.stdout.log",
+        "evidence/fixed-old-module-run.stdout.log",
+        "evidence/api-scratch-literal-newline-compile-failure.log",
+        "evidence/api-0.3-CodeBuild.log"
+      ]
+    },
+    {
+      "feature_id": "scene-startup",
+      "action": "Ran the isolated project with startupScene=Content/Scenes/Main.scene.json.",
+      "expected": "Main loads and gameplay initializes.",
+      "actual": "GameSceneLoaded; GameStart; Main subsystem scene-ready; exit 0.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/gameplay-lifecycle.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "scene-select",
+      "action": "Used project.scene to select two serialized objects and then a different single object.",
+      "expected": "Select scene objects through the editor.",
+      "actual": "Select returned IDs [1,2], then [3], exit 0. Selection UI/tree remains unverified. Runtime-created Bomber.Unit objects are not in the authored Main scene and were correctly not found by the editor commandlet.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/api-0.2-scene-select.result.json"
+      ]
+    },
+    {
+      "feature_id": "subsystem",
+      "action": "Ran 400 actual Runtime frames and observed subsystem lifecycle.",
+      "expected": "Initialize, OnSceneReady, Tick, OnSceneClosing, and destruction occur in order.",
+      "actual": "All lifecycle messages observed; exit 0.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/gameplay-lifecycle.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "session",
+      "action": "Ran session.lifecycle with two scenes, five frames per scene at dt=.02.",
+      "expected": "Subsystem state persists while switching scenes in one session.",
+      "actual": "ready=2, closing=2, ticks=10, elapsed=.2; session stopped cleanly with running=false, exit 0.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/api-0.2-session-lifecycle.result.json",
+        "evidence/api-0.2-session-lifecycle.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "input",
+      "action": "Retested disabled controller save/load and enabled counterpart on fixed SDK; project.input held W across focus loss/regain.",
+      "expected": "Actions move the character when enabled and honor disabled controller scope after load.",
+      "actual": "Fixed .3 `Input::System.SetKey` F7 sequence toggled diagnostics false/true; F8 selected second target in runtime and embedded project.input Play.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/api-0.3-hotkeys-runtime.stdout.log",
+        "evidence/api-0.3-project-input-f7f8.result.json",
+        "evidence/api-0.3-project-input-f7f8.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "character",
+      "action": "Pressed W for 30 project.input frames on Bomber.Player.",
+      "expected": "The possessed Character changes position.",
+      "actual": "Character Z changed from 5.0 to 2.6; commandlet exit 0.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/controller-move-enabled.result.json"
+      ]
+    },
+    {
+      "feature_id": "controller",
+      "action": "Disabled CharacterController, saved, loaded in another process, then injected W and right-mouse look via Input::System.",
+      "expected": "Disabled controller does not move the character or change camera/yaw.",
+      "actual": "Baseline BUG-R2-002 reproduced; fixed SDK .2 and .3 disabled loads kept position/camera/yaw unchanged under W+look; explicit enable restored response.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/fixed-controller-before.save.json",
+        "evidence/fixed-controller-disabled-after.save.json",
+        "evidence/fixed-controller-enabled-after.save.json",
+        "evidence/api-0.3-controller-before.save.json",
+        "evidence/api-0.3-controller-after.save.json",
+        "evidence/api-0.3-controller-save.stdout.log",
+        "evidence/api-0.3-controller-disabled-load.stdout.log",
+        "evidence/api-0.3-controller-enabled-load.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "camera-orthographic",
+      "action": "Rendered a viewPlane=2 orthographic camera and changed its Y and orthoHeight.",
+      "expected": "Orthographic projection remains stable as the camera moves; zoom changes projected size.",
+      "actual": "Baseline defect reproduced; .2 and .3 exact fixed runtime test kept LOD1 for camera Y=8 and24 at orthoHeight24, zoom orthoHeight8 selected LOD0.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/fixed-lod-final.stdout.log",
+        "evidence/api-0.3-ortho-lod.stdout.log",
+        "evidence/api-0.3-lod-y24-ortho24.bmp",
+        "evidence/api-0.3-lod-y24-ortho8.bmp"
+      ]
+    },
+    {
+      "feature_id": "trace-world",
+      "action": "Dropped bombs and ran exact downward Scene::Raycast queries.",
+      "expected": "A bomb that reaches a unit reports a hit and updates score.",
+      "actual": "Game raycast hit and score effects passed; exact SDK TraceExamples.cpp .3 calls also returned WorldTrace Hit at 9.5 and PixelTrace center Hit at 23.4, plus a valid ScreenRay.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/fixed-sideprobes.stdout.log",
+        "evidence/gameplay-lifecycle.stdout.log",
+        "evidence/developer2-TraceExamples.cpp",
+        "evidence/developer2-trace-renderhost.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "trace-filter",
+      "action": "Queried the first unit with trace channels 1 and 2.",
+      "expected": "Channel filters distinguish the floor from the unit.",
+      "actual": "Channel 1 returned ground; channel 2 returned unit.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/fixed-sideprobes.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "trace-debug",
+      "action": "Ran long ray through a live bomb, queried Scene::Raycast, requested DebugDrawTrace and frame dump.",
+      "expected": "Ray/hit diagnostics are visible and useful in a rendered frame.",
+      "actual": "Ray hit at 6.58; debug line counter reported 23. Image shows scene but debug ray itself is not clearly distinguishable, so visual diagnostic remains partial.",
+      "status": "partial",
+      "evidence_paths": [
+        "evidence/fixed-trace-debug.stdout.log",
+        "evidence/fixed-trace-debug-active-bomb.bmp"
+      ]
+    },
+    {
+      "feature_id": "skeletal",
+      "action": "Loaded CesiumMan GLB into game, played clip and sampled pose on real Runtime frames.",
+      "expected": "Load a skeletal model and play a clip.",
+      "actual": "Loaded 19 bones, one 2-second clip; animation time advanced at frames 30/120, visible D3D BMP captured.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/fixed-skeletal.stdout.log",
+        "evidence/fixed-skeletal-character.bmp"
+      ]
+    },
+    {
+      "feature_id": "instances",
+      "action": "Rendered 13 instanced markers with one hidden and one outside the camera frustum.",
+      "expected": "Instancing and diagnostics account for drawn and culled instances.",
+      "actual": "Fixed SDK .3 actual game runtime: default-material/vertex-shader-free component at X=-3,0,3 reported drawn=3/3 and rendered separate red, green, blue silhouettes.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/api-0.3-instance-fallback.stdout.log",
+        "evidence/api-0.3-instance-fallback-3colors.bmp"
+      ]
+    },
+    {
+      "feature_id": "lod",
+      "action": "Used a one-cube screen-height probe at Y=8 and Y=24 with orthoHeight=24, then set height=8.",
+      "expected": "The same orthoHeight keeps the same LOD at both camera heights; zoom selects LOD0.",
+      "actual": "Fixed SDK .3: Y8/Y24 at orthoHeight24 select LOD1, then Y24/orthoHeight8 selects LOD0. Distinct runtime D3D frame evidence.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/api-0.3-ortho-lod.stdout.log",
+        "evidence/api-0.3-lod-y24-ortho24.bmp",
+        "evidence/api-0.3-lod-y24-ortho8.bmp"
+      ]
+    },
+    {
+      "feature_id": "mesh-tools",
+      "action": "Called ValidateMesh with default and ground-pivot settings, then SimplifyMesh on a procedural cube.",
+      "expected": "Validation identifies pivot usability and simplification returns a useful lower triangle count.",
+      "actual": "Cube validation default failed for centered ground pivot; ground-pivot config passed. SimplifyMesh retained 12-triangle cube; dense sphere reduced 224→130 triangles with error=0.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/fixed-sideprobes.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "particles",
+      "action": "Spawned a spark burst on a hit, saved while active, loaded in a new process, and resumed.",
+      "expected": "Particle component settings/time survive; GPU particles are recreated after load.",
+      "actual": "Save/load spark recreation passed; .3 controlled variants also produced the same hit at t=1.95s and particle frames at frame145.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/round-1.save.json",
+        "evidence/paused-load.stdout.log",
+        "evidence/resume-after-load.stdout.log",
+        "evidence/restored-sparks-and-hud.bmp",
+        "evidence/api-0.3-particle-baseline.stdout.log",
+        "evidence/api-0.3-particle-baseline-late.bmp"
+      ]
+    },
+    {
+      "feature_id": "particle-collision",
+      "action": "Ran three same-project 150-frame D3D variants, all with same hit at t=1.95s; baseline collision+sort, no-collision, and no-sort. At frame145 captured same particle burst region.",
+      "expected": "Collision and sorting behave as intended against the ground.",
+      "actual": "All processes exited 0 and reported dispatches=38. Baseline versus no-collision changed 2,946 pixels in particle ROI x530..650,y160..270; baseline versus no-sort changed 2,794 pixels. Shapes show visible difference; no quantitative GPU particle-state query is public.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/api-0.3-particle-baseline.stdout.log",
+        "evidence/api-0.3-particle-no-collision.stdout.log",
+        "evidence/api-0.3-particle-no-sort.stdout.log",
+        "evidence/api-0.3-particle-baseline-late.bmp",
+        "evidence/api-0.3-particle-no-collision-late.bmp",
+        "evidence/api-0.3-particle-no-sort-late.bmp"
+      ]
+    },
+    {
+      "feature_id": "hud-elements",
+      "action": "Rendered score label and panel during hits.",
+      "expected": "HUD text updates to show score.",
+      "actual": "Real frame shows hits=2, misses=0; text remains readable.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/restored-sparks-and-hud.bmp"
+      ]
+    },
+    {
+      "feature_id": "hud-layout",
+      "action": "Captured a custom Cyrillic HUD label at 640×480 and 320×240 in D3D runtime.",
+      "expected": "Layout adapts across resize and Cyrillic text remains readable.",
+      "actual": "Cyrillic renders at both sizes. At 320×240 HUD title and LOD panel content are clipped/truncated; manual editor layout remains untested.",
+      "status": "partial",
+      "evidence_paths": [
+        "evidence/api-0.2-hud-resize-640.bmp",
+        "evidence/api-0.2-hud-resize-320.bmp"
+      ]
+    },
+    {
+      "feature_id": "game-settings",
+      "action": "Set VSync=false, AA=1, Forward rendering in project startup.",
+      "expected": "Runtime reports requested GameSettings and renders a frame.",
+      "actual": "Runtime logged the three values and rendered the game.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/gameplay-lifecycle.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "render-modes",
+      "action": "Rendered the same three-instance D3D commandlet scene at 640×480 in Forward, Deferred and Custom; panel hidden; fixed SDK .3.",
+      "expected": "Compare Forward, Deferred, and Custom results.",
+      "actual": "All three modes exited 0, reported valid frame counters and drew 3 instances. Forward/Custom rendered three separate silhouettes; Deferred shows its G-buffer debug quad/sample colors. This is a renderer API comparison with synthetic instances, not the full gameplay scene.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/api-0.3-render-forward.result.json",
+        "evidence/api-0.3-render-deferred.result.json",
+        "evidence/api-0.3-render-custom.result.json",
+        "evidence/api-0.3-render-forward.bmp",
+        "evidence/api-0.3-render-deferred.bmp",
+        "evidence/api-0.3-render-custom.bmp"
+      ]
+    },
+    {
+      "feature_id": "render-resize",
+      "action": "Called Game::OnWindowResized at runtime 1000×500→640×480→320×240 and queried GetDisplay after each D3D resize.",
+      "expected": "Viewport and presentation adapt after resize.",
+      "actual": "Display reported all requested client sizes; frame dumps exactly 640×480 and 320×240; exit 0.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/api-0.2-resize-diagnostics.stdout.log",
+        "evidence/api-0.2-hud-resize-640.bmp",
+        "evidence/api-0.2-hud-resize-320.bmp"
+      ]
+    },
+    {
+      "feature_id": "diagnostics",
+      "action": "Read completed-frame stats from PreUpdate and captured actual runtime frame dumps.",
+      "expected": "Valid completed frame has changing index and nonzero counters.",
+      "actual": "Valid frame snapshots at indices 59/109 with nonzero draw/instance counts; real BMP dumps were written.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/api-0.3-ortho-lod.stdout.log",
+        "evidence/api-0.3-CodeBuild.log",
+        "evidence/api-0.3-EngineVersion.json",
+        "evidence/api-0.3-build-hashes.json"
+      ]
+    },
+    {
+      "feature_id": "host-services",
+      "action": "Ran project through runtime VFS and used module VFS FrameDump plus SaveGame path.",
+      "expected": "Game can read mounted Engine/Game resources and write its project slot.",
+      "actual": "Standalone Runtime mounted /Engine and /Game; a real module VFS read of /Engine/Shaders/RotatedFigure.hlsl was logged and the exported process read that shader from the bundled EngineContent. Embedded .3 project.input reported Viewport overlay service FOUND (v3) during Play and NOT FOUND after Stop. The SaveGame and frame-dump writes are recorded as output files, not as VFS reads.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/gameplay-lifecycle.stdout.log",
+        "evidence/api-0.3-project-input-f7f8.stdout.log",
+        "evidence/developer2-export-play.stdout.log",
+        "evidence/developer2-export-resume.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "savegame-derived",
+      "action": "Saved custom round fields, references, and active particle state; loaded twice in independent processes.",
+      "expected": "Score, timers, moving-unit refs, bomb/particle state, and disabled simulation restore and gameplay continues after resume.",
+      "actual": "Loaded hits=1, misses=0, elapsed=2.06667, four units, remapped spark, simulation=false; resumed process continued and scored another hit. Exit 0.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/round-1.save.json",
+        "evidence/paused-load.stdout.log",
+        "evidence/resume-after-load.stdout.log",
+        "evidence/restored-sparks-and-hud.bmp"
+      ]
+    },
+    {
+      "feature_id": "completed-frame",
+      "action": "Read GetCompletedFrameStats from PreUpdate in real Runtime runs.",
+      "expected": "Previous rendered frame is valid with a changing index and nonzero counters.",
+      "actual": "Frame 59 and 109 snapshots were valid; DrawCalls 8/9 and InstancesDrawn 18/19.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/resume-after-load.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "lod-panel",
+      "action": "Changed diagnostic target through public Game::SetLodDiagnosticsTarget and inspected real panel lines at viewport sizes.",
+      "expected": "Panel shows frame, instance totals, cull reasons, selected component, and LOD buckets.",
+      "actual": "Direct target setter selected Component 2/2; diagnostics panel remains readable at 640×480 but truncates at 320×240. Manual F7/F8 is not claimed.",
+      "status": "partial",
+      "evidence_paths": [
+        "evidence/api-0.2-lod-target-second.bmp",
+        "evidence/api-0.2-hud-resize-640.bmp",
+        "evidence/api-0.2-hud-resize-320.bmp"
+      ]
+    },
+    {
+      "feature_id": "savegame-restart",
+      "action": "Loaded the same slot in two separate Runtime processes.",
+      "expected": "Saved state is restored after process restart.",
+      "actual": "Both separate processes loaded successfully; the second resumed and continued the round.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/paused-load.stdout.log",
+        "evidence/resume-after-load.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "play",
+      "action": "Ran standalone game to 400 frames including movement, hits, and stop.",
+      "expected": "Play session advances and stops cleanly.",
+      "actual": "Game started, ticked, recorded hits, then stopped with exit 0 and empty stderr.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/gameplay-lifecycle.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "render-host",
+      "action": "Added an actual user MeshComponent subclass with a public Render(ID3D11DeviceContext*) override, called MeshComponent::Render, logged the live context and in-progress D3D counters, then read completed stats in the next PreUpdate.",
+      "expected": "Custom component Render hook receives the active D3D context and contributes measurable indexed drawing to a completed frame.",
+      "actual": "Render called 7 times. First call had context non-null and in-progress drawCalls=4/indices=852 after the base indexed draw. Next PreUpdate showed completed frame 7, draws=10, indices=1206. A real D3D BMP shows the magenta component; process exit 0.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/developer2-trace-renderhost.stdout.log",
+        "evidence/developer2-render-hook-component.bmp",
+        "evidence/developer2-trace-build.log"
+      ]
+    },
+    {
+      "feature_id": "sdk-examples",
+      "action": "Copied the release SDK Examples/TraceExamples.cpp unchanged into a clean .3 project Source, compiled it and invoked WorldTrace, PixelTrace and ScreenRay from ProjectGame::PreUpdate on a live Runtime frame.",
+      "expected": "SDK example functions link into a real user project and return measurable world hit and screen ray results.",
+      "actual": "WorldTrace Hit distance=9.5 component=9; PixelTrace at (500,250) Hit distance=23.4 component=9; ScreenRay Success origin=(18.228,23.9,-8.124), direction=(0,-1,0); exit 0.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/developer2-TraceExamples.cpp",
+        "evidence/developer2-trace-renderhost.stdout.log",
+        "evidence/developer2-trace-build.log"
+      ]
+    },
+    {
+      "feature_id": "export",
+      "action": "Ran official Export-Project.ps1 on a clean source-only .3 project into a new package. Started the exported Runtime in process 1, saved a paused round after a hit, stopped; launched exported Runtime again in process 2, loaded slot and resumed.",
+      "expected": "Release package validates and starts standalone; SaveGame state survives process restart and continued play has an effect.",
+      "actual": "Export exit 0; Validation.log and three-frame GameSmoke.log succeeded. Process 1 hit a unit, saved round-1 at frame125 with hits=1 and simulation=false. Process 2 loaded round-1, resumed, scored another hit at elapsed=4.76667; both exited 0. Export package includes EngineRuntime, Game.dll and Content, with no SDK.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/developer2-export.stdout.log",
+        "evidence/developer2-export-report.json",
+        "evidence/developer2-export-validation.log",
+        "evidence/developer2-export-gamesmoke.log",
+        "evidence/developer2-export-play.stdout.log",
+        "evidence/developer2-export-resume.stdout.log",
+        "evidence/developer2-export-round-1.save.json",
+        "evidence/developer2-export-hit-1.bmp",
+        "evidence/developer2-export-hit-2.bmp"
+      ]
+    },
+    {
+      "feature_id": "scene-recovery",
+      "action": "Used the official launcher CLI to create a fresh SceneProject template, ran EditorUiTests --workflow to add three objects and simulate abrupt process termination, then ran --recovery-check in a second process.",
+      "expected": "Simulate editor process termination with unsaved scene state, then verify a second process restores the workflow record and scene.",
+      "actual": "CLI-created project started with 4 template objects. Workflow committed recovery snapshot with 7 unsaved objects and a non-empty module SHA256, then exited 0 at simulated crash. A separate EditorUiTests process found the recovery candidate, loaded the recorded snapshot, verified 7 objects and module identity, and exited 0.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/developer2-recovery-create.stdout.log",
+        "evidence/developer2-recovery-Project.json",
+        "evidence/developer2-recovery-workflow.stdout.log",
+        "evidence/developer2-recovery-record.json",
+        "evidence/developer2-recovery-restored-scene.json",
+        "evidence/developer2-recovery-check.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "vfs",
+      "action": "Ran the Bomber module in standalone and exported Runtime processes with VFS service v1, then observed mount and read logs.",
+      "expected": "Project code can read mounted engine/game resources through the VFS.",
+      "actual": "Standalone and exported processes mounted /Engine and /Game; module first-read logged /Engine/Shaders/RotatedFigure.hlsl and shader registration resolved it under the respective EngineContent. Verified reads/mounts only; project write through the VFS host API was not tested (SaveGame and frame dumps are not counted as VFS writes).",
+      "status": "partial",
+      "evidence_paths": [
+        "evidence/gameplay-lifecycle.stdout.log",
+        "evidence/developer2-export-play.stdout.log",
+        "evidence/developer2-export-resume.stdout.log"
+      ]
+    }
+  ],
+  "issues": [
+    "BUG-R2-001",
+    "BUG-R2-002",
+    "BUG-R2-004",
+    "BUG-R2-005"
+  ],
+  "limitations": [
+    "Editor selection tree and interactive class wizard UI were not driven; editor API scene selection and ProjectTools AddClass CLI were exercised.",
+    "Manual keyboard use remains unverified. Programmatic Input.System.SetKey and embedded project.input were tested on .3.",
+    "320×240 uses the correct D3D backbuffer and frame progression, but the HUD title and diagnostics panel clip/truncate.",
+    "GPU particle buffers have no public per-particle readback; collision/sorting were compared by controlled D3D frames and pixel differences.",
+    "final-source.zip and fixed-source.zip contain only source/project assets plus rebuild instructions; match Engine.lock.json and build before launch."
+  ]
+}

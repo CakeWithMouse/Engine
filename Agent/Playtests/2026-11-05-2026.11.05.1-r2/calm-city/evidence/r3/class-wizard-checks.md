@@ -1,0 +1,3 @@
+# Supplemental class-wizard checks (not assigned to role 1 in the shared matrix)
+
+Native-window `.3` `EditorUiTests` run on `CalmUiProbeFresh` completed with exit 0 and `EditorUiTests: 5029 checks passed` (`editor-ui-r3.log`). Its `CodeClassDialog` assertions in `Editor/tests/EditorUiTests.cpp` around lines 480–506 checked empty/invalid identifiers (including spaces, a header suffix, leading digit, keyword, and reserved device name), inline error plus preservation of rejected text, trimmed `Character` name/default parent/header, rejection of self-inheritance and pre-existing source, and `Object` mode omitting an empty `-Base` argument. These checks support a partial class-wizard note; they do not demonstrate creating all four requested class kinds through the UI.

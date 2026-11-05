@@ -1,0 +1,10 @@
+﻿
+  ComponentGenerator: 4 component(s), Project
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\lod-2026-11-05\tired-bomber\Binaries\Release\1630e79a83f24bf7af2ffe7061e3ae3a\Game.lib и объект E:\Engine\Engine\build\playtests\lod-2026-11-05\tired-bomber\Binaries\Release\1630e79a83f24bf7af2ffe7061e3ae3a\Game.exp
+LINK : fatal error LNK1101: неправильная версия MSPDB140.DLL; перепроверьте установку этого продукта [E:\Engine\Engine\build\playtests\lod-2026-11-05\tired-bomber\Game.vcxproj]

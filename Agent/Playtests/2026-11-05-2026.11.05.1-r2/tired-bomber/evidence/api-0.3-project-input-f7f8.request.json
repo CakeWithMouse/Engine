@@ -1,0 +1,71 @@
+{
+  "steps": [
+    {
+      "action": "play",
+      "kind": "control"
+    },
+    {
+      "enabled": true,
+      "kind": "focus"
+    },
+    {
+      "down": true,
+      "kind": "key",
+      "key": 118
+    },
+    {
+      "count": 2,
+      "kind": "frames"
+    },
+    {
+      "down": false,
+      "kind": "key",
+      "key": 118
+    },
+    {
+      "count": 2,
+      "kind": "frames"
+    },
+    {
+      "down": true,
+      "kind": "key",
+      "key": 118
+    },
+    {
+      "count": 2,
+      "kind": "frames"
+    },
+    {
+      "down": false,
+      "kind": "key",
+      "key": 118
+    },
+    {
+      "count": 2,
+      "kind": "frames"
+    },
+    {
+      "down": true,
+      "kind": "key",
+      "key": 119
+    },
+    {
+      "count": 2,
+      "kind": "frames"
+    },
+    {
+      "down": false,
+      "kind": "key",
+      "key": 119
+    },
+    {
+      "count": 3,
+      "kind": "frames"
+    },
+    {
+      "action": "stop",
+      "kind": "control"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\tired-bomber\\final-copy\\Project.json"
+}

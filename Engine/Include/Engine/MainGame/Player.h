@@ -34,6 +34,7 @@ public:
     float GetNearPlane() const { return nearPlane; }
     float GetFarPlane() const { return farPlane; }
     float GetFovY() const { return DirectX::XMConvertToRadians(fovDegrees); }
+    bool IsOrthographic() const { return orthographic; }
 
     void SetProjection(bool orthographic, float fov, float nearClip, float farClip, float height);
     void SetCameraMode(CameraMode mode)

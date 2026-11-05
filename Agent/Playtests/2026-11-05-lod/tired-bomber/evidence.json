@@ -1,0 +1,51 @@
+{
+  "persona": "tired-bomber",
+  "version": "PainEngine 2026.11.05.1",
+  "run": {
+    "build_command": "Build.ps1 -Runtime E:\\Engine\\Game\\build\\x64\\Release\\Runtime",
+    "runtime_command": "EngineRuntime.exe --project <copy>/Project.json --mode game --frames 220 --compatible-engine",
+    "exit_code": 0,
+    "error_log_empty": true
+  },
+  "evidence": [
+    {
+      "feature_id": "completed_frame_stats_preupdate",
+      "action": "Read GetCompletedFrameStats() from ProjectGame::PreUpdate during a 220-frame standalone run.",
+      "expected": "A valid snapshot of the previous completed render with a changing frame index and nonzero counters, rather than zeroed current-frame stats.",
+      "actual": "At PreUpdate frame 60, valid=1, frameIndex=59, DrawCalls=8, InstancesDrawn=18. At frame 110, valid=1, frameIndex=109, DrawCalls=9, InstancesDrawn=19.",
+      "status": "passed",
+      "evidence_paths": ["Runtime-lod-24-8.log", "Build-success.log"]
+    },
+    {
+      "feature_id": "lod_diagnostics_explain_instance_counts",
+      "action": "Enable diagnostics overlay in game code and capture frame at camera Y=24.",
+      "expected": "Explain total 13 as 11 drawn plus one hidden and one frustum-culled; show per-LOD counts and thresholds.",
+      "actual": "Frame 59: drawn=11/13, hidden=1, distanceCulled=0, frustumCulled=1, perLOD=(0,0,11), thresholds=(9,17), drawDistance=60, camera distance 24.5967..46.545. BMP visibly contains the readable panel.",
+      "status": "passed",
+      "evidence_paths": ["Runtime-lod-24-8.log", "lod-camera-24.bmp"]
+    },
+    {
+      "feature_id": "lod_distance_changes_bucket",
+      "action": "Move SceneCamera from Y=24 to Y=8 in the isolated harness; capture a second frame.",
+      "expected": "A completed frame at a closer camera distance selects a nearer LOD bucket while preserving cull accounting.",
+      "actual": "Frame 109: drawn=11/13, hidden=1, distanceCulled=0, frustumCulled=1, perLOD=(0,11,0), thresholds=(9,17), drawDistance=60, camera distance 9.96996..40.7534. BMP visibly contains the updated panel.",
+      "status": "passed",
+      "evidence_paths": ["Runtime-lod-24-8.log", "lod-camera-8.bmp"]
+    },
+    {
+      "feature_id": "diagnostics_shortcuts_manual",
+      "action": "Observe overlay and data through game API and frame dump; do not drive the interactive window.",
+      "expected": "F7 toggles panel visibility; F8 changes selected InstancedMeshComponent.",
+      "actual": "Not manually exercised. Panel was enabled through SetRenderDiagnosticsVisible(true); scene has one instanced component, so F8 selection was not needed for this scenario.",
+      "status": "not-tested",
+      "evidence_paths": ["lod-camera-24.bmp", "lod-camera-8.bmp"]
+    }
+  ],
+  "limitations": [
+    "Only one persona was tested.",
+    "Two visible LOD buckets (LOD2 and LOD1) were observed; LOD0 was not exercised.",
+    "Final Runtime/SDK rebuild and rerun after the shader-cache integration adjustment completed successfully with the same measured results.",
+    "FrameDump verifies a rendered panel, not interactive F7/F8 behavior or user input focus."
+  ]
+}
+

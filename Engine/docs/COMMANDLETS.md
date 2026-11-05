@@ -2,7 +2,7 @@
 
 Создание/сборка проектов также доступны через [EngineLauncher CLI](LAUNCHER-CLI.md). Его интеграционные регрессии: `Game/Launcher/Tests/CliTests.ps1` (PowerShell 7).
 
-`EngineCommandlets.exe` — локальные параметризованные вызовы существующего Engine/Editor API. Отдельная DLL редактора и процесс EngineRuntime в режиме editor не запускаются. Для UI создаются настоящие Qt-виджеты на offscreen backend; для игровых команд используется скрытый HWND и настоящее D3D11 устройство. Это не обещание работы без GPU. Аналогичный принцип отдельных служебных запусков используется в [UE Commandlets](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Engine/UCommandlet).
+`EngineCommandlets.exe` — локальные параметризованные вызовы существующего Engine/Editor API. Отдельная DLL редактора и процесс EngineRuntime в режиме editor не запускаются. Для UI создаются настоящие Qt-виджеты: обычно offscreen, а для материала — скрытое native Qt окно с HWND превью. Для игровых команд используется скрытый HWND и настоящее D3D11 устройство. Это не обещание работы без GPU или Windows desktop session. Аналогичный принцип отдельных служебных запусков используется в [UE Commandlets](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Engine/UCommandlet).
 
 ## Сборка и протокол
 
@@ -36,6 +36,107 @@ $tool = 'Game/build/x64/Release/Runtime/EngineCommandlets.exe'
 
 ## Команды
 
+### Игровой ввод и диагностика рендера
+
+`project.input` загружает настоящую игровую DLL из `project` (абсолютный путь к
+scratch `Project.json`) и передаёт события через EditorQtHost. Каждый шаг имеет
+обязательное поле **`kind`**. Пример удержания W, отпускания и потери фокуса:
+
+```json
+{"project":"E:/scratch/Project.json","steps":[
+  {"kind":"control","action":"play"},
+  {"kind":"focus","enabled":true},
+  {"kind":"frames","count":3},
+  {"kind":"key","key":87,"down":true},
+  {"kind":"frames","count":30},
+  {"kind":"focus","enabled":false},
+  {"kind":"frames","count":10},
+  {"kind":"key","key":87,"down":false}
+]}
+```
+
+`control.action`: `play`, `pause`, `resume`, `stop`. `key` — значение **Engine Keys**
+0..507 (W=87, LeftButton=500, RightButton=501). Для клика сначала передать
+`{"kind":"cursor","x":95,"y":131,"valid":true}`: viewport 640×480.
+`frames.count`: 0..600, суммарно не более 2000; шагов не более 100.
+Относительное движение мыши: `{"kind":"pointer","delta":[60,0,0]}`
+(x/y и колесо), через штатный viewport input API.
+Результат `steps[].objects` содержит реальные имена, типы и позиции объектов
+после каждого шага. При завершении вызывается Stop. Игровые обработчики могут
+записывать свои SaveGame — используйте отдельный проект и каталог сохранений.
+
+`render.diagnostics` создаёт скрытый D3D viewport без игровой DLL и отрисовывает
+параметризованный InstancedMesh из кубов. Пример проверки ортографического LOD:
+
+```json
+{"width":640,"height":480,"screenHeights":[50,20],
+ "instances":[{"position":[0,0,0],"scale":1,"visible":true}],
+ "views":[{"position":[0,8,0],"orthographic":true,"orthoHeight":24},
+          {"position":[0,24,0],"orthographic":true,"orthoHeight":24}]}
+```
+
+Камера по умолчанию смотрит вниз `[0,-1,0]`, up `[0,0,1]`, FOV=60.
+Дополнительно: `lodCount` 1..4, `distances` (по умолчанию `[9,17]`),
+`drawDistance:60`, `fade:0`, `rendering:0`, `panel:true`. `views` — до 32,
+`instances` — до 10000. `image` — новый абсолютный BMP-путь с существующим
+родителем; существующий файл не перезаписывается. Результат `frames[]` содержит
+снимки завершённого кадра, причины отсечения, LOD-корзины и строки самой панели.
+Это CPU-счётчики подачи команд, не GPU timing. Регрессия:
+`Editor/tests/RenderDiagnosticsCommandletTests.ps1`.
+
+### Граф материала через настоящее окно Qt
+
+`material.graph` принимает `project`, `material` (путь `/Game/...mat`), `steps`
+и необязательный PNG `image`. Открывает MaterialEditorWindow с полной темой,
+живым Engine host и превью; использует скрытое окно Qt windows backend, требует D3D.
+Offscreen Qt не предоставляет HWND для native preview; команда проверяет его
+и возвращает `nativePreviewWindow:true`. PNG снимает Qt canvas/форму и не
+захватывает пиксели native swapchain превью.
+
+```json
+{"project":"E:/scratch/Project.json","material":"/Game/Materials/Stone.mat",
+ "steps":[{"action":"enable"},{"action":"preset","index":1},
+          {"action":"apply"},{"action":"revert"}]}
+```
+
+Доступны `enable`, `disable`, `preset` (индекс штатного пресета), `apply`,
+`ai` (`text` — ответ с JSON графа), `undo`, `redo`, `remove` (`ids`), `save`,
+`revert`. Вызов автоматически нажимает Yes при явно запрошенном Revert.
+`steps[].accepted`, `hasGraph`, `dirty`, `graph`, `hlsl` отражают состояние
+настоящего редактора; `dialogs` сохраняет тексты его сообщений.
+Для воспроизведения отказа записи у шага можно указать абсолютный `lockedFile`:
+команда держит read-only handle без разрешения записи/удаления до конца шага.
+Выбирайте файл, который изменяет именно этот шаг: для сохранения только графа
+это существующий `.mat.graph.json` sidecar. Блокировка неизменяемого HLSL
+не доказывает отказ записи графа.
+`save` ждёт завершения асинхронной операции; при отказе возвращает
+`accepted:false`. Сам выполненный сценарий может вернуть exit 0, даже если
+операция была ожидаемо отвергнута — проверяйте состояния и `dialogs`.
+**Операции меняют файлы указанного материала.** Для тестов используйте копию
+проекта. Для отката несохранённых изменений явно добавляйте `revert`.
+
+### Операции редактора над сценой
+
+`project.scene` использует ту же очередь EditorQtHost, историю и batch API,
+что команды редактора. Вход: `project` и до 100 `steps`. Каждый шаг имеет
+`action`; объект выбирается по уникальному `target` (имя). Доступны:
+
+- `create`: `type` и `name`; `delete`, `duplicate`, `rename` (`name`).
+- `select`: `target` или `targets:["A","B"]` для группы.
+- `move`: `target`, `delta:[2,0,0]`; применяет настоящий групповой nudge.
+- `parent`: `target`, `parent` (пустая строка снимает родителя).
+- `property`: `target`, JSON-pointer `path`, JSON `value`.
+- `material`: `target`, `path` к материалу.
+- `save`/`load`: абсолютный `path` сцены; `new`, `undo`, `redo`.
+
+Результат `steps[]` содержит `status`, `error`, реальные `objects` с ID/parent/
+локальной позицией, `selected`, `canUndo`, `canRedo`. Неуспех отдельной операции
+сохраняется в её `status`, проверяйте его даже при exit 0 сценария.
+Изменения существуют в открытой сессии до явно запрошенного `save`.
+В restricted Windows host установите writable `TEMP`/`TMP`, как для hot reload.
+`SceneCommandletTests.ps1 -Project <scratch Project.json>` проверяет 16 операций:
+группу, nudge, историю, иерархию, duplicate, Save As/New/Load и удаление.
+
 Все координаты — числа. Векторы — массивы из трёх чисел, quaternion — `[x,y,z,w]`.
 
 | Команда | Вход / значения по умолчанию | Наблюдаемый результат |
@@ -57,6 +158,10 @@ $tool = 'Game/build/x64/Release/Runtime/EngineCommandlets.exe'
 | `project.reload-input` | `project`, `candidate` (другой путь DLL), `key:84`; необязательные `clickX/clickY` | Один Focus до первого Play; Play → key/click → Stop → Reload → Play → key/click. Снимки объектов before/afterKey/afterClick до и после DLL. Viewport 640×480, стандартные игровые callbacks |
 
 При `project.build` закрытый read handle Project.json не мешает атомарной активации. Команда не использует отдельную упрощённую реализацию сборки: QAction вызывает штатный CodeTools. Сборка ограничена 180 сек. Проверки запускать на scratch-проектах. `project.reload-input` сам не сохраняет проект, но создаёт временный checkpoint через editor history; candidate должен иметь другую файловую идентичность.
+
+Для restricted Windows host укажите `TEMP` и `TMP` на существующий scratch-каталог,
+если системный временный каталог запрещает запись checkpoint (Windows error 5).
+`ReloadInputTests.ps1` делает это автоматически и восстанавливает окружение.
 
 UI-команды требуют поставляемые Qt DLL и `platforms/qoffscreen.dll`. Offscreen backend Windows загружает Segoe UI из Windows/Fonts для читаемого PNG. UI preview использует D3D WARP для атласа шрифта. Project-команды требуют D3D11, EngineContent, Templates и SDK рядом с exe, MSVC для build. `asset.import` требует Assimp: первая сборка `Engine/build.ps1 -Configuration Release -Target EngineLauncher -EnableAssimp $true` устанавливает пакет из закреплённого vcpkg manifest. Следующие сборки автоматически включают установленный Assimp; явный `-EnableAssimp:$false` отключает его. DLL импортёра входит в Runtime, библиотеки — в SDK.
 

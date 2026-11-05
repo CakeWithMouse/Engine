@@ -1,0 +1,410 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "ok": true,
+    "steps": [
+        {
+            "action": "new",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Probe Cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                1
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Probe Cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "Probe Sphere",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Sphere"
+                }
+            ],
+            "selected": [
+                2
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Probe Cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "Probe Sphere",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Sphere"
+                },
+                {
+                    "id": 3,
+                    "name": "Probe Plane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                }
+            ],
+            "selected": [
+                3
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Probe Cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "Probe Sphere",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Sphere"
+                },
+                {
+                    "id": 3,
+                    "name": "Probe Plane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 4,
+                    "name": "Probe Cylinder",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cylinder"
+                }
+            ],
+            "selected": [
+                4
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Probe Cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "Probe Sphere",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Sphere"
+                },
+                {
+                    "id": 3,
+                    "name": "Probe Plane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 4,
+                    "name": "Probe Cylinder",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 5,
+                    "name": "Probe Cone",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cone"
+                }
+            ],
+            "selected": [
+                5
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Probe Cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "Probe Sphere",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Sphere"
+                },
+                {
+                    "id": 3,
+                    "name": "Probe Plane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 4,
+                    "name": "Probe Cylinder",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 5,
+                    "name": "Probe Cone",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cone"
+                },
+                {
+                    "id": 6,
+                    "name": "Probe Pyramid",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Pyramid"
+                }
+            ],
+            "selected": [
+                6
+            ],
+            "status": 0
+        },
+        {
+            "action": "save",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Probe Cube",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 2,
+                    "name": "Probe Sphere",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Sphere"
+                },
+                {
+                    "id": 3,
+                    "name": "Probe Plane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 4,
+                    "name": "Probe Cylinder",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 5,
+                    "name": "Probe Cone",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cone"
+                },
+                {
+                    "id": 6,
+                    "name": "Probe Pyramid",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Pyramid"
+                }
+            ],
+            "selected": [
+                6
+            ],
+            "status": 0
+        }
+    ]
+}
+
