@@ -8,7 +8,7 @@ class GameComponent;
 namespace SceneAssets
 {
     inline constexpr const char* ModelType = "Engine.Model";
-    enum Kind : unsigned { Model = 0, Texture = 1 };
+    enum Kind : unsigned { Model = 0, Texture = 1, Audio = 2 };
     // Scene references are portable, canonical /Game paths. Empty means no asset.
     bool ValidPath(std::string_view path);
     void ValidateTexture(std::string_view path);

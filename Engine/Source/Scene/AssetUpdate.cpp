@@ -12,6 +12,7 @@ using Json=nlohmann::json;
 namespace {
 std::string Extension(const fs::path& path) {auto value=path.extension().u8string();std::transform(value.begin(),value.end(),value.begin(),[](unsigned char c){return char(std::tolower(c));});return value;}
 bool Model(const fs::path& path) {const auto e=Extension(path);return e==".fbx"||e==".obj"||e==".gltf"||e==".glb";}
+bool Audio(const fs::path& path) {const auto e=Extension(path);return e==".wav"||e==".ogg"||e==".mp3"||e==".flac";}
 bool Inside(const fs::path& child,const fs::path& root) {
     auto relative=fs::weakly_canonical(child).lexically_relative(fs::canonical(root));
     return !relative.empty()&&!relative.is_absolute()&&*relative.begin()!="..";
@@ -41,7 +42,8 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
     const auto ext=Extension(file);
     const bool model=Model(file);
     const bool texture=ext==".png"||ext==".jpg"||ext==".jpeg"||ext==".bmp"||ext==".tga";
-    if(!model&&!texture&&!(operation==1&&ext==".mat"))throw std::runtime_error("Select a model, texture or material");
+    const bool audio=Audio(file);
+    if(!model&&!texture&&!audio&&!(operation==1&&ext==".mat"))throw std::runtime_error("Select a model, texture, audio file or material");
     const auto sourceRoot=model?file.parent_path():file;
     if(operation==1&&!model)for(auto folder=file.parent_path();folder!=content&&Inside(folder,content);folder=folder.parent_path())
         for(const auto& entry:fs::directory_iterator(folder))if(entry.is_regular_file()&&Model(entry.path()))throw std::runtime_error("This file belongs to a model bundle; move the model folder to keep its internal references");
@@ -66,7 +68,7 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
             const auto original=fs::u8path(source);
             if(!original.is_absolute() || !fs::is_regular_file(original))throw std::runtime_error("Original source is missing; choose its new location");
             if(Inside(original,sourceRoot.parent_path()) && (original==file || (model&&Inside(original,sourceRoot))))throw std::runtime_error("Choose the external original, not a file inside this import");
-            const auto virtualImport=SceneAssets::Import(content,original,model?SceneAssets::Model:SceneAssets::Texture);
+            const auto virtualImport=SceneAssets::Import(content,original,model?SceneAssets::Model:audio?SceneAssets::Audio:SceneAssets::Texture);
             imported=content/fs::u8path(virtualImport.substr(6));importRoot=model?imported.parent_path():imported;
             if(Extension(imported)!=ext)throw std::runtime_error("Reimport must keep the asset format (BLEND is converted to GLB)");
             const auto candidate=backup/"candidate";

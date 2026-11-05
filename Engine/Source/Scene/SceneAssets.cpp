@@ -162,10 +162,15 @@ std::string Import(const fs::path& content, const fs::path& source, Kind kind)
             throw std::runtime_error("Supported textures: PNG, JPG, BMP, TGA");
         if (!TextureLoader::ValidateImage(Read(source))) throw std::runtime_error("Invalid or oversized image");
     }
+    else if (kind == Audio)
+    {
+        if (extension != ".wav" && extension != ".ogg" && extension != ".mp3" && extension != ".flac")
+            throw std::runtime_error("Supported audio: WAV, OGG, MP3, FLAC");
+    }
     else if (kind != Model || (extension != ".glb" && extension != ".gltf" && extension != ".obj" && extension != ".fbx" && extension != ".blend"))
         throw std::runtime_error("Supported models: GLB, glTF, OBJ, FBX, BLEND (requires Blender)");
     CheckedSize(source);
-    const auto group = content / (kind == Model ? "Models" : "Textures");
+    const auto group = content / (kind == Model ? "Models" : kind == Texture ? "Textures" : "Audio");
     if (!Inside(content, group)) throw std::runtime_error("Asset directory is outside project Content");
     fs::create_directories(group);
     for (unsigned suffix = 0; suffix < 10000; ++suffix)

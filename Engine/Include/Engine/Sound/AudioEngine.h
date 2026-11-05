@@ -16,7 +16,6 @@
 #include <vector>
 
 #pragma comment(lib, "xaudio2.lib")
-#pragma comment(lib, "x3daudio.lib")
 
 namespace audio
 {
@@ -135,5 +134,6 @@ namespace audio
         std::vector<Active3DSound> active3DSounds_;
 
         bool ownsCom_ = false;
+        bool x3dAvailable_ = false;
     };
 }

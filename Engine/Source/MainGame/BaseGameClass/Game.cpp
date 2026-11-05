@@ -23,6 +23,7 @@
 #include <Engine/Render/Material.h>
 #include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/ShaderCompiler.h>
+#include <Engine/Sound/AudioEngine.h>
 #include <dxgi1_6.h>
 #include "../../Resources/VfsRead.h"
 #include "stb_image.h"
@@ -396,6 +397,7 @@ void Game::DestroyResources(bool preserveScene)
     Device.Reset();
 
     // The input device and the window go last: the swap chain referenced the window.
+    AudioEnginePtr.reset();
     InputDevicePtr.reset();
     FirstPlayer.reset();
     DisplayPtr.reset();
@@ -474,6 +476,13 @@ bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int reque
     FirstPlayer = std::make_unique<Player>();
     FirstPlayer->SetGamePointer(this);
     if (!bEmbedded) InputDevicePtr = std::make_unique<InputDevice>(this);
+
+    AudioEnginePtr = std::make_unique<audio::AudioEngine>();
+    if (!AudioEnginePtr->Initialize())
+    {
+        // Audio is optional: the game keeps running without sound.
+        AudioEnginePtr.reset();
+    }
 
     const HWND hWnd = DisplayPtr->GetHwnd();
     if (!bEmbedded && (!bRuntimeWindow || bRuntimeWindowVisible))
@@ -3749,6 +3758,7 @@ void Game::UpdateFrame(float realDeltaTime)
     ProcessHotkeys();
     if (bSimulationEnabled) UpdateSimulation(deltaTime);
     else FirstPlayer->UpdateCamera(0.0f);
+    UpdateAudio();
     PrepareRenderFrame();
 }
 
@@ -3786,6 +3796,29 @@ void Game::UpdateSimulation(float deltaTime)
     if (FirstPlayer) FirstPlayer->UpdateCamera(deltaTime);
     TickComponents(deltaTime);
     if (Controller && FirstPlayer) Controller->UpdateCamera(*FirstPlayer);
+}
+
+void Game::UpdateAudio()
+{
+    if (!AudioEnginePtr)
+    {
+        return;
+    }
+
+    // Follow the active camera so 3D sounds pan/dampen correctly.
+    if (FirstPlayer)
+    {
+        audio::AudioListener3D listener;
+        const glm::vec3 p = FirstPlayer->GetPosition();
+        listener.position = {p.x, p.y, p.z};
+        const glm::vec3 f = FirstPlayer->GetForward();
+        listener.front = {f.x, f.y, f.z};
+        const glm::vec3 u = FirstPlayer->GetUp();
+        listener.top = {u.x, u.y, u.z};
+        AudioEnginePtr->SetListener(listener);
+    }
+
+    AudioEnginePtr->Update();
 }
 
 std::unique_ptr<CharacterController> Game::CreateCharacterController() { return std::make_unique<CharacterController>(*this); }

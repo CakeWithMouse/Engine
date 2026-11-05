@@ -3,6 +3,63 @@
 
 #include <cmath>
 
+namespace
+{
+    // Windows SDK поставляет x3daudio.h, но не x3daudio.lib (она есть только в XAudio2 Redist).
+    // X3DAudio1_7.dll входит в состав Windows, поэтому функции загружаются напрямую из неё.
+    struct X3DAudioRuntime final
+    {
+        using InitializeFn = HRESULT (STDAPIVCALLTYPE*)(
+            UINT32 speakerChannelMask, FLOAT32 speedOfSound, X3DAUDIO_HANDLE instance);
+        using CalculateFn = void (STDAPIVCALLTYPE*)(
+            const X3DAUDIO_HANDLE instance, const X3DAUDIO_LISTENER* listener,
+            const X3DAUDIO_EMITTER* emitter, UINT32 flags, X3DAUDIO_DSP_SETTINGS* dspSettings);
+
+        HMODULE module = nullptr;
+        InitializeFn initialize = nullptr;
+        CalculateFn calculate = nullptr;
+
+        bool Load()
+        {
+            if (initialize && calculate)
+            {
+                return true;
+            }
+
+            if (!module)
+            {
+                module = LoadLibraryW(L"X3DAudio1_7.dll");
+            }
+
+            if (!module)
+            {
+                return false;
+            }
+
+            initialize = reinterpret_cast<InitializeFn>(
+                GetProcAddress(module, "X3DAudioInitialize"));
+            calculate = reinterpret_cast<CalculateFn>(
+                GetProcAddress(module, "X3DAudioCalculate"));
+
+            return initialize && calculate;
+        }
+
+        ~X3DAudioRuntime()
+        {
+            if (module)
+            {
+                FreeLibrary(module);
+            }
+        }
+    };
+
+    X3DAudioRuntime& X3D()
+    {
+        static X3DAudioRuntime runtime;
+        return runtime;
+    }
+}
+
 namespace audio
 {
     float AudioEngine::PitchSemitonesToRatio(float semitones)
@@ -77,11 +134,10 @@ namespace audio
         masterVoice_->GetVoiceDetails(&details);
         outputChannels_ = details.InputChannels;
 
-        if (!InitializeX3DAudio())
-        {
-            Shutdown();
-            return false;
-        }
+        x3dAvailable_ = InitializeX3DAudio();
+
+        // X3DAudio отсутствует (например, взятая из Windows DLL не найдена) —
+        // 2D-звук и стриминг продолжают работать, отключается только 3D-панорамирование.
 
         voicePool_.Initialize(xaudio_.Get(), masterVoice_);
 
@@ -96,11 +152,16 @@ namespace audio
         // можно временно использовать SPEAKER_STEREO.
         masterVoice_->GetChannelMask(&channelMask);
 
-        HRESULT hr = X3DAudioInitialize(
-            channelMask,
-            343.5f,
-            x3dInstance_
-        );
+        HRESULT hr = E_FAIL;
+
+        if (X3D().Load())
+        {
+            hr = X3D().initialize(
+                channelMask,
+                343.5f,
+                x3dInstance_
+            );
+        }
 
         return SUCCEEDED(hr);
     }
@@ -122,6 +183,7 @@ namespace audio
         }
 
         xaudio_.Reset();
+        x3dAvailable_ = false;
 
         if (ownsCom_)
         {
@@ -446,7 +508,7 @@ namespace audio
 
     void AudioEngine::Apply3D(Active3DSound& sound)
     {
-        if (!sound.voice || !sound.voice->voice)
+        if (!sound.voice || !sound.voice->voice || !x3dAvailable_ || !X3D().Load())
         {
             return;
         }
@@ -476,7 +538,7 @@ namespace audio
         dsp.DstChannelCount = dstChannels;
         dsp.pMatrixCoefficients = sound.voice->outputLevels.data();
 
-        X3DAudioCalculate(
+        X3D().calculate(
             x3dInstance_,
             &listener_.native,
             &sound.emitter.native,
