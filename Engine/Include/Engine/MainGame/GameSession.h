@@ -28,7 +28,11 @@ public:
         return nullptr;
     }
 private:
-    struct Entry { std::unique_ptr<GameSubsystem> object; bool initialized = false; bool ready = false; };
+    friend class SaveGame;
+    friend class Game;
+    void SerializeSaveGame(SaveArchive& archive);
+    void NotifySaveGameLoaded(Scene& scene);
+    struct Entry { std::unique_ptr<GameSubsystem> object; bool initialized = false; bool ready = false; std::string key; };
     std::vector<Entry> entries_;
     std::thread::id thread_ = std::this_thread::get_id();
     SubsystemContext context_{*this};

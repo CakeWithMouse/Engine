@@ -1,0 +1,4 @@
+phase=types launched=Cardboard box round=1 aim=0.000000
+phase=types launched=Soda can round=1 aim=0.000000
+phase=types launched=Crumpled paper round=2 aim=0.000000
+phase=types complete hits=3 misses=0 accuracy=100% round=2 PASS

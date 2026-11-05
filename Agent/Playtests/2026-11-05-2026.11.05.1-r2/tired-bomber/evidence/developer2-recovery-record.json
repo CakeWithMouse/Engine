@@ -1,0 +1,10 @@
+{
+    "engineVersion": "2026.11.05.3",
+    "format": 1,
+    "module": "Game.dll",
+    "moduleSha256": "067990f00935aafea531dcc968fddc6c15704f431fe9b9d07170ab7c8a9ceffb",
+    "project": "E:/Engine/Engine/build/playtests/20261105-r2/tired-bomber/recovery-project/Project.json",
+    "savedUtc": "2026-11-05T14:10:01.625Z",
+    "snapshot": "55c96be0-fc0a-4ca3-a69c-fdf5eac6b989-76d5c374-6a4d-4061-a4fb-ca6b5554747d.scene.json",
+    "sourceScene": "E:/Engine/Engine/build/playtests/20261105-r2/tired-bomber/recovery-project/Content/Scenes/Other.scene.json"
+}

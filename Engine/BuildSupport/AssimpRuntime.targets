@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="DeployAssimpRuntime" AfterTargets="Build" Condition="'$(EngineEnableAssimp)'=='true'">
+    <!-- Multiple targets share Runtime; each must restore its dependency closure after incremental cleanup. -->
+    <PropertyGroup>
+      <AssimpBin>$(RepositoryRoot)Engine\vcpkg_installed\x64-windows\bin</AssimpBin>
+      <AssimpBin Condition="'$(Configuration)'=='Debug'">$(RepositoryRoot)Engine\vcpkg_installed\x64-windows\debug\bin</AssimpBin>
+    </PropertyGroup>
+    <ItemGroup><AssimpRuntimeDll Include="$(AssimpBin)\*.dll" /></ItemGroup>
+    <Error Condition="'@(AssimpRuntimeDll)'==''" Text="Assimp is enabled but its runtime dependencies are missing from $(AssimpBin)." />
+    <Copy SourceFiles="@(AssimpRuntimeDll)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+</Project>

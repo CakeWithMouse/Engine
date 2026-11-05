@@ -1,0 +1,6 @@
+{
+    "content": "Content",
+    "module": "Game.dll",
+    "name": "Tired Bomber Recovery Fixture",
+    "startupScene": "Content/Scenes/Other.scene.json"
+}

@@ -1,0 +1,6 @@
+skeletal frame=10 loaded=1 meshes=1 clips=1 clip=0 clip_name= animation_time=0.166667 bones=19
+skeletal frame=20 loaded=1 meshes=1 clips=1 clip=0 clip_name= animation_time=0.333333 bones=19
+skeletal frame=30 loaded=1 meshes=1 clips=1 clip=0 clip_name= animation_time=0.5 bones=19
+skeletal frame=40 loaded=1 meshes=1 clips=1 clip=0 clip_name= animation_time=0.666667 bones=19
+skeletal frame=50 loaded=1 meshes=1 clips=1 clip=0 clip_name= animation_time=0.833333 bones=19
+skeletal frame=60 loaded=1 meshes=1 clips=1 clip=0 clip_name= animation_time=1 bones=19

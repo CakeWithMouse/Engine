@@ -6,6 +6,7 @@
 #include <string>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Render/ImpostorAtlas.h>
+#include <Engine/Render/LodDiagnostics.h>
 #include <Engine/Render/MeshData.h>
 #include <Engine/Render/SkeletalData.h>
 #include <Engine/Render/SkeletalBaker.h>
@@ -38,6 +39,7 @@ static_assert(sizeof(MeshInstance) == 60, "MeshInstance must be 60 bytes");
 class InstancedMeshComponent : public GameComponent
 {
 public:
+    void SerializeSaveGame(SaveArchive& archive) override;
     static constexpr int MaxLodCount = 4;
 
     InstancedMeshComponent();
@@ -172,6 +174,7 @@ public:
     uint32_t GetDrawnInstances() const { return DrawnInstances; }
     uint32_t GetCulledInstances() const { return CulledInstances; }
     uint32_t GetDrawnInstancesForLod(int level) const;
+    const LodDiagnostics& GetLodDiagnostics() const { return Diagnostics; }
     /** Instances drawn as sprites in the last frame. */
     uint32_t GetDrawnImpostors() const { return static_cast<uint32_t>(ImpostorLevel.ColorStaging.size()); }
 
@@ -193,6 +196,7 @@ public:
     int GetIndexCount() override { return TotalIndexCount; }
 
 private:
+    LodDiagnostics Diagnostics;
     struct LodLevel
     {
         MeshLodData Data;

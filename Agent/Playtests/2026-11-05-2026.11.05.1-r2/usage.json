@@ -1,0 +1,30 @@
+{
+  "windowMinutes": 10080,
+  "resetAt": 1794317816,
+  "reserveAtUsedPercent": 47,
+  "checkpoints": [
+    {
+      "phase": "start",
+      "usedPercent": 28
+    },
+    {
+      "phase": "fixed-sdk-and-ui-regressions",
+      "usedPercent": 31
+    },
+    {
+      "phase": "independent-final-sdk-retests",
+      "usedPercent": 35
+    },
+    {
+      "phase": "final-texture-fix-and-full-two-persona-matrix",
+      "usedPercent": 37
+    },
+    {
+      "phase": "complete",
+      "usedPercent": 38
+    }
+  ],
+  "note": "User raised cap to 50%; shared account counter, no credit reset",
+  "limitUsedPercent": 50,
+  "startUsedPercent": 28
+}

@@ -395,4 +395,5 @@
     </Target>
     <ImportGroup Label="ExtensionTargets"/>
   <ItemGroup><ClCompile Include="Source/CodeTools.cpp" /></ItemGroup>
+    <Import Project="../Engine/BuildSupport/AssimpRuntime.targets" />
 </Project>

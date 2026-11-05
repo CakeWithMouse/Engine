@@ -15,6 +15,7 @@
 class SkeletalMeshComponent : public GameComponent
 {
 public:
+    void SerializeSaveGame(SaveArchive& archive) override;
     SkeletalMeshComponent();
     SkeletalMeshComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
     ~SkeletalMeshComponent() override;

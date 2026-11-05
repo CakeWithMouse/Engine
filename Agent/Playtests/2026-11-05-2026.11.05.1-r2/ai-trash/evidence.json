@@ -1,0 +1,398 @@
+{
+  "sdk": "2026.11.05.1",
+  "generatedAt": "2026-11-05",
+  "persona": "role4-ai-trash",
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\ai-trash\\TrashGameDev",
+  "features": [
+    {
+      "status": "passed",
+      "summary": "Created two isolated projects with launcher CLI; --enable-code succeeded and TrashGameDev built on pinned SDK 2026.11.05.1.",
+      "feature_id": "create-cpp",
+      "artifacts": [
+        "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\ai-trash\\fresh-create.log",
+        "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\ai-trash\\dev-enable.log",
+        "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\ai-trash\\trash-build-final.log"
+      ]
+    },
+    {
+      "status": "partial",
+      "summary": "Fresh native Windows Qt UI run completed with exit0, 5028 checks passed. CodeClassDialog validated empty/invalid names, preserved rejected input, trimmed Character name/default parent/header, self-inheritance and duplicate-source rejection, and Object mode omitting an empty -Base. Partial only; all four class kinds were not created through UI.",
+      "feature_id": "class-wizard",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\class-wizard-checks.md",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\editor-ui-probe-5028.log"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "A real incremental link failure left the previous module in place; after cleaning only this project Intermediate, a clean rebuild succeeded.",
+      "feature_id": "failed-build-rollback",
+      "artifacts": [
+        "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\ai-trash\\archive-build.log",
+        "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\ai-trash\\archive-build-retry.log"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Six gameplay assertions measured 0->1->2 projectiles before and after DLL replacement (T and HUD click).",
+      "feature_id": "hot-reload",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\reload-input-results.json",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\reload-input-result.json"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Created all six primitive types through project.scene and saved the actual scene; 8 of 8 steps status 0.",
+      "feature_id": "scene-primitives",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\scene-six-primitives.result.json",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\scene-six-primitives.scene.json"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "TrashProbeB parented to TrashProbeA and restored after New/Load; IDs and parent IDs measured in snapshots.",
+      "feature_id": "scene-hierarchy",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\project-scene.result.json"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "The built C++ Trash.Projectile ENGINE_OBJECT is created, ticked, raycast against the bucket, saved, and restored with project-specific data.",
+      "feature_id": "scene-object",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\round-three-items.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\save-process-final.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\load-process-final.log"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Real queue history applied Undo/Redo to group move, duplicate, and delete; all 16 statuses passed.",
+      "feature_id": "scene-undo",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\project-scene.result.json"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Two selected objects moved as one group with measured offsets.",
+      "feature_id": "scene-groups",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\project-scene.result.json"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Actual SnapVector and viewport gizmo-center helpers returned [0.5,1,-0.5] and [1.5,3,2.5].",
+      "feature_id": "scene-snapping",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\gizmo-snap.result.json",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\gizmo-center.result.json"
+      ]
+    },
+    {
+      "status": "not-tested",
+      "summary": "No independent role4 probe or direct measurement; not inferred from other personas or root regression runs.",
+      "feature_id": "scene-recovery",
+      "artifacts": []
+    },
+    {
+      "status": "partial",
+      "summary": "Player camera properties (fov/projection/view plane) were present and player controls persisted; separate screen-ray calculation is captured. No manual camera viewport orbit/zoom assessment.",
+      "feature_id": "camera-perspective",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-probe-fresh.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-character-properties.png",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\camera-screen-ray.result.json"
+      ]
+    },
+    {
+      "status": "partial",
+      "summary": "CPU scene raycast hit/miss and screen-to-ray are measured, but a visible viewport cursor ray interaction was not.",
+      "feature_id": "trace-screen",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\trace-raycast-hit.result.json",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\trace-raycast-miss.result.json",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\camera-screen-ray.result.json"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Assimp import placed CesiumMan.glb with 1 mesh / 14,016 indices.",
+      "feature_id": "model-import",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\model-import-glb.result.json"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Native asset.import converted/imported the packed BLEND into a GLB asset with 1 mesh / 36 indices.",
+      "feature_id": "model-blend",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\model-import-blend.result.json"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "A real 4×4 image was imported through the inspector to Content/Textures, assigned, cleared, reassigned, and read from the live material field. Fresh EditorUiTests run passed.",
+      "feature_id": "texture-import",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-probe-fresh.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-assets.png",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-material-textures.png"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "The editor reimport scenario replaced a red source bitmap with a blue source and exercised the reimport command; fresh EditorUiTests run passed.",
+      "feature_id": "asset-reimport",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-probe-fresh.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-assets.png"
+      ]
+    },
+    {
+      "status": "not-tested",
+      "summary": "No independent role4 probe or direct measurement; not inferred from other personas or root regression runs.",
+      "feature_id": "skeletal",
+      "artifacts": []
+    },
+    {
+      "status": "passed",
+      "summary": "Inspector texture assignment/removal and MaterialEditor texture slot assignment were exercised; on-disk material files and UI snapshots were produced.",
+      "feature_id": "material-assign",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-probe-fresh.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-material-slots.png",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-paint-material.json"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Changed Tint material Gloss parameter, saved, reopened, and verified persisted value 0.9; graph parameter edit propagated to the actual graph node.",
+      "feature_id": "material-params",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-probe-fresh.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-material-editor.png",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-material-preview.png",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-tint-material.json"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Actual Qt editor opened and saved HLSL/material edits, displayed a lit preview, and showed texture slots and graph canvas.",
+      "feature_id": "material-editor",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-probe-fresh.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-material-editor.png",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-material-preview.png",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-material-graph.png"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Invalid graph shader surfaced an X3003 duplicate TimeParams compile error in the live error list; graph stayed inspectable.",
+      "feature_id": "material-errors",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-probe-fresh.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-material-error.png"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "The UI changed material blending to Masked for an opacity-map slot and verified the saved Paint.mat render.blend value.",
+      "feature_id": "material-blends",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-probe-fresh.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-material-textures.png",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-paint-material.json"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Real editor inspector changed point-light color and intensity, toggled enabled off/on, and verified the snapshot retained values through duplication.",
+      "feature_id": "light-point",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-probe-fresh.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-point-light.png"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Real directional-light inspector changed intensity 1→2.5, color, and rotation, then verified Undo/Redo and saved state.",
+      "feature_id": "light-sun",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-probe-fresh.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-directional-light.png"
+      ]
+    },
+    {
+      "status": "partial",
+      "summary": "Directional-light shadows checkbox toggled and authored scene state was saved, but no before/after shadow pixels or distance/cache behavior was measured.",
+      "feature_id": "shadows",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-probe-fresh.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-directional-light.png"
+      ]
+    },
+    {
+      "status": "partial",
+      "summary": "The .4 game loaded a scene containing Environment.Sky and ProjectGame added the Trash sun (DirectionalLightComponent); saved Forward D3D captures visibly render the scene sky. Sky parameters and cubemap/reflection behavior were not varied or measured.",
+      "feature_id": "sky",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-probe-fresh.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-assets.png",
+        "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\ai-trash\\TrashBackfill4\\Content\\Scenes\\Main.scene.json",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\render-forward-r4.bmp"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Project startup UI renders HUD; saved BMP contains throw count, accuracy, aim, and button label.",
+      "feature_id": "hud-project",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\trash-three-items.bmp"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Real held T launches one box; LeftButton=500 click launches the second soda can (measured in project.input snapshots); post-reload assertions also pass.",
+      "feature_id": "hud-events",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\held-t-and-hud-result.json",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\reload-input-results.json"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "UI Editor edited/saved a HUD element; project HUD selection remained selected after reopening settings.",
+      "feature_id": "hud-editor",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-probe-fresh.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-hud-editor.png",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\ui-hud-settings.png"
+      ]
+    },
+    {
+      "status": "not-tested",
+      "summary": "No independent role4 probe or direct measurement; not inferred from other personas or root regression runs.",
+      "feature_id": "vfs",
+      "artifacts": []
+    },
+    {
+      "status": "not-tested",
+      "summary": "No independent role4 probe or direct measurement; not inferred from other personas or root regression runs.",
+      "feature_id": "export",
+      "artifacts": []
+    },
+    {
+      "status": "partial",
+      "summary": "SDK version lock and current project DLL launched on the pinned .1 Runtime; no older ABI migration round-trip was attempted.",
+      "feature_id": "compatibility",
+      "artifacts": [
+        "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\ai-trash\\TrashGameDev\\Engine.lock.json",
+        "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\ai-trash\\trash-build-final.log"
+      ]
+    },
+    {
+      "status": "not-tested",
+      "summary": "No independent role4 probe or direct measurement; not inferred from other personas or root regression runs.",
+      "feature_id": "sdk-examples",
+      "artifacts": []
+    },
+    {
+      "status": "not-tested",
+      "summary": "No independent role4 probe or direct measurement; not inferred from other personas or root regression runs.",
+      "feature_id": "render-host",
+      "artifacts": []
+    },
+    {
+      "status": "passed",
+      "summary": "Mid-flight projectile and current round saved, loaded, then a second EngineRuntime process resumed it and registered a hit.",
+      "feature_id": "savegame-restart",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\save-process-final.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\load-process-final.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\trash-round-save-load.bmp"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Actual MaterialEditorWindow accepted AI graph, undo/redo, apply, revert, and saved restored original material; status and HLSL measured.",
+      "feature_id": "material-graph",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\material-graph-result.json",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\material-graph.png"
+      ]
+    },
+    {
+      "status": "passed",
+      "summary": "Locked graph sidecar forced save accepted=false with dirty=true; Revert and subsequent Save succeeded.",
+      "feature_id": "material-graph-write-failure",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\material-write-failure-result.json",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\material-write-failure.log"
+      ]
+    },
+    {
+      "feature_id": "particles",
+      "status": "passed",
+      "summary": "On a clean .4 copy, a real thrown box hit Bucket base (hits=1, throws=1, 100% accuracy), spawning a transient 64-particle Sparks burst at the bucket; it was visibly present in D3D frame captures at hit+24 simulation ticks, with the live HUD.",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\particle-collision-on-sort-on.bmp",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\backfill-particle-phases.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\backfill-particle-forward.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\TrashBackfill4-build.log"
+      ]
+    },
+    {
+      "feature_id": "particle-collision",
+      "status": "partial",
+      "summary": "The same hit/burst phase ran with depth-collision and sorting toggles on/off. Collision-on vs off images differ by 685/500000 pixels, but the paired captures are one simulation tick apart, so the difference cannot be attributed to collision alone. Sorting was compared on the same frozen particle state; only 65/500000 pixels differ. The visual contribution is small, so the captures do not establish a strong collision or sorting effect.",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\particle-collision-on-sort-on.bmp",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\particle-collision-off-sort-on.bmp",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\particle-collision-on-sort-on-frozen.bmp",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\particle-collision-on-sort-off-frozen.bmp",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\backfill-particle-phases.log"
+      ]
+    },
+    {
+      "feature_id": "render-modes",
+      "status": "passed",
+      "summary": "A .4 game process ran Forward (type0), Deferred (type1) and Deferred G-buffer debug overlay (type1, overlay on) on the unchanged Trash HUD. All three D3D captures were written at 1000x500, exit0; completed-frame draw calls were 33/34/38 respectively. The G-buffer capture displays four diagnostic views.",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\render-forward-r4.bmp",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\render-deferred-r4.bmp",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\render-gbuffer-r4.bmp",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\backfill-render-phases.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\backfill-render-forward.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\backfill-render-deferred.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\backfill-render-gbuffer.log"
+      ]
+    },
+    {
+      "feature_id": "render-resize",
+      "status": "passed",
+      "summary": "The copied .4 game called OnWindowResized(640,480) then OnWindowResized(320,240); both swapchain resize captures wrote successfully with the same HUD score 0/0. BMP headers confirm exact 640x480 and 320x240 dimensions, at upcoming frames 2 and 3, process exit0.",
+      "artifacts": [
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\resize-640x480-r4.bmp",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\resize-320x240-r4.bmp",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\backfill-resize-phases.log",
+        "E:\\Engine\\Agent\\Playtests\\2026-11-05-2026.11.05.1-r2\\ai-trash\\evidence\\r4\\backfill-render-resize.log"
+      ]
+    }
+  ],
+  "backfillSdk": "2026.11.05.4",
+  "backfillProject": "E:/Engine/Engine/build/playtests/20261105-r2/ai-trash/TrashBackfill4",
+  "backfillRuntime": "E:/Engine/Engine/build/playtests/20261105-r2/final4/Runtime",
+  "supplementalBackfillFeatures": [
+    "particles",
+    "particle-collision",
+    "render-modes",
+    "render-resize"
+  ]
+}

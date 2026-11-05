@@ -3,19 +3,26 @@
 #include "EditorTheme.h"
 #include "GizmoMath.h"
 #include "MainWindow.h"
+#include "MaterialEditorWindow.h"
+#include "MaterialGraphWidget.h"
 #include "ObjectInspectorPanel.h"
 #include "QtHost.h"
 #include "UIEditorWindow.h"
+#include <DbgHelp.h>
+#include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
 #include <Engine/Components/SpecificComponents/MeshComponent.h>
 #include <Engine/InputDevice/Keys.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/GameSession.h>
 #include <Engine/Project/StandardTypes.h>
+#include <Engine/Render/SkeletalLoader.h>
+#include <Engine/Resources/Paths.h>
 #include <Engine/Runtime/EditorReloadApi.h>
 #include <Engine/Runtime/GameEditModule.h>
 #include <Engine/Runtime/SceneEditSession.h>
+#include <Engine/SaveGame/SaveGame.h>
 #include <Engine/Scene/Scene.h>
-#include <Engine/Render/SkeletalLoader.h>
+#include <Engine/Scene/SceneDocument.h>
 #include <Engine/UI/UIMarkup.h>
 #include <QAction>
 #include <QApplication>
@@ -33,16 +40,18 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPlainTextEdit>
+#include <QPointer>
 #include <QProcess>
 #include <QPushButton>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QTemporaryDir>
+#include <QThread>
 #include <QTimer>
 #include <Windows.h>
-#include <DbgHelp.h>
 #pragma comment(lib, "dbghelp.lib")
 #include <cfloat>
+#include <cmath>
 #include <cstdio>
 #include <filesystem>
 #include <stdexcept>
@@ -50,10 +59,12 @@
 namespace {
 std::wstring crashDumpPath;
 LONG WINAPI DumpCrash(EXCEPTION_POINTERS *exception) {
-  HANDLE file = CreateFileW(crashDumpPath.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+  HANDLE file = CreateFileW(crashDumpPath.c_str(), GENERIC_WRITE, 0, nullptr,
+                            CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
   if (file != INVALID_HANDLE_VALUE) {
     MINIDUMP_EXCEPTION_INFORMATION info{GetCurrentThreadId(), exception, FALSE};
-    MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), file, MiniDumpNormal, &info, nullptr, nullptr);
+    MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), file,
+                      MiniDumpNormal, &info, nullptr, nullptr);
     CloseHandle(file);
   }
   return EXCEPTION_EXECUTE_HANDLER;
@@ -75,7 +86,8 @@ glm::vec3 Vector(const QJsonValue &value, glm::vec3 fallback) {
   const auto a = value.toArray();
   Require(a.size() == 3, "vector must contain three numbers");
   for (auto n : a)
-    Require(n.isDouble(), "vector element must be numeric");
+    Require(n.isDouble() && std::isfinite(float(n.toDouble())),
+            "vector element must be finite numeric float");
   return {float(a[0].toDouble()), float(a[1].toDouble()),
           float(a[2].toDouble())};
 }
@@ -153,9 +165,20 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
       return &c.module->AuthoringApi();
     return nullptr;
   };
+  struct CommandCapture : IEditorUiListener {
+    uint32_t status = EngineSceneOk;
+    QString error;
+    void OnLogMessage(const QString &) override {}
+    void OnCommandFinished(const EditorCommand &, uint32_t value,
+                           const QString &detail) override {
+      status = value;
+      error = detail;
+    }
+  } capture;
   EditorQtHost host(callbacks, [](IEditorHost *, std::atomic<bool> *ready) {
     ready->store(true);
   });
+  host.SetUiListener(&capture);
   host.SetModuleApi(module.Api());
   host.SetProjectDataApi(module.ProjectDataApi());
   host.SetSelectionApi(module.SelectionApi());
@@ -182,6 +205,8 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
         [](void *p, const EngineSceneObjectInfo *o) {
           static_cast<QJsonArray *>(p)->append(
               QJsonObject{{"name", o->name},
+                          {"id", double(o->id)},
+                          {"parent", double(o->parentId)},
                           {"type", o->typeName},
                           {"position", QJsonArray{o->transform.position[0],
                                                   o->transform.position[1],
@@ -191,7 +216,303 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
     return out;
   };
   QJsonObject result;
-  if (command == "project.reload-input") {
+  if (command == "project.scene") {
+    const auto steps = in["steps"].toArray();
+    Require(!steps.empty() && steps.size() <= 100,
+            "1..100 scene steps required");
+    auto resolve = [&](const QString &name) -> uint64_t {
+      if (name.isEmpty())
+        return 0;
+      for (const auto value : objects()) {
+        const auto object = value.toObject();
+        if (object["name"].toString() == name)
+          return uint64_t(object["id"].toDouble());
+      }
+      throw std::runtime_error(("Object not found: " + name).toStdString());
+    };
+    QJsonArray results;
+    for (const auto value : steps) {
+      Require(value.isObject(), "scene step must be an object");
+      const auto step = value.toObject();
+      const auto action = step["action"].toString();
+      EditorCommand cmd;
+      cmd.objectId = resolve(step["target"].toString());
+      cmd.name = step["name"].toString();
+      cmd.path = step["path"].toString();
+      if (action == "create") {
+        cmd.type = EditorCommand::CreateObject;
+        cmd.path = step["type"].toString();
+        Require(!cmd.path.isEmpty(), "create requires type");
+      } else if (action == "delete")
+        cmd.type = EditorCommand::RemoveObject;
+      else if (action == "duplicate")
+        cmd.type = EditorCommand::DuplicateObject;
+      else if (action == "rename")
+        cmd.type = EditorCommand::RenameObject;
+      else if (action == "parent") {
+        cmd.type = EditorCommand::SetParent;
+        cmd.parentId = resolve(step["parent"].toString());
+      } else if (action == "select") {
+        cmd.type = EditorCommand::SelectObject;
+        for (const auto name : step["targets"].toArray())
+          cmd.objectIds.push_back(resolve(name.toString()));
+        if (!cmd.objectId && !cmd.objectIds.empty())
+          cmd.objectId = cmd.objectIds.front();
+      } else if (action == "move") {
+        cmd.type = EditorCommand::UpdateObjectTransform;
+        cmd.path = "nudge";
+        const auto delta = Vector(step["delta"], {});
+        cmd.right = delta.x;
+        cmd.up = delta.y;
+        cmd.forward = delta.z;
+      } else if (action == "property") {
+        cmd.type = EditorCommand::SetProperty;
+        const auto bytes = QJsonDocument(QJsonArray{step["value"]})
+                               .toJson(QJsonDocument::Compact);
+        cmd.name = QString::fromUtf8(bytes.mid(1, bytes.size() - 2));
+      } else if (action == "material") {
+        cmd.type = EditorCommand::SetMaterial;
+      } else if (action == "save")
+        cmd.type = EditorCommand::SaveScene;
+      else if (action == "load")
+        cmd.type = EditorCommand::LoadScene;
+      else if (action == "new")
+        cmd.type = EditorCommand::NewScene;
+      else if (action == "undo")
+        cmd.type = EditorCommand::Undo;
+      else if (action == "redo")
+        cmd.type = EditorCommand::Redo;
+      else
+        throw std::runtime_error("unknown project.scene action");
+      capture.status = EngineSceneFailure;
+      capture.error.clear();
+      host.PostCommand(cmd);
+      host.Update(0);
+      const auto snapshot = host.ReadSnapshot();
+      QJsonArray selected;
+      for (auto id : snapshot.selectedIds)
+        selected.append(double(id));
+      results.append(QJsonObject{{"action", action},
+                                 {"status", int(capture.status)},
+                                 {"error", capture.error},
+                                 {"objects", objects()},
+                                 {"selected", selected},
+                                 {"canUndo", snapshot.canUndo},
+                                 {"canRedo", snapshot.canRedo}});
+    }
+    result["steps"] = results;
+  } else if (command == "material.graph") {
+    EditorTheme::Apply(
+        *static_cast<QApplication *>(QCoreApplication::instance()));
+    const auto material = in["material"].toString();
+    Require(material.startsWith("/Game/"),
+            "material must be a /Game path in the scratch project");
+    QStringList dialogs;
+    QTimer dismiss;
+    QObject::connect(&dismiss, &QTimer::timeout, [&] {
+      for (auto *w : QApplication::topLevelWidgets())
+        if (auto *box = qobject_cast<QMessageBox *>(w)) {
+          dialogs << box->text();
+          auto *button =
+              box->button(box->standardButtons().testFlag(QMessageBox::Yes)
+                              ? QMessageBox::Yes
+                              : QMessageBox::Ok);
+          if (button)
+            button->click();
+        }
+    });
+    dismiss.start(10);
+    QPointer<MaterialEditorWindow> editor =
+        new MaterialEditorWindow(&host, material);
+    struct EditorGuard {
+      QPointer<MaterialEditorWindow> &ptr;
+      ~EditorGuard() {
+        if (ptr)
+          delete ptr.data();
+      }
+    } editorGuard{editor};
+    editor->setAttribute(Qt::WA_DontShowOnScreen);
+    editor->resize(1000, 720);
+    editor->show();
+    auto pump = [&] {
+      QElapsedTimer timer;
+      timer.start();
+      qint64 nextFrame = 0;
+      do {
+        host.Update(0);
+        QApplication::processEvents();
+        if (timer.elapsed() >= nextFrame) {
+          Require(module.Api().frame(module.Api().context, .016) ==
+                      EngineSceneOk,
+                  "material preview frame failed");
+          nextFrame = timer.elapsed() + 16;
+        }
+        QThread::msleep(1);
+      } while (timer.elapsed() < 400);
+    };
+    pump();
+    auto *preview = editor->findChild<QWidget *>("MaterialPreview");
+    Require(preview && IsWindow(reinterpret_cast<HWND>(preview->winId())),
+            "material preview requires a real native HWND");
+    result["nativePreviewWindow"] = true;
+    QJsonArray results;
+    const auto steps = in["steps"].toArray();
+    Require(!steps.empty() && steps.size() <= 100,
+            "1..100 graph steps required");
+    for (const auto value : steps) {
+      const auto step = value.toObject();
+      const auto action = step["action"].toString();
+      HANDLE lock = INVALID_HANDLE_VALUE;
+      const auto lockedFile = step["lockedFile"].toString();
+      if (!lockedFile.isEmpty()) {
+        Require(QFileInfo(lockedFile).isAbsolute(),
+                "lockedFile must be absolute");
+        lock = CreateFileW(reinterpret_cast<LPCWSTR>(lockedFile.utf16()),
+                           GENERIC_READ, FILE_SHARE_READ, nullptr,
+                           OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+        Require(lock != INVALID_HANDLE_VALUE,
+                "cannot acquire write-failure lock");
+      }
+      struct LockGuard {
+        HANDLE h;
+        ~LockGuard() {
+          if (h != INVALID_HANDLE_VALUE)
+            CloseHandle(h);
+        }
+      } lockGuard{lock};
+      bool accepted = true;
+      if (action == "enable")
+        editor->EnableGraph();
+      else if (action == "disable")
+        editor->DisableGraph();
+      else if (action == "apply")
+        editor->ApplyGraph();
+      else if (action == "revert")
+        editor->Revert();
+      else if (action == "save") {
+        bool done = false, success = false;
+        accepted = editor->Save([&](bool ok) {
+          done = true;
+          success = ok;
+        });
+        if (accepted) {
+          QElapsedTimer timer;
+          timer.start();
+          while (!done && timer.elapsed() < 15000)
+            pump();
+          Require(done, "material save timed out");
+          accepted = success;
+        }
+      } else {
+        Require(editor->HasGraph() && editor->Graph(), "graph is not enabled");
+        auto *graph = editor->Graph();
+        if (action == "preset") {
+          const int index = step["index"].toInt(-1);
+          Require(index >= 0 && index < graph->PresetNames().size(),
+                  "invalid preset index");
+          graph->LoadPreset(index);
+        } else if (action == "ai")
+          accepted = graph->PasteFromAi(step["text"].toString());
+        else if (action == "undo")
+          graph->Undo();
+        else if (action == "redo")
+          graph->Redo();
+        else if (action == "remove") {
+          QList<int> ids;
+          for (const auto id : step["ids"].toArray())
+            ids.append(id.toInt());
+          graph->RemoveNodes(ids);
+        } else
+          throw std::runtime_error("unknown material.graph action");
+      }
+      pump();
+      QJsonObject state{{"action", action},
+                        {"accepted", accepted},
+                        {"hasGraph", editor->HasGraph()},
+                        {"dirty", editor->HasUnsavedChanges()}};
+      if (editor->HasGraph())
+        state["graph"] = QJsonDocument::fromJson(
+                             editor->Graph()->Model().ExportToJson().toUtf8())
+                             .object();
+      if (auto *source = editor->findChild<QPlainTextEdit *>("MaterialSource"))
+        state["hlsl"] = source->toPlainText();
+      results.append(state);
+    }
+    const auto image = in["image"].toString();
+    if (!image.isEmpty())
+      Require(editor->grab().save(image), "graph image write failed");
+    result["steps"] = results;
+    result["dialogs"] = QJsonArray::fromStringList(dialogs);
+    Require(editor->Shutdown(), "material shutdown rollback failed");
+    pump();
+  } else if (command == "project.input") {
+    const auto steps = in["steps"].toArray();
+    Require(!steps.empty() && steps.size() <= 100,
+            "steps must contain 1..100 input/control/frame operations");
+    int totalFrames = 0;
+    QJsonArray results;
+    for (const auto value : steps) {
+      Require(value.isObject(), "step must be an object");
+      const auto step = value.toObject();
+      const auto kind = step["kind"].toString();
+      if (kind == "control") {
+        const auto action = step["action"].toString();
+        const int control = action == "play"     ? EnginePlay
+                            : action == "stop"   ? EngineStop
+                            : action == "pause"  ? EnginePause
+                            : action == "resume" ? EngineResume
+                                                 : -1;
+        Require(control >= 0, "unknown play control");
+        Require(module.Api().control(module.Api().context, control) ==
+                    EngineSceneOk,
+                "play control failed");
+      } else if (kind == "frames") {
+        const int count = step["count"].toInt(-1);
+        totalFrames += count;
+        Require(count >= 0 && count <= 600 && totalFrames <= 2000,
+                "bounded frame count required");
+        for (int i = 0; i < count; ++i)
+          tick();
+      } else if (kind == "key" || kind == "focus") {
+        EditorCommand input;
+        input.type =
+            kind == "key" ? EditorCommand::InputKey : EditorCommand::InputFocus;
+        if (kind == "key") {
+          const int key = step["key"].toInt(-1);
+          Require(key >= 0 && key <= 507 && step["down"].isBool(),
+                  "Engine Keys 0..507 and boolean down required");
+          input.w = key;
+          input.h = step["down"].toBool() ? 1 : 0;
+        } else {
+          Require(step["enabled"].isBool(), "boolean focus enabled required");
+          input.w = step["enabled"].toBool() ? 1 : 0;
+        }
+        host.PostCommand(input);
+        host.Update(0);
+      } else if (kind == "pointer") {
+        const auto delta = Vector(step["delta"], {});
+        EditorCommand input;
+        input.type = EditorCommand::InputPointer;
+        input.yaw = delta.x;
+        input.pitch = delta.y;
+        input.zoom = delta.z;
+        host.PostCommand(input);
+        host.Update(0);
+      } else if (kind == "cursor") {
+        auto cursor = module.ViewportCursorApi();
+        Require(cursor.set, "cursor API unavailable");
+        Require(cursor.set(cursor.context, float(step["x"].toDouble()),
+                           float(step["y"].toDouble()), 640, 480,
+                           step["valid"].toBool(true) ? 1 : 0) == EngineSceneOk,
+                "cursor update failed");
+      } else
+        throw std::runtime_error("unknown project.input step");
+      results.append(QJsonObject{{"kind", kind}, {"objects", objects()}});
+    }
+    result["steps"] = results;
+    result["frames"] = totalFrames;
+    module.Api().control(module.Api().context, EngineStop);
+  } else if (command == "project.reload-input") {
     EditorCommand focus;
     focus.type = EditorCommand::InputFocus;
     focus.w = 1;
@@ -244,6 +565,9 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
     Require(!reload.path.isEmpty(), "candidate DLL is required");
     host.PostCommand(reload);
     host.Update(0);
+    Require(capture.status == EngineSceneOk,
+            capture.error.isEmpty() ? "Reload command rejected"
+                                    : capture.error.toUtf8().constData());
     Require(module.Api().context != old, "candidate did not replace session");
     result["reloaded"] = exercise();
     result["replaced"] = true;
@@ -297,38 +621,246 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
   return result;
 }
 QJsonObject Run(const QString &command, const QJsonObject &in) {
+  if (command == "render.diagnostics") {
+    const int width = in["width"].toInt(640), height = in["height"].toInt(480);
+    Require(width >= 100 && width <= 1920 && height >= 100 && height <= 1080,
+            "viewport must be 100..1920 by 100..1080");
+    const auto runtime = std::filesystem::path(
+        QCoreApplication::applicationDirPath().toStdWString());
+    EnginePaths::SetContentRoot(runtime / "EngineContent");
+    HWND hwnd = CreateWindowExW(
+        0, L"STATIC", L"Render diagnostics commandlet", WS_OVERLAPPEDWINDOW, 0,
+        0, width, height, nullptr, nullptr, GetModuleHandleW(nullptr), nullptr);
+    Require(hwnd != nullptr, "viewport creation failed");
+    struct WindowGuard {
+      HWND h;
+      ~WindowGuard() { DestroyWindow(h); }
+    } guard{hwnd};
+    Game game;
+    Require(game.InitializeViewport(hwnd, width, height),
+            "D3D viewport unavailable");
+    game.SetSimulationEnabled(false);
+    game.GetSettings().SetVSync(false);
+    const int rendering = in["rendering"].toInt(0);
+    Require(rendering >= 0 && rendering <= 2, "rendering must be 0..2");
+    game.GetSettings().SetRenderingType(static_cast<RenderType>(rendering));
+    game.SetRenderDiagnosticsVisible(in["panel"].toBool(true));
+    auto mesh = std::make_unique<InstancedMeshComponent>();
+    auto *ptr = mesh.get();
+    const int lodCount = in["lodCount"].toInt(3);
+    Require(lodCount >= 1 && lodCount <= 4, "lodCount must be 1..4");
+    for (int level = 0; level < lodCount; ++level)
+      Require(ptr->SetLod(level, MeshPrimitives::Cube()),
+              "LOD geometry rejected");
+    auto floats = [](const QJsonValue &value) {
+      std::vector<float> result;
+      Require(value.isArray(), "threshold array required");
+      for (const auto n : value.toArray()) {
+        Require(n.isDouble() && n.toDouble() > 0 &&
+                    std::isfinite(float(n.toDouble())),
+                "finite positive numeric threshold required");
+        result.push_back(float(n.toDouble()));
+      }
+      return result;
+    };
+    const auto distances = in.contains("distances") ? floats(in["distances"])
+                                                    : std::vector<float>{9, 17};
+    Require(distances.size() <= 4, "too many distance thresholds");
+    ptr->SetLodDistances(distances);
+    if (in.contains("screenHeights")) {
+      const auto values = floats(in["screenHeights"]);
+      Require(values.size() <= 4, "too many screen thresholds");
+      ptr->SetLodScreenHeights(values);
+    }
+    const float limit = float(in["drawDistance"].toDouble(60));
+    Require(std::isfinite(limit) && limit >= 0,
+            "drawDistance must be finite and nonnegative");
+    ptr->SetDrawDistance(limit);
+    const float fade = float(in["fade"].toDouble(0));
+    Require(fade >= 0 && fade <= 1, "fade must be 0..1");
+    ptr->SetLodFadeFraction(fade);
+    const auto instances = in["instances"].toArray();
+    Require(instances.size() <= 10000, "at most 10000 instances");
+    for (const auto value : instances) {
+      Require(value.isObject(), "instance must be an object");
+      const auto object = value.toObject();
+      MeshInstance item;
+      item.Position = Vector(object["position"], {});
+      item.Scale = float(object["scale"].toDouble(1));
+      Require(std::isfinite(item.Scale) && item.Scale > 0,
+              "finite positive scale required");
+      item.bVisible = object["visible"].toBool(true);
+      ptr->AddInstance(item);
+    }
+    std::unique_ptr<GameComponent> owner = std::move(mesh);
+    game.GetScene().AddComponent("Diagnostics instances", owner);
+    auto views = in["views"].toArray();
+    if (views.empty())
+      views.append(QJsonObject{{"position", QJsonArray{0, 24, 0}}});
+    Require(views.size() <= 32, "at most 32 views");
+    QJsonArray frames;
+    for (int index = 0; index < views.size(); ++index) {
+      Require(views[index].isObject(), "view must be object");
+      const auto view = views[index].toObject();
+      auto *camera = game.GetPlayer();
+      camera->SetCameraMode(CameraMode::Free);
+      camera->SetPosition(Vector(view["position"], {0, 24, 0}));
+      const auto direction = Vector(view["direction"], {0, -1, 0}),
+                 up = Vector(view["up"], {0, 0, 1});
+      Require(glm::length(direction) > 0 && glm::length(up) > 0 &&
+                  glm::length(glm::cross(glm::normalize(direction),
+                                         glm::normalize(up))) > .001f,
+              "camera direction and up must be nonzero and nonparallel");
+      camera->SetViewDirection(direction, up);
+      const float fov = float(view["fov"].toDouble(60)),
+                  orthoHeight = float(view["orthoHeight"].toDouble(24));
+      Require(fov > 0 && fov < 180 && std::isfinite(orthoHeight) &&
+                  orthoHeight > 0,
+              "valid camera projection required");
+      camera->SetProjection(view["orthographic"].toBool(true), fov, .1f, 2000,
+                            orthoHeight);
+      const auto image = in["image"].toString();
+      if (index == views.size() - 1 && !image.isEmpty()) {
+        Require(
+            QFileInfo(image).isAbsolute() && !QFileInfo::exists(image) &&
+                QFileInfo(image).dir().exists(),
+            "image must be a new absolute BMP path with an existing parent");
+        game.RequestFrameDump(image.toUtf8().toStdString());
+      }
+      const bool previous = game.GetCompletedFrameStats().valid;
+      Require(game.RenderViewportFrame(0), "render frame failed");
+      const auto &frame = game.GetCompletedFrameStats();
+      const auto &d = frame.lodComponents.at(0);
+      if (index == views.size() - 1 && !image.isEmpty())
+        Require(QFileInfo(image).size() > 54, "frame dump was not written");
+      QJsonArray buckets, thresholds, lines;
+      for (auto count : d.perLod)
+        buckets.append(int(count));
+      for (auto value : d.thresholds)
+        thresholds.append(value);
+      for (const auto &line : game.GetRenderDiagnosticsLines())
+        lines.append(QString::fromStdString(line));
+      frames.append(QJsonObject{
+          {"valid", frame.valid},
+          {"previousValid", previous},
+          {"frameIndex", double(frame.frameIndex)},
+          {"drawCalls", int(frame.counters.DrawCalls)},
+          {"instancesSubmitted", int(frame.counters.InstancesDrawn)},
+          {"prepared", d.prepared},
+          {"total", int(d.total)},
+          {"drawn", int(d.drawn)},
+          {"hidden", int(d.hidden)},
+          {"distanceCulled", int(d.distanceCulled)},
+          {"frustumCulled", int(d.frustumCulled)},
+          {"minDistance", d.minDistance},
+          {"maxDistance", d.maxDistance},
+          {"screenSize", d.screenSize},
+          {"perLod", buckets},
+          {"thresholds", thresholds},
+          {"lines", lines}});
+    }
+    return {{"frames", frames}};
+  }
+  if (command.startsWith("savegame.")) {
+    Game game;
+    game.Saves().SetCatalog(SceneProject::GetComponentTypes());
+    const auto root = in["root"].toString();
+    Require(!root.isEmpty(),
+            "savegame commands require an explicit scratch root");
+    game.Saves().Configure(in["gameId"].toString("commandlet").toStdString(),
+                           std::filesystem::path(root.toStdWString()));
+    const auto slot = in["slot"].toString("manual-1").toStdString();
+    if (command == "savegame.list") {
+      QJsonArray slotNames;
+      for (const auto &name : game.Saves().ListSlots())
+        slotNames.append(QString::fromStdString(name));
+      return {{"slots", slotNames}};
+    }
+    if (command == "savegame.delete") {
+      game.Saves().DeleteSlot(slot);
+      return {{"deleted", QString::fromStdString(slot)}};
+    }
+    if (command == "savegame.save") {
+      Require(in["scene"].isObject(), "scene document required");
+      auto data = SceneDocument::Parse(
+          QJsonDocument(in["scene"].toObject()).toJson().toStdString());
+      SceneDocument::Restore(data, SceneProject::GetComponentTypes(),
+                             game.GetScene());
+      game.Saves().RequestSave(slot);
+      game.Saves().ProcessPending();
+      Require(game.Saves().LastResult().Succeeded(),
+              game.Saves().LastResult().message.c_str());
+    } else if (command == "savegame.load" || command == "savegame.validate") {
+      game.Saves().RequestLoad(slot);
+      game.Saves().ProcessPending();
+      Require(game.Saves().LastResult().Succeeded(),
+              game.Saves().LastResult().message.c_str());
+    } else
+      throw std::runtime_error("unknown savegame command");
+    return {{"state", QJsonDocument::fromJson(
+                          QByteArray::fromStdString(game.Saves().Capture()))
+                          .object()}};
+  }
   if (command == "asset.import") {
     namespace fs = std::filesystem;
     const auto source = QFileInfo(in["source"].toString()).absoluteFilePath();
-    Require(in["source"].isString() && QFileInfo::exists(source), "source file is required");
-    Require(in["content"].isString() && !in["content"].toString().isEmpty(), "content output directory is required");
-    const auto content = fs::absolute(fs::path(in["content"].toString().toStdWString()));
+    Require(in["source"].isString() && QFileInfo::exists(source),
+            "source file is required");
+    Require(in["content"].isString() && !in["content"].toString().isEmpty(),
+            "content output directory is required");
+    const auto content =
+        fs::absolute(fs::path(in["content"].toString().toStdWString()));
     fs::create_directories(content);
-    const auto runtime = fs::path(QCoreApplication::applicationDirPath().toStdWString());
-    GameEditModule module(runtime/"Templates/SceneProject/Game.dll",runtime/"EngineContent",content);
-    const auto api = module.Api();char error[2048]{},path[4096]{};
-    const auto status=api.importAsset(api.context,source.toUtf8().constData(),0,path,sizeof(path),error,sizeof(error));
-    Require(status==EngineSceneOk,error);
-    uint64_t object=0;Require(api.createModel(api.context,path,"Imported",nullptr,&object,error,sizeof(error))==EngineSceneOk,error);
-    QJsonObject out{{"asset",QString::fromUtf8(path)},{"placed",object!=0}};
+    const auto runtime =
+        fs::path(QCoreApplication::applicationDirPath().toStdWString());
+    GameEditModule module(runtime / "Templates/SceneProject/Game.dll",
+                          runtime / "EngineContent", content);
+    const auto api = module.Api();
+    char error[2048]{}, path[4096]{};
+    const auto status =
+        api.importAsset(api.context, source.toUtf8().constData(), 0, path,
+                        sizeof(path), error, sizeof(error));
+    Require(status == EngineSceneOk, error);
+    uint64_t object = 0;
+    Require(api.createModel(api.context, path, "Imported", nullptr, &object,
+                            error, sizeof(error)) == EngineSceneOk,
+            error);
+    QJsonObject out{{"asset", QString::fromUtf8(path)},
+                    {"placed", object != 0}};
     EngineSceneInfo scene{};
-    api.readActiveScene(api.context,&scene,[](void* context,const EngineSceneObjectInfo* info){
-      auto& result=*static_cast<QJsonObject*>(context);result["material"]=QString::fromUtf8(info->materialAsset);result["type"]=QString::fromUtf8(info->typeName);
-    },&out);
+    api.readActiveScene(
+        api.context, &scene,
+        [](void *context, const EngineSceneObjectInfo *info) {
+          auto &result = *static_cast<QJsonObject *>(context);
+          result["material"] = QString::fromUtf8(info->materialAsset);
+          result["type"] = QString::fromUtf8(info->typeName);
+        },
+        &out);
     // Inspect the asset that the engine actually created. BLEND is converted to
-    // GLB by Blender; feeding the original file to Assimp reports a false failure.
-    const auto asset=QString::fromUtf8(path);
-    Require(asset.startsWith("/Game/"),"import returned an invalid asset path");
-    const auto physical=content/fs::u8path(std::string(path).substr(6));
+    // GLB by Blender; feeding the original file to Assimp reports a false
+    // failure.
+    const auto asset = QString::fromUtf8(path);
+    Require(asset.startsWith("/Game/"),
+            "import returned an invalid asset path");
+    const auto physical = content / fs::u8path(std::string(path).substr(6));
     QFile bytes(QString::fromStdWString(physical.wstring()));
-    Require(bytes.open(QIODevice::ReadOnly),"cannot read imported model bytes");const auto data=bytes.readAll();
-    auto model=LoadSkeletalModelFromMemory(data.constData(),size_t(data.size()),QFileInfo(bytes.fileName()).suffix().toStdString());
-    if(model.Success && model.Model){out["meshes"]=int(model.Model->Meshes.size());out["indices"]=model.Model->TotalIndexCount;out["clips"]=int(model.Model->Clips.size());}
-    else out["memoryLoadError"]=QString::fromStdString(model.ErrorMessage);
+    Require(bytes.open(QIODevice::ReadOnly),
+            "cannot read imported model bytes");
+    const auto data = bytes.readAll();
+    auto model = LoadSkeletalModelFromMemory(
+        data.constData(), size_t(data.size()),
+        QFileInfo(bytes.fileName()).suffix().toStdString());
+    if (model.Success && model.Model) {
+      out["meshes"] = int(model.Model->Meshes.size());
+      out["indices"] = model.Model->TotalIndexCount;
+      out["clips"] = int(model.Model->Clips.size());
+    } else
+      out["memoryLoadError"] = QString::fromStdString(model.ErrorMessage);
     return out;
   }
   if (command.startsWith("ui."))
-    EditorTheme::Apply(*static_cast<QApplication *>(QCoreApplication::instance()));
+    EditorTheme::Apply(
+        *static_cast<QApplication *>(QCoreApplication::instance()));
   if (command == "game.settings") {
     Game game;
     auto &settings = game.GetSettings();
@@ -373,7 +905,9 @@ QJsonObject Run(const QString &command, const QJsonObject &in) {
             {"minimum", Array(minimum)},
             {"maximum", Array(maximum)}};
   }
-  if (command == "project.build" || command == "project.reload-input")
+  if (command == "project.build" || command == "project.reload-input" ||
+      command == "project.input" || command == "material.graph" ||
+      command == "project.scene")
     return ProjectCommand(command, in);
   if (command == "scene.property") {
     SceneEditSession session(SceneProject::GetComponentTypes());
@@ -427,9 +961,9 @@ QJsonObject Run(const QString &command, const QJsonObject &in) {
     QWidget window;
     QDoubleSpinBox spin(&window);
     QComboBox combo(&window);
-    spin.setGeometry(12,12,160,28);
+    spin.setGeometry(12, 12, 160, 28);
     combo.addItem(QString::fromUtf8("Камера"));
-    combo.setGeometry(12,50,160,28);
+    combo.setGeometry(12, 50, 160, 28);
     window.resize(240, 100);
     window.show();
     QApplication::processEvents();
@@ -668,7 +1202,10 @@ QJsonObject Run(const QString &command, const QJsonObject &in) {
 } // namespace
 int main(int argc, char **argv) {
   SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
-  qputenv("QT_QPA_PLATFORM", "offscreen");
+  // Native material preview needs a real child HWND. Keep that window hidden;
+  // other commandlets use offscreen Qt and their own explicit D3D HWND.
+  qputenv("QT_QPA_PLATFORM", argc > 1 && std::string(argv[1]) == "material.graph"
+                                ? "windows" : "offscreen");
   QApplication app(argc, argv);
   qInstallMessageHandler(Messages);
   // Qt's offscreen Windows backend has no system font database.
@@ -676,8 +1213,13 @@ int main(int argc, char **argv) {
       qEnvironmentVariable("WINDIR") + "/Fonts/segoeui.ttf");
   if (font >= 0)
     app.setFont(QFont(QFontDatabase::applicationFontFamilies(font).first(), 9));
+  QFontDatabase::addApplicationFont(qEnvironmentVariable("WINDIR") +
+                                    "/Fonts/seguisym.ttf");
   const auto args = app.arguments();
-  if(args.size()==4) {crashDumpPath=(args[3]+".dmp").toStdWString();SetUnhandledExceptionFilter(DumpCrash);}
+  if (args.size() == 4) {
+    crashDumpPath = (args[3] + ".dmp").toStdWString();
+    SetUnhandledExceptionFilter(DumpCrash);
+  }
   if (args.size() == 2 && args[1] == "--help") {
     std::puts("EngineCommandlets <command> <request.json> "
               "<result.json>\n--list lists commands. Contracts: "
@@ -689,7 +1231,10 @@ int main(int argc, char **argv) {
     std::puts("ui.style\nui.inspector\nui.edit-text\ninput.rebind\ntrace."
               "raycast\ngizmo.snap\ngizmo.center\ncamera.screen-ray\nscene."
               "property\nsession.lifecycle\nproject.build\nproject.reload-"
-              "input\nmesh.primitive\ngame.settings\nasset.import");
+              "input\nproject.input\nproject.scene\nrender."
+              "diagnostics\nmaterial.graph\nmesh.primitive\ngame."
+              "settings\nasset.import\nsavegame.save\nsavegame.load\nsavegame."
+              "validate\nsavegame.list\nsavegame.delete");
     return 0;
   }
   QJsonObject result;

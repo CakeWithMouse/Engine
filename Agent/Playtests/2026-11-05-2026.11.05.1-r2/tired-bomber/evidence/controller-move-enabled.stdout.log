@@ -1,0 +1,2166 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[TiredBomber] subsystem initialized
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[TiredBomber] settings vsync=0 aa=1 mode=0 adapter=
+[TiredBomber] mesh check usable=0 triangles=12 configured=1 lowLOD=12 error=0
+asset-check procedural cube (default unit profile): 12 triangles, 24 vertices, size 1.00 x 1.00 x 1.00 m, pivot y -0.50, uv yes, NOT USABLE
+  problem: Pivot is not on the ground: the lowest point is at y = -0.50 m. Move the model so that its tracks or wheels touch y = 0.
+[TiredBomber] trace filter channel=1 -> ground
+[TiredBomber] trace filter channel=2 -> unit
+[TiredBomber] scene ready: 4 moving units, orthographic XZ camera, W/A/S/D controller, B drops a bomb
+[TiredBomber] subsystem scene ready: Main
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+auto-lod mesh LOD1: 12 -> 12 triangles (target 6, error 0, silhouette drift 0%)
+auto-lod mesh LOD2: 12 -> 12 triangles (target 3, error 0, silhouette drift 0%)
+auto-lod mesh LOD1: 12 -> 12 triangles (target 6, error 0, silhouette drift 0%)
+auto-lod mesh LOD2: 12 -> 12 triangles (target 3, error 0, silhouette drift 0%)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+FontAtlas: 161 glyphs at 14 px in a 512x128 atlas.
+frame-dump E:\Engine\Engine\build\playtests\20261105-r2\tired-bomber\legacy-copy\Content/tired-bomber-frame.bmp written=1 size=640x480
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 640x480
+[TiredBomber] input P: simulation=1
+[TiredBomber] GetSubsystem after startup=available
+[TiredBomber] marker instances drawn=11 total=13 LODs=3 lod0=0 lod1=0 lod2=11
+[TiredBomber] completed frame valid=1 index=46 draws=9 instances=19 visible=8 culled=0
+[TiredBomber] LOD component=Bomber.LOD.ScreenHeightProbe frame=46 prepared=1 drawn=1/1 hidden=0 distance=0 frustum=0 camera=24..24 thresholds=50,20, perLOD=0,1,0,
+[TiredBomber] LOD component=Bomber.Markers.LOD frame=46 prepared=1 drawn=11/13 hidden=1 distance=0 frustum=1 camera=24.5967..46.545 thresholds=9,17, perLOD=0,0,11,
+[LOD panel] RENDER / LOD    F7 hide | F8 next
+[LOD panel] Frame 46 | CPU submission counters
+[LOD panel] Draws 9  instances 19  dispatch 0
+[LOD panel] Indices 1170 (all passes)
+[LOD panel] Component 1/2  Bomber.LOD.ScreenHeightProbe
+[LOD panel] Color visible 1 / 1
+[LOD panel] Hidden 0  distance 0  frustum 0
+[LOD panel] Camera distance 24.0..24.0
+[LOD panel] Draw limit off | LOD by screen pixels
+[LOD panel] LOD0 mesh: 0 | next < 50.0 px
+[LOD panel] LOD1 mesh: 1 | next < 20.0 px
+[LOD panel] LOD2 mesh: 0
+[LOD panel] Buckets may overlap during LOD fade
+[LOD panel] Color selection only; shadows counted separately
+frame-dump E:\Engine\Engine\build\playtests\20261105-r2\tired-bomber\legacy-copy\Content/lod-camera-24.bmp written=1 size=640x480
+[TiredBomber] diagnostics camera moved to Y=8 at frame 90
+[TiredBomber] player position x=-10 y=0.5 z=-2.2 t=1.008s
+[TiredBomber] bomb released at t=1.008s
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[TiredBomber] input P: simulation=0
+[TiredBomber] save completion status=0 ticket=0 message=
+[TiredBomber] subsystem scene closing: Main
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "frames": 99,
+    "ok": true,
+    "steps": [
+        {
+            "kind": "control",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -6,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -2,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        2,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        6,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        5
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                }
+            ]
+        },
+        {
+            "kind": "focus",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -6,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -2,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        2,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        6,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        5
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -6,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -2,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        2,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        6,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        5
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -6,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -2,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        2,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        6,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        2.6000022888183594
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -6,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -2,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        2,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        6,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        2.6000022888183594
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -6,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -2,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        2,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        6,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        2.6000022888183594
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -6,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -2,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        2,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        6,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        2.6000022888183594
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -6,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -2,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        2,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        6,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        2.6000022888183594
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -6,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -2,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        2,
+                        0.41999998688697815,
+                        -2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        6,
+                        0.41999998688697815,
+                        2
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        24,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        2.6000022888183594
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -5.074664115905762,
+                        0.41999998688697815,
+                        -1.525078296661377
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -0.9654507637023926,
+                        0.41999998688697815,
+                        1.9905738830566406
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        1.193605661392212,
+                        0.41999998688697815,
+                        -2.48414945602417
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        4.872739791870117,
+                        0.41999998688697815,
+                        1.5354571342468262
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        8,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        -2.199997901916504
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -5.074664115905762,
+                        0.41999998688697815,
+                        -1.525078296661377
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -0.9654507637023926,
+                        0.41999998688697815,
+                        1.9905738830566406
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        1.193605661392212,
+                        0.41999998688697815,
+                        -2.48414945602417
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        4.872739791870117,
+                        0.41999998688697815,
+                        1.5354571342468262
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        8,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        -2.199997901916504
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -5.0019731521606445,
+                        0.41999998688697815,
+                        -1.5406701564788818
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -1.0459834337234497,
+                        0.41999998688697815,
+                        1.9566153287887573
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        1.0897047519683838,
+                        0.41999998688697815,
+                        -2.501190662384033
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        4.962271690368652,
+                        0.41999998688697815,
+                        1.5597972869873047
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        8,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        -2.199997901916504
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                },
+                {
+                    "name": "Bomber.ActiveBomb",
+                    "position": [
+                        -5.0019731521606445,
+                        9.711999893188477,
+                        -1.5406701564788818
+                    ],
+                    "type": "BomberPiece"
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -5.0019731521606445,
+                        0.41999998688697815,
+                        -1.5406701564788818
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -1.0459834337234497,
+                        0.41999998688697815,
+                        1.9566153287887573
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        1.0897047519683838,
+                        0.41999998688697815,
+                        -2.501190662384033
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        4.962271690368652,
+                        0.41999998688697815,
+                        1.5597972869873047
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        8,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        -2.199997901916504
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                },
+                {
+                    "name": "Bomber.ActiveBomb",
+                    "position": [
+                        -5.0019731521606445,
+                        9.711999893188477,
+                        -1.5406701564788818
+                    ],
+                    "type": "BomberPiece"
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -5.0019731521606445,
+                        0.41999998688697815,
+                        -1.5406701564788818
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -1.0459834337234497,
+                        0.41999998688697815,
+                        1.9566153287887573
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        1.0897047519683838,
+                        0.41999998688697815,
+                        -2.501190662384033
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        4.962271690368652,
+                        0.41999998688697815,
+                        1.5597972869873047
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        8,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        -2.199997901916504
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                },
+                {
+                    "name": "Bomber.ActiveBomb",
+                    "position": [
+                        -5.0019731521606445,
+                        9.711999893188477,
+                        -1.5406701564788818
+                    ],
+                    "type": "BomberPiece"
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -5.0019731521606445,
+                        0.41999998688697815,
+                        -1.5406701564788818
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -1.0459834337234497,
+                        0.41999998688697815,
+                        1.9566153287887573
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        1.0897047519683838,
+                        0.41999998688697815,
+                        -2.501190662384033
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        4.962271690368652,
+                        0.41999998688697815,
+                        1.5597972869873047
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        8,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        -2.199997901916504
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                },
+                {
+                    "name": "Bomber.ActiveBomb",
+                    "position": [
+                        -5.0019731521606445,
+                        9.711999893188477,
+                        -1.5406701564788818
+                    ],
+                    "type": "BomberPiece"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -4.990418434143066,
+                        0.41999998688697815,
+                        -1.5433990955352783
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -1.0601463317871094,
+                        0.41999998688697815,
+                        1.9509682655334473
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        1.0732426643371582,
+                        0.41999998688697815,
+                        -2.5037951469421387
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        4.978476524353027,
+                        0.41999998688697815,
+                        1.5641181468963623
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        8,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        -4.5999956130981445
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                },
+                {
+                    "name": "Bomber.ActiveBomb",
+                    "position": [
+                        -4.990418434143066,
+                        9.567999839782715,
+                        -1.5433990955352783
+                    ],
+                    "type": "BomberPiece"
+                }
+            ]
+        },
+        {
+            "kind": "key",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -4.990418434143066,
+                        0.41999998688697815,
+                        -1.5433990955352783
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -1.0601463317871094,
+                        0.41999998688697815,
+                        1.9509682655334473
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        1.0732426643371582,
+                        0.41999998688697815,
+                        -2.5037951469421387
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        4.978476524353027,
+                        0.41999998688697815,
+                        1.5641181468963623
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        8,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        -4.5999956130981445
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                },
+                {
+                    "name": "Bomber.ActiveBomb",
+                    "position": [
+                        -4.990418434143066,
+                        9.567999839782715,
+                        -1.5433990955352783
+                    ],
+                    "type": "BomberPiece"
+                }
+            ]
+        },
+        {
+            "kind": "frames",
+            "objects": [
+                {
+                    "name": "Ground",
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "name": "Warm Light",
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Cool Light",
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "name": "Bomber.Unit.1",
+                    "position": [
+                        -4.990418434143066,
+                        0.41999998688697815,
+                        -1.5433990955352783
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.2",
+                    "position": [
+                        -1.0601463317871094,
+                        0.41999998688697815,
+                        1.9509682655334473
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.3",
+                    "position": [
+                        1.0732426643371582,
+                        0.41999998688697815,
+                        -2.5037951469421387
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Unit.4",
+                    "position": [
+                        4.978476524353027,
+                        0.41999998688697815,
+                        1.5641181468963623
+                    ],
+                    "type": "BomberPiece"
+                },
+                {
+                    "name": "Bomber.Markers.LOD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.LOD.ScreenHeightProbe",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberMarkers"
+                },
+                {
+                    "name": "Bomber.Camera",
+                    "position": [
+                        0,
+                        8,
+                        0
+                    ],
+                    "type": "Gameplay.Camera"
+                },
+                {
+                    "name": "Bomber.Player",
+                    "position": [
+                        -10,
+                        0.5,
+                        -4.5999956130981445
+                    ],
+                    "type": "Gameplay.Character"
+                },
+                {
+                    "name": "Bomber.HUD",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "BomberHud"
+                },
+                {
+                    "name": "Bomber.ActiveBomb",
+                    "position": [
+                        -4.990418434143066,
+                        9.567999839782715,
+                        -1.5433990955352783
+                    ],
+                    "type": "BomberPiece"
+                }
+            ]
+        }
+    ]
+}
+

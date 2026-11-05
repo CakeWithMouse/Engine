@@ -52,6 +52,7 @@ void MeshComponent::SetMesh(MeshLodData mesh)
 
 void MeshComponent::CreateBuffers(ID3D11Device* Device)
 {
+    LoadPendingTexture();
     if (Device == nullptr)
     {
         return;

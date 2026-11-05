@@ -1237,14 +1237,67 @@ int wmain(int argc, wchar_t** argv)
             Check(savedGraph.contains(QStringLiteral("\"textureName\": \"Detail\"")) &&
                   savedGraph.contains(QStringLiteral("\"texture\": \"/Game/Textures/flat-normal.png\"")), "graph file keeps names and node textures as text");
 
-            // An unsaved graph edit is written at once, and Discard brings both files back.
-            Ui([&](auto* w) { editor(w)->Graph()->RemoveNodes({multiply}); editor(w)->ApplyGraph(); });
-            until([&] { return !readText(graphHlsl).contains(QStringLiteral("BaseMap.Sample")); });
-            Ui([](auto* w) { QMetaObject::invokeMethod(w->template findChild<MaterialEditorWindow*>(), "close", Qt::QueuedConnection); });
-            until([&] { bool modal = false; Ui([&](auto*) { modal = qobject_cast<QMessageBox*>(QApplication::activeModalWidget()) != nullptr; }); return modal; });
-            Ui([](auto*) { qobject_cast<QMessageBox*>(QApplication::activeModalWidget())->button(QMessageBox::Discard)->click(); });
-            until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
-            Check(readText(graphHlsl) == savedHlsl && readText(graphJson) == savedGraph, "discard restores the graph and its HLSL");
+            // Deny replacement/deletion but allow reading: QSaveFile can stage bytes, yet its commit fails.
+            struct ReplacementLock {
+                HANDLE handle;
+                explicit ReplacementLock(const std::filesystem::path& file)
+                    : handle(CreateFileW(file.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                         nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr))
+                { Check(handle != INVALID_HANDLE_VALUE, "lock material file against replacement"); }
+                void Release() { if (handle != INVALID_HANDLE_VALUE) { CloseHandle(handle); handle = INVALID_HANDLE_VALUE; } }
+                ~ReplacementLock() { Release(); }
+            };
+            const auto answerMaterialDialog = [&](QMessageBox::StandardButton answer, const QString& failedPath = QString()) {
+                until([&] { bool modal = false; Ui([&](auto*) { modal = qobject_cast<QMessageBox*>(QApplication::activeModalWidget()) != nullptr; }); return modal; });
+                Ui([&](auto*) {
+                    auto* dialog = qobject_cast<QMessageBox*>(QApplication::activeModalWidget());
+                    if (!failedPath.isEmpty()) {
+                        Check(dialog->icon() == QMessageBox::Warning &&
+                              QString(dialog->text()).replace('\\', '/').contains(QString(failedPath).replace('\\', '/')),
+                              qPrintable(QStringLiteral("restore failure identifies the locked file: ") + dialog->text()));
+                        Check(dialog->text().contains(QStringLiteral("Резервная копия")), "restore failure explains that backup survives");
+                    }
+                    Check(dialog->button(answer) != nullptr, "material dialog offers expected action");
+                    dialog->button(answer)->click();
+                });
+            };
+            for (const bool discard : {false, true})
+            {
+                Ui([&](auto* w) { editor(w)->Graph()->RemoveNodes({multiply}); editor(w)->ApplyGraph(); });
+                until([&] { return !readText(graphHlsl).contains(QStringLiteral("BaseMap.Sample")); });
+                const auto lockedPath = discard ? graphJson : graphHlsl;
+                ReplacementLock lock(lockedPath);
+                Ui([&](auto* w) {
+                    QTimer::singleShot(0, w, [&, w] {
+                        if (discard) w->close();
+                        else editor(w)->Revert();
+                    });
+                });
+                answerMaterialDialog(discard ? QMessageBox::Discard : QMessageBox::Yes);
+                answerMaterialDialog(QMessageBox::Ok, QString::fromStdWString(lockedPath.wstring()));
+                if (discard) {
+                    Ui([](auto* w) { Check(w->isVisible(), "file restore failure vetoes closing the main editor"); });
+                    Check(readText(graphHlsl) == savedHlsl && readText(graphJson) != savedGraph,
+                          "graph write failure follows a partial HLSL restore");
+                }
+                Ui([&](auto* w) {
+                    Check(editor(w) && editor(w)->isVisible() && editor(w)->HasUnsavedChanges(), "failed restore keeps dirty editor open");
+                    Check(!editor(w)->Graph()->Model().FindNode(multiply), "failed restore does not reset the editable graph");
+                });
+                lock.Release();
+                Ui([&](auto* w) {
+                    if (discard) QMetaObject::invokeMethod(editor(w), "close", Qt::QueuedConnection);
+                    else QTimer::singleShot(0, editor(w), [&, w] { editor(w)->Revert(); });
+                });
+                answerMaterialDialog(discard ? QMessageBox::Discard : QMessageBox::Yes);
+                until([&] {
+                    bool done = false;
+                    Ui([&](auto* w) { auto* e = w->template findChild<MaterialEditorWindow*>(); done = discard ? !e : e && !e->HasUnsavedChanges(); });
+                    return done;
+                });
+                Check(readText(graphHlsl) == savedHlsl && readText(graphJson) == savedGraph,
+                      "retry after unlocking restores both original files");
+            }
 
             Ui([&](auto* w) { w->OpenMaterialEditor(QString::fromStdWString(graphMat.wstring())); });
             until([&] { return inEditor(QStringLiteral("MaterialSlot_BaseMap")); });
@@ -1259,8 +1312,19 @@ int wmain(int argc, wchar_t** argv)
             });
             until([&] { bool saved = false; Ui([&](auto* w) { saved = editor(w)->isEnabled() && !editor(w)->HasUnsavedChanges(); }); return saved; });
             Check(!std::filesystem::exists(graphJson) && readText(graphHlsl) == savedHlsl, "code material keeps the last graph HLSL");
+            // A newly enabled graph must be deleted on Discard; failed deletion must also keep the backup.
+            Ui([&](auto* w) { editor(w)->EnableGraph(); });
+            ReplacementLock newGraphLock(graphJson);
             Ui([](auto* w) { QMetaObject::invokeMethod(w->template findChild<MaterialEditorWindow*>(), "close", Qt::QueuedConnection); });
+            answerMaterialDialog(QMessageBox::Discard);
+            answerMaterialDialog(QMessageBox::Ok, QString::fromStdWString(graphJson.wstring()));
+            Ui([&](auto* w) { Check(editor(w)->isVisible() && editor(w)->HasUnsavedChanges(), "failed graph deletion keeps backup and window"); });
+            Check(std::filesystem::exists(graphJson), "locked new graph has not been deleted");
+            newGraphLock.Release();
+            Ui([](auto* w) { QMetaObject::invokeMethod(w->template findChild<MaterialEditorWindow*>(), "close", Qt::QueuedConnection); });
+            answerMaterialDialog(QMessageBox::Discard);
             until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
+            Check(!std::filesystem::exists(graphJson) && readText(graphHlsl) == savedHlsl, "retry deletes new graph and restores original code material");
         }
         Ui([](auto* w) { w->activateWindow(); });
 

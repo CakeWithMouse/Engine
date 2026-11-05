@@ -1,0 +1,33 @@
+{
+  "views": [
+    {
+      "orthoHeight": 24,
+      "position": [
+        0,
+        8,
+        0
+      ]
+    },
+    {
+      "orthoHeight": 24,
+      "position": [
+        0,
+        24,
+        0
+      ]
+    }
+  ],
+  "screenHeights": [
+    50,
+    20
+  ],
+  "instances": [
+    {
+      "position": [
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  EngineCommandlets.cpp
+E:\Engine\Editor\Tools\EngineCommandlets.cpp(200,68): error C2039: "parent": не является членом "EngineSceneObjectInfo". [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Engine\Include\Engine\Runtime\SceneModuleApi.h(36,8): message : см. объявление "EngineSceneObjectInfo" [E:\Engine\Editor\EditorModule.vcxproj]
+

@@ -664,18 +664,32 @@ void MaterialEditorWindow::BackupGraphFiles()
 
 bool MaterialEditorWindow::RestoreGraphFiles()
 {
-    if (!graphBackup_.active) return false;
+    if (!graphBackup_.active) return true;
     graphApply_->stop();
-    graphBackup_.active = false;
-    QSaveFile shader(shaderFile_);
-    if (shader.open(QIODevice::WriteOnly)) { shader.write(graphBackup_.hlsl); shader.commit(); }
+    const auto failed = [this](const QString& path, const QString& error) {
+        QMessageBox::warning(this, QStringLiteral("Откат не выполнен"),
+            QStringLiteral("Не удалось восстановить %1: %2\nРезервная копия сохранена в памяти. "
+                           "Устраните причину ошибки и повторите откат.").arg(path, error));
+        return false;
+    };
+    const auto write = [&failed](const QString& path, const QByteArray& bytes) {
+        QSaveFile file(path);
+        if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit())
+            return failed(path, file.errorString());
+        return true;
+    };
+    if (!write(shaderFile_, graphBackup_.hlsl)) return false;
     if (graphBackup_.hadGraph)
     {
-        QSaveFile graph(GraphFile());
-        if (graph.open(QIODevice::WriteOnly)) { graph.write(graphBackup_.graph); graph.commit(); }
+        if (!write(GraphFile(), graphBackup_.graph)) return false;
     }
-    else
-        QFile::remove(GraphFile());
+    else if (QFile::exists(GraphFile()))
+    {
+        QFile graph(GraphFile());
+        if (!graph.remove()) return failed(GraphFile(), graph.errorString());
+    }
+    // A partial restore can be retried: retain both original files until every operation succeeds.
+    graphBackup_.active = false;
     return true;
 }
 
@@ -1220,7 +1234,8 @@ void MaterialEditorWindow::Revert()
     if (QMessageBox::question(this, QStringLiteral("Откатить материал"),
                               QStringLiteral("Отменить все несохранённые изменения материала и HLSL?")) != QMessageBox::Yes)
         return;
-    const bool restored = RestoreGraphFiles();
+    const bool restored = graphBackup_.active;
+    if (!RestoreGraphFiles()) return;
     LoadShaderText();
     LoadGraph();
     edited_ = false;
@@ -1257,12 +1272,13 @@ bool MaterialEditorWindow::ConfirmClose(std::function<void()> afterSave)
     return discard_;
 }
 
-void MaterialEditorWindow::Shutdown()
+bool MaterialEditorWindow::Shutdown()
 {
-    if (shuttingDown_) return;
-    shuttingDown_ = true;
+    if (shuttingDown_) return true;
     graphApply_->stop();
-    const bool restored = discard_ && RestoreGraphFiles();
+    const bool restored = discard_ && graphBackup_.active;
+    if (restored && !RestoreGraphFiles()) return false;
+    shuttingDown_ = true;
     const bool revert = discard_ && (edited_ || state_.modified || restored);
     hide(); // нативное окно живо, пока движок не отпустит превью
     QPointer<MaterialEditorWindow> self(this);
@@ -1277,6 +1293,7 @@ void MaterialEditorWindow::Shutdown()
         engine->preview = 0;
         host->RunOnUi([self] { if (self) self->deleteLater(); });
     });
+    return true;
 }
 
 void MaterialEditorWindow::closeEvent(QCloseEvent* event)

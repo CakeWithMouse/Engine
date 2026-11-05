@@ -1,0 +1,16 @@
+{
+  "frozenSdkHash": "0FA010193F59C1BBE25B2CFA8EAAB70B51B8C08027E90A0273B9C6F2285F48FA",
+  "version": "2026.11.05.5",
+  "rootPixelComparison": {
+    "bounds": [
+      618,
+      202,
+      740,
+      297
+    ],
+    "differentPixels": 11582
+  },
+  "engineLibHash": "0FA010193F59C1BBE25B2CFA8EAAB70B51B8C08027E90A0273B9C6F2285F48FA",
+  "runtimeSdkHash": "0FA010193F59C1BBE25B2CFA8EAAB70B51B8C08027E90A0273B9C6F2285F48FA",
+  "apiCheck": "39 pages, 306 entries, 86 headers, 10 examples"
+}

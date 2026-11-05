@@ -75,6 +75,7 @@ struct GPUParticleRenderCB
 class ParticleSystemComponent : public GameComponent
 {
 public:
+    void SerializeSaveGame(SaveArchive& archive) override;
     ParticleSystemComponent();
     ParticleSystemComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm::vec4 color);
     ~ParticleSystemComponent() override;

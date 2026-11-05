@@ -22,6 +22,16 @@ Scene::Scene(std::string name) : id_(nextSceneId.fetch_add(1)), name_(std::move(
 }
 Scene::~Scene() = default;
 
+void Scene::ExchangeSavedContents(Scene& other) noexcept
+{
+    components_.swap(other.components_); byId_.swap(other.byId_);
+    name_.swap(other.name_); std::swap(nextId_,other.nextId_);
+    std::swap(documentVersion_,other.documentVersion_);
+    for(auto& entry:byId_) entry.second->RegisteredScene=this;
+    for(auto& entry:other.byId_) entry.second->RegisteredScene=&other;
+    ++revision_; ++other.revision_; traceStatistics_={}; other.traceStatistics_={};
+}
+
 SceneResult Scene::SetName(std::string name)
 {
     if (name.empty()) return SceneResult::EmptyName;
