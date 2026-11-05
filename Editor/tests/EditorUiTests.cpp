@@ -3,6 +3,9 @@
 #include "QtHost.h"
 #include "MainWindow.h"
 #include "MaterialEditorWindow.h"
+#include "MaterialTextureTools.h"
+#include "MaterialGraphWidget.h"
+#include "HlslGraphCompiler.h"
 #include "UIEditorWindow.h"
 #include <Engine/UI/UIMarkup.h>
 #include <QDialogButtonBox>
@@ -14,6 +17,10 @@
 #include <Engine/Runtime/ProjectDataApi.h>
 #include <Engine/Runtime/GameEditModule.h>
 #include <QDialog>
+#include <QDragEnterEvent>
+#include <QDropEvent>
+#include <QMimeData>
+#include <QUrl>
 #include <QTimer>
 #include <QApplication>
 #include <QAbstractEventDispatcher>
@@ -39,6 +46,11 @@
 #include <QLabel>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QGraphicsView>
+#include <QGraphicsScene>
+#include <QGraphicsItem>
+#include <QClipboard>
+#include <QFrame>
 #include <QStyle>
 #include <QLineEdit>
 #include <QToolButton>
@@ -669,7 +681,7 @@ int wmain(int argc, wchar_t** argv)
             });
             return errorLine != 0;
         });
-        Check(errorLine == 11, "compile error points at the surface line");
+        Check(errorLine == 13, "compile error points at the surface line");
         Check(std::abs(materialText().value(QStringLiteral("params")).toObject().value(QStringLiteral("Gloss")).toDouble() - 0.9) < 1e-4, "save writes edited parameter");
         Ui([&](auto* w) {
             auto* source = static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")));
@@ -717,6 +729,541 @@ int wmain(int argc, wchar_t** argv)
         Ui([](auto*) { qobject_cast<QMessageBox*>(QApplication::activeModalWidget())->button(QMessageBox::Save)->click(); });
         until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
         Check(std::abs(materialText().value(QStringLiteral("params")).toObject().value(QStringLiteral("Gloss")).toDouble() - 0.6) < 1e-4, "close waits for successful material save");
+
+        // Texture slots: HLSL edits, drag and drop, import, the picker, add and remove from the UI.
+        {
+            namespace Tex = MaterialTextures;
+            QString text = QStringLiteral("void Surface(MaterialInput input, inout MaterialOutput output) { /* } */ output.Albedo = 1; }\n"), problem;
+            Check(Tex::AddSlot(text, QStringLiteral("A"), Tex::Role::Color, problem) && text.contains(QStringLiteral("A.Sample(MaterialSampler, input.UV)")) &&
+                  text.contains(QStringLiteral("output.Albedo *= aColor.rgb;")) && text.contains(QStringLiteral("Texture2D A : register(t6);")), "slot uses the surface's own argument names");
+            Check(text.indexOf(QStringLiteral("output.Albedo *= aColor.rgb;")) > text.indexOf(QStringLiteral("output.Albedo = 1;")), "slot is read after the surface code");
+            Check(Tex::AddSlot(text, QStringLiteral("B"), Tex::Role::Emissive, problem) && text.contains(QStringLiteral("register(t7)")) &&
+                  text.contains(QStringLiteral("#define MATERIAL_EMISSIVE")), "next register and emissive define");
+            Check(!Tex::AddSlot(text, QStringLiteral("B"), Tex::Role::Color, problem), "taken slot name rejected");
+            Check(!Tex::RemoveSlot(text, QStringLiteral("output"), problem), "shared line is not cut");
+            Check(Tex::RemoveSlot(text, QStringLiteral("A"), problem) && !text.contains(QStringLiteral("aColor")) && !text.contains(QStringLiteral("A.Sample")), "removal drops the slot and its local");
+            QString mixed = QStringLiteral("Texture2D C : register(t6);\nvoid Surface(MaterialInput i, inout MaterialOutput o)\n{\n    float4 color = C.Sample(MaterialSampler, i.UV) * Tint;\n    o.Albedo *= color.rgb;\n}\n");
+            const QString untouched = mixed;
+            Check(!Tex::RemoveSlot(mixed, QStringLiteral("C"), problem) && mixed == untouched, "expression with other logic is not cut");
+            QString noSurface = QStringLiteral("float4 Other() { return 0; }\n");
+            Check(!Tex::AddSlot(noSurface, QStringLiteral("A"), Tex::Role::Color, problem), "no Surface function");
+        }
+        const auto paintFile = root / "Content/Materials/Paint.mat", redSource = root / L"outside-red.bmp";
+        auto textureField = [&](const QString& slot) { QString value; Ui([&](auto* w) { if (auto* field = qobject_cast<QLineEdit*>(editorWidget(w, QStringLiteral("MaterialTexture_") + slot))) value = field->text(); }); return value; };
+        auto dropTexture = [](QWidget* slot, const QString& file, bool accepted) {
+            QMimeData mime;
+            mime.setUrls({QUrl::fromLocalFile(file)});
+            QDragEnterEvent enter(QPoint(4, 4), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
+            QApplication::sendEvent(slot, &enter);
+            Check(enter.isAccepted() == accepted, "slot filters dragged files");
+            if (!accepted) return;
+            QDropEvent drop(QPointF(4, 4), Qt::CopyAction, &mime, Qt::LeftButton, Qt::NoModifier);
+            QApplication::sendEvent(slot, &drop);
+        };
+        auto previewCenter = [&] {
+            QColor color;
+            Ui([&](auto* w) {
+                auto* preview = editorWidget(w, QStringLiteral("MaterialPreview"));
+                const QImage frame = preview->screen()->grabWindow(preview->winId()).toImage();
+                color = frame.pixelColor(frame.width() / 2, frame.height() / 2);
+            });
+            return color;
+        };
+        auto modalIs = [&](const QString& name) { bool found = false; Ui([&](auto*) { auto* modal = QApplication::activeModalWidget(); found = modal && modal->objectName() == name; }); return found; };
+        auto pickTexture = [&](const QString& file) {
+            Ui([&](auto*) {
+                auto* dialog = QApplication::activeModalWidget();
+                auto* list = dialog->template findChild<QListWidget*>(QStringLiteral("MaterialTextureList"));
+                for (int i = 0; i < list->count(); ++i) if (list->item(i)->text() == file) list->setCurrentRow(i);
+                Check(list->currentItem() && list->currentItem()->text() == file, "picker lists project texture");
+                dialog->template findChild<QDialogButtonBox*>()->button(QDialogButtonBox::Ok)->click();
+            });
+        };
+        Ui([&](auto* w) {
+            Check(w->template findChild<QTreeView*>(QStringLiteral("ProjectFiles"))->dragEnabled(), "files can be dragged");
+            QImage image(4, 4, QImage::Format_RGB32); image.fill(Qt::red); Check(image.save(QString::fromStdWString(redSource.wstring())), "write outside texture fixture");
+            Check(!w->CreateMaterial({}, QStringLiteral("Paint")).isEmpty(), "create textured material");
+        });
+        until([&] { return inEditor(QStringLiteral("MaterialSlot_BaseMap")) && inEditor(QStringLiteral("MaterialAddTextureButton")); });
+        const QString greenFile = QString::fromStdWString(importedImage.wstring()), redFile = QString::fromStdWString(redSource.wstring());
+        Ui([&](auto* w) {
+            auto* slot = editorWidget(w, QStringLiteral("MaterialSlot_BaseMap"));
+            dropTexture(slot, QStringLiteral("C:/Windows/notes.txt"), false);
+            dropTexture(slot, greenFile, true);
+        });
+        until([&] { return textureField(QStringLiteral("BaseMap")) == QStringLiteral("/Game/Textures/outside.bmp"); });
+        until([&] { const QColor c = previewCenter(); return c.green() > c.red() + 40 && c.green() > c.blue() + 40; });
+        Ui([&](auto* w) { dropTexture(editorWidget(w, QStringLiteral("MaterialSlot_BaseMap")), redFile, true); });
+        until([&] { return textureField(QStringLiteral("BaseMap")) == QStringLiteral("/Game/Textures/outside-red.bmp"); });
+        Check(std::filesystem::exists(root / "Content/Textures/outside-red.bmp"), "file from outside the project is imported");
+        until([&] { const QColor c = previewCenter(); return c.red() > c.green() + 40 && c.red() > c.blue() + 40; });
+        Ui([&](auto* w) { static_cast<QPushButton*>(editorWidget(w, QStringLiteral("MaterialTextureChoose_BaseMap")))->click(); });
+        until([&] { return modalIs(QStringLiteral("MaterialTexturePicker")); });
+        Ui([&](auto*) {
+            auto* dialog = QApplication::activeModalWidget();
+            auto* list = dialog->template findChild<QListWidget*>(QStringLiteral("MaterialTextureList"));
+            Check(list->count() == 3 && list->currentItem()->text() == QStringLiteral("outside-red.bmp"), "picker shows None, project textures and the current one");
+            dialog->template findChild<QLineEdit*>(QStringLiteral("MaterialTextureSearch"))->setText(QStringLiteral("RED"));
+            Check(!list->item(0)->isHidden() && list->findItems(QStringLiteral("outside.bmp"), Qt::MatchExactly).first()->isHidden(), "picker search");
+            Check(dialog->grab().save(QString::fromStdWString((root / "editor-material-picker.png").wstring())), "save texture picker");
+            dialog->template findChild<QLineEdit*>(QStringLiteral("MaterialTextureSearch"))->clear();
+        });
+        pickTexture(QStringLiteral("outside.bmp"));
+        until([&] { return textureField(QStringLiteral("BaseMap")) == QStringLiteral("/Game/Textures/outside.bmp"); });
+        Ui([&](auto* w) { static_cast<QPushButton*>(editorWidget(w, QStringLiteral("MaterialAddTextureButton")))->click(); });
+        until([&] { return modalIs(QStringLiteral("MaterialAddTexture")); });
+        Ui([&](auto*) {
+            auto* dialog = QApplication::activeModalWidget();
+            auto* name = dialog->template findChild<QLineEdit*>(QStringLiteral("MaterialAddTextureName"));
+            Check(name->text() == QStringLiteral("BaseMap2"), "free default slot name");
+            auto* ok = dialog->template findChild<QDialogButtonBox*>()->button(QDialogButtonBox::Ok);
+            name->setText(QStringLiteral("Tint"));
+            Check(!ok->isEnabled(), "name taken by a parameter rejected");
+            name->setText(QStringLiteral("BaseMap2"));
+            dialog->template findChild<QComboBox*>(QStringLiteral("MaterialAddTextureRole"))->setCurrentIndex(3);
+            Check(name->text() == QStringLiteral("EmissiveMap") && ok->isEnabled(), "default name follows the purpose");
+            ok->click();
+        });
+        until([&] { return modalIs(QStringLiteral("MaterialTexturePicker")); });
+        pickTexture(QStringLiteral("outside-red.bmp"));
+        until([&] { return textureField(QStringLiteral("EmissiveMap")) == QStringLiteral("/Game/Textures/outside-red.bmp"); });
+        Ui([&](auto* w) {
+            const QString source = static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")))->toPlainText();
+            Check(source.contains(QStringLiteral("Texture2D EmissiveMap : register(t7);")) && source.contains(QStringLiteral("#define MATERIAL_EMISSIVE")), "slot written to HLSL");
+            Check(static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")))->count() == 0, "added slot compiles");
+            Check(!static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")))->document()->isModified(), "added slot is written to disk");
+            w->template findChild<MaterialEditorWindow*>()->AddTextureSlot(QStringLiteral("MaskMap"), 1, {});
+        });
+        until([&] { return inEditor(QStringLiteral("MaterialSlot_MaskMap")); });
+        Ui([&](auto* w) {
+            Check(static_cast<QComboBox*>(editorWidget(w, QStringLiteral("MaterialBlend")))->currentIndex() == 1, "opacity map switches an opaque material to masked");
+            w->template findChild<MaterialEditorWindow*>()->RemoveTextureSlot(QStringLiteral("EmissiveMap"));
+        });
+        until([&] { return !inEditor(QStringLiteral("MaterialSlot_EmissiveMap")); });
+        Ui([&](auto* w) {
+            const QString cleaned = static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")))->toPlainText();
+            Check(!cleaned.contains(QStringLiteral("EmissiveMap")) && !cleaned.contains(QStringLiteral("MATERIAL_EMISSIVE")), "removed slot leaves HLSL");
+            Check(static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")))->count() == 0, "HLSL compiles after removal");
+            Check(w->template findChild<MaterialEditorWindow*>()->grab().save(QString::fromStdWString((root / "editor-material-textures.png").wstring())), "save texture slots preview");
+            Check(editorWidget(w, QStringLiteral("MaterialSlot_BaseMap"))->parentWidget()->grab().save(QString::fromStdWString((root / "editor-material-slots.png").wstring())), "save texture slots");
+            saveMaterial(w);
+        });
+        until([&] { bool saved = false; Ui([&](auto* w) { auto* e = w->template findChild<MaterialEditorWindow*>(); saved = e->isEnabled() && !e->HasUnsavedChanges(); }); return saved; });
+        {
+            QFile saved(QString::fromStdWString(paintFile.wstring())); Check(saved.open(QIODevice::ReadOnly), "saved material readable");
+            const auto document = QJsonDocument::fromJson(saved.readAll()).object();
+            Check(document.value(QStringLiteral("textures")).toObject().value(QStringLiteral("BaseMap")).toString() == QStringLiteral("../Textures/outside.bmp"), "texture written relative to the .mat");
+            Check(document.value(QStringLiteral("render")).toObject().value(QStringLiteral("blend")).toString() == QStringLiteral("masked"), "blend change saved");
+        }
+        Ui([](auto* w) { QMetaObject::invokeMethod(w->template findChild<MaterialEditorWindow*>(), "close", Qt::QueuedConnection); });
+        until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
+        Ui([&](auto* w) { w->OpenMaterialEditor(QString::fromStdWString(paintFile.wstring())); });
+        until([&] { return textureField(QStringLiteral("BaseMap")) == QStringLiteral("/Game/Textures/outside.bmp"); });
+        Ui([](auto* w) { QMetaObject::invokeMethod(w->template findChild<MaterialEditorWindow*>(), "close", Qt::QueuedConnection); });
+        until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
+
+        // Node graph: the graph generates the HLSL; edits go to disk at once and are undone by Discard until Save.
+        {
+            const auto graphMat = root / "Content/Materials/Graphy.mat", graphHlsl = root / "Content/Materials/Graphy.hlsl";
+            const auto graphJson = root / "Content/Materials/Graphy.mat.graph.json";
+            auto readText = [](const std::filesystem::path& file) { QFile f(QString::fromStdWString(file.wstring())); f.open(QIODevice::ReadOnly); return QString::fromUtf8(f.readAll()); };
+            auto editor = [](auto* w) { return w->template findChild<MaterialEditorWindow*>(); };
+            auto masterId = [](MaterialGraphWidget* g) { for (const auto& n : g->Model().Nodes()) if (n.type == QStringLiteral("MaterialOutput")) return n.id; return 0; };
+            auto hasLink = [](MaterialGraphWidget* g, int from, const QString& fromPin, int to, const QString& toPin) {
+                for (const auto& c : g->Model().Connections()) if (c.fromNode == from && c.fromPin == fromPin && c.toNode == to && c.toPin == toPin) return true;
+                return false;
+            };
+            auto mouse = [](QGraphicsView* view, QEvent::Type type, const QPointF& scenePos) {
+                const QPointF local = view->mapFromScene(scenePos);
+                QMouseEvent event(type, local, view->viewport()->mapToGlobal(local), Qt::LeftButton,
+                                  type == QEvent::MouseButtonRelease ? Qt::NoButton : Qt::LeftButton, Qt::NoModifier);
+                QApplication::sendEvent(view->viewport(), &event);
+            };
+            const QString flatFile = QString::fromStdWString((root / "Content/Textures/flat-normal.png").wstring());
+            const QString tiltFile = QString::fromStdWString((root / "Content/Textures/tilt-normal.png").wstring());
+            Ui([&](auto* w) {
+                QImage flat(4, 4, QImage::Format_RGB32); flat.fill(QColor(128, 128, 255)); Check(flat.save(flatFile), "write flat normal map");
+                QImage tilt(4, 4, QImage::Format_RGB32); tilt.fill(QColor(250, 128, 140)); Check(tilt.save(tiltFile), "write tilted normal map");
+                Check(!w->CreateMaterial({}, QStringLiteral("Graphy")).isEmpty(), "create material for graph");
+            });
+            until([&] { return inEditor(QStringLiteral("MaterialParam_Tint_0")); });
+            Ui([&](auto* w) {
+                Check(!editor(w)->HasGraph() && !std::filesystem::exists(graphJson), "new material starts as code");
+                editor(w)->EnableGraph();
+            });
+            until([&] { return inEditor(QStringLiteral("MaterialParam_BaseColor_0")) && !inEditor(QStringLiteral("MaterialParam_Tint_0")); });
+            int texture = 0, multiply = 0, scalar = 0;
+            Ui([&](auto* w) {
+                auto* e = editor(w);
+                auto* source = static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")));
+                Check(e->HasGraph() && std::filesystem::exists(graphJson) && source->isReadOnly(), "graph mode: json on disk, HLSL read-only");
+                Check(source->toPlainText().contains(QStringLiteral("Generated by")) && readText(graphHlsl) == source->toPlainText(), "HLSL generated from the graph");
+                Check(!editorWidget(w, QStringLiteral("MaterialAddTextureButton")), "graph materials add textures with nodes");
+                auto* g = e->Graph();
+                const int master = masterId(g);
+                int color = 0;
+                for (const auto& n : g->Model().Nodes()) if (n.type == QStringLiteral("ColorParam")) color = n.id;
+                texture = g->AddNode(QStringLiteral("Texture2D"), QPointF(0, 400));
+                multiply = g->AddNode(QStringLiteral("Multiply"), QPointF(300, 400));
+                Check(g->Connect(texture, QStringLiteral("RGB"), multiply, QStringLiteral("A")) &&
+                      g->Connect(color, QStringLiteral("RGB"), multiply, QStringLiteral("B")) &&
+                      g->Connect(multiply, QStringLiteral("Out"), master, QStringLiteral("Albedo")), "connect nodes");
+                Check(!hasLink(g, color, QStringLiteral("RGB"), master, QStringLiteral("Albedo")), "an input keeps one link");
+                Check(!g->Connect(multiply, QStringLiteral("Out"), texture, QStringLiteral("UV")), "cycles are rejected");
+                Check(!g->Connect(texture, QStringLiteral("UV"), multiply, QStringLiteral("A")), "inputs cannot feed inputs");
+                const int second = g->AddNode(QStringLiteral("Texture2D"), QPointF(0, 600));
+                Check(g->Model().FindNode(second)->properties.value(QStringLiteral("textureName")).toString() == QStringLiteral("BaseMap2"), "new texture node gets a free name");
+                g->RemoveNodes({second, master});
+                Check(g->Model().FindNode(master) && !g->Model().FindNode(second), "material output cannot be deleted");
+
+                // Drag a link with the mouse, then pull it off the input again.
+                scalar = g->AddNode(QStringLiteral("ScalarParam"), QPointF(0, 700));
+                mouse(g->View(), QEvent::MouseButtonPress, g->PinScenePos(scalar, QStringLiteral("Value")));
+                mouse(g->View(), QEvent::MouseMove, g->PinScenePos(master, QStringLiteral("AmbientModel")));
+                mouse(g->View(), QEvent::MouseButtonRelease, g->PinScenePos(master, QStringLiteral("AmbientModel")));
+                Check(hasLink(g, scalar, QStringLiteral("Value"), master, QStringLiteral("AmbientModel")), "link dragged from an output to an input");
+                mouse(g->View(), QEvent::MouseButtonPress, g->PinScenePos(master, QStringLiteral("AmbientModel")));
+                mouse(g->View(), QEvent::MouseButtonRelease, g->PinScenePos(master, QStringLiteral("AmbientModel")) + QPointF(-200, 300));
+                Check(!hasLink(g, scalar, QStringLiteral("Value"), master, QStringLiteral("AmbientModel")), "dragging off an input removes its link");
+                e->ApplyGraph();
+            });
+            until([&] { return inEditor(QStringLiteral("MaterialSlot_BaseMap")); });
+            Ui([&](auto* w) {
+                Check(!editorWidget(w, QStringLiteral("MaterialTextureRemove_BaseMap"))->isVisible(), "graph slots are removed with nodes");
+                Check(static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")))->count() == 0, "graph HLSL compiles");
+                editor(w)->AssignTexture(QStringLiteral("BaseMap"), greenFile);
+            });
+            until([&] { return textureField(QStringLiteral("BaseMap")) == QStringLiteral("/Game/Textures/outside.bmp"); });
+            until([&] { const QColor c = previewCenter(); return c.green() > c.red() + 40 && c.green() > c.blue() + 40; });
+            Ui([&](auto* w) {
+                static_cast<QDoubleSpinBox*>(editorWidget(w, QStringLiteral("MaterialParam_Specular_0")))->setValue(0.8);
+                for (const auto& n : editor(w)->Graph()->Model().Nodes())
+                    if (n.properties.value(QStringLiteral("name")).toString() == QStringLiteral("Specular"))
+                        Check(std::abs(n.properties.value(QStringLiteral("value")).toDouble() - 0.8) < 1e-4, "settings value reaches the graph node");
+            });
+            for (int i = 0; i < 20; ++i) pump();
+            const QColor baseline = previewCenter();
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                const int normal = g->AddNode(QStringLiteral("NormalMap"), QPointF(0, 900));
+                Check(g->Connect(normal, QStringLiteral("Normal"), masterId(g), QStringLiteral("Normal")), "connect normal map");
+                editor(w)->ApplyGraph();
+            });
+            until([&] { return inEditor(QStringLiteral("MaterialSlot_NormalMap")); });
+            Ui([&](auto* w) { editor(w)->AssignTexture(QStringLiteral("NormalMap"), flatFile); });
+            until([&] { return textureField(QStringLiteral("NormalMap")) == QStringLiteral("/Game/Textures/flat-normal.png"); });
+            for (int i = 0; i < 20; ++i) pump();
+            const QColor flat = previewCenter();
+            Ui([&](auto* w) { editor(w)->AssignTexture(QStringLiteral("NormalMap"), tiltFile); });
+            until([&] { return textureField(QStringLiteral("NormalMap")) == QStringLiteral("/Game/Textures/tilt-normal.png"); });
+            for (int i = 0; i < 20; ++i) pump();
+            const QColor tilted = previewCenter();
+            Check(std::abs(flat.red() - baseline.red()) <= 8 && std::abs(flat.green() - baseline.green()) <= 8 &&
+                  std::abs(flat.blue() - baseline.blue()) <= 8, "flat normal map keeps the surface normal");
+            Check(std::abs(tilted.green() - flat.green()) > 12, "tilted normal map changes the lighting");
+
+            // A texture is chosen on a node that is not connected yet: kept in the node, applied once the slot compiles.
+            int detail = 0;
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                detail = g->AddNode(QStringLiteral("Texture2D"), QPointF(0, 1100), {{QStringLiteral("textureName"), QStringLiteral("Detail")}});
+                editor(w)->ApplyGraph();
+                QMetaObject::invokeMethod(w, [g] { g->textureRequested(QStringLiteral("Detail")); }, Qt::QueuedConnection);
+            });
+            until([&] { return modalIs(QStringLiteral("MaterialTexturePicker")); });
+            pickTexture(QStringLiteral("flat-normal.png"));
+            until([&] { QString stored; Ui([&](auto* w) { stored = editor(w)->Graph()->NodeTextures().value(QStringLiteral("Detail")); }); return !stored.isEmpty(); });
+            Ui([&](auto* w) {
+                Check(editor(w)->Graph()->NodeTextures().value(QStringLiteral("Detail")) == QStringLiteral("/Game/Textures/flat-normal.png"), "texture of an unconnected node is kept in the graph");
+                Check(!editorWidget(w, QStringLiteral("MaterialSlot_Detail")), "unconnected node has no slot yet");
+                auto* g = editor(w)->Graph();
+                Check(g->Connect(detail, QStringLiteral("RGB"), masterId(g), QStringLiteral("Emissive")), "connect the detail node");
+                editor(w)->ApplyGraph();
+            });
+            until([&] { return textureField(QStringLiteral("Detail")) == QStringLiteral("/Game/Textures/flat-normal.png"); });
+
+            // Project presets: the current graph is saved as a file in Content/MaterialGraphs and listed in the menu.
+            const auto presetFile = root / L"Content/MaterialGraphs/Мой вид.graph.json";
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                QString problem;
+                Check(!g->SaveUserPreset(QStringLiteral("../escape"), problem) && !problem.isEmpty(), "preset name cannot leave the folder");
+                Check(g->SaveUserPreset(QStringLiteral("Мой вид"), problem), "save the current graph as a preset");
+                Check(std::filesystem::exists(presetFile) && g->UserPresets() == QStringList{QStringLiteral("Мой вид")}, "preset file in the project");
+                auto* menu = g->template findChild<QMenu*>(QStringLiteral("MaterialGraphPresetMenu"));
+                QMetaObject::invokeMethod(menu, "aboutToShow", Qt::DirectConnection);
+                bool listed = false;
+                for (auto* action : menu->actions()) listed = listed || action->text() == QStringLiteral("Мой вид");
+                Check(listed, "preset listed in the menu");
+                const int nodes = static_cast<int>(g->Model().Nodes().size());
+                g->RemoveNodes({multiply});
+                Check(g->LoadUserPreset(QStringLiteral("Мой вид"), problem) && static_cast<int>(g->Model().Nodes().size()) == nodes &&
+                      g->Model().FindNode(multiply) != nullptr, "loading the preset restores the graph");
+                Check(g->RemoveUserPreset(QStringLiteral("Мой вид")) && !std::filesystem::exists(presetFile) && g->UserPresets().isEmpty(), "preset deleted");
+                editor(w)->ApplyGraph();
+            });
+            for (int i = 0; i < 20; ++i) pump();
+
+            // Undo and redo: graph edits, a dragged slider as one step, values and textures go back to the material too.
+            QList<int> kept;
+            auto key = [](QWidget* target, int code, Qt::KeyboardModifiers modifiers) {
+                QKeyEvent shortcut(QEvent::ShortcutOverride, code, modifiers);
+                QApplication::sendEvent(target, &shortcut);
+                QKeyEvent press(QEvent::KeyPress, code, modifiers);
+                QApplication::sendEvent(target, &press);
+            };
+            auto specular = [&] { double v = 0; Ui([&](auto* w) { v = static_cast<QDoubleSpinBox*>(editorWidget(w, QStringLiteral("MaterialParam_Specular_0")))->value(); }); return v; };
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                for (const auto& n : g->Model().Nodes()) kept << n.id;
+                const int nodes = static_cast<int>(g->Model().Nodes().size());
+                const int add = g->AddNode(QStringLiteral("Add"), QPointF(600, 1100));
+                Check(g->CanUndo() && !g->CanRedo(), "an edit can be undone");
+                g->Undo();
+                Check(!g->Model().FindNode(add) && static_cast<int>(g->Model().Nodes().size()) == nodes && g->CanRedo(), "undo removes the added node");
+                g->Redo();
+                Check(g->Model().FindNode(add) && g->Model().FindNode(add)->type == QStringLiteral("Add"), "redo brings it back with its id");
+                Check(g->Connect(add, QStringLiteral("Out"), masterId(g), QStringLiteral("AmbientModel")), "connect for undo");
+                g->Undo();
+                Check(!hasLink(g, add, QStringLiteral("Out"), masterId(g), QStringLiteral("AmbientModel")) && g->Model().FindNode(add), "undo removes only the link");
+                g->View()->setFocus();
+                key(g->View(), Qt::Key_Z, Qt::ControlModifier);
+                Check(!g->Model().FindNode(add), "Ctrl+Z on the canvas undoes");
+                key(g->View(), Qt::Key_Y, Qt::ControlModifier);
+                Check(g->Model().FindNode(add) != nullptr, "Ctrl+Y on the canvas redoes");
+                g->RemoveNodes({add});
+
+                auto* spin = static_cast<QDoubleSpinBox*>(editorWidget(w, QStringLiteral("MaterialParam_Specular_0")));
+                for (const double v : {0.31, 0.32, 0.33}) spin->setValue(v);
+                g->Undo();
+                for (const auto& n : g->Model().Nodes())
+                    if (n.properties.value(QStringLiteral("name")).toString() == QStringLiteral("Specular"))
+                        Check(std::abs(n.properties.value(QStringLiteral("value")).toDouble() - 0.8) < 1e-4, "a dragged value is one undo step");
+                editor(w)->AssignTexture(QStringLiteral("Detail"), tiltFile);
+            });
+            until([&] { return std::abs(specular() - 0.8) < 1e-4; });
+            until([&] { return textureField(QStringLiteral("Detail")) == QStringLiteral("/Game/Textures/tilt-normal.png"); });
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                Check(g->NodeTextures().value(QStringLiteral("Detail")) == QStringLiteral("/Game/Textures/tilt-normal.png"), "texture choice reaches the node");
+                g->Undo();
+                Check(g->NodeTextures().value(QStringLiteral("Detail")) == QStringLiteral("/Game/Textures/flat-normal.png"), "undo restores the node texture");
+            });
+            until([&] { return textureField(QStringLiteral("Detail")) == QStringLiteral("/Game/Textures/flat-normal.png"); });
+            Check(std::abs(specular() - 0.8) < 1e-4, "undone value reaches the material settings");
+
+            // Copy, paste and duplicate: links inside the selection come along, names stay unique, textures are shared.
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                Check(!g->CopyNodes({masterId(g)}), "the material output is not copied");
+                Check(g->CopyNodes({texture, multiply}) && QGuiApplication::clipboard()->text().contains(QStringLiteral("materialGraphNodes")) && g->CanPaste(),
+                      "selection copied as graph JSON");
+                const QList<int> pasted = g->PasteNodes(QPointF(700, 1200));
+                Check(pasted.size() == 2 && g->SelectedNodes() == pasted, "paste selects the new nodes");
+                int newTexture = 0, newMultiply = 0;
+                for (const int id : pasted)
+                    (g->Model().FindNode(id)->type == QStringLiteral("Texture2D") ? newTexture : newMultiply) = id;
+                Check(newTexture && newMultiply && hasLink(g, newTexture, QStringLiteral("RGB"), newMultiply, QStringLiteral("A")), "link inside the selection is pasted");
+                Check(g->Model().FindNode(newTexture)->properties.value(QStringLiteral("textureName")).toString() == QStringLiteral("BaseMap"),
+                      "pasted texture node reads the same texture");
+                Check(std::none_of(g->Model().Connections().begin(), g->Model().Connections().end(),
+                                   [&](const auto& c) { return c.toNode == newMultiply && c.toPin == QStringLiteral("B"); }), "links from outside the selection stay behind");
+                const QList<int> twin = g->DuplicateNodes({scalar});
+                Check(twin.size() == 1 && g->Model().FindNode(twin.first())->properties.value(QStringLiteral("name")).toString() != g->Model().FindNode(scalar)->properties.value(QStringLiteral("name")).toString(),
+                      "a duplicated parameter gets its own name");
+                const QPointF offset = g->Model().FindNode(twin.first())->pos - g->Model().FindNode(scalar)->pos;
+                Check(offset.x() > 0 && offset.y() > 0, "duplicate is placed next to the original");
+                g->Undo();
+                g->Undo();
+                Check(!g->Model().FindNode(twin.first()) && !g->Model().FindNode(newTexture), "paste and duplicate are undone");
+
+                // Keyboard: select, copy, paste, delete.
+                g->SelectNodes({scalar});
+                g->View()->setFocus();
+                key(g->View(), Qt::Key_C, Qt::ControlModifier);
+                key(g->View(), Qt::Key_V, Qt::ControlModifier);
+                const QList<int> keyed = g->SelectedNodes();
+                Check(keyed.size() == 1 && keyed.first() != scalar && g->Model().FindNode(keyed.first())->type == QStringLiteral("ScalarParam"), "Ctrl+C, Ctrl+V");
+                key(g->View(), Qt::Key_Delete, Qt::NoModifier);
+                Check(!g->Model().FindNode(keyed.first()), "Delete removes the pasted node");
+                key(g->View(), Qt::Key_D, Qt::ControlModifier);
+                Check(g->SelectedNodes().isEmpty() || !kept.contains(g->SelectedNodes().first()), "Ctrl+D without a selection adds nothing old");
+                key(g->View(), Qt::Key_A, Qt::ControlModifier);
+                Check(g->SelectedNodes().size() == static_cast<int>(g->Model().Nodes().size()), "Ctrl+A selects every node");
+                key(g->View(), Qt::Key_F, Qt::NoModifier);
+                g->SelectNodes({});
+            });
+
+            // Node search: Russian and English names, synonyms; Enter adds the first match where the list was opened.
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                auto search = [&](const QString& text) {
+                    g->ShowNodeSearch(QPoint(200, 200), QPointF(900, 1300));
+                    auto* popup = g->template findChild<QFrame*>(QStringLiteral("MaterialGraphNodeSearch"));
+                    auto* field = popup ? popup->template findChild<QLineEdit*>(QStringLiteral("MaterialGraphNodeSearchText")) : nullptr;
+                    auto* list = popup ? popup->template findChild<QListWidget*>(QStringLiteral("MaterialGraphNodeSearchList")) : nullptr;
+                    Check(field && list && popup->isVisible(), "search opens as a popup");
+                    field->setText(text);
+                    if (text == QStringLiteral("умнож"))
+                        Check(popup->grab().save(QString::fromStdWString((root / "editor-material-graph-search.png").wstring())), "save node search");
+                    QString first = list->currentItem() ? list->currentItem()->data(Qt::UserRole).toString() : QString();
+                    popup->setObjectName({}); // закрытое окно удаляется позже: следующий поиск найдёт новое
+                    return std::make_pair(first, field);
+                };
+                auto [byRussian, field] = search(QStringLiteral("умнож"));
+                Check(byRussian == QStringLiteral("Multiply"), "Russian name finds Multiply");
+                const int before = static_cast<int>(g->Model().Nodes().size());
+                key(field, Qt::Key_Return, Qt::NoModifier);
+                Check(static_cast<int>(g->Model().Nodes().size()) == before + 1 && g->Model().Nodes().last().type == QStringLiteral("Multiply") &&
+                      g->Model().Nodes().last().pos == QPointF(900, 1300), "Enter adds the node where the list was opened");
+                Check(g->SelectedNodes() == QList<int>{g->Model().Nodes().last().id}, "the added node is selected");
+                g->RemoveNodes(g->SelectedNodes());
+                auto [byEnglish, englishField] = search(QStringLiteral("fresnel"));
+                Check(byEnglish == QStringLiteral("Fresnel"), "English type name works");
+                key(englishField, Qt::Key_Escape, Qt::NoModifier);
+                auto [bySynonym, synonymField] = search(QStringLiteral("край"));
+                Check(bySynonym == QStringLiteral("Fresnel"), "a synonym finds the node");
+                key(synonymField, Qt::Key_Escape, Qt::NoModifier);
+                auto [nothing, nothingField] = search(QStringLiteral("телепорт"));
+                Check(nothing.isEmpty(), "unknown words find nothing");
+                key(nothingField, Qt::Key_Return, Qt::NoModifier);
+                Check(static_cast<int>(g->Model().Nodes().size()) == before, "Enter on no match adds nothing");
+                key(nothingField, Qt::Key_Escape, Qt::NoModifier);
+            });
+
+            // A compile error is shown on its node: the list names the node, a double click selects it, undo fixes it.
+            int clash = 0;
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                clash = g->AddNode(QStringLiteral("ScalarParam"), QPointF(600, 1300), {{QStringLiteral("name"), QStringLiteral("TimeParams")}});
+                Check(!g->RenameNode(scalar, QStringLiteral("TimeParams")) && !g->RenameNode(scalar, QStringLiteral("float3")), "rename refuses engine names and HLSL words");
+                Check(g->Connect(clash, QStringLiteral("Value"), masterId(g), QStringLiteral("AmbientModel")), "connect the clashing parameter");
+                editor(w)->ApplyGraph();
+            });
+            QListWidgetItem* clashItem = nullptr;
+            until([&] {
+                Ui([&](auto* w) {
+                    auto* errors = static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")));
+                    clashItem = nullptr;
+                    for (int i = 0; i < errors->count(); ++i)
+                        if (errors->item(i)->data(Qt::UserRole + 2).toInt() == clash && errors->item(i)->text().contains(QStringLiteral("redefinition"))) clashItem = errors->item(i);
+                });
+                return clashItem != nullptr;
+            });
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                auto* errors = static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")));
+                Check(clashItem->text().contains(QStringLiteral("TimeParams")) && !clashItem->text().contains(QStringLiteral(".hlsl(")), "error names the node, not the generated file");
+                bool marked = false;
+                for (auto* item : g->View()->scene()->items()) marked = marked || item->toolTip().contains(QStringLiteral("TimeParams"));
+                Check(marked, "the node shows the error");
+                g->SelectNodes({});
+                emit errors->itemActivated(clashItem);
+                Check(g->SelectedNodes() == QList<int>{clash}, "double click on the error selects the node");
+                g->SelectNodes({});
+                Check(editor(w)->grab().save(QString::fromStdWString((root / "editor-material-graph-error.png").wstring())), "save graph error");
+                g->Undo(); // связь
+                g->Undo(); // нода
+                Check(!g->Model().FindNode(clash), "undo removes the clashing node");
+                editor(w)->ApplyGraph();
+            });
+            until([&] { int count = -1; Ui([&](auto* w) { count = static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")))->count(); }); return count == 0; });
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                bool marked = false;
+                for (auto* item : g->View()->scene()->items()) marked = marked || item->toolTip().contains(QStringLiteral("TimeParams"));
+                Check(!marked, "fixed error leaves the nodes");
+                QList<int> extra;
+                for (const auto& n : g->Model().Nodes()) if (!kept.contains(n.id)) extra << n.id;
+                g->RemoveNodes(extra);
+                editor(w)->ApplyGraph();
+            });
+            for (int i = 0; i < 20; ++i) pump();
+
+            // Every node type at once, every input fed a float3: the engine must compile whatever the links are.
+            QList<int> sink;
+            Ui([&](auto* w) {
+                auto* g = editor(w)->Graph();
+                const int source = g->AddNode(QStringLiteral("Vector3Param"), QPointF(-400, 1400), {{QStringLiteral("value"), QVariantList{0.2, 0.4, 0.6}}});
+                sink << source;
+                int sum = 0;
+                QString sumPin;
+                const QStringList types{
+                    "ColorParam", "ScalarParam", "Vector2Param", "Vector3Param", "Constant", "Split", "Combine", "ObjectColor",
+                    "SurfaceDefaults", "InstanceData", "WorldPosition", "SurfaceNormal", "ViewDirection", "FrontFace", "Texture2D",
+                    "NormalMap", "UVCoord", "Panner", "Time", "Add", "Subtract", "Multiply", "Divide", "Power", "Min", "Max", "Lerp",
+                    "Clamp", "Saturate", "OneMinus", "Abs", "Frac", "Sine", "Normalize", "Step", "Smoothstep", "Dot", "Fresnel"};
+                for (const QString& type : types)
+                {
+                    const int node = g->AddNode(type, QPointF(0, 1400 + 40 * sink.size()));
+                    sink << node;
+                    for (const auto& pin : EditorCore::HlslGraphCompiler::NodePins(type))
+                    {
+                        if (pin.isInput) { Check(g->Connect(source, QStringLiteral("Value"), node, pin.name), "feed every input"); continue; }
+                        if (!sum) { sum = node; sumPin = pin.name; continue; }
+                        const int add = g->AddNode(QStringLiteral("Add"), QPointF(300, 1400 + 40 * sink.size()));
+                        sink << add;
+                        Check(g->Connect(sum, sumPin, add, QStringLiteral("A")) && g->Connect(node, pin.name, add, QStringLiteral("B")), "sum every output");
+                        sum = add;
+                        sumPin = QStringLiteral("Out");
+                    }
+                }
+                Check(g->Connect(sum, sumPin, masterId(g), QStringLiteral("AmbientModel")), "connect the sum");
+                editor(w)->ApplyGraph();
+                const QString generated = static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")))->toPlainText();
+                Check(generated.contains(QStringLiteral("smoothstep(")) && generated.contains(QStringLiteral("defaults.Albedo")) &&
+                      generated.contains(QStringLiteral("i.InstanceData")), "every node is in the HLSL");
+            });
+            for (int i = 0; i < 40; ++i) pump();
+            Ui([&](auto* w) {
+                auto* errors = static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")));
+                Check(errors->count() == 0, errors->count() ? qPrintable(QStringLiteral("graph with every node compiles: ") + errors->item(0)->text())
+                                                            : "graph with every node compiles");
+                editor(w)->Graph()->RemoveNodes(sink);
+                editor(w)->ApplyGraph();
+            });
+            for (int i = 0; i < 20; ++i) pump();
+            Ui([&](auto* w) {
+                Check(static_cast<QListWidget*>(editorWidget(w, QStringLiteral("MaterialErrors")))->count() == 0, "normal map HLSL compiles");
+                editor(w)->Graph()->FrameNodes();
+                Check(editor(w)->grab().save(QString::fromStdWString((root / "editor-material-graph.png").wstring())), "save graph editor");
+                saveMaterial(w);
+            });
+            until([&] { bool saved = false; Ui([&](auto* w) { saved = editor(w)->isEnabled() && !editor(w)->HasUnsavedChanges(); }); return saved; });
+            const QString savedHlsl = readText(graphHlsl), savedGraph = readText(graphJson);
+            Check(savedHlsl.contains(QStringLiteral("BaseMap.Sample")) && savedHlsl.contains(QStringLiteral("NormalFromMap")), "saved HLSL comes from the graph");
+            Check(readText(graphMat).contains(QStringLiteral("\"NormalMap\": \"../Textures/tilt-normal.png\"")) &&
+                  readText(graphMat).contains(QStringLiteral("\"Detail\": \"../Textures/flat-normal.png\"")), "textures saved in the .mat");
+            Check(savedGraph.contains(QStringLiteral("\"textureName\": \"Detail\"")) &&
+                  savedGraph.contains(QStringLiteral("\"texture\": \"/Game/Textures/flat-normal.png\"")), "graph file keeps names and node textures as text");
+
+            // An unsaved graph edit is written at once, and Discard brings both files back.
+            Ui([&](auto* w) { editor(w)->Graph()->RemoveNodes({multiply}); editor(w)->ApplyGraph(); });
+            until([&] { return !readText(graphHlsl).contains(QStringLiteral("BaseMap.Sample")); });
+            Ui([](auto* w) { QMetaObject::invokeMethod(w->template findChild<MaterialEditorWindow*>(), "close", Qt::QueuedConnection); });
+            until([&] { bool modal = false; Ui([&](auto*) { modal = qobject_cast<QMessageBox*>(QApplication::activeModalWidget()) != nullptr; }); return modal; });
+            Ui([](auto*) { qobject_cast<QMessageBox*>(QApplication::activeModalWidget())->button(QMessageBox::Discard)->click(); });
+            until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
+            Check(readText(graphHlsl) == savedHlsl && readText(graphJson) == savedGraph, "discard restores the graph and its HLSL");
+
+            Ui([&](auto* w) { w->OpenMaterialEditor(QString::fromStdWString(graphMat.wstring())); });
+            until([&] { return inEditor(QStringLiteral("MaterialSlot_BaseMap")); });
+            Ui([&](auto* w) {
+                auto* e = editor(w);
+                Check(e->HasGraph() && e->Graph()->Model().FindNode(multiply) != nullptr, "graph reopens from its file");
+                Check(static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")))->isReadOnly(), "reopened graph HLSL is read-only");
+                e->DisableGraph();
+                Check(!e->HasGraph() && !std::filesystem::exists(graphJson) &&
+                      !static_cast<QPlainTextEdit*>(editorWidget(w, QStringLiteral("MaterialSource")))->isReadOnly(), "back to code: graph removed, HLSL editable");
+                saveMaterial(w);
+            });
+            until([&] { bool saved = false; Ui([&](auto* w) { saved = editor(w)->isEnabled() && !editor(w)->HasUnsavedChanges(); }); return saved; });
+            Check(!std::filesystem::exists(graphJson) && readText(graphHlsl) == savedHlsl, "code material keeps the last graph HLSL");
+            Ui([](auto* w) { QMetaObject::invokeMethod(w->template findChild<MaterialEditorWindow*>(), "close", Qt::QueuedConnection); });
+            until([&] { bool gone = false; Ui([&](auto* w) { gone = w->template findChild<MaterialEditorWindow*>() == nullptr; }); return gone; });
+        }
+        Ui([](auto* w) { w->activateWindow(); });
+
         // "Редактировать" on the default material: a new material is created, assigned and opened.
         Ui([](auto* w) {
             auto* tree = w->findChild<QTreeWidget*>();

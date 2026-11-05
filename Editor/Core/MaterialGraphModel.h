@@ -20,7 +20,7 @@ struct GraphPin
 struct GraphNodeData
 {
     int id = 0;
-    QString type;   // PBRMasterOutput, ColorParam, ScalarParam, Texture2D, ORMTexture, Time, UVCoord, Panner, Multiply, Add, Lerp, OneMinus, Sine, Fresnel
+    QString type;   // MaterialOutput, ColorParam, ScalarParam, Texture2D, NormalMap, Time, UVCoord, Panner, Multiply, Add, Lerp, OneMinus, Sine, Fresnel
     QString title;
     QPointF pos;
     QVariantMap properties;

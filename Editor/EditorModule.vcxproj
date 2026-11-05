@@ -182,6 +182,8 @@
         <ClCompile Include="Source/ProjectProperties.cpp"/>
         <ClCompile Include="Source/SceneObjectsPanel.cpp"/>
         <ClCompile Include="Source/MaterialEditorWindow.cpp"/>
+        <ClCompile Include="Source/MaterialTextureTools.cpp"/>
+        <ClCompile Include="Source/MaterialGraphWidget.cpp"/>
         <ClCompile Include="Core/Logger.cpp"/>
         <ClCompile Include="Core/CommandRegistry.cpp"/>
         <ClCompile Include="Core/FileService.cpp"/>
@@ -304,6 +306,8 @@
         <ClInclude Include="UI/SpinBoxArrowStyle.h"/>
         <ClInclude Include="Include/CodeClassDialog.h"/>
         <ClInclude Include="Include/FileBrowser.h"/>
+        <ClInclude Include="Include/MaterialTextureTools.h"/>
+        <ClInclude Include="Include/MaterialGraphWidget.h"/>
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->
         <CustomBuild Include="Include/MainWindow.h">
             <FileType>Document</FileType>

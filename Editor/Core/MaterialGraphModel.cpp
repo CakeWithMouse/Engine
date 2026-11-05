@@ -92,8 +92,8 @@ void MaterialGraphModel::SetupDefaultMasterNode()
 {
     Clear();
 
-    // Master Output
-    AddNode(QStringLiteral("PBRMasterOutput"), QStringLiteral("PBR Master Output"), QPointF(550, 180));
+    // Выход материала: поля MaterialOutput освещения движка (Блинн-Фонг)
+    AddNode(QStringLiteral("MaterialOutput"), QStringLiteral("Material Output"), QPointF(560, 180));
 
     // ColorParam BaseColor
     QVariantMap colorProps;
@@ -101,24 +101,16 @@ void MaterialGraphModel::SetupDefaultMasterNode()
     colorProps[QStringLiteral("color")] = QColor(220, 220, 225);
     AddNode(QStringLiteral("ColorParam"), QStringLiteral("BaseColor"), QPointF(200, 120), colorProps);
 
-    // ScalarParam Roughness
-    QVariantMap roughProps;
-    roughProps[QStringLiteral("name")] = QStringLiteral("Roughness");
-    roughProps[QStringLiteral("value")] = 0.45;
-    AddNode(QStringLiteral("ScalarParam"), QStringLiteral("Roughness"), QPointF(200, 260), roughProps);
+    // ScalarParam Specular
+    QVariantMap specularProps;
+    specularProps[QStringLiteral("name")] = QStringLiteral("Specular");
+    specularProps[QStringLiteral("value")] = 0.5;
+    AddNode(QStringLiteral("ScalarParam"), QStringLiteral("Specular"), QPointF(200, 280), specularProps);
 
-    // ScalarParam Metallic
-    QVariantMap metalProps;
-    metalProps[QStringLiteral("name")] = QStringLiteral("Metallic");
-    metalProps[QStringLiteral("value")] = 0.0;
-    AddNode(QStringLiteral("ScalarParam"), QStringLiteral("Metallic"), QPointF(200, 360), metalProps);
-
-    // Connect BaseColor.RGB -> PBRMasterOutput.BaseColor
-    AddConnection(2, QStringLiteral("RGB"), 1, QStringLiteral("BaseColor"));
-    // Connect Roughness -> PBRMasterOutput.Roughness
-    AddConnection(3, QStringLiteral("Param"), 1, QStringLiteral("Roughness"));
-    // Connect Metallic -> PBRMasterOutput.Metallic
-    AddConnection(4, QStringLiteral("Param"), 1, QStringLiteral("Metallic"));
+    // Connect BaseColor.RGB -> MaterialOutput.Albedo
+    AddConnection(2, QStringLiteral("RGB"), 1, QStringLiteral("Albedo"));
+    // Connect Specular -> MaterialOutput.Specular
+    AddConnection(3, QStringLiteral("Value"), 1, QStringLiteral("Specular"));
 }
 
 const GraphNodeData* MaterialGraphModel::FindNode(int id) const
@@ -159,7 +151,8 @@ QString MaterialGraphModel::ExportToJson() const
         QJsonObject props;
         for (auto it = n.properties.begin(); it != n.properties.end(); ++it)
         {
-            if (it.value().canConvert<QColor>())
+            // canConvert<QColor>() верен и для строк ("BaseMap" разбирается как имя цвета): проверяем сам тип.
+            if (it.value().metaType().id() == QMetaType::QColor)
             {
                 QColor c = it.value().value<QColor>();
                 QJsonArray colArr = { c.redF(), c.greenF(), c.blueF(), c.alphaF() };
