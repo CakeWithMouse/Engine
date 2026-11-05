@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <fstream>
 #include <map>
+#include <cctype>
 #include <stdexcept>
 #include <algorithm>
 #include "../ThirdParty/nlohmann/json.hpp"
@@ -190,47 +191,82 @@ std::filesystem::path EngineStore()
 EngineRelease InstallEngineRelease(const std::filesystem::path& runtime)
 {
     const auto release = ReadEngineRelease(runtime);
-    const auto parent = EngineStore() / release.version;
-    const auto target = parent / release.configuration;
-    const auto relativeTarget = std::filesystem::weakly_canonical(target).lexically_relative(std::filesystem::weakly_canonical(release.runtime));
-    if (!relativeTarget.empty() && !relativeTarget.is_absolute() && *relativeTarget.begin() != ".." && relativeTarget != ".")
-        throw std::runtime_error("Engine store cannot be inside the release being installed");
+    const auto store = EngineStore();
+
+    auto sameBytes = [](const std::filesystem::path& a, const std::filesystem::path& b) {
+        std::error_code ec;
+        if (!std::filesystem::is_regular_file(a, ec) || !std::filesystem::is_regular_file(b, ec) ||
+            std::filesystem::file_size(a, ec) != std::filesystem::file_size(b, ec) || ec)
+            return false;
+        std::ifstream oldBytes(a, std::ios::binary), newBytes(b, std::ios::binary);
+        return std::equal(std::istreambuf_iterator<char>(oldBytes), std::istreambuf_iterator<char>(),
+                          std::istreambuf_iterator<char>(newBytes));
+    };
+
+    // "2026.11.06.0" -> "2026.11.06.1"; "1.0-beta" -> "1.0-beta.1".
+    auto nextBuildVersion = [](const std::string& version) {
+        const auto dot = version.rfind('.');
+        if (dot != std::string::npos && dot + 1 < version.size() &&
+            std::all_of(version.begin() + static_cast<std::ptrdiff_t>(dot) + 1, version.end(),
+                        [](unsigned char c) { return std::isdigit(c) != 0; }))
+            return version.substr(0, dot + 1) + std::to_string(std::stoull(version.substr(dot + 1)) + 1);
+        return version + ".1";
+    };
+
+    auto installAs = [&](const std::string& version) -> EngineRelease {
+        const auto parent = store / version;
+        const auto target = parent / release.configuration;
+        const auto relativeTarget = std::filesystem::weakly_canonical(target).lexically_relative(std::filesystem::weakly_canonical(release.runtime));
+        if (!relativeTarget.empty() && !relativeTarget.is_absolute() && *relativeTarget.begin() != ".." && relativeTarget != ".")
+            throw std::runtime_error("Engine store cannot be inside the release being installed");
+        std::filesystem::create_directories(parent);
+        const auto staging = parent / (release.configuration + ".install-" + std::to_string(GetCurrentProcessId()));
+        if (!std::filesystem::create_directory(staging)) throw std::runtime_error("Engine installation is already in progress");
+        try
+        {
+            for (auto it = std::filesystem::recursive_directory_iterator(release.runtime); it != std::filesystem::recursive_directory_iterator(); ++it)
+            {
+                if ((GetFileAttributesW(it->path().c_str()) & FILE_ATTRIBUTE_REPARSE_POINT) || (it->is_directory() && (it->path().filename() == ".shadow_cache" || it->path().filename() == "Projects")))
+                { if (it->is_directory()) it.disable_recursion_pending(); continue; }
+                const auto dest = staging / std::filesystem::relative(it->path(), release.runtime);
+                if (it->is_directory()) std::filesystem::create_directories(dest);
+                else if (it->is_regular_file() && it->path().extension() != ".pdb" &&
+                    (it->path().extension() != ".lib" || *std::filesystem::relative(it->path(), release.runtime).begin() == "SDK") &&
+                    it->path().extension() != ".exp" && it->path().filename() != "EditorUiTests.exe")
+                    std::filesystem::copy_file(it->path(), dest);
+            }
+            // A version re-assigned to the next build number must report it: ResolveEngineRelease
+            // validates the manifest inside the store against the pinned directory version.
+            std::ofstream manifest(staging / "EngineVersion.json", std::ios::binary | std::ios::trunc);
+            manifest << "{\"version\":\"" << version << "\"}";
+            manifest.close();
+            ReadEngineRelease(staging);
+            std::filesystem::rename(staging, target); // complete release becomes visible atomically
+        }
+        catch (...) { std::error_code ec; std::filesystem::remove_all(staging, ec); throw; }
+        return ReadEngineRelease(target);
+    };
+
+    const auto target = store / release.version / release.configuration;
     if (std::filesystem::exists(target))
     {
         const auto installed = ReadEngineRelease(target);
         if (installed.version != release.version || installed.configuration != release.configuration)
             throw std::runtime_error("Installed engine release identity mismatch");
+        bool identical = true;
         for (const auto* name : {"EngineRuntime.exe","Editor.dll","Templates/SceneProject/Game.dll"})
-        {
-            const auto oldFile = target / name, newFile = release.runtime / name;
-            std::ifstream oldBytes(oldFile,std::ios::binary), newBytes(newFile,std::ios::binary);
-            if (std::filesystem::file_size(oldFile) != std::filesystem::file_size(newFile) ||
-                !std::equal(std::istreambuf_iterator<char>(oldBytes),std::istreambuf_iterator<char>(),std::istreambuf_iterator<char>(newBytes)))
-                throw std::runtime_error("This engine version is already installed with different binaries. Assign a new release version; the installed release was preserved.");
-        }
-        return installed;
+            if (!sameBytes(target / name, release.runtime / name)) { identical = false; break; }
+        if (identical)
+            return installed;
+        // The same version was rebuilt locally (development build). Installed releases are
+        // immutable, so the new binaries are installed side by side under the next free build
+        // number instead of failing; the preserved release stays available to pinned projects.
+        std::string version = release.version;
+        while (std::filesystem::exists(store / version / release.configuration))
+            version = nextBuildVersion(version);
+        return installAs(version);
     }
-    std::filesystem::create_directories(parent);
-    const auto staging = parent / (release.configuration + ".install-" + std::to_string(GetCurrentProcessId()));
-    if (!std::filesystem::create_directory(staging)) throw std::runtime_error("Engine installation is already in progress");
-    try
-    {
-        for (auto it = std::filesystem::recursive_directory_iterator(release.runtime); it != std::filesystem::recursive_directory_iterator(); ++it)
-        {
-            if ((GetFileAttributesW(it->path().c_str()) & FILE_ATTRIBUTE_REPARSE_POINT) || (it->is_directory() && (it->path().filename() == ".shadow_cache" || it->path().filename() == "Projects")))
-            { if (it->is_directory()) it.disable_recursion_pending(); continue; }
-            const auto dest = staging / std::filesystem::relative(it->path(), release.runtime);
-            if (it->is_directory()) std::filesystem::create_directories(dest);
-            else if (it->is_regular_file() && it->path().extension() != ".pdb" &&
-                (it->path().extension() != ".lib" || *std::filesystem::relative(it->path(), release.runtime).begin() == "SDK") &&
-                it->path().extension() != ".exp" && it->path().filename() != "EditorUiTests.exe")
-                std::filesystem::copy_file(it->path(), dest);
-        }
-        ReadEngineRelease(staging);
-        std::filesystem::rename(staging, target); // complete release becomes visible atomically
-    }
-    catch (...) { std::error_code ec; std::filesystem::remove_all(staging, ec); throw; }
-    return ReadEngineRelease(target);
+    return installAs(release.version);
 }
 EngineRelease ResolveEngineRelease(const RuntimeProject& project, const std::filesystem::path& currentRuntime)
 {
