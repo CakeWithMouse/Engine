@@ -33,3 +33,51 @@ bpy.ops.export_scene.fbx(filepath=os.path.join(folder, "blender-packed.fbx"), pa
 image.unpack(method="REMOVE")
 image.filepath = "//missing.png"
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(folder, "blend-missing.blend"))
+
+# A real Blender model, plus a UV chart whose four corners expose vertical flips.
+# Self-contained fixtures: Suzanne ships with Blender; no downloaded assets/license required.
+bpy.ops.object.select_all(action="SELECT")
+bpy.ops.object.delete(use_global=False)
+chart = bpy.data.images.new("UV corners", width=64, height=64)
+pixels = []
+for y in range(64):
+    for x in range(64):
+        pixels.extend(((0, 0, 1, 1) if x < 32 else (1, 1, 0, 1)) if y < 32
+                      else ((1, 0, 0, 1) if x < 32 else (0, 1, 0, 1)))
+chart.pixels[:] = pixels
+chart.filepath_raw = os.path.join(folder, "uv-corners.png")
+chart.file_format = "PNG"
+chart.save()
+chart.pack()
+chart_mat = bpy.data.materials.new("UV chart")
+chart_mat.use_nodes = True
+texture = chart_mat.node_tree.nodes.new("ShaderNodeTexImage")
+texture.image = chart
+chart_mat.node_tree.links.new(texture.outputs["Color"],
+                            chart_mat.node_tree.nodes.get("Principled BSDF").inputs["Base Color"])
+mesh = bpy.data.meshes.new("UV plane")
+mesh.from_pydata([(-1, 0, -1), (1, 0, -1), (1, 0, 1), (-1, 0, 1)], [], [(0, 1, 2, 3)])
+uv = mesh.uv_layers.new()
+for loop, coord in zip(uv.data, [(0, 0), (1, 0), (1, 1), (0, 1)]):
+    loop.uv = coord
+plane = bpy.data.objects.new("UV plane", mesh)
+bpy.context.collection.objects.link(plane)
+mesh.materials.append(chart_mat)
+bpy.ops.wm.save_as_mainfile(filepath=os.path.join(folder, "blend-uv.blend"))
+bpy.ops.object.select_all(action="SELECT")
+bpy.ops.object.delete(use_global=False)
+bpy.ops.mesh.primitive_monkey_add()
+suzanne = bpy.context.object
+modifier = suzanne.modifiers.new("Subdivision", "SUBSURF")
+modifier.levels = 1
+bpy.ops.object.modifier_apply(modifier=modifier.name)
+bpy.ops.object.shade_smooth()
+suzanne.data.materials.append(chart_mat)
+bpy.ops.wm.save_as_mainfile(filepath=os.path.join(folder, "blend-suzanne.blend"))
+second = bpy.data.materials.new("Second material magenta")
+second.use_nodes = True
+second.node_tree.nodes.get("Principled BSDF").inputs["Base Color"].default_value = (1, 0, 1, 1)
+suzanne.data.materials.append(second)
+for polygon in suzanne.data.polygons:
+    polygon.material_index = int(polygon.center.x > 0)
+bpy.ops.wm.save_as_mainfile(filepath=os.path.join(folder, "blend-suzanne-multiple.blend"))

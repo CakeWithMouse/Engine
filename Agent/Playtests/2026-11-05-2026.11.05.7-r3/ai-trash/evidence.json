@@ -1,0 +1,419 @@
+{
+  "generatedAt": "2026-11-05",
+  "persona": "role4-ai-trash",
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\ai-trash\\Final8Trash",
+  "baselineProject": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\ai-trash\\TrashGame",
+  "baselineSdk": "2026.11.05.7",
+  "verificationSdk": "2026.11.05.8",
+  "features": [
+    {
+      "feature_id": "create-cpp",
+      "status": "partial",
+      "action": "Created fresh project through official CLI, then used separate --enable-code and built it.",
+      "expected": "One-step C++ project creation produces usable code template.",
+      "actual": "Only two-step CLI create + enable-code was exercised; GUI one-step C++ option was not tested.",
+      "evidence_paths": [
+        "evidence/project-build.stdout.log",
+        "evidence/dot7-CodeBuild.log"
+      ]
+    },
+    {
+      "feature_id": "class-wizard",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "failed-build-rollback",
+      "status": "partial",
+      "action": "Observed an initial source compile failure, then corrected project code and rebuilt.",
+      "expected": "Failed build leaves previous usable DLL intact.",
+      "actual": "Compile failure and recovery are recorded; previous DLL usability was not independently verified.",
+      "evidence_paths": [
+        "evidence/incident-build-c2039.log",
+        "evidence/dot7-CodeBuild.log"
+      ]
+    },
+    {
+      "feature_id": "hot-reload",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "scene-primitives",
+      "status": "partial",
+      "action": "Called mesh.primitive for cube, sphere, plane, cylinder, cone, pyramid.",
+      "expected": "All supported primitive types produce valid mesh geometry and are placeable.",
+      "actual": "All six calls returned ok with nonzero vertices/triangles and bounds; placement workflow not checked.",
+      "evidence_paths": [
+        "evidence/six-primitives.summary.json"
+      ]
+    },
+    {
+      "feature_id": "scene-hierarchy",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "scene-object",
+      "status": "partial",
+      "action": "Saved the game scene containing the custom ThrowLedger ENGINE_OBJECT adapter.",
+      "expected": "Project-defined object serialization restores the ledger state.",
+      "actual": "The exact failing .7 snapshot has ThrowLedger id=11/type ThrowLedger with projectData throws=1,hits=0,misses=0,round=1; runtime .8 load retained those gameplay counters, but adapter state was not queried independently after restore.",
+      "evidence_paths": [
+        "evidence/scene-object-throw-ledger-snapshot.json",
+        "evidence/legacy-dot7-on-dot8.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "scene-undo",
+      "status": "passed",
+      "action": "Workflow UI scenario exercised group undo and save state.",
+      "expected": "Undo restores group edit and dirty state is accurate.",
+      "actual": "Output reports group UI/save checks passed; recovery process later loaded seven objects.",
+      "evidence_paths": [
+        "evidence/workflow-native-temp.stdout.log",
+        "evidence/recovery-check.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "scene-groups",
+      "status": "passed",
+      "action": "Ran the workflow UI checks on this role scratch project; output confirms Group UI and save checks passed.",
+      "expected": "Objects can be selected/changed as a group and saved.",
+      "actual": "Workflow commandlet UI checks completed on this role scratch project; coordinator reran the request after my first startup failure.",
+      "evidence_paths": [
+        "evidence/workflow-native-temp.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "scene-snapping",
+      "status": "partial",
+      "action": "Called gizmo.snap for delta [-1.6378729,0,0] with step .5.",
+      "expected": "Gizmo drag snaps position as configured.",
+      "actual": "API rounded delta to [-1.5,0,0]; no full transform drag/angle validation.",
+      "evidence_paths": [
+        "evidence/gizmo-snap.request.json",
+        "evidence/gizmo-snap.result.json"
+      ]
+    },
+    {
+      "feature_id": "scene-recovery",
+      "status": "passed",
+      "action": "After workflow simulated process crash, ran recovery-check on the same role scratch project.",
+      "expected": "Recovery is found and loads actual scene with all seven unsaved objects and build identity.",
+      "actual": "Exit0; checks 8–11 passed.",
+      "evidence_paths": [
+        "evidence/workflow-native-temp.stdout.log",
+        "evidence/recovery-check.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "camera-perspective",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "trace-screen",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "model-import",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "model-blend",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "texture-import",
+      "status": "passed",
+      "action": "Authoring UI imported a 2x2 red BMP source into project Content and verified it existed before reimport.",
+      "expected": "Texture import creates a usable project asset.",
+      "actual": "Authoring run exited 0/221 checks; import and subsequent update/move completed.",
+      "evidence_paths": [
+        "evidence/authoring-reimport.stdout.log",
+        "evidence/reimport-blue-fixture.bmp"
+      ]
+    },
+    {
+      "feature_id": "asset-reimport",
+      "status": "passed",
+      "action": "Authoring UI reimported red BMP from blue source and moved the updated asset.",
+      "expected": "Content updates pixels, dirties scene/clears stale undo, and move replaces previous asset path.",
+      "actual": "Authoring run exited 0/221 checks; blue pixel observed, dirty and undo state updated, file moved to Content/Images/Renamed.bmp.",
+      "evidence_paths": [
+        "evidence/authoring-reimport.stdout.log",
+        "evidence/reimport-blue-fixture.bmp"
+      ]
+    },
+    {
+      "feature_id": "skeletal",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "material-assign",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "material-params",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "material-editor",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "material-errors",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "material-blends",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "light-point",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "light-sun",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "shadows",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "sky",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "hud-project",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "hud-events",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "hud-editor",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "vfs",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "export",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "compatibility",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "sdk-examples",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "render-host",
+      "status": "not-tested",
+      "action": "No isolated r3 probe run for this assigned feature.",
+      "expected": "Verify against the current feature-matrix criterion.",
+      "actual": "No r3 claim; previous campaign evidence is not reused as this run.",
+      "evidence_paths": []
+    },
+    {
+      "feature_id": "savegame-restart",
+      "status": "passed",
+      "action": "Saved during flight; loaded same process and new process on .8; retried exact .7 failure slot.",
+      "expected": "Round counters and trajectory survive, projectile resolves after restart.",
+      "actual": ".8 runs PASS, imported projectile restored and resumed to one hit.",
+      "evidence_paths": [
+        "evidence/dot8-save-load-resume.log",
+        "evidence/legacy-dot7-on-dot8.stdout.log",
+        "evidence/trash-round-save-load.png",
+        "evidence/trash-round-restart.png"
+      ]
+    },
+    {
+      "feature_id": "material-graph",
+      "status": "passed",
+      "action": "Own material.graph commandlet sequence: enable/save, preset/apply/revert, invalid AI response, undo/redo/revert.",
+      "expected": "Graph editing and preview work through native Qt window.",
+      "actual": "Exit0; nativePreviewWindow=true, invalid AI text rejected, edits applied/reverted, undo/redo accepted.",
+      "evidence_paths": [
+        "evidence/material-graph-writefailure.result.json",
+        "evidence/material-graph-writefailure.png"
+      ]
+    },
+    {
+      "feature_id": "material-graph-write-failure",
+      "status": "passed",
+      "action": "Locked the .graph.json sidecar and requested revert; then retried after removing lock.",
+      "expected": "Failed disk write preserves dirty in-memory graph; retry restores saved graph.",
+      "actual": "Access-denied dialog appeared; failed operation kept dirty graph byte-equivalent to edited graph. Retry cleared dirty state and restored saved graph/HLSL. Undo/redo and invalid-AI rejection also passed.",
+      "evidence_paths": [
+        "evidence/material-graph-writefailure-checks.json",
+        "evidence/material-graph-writefailure.result.json",
+        "evidence/material-graph-writefailure.png"
+      ]
+    },
+    {
+      "feature_id": "material-slots",
+      "status": "passed",
+      "action": "Imported packed BLEND and used its two material slots on imported game projectile.",
+      "expected": "Both source slots survive import and render on the item.",
+      "actual": "Imported mesh renders distinct material regions in GPU capture; save snapshot holds two paths.",
+      "evidence_paths": [
+        "evidence/trash-imported-inflight.png",
+        "evidence/round-current-dot7-save.json"
+      ]
+    },
+    {
+      "feature_id": "material-slot-edit",
+      "status": "passed",
+      "action": "Used project.scene on own project: assigned explicit Material_1/Material_0 slot paths, undo/redo, saved/reopened scene.",
+      "expected": "Two slots edit independently and persist.",
+      "actual": "Saved scene contains the slot map; source IDs are retained.",
+      "evidence_paths": [
+        "evidence/material-slots-scene-final.json"
+      ]
+    },
+    {
+      "feature_id": "material-slot-persist",
+      "status": "passed",
+      "action": "Loaded exact .7 failure SaveGame JSON on .8 in a separate process.",
+      "expected": "Previously failing Skeletal-derived projectile restores geometry, slot assignments and flight.",
+      "actual": "PASS; exact old .7 snapshot has model /Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb, slots 0=Material_1 and 1=Material_0, type Trash.MultiMaterialProjectile, flight elapsed=0.5; fresh .8 process loaded it and resumed to hit.",
+      "evidence_paths": [
+        "evidence/material-slots-from-legacy-snapshot.json",
+        "evidence/legacy-dot7-on-dot8.stdout.log",
+        "evidence/dot7-save-loaded-by-dot8.png"
+      ]
+    },
+    {
+      "feature_id": "imported-shadows",
+      "status": "passed",
+      "action": "Captured same imported scene on/off castShadows; pixel-diffed GPU frames.",
+      "expected": "Only shadow contribution changes.",
+      "actual": "667 pixel differences, bbox x484..543 y274..300; same imported model appears in both.",
+      "evidence_paths": [
+        "evidence/trash-shadow-On.png",
+        "evidence/trash-shadow-Off.png"
+      ]
+    },
+    {
+      "feature_id": "imported-uv",
+      "status": "partial",
+      "action": "Imported textured multi-material Suzanne and captured it in flight.",
+      "expected": "UV chart pattern readable on mesh.",
+      "actual": "Textured model visible but too small for reliable chart-detail verdict.",
+      "evidence_paths": [
+        "evidence/trash-imported-inflight.png"
+      ]
+    },
+    {
+      "feature_id": "game-settings",
+      "status": "partial",
+      "action": "Called game.settings with rendering=1, vsync=false, antialiasing=1 on frozen .8 commandlet.",
+      "expected": "Settings API returns the selected settings and visual renderer reflects them.",
+      "actual": "API returned the requested values; no GPU visual comparison.",
+      "evidence_paths": [
+        "evidence/game-settings.request.json",
+        "evidence/game-settings.result.json"
+      ]
+    }
+  ]
+}

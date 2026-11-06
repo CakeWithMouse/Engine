@@ -1,0 +1,137 @@
+Project: Curious City .7
+Mode: game
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/playtests/20261105-r3/curious-city/fresh-city/Content'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+GameCreate
+[VfsService] first read via module: /Game/Models/blend-uv/blend-uv.glb
+GameSceneLoaded
+GameStart
+Curious City .7
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+GameUpdate
+Texture loaded: E:/Engine/Engine/build/playtests/20261105-r3/curious-city/fresh-city/Content/Models/CesiumMan/Textures/BaseColor_0.jpg (1024x1024)
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+FontAtlas: 161 glyphs at 18 px in a 512x128 atlas.
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+frame-dump E:\Engine\Engine\build\playtests\20261105-r3\curious-city\uv-control.bmp written=1 size=1000x500
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdates=35
+GameStop
+GameDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+

@@ -333,14 +333,20 @@ int wmain(int argc, wchar_t** argv)
         Ui([](auto* w){
             ObjectInspectorPanel panel(w);EditorQtHost::Snapshot view;
             EditorQtHost::SceneObject object{};object.id=123;object.name="Property probe";object.type="UiProbe";
-            object.projectData=R"({"version":1,"speed":5,"enabled":true,"mode":"walk","target":123,"asset":"/Game/pixel.bmp"})";
-            object.propertySchema=R"({"version":1,"fields":[{"path":"/speed","type":"number","group":"Behavior/Movement","min":0,"max":20},{"path":"/enabled","type":"bool","group":"Behavior/Movement"},{"path":"/mode","type":"enum","options":[{"label":"Walk","value":"walk"}]},{"path":"/target","type":"object"},{"path":"/asset","type":"asset"}]})";
+            object.projectData=R"({"version":1,"speed":5,"enabled":true,"mode":"walk","target":123,"asset":"/Game/pixel.bmp","materialSlots":{"4":"/Game/Roof.mat"}})";
+            object.propertySchema=R"({"version":1,"fields":[{"path":"/speed","type":"number","group":"Behavior/Movement","min":0,"max":20},{"path":"/enabled","type":"bool","group":"Behavior/Movement"},{"path":"/mode","type":"enum","options":[{"label":"Walk","value":"walk"}]},{"path":"/target","type":"object"},{"path":"/asset","type":"asset"},{"path":"/materialSlots/4","type":"asset","extensions":[".mat"]}]})";
             view.objects.push_back(object);panel.Refresh(view,123,true);
             auto* number=panel.findChild<QDoubleSpinBox*>("Property/speed");auto* check=panel.findChild<QCheckBox*>("Property/enabled");
             auto* mode=panel.findChild<QComboBox*>("Property/mode");auto* target=panel.findChild<QComboBox*>("Property/target");
             Check(number&&number->value()==5&&number->maximum()==20,"typed numeric value and bounds");
             Check(check&&check->isChecked(),"typed boolean");Check(mode&&mode->currentText()=="Walk","typed enum");Check(target&&target->currentText()=="Property probe","typed object reference");
             Check(panel.findChild<QLineEdit*>("Property/asset")->text()=="/Game/pixel.bmp","typed asset path");
+            auto* slotEdit=panel.findChild<QPushButton*>("EditMaterial/materialSlots/4");
+            Check(slotEdit && slotEdit->isEnabled(),"material slot has an enabled editor button");
+            QString editedMaterial;QObject::connect(&panel,&ObjectInspectorPanel::EditMaterialRequested,&panel,[&](const QString& path){editedMaterial=path;});
+            slotEdit->click();Check(editedMaterial=="/Game/Roof.mat","material slot button opens its own asset");
+            auto* slotPath=panel.findChild<QLineEdit*>("Property/materialSlots/4");
+            slotPath->setText("");Check(!slotEdit->isEnabled(),"empty material slot cannot open material editor");
             QString path,value;quint64 selected=0;QObject::connect(&panel,&ObjectInspectorPanel::PropertyEditingFinished,&panel,[&](auto id,const auto& p,const auto& v){selected=id;path=p;value=v;});
             number->setValue(7);QMetaObject::invokeMethod(number,"editingFinished");Check(selected==123&&path=="/speed"&&value=="7","typed property signal contains scalar JSON");
             auto* header=panel.findChild<QToolButton*>("Section.UiProbe/Behavior/Movement");Check(header!=nullptr,"nested collapsible section");

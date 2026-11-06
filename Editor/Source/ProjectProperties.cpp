@@ -126,6 +126,18 @@ void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot
                         line->setText("/Game/"+QDir::fromNativeSeparators(relative));SubmitProperty(path,line->text());
                     });
                     form->addRow(pick);pick->setEnabled(!field["readOnly"].toBool());
+                    if(field["extensions"].toArray().contains(".mat")) {
+                        auto* edit=new QPushButton(Tr("Редактировать материал…","Edit Material…"),properties_);
+                        edit->setObjectName("EditMaterial"+path);
+                        connect(edit,&QPushButton::clicked,this,[this,line]{
+                            const auto asset=line->text();
+                            if(asset.startsWith("/Game/") && asset.endsWith(".mat",Qt::CaseInsensitive))emit EditMaterialRequested(asset);
+                        });
+                        auto refresh=[edit,line]{edit->setEnabled(line->isEnabled() && line->text().startsWith("/Game/") && line->text().endsWith(".mat",Qt::CaseInsensitive));};
+                        connect(line,&QLineEdit::textChanged,this,[refresh]{refresh();});
+                        propertyRefresh_.push_back([refresh](const auto&){refresh();});
+                        form->addRow(edit);
+                    }
                 }
             } else {widget=new QLabel(Tr("Неподдерживаемый тип: ", "Unsupported Type: ")+type,properties_);}
             widget->setObjectName("Property"+path);widget->setToolTip(field["description"].toString());widget->setEnabled(!field["readOnly"].toBool());

@@ -1,0 +1,540 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "ok": true,
+    "steps": [
+        {
+            "action": "model",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+                4
+            ],
+            "status": 0
+        },
+        {
+            "action": "move",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        10,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+                4
+            ],
+            "status": 0
+        },
+        {
+            "action": "property",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        10,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+                4
+            ],
+            "status": 0
+        },
+        {
+            "action": "save",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        10,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+                4
+            ],
+            "status": 0
+        },
+        {
+            "action": "material",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        10,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+                4
+            ],
+            "status": 0
+        },
+        {
+            "action": "material",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        10,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+                4
+            ],
+            "status": 0
+        },
+        {
+            "action": "new",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "load",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        10,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        }
+    ]
+}

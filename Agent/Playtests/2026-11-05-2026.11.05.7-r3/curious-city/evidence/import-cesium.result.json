@@ -1,0 +1,13 @@
+{
+    "asset": "/Game/Models/CesiumMan/CesiumMan.glb",
+    "clips": 1,
+    "indices": 14016,
+    "material": "/Game/Models/CesiumMan/Materials/Material_0.mat",
+    "materialSlots": {
+        "0": ""
+    },
+    "meshes": 1,
+    "ok": true,
+    "placed": true,
+    "type": "Engine.Model"
+}

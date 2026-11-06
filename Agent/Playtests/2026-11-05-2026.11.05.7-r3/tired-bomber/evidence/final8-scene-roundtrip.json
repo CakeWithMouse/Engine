@@ -1,0 +1,150 @@
+{
+    "ok": true,
+    "steps": [
+        {
+            "action": "new",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "model",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+                1
+            ],
+            "status": 0
+        },
+        {
+            "action": "property",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+                1
+            ],
+            "status": 0
+        },
+        {
+            "action": "save",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+                1
+            ],
+            "status": 0
+        },
+        {
+            "action": "new",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "load",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        }
+    ]
+}

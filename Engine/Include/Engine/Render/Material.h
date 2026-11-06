@@ -126,10 +126,10 @@ public:
     bool WritesGBuffer() const { return Sets[MaterialVariant::Mesh].GBufferPixelShader != nullptr; }
 
     /**
-     * Masked materials draw their own shadow (the clip leaves holes); every other material uses
-     * the engine's depth shader. Valid while HasShadowShaders().
+     * Masked materials and skinned variants draw their own shadow (clip and bone palette).
+     * Ordinary opaque meshes use the engine's depth shader. Valid while HasShadowShaders(variant).
      */
-    bool HasShadowShaders() const { return Sets[MaterialVariant::Mesh].ShadowPixelShader != nullptr; }
+    bool HasShadowShaders(uint32_t variant = MaterialVariant::Mesh) const { return Sets[variant].ShadowPixelShader != nullptr; }
     ID3D11VertexShader* GetShadowVertexShader(uint32_t variant = MaterialVariant::Mesh) const { return Sets[variant].ShadowVertexShader.Get(); }
     ID3D11PixelShader* GetShadowPixelShader(uint32_t variant = MaterialVariant::Mesh) const { return Sets[variant].ShadowPixelShader.Get(); }
 

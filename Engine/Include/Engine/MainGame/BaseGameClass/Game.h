@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <Engine/Runtime/ViewportOverlayApi.h>
 #include <wrl/client.h>
 #include <glm/vec3.hpp>
@@ -408,6 +409,7 @@ protected:
     void RenderShadowMaps();
     enum class OpaqueFilter { All, DeferredCapable, ForwardOnly };
     void RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant);
+    std::vector<GameComponent*> CollectRenderComponents();
     void RenderSkybox();
     void DispatchComputePhase();
     void RenderTransparent();
@@ -592,6 +594,7 @@ protected:
     // Frame data and diagnostics
     FrameConstants CurrentFrame{};
     FrameStats Stats;
+    std::unordered_set<GameComponent*> CountedVisibleObjects;
     FrameStats LastFrameStats;
     CompletedFrameStats CompletedStats;
     bool bRenderDiagnostics=false, bDiagnosticsKeyWasDown=false, bDiagnosticsNextWasDown=false;

@@ -29,6 +29,9 @@ Copy-Item -LiteralPath "$engineRoot/docs/GAME-SUBSYSTEMS.md" -Destination "$sdk/
 Copy-Item -LiteralPath "$engineRoot/docs/SAVEGAME.md" -Destination "$sdk/Docs/SAVEGAME.md" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/RENDER-DIAGNOSTICS.md" -Destination "$sdk/Docs/RENDER-DIAGNOSTICS.md" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/COMMANDLETS.md" -Destination "$sdk/Docs/COMMANDLETS.md" -Force
+foreach($document in @('PROJECT-ASSETS.md','MATERIALS.md','ENGINE-VERSIONS.md')) {
+    Copy-Item -LiteralPath "$engineRoot/docs/$document" -Destination "$sdk/Docs/$document" -Force
+}
 Copy-Item -LiteralPath "$engineRoot/docs/SAVEGAME.html" -Destination "$sdk/Docs/SAVEGAME.html" -Force
 Copy-Item -LiteralPath "$engineRoot/examples/TraceExamples.cpp" -Destination "$sdk/Examples/TraceExamples.cpp" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/TRACE-API.md" -Destination "$sdk/Docs/TRACE-API.md" -Force

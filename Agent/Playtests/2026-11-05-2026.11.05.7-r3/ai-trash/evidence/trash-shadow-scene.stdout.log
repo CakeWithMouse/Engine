@@ -1,0 +1,1370 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "ok": true,
+    "steps": [
+        {
+            "action": "load",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 0,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 0,
+                        "version": 3
+                    },
+                    "type": "ThrowLedger"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Imported trash slots",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "move",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 0,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 0,
+                        "version": 3
+                    },
+                    "type": "ThrowLedger"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Imported trash slots",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "save",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 0,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 0,
+                        "version": 3
+                    },
+                    "type": "ThrowLedger"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Imported trash slots",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "new",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "load",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 0,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 0,
+                        "version": 3
+                    },
+                    "type": "ThrowLedger"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Imported trash slots",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "property",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 0,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 0,
+                        "version": 3
+                    },
+                    "type": "ThrowLedger"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Imported trash slots",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/TrashShadowOff.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "save",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 0,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 0,
+                        "version": 3
+                    },
+                    "type": "ThrowLedger"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Imported trash slots",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/TrashShadowOff.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "new",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "load",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        5,
+                        -1
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        3,
+                        4,
+                        6
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Throw lane",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.03999999910593033,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.ThrowLane"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Bucket base",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.11999999731779099,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketBase"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "Bucket left wall",
+                    "parent": 0,
+                    "position": [
+                        -1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "Bucket right wall",
+                    "parent": 0,
+                    "position": [
+                        1.25,
+                        0.75,
+                        5.199999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Bucket front wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        3.950000047683716
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "Bucket back wall",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.75,
+                        6.449999809265137
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Trash.BucketWall"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Sky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Throw ledger",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "hits": 0,
+                        "misses": 0,
+                        "round": 1,
+                        "throws": 0,
+                        "version": 3
+                    },
+                    "type": "ThrowLedger"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Imported trash slots",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        1,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/TrashShadowOff.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        }
+    ]
+}

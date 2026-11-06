@@ -1,0 +1,384 @@
+{
+    "ok": true,
+    "original": {
+        "afterClick": [
+            {
+                "id": 1,
+                "material": "",
+                "name": "Ground",
+                "parent": 0,
+                "position": [
+                    0,
+                    -0.5,
+                    0
+                ],
+                "projectData": {
+                },
+                "type": "Primitive.Plane"
+            },
+            {
+                "id": 3,
+                "material": "",
+                "name": "Warm Light",
+                "parent": 0,
+                "position": [
+                    2,
+                    3,
+                    2
+                ],
+                "projectData": {
+                },
+                "type": "Light.Point"
+            },
+            {
+                "id": 4,
+                "material": "",
+                "name": "Cool Light",
+                "parent": 0,
+                "position": [
+                    -3,
+                    2,
+                    1
+                ],
+                "projectData": {
+                },
+                "type": "Light.Point"
+            },
+            {
+                "id": 5,
+                "material": "",
+                "name": "CityControls",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "projectData": {
+                },
+                "type": "CuriousCity.Interaction"
+            },
+            {
+                "id": 6,
+                "material": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                "name": "House_1",
+                "parent": 0,
+                "position": [
+                    -4,
+                    0.75,
+                    -2
+                ],
+                "projectData": {
+                },
+                "type": "CuriousCity.House"
+            }
+        ],
+        "afterKey": [
+            {
+                "id": 1,
+                "material": "",
+                "name": "Ground",
+                "parent": 0,
+                "position": [
+                    0,
+                    -0.5,
+                    0
+                ],
+                "projectData": {
+                },
+                "type": "Primitive.Plane"
+            },
+            {
+                "id": 3,
+                "material": "",
+                "name": "Warm Light",
+                "parent": 0,
+                "position": [
+                    2,
+                    3,
+                    2
+                ],
+                "projectData": {
+                },
+                "type": "Light.Point"
+            },
+            {
+                "id": 4,
+                "material": "",
+                "name": "Cool Light",
+                "parent": 0,
+                "position": [
+                    -3,
+                    2,
+                    1
+                ],
+                "projectData": {
+                },
+                "type": "Light.Point"
+            },
+            {
+                "id": 5,
+                "material": "",
+                "name": "CityControls",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "projectData": {
+                },
+                "type": "CuriousCity.Interaction"
+            }
+        ],
+        "before": [
+            {
+                "id": 1,
+                "material": "",
+                "name": "Ground",
+                "parent": 0,
+                "position": [
+                    0,
+                    -0.5,
+                    0
+                ],
+                "projectData": {
+                },
+                "type": "Primitive.Plane"
+            },
+            {
+                "id": 3,
+                "material": "",
+                "name": "Warm Light",
+                "parent": 0,
+                "position": [
+                    2,
+                    3,
+                    2
+                ],
+                "projectData": {
+                },
+                "type": "Light.Point"
+            },
+            {
+                "id": 4,
+                "material": "",
+                "name": "Cool Light",
+                "parent": 0,
+                "position": [
+                    -3,
+                    2,
+                    1
+                ],
+                "projectData": {
+                },
+                "type": "Light.Point"
+            },
+            {
+                "id": 5,
+                "material": "",
+                "name": "CityControls",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "projectData": {
+                },
+                "type": "CuriousCity.Interaction"
+            }
+        ]
+    },
+    "reloaded": {
+        "afterClick": [
+            {
+                "id": 1,
+                "material": "",
+                "name": "Ground",
+                "parent": 0,
+                "position": [
+                    0,
+                    -0.5,
+                    0
+                ],
+                "projectData": {
+                },
+                "type": "Primitive.Plane"
+            },
+            {
+                "id": 3,
+                "material": "",
+                "name": "Warm Light",
+                "parent": 0,
+                "position": [
+                    2,
+                    3,
+                    2
+                ],
+                "projectData": {
+                },
+                "type": "Light.Point"
+            },
+            {
+                "id": 4,
+                "material": "",
+                "name": "Cool Light",
+                "parent": 0,
+                "position": [
+                    -3,
+                    2,
+                    1
+                ],
+                "projectData": {
+                },
+                "type": "Light.Point"
+            },
+            {
+                "id": 5,
+                "material": "",
+                "name": "CityControls",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "projectData": {
+                },
+                "type": "CuriousCity.Interaction"
+            },
+            {
+                "id": 6,
+                "material": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                "name": "House_1",
+                "parent": 0,
+                "position": [
+                    -4,
+                    0.75,
+                    -2
+                ],
+                "projectData": {
+                },
+                "type": "CuriousCity.House"
+            }
+        ],
+        "afterKey": [
+            {
+                "id": 1,
+                "material": "",
+                "name": "Ground",
+                "parent": 0,
+                "position": [
+                    0,
+                    -0.5,
+                    0
+                ],
+                "projectData": {
+                },
+                "type": "Primitive.Plane"
+            },
+            {
+                "id": 3,
+                "material": "",
+                "name": "Warm Light",
+                "parent": 0,
+                "position": [
+                    2,
+                    3,
+                    2
+                ],
+                "projectData": {
+                },
+                "type": "Light.Point"
+            },
+            {
+                "id": 4,
+                "material": "",
+                "name": "Cool Light",
+                "parent": 0,
+                "position": [
+                    -3,
+                    2,
+                    1
+                ],
+                "projectData": {
+                },
+                "type": "Light.Point"
+            },
+            {
+                "id": 5,
+                "material": "",
+                "name": "CityControls",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "projectData": {
+                },
+                "type": "CuriousCity.Interaction"
+            }
+        ],
+        "before": [
+            {
+                "id": 1,
+                "material": "",
+                "name": "Ground",
+                "parent": 0,
+                "position": [
+                    0,
+                    -0.5,
+                    0
+                ],
+                "projectData": {
+                },
+                "type": "Primitive.Plane"
+            },
+            {
+                "id": 3,
+                "material": "",
+                "name": "Warm Light",
+                "parent": 0,
+                "position": [
+                    2,
+                    3,
+                    2
+                ],
+                "projectData": {
+                },
+                "type": "Light.Point"
+            },
+            {
+                "id": 4,
+                "material": "",
+                "name": "Cool Light",
+                "parent": 0,
+                "position": [
+                    -3,
+                    2,
+                    1
+                ],
+                "projectData": {
+                },
+                "type": "Light.Point"
+            },
+            {
+                "id": 5,
+                "material": "",
+                "name": "CityControls",
+                "parent": 0,
+                "position": [
+                    0,
+                    0,
+                    0
+                ],
+                "projectData": {
+                },
+                "type": "CuriousCity.Interaction"
+            }
+        ]
+    },
+    "replaced": true
+}

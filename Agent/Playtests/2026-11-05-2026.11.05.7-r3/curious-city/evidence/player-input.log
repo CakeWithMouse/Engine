@@ -1,0 +1,3 @@
+vfs_read path=/Game/Config/city-settings.txt value=district=harbor
+event=scene_ready balance=500 houses=0
+event=hud_reference_rebound balance=500 houses=0

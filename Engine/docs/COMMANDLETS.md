@@ -122,12 +122,16 @@ Offscreen Qt не предоставляет HWND для native preview; ком�
 `action`; объект выбирается по уникальному `target` (имя). Доступны:
 
 - `create`: `type` и `name`; `delete`, `duplicate`, `rename` (`name`).
+- `model`: `path` к уже импортированной `/Game/Models/...` модели и `name`; штатное размещение с её слотами.
 - `select`: `target` или `targets:["A","B"]` для группы.
 - `move`: `target`, `delta:[2,0,0]`; применяет настоящий групповой nudge.
 - `parent`: `target`, `parent` (пустая строка снимает родителя).
 - `property`: `target`, JSON-pointer `path`, JSON `value`.
 - `material`: `target`, `path` к материалу.
 - `save`/`load`: абсолютный `path` сцены; `new`, `undo`, `redo`.
+
+Каждый объект результата содержит также `material` (общий override) и `projectData`,
+включая `materialSlots`. Это позволяет сравнить назначения до/после изменения и Undo/Redo.
 
 Результат `steps[]` содержит `status`, `error`, реальные `objects` с ID/parent/
 локальной позицией, `selected`, `canUndo`, `canRedo`. Неуспех отдельной операции
@@ -147,7 +151,7 @@ Offscreen Qt не предоставляет HWND для native preview; ком�
 | `session.lifecycle` | `scenes:2`, `frames:3`, `dt:0.02`, `tickEnabled:true` | Настоящие GameSession/Game и тестовый счётчик GameSubsystem: ready, closing, ticks, elapsed, running после Stop |
 | `game.settings` | `rendering:0` (Forward=0, Deferred=1, Custom=2), `vsync:true`, `antialiasing:0` | Изменяет и читает настройки конкретного Game; визуальный результат проверяется отдельными GPU-тестами |
 | `mesh.primitive` | `shape:"cube"` (также sphere/plane/cylinder/cone/pyramid), `size:1`, `slices:16` | Штатные MeshPrimitives: vertices, triangles, minimum/maximum; CPU-геометрия без загрузки модели |
-| `asset.import` | абсолютные `source` (модель) и `content` (каталог назначения) | Штатный importAsset и createModel через GameEditModule; asset, placed, material, meshes, indices, clips. **Копирует модель и материалы в content**. Требует Assimp |
+| `asset.import` | абсолютные `source` (модель) и `content` (каталог назначения) | Штатный importAsset и createModel через GameEditModule; asset, placed, material (общий override), materialSlots (source ID → .mat), meshes, indices, clips. **Копирует модель и материалы в content**. Требует Assimp |
 | `gizmo.snap` | `delta`, `step:0.5` | SnapVector; результат delta |
 | `gizmo.center` | `delta`, `position:[0,0,0]`, `rotation:[0,0,0,1]`, `snap:true`, `step:0.5`, `local:false` | Та же операция свободного drag, которую вызывает ViewportWidget; итоговая position |
 | `ui.inspector` | `width:310`, `height:600`, необязательный `image` | Настоящий Inspector с выбранным кубом: достижимость всех полей Transform, геометрия и диапазон скролла, PNG |
@@ -184,6 +188,24 @@ ReloadInputTests — отдельный сценарий жалобы BUG007 н�
 AssimpCommandletTests импортирует OBJ, FBX и анимированный GLB в каталоги с кириллицей, размещает модели и проверяет отказ повреждённому FBX без оставшегося каталога модели. `Engine/tests/assets/run.ps1` дополнительно проверяет материалы, текстуры, перенос сцены и реальные GPU-пиксели, сохраняя `imported-model.bmp`; `Engine/tests/skeletal/run.ps1` проверяет загрузку, запекание анимации и LOD.
 
 `Engine/tests/assets/run-blend.ps1` находит установленный Blender (либо принимает `-Blender <blender.exe>`), создаёт fixtures с внешней/упакованной/отсутствующей текстурой в пути с кириллицей, запускает asset-тесты и `AssimpCommandletTests -BlendFixtures <каталог>`. Последний также принимает `-Commandlet <exe>` для проверки установленного Runtime. Для BLEND геометрия измеряется по полученному GLB, а не по исходному файлу Blender. Новый каталог `-Output` обязателен, если указан явно. Рендер сохраняет `blend-external.bmp` и `blend-packed.bmp` в перенесённом тестовом проекте.
+
+С 2026.11.05.6 этот runner также создаёт Suzanne (встроенную модель Blender), вариант с двумя
+материалами и четырёхцветную UV-плоскость. `ImportedModelRenderTests.cpp` проверяет реальные пиксели
+BaseMap/текстуры объекта, тень на принимающей поверхности в Custom/Forward/Deferred, глубину каскадов,
+masked/castShadows, текущую позу костей и статический кэш/yaw. Сохраняются `uv-*.bmp` и `suzanne-*.bmp`.
+Без Blender-fixtures эта интеграционная часть пропускается; обычные FBX/GLB-тесты остаются доступными.
+С 2026.11.05.7 вариант с двумя материалами проверяет автоматические submesh-назначения,
+разные blend/shadow states, замену одного слота, reload, сцену и SaveGame. Полный Blender/PBR
+не переносится. Через `project.scene` используйте `action: "property"`, `path: "/materialSlots/<ID>"`,
+`value: "/Game/Materials/Example.mat"`; это штатная история редактора, включая Undo/Redo.
+Общее назначение `action: "material"` остаётся override всех слотов.
+
+`Editor/tests/MaterialSlotsCommandletTests.ps1 -Project <scratch/Project.json> -Model <model.blend> -Output <new-directory>`
+проверяет импорт нескольких слотов, назначение, Undo/Redo, атомарный отказ неверного пути,
+дублирование, сохранение/загрузку и общий override. Передавайте отдельный тестовый проект:
+runner добавляет импортированные ресурсы. Модель должна содержать минимум два материала;
+внешние зависимости должны лежать рядом с ней, либо используйте BLEND с упакованными текстурами.
+Для другого runtime предусмотрен `-Commandlet <EngineCommandlets.exe>`.
 
 Связанные наборы: `Engine/tests/run.ps1`, `Engine/tests/input/run.ps1`, `Engine/tests/subsystems/run.ps1`, Editor CoreTests/HostTests. Основной runner пересобирает RuntimeFixtures, чтобы Module API не устаревал. Без Assimp импортная часть AuthoringTests явно SKIP после проверки доступных свойств/текстур и корректного отказа импортёра; она не учитывается как passed. С `-EnableAssimp` выполняется полный сценарий моделей.
 

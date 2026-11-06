@@ -1,0 +1,13 @@
+00:02.000  blend            | Read blend: "E:\Engine\Engine\build\imported-model-probe\fixtures\blend-suzanne-multiple.blend"
+E:\Engine\Engine\build\playtests\20261105-r3\Runtime\EngineContent\Tools\ImportBlend.py:18: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  if not material.use_nodes:
+INFO Draco is available, use library at C:\Program Files\Blender Foundation\Blender 5.2\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_draco_bridge.dll
+INFO MeshOptimizer is available, use library at C:\Program Files\Blender Foundation\Blender 5.2\5.2\scripts\addons_core\io_scene_gltf2\bf_intern_meshopt_bridge.dll
+22:15:27 | INFO: Starting glTF 2.0 export
+22:15:27 | INFO: Extracting primitive: Suzanne
+22:15:28 | INFO: Primitives created: 2
+22:15:28 | INFO: Finished glTF 2.0 export in 0.10747122764587402 s
+
+Blender 5.2.3 LTS (hash e13b728c6880 built 2026-10-22 01:37:16)
+
+Blender quit

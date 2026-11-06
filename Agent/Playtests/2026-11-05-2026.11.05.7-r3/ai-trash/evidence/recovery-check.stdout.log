@@ -1,0 +1,15 @@
+CHECK 1: usage: EditorUiTests <project directory> <EngineContent> [model]
+CHECK 2: load project module
+CHECK 3: create edit session
+CHECK 4: configure UI project content
+CHECK 5: load UI fixture
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: FOUND (version 3)
+CHECK 6: cursor extension version rejected
+CHECK 7: cursor extension size rejected
+CHECK 8: abruptly terminated editor has a recovery record
+CHECK 9: recover actual scene through DLL
+CHECK 10: all unsaved objects recovered
+CHECK 11: recovery records game build identity
+Recovery process-restart checks passed
+[Info] Viewport overlay service: NOT FOUND (version 0)

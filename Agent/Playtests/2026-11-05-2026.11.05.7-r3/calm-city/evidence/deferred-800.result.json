@@ -1,0 +1,46 @@
+{
+    "frames": [
+        {
+            "distanceCulled": 0,
+            "drawCalls": 6,
+            "drawn": 2,
+            "frameIndex": 1,
+            "frustumCulled": 0,
+            "hidden": 0,
+            "instancesSubmitted": 7,
+            "lines": [
+                "RENDER / LOD    F7 hide | F8 next",
+                "Frame 1 | CPU submission counters",
+                "Draws 6  instances 7  dispatch 0",
+                "Indices 87 (all passes)",
+                "Component 1/1  Diagnostics instances",
+                "Color visible 2 / 2",
+                "Hidden 0  distance 0  frustum 0",
+                "Camera distance 23.3..23.7",
+                "Draw limit 60.0 | LOD by distance",
+                "LOD0 mesh: 0 | next >= 9.0 units",
+                "LOD1 mesh: 0 | next >= 17.0 units",
+                "LOD2 mesh: 2",
+                "Buckets may overlap during LOD fade",
+                "Color selection only; shadows counted separately"
+            ],
+            "maxDistance": 23.66431999206543,
+            "minDistance": 23.323806762695312,
+            "perLod": [
+                0,
+                0,
+                2
+            ],
+            "prepared": true,
+            "previousValid": false,
+            "screenSize": false,
+            "thresholds": [
+                9,
+                17
+            ],
+            "total": 2,
+            "valid": true
+        }
+    ],
+    "ok": true
+}

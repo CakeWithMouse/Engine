@@ -1,0 +1,597 @@
+{
+  "features": [
+    {
+      "actual": "Штатный CLI создал новый каталог и Project.json; exit 0.",
+      "status": "passed",
+      "feature_id": "create-nocode",
+      "evidence_paths": [
+        "evidence/create.stdout.log"
+      ],
+      "action": "EngineLauncher --create-project CalmCity",
+      "expected": "Создать проект без кода: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Штатно созданы C++ исходники и DLL; exit 0, CodeBuild.log успешен.",
+      "status": "passed",
+      "feature_id": "enable-cpp",
+      "evidence_paths": [
+        "evidence/enable.stdout.log",
+        "evidence/enable-CodeBuild.log"
+      ],
+      "action": "EngineLauncher --enable-code Project.json",
+      "expected": "Добавить C++ к проекту: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Сборка против frozen .7 прошла и активировала DLL; exit 0.",
+      "status": "passed",
+      "feature_id": "build-activate",
+      "evidence_paths": [
+        "evidence/build.stdout.log",
+        "evidence/build-CodeBuild.log"
+      ],
+      "action": "EngineLauncher --build-project после переноса r2 Source/Content",
+      "expected": "Сборка кандидата и активация DLL: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Функцию в этом пользовательском проекте не проверял; код/API или результаты других ролей не считаются доказательством.",
+      "status": "not-tested",
+      "feature_id": "hot-reload",
+      "evidence_paths": [],
+      "action": "Не выполнял в ограниченной порции роли 1",
+      "expected": "C++ Hot Reload с сохранением edit-сцены: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "GameSceneLoaded/GameStart, построен квартал и отображён импортированный объект; процесс завершился штатно.",
+      "status": "passed",
+      "feature_id": "project-game",
+      "evidence_paths": [
+        "evidence/runtime-game.stdout.log",
+        "evidence/calm-city-runtime.png"
+      ],
+      "action": "Запустил созданную Game DLL в EngineRuntime .7 --mode game --frames 30",
+      "expected": "Выбор пользовательского Game: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Все 6 штатных форм вернули конечную геометрию и разумные bounds; от 2 до 480 triangles.",
+      "status": "passed",
+      "feature_id": "scene-primitives",
+      "evidence_paths": [
+        "evidence/primitive-cube.result.json",
+        "evidence/primitive-sphere.result.json",
+        "evidence/primitive-plane.result.json",
+        "evidence/primitive-cylinder.result.json",
+        "evidence/primitive-cone.result.json",
+        "evidence/primitive-pyramid.result.json"
+      ],
+      "action": "Вызвал mesh.primitive для cube/sphere/plane/cylinder/cone/pyramid",
+      "expected": "Шесть примитивов: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Все операции status=0; ProbeB отсутствовал после delete и вернулся после undo.",
+      "status": "passed",
+      "feature_id": "scene-create-delete",
+      "evidence_paths": [
+        "evidence/SceneOps.result.json"
+      ],
+      "action": "Создал ProbeA/ProbeB, удалил ProbeB, Undo вернул",
+      "expected": "Создание/удаление/поиск объектов: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Иерархия восстановлена после Save/New/Load.",
+      "status": "passed",
+      "feature_id": "scene-hierarchy",
+      "evidence_paths": [
+        "evidence/SceneOps.result.json",
+        "evidence/SceneOpsSaved.scene.json"
+      ],
+      "action": "Связал ProbeB parent=ProbeA и затем сохранил/загрузил сцену",
+      "expected": "Родители и локальные/мировые transform: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Оба объекта приняли group move, Undo вернул исходное, Redo снова применил.",
+      "status": "passed",
+      "feature_id": "scene-transform",
+      "evidence_paths": [
+        "evidence/SceneOps.result.json"
+      ],
+      "action": "Сместил группу ProbeA/ProbeB на +2 X; Undo и Redo",
+      "expected": "Перемещение/поворот/масштаб: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Операция принята; после save и load slot 0 = Material_0, slot 1 = Material_1.",
+      "status": "passed",
+      "feature_id": "scene-properties",
+      "evidence_paths": [
+        "evidence/scene-material0.json",
+        "evidence/CalmCityImported.scene.json"
+      ],
+      "action": "Поставил /materialSlots/0 = Material_0 через project.scene property",
+      "expected": "Редактирование отражённых свойств: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Slot map вернулась; пользовательский CarMover data в той же сцене не сравнивал отдельно.",
+      "status": "partial",
+      "feature_id": "scene-codec",
+      "evidence_paths": [
+        "evidence/scene-material0.json",
+        "evidence/CalmCityImported.scene.json"
+      ],
+      "action": "Сохранил scene с projectData.materialSlots и повторно открыл",
+      "expected": "Пользовательский кодек и восстановление: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Duplicate добавил объект; Undo вернул исходный count.",
+      "status": "passed",
+      "feature_id": "scene-clone",
+      "evidence_paths": [
+        "evidence/SceneOps.result.json"
+      ],
+      "action": "Duplicate ProbeA, затем Undo",
+      "expected": "Дублирование и ремап ссылок: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Все шаги status=0; модель, position и оба material slots восстановлены.",
+      "status": "passed",
+      "feature_id": "scene-save-load",
+      "evidence_paths": [
+        "evidence/scene-material0.json",
+        "evidence/CalmCityImported.scene.json"
+      ],
+      "action": "Выполнил save → new → load отдельной CalmCityImported.scene.json",
+      "expected": "Сохранение и повторное открытие: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Save/New/Load завершились status=0 в r3 проекте.",
+      "status": "passed",
+      "feature_id": "scene-new-save-as",
+      "evidence_paths": [
+        "evidence/scene-slots.json",
+        "evidence/CalmCityImported.scene.json"
+      ],
+      "action": "Сохранил сцену под новым именем, создал новую и загрузил её обратно",
+      "expected": "Новая сцена и Save As: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "ProbeA и ProbeB смещены одной операцией, история вернула ожидаемые координаты.",
+      "status": "passed",
+      "feature_id": "scene-groups",
+      "evidence_paths": [
+        "evidence/SceneOps.result.json"
+      ],
+      "action": "Групповое выделение и move; проверил обе позиции",
+      "expected": "Группы и групповые transform: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Получено -1.5.",
+      "status": "passed",
+      "feature_id": "scene-snapping",
+      "evidence_paths": [
+        "evidence/gizmo-snap.result.json"
+      ],
+      "action": "gizmo.snap delta -1.6378729 с шагом 0.5",
+      "expected": "Привязка позиции/угла: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Выбор группы и отдельного объекта завершился status=0.",
+      "status": "passed",
+      "feature_id": "scene-select",
+      "evidence_paths": [
+        "evidence/SceneOps.result.json"
+      ],
+      "action": "Выбрал группу объектов, затем отдельный ProbeA",
+      "expected": "Picking/иерархия/рамка/фокус: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Функцию в этом пользовательском проекте не проверял; код/API или результаты других ролей не считаются доказательством.",
+      "status": "not-tested",
+      "feature_id": "scene-recovery",
+      "evidence_paths": [],
+      "action": "Не выполнял в ограниченной порции роли 1",
+      "expected": "Автовосстановление после аварии: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Машина остановилась при Pause, снова двигалась после Resume, Stop восстановил edit-позицию; exit 0.",
+      "status": "passed",
+      "feature_id": "play",
+      "evidence_paths": [
+        "evidence/game-pause.result.json"
+      ],
+      "action": "project.input Play → 2 frames → Pause → 30 frames → Resume → 30 frames → Stop",
+      "expected": "Play/Pause/Resume/Stop и копия сцены: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Отдельный runtime-процесс создал D3D11 игру, прошёл 30 кадров и штатно остановился.",
+      "status": "passed",
+      "feature_id": "external",
+      "evidence_paths": [
+        "evidence/runtime-game.stdout.log"
+      ],
+      "action": "EngineRuntime.exe --project Project.json --mode game --frames 30",
+      "expected": "Отдельный запуск: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Обычный Play переместил машину -5.60→-5.52 за 2 frames; Resume — дальше до -4.32, Pause удержал позицию.",
+      "status": "passed",
+      "feature_id": "time",
+      "evidence_paths": [
+        "evidence/game-pause.result.json",
+        "evidence/SaveGameSelfTest.log"
+      ],
+      "action": "Сравнил CarMover позиции на обычных игровых frames и в SaveGame процессе",
+      "expected": "Tick/deltaTime/масштаб времени: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "В кадре различимы квартал, машина, импортированный объект и глубина перспективы; положение камеры описано в run-notes.",
+      "status": "passed",
+      "feature_id": "camera-perspective",
+      "evidence_paths": [
+        "evidence/calm-city-runtime.png",
+        "evidence/run-notes.md"
+      ],
+      "action": "Захватил реальный игровой кадр 1000x500 с камерой Calm City",
+      "expected": "SceneCamera и перспектива: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Создан GLB /Game asset с двумя meshes и двумя непустыми slot mappings.",
+      "status": "passed",
+      "feature_id": "model-import",
+      "evidence_paths": [
+        "evidence/asset-import.json"
+      ],
+      "action": "Импортировал fixture blend-suzanne-multiple.blend штатным asset.import",
+      "expected": "Импорт OBJ/glTF/GLB/FBX: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Команда exit 0, GLB и материалы записаны в Content.",
+      "status": "passed",
+      "feature_id": "model-blend",
+      "evidence_paths": [
+        "evidence/asset-import.json",
+        "evidence/runtime-game.stdout.log"
+      ],
+      "action": "Импортировал .blend при PAINENGINE_BLENDER=Blender 5.2",
+      "expected": "Конверсия BLEND при наличии Blender: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Текстура 64x64 загружена; рисунок UV на отдельном крупном render кадре не подтверждён.",
+      "status": "partial",
+      "feature_id": "texture-import",
+      "evidence_paths": [
+        "evidence/runtime-game.stdout.log",
+        "evidence/uv-closeup.png"
+      ],
+      "action": "Импортировал texture-bearing BLEND и запустил runtime",
+      "expected": "Импорт и назначение текстуры: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Функцию в этом пользовательском проекте не проверял; код/API или результаты других ролей не считаются доказательством.",
+      "status": "not-tested",
+      "feature_id": "asset-reimport",
+      "evidence_paths": [],
+      "action": "Не выполнял в ограниченной порции роли 1",
+      "expected": "Переимпорт и обновление ресурсов: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Runtime разрешил /Game/...glb и загрузил текстуру; абсолютный исходный BLEND не нужен во время игры.",
+      "status": "passed",
+      "feature_id": "asset-paths",
+      "evidence_paths": [
+        "evidence/runtime-game.stdout.log",
+        "evidence/asset-import.json"
+      ],
+      "action": "Запустил игру из свежего CLI-проекта с /Game модели/материалов",
+      "expected": "Переносимые /Game ссылки: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Диагностический кадр показывает 8/8 видимых инстансов, в панели Draws 81, instances 105.",
+      "status": "passed",
+      "feature_id": "instances",
+      "evidence_paths": [
+        "evidence/calm-city-runtime.png",
+        "evidence/LodPanel.log"
+      ],
+      "action": "Наблюдал runtime LOD row на кадре игры",
+      "expected": "Инстансинг: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Панель отображала LOD mesh counts, но переход LOD по дистанции в игре не сравнивал.",
+      "status": "partial",
+      "feature_id": "lod",
+      "evidence_paths": [
+        "evidence/calm-city-runtime.png",
+        "evidence/LodPanel.log",
+        "evidence/forward-640.result.json"
+      ],
+      "action": "Снял overlay кадр и 3 режима render diagnostics на разных размерах",
+      "expected": "LOD/culling/impostor: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Функцию в этом пользовательском проекте не проверял; код/API или результаты других ролей не считаются доказательством.",
+      "status": "not-tested",
+      "feature_id": "mesh-tools",
+      "evidence_paths": [],
+      "action": "Не выполнял в ограниченной порции роли 1",
+      "expected": "Проверка мешей и упрощение CPU LOD: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Slot 0 Material_0, slot 1 Material_1; в D3D кадре видны циановые и magenta участки модели.",
+      "status": "passed",
+      "feature_id": "material-assign",
+      "evidence_paths": [
+        "evidence/scene-material0.json",
+        "evidence/calm-city-runtime.png"
+      ],
+      "action": "Назначил разные .mat компонентам submesh через штатную очередь",
+      "expected": "Назначение/снятие .mat: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Изменение числовых параметров материала отдельно не проверял.",
+      "status": "not-tested",
+      "feature_id": "material-params",
+      "evidence_paths": [
+        "evidence/material-graph.result.json"
+      ],
+      "action": "Назначал слоты и проверял граф; параметры Tint не редактировал в этом продолжении",
+      "expected": "Параметры/текстуры материала: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "nativePreviewWindow=true; валидная граф-операция и возврат к baseline прошли.",
+      "status": "passed",
+      "feature_id": "material-editor",
+      "evidence_paths": [
+        "evidence/material-graph.result.json",
+        "evidence/material-graph.png",
+        "evidence/extended-probes.md"
+      ],
+      "action": "Запустил настоящий .7 material.graph Qt window, сохранил, применил preset, undo/redo и revert",
+      "expected": "Редактор HLSL/preview/сохранение/откат: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Функцию в этом пользовательском проекте не проверял; код/API или результаты других ролей не считаются доказательством.",
+      "status": "not-tested",
+      "feature_id": "material-errors",
+      "evidence_paths": [],
+      "action": "Не выполнял в ограниченной порции роли 1",
+      "expected": "Ошибка шейдера/fallback/восстановление: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Функцию в этом пользовательском проекте не проверял; код/API или результаты других ролей не считаются доказательством.",
+      "status": "not-tested",
+      "feature_id": "material-blends",
+      "evidence_paths": [],
+      "action": "Не выполнял в ограниченной порции роли 1",
+      "expected": "Прозрачность/masked/two-sided: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Функцию в этом пользовательском проекте не проверял; код/API или результаты других ролей не считаются доказательством.",
+      "status": "not-tested",
+      "feature_id": "light-point",
+      "evidence_paths": [],
+      "action": "Не выполнял в ограниченной порции роли 1",
+      "expected": "Точечный свет/радиус/интенсивность: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Сцена отрисовалась; направление/интенсивность отдельно не менял и не A/B сравнивал.",
+      "status": "partial",
+      "feature_id": "light-sun",
+      "evidence_paths": [
+        "evidence/calm-city-runtime.png"
+      ],
+      "action": "Запустил сцену города с Game солнцем",
+      "expected": "Направленный свет: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Shadow geometry влияет на submission и pixels; общие cache/range настройки не пробовал.",
+      "status": "partial",
+      "feature_id": "shadows",
+      "evidence_paths": [
+        "evidence/shadow-On.png",
+        "evidence/shadow-Off.png",
+        "evidence/extended-probes.md"
+      ],
+      "action": "Сравнил один и тот же импортированный материал с включённым и выключенным castShadows",
+      "expected": "Тени/дальность/cache: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Функцию в этом пользовательском проекте не проверял; код/API или результаты других ролей не считаются доказательством.",
+      "status": "not-tested",
+      "feature_id": "sky",
+      "evidence_paths": [],
+      "action": "Не выполнял в ограниченной порции роли 1",
+      "expected": "Небо/cubemap/отражения: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Функцию в этом пользовательском проекте не проверял; код/API или результаты других ролей не считаются доказательством.",
+      "status": "not-tested",
+      "feature_id": "particles",
+      "evidence_paths": [],
+      "action": "Не выполнял в ограниченной порции роли 1",
+      "expected": "Искры/дым и пауза: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Функцию в этом пользовательском проекте не проверял; код/API или результаты других ролей не считаются доказательством.",
+      "status": "not-tested",
+      "feature_id": "particle-collision",
+      "evidence_paths": [],
+      "action": "Не выполнял в ограниченной порции роли 1",
+      "expected": "GPU particles depth collision/sorting: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Game вернул те же значения.",
+      "status": "passed",
+      "feature_id": "game-settings",
+      "evidence_paths": [
+        "evidence/game-settings.result.json"
+      ],
+      "action": "Поставил GameSettings rendering=Forward, vsync=false, antialiasing=0",
+      "expected": "GameSettings VSync/render/AA: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Все режимы подготовили/отрисовали 2 объекта; Deferred показывал дополнительные draw/index submission. Визуальное сравнение материала/света в полноценной игровой сцене не проводил.",
+      "status": "partial",
+      "feature_id": "render-modes",
+      "evidence_paths": [
+        "evidence/forward-640.result.json",
+        "evidence/deferred-800.result.json",
+        "evidence/custom-1000.result.json",
+        "evidence/forward-640.png",
+        "evidence/deferred-800.png",
+        "evidence/custom-1000.png"
+      ],
+      "action": "Сделал D3D render.diagnostics в Forward/Deferred/Custom",
+      "expected": "Forward/Deferred/G-buffer: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Все размеры вернули завершённый кадр; размер окна того же процесса через UI не менял.",
+      "status": "partial",
+      "feature_id": "render-resize",
+      "evidence_paths": [
+        "evidence/forward-640.result.json",
+        "evidence/deferred-800.result.json",
+        "evidence/custom-1000.result.json"
+      ],
+      "action": "Создал D3D viewport commandlet в 640x480, 800x600 и 1000x500",
+      "expected": "Изменение размера viewport: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Функцию в этом пользовательском проекте не проверял; код/API или результаты других ролей не считаются доказательством.",
+      "status": "not-tested",
+      "feature_id": "compatibility",
+      "evidence_paths": [],
+      "action": "Не выполнял в ограниченной порции роли 1",
+      "expected": "Закрепление версии/обновление копии/старый ABI: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Функцию в этом пользовательском проекте не проверял; код/API или результаты других ролей не считаются доказательством.",
+      "status": "not-tested",
+      "feature_id": "render-host",
+      "evidence_paths": [],
+      "action": "Не выполнял в ограниченной порции роли 1",
+      "expected": "Публичные D3D/render hooks пользовательского компонента: Повторить реальный пользовательский сценарий и измерить эффект"
+    },
+    {
+      "actual": "Slot содержит 19 объектов, CarMover, модель и materialSlots; маршрутная координата восстановлена.",
+      "status": "passed",
+      "feature_id": "savegame-scene",
+      "evidence_paths": [
+        "evidence/manual-1.save.json",
+        "evidence/SaveGameSelfTest.log"
+      ],
+      "action": "Сохранил и загрузил SaveGame с полной сценой Calm City",
+      "expected": "SaveGame сцена/иерархия/базовые классы: Штатный API/редактор; сравнить сохраненное состояние или кадр до/после"
+    },
+    {
+      "actual": "Новый процесс восстановил car x=5.6 и продолжил маршрут до 5.35.",
+      "status": "passed",
+      "feature_id": "savegame-restart",
+      "evidence_paths": [
+        "evidence/SaveGameSelfTest.log",
+        "evidence/save-load-new-process.png"
+      ],
+      "action": "Сохранил в одном EngineRuntime процессе, загрузил во втором",
+      "expected": "SaveGame отдельный процесс/ошибки файла: Штатный API/редактор; сравнить сохраненное состояние или кадр до/после"
+    },
+    {
+      "actual": "Кадр и лог показывают Frame 1, 8/8 visible, LOD0/LOD1 mesh counts.",
+      "status": "passed",
+      "feature_id": "lod-panel",
+      "evidence_paths": [
+        "evidence/calm-city-runtime.png",
+        "evidence/LodPanel.log"
+      ],
+      "action": "Сделал настоящий D3D кадр с LOD panel",
+      "expected": "Панель LOD/причины отсечения/resize: Штатный API/редактор; сравнить сохраненное состояние или кадр до/после"
+    },
+    {
+      "actual": "Сохранённый граф загружен; undo/redo и возврат к сохранённой baseline подтверждены.",
+      "status": "passed",
+      "feature_id": "material-graph",
+      "evidence_paths": [
+        "evidence/material-graph.result.json",
+        "evidence/WarmStone.graph.json",
+        "evidence/material-graph.png"
+      ],
+      "action": "Проверил graph enable/save/preset/apply/undo/redo/revert на изолированной копии материала",
+      "expected": "Граф материалов/Undo/Redo/clipboard: Штатный API/редактор; сравнить сохраненное состояние или кадр до/после"
+    },
+    {
+      "actual": "Первый отказ сообщил access denied и оставил dirty backup; после unlock состояние удалось откатить.",
+      "status": "passed",
+      "feature_id": "material-graph-write-failure",
+      "evidence_paths": [
+        "evidence/material-graph.result.json",
+        "evidence/material-graph.stdout.log"
+      ],
+      "action": "Удерживал graph sidecar read-only при попытке Revert, затем повторил Revert",
+      "expected": "Граф материалов отказ записи/повторный откат: Штатный API/редактор; сравнить сохраненное состояние или кадр до/после"
+    },
+    {
+      "actual": "Импорт вернул два mesh, slot 0 texture material и slot 1 magenta; кадр показывает разные submesh цвета.",
+      "status": "passed",
+      "feature_id": "material-slots",
+      "evidence_paths": [
+        "evidence/asset-import.json",
+        "evidence/calm-city-runtime.png"
+      ],
+      "action": "Импортировал multi-material BLEND; разместил и отрисовал модель в игровом квартале",
+      "expected": "Материалы по submesh: импорт и GPU: Отдельный пользовательский проект; реальные пиксели и сохранение"
+    },
+    {
+      "actual": "Все операции status=0; повторная загрузка вернула разные назначения двух слотов.",
+      "status": "passed",
+      "feature_id": "material-slot-edit",
+      "evidence_paths": [
+        "evidence/scene-slots.json",
+        "evidence/scene-material0.json"
+      ],
+      "action": "Заменил слот 0, прошёл undo/redo, затем назначил Material_0 и сохранил сцену",
+      "expected": "Назначение слотов: SDK, инспектор, Undo/Redo: Отдельный пользовательский проект; реальные пиксели и сохранение"
+    },
+    {
+      "actual": "Scene JSON и SaveGame JSON содержат два materialSlots, кадр нового процесса показывает раздельные цвета; перенос проекта в другую папку не проверял.",
+      "status": "partial",
+      "feature_id": "material-slot-persist",
+      "evidence_paths": [
+        "evidence/CalmCityImported.scene.json",
+        "evidence/manual-1.save.json",
+        "evidence/save-load-new-process.png"
+      ],
+      "action": "Сохранил/перезагрузил сцену и SaveGame, затем загрузил игровой слот в другом процессе",
+      "expected": "Слоты: сцена, SaveGame, перенос проекта: Отдельный пользовательский проект; реальные пиксели и сохранение"
+    },
+    {
+      "actual": "35 пикселей в области под моделью меняются при отключении castShadows; draw-index count 83472→65760, обе сцены render exit 0.",
+      "status": "passed",
+      "feature_id": "imported-shadows",
+      "evidence_paths": [
+        "evidence/shadow-On.png",
+        "evidence/shadow-Off.png",
+        "evidence/extended-probes.md"
+      ],
+      "action": "Выполнил imported submesh castShadows A/B на одинаковой сцене",
+      "expected": "Тени импортированных моделей и анимации: Отдельный пользовательский проект; реальные пиксели и сохранение"
+    },
+    {
+      "actual": "Модель увеличена и изображена, но визуальный рисунок текстуры читается неуверенно из-за материала/ракурса; UV correctness не утверждаю.",
+      "status": "partial",
+      "feature_id": "imported-uv",
+      "evidence_paths": [
+        "evidence/uv-closeup.png",
+        "evidence/runtime-game.stdout.log"
+      ],
+      "action": "Снял крупнее объект, использующий imported BaseColor texture и UV",
+      "expected": "UV: BaseMap и texture объекта: Отдельный пользовательский проект; реальные пиксели и сохранение"
+    }
+  ],
+  "persona": "calm-city",
+  "release": "2026.11.05.7",
+  "final8_retest": {
+    "evidence": "evidence/final8/",
+    "limits": "No new isolated material pixel assertion; does not upgrade partial slot-persist",
+    "by": "coordinator after persona1 completion",
+    "standalone_save_load": "passed, two processes, x=5.6 restored then 5.35",
+    "build": "passed",
+    "upgrade": "passed",
+    "version": "2026.11.05.8"
+  }
+}

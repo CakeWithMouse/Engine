@@ -1,0 +1,38 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\tired-bomber\\Final8Bomber\\Project.json",
+  "steps": [
+    {
+      "target": "Ground",
+      "action": "select"
+    },
+    {
+      "action": "move",
+      "target": "Ground",
+      "delta": [
+        0.5,
+        0,
+        0
+      ]
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\tired-bomber\\ExtraFinal8\\undo-roundtrip.scene.json",
+      "action": "save"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\tired-bomber\\ExtraFinal8\\undo-roundtrip.scene.json",
+      "action": "load"
+    }
+  ]
+}

@@ -1,0 +1,662 @@
+{
+  "persona": "tired-bomber",
+  "version": "PainEngine .7 broad round + .8 targeted regression and export",
+  "runtime": "Engine/build/playtests/20261105-r3/Runtime",
+  "project": "Engine/build/playtests/20261105-r3/tired-bomber/BomberProject/Project.json",
+  "source_archive": "Agent/Playtests/2026-11-05-2026.11.05.7-r3/tired-bomber/tired-bomber-source-r3.zip",
+  "usage": {
+    "start_percent": 41,
+    "latest_percent": 43,
+    "credits_reset_or_purchased": false,
+    "note": "Shared rounded account counter; parent owns final usage accounting"
+  },
+  "evidence": [
+    {
+      "feature_id": "material-slots",
+      "status": "passed",
+      "expected": "Two source-material IDs render their own material on submeshes.",
+      "actual": "Importer returned 2 meshes and source IDs 0 and 1; real game frame showed split magenta/blue Suzanne. Runtime enumerated the map.",
+      "evidence_paths": [
+        "evidence/game-shadow.stdout.txt",
+        "evidence/frame-uv-shadow-control.png"
+      ],
+      "action": "Imported the real multi-material Blender Suzanne fixture through frozen .7 asset.import, then loaded it in the standalone gameplay project."
+    },
+    {
+      "feature_id": "material-slot-edit",
+      "status": "passed",
+      "expected": "Change one source slot, reject invalid ID, and clear common override to recover per-slot rendering.",
+      "actual": "changed=1, unknownIdRejected=1, overrideSet=1, overrideCleared=1, slotRestored=1; project.scene steps all status 0 and reported preserved slot map.",
+      "evidence_paths": [
+        "evidence/game-shadow.stdout.txt",
+        "evidence/slot-scene-roundtrip.json"
+      ],
+      "action": "Called GetMaterialSlots/SetMaterialSlot with actual source IDs, rejected uint32 max, set/cleared whole-model material; project.scene set slot 1 to a different .mat."
+    },
+    {
+      "feature_id": "material-slot-persist",
+      "status": "passed",
+      "expected": "Per-source material assignments survive scene reopen and SaveGame.",
+      "actual": ".7 scene save/reopen preserved slot map; .7 SaveGame did not assert slot restore. On final8, rebuilt upgraded project and saved a real hit round (frame 145, hits=1), exited; a separate Runtime process loaded round-1 and logged slots=2 with source IDs 0 and 1, variant path on ID 1, loaded elapsed=2.4 hits=1 and exited 0. Final8 project.scene save/new/load retained projectData.materialSlots for source ID 1. Narrow final8 test closes the .7 SaveGame restore gap.",
+      "evidence_paths": [
+        "evidence/slot-scene-roundtrip.json",
+        "evidence/final8-save-run.stdout.txt",
+        "evidence/final8-load-run.stdout.txt",
+        "evidence/final8-scene-roundtrip.json",
+        "evidence/final8-hit.png"
+      ],
+      "action": "After coordinator provided final8 frozen Runtime, upgraded the existing CLI project to a separate Final8Bomber copy and rebuilt it; exercised hit+SaveGame in one process, loaded in a second process with slot logging, plus project.scene save/new/load."
+    },
+    {
+      "feature_id": "imported-shadows",
+      "status": "passed",
+      "expected": "A masked/translucent material clips its silhouette; toggling castShadows changes its ground shadow.",
+      "actual": "Masked alpha 0 clipped the magenta submesh; opaque/castShadows true showed the model shadow, and false removed it. Real D3D BMP comparisons.",
+      "evidence_paths": [
+        "evidence/masked-transparent-shadow-on.png",
+        "evidence/opaque-shadow-on.png",
+        "evidence/opaque-shadow-off.png",
+        "evidence/translucent-no-shadow.png"
+      ],
+      "action": "Captured paused standalone frames with identical scene/camera and changed only material 1 blend/castShadows."
+    },
+    {
+      "feature_id": "imported-uv",
+      "status": "passed",
+      "expected": "Visible distinct texture regions follow imported UVs.",
+      "actual": "The simple control showed two large yellow/blue texture regions on its face in the opaque comparison frame.",
+      "evidence_paths": [
+        "evidence/opaque-shadow-on.png"
+      ],
+      "action": "Imported Blender four-color UV fixture, rotated its plane toward the orthographic camera, assigned the imported BaseMap, then captured standalone D3D frame."
+    },
+    {
+      "feature_id": "trace-world",
+      "status": "passed",
+      "expected": "Trace reaches a target and increments gameplay hit count.",
+      "actual": "HIT unit id=7 t=1.95s trace=Hit; HUD hit count advanced to 1 and hit frame dump was captured.",
+      "evidence_paths": [
+        "evidence/game-shadow.stdout.txt",
+        "evidence/game-hit-imported-target.png"
+      ],
+      "action": "Ran the Tired Bomber standalone game; a moving bomb issued an exact downward scene ray against the imported target."
+    },
+    {
+      "feature_id": "trace-filter",
+      "status": "passed",
+      "expected": "Channels select separate world and unit targets.",
+      "actual": "channel=1 -> ground; channel=2 -> unit.",
+      "evidence_paths": [
+        "evidence/game-shadow.stdout.txt"
+      ],
+      "action": "At startup traced same unit with channels 1 and 2."
+    },
+    {
+      "feature_id": "camera-orthographic",
+      "status": "passed",
+      "expected": "Orthographic framing and view-plane setup produce a stable gameplay view and changed LOD only on zoom.",
+      "actual": "Actual game frames at Y=24 and Y=8 were captured; completed frame logs retained LOD1 for the screen-height probe.",
+      "evidence_paths": [
+        "evidence/lod-camera-24.png",
+        "evidence/lod-camera-8.png",
+        "evidence/game-shadow.stdout.txt"
+      ],
+      "action": "Standalone camera used orthographic=true, viewPlane=2, orthoHeight=24; game moved camera Y from 24 to 8 while frame diagnostics reported screen-height LOD."
+    },
+    {
+      "feature_id": "lod",
+      "status": "passed",
+      "expected": "Per-component LOD counts and culling respond to camera and draw distance.",
+      "actual": "Completed-frame logs listed both components, camera ranges, perLOD buckets, hidden/frustum counts; screenshot panel showed LOD1 selection.",
+      "evidence_paths": [
+        "evidence/lod-camera-24.png",
+        "evidence/lod-camera-8.png",
+        "evidence/game-shadow.stdout.txt"
+      ],
+      "action": "Observed real InstancedMeshComponent screen-height and distance LOD in standalone frames."
+    },
+    {
+      "feature_id": "lod-panel",
+      "status": "passed",
+      "expected": "Panel identifies target, LOD thresholds and culling reasons.",
+      "actual": "Panel displayed target index, LOD0/1/2 thresholds and CPU submission counters; completed logs included hidden/frustum and perLOD counts.",
+      "evidence_paths": [
+        "evidence/lod-camera-24.png",
+        "evidence/lod-camera-8.png"
+      ],
+      "action": "Captured real runtime LOD panel and changed camera distance/zoom during play."
+    },
+    {
+      "feature_id": "completed-frame",
+      "status": "passed",
+      "expected": "Previous completed frame exposes valid counters and LOD component detail.",
+      "actual": "valid=1 at indices 59/109/149 with draw, instance, visible, culled values and two LOD records.",
+      "evidence_paths": [
+        "evidence/game-shadow.stdout.txt"
+      ],
+      "action": "Read GetCompletedFrameStats in ProjectGame::PreUpdate during actual standalone frames."
+    },
+    {
+      "feature_id": "diagnostics",
+      "status": "passed",
+      "expected": "Counters advance and a BMP can be written from a game frame.",
+      "actual": "Frame indices advanced 59→109→149; draw calls 40→46→41; runtime wrote 1000x500 frame and hit BMPs.",
+      "evidence_paths": [
+        "evidence/game-shadow.stdout.txt",
+        "evidence/frame-uv-shadow-control.png"
+      ],
+      "action": "Collected completed-frame counters and real FrameDump output during gameplay."
+    },
+    {
+      "feature_id": "instances",
+      "status": "passed",
+      "expected": "Multiple instances submit/render, with LOD buckets.",
+      "actual": "Frame counters reported instances=71/87 and panel showed marker group, LOD thresholds and selection.",
+      "evidence_paths": [
+        "evidence/frame-uv-shadow-control.png",
+        "evidence/game-shadow.stdout.txt"
+      ],
+      "action": "Viewed the gameplay marker InstancedMesh and renderer panel in standalone."
+    },
+    {
+      "feature_id": "mesh-tools",
+      "status": "passed",
+      "expected": "Validation and simplifier return usable mesh and lower triangle count.",
+      "actual": "Sphere triangles 224→130; simplification error 0; configured mesh valid. This is a small in-game API probe.",
+      "evidence_paths": [
+        "evidence/game-shadow.stdout.txt"
+      ],
+      "action": "Validated procedural cube and simplified a dense sphere inside the real project initialization."
+    },
+    {
+      "feature_id": "particles",
+      "status": "passed",
+      "expected": "Hit produces a visible timed particle burst.",
+      "actual": "HIT event created 256 GPU spark burst; hit BMP contains bright burst on the floor.",
+      "evidence_paths": [
+        "evidence/game-hit-imported-target.png",
+        "evidence/game-shadow.stdout.txt"
+      ],
+      "action": "Let the real bomb hit spawn GPU sparks and captured the hit frame."
+    },
+    {
+      "feature_id": "hud-elements",
+      "status": "passed",
+      "expected": "UI label displays hit/miss counts.",
+      "actual": "HUD showed hits=0 then hits=1 after real trace hit.",
+      "evidence_paths": [
+        "evidence/frame-uv-shadow-control.png",
+        "evidence/game-hit-imported-target.png"
+      ],
+      "action": "Observed HUD label in the real game while score changed."
+    },
+    {
+      "feature_id": "savegame-derived",
+      "status": "passed",
+      "expected": "Derived Game fields and references resume from SaveGame.",
+      "actual": "Second process restored elapsed=2.4, hits=1, units=5, active sparks reference/timer and paused simulation.",
+      "evidence_paths": [
+        "evidence/game-shadow.stdout.txt",
+        "evidence/game-load.stdout.txt"
+      ],
+      "action": "Saved custom ProjectGame fields after a hit in one standalone process and loaded slot in a new process."
+    },
+    {
+      "feature_id": "subsystem",
+      "status": "passed",
+      "expected": "Subsystem initializes, gets scene-ready, ticks, remains accessible and closes.",
+      "actual": "initialized, ready Main, GetSubsystem available, periodic Tick alive after >5s, closing Main; exit 0.",
+      "evidence_paths": [
+        "evidence/subsystem-long-run.stdout.txt"
+      ],
+      "action": "Ran standalone for 360 frames with BomberSessionDiagnostics and observed its full lifecycle."
+    },
+    {
+      "feature_id": "class-wizard",
+      "action": "Ran the frozen SDK ProjectTools AddClass action to generate R3WizardProbe, built it, then created and selected it through project.scene.",
+      "expected": "Create a registered game component from the editor wizard.",
+      "actual": "Generator created the component source; rebuild registered it and the editor API instantiated type R3WizardProbe. The actual desktop wizard UI was not driven.",
+      "status": "partial",
+      "evidence_paths": [
+        "evidence/class-generator.log",
+        "evidence/class-wizard-generator.result.json"
+      ]
+    },
+    {
+      "feature_id": "failed-build-rollback",
+      "action": "Inserted an intentional #error into R3WizardProbe.cpp and used the official launcher build, checked the active module SHA256, then launched the prior DLL.",
+      "expected": "A failed candidate build preserves the old module and it remains runnable.",
+      "actual": "Build exited 1 with C1189; active Game.dll SHA256 was unchanged, old DLL launched with exit 0, source was restored and a subsequent build succeeded.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/rollback-failed-build.stdout.txt",
+        "evidence/rollback-failed-CodeBuild.log",
+        "evidence/rollback-before-module.txt",
+        "evidence/rollback-after-module.txt",
+        "evidence/rollback-old-module-run.stdout.txt"
+      ]
+    },
+    {
+      "feature_id": "scene-startup",
+      "action": "Changed startupScene to a separate Alternate.scene.json, launched standalone Runtime, then restored Project.json.",
+      "expected": "The selected alternate scene becomes the initial gameplay scene.",
+      "actual": "Runtime exit 0 and the game subsystem logged scene ready: Alternate Start.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/startup-alternate.stdout.txt"
+      ]
+    },
+    {
+      "feature_id": "scene-select",
+      "action": "Selected the imported target, UV control, multi-selected both and selected the sun through project.scene.",
+      "expected": "Pick objects and manage single/group scene selection in the viewport.",
+      "actual": "Editor scene API returned the expected component IDs for every selection; desktop viewport picking/focus remains unverified.",
+      "status": "partial",
+      "evidence_paths": [
+        "evidence/scene-select.result.json",
+        "evidence/scene-select.log"
+      ]
+    },
+    {
+      "feature_id": "session",
+      "action": "Ran session.lifecycle with two scenes and also Play/Stop/Play/Stop in the actual Tired Bomber editor host.",
+      "expected": "Subsystem survives scene changes in one session and sees lifecycle callbacks.",
+      "actual": "Generic session API reported ready=2, closing=2, ticks=10; custom subsystem got fresh initialize/ready/closing per Play session. I did not compare a custom subsystem field across two scenes.",
+      "status": "partial",
+      "evidence_paths": [
+        "evidence/session-lifecycle.result.json",
+        "evidence/input-session-focus.log"
+      ]
+    },
+    {
+      "feature_id": "input",
+      "action": "Sent focus then B, W, pause/resume and stop events through project.input.",
+      "expected": "Actions, bindings and subscriptions deliver game input and drive an effect.",
+      "actual": "B callback fired; W moved the player from z=5 to z=1.4000025 in 45 frames; pause/resume/stop and a second Play session worked.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/input-session-focus.log",
+        "evidence/character-move.result.json",
+        "evidence/character-move.log"
+      ]
+    },
+    {
+      "feature_id": "character",
+      "action": "Moved the player-controlled Gameplay.Character using W through project.input.",
+      "expected": "Player character moves from its authored position in response to input.",
+      "actual": "Position changed z=5 to z=1.4000025; input release stopped movement.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/character-move.result.json",
+        "evidence/character-move.log"
+      ]
+    },
+    {
+      "feature_id": "controller",
+      "action": "Used project.input W movement and a standalone disabled CharacterController probe.",
+      "expected": "CharacterController moves the Character and disabling it suppresses movement/look input.",
+      "actual": "Enabled controller moved z=5→1.4000025; the disabled probe held x=-10,z=5 under W+look events.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/character-move.result.json",
+        "evidence/controller-disabled.stdout.txt"
+      ]
+    },
+    {
+      "feature_id": "trace-debug",
+      "action": "Fired DebugDrawTrace at an active bomb and inspected the real runtime frame.",
+      "expected": "A hit ray/normal is visible and reported with useful line statistics.",
+      "actual": "Ray returned Hit at distance 6.58 with 23 debug lines; the ray itself was difficult to isolate visually in the perspective BMP.",
+      "status": "partial",
+      "evidence_paths": [
+        "evidence/trace-debug-runtime.stdout.txt",
+        "evidence/trace-debug-active-bomb.png"
+      ]
+    },
+    {
+      "feature_id": "particle-collision",
+      "action": "Ran identical real game hits at 1.95s with GPU particle depth collision off and sorting off.",
+      "expected": "Collision/sorting toggles alter the rendered particle burst.",
+      "actual": "Both configured variants and same hit time were confirmed; burst images differ visually, but per-particle GPU positions are not publicly readable for exact assertions.",
+      "status": "partial",
+      "evidence_paths": [
+        "evidence/particles-no-collision.stdout.txt",
+        "evidence/particles-no-sort.stdout.txt",
+        "evidence/particles-no-collision.png",
+        "evidence/particles-no-sort.png"
+      ]
+    },
+    {
+      "feature_id": "hud-layout",
+      "action": "Rendered the same game at 640×480 and 320×240 through OnWindowResized.",
+      "expected": "HUD, diagnostics, names and counters remain legible after resize.",
+      "actual": "Counters and target label fit at 1000×500; at 640×480 the LOD panel overlaps the game HUD, and at 320×240 the panel abbreviates/clips text and fully covers the HUD. Cyrillic was not exercised.",
+      "status": "partial",
+      "evidence_paths": [
+        "evidence/resize-runtime.stdout.txt",
+        "evidence/resize-640x480.png",
+        "evidence/resize-320x240.png"
+      ]
+    },
+    {
+      "feature_id": "host-services",
+      "action": "Used EngineModuleVfs to resolve /Game for frames, SaveSlots and imported assets in standalone and editor-host sessions.",
+      "expected": "Host lifecycle/VFS/active-session services provide project paths and callbacks.",
+      "actual": "Game lifecycle was observed and project writes worked, but Runtime logged local VFS/no host service; BaseEngine service injection was not exercised.",
+      "status": "partial",
+      "evidence_paths": [
+        "evidence/game-shadow.stdout.txt",
+        "evidence/input-session-focus.log"
+      ]
+    },
+    {
+      "feature_id": "material-assign",
+      "action": "Assigned and cleared the shared material override through project.scene, retaining the two imported per-source slots.",
+      "expected": "Assign/remove .mat on a model and return to original per-slot material behavior.",
+      "actual": "Override set and empty-path clear both returned status 0; slot map remained unchanged.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/slot-scene-roundtrip.json",
+        "evidence/game-shadow.stdout.txt"
+      ]
+    },
+    {
+      "feature_id": "material-params",
+      "action": "Changed imported Tint values and used the material graph editor preset, apply, undo/redo and revert actions.",
+      "expected": "Material parameters change and render in the preview/game.",
+      "actual": "Tint alpha/color changes affected the visible submesh; graph preset produced new BaseColor/Specular HLSL and was reverted to saved values.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/material-graph.result.json",
+        "evidence/opaque-shadow-on.png",
+        "evidence/masked-transparent-shadow-on.png"
+      ]
+    },
+    {
+      "feature_id": "material-editor",
+      "action": "Opened the real Material Graph Editor Qt window through the hidden commandlet and saved/reverted a graph.",
+      "expected": "Edit HLSL in material editor, preview, save, and revert.",
+      "actual": "nativePreviewWindow=true; graph preset/apply/undo/redo/revert worked and returned HLSL, but the text HLSL editor UI path was not tested.",
+      "status": "partial",
+      "evidence_paths": [
+        "evidence/material-graph.result.json",
+        "evidence/material-graph-editor.png",
+        "evidence/material-graph.log"
+      ]
+    },
+    {
+      "feature_id": "material-errors",
+      "action": "Assigned a deliberately invalid HLSL material to one Suzanne source slot and ran the standalone game.",
+      "expected": "Bad shader errors are clear and only the affected submesh uses the error fallback.",
+      "actual": "Runtime logged HLSL X3000 plus undeclared param/texture warnings; checkerboard fallback appeared only on the magenta submesh; process still exited 0.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/material-error.stdout.txt",
+        "evidence/material-error-checker.png",
+        "evidence/material-error-scene.result.json"
+      ]
+    },
+    {
+      "feature_id": "material-blends",
+      "action": "Compared translucent, masked and opaque submesh materials with twoSided set in the actual .mat assets.",
+      "expected": "Blend/mask/two-sided settings affect the rendered submesh.",
+      "actual": "Masked alpha clipped one half; opaque and translucent captures differed. I did not make a separate backface/cull comparison for twoSided.",
+      "status": "partial",
+      "evidence_paths": [
+        "evidence/translucent-no-shadow.png",
+        "evidence/masked-transparent-shadow-on.png",
+        "evidence/opaque-shadow-on.png"
+      ]
+    },
+    {
+      "feature_id": "light-point",
+      "action": "Captured standalone frames with the same point lights enabled and both disabled in an alternate scene.",
+      "expected": "Point light intensity affects object/ground lighting.",
+      "actual": "The enabled scene had visible brighter/warmer gradients around the target/floor; disabling both lights made ground color flatter; both runs exited 0.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/point-light-on.png",
+        "evidence/point-light-off.png",
+        "evidence/point-light-on.stdout.txt",
+        "evidence/point-light-off.stdout.txt"
+      ]
+    },
+    {
+      "feature_id": "light-sun",
+      "action": "Created the standard directional light and compared imported-model material shadow casts with castShadows on/off.",
+      "expected": "Directional light plus shadow settings give imported models visible lighting and shadows.",
+      "actual": "Real D3D capture showed a ground shadow with castShadows=true; the same model lost it when false.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/opaque-shadow-on.png",
+        "evidence/opaque-shadow-off.png"
+      ]
+    },
+    {
+      "feature_id": "sky",
+      "action": "Created Environment.Sky in a separate saved scene and launched the game with the perspective camera probe.",
+      "expected": "Sky component visibly supplies a background behind the world.",
+      "actual": "Perspective runtime image showed the gray-blue gradient behind the ground/model; no sky scene was dark navy.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/skybox-perspective-view.png",
+        "evidence/skybox.stdout.txt"
+      ]
+    },
+    {
+      "feature_id": "render-host",
+      "action": "Added a small MeshComponent subclass with Render override, called its base draw and launched actual Runtime.",
+      "expected": "Custom game renderer receives a live host D3D context.",
+      "actual": "Runtime logged Render context=ready and exited 0; the probe geometry was submitted.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/render-host.stdout.txt",
+        "evidence/render-host.stderr.txt"
+      ]
+    },
+    {
+      "feature_id": "material-graph",
+      "action": "Opened a copied imported .mat in the Material Graph editor via commandlet; used enable/save/preset/apply/undo/redo/revert.",
+      "expected": "Graph editor hosts a real preview, compiles/updates HLSL and restores saved graph.",
+      "actual": "nativePreviewWindow=true; graph/HLSL changed after preset and revert restored original graph; commandlet exit 0.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/material-graph.result.json",
+        "evidence/material-graph-editor.png",
+        "evidence/material-graph.log"
+      ]
+    },
+    {
+      "feature_id": "game-settings",
+      "action": "Set and read GameSettings in standalone project while switching Forward/Deferred/Custom.",
+      "expected": "VSync/AA/render mode persist as current session settings and select a rendering path.",
+      "actual": "Runtime logged vsync=0 aa=1 and actual rendering mode 0/1/2; three modes rendered, Deferred showed its G-buffer overlay.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/render-forward.stdout.txt",
+        "evidence/render-deferred.stdout.txt",
+        "evidence/render-custom.stdout.txt",
+        "evidence/render-forward.png",
+        "evidence/render-deferred.png",
+        "evidence/render-custom.png"
+      ]
+    },
+    {
+      "feature_id": "render-modes",
+      "action": "Ran the standalone game separately in Forward, Deferred and Custom on the same frozen .7 project.",
+      "expected": "Each renderer mode starts and renders the imported target/material slots.",
+      "actual": "All three runs exited 0; screenshots show the target/UV control and their mode-specific render result.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/render-forward.stdout.txt",
+        "evidence/render-deferred.stdout.txt",
+        "evidence/render-custom.stdout.txt",
+        "evidence/render-forward.png",
+        "evidence/render-deferred.png",
+        "evidence/render-custom.png"
+      ]
+    },
+    {
+      "feature_id": "render-resize",
+      "action": "Called the real Game::OnWindowResized hook during standalone frames, then read Display and completed-frame sizes.",
+      "expected": "New viewport sizes render at the requested dimensions without stopping frame publication.",
+      "actual": "640×480 and 320×240 frames matched Display size; restoring 1000×500 advanced frame 59.",
+      "status": "passed",
+      "evidence_paths": [
+        "evidence/resize-runtime.stdout.txt",
+        "evidence/resize-640x480.png",
+        "evidence/resize-320x240.png"
+      ]
+    },
+    {
+      "status": "passed",
+      "actual": "Frozen .7 asset.import imported the multi-material BLEND fixture to GLB with 2 meshes and the UV BLEND fixture to GLB with 1 mesh; the standalone game rendered the imported Suzanne and UV control.",
+      "action": "Used frozen asset.import commandlet against supplied real Blender fixtures, then opened resulting assets in the new project.",
+      "evidence_paths": [
+        "evidence/suzanne-blend-import.log",
+        "evidence/uv-blend-import.log",
+        "evidence/uv-import.request.json",
+        "evidence/uv-import.result.json",
+        "evidence/game-shadow.stdout.txt",
+        "evidence/game-hit-imported-target.png"
+      ],
+      "expected": "Import an actual model asset into the new project using the current importer.",
+      "feature_id": "model-import"
+    },
+    {
+      "status": "passed",
+      "actual": "Both real fixtures were converted: multi-material Suzanne produced 2 meshes and source IDs 0/1; UV plane produced 1 mesh. Blender logs report glTF export completion.",
+      "action": "Imported blend-suzanne-multiple.blend and blend-uv.blend with the frozen Runtime asset.import commandlet.",
+      "evidence_paths": [
+        "evidence/suzanne-blend-import.log",
+        "evidence/uv-blend-import.log",
+        "evidence/uv-import.result.json",
+        "evidence/game-shadow.stdout.txt"
+      ],
+      "expected": "Convert real .blend source assets through Blender importer.",
+      "feature_id": "model-blend"
+    },
+    {
+      "status": "passed",
+      "actual": "The UV BLEND import emitted BaseColor_0.png; the UV control rendered its yellow/blue texture regions in the real gameplay frame.",
+      "action": "Imported UV BLEND fixture with embedded BaseColor texture, assigned imported material, and rendered the control plane.",
+      "evidence_paths": [
+        "evidence/uv-import.result.json",
+        "evidence/uv-basecolor-imported.png",
+        "evidence/frame-uv-shadow-control.png"
+      ],
+      "expected": "Import and display a texture on a mesh.",
+      "feature_id": "texture-import"
+    },
+    {
+      "status": "passed",
+      "actual": "Fixed-camera A/B captures show opaque imported model shadow with castShadows on and no shadow when off; masked transparency removes the visible submesh/shadow, while translucent material has no cast shadow.",
+      "action": "Compared paused runtime frames with identical camera and scene while varying imported submesh material blend and castShadows.",
+      "evidence_paths": [
+        "evidence/opaque-shadow-on.png",
+        "evidence/opaque-shadow-off.png",
+        "evidence/masked-transparent-shadow-on.png",
+        "evidence/translucent-no-shadow.png"
+      ],
+      "expected": "Verify imported model shadow toggling and blend/castShadows behavior.",
+      "feature_id": "shadows"
+    },
+    {
+      "action": "Issued six frozen .8 mesh.primitive commandlets from the persona scratch with size=1 and slices=16.",
+      "evidence_paths": [
+        "evidence/final8-additional/cube.result.json",
+        "evidence/final8-additional/sphere.result.json",
+        "evidence/final8-additional/plane.result.json",
+        "evidence/final8-additional/cylinder.result.json",
+        "evidence/final8-additional/cone.result.json",
+        "evidence/final8-additional/pyramid.result.json"
+      ],
+      "feature_id": "scene-primitives",
+      "actual": "All six mesh.primitive calls exited 0 and returned ok=true with finite topology: cube 24 vertices/12 triangles, sphere 289/480, plane 4/2, cylinder 70/64, cone 66/32, pyramid 16/6.",
+      "status": "passed",
+      "expected": "Six standard primitive mesh shapes return valid geometry."
+    },
+    {
+      "action": "Ran the frozen .8 project.scene commandlet on the scratch project with a small Ground nudge, history operations, and Save/New/Load.",
+      "evidence_paths": [
+        "evidence/final8-additional/undo.request.json",
+        "evidence/final8-additional/undo.result.json",
+        "evidence/final8-additional/undo-roundtrip.scene.json"
+      ],
+      "feature_id": "scene-undo",
+      "actual": "Select/move/undo/redo/undo/save/new/load all returned status 0 with empty errors. Ground position changed on move, reverted on Undo, reapplied on Redo, reverted again and remained original after load.",
+      "status": "passed",
+      "expected": "Undo/Redo changes scene state and survives a scene save/reopen."
+    },
+    {
+      "action": "Called the frozen .8 gizmo.snap and gizmo.center commandlets with explicit fractional deltas.",
+      "evidence_paths": [
+        "evidence/final8-additional/gizmo-snap.request.json",
+        "evidence/final8-additional/gizmo-snap.result.json",
+        "evidence/final8-additional/gizmo-center.request.json",
+        "evidence/final8-additional/gizmo-center.result.json"
+      ],
+      "feature_id": "scene-snapping",
+      "actual": "gizmo.snap returned [-1.5,0.5,2.5] for input [-1.6378729,0.26,2.41] at 0.5 step; gizmo.center with snap returned [3.6,0.4,-2.1].",
+      "status": "passed",
+      "expected": "Position deltas snap to configured increments."
+    },
+    {
+      "action": "Ran camera.screen-ray at viewport center and upper-right with orthographic=false and FOV 60.",
+      "evidence_paths": [
+        "evidence/final8-additional/camera-perspective-center.request.json",
+        "evidence/final8-additional/camera-perspective-center.result.json",
+        "evidence/final8-additional/camera-perspective-corner.request.json",
+        "evidence/final8-additional/camera-perspective-corner.result.json"
+      ],
+      "feature_id": "camera-perspective",
+      "actual": "Perspective ScreenPointToRay returned Success at center with direction [0,0,-1]; upper-right returned Success with direction [0.519,0.371,-0.770]. Both origins were on the near plane.",
+      "status": "passed",
+      "expected": "Perspective camera screen rays change direction across the viewport."
+    },
+    {
+      "action": "Bounded screen-coordinate probe covered ray construction only; a Game viewport trace API call was not made.",
+      "evidence_paths": [
+        "evidence/final8-additional/camera-perspective-center.result.json",
+        "evidence/final8-additional/camera-perspective-corner.result.json"
+      ],
+      "feature_id": "trace-screen",
+      "actual": "The .8 perspective screen-ray commandlet proved screen-to-ray geometry for center and corner points, but this persona did not call Game::RaycastScreen or RaycastCursor nor verify an integrated screen trace hit.",
+      "status": "partial",
+      "expected": "Use Game::RaycastScreen/RaycastCursor from a viewport coordinate."
+    },
+    {
+      "action": "No SDK example compilation attempt was made; do not count source inspection or analogous API use as an attempt.",
+      "evidence_paths": [
+        "evidence/final8-additional/project-build.log",
+        "evidence/final8-additional/boundaries.md"
+      ],
+      "feature_id": "sdk-examples",
+      "actual": "The official SDK ReferenceExamples.cpp was not compiled in this persona run. The successful project build covers the game source but is not evidence of SDK example compilation.",
+      "status": "not-tested",
+      "expected": "Compile API Reference SDK example snippets."
+    },
+    {
+      "action": "Ran official Engine/BuildSupport/Export-Project.ps1 against Final8Bomber and frozen final8 Runtime, then directly launched the packaged Runtime from its exported directory using the same Project.json/--mode game invocation as Start.cmd with --frames 90.",
+      "evidence_paths": [
+        "evidence/final8-additional/export.stdout.txt",
+        "evidence/final8-additional/export-ExportReport.json",
+        "evidence/final8-additional/export-Validation.log",
+        "evidence/final8-additional/export-GameSmoke.log",
+        "evidence/final8-additional/export-Start.cmd",
+        "evidence/final8-additional/package-run.stdout.txt",
+        "evidence/final8-additional/package-run.stderr.txt"
+      ],
+      "feature_id": "export",
+      "actual": "Official Export-Project.ps1 completed with exit 0 and published a new folder with Game/, Runtime/, Start.cmd, ExportReport.json, Validation.log and GameSmoke.log. Export validation passed; the package smoke ran 3 frames. Launching the exported Runtime/EngineRuntime.exe against exported Game/Project.json completed 90 frames and exited 0.",
+      "status": "passed",
+      "expected": "Export a project package and launch it outside the editor."
+    }
+  ],
+  "final8_runtime": "Engine/build/playtests/20261105-r3/final8/Runtime",
+  "final8_project": "Engine/build/playtests/20261105-r3/tired-bomber/Final8Bomber/Project.json",
+  "baselineRuntime": "Engine/build/playtests/20261105-r3/Runtime",
+  "baselineProject": "Engine/build/playtests/20261105-r3/tired-bomber/BomberProject/Project.json",
+  "finalRuntime": "Engine/build/playtests/20261105-r3/final8/Runtime",
+  "finalProject": "Engine/build/playtests/20261105-r3/tired-bomber/Final8Bomber/Project.json"
+}

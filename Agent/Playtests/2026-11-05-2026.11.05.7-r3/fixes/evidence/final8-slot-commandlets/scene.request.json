@@ -1,0 +1,59 @@
+{
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "action": "model",
+      "name": "Multi",
+      "path": "/Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb"
+    },
+    {
+      "action": "property",
+      "value": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+      "target": "Multi",
+      "path": "/materialSlots/1"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "action": "property",
+      "value": "/Game/../outside.mat",
+      "target": "Multi",
+      "path": "/materialSlots/1"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\slots-final8-evidence/Slots.scene.json",
+      "action": "save"
+    },
+    {
+      "target": "Multi",
+      "action": "duplicate"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\slots-final8-evidence/Slots.scene.json",
+      "action": "load"
+    },
+    {
+      "action": "material",
+      "target": "Multi",
+      "path": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat"
+    },
+    {
+      "action": "material",
+      "target": "Multi",
+      "path": ""
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\slots-final8\\Project.json"
+}
