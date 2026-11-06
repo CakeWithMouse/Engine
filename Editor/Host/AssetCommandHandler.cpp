@@ -10,6 +10,9 @@ bool AssetCommandHandler::CanHandle(EditorCommand::Type type) const
     {
     case EditorCommand::ImportModel:
     case EditorCommand::ImportTexture:
+    case EditorCommand::ImportAudio:
+    case EditorCommand::PlayAudio:
+    case EditorCommand::StopAudio:
     case EditorCommand::ReloadProject:
     case EditorCommand::RunTask:
         return true;
@@ -40,7 +43,9 @@ void AssetCommandHandler::Handle(const EditorCommand& cmd,
         return;
     }
 
-    if (cmd.type == EditorCommand::ImportModel || cmd.type == EditorCommand::ImportTexture)
+    if (cmd.type == EditorCommand::ImportModel ||
+        cmd.type == EditorCommand::ImportTexture ||
+        cmd.type == EditorCommand::ImportAudio)
     {
         if (!hasScene)
         {
@@ -49,15 +54,39 @@ void AssetCommandHandler::Handle(const EditorCommand& cmd,
         }
         char path[4096]{};
         char errBuf[1024]{};
+        const uint32_t kind =
+            cmd.type == EditorCommand::ImportTexture ? 1 : cmd.type == EditorCommand::ImportAudio ? 2 : 0;
         result = ctx.scene.importAsset(ctx.scene.context,
                                        cmd.path.toUtf8().constData(),
-                                       cmd.type == EditorCommand::ImportTexture ? 1 : 0,
+                                       kind,
                                        path,
                                        sizeof(path),
                                        errBuf,
                                        sizeof(errBuf));
         if (result == EngineSceneOk)
             completedCmd.path = QString::fromUtf8(path);
+        error = QString::fromUtf8(errBuf);
+        return;
+    }
+
+    if (cmd.type == EditorCommand::PlayAudio || cmd.type == EditorCommand::StopAudio)
+    {
+        if (!ctx.audio.play || !ctx.audio.stop)
+        {
+            result = EngineSceneReadOnly;
+            error = QStringLiteral("Эта версия игрового модуля не поддерживает предпрослушку аудио");
+            return;
+        }
+        if (cmd.type == EditorCommand::StopAudio)
+        {
+            result = ctx.audio.stop(ctx.audio.context);
+            return;
+        }
+        char errBuf[1024]{};
+        result = ctx.audio.play(ctx.audio.context,
+                                cmd.path.toUtf8().constData(),
+                                errBuf,
+                                sizeof(errBuf));
         error = QString::fromUtf8(errBuf);
         return;
     }
@@ -108,7 +137,7 @@ void AssetCommandHandler::Handle(const EditorCommand& cmd,
             if (result == EngineSceneOk)
             {
                 if (ctx.onReloadBindings)
-                    ctx.onReloadBindings(bindings.scene, bindings.data, bindings.selection, bindings.input);
+                    ctx.onReloadBindings(bindings.scene, bindings.data, bindings.selection, bindings.input, bindings.audio);
 
                 history.Reset();
 

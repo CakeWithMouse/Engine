@@ -67,7 +67,7 @@ struct EngineEditSessionApi
     uint32_t (ENGINE_MODULE_CALL *focusObject)(void*, uint64_t id);
     // Absolute project Content directory; configure before loading a scene with assets.
     uint32_t (ENGINE_MODULE_CALL *setContentRoot)(void*, const char*, char*, uint32_t);
-    // kind: 0 model, 1 texture. Output buffer must have at least 4096 bytes.
+    // kind: 0 model, 1 texture, 2 audio. Output buffer must have at least 4096 bytes.
     uint32_t (ENGINE_MODULE_CALL *importAsset)(void*, const char* source, uint32_t kind,
         char* virtualPath, uint32_t pathCapacity, char* error, uint32_t errorCapacity);
     uint32_t (ENGINE_MODULE_CALL *createModel)(void*, const char* virtualPath, const char* name,

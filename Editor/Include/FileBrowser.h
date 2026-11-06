@@ -38,6 +38,7 @@ private:
     QToolButton* imports_ = nullptr;
     QAction* actImportModel_ = nullptr;
     QAction* actImportTexture_ = nullptr;
+    QAction* actImportAudio_ = nullptr;
     int langSubId_ = 0;
     int themeSubId_ = 0;
     QString projectDir_;

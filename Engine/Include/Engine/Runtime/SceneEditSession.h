@@ -33,6 +33,7 @@ public:
     EngineViewportCursorApi GetViewportCursorApi() noexcept;
     EngineViewportOverlayApi GetViewportOverlayApi() noexcept;
     EnginePointLightV2Api GetPointLightV2Api() noexcept;
+    EngineAudioPreviewApi GetAudioPreviewApi() noexcept;
     SceneEditSession(const SceneEditSession&) = delete;
     SceneEditSession& operator=(const SceneEditSession&) = delete;
 private:
@@ -64,6 +65,7 @@ private:
     std::filesystem::path contentRoot_, previousGameRoot_;
     bool ownsGameMount_ = false;
     void AddAssetApi(EngineEditSessionApi& api) noexcept;
+    // Audio asset preview through the edit scene's audio engine (edit state only).
 
     // Material editing: previews are small scenes of their own (one per editor window).
     std::map<uint64_t, std::unique_ptr<Game>> previews_;

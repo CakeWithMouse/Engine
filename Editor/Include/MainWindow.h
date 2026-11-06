@@ -56,7 +56,8 @@ public:
 
     void OpenScene(const QString& path = {});
     void UpdateAsset(const QString& path, bool move, const QString& supplied = {});
-    void ImportAsset(bool texture, const QString& source = {});
+    // kind: 0 model, 1 texture, 2 audio.
+    void ImportAsset(int kind, const QString& source = {});
     void AddModel(const QString& path = {});
     void ShowDirectionalLight();
     void UseAsset(const QString& path);
@@ -170,6 +171,7 @@ private:
     QAction* actAddModel_ = nullptr;
     QAction* actImportModel_ = nullptr;
     QAction* actImportTexture_ = nullptr;
+    QAction* actImportAudio_ = nullptr;
     QAction* actReloadShaders_ = nullptr;
     QAction* actResetLayout_ = nullptr;
     QAction* actGrid_ = nullptr;

@@ -13,6 +13,7 @@ Engine/
   BuildSupport/                 настройки MSBuild, копирование контента, скрипты
   Include/Engine/               публичные заголовки
     Base/                       BaseEngine, BaseResources, BaseGameConfig
+    Sound/                      звук: AudioEngine (XAudio2 + X3DAudio), декодеры WAV/Media Foundation, потоковое воспроизведение
   Source/                       реализации ядра
   Content/Shaders/              общие шейдеры
   ThirdParty/                   GLM, stb, meshoptimizer и лицензии

@@ -5,6 +5,8 @@
     <Filter Include="Header Files" />
     <Filter Include="Source Files\Resources" />
     <Filter Include="Header Files\Resources" />
+    <Filter Include="Source Files\Sound" />
+    <Filter Include="Header Files\Sound" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Resources\VirtualFileSystem.cpp">
@@ -14,10 +16,17 @@
     <ClCompile Include="Source\Scene\SceneCommands.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Source\Scene\SceneDocument.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Source\Runtime\SceneEditSession.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="Source\Runtime\SceneEditAudio.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Source\Runtime\GameEditModule.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="Source\Resources\Paths.cpp">
       <Filter>Source Files\Resources</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Sound\AudioEngine.cpp"><Filter>Source Files\Sound</Filter></ClCompile>
+    <ClCompile Include="Source\Sound\AudioStream.cpp"><Filter>Source Files\Sound</Filter></ClCompile>
+    <ClCompile Include="Source\Sound\DecoderFactory.cpp"><Filter>Source Files\Sound</Filter></ClCompile>
+    <ClCompile Include="Source\Sound\MediaFoundationDecoder.cpp"><Filter>Source Files\Sound</Filter></ClCompile>
+    <ClCompile Include="Source\Sound\VoicePool.cpp"><Filter>Source Files\Sound</Filter></ClCompile>
+    <ClCompile Include="Source\Sound\WavDecoder.cpp"><Filter>Source Files\Sound</Filter></ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Engine\Resources\VirtualFileSystem.h">
@@ -37,5 +46,14 @@
     <ClInclude Include="Include\Engine\Resources\Paths.h">
       <Filter>Header Files\Resources</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Engine\Sound\Audio3D.h"><Filter>Header Files\Sound</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Sound\AudioEngine.h"><Filter>Header Files\Sound</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Sound\AudioStream.h"><Filter>Header Files\Sound</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Sound\AudioTypes.h"><Filter>Header Files\Sound</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Sound\DecoderFactory.h"><Filter>Header Files\Sound</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Sound\IAudioDecoder.h"><Filter>Header Files\Sound</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Sound\MediaFoundationDecoder.h"><Filter>Header Files\Sound</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Sound\VoicePool.h"><Filter>Header Files\Sound</Filter></ClInclude>
+    <ClInclude Include="Include\Engine\Sound\WavDecoder.h"><Filter>Header Files\Sound</Filter></ClInclude>
   </ItemGroup>
 </Project>

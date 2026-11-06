@@ -4,6 +4,7 @@
 #include "ViewportCommandHandler.h"
 #include "AssetCommandHandler.h"
 #include "SceneCommandHandler.h"
+#include <Engine/Runtime/EditExtensions.h>
 
 #include <atomic>
 #include <cstdint>
@@ -75,6 +76,9 @@ public:
         if (api.focus) api.focus(api.context, viewportFocused_ ? 1u : 0u);
     }
     void SetSelectionApi(const EngineSelectionApi& api) { selection_ = api; }
+    void SetAudioPreviewApi(const EngineAudioPreviewApi& api) { audio_ = api; }
+    // Доступен только если игровой модуль реализует EngineAudioPreviewExtension.
+    const EngineAudioPreviewApi* AudioApi() const { return audio_.play ? &audio_ : nullptr; }
     void InitializeRecovery();
     void SetBatchApi(const EngineSceneBatchApi& api) { batch_ = api; }
     void SetAuthoringApi(const EngineAuthoringApi& api) { authoring_ = api; }
@@ -116,6 +120,7 @@ private:
     EngineViewportInputApi viewportInput_{};
     bool viewportFocused_ = false;
     EngineViewportOverlayApi overlay_{};
+    EngineAudioPreviewApi audio_{};
     uint32_t antialiasingMode_ = 1;
 
     struct PendingIcon

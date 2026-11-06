@@ -353,13 +353,15 @@ void EditorQtHost::DrainCommands()
                 projectData_,
                 selection_,
                 viewportInput_,
+                audio_,
                 [this](const char* msg) { Log(msg); },
-                [this](const auto& s, const auto& d, const auto& sel, const auto& in) {
+                [this](const auto& s, const auto& d, const auto& sel, const auto& in, const auto& audio) {
                     recovery_.RefreshBuild();
                     SetModuleApi(s);
                     SetProjectDataApi(d);
                     SetSelectionApi(sel);
                     SetViewportInputApi(in);
+                    SetAudioPreviewApi(audio);
                 },
                 [this] { return sceneHandler_.GetSelectedObjectName(); },
                 [this](uint64_t id) { sceneHandler_.SetSelectedId(id); },

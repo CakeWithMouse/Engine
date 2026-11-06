@@ -29,6 +29,11 @@ class CharacterController;
 class SaveGame;
 class SaveArchive;
 
+namespace audio
+{
+    class AudioEngine;
+}
+
 enum class ShaderCompileVariant
 {
     Default,
@@ -226,6 +231,7 @@ public:
     UIComponent* GetProjectHud() const { return ProjectHudComponent.get(); }
     Display* GetDisplay() const { return DisplayPtr.get(); }
     InputDevice* GetInputDevice() const { return InputDevicePtr.get(); }
+    audio::AudioEngine* GetAudioEngine() const { return AudioEnginePtr.get(); }
     Input::System& GetInput() { return ActionInput; }
     CharacterController* GetCharacterController() const { return Controller.get(); }
     void SetCharacterController(std::unique_ptr<CharacterController>);
@@ -384,6 +390,7 @@ protected:
     void ApplyPendingResize();
     void UpdateFrame(float realDeltaTime);
     void UpdateSimulation(float deltaTime);
+    void UpdateAudio();
     void StartGameplayComponents();
     void PrepareRenderFrame();
     void SynchronizeSceneResources();
@@ -478,6 +485,7 @@ protected:
 
     std::unique_ptr<Display> DisplayPtr;
     std::unique_ptr<InputDevice> InputDevicePtr;
+    std::unique_ptr<audio::AudioEngine> AudioEnginePtr;
     std::unique_ptr<Player> FirstPlayer;
     Input::System ActionInput;
     std::unique_ptr<CharacterController> Controller;

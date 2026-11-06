@@ -1790,6 +1790,7 @@ void SceneHierarchyTests();
 void SceneDeferredTests();
 void SceneBatchTests();
 void AuthoringTests();
+void SoundDecoderTests();
 void PrimitiveApiTests();
 void GameSettingsTests();
 
@@ -1809,6 +1810,7 @@ int main()
         {"scene hierarchy and snapshots (no GPU)", SceneHierarchyTests},
         {"scene deferred mutations (no GPU)", SceneDeferredTests},
         {"atomic group transforms, references and deletion (no GPU)", SceneBatchTests},
+        {"wav decoder: RIFF parsing, read, seek", SoundDecoderTests},
         {"typed properties and transactional asset updates", AuthoringTests},
         {"registry ownership", RegistryOwnership}, {"registration failure ownership", RegistryFailures},
         {"transform hierarchy and cache", TransformHierarchy}, {"unregister hierarchy and instances", UnregisterHierarchyAndInstances},

@@ -57,7 +57,7 @@ void SceneEditSession::AddAssetApi(EngineEditSessionApi& api) noexcept
     api.importAsset = [](void* p, const char* source, uint32_t kind, char* path, uint32_t pathCapacity,
         char* error, uint32_t capacity) -> uint32_t {
         if (path && pathCapacity) path[0] = 0;
-        if (!path || pathCapacity < 4096 || kind > 1 || !Text(source)) return EngineSceneInvalidArgument;
+        if (!path || pathCapacity < 4096 || kind > 2 || !Text(source)) return EngineSceneInvalidArgument;
         return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
             if (s.state_ != EngineEditing) return EngineSceneReadOnly;
             return AssetCall(error, capacity, [&]() -> uint32_t {
