@@ -63,6 +63,9 @@ public:
         bool ValidateAssets = false;
         // On-screen panels in the corner of the scene; F7 toggles them at runtime.
         bool Hud = false; // Demo statistics are opt-in, like project HUDs.
+        // Warm point light over the centre of the field, and whether it casts shadows.
+        bool PointLight = true;
+        bool PointShadows = true;
         // Units and scenery use the material assets of GameContent/Materials; false draws them with
         // the old InstancedMesh shader (same look without mud), for comparisons.
         bool Materials = true;

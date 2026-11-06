@@ -14,6 +14,8 @@
 #include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/MeshPrimitives.h>
 #include <Engine/Render/ShaderCompiler.h>
+#include <Engine/Render/PointShadow.h>
+#include <Engine/Render/ShadowCascades.h>
 #include "../Source/Resources/VfsRead.h"
 #include "VfsLifecycleTests.h"
 #include <algorithm>
@@ -1673,6 +1675,246 @@ MeshLodData MakeTestSphere(int segments, float radius)
     return mesh;
 }
 
+/** A quad in the XZ plane: +u runs along +X, +v along +Z, the normal is +Y. */
+MeshLodData MakeTangentQuad(bool bMirrorU)
+{
+    const float xs[4] = {0.0f, 1.0f, 0.0f, 1.0f};
+    const float zs[4] = {0.0f, 0.0f, 1.0f, 1.0f};
+    const float leftU = bMirrorU ? 1.0f : 0.0f;
+    const float rightU = bMirrorU ? 0.0f : 1.0f;
+    const float us[4] = {leftU, rightU, leftU, rightU};
+    const float vs[4] = {0.0f, 0.0f, 1.0f, 1.0f};
+
+    MeshLodData mesh;
+    for (int index = 0; index < 4; ++index)
+    {
+        MeshVertex vertex;
+        vertex.Position = XMFLOAT4(xs[index], 0.0f, zs[index], 1.0f);
+        vertex.Normal = XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f);
+        vertex.TexCoord = XMFLOAT4(us[index], vs[index], 0.0f, 0.0f);
+        mesh.Vertices.push_back(vertex);
+    }
+    mesh.Indices = {0, 1, 2, 2, 1, 3};
+    return mesh;
+}
+
+/** The bitangent the shader rebuilds: cross(normal, tangent) * w, here only its Z component. */
+float RebuiltBitangentZ(const MeshVertex& vertex)
+{
+    // cross((0,1,0), T) = (T.z, 0, -T.x)
+    return -vertex.Tangent.x * vertex.Tangent.w;
+}
+
+void MeshTangentBasis()
+{
+    // Geometry nobody built a basis for must say so, or NormalFromMap trusts an arbitrary vector.
+    CHECK(MeshVertex{}.Tangent.w == 0.0f);
+
+    MeshLodData quad = MakeTangentQuad(false);
+    GenerateTangents(quad);
+    for (const MeshVertex& vertex : quad.Vertices)
+    {
+        CHECK(vertex.Tangent.x > 0.99f);
+        CHECK(std::fabs(vertex.Tangent.y) < 1e-4f);
+        CHECK(std::fabs(vertex.Tangent.z) < 1e-4f);
+        CHECK(std::fabs(std::fabs(vertex.Tangent.w) - 1.0f) < 1e-4f);
+        // Whatever the sign turns out to be, the rebuilt bitangent must run along +v, that is +Z.
+        CHECK(RebuiltBitangentZ(vertex) > 0.99f);
+    }
+
+    // The same quad with u running the other way: the tangent flips, and the sign in w has to
+    // flip with it, or the mirrored half of a model lights up inside out.
+    MeshLodData mirrored = MakeTangentQuad(true);
+    GenerateTangents(mirrored);
+    for (size_t index = 0; index < mirrored.Vertices.size(); ++index)
+    {
+        const MeshVertex& vertex = mirrored.Vertices[index];
+        CHECK(vertex.Tangent.x < -0.99f);
+        CHECK(RebuiltBitangentZ(vertex) > 0.99f);
+        CHECK(vertex.Tangent.w * quad.Vertices[index].Tangent.w < 0.0f);
+    }
+
+    // No texture coordinates to read a direction from: the basis still has to be usable, because
+    // a NaN here spreads through the lighting of the whole surface.
+    MeshLodData flat = MakeTangentQuad(false);
+    for (MeshVertex& vertex : flat.Vertices)
+    {
+        vertex.TexCoord = XMFLOAT4(0.25f, 0.25f, 0.0f, 0.0f);
+    }
+    GenerateTangents(flat);
+    for (const MeshVertex& vertex : flat.Vertices)
+    {
+        const float length = std::sqrt(vertex.Tangent.x * vertex.Tangent.x +
+                                       vertex.Tangent.y * vertex.Tangent.y +
+                                       vertex.Tangent.z * vertex.Tangent.z);
+        CHECK(std::fabs(length - 1.0f) < 1e-3f);
+        CHECK(std::fabs(vertex.Tangent.y) < 1e-3f); // perpendicular to the +Y normal
+        CHECK(vertex.Tangent.w == 0.0f); // no direction in the uv: the fallback has to take over
+    }
+}
+
+/**
+ * Cube faces have to agree with what TextureCube sampling reads for the same direction. The table
+ * is the one from the Direct3D specification: the major axis of a direction picks the face, and
+ * s and t are the world axes along which the texture coordinates grow.
+ */
+void PointShadowMath()
+{
+    struct FaceAxes
+    {
+        XMFLOAT3 Major;
+        XMFLOAT3 S;
+        XMFLOAT3 T;
+    };
+    const FaceAxes faces[PointShadowFaces] = {
+        {{1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, -1.0f, 0.0f}},
+        {{-1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, -1.0f, 0.0f}},
+        {{0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}},
+        {{0.0f, -1.0f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}},
+        {{0.0f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, -1.0f, 0.0f}},
+        {{0.0f, 0.0f, -1.0f}, {-1.0f, 0.0f, 0.0f}, {0.0f, -1.0f, 0.0f}},
+    };
+
+    const XMFLOAT3 light(10.0f, 5.0f, -3.0f);
+    const float farPlane = 100.0f;
+    const float distance = 25.0f;
+    for (int face = 0; face < PointShadowFaces; ++face)
+    {
+        const XMFLOAT4X4 stored = PointShadowViewProjection(face, light, farPlane);
+        const XMMATRIX matrix = XMMatrixTranspose(XMLoadFloat4x4(&stored));
+        const FaceAxes& axes = faces[face];
+        // Half way towards the right and the bottom of the face.
+        const XMVECTOR point = XMVectorSet(
+            light.x + (axes.Major.x + axes.S.x * 0.5f + axes.T.x * 0.5f) * distance,
+            light.y + (axes.Major.y + axes.S.y * 0.5f + axes.T.y * 0.5f) * distance,
+            light.z + (axes.Major.z + axes.S.z * 0.5f + axes.T.z * 0.5f) * distance, 1.0f);
+        XMFLOAT4 clip;
+        XMStoreFloat4(&clip, XMVector4Transform(point, matrix));
+        CHECK(std::fabs(clip.x / clip.w - 0.5f) < 1e-4f);
+        CHECK(std::fabs(clip.y / clip.w + 0.5f) < 1e-4f);
+        // The shader works the stored depth out from the distance along the axis.
+        CHECK(std::fabs(clip.z / clip.w - PointShadowDepth(distance, farPlane)) < 1e-5f);
+    }
+
+    // On an axis only that face is touched.
+    CHECK(PointShadowFaceMask(25.0f, 0.0f, 0.0f, 1.0f) == (1u << 0));
+    CHECK(PointShadowFaceMask(0.0f, -25.0f, 0.0f, 1.0f) == (1u << 3));
+    CHECK(PointShadowFaceMask(0.0f, 0.0f, 25.0f, 1.0f) == (1u << 4));
+    // On the seam between two faces it has to reach both, or the shadow is cut along the edge.
+    CHECK(PointShadowFaceMask(20.0f, 0.0f, 20.0f, 1.0f) == ((1u << 0) | (1u << 4)));
+    // A caster around the light blocks it in every direction.
+    CHECK(PointShadowFaceMask(0.5f, 0.0f, 0.0f, 5.0f) == 63u);
+}
+
+/** The range the cascades divide: the visible part of the area, and never inverted. */
+void ShadowCascadeRanges()
+{
+    const ShadowCascadeRange field = FitShadowCascadeRange(0.1f, 900.0f, 220.0f, 170.0f);
+    CHECK(field.Near == 50.0f);
+    CHECK(field.Far == 390.0f);
+
+    // The whole area lies past the shadow distance.
+    const ShadowCascadeRange distant = FitShadowCascadeRange(0.1f, 900.0f, 1500.0f, 300.0f);
+    CHECK(distant.Near < distant.Far);
+    CHECK(distant.Far <= 900.0f);
+
+    // The whole area lies behind the camera.
+    const ShadowCascadeRange behind = FitShadowCascadeRange(0.1f, 900.0f, -500.0f, 100.0f);
+    CHECK(behind.Near >= 0.1f);
+    CHECK(behind.Near < behind.Far);
+
+    // The camera stands inside the area.
+    const ShadowCascadeRange inside = FitShadowCascadeRange(0.1f, 900.0f, 50.0f, 2000.0f);
+    CHECK(inside.Near == 0.1f);
+    CHECK(inside.Far == 900.0f);
+
+    // Snapping keeps the range covered and puts a slightly moved range on the same grid.
+    float low = 12.34f;
+    float high = 112.34f;
+    SnapShadowBounds(low, high, 2048);
+    CHECK(low <= 12.34f);
+    CHECK(high >= 112.34f);
+    const float texel = (high - low) / 2048.0f;
+    float movedLow = 12.34f + texel * 5.3f;
+    float movedHigh = 112.34f + texel * 5.3f;
+    SnapShadowBounds(movedLow, movedHigh, 2048);
+    CHECK(std::fabs((movedHigh - movedLow) - (high - low)) < 1e-3f);
+    const float texelsMoved = (movedLow - low) / texel;
+    CHECK(std::fabs(texelsMoved - std::round(texelsMoved)) < 1e-2f);
+
+    for (const ShadowCascadeRange& range : {field, distant, behind, inside})
+    {
+        float splits[MaxShadowCascades + 1] = {};
+        SplitShadowCascadeRange(range, 0.7f, splits);
+        CHECK(splits[0] == range.Near);
+        CHECK(splits[MaxShadowCascades] == range.Far);
+        for (int index = 0; index < MaxShadowCascades; ++index)
+        {
+            CHECK(splits[index] < splits[index + 1]);
+        }
+    }
+}
+
+/** Every shape the engine builds, and every level the simplifier makes, carries a usable basis. */
+void MeshTangentsThroughPipeline()
+{
+    // maxUnoriented: vertices the uv cannot give a direction to. That is real geometry, not a defect
+    // - at the pole of a sphere the triangles collapse in space - so it is counted, not forbidden,
+    // and a flat shape must have none.
+    auto checkBasis = [](const MeshLodData& mesh, const char* what, size_t maxUnoriented)
+    {
+        size_t unoriented = 0;
+        if (mesh.Vertices.empty())
+        {
+            throw std::runtime_error(std::string(what) + ": no vertices");
+        }
+        for (const MeshVertex& vertex : mesh.Vertices)
+        {
+            const float length = std::sqrt(vertex.Tangent.x * vertex.Tangent.x +
+                                           vertex.Tangent.y * vertex.Tangent.y +
+                                           vertex.Tangent.z * vertex.Tangent.z);
+            if (std::fabs(length - 1.0f) > 1e-2f)
+            {
+                throw std::runtime_error(std::string(what) + ": tangent is not a unit vector");
+            }
+            const float alignment = vertex.Tangent.x * vertex.Normal.x +
+                                    vertex.Tangent.y * vertex.Normal.y +
+                                    vertex.Tangent.z * vertex.Normal.z;
+            if (std::fabs(alignment) > 1e-2f)
+            {
+                throw std::runtime_error(std::string(what) + ": tangent is not in the surface");
+            }
+            if (vertex.Tangent.w == 0.0f)
+            {
+                ++unoriented;
+            }
+            else if (std::fabs(std::fabs(vertex.Tangent.w) - 1.0f) > 1e-3f)
+            {
+                throw std::runtime_error(std::string(what) + ": handedness is not 0 or +-1");
+            }
+        }
+        if (unoriented > maxUnoriented)
+        {
+            throw std::runtime_error(std::string(what) + ": " + std::to_string(unoriented) + " of " +
+                                     std::to_string(mesh.Vertices.size()) + " vertices have no basis");
+        }
+    };
+
+    checkBasis(MeshPrimitives::Sphere(1.0f, 16, 12), "sphere", 2 * 17);
+    checkBasis(MeshPrimitives::Cube(1.0f), "cube", 0);
+    checkBasis(MeshPrimitives::Plane(4.0f, 4.0f, 3), "plane", 0);
+    checkBasis(MeshPrimitives::Cylinder(1.0f, 2.0f, 16), "cylinder", 0);
+    checkBasis(MeshPrimitives::Cone(1.0f, 2.0f, 16), "cone", 17);
+    checkBasis(MeshPrimitives::Pyramid(1.0f, 2.0f), "pyramid", 0);
+
+    // The simplifier welds vertices and rebuilds the normals, so the basis of the source level
+    // says nothing about the simplified one and has to come out valid on its own.
+    MeshSimplifySettings settings;
+    settings.TargetRatio = 0.3f;
+    const MeshLodData simplified = SimplifyMesh(MeshPrimitives::Sphere(2.0f, 32, 24), settings, nullptr);
+    checkBasis(simplified, "simplified sphere", simplified.Vertices.size() / 10);
+}
+
 void MeshSimplification()
 {
     const MeshLodData source = MakeTestSphere(24, 2.0f);
@@ -1834,6 +2076,10 @@ int main()
         {"vfs project content unmounted after stop", VfsLifecycle_ContentRootReverted},
         {"vfs premounted game restored after stop", VfsLifecycle_PreMountedGameReverted},
         {"mesh simplification", MeshSimplification}, {"mesh validation rules", MeshValidationRules},
+        {"mesh tangent basis and mirrored uv", MeshTangentBasis},
+        {"tangents through primitives and simplifier", MeshTangentsThroughPipeline},
+        {"shadow cascade range and splits", ShadowCascadeRanges},
+        {"point shadow faces match cube sampling", PointShadowMath},
         {"vfs service: resolve and toVirtual", VfsService_ResolveAndToVirtual},
         {"vfs service: exists and stat", VfsService_ExistsAndStat},
         {"vfs service: readFile and allocator", VfsService_ReadFileAndAllocator},

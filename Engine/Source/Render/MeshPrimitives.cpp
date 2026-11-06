@@ -65,6 +65,8 @@ namespace
     }
 }
 
+// Every shape finishes by building its tangent basis: a normal map on a primitive must not
+// depend on whoever loads it remembering to do it.
 namespace MeshPrimitives
 {
     MeshLodData Sphere(float radius, int slices, int stacks)
@@ -117,6 +119,7 @@ namespace MeshPrimitives
             }
         }
         mesh.Indices = std::move(indices);
+        GenerateTangents(mesh);
         return mesh;
     }
 
@@ -155,6 +158,7 @@ namespace MeshPrimitives
             mesh.Vertices.push_back(MakeVertex(corner(-1.0f, -1.0f), face.Normal, 0.0f, 1.0f));
             AddQuad(mesh, base, base + 1, base + 2, base + 3);
         }
+        GenerateTangents(mesh);
         return mesh;
     }
 
@@ -184,6 +188,7 @@ namespace MeshPrimitives
                 AddQuad(mesh, topLeft, topLeft + 1, topLeft + rowSize + 1, topLeft + rowSize);
             }
         }
+        GenerateTangents(mesh);
         return mesh;
     }
 
@@ -209,6 +214,7 @@ namespace MeshPrimitives
         }
         AddCap(mesh, radius, top, true, slices);
         AddCap(mesh, radius, -top, false, slices);
+        GenerateTangents(mesh);
         return mesh;
     }
 
@@ -240,6 +246,7 @@ namespace MeshPrimitives
             AddFacingTriangle(mesh, apex, a, rim(u1));
         }
         AddCap(mesh, radius, -top, false, slices);
+        GenerateTangents(mesh);
         return mesh;
     }
 
@@ -274,6 +281,7 @@ namespace MeshPrimitives
         }
         AddFacingTriangle(mesh, first, first + 1, first + 2);
         AddFacingTriangle(mesh, first, first + 2, first + 3);
+        GenerateTangents(mesh);
         return mesh;
     }
 }

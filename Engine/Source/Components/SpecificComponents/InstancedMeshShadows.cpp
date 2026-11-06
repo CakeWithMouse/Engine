@@ -1,5 +1,6 @@
 #include "InstancedMeshInternal.h"
 #include <Engine/Render/Material.h>
+#include <Engine/Render/PointShadow.h>
 
 using namespace InstancedMeshDetail;
 
@@ -93,13 +94,49 @@ void InstancedMeshComponent::CollectShadowCasters(
             continue;
         }
 
-        int shadowLevel = std::min(meshLevel + ShadowLodBias + cascade, LodCount - 1);
-        if ((cascade >= 2 || meshLevel >= 2) && LodCount > 1)
-        {
-            shadowLevel = LodCount - 1;
-        }
+        // The level follows the on-screen size of the unit, never the cascade. A cascade index says
+        // nothing about distance once the splits follow the scene, and a caster coarser than the
+        // drawn level encloses the visible hull, which then sits inside its own shadow: the near
+        // vehicles went black on their sunlit sides.
+        const int shadowLevel = std::min(meshLevel + ShadowLodBias, LodCount - 1);
         Lods[shadowLevel].ShadowStaging[cascade].push_back(data);
 
+    }
+}
+
+void InstancedMeshComponent::CollectPointCasters(
+    const MeshInstance& instance, InstData data, int meshLevel, float radius,
+    const DirectX::XMFLOAT4* lightSpheres, int lightCount)
+{
+    data.ObjectColor = DirectX::XMFLOAT4(instance.Color.x, instance.Color.y, instance.Color.z, instance.Color.w);
+    data.Params = AnimationTextureSRV != nullptr
+        ? DirectX::XMFLOAT4(1.0f, static_cast<float>(instance.ClipId), instance.AnimationPhase, instance.Speed)
+        : DirectX::XMFLOAT4(1.0f, instance.CustomData.x, instance.CustomData.y, instance.CustomData.z);
+
+    // The level that is drawn, without the shadow bias of the sun. A coarser caster is a box wider
+    // than the hull, and a lamp close by and low down lights exactly the surfaces that end up
+    // inside it: only the top of the turret stayed lit.
+    LodLevel& lod = Lods[meshLevel];
+    for (int light = 0; light < lightCount; ++light)
+    {
+        const DirectX::XMFLOAT4& sphere = lightSpheres[light];
+        const glm::vec3 offset = instance.Position - glm::vec3(sphere.x, sphere.y, sphere.z);
+        const float reach = sphere.w + radius;
+        if (glm::dot(offset, offset) > reach * reach)
+        {
+            continue;
+        }
+
+        // Each copy goes only to the faces it can land on: six full streams would draw a dense
+        // field six times over.
+        const uint32_t faces = PointShadowFaceMask(offset.x, offset.y, offset.z, radius);
+        for (int face = 0; face < PointShadowFaces; ++face)
+        {
+            if (faces & (1u << face))
+            {
+                lod.PointStaging[light * PointShadowFaces + face].push_back(data);
+            }
+        }
     }
 }
 
@@ -176,7 +213,8 @@ void InstancedMeshComponent::RenderShadow(ID3D11DeviceContext* context, const Sh
         return;
     }
 
-    if (shadowPass.CascadeIndex < 0)
+    const bool bPointPass = shadowPass.PointFace >= 0;
+    if (!bPointPass && shadowPass.CascadeIndex < 0)
     {
         RenderStaticShadow(context, shadowPass);
         return;
@@ -223,19 +261,20 @@ void InstancedMeshComponent::RenderShadow(ID3D11DeviceContext* context, const Sh
     const bool bMaterialShadow = BindMaterialShadow(context, shadowPass);
 
     const int cascade = std::max(0, std::min(shadowPass.CascadeIndex, MaxShadowCascades - 1));
+    const int pointStream = shadowPass.PointLightIndex * PointShadowFaces + shadowPass.PointFace;
     const UINT offset = 0;
     for (int level = 0; level < LodCount; ++level)
     {
         LodLevel& lod = Lods[level];
-        // Only the casters this cascade needs, at the detail chosen for it.
-        const UINT instanceCount = static_cast<UINT>(lod.ShadowStaging[cascade].size());
-        if (instanceCount == 0 || !lod.VertexBuffer || !lod.IndexBuffer || !lod.ShadowSRV[cascade])
+        // Only the casters this cascade or cube face needs, at the detail chosen for it.
+        const UINT instanceCount = static_cast<UINT>((bPointPass ? lod.PointStaging[pointStream] : lod.ShadowStaging[cascade]).size());
+        ID3D11ShaderResourceView* instanceSRV = bPointPass ? lod.PointSRV[pointStream].Get() : lod.ShadowSRV[cascade].Get();
+        if (instanceCount == 0 || !lod.VertexBuffer || !lod.IndexBuffer || instanceSRV == nullptr)
         {
             continue;
         }
 
         ID3D11Buffer* vertexBuffers[] = {lod.VertexBuffer.Get()};
-        ID3D11ShaderResourceView* instanceSRV = lod.ShadowSRV[cascade].Get();
         const UINT stride = lod.VertexStride;
         context->IASetVertexBuffers(0, 1, vertexBuffers, &stride, &offset);
         context->IASetIndexBuffer(lod.IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);

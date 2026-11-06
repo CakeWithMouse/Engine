@@ -208,6 +208,7 @@ inline MeshLodData BuildVehicleLod(VehicleType type, int level, int detail = 1)
         AppendBox(mesh, VehicleSilhouette(type), 2 * scale);
         break;
     }
+    GenerateTangents(mesh);
     return mesh;
 }
 
@@ -253,6 +254,7 @@ inline MeshLodData BuildSceneryLod(SceneryType type, int level, int detail = 1)
         }
         break;
     }
+    GenerateTangents(mesh);
     return mesh;
 }
 

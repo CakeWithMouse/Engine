@@ -3,6 +3,19 @@
 
 constexpr int MaxPointLights = 8;
 constexpr int MaxShadowCascades = 3;
+// Near cascades that also draw the static scene; further out the baked map takes over.
+// Must match STATIC_CASTER_CASCADES in Shaders/Common.hlsli.
+constexpr int StaticCasterCascades = 2;
+
+// Point lights that cast shadows at the same time; each owns one cube of the shadow array.
+constexpr int MaxPointShadowLights = 2;
+constexpr int PointShadowFaces = 6;
+constexpr int PointShadowStreams = MaxPointShadowLights * PointShadowFaces;
+// These three must match POINT_SHADOW_SIZE, POINT_SHADOW_NEAR and the register of pointShadowTex in
+// Shaders/Common.hlsli. Materials own t6 and up, so the cube array sits well past them.
+constexpr int PointShadowMapSize = 1024;
+constexpr float PointShadowNearPlane = 0.5f;
+constexpr unsigned PointShadowTextureSlot = 32;
 
 /**
  * Layout of `cbuffer ConstantBuffer : register(b0)` from Shaders/Common.hlsli.

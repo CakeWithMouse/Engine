@@ -15,7 +15,9 @@
 
 namespace
 {
-    constexpr UINT MeshVertexStride = sizeof(DirectX::XMFLOAT4) * 3;
+    // Four float4 per vertex: position, normal, uv, tangent - see MeshVertex in MeshData.h.
+    constexpr size_t Float4PerVertex = 4;
+    constexpr UINT MeshVertexStride = sizeof(DirectX::XMFLOAT4) * Float4PerVertex;
 
     // Main-thread caches. Weak references: an asset lives while at least one component uses it.
     std::unordered_map<std::string, std::weak_ptr<const FBXImportedModel>> importedModelCache;
@@ -49,7 +51,7 @@ namespace
     FBXImportedMesh ImportMesh(const aiMesh* mesh, const aiScene* scene)
     {
         FBXImportedMesh result;
-        result.Vertices.reserve(static_cast<size_t>(mesh->mNumVertices) * 3);
+        result.Vertices.reserve(static_cast<size_t>(mesh->mNumVertices) * Float4PerVertex);
 
         for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
         {
@@ -57,9 +59,25 @@ namespace
             const aiVector3D normal = mesh->HasNormals() ? mesh->mNormals[i] : aiVector3D(0.0f, 1.0f, 0.0f);
             const aiVector3D uv = mesh->HasTextureCoords(0) ? mesh->mTextureCoords[0][i] : aiVector3D(0.0f, 0.0f, 0.0f);
 
+            // A w of 0 says "no basis" and sends NormalFromMap to its fallback. That covers models
+            // without texture coordinates, and the vertices Assimp marks with NaN because their
+            // uv mapping is degenerate.
+            aiVector3D tangent(1.0f, 0.0f, 0.0f);
+            float handedness = 0.0f;
+            if (mesh->HasTangentsAndBitangents() && std::isfinite(mesh->mTangents[i].x) &&
+                std::isfinite(mesh->mBitangents[i].x))
+            {
+                tangent = mesh->mTangents[i];
+                // Assimp stores the bitangent; the engine stores its sign, so mirrored uv
+                // islands survive without a third vector per vertex.
+                const aiVector3D expected = normal ^ tangent;
+                handedness = (expected * mesh->mBitangents[i]) < 0.0f ? -1.0f : 1.0f;
+            }
+
             result.Vertices.emplace_back(position.x, position.y, position.z, 1.0f);
             result.Vertices.emplace_back(normal.x, normal.y, normal.z, 0.0f);
             result.Vertices.emplace_back(uv.x, uv.y, 0.0f, 0.0f);
+            result.Vertices.emplace_back(tangent.x, tangent.y, tangent.z, handedness);
         }
 
         result.Indices.reserve(static_cast<size_t>(mesh->mNumFaces) * 3);
@@ -105,6 +123,9 @@ namespace
             aiProcess_Triangulate |
             aiProcess_ConvertToLeftHanded |
             aiProcess_GenNormals |
+            // Assimp builds the tangent basis from the model's own uv seams, which is better
+            // than rebuilding it here from the welded result.
+            aiProcess_CalcTangentSpace |
             aiProcess_PreTransformVertices |
             aiProcess_OptimizeMeshes);
 
@@ -120,7 +141,7 @@ namespace
         float maxRadiusSq = 0.0f;
         for (const FBXImportedMesh& mesh : model->Meshes)
         {
-            for (size_t i = 0; i < mesh.Vertices.size(); i += 3)
+            for (size_t i = 0; i < mesh.Vertices.size(); i += Float4PerVertex)
             {
                 const DirectX::XMFLOAT4& p = mesh.Vertices[i];
                 maxRadiusSq = std::max(maxRadiusSq, p.x * p.x + p.y * p.y + p.z * p.z);

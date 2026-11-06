@@ -1,6 +1,7 @@
 #include "../../../Engine/Source/Components/ComponentInternal.h"
 #include "BattleGame.h"
 
+#include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
 #include <Engine/Components/SpecificComponents/UIComponent.h>
 #include <Engine/Render/Material.h>
@@ -131,7 +132,7 @@ void BattleGame::BuildScene(const Settings& settings)
 
     std::mt19937 rng(1337u);
 
-    // Map scenery: never moves, so its shadow is baked once instead of being redrawn per cascade.
+    // Map scenery: never moves, so its distant shadow is baked once; only the near cascades redraw it.
     if (Config.SceneryCount > 0)
     {
         const int sceneryTypeCount = static_cast<int>(UnitMesh::SceneryType::Count);
@@ -293,6 +294,16 @@ void BattleGame::BuildScene(const Settings& settings)
             const float typeSpeed = speed(rng) * UnitMesh::VehicleSpeedScale(batch.Type);
             batch.Speeds.push_back(bSecondArmy ? -typeSpeed : typeSpeed);
         }
+    }
+
+    if (Config.PointLight)
+    {
+        // Sized from the field, as the camera is, so the pool of light reads the same at any unit count.
+        const float lightRadius = std::max(90.0f, FieldHalfSize * 0.5f);
+        auto light = std::make_unique<PointLightComponent>(glm::vec3(0.0f, lightRadius * 0.2f, 0.0f),
+                                                           glm::vec3(1.0f, 0.55f, 0.25f), 1.4f, lightRadius);
+        light->SetCastShadows(Config.PointShadows);
+        Register(*this, "PointLight", std::move(light));
     }
 
     Player* player = GetPlayer();

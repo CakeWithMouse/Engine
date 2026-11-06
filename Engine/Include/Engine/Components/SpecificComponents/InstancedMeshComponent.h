@@ -216,6 +216,11 @@ private:
         Microsoft::WRL::ComPtr<ID3D11Buffer> ShadowBuffer[MaxShadowCascades];
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ShadowSRV[MaxShadowCascades];
         size_t ShadowCapacity[MaxShadowCascades] = {};
+        // One stream per cube face of every shadowed point light.
+        std::vector<InstData> PointStaging[PointShadowStreams];
+        Microsoft::WRL::ComPtr<ID3D11Buffer> PointBuffer[PointShadowStreams];
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> PointSRV[PointShadowStreams];
+        size_t PointCapacity[PointShadowStreams] = {};
     };
 
     void BuildVisibleSets();
@@ -233,6 +238,8 @@ private:
     void RenderStaticShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass);
     void CollectShadowCasters(const MeshInstance& instance, InstData data, int meshLevel, float radius,
                               const glm::vec3& lightDirection, const DirectX::XMFLOAT4* cascadeSpheres, int cascadeLimit);
+    void CollectPointCasters(const MeshInstance& instance, InstData data, int meshLevel, float radius,
+                             const DirectX::XMFLOAT4* lightSpheres, int lightCount);
     /** Shaders and constants of a masked material for a depth pass; false: the pass keeps its own. */
     bool BindMaterialShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass);
     void UnbindMaterialShadow(ID3D11DeviceContext* context);

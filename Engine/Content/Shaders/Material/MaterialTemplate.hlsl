@@ -54,6 +54,7 @@ struct VS_IN
     float4 pos : POSITION;
     float3 normal : NORMAL;
     float2 texCoord : TEXCOORD;
+    float4 tangent : TANGENT;
 };
 #endif
 
@@ -66,6 +67,9 @@ struct PS_IN
     float4 color : COLOR;
     float3 instanceData : TEXCOORD2;
     float fade : TEXCOORD3; // LOD cross-fade of the copy, 1 = fully visible
+    // xyz world tangent, w the sign of the bitangent. w stays 0 when the vertex format has no
+    // tangent, which is how NormalFromMap knows to fall back to screen-space derivatives.
+    float4 tangent : TEXCOORD4;
 };
 
 PS_IN VSMain(VS_IN input, uint instanceId : SV_InstanceID)
@@ -81,10 +85,18 @@ PS_IN VSMain(VS_IN input, uint instanceId : SV_InstanceID)
 #elif defined(MATERIAL_SKINNED)
     SkinVertex(input, position.xyz, normal);
 #endif
+    // A skinned vertex has no tangent in its format; zero in w tells the surface to fall back.
+#if defined(MATERIAL_SKINNED)
+    float4 vertexTangent = float4(0.0f, 0.0f, 0.0f, 0.0f);
+#else
+    float4 vertexTangent = input.tangent;
+#endif
+
 #if defined(MATERIAL_INSTANCED)
     float4 worldPos = mul(position, instance.World);
     // Copies use a uniform scale, so their matrix transforms normals correctly.
     output.normal = mul(normal, (float3x3)instance.World);
+    output.tangent = float4(mul(vertexTangent.xyz, (float3x3)instance.World), vertexTangent.w);
     output.color = ObjectColor * instance.Color;
 #if !defined(MATERIAL_SKINNED)
     // Animated copies use Params.yzw for their clip, phase and speed instead.
@@ -93,8 +105,10 @@ PS_IN VSMain(VS_IN input, uint instanceId : SV_InstanceID)
     output.fade = instance.Params.x;
 #else
     float4 worldPos = mul(position, worldMatrix);
-    // Inverse-transpose keeps normals perpendicular under non-uniform scale.
+    // Inverse-transpose keeps normals perpendicular under non-uniform scale. The tangent lies in
+    // the surface instead of across it, so it goes through the world matrix itself.
     output.normal = mul(normal, (float3x3)normalMatrix);
+    output.tangent = float4(mul(vertexTangent.xyz, (float3x3)worldMatrix), vertexTangent.w);
     output.color = ObjectColor;
     output.fade = 1.0f;
 #endif
@@ -127,6 +141,10 @@ MaterialOutput EvaluateMaterial(PS_IN input, bool frontFace)
     i.InstanceData = input.instanceData;
     i.Time = TimeParams.x;
     i.FrontFace = frontFace;
+    // Interpolation shortens the tangent between vertices and the two-sided flip above turned the
+    // normal around; re-orthogonalising here keeps the basis square whatever the surface does.
+    float3 interpolatedTangent = input.tangent.xyz - normal * dot(input.tangent.xyz, normal);
+    i.Tangent = float4(interpolatedTangent, input.tangent.w);
 
     // The texture of the component (SetTexture, a scene object's texture) tints the default albedo,
     // as in the engine's other shaders; a surface may still replace it.

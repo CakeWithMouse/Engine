@@ -68,6 +68,8 @@ int main(int argc, char** argv)
             if (argument == "--validate") { settings.ValidateAssets = true; continue; }
             if (argument == "--hud") { settings.Hud = true; continue; }
             if (argument == "--no-hud") { settings.Hud = false; continue; }
+            if (argument == "--no-point-light") { settings.PointLight = false; continue; }
+            if (argument == "--no-point-shadow") { settings.PointShadows = false; continue; }
             if (argument == "--dump-frame" && i + 1 < argc) { settings.DumpFrame = argv[++i]; continue; }
             if (argument == "--legacy-shaders") { settings.Materials = false; continue; }
             if (argument == "--anim") { settings.Animated = true; continue; }
@@ -75,7 +77,7 @@ int main(int argc, char** argv)
                 "Usage: Battle.exe [--bench N] [--warmup N] [--units N] [--types N] [--spacing N] [--camera N]\n"
                 "        [--frames N] [--detail N] [--scenery N] [--sprite-px N] [--sun N] [--shadow-distance N]\n"
                 "        [--no-shadows] [--no-baked-shadows] [--no-impostors] [--forward] [--static] [--lod-debug]\n"
-                "        [--legacy-shaders] [--anim] [--lock-camera] [--auto-lod] [--validate] [--hud|--no-hud]\n"
+                "        [--legacy-shaders] [--anim] [--lock-camera] [--auto-lod] [--validate] [--hud|--no-hud] [--no-point-light] [--no-point-shadow]\n"
                 "        [--dump-shadows] [--dump-impostors] [--dump-frame FILE] [--smoke]");
         }
         if (settings.UnitCount < 1) throw std::runtime_error("--units must be positive");

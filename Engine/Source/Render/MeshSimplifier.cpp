@@ -388,5 +388,9 @@ MeshLodData SimplifyMesh(const MeshLodData& source,
 
     meshopt_optimizeVertexFetch(result.Vertices.data(), result.Indices.data(), result.Indices.size(),
                                 result.Vertices.data(), result.Vertices.size(), sizeof(MeshVertex));
+
+    // The simplifier welds and splits vertices and rebuilds the normals, so the tangent basis of
+    // the source level says nothing about this one and has to be built again.
+    GenerateTangents(result);
     return finish(std::move(result));
 }

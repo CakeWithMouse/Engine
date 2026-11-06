@@ -88,6 +88,7 @@ struct PointLightInfo
     glm::vec3 Color{1.0f, 1.0f, 1.0f};
     float Radius{50.0f};
     bool bEnabled{true};
+    bool bCastShadows{false};
 };
 
 /** Everything a component needs to draw itself into one shadow cascade. */
@@ -105,6 +106,9 @@ struct ShadowPassContext
     int CascadeCount = 1;
     DirectX::XMFLOAT4 CascadeSphere{}; // xyz centre, w radius
     DirectX::XMFLOAT4 LightDirection{};
+    // A face of a point light cube instead of a cascade; -1 in the directional passes.
+    int PointLightIndex = -1;
+    int PointFace = -1;
 };
 
 /** Per-frame counters shown in the window title. */
@@ -244,6 +248,11 @@ public:
 
     ID3D11ShaderResourceView* GetShadowMapSRV() const { return shadowSRV.Get(); }
     ID3D11SamplerState* GetShadowSampler() const { return shadowSampler.Get(); }
+    ID3D11SamplerState* GetShadowCompareSampler() const { return shadowCompareSampler.Get(); }
+    /** Point lights casting shadows this frame: xyz position, w radius. Cube i belongs to sphere i. */
+    const DirectX::XMFLOAT4* GetPointShadowSpheres() const { return PointShadowSpheres; }
+    int GetPointShadowCount() const { return PointShadowCount; }
+    ID3D11ShaderResourceView* GetPointShadowSRV() const { return pointShadowSRV.Get(); }
     ID3D11ShaderResourceView* GetDepthStencilSRV() const { return depthStencilSRV.Get(); }
 
     const DirectX::XMFLOAT4X4& GetViewMatrix() const { return FirstPlayer->GetViewMatrix(); }
@@ -414,6 +423,9 @@ protected:
     void BeginMainPass(bool bUseDepth);
     void SetFullViewport();
     void RenderShadowMaps();
+    void RenderPointShadowMaps();
+    void UpdatePointShadows();
+    bool InitPointShadowResources();
     enum class OpaqueFilter { All, DeferredCapable, ForwardOnly };
     void RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant);
     std::vector<GameComponent*> CollectRenderComponents();
@@ -562,6 +574,13 @@ protected:
     int AdapterDedicatedMemoryMb = 0;
     int ShadowMapSize = 2048;
     DirectX::XMFLOAT4 CascadeSplits = DirectX::XMFLOAT4(80.0f, 260.0f, 900.0f, 0.0f);
+    // The splits the shader actually selects with, recomputed every frame from the part of the
+    // shadow area the camera can see. xyz are the far edges of the three cascades, w the near
+    // edge of the first one. Only equal to CascadeSplits when the scene declares no shadow area.
+    DirectX::XMFLOAT4 ActiveCascadeSplits = DirectX::XMFLOAT4(80.0f, 260.0f, 900.0f, 0.0f);
+    // Mix of the logarithmic and the uniform split scheme: 1 is purely logarithmic (tight near
+    // cascades, coarse far ones), 0 purely uniform.
+    float CascadeSplitLambda = 0.7f;
     DirectX::XMFLOAT4 ShadowParams = DirectX::XMFLOAT4(0.0f, static_cast<float>(MaxShadowCascades), 0.0012f, 1.0f / 2048.0f);
     DirectX::XMFLOAT4 DirectionalLightDirection = DirectX::XMFLOAT4(-0.35f, -0.85f, -0.2f, 0.0f);
     DirectX::XMFLOAT4 DirectionalLightColorIntensity = DirectX::XMFLOAT4(0.95f, 0.93f, 0.90f, 0.80f);
@@ -572,6 +591,13 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV;
     Microsoft::WRL::ComPtr<ID3D11DepthStencilView> shadowDSVs[MaxShadowCascades];
     Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowSampler;
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> shadowCompareSampler;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> pointShadowTexture;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pointShadowDSVs[PointShadowStreams];
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> pointShadowSRV;
+    DirectX::XMFLOAT4 PointShadowSpheres[MaxPointShadowLights] = {};
+    int PointShadowCount = 0;
+    bool bPointShadowFailed = false;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> shadowVertexShader;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> shadowInstancedVertexShader;
     Microsoft::WRL::ComPtr<ID3DBlob> shadowVertexShaderBlob;
@@ -589,7 +615,7 @@ protected:
     DirectX::XMFLOAT4 StaticShadowBakedLight = DirectX::XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
     glm::vec3 StaticShadowCenter{0.0f, 0.0f, 0.0f};
     float StaticShadowExtent = 0.0f;
-    int StaticShadowMapSize = 2048;
+    int StaticShadowMapSize = 4096;
     float StaticShadowBias = 0.0015f;
     bool bStaticShadowDirty = true;
     bool bStaticShadowReady = false;

@@ -1,6 +1,14 @@
 #ifndef ENGINE_COMMON_HLSLI
 #define ENGINE_COMMON_HLSLI
 
+// Must match MaxShadowCascades in Engine/Include/Engine/Render/ShaderConstants.h.
+#define MAX_SHADOW_CASCADES 3
+// Must match StaticCasterCascades there: how many near cascades also draw the static scene.
+#define STATIC_CASTER_CASCADES 2
+// Must match PointShadowMapSize and PointShadowNearPlane there.
+#define POINT_SHADOW_SIZE 1024.0f
+#define POINT_SHADOW_NEAR 0.5f
+
 // Shared by the materials and the deferred lighting pass.
 // Layout must match ConstantBufferData in Source/Public/Render/ShaderConstants.h.
 cbuffer ConstantBuffer : register(b0)
@@ -20,7 +28,8 @@ cbuffer ConstantBuffer : register(b0)
     float4 LightParams[8];
     float4 LightMeta;            // x light count, y ambient, z shininess, w explicit scene lighting (no implicit ambient)
     float4 ReflectionData;       // x has cube map, y strength, z fresnel power, w is skybox
-    float4x4 LightViewProjection[3];
+    // Must match MaxShadowCascades in Engine/Include/Engine/Render/ShaderConstants.h.
+    float4x4 LightViewProjection[MAX_SHADOW_CASCADES];
     float4 CascadeSplits;
     float4 ShadowParams;         // x enabled, y cascades, z bias, w texel size
     float4 LightDirection;
@@ -68,7 +77,15 @@ GBufferOut EncodeGBuffer(float3 albedo, float3 normal, float3 worldPos, Material
 
 Texture2DArray shadowMapTex : register(t4);
 Texture2D staticShadowMapTex : register(t5);
-SamplerState shadowSampler : register(s4);
+// The comparison happens in the sampler: the hardware tests the four nearest texels and blends the
+// results. Filtering the depth first and testing once gives a hard edge along the rows of texels.
+SamplerComparisonState shadowCompareSampler : register(s5);
+
+/**
+ * Nine bilinear comparison taps with binomial weights: together a smooth tent about four texels
+ * wide, at the cost the old nine point tests had. The weights must add up to one.
+ */
+static const float ShadowTapWeight[3] = {0.25f, 0.5f, 0.25f};
 
 /**
  * Shadow of the static scene (terrain, buildings): one map fixed to the world, rendered once.
@@ -105,12 +122,12 @@ float ComputeStaticShadowFactor(float3 worldPos, float3 normal, float3 toLightDi
         for (int x = -1; x <= 1; ++x)
         {
             float2 offset = float2((float)x, (float)y) * texelSize;
-            float sampledDepth = staticShadowMapTex.SampleLevel(shadowSampler, uv + offset, 0.0f).r;
-            visibility += ((projCoords.z - bias) <= sampledDepth) ? 1.0f : 0.0f;
+            visibility += ShadowTapWeight[y + 1] * ShadowTapWeight[x + 1] *
+                staticShadowMapTex.SampleCmpLevelZero(shadowCompareSampler, uv + offset, projCoords.z - bias);
         }
     }
 
-    return visibility / 9.0f;
+    return visibility;
 }
 
 int SelectCascade(float viewDepth)
@@ -120,14 +137,20 @@ int SelectCascade(float viewDepth)
     return 2;
 }
 
-float ComputeShadowFactor(float3 worldPos, float3 normal, float3 toLightDir, float viewDepth)
+/** Edges of a cascade along the view; CascadeSplits.w is the near edge of the first one. */
+float CascadeStart(int cascadeIndex)
 {
-    if (ShadowParams.x < 0.5f)
-    {
-        return 1.0f;
-    }
+    return cascadeIndex == 0 ? CascadeSplits.w : (cascadeIndex == 1 ? CascadeSplits.x : CascadeSplits.y);
+}
 
-    int cascadeIndex = SelectCascade(viewDepth);
+float CascadeEnd(int cascadeIndex)
+{
+    return cascadeIndex == 0 ? CascadeSplits.x : (cascadeIndex == 1 ? CascadeSplits.y : CascadeSplits.z);
+}
+
+/** One cascade lookup. Fully lit when the pixel falls outside the map of this cascade. */
+float SampleCascade(int cascadeIndex, float3 worldPos, float bias)
+{
     float4 lightPos = mul(float4(worldPos, 1.0f), LightViewProjection[cascadeIndex]);
     float3 projCoords = lightPos.xyz / max(lightPos.w, 0.0001f);
 
@@ -139,11 +162,7 @@ float ComputeShadowFactor(float3 worldPos, float3 normal, float3 toLightDir, flo
         return 1.0f;
     }
 
-    float baseBias = max(ShadowParams.z, 0.00005f);
-    float slopeBias = 1.0f - saturate(dot(normal, toLightDir));
-    float bias = max(baseBias * slopeBias, baseBias * 0.25f);
     float texelSize = max(ShadowParams.w, 0.0001f);
-
     float visibility = 0.0f;
     [unroll]
     for (int y = -1; y <= 1; ++y)
@@ -152,15 +171,102 @@ float ComputeShadowFactor(float3 worldPos, float3 normal, float3 toLightDir, flo
         for (int x = -1; x <= 1; ++x)
         {
             float2 offset = float2((float)x, (float)y) * texelSize;
-            float sampledDepth = shadowMapTex.SampleLevel(shadowSampler, float3(uv + offset, cascadeIndex), 0.0f).r;
-            visibility += ((projCoords.z - bias) <= sampledDepth) ? 1.0f : 0.0f;
+            visibility += ShadowTapWeight[y + 1] * ShadowTapWeight[x + 1] *
+                shadowMapTex.SampleCmpLevelZero(shadowCompareSampler, float3(uv + offset, cascadeIndex), projCoords.z - bias);
+        }
+    }
+    return visibility;
+}
+
+float ComputeShadowFactor(float3 worldPos, float3 normal, float3 toLightDir, float viewDepth)
+{
+    if (ShadowParams.x < 0.5f)
+    {
+        return 1.0f;
+    }
+
+    float baseBias = max(ShadowParams.z, 0.00005f);
+    float slopeBias = 1.0f - saturate(dot(normal, toLightDir));
+    float bias = max(baseBias * slopeBias, baseBias * 0.25f);
+
+    // The near cascades draw the static scene themselves at their own, much finer density. Only
+    // the far ones rely on the baked map: taking the darker of the two everywhere would let its
+    // coarse edge show around every sharp shadow, which is exactly how columns came out blocky.
+    const float baked = ComputeStaticShadowFactor(worldPos, normal, toLightDir);
+
+    int cascadeIndex = SelectCascade(viewDepth);
+    float visibility = SampleCascade(cascadeIndex, worldPos, bias);
+    if (cascadeIndex >= STATIC_CASTER_CASCADES)
+    {
+        visibility = min(visibility, baked);
+    }
+
+    // Neighbouring cascades hold the same shadow at different resolutions; the last tenth of a
+    // cascade fades into the next so the change has no hard edge.
+    if (cascadeIndex < MAX_SHADOW_CASCADES - 1)
+    {
+        float start = CascadeStart(cascadeIndex);
+        float end = CascadeEnd(cascadeIndex);
+        float band = max((end - start) * 0.1f, 0.001f);
+        float blend = saturate((viewDepth - (end - band)) / band);
+        if (blend > 0.0f)
+        {
+            float next = SampleCascade(cascadeIndex + 1, worldPos, bias);
+            if (cascadeIndex + 1 >= STATIC_CASTER_CASCADES)
+            {
+                next = min(next, baked);
+            }
+            visibility = lerp(visibility, next, blend);
         }
     }
 
-    return visibility / 9.0f;
+    return visibility;
 }
 
 // Point lights + directional light with cascaded shadows. Returns the lit colour (not clamped).
+// Must match PointShadowTextureSlot in ShaderConstants.h. Materials own t6 and up, so the cube array
+// sits well past them.
+TextureCubeArray pointShadowTex : register(t32);
+
+/** Depth a cube face stores for a point this far along its axis; same mapping as its projection. */
+float PointShadowDepth(float axisDistance, float farPlane)
+{
+    return farPlane / (farPlane - POINT_SHADOW_NEAR) * (1.0f - POINT_SHADOW_NEAR / max(axisDistance, POINT_SHADOW_NEAR));
+}
+
+/** How much of a point light reaches this surface: 0 fully blocked, 1 nothing in the way. */
+float ComputePointShadow(int cube, float3 worldPos, float3 normal, float3 lightPos, float radius)
+{
+    float3 fromLight = worldPos - lightPos;
+    const float distanceToLight = length(fromLight);
+
+    // One texel of a cube face at this distance, in world units. Everything below scales with it:
+    // a fixed offset would be far too large next to the light and too small at its edge.
+    const float texel = 2.0f * distanceToLight / POINT_SHADOW_SIZE;
+    fromLight += normal * (texel * 1.5f);
+
+    const float3 direction = normalize(fromLight);
+    const float3 side = normalize(cross(direction, abs(direction.y) < 0.9f ? float3(0.0f, 1.0f, 0.0f) : float3(1.0f, 0.0f, 0.0f)));
+    const float3 up = cross(direction, side);
+
+    float visibility = 0.0f;
+    [unroll]
+    for (int y = -1; y <= 1; ++y)
+    {
+        [unroll]
+        for (int x = -1; x <= 1; ++x)
+        {
+            const float3 tap = fromLight + (side * (float)x + up * (float)y) * texel;
+            const float3 absolute = abs(tap);
+            const float axisDistance = max(absolute.x, max(absolute.y, absolute.z));
+            visibility += ShadowTapWeight[y + 1] * ShadowTapWeight[x + 1] *
+                pointShadowTex.SampleCmpLevelZero(shadowCompareSampler, float4(tap, (float)cube),
+                                                  PointShadowDepth(axisDistance - texel * 0.5f, radius));
+        }
+    }
+    return visibility;
+}
+
 float3 ComputeSceneLighting(float3 albedo, float3 normal, float3 worldPos, MaterialLighting material)
 {
     float3 viewDir = normalize(CameraPosition.xyz - worldPos);
@@ -198,6 +304,12 @@ float3 ComputeSceneLighting(float3 albedo, float3 normal, float3 worldPos, Mater
         attenuation *= rangeFade;
 
         float diffuse = max(dot(normal, lightDir), 0.0f);
+        // w is the cube of this light plus one. A surface turned away or out of range has nothing
+        // to lose, so it skips the lookups.
+        if (LightParams[i].w > 0.5f && diffuse > 0.0f && rangeFade > 0.0f)
+        {
+            attenuation *= ComputePointShadow((int)LightParams[i].w - 1, worldPos, normal, LightPositions[i].xyz, radius);
+        }
         float3 reflectDir = reflect(-lightDir, normal);
         float specular = pow(max(dot(viewDir, reflectDir), 0.0f), shininess);
         float3 lightContribution = LightColors[i].xyz * LightParams[i].x * attenuation * 1.45f;
@@ -208,10 +320,7 @@ float3 ComputeSceneLighting(float3 albedo, float3 normal, float3 worldPos, Mater
 
     float3 directionalToLight = normalize(-LightDirection.xyz);
     float viewDepth = length(CameraPosition.xyz - worldPos);
-    // Dynamic cascades cover the units, the baked map covers the scenery; a pixel is lit only if
-    // neither of them blocks the sun.
-    float shadow = min(ComputeShadowFactor(worldPos, normal, directionalToLight, viewDepth),
-                       ComputeStaticShadowFactor(worldPos, normal, directionalToLight));
+    float shadow = ComputeShadowFactor(worldPos, normal, directionalToLight, viewDepth);
 
     float3 directionalColor = DirectionalLightColorIntensity.rgb;
     float directionalIntensity = DirectionalLightColorIntensity.a;

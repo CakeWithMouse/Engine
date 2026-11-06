@@ -1,4 +1,6 @@
 #include <Engine/Resources/Paths.h>
+#include <Engine/Render/PointShadow.h>
+#include <Engine/Render/ShadowCascades.h>
 #include <Engine/SaveGame/SaveGame.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/CharacterController.h>
@@ -357,6 +359,11 @@ void Game::DestroyResources(bool preserveScene)
         dsv.Reset();
     }
     shadowSampler.Reset();
+    shadowCompareSampler.Reset();
+    for (auto& view : pointShadowDSVs) view.Reset();
+    pointShadowSRV.Reset();
+    pointShadowTexture.Reset();
+    PointShadowCount = 0;
     shadowVertexShader.Reset();
     shadowInstancedVertexShader.Reset();
     shadowVertexShaderBlob.Reset();
@@ -891,10 +898,13 @@ bool Game::CreateInputLayouts()
         {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
+    // Offsets follow MeshVertex in Engine/Render/MeshData.h. A shader that does not read the
+    // tangent simply ignores the element; only the other direction is an error.
     const D3D11_INPUT_ELEMENT_DESC meshElements[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
 
     if (FAILED(Device->CreateInputLayout(primitiveElements, ARRAYSIZE(primitiveElements),
@@ -1061,6 +1071,7 @@ std::vector<PointLightInfo> Game::GetPointLights(size_t maxLights) const
         info.Intensity = pointLight->GetIntensity();
         info.Radius = pointLight->GetRadius();
         info.bEnabled = pointLight->IsEnabled();
+        info.bCastShadows = pointLight->CastsShadow();
         result.push_back(info);
 
         if (result.size() >= maxLights)
@@ -1961,6 +1972,9 @@ void Game::RenderDeferredLightingPass()
         ID3D11ShaderResourceView* shadowMapSRV = shadowSRV.Get();
         Context->PSSetShaderResources(4, 1, &shadowMapSRV);
         Context->PSSetSamplers(4, 1, shadowSampler.GetAddressOf());
+        Context->PSSetSamplers(5, 1, shadowCompareSampler.GetAddressOf());
+        ID3D11ShaderResourceView* pointShadowView = pointShadowSRV.Get();
+        Context->PSSetShaderResources(PointShadowTextureSlot, 1, &pointShadowView);
 
         ID3D11ShaderResourceView* bakedShadowSRV = bStaticShadowReady ? staticShadowSRV.Get() : nullptr;
         Context->PSSetShaderResources(5, 1, &bakedShadowSRV);
@@ -1971,6 +1985,7 @@ void Game::RenderDeferredLightingPass()
 
     ID3D11ShaderResourceView* nullSRVs[6] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
     Context->PSSetShaderResources(0, 6, nullSRVs);
+    Context->PSSetShaderResources(PointShadowTextureSlot, 1, nullSRVs);
 }
 
 void Game::RenderDeferredDebugOverlay()
@@ -2127,6 +2142,16 @@ bool Game::InitShadowResources()
         return false;
     }
 
+    D3D11_SAMPLER_DESC compareDesc = shadowSamplerDesc;
+    compareDesc.Filter = D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+    compareDesc.ComparisonFunc = D3D11_COMPARISON_LESS_EQUAL;
+    hr = Device->CreateSamplerState(&compareDesc, shadowCompareSampler.ReleaseAndGetAddressOf());
+    if (FAILED(hr))
+    {
+        std::cout << "Failed to create shadow comparison sampler." << std::endl;
+        return false;
+    }
+
     const HWND hWnd = DisplayPtr ? DisplayPtr->GetHwnd() : nullptr;
     hr = CreateShader(hWnd, nullptr, ShadowShaderPath().c_str(), "VSMain", "vs_5_0", shadowVertexShaderBlob.ReleaseAndGetAddressOf());
     if (FAILED(hr))
@@ -2169,7 +2194,8 @@ bool Game::InitShadowResources()
     const D3D11_INPUT_ELEMENT_DESC meshLayoutDesc[] = {
         {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
         {"NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0}
+        {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0},
+        {"TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0}
     };
     hr = Device->CreateInputLayout(meshLayoutDesc, ARRAYSIZE(meshLayoutDesc),
                                    shadowVertexShaderBlob->GetBufferPointer(), shadowVertexShaderBlob->GetBufferSize(),
@@ -2211,6 +2237,156 @@ bool Game::InitShadowResources()
     return true;
 }
 
+namespace
+{
+    /** The near plane sits at PointShadowNearPlane, so a smaller light has no depth range to store. */
+    bool CastsPointShadow(const PointLightInfo& light)
+    {
+        return light.bEnabled && light.bCastShadows && light.Radius > PointShadowNearPlane + 1.0f;
+    }
+}
+
+void Game::UpdatePointShadows()
+{
+    PointShadowCount = 0;
+    if (!AreShadowsActive() || bPointShadowFailed)
+    {
+        return;
+    }
+
+    for (const PointLightInfo& light : GetPointLights(MaxPointLights))
+    {
+        if (PointShadowCount < MaxPointShadowLights && CastsPointShadow(light))
+        {
+            PointShadowSpheres[PointShadowCount++] =
+                DirectX::XMFLOAT4(light.Position.x, light.Position.y, light.Position.z, light.Radius);
+        }
+    }
+
+    if (PointShadowCount > 0 && !InitPointShadowResources())
+    {
+        std::cout << "Point light shadows are unavailable." << std::endl;
+        bPointShadowFailed = true;
+        PointShadowCount = 0;
+    }
+}
+
+bool Game::InitPointShadowResources()
+{
+    if (pointShadowSRV)
+    {
+        return true;
+    }
+
+    D3D11_TEXTURE2D_DESC desc = {};
+    desc.Width = PointShadowMapSize;
+    desc.Height = PointShadowMapSize;
+    desc.MipLevels = 1;
+    desc.ArraySize = PointShadowStreams;
+    desc.Format = DXGI_FORMAT_R32_TYPELESS;
+    desc.SampleDesc.Count = 1;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+    desc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+    if (FAILED(Device->CreateTexture2D(&desc, nullptr, pointShadowTexture.ReleaseAndGetAddressOf())))
+    {
+        return false;
+    }
+
+    for (int slice = 0; slice < PointShadowStreams; ++slice)
+    {
+        D3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+        dsvDesc.Format = DXGI_FORMAT_D32_FLOAT;
+        dsvDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+        dsvDesc.Texture2DArray.ArraySize = 1;
+        dsvDesc.Texture2DArray.FirstArraySlice = slice;
+        if (FAILED(Device->CreateDepthStencilView(pointShadowTexture.Get(), &dsvDesc,
+                                                  pointShadowDSVs[slice].ReleaseAndGetAddressOf())))
+        {
+            return false;
+        }
+    }
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURECUBEARRAY;
+    srvDesc.TextureCubeArray.MipLevels = 1;
+    srvDesc.TextureCubeArray.NumCubes = MaxPointShadowLights;
+    return SUCCEEDED(Device->CreateShaderResourceView(pointShadowTexture.Get(), &srvDesc,
+                                                      pointShadowSRV.ReleaseAndGetAddressOf()));
+}
+
+void Game::RenderPointShadowMaps()
+{
+    if (PointShadowCount == 0)
+    {
+        return;
+    }
+
+    ID3D11ShaderResourceView* nullSRV = nullptr;
+    Context->PSSetShaderResources(PointShadowTextureSlot, 1, &nullSRV);
+
+    D3D11_VIEWPORT viewport = {};
+    viewport.Width = static_cast<float>(PointShadowMapSize);
+    viewport.Height = static_cast<float>(PointShadowMapSize);
+    viewport.MaxDepth = 1.0f;
+
+    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    Context->RSSetState(shadowRasterState.Get());
+    Context->RSSetViewports(1, &viewport);
+    Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
+
+    ShadowPassContext pass;
+    pass.VertexShader = shadowVertexShader.Get();
+    pass.InstancedVertexShader = shadowInstancedVertexShader.Get();
+    pass.ConstantBuffer = shadowPassCB.Get();
+    pass.PrimitiveLayout = shadowInputLayoutPrimitive.Get();
+    pass.MeshLayout = shadowInputLayoutMesh.Get();
+
+    const auto components = CollectRenderComponents();
+    for (int light = 0; light < PointShadowCount; ++light)
+    {
+        const DirectX::XMFLOAT4& sphere = PointShadowSpheres[light];
+        const DirectX::XMFLOAT3 position(sphere.x, sphere.y, sphere.z);
+        pass.PointLightIndex = light;
+
+        for (int face = 0; face < PointShadowFaces; ++face)
+        {
+            ID3D11DepthStencilView* faceDSV = pointShadowDSVs[light * PointShadowFaces + face].Get();
+            Context->OMSetRenderTargets(0, nullptr, faceDSV);
+            Context->ClearDepthStencilView(faceDSV, D3D11_CLEAR_DEPTH, 1.0f, 0);
+            pass.LightViewProjection = PointShadowViewProjection(face, position, sphere.w);
+            pass.PointFace = face;
+
+            for (auto* component : components)
+            {
+                if (!component->IsRenderable() || component->IsSkybox())
+                {
+                    continue;
+                }
+                // Six faces multiply every draw, so an object is only drawn where it can land.
+                // Components holding many copies sort them out themselves.
+                if (component->SupportsFrustumCulling())
+                {
+                    const glm::vec3 offset = component->GetWorldPosition() - glm::vec3(sphere.x, sphere.y, sphere.z);
+                    const float objectRadius = component->GetWorldBoundingRadius();
+                    const float reach = sphere.w + objectRadius;
+                    if (glm::dot(offset, offset) > reach * reach ||
+                        (PointShadowFaceMask(offset.x, offset.y, offset.z, objectRadius) & (1u << face)) == 0)
+                    {
+                        continue;
+                    }
+                }
+                component->RenderShadow(Context.Get(), pass);
+            }
+        }
+    }
+
+    Context->RSSetState(DefaultRasterState.Get());
+    SetFullViewport();
+    Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
+}
+
 void Game::UpdateShadowCascades()
 {
     using namespace DirectX;
@@ -2247,12 +2423,28 @@ void Game::UpdateShadowCascades()
     const XMFLOAT3 lightDirection = NormalizeFloat3(DirectionalLightDirection);
     const XMVECTOR lightDirV = XMVector3Normalize(XMVectorSet(lightDirection.x, lightDirection.y, lightDirection.z, 0.0f));
 
-    const float splitDistances[MaxShadowCascades + 1] = {
-        nearPlane,
-        std::max(CascadeSplits.x, nearPlane + 1.0f),
-        std::max(CascadeSplits.y, nearPlane + 2.0f),
-        std::min(std::max(CascadeSplits.z, nearPlane + 3.0f), farPlane)
-    };
+    // Where the cascades are split decides whether they are worth anything. Splitting a fixed
+    // fraction of the shadow distance assumes the camera stands among the geometry; a strategy
+    // camera looks at the field from hundreds of units away, so the first cascade lands in empty
+    // air in front of it: with the camera 220 units from the Battle field it held 0 of 2048x2048 texels and
+    // one cascade carried nearly the whole field. The range is therefore taken from the part of the
+    // declared shadow area the camera can see, and only then divided.
+    float splitDistances[MaxShadowCascades + 1] = {};
+    if (StaticShadowExtent > 0.0f)
+    {
+        const float centerDepth = glm::dot(StaticShadowCenter - cameraPosition, cameraForward);
+        SplitShadowCascadeRange(FitShadowCascadeRange(nearPlane, farPlane, centerDepth, StaticShadowExtent),
+                                CascadeSplitLambda, splitDistances);
+    }
+    else
+    {
+        // No shadow area declared: keep the splits the scene configured.
+        splitDistances[0] = nearPlane;
+        splitDistances[1] = std::max(CascadeSplits.x, nearPlane + 1.0f);
+        splitDistances[2] = std::max(CascadeSplits.y, nearPlane + 2.0f);
+        splitDistances[3] = std::min(std::max(CascadeSplits.z, nearPlane + 3.0f), farPlane);
+    }
+    ActiveCascadeSplits = XMFLOAT4(splitDistances[1], splitDistances[2], splitDistances[3], splitDistances[0]);
 
     for (int cascadeIndex = 0; cascadeIndex < MaxShadowCascades; ++cascadeIndex)
     {
@@ -2302,14 +2494,15 @@ void Game::UpdateShadowCascades()
         XMStoreFloat3(&centroidPosition, centroid);
         CascadeSpheres[cascadeIndex] = XMFLOAT4(centroidPosition.x, centroidPosition.y, centroidPosition.z, radius);
 
-        const XMVECTOR lightPosition = XMVectorSubtract(centroid, XMVectorScale(lightDirV, radius * 2.2f + 120.0f));
         XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
         if (std::abs(XMVectorGetX(XMVector3Dot(up, lightDirV))) > 0.95f)
         {
             up = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
         }
 
-        const XMMATRIX lightView = XMMatrixLookAtLH(lightPosition, centroid, up);
+        // Anchored to the world, not to the cascade: the map grid has to stay put in light space, or
+        // snapping the bounds below would snap to a grid that moves with the camera.
+        const XMMATRIX lightView = XMMatrixLookAtLH(XMVectorNegate(lightDirV), XMVectorZero(), up);
 
         float minX = FLT_MAX;
         float maxX = -FLT_MAX;
@@ -2328,6 +2521,11 @@ void Game::UpdateShadowCascades()
             minZ = std::min(minZ, XMVectorGetZ(cornerLS));
             maxZ = std::max(maxZ, XMVectorGetZ(cornerLS));
         }
+
+        // Static casters are drawn here too, and their edges would crawl if a fraction of a texel of
+        // camera movement shifted the whole map under them.
+        SnapShadowBounds(minX, maxX, ShadowMapSize);
+        SnapShadowBounds(minY, maxY, ShadowMapSize);
 
         const float depthPadding = std::max(80.0f, radius * 0.45f);
         minZ -= depthPadding;
@@ -2738,8 +2936,9 @@ void Game::RenderShadowMaps()
             {
                 continue;
             }
-            // Static casters are already in the baked map: drawing them again would cost twice.
-            if (bStaticShadowReady && component->IsStaticShadowCaster())
+            // Beyond the near cascades static casters come from the baked map; close to the camera
+            // its density is too low, and a column shadow turns into a row of blocks.
+            if (bStaticShadowReady && component->IsStaticShadowCaster() && cascadeIndex >= StaticCasterCascades)
             {
                 continue;
             }
@@ -3944,6 +4143,7 @@ void Game::PrepareRenderFrame()
     }
 
     UpdateShadowCascades();
+    UpdatePointShadows();
     BuildFrameConstants();
 
     for (auto& pair : Components)
@@ -4002,12 +4202,16 @@ void Game::BuildFrameConstants()
     }
     const std::vector<PointLightInfo> pointLights = GetPointLights(MaxPointLights);
     const int lightCount = static_cast<int>(pointLights.size());
+    int nextShadowCube = 0;
     for (int i = 0; i < lightCount; ++i)
     {
         const PointLightInfo& light = pointLights[i];
         frame.LightPositions[i] = XMFLOAT4(light.Position.x, light.Position.y, light.Position.z, 1.0f);
         frame.LightColors[i] = XMFLOAT4(light.Color.x, light.Color.y, light.Color.z, 1.0f);
-        frame.LightParams[i] = XMFLOAT4(light.Intensity, light.Radius, light.bEnabled ? 1.0f : 0.0f, 0.0f);
+        // w is the cube of this light plus one; zero means it casts no shadow.
+        const bool bShadowCube = CastsPointShadow(light) && nextShadowCube < PointShadowCount;
+        frame.LightParams[i] = XMFLOAT4(light.Intensity, light.Radius, light.bEnabled ? 1.0f : 0.0f,
+                                        bShadowCube ? static_cast<float>(++nextShadowCube) : 0.0f);
     }
     frame.LightMeta = XMFLOAT4(static_cast<float>(lightCount), bSceneLighting ? 0.0f : AmbientIntensity,
         SpecularShininess, bSceneLighting ? 1.0f : 0.0f);
@@ -4022,7 +4226,7 @@ void Game::BuildFrameConstants()
     }
     frame.StaticShadowViewProjection = bStaticShadowReady ? StaticShadowViewProjection : Identity4x4();
     frame.StaticShadowParams = (bShadows && bStaticShadowReady) ? StaticShadowParams : XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-    frame.CascadeSplits = bShadows ? CascadeSplits : XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+    frame.CascadeSplits = bShadows ? ActiveCascadeSplits : XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
     frame.ShadowParams = bShadows ? ShadowParams : XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
     frame.ShadowParams.x = bShadows ? 1.0f : 0.0f;
 
@@ -4206,6 +4410,7 @@ void Game::DrawForward()
 {
     BeginMainPass(true);
     RenderShadowMaps();
+    RenderPointShadowMaps();
     RenderOpaque(OpaqueFilter::All, ShaderCompileVariant::Default);
     RenderSkybox();
     DispatchComputePhase();
@@ -4233,6 +4438,7 @@ void Game::DrawDeffered()
     Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     RenderShadowMaps();
+    RenderPointShadowMaps();
 
     // 1. Geometry pass: only materials that really write the G-buffer.
     ID3D11RenderTargetView* gBufferTargets[3] =

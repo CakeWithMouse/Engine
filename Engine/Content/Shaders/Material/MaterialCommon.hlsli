@@ -46,6 +46,9 @@ struct MaterialInput
 {
     float3 WorldPos;
     float3 Normal;    // world space, normalized; flipped on back faces of two-sided materials
+    // xyz world tangent along +U, w the sign of the bitangent. w is 0 when the mesh carries no
+    // tangent (a skinned vertex, for instance) and NormalFromMap then falls back to derivatives.
+    float4 Tangent;
     float2 UV;
     float3 ViewDir;   // from the surface towards the camera, normalized
     float4 Color;     // colour of the component (SetColor), times the colour of the copy when instanced
@@ -65,19 +68,34 @@ struct MaterialOutput
 };
 
 // World normal from a tangent-space normal map sample (rgb in 0..1, DirectX convention: green
-// points to +V, which is down the image). The tangent frame comes from screen-space derivatives
-// of the position and UV, so meshes need no tangents; pixel shader only.
+// points to +V, which is down the image). Pixel shader only.
 //     o.Normal = NormalFromMap(i, NormalMap.Sample(MaterialSampler, i.UV).xyz, 1.0f);
+//
+// The basis comes from the mesh when it has one. Screen-space derivatives are the fallback, and
+// they are only an approximation: they read the same frame for a whole 2x2 block of pixels, they
+// break down along a uv seam, and they cannot tell a mirrored island from a normal one, so a
+// mirrored half of a model lights up inside out. Where the vertices carry a tangent, the sign in
+// w says which way the bitangent goes and all three problems disappear.
 float3 NormalFromMap(MaterialInput i, float3 encoded, float strength)
 {
+    float3 n = encoded * 2.0f - 1.0f;
+    n.xy *= strength;
+
+    // w is interpolated, and a triangle can mix a vertex with a basis and one without (the pole of
+    // a sphere), so only its sign is meaningful. The length check catches tangents that cancelled.
+    if (abs(i.Tangent.w) > 0.5f && dot(i.Tangent.xyz, i.Tangent.xyz) > 1e-8f)
+    {
+        const float3 tangent = normalize(i.Tangent.xyz);
+        const float3 bitangent = cross(i.Normal, tangent) * (i.Tangent.w < 0.0f ? -1.0f : 1.0f);
+        return normalize(n.x * tangent + n.y * bitangent + n.z * i.Normal);
+    }
+
     const float3 dp1 = ddx(i.WorldPos), dp2 = ddy(i.WorldPos);
     const float2 duv1 = ddx(i.UV), duv2 = ddy(i.UV);
     const float3 dp2perp = cross(dp2, i.Normal), dp1perp = cross(i.Normal, dp1);
     const float3 tangent = dp2perp * duv1.x + dp1perp * duv2.x;
     const float3 bitangent = dp2perp * duv1.y + dp1perp * duv2.y;
     const float scale = rsqrt(max(max(dot(tangent, tangent), dot(bitangent, bitangent)), 1e-20f));
-    float3 n = encoded * 2.0f - 1.0f;
-    n.xy *= strength;
     return normalize(n.x * tangent * scale + n.y * bitangent * scale + n.z * i.Normal);
 }
 

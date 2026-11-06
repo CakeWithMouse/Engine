@@ -103,6 +103,7 @@
     <ClCompile Include="Source\MainGame\Player.cpp" />
     <ClCompile Include="Source\Render\ImpostorAtlas.cpp" />
     <ClCompile Include="Source\Render\Material.cpp" />
+    <ClCompile Include="Source\Render\MeshData.cpp" />
     <ClCompile Include="Source\Render\MaterialAsset.cpp" />
     <ClCompile Include="Source\Render\MeshPrimitives.cpp" />
     <ClCompile Include="Source\Render\MeshSimplifier.cpp" />
@@ -173,6 +174,8 @@
     <ClInclude Include="Include\Engine\Render\Material.h" />
     <ClInclude Include="Include\Engine\Render\MaterialAsset.h" />
     <ClInclude Include="Include\Engine\Render\MeshSimplifier.h" />
+    <ClInclude Include="Include\Engine\Render\PointShadow.h" />
+    <ClInclude Include="Include\Engine\Render\ShadowCascades.h" />
     <ClInclude Include="Include\Engine\Render\MeshValidation.h" />
     <ClInclude Include="Include\Engine\UI\FontAtlas.h" />
     <ClInclude Include="Include\Engine\UI\UIElement.h" />

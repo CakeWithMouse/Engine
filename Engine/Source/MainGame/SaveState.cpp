@@ -16,7 +16,9 @@ void MeshState(SaveArchive& a,MeshLodData& mesh) {
     auto indices=mesh.Indices;a.Field("vertices",vertices);a.Field("indices",indices);
     if(vertices.size()>1000000 || indices.size()>3000000 || indices.size()%3)throw std::runtime_error("Invalid saved mesh size");
     for(auto index:indices)if(index>=vertices.size())throw std::runtime_error("Invalid saved mesh index");
-    if(a.IsReading()){mesh.Vertices.clear();for(const auto& v:vertices)mesh.Vertices.push_back({{v[0],v[1],v[2],v[3]},{v[4],v[5],v[6],v[7]},{v[8],v[9],v[10],v[11]}});mesh.Indices=std::move(indices);}
+    if(a.IsReading()){mesh.Vertices.clear();for(const auto& v:vertices)mesh.Vertices.push_back({{v[0],v[1],v[2],v[3]},{v[4],v[5],v[6],v[7]},{v[8],v[9],v[10],v[11]}});mesh.Indices=std::move(indices);
+        // The save format keeps twelve floats per vertex; the tangents are derived data.
+        GenerateTangents(mesh);}
 }
 }
 
@@ -166,11 +168,16 @@ void MeshComponent::SerializeSaveGame(SaveArchive& a){
     a.Section("MeshComponent",[&](SaveArchive& m){m.Version(1);MeshState(m,Mesh);});
     if(a.IsReading()){auto mesh=Mesh;SetMesh(std::move(mesh));}
 }
+#if defined(ENGINE_ENABLE_ASSIMP)
+// FBXComponent.cpp is only compiled with Assimp, so LoadModel and modelPath exist only then.
+// Without the guard this definition is the one reference that keeps the whole engine from
+// linking when the optional dependency is absent.
 void FBXComponent::SerializeSaveGame(SaveArchive& a){
     GameComponent::SerializeSaveGame(a);
     a.Section("FBXComponent",[&](SaveArchive& s){s.Version(1);auto path=modelPath;s.Field("model",path);
         if(s.IsReading()&&!path.empty()&&!LoadModel(path))throw std::runtime_error("Cannot restore imported model: "+path);});
 }
+#endif
 void UIComponent::SerializeSaveGame(SaveArchive& a){
     GameComponent::SerializeSaveGame(a);
     a.Section("UIComponent",[&](SaveArchive& s){

@@ -9,7 +9,8 @@
 /** One sub-mesh of an imported model, CPU side (device independent). */
 struct FBXImportedMesh
 {
-    // Interleaved position, normal, uv as three float4 per vertex (VertexFormat::Mesh), node transforms baked in.
+    // Interleaved position, normal, uv, tangent as four float4 per vertex (VertexFormat::Mesh),
+    // node transforms baked in.
     std::vector<DirectX::XMFLOAT4> Vertices;
     std::vector<uint32_t> Indices;
     DirectX::XMFLOAT4 Color{1.0f, 1.0f, 1.0f, 1.0f}; // diffuse colour of the sub-mesh material

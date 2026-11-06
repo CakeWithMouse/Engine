@@ -283,6 +283,10 @@ void InstancedMeshComponent::BuildVisibleSets()
         {
             Lods[level].ShadowStaging[cascade].clear();
         }
+        for (std::vector<InstData>& stream : Lods[level].PointStaging)
+        {
+            stream.clear();
+        }
     }
     ImpostorLevel.ColorStaging.clear();
     DrawnInstances = 0;
@@ -311,6 +315,8 @@ void InstancedMeshComponent::BuildVisibleSets()
     const float screenFactor = ComputeScreenFactor();
     const bool orthographic = GamePtr->GetPlayer()->IsOrthographic();
     const DirectX::XMFLOAT4* cascadeSpheres = GamePtr->GetCascadeSpheres();
+    const DirectX::XMFLOAT4* pointSpheres = GamePtr->GetPointShadowSpheres();
+    const int pointLightCount = bCastsShadow ? GamePtr->GetPointShadowCount() : 0;
     const int cascadeLimit = ShadowCascadeLimit > 0 ? std::min(ShadowCascadeLimit, MaxShadowCascades) : MaxShadowCascades;
     const DirectX::XMFLOAT4& lightDirectionValue = GamePtr->GetDirectionalLightDirection();
     glm::vec3 lightDirection(lightDirectionValue.x, lightDirectionValue.y, lightDirectionValue.z);
@@ -369,7 +375,15 @@ void InstancedMeshComponent::BuildVisibleSets()
                 bWantsShadow = StableUnitFraction(instanceIndex) < keep;
             }
         }
-        if (!bInsideFrustum && !bWantsShadow)
+        // A point light reaches casters the camera does not see, so they stay in the frame.
+        bool bPointCaster = false;
+        for (int light = 0; light < pointLightCount && !bPointCaster; ++light)
+        {
+            const glm::vec3 toLight = instance.Position - glm::vec3(pointSpheres[light].x, pointSpheres[light].y, pointSpheres[light].z);
+            const float reach = pointSpheres[light].w + radius;
+            bPointCaster = glm::dot(toLight, toLight) <= reach * reach;
+        }
+        if (!bInsideFrustum && !bWantsShadow && !bPointCaster)
         {
             ++Diagnostics.frustumCulled;
             ++CulledInstances;
@@ -451,6 +465,10 @@ void InstancedMeshComponent::BuildVisibleSets()
         {
             const int meshLevel = std::min(level, LodCount - 1);
             CollectShadowCasters(instance, data, meshLevel, radius, lightDirection, cascadeSpheres, cascadeLimit);
+        }
+        if (bPointCaster)
+        {
+            CollectPointCasters(instance, data, std::min(level, LodCount - 1), radius, pointSpheres, pointLightCount);
         }
     }
 
@@ -538,6 +556,11 @@ void InstancedMeshComponent::EnsureFrameData(ID3D11DeviceContext* context)
         {
             UploadStream(context, lod.ShadowStaging[cascade], lod.ShadowBuffer[cascade],
                          lod.ShadowSRV[cascade], lod.ShadowCapacity[cascade]);
+        }
+        for (int stream = 0; stream < PointShadowStreams; ++stream)
+        {
+            UploadStream(context, lod.PointStaging[stream], lod.PointBuffer[stream],
+                         lod.PointSRV[stream], lod.PointCapacity[stream]);
         }
     }
     UploadStream(context, ImpostorLevel.ColorStaging, ImpostorLevel.ColorBuffer,

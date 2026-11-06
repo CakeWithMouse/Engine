@@ -624,6 +624,10 @@ void GameComponent::BindMaterialResources(ID3D11DeviceContext* context)
         ID3D11SamplerState* shadowMapSampler = GamePtr->GetShadowSampler();
         context->PSSetShaderResources(4, 1, &shadowMapSRV);
         context->PSSetSamplers(4, 1, &shadowMapSampler);
+        ID3D11SamplerState* shadowCompareSampler = GamePtr->GetShadowCompareSampler();
+        context->PSSetSamplers(5, 1, &shadowCompareSampler);
+        ID3D11ShaderResourceView* pointShadowSRV = GamePtr->GetPointShadowSRV();
+        context->PSSetShaderResources(PointShadowTextureSlot, 1, &pointShadowSRV);
 
         ID3D11ShaderResourceView* staticShadowSRV = GamePtr->IsStaticShadowReady() ? GamePtr->GetStaticShadowSRV() : nullptr;
         context->PSSetShaderResources(5, 1, &staticShadowSRV);
@@ -642,6 +646,7 @@ void GameComponent::UnbindMaterialResources(ID3D11DeviceContext* context)
     context->PSSetShaderResources(1, 1, &nullSRV);
     context->PSSetShaderResources(4, 1, &nullSRV);
     context->PSSetShaderResources(5, 1, &nullSRV);
+    context->PSSetShaderResources(PointShadowTextureSlot, 1, &nullSRV);
     if (MaterialPtr)
     {
         MaterialPtr->Unbind(context);
