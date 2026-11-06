@@ -5,6 +5,7 @@
 #include <Engine/Components/Character.h>
 #include <Engine/Components/SpecificComponents/UIComponent.h>
 #include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
+#include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
 #include <Engine/UI/ProjectHud.h>
 
 #include <algorithm>
@@ -1445,9 +1446,8 @@ void Game::RetryFailedMaterialAssets()
     {
         return;
     }
-    for (auto& pair : Components)
+    for (auto* component : CollectRenderComponents())
     {
-        GameComponent* component = pair.second->GetRenderComponent();
         if (!component->MaterialAssetPath.empty() && component->MaterialPtr == errorMaterial)
         {
             component->bMaterialAssetLoaded = false;
@@ -1557,7 +1557,8 @@ void Game::OnShadersInvalidated()
         component->SetVertexShader(nullptr);
         component->SetPixelShader(nullptr);
     };
-    for (auto& pair : Components) { resetShaders(pair.second.get()); resetShaders(pair.second->GetRenderComponent()); }
+    for (auto& pair : Components) resetShaders(pair.second.get());
+    for (auto* part : CollectRenderComponents()) resetShaders(part);
     resetShaders(ProjectHudComponent.get());
     resetShaders(DiagnosticsHud.get());
 
@@ -2663,9 +2664,8 @@ void Game::RenderStaticShadowMap()
     staticPass.LightDirection = DirectionalLightDirection;
 
     uint32_t casterCount = 0;
-    for (auto& pair : Components)
+    for (auto* component : CollectRenderComponents())
     {
-        GameComponent* component = pair.second->GetRenderComponent();
         if (!component->IsRenderable() || !component->IsStaticShadowCaster())
         {
             continue;
@@ -2723,9 +2723,8 @@ void Game::RenderShadowMaps()
         shadowPass.CascadeIndex = cascadeIndex;
         shadowPass.CascadeSphere = CascadeSpheres[cascadeIndex];
 
-        for (auto& componentPair : Components)
+        for (auto* component : CollectRenderComponents())
         {
-            GameComponent* component = componentPair.second->GetRenderComponent();
             if (!component->IsRenderable() || component->IsSkybox())
             {
                 continue;
@@ -2810,7 +2809,7 @@ void Game::Run()
         deltaTime = std::min(deltaTime, MaxFrameDeltaSeconds);
 
         ++FrameIndex;
-        Stats.Reset();
+        Stats.Reset();CountedVisibleObjects.clear();
 
         UpdateFrame(deltaTime);
 
@@ -3527,7 +3526,7 @@ bool Game::RenderViewportFrame(float deltaTime)
     if (!bRunning) return false;
     if (bMinimized) return true;
     ++FrameIndex;
-    Stats.Reset();
+    Stats.Reset();CountedVisibleObjects.clear();
     UpdateFrame(std::clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds));
     BeginGpuTimer();
 
@@ -3647,7 +3646,7 @@ Game::RuntimeFrameResult Game::RunRuntimeFrame(float deltaTime)
     if (!bRunning) return RuntimeFrameResult::Failed;
     if (bMinimized) { Sleep(10); return RuntimeFrameResult::Running; }
     ++FrameIndex;
-    Stats.Reset();
+    Stats.Reset();CountedVisibleObjects.clear();
     UpdateFrame(std::min(deltaTime, MaxFrameDeltaSeconds));
     BeginGpuTimer();
     RenderFrame();
@@ -3898,6 +3897,7 @@ void Game::PrepareRenderFrame()
         bShadowResourcesReady = InitShadowResources();
         bShadowInitFailed = !bShadowResourcesReady;
     }
+    for(auto* part : CollectRenderComponents()) PrepareMaterial(part);
     // The baked map only has to be redrawn when the sun or the area changes.
     if (AreShadowsActive() && StaticShadowExtent > 0.0f && !bStaticShadowFailed)
     {
@@ -4247,14 +4247,14 @@ bool Game::IsVisible(GameComponent* Component)
 {
     if (!bFrustumCulling || !Component->SupportsFrustumCulling())
     {
-        ++Stats.VisibleObjects;
+        if(CountedVisibleObjects.insert(SkeletalMeshComponent::RenderOwnerOf(Component)).second) ++Stats.VisibleObjects;
         return true;
     }
 
     const float radius = Component->GetWorldBoundingRadius();
     if (radius <= 0.0f)
     {
-        ++Stats.VisibleObjects;
+        if(CountedVisibleObjects.insert(SkeletalMeshComponent::RenderOwnerOf(Component)).second) ++Stats.VisibleObjects;
         return true;
     }
 
@@ -4268,8 +4268,20 @@ bool Game::IsVisible(GameComponent* Component)
         }
     }
 
-    ++Stats.VisibleObjects;
+    if(CountedVisibleObjects.insert(SkeletalMeshComponent::RenderOwnerOf(Component)).second) ++Stats.VisibleObjects;
     return true;
+}
+
+std::vector<GameComponent*> Game::CollectRenderComponents()
+{
+    std::vector<GameComponent*> output;
+    output.reserve(Components.size());
+    for (auto& entry : Components) {
+        auto* visual=entry.second->GetRenderComponent();
+        if(auto* model=dynamic_cast<SkeletalMeshComponent*>(visual)) model->AppendRenderParts(output);
+        else output.push_back(visual);
+    }
+    return output;
 }
 
 void Game::RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant)
@@ -4278,9 +4290,8 @@ void Game::RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant)
     Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
     Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
 
-    for (auto& pair : Components)
+    for (auto* Component : CollectRenderComponents())
     {
-        GameComponent* Component = pair.second->GetRenderComponent();
         if (!Component->IsRenderable() || Component->IsSkybox() || Component->HasOpacity() ||
             Component->IsScreenSpaceUI())
         {
@@ -4310,9 +4321,8 @@ void Game::RenderSkybox()
 {
     // Skybox is drawn after opaque geometry at the far plane: it only fills empty pixels.
     Context->OMSetDepthStencilState(depthStencilStateSkybox.Get(), 0);
-    for (auto& pair : Components)
+    for (auto* Component : CollectRenderComponents())
     {
-        GameComponent* Component = pair.second->GetRenderComponent();
         if (!Component->IsSkybox() || !Component->IsRenderable())
         {
             continue;
@@ -4343,9 +4353,8 @@ void Game::RenderUI()
         ProjectHudComponent->Render(Context.Get());
     // Last pass of the frame: the interface sits on the finished image, with no depth of its own.
     // Each UI component sets its own blending and states, so nothing here has to be undone.
-    for (auto& pair : Components)
+    for (auto* Component : CollectRenderComponents())
     {
-        GameComponent* Component = pair.second->GetRenderComponent();
         if (!Component->IsRenderable() || !Component->IsScreenSpaceUI())
         {
             continue;
@@ -4372,9 +4381,8 @@ void Game::RenderTransparent()
 
     std::vector<SortedDraw> transparentDraws;
     const glm::vec3 cameraPosition(CurrentFrame.CameraPosition.x, CurrentFrame.CameraPosition.y, CurrentFrame.CameraPosition.z);
-    for (auto& pair : Components)
+    for (auto* Component : CollectRenderComponents())
     {
-        GameComponent* Component = pair.second->GetRenderComponent();
         if (!Component->IsRenderable() || Component->IsSkybox() || !Component->HasOpacity() ||
             Component->IsScreenSpaceUI() || !IsVisible(Component))
         {

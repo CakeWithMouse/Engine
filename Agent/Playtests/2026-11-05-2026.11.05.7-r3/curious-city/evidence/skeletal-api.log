@@ -1,0 +1,38 @@
+skeletal_material_api slots=1 source_id=0 original=/Game/Models/CesiumMan/Materials/Material_0.mat set_slot=1 invalid_slot=0 set_override=1 override=/Game/Models/CesiumMan/Materials/Material_0.mat clear_override=1 restored=/Game/Models/CesiumMan/Materials/Material_0.mat
+event=scene_ready balance=500 houses=0
+event=hud_reference_rebound balance=500 houses=0
+completed_frame valid=false before_first_render
+completed_frame valid=true index=1 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=2 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=3 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=4 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=5 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=6 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=7 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=8 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=9 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=10 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=11 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=12 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=13 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=14 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=15 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=16 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=17 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=18 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=19 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=20 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=21 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=22 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=23 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=24 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=25 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=26 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=27 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=28 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=29 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=30 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=31 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=32 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=33 draw_calls=4 visible=3 culled=0
+completed_frame valid=true index=34 draw_calls=4 visible=3 culled=0

@@ -1,0 +1,14 @@
+
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 11 component(s), Project
+  R3WizardProbe.cpp
+E:\Engine\Engine\build\playtests\20261105-r3\tired-bomber\BomberProject\Source\R3WizardProbe.cpp(5,1): error C1189: #error:  R3 intentional rollback probe [E:\Engine\Engine\build\playtests\20261105-r3\tired-bomber\BomberProject\Game.vcxproj]
+
+Full build log: E:\Engine\Engine\build\playtests\20261105-r3\tired-bomber\BomberProject\Binaries\Release\786554d928ea477a95520dd0966a992e\build.log
+Project build failed; previous module preserved
+E:\Engine\Engine\build\playtests\20261105-r3\Runtime\SDK\ProjectTools.ps1:294 знак:31
++ ... ExitCode) { throw 'Project build failed; previous module preserved' } ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Project build f...odule preserved:String) [], RuntimeException
+    + FullyQualifiedErrorId : Project build failed; previous module preserved
+ 

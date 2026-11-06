@@ -4,6 +4,7 @@
 #include <Engine/Scene/SceneDocument.h>
 #include <Engine/Components/Character.h>
 #include <Engine/Components/GameComponents.h>
+#include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
 #include <Engine/Scene/SceneAssets.h>
 #include "../../ThirdParty/nlohmann/json.hpp"
 #include <atomic>
@@ -262,8 +263,12 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
     {
         auto object = o.typeName == SceneAssets::ModelType ? SceneAssets::CreateModel(o.modelAsset, false) : catalog.Find(o.typeName)->create();
         if (!object) throw std::runtime_error("Component factory returned null");
+        // Engine.Model is already loaded by its factory; project subclasses are not.
+        // Their material-slot codec validates source IDs against the loaded geometry.
+        const bool skeletal = dynamic_cast<SkeletalMeshComponent*>(object.get()) != nullptr;
+        if (skeletal) SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
         object->LoadProjectData(o.projectData);
-        SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
+        if (!skeletal) SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
         auto added = target.AddComponent(o.name, object, o.typeName);
         if (added.result != SceneResult::Ok || target.SetTransform(added.id, o.transform) != SceneResult::Ok)
             throw std::runtime_error("Cannot restore object: " + o.name);

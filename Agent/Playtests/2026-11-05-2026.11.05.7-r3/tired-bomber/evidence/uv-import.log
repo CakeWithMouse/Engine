@@ -1,0 +1,14 @@
+[VfsRead] using local VFS (no host service)
+{
+    "asset": "/Game/Models/blend-uv/blend-uv.glb",
+    "clips": 0,
+    "indices": 6,
+    "material": "/Game/Models/blend-uv/Materials/Material_0.mat",
+    "materialSlots": {
+        "0": ""
+    },
+    "meshes": 1,
+    "ok": true,
+    "placed": true,
+    "type": "Engine.Model"
+}

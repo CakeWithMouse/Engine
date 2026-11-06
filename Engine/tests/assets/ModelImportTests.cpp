@@ -1,4 +1,5 @@
 #include <Engine/Runtime/EditSessionApi.h>
+#include <Engine/Runtime/ProjectDataApi.h>
 #include <Engine/Render/MaterialAsset.h>
 #include <Engine/Scene/SceneDocument.h>
 #include "../../ThirdParty/nlohmann/json.hpp"
@@ -29,15 +30,21 @@ std::string Import(const EngineEditSessionApi& api, const fs::path& source)
     Check(status == EngineSceneOk, "import model and its material");
     return path;
 }
-std::string Place(const EngineEditSessionApi& api, const std::string& path, const std::string& name, const fs::path& content, bool texture)
+std::string Place(const EngineEditSessionApi& api, const EngineProjectDataApi& dataApi, const std::string& path, const std::string& name, const fs::path& content, bool texture)
 {
     char error[2048]{}; uint64_t id = 0;
     Check(api.createModel(api.context, path.c_str(), name.c_str(), nullptr, &id, error, sizeof(error)) == EngineSceneOk, "place model with auto material");
-    struct Result { uint64_t id; std::string material, texture; } result{id};
+    struct Result { uint64_t id; std::string material, texture, data; } result{id};
     EngineSceneInfo info{};
     Check(api.readActiveScene(api.context, &info, [](void* p, const EngineSceneObjectInfo* o) {
-        auto& r = *static_cast<Result*>(p); if (r.id == o->id) { r.material = o->materialAsset; r.texture = o->textureAsset; }
+        auto& r = *static_cast<Result*>(p); if (r.id == o->id) { r.material = o->materialAsset; r.texture = o->textureAsset;  }
     }, &result) == EngineSceneOk, "read imported model");
+    Check(dataApi.read(dataApi.context,id,[](void* p,const char* data){*static_cast<std::string*>(p)=data;},&result.data)==EngineSceneOk,"read material slots through project data API");
+    if(result.material.empty() && !result.data.empty()) {
+        const auto slots=Json::parse(result.data).at("materialSlots");
+        Check(slots.size()>1,"multiple source materials assigned to slots");
+        result.material=slots.begin().value().get<std::string>();
+    }
     Check(!result.material.empty() && result.texture.empty(), "material auto assigned without double multiplying the texture");
     MaterialAsset material; std::string problem;
     const auto materialPath = content / fs::u8path(result.material.substr(6));
@@ -60,7 +67,7 @@ std::string Place(const EngineEditSessionApi& api, const std::string& path, cons
 }
 #endif
 
-void RunModelImportTests(const EngineEditSessionApi& api, const fs::path& content, const fs::path& sources)
+void RunModelImportTests(const EngineEditSessionApi& api, const EngineProjectDataApi& dataApi, const fs::path& content, const fs::path& sources)
 {
 #if defined(ENGINE_ENABLE_ASSIMP)
     fs::create_directories(sources / "maps");
@@ -70,21 +77,21 @@ void RunModelImportTests(const EngineEditSessionApi& api, const fs::path& conten
     Fbx(sources / "auto-multiple.fbx");
     Fbx(sources / "auto-color.fbx");
     auto external = Import(api, sources / "auto-external.fbx");
-    const auto firstMaterial = Place(api, external, "FBX external", content, true);
+    const auto firstMaterial = Place(api,dataApi, external, "FBX external", content, true);
     const auto duplicate = Import(api, sources / "auto-external.fbx");
     Check(external != duplicate && fs::exists(content / "Models/auto-external_1/Materials/Material_0.mat"), "repeat model import is independent");
-    Place(api, Import(api, sources / "auto-embedded.fbx"), "FBX embedded", content, true);
-    Place(api, Import(api, sources / "auto-color.fbx"), "FBX color", content, false);
+    Place(api,dataApi, Import(api, sources / "auto-embedded.fbx"), "FBX embedded", content, true);
+    Place(api,dataApi, Import(api, sources / "auto-color.fbx"), "FBX color", content, false);
     const auto multiple = Import(api, sources / "auto-multiple.fbx");
     const auto manifestPath = content / fs::u8path(multiple.substr(6) + ".import.json");
     const auto manifest = Json::parse(std::ifstream(manifestPath));
-    Check(manifest.at("materials").size() == 2 && manifest.contains("note"), "all used materials are retained with explicit one-material limitation");
+    Check(manifest.at("version")==2 && manifest.at("materialSlots").size()==2 && !manifest.contains("note"), "source material slots retained without one-material limitation");
     Check(std::distance(fs::directory_iterator(manifestPath.parent_path() / "Textures"), fs::directory_iterator{}) == 1, "shared image copied once");
     // A stale absolute author path is recovered from the standard FBX media folder.
     fs::create_directory(sources / "auto-fallback.fbm");
     Bitmap(sources / "auto-fallback.fbm/color.bmp");
     Fbx(sources / "auto-fallback.fbx");
-    Place(api, Import(api, sources / "auto-fallback.fbx"), "FBX fallback", content, true);
+    Place(api,dataApi, Import(api, sources / "auto-fallback.fbx"), "FBX fallback", content, true);
 
     Fbx(sources / "auto-missing.fbx");
     Fbx(sources / "auto-corrupt.fbx"); Write(sources / "maps/corrupt.png", "bad image");
@@ -94,7 +101,7 @@ void RunModelImportTests(const EngineEditSessionApi& api, const fs::path& conten
               !fs::exists(content / "Models" / name), "missing/corrupt linked image rolls back the complete import");
     Check(fs::exists(content / fs::u8path(firstMaterial.substr(6))), "failed import preserves previous assets");
     fs::remove(sources / "maps" / L"цвет.bmp");
-    Place(api, external, "FBX after source deleted", content, true);
+    Place(api,dataApi, external, "FBX after source deleted", content, true);
 
     // Optional real Blender integration fixtures generated by make-blend-fixtures.py.
     // The ordinary suite still tests FBX (external + embedded) without Blender installed.
@@ -106,15 +113,18 @@ void RunModelImportTests(const EngineEditSessionApi& api, const fs::path& conten
         {
             const auto blend = Import(api, folder / (std::string(name) + ".blend"));
             Check(fs::u8path(blend).extension() == ".glb", "BLEND converted to portable GLB");
-            Place(api, blend, name, content, true);
+            Place(api,dataApi, blend, name, content, true);
         }
         for (const auto* name : {"blender-external", "blender-packed"})
-            Place(api, Import(api, folder / (std::string(name) + ".fbx")), name, content, true);
+            Place(api,dataApi, Import(api, folder / (std::string(name) + ".fbx")), name, content, true);
+        for (const auto* name : {"blend-uv", "blend-suzanne", "blend-suzanne-multiple"})
+            if (fs::exists(folder / (std::string(name) + ".blend")))
+                Place(api,dataApi, Import(api, folder / (std::string(name) + ".blend")), name, content, true);
         Check(api.importAsset(api.context, (folder / "blend-missing.blend").u8string().c_str(), 0, path, sizeof(path), error, sizeof(error)) != EngineSceneOk &&
               !fs::exists(content / "Models/blend-missing"), "missing BLEND image rolls back and reports Blender error");
     }
     else std::cout << "BLEND integration skipped (set PAINENGINE_BLEND_FIXTURES and PAINENGINE_BLENDER)\n";
 #else
-    (void)api; (void)content; (void)sources;
+    (void)api; (void)dataApi; (void)content; (void)sources;
 #endif
 }

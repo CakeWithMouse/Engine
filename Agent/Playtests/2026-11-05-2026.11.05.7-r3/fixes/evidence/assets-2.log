@@ -1,0 +1,390 @@
+Assimp enabled: true
+
+  Base.cpp
+  BaseGameConfig.cpp
+  Character.cpp
+  ComponentTrace.cpp
+  GameComponents.cpp
+  CubeMap.cpp
+  DirectionalLightComponent.cpp
+  CubeComponent.cpp
+  FBXComponent.cpp
+  InstancedMeshComponent.cpp
+  InstancedMeshImpostor.cpp
+  InstancedMeshShadows.cpp
+  InstancedMeshSkinned.cpp
+  MeshComponent.cpp
+  ParticleSystemComponent.cpp
+  SkeletalMeshComponent.cpp
+  SphereComponent.cpp
+  TriangleComponent.cpp
+  UIComponent.cpp
+  StandardSky.cpp
+  Display.cpp
+E:\Engine\Engine\Source\Base\Base.cpp(736,26): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details. [E:\Engine\Engine\Engine.vcxproj]
+  InputDevice.cpp
+  Game.cpp
+  CharacterController.cpp
+  GameTrace.cpp
+  Player.cpp
+  RenderDiagnostics.cpp
+  SaveGame.cpp
+  SaveState.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(388,82): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(388,82): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp) [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Components\SpecificComponents\InstancedMeshComponent.cpp(44,106): message : выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 &std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::emplace_back<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(858,24): message : выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(776,20): message : выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(791,13): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Construct_in_place<DirectX::XMFLOAT4,_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 &,_Ty &&,_Ty &&,_Ty &&,_Ty &&) noexcept" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xmemory(700,103): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xmemory(700,103): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp) [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(779,17): message : выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 *std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::_Emplace_reallocate<_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 *const ,_Ty &&,_Ty &&,_Ty &&,_Ty &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(830,23): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Default_allocator_traits<_Alloc>::construct<_Ty,int,int,int,int>(_Alloc &,_Objty *const ,int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Alloc=std::allocator<DirectX::XMFLOAT4>,
+              _Ty=DirectX::XMFLOAT4,
+              _Objty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\InstancedMeshComponent.cpp)
+  ImpostorAtlas.cpp
+  SceneAuthoring.cpp
+  SceneEditAssets.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(388,82): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(388,82): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp) [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\Components\SpecificComponents\SkeletalMeshComponent.cpp(200,49): message : выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 &std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::emplace_back<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(858,24): message : выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_one_at_back<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(776,20): message : выполняется компиляция ссылки на экземпляр шаблон функции "_Ty &std::vector<_Ty,std::allocator<_Ty>>::_Emplace_back_with_unused_capacity<int,int,int,int>(int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(791,13): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Construct_in_place<DirectX::XMFLOAT4,_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 &,_Ty &&,_Ty &&,_Ty &&,_Ty &&) noexcept" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xmemory(700,103): warning C4244: аргумент: преобразование "_Ty" в "float", возможна потеря данных [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xmemory(700,103): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp) [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(779,17): message : выполняется компиляция ссылки на экземпляр шаблон функции "DirectX::XMFLOAT4 *std::vector<DirectX::XMFLOAT4,std::allocator<DirectX::XMFLOAT4>>::_Emplace_reallocate<_Ty,_Ty,_Ty,_Ty>(DirectX::XMFLOAT4 *const ,_Ty &&,_Ty &&,_Ty &&,_Ty &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Ty=int
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\vector(830,23): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::_Default_allocator_traits<_Alloc>::construct<_Ty,int,int,int,int>(_Alloc &,_Objty *const ,int &&,int &&,int &&,int &&)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Alloc=std::allocator<DirectX::XMFLOAT4>,
+              _Ty=DirectX::XMFLOAT4,
+              _Objty=DirectX::XMFLOAT4
+          ] (компилируется исходный файл Source\Components\SpecificComponents\SkeletalMeshComponent.cpp)
+  SceneEditBatch.cpp
+  SceneEditMaterials.cpp
+  SceneEditSession.cpp
+  Scene.cpp
+  SceneAssets.cpp
+  SceneCommands.cpp
+  SceneDocument.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(4672,18): warning C4244: =: преобразование "const wchar_t" в "char", возможна потеря данных (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp) [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(4672,18): message : контекст создания экземпляра шаблона (сначала самый старый) (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp) [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\MainGame\BaseGameClass\Game.cpp(699,21): message : выполняется компиляция ссылки на экземпляр шаблон функции "std::basic_string<char,std::char_traits<char>,std::allocator<char>> &std::basic_string<char,std::char_traits<char>,std::allocator<char>>::assign<std::_String_const_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(const _Iter,const _Iter)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Elem=wchar_t,
+              _Iter=std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t>>>
+          ]
+E:\Engine\Engine\Source\MainGame\BaseGameClass\Game.cpp(699,27): message : см. первую ссылку на "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::assign" в "Game::CreateDeviceAndSwapChain" [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xstring(3466,32): message : выполняется компиляция ссылки на экземпляр шаблон функции "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<const wchar_t*,0>(_Iter,_Iter,const _Alloc &)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Iter=const wchar_t *,
+              _Alloc=std::allocator<char>
+          ] (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xstring(2603,17): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<const wchar_t*,const wchar_t*,_Size_type>(_Iter,const _Sent,_Size)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Size_type=unsigned __int64,
+              _Iter=const wchar_t *,
+              _Sent=const wchar_t *,
+              _Size=unsigned __int64
+          ] (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xstring(2759,18): message : выполняется компиляция ссылки на экземпляр шаблон функции "_OutIt *std::_Copy_n_unchecked4<const wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _OutIt=char *,
+              _Size=unsigned __int64,
+              _InIt=const wchar_t *,
+              _SizeTy=unsigned __int64
+          ] (компилируется исходный файл Source\MainGame\BaseGameClass\Game.cpp)
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  Module.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Templates/SceneProject/Game.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Templates/SceneProject/Game.exp
+  SceneProject.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Templates\SceneProject\Game.dll
+  AssetRenderTests.cpp
+  AssetTests.cpp
+  ImportedModelRenderTests.cpp
+  ModelImportTests.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\AssetTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\AssetTests.exp
+  AssetTests.vcxproj -> E:\Engine\Engine\build\x64\Release\AssetTests.exe
+
+Invalid or oversized image
+Asset file is empty (0 bytes): E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6\Sources\empty.fbx
+Asset exceeds the import limit of 256 MiB (268435456 bytes): E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6\Sources\large.fbx (268435457 bytes)
+[VfsRead] Failed to read bytes for path '/Game/missing.png' (virtual: '/Game/missing.png'): Failed to open virtual file: /Game/missing.png -> E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/missing.png
+[VfsRead] using local VFS (no host service)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 640x480
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Material 'E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Materials/Tinted.hlsl' failed to compile:
+E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6\Content\Materials\Tinted.hlsl(1,68-70): error X3004: undeclared identifier 'Tnt'
+
+Recompiled 1 material(s) depending on E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6\Content\Materials/Tinted.hlsl
+Recompiled 1 material(s) depending on E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6\Content\Materials/Tinted.hlsl
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+LoadMaterial failed: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Materials/Missing.mat: cannot read the file
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/auto-external/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/auto-embedded/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/auto-fallback/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blender-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blender-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-suzanne/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Missing or external glTF dependency: absent.bin
+glTF dependencies must be relative files inside the model folder
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/CesiumMan/Textures/BaseColor_0.jpg (1024x1024)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/auto-embedded/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/auto-external/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/auto-fallback/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-suzanne/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blender-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blender-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+[Info] FXAA pipeline and shaders compiled successfully
+
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[VfsRead] Failed to read bytes for path '/Game/Textures/цвет.bmp' (virtual: '/Game/Textures/цвет.bmp'): Failed to open virtual file: /Game/Textures/цвет.bmp -> E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Textures/цвет.bmp
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/CesiumMan/Textures/BaseColor_0.jpg (1024x1024)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/auto-embedded/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/auto-external/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/auto-fallback/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+LoadMaterial failed: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Materials/Red.mat: invalid JSON: [json.exception.parse_error.101] parse error at line 1, column 4: syntax error while parsing object key - invalid literal; last read: '{ no'; expected string literal
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-suzanne/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blender-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blender-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Invalidated all 2 cached shader(s)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/CesiumMan/Textures/BaseColor_0.jpg (1024x1024)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/auto-embedded/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/auto-external/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/auto-fallback/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-suzanne/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blender-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blender-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+[Info] FXAA pipeline and shaders compiled successfully
+[VfsRead] using local VFS (no host service)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 640x480
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+PendingTexture kind=0 loaded=1 visible=1
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\pending-texture-0.bmp written=1 size=640x480
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+PendingTexture kind=1 loaded=1 visible=1
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\pending-texture-1.bmp written=1 size=640x480
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+PendingTexture kind=2 loaded=1 visible=1
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+LoadMaterial failed: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Materials/Late.mat: invalid JSON: [json.exception.parse_error.101] parse error at line 1, column 4: syntax error while parsing object key - invalid literal; last read: '{ no'; expected string literal
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Invalidated all 4 cached shader(s)
+Reloaded 1 material(s)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\imported-model.bmp written=1 size=640x480
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/auto-external/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/auto-embedded/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blend-external/Textures/BaseColor_0.png (2x2)
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\blend-external.bmp written=1 size=640x480
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blend-packed/Textures/BaseColor_0.png (2x2)
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\blend-packed.bmp written=1 size=640x480
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blender-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blender-packed/Textures/BaseColor_0.png (2x2)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\uv-material.bmp written=1 size=640x480
+UV corner 260,180 rgb=255,0,0
+UV corner 380,180 rgb=0,255,0
+UV corner 260,300 rgb=0,0,255
+UV corner 380,300 rgb=255,255,0
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\uv-component.bmp written=1 size=640x480
+UV corner 260,180 rgb=255,0,0
+UV corner 380,180 rgb=0,255,0
+UV corner 260,300 rgb=0,0,255
+UV corner 380,300 rgb=255,255,0
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blend-suzanne/Textures/BaseColor_0.png (64x64)
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\suzanne-no-shadows.bmp written=1 size=640x480
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\suzanne-shadows.bmp written=1 size=640x480
+ImportedModelProbe materialUV=1 componentUV=1 darkerGround=4642
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\suzanne-forward.bmp written=1 size=640x480
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\suzanne-deferred.bmp written=1 size=640x480
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\suzanne-default-material.bmp written=1 size=640x480
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\suzanne-masked.bmp written=1 size=640x480
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\suzanne-animated.bmp written=1 size=640x480
+Baked shadow map: 1 static components at 2048 px.
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\suzanne-static-shadow.bmp written=1 size=640x480
+Baked shadow map: 1 static components at 2048 px.
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+Baked shadow map: 0 static components at 2048 px.
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\suzanne-multiple-materials.bmp written=1 size=640x480
+Baked shadow map: 0 static components at 2048 px.
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\slots-mixed-forward.bmp written=1 size=640x480
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\slots-mixed-deferred.bmp written=1 size=640x480
+Baked shadow map: 0 static components at 2048 px.
+frame-dump E:\Engine\Engine\build\asset-tests\Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved\suzanne-slot-replaced.bmp written=1 size=640x480
+Baked shadow map: 0 static components at 2048 px.
+LoadMaterial failed: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Materials/LateSlot.mat: cannot read the file
+Baked shadow map: 0 static components at 2048 px.
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Invalidated all 4 cached shader(s)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blend-suzanne/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+Reloaded 10 material(s)
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/Content'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+GameCreate
+[VfsService] first read via module: /Game/Textures/цвет.bmp
+GameSceneLoaded
+GameStart
+Imported scene standalone
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+GameUpdate
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/CesiumMan/Textures/BaseColor_0.jpg (1024x1024)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/auto-embedded/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/auto-external/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/auto-fallback/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blend-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blend-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blend-suzanne/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blender-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blender-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект fc1febd3ef594668bf68d1eb48d6b1d6-moved/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdates=2
+GameStop
+GameDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+Asset workflow: 499 checks passed

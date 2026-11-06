@@ -1,0 +1,56 @@
+{
+  "name": "Scene",
+  "objects": [
+    {
+      "id": 1,
+      "inheritParentScale": true,
+      "name": "ProbeA",
+      "parent": 0,
+      "transform": {
+        "position": [
+          2.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Primitive.Cube"
+    },
+    {
+      "id": 2,
+      "inheritParentScale": true,
+      "name": "ProbeB",
+      "parent": 1,
+      "transform": {
+        "position": [
+          2.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "Primitive.Cube"
+    }
+  ],
+  "version": 1
+}

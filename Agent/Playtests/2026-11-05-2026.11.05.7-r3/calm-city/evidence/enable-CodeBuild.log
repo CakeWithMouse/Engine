@@ -1,0 +1,11 @@
+﻿
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 3 component(s), Project
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\20261105-r3\calm-city\CalmCity\Binaries\Release\3f6ec524db144459a376814b84bd4643\Game.lib и объект E:\Engine\Engine\build\playtests\20261105-r3\calm-city\CalmCity\Binaries\Release\3f6ec524db144459a376814b84bd4643\Game.exp
+  Game.vcxproj -> E:\Engine\Engine\build\playtests\20261105-r3\calm-city\CalmCity\Binaries\Release\3f6ec524db144459a376814b84bd4643\Game.dll

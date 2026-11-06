@@ -164,6 +164,8 @@ struct SkeletalMesh
 {
     std::vector<SkinnedVertex> Vertices;
     std::vector<uint32_t> Indices;
+    uint32_t MaterialIndex = 0; // Stable source material ID, not mesh order (may be sparse).
+    std::string MaterialName;
 };
 
 struct SkeletalModel

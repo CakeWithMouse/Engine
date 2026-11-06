@@ -198,8 +198,9 @@ bool Material::CompileSet(const std::string& surface, uint32_t variant, ShaderSe
         return false;
     }
 
-    // Only a clip changes the silhouette seen by the light; other materials share the engine's depth shader.
-    if (state.Blend == MaterialBlendMode::Masked)
+    // Skinned vertices need their bone palette even for an opaque silhouette.
+    // Ordinary opaque meshes still share the engine's position-only depth shader.
+    if (state.Blend == MaterialBlendMode::Masked || (variant & MaterialVariant::Skinned))
     {
         ShaderCompiler::CompileResult shadowVertex = ShaderCompiler::Compile(templatePath, "VSMain", "vs_5_0", shadowOptions);
         ShaderCompiler::CompileResult shadowPixel = ShaderCompiler::Compile(templatePath, "PSMain", "ps_5_0", shadowOptions);

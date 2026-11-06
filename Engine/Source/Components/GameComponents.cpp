@@ -479,7 +479,11 @@ bool GameComponent::TrySetTexture(const std::string& path)
     ID3D11DeviceContext* context = GamePtr ? GamePtr->GetContext() : nullptr;
     if (!device || !context) { texturePath = path; return true; }
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> candidate;
-    if (!TextureLoader::LoadTexture2D(device, context, path, true, candidate)) return false;
+    // Assimp's left-handed conversion already flips UV0 into Direct3D's top-left
+    // convention. Flipping the image again inverted imported/skinned models and
+    // disagreed with the same image sampled by a material's BaseMap.
+    const bool flipImage = (GetMaterialVariant() & MaterialVariant::Skinned) == 0;
+    if (!TextureLoader::LoadTexture2D(device, context, path, flipImage, candidate)) return false;
     texturePath = path;
     textureSRV = std::move(candidate);
     CreateSamplerState();

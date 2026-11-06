@@ -1,0 +1,26 @@
+[VfsRead] using local VFS (no host service)
+[TiredBomber] subsystem initialized
+[TiredBomber] subsystem scene ready: Alternate Start
+[TiredBomber] subsystem scene closing: Alternate Start
+[TiredBomber] subsystem initialized
+[TiredBomber] subsystem scene ready: Main
+[TiredBomber] subsystem scene closing: Main
+[TiredBomber] subsystem initialized
+[TiredBomber] subsystem scene ready: Main
+[TiredBomber] subsystem scene closing: Main
+[TiredBomber] subsystem initialized
+[TiredBomber] subsystem scene ready: Scene
+[TiredBomber] subsystem scene closing: Scene
+[TiredBomber] subsystem initialized
+[TiredBomber] subsystem scene ready: Main
+[TiredBomber] subsystem scene closing: Main
+[TiredBomber] subsystem initialized
+[TiredBomber] subsystem scene ready: Main
+[TiredBomber] subsystem scene closing: Main
+[TiredBomber] subsystem initialized
+[TiredBomber] subsystem scene ready: Main
+[TiredBomber] subsystem scene closing: Main
+[TiredBomber] subsystem initialized
+[TiredBomber] subsystem scene ready: Main
+[TiredBomber] subsystem scene closing: Main
+Candidate project validated

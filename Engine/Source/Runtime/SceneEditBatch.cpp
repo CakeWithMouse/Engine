@@ -3,6 +3,7 @@
 #include <Engine/Scene/SceneDocument.h>
 #include <Engine/Scene/SceneAssets.h>
 #include <Engine/Components/GameComponents.h>
+#include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
@@ -47,6 +48,8 @@ EngineSceneBatchApi SceneEditSession::GetBatchApi() noexcept {
                         if(o.projectData.empty())return;
                         auto object=o.typeName==SceneAssets::ModelType ? SceneAssets::CreateModel(o.modelAsset,false) : s.catalog_.Find(o.typeName)->create();
                         if(!object)throw std::runtime_error("Cannot create object for reference remapping");
+                        if(dynamic_cast<SkeletalMeshComponent*>(object.get()))
+                            SceneAssets::Apply(*object,o.modelAsset,o.textureAsset,o.materialAsset);
                         object->LoadProjectData(o.projectData);EngineInternal::ComponentAccess::Remap(*object, mapping);o.projectData=object->SaveProjectData();
                     };
                     if(operation==EngineBatchTransform) {

@@ -208,11 +208,20 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
                           {"id", double(o->id)},
                           {"parent", double(o->parentId)},
                           {"type", o->typeName},
+                          {"material",o->materialAsset},
                           {"position", QJsonArray{o->transform.position[0],
                                                   o->transform.position[1],
                                                   o->transform.position[2]}}});
         },
         &out);
+    const auto dataApi=module.ProjectDataApi();
+    for(int i=0;i<out.size();++i) {
+      auto object=out[i].toObject();
+      dataApi.read(dataApi.context,uint64_t(object["id"].toDouble()),[](void* p,const char* data){
+        (*static_cast<QJsonObject*>(p))["projectData"]=QJsonDocument::fromJson(QByteArray(data)).object();
+      },&object);
+      out[i]=object;
+    }
     return out;
   };
   QJsonObject result;
@@ -243,6 +252,9 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
         cmd.type = EditorCommand::CreateObject;
         cmd.path = step["type"].toString();
         Require(!cmd.path.isEmpty(), "create requires type");
+      } else if (action == "model") {
+        cmd.type=EditorCommand::CreateModel;
+        Require(cmd.path.startsWith("/Game/"),"model requires a /Game asset path");
       } else if (action == "delete")
         cmd.type = EditorCommand::RemoveObject;
       else if (action == "duplicate")
@@ -836,6 +848,10 @@ QJsonObject Run(const QString &command, const QJsonObject &in) {
           result["type"] = QString::fromUtf8(info->typeName);
         },
         &out);
+    const auto dataApi=module.ProjectDataApi();
+    Require(dataApi.read(dataApi.context,object,[](void* p,const char* data){
+        (*static_cast<QJsonObject*>(p))["materialSlots"]=QJsonDocument::fromJson(QByteArray(data)).object().value("materialSlots");
+    },&out)==EngineSceneOk,"cannot read material slots");
     // Inspect the asset that the engine actually created. BLEND is converted to
     // GLB by Blender; feeding the original file to Assimp reports a false
     // failure.

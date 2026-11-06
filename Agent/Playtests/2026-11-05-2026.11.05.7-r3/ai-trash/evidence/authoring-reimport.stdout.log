@@ -1,0 +1,265 @@
+CHECK 1: usage: EditorUiTests <project directory> <EngineContent> [model]
+CHECK 2: load project module
+CHECK 3: create edit session
+CHECK 4: configure UI project content
+CHECK 5: load UI fixture
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: FOUND (version 3)
+CHECK 6: cursor extension version rejected
+CHECK 7: cursor extension size rejected
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'view/grid'
+[Info] SettingsService: Set 'view/gizmo'
+[Info] SettingsService: Set 'view/icons'
+[Info] SettingsService: Set 'view/overlays'
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 3, handler = 00007FFB0D435F00
+EditorStart
+UI test
+E:\Engine\Engine\build\playtests\20261105-r3\ai-trash\Supplemental8\Authoring\Project.json
+CHECK 8: start Qt editor
+CHECK 9: Qt main event dispatcher belongs to the editor UI thread
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+EditorSceneViewportAttach ok
+[Info] Camera: ok
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 713x423
+CHECK 10: editor render frame
+CHECK 11: editor render frame
+CHECK 12: editor render frame
+CHECK 13: editor render frame
+CHECK 14: editor render frame
+CHECK 15: editor render frame
+CHECK 16: editor render frame
+CHECK 17: editor render frame
+CHECK 18: editor render frame
+CHECK 19: editor render frame
+CHECK 20: editor render frame
+CHECK 21: editor render frame
+CHECK 22: editor render frame
+CHECK 23: editor render frame
+CHECK 24: editor render frame
+CHECK 25: editor render frame
+CHECK 26: editor render frame
+CHECK 27: editor render frame
+CHECK 28: editor render frame
+CHECK 29: editor render frame
+CHECK 30: editor render frame
+CHECK 31: editor render frame
+CHECK 32: editor render frame
+CHECK 33: editor render frame
+CHECK 34: editor render frame
+CHECK 35: editor render frame
+CHECK 36: editor render frame
+CHECK 37: editor render frame
+CHECK 38: editor render frame
+CHECK 39: editor render frame
+CHECK 40: editor render frame
+CHECK 41: typed numeric value and bounds
+CHECK 42: typed boolean
+CHECK 43: typed enum
+CHECK 44: typed object reference
+CHECK 45: typed asset path
+CHECK 46: material slot has an enabled editor button
+CHECK 47: material slot button opens its own asset
+CHECK 48: empty material slot cannot open material editor
+CHECK 49: typed property signal contains scalar JSON
+CHECK 50: nested collapsible section
+CHECK 51: collapse hides section body
+CHECK 52: refresh preserves widget and collapse state
+CHECK 53: collapsed hierarchy persists across inspector recreation
+CHECK 54: authoring extension exposed
+CHECK 55: write reimport source
+CHECK 56: editor render frame
+CHECK 57: editor render frame
+CHECK 58: editor render frame
+CHECK 59: editor render frame
+CHECK 60: editor render frame
+CHECK 61: editor render frame
+CHECK 62: editor render frame
+CHECK 63: editor render frame
+CHECK 64: editor render frame
+CHECK 65: editor render frame
+CHECK 66: editor render frame
+CHECK 67: editor render frame
+CHECK 68: editor render frame
+CHECK 69: editor render frame
+CHECK 70: editor render frame
+CHECK 71: editor render frame
+CHECK 72: editor render frame
+CHECK 73: editor render frame
+CHECK 74: editor render frame
+CHECK 75: editor render frame
+CHECK 76: editor render frame
+CHECK 77: editor render frame
+CHECK 78: editor render frame
+CHECK 79: editor render frame
+CHECK 80: editor render frame
+CHECK 81: editor render frame
+CHECK 82: editor render frame
+CHECK 83: editor render frame
+CHECK 84: editor render frame
+CHECK 85: editor render frame
+CHECK 86: editor render frame
+CHECK 87: change reimport source
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Recovery: unsaved scene checkpoint committed
+[Info] FXAA pipeline and shaders compiled successfully
+CHECK 88: editor render frame
+CHECK 89: editor render frame
+CHECK 90: editor render frame
+CHECK 91: editor render frame
+CHECK 92: editor render frame
+CHECK 93: editor render frame
+CHECK 94: editor render frame
+CHECK 95: editor render frame
+CHECK 96: editor render frame
+CHECK 97: editor render frame
+CHECK 98: editor render frame
+CHECK 99: editor render frame
+CHECK 100: editor render frame
+CHECK 101: editor render frame
+CHECK 102: editor render frame
+CHECK 103: editor render frame
+CHECK 104: editor render frame
+CHECK 105: editor render frame
+CHECK 106: editor render frame
+CHECK 107: editor render frame
+CHECK 108: editor render frame
+CHECK 109: editor render frame
+CHECK 110: editor render frame
+CHECK 111: editor render frame
+CHECK 112: editor render frame
+CHECK 113: editor render frame
+CHECK 114: editor render frame
+CHECK 115: editor render frame
+CHECK 116: editor render frame
+CHECK 117: editor render frame
+CHECK 118: editor render frame
+CHECK 119: asset update marks dirty and clears stale undo
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Recovery: unsaved scene checkpoint committed
+[Info] FXAA pipeline and shaders compiled successfully
+CHECK 120: editor render frame
+CHECK 121: editor render frame
+CHECK 122: editor render frame
+CHECK 123: editor render frame
+CHECK 124: editor render frame
+CHECK 125: editor render frame
+CHECK 126: editor render frame
+CHECK 127: editor render frame
+CHECK 128: editor render frame
+CHECK 129: editor render frame
+CHECK 130: editor render frame
+CHECK 131: editor render frame
+CHECK 132: editor render frame
+CHECK 133: editor render frame
+CHECK 134: editor render frame
+CHECK 135: editor render frame
+CHECK 136: editor render frame
+CHECK 137: editor render frame
+CHECK 138: editor render frame
+CHECK 139: editor render frame
+CHECK 140: editor render frame
+CHECK 141: editor render frame
+CHECK 142: editor render frame
+CHECK 143: editor render frame
+CHECK 144: editor render frame
+CHECK 145: editor render frame
+CHECK 146: editor render frame
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 121: AntialiasingMode = 1 (FXAA), bb = 713x423
+CHECK 147: editor render frame
+CHECK 148: editor render frame
+CHECK 149: editor render frame
+CHECK 150: editor render frame
+CHECK 151: asset move replaces old location
+CHECK 152: editor render frame
+CHECK 153: editor render frame
+CHECK 154: editor render frame
+CHECK 155: editor render frame
+CHECK 156: editor render frame
+CHECK 157: editor render frame
+CHECK 158: editor render frame
+CHECK 159: editor render frame
+CHECK 160: editor render frame
+CHECK 161: editor render frame
+CHECK 162: editor render frame
+CHECK 163: editor render frame
+CHECK 164: editor render frame
+CHECK 165: editor render frame
+CHECK 166: editor render frame
+CHECK 167: editor render frame
+CHECK 168: editor render frame
+CHECK 169: editor render frame
+CHECK 170: editor render frame
+CHECK 171: editor render frame
+CHECK 172: editor render frame
+CHECK 173: editor render frame
+CHECK 174: editor render frame
+CHECK 175: editor render frame
+CHECK 176: editor render frame
+CHECK 177: editor render frame
+CHECK 178: editor render frame
+CHECK 179: editor render frame
+CHECK 180: editor render frame
+CHECK 181: editor render frame
+CHECK 182: editor render frame
+[Info] SettingsService: Set 'layout/1cda7871e5ec/state'
+[Info] SettingsService: Set 'layout/1cda7871e5ec/geometry'
+CHECK 183: editor render frame
+CHECK 184: editor render frame
+CHECK 185: editor render frame
+CHECK 186: editor render frame
+CHECK 187: editor render frame
+CHECK 188: editor render frame
+CHECK 189: editor render frame
+CHECK 190: editor render frame
+EditorRequestExit
+CHECK 191: editor render frame
+CHECK 192: editor render frame
+CHECK 193: editor render frame
+CHECK 194: editor render frame
+CHECK 195: editor render frame
+CHECK 196: editor render frame
+CHECK 197: editor render frame
+CHECK 198: editor render frame
+CHECK 199: editor render frame
+CHECK 200: editor render frame
+CHECK 201: editor render frame
+CHECK 202: editor render frame
+CHECK 203: editor render frame
+CHECK 204: editor render frame
+CHECK 205: editor render frame
+CHECK 206: editor render frame
+CHECK 207: editor render frame
+CHECK 208: editor render frame
+CHECK 209: editor render frame
+CHECK 210: editor render frame
+CHECK 211: editor render frame
+CHECK 212: editor render frame
+CHECK 213: editor render frame
+CHECK 214: editor render frame
+CHECK 215: editor render frame
+CHECK 216: editor render frame
+CHECK 217: editor render frame
+CHECK 218: editor render frame
+CHECK 219: editor render frame
+CHECK 220: editor render frame
+CHECK 221: editor render frame
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=0 | snapObjs=4 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=2 | tris=0
+EditorUpdates=194
+EditorStop
+Authoring EditorUiTests: 221 checks passed
+[Info] Viewport overlay service: NOT FOUND (version 0)

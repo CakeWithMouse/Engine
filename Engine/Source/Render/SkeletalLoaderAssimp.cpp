@@ -5,6 +5,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <assimp/material.h>
 #include "AssimpVfsIO.h"
 #include <functional>
 #include "../Resources/VfsRead.h"
@@ -185,6 +186,12 @@ static SkeletalLoadResult LoadModel(const std::function<const aiScene*(Assimp::I
         {
             const aiMesh* mesh = scene->mMeshes[m];
             SkeletalMesh skMesh;
+            skMesh.MaterialIndex = mesh->mMaterialIndex;
+            if (mesh->mMaterialIndex < scene->mNumMaterials) {
+                aiString name;
+                scene->mMaterials[mesh->mMaterialIndex]->Get(AI_MATKEY_NAME, name);
+                skMesh.MaterialName = name.C_Str();
+            }
             skMesh.Vertices.resize(mesh->mNumVertices);
 
             for (unsigned int v = 0; v < mesh->mNumVertices; ++v)
