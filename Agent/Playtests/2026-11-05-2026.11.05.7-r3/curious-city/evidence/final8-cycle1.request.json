@@ -1,0 +1,17 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\curious-city\\Final8City\\Project.json",
+  "steps": [
+    {
+      "kind": "control",
+      "action": "play"
+    },
+    {
+      "kind": "frames",
+      "count": 130
+    },
+    {
+      "kind": "control",
+      "action": "stop"
+    }
+  ]
+}

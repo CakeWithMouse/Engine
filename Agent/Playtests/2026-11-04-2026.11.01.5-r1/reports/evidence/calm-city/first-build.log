@@ -1,0 +1,12 @@
+
+  ComponentGenerator: 6 component(s), Project
+  CarMover.cpp
+E:\Engine\Engine\build\playtests\20261104-r1\calm-city\CalmCityProject\Source\CarMover.cpp(16,21): error C3861: GetPosition: идентификатор не найден [E:\Engine\Engine\build\playtests\20261104-r1\calm-city\CalmCityProject\Game.vcxproj]
+  CityBuilding.cpp
+  CityRoad.cpp
+  ProjectGame.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+
+
+Full build log: E:\Engine\Engine\build\playtests\20261104-r1\calm-city\CalmCityProject\Binaries\Release\637036fe7b7443fbaf48844cd1a28d35\build.log

@@ -120,7 +120,7 @@ void ModelImport::CreateMaterials(const fs::path& source, const fs::path& destin
     Write(destination / "Materials/Imported.hlsl", Surface);
     std::map<std::string, std::string> textures;
     std::set<unsigned> written;
-    Json manifest = {{"version", 1}, {"materials", Json::array()}};
+    Json manifest = {{"version", 2}, {"materials", Json::array()}, {"materialSlots",Json::object()}};
     for (unsigned m = 0; m < scene->mNumMeshes; ++m)
     {
         const auto index = scene->mMeshes[m]->mMaterialIndex;
@@ -159,9 +159,8 @@ void ModelImport::CreateMaterials(const fs::path& source, const fs::path& destin
         Write(destination / fs::u8path(relative), mat.dump(2) + "\n");
         if (!manifest.contains("defaultMaterial")) manifest["defaultMaterial"] = relative;
         manifest["materials"].push_back(relative);
+        manifest["materialSlots"][std::to_string(index)] = relative;
     }
-    if (written.size() > 1)
-        manifest["note"] = "One material per object: the first mesh material is assigned; other imported materials can be assigned manually.";
     Write(fs::u8path((destination / fs::u8path(modelPath).filename()).u8string() + ".import.json"), manifest.dump(2) + "\n");
 #else
     (void)source; (void)destination; (void)modelPath;
@@ -176,9 +175,39 @@ std::string ModelImport::DefaultMaterial(const std::string& modelPath)
     const auto bytes = VfsRead::Active().ReadBytes(sidecar);
     if (bytes.size() > 1024 * 1024) throw std::runtime_error("Model import metadata is too large");
     const auto json = Json::parse(bytes.begin(), bytes.end());
-    if (json.at("version") != 1) throw std::runtime_error("Unsupported model import metadata version");
+    if (json.at("version") != 1 && json.at("version") != 2) throw std::runtime_error("Unsupported model import metadata version");
     const auto relative = json.value("defaultMaterial", std::string{});
     if (relative.empty()) return {};
     if (!SceneAssets::ValidPath("/Game/" + relative)) throw std::runtime_error("Invalid imported material path");
     return modelPath.substr(0, modelPath.find_last_of('/') + 1) + relative;
+}
+
+std::map<uint32_t,std::string> ModelImport::MaterialSlots(const std::string& modelPath)
+{
+    const auto sidecar=modelPath+".import.json";
+    if(!VfsRead::Active().Exists(sidecar))return {};
+    const auto bytes=VfsRead::Active().ReadBytes(sidecar);
+    if(bytes.size()>1024*1024)throw std::runtime_error("Model import metadata is too large");
+    const auto data=Json::parse(bytes.begin(),bytes.end());
+    std::map<uint32_t,std::string> result;
+    auto add=[&](const std::string& id,const std::string& relative) {
+        size_t used=0;const auto index=std::stoul(id,&used);
+        if(used!=id.size() || std::to_string(index)!=id || index>UINT32_MAX || relative.empty())throw std::runtime_error("Invalid material slot ID");
+        const auto path=modelPath.substr(0,modelPath.find_last_of('/')+1)+relative;
+        SceneAssets::ValidateMaterialPath(path);
+        if(!result.emplace(static_cast<uint32_t>(index),path).second)throw std::runtime_error("Duplicate material slot");
+    };
+    if(data.at("version")==2) {
+        if(!data.at("materialSlots").is_object())throw std::runtime_error("Invalid material slots metadata");
+        for(auto it=data.at("materialSlots").begin();it!=data.at("materialSlots").end();++it)add(it.key(),it.value().get<std::string>());
+    } else if(data.at("version")==1) {
+        // The old importer named every material after its source ID. Recover the
+        // mapping when placing a new instance; saved scenes retain their own assignments.
+        for(const auto& value:data.at("materials")) {
+            const auto path=value.get<std::string>();const auto stem=fs::u8path(path).stem().string();
+            if(stem.rfind("Material_",0)!=0)throw std::runtime_error("Cannot recover legacy material slot");
+            add(stem.substr(9),path);
+        }
+    } else throw std::runtime_error("Unsupported model import metadata version");
+    return result;
 }

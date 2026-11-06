@@ -1,0 +1,2 @@
+failed build exit=1 moduleSame=True dllHashSame=True
+old module run exit=0

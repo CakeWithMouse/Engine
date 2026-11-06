@@ -28,6 +28,7 @@ namespace EngineInternal { struct ComponentAccess; }
 // @engine-internal-end
 class Game;
 class Material;
+class SaveArchive;
 struct MeshLodData;
 
 /** Shader pair of one pass variant, resolved lazily by Game::BindComponentShaders. */
@@ -102,6 +103,8 @@ public:
     // Called once before the first input dispatch/tick in Play, never in Edit/Pause.
     // Use this for input setup; call the immediate parent's BeginPlay in overrides.
     virtual void BeginPlay() {}
+    virtual void SerializeSaveGame(SaveArchive& archive);
+    bool WasLoadedFromSaveGame() const { return LoadedFromSaveGame; }
     // Optional module-local codec. Return UTF-8 JSON with its own schema version.
     // Called for save, duplicate, undo and Play, never for transient gameplay state.
     // Optional editor schema; properties are available to every component.
@@ -197,6 +200,8 @@ public:
     // @engine-internal-begin
 private:
     friend struct EngineInternal::ComponentAccess;
+    friend class SaveGame;
+    bool LoadedFromSaveGame = false;
     friend class Character;
     friend class UIComponent;
     friend class CubeComponent;

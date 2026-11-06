@@ -1,0 +1,9 @@
+{
+  "steps": [
+    {
+      "action": "load",
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\curious-city\\Final8City\\Content\\Scenes\\CityRulesProbe.scene.json"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\curious-city\\Final8City\\Project.json"
+}

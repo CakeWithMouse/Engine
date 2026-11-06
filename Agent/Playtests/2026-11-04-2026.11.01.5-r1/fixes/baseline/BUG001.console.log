@@ -1,0 +1,52 @@
+{
+    "fields": [
+        {
+            "name": "Transform0",
+            "reachable": true,
+            "width": 150
+        },
+        {
+            "name": "Transform1",
+            "reachable": false,
+            "width": 150
+        },
+        {
+            "name": "Transform2",
+            "reachable": false,
+            "width": 150
+        },
+        {
+            "name": "Transform3",
+            "reachable": true,
+            "width": 150
+        },
+        {
+            "name": "Transform4",
+            "reachable": false,
+            "width": 150
+        },
+        {
+            "name": "Transform5",
+            "reachable": false,
+            "width": 150
+        },
+        {
+            "name": "Transform6",
+            "reachable": true,
+            "width": 150
+        },
+        {
+            "name": "Transform7",
+            "reachable": false,
+            "width": 150
+        },
+        {
+            "name": "Transform8",
+            "reachable": false,
+            "width": 150
+        }
+    ],
+    "horizontalRange": 302,
+    "ok": true,
+    "reachable": false
+}

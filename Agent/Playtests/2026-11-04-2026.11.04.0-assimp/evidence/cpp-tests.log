@@ -1,0 +1,8 @@
+Create: True
+BUG005_LauncherEnable: True
+BUG004_FailureReturns: True
+BUG006_Utf8: True
+BUG005_EditorModules: True
+PreviousDllPreserved: True
+BUG004_SuccessReturns: True
+NewDllActivated: True

@@ -1,0 +1,543 @@
+{
+  "release": "2026.11.01.5",
+  "role": 4,
+  "project": "Engine/build/playtests/20261104-r1/ai-trash/TrashGame",
+  "runtime": "Game/build/x64/Release/Runtime",
+  "sdk": "2026.11.01.5 Release x64 / v143",
+  "isolatedStore": "Engine/build/playtests/20261104-r1/ai-trash/EngineStore",
+  "buildId": "4c74a1b450764b5a9aaa2df6f3a1fc42",
+  "projectStatus": "built-validated-activated",
+  "visualStatus": "coordinator-confirmed-final-fresh-reopen",
+  "attempts": [
+    {
+      "action": "Launcher --create-project TrashGame",
+      "expected": "Project scaffold created",
+      "actual": "exit 0",
+      "status": "passed",
+      "log": "Engine/build/playtests/20261104-r1/ai-trash/launcher-create.stderr.log"
+    },
+    {
+      "action": "ProjectTools Enable",
+      "expected": "C++ scaffold pinned to release",
+      "actual": "SDK 2026.11.01.5, project prepared",
+      "status": "passed",
+      "log": "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Project.code.json"
+    },
+    {
+      "action": "ProjectTools AddClass -Kind Object -Name ThrowLedger",
+      "expected": "ENGINE_OBJECT class generated",
+      "actual": "Generated ThrowLedger.h/.cpp, then added documented adapter codec",
+      "status": "passed",
+      "log": "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Source/ThrowLedger.h"
+    },
+    {
+      "action": "Release build candidate",
+      "expected": "Compile, validate and activate",
+      "actual": "Final build bb145 passed candidate validation/startup, module active",
+      "status": "passed",
+      "log": "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log"
+    },
+    {
+      "action": "Launcher --smoke-project / --smoke-project-editor",
+      "expected": "Game start and project editor scene load",
+      "actual": "Both exit 0 after build e3fe; current bb145 candidate also passed built-in startup smoke",
+      "status": "passed",
+      "log": "Engine/build/playtests/20261104-r1/ai-trash/smoke-final-game.stdout.log"
+    },
+    {
+      "action": "Export-Project.ps1",
+      "expected": "Release package validates and publishes",
+      "actual": "exit 0, ExportReport validation successful",
+      "status": "passed",
+      "buildId": "e3fe34b68e504ff6b878df55243ec6e6",
+      "log": "Engine/build/playtests/20261104-r1/ai-trash/TrashGameExport/ExportReport.json"
+    },
+    {
+      "action": "Export Start.cmd --frames 3",
+      "expected": "Package starts from own directory",
+      "actual": "exit 0, mounted Game/Runtime from TrashGameExport, three frames and clean shutdown",
+      "status": "passed",
+      "log": "Engine/build/playtests/20261104-r1/ai-trash/TrashGameExport/portable-start.stdout.log"
+    },
+    {
+      "action": "Coordinator UI toss test",
+      "expected": "T/button tosses trash and target hit increments score",
+      "actual": "Awaiting coordinator UI pass and screenshot",
+      "status": "visual-unverified"
+    }
+  ],
+  "features": [
+    {
+      "feature_id": "asset-paths",
+      "status": "not-tested",
+      "action": "Переносимые /Game ссылки",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "asset-reimport",
+      "status": "not-tested",
+      "action": "Переимпорт и обновление ресурсов",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "build-activate",
+      "status": "passed",
+      "action": "Сборка кандидата и активация DLL",
+      "actual": "Release candidate built, validated, startup-smoked and active.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+      ]
+    },
+    {
+      "feature_id": "camera-perspective",
+      "status": "passed",
+      "action": "SceneCamera и перспектива",
+      "actual": "Coordinator observed camera framing the bucket correctly.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+      ]
+    },
+    {
+      "feature_id": "class-wizard",
+      "status": "passed",
+      "action": "Мастер классов Game/Component/Object/Character",
+      "actual": "ProjectTools AddClass generated ThrowLedger with ENGINE_OBJECT.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+      ]
+    },
+    {
+      "feature_id": "compatibility",
+      "status": "passed",
+      "action": "Закрепление версии/обновление копии/старый ABI",
+      "actual": "Frozen pre-lights fixture SHA256 verified; current runtime smoke via Launcher --smoke-project-current exited 0 and copied DLL remained unchanged at 0B26410EF32692CAD532CAB3FA6AE8265B702FA5C89534DA8D58B78CC88F1500. Upgrade prompt/old-runtime flow not tested.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/FrozenCompatibility/result.txt",
+        "Engine/build/playtests/20261104-r1/ai-trash/FrozenCompatibility/sha256-verified.txt"
+      ]
+    },
+    {
+      "feature_id": "create-cpp",
+      "status": "partial",
+      "action": "Создать сразу C++ проект",
+      "actual": "Direct C++ checkbox flow is UI-only in this pass; no UI used by role agent.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+      ]
+    },
+    {
+      "feature_id": "create-nocode",
+      "status": "passed",
+      "action": "Создать проект без кода",
+      "actual": "Launcher CLI project creation exit 0.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+      ]
+    },
+    {
+      "feature_id": "enable-cpp",
+      "status": "passed",
+      "action": "Добавить C++ к проекту",
+      "actual": "SDK ProjectTools Enable created C++ scaffold.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+      ]
+    },
+    {
+      "feature_id": "export",
+      "status": "passed",
+      "action": "Экспорт Release и переносимый запуск",
+      "actual": "Final Release export validation succeeded; portable Start.cmd --frames 3 exited 0 from TrashGameExportFinal.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGameExportFinal/ExportReport.json",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGameExportFinal/final-start.stdout.log"
+      ]
+    },
+    {
+      "feature_id": "external",
+      "status": "not-tested",
+      "action": "Отдельный запуск",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "failed-build-rollback",
+      "status": "partial",
+      "action": "Отказ сборки сохраняет рабочую DLL",
+      "actual": "Next non-UI pass; wait until coordinator closes project UI.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+      ]
+    },
+    {
+      "feature_id": "host-services",
+      "status": "partial",
+      "action": "Сервисы BaseEngine: lifecycle/VFS/active session",
+      "actual": "Template bound host VFS service v1; SDK module bridge resolved host-mounted /Game and read marker. Other BaseEngine host services were not exercised.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/startup.log"
+      ]
+    },
+    {
+      "feature_id": "hot-reload",
+      "status": "partial",
+      "action": "C++ Hot Reload с сохранением edit-сцены",
+      "actual": "New module 4c74a1b450764b5a9aaa2df6f3a1fc42 activated; immediate post-reload gameplay input did not respond. Fresh reopen restored it.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+      ]
+    },
+    {
+      "feature_id": "hud-editor",
+      "status": "partial",
+      "action": "Редактор UI/сохранение/Hot Reload",
+      "actual": "Hot Reload activated new DLL, but button/T input became unresponsive until project fresh reopen (BUG007).",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+      ]
+    },
+    {
+      "feature_id": "hud-elements",
+      "status": "passed",
+      "action": "Panel/Label/Bar/Button",
+      "actual": "Panel, labels and button rendered; short success text fit after change.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+      ]
+    },
+    {
+      "feature_id": "hud-events",
+      "status": "passed",
+      "action": "События кнопок и input capture",
+      "actual": "Button callback and T action each triggered throws on fresh reopen.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+      ]
+    },
+    {
+      "feature_id": "hud-project",
+      "status": "passed",
+      "action": "Назначение .ui HUD проекта",
+      "actual": "Project HUD displayed and score updated to Hits 3 / Throws 3 on fresh reopen.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+      ]
+    },
+    {
+      "feature_id": "input",
+      "status": "passed",
+      "action": "Actions/bindings/subscriptions/contexts",
+      "actual": "Fresh reopen: T launched the next trash item; UI button and T both exercised across three throws.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+      ]
+    },
+    {
+      "feature_id": "light-point",
+      "status": "passed",
+      "action": "Точечный свет/радиус/интенсивность",
+      "actual": "Coordinator observed adequate lighting in Play view.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+      ]
+    },
+    {
+      "feature_id": "material-assign",
+      "status": "not-tested",
+      "action": "Назначение/снятие .mat",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "material-blends",
+      "status": "not-tested",
+      "action": "Прозрачность/masked/two-sided",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "material-editor",
+      "status": "not-tested",
+      "action": "Редактор HLSL/preview/сохранение/откат",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "material-errors",
+      "status": "not-tested",
+      "action": "Ошибка шейдера/fallback/восстановление",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "material-params",
+      "status": "not-tested",
+      "action": "Параметры/текстуры материала",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "model-blend",
+      "status": "not-tested",
+      "action": "Конверсия BLEND при наличии Blender",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "model-import",
+      "status": "not-tested",
+      "action": "Импорт OBJ/glTF/GLB/FBX",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "play",
+      "status": "not-tested",
+      "action": "Play/Pause/Resume/Stop и копия сцены",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "project-game",
+      "status": "passed",
+      "action": "Выбор пользовательского Game",
+      "actual": "Content/ProjectGame.txt selects ProjectGame; candidate startup succeeded.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+      ]
+    },
+    {
+      "feature_id": "scene-clone",
+      "status": "not-tested",
+      "action": "Дублирование и ремап ссылок",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "scene-hierarchy",
+      "status": "not-tested",
+      "action": "Родители и локальные/мировые transform",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "scene-object",
+      "status": "passed",
+      "action": "Произвольный ENGINE_OBJECT и адаптер",
+      "actual": "ThrowLedger Object adapter codec registered and scene candidate with projectData validated.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+      ]
+    },
+    {
+      "feature_id": "scene-recovery",
+      "status": "not-tested",
+      "action": "Автовосстановление после аварии",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "scene-save-load",
+      "status": "passed",
+      "action": "Сохранение и повторное открытие",
+      "actual": "Scene and ThrowLedger projectData loaded by candidate validation and editor smoke; direct JSON authoring, no manual editor save.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+      ]
+    },
+    {
+      "feature_id": "scene-startup",
+      "status": "not-tested",
+      "action": "Отдельное назначение стартовой сцены",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "scene-transform",
+      "status": "not-tested",
+      "action": "Перемещение/поворот/масштаб",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "sdk-examples",
+      "status": "passed",
+      "action": "Компиляция примеров API Reference",
+      "actual": "Shipped ReferenceExamples.cpp and ReferenceComponent.h compiled in the SDK C++ project; VFS ReadGameLine example ran at startup.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/build.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/startup.log"
+      ]
+    },
+    {
+      "feature_id": "skeletal",
+      "status": "not-tested",
+      "action": "Скелетная модель и клипы анимации",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "sky",
+      "status": "passed",
+      "action": "Небо/cubemap/отражения",
+      "actual": "Environment.Sky and BasicSky shader loaded at startup.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log"
+      ]
+    },
+    {
+      "feature_id": "texture-import",
+      "status": "not-tested",
+      "action": "Импорт и назначение текстуры",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "time",
+      "status": "not-tested",
+      "action": "Tick/deltaTime/масштаб времени",
+      "actual": "No recorded attempt in this role pass.",
+      "evidence": []
+    },
+    {
+      "feature_id": "trace-screen",
+      "status": "passed",
+      "action": "RaycastCursor/Screen и viewport",
+      "actual": "AIProbe runtime: ScreenPointToRay(Pixel(640,360)) Success; RaycastScreen center Hit and fractional logical coordinate Hit, 4 triangles.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Binaries/Release/5ed0fedab505437b8f23ed61f6803b01/startup.log",
+        "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Source/ProjectGame.cpp"
+      ]
+    },
+    {
+      "feature_id": "trace-world",
+      "status": "passed",
+      "action": "Raycast/SegmentCast мировой геометрии",
+      "actual": "On fresh reopen all three tossed forms registered target hits; Hits 3 / Throws 3 after the component-ID filtering correction.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+      ]
+    },
+    {
+      "feature_id": "vfs",
+      "status": "passed",
+      "action": "VFS чтение/запись/mount через host API",
+      "actual": "AIProbe runtime resolved /Game/Config/message.txt and SDK ReadGameLine returned exact host Content marker.",
+      "evidence": [
+        "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/startup.log"
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "category": "user-code-error",
+      "actual": "C2027 incomplete UIComponent at ProjectGame.cpp lines 29,55,64,72,78",
+      "resolution": "Included UIComponent.h",
+      "log": "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/9c3c897fd8f341509cb88c70c411ff30/build.log"
+    },
+    {
+      "category": "user-scene-error",
+      "actual": "Candidate rejected: Duplicate or zero object ID",
+      "resolution": "Filtered old generated object names before rebuilding scene list",
+      "log": "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/e9dfb74302254354887c03c582d88845/validate-error.log"
+    },
+    {
+      "category": "user-code-error",
+      "actual": "MSVC C2665 at TrashProjectile.cpp(68,30): query.ignore.push_back(entry.first) passes const std::string where uint64_t is required",
+      "resolution": "Changed to entry.second->GetComponentId() for all existing TrashProjectile components; source-only, awaiting rebuild.",
+      "log": "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/ed38389*/build.log"
+    }
+  ],
+  "screenshots": [
+    "Engine/build/playtests/20261104-r1/ui-evidence/trash-final-hits3.png"
+  ],
+  "logs": [
+    "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+    "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+    "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log",
+    "Engine/build/playtests/20261104-r1/ai-trash/TrashGameExport/ExportReport.json",
+    "Engine/build/playtests/20261104-r1/ai-trash/TrashGameExport/portable-start.stdout.log",
+    "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Binaries/Release/ed38389*/build.log",
+    "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/build.log",
+    "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/startup.log",
+    "Engine/build/playtests/20261104-r1/ai-trash/TrashGameExportFinal/ExportReport.json",
+    "Engine/build/playtests/20261104-r1/ai-trash/TrashGameExportFinal/final-start.stdout.log",
+    "Engine/build/playtests/20261104-r1/ai-trash/FrozenCompatibility/result.txt",
+    "Engine/build/playtests/20261104-r1/ai-trash/FrozenCompatibility/sha256-verified.txt",
+    "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Binaries/Release/5ed0fedab505437b8f23ed61f6803b01/build.log",
+    "Engine/build/playtests/20261104-r1/ai-trash/AIProbe/Binaries/Release/5ed0fedab505437b8f23ed61f6803b01/startup.log"
+  ],
+  "coordinatorObservations": [
+    {
+      "action": "Click HUD Throw button",
+      "expected": "One launch and bucket hit update score",
+      "actual": "Throws 1 / Hits 1; box visibly launched, hit text appeared",
+      "status": "passed",
+      "screenshot": "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png"
+    },
+    {
+      "action": "Press T",
+      "expected": "Keyboard action launches next shape",
+      "actual": "Throws 2; can launched",
+      "status": "passed",
+      "screenshot": "Engine/build/playtests/20261104-r1/ui-evidence/trash-box-flying.png"
+    },
+    {
+      "action": "Throw subsequent can/paper",
+      "expected": "Each centered toss hits bucket base",
+      "actual": "Hits stayed 1 while Throws reached 3; non-target/rim hit reported; likely prior stopped projectile intercepted exact segment ray",
+      "status": "gameplay-user-code-failure-needs-fix",
+      "screenshot": "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+    },
+    {
+      "action": "Read success status",
+      "expected": "HUD message fits panel",
+      "actual": "Long success string overflowed 300px panel; source shortened to Hit! In the bucket. but not reloaded",
+      "status": "game-hud-layout-fix-pending",
+      "screenshot": "Engine/build/playtests/20261104-r1/ui-evidence/trash-hit1.png"
+    },
+    {
+      "action": "Play camera and lighting",
+      "expected": "Bucket/lane visible",
+      "actual": "Coordinator reports camera and light correct",
+      "status": "passed",
+      "screenshot": "Engine/build/playtests/20261104-r1/ui-evidence/trash-play-before.png"
+    }
+  ],
+  "openGameCodeIssue": {
+    "id": "R4-TRACE-001",
+    "category": "user-code-error",
+    "file": "Engine/build/playtests/20261104-r1/ai-trash/TrashGame/Source/TrashProjectile.cpp",
+    "expected": "Ignore prior stopped trash so each throw ray reaches bucket base",
+    "actual": "Later throws likely hit an earlier projectile first",
+    "status": "fix-pending-coordinator-UI-close",
+    "screenshot": "Engine/build/playtests/20261104-r1/ui-evidence/trash-result3.png"
+  },
+  "archive": "Agent/Playtests/2026-11-04-2026.11.01.5-r1/ai-trash/trash-game-source.zip"
+}

@@ -1,0 +1,104 @@
+[
+  {
+    "shape": "cube",
+    "exit": 0,
+    "ok": true,
+    "vertices": 24,
+    "triangles": 12,
+    "min": [
+      -0.5,
+      -0.5,
+      -0.5
+    ],
+    "max": [
+      0.5,
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "shape": "sphere",
+    "exit": 0,
+    "ok": true,
+    "vertices": 169,
+    "triangles": 264,
+    "min": [
+      -0.5,
+      -0.5,
+      -0.5
+    ],
+    "max": [
+      0.5,
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "shape": "plane",
+    "exit": 0,
+    "ok": true,
+    "vertices": 4,
+    "triangles": 2,
+    "min": [
+      -0.5,
+      0,
+      -0.5
+    ],
+    "max": [
+      0.5,
+      0,
+      0.5
+    ]
+  },
+  {
+    "shape": "cylinder",
+    "exit": 0,
+    "ok": true,
+    "vertices": 54,
+    "triangles": 48,
+    "min": [
+      -0.5,
+      -0.5,
+      -0.5
+    ],
+    "max": [
+      0.5,
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "shape": "cone",
+    "exit": 0,
+    "ok": true,
+    "vertices": 50,
+    "triangles": 24,
+    "min": [
+      -0.5,
+      -0.5,
+      -0.5
+    ],
+    "max": [
+      0.5,
+      0.5,
+      0.5
+    ]
+  },
+  {
+    "shape": "pyramid",
+    "exit": 0,
+    "ok": true,
+    "vertices": 16,
+    "triangles": 6,
+    "min": [
+      -0.5,
+      -0.5,
+      -0.5
+    ],
+    "max": [
+      0.5,
+      0.5,
+      0.5
+    ]
+  }
+]

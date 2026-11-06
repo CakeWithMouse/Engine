@@ -1,0 +1,1156 @@
+{
+    "ok": true,
+    "steps": [
+        {
+            "action": "load",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "West block",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        1.7999999523162842,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Central block",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        1.25,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "East block",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        2.0999999046325684,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "West corner",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        1.4500000476837158,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Central corner",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        1.850000023841858,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "East corner",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        1.350000023841858,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Main street",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.02500000037252903,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Street"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Moving car",
+                    "parent": 0,
+                    "position": [
+                        -5.599999904632568,
+                        0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "moving": true,
+                        "speed": 2.5,
+                        "version": 1
+                    },
+                    "type": "CalmCity.CarMover"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Car roof",
+                    "parent": 11,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Front left wheel",
+                    "parent": 11,
+                    "position": [
+                        0.44999998807907104,
+                        -0.30000001192092896,
+                        -0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Front right wheel",
+                    "parent": 11,
+                    "position": [
+                        0.44999998807907104,
+                        -0.30000001192092896,
+                        0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "Rear left wheel",
+                    "parent": 11,
+                    "position": [
+                        -0.44999998807907104,
+                        -0.30000001192092896,
+                        -0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "Rear right wheel",
+                    "parent": 11,
+                    "position": [
+                        -0.44999998807907104,
+                        -0.30000001192092896,
+                        0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 17,
+                    "material": "",
+                    "name": "North lane stripe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05700000002980232,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 18,
+                    "material": "",
+                    "name": "South lane stripe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05700000002980232,
+                        0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 19,
+                    "material": "",
+                    "name": "Suzanne imported",
+                    "parent": 0,
+                    "position": [
+                        8,
+                        1,
+                        1
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "move",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "West block",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        1.7999999523162842,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Central block",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        1.25,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "East block",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        2.0999999046325684,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "West corner",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        1.4500000476837158,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Central corner",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        1.850000023841858,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "East corner",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        1.350000023841858,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Main street",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.02500000037252903,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Street"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Moving car",
+                    "parent": 0,
+                    "position": [
+                        -5.599999904632568,
+                        0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "moving": true,
+                        "speed": 2.5,
+                        "version": 1
+                    },
+                    "type": "CalmCity.CarMover"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Car roof",
+                    "parent": 11,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Front left wheel",
+                    "parent": 11,
+                    "position": [
+                        0.44999998807907104,
+                        -0.30000001192092896,
+                        -0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Front right wheel",
+                    "parent": 11,
+                    "position": [
+                        0.44999998807907104,
+                        -0.30000001192092896,
+                        0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "Rear left wheel",
+                    "parent": 11,
+                    "position": [
+                        -0.44999998807907104,
+                        -0.30000001192092896,
+                        -0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "Rear right wheel",
+                    "parent": 11,
+                    "position": [
+                        -0.44999998807907104,
+                        -0.30000001192092896,
+                        0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 17,
+                    "material": "",
+                    "name": "North lane stripe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05700000002980232,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 18,
+                    "material": "",
+                    "name": "South lane stripe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05700000002980232,
+                        0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 19,
+                    "material": "",
+                    "name": "Suzanne imported",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        2,
+                        1
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "save",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "West block",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        1.7999999523162842,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Central block",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        1.25,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "East block",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        2.0999999046325684,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "West corner",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        1.4500000476837158,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Central corner",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        1.850000023841858,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "East corner",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        1.350000023841858,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Main street",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.02500000037252903,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Street"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Moving car",
+                    "parent": 0,
+                    "position": [
+                        -5.599999904632568,
+                        0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "moving": true,
+                        "speed": 2.5,
+                        "version": 1
+                    },
+                    "type": "CalmCity.CarMover"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Car roof",
+                    "parent": 11,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Front left wheel",
+                    "parent": 11,
+                    "position": [
+                        0.44999998807907104,
+                        -0.30000001192092896,
+                        -0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Front right wheel",
+                    "parent": 11,
+                    "position": [
+                        0.44999998807907104,
+                        -0.30000001192092896,
+                        0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "Rear left wheel",
+                    "parent": 11,
+                    "position": [
+                        -0.44999998807907104,
+                        -0.30000001192092896,
+                        -0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "Rear right wheel",
+                    "parent": 11,
+                    "position": [
+                        -0.44999998807907104,
+                        -0.30000001192092896,
+                        0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 17,
+                    "material": "",
+                    "name": "North lane stripe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05700000002980232,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 18,
+                    "material": "",
+                    "name": "South lane stripe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05700000002980232,
+                        0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 19,
+                    "material": "",
+                    "name": "Suzanne imported",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        2,
+                        1
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "new",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "load",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "West block",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        1.7999999523162842,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 5,
+                    "material": "",
+                    "name": "Central block",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        1.25,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "East block",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        2.0999999046325684,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 7,
+                    "material": "",
+                    "name": "West corner",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        1.4500000476837158,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 8,
+                    "material": "",
+                    "name": "Central corner",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        1.850000023841858,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 9,
+                    "material": "",
+                    "name": "East corner",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        1.350000023841858,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 10,
+                    "material": "",
+                    "name": "Main street",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.02500000037252903,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Street"
+                },
+                {
+                    "id": 11,
+                    "material": "",
+                    "name": "Moving car",
+                    "parent": 0,
+                    "position": [
+                        -5.599999904632568,
+                        0.550000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "moving": true,
+                        "speed": 2.5,
+                        "version": 1
+                    },
+                    "type": "CalmCity.CarMover"
+                },
+                {
+                    "id": 12,
+                    "material": "",
+                    "name": "Car roof",
+                    "parent": 11,
+                    "position": [
+                        0,
+                        0.6499999761581421,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 13,
+                    "material": "",
+                    "name": "Front left wheel",
+                    "parent": 11,
+                    "position": [
+                        0.44999998807907104,
+                        -0.30000001192092896,
+                        -0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 14,
+                    "material": "",
+                    "name": "Front right wheel",
+                    "parent": 11,
+                    "position": [
+                        0.44999998807907104,
+                        -0.30000001192092896,
+                        0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 15,
+                    "material": "",
+                    "name": "Rear left wheel",
+                    "parent": 11,
+                    "position": [
+                        -0.44999998807907104,
+                        -0.30000001192092896,
+                        -0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 16,
+                    "material": "",
+                    "name": "Rear right wheel",
+                    "parent": 11,
+                    "position": [
+                        -0.44999998807907104,
+                        -0.30000001192092896,
+                        0.550000011920929
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Cylinder"
+                },
+                {
+                    "id": 17,
+                    "material": "",
+                    "name": "North lane stripe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05700000002980232,
+                        -0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 18,
+                    "material": "",
+                    "name": "South lane stripe",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0.05700000002980232,
+                        0.5
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CalmCity.Building"
+                },
+                {
+                    "id": 19,
+                    "material": "",
+                    "name": "Suzanne imported",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        2,
+                        1
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        }
+    ]
+}

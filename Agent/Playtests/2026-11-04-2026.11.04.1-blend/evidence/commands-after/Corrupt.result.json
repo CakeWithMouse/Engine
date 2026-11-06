@@ -1,0 +1,4 @@
+{
+    "error": "Cannot load model '/Game/Models/corrupt/corrupt.fbx': FBX-Parser (TOK_DATA, line 1, col 4) unexpected token, expected TOK_KEY",
+    "ok": false
+}

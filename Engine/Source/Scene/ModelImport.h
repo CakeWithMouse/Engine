@@ -1,6 +1,8 @@
 #pragma once
 #include <filesystem>
 #include <string>
+#include <map>
+#include <cstdint>
 
 // Import-time helpers. All output goes into the new model directory; SceneAssets rolls it
 // back as a unit on failure. Runtime scenes only depend on the resulting project assets.
@@ -10,4 +12,5 @@ namespace ModelImport
     void CreateMaterials(const std::filesystem::path& source, const std::filesystem::path& destination,
                          const std::string& modelPath);
     std::string DefaultMaterial(const std::string& modelPath);
+    std::map<uint32_t,std::string> MaterialSlots(const std::string& modelPath);
 }

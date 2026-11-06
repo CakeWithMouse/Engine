@@ -1,0 +1,59 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\MaterialSlotsProbe\\Project.json",
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "path": "/Game/Models/blend-suzanne-multiple/blend-suzanne-multiple.glb",
+      "action": "model",
+      "name": "Multi"
+    },
+    {
+      "target": "Multi",
+      "path": "/materialSlots/1",
+      "action": "property",
+      "value": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "target": "Multi",
+      "path": "/materialSlots/1",
+      "action": "property",
+      "value": "/Game/../outside.mat"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\slot-commandlets-2/Slots.scene.json",
+      "action": "save"
+    },
+    {
+      "target": "Multi",
+      "action": "duplicate"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\slot-commandlets-2/Slots.scene.json",
+      "action": "load"
+    },
+    {
+      "target": "Multi",
+      "path": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+      "action": "material"
+    },
+    {
+      "target": "Multi",
+      "path": "",
+      "action": "material"
+    }
+  ]
+}

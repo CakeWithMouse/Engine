@@ -4,6 +4,7 @@ if (!$env:VCPKG_ROOT -and (Test-Path 'C:\Program Files\Microsoft Visual Studio\1
     $env:VCPKG_ROOT = 'C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg'
 }
 $repo = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../..'))
-& "$repo/Engine/BuildSupport/Invoke-MSBuild.ps1" -Project "$PSScriptRoot/SkeletalTests.vcxproj" -Configuration $Configuration -PlatformToolset $PlatformToolset -EnableAssimp:$EnableAssimp
+$assimpArgs=@{};if($PSBoundParameters.ContainsKey('EnableAssimp')){$assimpArgs.EnableAssimp=$EnableAssimp}
+& "$repo/Engine/BuildSupport/Invoke-MSBuild.ps1" -Project "$PSScriptRoot/SkeletalTests.vcxproj" -Configuration $Configuration -PlatformToolset $PlatformToolset @assimpArgs
 & "$repo/Engine/build/x64/$Configuration/SkeletalTests.exe"
 if ($LASTEXITCODE -ne 0) { throw 'Skeletal tests failed' }

@@ -1,0 +1,6 @@
+E:\Engine\Engine\build\playtests\20261104-r1\launcher-ui\EngineStore\2026.11.01.5\Release\SDK\ProjectTools.ps1 : Имя "G
+et-FileHash" не распознано как имя командлета, функции, файла сценария или выполняемой программы. Проверьте правильност
+ь написания имени, а также наличие и правильность пути, после чего повторите попытку.
+    + CategoryInfo          : ObjectNotFound: (Get-FileHash:String) [ProjectTools.ps1], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException,ProjectTools.ps1
+ 

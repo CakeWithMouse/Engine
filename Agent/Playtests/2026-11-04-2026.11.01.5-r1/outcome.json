@@ -1,0 +1,50 @@
+{
+  "release": "2026.11.01.5",
+  "configuration": "Release",
+  "platform": "x64",
+  "toolset": "v143",
+  "agents": 3,
+  "personas": 4,
+  "model": "gpt-6-luna",
+  "reasoning_effort": "medium",
+  "coverage": {
+    "groups": 73,
+    "at_least_two_attempts": 73,
+    "at_least_two_passed": 58
+  },
+  "issues": {
+    "total": 8,
+    "fixed": [
+      "BUG-004",
+      "BUG-005"
+    ],
+    "open": [
+      "BUG-001",
+      "BUG-002",
+      "BUG-003",
+      "BUG-006",
+      "BUG-007",
+      "BUG-008"
+    ]
+  },
+  "budget": {
+    "baseline": 0,
+    "observed_final": 13,
+    "account_wide": true,
+    "stopped_for_budget": false
+  },
+  "report": "report.md",
+  "matrix": "feature-matrix.csv",
+  "bugs": "issues.md",
+  "skill": "../../Skills/try-engine/SKILL.md",
+  "validation": [
+    "Editor Release build",
+    "Launcher Release build",
+    "Native UI C++ creation and HotReload",
+    "4 clean builds from delivered source archives",
+    "Skill validator",
+    "git diff --check",
+    "Archive CRC and SHA256 index",
+    "All report links exist"
+  ]
+}

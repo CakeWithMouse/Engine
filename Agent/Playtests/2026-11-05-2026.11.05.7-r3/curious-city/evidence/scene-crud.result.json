@@ -1,0 +1,633 @@
+{
+    "ok": true,
+    "steps": [
+        {
+            "action": "new",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "NorthHome",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                }
+            ],
+            "selected": [
+                1
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "NorthHome",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "SouthHome",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                }
+            ],
+            "selected": [
+                2
+            ],
+            "status": 0
+        },
+        {
+            "action": "parent",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "NorthHome",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "SouthHome",
+                    "parent": 1,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                }
+            ],
+            "selected": [
+                2
+            ],
+            "status": 0
+        },
+        {
+            "action": "move",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "NorthHome",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "SouthHome",
+                    "parent": 1,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                }
+            ],
+            "selected": [
+                2
+            ],
+            "status": 0
+        },
+        {
+            "action": "select",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "NorthHome",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "SouthHome",
+                    "parent": 1,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                }
+            ],
+            "selected": [
+                1,
+                2
+            ],
+            "status": 0
+        },
+        {
+            "action": "move",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "NorthHome",
+                    "parent": 0,
+                    "position": [
+                        4,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "SouthHome",
+                    "parent": 1,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                }
+            ],
+            "selected": [
+                1,
+                2
+            ],
+            "status": 0
+        },
+        {
+            "action": "duplicate",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "NorthHome",
+                    "parent": 0,
+                    "position": [
+                        4,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "SouthHome",
+                    "parent": 1,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "NorthHome 2",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "SouthHome 2",
+                    "parent": 3,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                }
+            ],
+            "selected": [
+                3,
+                4
+            ],
+            "status": 0
+        },
+        {
+            "action": "save",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "NorthHome",
+                    "parent": 0,
+                    "position": [
+                        4,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "SouthHome",
+                    "parent": 1,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "NorthHome 2",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "SouthHome 2",
+                    "parent": 3,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                }
+            ],
+            "selected": [
+                3,
+                4
+            ],
+            "status": 0
+        },
+        {
+            "action": "new",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "load",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "NorthHome",
+                    "parent": 0,
+                    "position": [
+                        4,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "SouthHome",
+                    "parent": 1,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "NorthHome 2",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "SouthHome 2",
+                    "parent": 3,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "delete",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "SouthHome",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "NorthHome 2",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "SouthHome 2",
+                    "parent": 3,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "undo",
+            "canRedo": true,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "NorthHome",
+                    "parent": 0,
+                    "position": [
+                        4,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "SouthHome",
+                    "parent": 1,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "NorthHome 2",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "SouthHome 2",
+                    "parent": 3,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "redo",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "SouthHome",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "NorthHome 2",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "SouthHome 2",
+                    "parent": 2,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "CuriousCity.House"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        }
+    ]
+}

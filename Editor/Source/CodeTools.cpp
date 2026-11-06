@@ -19,6 +19,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QProcess>
+#include <QProcessEnvironment>
 #include <QPushButton>
 #include <QSaveFile>
 #include <QTreeWidget>
@@ -28,6 +29,7 @@
 
 void EditorMainWindow::RunCodeTool(const QString& action, const QStringList& extra)
 {
+    if (sceneBusy_) return;
     if (action != QStringLiteral("AddClass") && host_->PlayState() != EditorQtHost::Edit) { QMessageBox::information(this,"C++",QStringLiteral("Сначала остановите Play.")); return; }
     const auto project = QString::fromUtf8(host_->host().projectFile);
     const auto runtime = QCoreApplication::applicationDirPath();
@@ -44,22 +46,30 @@ void EditorMainWindow::RunCodeTool(const QString& action, const QStringList& ext
     reloadTypesExisted_=typesBefore.exists(); reloadTypesBefore_.clear();
     if (typesBefore.open(QIODevice::ReadOnly)) reloadTypesBefore_=typesBefore.readAll();
     // The candidate validates saved scenes. Keep them unchanged until activation.
-    if (action != QStringLiteral("AddClass")) { sceneBusy_ = true; setEnabled(false); }
+    // Existing sceneBusy_ guards and RefreshSceneUi gate editing while the
+    // candidate is built. Do not recursively disable menus via the main window:
+    // Qt 6.7 can crash in QMenu::changeEvent / QAction::setEnabled there.
+    if (action != QStringLiteral("AddClass")) { sceneBusy_ = true; UpdatePlayButtons(); }
     auto* process = new QProcess(this);
+    // Windows PowerShell must discover its own modules. An editor launched from
+    // PowerShell 7 can inherit incompatible Utility modules (Get-FileHash fails).
+    auto environment = QProcessEnvironment::systemEnvironment();
+    environment.remove(QStringLiteral("PSModulePath"));
+    process->setProcessEnvironment(environment);
     process->setObjectName(QStringLiteral("projectCodeBuild"));
     process->setProcessChannelMode(QProcess::MergedChannels);
     connect(process, &QProcess::readyReadStandardOutput, this, [this,process] {
         auto pending=process->property("pendingOutput").toByteArray()+process->readAllStandardOutput();
-        int end=0;while((end=pending.indexOf('\n'))>=0) { AppendLine(QString::fromLocal8Bit(pending.left(end)));pending.remove(0,end+1); }
+        int end=0;while((end=pending.indexOf('\n'))>=0) { AppendLine(QString::fromUtf8(pending.left(end)));pending.remove(0,end+1); }
         process->setProperty("pendingOutput",pending);
     });
     connect(process, &QProcess::errorOccurred, this, [this,process](QProcess::ProcessError error) {
-        AppendLine(process->errorString()); if (error == QProcess::FailedToStart) { sceneBusy_ = false; setEnabled(true); process->deleteLater(); }
+        AppendLine(process->errorString()); if (error == QProcess::FailedToStart) { sceneBusy_ = false; UpdatePlayButtons(); process->deleteLater(); }
     });
     connect(process, qOverload<int,QProcess::ExitStatus>(&QProcess::finished), this,
         [this,process,action,project,runtime,previousModule](int code, QProcess::ExitStatus state) {
-            sceneBusy_ = false; setEnabled(true);
-            AppendLine(QString::fromLocal8Bit(process->property("pendingOutput").toByteArray()+process->readAllStandardOutput()));
+            sceneBusy_ = false; UpdatePlayButtons();
+            AppendLine(QString::fromUtf8(process->property("pendingOutput").toByteArray()+process->readAllStandardOutput()));
             process->deleteLater();
             if (code || state != QProcess::NormalExit) {
                 AppendLine(QStringLiteral("[Ошибка C++] %1: код завершения %2. Проект: %3").arg(action).arg(code).arg(project));
@@ -76,7 +86,7 @@ void EditorMainWindow::RunCodeTool(const QString& action, const QStringList& ext
                 if (module.isEmpty()) { QMessageBox::warning(this, "C++", QStringLiteral("В Project.json отсутствует module.")); return; }
                 QFile typesBuilt(QFileInfo(project).dir().filePath("ProjectTypes.tsv")); reloadTypesBuilt_.clear();
                 if(typesBuilt.open(QIODevice::ReadOnly)) reloadTypesBuilt_=typesBuilt.readAll();
-                sceneBusy_ = true; setEnabled(false);
+                sceneBusy_ = true; UpdatePlayButtons();
                 EditorCommand c; c.type = EditorCommand::ReloadProject; c.name=previousModule; c.path = QFileInfo(project).dir().absoluteFilePath(module);
                 host_->PostCommand(c); return;
             }

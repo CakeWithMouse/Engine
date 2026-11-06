@@ -1,0 +1,7 @@
+backfill render-mode=forward type=0 gbuffer-overlay=off
+backfill particle-test throw-started frame=1
+backfill impact-burst created count=64 lifetime=1.0s collision=on sorting=on
+backfill particle-capture phase=collision-on-sort-on hit=1 throw=1 ticks-after-hit=24 collision=on sorting=on upcoming-frame=122 completed-valid=1
+backfill particle-capture phase=collision-off-sort-on hit=1 throw=1 ticks-after-hit=24 collision=off sorting=on upcoming-frame=123 completed-valid=1
+backfill particle-capture phase=collision-on-sort-on-frozen hit=1 throw=1 ticks-after-hit=24 collision=on sorting=on upcoming-frame=124 completed-valid=1
+backfill particle-capture phase=collision-on-sort-off-frozen hit=1 throw=1 ticks-after-hit=24 collision=on sorting=off upcoming-frame=125 completed-valid=1

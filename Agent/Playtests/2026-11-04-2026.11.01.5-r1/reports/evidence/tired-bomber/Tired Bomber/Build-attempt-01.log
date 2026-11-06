@@ -1,0 +1,9 @@
+
+  ComponentGenerator: 3 component(s), Project
+  GeneratedComponents.cpp
+  ProjectGame.cpp
+  Создание кода...
+E:\Engine\Engine\build\playtests\20261104-r1\tired-bomber\Tired Bomber\Source\ProjectGame.cpp(7,10): error C2013: отсутствует ">" [E:\Engine\Engine\build\playtests\20261104-r1\tired-bomber\Tired Bomber\Game.vcxproj]
+
+
+Full build log: E:\Engine\Engine\build\playtests\20261104-r1\tired-bomber\Tired Bomber\Binaries\Release\c4c09a6326a1493393fc7a668f44af47\build.log

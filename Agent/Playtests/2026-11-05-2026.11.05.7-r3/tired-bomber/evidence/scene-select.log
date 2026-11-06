@@ -1,0 +1,476 @@
+[VfsRead] using local VFS (no host service)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "ok": true,
+    "steps": [
+        {
+            "action": "select",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        10,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "material": "/Game/Models/blend-uv/Materials/Material_0.mat",
+                    "name": "UV.Control",
+                    "parent": 0,
+                    "position": [
+                        -11,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ProbeSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 100,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "type": "Light.Directional"
+                }
+            ],
+            "selected": [
+                4
+            ],
+            "status": 0
+        },
+        {
+            "action": "select",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        10,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "material": "/Game/Models/blend-uv/Materials/Material_0.mat",
+                    "name": "UV.Control",
+                    "parent": 0,
+                    "position": [
+                        -11,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ProbeSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 100,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "type": "Light.Directional"
+                }
+            ],
+            "selected": [
+                5
+            ],
+            "status": 0
+        },
+        {
+            "action": "select",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        10,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "material": "/Game/Models/blend-uv/Materials/Material_0.mat",
+                    "name": "UV.Control",
+                    "parent": 0,
+                    "position": [
+                        -11,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ProbeSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 100,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "type": "Light.Directional"
+                }
+            ],
+            "selected": [
+                4,
+                5
+            ],
+            "status": 0
+        },
+        {
+            "action": "select",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "material": "",
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        -5,
+                        10,
+                        -4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "material": "",
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        5,
+                        9,
+                        4
+                    ],
+                    "projectData": {
+                    },
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "material": "",
+                    "name": "Bomber.ImportedTarget",
+                    "parent": 0,
+                    "position": [
+                        10,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": "/Game/Models/blend-suzanne-multiple/Materials/Material_0.mat",
+                            "1": "/Game/Models/blend-suzanne-multiple/Materials/Material_1_variant.mat"
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "material": "/Game/Models/blend-uv/Materials/Material_0.mat",
+                    "name": "UV.Control",
+                    "parent": 0,
+                    "position": [
+                        -11,
+                        0.800000011920929,
+                        0
+                    ],
+                    "projectData": {
+                        "materialSlots": {
+                            "0": ""
+                        },
+                        "version": 1
+                    },
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 6,
+                    "material": "",
+                    "name": "ProbeSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "color": [
+                            1,
+                            0.9700000286102295,
+                            0.9200000166893005
+                        ],
+                        "enabled": true,
+                        "intensity": 1,
+                        "shadowDistance": 100,
+                        "shadows": true,
+                        "version": 1
+                    },
+                    "type": "Light.Directional"
+                }
+            ],
+            "selected": [
+                6
+            ],
+            "status": 0
+        }
+    ]
+}

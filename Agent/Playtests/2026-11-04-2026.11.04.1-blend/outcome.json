@@ -1,0 +1,22 @@
+{
+  "status": "completed",
+  "blender": "5.2.3 LTS",
+  "blenderExecutable": "C:/Program Files/Blender Foundation/Blender 5.2/blender.exe",
+  "engineVersion": "2026.11.04.1",
+  "configuration": "Release",
+  "installed": true,
+  "checks": {
+    "assetPassed": 273,
+    "blendSkipped": false,
+    "commandletPassed": 7,
+    "installedCommandletPassed": 7,
+    "otherRegressionsPassed": 25,
+    "renderEvidenceViewed": true,
+    "runnerExit": 0,
+    "installedIdentityMatches": true
+  },
+  "fixed": ["BUG010: asset.import inspects converted GLB instead of original BLEND", "Successful test suite resets expected negative-case LASTEXITCODE"],
+  "remainingDefects": [],
+  "scope": "Existing Base Color/UV0 import, external and packed images, missing-image rollback, Unicode paths and project relocation",
+  "weeklyAccountUsagePercent": {"before": 17, "latest": 18}
+}

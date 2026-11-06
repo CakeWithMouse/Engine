@@ -479,7 +479,11 @@ bool GameComponent::TrySetTexture(const std::string& path)
     ID3D11DeviceContext* context = GamePtr ? GamePtr->GetContext() : nullptr;
     if (!device || !context) { texturePath = path; return true; }
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> candidate;
-    if (!TextureLoader::LoadTexture2D(device, context, path, true, candidate)) return false;
+    // Assimp's left-handed conversion already flips UV0 into Direct3D's top-left
+    // convention. Flipping the image again inverted imported/skinned models and
+    // disagreed with the same image sampled by a material's BaseMap.
+    const bool flipImage = (GetMaterialVariant() & MaterialVariant::Skinned) == 0;
+    if (!TextureLoader::LoadTexture2D(device, context, path, flipImage, candidate)) return false;
     texturePath = path;
     textureSRV = std::move(candidate);
     CreateSamplerState();
@@ -842,8 +846,11 @@ GameComponent* GameComponent::GetRenderComponent() {
     // Explicit legacy shader pairs still consume the component's position/colour stream.
     // The ready mesh is retained for materials (including its authored normals and UVs).
     if(VisualPrimitive && MaterialAssetPath.empty() && !MaterialPtr && !VertexShaderName.empty()) return this;
-    // Legacy position/color primitives are converted to the material vertex format lazily.
-    if(!VisualComponent && !SupportsMaterials() && (!MaterialAssetPath.empty()||MaterialPtr) && !points.empty()) {
+    // Default primitive copies use the same mesh/material stream as authored
+    // primitives. The legacy instanced constant buffer only matches explicit
+    // legacy shaders (e.g. InstanceSphereFigure), not the ordinary fallback.
+    const bool defaultCopies = HasInstances() && VertexShaderName.empty();
+    if(!VisualComponent && !SupportsMaterials() && (!MaterialAssetPath.empty()||MaterialPtr||defaultCopies) && !points.empty()) {
         MeshLodData mesh;
         for(size_t i=0;i+2<indices.size();i+=3) {
             glm::vec3 p[3]; bool valid=true;
@@ -856,9 +863,9 @@ GameComponent* GameComponent::GetRenderComponent() {
         auto visual=std::make_unique<MeshComponent>();visual->SetMesh(std::move(mesh));visual->SetParent(this);visual->SetGame(GamePtr);VisualComponent=std::move(visual);
     }
     if(!VisualComponent)return this;
-    if(!VisualPrimitive && VisualModelAsset.empty() && MaterialAssetPath.empty() && !MaterialPtr) { VisualComponent.reset();return this; }
+    if(!VisualPrimitive && VisualModelAsset.empty() && MaterialAssetPath.empty() && !MaterialPtr && !defaultCopies) { VisualComponent.reset();return this; }
     auto* visual=VisualComponent.get();
-    if(VisualPrimitive) {
+    if(VisualPrimitive || (VisualModelAsset.empty() && !SupportsMaterials())) {
         while(visual->InstanceArray.size()<InstanceArray.size())
             visual->InstanceArray.push_back(std::make_unique<GameComponent>());
         visual->InstanceArray.resize(InstanceArray.size());

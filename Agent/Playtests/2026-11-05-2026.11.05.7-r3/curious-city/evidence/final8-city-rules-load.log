@@ -1,0 +1,45 @@
+[VfsRead] using local VFS (no host service)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "ok": true,
+    "steps": [
+        {
+            "action": "load",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "material": "",
+                    "name": "CityRules",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "projectData": {
+                        "balance": 850,
+                        "buildingLimit": 20,
+                        "version": 1
+                    },
+                    "type": "CuriousCity.CityRules"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        }
+    ]
+}

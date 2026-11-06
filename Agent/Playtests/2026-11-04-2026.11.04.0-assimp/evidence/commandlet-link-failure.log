@@ -1,0 +1,32 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  EngineCommandlets.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineCommandlets.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineCommandlets.exp
+Engine.lib(SkeletalLoaderAssimp.obj) : error LNK2001: неразрешенный внешний символ "public: static void * __cdecl Assimp::Intern::AllocateFromAssimpHeap::operator new(unsigned __int64)" (??2AllocateFromAssimpHeap@Intern@Assimp@@SAPEAX_K@Z). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(ModelImport.obj) : error LNK2001: неразрешенный внешний символ "public: static void * __cdecl Assimp::Intern::AllocateFromAssimpHeap::operator new(unsigned __int64)" (??2AllocateFromAssimpHeap@Intern@Assimp@@SAPEAX_K@Z). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(SkeletalLoaderAssimp.obj) : error LNK2001: неразрешенный внешний символ "public: static void __cdecl Assimp::Intern::AllocateFromAssimpHeap::operator delete(void *)" (??3AllocateFromAssimpHeap@Intern@Assimp@@SAXPEAX@Z). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(ModelImport.obj) : error LNK2001: неразрешенный внешний символ "public: static void __cdecl Assimp::Intern::AllocateFromAssimpHeap::operator delete(void *)" (??3AllocateFromAssimpHeap@Intern@Assimp@@SAXPEAX@Z). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(SkeletalLoaderAssimp.obj) : error LNK2001: неразрешенный внешний символ "public: __cdecl Assimp::Importer::Importer(void)" (??0Importer@Assimp@@QEAA@XZ). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(ModelImport.obj) : error LNK2001: неразрешенный внешний символ "public: __cdecl Assimp::Importer::Importer(void)" (??0Importer@Assimp@@QEAA@XZ). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(SkeletalLoaderAssimp.obj) : error LNK2001: неразрешенный внешний символ "public: __cdecl Assimp::Importer::~Importer(void)" (??1Importer@Assimp@@QEAA@XZ). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(ModelImport.obj) : error LNK2001: неразрешенный внешний символ "public: __cdecl Assimp::Importer::~Importer(void)" (??1Importer@Assimp@@QEAA@XZ). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(SkeletalLoaderAssimp.obj) : error LNK2001: неразрешенный внешний символ "public: void __cdecl Assimp::Importer::SetIOHandler(class Assimp::IOSystem *)" (?SetIOHandler@Importer@Assimp@@QEAAXPEAVIOSystem@2@@Z). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(ModelImport.obj) : error LNK2001: неразрешенный внешний символ "public: void __cdecl Assimp::Importer::SetIOHandler(class Assimp::IOSystem *)" (?SetIOHandler@Importer@Assimp@@QEAAXPEAVIOSystem@2@@Z). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(SkeletalLoaderAssimp.obj) : error LNK2001: неразрешенный внешний символ "public: struct aiScene const * __cdecl Assimp::Importer::ReadFile(char const *,unsigned int)" (?ReadFile@Importer@Assimp@@QEAAPEBUaiScene@@PEBDI@Z). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(ModelImport.obj) : error LNK2001: неразрешенный внешний символ "public: struct aiScene const * __cdecl Assimp::Importer::ReadFile(char const *,unsigned int)" (?ReadFile@Importer@Assimp@@QEAAPEBUaiScene@@PEBDI@Z). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(SkeletalLoaderAssimp.obj) : error LNK2001: неразрешенный внешний символ "public: struct aiScene const * __cdecl Assimp::Importer::ReadFileFromMemory(void const *,unsigned __int64,unsigned int,char const *)" (?ReadFileFromMemory@Importer@Assimp@@QEAAPEBUaiScene@@PEBX_KIPEBD@Z). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(SkeletalLoaderAssimp.obj) : error LNK2001: неразрешенный внешний символ "public: struct aiScene const * __cdecl Assimp::Importer::ApplyPostProcessing(unsigned int)" (?ApplyPostProcessing@Importer@Assimp@@QEAAPEBUaiScene@@I@Z). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(SkeletalLoaderAssimp.obj) : error LNK2001: неразрешенный внешний символ "public: char const * __cdecl Assimp::Importer::GetErrorString(void)const " (?GetErrorString@Importer@Assimp@@QEBAPEBDXZ). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(ModelImport.obj) : error LNK2001: неразрешенный внешний символ "public: char const * __cdecl Assimp::Importer::GetErrorString(void)const " (?GetErrorString@Importer@Assimp@@QEBAPEBDXZ). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(SkeletalLoaderAssimp.obj) : error LNK2001: неразрешенный внешний символ "public: virtual bool __cdecl Assimp::IOSystem::ComparePaths(char const *,char const *)const " (?ComparePaths@IOSystem@Assimp@@UEBA_NPEBD0@Z). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(ModelImport.obj) : error LNK2001: неразрешенный внешний символ "public: virtual bool __cdecl Assimp::IOSystem::ComparePaths(char const *,char const *)const " (?ComparePaths@IOSystem@Assimp@@UEBA_NPEBD0@Z). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(SkeletalLoaderAssimp.obj) : error LNK2001: неразрешенный внешний символ "public: virtual class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > const & __cdecl Assimp::IOSystem::CurrentDirectory(void)const " (?CurrentDirectory@IOSystem@Assimp@@UEBAAEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(ModelImport.obj) : error LNK2001: неразрешенный внешний символ "public: virtual class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > const & __cdecl Assimp::IOSystem::CurrentDirectory(void)const " (?CurrentDirectory@IOSystem@Assimp@@UEBAAEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ). [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(ModelImport.obj) : error LNK2001: неразрешенный внешний символ aiGetMaterialColor. [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(ModelImport.obj) : error LNK2001: неразрешенный внешний символ aiGetMaterialString. [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(ModelImport.obj) : error LNK2001: неразрешенный внешний символ aiGetMaterialTextureCount. [E:\Engine\Editor\EditorModule.vcxproj]
+Engine.lib(ModelImport.obj) : error LNK2001: неразрешенный внешний символ aiGetMaterialTexture. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Engine\BuildSupport\..\..\Game\build\x64\Release\Runtime\EngineCommandlets.exe : fatal error LNK1120: неразрешенных внешних элементов: 15 [E:\Engine\Editor\EditorModule.vcxproj]
+

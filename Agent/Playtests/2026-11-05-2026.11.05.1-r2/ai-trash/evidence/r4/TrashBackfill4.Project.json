@@ -1,0 +1,6 @@
+{
+  "content": "Content",
+  "module": "Binaries/Release/cc000a4321964824a5f2994b433b33f7/Game.dll",
+  "name": "TrashGameDev",
+  "startupScene": "Content/Scenes/Main.scene.json"
+}

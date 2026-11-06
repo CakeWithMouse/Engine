@@ -1,0 +1,6 @@
+﻿
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 8 component(s), Project
+  ProjectGame.cpp
+     Создается библиотека E:\Engine\Engine\build\playtests\20261105-r2\ai-trash\TrashBackfill4\Binaries\Release\cc000a4321964824a5f2994b433b33f7\Game.lib и объект E:\Engine\Engine\build\playtests\20261105-r2\ai-trash\TrashBackfill4\Binaries\Release\cc000a4321964824a5f2994b433b33f7\Game.exp
+  Game.vcxproj -> E:\Engine\Engine\build\playtests\20261105-r2\ai-trash\TrashBackfill4\Binaries\Release\cc000a4321964824a5f2994b433b33f7\Game.dll

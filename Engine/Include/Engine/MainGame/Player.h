@@ -20,6 +20,7 @@ enum class CameraMode
 class Player
 {
 public:
+    void SerializeSaveGame(class SaveArchive& archive);
     Player();
     void UpdateCamera(float deltaTime);
     // Refresh derived matrices without processing input or advancing the camera.
@@ -33,6 +34,7 @@ public:
     float GetNearPlane() const { return nearPlane; }
     float GetFarPlane() const { return farPlane; }
     float GetFovY() const { return DirectX::XMConvertToRadians(fovDegrees); }
+    bool IsOrthographic() const { return orthographic; }
 
     void SetProjection(bool orthographic, float fov, float nearClip, float farClip, float height);
     void SetCameraMode(CameraMode mode)

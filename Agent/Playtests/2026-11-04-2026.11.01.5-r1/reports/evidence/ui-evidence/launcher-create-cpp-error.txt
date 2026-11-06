@@ -1,0 +1,67 @@
+Window: "Engine Launcher", App: EngineLauncher.exe.
+	0 окно (disabled) Engine Launcher Secondary Actions: Raise
+		30 диалоговое окно (disabled) Создать проект Secondary Actions: Raise
+			42 диалоговое окно Проект создан; C++ не собран. Открывается прежний модуль Secondary Actions: Raise
+				43 кнопка ОК ID: 2
+				44 рисунок ID: 20
+				45 текстовый C++ build failed. Existing project preserved. See CodeBuild.log in the project folder. ID: 65535
+				46 название (settable, string) Value: Проект создан; C++ не собран. Открывается прежний модуль
+					47 кнопка Закрыть
+			31 текстовый Название проекта
+			32 поле (settable, string) Название проекта Value: Curious Direct Cpp ID: 201
+			33 текстовый Новая папка проекта (будет создана внутри выбранной папки)
+			34 поле (settable, string) Новая папка проекта (будет создана внутри выбранной папки) Value: E:\Engine\Engine\build\playtests\20261104-r1\curious-city\DirectCpp ID: 202
+			35 кнопка Обзор… ID: 203
+			36 текстовый Готовая сцена: земля, куб и свет. Версия движка сохраняется в проекте.
+			37 флажок Проект с C++ (нужны Visual Studio C++ tools) ID: 204
+			38 кнопка Создать ID: 1
+			39 кнопка Отмена ID: 2
+			40 название (settable, string) Value: Создать проект
+				41 кнопка Закрыть
+		1 текстовый Примеры и ваши проекты
+		2 список Примеры и ваши проекты ID: 100
+			3 элемент списка (selectable) Runtime Example — редактор с BasicExamples preview
+			4 элемент списка (selectable) BasicExamples — квадраты / куб
+			5 элемент списка (selectable) Pong — ракетки и мяч
+			6 элемент списка (selectable) SunGame — солнечная система
+			7 элемент списка (selectable) Battle — массовая техника, LOD и инстансинг
+			8 элемент списка (selectable) Battle (Animated Crowd) — анимированная толпа 10 000+ скелетов (VAT, Assimp)
+			9 элемент списка (selectable) Katamari — сбор объектов (требуется Assimp)
+		10 кнопка Играть ID: 101
+		11 кнопка Редактировать ID: 102
+		12 кнопка Создать проект ID: 103
+		13 кнопка Открыть проект… ID: 104
+		14 текстовый Игра готова к запуску. Редактировать: preview сцены в Qt. Изменение объектов пока недоступно.
+		15 название (settable, string) Value: Engine Launcher
+			16 строка меню Система ID: MenuBar
+				48 элемент меню Система
+			18 кнопка Свернуть
+			19 кнопка (disabled) Развернуть
+			20 кнопка Закрыть
+		21 строка меню Приложение ID: MenuBar
+			49 элемент меню Проект
+			50 элемент меню Версии движка
+		42 диалоговое окно Проект создан; C++ не собран. Открывается прежний модуль Secondary Actions: Raise
+			43 кнопка ОК ID: 2
+			44 рисунок ID: 20
+			45 текстовый C++ build failed. Existing project preserved. See CodeBuild.log in the project folder. ID: 65535
+			46 название (settable, string) Value: Проект создан; C++ не собран. Открывается прежний модуль
+				47 кнопка Закрыть
+		30 диалоговое окно (disabled) Создать проект Secondary Actions: Raise
+			42 диалоговое окно Проект создан; C++ не собран. Открывается прежний модуль Secondary Actions: Raise
+				43 кнопка ОК ID: 2
+				44 рисунок ID: 20
+				45 текстовый C++ build failed. Existing project preserved. See CodeBuild.log in the project folder. ID: 65535
+				46 название (settable, string) Value: Проект создан; C++ не собран. Открывается прежний модуль
+					47 кнопка Закрыть
+			31 текстовый Название проекта
+			32 поле (settable, string) Название проекта Value: Curious Direct Cpp ID: 201
+			33 текстовый Новая папка проекта (будет создана внутри выбранной папки)
+			34 поле (settable, string) Новая папка проекта (будет создана внутри выбранной папки) Value: E:\Engine\Engine\build\playtests\20261104-r1\curious-city\DirectCpp ID: 202
+			35 кнопка Обзор… ID: 203
+			36 текстовый Готовая сцена: земля, куб и свет. Версия движка сохраняется в проекте.
+			37 флажок Проект с C++ (нужны Visual Studio C++ tools) ID: 204
+			38 кнопка Создать ID: 1
+			39 кнопка Отмена ID: 2
+			40 название (settable, string) Value: Создать проект
+				41 кнопка Закрыть

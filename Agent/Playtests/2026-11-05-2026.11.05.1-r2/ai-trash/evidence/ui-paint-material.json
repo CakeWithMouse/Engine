@@ -1,0 +1,24 @@
+{
+  "shader": "Paint.hlsl",
+  "version": 1,
+  "render": {
+    "blend": "masked",
+    "alphaClip": 0.5,
+    "lighting": "lit",
+    "twoSided": false,
+    "castShadows": true
+  },
+  "params": {
+    "Tint": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "Gloss": 0.5
+  },
+  "textures": {
+    "BaseMap": "../Textures/outside.bmp",
+    "MaskMap": null
+  }
+}

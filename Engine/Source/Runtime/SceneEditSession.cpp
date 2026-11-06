@@ -2,6 +2,7 @@
 #include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/MainGame/Player.h>
 #include <Engine/Scene/SceneDocument.h>
+#include <Engine/SaveGame/SaveGame.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
 #include <Engine/Components/Character.h>
 #include <cstring>
@@ -50,6 +51,7 @@ std::unique_ptr<Game> SceneEditSession::CopyForPlay()
 {
     auto candidate = gameFactory_ ? gameFactory_() : EmptyGame();
     if (!candidate) throw std::runtime_error("Game factory returned null");
+    candidate->Saves().SetCatalog(catalog_);
     candidate->SetSimulationEnabled(false);
     candidate->SetSimulationTimeScale(1.0f);
     candidate->SetSceneLightingEnabled(true);

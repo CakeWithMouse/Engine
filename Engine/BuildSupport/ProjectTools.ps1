@@ -6,6 +6,9 @@ param(
     [string]$Base='', [string]$BaseHeader=''
 )
 $ErrorActionPreference='Stop'
+# The editor and launcher consume UTF-8, including PowerShell diagnostics.
+$OutputEncoding = [Text.UTF8Encoding]::new($false)
+[Console]::OutputEncoding = $OutputEncoding
 if (-not ('ProjectFileCommit' -as [type])) {
     Add-Type -TypeDefinition @'
 using System;
@@ -277,13 +280,15 @@ $start.FileName=$msbuild; $start.UseShellExecute=$false
 $start.RedirectStandardOutput=$true; $start.RedirectStandardError=$true
 $start.EnvironmentVariables.Clear()
 foreach($entry in [Environment]::GetEnvironmentVariables().GetEnumerator()) { $start.EnvironmentVariables[$entry.Key.ToUpperInvariant()]=$entry.Value }
-$start.Arguments='"'+(Join-Path $projectRoot 'Game.vcxproj')+'" /nologo /m:1 /nr:false /verbosity:minimal /p:Platform=x64 /p:Configuration='+$pin.engineConfiguration+' /p:PlatformToolset='+$sdkInfo.toolset+' "/p:EngineSdk='+$sdk+'" "/p:ProjectBuildOutput='+$output+'"'
+$buildLog=Join-Path $output 'build.log'
+# MSBuild owns decoding its native compiler tasks. Its explicit UTF-8 file logger
+# avoids guessing OEM/ANSI encodings of redirected console bytes in PowerShell.
+$start.Arguments='"'+(Join-Path $projectRoot 'Game.vcxproj')+'" /nologo /m:1 /nr:false /noconsolelogger "/flp:LogFile='+$buildLog+';Encoding=UTF-8;Verbosity=minimal" /p:Platform=x64 /p:Configuration='+$pin.engineConfiguration+' /p:PlatformToolset='+$sdkInfo.toolset+' "/p:EngineSdk='+$sdk+'" "/p:ProjectBuildOutput='+$output+'"'
 $buildProcess=[Diagnostics.Process]::Start($start)
 $buildOutput=$buildProcess.StandardOutput.ReadToEndAsync(); $buildErrors=$buildProcess.StandardError.ReadToEndAsync()
 $buildProcess.WaitForExit()
-$buildText=$buildOutput.GetAwaiter().GetResult()+[Environment]::NewLine+$buildErrors.GetAwaiter().GetResult()
-$buildLog=Join-Path $output 'build.log'
-[IO.File]::WriteAllText($buildLog,$buildText,[Text.UTF8Encoding]::new($false))
+$startupOutput=$buildOutput.GetAwaiter().GetResult()+[Environment]::NewLine+$buildErrors.GetAwaiter().GetResult()
+$buildText=if(Test-Path -LiteralPath $buildLog){[IO.File]::ReadAllText($buildLog,[Text.Encoding]::UTF8)}else{$startupOutput}
 Write-Output $buildText
 Write-Output "Full build log: $buildLog"
 if ($buildProcess.ExitCode) { throw 'Project build failed; previous module preserved' }

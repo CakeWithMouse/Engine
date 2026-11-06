@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PainEngine · SaveGame — проект архитектуры</title>
+<style>
+:root{color-scheme:light dark;--bg:light-dark(#f5f5f0,#141917);--fg:light-dark(#202b26,#e7eee9);--muted:light-dark(#52655b,#a4b9ac);--line:light-dark(#b8c6bc,#475b4d);--panel:light-dark(#fff,#202a24);--accent:light-dark(#216a47,#87d5a4);--new:light-dark(#77541a,#e3bb72)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 system-ui,sans-serif}main{max-width:1160px;margin:auto;padding:36px 24px 60px}h1{font-size:clamp(30px,5vw,52px);line-height:1.1;letter-spacing:-.035em;margin:14px 0}h2{font-size:25px;line-height:1.3;margin:24px 0 12px}h3{margin:0 0 8px;font-size:18px}p{max-width:85ch;margin:8px 0 16px}.eyebrow{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}.lead{font-size:19px}.notice{border-left:4px solid var(--new);padding:8px 16px;color:var(--new)}a{color:var(--accent)}button{font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 16px;cursor:pointer;min-height:44px}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:4px}button:disabled{opacity:.5;cursor:default}.tabs{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);padding:20px 0}.tabs button[aria-selected=true]{background:var(--accent);color:var(--bg);border-color:var(--accent)}[hidden]{display:none!important}.legend{display:flex;flex-wrap:wrap;gap:24px;font-size:14px;color:var(--muted);margin:20px 0}.legend span:before{content:'';display:inline-block;width:24px;border-top:2px solid var(--accent);margin-right:8px;vertical-align:middle}.legend .planned:before{border-top:2px dashed var(--new)}.architecture{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:24px;align-items:start}.lane{min-width:0}.lane-title{color:var(--muted);font-size:14px;font-weight:700;margin:0 0 12px}.node{width:100%;text-align:left;display:block;min-height:86px;border-left:4px solid var(--accent)}.node small{display:block;color:var(--muted);font-size:13px}.node.new{border:1px dashed var(--new);border-left:4px solid var(--new)}.node[aria-pressed=true]{outline:2px solid var(--accent);outline-offset:3px}.arrow{text-align:center;color:var(--muted);font-size:13px;padding:6px 0;overflow-wrap:anywhere}.arrow b{font-size:20px;margin-right:6px}.detail{border-top:1px solid var(--line);margin-top:24px;padding-top:16px}.detail p{min-height:3em}.boundary{margin-top:20px;font-size:14px;color:var(--muted)}.split{display:grid;grid-template-columns:1fr 1.2fr;gap:32px;margin-top:20px}.steps{padding-left:24px;margin:0}.steps li{padding:8px 0 8px 4px;color:var(--muted)}.steps li.active{color:var(--accent);font-weight:700}.step-view{align-self:start;border-top:4px solid var(--accent);padding-top:16px;min-width:0}.controls{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0}.state{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:18px 0;border-block:1px solid var(--line);margin:20px 0}.state strong{display:block;font-size:25px}.state small{color:var(--muted)}label{display:flex;gap:10px;align-items:start;margin:16px 0}input{margin-top:7px}pre{background:var(--panel);padding:18px;border-radius:8px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.65}code{font-family:ui-monospace,Consolas,monospace}table{border-collapse:collapse;width:100%;font-size:14px}td,th{padding:12px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--muted)}.footer{margin-top:36px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}.compact{font-size:14px;color:var(--muted)}@media(max-width:740px){main{padding:24px 16px}.architecture,.split{grid-template-columns:1fr}.lane{margin-bottom:8px}.step-view{min-height:0}.tabs button{flex:1 1 40%}.state{gap:10px}.detail p{min-height:0}td,th{padding:10px 5px}}
+</style>
+</head>
+<body><main>
+<header><div class="eyebrow">PainEngine / предложение · 04.11.2026</div>
+<h1>SaveGame</h1><p class="lead">Продолжить игровую партию после закрытия игры.</p>
+<p class="notice">Архив первоначального предложения. Контракт изменён: сцена и базовые классы сохраняются движком, наследники дописывают поля. <a href="SAVEGAME.html">Актуальная схема реализации</a>. Шаги ниже описывают старый проект.</p></header>
+<nav class="tabs" role="tablist" aria-label="Разделы схемы">
+<button type="button" role="tab" id="tab-map" aria-controls="map" aria-selected="true">Архитектура</button>
+<button type="button" role="tab" id="tab-save" aria-controls="save" aria-selected="false">Сохранение</button>
+<button type="button" role="tab" id="tab-load" aria-controls="load" aria-selected="false">Загрузка</button>
+<button type="button" role="tab" id="tab-dev" aria-controls="dev" aria-selected="false">Разработчику</button>
+</nav>
+<section id="map" role="tabpanel" aria-labelledby="tab-map">
+<h2>Кто хранит данные и кто управляет жизненным циклом</h2>
+<div class="legend"><span>Уже существует</span><span class="planned">Предлагается добавить</span></div>
+<div class="architecture" aria-label="Три области: игра, Engine в игровом модуле, Runtime host">
+<div class="lane"><div class="lane-title">1 / Код конкретной игры</div>
+<button class="node" data-node="game" aria-pressed="false"><strong>CityGame / HUD</strong><small>Кнопка, клавиша, деньги и дома · есть</small></button>
+<div class="arrow"><b>↓</b> RequestSave / RequestLoad</div>
+<button class="node new" data-node="codec" aria-pressed="false"><strong>CitySaveCodec</strong><small>Выбор данных, проверка и миграция · новое</small></button>
+<div class="arrow"><b>↓</b> DTO → версионированный payload</div>
+<button class="node new" data-node="data" aria-pressed="false"><strong>CitySaveData</strong><small>Balance, House SaveId, таймер · новое</small></button></div>
+<div class="lane"><div class="lane-title">2 / Engine внутри игровой DLL</div>
+<button class="node" data-node="session" aria-pressed="false"><strong>Module Session</strong><small>Владеет GameSession и Game; Game владеет Scene · есть</small></button>
+<div class="arrow"><b>↓</b> безопасная граница кадра</div>
+<button class="node new" data-node="facade" aria-pressed="false"><strong>SaveGame facade + adapter</strong><small>Capture / PrepareRestore / SaveId remap · новое</small></button>
+<div class="arrow"><b>↔</b> только versioned C ABI</div>
+<button class="node" data-node="scene" aria-pressed="false"><strong>SceneDocument / VFS</strong><small>Базовая сцена и ассеты · есть</small></button></div>
+<div class="lane"><div class="lane-title">3 / Runtime host, вне заменяемой сессии</div>
+<button class="node new" data-node="coordinator" aria-pressed="false"><strong>SaveGameCoordinator</strong><small>Очередь, ticket, кандидат, активация · новое</small></button>
+<div class="arrow"><b>↓</b> host-owned байты, без Game*</div>
+<button class="node new" data-node="store" aria-pressed="false"><strong>SaveGameStore</strong><small>List / Read / Write / Delete · новое</small></button>
+<div class="arrow"><b>↓</b> temp → flush → replace</div>
+<button class="node new" data-node="disk" aria-pressed="false"><strong>Пользовательский слот</strong><small>LocalAppData / gameId / profile / slot · новое</small></button></div>
+</div>
+<p class="boundary">Связь колонок: игра вызывает facade; facade и module adapter общаются с координатором через необязательный C ABI extension и host service. STL, указатели и владение игровыми объектами границу DLL не пересекают.</p>
+<div class="detail" aria-live="polite"><h3 id="node-title">Выберите сущность</h3><p id="node-text">Нажмите на блок, чтобы увидеть ответственность и границы. Сохранение сцены, recovery редактора и SaveGame решают разные задачи.</p></div>
+</section>
+<section id="save" role="tabpanel" aria-labelledby="tab-save" hidden>
+<h2>Сначала согласованный снимок, потом подтверждение записи</h2>
+<div class="split"><ol class="steps" id="save-steps"></ol><div class="step-view"><div class="eyebrow" id="save-count"></div><h3 id="save-title"></h3><p id="save-text" aria-live="polite"></p><div class="state"><div><small>HUD</small><strong id="save-status"></strong></div><div><small>Слот на диске</small><strong id="save-slot"></strong></div></div><div class="controls"><button id="save-prev" type="button">Назад</button><button id="save-next" type="button">Следующий шаг</button><button id="save-reset" type="button">Сначала</button></div></div></div>
+<p class="compact">Если запись или замена файла не удалась: Failed, предыдущий слот сохранён. Accepted означает постановку запроса, а не успешное сохранение.</p>
+</section>
+<section id="load" role="tabpanel" aria-labelledby="tab-load" hidden>
+<h2>Подготовить кандидата до замены текущей игры</h2>
+<label><input type="checkbox" id="load-error">Смоделировать отсутствующий тип дома при подготовке кандидата</label>
+<div class="split"><ol class="steps" id="load-steps"></ol><div class="step-view"><div class="eyebrow" id="load-count"></div><h3 id="load-title"></h3><p id="load-text" aria-live="polite"></p><div class="state"><div><small>Активная игра</small><strong id="load-world"></strong></div><div><small>Статус</small><strong id="load-status"></strong></div></div><div class="controls"><button id="load-prev" type="button">Назад</button><button id="load-next" type="button">Следующий шаг</button><button id="load-reset" type="button">Сначала</button></div></div></div>
+<p class="notice">MVP: загрузка из меню в новую сессию. Показанная безопасная замена живой игры требует отдельного этапа реализации. Откат относится к ошибкам до commit, а не к произвольным внешним побочным эффектам игрового кода.</p>
+</section>
+<section id="dev" role="tabpanel" aria-labelledby="tab-dev" hidden>
+<h2>Разработчик описывает данные игры</h2>
+<p>Движок отвечает за слот, диагностику и момент операции. Игра знает, что означает баланс и как воссоздать дом. Регистрация — один раз до старта сессии; имена ниже пока являются эскизом API.</p>
+<pre><code>// Предложение, не текущий SDK
+struct CitySaveData {
+    int balance;
+    double incomeRemainder;
+    bool incomePaused;
+    std::vector&lt;HouseSaveData&gt; houses; // SaveId, тип, позиция
+};
+
+saveGames.RegisterCodec("city", 1, std::make_unique&lt;CitySaveCodec&gt;());
+// Codec: Capture / DecodeAndValidate / Migrate / PrepareRestore
+
+auto ticket = saveGames.RequestSave("manual-1");
+// Accepted: «Сохраняется…»; Completed: «Сохранено»; Failed: причина
+
+auto slots = saveGames.ListSlots();
+saveGames.RequestLoad(slots.front().id);
+
+if (start.reason == StartReason::NewGame)
+    CreateInitialCity(); // LoadGame не покупает дома повторно</code></pre>
+<table><thead><tr><th>Кто</th><th>Обязанность</th></tr></thead><tbody>
+<tr><td>Игра</td><td>Выбрать сохраняемые данные, их схему и миграции. Присвоить постоянные SaveId. Не дублировать дома между базовой сценой и DTO.</td></tr>
+<tr><td>Engine</td><td>Граница кадра, очередь операций, безопасное хранилище, подготовка и переключение сессии, статусы ошибок.</td></tr>
+<tr><td>Новый lifecycle</td><td>Применить LoadGame-состояние до OnSceneReady/BeginPlay; заново создать HUD и подписки. Восстановить ссылки после всех объектов.</td></tr>
+<tr><td>Не сериализуется</td><td>Game*, Scene*, ComponentId как постоянная ссылка, GPU, input connections, DLL handles и память процесса.</td></tr>
+</tbody></table>
+<h2>Порядок внедрения</h2><ol><li>Контейнер + stable gameId + атомарное хранилище слотов.</li><li>Codec и захват на границе кадра, пример экономики.</li><li>Загрузка из меню в новую сессию с remap ссылок.</li><li>Подготовка кандидата и безопасная загрузка из живой игры.</li><li>Совместимость старых DLL, SDK-пример, проверки editor и export.</li></ol>
+</section>
+<footer class="footer"><a href="SAVEGAME-DESIGN.md">Полный план: формат, ABI, ограничения и критерии тестов</a><p>Текущие опоры: GameSession, GameSubsystem, SceneModule, SceneDocument, Scene, host.getService. SaveGame не заменяет сохранение проекта или recovery редактора.</p></footer>
+</main>
+<script>
+const nodes={
+ game:['CityGame / HUD','Здесь находятся правила покупки, баланс и кнопки. Уже реализовано. Новый вызов SaveGame не переносит экономику в Engine.'],
+ codec:['CitySaveCodec — код проекта','Игра определяет полезные данные, миграции своей схемы и подготовку мира. В MVP достаточно одного codec на игру. Подготовка не должна менять внешние файлы или активную партию.'],
+ data:['CitySaveData — чистые данные','Баланс, остаток секунды дохода, пауза и дома с устойчивыми SaveId. Никаких указателей и подписок. Envelope дополнительно хранит gameId, format, gameSchema и базовую сцену.'],
+ session:['Существующее владение','В SceneModule объект Session владеет GameSession и Game; Game связан через AttachSession и владеет Scene. GameSession хранит подсистемы между сценами, но не сохраняет их на диск.'],
+ facade:['Новый module-local адаптер','Публичный фасад принимает запрос. Capture работает после тика и коммита Deferred-изменений. Restore создаёт новые объекты и таблицу SaveId → ComponentId; прямое восстановление старых числовых ID не обещается.'],
+ scene:['Сцена и ассеты — существующая основа','SceneDocument умеет сериализовать сценовые данные. VFS читает /Game и /Engine. Сохранение партии дополняет их; исходный Content не становится папкой пользовательских сохранений.'],
+ coordinator:['Координатор принадлежит host','Он живёт вне заменяемой GameSession, держит очередь и результаты. Один Save/Load за раз. Перед unload DLL освобождает её handles; callbacks старой generation больше не вызываются.'],
+ store:['Хранилище не знает экономику','Получает собственные байты, проверяет слот и лимиты, пишет временный файл и атомарно заменяет старый. Доступно через версионный host service.'],
+ disk:['Локальные слоты','%LOCALAPPDATA%/PainEngine/Saves/<gameId>/<profile>/<slot>.save.json. gameId стабилен при export/upgrade. Ошибочная запись оставляет старую версию слота.']};
+document.querySelectorAll('[data-node]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-node]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));const n=nodes[b.dataset.node];document.getElementById('node-title').textContent=n[0];document.getElementById('node-text').textContent=n[1];}));
+const tabs=[...document.querySelectorAll('[role=tab]')];
+function selectTab(b){tabs.forEach(x=>{const on=x===b;x.setAttribute('aria-selected',String(on));document.getElementById(x.getAttribute('aria-controls')).hidden=!on;});}
+tabs.forEach((b,i)=>{b.addEventListener('click',()=>selectTab(b));b.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();const n=tabs[(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length];selectTab(n);n.focus();}});});
+const saveSteps=[
+ ['Запрос','Кнопка или клавиша вызывает RequestSave. Координатор выдаёт ticket; игра ещё не сохранена.','Сохраняется…','Старая версия'],
+ ['Граница кадра','Тик и отложенные изменения Scene завершены. Захват выполняется в потоке Engine при неизменном состоянии.','Сохраняется…','Старая версия'],
+ ['Capture → DTO','Codec собирает баланс, дома, таймер и паузу. Engine получает свою копию байтов, не ссылки на игровые объекты.','Сохраняется…','Старая версия'],
+ ['Запись temp','Store проверяет slot/gameId и размер, записывает временный файл рядом со слотом и завершает запись.','Сохраняется…','Старая версия'],
+ ['Атомарная замена','Только после успешной записи временный файл заменяет слот. Ошибка до замены сохраняет прежний слот.','Сохраняется…','Новая версия'],
+ ['Completed','Host сообщает успешный результат операции. Теперь HUD вправе показать «Сохранено».','Сохранено','Новая версия']];
+const loadSteps=[
+ ['Чтение слота','Текущая игра: 5 домов, 220 денег. Слот содержит 4 дома, 140 денег. Чтение ничего в мире не меняет.'],
+ ['Проверка и миграция','Проверяются gameId, format, gameSchema, типы и ассеты. Миграция выполняется над копией данных.'],
+ ['Подготовка кандидата','Новая GameSession и Game получают базовую сцену, экономику, дома и таблицу SaveId. Старый мир приостановлен, но ещё существует.'],
+ ['LoadGame lifecycle','Состояние применено до OnSceneReady/BeginPlay. Стартовая покупка домов не выполняется. Все отклоняемые проверки завершаются до commit.'],
+ ['Commit на границе кадра','Координатор переключает активную сессию, камеру и ввод. Старый экземпляр освобождается; callbacks старой DLL не остаются.'],
+ ['Loaded','Новая партия активна: 4 дома, 140 денег. Доход продолжается с сохранённого остатка таймера.']];
+const index={save:0,load:0};
+function render(kind){const items=kind==='save'?saveSteps:loadSteps,i=index[kind],failed=kind==='load'&&document.getElementById('load-error').checked&&i>=2;
+ const list=document.getElementById(kind+'-steps');list.replaceChildren();items.forEach((v,j)=>{const li=document.createElement('li');li.textContent=v[0];if(j===i)li.className='active';list.appendChild(li);});
+ document.getElementById(kind+'-count').textContent=`Шаг ${i+1} / ${items.length}`;
+ document.getElementById(kind+'-title').textContent=failed?'Кандидат отклонён':items[i][0];
+ document.getElementById(kind+'-text').textContent=failed?'Тип дома отсутствует. Подготовка прервана, кандидат уничтожен; прежний мир возобновлён. До commit не дошли.':items[i][1];
+ document.getElementById(kind+'-prev').disabled=i===0;document.getElementById(kind+'-next').disabled=i===items.length-1||failed;
+ if(kind==='save'){document.getElementById('save-status').textContent=items[i][2];document.getElementById('save-slot').textContent=items[i][3];}
+ else{document.getElementById('load-world').textContent=(!failed&&i>=4)?'4 дома · 140':'5 домов · 220';document.getElementById('load-status').textContent=failed?'Failed':i===5?'Loaded':i>=2?'Подготовка':'Проверка';}}
+['save','load'].forEach(kind=>{document.getElementById(kind+'-prev').onclick=()=>{index[kind]=Math.max(0,index[kind]-1);render(kind);};document.getElementById(kind+'-next').onclick=()=>{index[kind]=Math.min(5,index[kind]+1);render(kind);};document.getElementById(kind+'-reset').onclick=()=>{index[kind]=0;render(kind);};render(kind);});
+document.getElementById('load-error').onchange=()=>{index.load=0;render('load');};
+</script></body></html>

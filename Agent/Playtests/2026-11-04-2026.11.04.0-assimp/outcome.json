@@ -1,0 +1,21 @@
+{
+  "status": "completed",
+  "engineVersion": "2026.11.04.0",
+  "configuration": "Release",
+  "assimp": "6.0.4#3",
+  "installedRuntime": "C:/Users/serge/AppData/Local/PainEngine/Engines/2026.11.04.0/Release",
+  "checks": {
+    "enginePassed": 54,
+    "engineSkipped": 0,
+    "assetPassed": 208,
+    "skeletalPassed": 8,
+    "assimpCommandletsPassed": 4,
+    "commandletRegressionsPassed": 25,
+    "cppWorkflowPassed": 8,
+    "installedFormatsPassed": ["OBJ", "FBX", "GLB"],
+    "projectsBuildGameEditorPassed": 4,
+    "installedHashesMatch": true
+  },
+  "limitations": ["Optional Blender integration skipped: PAINENGINE_BLEND_FIXTURES and PAINENGINE_BLENDER not configured", "Other Assimp file formats not separately tested"],
+  "weeklyAccountUsagePercent": {"before": 16, "after": 17}
+}

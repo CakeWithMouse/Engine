@@ -1,0 +1,103 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\calm-city\\CalmCityDev\\Project.json",
+  "steps": [
+    {
+      "targets": [
+        "West block",
+        "Central block"
+      ],
+      "action": "select"
+    },
+    {
+      "target": "West block",
+      "action": "move",
+      "delta": [
+        0.5,
+        0,
+        0
+      ]
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "action": "redo"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "target": "West block",
+      "parent": "Central block",
+      "action": "parent"
+    },
+    {
+      "target": "East block",
+      "parent": "Central block",
+      "action": "parent"
+    },
+    {
+      "targets": [
+        "West block",
+        "East block"
+      ],
+      "action": "select"
+    },
+    {
+      "target": "West block",
+      "action": "move",
+      "delta": [
+        0,
+        0,
+        0.5
+      ]
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "target": "Moving car",
+      "action": "select"
+    },
+    {
+      "target": "Moving car",
+      "path": "/speed",
+      "action": "property",
+      "value": 3.5
+    },
+    {
+      "target": "Moving car",
+      "action": "duplicate"
+    },
+    {
+      "type": "CalmCity.Building",
+      "action": "create",
+      "name": "Temporary plaza"
+    },
+    {
+      "target": "Temporary plaza",
+      "action": "delete"
+    },
+    {
+      "action": "undo"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\calm-city\\CalmCityDev\\Content\\Scenes\\CalmCityRole1R3.scene.json",
+      "action": "save"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\calm-city\\CalmCityDev\\Content\\Scenes\\CalmCityRole1R3.scene.json",
+      "action": "load"
+    },
+    {
+      "target": "Moving car 2",
+      "action": "delete"
+    },
+    {
+      "action": "undo"
+    }
+  ]
+}

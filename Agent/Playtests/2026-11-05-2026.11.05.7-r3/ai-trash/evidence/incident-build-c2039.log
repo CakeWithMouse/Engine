@@ -1,0 +1,23 @@
+﻿
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 9 component(s), Project
+  BucketParts.cpp
+  ImportedTrashProjectile.cpp
+  ProjectGame.cpp
+E:\Engine\Engine\build\playtests\20261105-r3\ai-trash\TrashGame\Source\ProjectGame.cpp(208,60): error C2039: "GetLocalPosition": не является членом "TrashFlight". [E:\Engine\Engine\build\playtests\20261105-r3\ai-trash\TrashGame\Game.vcxproj]
+      E:\Engine\Engine\build\playtests\20261105-r3\ai-trash\TrashGame\Source\TrashFlight.h(5,7):
+       см. объявление "TrashFlight"
+  
+E:\Engine\Engine\build\playtests\20261105-r3\ai-trash\TrashGame\Source\ProjectGame.cpp(209,60): error C2039: "GetLocalPosition": не является членом "TrashFlight". [E:\Engine\Engine\build\playtests\20261105-r3\ai-trash\TrashGame\Game.vcxproj]
+      E:\Engine\Engine\build\playtests\20261105-r3\ai-trash\TrashGame\Source\TrashFlight.h(5,7):
+       см. объявление "TrashFlight"
+  
+E:\Engine\Engine\build\playtests\20261105-r3\ai-trash\TrashGame\Source\ProjectGame.cpp(210,60): error C2039: "GetLocalPosition": не является членом "TrashFlight". [E:\Engine\Engine\build\playtests\20261105-r3\ai-trash\TrashGame\Game.vcxproj]
+      E:\Engine\Engine\build\playtests\20261105-r3\ai-trash\TrashGame\Source\TrashFlight.h(5,7):
+       см. объявление "TrashFlight"
+  
+  ThrowLane.cpp
+  ThrowLedger.cpp
+  TrashProjectile.cpp
+  GeneratedComponents.cpp
+  Создание кода...

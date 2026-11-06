@@ -1,0 +1,632 @@
+{
+  "remaining": [
+    {
+      "plan": "Resize the viewport and compare anchor placement; current scene stayed 1000x500.",
+      "feature_id": "hud-layout"
+    },
+    {
+      "plan": "Add directional sun/receiving ground and compare same imported model with shadow casting toggled.",
+      "feature_id": "imported-shadows"
+    },
+    {
+      "plan": "Focus on imported plane bounds/orientation, then capture real UV texture pixels; current exact fixture imports but is not visible from selected camera.",
+      "feature_id": "imported-uv"
+    },
+    {
+      "plan": "Manual viewport Inspector/picker/Undo inspection; desktop was not granted. Functional commandlet and project API probes are complete.",
+      "feature_id": "material-slot-edit"
+    },
+    {
+      "plan": "Load a second named scene in the same session and verify GameSubsystem identity/state across close/ready.",
+      "feature_id": "session"
+    }
+  ],
+  "runtime": "2026.11.05.7 + focused .8 retest",
+  "project": "Engine/build/playtests/20261105-r3/curious-city/Final8City (upgrade from fresh-city)",
+  "persona": "curious-city",
+  "status": "final-persona-report",
+  "features": [
+    {
+      "fact": "Exit 0; clean project scaffold and Project.json created.",
+      "status": "pass",
+      "action": "EngineLauncher --create-project fresh-city",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/launcher-create.stdout.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/launcher-create.exitcode.txt"
+      ],
+      "feature_id": "create-nocode"
+    },
+    {
+      "fact": "Exit 0; SDK-generated project C++ built and activated.",
+      "status": "pass",
+      "action": "EngineLauncher --enable-code fresh-city/Project.json",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/launcher-enable.stdout.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/CodeBuild.log"
+      ],
+      "feature_id": "enable-cpp"
+    },
+    {
+      "fact": "Documented CLI path created and built a C++ project; direct GUI create-with-code checkbox was not tried.",
+      "status": "partial",
+      "action": "CLI create-project then enable-code in fresh scaffold; no GUI checkbox",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/launcher-create.exitcode.txt",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/launcher-enable.exitcode.txt"
+      ],
+      "feature_id": "create-cpp"
+    },
+    {
+      "fact": "First attempt failed due my missing glm declaration and wrong GetName call; corrected second/third/fourth builds activate module; no stale DLL used after failure.",
+      "status": "pass",
+      "action": "launcher --build-project after game source edits",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/launcher-build-1.stderr.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/launcher-build-2.stdout.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/launcher-build-3.stdout.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/launcher-build-skeletal.stdout.log"
+      ],
+      "feature_id": "build-activate"
+    },
+    {
+      "fact": "Game-start logs, HUD rebind, purchases, deferred object insertion are recorded.",
+      "status": "pass",
+      "action": "Runtime loads project Game and UI; game callback triggers economy",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/runtime-cycle1.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/city-placement.log"
+      ],
+      "feature_id": "project-game"
+    },
+    {
+      "fact": "Named house objects were created, duplicated and deleted; Undo restored deletion and Redo removed it.",
+      "status": "pass",
+      "action": "project.scene create/delete/undo on custom House objects",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/scene-crud.result.json"
+      ],
+      "feature_id": "scene-create-delete"
+    },
+    {
+      "fact": "Slot assignment accepted and changed serialized property; invalid skeletal source ID was rejected by project API.",
+      "status": "pass",
+      "action": "project.scene property /materialSlots/0",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-scene-variants.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/skeletal-api.log"
+      ],
+      "feature_id": "scene-properties"
+    },
+    {
+      "fact": "IDs 0/1 and /Game material links survived scene save/reopen.",
+      "status": "pass",
+      "action": "Save, load and inspect projectData.materialSlots",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-scene-variants.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/MaterialSlotsBefore.scene.json"
+      ],
+      "feature_id": "scene-codec"
+    },
+    {
+      "fact": "Model and per-slot assignments restored from the saved scene.",
+      "status": "pass",
+      "action": "project.scene save then load",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-scene-variants.result.json"
+      ],
+      "feature_id": "scene-save-load"
+    },
+    {
+      "fact": "Each designated scene loaded in the real Runtime .7 process; Project.json restored to Main afterward.",
+      "status": "pass",
+      "action": "Set Project.json startupScene to material/UV test scene then standalone launch",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/slots-before.stdout.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/uv-control.stdout.log"
+      ],
+      "feature_id": "scene-startup"
+    },
+    {
+      "fact": "MaterialSlotsBefore and UvControl scenes created and reopened.",
+      "status": "pass",
+      "action": "project.scene new, save to named scene, load",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-scene-variants.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/uv-scene.result.json"
+      ],
+      "feature_id": "scene-new-save-as"
+    },
+    {
+      "fact": "Undo restored Material_0 while redo restored Material_1; both returned status 0.",
+      "status": "pass",
+      "action": "Change slot 0, undo, redo",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-slots.result.json"
+      ],
+      "feature_id": "scene-undo"
+    },
+    {
+      "fact": "HUD interaction and 130-frame standalone scene executed; purchases, income and save/load callbacks observed.",
+      "status": "pass",
+      "action": "project.input Play and standalone runtime frames",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/city-placement.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/runtime-cycle1.stdout.log"
+      ],
+      "feature_id": "play"
+    },
+    {
+      "fact": "Standalone game process exited 0 after 130 frames.",
+      "status": "pass",
+      "action": "Launch EngineRuntime.exe with project and game mode",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/runtime-cycle1.exitcode.txt",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/runtime-cycle1.stdout.log"
+      ],
+      "feature_id": "external"
+    },
+    {
+      "fact": "One house earned $10 by frame 125; second process continued income to $410.",
+      "status": "pass",
+      "action": "GameSubsystem income tick",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/runtime-cycle1.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-save-cycle2.log"
+      ],
+      "feature_id": "time"
+    },
+    {
+      "fact": "OnSceneReady, house purchase, income and OnSaveGameLoaded callbacks observed.",
+      "status": "pass",
+      "action": "GameSubsystem ready, tick, save/load lifecycle",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-save-cycle1.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-save-cycle2.log"
+      ],
+      "feature_id": "subsystem"
+    },
+    {
+      "fact": "Subsystem state reloads across processes; switching scenes within one live session not probed.",
+      "status": "partial",
+      "action": "Standalone SaveGame, reopen new process",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-save-cycle1.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-save-cycle2.log"
+      ],
+      "feature_id": "session"
+    },
+    {
+      "fact": "A down-frame-up sequence is required; clicks spawned homes and invoked HUD actions.",
+      "status": "pass",
+      "action": "project.input clicks Build/Save/Build/Load and world-ground click",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/city-economy-input-clicks.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/city-placement.log"
+      ],
+      "feature_id": "input"
+    },
+    {
+      "fact": "Real cursor ray hit the ground; accepted house was charged and inserted.",
+      "status": "pass",
+      "action": "Mouse cursor raycast to Ground then build",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/city-placement.log"
+      ],
+      "feature_id": "trace-world"
+    },
+    {
+      "fact": "Ground hit from viewport pixel (500,400) produced house at the hit position.",
+      "status": "pass",
+      "action": "RaycastCursor under project.input viewport",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/city-placement.log"
+      ],
+      "feature_id": "trace-screen"
+    },
+    {
+      "fact": "Runtime loaded models/materials using project-local VFS paths.",
+      "status": "pass",
+      "action": "Import Blender models to Content and load through /Game paths",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/import-suzanne.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/slots-before.stdout.log"
+      ],
+      "feature_id": "asset-paths"
+    },
+    {
+      "fact": "HUD visibly rendered in standalone GPU frame with balance/income/home count and buttons.",
+      "status": "pass",
+      "action": "ProjectHud.txt loads CityHud.ui",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/runtime-cycle1.png",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/runtime-cycle1.log"
+      ],
+      "feature_id": "hud-project"
+    },
+    {
+      "fact": "Balance, income, home count, Build, Save, Load rendered and updated after gameplay.",
+      "status": "pass",
+      "action": "HUD labels/buttons",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/runtime-cycle1.png",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/city-placement.log"
+      ],
+      "feature_id": "hud-elements"
+    },
+    {
+      "fact": "Real button callbacks logged and updated scene/save state.",
+      "status": "pass",
+      "action": "Click Build/Save/Load buttons through project.input",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/city-placement.log"
+      ],
+      "feature_id": "hud-events"
+    },
+    {
+      "fact": "Text and buttons readable; viewport resize and Cyrillic captions not tested.",
+      "status": "partial",
+      "action": "Render at 1000x500 and inspect HUD",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/runtime-cycle1.png"
+      ],
+      "feature_id": "hud-layout"
+    },
+    {
+      "fact": "Valid completed frames report draw calls and visible object counts.",
+      "status": "pass",
+      "action": "GetCompletedFrameStats from PreUpdate",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/runtime-cycle1.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-save-cycle1.log"
+      ],
+      "feature_id": "diagnostics"
+    },
+    {
+      "fact": "Host initialized HUD/input and logs show VFS bind; broader callbacks not probed.",
+      "status": "partial",
+      "action": "Game.GetProjectHud/GetInput/GetScene, module VFS binding",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/city-placement.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/first-process.stdout.log"
+      ],
+      "feature_id": "host-services"
+    },
+    {
+      "fact": "Loaded game restored one house and material-slot scene object; save JSON includes materialSlots map.",
+      "status": "pass",
+      "action": "SaveGame save/load changes scene",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-save-cycle1.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-save-cycle2.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/city.save.json"
+      ],
+      "feature_id": "savegame-scene"
+    },
+    {
+      "fact": "Balance $400 and one house restored; income resumed across process boundary.",
+      "status": "pass",
+      "action": "Subsystem SerializeSaveGame; first and second process",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-save-cycle1.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-save-cycle2.log"
+      ],
+      "feature_id": "savegame-derived"
+    },
+    {
+      "fact": "Process 2 loaded Process 1 save and continued income.",
+      "status": "pass",
+      "action": "Separate EngineRuntime processes share one scratch slot",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-save-cycle1.exitcode.txt",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-save-cycle2.exitcode.txt"
+      ],
+      "feature_id": "savegame-restart"
+    },
+    {
+      "fact": "Stats become valid after first rendered frame, e.g. draw_calls=4 and visible=3.",
+      "status": "pass",
+      "action": "Read completed frame stats from PreUpdate",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-save-cycle1.log"
+      ],
+      "feature_id": "completed-frame"
+    },
+    {
+      "fact": "IDs 0/1; per-slot reassignment changes 10,179 pixels in target submesh ROI; common override and clear produce expected different/restored frame.",
+      "status": "pass",
+      "action": "Import Suzanne with two submeshes and render A/B",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/import-suzanne.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-scene-variants.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/slots-before.png",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/slots-after.png",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/override.png",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/override-cleared.png"
+      ],
+      "feature_id": "material-slots"
+    },
+    {
+      "fact": "Property persists; skeletal SetMaterialSlot valid source ID returned true and unknown UINT32_MAX returned false; manual visible inspector/Qt undo not observed.",
+      "status": "partial",
+      "action": "project.scene reflected property slot + undo/redo, project C++ API valid/invalid ID",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/material-slots.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/skeletal-api.log"
+      ],
+      "feature_id": "material-slot-edit"
+    },
+    {
+      "fact": "Frozen .8 retest: upgraded project build activated; SaveGame first process saved, altered city, loaded in same process and second process; OnSaveGameLoaded read back both source IDs (slot0 CesiumMan material set in game code, slot1 imported material) after restore; economy balance/houses and income continued; post-load GPU frame shows Suzanne and HUD. .7 before-state retained.",
+      "status": "pass",
+      "action": ".8 upgraded build; two-process SaveGame restores a two-slot SkeletalMeshComponent with slot readback and rendered frame",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-cycle1.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-cycle2.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-cycle1.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-cycle2.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-city.save.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-after-load.png",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-second-process.png",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-main.scene.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-engine-lib.sha256.txt"
+      ],
+      "feature_id": "material-slot-persist"
+    },
+    {
+      "fact": "Asset import exit 0 but the sampled model viewport remained one background color in both captures; placement/camera unresolved, so no successful UV rendering claim.",
+      "status": "partial",
+      "action": "Import blend-uv, render at default and adjusted transform",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/import-uv.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/uv-control.png",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/uv-facing.png"
+      ],
+      "feature_id": "imported-uv"
+    },
+    {
+      "fact": "Needs comparison with/without a shadow-casting imported model under a directional light.",
+      "status": "not-tested",
+      "action": "Not attempted by this developer",
+      "paths": [],
+      "feature_id": "imported-shadows"
+    },
+    {
+      "feature_id": "scene-transform",
+      "status": "pass",
+      "action": "project.scene move and group move",
+      "fact": "Root house moved to x=4; grouped move applied to selected hierarchy; parent/child and duplicate positions persisted through scene Save/Load.",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/scene-crud.result.json"
+      ]
+    },
+    {
+      "feature_id": "scene-clone",
+      "status": "pass",
+      "action": "project.scene duplicate named house hierarchy",
+      "fact": "Duplicate operation created NorthHome 2 and SouthHome 2 with remapped parent IDs.",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/scene-crud.result.json"
+      ]
+    },
+    {
+      "feature_id": "character",
+      "status": "pass",
+      "action": "Gameplay.Player and W input in project.input",
+      "fact": "Player moved from z=0 to z=-2.4 over 30 frames; Stop restored edit scene at z=0.",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/player-scene.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/player-input.result.json"
+      ]
+    },
+    {
+      "feature_id": "controller",
+      "status": "pass",
+      "action": "Standard CharacterController movement through W action",
+      "fact": "Real input advanced the spawned PlayerCharacter in scene and stopped on key release.",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/player-input.result.json"
+      ]
+    },
+    {
+      "feature_id": "camera-orthographic",
+      "status": "pass",
+      "action": "camera.screen-ray with orthographic and perspective settings",
+      "fact": "Orthographic center ray returned Success and direction [0,0,-1]; perspective off-center ray returned Success.",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/camera-ortho.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/camera-perspective.result.json"
+      ]
+    },
+    {
+      "feature_id": "trace-filter",
+      "status": "pass",
+      "action": "Project C++ Scene::Raycast on free ground with channel and ignore query",
+      "fact": "all=Hit, default channel after Ground moved to channel 2=Miss, channel2=Hit, ignoreGround=Miss.",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/trace-filter-debug2.log"
+      ]
+    },
+    {
+      "feature_id": "trace-debug",
+      "status": "pass",
+      "action": "DebugDrawTrace/GetDebugTraceLineCount/ClearDebugTraces",
+      "fact": "A successful ray produced 5 debug lines; ClearDebugTraces reduced count to 0.",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/trace-filter-debug2.log"
+      ]
+    },
+    {
+      "feature_id": "hud-editor",
+      "status": "partial",
+      "action": "ui.edit-text commandlet saves Cyrillic text; standalone reload checks rendering",
+      "fact": "Markup round-trip and runtime reload succeeded; A/B pixel diff changes only button text. Manual editor/Hot Reload not tested; bullet/ruble glyphs are outside documented atlas ranges.",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/hud-edit.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/hud-ab.pixel-diff.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/hud-ab-before.png",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/hud-ab-after.png",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/hud-before.xml",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/hud-after.xml"
+      ]
+    },
+    {
+      "feature_id": "vfs",
+      "status": "pass",
+      "action": "EngineModuleVfs::Resolve and file read in project game",
+      "fact": "Read /Game/Config/city-settings.txt returned district=harbor.",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/vfs-sdk.log"
+      ]
+    },
+    {
+      "feature_id": "sdk-examples",
+      "status": "pass",
+      "action": "Compile shipped SDK TraceExamples.cpp in project module",
+      "fact": "Build log lists TraceExamples.cpp and candidate DLL activates successfully.",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/launcher-build-sdk.stdout.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/launcher-build-sdk.exitcode.txt"
+      ]
+    },
+    {
+      "feature_id": "export",
+      "status": "pass",
+      "action": "Export-Project.ps1 then run packaged Runtime executable",
+      "fact": "Export validation and internal standalone smoke passed; bundled Runtime launched the exported game for 3 frames, exit 0.",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/ExportReport.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/GameSmoke.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/export-runtime.stdout.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/export-runtime.exitcode.txt"
+      ]
+    },
+    {
+      "feature_id": "hot-reload",
+      "status": "pass",
+      "action": "project.reload-input with an older .7 DLL candidate",
+      "fact": "Host set replaced=true; first and reloaded session each accepted a build click and produced House_1.",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/hot-reload.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/hot-reload.log"
+      ]
+    },
+    {
+      "feature_id": "compatibility",
+      "status": "partial",
+      "action": "Launcher check/smoke on the exact pinned .7 runtime",
+      "fact": "Project manifest check and pinned .7 smoke passed; older runtime/ABI upgrade compatibility not tested.",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/check-project.exitcode.txt",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/smoke-project.exitcode.txt"
+      ]
+    },
+    {
+      "fact": "ENGINE_OBJECT City Rules / CuriousCity.CityRules generated a catalog Object. Saved defaults (balance 500, buildingLimit 12), changed only scene JSON to balance 850/buildingLimit 20, then loaded through project.scene; result reports same type/ID and data 850/20, proving project object adapter Load/Save path. Tests a small non-GameComponent object; no UI palette observation.",
+      "feature_id": "scene-object",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-build-object8.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-ProjectTypes.tsv",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-city-rules-save.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-city-rules-load.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-city-rules.scene.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-CityRulesObject.h"
+      ],
+      "action": "Frozen .8 ProjectObjectAdapter probe in upgraded Final8City: ENGINE_OBJECT CityRulesObject with JSON Save/Load codec; project.scene creates, saves, loads modified projectData",
+      "status": "pass"
+    },
+    {
+      "fact": "Workflow wrote an unsaved scene checkpoint and simulated editor crash; fresh process found recovery record, loaded scene, verified 7 unsaved objects and module SHA.",
+      "feature_id": "scene-recovery",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/scene-recovery8-workflow.stdout.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/scene-recovery8-check.stdout.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/scene-recovery8-workflow.exitcode.txt",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/scene-recovery8-check.exitcode.txt"
+      ],
+      "action": "EditorUiTests on fresh .8 nocode RecoveryProbe: --workflow then process restart --recovery-check",
+      "status": "pass"
+    },
+    {
+      "fact": "Blender multi-material Suzanne imported as two meshes with material slots 0/1 and was present in actual post-load GPU frame.",
+      "feature_id": "model-import",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/import-suzanne.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-after-load.png"
+      ],
+      "action": "asset.import on real GLB/BLEND fixtures; inspect runtime render",
+      "status": "pass"
+    },
+    {
+      "fact": "Real blend-suzanne-multiple.blend converted into runtime GLB and two material slots; render capture in focused .8 cycle confirms visible imported model.",
+      "feature_id": "model-blend",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/import-suzanne.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/final8-after-load.png"
+      ],
+      "action": "Import real Blender multi-material .blend fixture into Content using frozen .7 import commandlet",
+      "status": "pass"
+    },
+    {
+      "fact": "Scene CRUD runner reparented SouthHome under NorthHome, moved parent/group, then saved/reloaded scene and preserved object identity/hierarchy.",
+      "feature_id": "scene-hierarchy",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/scene-crud.result.json"
+      ],
+      "action": "project.scene parent/transform/scene save-load",
+      "status": "pass"
+    },
+    {
+      "fact": "Two selected city objects moved together, duplicate/save/new/load/delete/undo/redo path completed.",
+      "feature_id": "scene-groups",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/scene-crud.result.json"
+      ],
+      "action": "project.scene multi-selection and group move",
+      "status": "pass"
+    },
+    {
+      "feature_id": "asset-reimport",
+      "status": "pass",
+      "action": "Fresh .8 AssetProbe --authoring hidden native window scenario",
+      "fact": "215 checks passed. 2x2 source changed red→blue and reimported; then asset moved from /Game/Textures/Reimport.bmp to /Game/Images/Renamed.bmp. Two AssetBackups operations retain originals and operation JSON.",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/asset-authoring8.stdout.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/asset-authoring8.exitcode.txt",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/asset-reimport-2x2.png",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/asset-reimport-operation.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/asset-move-operation.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/asset-reimport-original.backup.bmp",
+        "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence/asset-move-original.backup.bmp"
+      ]
+    }
+  ],
+  "run": "2026-11-05-2026.11.05.7-r3",
+  "artifacts": [
+    {
+      "path": "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/CuriousCity-source.zip",
+      "kind": "source-project-archive",
+      "description": "Only Source and Content; excludes SDK, binaries and Intermediate."
+    },
+    {
+      "path": "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/diary.md",
+      "kind": "diary"
+    },
+    {
+      "path": "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/feedback.md",
+      "kind": "feedback"
+    },
+    {
+      "path": "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/issues.md",
+      "kind": "issues"
+    },
+    {
+      "path": "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/evidence",
+      "kind": "evidence-folder"
+    },
+    {
+      "path": "Agent/Playtests/2026-11-05-2026.11.05.7-r3/curious-city/CuriousCity-final8-source.zip",
+      "kind": "source-project-archive",
+      "description": "Upgraded .8 project Source and Content only; excludes SDK, build outputs, binaries and Intermediate."
+    }
+  ]
+}

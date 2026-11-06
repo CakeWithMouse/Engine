@@ -1,0 +1,759 @@
+event=character_probe_loaded elapsed=0.0s balance=500 houses=0 detail=player=1 camera=3 plane=2
+event=orthographic_camera_loaded elapsed=0.0s balance=500 houses=0 detail=orthographic=1 plane=2 height=12.000000
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_1
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_2
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_3
+event=city_hud_configured elapsed=0.0s balance=200 houses=3
+event=city_started elapsed=0.0s balance=200 houses=3
+event=hud_attached elapsed=0.0s balance=200 houses=3
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.000000
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.350000
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.700000
+event=character_probe_loaded elapsed=0.0s balance=500 houses=0 detail=player=1 camera=3 plane=2
+event=orthographic_camera_loaded elapsed=0.0s balance=500 houses=0 detail=orthographic=1 plane=2 height=12.000000
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_1
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_2
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_3
+event=city_hud_configured elapsed=0.0s balance=200 houses=3
+event=city_started elapsed=0.0s balance=200 houses=3
+event=hud_attached elapsed=0.0s balance=200 houses=3
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.000000
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.350000
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.700000
+event=controller_position frame=15 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=30 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=45 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=1.0s balance=230 houses=3
+event=controller_position frame=60 x=0 y=0 z=0 key_w=0 key_d=0
+event=character_probe_loaded elapsed=0.0s balance=500 houses=0 detail=player=1 camera=3 plane=2
+event=orthographic_camera_loaded elapsed=0.0s balance=500 houses=0 detail=orthographic=1 plane=2 height=12.000000
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_1
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_2
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_3
+event=city_hud_configured elapsed=0.0s balance=200 houses=3
+event=city_started elapsed=0.0s balance=200 houses=3
+event=hud_attached elapsed=0.0s balance=200 houses=3
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.000000
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.350000
+event=house_property_loaded elapsed=0.0s balance=200 houses=3 detail=1.700000
+event=controller_position frame=15 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=30 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=45 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=60 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=75 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=90 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=105 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=1.0s balance=230 houses=3
+event=controller_position frame=120 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=135 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=150 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=165 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=180 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=195 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=210 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=225 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=240 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=255 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=2.0s balance=260 houses=3
+event=controller_position frame=270 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=285 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=300 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=315 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=330 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=345 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=360 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=375 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=390 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=3.0s balance=290 houses=3
+event=controller_position frame=405 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=420 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=435 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=450 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=465 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=480 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=495 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=510 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=525 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=4.0s balance=320 houses=3
+event=controller_position frame=540 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=555 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=570 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=585 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=600 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=615 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=630 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=645 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=5.0s balance=350 houses=3
+event=controller_position frame=660 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=675 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=690 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=705 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=720 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=735 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=750 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=765 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=780 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=6.0s balance=380 houses=3
+event=controller_position frame=795 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=810 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=825 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=840 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=855 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=870 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=885 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=900 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=915 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=7.0s balance=410 houses=3
+event=controller_position frame=930 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=945 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=960 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=975 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=990 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1005 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1020 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1035 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=8.0s balance=440 houses=3
+event=controller_position frame=1050 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1065 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1080 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1095 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1110 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1125 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1140 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1155 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1170 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=9.0s balance=470 houses=3
+event=controller_position frame=1185 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1200 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1215 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1230 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1245 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1260 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1275 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1290 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1305 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=10.0s balance=500 houses=3
+event=controller_position frame=1320 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1335 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1350 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1365 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1380 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1395 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1410 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1425 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1440 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=11.0s balance=530 houses=3
+event=controller_position frame=1455 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1470 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1485 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1500 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1515 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1530 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1545 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1560 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1575 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=12.0s balance=560 houses=3
+event=controller_position frame=1590 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1605 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1620 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1635 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1650 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1665 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1680 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1695 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1710 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=13.0s balance=590 houses=3
+event=controller_position frame=1725 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1740 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1755 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1770 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1785 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1800 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1815 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1830 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=14.0s balance=620 houses=3
+event=controller_position frame=1845 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1860 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1875 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1890 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1905 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1920 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1935 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1950 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=15.0s balance=650 houses=3
+event=controller_position frame=1965 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1980 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=1995 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2010 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2025 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2040 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2055 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2070 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=16.0s balance=680 houses=3
+event=controller_position frame=2085 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2100 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2115 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2130 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2145 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2160 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2175 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2190 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=17.0s balance=710 houses=3
+event=controller_position frame=2205 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2220 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2235 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2250 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2265 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2280 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2295 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2310 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2325 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=18.0s balance=740 houses=3
+event=controller_position frame=2340 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2355 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2370 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2385 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2400 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2415 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2430 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2445 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2460 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=19.0s balance=770 houses=3
+event=controller_position frame=2475 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2490 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2505 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2520 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2535 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2550 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2565 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2580 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=20.0s balance=800 houses=3
+event=controller_position frame=2595 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2610 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2625 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2640 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2655 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2670 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2685 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2700 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2715 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=21.0s balance=830 houses=3
+event=controller_position frame=2730 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2745 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2760 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2775 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2790 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2805 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2820 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2835 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2850 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=22.0s balance=860 houses=3
+event=controller_position frame=2865 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2880 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2895 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2910 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2925 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2940 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2955 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=2970 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=23.0s balance=890 houses=3
+event=controller_position frame=2985 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3000 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3015 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3030 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3045 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3060 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3075 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3090 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=24.0s balance=920 houses=3
+event=controller_position frame=3105 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3120 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3135 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3150 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3165 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3180 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3195 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3210 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3225 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=25.0s balance=950 houses=3
+event=controller_position frame=3240 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3255 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3270 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3285 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3300 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3315 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3330 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3345 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3360 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=26.0s balance=980 houses=3
+event=controller_position frame=3375 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3390 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3405 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3420 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3435 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3450 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3465 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3480 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=27.0s balance=1010 houses=3
+event=controller_position frame=3495 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3510 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3525 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3540 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3555 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3570 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3585 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3600 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=28.0s balance=1040 houses=3
+event=controller_position frame=3615 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3630 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3645 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3660 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3675 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3690 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3705 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3720 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3735 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=29.0s balance=1070 houses=3
+event=controller_position frame=3750 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3765 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3780 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3795 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3810 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3825 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3840 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3855 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=30.0s balance=1100 houses=3
+event=controller_position frame=3870 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3885 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3900 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3915 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3930 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3945 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3960 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3975 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=3990 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=31.0s balance=1130 houses=3
+event=controller_position frame=4005 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4020 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4035 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4050 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4065 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4080 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4095 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4110 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=32.0s balance=1160 houses=3
+event=controller_position frame=4125 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4140 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4155 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4170 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4185 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4200 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4215 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4230 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4245 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=33.0s balance=1190 houses=3
+event=controller_position frame=4260 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4275 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4290 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4305 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4320 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4335 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4350 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4365 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=34.0s balance=1220 houses=3
+event=controller_position frame=4380 x=0 y=0 z=0 key_w=0 key_d=0
+event=trace_channel_filter elapsed=34.2s balance=1220 houses=3 detail=Miss
+event=cursor_trace elapsed=34.2s balance=1220 houses=3 detail=Hit
+event=controller_position frame=4395 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4410 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4425 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4440 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4455 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4470 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4485 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=35.0s balance=1250 houses=3
+event=controller_position frame=4500 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4515 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4530 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4545 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4560 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4575 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4590 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4605 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=36.0s balance=1280 houses=3
+event=controller_position frame=4620 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4635 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4650 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4665 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4680 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4695 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4710 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4725 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4740 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=37.0s balance=1310 houses=3
+event=controller_position frame=4755 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4770 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4785 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4800 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4815 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4830 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4845 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4860 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4875 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=38.0s balance=1340 houses=3
+event=controller_position frame=4890 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4905 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4920 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4935 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4950 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4965 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4980 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=4995 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=39.0s balance=1370 houses=3
+event=controller_position frame=5010 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5025 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5040 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5055 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5070 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5085 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5100 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5115 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=40.0s balance=1400 houses=3
+event=controller_position frame=5130 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5145 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5160 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5175 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5190 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5205 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5220 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5235 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5250 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=41.0s balance=1430 houses=3
+event=controller_position frame=5265 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5280 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5295 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5310 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5325 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5340 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5355 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5370 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=42.0s balance=1460 houses=3
+event=controller_position frame=5385 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5400 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5415 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5430 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5445 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5460 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5475 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5490 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5505 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=43.0s balance=1490 houses=3
+event=controller_position frame=5520 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5535 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5550 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5565 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5580 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5595 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5610 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5625 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5640 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=44.0s balance=1520 houses=3
+event=controller_position frame=5655 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5670 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5685 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5700 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5715 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5730 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5745 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5760 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=45.0s balance=1550 houses=3
+event=controller_position frame=5775 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5790 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5805 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5820 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5835 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5850 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5865 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5880 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=46.0s balance=1580 houses=3
+event=controller_position frame=5895 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5910 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5925 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5940 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5955 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5970 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=5985 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6000 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=47.0s balance=1610 houses=3
+event=controller_position frame=6015 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6030 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6045 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6060 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6075 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6090 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6105 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6120 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6135 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=48.0s balance=1640 houses=3
+event=controller_position frame=6150 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6165 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6180 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6195 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6210 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6225 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6240 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6255 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=49.0s balance=1670 houses=3
+event=controller_position frame=6270 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6285 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6300 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6315 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6330 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6345 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6360 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=50.0s balance=1700 houses=3
+event=controller_position frame=6375 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6390 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6405 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6420 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6435 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6450 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6465 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6480 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=51.0s balance=1730 houses=3
+event=controller_position frame=6495 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6510 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6525 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6540 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6555 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6570 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6585 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6600 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6615 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=52.0s balance=1760 houses=3
+event=controller_position frame=6630 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6645 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6660 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6675 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6690 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6705 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6720 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6735 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=53.0s balance=1790 houses=3
+event=controller_position frame=6750 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6765 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6780 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6795 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6810 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6825 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6840 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6855 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6870 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=54.0s balance=1820 houses=3
+event=controller_position frame=6885 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6900 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6915 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6930 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6945 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6960 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6975 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=6990 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=55.0s balance=1850 houses=3
+event=controller_position frame=7005 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7020 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7035 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7050 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7065 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7080 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7095 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7110 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7125 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=56.0s balance=1880 houses=3
+event=controller_position frame=7140 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7155 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7170 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7185 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7200 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7215 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7230 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7245 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=57.0s balance=1910 houses=3
+event=controller_position frame=7260 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7275 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7290 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7305 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7320 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7335 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7350 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7365 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=58.0s balance=1940 houses=3
+event=controller_position frame=7380 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7395 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7410 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7425 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7440 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7455 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7470 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7485 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=59.0s balance=1970 houses=3
+event=controller_position frame=7500 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7515 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7530 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7545 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7560 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7575 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7590 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7605 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=60.0s balance=2000 houses=3
+event=controller_position frame=7620 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7635 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7650 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7665 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7680 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7695 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7710 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7725 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=61.0s balance=2030 houses=3
+event=controller_position frame=7740 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7755 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7770 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7785 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7800 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7815 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7830 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7845 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7860 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=62.0s balance=2060 houses=3
+event=controller_position frame=7875 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7890 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7905 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7920 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7935 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7950 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7965 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=7980 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=63.0s balance=2090 houses=3
+event=controller_position frame=7995 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8010 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8025 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8040 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8055 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8070 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8085 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8100 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8115 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=64.0s balance=2120 houses=3
+event=controller_position frame=8130 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8145 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8160 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8175 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8190 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8205 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8220 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8235 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=65.0s balance=2150 houses=3
+event=controller_position frame=8250 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8265 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8280 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8295 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8310 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8325 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8340 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8355 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=66.0s balance=2180 houses=3
+event=controller_position frame=8370 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8385 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8400 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8415 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8430 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8445 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8460 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8475 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8490 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=67.0s balance=2210 houses=3
+event=controller_position frame=8505 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8520 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8535 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8550 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8565 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8580 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8595 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8610 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=68.0s balance=2240 houses=3
+event=controller_position frame=8625 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8640 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8655 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8670 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8685 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8700 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8715 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8730 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=69.0s balance=2270 houses=3
+event=controller_position frame=8745 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8760 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8775 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8790 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8805 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8820 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8835 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8850 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8865 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=70.0s balance=2300 houses=3
+event=controller_position frame=8880 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8895 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8910 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8925 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8940 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8955 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8970 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=8985 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=71.0s balance=2330 houses=3
+event=controller_position frame=9000 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9015 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9030 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9045 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9060 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9075 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9090 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9105 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9120 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=72.0s balance=2360 houses=3
+event=controller_position frame=9135 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9150 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9165 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9180 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9195 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9210 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9225 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9240 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9255 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=73.0s balance=2390 houses=3
+event=controller_position frame=9270 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9285 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9300 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9315 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9330 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9345 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9360 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9375 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=74.0s balance=2420 houses=3
+event=controller_position frame=9390 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9405 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9420 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9435 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9450 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9465 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9480 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9495 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9510 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=75.0s balance=2450 houses=3
+event=controller_position frame=9525 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9540 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9555 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9570 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9585 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9600 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9615 x=0 y=0 z=0 key_w=0 key_d=0
+event=controller_position frame=9630 x=0 y=0 z=0 key_w=0 key_d=0
+event=income elapsed=76.0s balance=2480 houses=3
+event=controller_position frame=9645 x=0 y=0 z=0 key_w=0 key_d=0

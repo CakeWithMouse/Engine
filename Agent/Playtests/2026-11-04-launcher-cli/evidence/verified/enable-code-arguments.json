@@ -1,0 +1,5 @@
+{
+  "stdout": "",
+  "stderr": "Invalid arguments. Usage: EngineLauncher.exe --enable-code <Project.json>\nRun EngineLauncher.exe --help for supported commands.\n",
+  "exit": 2
+}

@@ -223,6 +223,7 @@ bool FBXComponent::LoadModel(const std::string& filePath)
 
 void FBXComponent::CreateBuffers(ID3D11Device* Device)
 {
+    LoadPendingTexture();
     if (Device == nullptr)
     {
         return;

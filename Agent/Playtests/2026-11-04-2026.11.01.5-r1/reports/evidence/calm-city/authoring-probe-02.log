@@ -1,0 +1,93 @@
+{"action":"set project Content","detail":"","feature":"asset-paths","returnCode":0,"status":"passed"}
+{"action":"reopen persona scene","detail":"","feature":"scene-save-load","returnCode":0,"status":"passed"}
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+{"action":"attach hidden D3D viewport","detail":"","feature":"render-host","returnCode":0,"status":"passed"}
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 800x600
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 800x600
+{"action":"render loaded project","detail":"","feature":"render-host","returnCode":0,"status":"passed"}
+{"action":"resize to 1024x512","detail":"","feature":"render-resize","returnCode":0,"status":"passed"}
+{"action":"Primitive.Cube","detail":"","feature":"scene-primitives","returnCode":0,"status":"passed"}
+{"action":"Primitive.Sphere","detail":"","feature":"scene-primitives","returnCode":0,"status":"passed"}
+{"action":"Primitive.Plane","detail":"","feature":"scene-primitives","returnCode":0,"status":"passed"}
+{"action":"Primitive.Cylinder","detail":"","feature":"scene-primitives","returnCode":0,"status":"passed"}
+{"action":"Primitive.Cone","detail":"","feature":"scene-primitives","returnCode":0,"status":"passed"}
+{"action":"Primitive.Pyramid","detail":"","feature":"scene-primitives","returnCode":0,"status":"passed"}
+{"action":"Light.Point","detail":"","feature":"light-point","returnCode":0,"status":"passed"}
+{"action":"Light.Directional","detail":"","feature":"light-sun","returnCode":0,"status":"passed"}
+{"action":"Particle.Sparks","detail":"","feature":"particles","returnCode":0,"status":"passed"}
+{"action":"Particle.Smoke","detail":"","feature":"particles","returnCode":0,"status":"passed"}
+{"action":"Environment.Sky","detail":"","feature":"sky","returnCode":0,"status":"passed"}
+Successfully registered shader: E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+{"action":"parent sphere to cube with scale inheritance","detail":"","feature":"scene-hierarchy","returnCode":0,"status":"passed"}
+{"action":"translate rotate scale parent","detail":"","feature":"scene-transform","returnCode":0,"status":"passed"}
+{"action":"focus selected parent","detail":"","feature":"scene-select","returnCode":0,"status":"passed"}
+{"action":"pick centre of focused viewport","detail":"","feature":"scene-select","returnCode":0,"status":"passed"}
+SetParent rejected: the hierarchy would contain a cycle.
+{"action":"reject hierarchy cycle","detail":"","feature":"scene-hierarchy","returnCode":1,"status":"passed"}
+{"action":"select parent and child","detail":"","feature":"scene-groups","returnCode":0,"status":"passed"}
+{"action":"group transform","detail":"","feature":"scene-groups","returnCode":0,"status":"passed"}
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+{"action":"duplicate parent subtree","detail":"","feature":"scene-clone","returnCode":0,"status":"passed"}
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+{"action":"delete duplicated group","detail":"","feature":"scene-create-delete","returnCode":0,"status":"passed"}
+{"action":"assign custom material","detail":"","feature":"material-assign","returnCode":0,"status":"passed"}
+Successfully registered shader: E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+{"action":"compile/read reflected material","detail":"","feature":"material-params","returnCode":0,"status":"passed"}
+{"action":"change Tint","detail":"","feature":"material-params","returnCode":0,"status":"passed"}
+{"action":"set blend 0 twoSided","detail":"","feature":"material-blends","returnCode":0,"status":"passed"}
+{"action":"set blend 1 twoSided","detail":"","feature":"material-blends","returnCode":0,"status":"passed"}
+{"action":"set blend 2 twoSided","detail":"","feature":"material-blends","returnCode":0,"status":"passed"}
+{"action":"set blend 3 twoSided","detail":"","feature":"material-blends","returnCode":0,"status":"passed"}
+{"action":"save material through public authoring API","detail":"","feature":"material-editor","returnCode":0,"status":"passed"}
+{"action":"revert unsaved parameter","detail":"","feature":"material-editor","returnCode":0,"status":"passed"}
+Material 'E:/Engine/Engine/build/playtests/20261104-r1/calm-city/AuthoringLab2/Content/Materials/PersonaLab.hlsl' failed to compile:
+E:\Engine\Engine\build\playtests\20261104-r1\calm-city\AuthoringLab2\Content\Materials\PersonaLab.hlsl(1,1-4): error X3000: unrecognized identifier 'this'
+
+Recompiled 1 material(s) depending on E:\Engine\Engine\build\playtests\20261104-r1\calm-city\AuthoringLab2\Content\Materials/PersonaLab.hlsl
+{"action":"invalid HLSL reports diagnostic","detail":"","feature":"material-errors","returnCode":0,"status":"passed"}
+{"expectedShaderDiagnostic":"E:\\Engine\\Engine\\build\\playtests\\20261104-r1\\calm-city\\AuthoringLab2\\Content\\Materials\\PersonaLab.hlsl(1,1-4): error X3000: unrecognized identifier 'this'\n"}
+Recompiled 1 material(s) depending on E:\Engine\Engine\build\playtests\20261104-r1\calm-city\AuthoringLab2\Content\Materials/PersonaLab.hlsl
+{"action":"repair HLSL and reload","detail":"","feature":"material-errors","returnCode":0,"status":"passed"}
+{"action":"import BMP","detail":"","feature":"texture-import","returnCode":0,"status":"passed"}
+Texture loaded: /Game/Textures/checker.bmp (2x2)
+{"action":"assign imported texture","detail":"","feature":"texture-import","returnCode":0,"status":"passed"}
+Texture loaded: E:/Engine/Engine/build/playtests/20261104-r1/calm-city/AuthoringLab2/Content/Textures/checker.bmp (2x2)
+{"action":"assign material texture slot","detail":"","feature":"material-params","returnCode":0,"status":"passed"}
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+{"action":"reimport BMP from recorded source","detail":"","feature":"asset-reimport","returnCode":0,"status":"passed"}
+{"action":"import triangle.obj","detail":"Cannot load model '/Game/Models/triangle/triangle.obj': Assimp not enabled (Сборка выполнена без поддержки Assimp. Установите зависимости в Engine/vcpkg_installed и соберите с Assimp / Build with -EnableAssimp)","feature":"model-import","returnCode":6,"status":"failed"}
+{"action":"import CesiumMan.glb","detail":"Cannot load model '/Game/Models/CesiumMan/CesiumMan.glb': Assimp not enabled (Сборка выполнена без поддержки Assimp. Установите зависимости в Engine/vcpkg_installed и соберите с Assimp / Build with -EnableAssimp)","feature":"model-import","returnCode":6,"status":"failed"}
+{"action":"import auto-color.fbx","detail":"Cannot load model '/Game/Models/auto-color/auto-color.fbx': Assimp not enabled (Сборка выполнена без поддержки Assimp. Установите зависимости в Engine/vcpkg_installed и соберите с Assimp / Build with -EnableAssimp)","feature":"model-import","returnCode":6,"status":"failed"}
+{"action":"set saved car speed 3.25","detail":"","feature":"scene-properties","returnCode":0,"status":"passed"}
+{"action":"read saved speed","detail":"","feature":"scene-codec","returnCode":0,"status":"passed"}
+{"action":"save authoring lab as new scene","detail":"","feature":"scene-new-save-as","returnCode":0,"status":"passed"}
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+{"action":"reopen saved lab","detail":"","feature":"scene-save-load","returnCode":0,"status":"passed"}
+Successfully registered shader: E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+Texture loaded: E:/Engine/Engine/build/playtests/20261104-r1/calm-city/AuthoringLab2/Content/Textures/checker.bmp (2x2)
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+{"action":"Play saved lab","detail":"","feature":"play","returnCode":0,"status":"passed"}
+Successfully registered shader: E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\BasicSky.hlsl [VARIANT_DEFAULT]
+Texture loaded: E:/Engine/Engine/build/playtests/20261104-r1/calm-city/AuthoringLab2/Content/Textures/checker.bmp (2x2)
+[Info] FXAA pipeline and shaders compiled successfully
+{"action":"Pause","detail":"","feature":"play","returnCode":0,"status":"passed"}
+{"action":"Resume","detail":"","feature":"play","returnCode":0,"status":"passed"}
+{"action":"Stop","detail":"","feature":"play","returnCode":0,"status":"passed"}
+{"summaryFailures":3,"visualVerification":false}

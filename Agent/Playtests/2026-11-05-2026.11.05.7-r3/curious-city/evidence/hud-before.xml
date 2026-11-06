@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UI name="" anchor="TopLeft" rect="0 0 0 0" padding="0 0 0 0" visible="true" interactive="false">
+  <Panel name="cityPanel" anchor="TopLeft" rect="16 16 330 206" padding="12 12 12 12" visible="true" interactive="false" color="#090f18e8" border="1" borderColor="#6d8ca6aa">
+    <Label name="balance" anchor="TopLeft" rect="0 0 300 24" padding="0 0 0 0" visible="true" interactive="false" text="Balance: 500" color="#fff2d7ff" align="left"/>
+    <Label name="income" anchor="TopLeft" rect="0 26 300 22" padding="0 0 0 0" visible="true" interactive="false" text="Income: 0 / second" color="#a9cee9ff" align="left"/>
+    <Label name="houses" anchor="TopLeft" rect="0 48 300 22" padding="0 0 0 0" visible="true" interactive="false" text="Homes: 0" color="#a9cee9ff" align="left"/>
+    <Button name="buildHouse" anchor="TopLeft" rect="0 78 96 32" padding="0 0 0 0" visible="true" interactive="true" text="Build $100" color="#183044ff" hoverColor="#28516cff" pressedColor="#0d2132ff" textColor="#f2f5f4ff" border="1" borderColor="#7aa5c8ff"/>
+    <Button name="saveCity" anchor="TopLeft" rect="102 78 80 32" padding="0 0 0 0" visible="true" interactive="true" text="Save" color="#183044ff" hoverColor="#28516cff" pressedColor="#0d2132ff" textColor="#f2f5f4ff" border="1" borderColor="#7aa5c8ff"/>
+    <Button name="loadCity" anchor="TopLeft" rect="188 78 80 32" padding="0 0 0 0" visible="true" interactive="true" text="Load" color="#183044ff" hoverColor="#28516cff" pressedColor="#0d2132ff" textColor="#f2f5f4ff" border="1" borderColor="#7aa5c8ff"/>
+  </Panel>
+</UI>

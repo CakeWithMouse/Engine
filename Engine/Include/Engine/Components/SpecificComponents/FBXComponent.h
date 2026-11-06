@@ -51,6 +51,7 @@ struct CachedFBXTexture
 class FBXComponent : public GameComponent
 {
 public:
+    void SerializeSaveGame(SaveArchive& archive) override;
     FBXComponent();
     FBXComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale);
     FBXComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm::vec4 color);

@@ -1,0 +1,152 @@
+[
+  {
+    "id": "BUG001",
+    "command": "ui.inspector",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "BUG002",
+    "command": "ui.style",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "BUG003",
+    "command": "ui.edit-text",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "PendingClose",
+    "command": "ui.edit-text",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "BUG007",
+    "command": "input.rebind",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "FocusOff",
+    "command": "input.rebind",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "TraceHit",
+    "command": "trace.raycast",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "TraceMiss",
+    "command": "trace.raycast",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "Snap",
+    "command": "gizmo.snap",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "BUG008",
+    "command": "gizmo.center",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "SnapOff",
+    "command": "gizmo.center",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "ZeroStep",
+    "command": "gizmo.center",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "CameraPerspective",
+    "command": "camera.screen-ray",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "CameraXZ",
+    "command": "camera.screen-ray",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "Session",
+    "command": "session.lifecycle",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "SessionDisabled",
+    "command": "session.lifecycle",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "CameraProperty",
+    "command": "scene.property",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "CameraInvalid",
+    "command": "scene.property",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "SnapLocal",
+    "command": "gizmo.center",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "BadVector",
+    "command": "trace.raycast",
+    "passed": true,
+    "exit": 2
+  },
+  {
+    "id": "BadViewport",
+    "command": "camera.screen-ray",
+    "passed": true,
+    "exit": 2
+  },
+  {
+    "id": "UnknownCommand",
+    "command": "missing.command",
+    "passed": true,
+    "exit": 2
+  },
+  {
+    "id": "GameSettings",
+    "command": "game.settings",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "Cube",
+    "command": "mesh.primitive",
+    "passed": true,
+    "exit": 0
+  },
+  {
+    "id": "Plane",
+    "command": "mesh.primitive",
+    "passed": true,
+    "exit": 0
+  }
+]

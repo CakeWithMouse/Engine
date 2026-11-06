@@ -122,9 +122,13 @@ std::unique_ptr<GameComponent> CreateModel(const std::string& path, bool useImpo
     auto object = std::make_unique<SkeletalMeshComponent>();
     // Keep the asset reference and the loaded CPU model without importing twice.
     if (!object->SetAssetModel(path, std::move(model.Model))) throw std::runtime_error("Invalid model");
-    const auto material = useImportedMaterial ? ModelImport::DefaultMaterial(path) : std::string{};
-    ValidateMaterialPath(material);
-    if (!material.empty() && !object->SetMaterialAsset(material)) throw std::runtime_error("Cannot assign imported material");
+    if(useImportedMaterial) {
+        const auto slots=ModelImport::MaterialSlots(path);
+        if(slots.size()>1)for(const auto& slot:slots)
+            if(!object->SetMaterialSlot(slot.first,slot.second))throw std::runtime_error("Imported material slot does not match geometry");
+        // Preserve the ordinary single-material property for one-slot models.
+        if(slots.size()==1)object->SetMaterialAsset(slots.begin()->second);
+    }
     return object;
 }
 void ValidateMaterialPath(std::string_view path)
@@ -144,7 +148,13 @@ void ValidateMaterial(std::string_view path)
 }
 void Apply(GameComponent& object, const std::string& model, const std::string& texture, const std::string& material)
 {
-    if (object.GetModelAsset() != model) object.SetModelAsset(model);
+    if (object.GetModelAsset() != model) {
+        // A skeletal subclass owns its geometry and animation state directly.
+        // A generic visual proxy would leave its slot codec and bone palette empty.
+        if (auto* skeletal = dynamic_cast<SkeletalMeshComponent*>(&object); skeletal && !model.empty()) {
+            if (!skeletal->LoadFromVfs(model)) throw std::runtime_error("Cannot restore skeletal model: " + model);
+        } else object.SetModelAsset(model);
+    }
     ValidateTexture(texture);
     if (!object.TrySetTexture(texture)) throw std::runtime_error("Cannot create texture resources");
     // A missing or broken .mat does not stop the scene: the game draws the error material instead.
@@ -194,7 +204,7 @@ std::string Import(const fs::path& content, const fs::path& source, Kind kind)
             {
                 if (extension == ".gltf") CopyGltfDependencies(source, target);
                 CreateModel(virtualPath); // Validate geometry before reporting success.
-                if (extension == ".fbx" || extension == ".blend")
+                if (extension == ".fbx" || extension == ".blend" || extension == ".glb" || extension == ".gltf")
                     ModelImport::CreateMaterials(source, target, virtualPath);
             }
             std::ofstream metadata(fs::u8path(file.u8string()+".source.json"),std::ios::binary);

@@ -1,0 +1,5 @@
+frame=1 found=1 texture_path=/Game/Images/Renamed.bmp has_texture=1 texture_srv=1 try_texture=0 device=1 context=1
+frame=2 found=1 texture_path=/Game/Images/Renamed.bmp has_texture=1 texture_srv=1 try_texture=0 device=1 context=1
+frame=3 found=1 texture_path=/Game/Images/Renamed.bmp has_texture=1 texture_srv=1 try_texture=0 device=1 context=1
+frame=10 found=1 texture_path=/Game/Images/Renamed.bmp has_texture=1 texture_srv=1 try_texture=0 device=1 context=1
+frame=20 found=1 texture_path=/Game/Images/Renamed.bmp has_texture=1 texture_srv=1 try_texture=0 device=1 context=1

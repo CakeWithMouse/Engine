@@ -1,0 +1,12 @@
+event=scene_ready balance=500 houses=0
+event=hud_reference_rebound balance=500 houses=0
+event=house_add_deferred_accepted_and_charged balance=400 houses=1
+cycle=first frame=1 event=house_built_and_save_queued balance=400 houses=1 save_status=1
+cycle=first frame=2 event=saved balance=400 houses=1 save_status=2
+event=house_add_deferred_accepted_and_charged balance=310 houses=2
+cycle=first frame=62 event=second_house_after_income balance=310 houses=2 save_status=2
+cycle=first frame=63 event=load_queued balance=310 houses=2 save_status=1
+event=savegame_loaded_references_cleared balance=400 houses=1
+event=hud_reference_rebound balance=400 houses=1
+cycle=first frame=64 event=loaded_scene_callbacks_complete balance=400 houses=1 save_status=3
+cycle=first frame=125 event=income_continued_after_load balance=410 houses=1 save_status=3

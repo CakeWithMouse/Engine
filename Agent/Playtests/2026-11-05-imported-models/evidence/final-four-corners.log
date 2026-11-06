@@ -1,0 +1,215 @@
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  SceneProject.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Templates\SceneProject\Game.dll
+  ImportedModelRenderTests.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\AssetTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\AssetTests.exp
+  AssetTests.vcxproj -> E:\Engine\Engine\build\x64\Release\AssetTests.exe
+
+Invalid or oversized image
+Asset file is empty (0 bytes): E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890\Sources\empty.fbx
+Asset exceeds the import limit of 256 MiB (268435456 bytes): E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890\Sources\large.fbx (268435457 bytes)
+[VfsRead] Failed to read bytes for path '/Game/missing.png' (virtual: '/Game/missing.png'): Failed to open virtual file: /Game/missing.png -> E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/missing.png
+[VfsRead] using local VFS (no host service)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 640x480
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Material 'E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Materials/Tinted.hlsl' failed to compile:
+E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890\Content\Materials\Tinted.hlsl(1,68-70): error X3004: undeclared identifier 'Tnt'
+
+Recompiled 1 material(s) depending on E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890\Content\Materials/Tinted.hlsl
+Recompiled 1 material(s) depending on E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890\Content\Materials/Tinted.hlsl
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+LoadMaterial failed: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Materials/Missing.mat: cannot read the file
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/auto-external/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/auto-embedded/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/auto-fallback/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blender-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blender-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-suzanne/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Missing or external glTF dependency: absent.bin
+glTF dependencies must be relative files inside the model folder
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/auto-embedded/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/auto-external/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/auto-fallback/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-suzanne/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blender-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blender-packed/Textures/BaseColor_0.png (2x2)
+[Info] FXAA pipeline and shaders compiled successfully
+
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[VfsRead] Failed to read bytes for path '/Game/Textures/цвет.bmp' (virtual: '/Game/Textures/цвет.bmp'): Failed to open virtual file: /Game/Textures/цвет.bmp -> E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Textures/цвет.bmp
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/auto-embedded/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/auto-external/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/auto-fallback/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+LoadMaterial failed: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Materials/Red.mat: invalid JSON: [json.exception.parse_error.101] parse error at line 1, column 4: syntax error while parsing object key - invalid literal; last read: '{ no'; expected string literal
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-suzanne/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blender-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blender-packed/Textures/BaseColor_0.png (2x2)
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Invalidated all 2 cached shader(s)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/auto-embedded/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/auto-external/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/auto-fallback/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-suzanne/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blender-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890/Content/Models/blender-packed/Textures/BaseColor_0.png (2x2)
+[Info] FXAA pipeline and shaders compiled successfully
+[VfsRead] using local VFS (no host service)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 640x480
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+PendingTexture kind=0 loaded=1 visible=1
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\pending-texture-0.bmp written=1 size=640x480
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+PendingTexture kind=1 loaded=1 visible=1
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\pending-texture-1.bmp written=1 size=640x480
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+PendingTexture kind=2 loaded=1 visible=1
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+LoadMaterial failed: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Materials/Late.mat: invalid JSON: [json.exception.parse_error.101] parse error at line 1, column 4: syntax error while parsing object key - invalid literal; last read: '{ no'; expected string literal
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Invalidated all 4 cached shader(s)
+Reloaded 1 material(s)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\imported-model.bmp written=1 size=640x480
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/auto-external/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/auto-embedded/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blend-external/Textures/BaseColor_0.png (2x2)
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\blend-external.bmp written=1 size=640x480
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blend-packed/Textures/BaseColor_0.png (2x2)
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\blend-packed.bmp written=1 size=640x480
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blender-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blender-packed/Textures/BaseColor_0.png (2x2)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\uv-material.bmp written=1 size=640x480
+UV corner 260,180 rgb=255,0,0
+UV corner 380,180 rgb=0,255,0
+UV corner 260,300 rgb=0,0,255
+UV corner 380,300 rgb=255,255,0
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\uv-component.bmp written=1 size=640x480
+UV corner 260,180 rgb=255,0,0
+UV corner 380,180 rgb=0,255,0
+UV corner 260,300 rgb=0,0,255
+UV corner 380,300 rgb=255,255,0
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blend-suzanne/Textures/BaseColor_0.png (64x64)
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\suzanne-no-shadows.bmp written=1 size=640x480
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\suzanne-shadows.bmp written=1 size=640x480
+ImportedModelProbe materialUV=1 componentUV=1 darkerGround=4642
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\suzanne-forward.bmp written=1 size=640x480
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\suzanne-deferred.bmp written=1 size=640x480
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\suzanne-default-material.bmp written=1 size=640x480
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\suzanne-masked.bmp written=1 size=640x480
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\suzanne-animated.bmp written=1 size=640x480
+Baked shadow map: 1 static components at 2048 px.
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\suzanne-static-shadow.bmp written=1 size=640x480
+Baked shadow map: 1 static components at 2048 px.
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+Baked shadow map: 0 static components at 2048 px.
+frame-dump E:\Engine\Engine\build\asset-tests\Проект bf41b41d8839420ca4601e54bc884890-moved\suzanne-multiple-materials.bmp written=1 size=640x480
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/Content'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+GameCreate
+[VfsService] first read via module: /Game/Textures/цвет.bmp
+GameSceneLoaded
+GameStart
+Imported scene standalone
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/Content/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+GameUpdate
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/auto-embedded/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/auto-external/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/auto-fallback/Textures/BaseColor_0.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: /Game/Textures/цвет.bmp (1x1)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blend-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blend-packed/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blend-suzanne/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blend-uv/Textures/BaseColor_0.png (64x64)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blender-external/Textures/BaseColor_0.png (2x2)
+Texture loaded: E:/Engine/Engine/build/asset-tests/Проект bf41b41d8839420ca4601e54bc884890-moved/Content/Models/blender-packed/Textures/BaseColor_0.png (2x2)
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdates=2
+GameStop
+GameDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
+Asset workflow: 437 checks passed

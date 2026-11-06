@@ -1,0 +1,16 @@
+{
+    "distance": 5,
+    "hit": true,
+    "normal": [
+        0,
+        0,
+        1
+    ],
+    "ok": true,
+    "position": [
+        0,
+        0,
+        0
+    ]
+}
+exit:0

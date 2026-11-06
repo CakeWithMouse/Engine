@@ -1,0 +1,772 @@
+{
+    "ok": true,
+    "steps": [
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "name": "CesiumResident",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "name": "WestHome",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                5
+            ],
+            "status": 0
+        },
+        {
+            "action": "move",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "name": "CesiumResident",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "name": "WestHome",
+                    "parent": 0,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                5
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "name": "CesiumResident",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "name": "WestHome",
+                    "parent": 0,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 6,
+                    "name": "EastHome",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                6
+            ],
+            "status": 0
+        },
+        {
+            "action": "move",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "name": "CesiumResident",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "name": "WestHome",
+                    "parent": 0,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 6,
+                    "name": "EastHome",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                6
+            ],
+            "status": 0
+        },
+        {
+            "action": "save",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "name": "CesiumResident",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "name": "WestHome",
+                    "parent": 0,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 6,
+                    "name": "EastHome",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                }
+            ],
+            "selected": [
+                6
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "name": "CesiumResident",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "name": "WestHome",
+                    "parent": 0,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 6,
+                    "name": "EastHome",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 7,
+                    "name": "QuarterSky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Environment.Sky"
+                }
+            ],
+            "selected": [
+                7
+            ],
+            "status": 0
+        },
+        {
+            "action": "create",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "name": "CesiumResident",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "name": "WestHome",
+                    "parent": 0,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 6,
+                    "name": "EastHome",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 7,
+                    "name": "QuarterSky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 8,
+                    "name": "QuarterSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Light.Directional"
+                }
+            ],
+            "selected": [
+                8
+            ],
+            "status": 0
+        },
+        {
+            "action": "save",
+            "canRedo": false,
+            "canUndo": true,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "name": "CesiumResident",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "name": "WestHome",
+                    "parent": 0,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 6,
+                    "name": "EastHome",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 7,
+                    "name": "QuarterSky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 8,
+                    "name": "QuarterSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Light.Directional"
+                }
+            ],
+            "selected": [
+                8
+            ],
+            "status": 0
+        },
+        {
+            "action": "new",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+            ],
+            "selected": [
+            ],
+            "status": 0
+        },
+        {
+            "action": "load",
+            "canRedo": false,
+            "canUndo": false,
+            "error": "",
+            "objects": [
+                {
+                    "id": 1,
+                    "name": "Ground",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        -0.5,
+                        0
+                    ],
+                    "type": "Primitive.Plane"
+                },
+                {
+                    "id": 2,
+                    "name": "Warm Light",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        3,
+                        2
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 3,
+                    "name": "Cool Light",
+                    "parent": 0,
+                    "position": [
+                        -3,
+                        2,
+                        1
+                    ],
+                    "type": "Light.Point"
+                },
+                {
+                    "id": 4,
+                    "name": "CesiumResident",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Engine.Model"
+                },
+                {
+                    "id": 5,
+                    "name": "WestHome",
+                    "parent": 0,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 6,
+                    "name": "EastHome",
+                    "parent": 0,
+                    "position": [
+                        2,
+                        0,
+                        0
+                    ],
+                    "type": "Primitive.Cube"
+                },
+                {
+                    "id": 7,
+                    "name": "QuarterSky",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Environment.Sky"
+                },
+                {
+                    "id": 8,
+                    "name": "QuarterSun",
+                    "parent": 0,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "type": "Light.Directional"
+                }
+            ],
+            "selected": [
+            ],
+            "status": 0
+        }
+    ]
+}

@@ -1,0 +1,3252 @@
+[
+  {
+    "path": "reports/evidence/ai-trash/AIProbe/Binaries/Release/5ed0fedab505437b8f23ed61f6803b01/build.log",
+    "bytes": 727,
+    "sha256": "043c1901915f2bb8d3fbaea4e1d16b0f2f076627549e75c63037cf05e0d8f5e1"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AIProbe/Binaries/Release/5ed0fedab505437b8f23ed61f6803b01/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AIProbe/Binaries/Release/5ed0fedab505437b8f23ed61f6803b01/startup.log",
+    "bytes": 1349,
+    "sha256": "20f94fc75217871ffd60a387fdb4a0e24fa437aff87a25fe44e817a13f12fc05"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AIProbe/Binaries/Release/5ed0fedab505437b8f23ed61f6803b01/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AIProbe/Binaries/Release/5ed0fedab505437b8f23ed61f6803b01/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/build.log",
+    "bytes": 869,
+    "sha256": "4f5025e9b8e9dbc10b607db75e3801a27792b5d113203f35cac760e0d4515a46"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/startup.log",
+    "bytes": 1282,
+    "sha256": "b842abb093abbcba71ef654c8eb05ef5457436c81a2504f7084d169c6349e95a"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AIProbe/Binaries/Release/abad89b961d9405ab653825c8f646687/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AIProbe/Binaries/Release/d1804d408b074fc28d01b19f6c531211/build.log",
+    "bytes": 723,
+    "sha256": "3d132c81c8bcb04b30a376b474846a55aa441a85ee3537aa455ac378ca41d1c9"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AIProbe/Content/Config/message.txt",
+    "bytes": 14,
+    "sha256": "86bf249b5ff6bdce9d6d1a4ffb3773fff115b9211cb60a8eb7a9dcda500be469"
+  },
+  {
+    "path": "reports/evidence/ai-trash/authoring-probe.log",
+    "bytes": 10862,
+    "sha256": "fafd0efdfc2b68a951aeab78f8409cececcab868cb08bfacdfdd2a4ed5d34aaf"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AuthoringLab/Content/ProjectGame.txt",
+    "bytes": 13,
+    "sha256": "935078a7b25c1a7591a848af3c514340b1f5ee9a8d7b07a55bb82c9b8e8597b2"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AuthoringLab/Content/ProjectHud.txt",
+    "bytes": 11,
+    "sha256": "6f8b6ed96f6b05bae451c65d72b09f82efa3664db00cb2ded18e6a20745ce77e"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AuthoringLab/Content/Textures/checker.bmp",
+    "bytes": 70,
+    "sha256": "7407794b618685dd6b3b4e2c7475173dabee72dc468ec1d5b9036c1a3a0fa43d"
+  },
+  {
+    "path": "reports/evidence/ai-trash/AuthoringLab/ProbeSources/checker.bmp",
+    "bytes": 70,
+    "sha256": "7407794b618685dd6b3b4e2c7475173dabee72dc468ec1d5b9036c1a3a0fa43d"
+  },
+  {
+    "path": "reports/evidence/ai-trash/build-windows-powershell.log",
+    "bytes": 961,
+    "sha256": "270cba6da146ba28ab279e61e9e2ede11910e39f4156a5fcddbc81889e18dc59"
+  },
+  {
+    "path": "reports/evidence/ai-trash/DirectCpp/Binaries/Release/25926d689385464580ec0aeffcaa0c67/build.log",
+    "bytes": 781,
+    "sha256": "930d37c4d203c27a74be0b4dd686929c4a6336913d66908e8a95b405f62ca07f"
+  },
+  {
+    "path": "reports/evidence/ai-trash/DirectCpp/Binaries/Release/25926d689385464580ec0aeffcaa0c67/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/DirectCpp/Binaries/Release/25926d689385464580ec0aeffcaa0c67/startup.log",
+    "bytes": 1408,
+    "sha256": "a060ea1a744ebb7241631b5ede582d4ef59a16456ef61fec64d4173b1f4eed70"
+  },
+  {
+    "path": "reports/evidence/ai-trash/DirectCpp/Binaries/Release/25926d689385464580ec0aeffcaa0c67/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/DirectCpp/Binaries/Release/25926d689385464580ec0aeffcaa0c67/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/ai-trash/DirectCpp/CodeBuild.log",
+    "bytes": 865,
+    "sha256": "41af04bcd987be8478a972051fb103a833867536ef5ebea13d9b438b868b06d3"
+  },
+  {
+    "path": "reports/evidence/ai-trash/FrozenCompatibility/frozen/SHA256SUMS.txt",
+    "bytes": 553,
+    "sha256": "089a62ba8050cc3fe3d92d7ed7d62ad57e7c12d4287474c961ec9ac9c2fd3731"
+  },
+  {
+    "path": "reports/evidence/ai-trash/FrozenCompatibility/result.txt",
+    "bytes": 278,
+    "sha256": "fbd73e19fd6f8b317f6981f210a6f3a02baeeae175e1703a154abb1f8b841da9"
+  },
+  {
+    "path": "reports/evidence/ai-trash/FrozenCompatibility/sha256-verified.txt",
+    "bytes": 546,
+    "sha256": "5de89ab7619c2541af1c2606d4f1ac456948d170c16b9882c33812f45f1d2ebb"
+  },
+  {
+    "path": "reports/evidence/ai-trash/launcher-create.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/launcher-create.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/material-ui.log",
+    "bytes": 13736,
+    "sha256": "37d40b79ae7b566e9aa68772cd1cd2f6f3af8975984578506116bb31dff13ea8"
+  },
+  {
+    "path": "reports/evidence/ai-trash/smoke-editor.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/smoke-editor.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/smoke-final-editor.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/smoke-final-editor.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/smoke-final-game.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/smoke-final-game.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/smoke-game.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/smoke-game.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/13bc890aa90747409d5692d6630595a0/build.log",
+    "bytes": 729,
+    "sha256": "66959ba0655fe3b2bf0dd68374e629c2c29947f5922361915664ad80784d37df"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/2203b6c7b11f47de9400b9a4717122e6/build.log",
+    "bytes": 824,
+    "sha256": "600d7c77d81bbd9d55eb769aea05b88e7a9034d3902f4d36c371573771cb262e"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/2203b6c7b11f47de9400b9a4717122e6/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/2203b6c7b11f47de9400b9a4717122e6/startup.log",
+    "bytes": 1799,
+    "sha256": "32348ffd5b31f8445702b544812270d9e5e08b723aaf3547311801129623b9aa"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/2203b6c7b11f47de9400b9a4717122e6/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/2203b6c7b11f47de9400b9a4717122e6/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/4c74a1b450764b5a9aaa2df6f3a1fc42/build.log",
+    "bytes": 834,
+    "sha256": "0bf6b4fe50f05dbb0e8cf547aa3fbdd01536a107f9eb5206926111222741a5dc"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/4c74a1b450764b5a9aaa2df6f3a1fc42/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/4c74a1b450764b5a9aaa2df6f3a1fc42/startup.log",
+    "bytes": 1799,
+    "sha256": "32348ffd5b31f8445702b544812270d9e5e08b723aaf3547311801129623b9aa"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/4c74a1b450764b5a9aaa2df6f3a1fc42/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/4c74a1b450764b5a9aaa2df6f3a1fc42/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/5307b782de5349ffb749caf2206aab93/build.log",
+    "bytes": 733,
+    "sha256": "5d1728e3d3a211a2341c35c9bd7d32ed73781cb02e26fef0497ab6c8bb84bc2b"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/5307b782de5349ffb749caf2206aab93/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/5307b782de5349ffb749caf2206aab93/startup.log",
+    "bytes": 1799,
+    "sha256": "32348ffd5b31f8445702b544812270d9e5e08b723aaf3547311801129623b9aa"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/5307b782de5349ffb749caf2206aab93/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/5307b782de5349ffb749caf2206aab93/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/8ff98f816a0e47f8b7226d14e7ab29b2/build.log",
+    "bytes": 714,
+    "sha256": "3125d3a3716cdb1f595a1524a7c8f72c1de7714cf886fef203beb599c1a83ef5"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/8ff98f816a0e47f8b7226d14e7ab29b2/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/8ff98f816a0e47f8b7226d14e7ab29b2/startup.log",
+    "bytes": 1799,
+    "sha256": "32348ffd5b31f8445702b544812270d9e5e08b723aaf3547311801129623b9aa"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/8ff98f816a0e47f8b7226d14e7ab29b2/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/8ff98f816a0e47f8b7226d14e7ab29b2/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/9c3c897fd8f341509cb88c70c411ff30/build.log",
+    "bytes": 2589,
+    "sha256": "cffd2eb5c19fc1d1079aa10987529a781c66c86339466c25c09596a212b327f8"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/build.log",
+    "bytes": 733,
+    "sha256": "b22be2e0b3d106eb2d52764036dc9df565b695d0844a407342e33fdd884c19bc"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/startup.log",
+    "bytes": 1799,
+    "sha256": "32348ffd5b31f8445702b544812270d9e5e08b723aaf3547311801129623b9aa"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/bb145a89f658424a918c720d46f8cbd0/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/e3fe34b68e504ff6b878df55243ec6e6/build.log",
+    "bytes": 733,
+    "sha256": "2f530d24fe2059784bc9c1bf4ae22a02869d6ebced87faa29468d19c5dbac946"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/e3fe34b68e504ff6b878df55243ec6e6/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/e3fe34b68e504ff6b878df55243ec6e6/startup.log",
+    "bytes": 1799,
+    "sha256": "32348ffd5b31f8445702b544812270d9e5e08b723aaf3547311801129623b9aa"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/e3fe34b68e504ff6b878df55243ec6e6/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/e3fe34b68e504ff6b878df55243ec6e6/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/e9dfb74302254354887c03c582d88845/build.log",
+    "bytes": 834,
+    "sha256": "5a6764957b9af2fc2f726f09efa6cf2541c2d1180f2baec51004a7a5b830ee38"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/e9dfb74302254354887c03c582d88845/validate-error.log",
+    "bytes": 68,
+    "sha256": "cf710918bffa889d8c3dbf072bb52f7c4e605d33fa00a9cb393f486f65c3ec48"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/e9dfb74302254354887c03c582d88845/validate.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Binaries/Release/ed38389df95048f5871f76caaba12980/build.log",
+    "bytes": 5887,
+    "sha256": "1fb71e98a1ba77485b2c2fca02f6c9fe0869b2b119c87a56b729bdf2c24aceb9"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Content/ProjectGame.txt",
+    "bytes": 13,
+    "sha256": "935078a7b25c1a7591a848af3c514340b1f5ee9a8d7b07a55bb82c9b8e8597b2"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGame/Content/ProjectHud.txt",
+    "bytes": 11,
+    "sha256": "6f8b6ed96f6b05bae451c65d72b09f82efa3664db00cb2ded18e6a20745ce77e"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGameExport/Game/Content/ProjectGame.txt",
+    "bytes": 13,
+    "sha256": "935078a7b25c1a7591a848af3c514340b1f5ee9a8d7b07a55bb82c9b8e8597b2"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGameExport/Game/Content/ProjectHud.txt",
+    "bytes": 11,
+    "sha256": "6f8b6ed96f6b05bae451c65d72b09f82efa3664db00cb2ded18e6a20745ce77e"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGameExport/GameSmoke.log",
+    "bytes": 2181,
+    "sha256": "05833cb4ba373cca908c3beeb36cc1345196350d78e1d66eee5d9af04b6f1ad9"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGameExport/portable-start.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGameExport/portable-start.stdout.log",
+    "bytes": 2069,
+    "sha256": "dd33f832536d56fa0a5a8281285dd34b8bb1fbc61547b693e7fa2d9d3cb938b3"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGameExport/Validation.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGameExportFinal/final-start.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGameExportFinal/final-start.stdout.log",
+    "bytes": 2109,
+    "sha256": "22589142d35fed387e37aff195e1502d9b8baefe766bb3e994f7145be784e697"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGameExportFinal/Game/Content/ProjectGame.txt",
+    "bytes": 13,
+    "sha256": "935078a7b25c1a7591a848af3c514340b1f5ee9a8d7b07a55bb82c9b8e8597b2"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGameExportFinal/Game/Content/ProjectHud.txt",
+    "bytes": 11,
+    "sha256": "6f8b6ed96f6b05bae451c65d72b09f82efa3664db00cb2ded18e6a20745ce77e"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGameExportFinal/GameSmoke.log",
+    "bytes": 2221,
+    "sha256": "60118eba171fec9868127c2d90eb5ffc16fe5d12803d47e952f882fe7cb4c357"
+  },
+  {
+    "path": "reports/evidence/ai-trash/TrashGameExportFinal/Validation.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/ai-trash/ui-editor-busy-guards.log",
+    "bytes": 23465,
+    "sha256": "d5676e4a883b13881389a74920f2c2147da46f7079ca7905a628bb7743ec00eb"
+  },
+  {
+    "path": "reports/evidence/ai-trash/ui-editor-final.log",
+    "bytes": 9466,
+    "sha256": "fd094eb2ebf88ea3b24f0b67cce33662db122b5537d39376015811f8a8f3c972"
+  },
+  {
+    "path": "reports/evidence/ai-trash/ui-editor-powershell-fixed.log",
+    "bytes": 3897,
+    "sha256": "a2858f1ca0f987da418673ba0cb12515534ab424fba48d17613588d5ced10cf2"
+  },
+  {
+    "path": "reports/evidence/ai-trash/ui-editor-powershell-fixed2.log",
+    "bytes": 5781,
+    "sha256": "43e7c02eb4fb6357cdd0cb5909411c4da4364dd26202222b612394a3391ed000"
+  },
+  {
+    "path": "reports/evidence/ai-trash/ui-editor-queued-build.log",
+    "bytes": 3741,
+    "sha256": "65a67bd47a36f37df0eabfa2aa30163b1d489910dc8396af3cbe70325c103292"
+  },
+  {
+    "path": "reports/evidence/ai-trash/ui-editor-reload-retry.log",
+    "bytes": 11017,
+    "sha256": "23763e69e2feaf44dc8086c8eb43faa5ff6fa1483801bda55426b6d70a2552a4"
+  },
+  {
+    "path": "reports/evidence/ai-trash/ui-editor.log",
+    "bytes": 16371,
+    "sha256": "86c4e626afe002317ca49ae04e2cf8cf5d96fa0bfb4d1a3171dcda5317b11890"
+  },
+  {
+    "path": "reports/evidence/api-reference-check.log",
+    "bytes": 135,
+    "sha256": "e013b8228627ad9e4f184a079b17e63241df9a349a84bda770fb17b70329a488"
+  },
+  {
+    "path": "reports/evidence/archive-restore/ai-trash-final-build.log",
+    "bytes": 1204,
+    "sha256": "c49dc33909af34212e99a7696f479c245ce484ab0f546ae1546ccb801656f2e1"
+  },
+  {
+    "path": "reports/evidence/archive-restore/calm-city-final-build.log",
+    "bytes": 1182,
+    "sha256": "a45fc334f581cf267c36cf2abafceb884232b82fde21fb47ff4a6676b20ad395"
+  },
+  {
+    "path": "reports/evidence/archive-restore/curious-city-final-build.log",
+    "bytes": 1266,
+    "sha256": "e6dfb99bf89e96c6ce5b3dd16133bca74223e0bb61dc84bca8feb3dd41404788"
+  },
+  {
+    "path": "reports/evidence/archive-restore/tired-bomber-final-build.log",
+    "bytes": 1142,
+    "sha256": "2d54f42b4edd40c39ef7d5d1868b552716d9f41123b35c01fccd15769f3520ee"
+  },
+  {
+    "path": "reports/evidence/authoring-probe/obj/vcpkg.applocal.log",
+    "bytes": 2,
+    "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6"
+  },
+  {
+    "path": "reports/evidence/authoring-probe-build-03.log",
+    "bytes": 175,
+    "sha256": "6a47ca40150e8cdf18be2f131be50d6a530ebc64d8156a436468ed463562823b"
+  },
+  {
+    "path": "reports/evidence/authoring-probe-build-retry.log",
+    "bytes": 175,
+    "sha256": "6a47ca40150e8cdf18be2f131be50d6a530ebc64d8156a436468ed463562823b"
+  },
+  {
+    "path": "reports/evidence/authoring-probe-build.log",
+    "bytes": 1058,
+    "sha256": "f8eabdeaf75ac70d53ec1a45e545bf333ae550551971f535e59cd6cfe77b8a64"
+  },
+  {
+    "path": "reports/evidence/build-editor-busy-guards.log",
+    "bytes": 1829,
+    "sha256": "3d4eb07a700f217be466364d6aa9cd256baea7547c2715fac6dccd47611bc488"
+  },
+  {
+    "path": "reports/evidence/build-editor-powershell-fix.log",
+    "bytes": 395,
+    "sha256": "759ce3231c2721c6f9a37aad4aed2754287e6966d42c22e9a2aeba97f84c3734"
+  },
+  {
+    "path": "reports/evidence/build-editor-queued-build.log",
+    "bytes": 395,
+    "sha256": "759ce3231c2721c6f9a37aad4aed2754287e6966d42c22e9a2aeba97f84c3734"
+  },
+  {
+    "path": "reports/evidence/build-launcher-powershell-fix.log",
+    "bytes": 891,
+    "sha256": "d1fbb8c30b9addace0739f8e122dfe161a94e915f5a9bbc73395858fd079412c"
+  },
+  {
+    "path": "reports/evidence/calm-city/authoring-probe-02.log",
+    "bytes": 10795,
+    "sha256": "ee7ba73538ea088d3f0d7bc34e88ac60dd926a2253b05798020d714be4b68a68"
+  },
+  {
+    "path": "reports/evidence/calm-city/authoring-probe.log",
+    "bytes": 14353,
+    "sha256": "d48ace0bb05723abf2f6d546c90d8970404153849923485508815563d13d5e81"
+  },
+  {
+    "path": "reports/evidence/calm-city/AuthoringLab/Content/Textures/checker.bmp",
+    "bytes": 70,
+    "sha256": "7407794b618685dd6b3b4e2c7475173dabee72dc468ec1d5b9036c1a3a0fa43d"
+  },
+  {
+    "path": "reports/evidence/calm-city/AuthoringLab/ProbeSources/checker.bmp",
+    "bytes": 70,
+    "sha256": "7407794b618685dd6b3b4e2c7475173dabee72dc468ec1d5b9036c1a3a0fa43d"
+  },
+  {
+    "path": "reports/evidence/calm-city/AuthoringLab2/Content/Textures/checker.bmp",
+    "bytes": 70,
+    "sha256": "7407794b618685dd6b3b4e2c7475173dabee72dc468ec1d5b9036c1a3a0fa43d"
+  },
+  {
+    "path": "reports/evidence/calm-city/AuthoringLab2/ProbeSources/checker.bmp",
+    "bytes": 70,
+    "sha256": "7407794b618685dd6b3b4e2c7475173dabee72dc468ec1d5b9036c1a3a0fa43d"
+  },
+  {
+    "path": "reports/evidence/calm-city/build-02.log",
+    "bytes": 839,
+    "sha256": "60488550ad46c6305ccc17ad5b7b6e1f6b6fc8ccfc66bb399e15b4ded142d162"
+  },
+  {
+    "path": "reports/evidence/calm-city/build-03.log",
+    "bytes": 1158,
+    "sha256": "d9aaae61cd8bc4dd37a08a4646224bab11a24b0a5ab9080f0363a2fdddecd615"
+  },
+  {
+    "path": "reports/evidence/calm-city/build-camera-02.log",
+    "bytes": 989,
+    "sha256": "e4a79bd711a8ee37fd40b89082e61eb252591de39585fb9475b4bca53bb59e18"
+  },
+  {
+    "path": "reports/evidence/calm-city/build-camera.log",
+    "bytes": 989,
+    "sha256": "ff1c91a34c3fdf6df57cd1d8c2f611996f9c73e471a3cb2f7ad528a9d3e88543"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/4a3c6c0312b143b0a4975582fd669f50/build.log",
+    "bytes": 883,
+    "sha256": "22db472c223242d4e301117247021dbf4527a687a2921aad6c58ab23ac1c4c51"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/4a3c6c0312b143b0a4975582fd669f50/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/4a3c6c0312b143b0a4975582fd669f50/startup.log",
+    "bytes": 1793,
+    "sha256": "7e030d161a706be0e33a1107cf498825e777a87cf31d108f5cdc44df5a3b9dd0"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/4a3c6c0312b143b0a4975582fd669f50/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/4a3c6c0312b143b0a4975582fd669f50/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/5ab2c04fab34491b8ebbb8556d5085e3/build.log",
+    "bytes": 744,
+    "sha256": "23bf7d2a0b683dae66e63ee196fc22ea463b6115bac48142bfd50f1dd01cfa57"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/e708dc254632461baa7aaec84f6d0b48/build.log",
+    "bytes": 825,
+    "sha256": "648c6b15a705490ff1229365ad3f6cb88a99afd1ea45df8f2c0242e7ea716114"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/e708dc254632461baa7aaec84f6d0b48/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/e708dc254632461baa7aaec84f6d0b48/startup.log",
+    "bytes": 1678,
+    "sha256": "7b2da806a2c2b97472e7413c288d6df6119f5208802f8cc9a2119b3ff52c7768"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/e708dc254632461baa7aaec84f6d0b48/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/e708dc254632461baa7aaec84f6d0b48/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/build.log",
+    "bytes": 837,
+    "sha256": "8d192c1a856ace353c81ef2c87daa3d5134e64c662e2cf75b9f6d76ac7b40402"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/startup.log",
+    "bytes": 1678,
+    "sha256": "7b2da806a2c2b97472e7413c288d6df6119f5208802f8cc9a2119b3ff52c7768"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProbe/Binaries/Release/e9a04ad5f5a94415996697338812ec8c/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/316b3468662647ea97c3edb2cc7f4194/build.log",
+    "bytes": 923,
+    "sha256": "ca4d97a6ff28d039643aa5f04e4ad6697830b604bc8584938b9a90e035126574"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/316b3468662647ea97c3edb2cc7f4194/validate-error.log",
+    "bytes": 85,
+    "sha256": "0ebf9b0c8d09c1dc7d704f72d82aeb6c3ec7cef5f6b33c778041fda97b2c4e77"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/316b3468662647ea97c3edb2cc7f4194/validate.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/408956114a2d4998ab84f1658f48065a/build.log",
+    "bytes": 689,
+    "sha256": "3bb1785e6bf83e7b3cbc90028d2206116e19f3761c6d9302adc26ee1ddf4a06b"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/4ecec7142e9d48c4b95b6552fbde6e1f/build.log",
+    "bytes": 754,
+    "sha256": "66043881eb2fc01c271a4aabf0c9cbf0b438b1b1fd3e226122dff1fddf442955"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/4ecec7142e9d48c4b95b6552fbde6e1f/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/4ecec7142e9d48c4b95b6552fbde6e1f/startup.log",
+    "bytes": 1252,
+    "sha256": "85f6d0572b6f47316f55f6bfbf992cfe75ce8e4f945b0886ccf138ae8e0b8a9f"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/4ecec7142e9d48c4b95b6552fbde6e1f/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/4ecec7142e9d48c4b95b6552fbde6e1f/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/637036fe7b7443fbaf48844cd1a28d35/build.log",
+    "bytes": 438,
+    "sha256": "646f3735e9299e972427fc4e64cdd20a7cfea0ea6441d6bbad5b559a705bb5d6"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/7898c8d87862449f958d1af88136cab8/build.log",
+    "bytes": 754,
+    "sha256": "ceb4f92010bb51e60d434119c57ec49645b08859c6376689ab4c412ad453eca3"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/7898c8d87862449f958d1af88136cab8/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/7898c8d87862449f958d1af88136cab8/startup.log",
+    "bytes": 1252,
+    "sha256": "85f6d0572b6f47316f55f6bfbf992cfe75ce8e4f945b0886ccf138ae8e0b8a9f"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/7898c8d87862449f958d1af88136cab8/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/7898c8d87862449f958d1af88136cab8/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/84be821430a447bd843c561290a05e5b/build.log",
+    "bytes": 750,
+    "sha256": "fea4f36abf91026b4c1d60bfa3bec9bdf5e80dafa84a116e6b656c04c9e991c2"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/8d5c3a289a5e4abb95d34a4f513dd1eb/build.log",
+    "bytes": 851,
+    "sha256": "f9cb69612bcfa19ffe487232c7e9c01a745a8d2e98a3b469c4fc72c653e5a808"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/8d5c3a289a5e4abb95d34a4f513dd1eb/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/8d5c3a289a5e4abb95d34a4f513dd1eb/startup.log",
+    "bytes": 1252,
+    "sha256": "85f6d0572b6f47316f55f6bfbf992cfe75ce8e4f945b0886ccf138ae8e0b8a9f"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/8d5c3a289a5e4abb95d34a4f513dd1eb/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/8d5c3a289a5e4abb95d34a4f513dd1eb/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/build.log",
+    "bytes": 735,
+    "sha256": "3ff19c0e4d497a8df2e323781183a3c37ab2a0203b0a5991f217026b5098de68"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/startup.log",
+    "bytes": 1252,
+    "sha256": "85f6d0572b6f47316f55f6bfbf992cfe75ce8e4f945b0886ccf138ae8e0b8a9f"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/CalmCityProject/Binaries/Release/b53bf9d623d9478e89353842ce057bed/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/calm-city/first-build.log",
+    "bytes": 588,
+    "sha256": "16e360993734ae35a8dcb72aaa63814f58bf69f1ce81aaf47f29a507c63b320b"
+  },
+  {
+    "path": "reports/evidence/calm-city/FrozenCompatibility/frozen/SHA256SUMS.txt",
+    "bytes": 553,
+    "sha256": "1cfe3f01d32d9653e3051cbf08e5506a93e93f3fd25850837c86cfbf97e77c4c"
+  },
+  {
+    "path": "reports/evidence/calm-city/FrozenCompatibility/result.txt",
+    "bytes": 278,
+    "sha256": "5ee645ba872c7fbeb16f642b9da53708c912519e5b36842579cdb1a9884b4e36"
+  },
+  {
+    "path": "reports/evidence/calm-city/FrozenCompatibility/runtime.stderr.log",
+    "bytes": 91,
+    "sha256": "87303d64d8d8f5224dcad4be3f27e46fd730160455d245804873035956b40711"
+  },
+  {
+    "path": "reports/evidence/calm-city/FrozenCompatibility/runtime.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/FrozenCompatibility/sha256-verified.txt",
+    "bytes": 546,
+    "sha256": "77dbbe028724c75a043a39b7dd08df645d936eb61d7dc9fde8c9163882b5b7a7"
+  },
+  {
+    "path": "reports/evidence/calm-city/FrozenCompatibility/smoke.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/launcher-create.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/launcher-create.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/material-ui.log",
+    "bytes": 18862,
+    "sha256": "66c66412445bb726b61c2925555bd83de30cda2682a673aead6b982423eef569"
+  },
+  {
+    "path": "reports/evidence/calm-city/probe-create.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/probe-create.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/sdk-enable.log",
+    "bytes": 900,
+    "sha256": "5ae1f18a38a41fd65f43b2218b7599fb56bc678c3250885542fb97636f313bcd"
+  },
+  {
+    "path": "reports/evidence/calm-city/smoke-editor.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/smoke-editor.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/smoke-game.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/smoke-game.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/calm-city/ui-editor.log",
+    "bytes": 14764,
+    "sha256": "55d8750241d4ef0569a927905ef7ab632fd8598be79cdadf7357a7a92ec7e249"
+  },
+  {
+    "path": "reports/evidence/calm-city/ui-final-workflows.log",
+    "bytes": 17149,
+    "sha256": "7eef66f2dd106f0690cdcfdfe8e184481c273173aead2d6da45dddcb73db0e82"
+  },
+  {
+    "path": "reports/evidence/calm-city/ui-game-camera.log",
+    "bytes": 126278,
+    "sha256": "4f3592c4bccf37d50084bfbe5999bb5d2447dc27a992e0ffd53b926523830bc8"
+  },
+  {
+    "path": "reports/evidence/calm-city/ui-recovery.log",
+    "bytes": 8825,
+    "sha256": "b23b900f62401540766e23d55ed2a81a990aab15720685d75e68e060d31209cc"
+  },
+  {
+    "path": "reports/evidence/curious-city/add-class-object.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-001.log",
+    "bytes": 1915,
+    "sha256": "f0c55624ad149947e8295c7658b36d4c22f9dbfe14363bfd45391f306ed04f98"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-002.log",
+    "bytes": 1032,
+    "sha256": "4ccf3c16c60599c80ff2df1e4112300b0ed210a237d569038d41828729dd939f"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-003.log",
+    "bytes": 978,
+    "sha256": "c7aae32b330eb1d2ebb821b279bbbb32ba4cf70f83f79a49be6691682b29c4b9"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-004-layout-ui.log",
+    "bytes": 1110,
+    "sha256": "85b77080634b15786641bdb421ffeb72dc8fa40a60650855ab8f15d36d51f931"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-005-projecthud-input-property.log",
+    "bytes": 1088,
+    "sha256": "9aef1eddccf8675bcae07c6f4a7ca67977d7bd3da59a8b0a0bf6b1b7d9c643cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-006-hud-attach-fix.log",
+    "bytes": 1088,
+    "sha256": "185fcfdad2119f3842c6a0344a5803767c76f4e6821f514b73afe37f17184e04"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-007-hud-button.log",
+    "bytes": 978,
+    "sha256": "e80f360694c85242db8a16ddca7256344608480f5b516cba9ece6d23fb96ef9a"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-008-reference-examples.log",
+    "bytes": 1034,
+    "sha256": "e1ca6c343ef21f21a739815283497d0e5b2c30ba561477653a6abbe71d1c19a9"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-009-object-codec.log",
+    "bytes": 1026,
+    "sha256": "9d9f78216626c66f1c02a4687784bbb888d8eb59f2e2cdf762c177da9436c910"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-010-session-object-probe.log",
+    "bytes": 1110,
+    "sha256": "36f161f21b28af43b6e9d55ad9abadbbba1ea15dff090f6c79553da58140fc6d"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-011-session-probe-fix.log",
+    "bytes": 978,
+    "sha256": "bd408c44f8bf6bbf3dbb412ce885b11cf83f7641d11f0bce7f36305fb855abc2"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-012-vfs-probe.log",
+    "bytes": 969,
+    "sha256": "c3563e2d2ab2c3f495c16b729d1c20342819dc303ef0080415178d1f6fac83a2"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-013-vfs-log-fix.log",
+    "bytes": 969,
+    "sha256": "ef5927307a3f55d1f5a395b44253bd09e21f0bab62f2a16e06ffd255f3afd81f"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-014-scene-document-probe.log",
+    "bytes": 9643,
+    "sha256": "b0f741c2332d5a7a4325fb4e27d8d140d43d66c2e7caad05eae0cd55ad5ded35"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-015-scene-document-fix.log",
+    "bytes": 969,
+    "sha256": "53d399bb619002fa4dc026910d9ba5bc25fe56826dcb609cc4aa5916a081d562"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-016-saveas-scene-validation.log",
+    "bytes": 31,
+    "sha256": "c9f6b8aea0ba24a63971f2fc69f5cd1c873489ceecca145d7eb2dec061e1a4e5"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-017-character-camera-probe.log",
+    "bytes": 978,
+    "sha256": "5bf0d9cd2f6dac3e88d1074091a2a31f5b6a86ca712c433a8b546eac9eab3e76"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-018-assets-probe.log",
+    "bytes": 969,
+    "sha256": "38d08cbde4217f33b52834189f88868e07ff33d0bc4811034d72f901a0c8fbc9"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-019-assets-error-log.log",
+    "bytes": 969,
+    "sha256": "b8e48b9c42a8688f687a88f98b71d2253d832e64f777bbe1617891db968cf5aa"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-020-trace-controller.log",
+    "bytes": 1004,
+    "sha256": "957ff050fd57cf98204e90b4c8472e237486dd6d873719125855dd2d7ed7f47b"
+  },
+  {
+    "path": "reports/evidence/curious-city/build-021-trace-controller-escalated.log",
+    "bytes": 1210,
+    "sha256": "e78657b1c90b1b0c1582cff2136db374d359bd6390aebc60aa2226d86d7747d3"
+  },
+  {
+    "path": "reports/evidence/curious-city/controller-input-observation.log",
+    "bytes": 49062,
+    "sha256": "7b057b21c842642ad4d15370027485d96b1a5c11d208b85b9b8b3fb4295d77fd"
+  },
+  {
+    "path": "reports/evidence/curious-city/controller-ui.log",
+    "bytes": 117330,
+    "sha256": "2fa89509f76a55218ecd45ba34912d701dfa76dd97e9742f63e691ff1fa96505"
+  },
+  {
+    "path": "reports/evidence/curious-city/ControllerProbe/Content/Config/message.txt",
+    "bytes": 41,
+    "sha256": "f271efeda2f855a0f9d2c7d4f1d2643ef886c474a12874efa627f31111b6034c"
+  },
+  {
+    "path": "reports/evidence/curious-city/ControllerProbe/Content/ProjectGame.txt",
+    "bytes": 13,
+    "sha256": "935078a7b25c1a7591a848af3c514340b1f5ee9a8d7b07a55bb82c9b8e8597b2"
+  },
+  {
+    "path": "reports/evidence/curious-city/ControllerProbe/Content/ProjectHud.txt",
+    "bytes": 15,
+    "sha256": "8abc232d459701a49d06f7c1271f8cd9acfa34193991ce842b4db9db2aeb5e7f"
+  },
+  {
+    "path": "reports/evidence/curious-city/create-code-project.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/create-code-project.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/create-project-attempt2.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/direct-cpp-original-build-error.log",
+    "bytes": 519,
+    "sha256": "75bd78bc341674cfdd4791dac0b81b2c51a4ca3c83e7bf2bfa6476ac15a5a08c"
+  },
+  {
+    "path": "reports/evidence/curious-city/DirectCpp/Binaries/Release/076dd01dd3c8438b8b6eae280d67cc04/build.log",
+    "bytes": 793,
+    "sha256": "1024b82e7fdbe9fc37189e3abfd9829a4f8ebde5fa6f537b5a7e7203d993138e"
+  },
+  {
+    "path": "reports/evidence/curious-city/DirectCpp/Binaries/Release/076dd01dd3c8438b8b6eae280d67cc04/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/DirectCpp/Binaries/Release/076dd01dd3c8438b8b6eae280d67cc04/startup.log",
+    "bytes": 1416,
+    "sha256": "60e0bbafc10b25e7ba433a384081ddcf330eaf93bbe1ffdfbb07586c9ce44f8a"
+  },
+  {
+    "path": "reports/evidence/curious-city/DirectCpp/Binaries/Release/076dd01dd3c8438b8b6eae280d67cc04/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/DirectCpp/Binaries/Release/076dd01dd3c8438b8b6eae280d67cc04/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/DirectCpp/CodeBuild.log",
+    "bytes": 881,
+    "sha256": "9acee52e1fb1ea3c269f0bb12687fcf8bceac115d0c1dc92591cc26959a3eb11"
+  },
+  {
+    "path": "reports/evidence/curious-city/export-final.log",
+    "bytes": 37,
+    "sha256": "febe1416aa203474c2720a8e4d1b00926430787c47e5d0f5fd23864d06186305"
+  },
+  {
+    "path": "reports/evidence/curious-city/export-final.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/export.log",
+    "bytes": 37,
+    "sha256": "febe1416aa203474c2720a8e4d1b00926430787c47e5d0f5fd23864d06186305"
+  },
+  {
+    "path": "reports/evidence/curious-city/export.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Exported/Game/Content/Config/message.txt",
+    "bytes": 41,
+    "sha256": "f271efeda2f855a0f9d2c7d4f1d2643ef886c474a12874efa627f31111b6034c"
+  },
+  {
+    "path": "reports/evidence/curious-city/Exported/Game/Content/ProjectGame.txt",
+    "bytes": 13,
+    "sha256": "935078a7b25c1a7591a848af3c514340b1f5ee9a8d7b07a55bb82c9b8e8597b2"
+  },
+  {
+    "path": "reports/evidence/curious-city/Exported/Game/Content/ProjectHud.txt",
+    "bytes": 15,
+    "sha256": "8abc232d459701a49d06f7c1271f8cd9acfa34193991ce842b4db9db2aeb5e7f"
+  },
+  {
+    "path": "reports/evidence/curious-city/Exported/GameSmoke.log",
+    "bytes": 1809,
+    "sha256": "f9661d16e9c803ff13d281a8af4fec80a538563981ea300442fc8ba717865952"
+  },
+  {
+    "path": "reports/evidence/curious-city/Exported/Validation.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/ExportedFinal/Game/Content/Config/message.txt",
+    "bytes": 41,
+    "sha256": "f271efeda2f855a0f9d2c7d4f1d2643ef886c474a12874efa627f31111b6034c"
+  },
+  {
+    "path": "reports/evidence/curious-city/ExportedFinal/Game/Content/ProjectGame.txt",
+    "bytes": 13,
+    "sha256": "935078a7b25c1a7591a848af3c514340b1f5ee9a8d7b07a55bb82c9b8e8597b2"
+  },
+  {
+    "path": "reports/evidence/curious-city/ExportedFinal/Game/Content/ProjectHud.txt",
+    "bytes": 15,
+    "sha256": "8abc232d459701a49d06f7c1271f8cd9acfa34193991ce842b4db9db2aeb5e7f"
+  },
+  {
+    "path": "reports/evidence/curious-city/ExportedFinal/GameSmoke.log",
+    "bytes": 1839,
+    "sha256": "f131abadb0d320bd4519071ce6c77e274dd6cd5fca5427cd522cb6a2b149d766"
+  },
+  {
+    "path": "reports/evidence/curious-city/ExportedFinal/Validation.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/portable-export-runtime.log",
+    "bytes": 679,
+    "sha256": "23db3e2bc715c50db6c2254b580fbe869a5876f7a7bd2793d8cf62db3ec2aa40"
+  },
+  {
+    "path": "reports/evidence/curious-city/portable-final.log",
+    "bytes": 679,
+    "sha256": "23db3e2bc715c50db6c2254b580fbe869a5876f7a7bd2793d8cf62db3ec2aa40"
+  },
+  {
+    "path": "reports/evidence/curious-city/portable-final.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/portable-final.stdout.log",
+    "bytes": 1893,
+    "sha256": "8bcd0d30046f327c7dc1db5196d818427a4d8748bfb795c2601e6d7974e201a1"
+  },
+  {
+    "path": "reports/evidence/curious-city/portable-runtime.log",
+    "bytes": 1863,
+    "sha256": "4c6c621a95be58caf859b7cfbcfb225463fa48f4c80aabb369de31d8a49e9da8"
+  },
+  {
+    "path": "reports/evidence/curious-city/portable-runtime.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/0a51eabfa0c94180bd32b930ebcfa32e/build.log",
+    "bytes": 739,
+    "sha256": "cbd5d238f27ca96fd45a3006f51f81bd81ca1edd6285f3f9617c98b697ce41e8"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/0a51eabfa0c94180bd32b930ebcfa32e/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/0a51eabfa0c94180bd32b930ebcfa32e/startup.log",
+    "bytes": 1549,
+    "sha256": "8adfcd9e4638ca2a1fcfc66f688bb42825afbb00e9f8d4f442241f40d6f957cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/0a51eabfa0c94180bd32b930ebcfa32e/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/0a51eabfa0c94180bd32b930ebcfa32e/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/0b506cfc3c654239b858c76a5fac1ed8/build.log",
+    "bytes": 796,
+    "sha256": "50f077edf63c0ca1d83e4a5be467c7eed4fe8e8315e3fd9083cdcb823e86e48a"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/0b506cfc3c654239b858c76a5fac1ed8/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/0b506cfc3c654239b858c76a5fac1ed8/startup.log",
+    "bytes": 1549,
+    "sha256": "8adfcd9e4638ca2a1fcfc66f688bb42825afbb00e9f8d4f442241f40d6f957cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/0b506cfc3c654239b858c76a5fac1ed8/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/0b506cfc3c654239b858c76a5fac1ed8/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/2350418067c94f909dae4feb436a733e/build.log",
+    "bytes": 859,
+    "sha256": "86e2af0527c967773ca1e7ac3a228156330e231f5722701fade359e180ad04bf"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/2b9b0289f29546d0a7c82623c7e98ff5/build.log",
+    "bytes": 739,
+    "sha256": "2a4445663492e3daf68b18028140c3106c7469be3920d579aa1a4b00f608c6a3"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/2b9b0289f29546d0a7c82623c7e98ff5/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/2b9b0289f29546d0a7c82623c7e98ff5/startup.log",
+    "bytes": 1549,
+    "sha256": "8adfcd9e4638ca2a1fcfc66f688bb42825afbb00e9f8d4f442241f40d6f957cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/2b9b0289f29546d0a7c82623c7e98ff5/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/2b9b0289f29546d0a7c82623c7e98ff5/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/2c0acecdd0d845aabcb2868fb3745a92/build.log",
+    "bytes": 739,
+    "sha256": "8aa5d395921e12b4a8b91997a8c4d7c980ca3b3ee844db593e36b654a3e6269a"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/2c0acecdd0d845aabcb2868fb3745a92/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/2c0acecdd0d845aabcb2868fb3745a92/startup.log",
+    "bytes": 1549,
+    "sha256": "8adfcd9e4638ca2a1fcfc66f688bb42825afbb00e9f8d4f442241f40d6f957cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/2c0acecdd0d845aabcb2868fb3745a92/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/2c0acecdd0d845aabcb2868fb3745a92/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/3b591aa5620a4f4594cde975e9beabeb/build.log",
+    "bytes": 748,
+    "sha256": "1f5255ecfc1a47fb6b42fd4df5040de440271630b76f146fbd31c8644573bd47"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/3b591aa5620a4f4594cde975e9beabeb/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/3b591aa5620a4f4594cde975e9beabeb/startup.log",
+    "bytes": 1549,
+    "sha256": "8adfcd9e4638ca2a1fcfc66f688bb42825afbb00e9f8d4f442241f40d6f957cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/3b591aa5620a4f4594cde975e9beabeb/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/3b591aa5620a4f4594cde975e9beabeb/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/42f96e7ffec14352aba2db7eee8a9401/build.log",
+    "bytes": 858,
+    "sha256": "5385ce803f946ddf23922992d2eca11bad947670c3b15e557aebb8dd8a141aab"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/42f96e7ffec14352aba2db7eee8a9401/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/42f96e7ffec14352aba2db7eee8a9401/startup.log",
+    "bytes": 1549,
+    "sha256": "8adfcd9e4638ca2a1fcfc66f688bb42825afbb00e9f8d4f442241f40d6f957cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/42f96e7ffec14352aba2db7eee8a9401/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/42f96e7ffec14352aba2db7eee8a9401/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/436fb5f3f98c47cb9111eebe80bf331e/build.log",
+    "bytes": 748,
+    "sha256": "f49e97476ab0f92331dea8fd4217c0da060ce22973bb40e08cf3e494562ac91f"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/436fb5f3f98c47cb9111eebe80bf331e/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/436fb5f3f98c47cb9111eebe80bf331e/startup.log",
+    "bytes": 1253,
+    "sha256": "d502fdbaa4c0445d5ddf7e9db26ec8fba4553a07bdeb4dc02abd9d3349136e2d"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/436fb5f3f98c47cb9111eebe80bf331e/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/436fb5f3f98c47cb9111eebe80bf331e/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/554944923f624a5d9caf4a0ecd8b2bf2/build.log",
+    "bytes": 1458,
+    "sha256": "2eb5a9d371f5c0316b0114ae47c57ff74dfd0defdf7e170eb79ea6480cc0c546"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/5a298bb47c4346fcb8fcf045a60848b2/build.log",
+    "bytes": 748,
+    "sha256": "4e16cd57ee40404c92cb6f71f2a9fe297cdf914df823fa989aa1a935b84f21da"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/5a298bb47c4346fcb8fcf045a60848b2/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/5a298bb47c4346fcb8fcf045a60848b2/startup.log",
+    "bytes": 1549,
+    "sha256": "8adfcd9e4638ca2a1fcfc66f688bb42825afbb00e9f8d4f442241f40d6f957cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/5a298bb47c4346fcb8fcf045a60848b2/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/5a298bb47c4346fcb8fcf045a60848b2/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/613caf348a6f4b46a7ccdd8925a58f20/build.log",
+    "bytes": 9186,
+    "sha256": "d506b116d52047884f18179808a2a04f47185fc9da6373f398f86675125a95c2"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/624f8a7518bd465892fa05417404df62/build.log",
+    "bytes": 880,
+    "sha256": "43eaf47e7c336a9792ef9202570ea19263cb4e4a78ae4d3795292709e0f7f642"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/624f8a7518bd465892fa05417404df62/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/624f8a7518bd465892fa05417404df62/startup.log",
+    "bytes": 1549,
+    "sha256": "242c9cacb7eb1eda5e766d776bc2959cc25b10a04bfe35fa037a44eef99146e1"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/624f8a7518bd465892fa05417404df62/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/624f8a7518bd465892fa05417404df62/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/723360ef7c94495cbd268daede76446e/build.log",
+    "bytes": 858,
+    "sha256": "d835ed2acf07eb897750d2739e0350a8a70157aa430f6b3869be327496ac6978"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/723360ef7c94495cbd268daede76446e/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/723360ef7c94495cbd268daede76446e/startup.log",
+    "bytes": 1549,
+    "sha256": "8adfcd9e4638ca2a1fcfc66f688bb42825afbb00e9f8d4f442241f40d6f957cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/723360ef7c94495cbd268daede76446e/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/723360ef7c94495cbd268daede76446e/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/818f9c61fc0b483ba8f438ab9bdc6ded/build.log",
+    "bytes": 804,
+    "sha256": "a6626ef4efdec9a2123764db4bc845d582d9fdab1ef5cb27a6b9441a541d6fbb"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/818f9c61fc0b483ba8f438ab9bdc6ded/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/818f9c61fc0b483ba8f438ab9bdc6ded/startup.log",
+    "bytes": 1549,
+    "sha256": "8adfcd9e4638ca2a1fcfc66f688bb42825afbb00e9f8d4f442241f40d6f957cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/818f9c61fc0b483ba8f438ab9bdc6ded/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/818f9c61fc0b483ba8f438ab9bdc6ded/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/ad8263f33d124d5d8d4f73e5f3ec52b0/build.log",
+    "bytes": 802,
+    "sha256": "1aa759a664d334bb5b2bf100d98c6869a9d20c5201ea1a3a83738e8d9fb643df"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/ad8263f33d124d5d8d4f73e5f3ec52b0/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/ad8263f33d124d5d8d4f73e5f3ec52b0/startup.log",
+    "bytes": 1253,
+    "sha256": "d502fdbaa4c0445d5ddf7e9db26ec8fba4553a07bdeb4dc02abd9d3349136e2d"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/ad8263f33d124d5d8d4f73e5f3ec52b0/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/ad8263f33d124d5d8d4f73e5f3ec52b0/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/b76401d3d97d483487863abf2941fa0c/build.log",
+    "bytes": 735,
+    "sha256": "01ca53a17d67944dcdde3f0d203d8820a2dfa57c0ba1a769101b03d41b0e1394"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/cd614e06c6b6406fbc9703ffd6127744/build.log",
+    "bytes": 980,
+    "sha256": "f258c7ab4afd8a52c95c8378cebc9e7d3948399fca216099ffaccc7b66d4c878"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/cd614e06c6b6406fbc9703ffd6127744/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/cd614e06c6b6406fbc9703ffd6127744/startup.log",
+    "bytes": 1549,
+    "sha256": "8adfcd9e4638ca2a1fcfc66f688bb42825afbb00e9f8d4f442241f40d6f957cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/cd614e06c6b6406fbc9703ffd6127744/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/cd614e06c6b6406fbc9703ffd6127744/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/d5be2f5fdb9747e889c57cff5e74789f/build.log",
+    "bytes": 748,
+    "sha256": "c3286027f2729172bd31d11a5bc2351c0e2adc854b33986a77c95b11d4a4518d"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/d5be2f5fdb9747e889c57cff5e74789f/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/d5be2f5fdb9747e889c57cff5e74789f/startup.log",
+    "bytes": 1549,
+    "sha256": "8adfcd9e4638ca2a1fcfc66f688bb42825afbb00e9f8d4f442241f40d6f957cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/d5be2f5fdb9747e889c57cff5e74789f/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/d5be2f5fdb9747e889c57cff5e74789f/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/f21721d93a4b4fa18ad2429e2fd9a94c/build.log",
+    "bytes": 739,
+    "sha256": "522c6958bd7a7ed149eaedd03b04da232d073d911cb116b2fd50761e0d932314"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/f21721d93a4b4fa18ad2429e2fd9a94c/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/f21721d93a4b4fa18ad2429e2fd9a94c/startup.log",
+    "bytes": 1549,
+    "sha256": "8adfcd9e4638ca2a1fcfc66f688bb42825afbb00e9f8d4f442241f40d6f957cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/f21721d93a4b4fa18ad2429e2fd9a94c/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/f21721d93a4b4fa18ad2429e2fd9a94c/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/f84c147a4d7e4247a1509a13b66bb48e/build.log",
+    "bytes": 739,
+    "sha256": "a282da664589bd42ded48e92dea018730e7c2996874988f8b05bc3d4ed542899"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/f84c147a4d7e4247a1509a13b66bb48e/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/f84c147a4d7e4247a1509a13b66bb48e/startup.log",
+    "bytes": 1549,
+    "sha256": "8adfcd9e4638ca2a1fcfc66f688bb42825afbb00e9f8d4f442241f40d6f957cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/f84c147a4d7e4247a1509a13b66bb48e/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/f84c147a4d7e4247a1509a13b66bb48e/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/fd258f60e84242f8a0c0d738cbb87a8b/build.log",
+    "bytes": 880,
+    "sha256": "06260f0f02855a081ff2e6f0821d3f2103c0004e3f09acc7955d5a95634b342c"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/fd258f60e84242f8a0c0d738cbb87a8b/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/fd258f60e84242f8a0c0d738cbb87a8b/startup.log",
+    "bytes": 1549,
+    "sha256": "8adfcd9e4638ca2a1fcfc66f688bb42825afbb00e9f8d4f442241f40d6f957cd"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/fd258f60e84242f8a0c0d738cbb87a8b/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Binaries/Release/fd258f60e84242f8a0c0d738cbb87a8b/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Content/Config/message.txt",
+    "bytes": 41,
+    "sha256": "f271efeda2f855a0f9d2c7d4f1d2643ef886c474a12874efa627f31111b6034c"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Content/ProjectGame.txt",
+    "bytes": 13,
+    "sha256": "935078a7b25c1a7591a848af3c514340b1f5ee9a8d7b07a55bb82c9b8e8597b2"
+  },
+  {
+    "path": "reports/evidence/curious-city/Project/Content/ProjectHud.txt",
+    "bytes": 15,
+    "sha256": "8abc232d459701a49d06f7c1271f8cd9acfa34193991ce842b4db9db2aeb5e7f"
+  },
+  {
+    "path": "reports/evidence/curious-city/recovery-editor-launch.stderr.log",
+    "bytes": 1643,
+    "sha256": "2d6a18873e127c46a3e55046f2e25a77038acbadd61697a6ffc049534f03ee41"
+  },
+  {
+    "path": "reports/evidence/curious-city/recovery-editor-launch.stdout.log",
+    "bytes": 16763,
+    "sha256": "2bb44481f055a9202305689023bdecf692c37417f024469f725b243b0c52df9d"
+  },
+  {
+    "path": "reports/evidence/curious-city/recovery-workflow-002.stderr.log",
+    "bytes": 73,
+    "sha256": "1bf493031159c5f2ab7676ade2fd2cb9aada84d48f71191618b388c14058a9ea"
+  },
+  {
+    "path": "reports/evidence/curious-city/recovery-workflow-002.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/recovery-workflow.stderr.log",
+    "bytes": 73,
+    "sha256": "1bf493031159c5f2ab7676ade2fd2cb9aada84d48f71191618b388c14058a9ea"
+  },
+  {
+    "path": "reports/evidence/curious-city/recovery-workflow.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/RecoveryProbe/Content/Config/message.txt",
+    "bytes": 41,
+    "sha256": "f271efeda2f855a0f9d2c7d4f1d2643ef886c474a12874efa627f31111b6034c"
+  },
+  {
+    "path": "reports/evidence/curious-city/RecoveryProbe/Content/ProjectGame.txt",
+    "bytes": 13,
+    "sha256": "935078a7b25c1a7591a848af3c514340b1f5ee9a8d7b07a55bb82c9b8e8597b2"
+  },
+  {
+    "path": "reports/evidence/curious-city/RecoveryProbe/Content/ProjectHud.txt",
+    "bytes": 15,
+    "sha256": "8abc232d459701a49d06f7c1271f8cd9acfa34193991ce842b4db9db2aeb5e7f"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-assets-probe-diagnosed.log",
+    "bytes": 306,
+    "sha256": "cd1ec15a0ad539641e0a572ee0371668dda19f281e5e1557101f46f2c8017966"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-assets-probe-diagnosed.stderr.log",
+    "bytes": 35,
+    "sha256": "31bddccda9d7148d264efd8d041ecd23426241c45046c6a7a785502c4396ca43"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-assets-probe-diagnosed.stdout.log",
+    "bytes": 1040,
+    "sha256": "8814a8edfce06ca20b54b0d4d59949e536a470f81c71b2a0b1f4de6130e8dcfa"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-assets-probe-direct.stderr.log",
+    "bytes": 35,
+    "sha256": "31bddccda9d7148d264efd8d041ecd23426241c45046c6a7a785502c4396ca43"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-assets-probe-direct.stdout.log",
+    "bytes": 1040,
+    "sha256": "8814a8edfce06ca20b54b0d4d59949e536a470f81c71b2a0b1f4de6130e8dcfa"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-character-camera-probe.log",
+    "bytes": 828,
+    "sha256": "cb16b22103957f1435cf6a8cd16012c5dbd0b77887319360beffe039e4da8eae"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-controller-probe.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-controller-probe.stdout.log",
+    "bytes": 5491,
+    "sha256": "579ec574dbec470f09edbf35ba33eb89db37f8033d75a2007030a5e13881b85c"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-deep-probes-fixed.log",
+    "bytes": 2214,
+    "sha256": "4990b7ed5f41043a3b664cf63db36895ed510817c90d099362433158220fb845"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-deep-probes.log",
+    "bytes": 2217,
+    "sha256": "b1cd1dda83a29a3953dd5c804b91cf28576293a4c35cbd477e1317bb016df762"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-final.log",
+    "bytes": 980,
+    "sha256": "64fbd964cd4fed9ed1a9ed7575057a4d981bcd9e725a010ce6e73216a3a46111"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-hud-active.log",
+    "bytes": 980,
+    "sha256": "64fbd964cd4fed9ed1a9ed7575057a4d981bcd9e725a010ce6e73216a3a46111"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-layout-ui.log",
+    "bytes": 750,
+    "sha256": "fd4b3e4b2572f11b1d1b728d99e88a053928e61bd6d0916b7fb123c5cf7a395b"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-observed.log",
+    "bytes": 2681,
+    "sha256": "46ceaf803d0ebf30d520fe38a77cce1e6721ec4866231193a8aceadf398a6735"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-probe-scenes-fixed.log",
+    "bytes": 2151,
+    "sha256": "19d313ec5fe2b3aab4d654e30c7c513daa546d7115578535746b847a7b7338cf"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-probe-scenes.log",
+    "bytes": 1280,
+    "sha256": "090be3c663fc84651700692a85fdcf7c1262940dd3ae7a2b0c07f522508c7350"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-projecthud.log",
+    "bytes": 864,
+    "sha256": "e5da974f2bfd89151854f2268d37b62157a0bc1375b274b4f5b4cf9b20002a83"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-results.log",
+    "bytes": 744,
+    "sha256": "3a1651bfd561e5265b17e3ef7d6927e3171c95f1fb790524e52557a48e8e80f8"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-saveas-probe.log",
+    "bytes": 725,
+    "sha256": "1224817c3df2b7a9c7c9fa183ad0fc0c8c0f7bb89b3daaa58533a25dbdfcc734"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-trace-debug-path-error.log",
+    "bytes": 214,
+    "sha256": "4e490f6425fc6d27ce7d2752947d154cb5309389f2159713841acebaff65d3e0"
+  },
+  {
+    "path": "reports/evidence/curious-city/runtime-trace-debug-probe.log",
+    "bytes": 929,
+    "sha256": "78641696ba6ad34757ffcbb3ddd542ec0337979f999096d3875b366b60fa1a04"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-001.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-001.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-002.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-002.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-003.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-003.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-004.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-004.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-005.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-005.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-006.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-006.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-assets-probe.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-assets-probe.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-character-camera.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-character-camera.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-controller-probe.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-controller-probe.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-deep-probes-fixed.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-deep-probes-fixed.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-deep-probes.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-deep-probes.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-editor-001.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-editor-001.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-saveas-probe.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-saveas-probe.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-scene-probe-fixed.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-scene-probe-fixed.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-scene-probe.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-scene-probe.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-trace-debug.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/smoke-trace-debug.stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/curious-city/ui-game.log",
+    "bytes": 77366,
+    "sha256": "8f42ce0fa158cbb6c17ef0f949ce869be09b3d854cd446e17091b6b630d957d1"
+  },
+  {
+    "path": "reports/evidence/curious-city/ui-interaction-editor.log",
+    "bytes": 62915,
+    "sha256": "8ee037d920f01ea5a30ad481511dd20dccd529813757d6f6f99db8e92e410ad5"
+  },
+  {
+    "path": "reports/evidence/curious-city/ui-interaction-events.log",
+    "bytes": 3467,
+    "sha256": "5ee09db601ab24d916a5cf5a2e119bdafe7a2743898855789a6c05f5e6c1d03c"
+  },
+  {
+    "path": "reports/evidence/launcher-ui/launcher.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/prepare-build-retry.log",
+    "bytes": 22268,
+    "sha256": "0cf9760295a775b0cfffe9af2f493e5b154201ac108b97a8fff3dfe10641e788"
+  },
+  {
+    "path": "reports/evidence/prepare-build.log",
+    "bytes": 31222,
+    "sha256": "71cc82285e2ae3a80e859dd0ed83343412d3aab43994153429b40bf491b7dbff"
+  },
+  {
+    "path": "reports/evidence/qt-crash-stack-scan.log",
+    "bytes": 8354,
+    "sha256": "1fda62a05a7ec0dcfeb13cc3c48a75963e0eb721cf221c439689bcf8aaf0fe1b"
+  },
+  {
+    "path": "reports/evidence/qtgui-exports.txt",
+    "bytes": 776166,
+    "sha256": "d2b99fdcc89727f5e9d6f1c6857cb49e73a4ff258dba31c4e30b9290b56c2b51"
+  },
+  {
+    "path": "reports/evidence/skill-validator-setup-retry.log",
+    "bytes": 228,
+    "sha256": "d7b7ce1b5e89a23d63b3349ba87dd6e08e8b45e08e2fec837a6805541d6ba4fd"
+  },
+  {
+    "path": "reports/evidence/skill-validator-setup.log",
+    "bytes": 2549,
+    "sha256": "6117c9fbc5a9a11a3850c4c6b69d4432188ddd5973f96224afd9ae6fa6ff1498"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/controller-ui.log",
+    "bytes": 1360567,
+    "sha256": "fd2a071d5b1cfdf8300b3190da4228d1af2afce593494ff82dcc604544a6cf6c"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/0a9b4d0754f24de582c016e9e5c3d7eb/build.log",
+    "bytes": 766,
+    "sha256": "871d43ff9059ad426120538ec673a386162b32ed8c354d26b7cf10a035b3cf14"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/0a9b4d0754f24de582c016e9e5c3d7eb/startup-error.log",
+    "bytes": 86,
+    "sha256": "614bd00c838a76650d2908859daab7de654b349dd3e2fbf615433a4b938f1b76"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/0a9b4d0754f24de582c016e9e5c3d7eb/startup.log",
+    "bytes": 3996,
+    "sha256": "d6029afb1e9d2cde7657f0bf8b66f3d9361e7bfe4553960d3ebdce29383200a7"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/0a9b4d0754f24de582c016e9e5c3d7eb/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/0a9b4d0754f24de582c016e9e5c3d7eb/validate.log",
+    "bytes": 324,
+    "sha256": "72cfe484a2de5e4b37ad8ce6bf03eb4d4b9804969c4302c6eb6f0c5c416561e6"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/35c224bf7ba44ee4b0969e1810fab113/build.log",
+    "bytes": 825,
+    "sha256": "3f460f90f3df7cf956a4b286be33facf95e3752d2b62eb1d0935ae7d4abd9b09"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/35c224bf7ba44ee4b0969e1810fab113/startup-error.log",
+    "bytes": 86,
+    "sha256": "614bd00c838a76650d2908859daab7de654b349dd3e2fbf615433a4b938f1b76"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/35c224bf7ba44ee4b0969e1810fab113/startup.log",
+    "bytes": 3426,
+    "sha256": "aeaa9ed406a313ee185dd0fd78cbe76a4dd199fe08b1ea7d8924ccafd841803d"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/35c224bf7ba44ee4b0969e1810fab113/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/35c224bf7ba44ee4b0969e1810fab113/validate.log",
+    "bytes": 324,
+    "sha256": "72cfe484a2de5e4b37ad8ce6bf03eb4d4b9804969c4302c6eb6f0c5c416561e6"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/69958f37575c4367a91f90b65a2efcf0/build.log",
+    "bytes": 766,
+    "sha256": "f279c0e221a9dd336febc8a04df5d75d6727fff34e8c2678c6a53114242c1ebb"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/69958f37575c4367a91f90b65a2efcf0/startup-error.log",
+    "bytes": 86,
+    "sha256": "614bd00c838a76650d2908859daab7de654b349dd3e2fbf615433a4b938f1b76"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/69958f37575c4367a91f90b65a2efcf0/startup.log",
+    "bytes": 3426,
+    "sha256": "889065589ec9faaedde992de024cbd4f38073083bfc5e5fafce5da1f30f7f77b"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/69958f37575c4367a91f90b65a2efcf0/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/69958f37575c4367a91f90b65a2efcf0/validate.log",
+    "bytes": 324,
+    "sha256": "72cfe484a2de5e4b37ad8ce6bf03eb4d4b9804969c4302c6eb6f0c5c416561e6"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/90ac519f641e40438e0299383bbbb907/build.log",
+    "bytes": 912,
+    "sha256": "597b6d402cd7aa802c1d3feb35d434ad5f468fe7ec5bba13e770d67364eb2765"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/90ac519f641e40438e0299383bbbb907/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/90ac519f641e40438e0299383bbbb907/startup.log",
+    "bytes": 2925,
+    "sha256": "041087d4c3c11eabaf0878c0103e742273d212e6642a56ebb9b05d048a84fcc1"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/90ac519f641e40438e0299383bbbb907/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/90ac519f641e40438e0299383bbbb907/validate.log",
+    "bytes": 324,
+    "sha256": "72cfe484a2de5e4b37ad8ce6bf03eb4d4b9804969c4302c6eb6f0c5c416561e6"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/946e31ea4b01407fa71cedb6542c0565/build.log",
+    "bytes": 747,
+    "sha256": "0af8ca5f4eb06c17b4db23f8ee18746016230a804450e36ed75eca0d75ad0fc7"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/946e31ea4b01407fa71cedb6542c0565/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/946e31ea4b01407fa71cedb6542c0565/startup.log",
+    "bytes": 2925,
+    "sha256": "041087d4c3c11eabaf0878c0103e742273d212e6642a56ebb9b05d048a84fcc1"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/946e31ea4b01407fa71cedb6542c0565/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/946e31ea4b01407fa71cedb6542c0565/validate.log",
+    "bytes": 324,
+    "sha256": "72cfe484a2de5e4b37ad8ce6bf03eb4d4b9804969c4302c6eb6f0c5c416561e6"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/94c74c497d0a4a8f881a8133e4baf6f6/build.log",
+    "bytes": 1078,
+    "sha256": "b1262827d5584573aba611845a99eae7b1af33924049aac1b4876b0ca5b53010"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/cc3bfe8a2b63484b8df5c9b0ec857dfd/build.log",
+    "bytes": 825,
+    "sha256": "2bab71732013c3284364e569b9825e100154fa7d85b7a46c3559c0a24d322c38"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/cc3bfe8a2b63484b8df5c9b0ec857dfd/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/cc3bfe8a2b63484b8df5c9b0ec857dfd/startup.log",
+    "bytes": 3281,
+    "sha256": "1131fc9339885d2d752620c067d5bcb3a85df4932b84df1a73f30b427d86317c"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/cc3bfe8a2b63484b8df5c9b0ec857dfd/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/cc3bfe8a2b63484b8df5c9b0ec857dfd/validate.log",
+    "bytes": 324,
+    "sha256": "72cfe484a2de5e4b37ad8ce6bf03eb4d4b9804969c4302c6eb6f0c5c416561e6"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/e05edfd7530d4732b6bf15eafeede708/build.log",
+    "bytes": 766,
+    "sha256": "8721e96ef8bece92ab074141230dde0764e9fef52727f2dac08aaa67e921cb25"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/e05edfd7530d4732b6bf15eafeede708/startup-error.log",
+    "bytes": 86,
+    "sha256": "614bd00c838a76650d2908859daab7de654b349dd3e2fbf615433a4b938f1b76"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/e05edfd7530d4732b6bf15eafeede708/startup.log",
+    "bytes": 3996,
+    "sha256": "d6029afb1e9d2cde7657f0bf8b66f3d9361e7bfe4553960d3ebdce29383200a7"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/e05edfd7530d4732b6bf15eafeede708/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Binaries/Release/e05edfd7530d4732b6bf15eafeede708/validate.log",
+    "bytes": 324,
+    "sha256": "72cfe484a2de5e4b37ad8ce6bf03eb4d4b9804969c4302c6eb6f0c5c416561e6"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Content/tired-bomber-frame.bmp",
+    "bytes": 1500054,
+    "sha256": "41701c2f9f1249ce2ff9d57a520d8fa296cfe4774680e195a6105fb270bb6552"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Content/tired-bomber-hit-1.bmp",
+    "bytes": 1500054,
+    "sha256": "ccbcd103fe2088c6d6c11cf4180158bd8e5db962f255ab769e852e548e6e24ff"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Content/tired-bomber-live-custom.bmp",
+    "bytes": 1500054,
+    "sha256": "48eb014e40db0e94c8f2dd2ffed46d38c265d46ccc24802bec4b57b6dfee8baa"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Content/tired-bomber-live-deferred.bmp",
+    "bytes": 1500054,
+    "sha256": "82c5befd58086bf5b2ce354a9229f0a36c9f71aa3f44293eb1565ef375b23b2a"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-build-base.log",
+    "bytes": 31,
+    "sha256": "c9f6b8aea0ba24a63971f2fc69f5cd1c873489ceecca145d7eb2dec061e1a4e5"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-build-class.log",
+    "bytes": 1151,
+    "sha256": "108950c3e5b214d23910695e91c04156d0d04824bdbf1739858eaa453fa3168a"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-build-custom-mode.log",
+    "bytes": 1005,
+    "sha256": "f8f1682de8a73eb7577fef7a3717418b73d4486f4036e87d19fc254bfaf5b46c"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-build-gbuffer.log",
+    "bytes": 1005,
+    "sha256": "5bf7fdf22649b8db801e849d08398366fdf2607831a10a335297fab1faa67fe0"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-build-intentional-failure.log",
+    "bytes": 1544,
+    "sha256": "3c32fd5544b9f81ce18413591157b633b155e0cad69e149c1b8f1eb5c2838c99"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-build-live-settings.log",
+    "bytes": 1064,
+    "sha256": "9abf53136a81fed828a56453a56093f18e6129e6a242353f39a999cd91b336d9"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-build-modes-vfs-skeletal.log",
+    "bytes": 1005,
+    "sha256": "ff13588b6b13fc0155351789b1e860b1e4d25e28e175556b227cdd9b3236e6ce"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-build-recovery.log",
+    "bytes": 986,
+    "sha256": "1fa05222784d5c39e033c81d3ba342decad78e39ce12866953ccf085ba5f67c4"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-build-session.log",
+    "bytes": 1064,
+    "sha256": "df5f2825d54f33c2f9e71b82c6dcea2dfabd0ef5c937ed234a0f37a247c70d58"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-custom-frame.bmp",
+    "bytes": 1500054,
+    "sha256": "41701c2f9f1249ce2ff9d57a520d8fa296cfe4774680e195a6105fb270bb6552"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-custom-hit.bmp",
+    "bytes": 1500054,
+    "sha256": "cd1d253ee0e9dc53ecbea75ac863965e25a27648f9e2d6a4eb516057afc59844"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-custom-vfs-skeletal.error.log",
+    "bytes": 86,
+    "sha256": "614bd00c838a76650d2908859daab7de654b349dd3e2fbf615433a4b938f1b76"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-custom-vfs-skeletal.log",
+    "bytes": 15968,
+    "sha256": "8d8b21db840b8665f28e5bdfd6b34e0eba8909181c55ceead80270e245b0252e"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-deferred-frame.bmp",
+    "bytes": 1500054,
+    "sha256": "c634269981dd479cf452b3a91b6a8e6910675087639f7f2777040dc6e9ae0e9d"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-deferred-vfs-skeletal.error.log",
+    "bytes": 86,
+    "sha256": "614bd00c838a76650d2908859daab7de654b349dd3e2fbf615433a4b938f1b76"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-deferred-vfs-skeletal.log",
+    "bytes": 16538,
+    "sha256": "aeb5f78b6d8b372017c5998bd40735a068ffd8e173445a09fe8d5088a926b7d5"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-gbuffer-frame.bmp",
+    "bytes": 1500054,
+    "sha256": "c634269981dd479cf452b3a91b6a8e6910675087639f7f2777040dc6e9ae0e9d"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-gbuffer-runtime.error.log",
+    "bytes": 86,
+    "sha256": "614bd00c838a76650d2908859daab7de654b349dd3e2fbf615433a4b938f1b76"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-gbuffer-runtime.log",
+    "bytes": 16538,
+    "sha256": "aeb5f78b6d8b372017c5998bd40735a068ffd8e173445a09fe8d5088a926b7d5"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-live-settings-runtime.error.log",
+    "bytes": 86,
+    "sha256": "614bd00c838a76650d2908859daab7de654b349dd3e2fbf615433a4b938f1b76"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-live-settings-runtime.log",
+    "bytes": 21151,
+    "sha256": "8ad3c201c57ba685457bd10e6912955c3fb88c7f5692a2d0b199739d9e79d06f"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-session-runtime.error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/FeatureProbeCopy/Probe-session-runtime.log",
+    "bytes": 3281,
+    "sha256": "1131fc9339885d2d752620c067d5bcb3a85df4932b84df1a73f30b427d86317c"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/frame-before-light-tuning.bmp",
+    "bytes": 1500054,
+    "sha256": "dfb71aedc8ff80f4c2d395600bb6a4ad157b4cc90e6e622b904c09639e9d5e60"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/039df3748af84482bb5a7b3301b68f50/build.log",
+    "bytes": 813,
+    "sha256": "60a0aeb98a2e9820b91c4fd207e335b83a1d75d7a1a6abfcadcee4ad5f0df860"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/039df3748af84482bb5a7b3301b68f50/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/039df3748af84482bb5a7b3301b68f50/startup.log",
+    "bytes": 2917,
+    "sha256": "b5d56e56265684378f882f6b6e810ff2e0b1bb4d8257d26a4ca8c6efb012954b"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/039df3748af84482bb5a7b3301b68f50/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/039df3748af84482bb5a7b3301b68f50/validate.log",
+    "bytes": 324,
+    "sha256": "72cfe484a2de5e4b37ad8ce6bf03eb4d4b9804969c4302c6eb6f0c5c416561e6"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/1842481c732f4794ac2d221ed2759fc8/build.log",
+    "bytes": 871,
+    "sha256": "2bf64908bd6cb5ebda06fe2697ec5d68a768f4068f5578accba97dab8ef02b2f"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/1842481c732f4794ac2d221ed2759fc8/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/1842481c732f4794ac2d221ed2759fc8/startup.log",
+    "bytes": 1640,
+    "sha256": "ec94b2728685fa10b4b2b26390c36597d5748137ee31749deda59b0357cb694d"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/1842481c732f4794ac2d221ed2759fc8/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/1842481c732f4794ac2d221ed2759fc8/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/21be50ca6036499a9a92a65a4af5fcf9/build.log",
+    "bytes": 754,
+    "sha256": "38746e0cdd22eb8336ec1968d7bc5c8f7618c7dcffc81ac7729c005d4b6f2dc6"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/21be50ca6036499a9a92a65a4af5fcf9/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/21be50ca6036499a9a92a65a4af5fcf9/startup.log",
+    "bytes": 2917,
+    "sha256": "b5d56e56265684378f882f6b6e810ff2e0b1bb4d8257d26a4ca8c6efb012954b"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/21be50ca6036499a9a92a65a4af5fcf9/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/21be50ca6036499a9a92a65a4af5fcf9/validate.log",
+    "bytes": 324,
+    "sha256": "72cfe484a2de5e4b37ad8ce6bf03eb4d4b9804969c4302c6eb6f0c5c416561e6"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/5751b130c8a543219223e5ef12bf8e4a/build.log",
+    "bytes": 813,
+    "sha256": "a971b4ca1b11bf692d9f6ef10efc2fcbc6067055b6057aa5d86aef1731add8ba"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/5751b130c8a543219223e5ef12bf8e4a/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/5751b130c8a543219223e5ef12bf8e4a/startup.log",
+    "bytes": 2075,
+    "sha256": "cf51c10653ee8c8ce9a4d8bd7766d15df368b5927c90ef96bb7d212fa8ccc301"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/5751b130c8a543219223e5ef12bf8e4a/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/5751b130c8a543219223e5ef12bf8e4a/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/743f03f7527c4406b69c0f8d0cf3e5b0/build.log",
+    "bytes": 754,
+    "sha256": "f65861ab2fbb77d6df1b0a3114adb542f918bffb9830f088d97c40ad7e4e3608"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/743f03f7527c4406b69c0f8d0cf3e5b0/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/743f03f7527c4406b69c0f8d0cf3e5b0/startup.log",
+    "bytes": 2917,
+    "sha256": "b5d56e56265684378f882f6b6e810ff2e0b1bb4d8257d26a4ca8c6efb012954b"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/743f03f7527c4406b69c0f8d0cf3e5b0/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/743f03f7527c4406b69c0f8d0cf3e5b0/validate.log",
+    "bytes": 324,
+    "sha256": "72cfe484a2de5e4b37ad8ce6bf03eb4d4b9804969c4302c6eb6f0c5c416561e6"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/79182ede98b948e59f92ad597e3d95fd/build.log",
+    "bytes": 754,
+    "sha256": "99d7d15e890a5e37ce608452facba9d80271a8c6cb5097a3e880541e73a76ea0"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/79182ede98b948e59f92ad597e3d95fd/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/79182ede98b948e59f92ad597e3d95fd/startup.log",
+    "bytes": 2422,
+    "sha256": "abab3e0da89c3c86cbd9b9bdd586717aa24fd6b69da007336afbf71d5c4ebbba"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/79182ede98b948e59f92ad597e3d95fd/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/79182ede98b948e59f92ad597e3d95fd/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/7ded1f94ce174347b71a8f89d6dcab1c/build.log",
+    "bytes": 750,
+    "sha256": "2c84748b94f5eca6bf3df4509f03aa84229cda9cc8a23a0efab00991066508ac"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/9b6c734be0d643a49958ab30ef62cb8b/build.log",
+    "bytes": 813,
+    "sha256": "0898e51cf49fa0d3a4b5a14d12893bd01aff811dd5793dd891fbc18e2ddf06ac"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/9b6c734be0d643a49958ab30ef62cb8b/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/9b6c734be0d643a49958ab30ef62cb8b/startup.log",
+    "bytes": 2917,
+    "sha256": "b5d56e56265684378f882f6b6e810ff2e0b1bb4d8257d26a4ca8c6efb012954b"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/9b6c734be0d643a49958ab30ef62cb8b/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/9b6c734be0d643a49958ab30ef62cb8b/validate.log",
+    "bytes": 324,
+    "sha256": "72cfe484a2de5e4b37ad8ce6bf03eb4d4b9804969c4302c6eb6f0c5c416561e6"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/c4c09a6326a1493393fc7a668f44af47/build.log",
+    "bytes": 357,
+    "sha256": "76d7eab74c21049bc007f2baafe2c0f9d2886927e14e00321257154182dc36d1"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/cc5d1d677fae4c809f0f5039d12aa630/build.log",
+    "bytes": 813,
+    "sha256": "92a382e907c1ac668ba0f4a5bc1a02bd77d751eef25375783881a42c3dd4553e"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/cc5d1d677fae4c809f0f5039d12aa630/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/cc5d1d677fae4c809f0f5039d12aa630/startup.log",
+    "bytes": 1640,
+    "sha256": "ec94b2728685fa10b4b2b26390c36597d5748137ee31749deda59b0357cb694d"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/cc5d1d677fae4c809f0f5039d12aa630/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/cc5d1d677fae4c809f0f5039d12aa630/validate.log",
+    "bytes": 74,
+    "sha256": "1adef6b35ce65b4de0ec40193bda40769129590573059beaef60762d660b7c00"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/cd9dd8e81a5f49cea1a32e5980b86282/build.log",
+    "bytes": 813,
+    "sha256": "bbfc5fc55adce19b0161be292a6bf96d36da1b504f3c44a88394c7c50cedf655"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/cd9dd8e81a5f49cea1a32e5980b86282/startup-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/cd9dd8e81a5f49cea1a32e5980b86282/startup.log",
+    "bytes": 2917,
+    "sha256": "b5d56e56265684378f882f6b6e810ff2e0b1bb4d8257d26a4ca8c6efb012954b"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/cd9dd8e81a5f49cea1a32e5980b86282/validate-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/cd9dd8e81a5f49cea1a32e5980b86282/validate.log",
+    "bytes": 324,
+    "sha256": "72cfe484a2de5e4b37ad8ce6bf03eb4d4b9804969c4302c6eb6f0c5c416561e6"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Binaries/Release/e8332f3bf7fb466888d361f9af2c3378/build.log",
+    "bytes": 633,
+    "sha256": "3f462482b450491bba9d34dc1e89957d5c104db7b76e10d6fed48b5f41114754"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Build-attempt-01.log",
+    "bytes": 507,
+    "sha256": "9ebd7bad98fbd9e0313cee61d5d69cad882fd4c120b568ba4af79317f35fee2b"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Build-attempt-02.log",
+    "bytes": 783,
+    "sha256": "231a12133b07dd805474ecb8e0febc41a790b5eab662b1abe5dce1fff8cdb5c1"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Build-attempt-03.log",
+    "bytes": 1106,
+    "sha256": "76ce001ae4c4d23f9422554b264429e6cc450c8edbceddc56e12181e391d3c24"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Build-attempt-04.log",
+    "bytes": 1048,
+    "sha256": "a774f0424c332121e1c0c29270e7bb620e996436ef36105b878ef7ac9ffa4f59"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Build-attempt-05.log",
+    "bytes": 1048,
+    "sha256": "1e2153a1266044b68a8dd6298eddaed7597f5cc7e04b708672cd637626797091"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Build-attempt-06.log",
+    "bytes": 989,
+    "sha256": "bc0f97a008c1397e4fd7b0cbd3cee5755df16bf496ccf1d95c32c62b24127ea7"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Build-attempt-07.log",
+    "bytes": 1048,
+    "sha256": "5d16e961979c31289e02c47e8bdd45039f9b0754bdea70691f63966e6cfa39b8"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Build-attempt-08.log",
+    "bytes": 989,
+    "sha256": "afcd4d6c9f87f827cf22c42c8b7431512c3e95daa1357e0d297181ad0f457e7c"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Build-attempt-09.log",
+    "bytes": 989,
+    "sha256": "b3f8abf522b73dd18c686b34acb412d06f62d1c1831714c8f7851b8b83f71d48"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Build-attempt-10.log",
+    "bytes": 1048,
+    "sha256": "d5b17046f878bf7645ddf7a2d58f91eebbe5c3e6c9ac85b4f352ca6d2d7a6815"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Build-input-baseline.log",
+    "bytes": 1048,
+    "sha256": "38210a8801e2e05c0289d8408a005739c946351847ca6e5528e5b4caf93bf652"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-frame.bmp",
+    "bytes": 1500054,
+    "sha256": "7997b395facbbe9f2585c2d4874059246d82dde9fa10748da2ae5c2689417885"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-1.bmp",
+    "bytes": 1500054,
+    "sha256": "7e17378fa64bd615720184a0e10bac46621abd1b8ae3a13682d01be684c92fd4"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-10.bmp",
+    "bytes": 1500054,
+    "sha256": "39a262511c783e8146cdeee7523c7f40470aa2e3f31a3b8397b61e2e3ab3874c"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-11.bmp",
+    "bytes": 1500054,
+    "sha256": "12c686f89365b61cca190d750e2d9011caab7a50e12a55c056205d6576d449f4"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-12.bmp",
+    "bytes": 1500054,
+    "sha256": "1987408963ab013dfb3ef49af564f9b966a5ab4ea2f1d486615370df19b24a04"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-13.bmp",
+    "bytes": 1500054,
+    "sha256": "1fbb281c2fe067f3447b09a02180fe0227a58b4a77c17319547be38da5f476e3"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-14.bmp",
+    "bytes": 1500054,
+    "sha256": "e4ed9520aafa122d73b2c298fdf5afbe75f396db4dfb7a99557f72098ec21948"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-15.bmp",
+    "bytes": 1500054,
+    "sha256": "9db31a6c0cdd8e1d0af941c49fb71ca050a0c0f733e9cff90241ce3b2adadb8a"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-16.bmp",
+    "bytes": 1500054,
+    "sha256": "618232653468e16fe0998f8b2016c21013948b5e766d7f76efed4990b4c936c3"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-17.bmp",
+    "bytes": 1500054,
+    "sha256": "b8fba56d039c3f0f5f26bd90cd5395c5bd4b6ca6cad774443b6d106af504c7fc"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-18.bmp",
+    "bytes": 1500054,
+    "sha256": "c20e3a93185ce01365372fa410916ac981d1d1ef3c633d23cf592b98d495e352"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-19.bmp",
+    "bytes": 1500054,
+    "sha256": "0e7cdc945c85ee079a3c2b6575a06b3058e3a01c6bd54b2dcf01c57e47d473ac"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-2.bmp",
+    "bytes": 1500054,
+    "sha256": "9d11214c79fb07a8da6141c4eaa06d72c64426ec35b77c2b4e3042f8abfb4876"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-20.bmp",
+    "bytes": 1500054,
+    "sha256": "77f854cab5e4fe79622c88dd18406df1d66b98f0e31ee213f75e1ec104e2d931"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-21.bmp",
+    "bytes": 1500054,
+    "sha256": "c406be86e5a8ae1cb2bc3c04716a6d140b7864bfb6471d75ba588f58f40026d1"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-22.bmp",
+    "bytes": 1500054,
+    "sha256": "52353445d844d9cba59efb4d4ae4ca6d9c88b7ea56d773646cf9ee8501dd7736"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-23.bmp",
+    "bytes": 1500054,
+    "sha256": "304fc2ba60c96ce1403b6e057b2cdba688133aa37b19689eeecbb0e281179369"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-24.bmp",
+    "bytes": 1500054,
+    "sha256": "97c6349b8b07c3963c9c02864e200b9f1d9e20bc80120432b2460f9a6d89c347"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-25.bmp",
+    "bytes": 1500054,
+    "sha256": "dcfcdaa223775d1d67e6cc86b779ef4ca2e8c30cba53efeaa746a976995a8b5a"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-26.bmp",
+    "bytes": 1500054,
+    "sha256": "b3fd7670eb9cea7ed9adbab1f6ebd78701e7ce7d2660a05b171728eec7f636b7"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-3.bmp",
+    "bytes": 1500054,
+    "sha256": "6fa7e394356db2a70f1d6bc2eedf196fd11a07b06d5125bd1f19eb8f5b4985fe"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-4.bmp",
+    "bytes": 1500054,
+    "sha256": "50516a391ff539c04329f803f338bc4cf93fd9ff6b17f295ac8a7e4e95a95e99"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-5.bmp",
+    "bytes": 1500054,
+    "sha256": "6d2ec6427bf22bb7b9ec315208eadd499eb369830a8d2fe975d30e3317ea42ae"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-6.bmp",
+    "bytes": 1500054,
+    "sha256": "b9a5312d5e78c4636673d34d50c26a0fda629b7818d225b43dd9ab2bd9dbfc0c"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-7.bmp",
+    "bytes": 1500054,
+    "sha256": "820333f553626022d793eba9bca1b1c3037b721cb36fe978f31723b01cd777ba"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-8.bmp",
+    "bytes": 1500054,
+    "sha256": "b52acfdb2753141a1c63995807a3fc1214aca49de8786b3ffba9498095fa097f"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Content/tired-bomber-hit-9.bmp",
+    "bytes": 1500054,
+    "sha256": "e08e8e6707713caf472aa7a9ddd3f6fb5b9ad8d2b41a0a81b76a655c9b2fee7a"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-01.error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-01.log",
+    "bytes": 63982,
+    "sha256": "9d441cef2e73055632da42ccb8448d514fae0f084a66144c09c4d57319ce567b"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-02.error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-02.log",
+    "bytes": 63994,
+    "sha256": "d9fb641cfc2a8a21469e623b875d5956777a521d84791cb4277f0493f16ed829"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-03.error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-03.log",
+    "bytes": 64908,
+    "sha256": "726190f01c83363770b515000fd081cf128707f2518c137c00f5225b7d4589a3"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-04.error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-04.log",
+    "bytes": 65255,
+    "sha256": "202d8a517a6e338b71ddbbc88b93d1717ee7f8418ad89d74887098782bd1e354"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-05.error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-05.log",
+    "bytes": 66185,
+    "sha256": "d38a59869dc1a3621aea31c65eb4bf1be145013063746d95c0c85b0f90e576b3"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-06.error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-06.log",
+    "bytes": 11177,
+    "sha256": "53a8f4a72e553c8a6e4f46d87a06716305a4ccf54fcb8bf9cd20548e201e9fdb"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-07.error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-07.log",
+    "bytes": 13247,
+    "sha256": "94d0232cfe79971920633d39a3452233aae335fbc14d1f604d5ab9e6e3390648"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-08.error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-08.log",
+    "bytes": 15455,
+    "sha256": "fdb116292946803a350285ebcde90ae3a088c81860cfb052b834169b8c699833"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-09.error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Runtime-attempt-09.log",
+    "bytes": 13385,
+    "sha256": "e9293332d4806cadedd3438558f81e5fba4d5d578995a579794a13ab469db458"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Smoke-final-editor.error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Smoke-final-editor.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Smoke-final-game.error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/Tired Bomber/Smoke-final-game.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/ui-editor-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/ui-editor-gameplay.log",
+    "bytes": 12818,
+    "sha256": "908dda1170529bf71b9253f724fdf567cb19356be3dd24186521a5d5672cbfcb"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/ui-editor-live.log",
+    "bytes": 10837,
+    "sha256": "660c0c33188e87d594cb6d360c6fbdc689c0fda10791b956bb37141a424fbdf6"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/ui-editor-retry-error.log",
+    "bytes": 1439,
+    "sha256": "f68002ff8ee65f56b1ec417a1db8ded26a16b0a283dc25a2a0bb0b246ba2251f"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/ui-editor-retry.log",
+    "bytes": 530433,
+    "sha256": "e8dea29fb7f4e317b3a8c0de43e90c409a344506357d9a9ebf242784afbca88b"
+  },
+  {
+    "path": "reports/evidence/tired-bomber/ui-editor.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/bomber-controller-input-attempt.png",
+    "bytes": 26421,
+    "sha256": "92d33f5f08308590e0402ac150470c6d3e19047fa1107d7f961856cde1661e58"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/bomber-default.png",
+    "bytes": 82025,
+    "sha256": "a37a1c2c72e9832b2d8acbe77a9643a7f6bd3f0140de2fa9c9c6665fb03e4982"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/bomber-default.txt",
+    "bytes": 7672,
+    "sha256": "8a4ed8551828ea410c9c48a78d1bd5d124c6b8c6d243205a174c2b71cad16669"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/bomber-maximized.png",
+    "bytes": 127710,
+    "sha256": "0deb9aef653d6d2cb640392211a64cdf0d141e97a9fb8595933aeaadb1ed4d2e"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/bomber-paused.png",
+    "bytes": 129040,
+    "sha256": "790539458c3e93b5e67d9582dadefb6b9df600c232f563ddf320ead39c94ba68"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/bomber-play.png",
+    "bytes": 130188,
+    "sha256": "5940c99425c902fb710f98a0cc0373487fff301800bd8ba965a5346561832f99"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/bomber-resumed.png",
+    "bytes": 129294,
+    "sha256": "c211749609f87e156cd942e4d6f64d640e9d4920547c6243b2828d73a528c2bc"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/bomber-selected-clipped-inspector.png",
+    "bytes": 99414,
+    "sha256": "26ea738bcec6b4393fcf9e1dfe644f572e0053706a331eeee7cb1360268cd917"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/bomber-stopped.png",
+    "bytes": 106142,
+    "sha256": "2410cb6a3a22e9ff85ee60d2a7a1ecf5d3c5a2c513c54a56f827f061997734ca"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/calm-game-a.png",
+    "bytes": 32520,
+    "sha256": "72775bb26e1a2b6f973ebbd6c9f0ca704f028a71a3d9ada6e847f81ddde4dccd"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/calm-game-b.png",
+    "bytes": 32121,
+    "sha256": "3d6c70dfab5f7d3aee4825fb5d7a81054a1ec0f3bdb0d91d51e76767fbd81be0"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/calm-game-c.png",
+    "bytes": 32523,
+    "sha256": "3160257a382b5bc04b6baa46b34bdcec27ff63874f58b7d6a3a2e8cfa0b2c9ff"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/calm-hot-reload-preserved-edit.png",
+    "bytes": 152050,
+    "sha256": "5ea807d0b04ab1ef75c1af137fc079223ee5606135a4b9d356fb97dfec3301fb"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/calm-initial-dark.png",
+    "bytes": 117751,
+    "sha256": "2b09e3445a98ae4a0a9d9357724678bf38c210aeeb330ac9a5ffc9700944d947"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/calm-material-lit.png",
+    "bytes": 64826,
+    "sha256": "62e6ac0429f6c1c96148799389963947aaa46178d3e0f72f97b9fc03b8cb8f98"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/calm-material-reverted.png",
+    "bytes": 65032,
+    "sha256": "69e259ea981f5f813eda58860b561e22976369b28cded058aaebd7a6d0524eff"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/calm-material-unlit.png",
+    "bytes": 64750,
+    "sha256": "f33c9c9828390336863ca039f95b78bd291cdb2e4c4c8c62237b87be1e389d62"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/calm-new-dll-gizmo-lines-only.png",
+    "bytes": 151174,
+    "sha256": "0a02585c8278cf262d4ddffb3eda129c4f7a2368c96865cd43fbbf9fe160d25d"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/calm-recovered-position.png",
+    "bytes": 119690,
+    "sha256": "5dd6c975894b2d696d95512b3a80ba40cec09347d8e2ce06a0bde818ea688b8d"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/calm-recovery-prompt.png",
+    "bytes": 119390,
+    "sha256": "d143831bf036946409e8f3509de408a94fdc0a947aae7ee3cf2cb20a3bf0f430"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/calm-snap-axis.png",
+    "bytes": 152374,
+    "sha256": "9bcfd8a055ec3768f639b6042a1a8ef85214aaf1b468bd08542b485ad4c6df3d"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/curious-controller-wd-attempt.png",
+    "bytes": 30071,
+    "sha256": "d7647232a1eb42e6b5ad33c60e5b8c3d244f7cda03e84586607f4863efcae2aa"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/curious-duplicated.png",
+    "bytes": 100382,
+    "sha256": "91628d3bcdbf127797398776332c8734045cf82523b0c278f3e87d0a9a607b7a"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/curious-engine-paused.png",
+    "bytes": 94542,
+    "sha256": "8750b8bdc29ec51dd2eea2638f3d29cb591660fc2e0f8fdce76f5ad36088583a"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/curious-engine-resumed.png",
+    "bytes": 94717,
+    "sha256": "3e8c4e834fafd47e1ffbbc0aae50cab0a7dac1cc768b079fdceb5979d7c2f146"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/curious-game-initial.png",
+    "bytes": 26484,
+    "sha256": "07ad9da65aefd30e418e7b7a1c33b69820f2df8b2a14e3551ac93fc759de4f38"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/curious-height.png",
+    "bytes": 97487,
+    "sha256": "757e24d7b51a4d93377c38eda8e8766c5dbc784a94785178762aff23566ae26b"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/curious-house-selected.png",
+    "bytes": 94622,
+    "sha256": "ef4b20bd2e4e163f39de7ab127f44b82c028443fd2d9582ca9d6ae220775b40c"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/curious-hud-before.png",
+    "bytes": 94210,
+    "sha256": "3c554e8e26099a3b39e40b0e705116083cc7d58a54674f6e89694aeb0afcc286"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/curious-income-paused.png",
+    "bytes": 94036,
+    "sha256": "7c1b63d71f83dfbea0de124c7a7e03ed4255256fa8fb060f4b171400e9d85b7a"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/curious-redo.png",
+    "bytes": 83362,
+    "sha256": "c45d90a0c2d665bbec6c3aae748628764ed83ae0741d9233dbb5e49fecbd195b"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/curious-saved.png",
+    "bytes": 82482,
+    "sha256": "8b9589b22d32f4bc072dffbbe3917738838c8676d5b6db69b72a69e8136ece7b"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/curious-ui-editor-cyrillic.png",
+    "bytes": 70485,
+    "sha256": "fe9c9905f6d6851222844d051911a7ffa10ab0a4ed0634b4d56c1cd57dd11d5e"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/curious-undo.png",
+    "bytes": 81910,
+    "sha256": "40ba593aa61b00479ad23fb2769fc8a72c945841f201e47dc84ef9a88b2a76a4"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/launcher-create-cpp-error.png",
+    "bytes": 12209,
+    "sha256": "be5e9f2c5006b5c1f70c9966376c30eeb3ec6f68ff130ac29f6e7e50dcbc146b"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/launcher-create-cpp-error.txt",
+    "bytes": 5585,
+    "sha256": "ce7bbf48699e6f37349f50f30e798d4f77b8c481b80dfaa9dcfb7978a5153a6f"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-after-reload-input.png",
+    "bytes": 119240,
+    "sha256": "8a797f29b21f934d83e0ea68ddbc3c4eeafd7e50024d8de3cc851a7adc8493e9"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-box-flying.png",
+    "bytes": 117620,
+    "sha256": "209ed81e82dd2cbe3548ea36f37420cbd255b984f6bf29915961ce1ac3de2c18"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-build-powershell-error.png",
+    "bytes": 98230,
+    "sha256": "30526bf6bab0d3857feb8205c6141610f2fb44b7094f4f037f2d7255ee12f4c9"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-build-powershell-error.txt",
+    "bytes": 10929,
+    "sha256": "6a3c077ce34424ce1fd14cca63b9d7a062b1a8c06b1f2b9b5c0f6d7413c067f6"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-direct-cpp-created.png",
+    "bytes": 81980,
+    "sha256": "38d16fdf555b10f33a580b187156adf2f6cdba1a2866001b6d07b4226f2f136e"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-edit.png",
+    "bytes": 90514,
+    "sha256": "57e07ce30a51623be48aed1322c7ab65c945402240c17f171a0294ab2b1fc31d"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-final-hits3.png",
+    "bytes": 119186,
+    "sha256": "c4db8ec98153892465189bbfc637e839ba2849b8c37101bf0bd28c6bb592b939"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-hit1.png",
+    "bytes": 117767,
+    "sha256": "9fbeb20101e49ba91c2c28206c8312e4bea3a397b845201f4a182c2c13bf941d"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-hit2.png",
+    "bytes": 118879,
+    "sha256": "d706245ea1000fde83b724295ee2b6e7f2aa185b772deb3c54df94021693a51f"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-hotreload-fixed.png",
+    "bytes": 94371,
+    "sha256": "b06854d305415bed89912ba0f2e897a1033dbb039aa97915bc6f8078fa9e22fa"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-hotreload-fixed.txt",
+    "bytes": 24559,
+    "sha256": "081cf1161d78bbe81241190181ff9ceb785fa9361ac1965e899674ee92e7664a"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-material-before.png",
+    "bytes": 64706,
+    "sha256": "02ef8685b1b3129c0961a0b6c5cb6a11ba6a97c735cda13cd82c4b86d93fcb2b"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-material-saved.png",
+    "bytes": 64102,
+    "sha256": "8d99419ca6d53ba2faf52fa1169f49674e79a506ee6fe8282f02bcd06d00b327"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-play-before.png",
+    "bytes": 115874,
+    "sha256": "e74274f440d4f5e765b2fcbeb5ede76532be3ed9c7b2a2805df6365f2f7b156b"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-recovered-position.png",
+    "bytes": 98723,
+    "sha256": "3eef64fc95e3525ea9b8bd7536911d6124abf2616ba8fc8ae1ce4f735bb61994"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-recovery-prompt.png",
+    "bytes": 94807,
+    "sha256": "b7f6994b7165bbd77b41930ec282d0beab918077c611469fd684848a2c6c29fd"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-redo-position.png",
+    "bytes": 127789,
+    "sha256": "06cbbae79fd97205110faed1047f4a12f1ff865ff19fb62e63aa67a8432e3b78"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-result3.png",
+    "bytes": 120304,
+    "sha256": "8247ab2828150cad78931b39c53f9e0185c5f1e383debcddaa6861a175c0adfd"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-snap-axis.png",
+    "bytes": 130077,
+    "sha256": "9700af5ff81b76580f24c2be5f72cb4b7270f97a02be0bd5c08a3db4cd94a53e"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-snap-center-nonquantized.png",
+    "bytes": 128524,
+    "sha256": "7d1592577e9c03667f7a6acabb6f78978b1bbb9e92ec9a3a58eb5d824b1f1073"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-ui-build-user-error.png",
+    "bytes": 99590,
+    "sha256": "b48458d40df8ffe4bf1f2e87dbd43fe140fc4e554e61d49e2f3257fd323bdc14"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-ui-build-user-error.txt",
+    "bytes": 23499,
+    "sha256": "eb59acb12dc4bf26905be92c3e1c7ff59d7deb615bbfc9466b18b7e3c1e3ef71"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-ui-editor.png",
+    "bytes": 70664,
+    "sha256": "cc012e995c62179de32cc2dac63f5e7c23f46a7cc9b007b9f71e94f090620ab9"
+  },
+  {
+    "path": "reports/evidence/ui-evidence/trash-undo-position.png",
+    "bytes": 106626,
+    "sha256": "837cbc223a8fed7de83353c34b7c899797f48453478f6fbd50455de31a0c4680"
+  },
+  {
+    "path": "reports/sideprobes/ai-trash-AIProbe.zip",
+    "bytes": 9532,
+    "sha256": "d8ddd619ed4d6f8562c4b0efbad28cc7b3103e3b43549d068708270e8782f20b"
+  },
+  {
+    "path": "reports/sideprobes/ai-trash-DirectCpp.zip",
+    "bytes": 5869,
+    "sha256": "e159d40ee17790ed6d863f315f34c6c86de0e361548022b37cf045d4bc5ab9eb"
+  },
+  {
+    "path": "reports/sideprobes/ai-trash-final.zip",
+    "bytes": 11665,
+    "sha256": "19044581a161410b0b5a82ec768c768e4feb712d62786aaaffaeffdd55bab271"
+  },
+  {
+    "path": "reports/sideprobes/calm-city-CalmCityProbe.zip",
+    "bytes": 8304,
+    "sha256": "b94c0ae1b5a2ffe02eea352f057e1e7c73b6219bddcabbb1cea17af4aa54966f"
+  },
+  {
+    "path": "reports/sideprobes/calm-city-final.zip",
+    "bytes": 8646,
+    "sha256": "a987e01a734203f97b66c99e8a3930c4466519f16c7f4b7d577458ac5f3e0fdc"
+  },
+  {
+    "path": "reports/sideprobes/curious-city-DirectCpp.zip",
+    "bytes": 5873,
+    "sha256": "b8aa5efd16e7bef187a16fbd6912e35e0b3b940f1c425d3697b7df3002943606"
+  },
+  {
+    "path": "reports/sideprobes/curious-city-final.zip",
+    "bytes": 324819,
+    "sha256": "05558ceb4593e2e229dd3cec0f594fb4c95189c40403a3dc7e6b6cabea466167"
+  },
+  {
+    "path": "reports/sideprobes/tired-bomber-FeatureProbeCopy.zip",
+    "bytes": 666621,
+    "sha256": "be0c5f243ec9bbc68b3bf57d0bc4c3b26952b9b5a095595569bd71175162e622"
+  },
+  {
+    "path": "reports/sideprobes/tired-bomber-final.zip",
+    "bytes": 2324432,
+    "sha256": "8b711925135ef1028156a764aca99832ace8e9e74d24b49446743666efba6199"
+  }
+]

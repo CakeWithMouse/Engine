@@ -56,6 +56,18 @@ namespace GizmoMath
 
     double SnapTranslation(double val, double step);
     void SnapVector(const double in[3], double step, double out[3]);
+    // Free/center drag shares the same world/local grid contract as axis handles.
+    inline EngineSceneTransform ApplyCenterTranslation(const EngineSceneTransform& start,
+        const double delta[3], bool snap, double step, bool local) {
+        double value[3]={delta[0],delta[1],delta[2]};
+        double rotation[4]={start.rotation[0],start.rotation[1],start.rotation[2],start.rotation[3]};
+        if(snap && step>1e-4) {
+            if(local) {double inverse[4]={-rotation[0],-rotation[1],-rotation[2],rotation[3]};RotateVectorQuat(inverse,delta,value);}
+            double snapped[3];SnapVector(value,step,snapped);
+            if(local)RotateVectorQuat(rotation,snapped,value);else std::copy(snapped,snapped+3,value);
+        }
+        auto result=start;for(int i=0;i<3;++i)result.position[i]+=static_cast<float>(value[i]);return result;
+    }
     double SnapRotation(double angleRad, double stepDeg);
     double SnapScale(double scale, double step);
 

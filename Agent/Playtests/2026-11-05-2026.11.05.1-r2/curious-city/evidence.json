@@ -1,0 +1,553 @@
+{
+  "run": "2026-11-05-2026.11.05.1-r2",
+  "persona": "curious-city",
+  "runtime": "Engine/build/playtests/20261105-r2/Runtime (read-only baseline)",
+  "features": [
+    {
+      "status": "pass",
+      "feature_id": "create-nocode",
+      "fact": "Project scaffold launched with baseline SDK",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/launcher-create.log"
+      ],
+      "action": "CLI created clean no-code scaffold"
+    },
+    {
+      "status": "pass",
+      "feature_id": "enable-cpp",
+      "fact": "Custom module activated",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/fresh-city/CodeBuild.log",
+        "Engine/build/playtests/20261105-r2/curious-city/fresh-city/build-attempt-7.log"
+      ],
+      "action": "CLI --enable-code then standard MSVC build"
+    },
+    {
+      "status": "partial",
+      "feature_id": "create-cpp",
+      "fact": "Custom-code project successfully built by the supported two-step workflow; GUI C++ creation checkbox/action remains untested.",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/launcher-create.log",
+        "Engine/build/playtests/20261105-r2/curious-city/fresh-city/CodeBuild.log"
+      ],
+      "action": "Verified documented CLI equivalent: create-project then --enable-code"
+    },
+    {
+      "status": "pass",
+      "feature_id": "build-activate",
+      "fact": "Final candidate validated and activated with baseline Runtime",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/fresh-city/build-attempt-7.log"
+      ],
+      "action": "Built and activated project module"
+    },
+    {
+      "status": "pass",
+      "feature_id": "project-game",
+      "fact": "ProjectGame and components logged gameplay and HUD events",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/first-process-cycle2.log"
+      ],
+      "action": "Launched project module in standalone Runtime"
+    },
+    {
+      "status": "pass",
+      "feature_id": "scene-create-delete",
+      "fact": "All project.scene operation statuses 0; undo restored deletion",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/project-scene-city-layout.result.json",
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/project-scene-delete-undo.result.json"
+      ],
+      "action": "Created Civic_Hall/Workshop and deleted duplicate"
+    },
+    {
+      "status": "pass",
+      "feature_id": "scene-transform",
+      "fact": "Civic_Hall moved to [6,0,2], child preserved relative transform",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/project-scene-city-layout.result.json"
+      ],
+      "action": "Moved, group-moved and parented named city objects"
+    },
+    {
+      "status": "pass",
+      "feature_id": "scene-properties",
+      "fact": "fov=75 and houseHeight=2.25 returned/persisted",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/scene.property.result.json",
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/project-scene-custom-property-save.result.json"
+      ],
+      "action": "Changed built-in camera fov and custom houseHeight"
+    },
+    {
+      "status": "pass",
+      "feature_id": "scene-codec",
+      "fact": "houseHeight=2.25 and scaleY=2.25 persisted",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/project-scene-custom-property-save.result.json",
+        "Engine/build/playtests/20261105-r2/curious-city/old-import/Content/Scenes/CityPropertyProbe.scene.json"
+      ],
+      "action": "Saved and reopened custom house property scene"
+    },
+    {
+      "status": "pass",
+      "feature_id": "scene-object",
+      "fact": "All 10 operations returned status 0. Both homes retained parent id 1; projectData roundtripped version=1, zoningCode=7, lotCount=2. The node is non-renderable by ProjectObjectComponent contract.",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/hud-editor-copy/Source/NeighborhoodGameObject.h",
+        "Engine/build/playtests/20261105-r2/curious-city/neighborhood-object-retry.result.json",
+        "Engine/build/playtests/20261105-r2/curious-city/hud-editor-copy/Content/Scenes/NeighborhoodObjectProbe.scene.json"
+      ],
+      "action": "Built a project ENGINE_OBJECT independent hierarchy type; created invisible NorthQuarter with two child house components; saved, cleared, and reloaded the scene"
+    },
+    {
+      "status": "pass",
+      "feature_id": "scene-clone",
+      "fact": "Civic_Hall 2 created at [7,0,2]",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/project-scene-city-layout.result.json"
+      ],
+      "action": "Duplicated Civic_Hall"
+    },
+    {
+      "status": "pass",
+      "feature_id": "scene-save-load",
+      "fact": "Scene restored three objects; gameplay save restored one home and balance across processes",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/project-scene-city-layout.result.json",
+        "Engine/build/playtests/20261105-r2/curious-city/second-process-cycle2.log"
+      ],
+      "action": "Saved and reloaded scene and project SaveGame"
+    },
+    {
+      "status": "pass",
+      "feature_id": "scene-startup",
+      "fact": "Game initialized two saved house components from the configured startup scene before its first measured gameplay frame; BMP shows both homes; startupScene restored to Main after run.",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/startup-neighborhood.launch.log",
+        "Engine/build/playtests/20261105-r2/curious-city/startup-neighborhood.log",
+        "Engine/build/playtests/20261105-r2/curious-city/startup-neighborhood-first-frame.bmp"
+      ],
+      "action": "Set scratch project startupScene to separate NeighborhoodObjectProbe scene and launched standalone game"
+    },
+    {
+      "status": "pass",
+      "feature_id": "scene-new-save-as",
+      "fact": "Three named objects restored",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/project-scene-city-layout.result.json"
+      ],
+      "action": "New scene, Save As CityLayout, then reopen"
+    },
+    {
+      "status": "pass",
+      "feature_id": "scene-undo",
+      "fact": "Object transforms and presence changed back and forth",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/project-scene-city-layout.result.json",
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/project-scene-delete-undo.result.json"
+      ],
+      "action": "Undid/redid group move and duplicate deletion"
+    },
+    {
+      "status": "pass",
+      "feature_id": "play",
+      "fact": "z=0→-0.768 while Playing; held position through 10 paused frames; fresh key up/down after Resume moved to -1.536; release held; Stop restored edit scene z=0.",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/play-pause-resume-retry.request.json",
+        "Engine/build/playtests/20261105-r2/curious-city/play-pause-resume-retry.result.json",
+        "Engine/build/playtests/20261105-r2/curious-city/play-pause-resume-retry.launch.log"
+      ],
+      "action": "EditorQtHost Play→Pause→Resume→Stop with W movement on Player"
+    },
+    {
+      "status": "pass",
+      "feature_id": "external",
+      "fact": "Cross-process save/load and portable runtime launch succeeded",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/second-process-cycle2.log",
+        "Engine/build/playtests/20261105-r2/curious-city/CityExport/StartCmd-smoke.log"
+      ],
+      "action": "Launched separate Runtime and exported package processes"
+    },
+    {
+      "status": "pass",
+      "feature_id": "time",
+      "fact": "Balance progressed $400->$410 after load; old city progressed $200->$230",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/first-process-cycle2.log",
+        "Engine/build/playtests/20261105-r2/curious-city/old-import-probes.log"
+      ],
+      "action": "Advanced simulation and recorded income"
+    },
+    {
+      "status": "pass",
+      "feature_id": "subsystem",
+      "fact": "Balance, houses, income clock saved; subsystem reused",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/fresh-city/Source/CityEconomySubsystem.cpp",
+        "Engine/build/playtests/20261105-r2/curious-city/old-import-probes.log"
+      ],
+      "action": "Serialized economy subsystem state and reused across scenes"
+    },
+    {
+      "status": "pass",
+      "feature_id": "session",
+      "fact": "Two scenes ready/closed, six ticks; subsystem reused across scenes",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/session.lifecycle.result.json",
+        "Engine/build/playtests/20261105-r2/curious-city/old-import-probes.log"
+      ],
+      "action": "Ran GameSession lifecycle commandlet and scene reuse probe"
+    },
+    {
+      "status": "pass",
+      "feature_id": "input",
+      "fact": "W moved player z=-0.768 then stopped at -1.536 after release; click added/charged one house",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/controller-w-release.log",
+        "Engine/build/playtests/20261105-r2/curious-city/button-click-key500-final.log"
+      ],
+      "action": "Held W and clicked Build via project.input"
+    },
+    {
+      "status": "pass",
+      "feature_id": "character",
+      "fact": "player=true, camera=3, viewPlane=2",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/old-import-probes.log"
+      ],
+      "action": "Loaded archived character probe scene"
+    },
+    {
+      "status": "pass",
+      "feature_id": "controller",
+      "fact": "Player moved while held and position remained stable after release",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/controller-w-release.log"
+      ],
+      "action": "Pressed then released W via project.input"
+    },
+    {
+      "status": "pass",
+      "feature_id": "camera-orthographic",
+      "fact": "orthographic=true, plane=2, height=12",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/old-import-probes.log"
+      ],
+      "action": "Loaded orthographic probe camera"
+    },
+    {
+      "status": "pass",
+      "feature_id": "trace-world",
+      "fact": "Triangle hit at distance 5; world probe returned hit and 16 triangles",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/trace.raycast.result.json",
+        "Engine/build/playtests/20261105-r2/curious-city/old-import-probes.log"
+      ],
+      "action": "Raycast and world debug probe"
+    },
+    {
+      "status": "pass",
+      "feature_id": "trace-screen",
+      "fact": "cursor_trace Hit",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/trace-screen.log"
+      ],
+      "action": "Screen-center trace in imported project"
+    },
+    {
+      "status": "pass",
+      "feature_id": "trace-filter",
+      "fact": "channel filter Miss while cursor trace Hit",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/trace-screen.log"
+      ],
+      "action": "Compared filtered channel and cursor trace"
+    },
+    {
+      "status": "pass",
+      "feature_id": "trace-debug",
+      "fact": "5 lines, 1 query, 7 bounds, 16 triangles; cleared lines=0",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/old-import-probes.log"
+      ],
+      "action": "Drew and cleared world trace diagnostics"
+    },
+    {
+      "status": "pass",
+      "feature_id": "asset-paths",
+      "fact": "VFS config message read; CesiumMan.glb imported",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/old-import-probes.log"
+      ],
+      "action": "Read /Game VFS path and imported GLB"
+    },
+    {
+      "status": "pass",
+      "feature_id": "hud-project",
+      "fact": "HUD loaded in standalone and EditorQtHost Play",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/fresh-city/Content/ProjectHud.txt"
+      ],
+      "action": "Loaded project HUD definition"
+    },
+    {
+      "status": "pass",
+      "feature_id": "hud-elements",
+      "fact": "GPU BMP shows $400, $10/sec, one home and house",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/city-after-ui-button-key500-final.bmp"
+      ],
+      "action": "Rendered balance, income, homes and action buttons"
+    },
+    {
+      "status": "pass",
+      "feature_id": "hud-events",
+      "fact": "Each event fired; house and balance restored and HUD reference rebound",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/hud-save-load-click.log"
+      ],
+      "action": "Clicked Build, Save, Build, Load"
+    },
+    {
+      "status": "partial",
+      "feature_id": "hud-layout",
+      "fact": "HUD is visible at tested sizes; anchors/resizing not systematically varied",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/city-after-ui-button-key500-final.bmp",
+        "Engine/build/playtests/20261105-r2/curious-city/city-house-hud.bmp"
+      ],
+      "action": "Inspected 640x480 and 1000x500 captures"
+    },
+    {
+      "status": "pass",
+      "feature_id": "hud-editor",
+      "fact": "Editor saved UTF-8 text; runtime HUD loaded Russian Build caption. Public root layout probe measured 640x480 and 960x540; panel (16,16,330,206), Build (28,106,96,32) in both sizes. Balance placeholder is overwritten by live game binding after BeginPlay. Long initial caption clipped; shortened caption fits.",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/ui-edit.result.json",
+        "Engine/build/playtests/20261105-r2/curious-city/ui-edit-button-final.result.json",
+        "Engine/build/playtests/20261105-r2/curious-city/hud-layout-proof.log",
+        "Engine/build/playtests/20261105-r2/curious-city/hud-edit-reloaded-clean.bmp"
+      ],
+      "action": "Ran ui.edit-text on scratch copy for Cyrillic balance label and Build button; launched game from edited project; sampled actual UIElement layout at two viewport sizes"
+    },
+    {
+      "status": "pass",
+      "feature_id": "diagnostics",
+      "fact": "First sample invalid before render; subsequent frames valid, draw_calls=3 visible=3 culled=0",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/first-process-cycle2.log"
+      ],
+      "action": "Sampled completed frame stats from PreUpdate"
+    },
+    {
+      "status": "pass",
+      "feature_id": "vfs",
+      "fact": "/Game/Config/message.txt returned expected city message",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/old-import-probes.log"
+      ],
+      "action": "Read VFS file through game module"
+    },
+    {
+      "status": "pass",
+      "feature_id": "export",
+      "fact": "Export validation succeeded; direct and wrapper launch exit 0",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/export.log",
+        "Engine/build/playtests/20261105-r2/curious-city/CityExport/StartCmd-smoke.log"
+      ],
+      "action": "Exported project, launched runtime and Start.cmd"
+    },
+    {
+      "status": "pass",
+      "feature_id": "sdk-examples",
+      "fact": "WorldTrace returned Hit (status=1) at 10.5 on component 1; ScreenRay returned Success (status=0), direction=(0.632604,0.281944,-0.721332).",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/Runtime/SDK/Examples/TraceExamples.cpp",
+        "Engine/build/playtests/20261105-r2/curious-city/hud-editor-copy/Source/TraceExamples.cpp",
+        "Engine/build/playtests/20261105-r2/curious-city/sdk-trace-examples.log",
+        "Engine/build/playtests/20261105-r2/curious-city/hud-editor-copy/Binaries/Release/66f21026b8334b1db1e1e5478b78f26e/build.log"
+      ],
+      "action": "Copied pinned SDK Examples/TraceExamples.cpp into isolated project, compiled and called WorldTrace and ScreenRay from actual Game"
+    },
+    {
+      "status": "partial",
+      "feature_id": "host-services",
+      "fact": "Measured host API surface: ViewportCursor set for UI clicks; Authoring setProperty for houseHeight; Batch apply for grouped transforms; Editor Reload service replaced DLL and button click still added House_1 afterward. Other host extension services were not exhaustively exercised.",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/hud-save-load-click-request.json",
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/project-scene-city-layout.request.json",
+        "Engine/build/playtests/20261105-r2/curious-city/commandlets/project-scene-custom-property-save.request.json",
+        "Engine/build/playtests/20261105-r2/curious-city/project-reload-input.request.json",
+        "Engine/build/playtests/20261105-r2/curious-city/project-reload-input.result.json"
+      ],
+      "action": "Invoked project.input and project.scene host commandlets, then project.reload-input with a different DLL candidate"
+    },
+    {
+      "status": "pass",
+      "feature_id": "savegame-scene",
+      "fact": "One home restored from save in second process",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/second-process-cycle2.log",
+        "Engine/build/playtests/20261105-r2/curious-city/save-slots-cycle2/curious-city-r2/default/city.save.json"
+      ],
+      "action": "Saved house scene and loaded across distinct Runtime processes"
+    },
+    {
+      "status": "pass",
+      "feature_id": "savegame-derived",
+      "fact": "Balance=$400, houses=1 restored; HUD reference cleared then rebound; income continued to $410",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/first-process-cycle2.log",
+        "Engine/build/playtests/20261105-r2/curious-city/hud-save-load-click.log",
+        "Engine/build/playtests/20261105-r2/curious-city/second-process-cycle2.log"
+      ],
+      "action": "Serialized economy subsystem and checked OnSaveGameLoaded / BeginPlay rebind"
+    },
+    {
+      "status": "pass",
+      "feature_id": "completed-frame",
+      "fact": "valid false before first render, then valid sample with three draw calls",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/first-process-cycle2.log"
+      ],
+      "action": "Read completed frame stats in PreUpdate"
+    },
+    {
+      "feature_id": "model-import",
+      "action": "Ran asset.import from the project CLI against CesiumMan.glb; loaded it into the project and captured a real game frame.",
+      "fact": "Final .3 Runtime imported CesiumMan.glb: ok=true, placed=true, 1 mesh, 14,016 indices, 1 animation clip; runtime rendered the resident in the measured city frame.",
+      "status": "pass",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/skeletal-import.request.json",
+        "Engine/build/playtests/20261105-r2/curious-city/skeletal-import.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/CesiumMan-source.glb",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/CesiumMan-import-result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/city-skeletal-animation.bmp"
+      ]
+    },
+    {
+      "feature_id": "skeletal",
+      "action": "Loaded the imported CesiumMan in the .3 project, ran 60 actual game frames, logged clip time every 10 ticks, and captured frame 20.",
+      "fact": "Runtime logged loaded=1, meshes=1, clips=1, clip=0 and a 19-bone palette; animation time advanced from 0.5 s at frame 30 to 1.0 s at frame 60. GPU frame shows CesiumMan in the city.",
+      "status": "pass",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/render-host-city.launch.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/city-skeletal-probe.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/city-skeletal-animation.bmp",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/CesiumMan-source.glb"
+      ]
+    },
+    {
+      "feature_id": "sky",
+      "action": "Created QuarterSky and QuarterSun through project.scene, saved scenes before and after, loaded the after scene, then ran the .3 Runtime for measured GPU BMPs.",
+      "fact": "Added Environment.Sky QuarterSky and Light.Directional QuarterSun to a saved/reloaded city scene. The 1000x500 before/after frames differ at 497,709 pixels by >6 summed RGB levels; comparison includes both additions and does not isolate cubemap/reflection behavior.",
+      "status": "partial",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/lighting-scene-operations.request.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/lighting-scene-operations.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/city-before-lighting.bmp",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/city-with-sky-sun.bmp"
+      ]
+    },
+    {
+      "feature_id": "light-sun",
+      "action": "Added Light.Directional to the city via project.scene and rendered the saved scene with sky.",
+      "fact": "QuarterSun was added and serialized, and the combined sky/sun scene produced a visibly different frame; the pixel comparison cannot attribute changes to the directional light alone.",
+      "status": "partial",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/lighting-scene-operations.result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/city-with-sky-sun.bmp"
+      ]
+    },
+    {
+      "feature_id": "shadows",
+      "action": "Observed city lighting only; shadow behavior remains unmeasured.",
+      "fact": "Directional light and sky rendered in the city, but no isolated shadow on/off comparison or distance/cache measurement was made.",
+      "status": "partial",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/city-before-lighting.bmp",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/city-with-sky-sun.bmp"
+      ]
+    },
+    {
+      "feature_id": "texture-import",
+      "action": "Used the authoring import→source change→reimport→move workflow, verified output pixel, and ran matched standalone frames before and after.",
+      "fact": "Final 2026.11.05.5 Runtime, independently rebuilt source copy with no TrySetTexture workaround: scene restored /Game/Images/Renamed.bmp and HasTexture/SRV were 1 from PreUpdate frame 1. Matched red→blue 2x2 BMP runs (50 frames each) changed 11,582/500,000 pixels, all in WestHome bbox x=618..740/y=202..297 (11,462 red vs 11,582 blue ROI pixels). The previous .3 pending-resource result is tracked as BUG-R2-007 and was not reproduced after the root fix.",
+      "status": "pass",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/texture-final5-main.scene.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/texture-final5-projectgame.cpp",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/texture-final5-red-probe.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/texture-final5-blue-probe.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/texture-final5-red.bmp",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/texture-final5-blue.bmp",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/texture-final5-build.log"
+      ]
+    },
+    {
+      "feature_id": "model-blend",
+      "action": "Ran final Runtime asset.import on the shared read-only Blender fixture, then loaded/placed the converted model in the isolated game and rendered it.",
+      "fact": "Imported existing blend-packed.blend to /Game/Models/blend-packed/blend-packed.glb (1 mesh, 36 indices, material asset); project Game placed it through SceneAssets::CreateModel and the real runtime BMP shows the green parcel.",
+      "status": "pass",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/blend-city-import.request.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/blender-fixture-source.blend",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/blender-import-result.json",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/blender-imported-model.glb",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/city-render-host-frame.bmp"
+      ]
+    },
+    {
+      "feature_id": "render-host",
+      "action": "Built project-local render probe against .3 SDK and ran 60 actual Runtime frames with a GPU frame dump.",
+      "fact": "Custom CubeComponent-derived Render override called GameComponent::Render; API probe reported GetDevice=1/GetContext=1, AddComponent status=0, Render calls 1,25,50 with context=1; GPU BMP shows the magenta cube.",
+      "status": "pass",
+      "paths": [
+        "Engine/build/playtests/20261105-r2/curious-city/render-host-city.launch.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/city-render-host-probe.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/city-render-host-frame.bmp"
+      ]
+    },
+    {
+      "fact": "EditorUiTests authoring reimport passed 211 checks and produced a 2x2 blue BMP (0,0,255). In an independently rebuilt .5 source copy with no manual setter, Main.scene restored /Game/Images/Renamed.bmp with HasTexture/SRV=1 from frame1; matched 50-frame red-control vs imported-blue GPU output changed 11,582 pixels only in the home ROI. The preceding .3 bug and its .5 fix are logged in issues.md.",
+      "action": "Imported and reimported test texture through EditorUiTests authoring host, verified file pixel, then loaded the exact blue output and compared same-scene GPU frames with project-runtime texture rebind.",
+      "feature_id": "asset-reimport",
+      "status": "pass",
+      "paths": [
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/texture-reimport-ui.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/texture-reimport-blue-file.bmp",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/texture-final5-red.bmp",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/texture-final5-blue.bmp",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/texture-final5-red-probe.log",
+        "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/texture-final5-blue-probe.log"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/CuriousCity-source.zip",
+      "kind": "source-project-archive",
+      "description": "Source-only project package; no SDK or build output."
+    },
+    {
+      "kind": "diary",
+      "path": "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/diary.md"
+    },
+    {
+      "kind": "feedback",
+      "path": "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/feedback.md"
+    },
+    {
+      "kind": "issues",
+      "path": "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/issues.md"
+    },
+    {
+      "path": "Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/CuriousCity-final5-texture-probe-source.zip",
+      "description": "Independent source-only project built against Runtime 2026.11.05.5 with no runtime TrySetTexture workaround; excludes SDK and Binaries.",
+      "kind": "source-project-archive"
+    }
+  ]
+}

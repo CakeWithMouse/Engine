@@ -1,4 +1,5 @@
 #include "../Source/Components/ComponentInternal.h"
+#include "TestSkipped.h"
 #include <Engine/Resources/Paths.h>
 #include <Engine/Resources/VirtualFileSystem.h>
 #include <Engine/Components/GameComponents.h>
@@ -1842,12 +1843,13 @@ int main()
         {"vfs proxy lifecycle: sessions and rejection", VfsProxyLifecycle_SessionsAndRejection},
         {"vfs proxy lifecycle: read parity and allocator", VfsProxyLifecycle_ReadParityAndAllocator}
     };
-    int failures = 0;
+    int failures = 0, skipped = 0;
     for (const auto& test : tests)
     {
         try { test.second(); std::cout << "PASS: " << test.first << '\n'; }
+        catch (const TestSkipped& error) { ++skipped; std::cout << "SKIP: " << test.first << ": " << error.what() << '\n'; }
         catch (const std::exception& error) { ++failures; std::cerr << "FAIL: " << test.first << ": " << error.what() << '\n'; }
     }
-    std::cout << std::size(tests) - failures << '/' << std::size(tests) << " tests passed\n";
+    std::cout << std::size(tests) - failures - skipped << '/' << std::size(tests) << " tests passed; " << skipped << " skipped; " << failures << " failed\n";
     return failures ? 1 : 0;
 }

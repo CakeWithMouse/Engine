@@ -1,0 +1,58 @@
+{
+  "steps": [
+    {
+      "action": "create",
+      "type": "Primitive.Cube",
+      "name": "WestHome"
+    },
+    {
+      "delta": [
+        -2,
+        0,
+        0
+      ],
+      "action": "move",
+      "target": "WestHome"
+    },
+    {
+      "action": "create",
+      "type": "Primitive.Cube",
+      "name": "EastHome"
+    },
+    {
+      "delta": [
+        2,
+        0,
+        0
+      ],
+      "action": "move",
+      "target": "EastHome"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\curious-city\\final-city-probe\\Content\\Scenes\\CityQuarterBeforeLighting.scene.json",
+      "action": "save"
+    },
+    {
+      "action": "create",
+      "type": "Environment.Sky",
+      "name": "QuarterSky"
+    },
+    {
+      "action": "create",
+      "type": "Light.Directional",
+      "name": "QuarterSun"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\curious-city\\final-city-probe\\Content\\Scenes\\CityQuarterLighting.scene.json",
+      "action": "save"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\curious-city\\final-city-probe\\Content\\Scenes\\CityQuarterLighting.scene.json",
+      "action": "load"
+    }
+  ],
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261105-r2\\curious-city\\final-city-probe\\Project.json"
+}

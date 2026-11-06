@@ -1,0 +1,12 @@
+event=template_cube_removed elapsed=0.0s balance=500 houses=0
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_1
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_2
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_3
+event=city_started elapsed=0.0s balance=200 houses=3
+event=template_cube_removed elapsed=0.0s balance=500 houses=0
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_1
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_2
+event=house_spawned elapsed=0.0s balance=200 houses=3 detail=House_3
+event=city_started elapsed=0.0s balance=200 houses=3
+event=income elapsed=1.0s balance=230 houses=3
+event=income elapsed=2.0s balance=260 houses=3

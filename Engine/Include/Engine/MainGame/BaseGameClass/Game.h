@@ -10,11 +10,13 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <Engine/Runtime/ViewportOverlayApi.h>
 #include <wrl/client.h>
 #include <glm/vec3.hpp>
 
 #include <Engine/Render/ShaderConstants.h>
+#include <Engine/Render/LodDiagnostics.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/MainGame/Player.h>
 #include <Engine/MainGame/GameSession.h>
@@ -24,6 +26,8 @@
 #include <Engine/InputDevice/InputActions.h>
 
 class CharacterController;
+class SaveGame;
+class SaveArchive;
 
 namespace audio
 {
@@ -118,6 +122,17 @@ struct FrameStats
     void Reset() { *this = FrameStats{}; }
 };
 
+/** Published after all main render passes; valid=false before first render/after shutdown.
+ * Read on the game thread. PreUpdate sees the previous rendered frame, including paused renders.
+ * Snapshot excludes the engine diagnostics panel and does not promise successful Present.
+ */
+struct CompletedFrameStats {
+    bool valid=false;
+    uint64_t frameIndex=0;
+    FrameStats counters;
+    std::vector<LodDiagnostics> lodComponents;
+};
+
 /**
  * The application: window, D3D11 device, scene registry and the frame loop.
  *
@@ -130,6 +145,10 @@ class Game
 {
 public:
     Game();
+    SaveGame& Saves();
+    virtual void SerializeSaveGame(SaveArchive& archive);
+    virtual void OnSaveGameLoaded() {}
+    bool WasLoadedFromSaveGame() const { return loadedFromSaveGame_; }
     // External session must outlive this Game; attach before InitializeGameplay.
     void AttachSession(GameSession& session);
     void CloseGameplayScene() noexcept;
@@ -276,6 +295,12 @@ private:
 public:
     // @engine-internal-end
     FrameStats& GetFrameStats() { return Stats; }
+    const CompletedFrameStats& GetCompletedFrameStats() const { return CompletedStats; }
+    void SetRenderDiagnosticsVisible(bool visible) { bRenderDiagnostics=visible; }
+    bool IsRenderDiagnosticsVisible() const { return bRenderDiagnostics; }
+    // Zero selects the first instanced component. F8 cycles while the panel is visible.
+    void SetLodDiagnosticsTarget(uint64_t id) { DiagnosticsTarget=id; }
+    std::vector<std::string> GetRenderDiagnosticsLines() const;
     void CountDraw(uint32_t indexCount, uint32_t instanceCount = 1);
     void CountDispatch(uint32_t dispatchCount = 1) { Stats.Dispatches += dispatchCount; }
     void CountCulledInstances(uint32_t count) { Stats.CulledInstances += count; }
@@ -391,6 +416,7 @@ protected:
     void RenderShadowMaps();
     enum class OpaqueFilter { All, DeferredCapable, ForwardOnly };
     void RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant);
+    std::vector<GameComponent*> CollectRenderComponents();
     void RenderSkybox();
     void DispatchComputePhase();
     void RenderTransparent();
@@ -425,6 +451,9 @@ protected:
     // @engine-internal-begin
 private:
     GameSettings Settings;
+    friend class SaveGame;
+    std::unique_ptr<SaveGame> saveGame_;
+    bool loadedFromSaveGame_ = false;
     uint64_t FrameIndex = 0;
 protected:
     // @engine-internal-end
@@ -573,7 +602,14 @@ protected:
     // Frame data and diagnostics
     FrameConstants CurrentFrame{};
     FrameStats Stats;
+    std::unordered_set<GameComponent*> CountedVisibleObjects;
     FrameStats LastFrameStats;
+    CompletedFrameStats CompletedStats;
+    bool bRenderDiagnostics=false, bDiagnosticsKeyWasDown=false, bDiagnosticsNextWasDown=false;
+    uint64_t DiagnosticsTarget=0;
+    std::unique_ptr<UIComponent> DiagnosticsHud;
+    void PublishFrameStats();
+    void RenderDiagnosticsPanel();
     ShaderCompileVariant CurrentPassVariant = ShaderCompileVariant::Default;
     bool bFrustumCulling = true;
     bool bOverlayKeyWasDown = false;

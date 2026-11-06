@@ -1,0 +1,4 @@
+valid=0 frame=0 drawCalls=0 instances=0
+West block material=/Game/Materials/WarmStone.mat loaded=1
+RENDER / LOD    F7 hide | F8 next
+Waiting for a completed render frame

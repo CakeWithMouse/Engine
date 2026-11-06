@@ -104,8 +104,9 @@ float InstancedMeshComponent::ComputeScreenFactor() const
         return 0.0f;
     }
     const float windowHeight = static_cast<float>(GamePtr->GetDisplay()->GetHeight());
-    const float tanHalfFov = std::tan(GamePtr->GetPlayer()->GetFovY() * 0.5f);
-    return tanHalfFov > 0.0001f ? windowHeight / tanHalfFov : 0.0f;
+    // Projection Y scale is cot(fov/2) for perspective and 2/height for ortho.
+    // Multiplying by the bounding radius gives the projected diameter in pixels.
+    return windowHeight * GamePtr->GetPlayer()->GetProjectionMatrix()._22;
 }
 
 void InstancedMeshComponent::DrawImpostors(ID3D11DeviceContext* context)

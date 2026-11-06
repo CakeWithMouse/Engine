@@ -1,0 +1,24 @@
+{
+  "shader": "Tint.hlsl",
+  "version": 1,
+  "render": {
+    "blend": "opaque",
+    "alphaClip": 0.5,
+    "lighting": "lit",
+    "twoSided": false,
+    "castShadows": true
+  },
+  "params": {
+    "Tint": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "Gloss": 0.6,
+    "Rim": 0.25
+  },
+  "textures": {
+    "BaseMap": null
+  }
+}

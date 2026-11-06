@@ -1,8 +1,11 @@
 #include <Engine/Resources/Paths.h>
+#include <Engine/SaveGame/SaveGame.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/CharacterController.h>
 #include <Engine/Components/Character.h>
 #include <Engine/Components/SpecificComponents/UIComponent.h>
+#include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
+#include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
 #include <Engine/UI/ProjectHud.h>
 
 #include <algorithm>
@@ -17,6 +20,7 @@
 #include <directxmath.h>
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/Light/DirectionalLightComponent.h>
@@ -310,6 +314,7 @@ void Game::DestroyResources(bool preserveScene)
 
     // Components first: they observe cube maps and shaders owned by the caches below.
     ProjectHudComponent.reset();
+    DiagnosticsHud.reset();CompletedStats={};LastFrameStats={};
     GameplayInitialized = false;
     if (!preserveScene) scene.Clear();
     materialCache.clear();
@@ -473,7 +478,7 @@ bool Game::InitializeInternal(HWND externalWindow, int requestedWidth, int reque
     }
     DisplayPtr->SetGamePointer(this);
 
-    FirstPlayer = std::make_unique<Player>();
+    if(!FirstPlayer) FirstPlayer = std::make_unique<Player>();
     FirstPlayer->SetGamePointer(this);
     if (!bEmbedded) InputDevicePtr = std::make_unique<InputDevice>(this);
 
@@ -1240,7 +1245,10 @@ ComponentShaderVariant& Game::ResolveComponentShaders(GameComponent* Component, 
         return slot;
     }
 
-    const std::string defaultPath = DefaultShaderPath();
+    // The generic shader has no SV_InstanceID and would draw every copy at the
+    // component origin. Empty shader names must resolve to this component's stream.
+    const std::string defaultPath = dynamic_cast<InstancedMeshComponent*>(Component)
+        ? EnginePaths::Shader("InstancedMesh.hlsl").generic_u8string() : DefaultShaderPath();
     const std::string& vsName = Component->GetVertexShaderName().empty() ? defaultPath : Component->GetVertexShaderName();
     const std::string& psName = Component->GetPixelShaderName().empty() ? defaultPath : Component->GetPixelShaderName();
 
@@ -1447,9 +1455,8 @@ void Game::RetryFailedMaterialAssets()
     {
         return;
     }
-    for (auto& pair : Components)
+    for (auto* component : CollectRenderComponents())
     {
-        GameComponent* component = pair.second->GetRenderComponent();
         if (!component->MaterialAssetPath.empty() && component->MaterialPtr == errorMaterial)
         {
             component->bMaterialAssetLoaded = false;
@@ -1559,8 +1566,10 @@ void Game::OnShadersInvalidated()
         component->SetVertexShader(nullptr);
         component->SetPixelShader(nullptr);
     };
-    for (auto& pair : Components) { resetShaders(pair.second.get()); resetShaders(pair.second->GetRenderComponent()); }
+    for (auto& pair : Components) resetShaders(pair.second.get());
+    for (auto* part : CollectRenderComponents()) resetShaders(part);
     resetShaders(ProjectHudComponent.get());
+    resetShaders(DiagnosticsHud.get());
 
     // The fallback pair keeps the old shaders alive until the new ones compile.
     InitShaderBuffers();
@@ -2335,7 +2344,7 @@ namespace
     bool WriteGrayscaleBmp(const std::string& path, const std::vector<uint8_t>& gray, int width, int height)
     {
         FILE* file = nullptr;
-        if (fopen_s(&file, path.c_str(), "wb") != 0 || file == nullptr)
+        if (_wfopen_s(&file, std::filesystem::u8path(path).c_str(), L"wb") != 0 || file == nullptr)
         {
             return false;
         }
@@ -2379,7 +2388,7 @@ namespace
     bool WriteColorBmp(const std::string& path, const uint8_t* pixels, size_t rowPitch, int width, int height)
     {
         FILE* file = nullptr;
-        if (fopen_s(&file, path.c_str(), "wb") != 0 || file == nullptr)
+        if (_wfopen_s(&file, std::filesystem::u8path(path).c_str(), L"wb") != 0 || file == nullptr)
         {
             return false;
         }
@@ -2664,9 +2673,8 @@ void Game::RenderStaticShadowMap()
     staticPass.LightDirection = DirectionalLightDirection;
 
     uint32_t casterCount = 0;
-    for (auto& pair : Components)
+    for (auto* component : CollectRenderComponents())
     {
-        GameComponent* component = pair.second->GetRenderComponent();
         if (!component->IsRenderable() || !component->IsStaticShadowCaster())
         {
             continue;
@@ -2724,9 +2732,8 @@ void Game::RenderShadowMaps()
         shadowPass.CascadeIndex = cascadeIndex;
         shadowPass.CascadeSphere = CascadeSpheres[cascadeIndex];
 
-        for (auto& componentPair : Components)
+        for (auto* component : CollectRenderComponents())
         {
-            GameComponent* component = componentPair.second->GetRenderComponent();
             if (!component->IsRenderable() || component->IsSkybox())
             {
                 continue;
@@ -2811,7 +2818,7 @@ void Game::Run()
         deltaTime = std::min(deltaTime, MaxFrameDeltaSeconds);
 
         ++FrameIndex;
-        Stats.Reset();
+        Stats.Reset();CountedVisibleObjects.clear();
 
         UpdateFrame(deltaTime);
 
@@ -3528,7 +3535,7 @@ bool Game::RenderViewportFrame(float deltaTime)
     if (!bRunning) return false;
     if (bMinimized) return true;
     ++FrameIndex;
-    Stats.Reset();
+    Stats.Reset();CountedVisibleObjects.clear();
     UpdateFrame(std::clamp(deltaTime, 0.0f, MaxFrameDeltaSeconds));
     BeginGpuTimer();
 
@@ -3648,7 +3655,7 @@ Game::RuntimeFrameResult Game::RunRuntimeFrame(float deltaTime)
     if (!bRunning) return RuntimeFrameResult::Failed;
     if (bMinimized) { Sleep(10); return RuntimeFrameResult::Running; }
     ++FrameIndex;
-    Stats.Reset();
+    Stats.Reset();CountedVisibleObjects.clear();
     UpdateFrame(std::min(deltaTime, MaxFrameDeltaSeconds));
     BeginGpuTimer();
     RenderFrame();
@@ -3721,6 +3728,18 @@ void Game::ApplyPendingResize()
 
 void Game::ProcessHotkeys()
 {
+    // Both standalone Raw Input and embedded viewport input feed ActionInput.
+    const bool diagnosticsDown=ActionInput.IsPhysicalKeyDown(Keys::F7);
+    if(diagnosticsDown&&!bDiagnosticsKeyWasDown)bRenderDiagnostics=!bRenderDiagnostics;
+    bDiagnosticsKeyWasDown=diagnosticsDown;
+    const bool nextDown=ActionInput.IsPhysicalKeyDown(Keys::F8);
+    if(nextDown&&!bDiagnosticsNextWasDown&&bRenderDiagnostics&&!CompletedStats.lodComponents.empty()){
+        const auto& list=CompletedStats.lodComponents;size_t next=0;
+        for(size_t i=0;i<list.size();++i)if(list[i].componentId==DiagnosticsTarget){next=(i+1)%list.size();break;}
+        if(!DiagnosticsTarget&&list.size()>1)next=1;
+        DiagnosticsTarget=list[next].componentId;
+    }
+    bDiagnosticsNextWasDown=nextDown;
     if (!InputDevicePtr)
     {
         return;
@@ -3758,12 +3777,16 @@ void Game::UpdateFrame(float realDeltaTime)
     ProcessHotkeys();
     if (bSimulationEnabled) UpdateSimulation(deltaTime);
     else FirstPlayer->UpdateCamera(0.0f);
+    if(saveGame_) saveGame_->ProcessPending();
     UpdateAudio();
     PrepareRenderFrame();
 }
 
 void Game::UpdateSimulation(float deltaTime)
 {
+    // Declared before UpdateScope: executes only after pending scene edits are committed.
+    struct SaveBoundary { Game& game; int exceptions=std::uncaught_exceptions();
+        ~SaveBoundary() { if(std::uncaught_exceptions()==exceptions) game.Saves().ProcessPending(); } } saveBoundary{*this};
     auto sceneUpdate = scene.BeginUpdate(); // Covers custom PreUpdate/TickComponents too.
     InitializeGameplay();
     if (!Session || !Session->IsRunning()) return;
@@ -3848,7 +3871,7 @@ void Game::InitializeGameplay()
     const auto content = VfsRead::Active().Resolve("/Game");
     if (!content.empty()) try {
         const auto hudFile = ProjectHud::Read(std::filesystem::u8path(content));
-        if (!hudFile.empty()) {
+        if (!hudFile.empty() && !ProjectHudComponent) {
             ProjectHudComponent = std::make_unique<UIComponent>();
             ProjectHudComponent->SetGame(this);
             ProjectHudComponent->LoadMarkup(hudFile.generic_u8string());
@@ -3860,15 +3883,17 @@ void Game::InitializeGameplay()
         if(player)throw std::runtime_error("Only one player is allowed: disable Player on other characters");player=character;
     }
     if(player){
-        if(!Controller)Controller=CreateCharacterController();
+        const bool newController=!Controller;
+        if(newController)Controller=CreateCharacterController();
         if(!Controller)throw std::runtime_error("Controller factory returned null");
-        Controller->Configure(*player);
+        if(newController||!loadedFromSaveGame_)Controller->Configure(*player);
         if(player->standardControl)Controller->BindInput();
         if(FirstPlayer)Controller->UpdateCamera(*FirstPlayer);
     }
     Session->SceneReady(scene);
     if (!Session->IsRunning()) throw std::runtime_error("Session stopped during scene startup");
     GameplayInitialized = true;
+    if(loadedFromSaveGame_){Session->NotifySaveGameLoaded(scene);OnSaveGameLoaded();}
     StartGameplayComponents();
     } catch (...) { Session->Stop(); GameplayInitialized = false; throw; }
 }
@@ -3905,6 +3930,7 @@ void Game::PrepareRenderFrame()
         bShadowResourcesReady = InitShadowResources();
         bShadowInitFailed = !bShadowResourcesReady;
     }
+    for(auto* part : CollectRenderComponents()) PrepareMaterial(part);
     // The baked map only has to be redrawn when the sun or the area changes.
     if (AreShadowsActive() && StaticShadowExtent > 0.0f && !bStaticShadowFailed)
     {
@@ -4069,6 +4095,8 @@ void Game::RenderFrame()
         RenderFxaaPass();
     }
 
+    PublishFrameStats();
+    RenderDiagnosticsPanel();
     // Before Present: after it the back buffer is no longer guaranteed to hold this frame.
     if (!PendingFrameDump.empty())
     {
@@ -4252,14 +4280,14 @@ bool Game::IsVisible(GameComponent* Component)
 {
     if (!bFrustumCulling || !Component->SupportsFrustumCulling())
     {
-        ++Stats.VisibleObjects;
+        if(CountedVisibleObjects.insert(SkeletalMeshComponent::RenderOwnerOf(Component)).second) ++Stats.VisibleObjects;
         return true;
     }
 
     const float radius = Component->GetWorldBoundingRadius();
     if (radius <= 0.0f)
     {
-        ++Stats.VisibleObjects;
+        if(CountedVisibleObjects.insert(SkeletalMeshComponent::RenderOwnerOf(Component)).second) ++Stats.VisibleObjects;
         return true;
     }
 
@@ -4273,8 +4301,20 @@ bool Game::IsVisible(GameComponent* Component)
         }
     }
 
-    ++Stats.VisibleObjects;
+    if(CountedVisibleObjects.insert(SkeletalMeshComponent::RenderOwnerOf(Component)).second) ++Stats.VisibleObjects;
     return true;
+}
+
+std::vector<GameComponent*> Game::CollectRenderComponents()
+{
+    std::vector<GameComponent*> output;
+    output.reserve(Components.size());
+    for (auto& entry : Components) {
+        auto* visual=entry.second->GetRenderComponent();
+        if(auto* model=dynamic_cast<SkeletalMeshComponent*>(visual)) model->AppendRenderParts(output);
+        else output.push_back(visual);
+    }
+    return output;
 }
 
 void Game::RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant)
@@ -4283,9 +4323,8 @@ void Game::RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant)
     Context->OMSetDepthStencilState(depthStencilState.Get(), 0);
     Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);
 
-    for (auto& pair : Components)
+    for (auto* Component : CollectRenderComponents())
     {
-        GameComponent* Component = pair.second->GetRenderComponent();
         if (!Component->IsRenderable() || Component->IsSkybox() || Component->HasOpacity() ||
             Component->IsScreenSpaceUI())
         {
@@ -4315,9 +4354,8 @@ void Game::RenderSkybox()
 {
     // Skybox is drawn after opaque geometry at the far plane: it only fills empty pixels.
     Context->OMSetDepthStencilState(depthStencilStateSkybox.Get(), 0);
-    for (auto& pair : Components)
+    for (auto* Component : CollectRenderComponents())
     {
-        GameComponent* Component = pair.second->GetRenderComponent();
         if (!Component->IsSkybox() || !Component->IsRenderable())
         {
             continue;
@@ -4348,9 +4386,8 @@ void Game::RenderUI()
         ProjectHudComponent->Render(Context.Get());
     // Last pass of the frame: the interface sits on the finished image, with no depth of its own.
     // Each UI component sets its own blending and states, so nothing here has to be undone.
-    for (auto& pair : Components)
+    for (auto* Component : CollectRenderComponents())
     {
-        GameComponent* Component = pair.second->GetRenderComponent();
         if (!Component->IsRenderable() || !Component->IsScreenSpaceUI())
         {
             continue;
@@ -4377,9 +4414,8 @@ void Game::RenderTransparent()
 
     std::vector<SortedDraw> transparentDraws;
     const glm::vec3 cameraPosition(CurrentFrame.CameraPosition.x, CurrentFrame.CameraPosition.y, CurrentFrame.CameraPosition.z);
-    for (auto& pair : Components)
+    for (auto* Component : CollectRenderComponents())
     {
-        GameComponent* Component = pair.second->GetRenderComponent();
         if (!Component->IsRenderable() || Component->IsSkybox() || !Component->HasOpacity() ||
             Component->IsScreenSpaceUI() || !IsVisible(Component))
         {

@@ -1,0 +1,41 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Game.cpp
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(4672,18): warning C4244: =: преобразование "const wchar_t" в "char", возможна потеря данных [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xutility(4672,18): message : контекст создания экземпляра шаблона (сначала самый старый) [E:\Engine\Engine\Engine.vcxproj]
+E:\Engine\Engine\Source\MainGame\BaseGameClass\Game.cpp(695,21): message : выполняется компиляция ссылки на экземпляр шаблон функции "std::basic_string<char,std::char_traits<char>,std::allocator<char>> &std::basic_string<char,std::char_traits<char>,std::allocator<char>>::assign<std::_String_const_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(const _Iter,const _Iter)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Elem=wchar_t,
+              _Iter=std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t>>>
+          ]
+E:\Engine\Engine\Source\MainGame\BaseGameClass\Game.cpp(695,27): message : см. первую ссылку на "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::assign" в "Game::CreateDeviceAndSwapChain" [E:\Engine\Engine\Engine.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xstring(3466,32): message : выполняется компиляция ссылки на экземпляр шаблон функции "std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<const wchar_t*,0>(_Iter,_Iter,const _Alloc &)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Iter=const wchar_t *,
+              _Alloc=std::allocator<char>
+          ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xstring(2603,17): message : выполняется компиляция ссылки на экземпляр шаблон функции "void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<const wchar_t*,const wchar_t*,_Size_type>(_Iter,const _Sent,_Size)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _Size_type=unsigned __int64,
+              _Iter=const wchar_t *,
+              _Sent=const wchar_t *,
+              _Size=unsigned __int64
+          ]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.40.33807\include\xstring(2759,18): message : выполняется компиляция ссылки на экземпляр шаблон функции "_OutIt *std::_Copy_n_unchecked4<const wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)" [E:\Engine\Engine\Engine.vcxproj]
+          with
+          [
+              _OutIt=char *,
+              _Size=unsigned __int64,
+              _InIt=const wchar_t *,
+              _SizeTy=unsigned __int64
+          ]
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineCommandlets.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineCommandlets.exp
+  Создание кода
+  Создание кода завершено
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\EngineCommandlets.exe
+

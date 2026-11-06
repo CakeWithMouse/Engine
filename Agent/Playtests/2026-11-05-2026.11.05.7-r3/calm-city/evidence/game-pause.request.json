@@ -1,0 +1,1 @@
+{"project":"E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\calm-city\\CalmCity\\Project.json","steps":[{"action":"play","kind":"control"},{"count":2,"kind":"frames"},{"action":"pause","kind":"control"},{"count":30,"kind":"frames"},{"action":"resume","kind":"control"},{"count":30,"kind":"frames"},{"action":"stop","kind":"control"}]}

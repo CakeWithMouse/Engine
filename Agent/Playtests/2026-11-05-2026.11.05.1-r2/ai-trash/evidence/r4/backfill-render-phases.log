@@ -1,0 +1,6 @@
+backfill render-mode=forward type=0 gbuffer-overlay=off
+backfill render-capture mode=0 completed-frame=2 draw-calls=33 dispatches=0 upcoming-frame=3
+backfill render-mode=deferred type=1 gbuffer-overlay=off
+backfill render-capture mode=1 completed-frame=2 draw-calls=34 dispatches=0 upcoming-frame=3
+backfill render-mode=gbuffer type=1 gbuffer-overlay=on
+backfill render-capture mode=1 completed-frame=2 draw-calls=38 dispatches=0 upcoming-frame=3

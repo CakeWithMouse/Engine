@@ -1,0 +1,47 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: FOUND (version 3)
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'view/grid'
+[Info] SettingsService: Set 'view/gizmo'
+[Info] SettingsService: Set 'view/icons'
+[Info] SettingsService: Set 'view/overlays'
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 3, handler = 00007FFB0D435F00
+EditorStart
+UI test
+E:\Engine\Engine\build\playtests\20261105-r3\curious-city\RecoveryProbe\Project.json
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/final8/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/final8/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+EditorSceneViewportAttach ok
+[Info] Camera: ok
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 121: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/final8/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/final8/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/final8/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/final8/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/final8/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/final8/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 241: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/final8/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/playtests/20261105-r3/final8/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 361: AntialiasingMode = 1 (FXAA), bb = 713x423
+Recovery: unsaved scene checkpoint committed
+Group UI and save checks passed; simulating process crash

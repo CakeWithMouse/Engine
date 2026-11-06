@@ -32,6 +32,7 @@ public:
         mainLayout->addWidget(headerBtn_);
 
         content_ = new QWidget(this);
+        content_->setObjectName(QStringLiteral("CardContent"));
         contentLayout_ = new QVBoxLayout(content_);
         contentLayout_->setContentsMargins(6, 4, 6, 4);
         contentLayout_->setSpacing(4);

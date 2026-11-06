@@ -1,0 +1,42 @@
+{
+  "limit": 50,
+  "bucket": "codex",
+  "windowMinutes": 10080,
+  "resetsAt": 1794317816,
+  "start": 40,
+  "checkpoints": [
+    {
+      "phase": "start",
+      "usedPercent": 40
+    },
+    {
+      "phase": "core implementation",
+      "usedPercent": 41
+    },
+    {
+      "phase": "three developer scenarios and GPU A/B",
+      "usedPercent": 43,
+      "at": "2026-11-05T22:31:07.8104815+03:00"
+    },
+    {
+      "at": "2026-11-05T22:38:23.038403+03:00",
+      "phase": "role1 complete; role4 started; HUD suspicion resolved",
+      "usedPercent": 44
+    },
+    {
+      "phase": "BUG-R3-001 fixed in .8; regression suites and original .7 save replay passed",
+      "at": "2026-11-05T23:04:40.502431+03:00",
+      "usedPercent": 46
+    },
+    {
+      "phase": "final evidence verification; all agents finished",
+      "usedPercent": 48,
+      "at": "2026-11-05T23:20:04.1372078+03:00"
+    }
+  ],
+  "note": "Shared rounded account counter; no reset or credits",
+  "end": 48,
+  "observedIncreasePercentagePoints": 8,
+  "stoppedNewBroadChecksAt": 48,
+  "stopReason": "Budget guard: reserve below user ceiling50. Core feature and all confirmed Engine defects completed; coverage gaps documented."
+}

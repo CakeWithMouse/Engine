@@ -1,0 +1,10 @@
+
+  ComponentGenerator: 6 component(s), Project
+  CarMover.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\20261104-r1\calm-city\CalmCityProject\Binaries\Release\408956114a2d4998ab84f1658f48065a\Game.lib и объект E:\Engine\Engine\build\playtests\20261104-r1\calm-city\CalmCityProject\Binaries\Release\408956114a2d4998ab84f1658f48065a\Game.exp
+LINK : fatal error LNK1101: неправильная версия MSPDB140.DLL; перепроверьте установку этого продукта [E:\Engine\Engine\build\playtests\20261104-r1\calm-city\CalmCityProject\Game.vcxproj]
+
+
+Full build log: E:\Engine\Engine\build\playtests\20261104-r1\calm-city\CalmCityProject\Binaries\Release\408956114a2d4998ab84f1658f48065a\build.log

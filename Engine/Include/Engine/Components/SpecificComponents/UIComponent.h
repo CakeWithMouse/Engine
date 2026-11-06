@@ -23,6 +23,7 @@
 class UIComponent : public GameComponent
 {
 public:
+    void SerializeSaveGame(SaveArchive& archive) override;
     UIComponent();
     ~UIComponent() override;
 

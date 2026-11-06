@@ -1064,7 +1064,7 @@ void EditorMainWindow::CommandFinished(
 )
 {
     if (command.type == EditorCommand::ReloadProject) {
-        sceneBusy_ = false; setEnabled(true);
+        sceneBusy_ = false; UpdatePlayButtons();
         if (status != EngineSceneOk && !command.name.isEmpty()) {
             // Roll back only our candidate module field; preserve concurrent edits to other fields.
             const auto project=QString::fromUtf8(host_->host().projectFile);

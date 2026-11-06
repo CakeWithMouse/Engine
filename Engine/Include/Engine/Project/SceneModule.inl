@@ -1,5 +1,6 @@
 ﻿#include <Engine/MainGame/BaseGameClass/Game.h>
 #define SCENE_MODULE_DOCUMENT_VERSION 3
+#include <Engine/SaveGame/SaveGame.h>
 #ifndef SCENE_MODULE_CREATE_GAME
 static std::unique_ptr<Game> DefaultProjectGame()
 {
@@ -39,7 +40,7 @@ struct Session
     bool started = false, sceneLoaded = false;
     bool startCalled = false, loading = false;
     std::thread::id thread = std::this_thread::get_id();
-    explicit Session(const EngineModuleHost& value) : host(value) { game->AttachSession(gameSession); game->SetSceneLightingEnabled(true); }
+    explicit Session(const EngineModuleHost& value) : host(value) { game->AttachSession(gameSession); game->SetSceneLightingEnabled(true); game->Saves().SetCatalog(ProjectComponentTypes()); }
 };
 void Log(Session* s, const char* text) { s->host.log(s->host.user, text); }
 void* __cdecl Create(const EngineModuleHost* host)
@@ -202,6 +203,8 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetGameSceneApi(uint32_t vers
                 if (!file.is_absolute()) return failure(EngineSceneInvalidArgument, "Expected absolute path");
                 auto data = SceneDocument::Read(file);
                 auto candidate = SCENE_MODULE_CREATE_GAME();
+                candidate->AttachSession(s.gameSession);
+                candidate->Saves().SetCatalog(ProjectComponentTypes());
                 SceneDocument::Restore(data, ProjectComponentTypes(), candidate->GetScene());
                 s.commands.Rebind(candidate->GetScene());
                 s.game.swap(candidate); s.sceneLoaded = true;

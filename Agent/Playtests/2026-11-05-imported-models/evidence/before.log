@@ -1,0 +1,14 @@
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  SceneProject.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Templates\SceneProject\Game.dll
+  AssetTests.cpp
+  ModelImportTests.cpp
+  ImportedModelRenderTests.cpp
+E:\Engine\Engine\tests\assets\ImportedModelRenderTests.cpp(57,42): error C2660: Player::SetViewDirection: функция не принимает 1 аргументов [E:\Engine\Engine\tests\assets\AssetTests.vcxproj]
+E:\Engine\Engine\Include\Engine\MainGame\Player.h(48,10): message : см. объявление "Player::SetViewDirection" (компилируется исходный файл ImportedModelRenderTests.cpp) [E:\Engine\Engine\tests\assets\AssetTests.vcxproj]
+E:\Engine\Engine\tests\assets\ImportedModelRenderTests.cpp(57,42): message : при попытке сопоставить список аргументов "(initializer list)" [E:\Engine\Engine\tests\assets\AssetTests.vcxproj]
+E:\Engine\Engine\tests\assets\ImportedModelRenderTests.cpp(80,42): error C2660: Player::SetViewDirection: функция не принимает 1 аргументов [E:\Engine\Engine\tests\assets\AssetTests.vcxproj]
+E:\Engine\Engine\Include\Engine\MainGame\Player.h(48,10): message : см. объявление "Player::SetViewDirection" (компилируется исходный файл ImportedModelRenderTests.cpp) [E:\Engine\Engine\tests\assets\AssetTests.vcxproj]
+E:\Engine\Engine\tests\assets\ImportedModelRenderTests.cpp(80,42): message : при попытке сопоставить список аргументов "(initializer list)" [E:\Engine\Engine\tests\assets\AssetTests.vcxproj]
+

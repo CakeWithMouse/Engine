@@ -1,0 +1,56 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  SkeletalTests.cpp
+  SkeletalOrientationTests.cpp
+  SkeletalBakerTests.cpp
+  SkeletalTests.vcxproj -> E:\Engine\Engine\build\x64\Release\SkeletalTests.exe
+
+=== Running Skeletal Animation and Import Tests ===
+PASS: model structure and vertex weights
+PASS: bind pose yields identity palette at t=0
+PASS: animation interpolation and looping continuity
+PASS: bone limit 64 rejection
+PASS: stub loader contract without Assimp
+[VfsRead] using local VFS (no host service)
+[SkeletalTests] CesiumMan loaded successfully:
+  Bones: 19 (<= 64)
+  Vertices: 2612
+  Clip name: '', duration: 2s
+  Bind pose (anim t=0) max dev: 1.65169
+  Rest pose vs MeshToModel max dev: 5.96046e-07
+  Palette diff(0, 0.25*dur): 1.40313
+  Palette diff(0.25, 0.5*dur): 1.01501
+  Seam diff: 0.0488215 (bone: Skeleton_arm_joint_R__3_)
+PASS: glb import (CesiumMan)
+--- Running Skeletal Orientation Tests ---
+[SkeletalOrientationTests] Rest pose vs MeshToModel max diff: 5.96046e-07
+[SkeletalOrientationTests] CPU Skinning at t=0s (2612 verts):
+  Bounds Min: (-0.310509, -0.0106453, -0.449895)
+  Bounds Max: (0.194655, 1.44716, 0.446594)
+  Width(X): 0.505164, Height(Y): 1.45781, Depth(Z): 0.896488
+[SkeletalOrientationTests] BBox checks: h>1.2: OK, h>w: OK, h>d: OK
+[SkeletalOrientationTests] CPU Skinning at t=0.5s (2612 verts):
+  Bounds Min: (-0.254667, 0.0174847, -0.371769)
+  Bounds Max: (0.189907, 1.50199, 0.405723)
+  Width(X): 0.444573, Height(Y): 1.4845, Depth(Z): 0.777492
+[SkeletalOrientationTests] BBox checks: h>1.2: OK, h>w: OK, h>d: OK
+[SkeletalOrientationTests] Raw Toe Tracking (t=0 to t=0.5s):
+  Left toe centroid at t=0:  (0.0575653, 0.145132, 0.428481)
+  Left toe centroid at t=0.5: (0.0781863, 0.167902, -0.0605645)
+  Left toe delta (dx,dy,dz): (0.020621, 0.0227697, -0.489045)
+  Right toe centroid at t=0:  (-0.111963, 0.00674227, -0.234039)
+  Right toe centroid at t=0.5: (-0.109025, 0.0701082, 0.258535)
+  Right toe delta (dx,dy,dz): (0.00293803, 0.0633659, 0.492574)
+PASS: skeletal orientation and bounds tests
+--- Running Skeletal Baker and Crowd Vertex Tests ---
+[CrowdSkinnedVertex] Size reduction: 64 bytes -> 32 bytes (50.0% bandwidth savings)
+PASS: crowd skinned vertex format and quantization
+PASS: skeletal baker synthetic model and limits
+[SkeletalBakerTests] CesiumMan baked texture: 57x60 (53 KB RGBA32F)
+PASS: skeletal baker CesiumMan validation
+[CrowdSkinnedLod] CesiumMan LOD0: 4672 tris (2612 verts), LOD1: 2118 tris (45.3339%), LOD2: 828 tris (17.7226%)
+PASS: crowd skinned LOD generation
+PASS: all skeletal baker tests passed
+=== Skeletal Tests: 8/8 passed ===

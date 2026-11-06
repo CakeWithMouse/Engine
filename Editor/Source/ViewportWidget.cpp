@@ -402,8 +402,8 @@ void ViewportWidget::ApplyGizmoDragGesture(const QPointF& pos)
             float curPt[3];
             if (GizmoGeometry::RayPlaneIntersection(rayOrig, rayDir, dragStartTransform_.position, camFwd, curPt))
             {
-                EngineSceneTransform t = dragStartTransform_;
-                for (int i = 0; i < 3; ++i) t.position[i] += (curPt[i] - dragStartHitPoint_[i]);
+                const double delta[3]={curPt[0]-dragStartHitPoint_[0],curPt[1]-dragStartHitPoint_[1],curPt[2]-dragStartHitPoint_[2]};
+                EngineSceneTransform t = GizmoMath::ApplyCenterTranslation(dragStartTransform_,delta,snapEnabled_,moveSnapStep_,localOrientation_);
                 PostSelectedTransform(t);
             }
         }

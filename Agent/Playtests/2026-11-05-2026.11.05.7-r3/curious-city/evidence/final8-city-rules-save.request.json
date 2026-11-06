@@ -1,0 +1,17 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\curious-city\\Final8City\\Project.json",
+  "steps": [
+    {
+      "action": "new"
+    },
+    {
+      "action": "create",
+      "type": "CuriousCity.CityRules",
+      "name": "CityRules"
+    },
+    {
+      "path": "E:\\Engine\\Engine\\build\\playtests\\20261105-r3\\curious-city\\Final8City\\Content\\Scenes\\CityRulesProbe.scene.json",
+      "action": "save"
+    }
+  ]
+}

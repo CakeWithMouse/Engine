@@ -1,0 +1,16 @@
+
+  CodeTools.cpp
+  MainWindow.cpp
+E:\Engine\Editor\Source\MainWindow.cpp(321,32): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(329,33): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(333,31): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(337,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(348,37): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(368,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(369,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(370,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Editor.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Editor.exp
+  Создание кода
+  Создание кода завершено
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Editor.dll
+

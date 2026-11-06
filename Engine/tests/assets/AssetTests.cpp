@@ -17,7 +17,8 @@ namespace fs = std::filesystem;
 using Json = nlohmann::json;
 int checks = 0;
 void RunAssetRenderTests(HWND, const fs::path&, const fs::path&, const std::string&, const std::string&);
-void RunModelImportTests(const EngineEditSessionApi&, const fs::path&, const fs::path&);
+void RunModelImportTests(const EngineEditSessionApi&, const EngineProjectDataApi&, const fs::path&, const fs::path&);
+void RunImportedModelRenderTests(HWND, const fs::path&);
 void Check(bool ok, const char* message) { if (!ok) throw std::runtime_error(message); ++checks; }
 void Write(const fs::path& path, const std::string& bytes)
 { std::ofstream out(path, std::ios::binary); out.write(bytes.data(), bytes.size()); if (!out) throw std::runtime_error("Write fixture"); }
@@ -200,7 +201,7 @@ int wmain(int argc, wchar_t** argv)
             Check(Objects(api).front().material == material, "failed assignment keeps the material");
             Check(api.frame(api.context,0) == EngineSceneOk, "draw the material");
             CheckMaterialEditing(api, content);
-            RunModelImportTests(api, content, sources);
+            RunModelImportTests(api, module.ProjectDataApi(), content, sources);
 #if defined(ENGINE_ENABLE_ASSIMP)
             for (const auto& o : Objects(api))
                 if (o.name == "FBX after source deleted")
@@ -289,6 +290,7 @@ int wmain(int argc, wchar_t** argv)
         Check(!SceneAssets::ValidPath("C:/outside.png") && !SceneAssets::ValidPath("/Game/a/../b") &&
             !SceneAssets::ValidPath("/Game//b") && SceneAssets::ValidPath(importedTexture), "portable path validation");
         RunAssetRenderTests(hwnd,fs::absolute(argv[2]),fs::path(moved) / "Content",importedTexture,importedModel);
+        RunImportedModelRenderTests(hwnd,fs::path(moved) / "Content");
         BaseEngine runtime;
         RuntimeLaunchOptions options;
         options.module = fs::absolute(argv[1]); options.projectName = "Imported scene standalone";

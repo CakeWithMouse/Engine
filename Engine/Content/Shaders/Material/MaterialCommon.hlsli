@@ -64,4 +64,21 @@ struct MaterialOutput
     float Alpha;           // used by masked, translucent and additive materials
 };
 
+// World normal from a tangent-space normal map sample (rgb in 0..1, DirectX convention: green
+// points to +V, which is down the image). The tangent frame comes from screen-space derivatives
+// of the position and UV, so meshes need no tangents; pixel shader only.
+//     o.Normal = NormalFromMap(i, NormalMap.Sample(MaterialSampler, i.UV).xyz, 1.0f);
+float3 NormalFromMap(MaterialInput i, float3 encoded, float strength)
+{
+    const float3 dp1 = ddx(i.WorldPos), dp2 = ddy(i.WorldPos);
+    const float2 duv1 = ddx(i.UV), duv2 = ddy(i.UV);
+    const float3 dp2perp = cross(dp2, i.Normal), dp1perp = cross(i.Normal, dp1);
+    const float3 tangent = dp2perp * duv1.x + dp1perp * duv2.x;
+    const float3 bitangent = dp2perp * duv1.y + dp1perp * duv2.y;
+    const float scale = rsqrt(max(max(dot(tangent, tangent), dot(bitangent, bitangent)), 1e-20f));
+    float3 n = encoded * 2.0f - 1.0f;
+    n.xy *= strength;
+    return normalize(n.x * tangent * scale + n.y * bitangent * scale + n.z * i.Normal);
+}
+
 #endif

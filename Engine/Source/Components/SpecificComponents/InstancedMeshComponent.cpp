@@ -154,6 +154,7 @@ bool InstancedMeshComponent::CreateLodBuffers(ID3D11Device* device, LodLevel& lo
 
 void InstancedMeshComponent::CreateBuffers(ID3D11Device* Device)
 {
+    LoadPendingTexture();
     if (Device == nullptr)
     {
         return;
@@ -286,6 +287,11 @@ void InstancedMeshComponent::BuildVisibleSets()
     ImpostorLevel.ColorStaging.clear();
     DrawnInstances = 0;
     CulledInstances = 0;
+    Diagnostics={};
+    Diagnostics.total=static_cast<uint32_t>(Instances.size());
+    Diagnostics.screenSize=!LodScreenHeights.empty();
+    Diagnostics.thresholds=Diagnostics.screenSize?LodScreenHeights:LodDistances;
+    Diagnostics.drawDistance=DrawDistance;Diagnostics.fadeFraction=LodFadeFraction;
 
     const int levelCount = GetLevelCount();
     const int impostorLevelIndex = GetImpostorLevelIndex();
@@ -296,11 +302,14 @@ void InstancedMeshComponent::BuildVisibleSets()
     }
 
     const FrameConstants& frame = GamePtr->GetFrameConstants();
+    Diagnostics.prepared=true;Diagnostics.frameIndex=GamePtr->GetFrameIndex();
+    Diagnostics.impostorLevel=impostorLevelIndex;
     const glm::vec3 cameraPosition(frame.CameraPosition.x, frame.CameraPosition.y, frame.CameraPosition.z);
     const float drawDistanceSq = DrawDistance > 0.0f ? DrawDistance * DrawDistance : 0.0f;
     const float shadowDistanceSq = ShadowDistance > 0.0f ? ShadowDistance * ShadowDistance : 0.0f;
     const bool bCastsShadow = CastsShadow() && GamePtr->AreShadowsActive();
     const float screenFactor = ComputeScreenFactor();
+    const bool orthographic = GamePtr->GetPlayer()->IsOrthographic();
     const DirectX::XMFLOAT4* cascadeSpheres = GamePtr->GetCascadeSpheres();
     const int cascadeLimit = ShadowCascadeLimit > 0 ? std::min(ShadowCascadeLimit, MaxShadowCascades) : MaxShadowCascades;
     const DirectX::XMFLOAT4& lightDirectionValue = GamePtr->GetDirectionalLightDirection();
@@ -317,13 +326,18 @@ void InstancedMeshComponent::BuildVisibleSets()
         const MeshInstance& instance = Instances[instanceIndex];
         if (!instance.bVisible)
         {
+            ++Diagnostics.hidden;
             continue;
         }
 
         const glm::vec3 toCamera = instance.Position - cameraPosition;
         const float distanceSq = glm::dot(toCamera, toCamera);
+        const float diagnosticDistance=std::sqrt(distanceSq);
+        if(!Diagnostics.hasDistance){Diagnostics.minDistance=Diagnostics.maxDistance=diagnosticDistance;Diagnostics.hasDistance=true;}
+        else {Diagnostics.minDistance=std::min(Diagnostics.minDistance,diagnosticDistance);Diagnostics.maxDistance=std::max(Diagnostics.maxDistance,diagnosticDistance);}
         if (drawDistanceSq > 0.0f && distanceSq > drawDistanceSq)
         {
+            ++Diagnostics.distanceCulled;
             ++CulledInstances;
             continue;
         }
@@ -357,13 +371,15 @@ void InstancedMeshComponent::BuildVisibleSets()
         }
         if (!bInsideFrustum && !bWantsShadow)
         {
+            ++Diagnostics.frustumCulled;
             ++CulledInstances;
             continue;
         }
 
         const float distance = std::sqrt(distanceSq);
         // Height of this instance on screen, in pixels of window height.
-        const float screenHeight = distance > 0.001f ? radius * screenFactor / distance : screenFactor;
+        const float screenHeight = orthographic ? radius * screenFactor
+            : (distance > 0.001f ? radius * screenFactor / distance : screenFactor);
 
         int level = SelectLod(distance, screenHeight);
         int fadePartner = -1;
@@ -427,6 +443,7 @@ void InstancedMeshComponent::BuildVisibleSets()
         }
         else
         {
+            ++Diagnostics.frustumCulled;
             ++CulledInstances;
         }
 
@@ -438,6 +455,8 @@ void InstancedMeshComponent::BuildVisibleSets()
     }
 
     GamePtr->CountCulledInstances(CulledInstances);
+    Diagnostics.drawn=DrawnInstances;
+    for(int level=0;level<levelCount;++level)Diagnostics.perLod.push_back(GetDrawnInstancesForLod(level));
 }
 
 bool InstancedMeshComponent::UploadStream(ID3D11DeviceContext* context,

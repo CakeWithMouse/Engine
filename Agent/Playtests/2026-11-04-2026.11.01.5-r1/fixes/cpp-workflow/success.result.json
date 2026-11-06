@@ -1,0 +1,9 @@
+{
+    "buildSucceeded": true,
+    "console": "[18:54:09.091] C++: Build\n[18:54:13.914]   ComponentGenerator: 3 component(s), Project\n\n[18:54:13.914]   ProjectComponent.cpp\n\n[18:54:13.914]      Создается библиотека E:\\Engine\\Agent\\Playtests\\2026-11-04-2026.11.01.5-r1\\fixes\\cpp-workflow\\Project\\Binaries\\Release\\ed4dcab75c1e4292bbc8ba1ec1de5070\\Game.lib и объект E:\\Engine\\Agent\\Playtests\\2026-11-04-2026.11.01.5-r1\\fixes\\cpp-workflow\\Project\\Binaries\\Release\\ed4dcab75c1e4292bbc8ba1ec1de5070\\Game.exp\n\n[18:54:13.914]   Game.vcxproj -> E:\\Engine\\Agent\\Playtests\\2026-11-04-2026.11.01.5-r1\\fixes\\cpp-workflow\\Project\\Binaries\\Release\\ed4dcab75c1e4292bbc8ba1ec1de5070\\Game.dll\n\n[18:54:13.914] Full build log: E:\\Engine\\Agent\\Playtests\\2026-11-04-2026.11.01.5-r1\\fixes\\cpp-workflow\\Project\\Binaries\\Release\\ed4dcab75c1e4292bbc8ba1ec1de5070\\build.log\n\n[18:54:15.731] Build validated and activated. Use Hot Reload in the editor, or reopen the project.\n\n[18:54:16.022] Hot reload: DLL заменена. Сцена, выбор и камера сохранены; история отмены очищена.",
+    "dialogs": [
+    ],
+    "ok": true,
+    "replaced": true,
+    "windowEnabled": true
+}

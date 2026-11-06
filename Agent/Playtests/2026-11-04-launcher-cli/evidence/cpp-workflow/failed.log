@@ -1,0 +1,24 @@
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(4,4,4,4), PM_ToolBarFrameWidth=2, PM_ItemMargin=2, PM_ItemSpacing=1
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 3, handler = 00007FFAD9230370
+[Info] Viewport overlay service: NOT FOUND (version 0)
+{
+    "buildSucceeded": false,
+    "console": "[23:15:04.530] C++: Build\n[23:15:06.934]   The vcpkg manifest was disabled, but we found a manifest file in E:\\Engine\\Engine\\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.\n\n[23:15:06.934]   ComponentGenerator: 3 component(s), Project\n\n[23:15:06.934]   ProjectComponent.cpp\n\n[23:15:06.934] E:\\Engine\\Engine\\build\\launcher-cli\\cpp-regression\\Project\\Source\\ProjectComponent.cpp(5,1): error C1189: #error:  Кириллица_проверка_сборки [E:\\Engine\\Engine\\build\\launcher-cli\\cpp-regression\\Project\\Game.vcxproj]\n\n[23:15:06.934] Full build log: E:\\Engine\\Engine\\build\\launcher-cli\\cpp-regression\\Project\\Binaries\\Release\\1531fc7c75b346b68754379b76f2957a\\build.log\n\n[23:15:06.998] Project build failed; previous module preserved\n\n[23:15:06.998] E:\\Engine\\Game\\build\\x64\\Release\\Runtime\\SDK\\ProjectTools.ps1:294 знак:31\n\n[23:15:06.998] + ... ExitCode) { throw 'Project build failed; previous module preserved' } ...\n\n[23:15:06.998] +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n[23:15:06.998]     + CategoryInfo          : OperationStopped: (Project build f...odule preserved:String) [], RuntimeException\n\n[23:15:06.998]     + FullyQualifiedErrorId : Project build failed; previous module preserved\n\n[23:15:07.061] [Ошибка C++] Build: код завершения 1. Проект: E:/Engine/Engine/build/launcher-cli/cpp-regression/Project/Project.json",
+    "dialogs": [
+        "Операция не завершена. Предыдущая DLL сохранена. Диагностика находится в Console."
+    ],
+    "ok": false,
+    "replaced": false,
+    "windowEnabled": true
+}

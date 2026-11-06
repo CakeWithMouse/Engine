@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UI name="" anchor="TopLeft" rect="0 0 0 0" padding="0 0 0 0" visible="true" interactive="false">
+  <Label name="label" anchor="TopLeft" rect="0 0 0 0" padding="0 0 0 0" visible="true" interactive="false" text="Повтор 4" color="#ffffffff" align="left"/>
+</UI>

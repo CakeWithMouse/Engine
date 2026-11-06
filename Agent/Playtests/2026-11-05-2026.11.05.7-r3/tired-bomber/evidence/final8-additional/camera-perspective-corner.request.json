@@ -1,0 +1,19 @@
+{
+  "x": 600,
+  "origin": [
+    0,
+    0,
+    0
+  ],
+  "width": 640,
+  "fov": 60,
+  "direction": [
+    0,
+    0,
+    -1
+  ],
+  "y": 40,
+  "orthographic": false,
+  "orthoSize": 24,
+  "height": 480
+}

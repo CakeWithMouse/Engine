@@ -1,0 +1,34 @@
+[
+  {
+    "passed": true,
+    "id": "Create"
+  },
+  {
+    "passed": true,
+    "id": "BUG005_LauncherEnable"
+  },
+  {
+    "passed": true,
+    "id": "BUG004_FailureReturns"
+  },
+  {
+    "passed": true,
+    "id": "BUG006_Utf8"
+  },
+  {
+    "passed": true,
+    "id": "BUG005_EditorModules"
+  },
+  {
+    "passed": true,
+    "id": "PreviousDllPreserved"
+  },
+  {
+    "passed": true,
+    "id": "BUG004_SuccessReturns"
+  },
+  {
+    "passed": true,
+    "id": "NewDllActivated"
+  }
+]
