@@ -1,4 +1,5 @@
 #include "UiTestHelperTests.h"
+#include "ImportSettingsDialogTests.h"
 #include "UiSmokeTests.h"
 #include "EditorTheme.h"
 #include <QApplication>
@@ -13,6 +14,7 @@ int main(int argc, char* argv[])
     try
     {
         UiTestHelperTests::Run();
+        ImportSettingsDialogTests::Run();
         UiSmokeTests::Run();
         return 0;
     }

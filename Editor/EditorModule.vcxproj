@@ -170,6 +170,7 @@
         <ClCompile Include="UI/DockLayoutManager.cpp"/>
         <ClCompile Include="UI/MainToolBar.cpp"/>
         <ClCompile Include="UI/IconProvider.cpp"/>
+        <ClCompile Include="UI/ImportSettingsDialog.cpp"/>
         <ClCompile Include="UI/PlaySettingsDialog.cpp"/>
         <ClCompile Include="UI/ExternalGameRunner.cpp"/>
         <ClCompile Include="Source/MainWindow.cpp"/>
@@ -306,6 +307,7 @@
         <ClInclude Include="UI/IconProvider.h"/>
         <ClInclude Include="UI/ViewportOverlayHelper.h"/>
         <ClInclude Include="UI/SpinBoxArrowStyle.h"/>
+        <ClInclude Include="UI/ImportSettingsDialog.h"/>
         <ClInclude Include="Include/CodeClassDialog.h"/>
         <ClInclude Include="Include/FileBrowser.h"/>
         <ClInclude Include="Include/MaterialTextureTools.h"/>

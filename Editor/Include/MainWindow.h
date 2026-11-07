@@ -102,6 +102,7 @@ private:
     void BuildSceneDocks();
     void BuildSceneMenu();
     void BuildToolsMenu();
+    void RegisterAssetCommands();
     void ConnectPanels();
 
     void ApplyDefaultLayout();

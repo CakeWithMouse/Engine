@@ -87,6 +87,8 @@
         <ClCompile Include="../Source/SceneObjectsPanel.cpp"/>
         <ClCompile Include="../Source/ObjectInspectorPanel.cpp"/>
         <ClCompile Include="../Source/ProjectProperties.cpp"/>
+        <ClCompile Include="../Core/ImportSettings.cpp"/>
+        <ClCompile Include="../UI/ImportSettingsDialog.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_Logger.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_CommandRegistry.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_FileService.cpp"/>
@@ -98,6 +100,7 @@
     <ItemGroup>
         <ClInclude Include="UiTestHelper.h"/>
         <ClInclude Include="UiTestHelperTests.h"/>
+        <ClInclude Include="ImportSettingsDialogTests.h"/>
         <ClInclude Include="UiSmokeTests.h"/>
     </ItemGroup>
 
