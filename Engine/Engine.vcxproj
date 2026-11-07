@@ -105,6 +105,9 @@
     <ClCompile Include="Source\Render\Material.cpp" />
     <ClCompile Include="Source\Render\MeshData.cpp" />
     <ClCompile Include="Source\Render\MaterialAsset.cpp" />
+    <ClCompile Include="Source\Script\ScriptCatalog.cpp" />
+    <ClCompile Include="Source\Script\ScriptProgram.cpp" />
+    <ClCompile Include="Source\Script\ScriptInstance.cpp" />
     <ClCompile Include="Source\Render\MeshPrimitives.cpp" />
     <ClCompile Include="Source\Render\MeshSimplifier.cpp" />
     <ClCompile Include="Source\Render\MeshValidation.cpp" />
@@ -173,6 +176,8 @@
     <ClInclude Include="Include\Engine\Render\ImpostorAtlas.h" />
     <ClInclude Include="Include\Engine\Render\Material.h" />
     <ClInclude Include="Include\Engine\Render\MaterialAsset.h" />
+    <ClInclude Include="Include\Engine\Script\ScriptRuntime.h" />
+    <ClInclude Include="Source\Script\ScriptProgram.h" />
     <ClInclude Include="Include\Engine\Render\MeshSimplifier.h" />
     <ClInclude Include="Include\Engine\Render\PointShadow.h" />
     <ClInclude Include="Include\Engine\Render\ShadowCascades.h" />

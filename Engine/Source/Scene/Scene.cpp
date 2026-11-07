@@ -3,6 +3,7 @@
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/Light/DirectionalLightComponent.h>
+#include <Engine/Script/ScriptRuntime.h>
 #include <atomic>
 #include <cmath>
 #include <stdexcept>
@@ -280,6 +281,7 @@ void Scene::Tick(float dt, bool pauseNonSkybox)
             entry.second->Tick(seconds);
             auto* visual=entry.second->GetRenderComponent();
             if(visual!=entry.second.get())visual->Tick(seconds);
+            if(entry.second->ScriptState)entry.second->ScriptState->Tick(seconds);
         }
     }
     catch (...) { ticking_ = false; throw; }

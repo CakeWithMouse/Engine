@@ -533,6 +533,12 @@ protected:
     /** Components whose material asset failed to load try again on their next draw. */
     void RetryFailedMaterialAssets();
 
+    // Visual scripts by resolved .vscript path; a changed file is compiled again at the next start.
+    struct CachedScript;
+    std::map<std::string, std::shared_ptr<const CachedScript>> scriptCache;
+    /** Creates the component's script instance and runs its BeginPlay; errors are logged, never thrown. */
+    void StartScript(GameComponent& component);
+
     // Depth
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;          // opaque: test + write
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilStateReadOnly;  // transparent: test, no write

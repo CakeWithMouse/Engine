@@ -2177,6 +2177,8 @@ void SoundDecoderTests();
 void PrimitiveApiTests();
 void GameSettingsTests();
 
+void ScriptTests();
+
 int main()
 {
     const std::pair<const char*, std::function<void()>> tests[] = {
@@ -2195,6 +2197,7 @@ int main()
         {"atomic group transforms, references and deletion (no GPU)", SceneBatchTests},
         {"wav decoder: RIFF parsing, read, seek", SoundDecoderTests},
         {"typed properties and transactional asset updates", AuthoringTests},
+        {"visual scripts: catalog, compilation, interpreter, Game lifecycle", ScriptTests},
         {"registry ownership", RegistryOwnership}, {"registration failure ownership", RegistryFailures},
         {"transform hierarchy and cache", TransformHierarchy}, {"unregister hierarchy and instances", UnregisterHierarchyAndInstances},
         {"frame light snapshot", LightSnapshot}, {"forward/deferred shader variants", ShaderVariants},
