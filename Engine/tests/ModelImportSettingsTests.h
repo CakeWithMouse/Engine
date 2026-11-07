@@ -150,11 +150,10 @@ inline void Run()
         check(!ModelImportSettings::Parse(kLegacyOutOfRangeScale, s, &err), "Parse failed on out of range legacy scale");
     }
 
-    // 10. Path resolution helper
+    // 10. Path resolution helper (shared kPathTestCases matching Editor's SidecarPathForAsset)
+    for (const auto& tc : kPathTestCases)
     {
-        check(ModelImportSettings::ResolveSidecarPath("/Game/Models/Hero/Hero.glb") == "/Game/Models/Hero/Hero.glb.importsettings.json", "ResolveSidecarPath appends suffix");
-        check(ModelImportSettings::ResolveSidecarPath("/Game/Models/Hero/Hero.glb.importsettings.json") == "/Game/Models/Hero/Hero.glb.importsettings.json", "ResolveSidecarPath idempotent on existing suffix");
-        check(ModelImportSettings::ResolveSidecarPath("").empty(), "ResolveSidecarPath empty for empty path");
+        check(ModelImportSettings::ResolveSidecarPath(tc.input) == tc.expected, "ResolveSidecarPath matches shared test case");
     }
 
     // 11. VFS integration: read non-existent, read valid, read broken

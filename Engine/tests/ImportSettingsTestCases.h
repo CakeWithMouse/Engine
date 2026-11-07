@@ -75,5 +75,19 @@ inline constexpr std::string_view kInvalidNormalsEnum = R"({"version": 1, "kind"
 inline constexpr std::string_view kLegacyBadScale = R"({"scale": "bad"})";
 inline constexpr std::string_view kLegacyOutOfRangeScale = R"({"scale": -1.0})";
 
+// 13. Path resolution test cases (shared between Editor and Engine)
+struct PathTestCase {
+    std::string_view input;
+    std::string_view expected;
+};
+
+inline constexpr PathTestCase kPathTestCases[] = {
+    {"", ""},
+    {"Content/Models/Hero/Hero.glb", "Content/Models/Hero/Hero.glb.importsettings.json"},
+    {"Content/Models/Hero/Hero.glb.importsettings.json", "Content/Models/Hero/Hero.glb.importsettings.json"},
+    {"Hero.fbx", "Hero.fbx.importsettings.json"},
+    {"/Game/Characters/Player/Mesh.glb", "/Game/Characters/Player/Mesh.glb.importsettings.json"}
+};
+
 } // namespace ImportSettingsTestCases
 

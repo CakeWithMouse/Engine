@@ -100,7 +100,7 @@
 |---|---|---|
 | Сборка `EditorModule` (Debug) | **PASS** | 0 ошибок, 0 новых warnings |
 | Сборка `EditorModule` (Release) | **PASS** | Собрано MSBuild x64 |
-| `Editor/tests/CoreTests.exe` | **529/529 PASS** | 474 baseline + S17.1-17.2 тесты sidecar (`CoreTests: 529 checks passed.`) |
+| `Editor/tests/CoreTests.exe` | **548/548 PASS** | 474 baseline + S17.1-17.2 тесты sidecar (`CoreTests: 548 checks passed.`) |
 | `Editor/tests/HostTests.exe` | **102/102 PASS** | 78 regression + 18 overlay + 6 history (`HostTests: 102 checks passed.`) |
 | `Editor/tests/UiTests.exe` | **274/274 PASS** | 15 helper + 14 import settings dialog + 245 smoke (`UiSmokeTests: 245 checks passed`) |
 | `Engine/tests/run.ps1` (Debug) | **71/71 PASS** | 70 baseline + S17.2 тест парсера sidecar (`71/71 tests passed; 0 skipped; 0 failed`) |
@@ -239,6 +239,7 @@
 - [ ] **Валидация путей `contains("..")` в `ModelImportSidecar`:** текущая проверка `contains("..")` отвергает валидные имена файлов с двойными точками (например, `Hero..v2.glb`); требуется разбор компонентов пути через `QDir::cleanPath` / `split('/')`.
 - [ ] **Чувствительность к регистру `Qt::CaseInsensitive` в `ModelImportSidecar`:** сравнение префикса проекта платформозависимо (на Linux/macOS пути чувствительны к регистру, на Windows нет).
 - [ ] **AssetUpdate: ремаппинг `.importsettings.json` при смене имени геометрии при реимпорте:** В `AssetUpdate.cpp:79-85` при реимпорте переименовываются `.source.json` и `.import.json`, но отсутствует ремаппинг `.importsettings.json`. Если импортер движка в будущем начнет генерировать `.importsettings.json` во временном каталоге, появится сирота под новым именем или перезапись существующего sidecar. Предложенная точная правка в `Engine/Source/Scene/AssetUpdate.cpp`: в строке 82 добавить `if(entry.path()==fs::u8path(imported.u8string()+".importsettings.json"))relative=fs::u8path(file.filename().u8string()+".importsettings.json");`, а в строке 84 добавить `||entry.path().u8string().find(".importsettings.json")!=std::string::npos` в условие `continue`.
+- [ ] **ReadFromVfs не вызывался на реальном ассете (Не проверено):** юнит-тест в `EngineTests` проверял чтение через динамический Mount во временную директорию (`/TestImportVfs`); вызов на реальном проектном ассете через `LoadSkeletalModelFromVfs` будет проверен в Шаге 17.3.
 
 ---
 

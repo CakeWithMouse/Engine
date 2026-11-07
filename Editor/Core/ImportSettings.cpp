@@ -412,7 +412,10 @@ QString ImportSettingsFile::SidecarPathForAsset(const QString& assetPath)
 {
     if (assetPath.isEmpty())
         return {};
-    return assetPath + QStringLiteral(".importsettings.json");
+    const QString suffix = QStringLiteral(".importsettings.json");
+    if (assetPath.endsWith(suffix))
+        return assetPath;
+    return assetPath + suffix;
 }
 
 } // namespace EditorCore

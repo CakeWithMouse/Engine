@@ -103,7 +103,30 @@ inline void RunImportSettingsTests(int& outChecks)
     check(s1Loaded.model.flipUv == true, "Loaded flipUv matches true");
     check(s1Loaded.model.mergeMeshes == true, "Loaded mergeMeshes matches true");
 
-    // 2b. Migration of legacy S16 format {"scale": 0.01, "foo": 1} with unknown fields preservation
+    // 2a. Direct parse of shared kValidV1 constant
+    ImportSettings sValidV1;
+    QString validV1Err;
+    check(ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kValidV1), sValidV1, &validV1Err), "Parse succeeded on shared kValidV1");
+    check(validV1Err.isEmpty(), "No error on shared kValidV1 parse");
+    check(sValidV1.version == 1 && sValidV1.kind == QStringLiteral("model"), "kValidV1 header correct");
+    check(std::abs(sValidV1.model.scale - 0.05f) < 1e-6f, "kValidV1 scale 0.05");
+    check(sValidV1.model.useFileUnitScale == true, "kValidV1 useFileUnitScale true");
+    check(sValidV1.model.normals == QStringLiteral("smooth"), "kValidV1 normals smooth");
+
+    // 2b. Migration of legacy S16 format {"scale": 0.01} and {"scale": 0.01, "foo": 1}
+    ImportSettings sLegacyPure;
+    QString legacyPureErr;
+    check(ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kLegacyScale), sLegacyPure, &legacyPureErr), "Parse succeeded on shared kLegacyScale");
+    check(sLegacyPure.version == 1 && sLegacyPure.kind == QStringLiteral("model"), "kLegacyScale header correct");
+    check(std::abs(sLegacyPure.model.scale - 0.01f) < 1e-6f, "kLegacyScale scale 0.01");
+    check(sLegacyPure.model.useFileUnitScale == false, "kLegacyScale useFileUnitScale false");
+    check(sLegacyPure.model.normals == QStringLiteral("file"), "kLegacyScale normals file");
+    check(std::abs(sLegacyPure.model.smoothingAngle - 60.0f) < 1e-6f, "kLegacyScale smoothingAngle 60.0");
+    check(sLegacyPure.model.importMaterials == true, "kLegacyScale importMaterials true");
+    check(sLegacyPure.model.importTextures == true, "kLegacyScale importTextures true");
+    check(sLegacyPure.model.flipUv == false, "kLegacyScale flipUv false");
+    check(sLegacyPure.model.mergeMeshes == false, "kLegacyScale mergeMeshes false");
+
     ImportSettings sLegacy;
     QString legacyErr;
     const bool legacyOk = ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kLegacyWithUnknown), sLegacy, &legacyErr);
@@ -193,10 +216,13 @@ inline void RunImportSettingsTests(int& outChecks)
     check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kLegacyBadScale), sOutOfRange, &rangeErr), "Parse fails on bad legacy scale");
     check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kLegacyOutOfRangeScale), sOutOfRange, &rangeErr), "Parse fails on out of range legacy scale");
 
-    // 7. Sidecar path helper
-    check(ImportSettingsFile::SidecarPathForAsset(QStringLiteral("Content/Models/Hero/Hero.glb")) ==
-          QStringLiteral("Content/Models/Hero/Hero.glb.importsettings.json"), "SidecarPathForAsset appends .importsettings.json");
-    check(ImportSettingsFile::SidecarPathForAsset(QString()).isEmpty(), "SidecarPathForAsset empty for empty path");
+    // 7. Sidecar path helper (shared kPathTestCases matching Engine's ResolveSidecarPath)
+    for (const auto& tc : ImportSettingsTestCases::kPathTestCases)
+    {
+        const QString inStr = QString::fromUtf8(tc.input.data(), static_cast<int>(tc.input.size()));
+        const QString expStr = QString::fromUtf8(tc.expected.data(), static_cast<int>(tc.expected.size()));
+        check(ImportSettingsFile::SidecarPathForAsset(inStr) == expStr, "SidecarPathForAsset matches shared test case");
+    }
 
     // 8. FileService integration (Save & Load with sandbox)
     QTemporaryDir tempDir;
