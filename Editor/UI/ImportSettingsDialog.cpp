@@ -11,6 +11,61 @@
 
 using EditorCore::ImportSettingsFile;
 
+static ImportSettingsDialog::ExecHook s_execHookForTesting = nullptr;
+
+void ImportSettingsDialog::SetExecHookForTesting(ExecHook hook)
+{
+    s_execHookForTesting = std::move(hook);
+}
+
+ImportScalePromptResult ImportSettingsDialog::Prompt(QWidget* parent, float initialScale)
+{
+    ImportSettingsDialog dialog(parent);
+    if (initialScale > 0.0f)
+    {
+        dialog.SetScale(initialScale);
+    }
+
+    int res = QDialog::Rejected;
+    if (s_execHookForTesting)
+    {
+        res = s_execHookForTesting(dialog);
+    }
+    else
+    {
+        res = dialog.exec();
+    }
+
+    if (res == QDialog::Accepted)
+    {
+        return { true, dialog.Scale() };
+    }
+    return { false, 1.0f };
+}
+
+ModelImportScaleDecision ResolveModelImportScale(
+    const QVariantMap& parameters,
+    bool hasSource,
+    QWidget* parent)
+{
+    if (parameters.contains(QStringLiteral("scale")))
+    {
+        return { true, static_cast<float>(parameters.value(QStringLiteral("scale")).toDouble()) };
+    }
+
+    if (!hasSource || parameters.value(QStringLiteral("showDialog"), false).toBool())
+    {
+        const auto prompt = ImportSettingsDialog::Prompt(parent);
+        if (!prompt.accepted)
+        {
+            return { false, 1.0f };
+        }
+        return { true, prompt.scale };
+    }
+
+    return { true, ImportSettingsFile::DefaultScale };
+}
+
 ImportSettingsDialog::ImportSettingsDialog(QWidget* parent)
     : QDialog(parent)
 {

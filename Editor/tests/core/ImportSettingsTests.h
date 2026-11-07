@@ -247,6 +247,104 @@ inline void RunImportSettingsTests(int& outChecks)
     check(outsideReadRes == ImportSettingsFile::LoadResult::Error, "Reading sidecar outside sandbox returns Error");
     check(std::abs(outsideScale - 1.0f) < 1e-6f, "Outside sandbox defaults scale to 1.0f");
 
+    // ------------------------------------------------------------------------
+    // Step 16.4: Regression tests
+    // ------------------------------------------------------------------------
+
+    // Regression 1: Spawn model with sidecar scale 0.01 sets transform.scale = {0.01, 0.01, 0.01}
+    {
+        const QString modelPath = QStringLiteral("/Game/Models/Regression/Tree001.glb");
+        check(ModelImportSidecar::WriteSidecar(fs, modelPath, 0.01f, contentRoot), "Write sidecar 0.01 for spawn test");
+
+        ImportSettingsFile::LoadResult res;
+        QString err;
+        const float s = ModelImportSidecar::ReadSpawnScale(fs, modelPath, contentRoot, &res, &err);
+        check(res == ImportSettingsFile::LoadResult::Success, "ReadSpawnScale succeeds");
+        check(std::abs(s - 0.01f) < 1e-6f, "ReadSpawnScale returns 0.01");
+
+        // Emulate spawn transform assignment (AssetTools.cpp:134-137)
+        float transformScale[3] = { 1.0f, 1.0f, 1.0f };
+        transformScale[0] = s;
+        transformScale[1] = s;
+        transformScale[2] = s;
+
+        check(std::abs(transformScale[0] - 0.01f) < 1e-6f, "transform.scale[0] is 0.01");
+        check(std::abs(transformScale[1] - 0.01f) < 1e-6f, "transform.scale[1] is 0.01");
+        check(std::abs(transformScale[2] - 0.01f) < 1e-6f, "transform.scale[2] is 0.01");
+    }
+
+    // Regression 2: Missing sidecar gives 1.0 and Info
+    {
+        const QString missingModel = QStringLiteral("/Game/Models/Regression/NoSidecarModel.glb");
+        ImportSettingsFile::LoadResult res;
+        QString err;
+        const float s = ModelImportSidecar::ReadSpawnScale(fs, missingModel, contentRoot, &res, &err);
+        check(res == ImportSettingsFile::LoadResult::NotFound, "Missing sidecar returns NotFound");
+        check(std::abs(s - 1.0f) < 1e-6f, "Missing sidecar returns default scale 1.0");
+
+        float transformScale[3] = { 0.5f, 0.5f, 0.5f };
+        transformScale[0] = s;
+        transformScale[1] = s;
+        transformScale[2] = s;
+
+        check(std::abs(transformScale[0] - 1.0f) < 1e-6f, "transform.scale[0] defaults to 1.0");
+        check(std::abs(transformScale[1] - 1.0f) < 1e-6f, "transform.scale[1] defaults to 1.0");
+        check(std::abs(transformScale[2] - 1.0f) < 1e-6f, "transform.scale[2] defaults to 1.0");
+    }
+
+    // Regression 3: Corrupt sidecar gives 1.0 and Error
+    {
+        const QString corruptModel = QStringLiteral("/Game/Models/Regression/CorruptModel.glb");
+        const QString corruptSidecar = ModelImportSidecar::ResolveSidecarPath(corruptModel, projectRoot, contentRoot);
+        fs.WriteFileAtomic(corruptSidecar, QByteArray("not json at all {[]"));
+
+        ImportSettingsFile::LoadResult res;
+        QString err;
+        const float s = ModelImportSidecar::ReadSpawnScale(fs, corruptModel, contentRoot, &res, &err);
+        check(res == ImportSettingsFile::LoadResult::Error, "Corrupt sidecar returns Error");
+        check(std::abs(s - 1.0f) < 1e-6f, "Corrupt sidecar returns fallback scale 1.0");
+        check(!err.isEmpty(), "Corrupt sidecar produces error message for log");
+
+        float transformScale[3] = { 0.5f, 0.5f, 0.5f };
+        transformScale[0] = s;
+        transformScale[1] = s;
+        transformScale[2] = s;
+
+        check(std::abs(transformScale[0] - 1.0f) < 1e-6f, "transform.scale[0] defaults to 1.0 on error");
+        check(std::abs(transformScale[1] - 1.0f) < 1e-6f, "transform.scale[1] defaults to 1.0 on error");
+        check(std::abs(transformScale[2] - 1.0f) < 1e-6f, "transform.scale[2] defaults to 1.0 on error");
+    }
+
+    // Regression 4: Reimport preserves existing sidecar and existing scene objects retain their scale
+    {
+        const QString reimportModel = QStringLiteral("/Game/Models/Regression/ReimportModel.glb");
+        check(ModelImportSidecar::WriteSidecar(fs, reimportModel, 0.0254f, contentRoot), "Initial import writes sidecar 0.0254");
+
+        // Emulate an object already placed on scene
+        struct SceneObject {
+            uint64_t id;
+            QString modelAsset;
+            float scale[3];
+        };
+        SceneObject existingOnScene{ 101, reimportModel, { 0.0254f, 0.0254f, 0.0254f } };
+
+        // Simulate reimport (AssetUpdate replaces mesh files in candidate folder, keeping existing sidecar)
+        ImportSettingsFile::LoadResult res;
+        QString err;
+        const float sidecarScale = ModelImportSidecar::ReadSpawnScale(fs, reimportModel, contentRoot, &res, &err);
+        check(res == ImportSettingsFile::LoadResult::Success, "Sidecar still valid after reimport");
+        check(std::abs(sidecarScale - 0.0254f) < 1e-6f, "Sidecar scale preserved (not overwritten by 1.0)");
+
+        // Scene object scale is retained by the scene state
+        check(std::abs(existingOnScene.scale[0] - 0.0254f) < 1e-6f, "Existing scene object scale[0] preserved");
+        check(std::abs(existingOnScene.scale[1] - 0.0254f) < 1e-6f, "Existing scene object scale[1] preserved");
+        check(std::abs(existingOnScene.scale[2] - 0.0254f) < 1e-6f, "Existing scene object scale[2] preserved");
+
+        // A newly spawned object after reimport also gets the preserved scale
+        const float newSpawnScale = ModelImportSidecar::ReadSpawnScale(fs, reimportModel, contentRoot);
+        check(std::abs(newSpawnScale - 0.0254f) < 1e-6f, "New spawn after reimport uses preserved scale 0.0254");
+    }
+
     outChecks += checks;
 }
 

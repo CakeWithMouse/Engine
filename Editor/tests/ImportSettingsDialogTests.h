@@ -95,70 +95,85 @@ inline void Run()
     Check(std::abs(dlg.Scale() - 0.1f) < 1e-5f, "Accepted scale is 0.1");
     ++checks;
 
-    // 8. Cancel does not create a command
+    // 8. Cancel via ResolveModelImportScale does not post any command
     {
         std::vector<EditorCommand> postedCommands;
-        CommandRegistry::Instance().RegisterCommand({
-            QStringLiteral("Test.Import.Cancel"),
-            QStringLiteral("Test Import Cancel"),
-            QString(),
-            QString(),
-            [&postedCommands](const CommandContext&) {
-                ImportSettingsDialog testDlg;
-                // User clicks cancel
-                UiTestHelper::ClickButton(&testDlg, QStringLiteral("ImportCancelBtn"));
-                if (testDlg.result() != QDialog::Accepted)
-                {
-                    return false;
-                }
-                EditorCommand c;
-                c.type = EditorCommand::ImportModel;
-                c.importScale = testDlg.Scale();
-                postedCommands.push_back(c);
-                return true;
-            },
-            nullptr
+
+        // Substitute modal exec() via test hook clicking Cancel
+        ImportSettingsDialog::SetExecHookForTesting([](ImportSettingsDialog& dialog) {
+            UiTestHelper::ClickButton(&dialog, QStringLiteral("ImportCancelBtn"));
+            return dialog.result();
         });
 
-        const bool result = CommandRegistry::Instance().Execute(QStringLiteral("Test.Import.Cancel"));
-        Check(!result, "Execute returns false on Cancel");
+        // The exact handler logic executed by Assets.Import
+        auto importHandler = [&postedCommands](const QVariantMap& params, bool hasSource) -> bool {
+            const auto decision = ResolveModelImportScale(params, hasSource, nullptr);
+            if (!decision.proceed)
+            {
+                return false;
+            }
+            EditorCommand c;
+            c.type = EditorCommand::ImportModel;
+            c.importScale = decision.scale;
+            postedCommands.push_back(c);
+            return true;
+        };
+
+        // When showDialog is true, dialog runs hook and Cancel returns proceed = false
+        QVariantMap params;
+        params[QStringLiteral("showDialog")] = true;
+
+        const bool result = importHandler(params, true);
+        Check(!result, "Handler returns false on Cancel");
         Check(postedCommands.empty(), "Cancel did not create or post any command");
-        CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Test.Import.Cancel"));
         ++checks;
     }
 
-    // 9. Ok creates command with chosen scale
+    // 9. Ok with preset via ResolveModelImportScale posts command with chosen scale
     {
         std::vector<EditorCommand> postedCommands;
-        CommandRegistry::Instance().RegisterCommand({
-            QStringLiteral("Test.Import.Ok"),
-            QStringLiteral("Test Import Ok"),
-            QString(),
-            QString(),
-            [&postedCommands](const CommandContext&) {
-                ImportSettingsDialog testDlg;
-                testDlg.SetScale(0.01f);
-                // User clicks OK
-                UiTestHelper::ClickButton(&testDlg, QStringLiteral("ImportOkBtn"));
-                if (testDlg.result() != QDialog::Accepted)
-                {
-                    return false;
-                }
-                EditorCommand c;
-                c.type = EditorCommand::ImportModel;
-                c.importScale = testDlg.Scale();
-                postedCommands.push_back(c);
-                return true;
-            },
-            nullptr
+
+        // Substitute modal exec() via test hook selecting Preset001 (0.01) and clicking Ok
+        ImportSettingsDialog::SetExecHookForTesting([](ImportSettingsDialog& dialog) {
+            UiTestHelper::ClickButton(&dialog, QStringLiteral("Preset001"));
+            UiTestHelper::ClickButton(&dialog, QStringLiteral("ImportOkBtn"));
+            return dialog.result();
         });
 
-        const bool result = CommandRegistry::Instance().Execute(QStringLiteral("Test.Import.Ok"));
-        Check(result, "Execute returns true on Ok");
+        auto importHandler = [&postedCommands](const QVariantMap& params, bool hasSource) -> bool {
+            const auto decision = ResolveModelImportScale(params, hasSource, nullptr);
+            if (!decision.proceed)
+            {
+                return false;
+            }
+            EditorCommand c;
+            c.type = EditorCommand::ImportModel;
+            c.importScale = decision.scale;
+            postedCommands.push_back(c);
+            return true;
+        };
+
+        QVariantMap params;
+        params[QStringLiteral("showDialog")] = true;
+
+        const bool result = importHandler(params, true);
+        Check(result, "Handler returns true on Ok");
         Check(postedCommands.size() == 1, "Ok created exactly one command");
         Check(std::abs(postedCommands[0].importScale - 0.01f) < 1e-5f, "Command received importScale 0.01");
-        CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Test.Import.Ok"));
         ++checks;
+
+        // 10. Explicit scale in params bypasses dialog
+        postedCommands.clear();
+        QVariantMap explicitParams;
+        explicitParams[QStringLiteral("scale")] = 0.5;
+        const bool explicitResult = importHandler(explicitParams, true);
+        Check(explicitResult, "Explicit scale returns true");
+        Check(postedCommands.size() == 1, "Explicit scale created command");
+        Check(std::abs(postedCommands[0].importScale - 0.5f) < 1e-5f, "Command received explicit scale 0.5");
+        ++checks;
+
+        // Reset hook
+        ImportSettingsDialog::SetExecHookForTesting(nullptr);
     }
 
     std::cout << "ImportSettingsDialogTests: " << checks << " checks passed." << std::endl;

@@ -10,6 +10,7 @@
 #include <QFileDialog>
 #include <QMenu>
 #include <QMessageBox>
+#include <chrono>
 
 void EditorMainWindow::RegisterAssetCommands()
 {
@@ -57,19 +58,12 @@ void EditorMainWindow::RegisterAssetCommands()
             float scale = 1.0f;
             if (kind == 0)
             {
-                if (ctx.parameters.contains(QStringLiteral("scale")))
+                const auto decision = ResolveModelImportScale(ctx.parameters, !source.isEmpty(), this);
+                if (!decision.proceed)
                 {
-                    scale = static_cast<float>(ctx.parameters.value(QStringLiteral("scale")).toDouble());
+                    return false;
                 }
-                else if (source.isEmpty() || ctx.parameters.value(QStringLiteral("showDialog"), false).toBool())
-                {
-                    ImportSettingsDialog dialog(this);
-                    if (dialog.exec() != QDialog::Accepted)
-                    {
-                        return false;
-                    }
-                    scale = dialog.Scale();
-                }
+                scale = decision.scale;
             }
 
             for (const auto& path : paths)
@@ -145,9 +139,15 @@ void EditorMainWindow::HandleModelImported(const EditorCommand& command)
     if (!EditorCore::ModelImportSidecar::WriteSidecar(fs, command.path, command.importScale, contentRoot, &sidecarError))
     {
         AppendLine(QStringLiteral("[Error] Не удалось сохранить настройки импорта для %1: %2").arg(command.path, sidecarError));
-        QMessageBox::warning(this, Tr("Настройки импорта", "Import Settings"),
-                             Tr("Не удалось сохранить настройки импорта (.importsettings.json): %1",
-                                "Failed to save import settings (.importsettings.json): %1").arg(sidecarError));
+        static auto s_lastImportWarningTime = std::chrono::steady_clock::time_point{};
+        const auto now = std::chrono::steady_clock::now();
+        if (now - s_lastImportWarningTime > std::chrono::seconds(3))
+        {
+            s_lastImportWarningTime = now;
+            QMessageBox::warning(this, Tr("Настройки импорта", "Import Settings"),
+                                 Tr("Не удалось сохранить настройки импорта (.importsettings.json): %1",
+                                    "Failed to save import settings (.importsettings.json): %1").arg(sidecarError));
+        }
     }
 }
 
@@ -163,9 +163,16 @@ float EditorMainWindow::GetModelSpawnScale(const QString& path)
     const float scale = EditorCore::ModelImportSidecar::ReadSpawnScale(fs, path, contentRoot, &res, &loadError);
     if (res == EditorCore::ImportSettingsFile::LoadResult::Error)
     {
-        QMessageBox::warning(this, Tr("Настройки модели", "Model Settings"),
-                             Tr("Ошибка при чтении настроек модели: %1. Использован масштаб 1.0.",
-                                "Error reading model settings: %1. Default scale 1.0 used.").arg(loadError));
+        AppendLine(QStringLiteral("[Error] Ошибка при чтении настроек модели для %1: %2").arg(path, loadError));
+        static auto s_lastSpawnWarningTime = std::chrono::steady_clock::time_point{};
+        const auto now = std::chrono::steady_clock::now();
+        if (now - s_lastSpawnWarningTime > std::chrono::seconds(3))
+        {
+            s_lastSpawnWarningTime = now;
+            QMessageBox::warning(this, Tr("Настройки модели", "Model Settings"),
+                                 Tr("Ошибка при чтении настроек модели: %1. Использован масштаб 1.0.",
+                                    "Error reading model settings: %1. Default scale 1.0 used.").arg(loadError));
+        }
     }
     return scale;
 }
