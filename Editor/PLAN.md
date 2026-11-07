@@ -118,6 +118,7 @@
 | `Engine/tests/code-projects/portable.ps1` | **FAIL (Красная база)** | `Join-Path : A positional parameter cannot be found that accepts argument 'С‹РїСѓСЃРє'` (нет BOM) |
 | `Engine/tests/code-projects/run.ps1` | **FAIL (Красная база)** | `ParserError: An expression was expected after '('` (нет BOM) |
 | `Engine/tests/input/run.ps1` | **FAIL (Красная база)** | `ParserError: Unexpected token 'std::unique_ptr<CharacterController>'` (нет BOM) |
+| Храповик строк `EditorUiTests.cpp` в `check.ps1:220` | **FAIL при модификации (Красная база)** | Реальный размер файла 1662 строки (на `main` 1674) против заниженного храповика 1045. При чистом diff `check.ps1` проходит, но любая правка файла роняет проверку line count |
 
 ---
 
@@ -221,6 +222,7 @@
 - [ ] **AssetUpdate и sidecar `.importsettings.json`:** `AssetUpdate.cpp` фильтрует только суффиксы `{".source.json", ".import.json"}` при переименовании и перемещении моделей/ассетов (появляются sidecar-сироты при переносе модели). Требуется поддержать перенос `.importsettings.json` при обновлении движка.
 - [ ] **Валидация путей `contains("..")` в `ModelImportSidecar`:** текущая проверка `contains("..")` отвергает валидные имена файлов с двойными точками (например, `Hero..v2.glb`); требуется разбор компонентов пути через `QDir::cleanPath` / `split('/')`.
 - [ ] **Чувствительность к регистру `Qt::CaseInsensitive` в `ModelImportSidecar`:** сравнение префикса проекта платформозависимо (на Linux/macOS пути чувствительны к регистру, на Windows нет).
+- [ ] **AssetUpdate: ремаппинг `.importsettings.json` при смене имени геометрии при реимпорте:** В `AssetUpdate.cpp:79-85` при реимпорте переименовываются `.source.json` и `.import.json`, но отсутствует ремаппинг `.importsettings.json`. Если импортер движка в будущем начнет генерировать `.importsettings.json` во временном каталоге, появится сирота под новым именем или перезапись существующего sidecar. Предложенная точная правка в `Engine/Source/Scene/AssetUpdate.cpp`: в строке 82 добавить `if(entry.path()==fs::u8path(imported.u8string()+".importsettings.json"))relative=fs::u8path(file.filename().u8string()+".importsettings.json");`, а в строке 84 добавить `||entry.path().u8string().find(".importsettings.json")!=std::string::npos` в условие `continue`.
 
 ---
 
@@ -323,6 +325,8 @@
 - Карточки инспектора и высота полей 22px при выделении объекта сцены.
 - Перетаскивание объекта за центральный кубический манипулятор гизмо (свободное перемещение в плоскости экрана для Move и равномерный масштаб для Scale) в запущенном интерактивном окне.
 - Переключение режима сглаживания через пункт меню "Вид -> Сглаживание -> Выкл / FXAA" в запущенном GUI с визуальной оценкой пикселей.
+- Реимпорт модели (`UpdateAsset`): подтверждение на живом проекте, что реальный вызов `UpdateAsset` через движок не перезаписывает `.importsettings.json` и сохраняет масштаб объектов на сцене (в юнит-тестах проверена эмуляция семантики копирования каталога `AssetUpdate::Run`).
+- Показ ровно одного модального окна `QMessageBox::warning` при пакетном спавне/импорте N файлов с битыми sidecar: коалесцирование с кулдауном 3 секунды реализовано в `ImportCommands.cpp`, но автотест с подсчётом модальных окон отсутствует (проверить вручную при пакетном спавне поврежденных файлов).
 
 ## Интеграция main в editor-v2 — 31.10.2026
 

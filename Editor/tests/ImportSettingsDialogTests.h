@@ -15,6 +15,20 @@
 namespace ImportSettingsDialogTests
 {
 
+struct ScopedImportDialogHook
+{
+    explicit ScopedImportDialogHook(ImportSettingsDialog::ExecHook hook)
+    {
+        ImportSettingsDialog::SetExecHookForTesting(std::move(hook));
+    }
+    ~ScopedImportDialogHook()
+    {
+        ImportSettingsDialog::SetExecHookForTesting(nullptr);
+    }
+    ScopedImportDialogHook(const ScopedImportDialogHook&) = delete;
+    ScopedImportDialogHook& operator=(const ScopedImportDialogHook&) = delete;
+};
+
 inline void Check(bool condition, const char* message)
 {
     if (!condition)
@@ -99,8 +113,8 @@ inline void Run()
     {
         std::vector<EditorCommand> postedCommands;
 
-        // Substitute modal exec() via test hook clicking Cancel
-        ImportSettingsDialog::SetExecHookForTesting([](ImportSettingsDialog& dialog) {
+        // RAII hook guarantees reset even upon early return or exception
+        ScopedImportDialogHook hook([](ImportSettingsDialog& dialog) {
             UiTestHelper::ClickButton(&dialog, QStringLiteral("ImportCancelBtn"));
             return dialog.result();
         });
@@ -133,8 +147,8 @@ inline void Run()
     {
         std::vector<EditorCommand> postedCommands;
 
-        // Substitute modal exec() via test hook selecting Preset001 (0.01) and clicking Ok
-        ImportSettingsDialog::SetExecHookForTesting([](ImportSettingsDialog& dialog) {
+        // RAII hook guarantees reset even upon early return or exception
+        ScopedImportDialogHook hook([](ImportSettingsDialog& dialog) {
             UiTestHelper::ClickButton(&dialog, QStringLiteral("Preset001"));
             UiTestHelper::ClickButton(&dialog, QStringLiteral("ImportOkBtn"));
             return dialog.result();
@@ -171,9 +185,6 @@ inline void Run()
         Check(postedCommands.size() == 1, "Explicit scale created command");
         Check(std::abs(postedCommands[0].importScale - 0.5f) < 1e-5f, "Command received explicit scale 0.5");
         ++checks;
-
-        // Reset hook
-        ImportSettingsDialog::SetExecHookForTesting(nullptr);
     }
 
     std::cout << "ImportSettingsDialogTests: " << checks << " checks passed." << std::endl;

@@ -315,7 +315,7 @@ inline void RunImportSettingsTests(int& outChecks)
         check(std::abs(transformScale[2] - 1.0f) < 1e-6f, "transform.scale[2] defaults to 1.0 on error");
     }
 
-    // Regression 4: Reimport preserves existing sidecar and existing scene objects retain their scale
+    // Regression 4: sidecar survives folder copy semantics (emulation)
     {
         const QString reimportModel = QStringLiteral("/Game/Models/Regression/ReimportModel.glb");
         check(ModelImportSidecar::WriteSidecar(fs, reimportModel, 0.0254f, contentRoot), "Initial import writes sidecar 0.0254");
@@ -328,21 +328,21 @@ inline void RunImportSettingsTests(int& outChecks)
         };
         SceneObject existingOnScene{ 101, reimportModel, { 0.0254f, 0.0254f, 0.0254f } };
 
-        // Simulate reimport (AssetUpdate replaces mesh files in candidate folder, keeping existing sidecar)
+        // Emulate AssetUpdate folder copy semantics (candidate preserves existing files in destination folder)
         ImportSettingsFile::LoadResult res;
         QString err;
         const float sidecarScale = ModelImportSidecar::ReadSpawnScale(fs, reimportModel, contentRoot, &res, &err);
-        check(res == ImportSettingsFile::LoadResult::Success, "Sidecar still valid after reimport");
-        check(std::abs(sidecarScale - 0.0254f) < 1e-6f, "Sidecar scale preserved (not overwritten by 1.0)");
+        check(res == ImportSettingsFile::LoadResult::Success, "sidecar survives folder copy semantics (emulation)");
+        check(std::abs(sidecarScale - 0.0254f) < 1e-6f, "sidecar scale preserved (not overwritten by 1.0)");
 
-        // Scene object scale is retained by the scene state
+        // Scene object scale is retained by the scene state (emulation)
         check(std::abs(existingOnScene.scale[0] - 0.0254f) < 1e-6f, "Existing scene object scale[0] preserved");
         check(std::abs(existingOnScene.scale[1] - 0.0254f) < 1e-6f, "Existing scene object scale[1] preserved");
         check(std::abs(existingOnScene.scale[2] - 0.0254f) < 1e-6f, "Existing scene object scale[2] preserved");
 
         // A newly spawned object after reimport also gets the preserved scale
         const float newSpawnScale = ModelImportSidecar::ReadSpawnScale(fs, reimportModel, contentRoot);
-        check(std::abs(newSpawnScale - 0.0254f) < 1e-6f, "New spawn after reimport uses preserved scale 0.0254");
+        check(std::abs(newSpawnScale - 0.0254f) < 1e-6f, "New spawn uses preserved scale 0.0254");
     }
 
     outChecks += checks;
