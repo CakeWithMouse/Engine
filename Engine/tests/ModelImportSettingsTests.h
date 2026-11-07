@@ -3,8 +3,11 @@
 #include "../Source/Scene/ModelImportSettings.h"
 #include "ImportSettingsTestCases.h"
 #include "../Source/Resources/VfsRead.h"
+#include <Engine/Render/SkeletalLoader.h>
+#include <Engine/Render/SkeletalData.h>
 
 #include <cmath>
+#include <cstring>
 #include <ctime>
 #include <filesystem>
 #include <fstream>
@@ -201,6 +204,114 @@ inline void Run()
             throw;
         }
     }
+
+#if defined(ENGINE_ENABLE_ASSIMP)
+    // 12. Assimp flags integration via VFS
+    {
+        const auto tempRoot = std::filesystem::temp_directory_path() / ("EngineAssimpFlagsTest_" + std::to_string(std::clock()));
+        std::filesystem::create_directories(tempRoot);
+
+        try
+        {
+            VfsRead::GetVFS().Mount("/TestFlagsVfs", tempRoot);
+
+            const char* kTestObj =
+                "o MeshA\n"
+                "usemtl SharedMat\n"
+                "v 0 0 0\n"
+                "v 1 0 0\n"
+                "v 0 1 0\n"
+                "v 0 0 1\n"
+                "vt 0.1 0.3\n"
+                "vt 0.5 0.3\n"
+                "vt 0.9 0.3\n"
+                "vt 0.5 0.8\n"
+                "f 1/1 2/2 3/3\n"
+                "f 1/1 3/3 4/4\n"
+                "o MeshB\n"
+                "usemtl SharedMat\n"
+                "v 2 0 0\n"
+                "v 3 0 0\n"
+                "v 2 1 0\n"
+                "vt 0.1 0.3\n"
+                "vt 0.5 0.3\n"
+                "vt 0.1 0.8\n"
+                "f 5/1 6/2 7/5\n";
+
+            // Write test model
+            {
+                std::ofstream out(tempRoot / "box.obj");
+                out << kTestObj;
+            }
+
+            // 12a. Absent sidecar: default flags (flipUv=false -> V ~ 0.7, mergeMeshes=false -> 2 meshes)
+            const SkeletalLoadResult resDefault = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
+            check(resDefault.Success, "Load default box.obj succeeded");
+            check(resDefault.Model != nullptr, "resDefault Model is not null");
+            check(resDefault.Model->Meshes.size() == 2, "Default sidecar preserves 2 distinct meshes (mergeMeshes=false)");
+            check(!resDefault.Model->Meshes[0].Vertices.empty(), "Mesh 0 has vertices");
+            check(std::abs(resDefault.Model->Meshes[0].Vertices[0].TexCoord.y - 0.7f) < 0.01f, "Default flipUv=false flips UV: 1.0 - 0.3 = 0.7");
+
+            // 12b. Explicit default sidecar must yield identical output to absent sidecar
+            {
+                std::ofstream out(tempRoot / "box.obj.importsettings.json");
+                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":false}}";
+            }
+            const SkeletalLoadResult resExplicitDefault = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
+            check(resExplicitDefault.Success, "Load with explicit default sidecar succeeded");
+            check(resExplicitDefault.Model->Meshes.size() == resDefault.Model->Meshes.size(), "Mesh count matches between absent and default sidecar");
+            check(resExplicitDefault.Model->Meshes[0].Vertices.size() == resDefault.Model->Meshes[0].Vertices.size(), "Vertex count matches");
+            check(std::memcmp(resExplicitDefault.Model->Meshes[0].Vertices.data(), resDefault.Model->Meshes[0].Vertices.data(),
+                              resDefault.Model->Meshes[0].Vertices.size() * sizeof(SkinnedVertex)) == 0,
+                  "Vertices bit-for-bit identical with default sidecar");
+
+            // 12c. flipUv=true: V coordinate is NOT flipped (V ~ 0.3)
+            {
+                std::ofstream out(tempRoot / "box.obj.importsettings.json");
+                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":true,\"mergeMeshes\":false}}";
+            }
+            const SkeletalLoadResult resFlipUv = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
+            check(resFlipUv.Success, "Load with flipUv=true succeeded");
+            check(std::abs(resFlipUv.Model->Meshes[0].Vertices[0].TexCoord.y - 0.3f) < 0.01f, "flipUv=true keeps original V: 0.3");
+
+            // 12d. mergeMeshes=true: meshes with same material merged into 1 mesh
+            {
+                std::ofstream out(tempRoot / "box.obj.importsettings.json");
+                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":true}}";
+            }
+            const SkeletalLoadResult resMerge = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
+            check(resMerge.Success, "Load with mergeMeshes=true succeeded");
+            check(resMerge.Model->Meshes.size() == 1, "mergeMeshes=true merges 2 meshes into 1");
+
+            // 12e. normals="flat" vs normals="smooth"
+            {
+                std::ofstream out(tempRoot / "box.obj.importsettings.json");
+                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"flat\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":false}}";
+            }
+            const SkeletalLoadResult resFlat = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
+            check(resFlat.Success, "Load with normals='flat' succeeded");
+
+            {
+                std::ofstream out(tempRoot / "box.obj.importsettings.json");
+                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"smooth\",\"smoothingAngle\":100.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":false}}";
+            }
+            const SkeletalLoadResult resSmooth = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
+            check(resSmooth.Success, "Load with normals='smooth' succeeded");
+
+            check(resFlat.Model->Meshes[0].Vertices.size() > resSmooth.Model->Meshes[0].Vertices.size(),
+                  "normals='flat' has more vertices than normals='smooth' due to unwelded sharp edge");
+
+            VfsRead::GetVFS().Unmount("/TestFlagsVfs");
+            std::filesystem::remove_all(tempRoot);
+        }
+        catch (...)
+        {
+            VfsRead::GetVFS().Unmount("/TestFlagsVfs");
+            std::filesystem::remove_all(tempRoot);
+            throw;
+        }
+    }
+#endif
 }
 
 } // namespace ModelImportSettingsTests
