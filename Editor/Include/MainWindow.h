@@ -8,6 +8,7 @@
 
 #include "ObjectInspectorPanel.h"
 #include "IEditorHost.h"
+#include <Engine/Runtime/PhysicsEditApi.h>
 
 class QTreeWidget;
 class QLineEdit;
@@ -72,6 +73,8 @@ public:
     void ReloadShaders();
     void OpenUIEditor(const QString& path);
     void ShowHudSettings();
+    // Читает настройки физики в потоке движка и показывает диалог настройки.
+    void ShowPhysicsSettings();
     QString CreateUI(const QString& supplied = {});
 
 public slots:
@@ -92,6 +95,7 @@ private:
     void BuildCodeTools();
     void RunCodeTool(const QString& action, const QStringList& extra = {});
     void ShowProjectTypes();
+    void ShowPhysicsSettingsDialog(uint32_t status, uint32_t available, const EnginePhysicsSettingsState& state);
     void BuildUi();
     void BuildToolBar();
     void UpdatePlayButtons();

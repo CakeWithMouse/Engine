@@ -8,6 +8,8 @@
     <ProjectGuid>{44337448-6FD6-40E1-AD30-A6150B8D85AE}</ProjectGuid>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion><PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'==''">false</EngineEnableAssimp>
+  <EngineEnableJolt Condition="'$(EngineEnableJolt)'=='' and Exists('..\..\Engine\vcpkg_installed\x64-windows\include\Jolt\Jolt.h')">true</EngineEnableJolt>
+  <EngineEnableJolt Condition="'$(EngineEnableJolt)'==''">false</EngineEnableJolt>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
@@ -53,4 +55,7 @@
     <Copy SourceFiles="@(GameContent)" DestinationFiles="@(GameContent->'$(OutDir)GameContent\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
   </Target>
   <Import Project="..\..\Engine\BuildSupport\ComponentGeneration.targets" />
+
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Debug'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/debug/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Release'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
 </Project>

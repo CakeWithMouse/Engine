@@ -4,6 +4,7 @@
 #include <Engine/SaveGame/SaveGame.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/CharacterController.h>
+#include <Engine/Physics/PhysicsWorld.h>
 #include <Engine/Components/Character.h>
 #include <Engine/Components/SpecificComponents/UIComponent.h>
 #include <Engine/Components/SpecificComponents/InstancedMeshComponent.h>
@@ -304,6 +305,7 @@ Game::~Game()
 
 void Game::DestroyResources(bool preserveScene)
 {
+    PhysicsWorldPtr.reset();
     CloseGameplayScene();
     if (OwnedSession) OwnedSession->Stop();
     Session = nullptr;
@@ -4016,8 +4018,27 @@ void Game::UpdateSimulation(float deltaTime)
     if (!Session->IsRunning()) return;
     if (Controller) Controller->Tick(deltaTime);
     if (FirstPlayer) FirstPlayer->UpdateCamera(deltaTime);
+    TickPhysicsWorld(deltaTime);
     TickComponents(deltaTime);
     if (Controller && FirstPlayer) Controller->UpdateCamera(*FirstPlayer);
+}
+
+void Game::TickPhysicsWorld(float deltaTime)
+{
+    if (!Settings.Physics().IsEnabled()) return;
+    if (!PhysicsWorldPtr)
+    {
+        PhysicsWorldPtr = std::make_unique<PhysicsWorld>();
+        std::string error;
+        if (!PhysicsWorldPtr->Initialize(Settings.Physics(), error))
+        {
+            std::cout << "Physics: " << error << std::endl;
+            PhysicsWorldPtr.reset();
+            return;
+        }
+    }
+    PhysicsWorldPtr->ApplySettings(Settings.Physics());
+    PhysicsWorldPtr->Update(deltaTime);
 }
 
 void Game::UpdateAudio()

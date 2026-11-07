@@ -8,4 +8,11 @@
 <ItemDefinitionGroup Condition="'$(EngineEnableAssimp)'=='true' and '$(Configuration)'=='Release'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/lib/assimp-vc143-mt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
 <ItemGroup><ClCompile Include="HudTests.cpp"/></ItemGroup><ItemGroup><ProjectReference Include="../../Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project></ProjectReference></ItemGroup>
 <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets"/><Import Project="../../BuildSupport/Content.targets"/>
+
+  <PropertyGroup>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'=='' and Exists('..\..\vcpkg_installed\x64-windows\include\Jolt\Jolt.h')">true</EngineEnableJolt>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'==''">false</EngineEnableJolt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Debug'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/debug/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Release'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
 </Project>

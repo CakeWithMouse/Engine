@@ -10,17 +10,21 @@
 <PropertyGroup>
   <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'=='' and Exists('$(MSBuildThisFileDirectory)..\vcpkg_installed\x64-windows\include\assimp\scene.h')">true</EngineEnableAssimp>
   <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'==''">false</EngineEnableAssimp>
+  <EngineEnableJolt Condition="'$(EngineEnableJolt)'=='' and Exists('..\vcpkg_installed\x64-windows\include\Jolt\Jolt.h')">true</EngineEnableJolt>
+  <EngineEnableJolt Condition="'$(EngineEnableJolt)'==''">false</EngineEnableJolt>
+    <EngineEnableVcpkg>$(EngineEnableAssimp)</EngineEnableVcpkg>
+    <EngineEnableVcpkg Condition="'$(EngineEnableJolt)'=='true'">true</EngineEnableVcpkg>
   <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VCPKG_ROOT)'!=''">$(VCPKG_ROOT)\</VcpkgRoot>
   <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VsInstallRoot)'!='' and Exists('$(VsInstallRoot)\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">$(VsInstallRoot)\VC\vcpkg\</VcpkgRoot>
   <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\</VcpkgRoot>
   <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\</VcpkgRoot>
   <VcpkgRoot Condition="'$(VcpkgRoot)'==''">C:\vcpkg\</VcpkgRoot>
-  <VcpkgEnableManifest>$(EngineEnableAssimp)</VcpkgEnableManifest>
-  <VcpkgEnabled>$(EngineEnableAssimp)</VcpkgEnabled>
+  <VcpkgEnableManifest>$(EngineEnableVcpkg)</VcpkgEnableManifest>
+  <VcpkgEnabled>$(EngineEnableVcpkg)</VcpkgEnabled>
   <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\</VcpkgManifestRoot>
   <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\vcpkg_installed\</VcpkgInstalledDir>
 </PropertyGroup>
-<Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
+<Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableVcpkg)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
 <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props" />
 <Import Project="..\BuildSupport\Cpp.props" />
 <PropertyGroup><OutDir>$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/Runtime/</OutDir><TargetName>EngineRuntime</TargetName></PropertyGroup>
@@ -28,7 +32,7 @@
 <Import Project="../../Game/Common/PreviewScenes.props" />
 <ItemGroup><ProjectReference Include="..\Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project><LinkLibraryDependencies>true</LinkLibraryDependencies></ProjectReference><ProjectReference Include="..\..\Editor\EditorModule.vcxproj"><Project>{D1C7E1A4-515D-501E-AEC8-7E082E8D7425}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference><ProjectReference Include="..\..\Game\RuntimeExample\RuntimeExample.vcxproj"><Project>{7A86EB5A-6C85-5FFA-8266-59398BABE19F}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference><ProjectReference Include="../../Game/SceneProject/SceneProject.vcxproj"><Project>{84C260EA-D588-4DE9-A997-B8F549FE0210}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference></ItemGroup>
 <Import Project="$(VCTargetsPath)/Microsoft.Cpp.targets" />
-<Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
+<Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableVcpkg)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
 <Import Project="../BuildSupport/Content.targets" />
 <ItemGroup>
   <PreviewProject Include="../../Game/BasicExamples/Project.json"><ProjectName>BasicExamples</ProjectName></PreviewProject>
@@ -57,4 +61,5 @@
 </Target>
 <Import Project="../BuildSupport/AssimpRuntime.targets" />
 
+  <Import Project="..\BuildSupport\JoltRuntime.targets" />
 </Project>

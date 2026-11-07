@@ -1,6 +1,7 @@
 #include <Engine/Runtime/ModuleApi.h>
 #include <Engine/Runtime/EditSessionApi.h>
 #include <Engine/Runtime/EditExtensions.h>
+#include <Engine/Runtime/PhysicsEditApi.h>
 #include <Engine/Runtime/VfsApi.h>
 #include "../../Engine/Source/Resources/VfsRead.h"
 #include "QtHost.h"
@@ -133,6 +134,13 @@ extern "C" __declspec(dllexport) int __cdecl EngineBindAudioPreview(uint32_t ver
 {
     if (version != 1 || size != sizeof(EngineAudioPreviewApi) || !instance) return 0;
     static_cast<EditorQtHost*>(instance)->SetAudioPreviewApi(api ? *api : EngineAudioPreviewApi{});
+    return 1;
+}
+
+extern "C" __declspec(dllexport) int __cdecl EngineBindPhysics(uint32_t version, uint32_t size, void* instance, const EnginePhysicsApi* api)
+{
+    if (version != 1 || size != sizeof(EnginePhysicsApi) || !instance) return 0;
+    static_cast<EditorQtHost*>(instance)->SetPhysicsApi(api ? *api : EnginePhysicsApi{});
     return 1;
 }
 

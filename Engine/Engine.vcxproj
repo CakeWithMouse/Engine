@@ -9,6 +9,10 @@
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion><PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'=='' and Exists('$(MSBuildThisFileDirectory)vcpkg_installed\x64-windows\include\assimp\scene.h')">true</EngineEnableAssimp>
     <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'==''">false</EngineEnableAssimp>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'=='' and Exists('$(MSBuildThisFileDirectory)vcpkg_installed\x64-windows\include\Jolt\Jolt.h')">true</EngineEnableJolt>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'==''">false</EngineEnableJolt>
+    <EngineEnableVcpkg>$(EngineEnableAssimp)</EngineEnableVcpkg>
+    <EngineEnableVcpkg Condition="'$(EngineEnableJolt)'=='true'">true</EngineEnableVcpkg>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
@@ -24,16 +28,17 @@
     <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\</VcpkgRoot>
     <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\</VcpkgRoot>
     <VcpkgRoot Condition="'$(VcpkgRoot)'==''">C:\vcpkg\</VcpkgRoot>
-    <VcpkgEnableManifest>$(EngineEnableAssimp)</VcpkgEnableManifest>
-    <VcpkgEnabled>$(EngineEnableAssimp)</VcpkgEnabled>
+    <VcpkgEnableManifest>$(EngineEnableVcpkg)</VcpkgEnableManifest>
+    <VcpkgEnabled>$(EngineEnableVcpkg)</VcpkgEnabled>
     <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\Engine\</VcpkgManifestRoot>
     <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\Engine\vcpkg_installed\</VcpkgInstalledDir>
   </PropertyGroup>
-  <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
+  <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableVcpkg)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Import Project="BuildSupport\Cpp.props" />
   <ItemDefinitionGroup><ClCompile><AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)ThirdParty\stb;$(MSBuildThisFileDirectory)ThirdParty\meshoptimizer\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories></ClCompile></ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(EngineEnableAssimp)'=='true'"><ClCompile><PreprocessorDefinitions>ENGINE_ENABLE_ASSIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile></ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true'"><ClCompile><PreprocessorDefinitions>ENGINE_ENABLE_JOLT;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile></ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\Base\Base.cpp" />
     <ClCompile Include="Source\Components\Light\DirectionalLightComponent.cpp" />
@@ -53,6 +58,8 @@
     <ClCompile Include="Source\Runtime\SceneEditAssets.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditAudio.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditMaterials.cpp" />
+    <ClInclude Include="Include\Engine\Components\SpecificComponents\RigidBodyComponent.h" />
+    <ClInclude Include="Include\Engine\Runtime\PhysicsEditApi.h" />
     <ClInclude Include="Include\Engine\Scene\SceneDocument.h" />
     <ClCompile Include="Source\Runtime\SceneEditSession.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditBatch.cpp" />
@@ -60,6 +67,7 @@
     <ClCompile Include="Source\Scene\AssetUpdate.cpp" />
     <ClCompile Include="Source\Runtime\GameEditModule.cpp" />
     <ClInclude Include="Include\Engine\Runtime\EditSessionApi.h" />
+    <ClInclude Include="Include\Engine\Runtime\PhysicsEditApi.h" />
     <ClInclude Include="Include\Engine\Runtime\GameSceneApi.h" />
     <ClInclude Include="Include\Engine\Runtime\GameWindowApi.h" />
     <ClInclude Include="Include\Engine\Runtime\SceneEditSession.h" />
@@ -99,6 +107,11 @@
     <ClInclude Include="Include\Engine\Components\Character.h" />
     <ClInclude Include="Include\Engine\MainGame\CharacterController.h" />
     <ClCompile Include="Source\MainGame\GameSession.cpp" />
+    <ClCompile Include="Source\Physics\PhysicsWorld.cpp" Condition="'$(EngineEnableJolt)'=='true'" />
+    <ClCompile Include="Source\Components\SpecificComponents\RigidBodyComponent.cpp" Condition="'$(EngineEnableJolt)'=='true'" />
+    <ClInclude Include="Include\Engine\Physics\PhysicsSettings.h" />
+    <ClInclude Include="Include\Engine\Physics\PhysicsWorld.h" />
+    <ClInclude Include="Include\Engine\Components\SpecificComponents\RigidBodyComponent.h" />
     <ClCompile Include="Source\MainGame\BaseGameClass\Game.cpp" />
     <ClCompile Include="Source\MainGame\Player.cpp" />
     <ClCompile Include="Source\Render\ImpostorAtlas.cpp" />
@@ -195,8 +208,8 @@
     <ClInclude Include="Source\Runtime\VfsService.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
-  <Target Name="RequireAssimpDependencies" BeforeTargets="PrepareForBuild" Condition="'$(EngineEnableAssimp)'=='true'">
-    <Error Condition="!Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" Text="EngineEnableAssimp requires vcpkg. Set VCPKG_ROOT or /p:VcpkgRoot to the installed vcpkg directory." />
+  <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableVcpkg)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
+  <Target Name="RequireVcpkgDependencies" BeforeTargets="PrepareForBuild" Condition="'$(EngineEnableVcpkg)'=='true'">
+    <Error Condition="!Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" Text="vcpkg-dependent features (assimp, Jolt physics) require vcpkg. Set VCPKG_ROOT or /p:VcpkgRoot to the installed vcpkg directory." />
   </Target>
 </Project>

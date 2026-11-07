@@ -26,4 +26,11 @@
   <Target Name="DeployBattleMaterials" AfterTargets="Build">
     <Copy SourceFiles="@(BattleMaterials)" DestinationFolder="$(OutDir)Materials" SkipUnchangedFiles="true" />
   </Target>
+
+  <PropertyGroup>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'=='' and Exists('..\..\vcpkg_installed\x64-windows\include\Jolt\Jolt.h')">true</EngineEnableJolt>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'==''">false</EngineEnableJolt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Debug'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/debug/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Release'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
 </Project>

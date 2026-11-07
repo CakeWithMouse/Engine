@@ -56,6 +56,7 @@ std::unique_ptr<Game> SceneEditSession::CopyForPlay()
     candidate->SetSimulationTimeScale(1.0f);
     candidate->SetSceneLightingEnabled(true);
     candidate->GetSettings().SetAntialiasing(antialiasingMode_);
+    candidate->GetSettings().Physics() = edit_->GetSettings().Physics();
     for (const auto& [id, st] : storedIcons_) candidate->SetOverlayIcon(id, st.width, st.height, st.pixels.data());
     SceneDocument::Restore(edit_->GetScene().GetSnapshot(), catalog_, candidate->GetScene());
     return candidate;
@@ -429,6 +430,50 @@ EngineViewportOverlayApi SceneEditSession::GetViewportOverlayApi() noexcept
         }
     };
 }
+EnginePhysicsApi SceneEditSession::GetPhysicsApi() noexcept
+{
+    return {1, this,
+        [](void* p, EnginePhysicsSettingsState* output) -> uint32_t {
+            if (!output) return EngineSceneInvalidArgument;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (!s.edit_) return EngineSceneFailure;
+                const auto& physics = s.Active().GetSettings().Physics();
+                const auto gravity = physics.GetGravity();
+                *output = {physics.IsEnabled() ? 1u : 0u,
+                           gravity.x, gravity.y, gravity.z,
+                           physics.GetFixedTimeStep(),
+                           static_cast<uint32_t>(physics.GetMaxSubSteps()),
+                           static_cast<uint32_t>(physics.GetVelocitySteps()),
+                           static_cast<uint32_t>(physics.GetPositionSteps())};
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, const EnginePhysicsSettingsState* value) -> uint32_t {
+            if (!value || (value->enabled != 0 && value->enabled != 1) ||
+                !(value->fixedTimeStep > 0.0f) || value->maxSubSteps == 0 ||
+                !std::isfinite(value->gravityX) || !std::isfinite(value->gravityY) ||
+                !std::isfinite(value->gravityZ)) return EngineSceneInvalidArgument;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                if (!s.edit_) return EngineSceneFailure;
+                auto& physics = s.Active().GetSettings().Physics();
+                physics.SetEnabled(value->enabled != 0);
+                physics.SetGravity({value->gravityX, value->gravityY, value->gravityZ});
+                physics.SetFixedTimeStep(value->fixedTimeStep);
+                physics.SetMaxSubSteps(static_cast<int>(value->maxSubSteps));
+                physics.SetVelocitySteps(static_cast<int>(value->velocitySteps));
+                physics.SetPositionSteps(static_cast<int>(value->positionSteps));
+                return EngineSceneOk;
+            });
+        },
+        [](void*) -> uint32_t {
+#ifdef ENGINE_ENABLE_JOLT
+            return 1;
+#else
+            return 0;
+#endif
+        }};
+}
+
 void SceneEditSession::ReplaceEdit(const SceneSnapshot& data)
 {
     auto candidate = EmptyGame();

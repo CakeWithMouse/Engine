@@ -62,6 +62,7 @@ const char* ToString(RegisterResult result);
 
 class GameComponent;
 class Material;
+class PhysicsWorld;
 class PointLightComponent;
 class UIComponent;
 class FBXComponent;
@@ -165,6 +166,11 @@ public:
     // Borrowed reference: valid for this Game lifetime.
     GameSettings& GetSettings() { return Settings; }
     const GameSettings& GetSettings() const { return Settings; }
+    /**
+     * World of the physics simulation. Created lazily while simulation runs and physics
+     * is enabled in the settings; nullptr otherwise. Valid until the Game is destroyed.
+     */
+    PhysicsWorld* GetPhysicsWorld() const { return PhysicsWorldPtr.get(); }
 
     /** Creates window, device and base resources. Returns false (and releases everything) on failure. */
     bool Initialize();
@@ -399,6 +405,8 @@ protected:
     void ApplyPendingResize();
     void UpdateFrame(float realDeltaTime);
     void UpdateSimulation(float deltaTime);
+    // Steps the physics world (fixed timestep) before component ticks.
+    void TickPhysicsWorld(float deltaTime);
     void UpdateAudio();
     void StartGameplayComponents();
     void PrepareRenderFrame();
@@ -504,6 +512,7 @@ protected:
     bool GameplayInitialized = false;
     std::unique_ptr<GameSession> OwnedSession;
     GameSession* Session = nullptr;
+    std::unique_ptr<PhysicsWorld> PhysicsWorldPtr;
     std::unique_ptr<UIComponent> ProjectHudComponent;
 
     // Scene owns components. The read-only alias preserves legacy traversal/order.

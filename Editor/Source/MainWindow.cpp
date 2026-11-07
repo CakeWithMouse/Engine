@@ -358,6 +358,8 @@ void EditorMainWindow::BuildSceneMenu()
     playMenu_ = menuBar()->addMenu(Tr("Запуск", "Play"));
     auto* hudSettings = playMenu_->addAction(Tr("HUD игры…", "Game HUD…"), this, &EditorMainWindow::ShowHudSettings);
     hudSettings->setObjectName("ProjectHudSettings");
+    playMenu_->addAction(Tr("Физика…", "Physics…"), this, &EditorMainWindow::ShowPhysicsSettings)
+        ->setObjectName("PhysicsSettings");
     if (actPlay_) playMenu_->addAction(actPlay_);
     if (actPause_) playMenu_->addAction(actPause_);
     if (actStop_) playMenu_->addAction(actStop_);
