@@ -70,7 +70,7 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
 }
 
 EditorMainWindow::~EditorMainWindow() {
-    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Import"));
+    UnregisterAssetCommands();
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("UI.Create"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("UI.OpenEditor"));
     if (host_) host_->SetUiListener(nullptr);
@@ -238,7 +238,6 @@ void EditorMainWindow::BuildUi()
     BuildSceneMenu();
     BuildCodeTools();
     BuildToolsMenu();
-    RegisterAssetCommands();
     for (auto* menu : { sceneMenu_, editMenu_, viewMenu_, playMenu_, projectMenu_, toolsMenu_ }) {
         if (menu) {
             auto* action = menu->menuAction();
@@ -342,11 +341,7 @@ void EditorMainWindow::BuildSceneMenu()
 
     sceneMenu_->addSeparator();
 
-    resourcesSubMenu_ = sceneMenu_->addMenu(Tr("Ресурсы", "Assets"));
-    actAddModel_ = resourcesSubMenu_->addAction(Tr("Добавить модель…", "Add Model…"), this, [this] { AddModel(); });
-    actImportModel_ = resourcesSubMenu_->addAction(Tr("Импорт модели…", "Import Model…"), this, [this] { CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 0}}); });
-    actImportTexture_ = resourcesSubMenu_->addAction(Tr("Импорт текстуры…", "Import Texture…"), this, [this] { CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 1}}); });
-    actImportAudio_ = resourcesSubMenu_->addAction(Tr("Импорт аудио…", "Import Audio…"), this, [this] { CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 2}}); });
+    BuildResourcesMenu(sceneMenu_);
 
     actReloadShaders_ = sceneMenu_->addAction(Tr("Перекомпилировать шейдеры", "Reload Shaders"), this, [this] {
         ReloadShaders();

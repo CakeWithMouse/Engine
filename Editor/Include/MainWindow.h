@@ -101,8 +101,10 @@ private:
 
     void BuildSceneDocks();
     void BuildSceneMenu();
+    void BuildResourcesMenu(QMenu* sceneMenu);
     void BuildToolsMenu();
     void RegisterAssetCommands();
+    void UnregisterAssetCommands();
     void ConnectPanels();
 
     void ApplyDefaultLayout();
