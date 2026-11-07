@@ -198,6 +198,7 @@
         <ClCompile Include="Core/HlslGraphCompiler.cpp"/>
         <ClCompile Include="Core/MaterialGraphModel.cpp"/>
         <ClCompile Include="Core/SceneFile.cpp"/>
+        <ClCompile Include="Core/ImportSettings.cpp"/>
         <ClCompile Include="Core/Terminal.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_Logger.cpp">
             <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -263,6 +264,7 @@
         <ClInclude Include="Core/HlslGraphCompiler.h"/>
         <ClInclude Include="Core/MaterialGraphModel.h"/>
         <ClInclude Include="Core/SceneFile.h"/>
+        <ClInclude Include="Core/ImportSettings.h"/>
         <ClInclude Include="Core/Terminal.h"/>
         <CustomBuild Include="Core/Logger.h">
             <FileType>Document</FileType>

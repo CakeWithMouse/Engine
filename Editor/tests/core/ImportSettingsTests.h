@@ -1,0 +1,146 @@
+#pragma once
+
+#include "../../Core/FileService.h"
+#include "../../Core/Logger.h"
+#include "../../Core/ImportSettings.h"
+
+#include <QTemporaryDir>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <limits>
+
+namespace
+{
+
+void CheckImportSettings(bool cond, const char* msg)
+{
+    if (!cond)
+    {
+        std::fprintf(stderr, "FAIL (ImportSettings): %s\n", msg);
+        std::exit(1);
+    }
+}
+
+inline void RunImportSettingsTests(int& outChecks)
+{
+    using namespace EditorCore;
+
+    int checks = 0;
+    auto check = [&](bool cond, const char* msg) {
+        CheckImportSettings(cond, msg);
+        ++checks;
+    };
+
+    // 1. IsValidScale and ClampScale
+    check(ImportSettingsFile::IsValidScale(1.0f), "Scale 1.0 is valid");
+    check(ImportSettingsFile::IsValidScale(0.1f), "Scale 0.1 is valid");
+    check(ImportSettingsFile::IsValidScale(0.01f), "Scale 0.01 is valid");
+    check(ImportSettingsFile::IsValidScale(1e-4f), "Scale 1e-4 is valid");
+    check(ImportSettingsFile::IsValidScale(1e4f), "Scale 1e4 is valid");
+    check(!ImportSettingsFile::IsValidScale(0.0f), "Scale 0.0 is invalid");
+    check(!ImportSettingsFile::IsValidScale(-1.0f), "Negative scale is invalid");
+    check(!ImportSettingsFile::IsValidScale(1e-5f), "Scale < 1e-4 is invalid");
+    check(!ImportSettingsFile::IsValidScale(1e5f), "Scale > 1e4 is invalid");
+    check(!ImportSettingsFile::IsValidScale(std::numeric_limits<float>::quiet_NaN()), "NaN scale is invalid");
+    check(!ImportSettingsFile::IsValidScale(std::numeric_limits<float>::infinity()), "Inf scale is invalid");
+
+    check(std::abs(ImportSettingsFile::ClampScale(1.0f) - 1.0f) < 1e-6f, "Clamp 1.0 keeps 1.0");
+    check(std::abs(ImportSettingsFile::ClampScale(1e-6f) - 1e-4f) < 1e-6f, "Clamp underflow to 1e-4");
+    check(std::abs(ImportSettingsFile::ClampScale(1e6f) - 1e4f) < 1e-6f, "Clamp overflow to 1e4");
+
+    // 2. Round-trip serialization
+    ImportSettings s1{0.01f};
+    const QByteArray bytes = ImportSettingsFile::Serialize(s1);
+    check(!bytes.isEmpty(), "Serialize produced non-empty data");
+
+    ImportSettings s1Loaded;
+    QString err;
+    const bool parseOk = ImportSettingsFile::Parse(bytes, s1Loaded, &err);
+    check(parseOk, "Parse succeeded on valid serialized data");
+    check(err.isEmpty(), "No error on valid parse");
+    check(std::abs(s1Loaded.scale - 0.01f) < 1e-6f, "Loaded scale matches serialized 0.01");
+
+    // 3. Broken JSON handling (explicit error logged, no silent fallback, default value set)
+    ImportSettings sBroken;
+    sBroken.scale = 42.0f;
+    QString brokenErr;
+    const bool brokenOk = ImportSettingsFile::Parse(QByteArray("not a valid json { broken"), sBroken, &brokenErr);
+    check(!brokenOk, "Parse fails on broken JSON");
+    check(!brokenErr.isEmpty(), "Error message populated for broken JSON");
+    check(std::abs(sBroken.scale - 1.0f) < 1e-6f, "Scale reset to default 1.0 on broken JSON");
+
+    // 4. Missing scale field in JSON
+    ImportSettings sMissing;
+    sMissing.scale = 42.0f;
+    QString missingErr;
+    const bool missingOk = ImportSettingsFile::Parse(QByteArray("{\"version\": 1}"), sMissing, &missingErr);
+    check(!missingOk, "Parse fails on JSON missing scale");
+    check(!missingErr.isEmpty(), "Error message populated for missing scale");
+    check(std::abs(sMissing.scale - 1.0f) < 1e-6f, "Scale reset to default 1.0 on missing scale");
+
+    // 5. Non-number scale field
+    ImportSettings sStr;
+    sStr.scale = 42.0f;
+    QString strErr;
+    const bool strOk = ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"scale\": \"big\"}"), sStr, &strErr);
+    check(!strOk, "Parse fails on string scale");
+    check(!strErr.isEmpty(), "Error message populated for string scale");
+    check(std::abs(sStr.scale - 1.0f) < 1e-6f, "Scale reset to default 1.0 on string scale");
+
+    // 6. Out of range scale values
+    ImportSettings sOutOfRange;
+    sOutOfRange.scale = 42.0f;
+    QString rangeErr;
+    const bool rangeOk = ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"scale\": 0.0}"), sOutOfRange, &rangeErr);
+    check(!rangeOk, "Parse fails on scale 0.0");
+    check(!rangeErr.isEmpty(), "Error message populated for scale 0.0");
+    check(std::abs(sOutOfRange.scale - 1.0f) < 1e-6f, "Scale reset to default 1.0 on scale 0.0");
+
+    const bool negOk = ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"scale\": -5.0}"), sOutOfRange, &rangeErr);
+    check(!negOk, "Parse fails on negative scale");
+    check(std::abs(sOutOfRange.scale - 1.0f) < 1e-6f, "Scale reset to default 1.0 on negative scale");
+
+    const bool largeOk = ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"scale\": 100000.0}"), sOutOfRange, &rangeErr);
+    check(!largeOk, "Parse fails on scale > 1e4");
+    check(std::abs(sOutOfRange.scale - 1.0f) < 1e-6f, "Scale reset to default 1.0 on scale > 1e4");
+
+    // 7. Sidecar path helper
+    check(ImportSettingsFile::SidecarPathForAsset(QStringLiteral("Content/Models/Hero/Hero.glb")) ==
+          QStringLiteral("Content/Models/Hero/Hero.glb.importsettings.json"), "SidecarPathForAsset appends .importsettings.json");
+    check(ImportSettingsFile::SidecarPathForAsset(QString()).isEmpty(), "SidecarPathForAsset empty for empty path");
+
+    // 8. FileService integration (Save & Load with sandbox)
+    QTemporaryDir tempDir;
+    check(tempDir.isValid(), "Temporary directory created for ImportSettings tests");
+
+    Logger logger;
+    FileService fs(&logger);
+    fs.SetProjectRoot(tempDir.path());
+
+    const QString sidecarRel = QStringLiteral("Models/Hero/Hero.glb.importsettings.json");
+    const ImportSettings saveSet{0.1f};
+    QString saveErr;
+    const bool saveOk = ImportSettingsFile::Save(fs, sidecarRel, saveSet, &saveErr);
+    check(saveOk, "ImportSettingsFile::Save succeeded via FileService");
+    check(saveErr.isEmpty(), "No error on save");
+
+    ImportSettings loadSet;
+    QString loadErr;
+    const bool loadOk = ImportSettingsFile::Load(fs, sidecarRel, loadSet, &loadErr);
+    check(loadOk, "ImportSettingsFile::Load succeeded via FileService");
+    check(loadErr.isEmpty(), "No error on load");
+    check(std::abs(loadSet.scale - 0.1f) < 1e-6f, "Loaded scale matches saved scale 0.1");
+
+    // Rejection on Save with invalid scale
+    const ImportSettings badSaveSet{-1.0f};
+    QString badSaveErr;
+    const bool badSaveOk = ImportSettingsFile::Save(fs, sidecarRel, badSaveSet, &badSaveErr);
+    check(!badSaveOk, "Save fails for invalid scale");
+    check(!badSaveErr.isEmpty(), "Error populated for invalid scale save");
+
+    outChecks += checks;
+}
+
+} // namespace
+

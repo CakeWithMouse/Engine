@@ -16,6 +16,8 @@
 #include "../Core/AssetOps.h"
 #include "core/AssetOpsTests.h"
 #include "core/GizmoGeometryTests.h"
+#include "../Core/ImportSettings.h"
+#include "core/ImportSettingsTests.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
@@ -413,6 +415,10 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestAssetOps...\n");
     std::fflush(stdout);
     TestAssetOps();
+
+    std::printf("[Test] TestImportSettings...\n");
+    std::fflush(stdout);
+    RunImportSettingsTests(gChecks);
 
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);
