@@ -96,11 +96,11 @@ inline void RunImportSettingsTests(int& outChecks)
     check(s1Loaded.model.flipUv == true, "Loaded flipUv matches true");
     check(s1Loaded.model.mergeMeshes == true, "Loaded mergeMeshes matches true");
 
-    // 2b. Migration of legacy S16 format {"scale": 0.01}
+    // 2b. Migration of legacy S16 format {"scale": 0.01, "foo": 1} with unknown fields preservation
     ImportSettings sLegacy;
     QString legacyErr;
-    const bool legacyOk = ImportSettingsFile::Parse(QByteArray("{\"scale\": 0.01}"), sLegacy, &legacyErr);
-    check(legacyOk, "Parse succeeded on legacy S16 sidecar");
+    const bool legacyOk = ImportSettingsFile::Parse(QByteArray("{\"scale\": 0.01, \"foo\": 1}"), sLegacy, &legacyErr);
+    check(legacyOk, "Parse succeeded on legacy S16 sidecar with foo");
     check(sLegacy.version == 1, "Legacy sidecar migrated to version 1");
     check(sLegacy.kind == QStringLiteral("model"), "Legacy sidecar migrated to kind model");
     check(std::abs(sLegacy.model.scale - 0.01f) < 1e-6f, "Legacy sidecar scale loaded as 0.01");
@@ -111,6 +111,13 @@ inline void RunImportSettingsTests(int& outChecks)
     check(sLegacy.model.importTextures == true, "Legacy sidecar importTextures defaults to true");
     check(sLegacy.model.flipUv == false, "Legacy sidecar flipUv defaults to false");
     check(sLegacy.model.mergeMeshes == false, "Legacy sidecar mergeMeshes defaults to false");
+    check(sLegacy.extraFields.contains(QStringLiteral("foo")), "Legacy extra field foo captured");
+    check(sLegacy.extraFields.value(QStringLiteral("foo")).toInt() == 1, "Legacy extra field foo value is 1");
+
+    const QByteArray legacyReserialized = ImportSettingsFile::Serialize(sLegacy);
+    const QJsonDocument legacyDoc = QJsonDocument::fromJson(legacyReserialized);
+    check(legacyDoc.object().value(QStringLiteral("foo")).toInt() == 1, "Legacy foo preserved upon reserialization");
+    check(std::abs(legacyDoc.object().value(QStringLiteral("model")).toObject().value(QStringLiteral("scale")).toDouble() - 0.01) < 1e-6, "Migrated model scale is 0.01");
 
     // 2c. Preservation of unknown fields (root and model)
     ImportSettings sUnknown;
