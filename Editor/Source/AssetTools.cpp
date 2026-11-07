@@ -44,47 +44,6 @@ void EditorMainWindow::UpdateAsset(const QString& path,bool move,const QString& 
     sceneBusy_=true;host_->PostCommand(c);
 }
 
-void EditorMainWindow::ImportAsset(int kind, const QString& source)
-{
-    if (!host_->HasScene() ||
-        sceneBusy_ ||
-        host_->PlayState() != EditorQtHost::EditorState::Edit)
-    {
-        return;
-    }
-
-    const QString title = kind == 1
-        ? Tr("Импорт текстур в проект", "Import Textures to Project")
-        : kind == 2
-            ? Tr("Импорт аудио в проект", "Import Audio to Project")
-            : Tr("Импорт моделей в проект", "Import Models to Project");
-
-    const QString filter = kind == 1
-        ? Tr("Текстуры (*.png *.jpg *.jpeg *.bmp *.tga)", "Textures (*.png *.jpg *.jpeg *.bmp *.tga)")
-        : kind == 2
-            ? Tr("Аудио (*.wav *.ogg *.mp3 *.flac)", "Audio (*.wav *.ogg *.mp3 *.flac)")
-            : Tr("Модели (*.glb *.gltf *.obj *.fbx *.blend)", "Models (*.glb *.gltf *.obj *.fbx *.blend)");
-
-    const QStringList paths = source.isEmpty()
-                                  ? QFileDialog::getOpenFileNames(this, title, {}, filter)
-                                  : QStringList{source};
-
-    for (const auto& path : paths)
-    {
-        EditorCommand c;
-
-        c.type = kind == 1
-                     ? EditorCommand::ImportTexture
-                     : kind == 2
-                         ? EditorCommand::ImportAudio
-                         : EditorCommand::ImportModel;
-
-        c.path = path;
-
-        host_->PostCommand(c);
-    }
-}
-
 void EditorMainWindow::AddModel(const QString& path)
 {
     if (!host_->HasScene() ||
@@ -171,6 +130,11 @@ void EditorMainWindow::UseAsset(const QString& path)
 
         for (int i = 0; i < 3; ++i)
             c.transform.position[i] = static_cast<float>(spawn[i]);
+
+        const float s = GetModelSpawnScale(path);
+        c.transform.scale[0] = s;
+        c.transform.scale[1] = s;
+        c.transform.scale[2] = s;
     }
     else
     {

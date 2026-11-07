@@ -1,9 +1,14 @@
 #pragma once
 #include "SceneCommandHandler.h"
+#include "AssetCommandHandler.h"
 #include <QFile>
+#include <QDir>
+#include <QFileInfo>
+#include <QTemporaryDir>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <cmath>
 #include <map>
 
 // In-memory scene with real checkpoint files: tests exercise command routing,
@@ -158,6 +163,91 @@ inline int Run() {
     history.BeginGizmoDrag(1);move.path="gizmo";
     auto now=std::chrono::steady_clock::now();history.OnTransformApplied(move,now);history.ClearHistory();
     check(!history.ShouldCoalesce(move,now),"clearing history invalidates active gesture checkpoint");
+
+    // Test batch import of 3 models at Host level (Remark 3)
+    {
+        AssetCommandHandler assetHandler;
+        AssetCommandHandler::Context assetCtx;
+        assetCtx.scene.context = &s;
+        assetCtx.scene.importAsset = [](void*, const char* source, uint32_t,
+                                        char* outPath, uint32_t outCapacity, char*, uint32_t) -> uint32_t {
+            std::string src(source);
+            auto pos = src.find_last_of("/\\");
+            std::string name = (pos == std::string::npos) ? src : src.substr(pos + 1);
+            std::string virt = "/Game/Models/Batch/" + name;
+            strncpy_s(outPath, outCapacity, virt.c_str(), _TRUNCATE);
+            return EngineSceneOk;
+        };
+
+        QTemporaryDir tempDir;
+        check(tempDir.isValid(), "Temporary directory created for batch import test");
+        const QString projectDir = tempDir.path();
+        const QString contentDir = projectDir + QStringLiteral("/Content");
+        QDir(projectDir).mkpath(QStringLiteral("Content/Models/Batch"));
+
+        struct FileSpec {
+            QString src;
+            float scale;
+        };
+        const std::vector<FileSpec> batch = {
+            { QStringLiteral("C:/Sources/Tree.glb"), 0.01f },
+            { QStringLiteral("C:/Sources/Rock.glb"), 0.1f },
+            { QStringLiteral("C:/Sources/Hero.glb"), 1.0f }
+        };
+
+        std::vector<QString> sidecarPaths;
+
+        for (const auto& item : batch)
+        {
+            EditorCommand cmd;
+            cmd.type = EditorCommand::ImportModel;
+            cmd.path = item.src;
+            cmd.importScale = item.scale;
+
+            EditorCommand completedCmd;
+            uint32_t res = 999;
+            QString err;
+            assetHandler.Handle(cmd, assetCtx, history, IEditorHost::Edit,
+                                nullptr, 0, 0, completedCmd, res, err);
+
+            check(res == EngineSceneOk, "Host AssetCommandHandler imports model successfully");
+            check(completedCmd.type == EditorCommand::ImportModel, "completedCmd type is ImportModel");
+            check(std::abs(completedCmd.importScale - item.scale) < 1e-5f, "completedCmd preserves importScale");
+            check(completedCmd.path.startsWith(QStringLiteral("/Game/Models/Batch/")), "completedCmd has virtual path");
+
+            // OnCommandFinished sidecar write: resolve path and write sidecar JSON
+            const QString virtRel = completedCmd.path.mid(6);
+            const QString diskAsset = contentDir + QStringLiteral("/") + virtRel;
+            const QString sidecarPath = diskAsset + QStringLiteral(".importsettings.json");
+
+            QJsonObject root;
+            root[QStringLiteral("version")] = 1;
+            root[QStringLiteral("scale")] = static_cast<double>(completedCmd.importScale);
+            QFile f(sidecarPath);
+            check(f.open(QIODevice::WriteOnly), "Can write sidecar file at host level");
+            f.write(QJsonDocument(root).toJson(QJsonDocument::Compact));
+            f.close();
+
+            sidecarPaths.push_back(sidecarPath);
+        }
+
+        check(sidecarPaths.size() == 3, "3 sidecars created");
+        check(sidecarPaths[0] != sidecarPaths[1] && sidecarPaths[1] != sidecarPaths[2],
+              "All 3 sidecar paths are distinct");
+
+        for (size_t i = 0; i < batch.size(); ++i)
+        {
+            QFile f(sidecarPaths[i]);
+            check(f.exists(), "Sidecar file exists on disk");
+            check(f.open(QIODevice::ReadOnly), "Sidecar can be opened");
+            auto doc = QJsonDocument::fromJson(f.readAll());
+            check(doc.isObject(), "Sidecar is valid JSON");
+            auto obj = doc.object();
+            check(obj[QStringLiteral("version")].toInt() == 1, "Sidecar version is 1");
+            const float scale = static_cast<float>(obj[QStringLiteral("scale")].toDouble());
+            check(std::abs(scale - batch[i].scale) < 1e-5f, "Sidecar scale matches completedCmd.importScale");
+        }
+    }
     std::cout<<"Host regression checks: "<<checks<<std::endl;return checks;
 }
 }

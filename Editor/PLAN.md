@@ -1,5 +1,5 @@
 # План разработки PainEngine Editor v2
-> **Ветка:** `rewrite/editor-v2`  
+> **Ветка:** `feat/import-settings`  
 > **Архитектор:** Юрий  
 > **Инженер-исполнитель:** Antigravity  
 > **Протокол:** `engine-work-protocol`
@@ -94,26 +94,31 @@
 
 ---
 
-## Эталон тестов (Baseline S0 / S1 / S2 / S3 / S9)
+## Эталон тестов (Baseline S16 на ветке main)
 
-| Тест / Скрипт | Результат на `main` | Результат после S9 | Примечание |
-|---|---|---|---|
-| Сборка `Editor` (Debug) | **FAIL (LNK1104)** | **PASS** | 0 ошибок, 0 новых warnings |
-| Сборка `Editor` (Release) | **FAIL (C1083 LTCG)** | **PASS** | Собрано из пути без запятых (`Documents\GitHub\Engine`) |
-| `Editor/tests/CoreTests.exe` | — | **216/216 PASS** | +17 проверок `GizmoGeometryTests` (S1–S3, S9, GizmoMath, Geometry, MaterialGraph, SceneFile, Terminal, AssetOps, Locale, Settings) |
-| `Editor/tests/HostTests.exe` | — | **6/6 PASS** | Юнит-тесты Host (`EditorHistory`) |
-| `Editor/tests/UiTests.exe` | — | **245/245 PASS** | 15 самопроверка + 230 UI Smoke тесты (89 Cyrillic строк в RU) |
-| `Engine/tests/run.ps1` | **43/43 PASS** | **43/43 PASS** | Тесты ядра Engine |
-| `Engine/tests/component-generation/run.ps1` | **20/20 PASS** | **20/20 PASS** | Генератор компонентов и контракты |
-| `Engine/tests/edit-session/run.ps1` | **609/609 PASS** | **617/617 PASS** | +8 тестов `ViewportOverlayApi` |
-| `Engine/tests/run-viewport.ps1` | **7/7 PASS** | **7/7 PASS** | Рендеринг и вьюпорт |
-| `Engine/tests/scene-module/run.ps1` | **109/109 PASS** | **109/109 PASS** | C-ABI сцены |
-| `Engine/tests/skeletal/run.ps1` | **8/8 PASS** | **8/8 PASS** | Скелетная анимация |
-| `Engine/tests/code-projects/class-names.ps1` | **27/27 PASS** | **27/27 PASS** | Имена классов |
-| `Game/tests/run-games.ps1` | **27/27 PASS** | **27/27 PASS** | Игры и Launcher |
-| `Engine/tests/run-runtime.ps1` | **LNK1104 FAIL** | **25/25 PASS** | Runtime тесты |
-| `Engine/tests/compatibility/run.ps1` | **LNK1104 FAIL** | **88/88 PASS** | Совместимость с предыдущими версиями |
-| `Engine/tests/project-workflow/run.ps1` | **LNK1104 FAIL** | **262/262 PASS** | Сквозные тесты проектов |
+| Тест / Скрипт | Результат на `main` (эталон) | Примечание |
+|---|---|---|
+| Сборка `EditorModule` (Debug) | **PASS** | 0 ошибок, 0 новых warnings |
+| Сборка `EditorModule` (Release) | **PASS** | Собрано MSBuild x64 |
+| `Editor/tests/CoreTests.exe` | **374/374 PASS** | Все тесты Core пройдены |
+| `Editor/tests/HostTests.exe` | **69/69 PASS** | 45 regression + 18 overlay + 6 history |
+| `Editor/tests/UiTests.exe` | **260/260 PASS** | 15 helper + 245 smoke (90 RU strings) |
+| `Engine/tests/run.ps1` (Debug) | **59/59 PASS** | Тесты ядра Engine |
+| `Engine/tests/component-generation/run.ps1` | **24/24 PASS** | Генератор компонентов и контракты |
+| `Engine/tests/edit-session/run.ps1` (Debug) | **651/651 PASS** | C-ABI сессии сцены |
+| `Engine/tests/scene-module/run.ps1` (Debug) | **109/109 PASS** | C-ABI сцены |
+| `Engine/tests/run-viewport.ps1` (Debug) | **7/7 PASS** | Рендеринг и вьюпорт |
+| `Engine/tests/skeletal/run.ps1` (Debug) | **8/8 PASS** | Скелетная анимация |
+| `Engine/tests/code-projects/class-names.ps1` | **27/27 PASS** | Имена классов |
+| `Engine/tests/run-runtime.ps1` (Debug) | **18/18 PASS** | Runtime тесты |
+| `Editor/tools/check.ps1 -Quick` | **FAIL (Красная база)** | `FAIL: Legacy file Editor/Source/MaterialEditorWindow.cpp exceeded Cyrillic ratchet limit (1380 > 800)` |
+| `Game/tests/run-games.ps1` | **FAIL (Красная база)** | `Expected 1, got -1073741515: BasicExamples.exe --smoke` (отсутствие assimp.dll в фикстуре, 25/27 PASS) |
+| `Editor/tests/run.ps1` (`EditorUiTests.exe`) | **FAIL (Красная база)** | `preview clears to its background` (падение grabWindow в фоновом окружении) |
+| `Engine/tests/assets/run.ps1` | **FAIL (Красная база)** | `ParserError: Unexpected token '' + [guid]::NewGuid().ToString(''` (нет BOM в PS 5.1) |
+| `Engine/tests/code-projects/portable.ps1` | **FAIL (Красная база)** | `Join-Path : A positional parameter cannot be found that accepts argument 'С‹РїСѓСЃРє'` (нет BOM) |
+| `Engine/tests/code-projects/run.ps1` | **FAIL (Красная база)** | `ParserError: An expression was expected after '('` (нет BOM) |
+| `Engine/tests/input/run.ps1` | **FAIL (Красная база)** | `ParserError: Unexpected token 'std::unique_ptr<CharacterController>'` (нет BOM) |
+| Храповик строк `EditorUiTests.cpp` в `check.ps1:220` | **FAIL при модификации (Красная база)** | Реальный размер файла 1662 строки (на `main` 1674) против заниженного храповика 1045. При чистом diff `check.ps1` проходит, но любая правка файла роняет проверку line count |
 
 ---
 
@@ -193,6 +198,17 @@
     - **Режим -Fast в run-editor.ps1:** По умолчанию `run-editor.ps1` собирает через MSBuild только целевые проекты, необходимые для запуска редактора (`Engine`, `EngineRuntime`, `SceneProject`, `EditorModule`, `EngineLauncher`), пропуская игры (Pong, Battle, SunGame, BasicExamples, Katamari) и тесты, если в их каталогах нет локальных изменений.
     - **Индикация прогресса и таймер линковки:** В `run-editor.ps1` добавлен вывод меток времени `[HH:mm:ss]`, подсветка этапов компиляции и сборки артефактов, а также периодический heartbeat-таймер раз в 15 секунд, информирующий пользователя об активном процессе линковки.
     - PCH для Engine и динамический `Game.dll` отложены в Backlog.
+23. **Sidecar настроек импорта (`<asset>.importsettings.json`):**
+    - Настройки импорта сохраняются в sidecar-файл с суффиксом `.importsettings.json` рядом с целевым ассетом (например `Content/Models/Character/Character.glb.importsettings.json`).
+    - Суффикс `.import.json` не используется, так как он занят манифестом материалов `ModelImport`.
+    - Формат JSON сериализуется через `QJsonDocument`, вещественные числа строго в C-локали (`QLocale::c()`). Запись и чтение производятся через `FileService` с логированием.
+24. **Объём среза S16 (Настройки импорта):**
+    - Реализуется только настройка масштаба (Scale) для моделей с пресетами 1.0, 0.1, 0.01 и возможностью ручного ввода.
+    - Текстуры и звуки импортируются по штатному конвейеру; неподдерживаемые движком параметры не добавляются в UI (правило №2: «Муляжей нет»).
+25. **Фиксация красной базы:**
+    - Прогон `check.ps1` на ветке `main` зафиксировал 4 эталонных падения: локализация в `MaterialEditorWindow.cpp`, отсутствие `assimp.dll` в фикстуре `run-games.ps1`, 4 скрипта тестов без BOM в PS 5.1, падение `grabWindow` в UI-тесте окна материалов. База признана эталоном и не исправляется в рамках задачи.
+26. **Запретные зоны:**
+    - `Engine/`, `Game/`, `build.ps1` не модифицируются.
 
 ---
 
@@ -203,6 +219,10 @@
 - [ ] **Тест `EditorUiTests.cpp:394`:** падение `preview clears to its background` связано с `grabWindow` в виртуализированном/фоновом графическом окружении. Оставить красным до этапа переработки окна материалов.
 - [ ] **Content Browser Sandbox:** замена открытого `QFileSystemModel` на изолированную модель на базе `FileService`, запрещающую выход за корень проекта.
 - [ ] **Checkpoint при ошибке setTransform:** Если `setTransform` вернул ошибку на первом тике жеста, `gizmoDragCheckpointed_` не выставляется и следующий тик создаст лишний Checkpoint.
+- [ ] **AssetUpdate и sidecar `.importsettings.json`:** `AssetUpdate.cpp` фильтрует только суффиксы `{".source.json", ".import.json"}` при переименовании и перемещении моделей/ассетов (появляются sidecar-сироты при переносе модели). Требуется поддержать перенос `.importsettings.json` при обновлении движка.
+- [ ] **Валидация путей `contains("..")` в `ModelImportSidecar`:** текущая проверка `contains("..")` отвергает валидные имена файлов с двойными точками (например, `Hero..v2.glb`); требуется разбор компонентов пути через `QDir::cleanPath` / `split('/')`.
+- [ ] **Чувствительность к регистру `Qt::CaseInsensitive` в `ModelImportSidecar`:** сравнение префикса проекта платформозависимо (на Linux/macOS пути чувствительны к регистру, на Windows нет).
+- [ ] **AssetUpdate: ремаппинг `.importsettings.json` при смене имени геометрии при реимпорте:** В `AssetUpdate.cpp:79-85` при реимпорте переименовываются `.source.json` и `.import.json`, но отсутствует ремаппинг `.importsettings.json`. Если импортер движка в будущем начнет генерировать `.importsettings.json` во временном каталоге, появится сирота под новым именем или перезапись существующего sidecar. Предложенная точная правка в `Engine/Source/Scene/AssetUpdate.cpp`: в строке 82 добавить `if(entry.path()==fs::u8path(imported.u8string()+".importsettings.json"))relative=fs::u8path(file.filename().u8string()+".importsettings.json");`, а в строке 84 добавить `||entry.path().u8string().find(".importsettings.json")!=std::string::npos` в условие `continue`.
 
 ---
 
@@ -260,6 +280,15 @@
    - В `Game.cpp` метод `RenderShadowMaps()` строит теневые карты исключительно для `DirectionalLightComponent` (`sun`). Для точечных источников (`Light.Point` / `PointLightComponent`) всенаправленные теневые карты (cube shadow maps / dual paraboloid / octahedral shadow maps) отсутствуют.
    - В UI редактора (`ObjectInspectorPanel.cpp:453`) чекбокс «Тени» скрыт для `Light.Point` во избежание муляжей (правило №2 протокола).
    - Требуется реализовать проход генерации omnidirectional shadow depth cube maps для точечных источников света в движке и сэмплирование в шейдере освещения.
+10. **Расширенные параметры импорта ресурсов (`Engine.Asset.Import`):**
+    - `Use file unit scale`: чтение метаданных `UnitScaleFactor` из `aiScene::mMetaData` в `SkeletalLoaderAssimp.cpp` (сейчас Assimp вызывается без флагов масштаба).
+    - `Normals / Smoothing angle`: настройка генерации нормалей (`aiProcess_GenNormals`, `aiProcess_GenSmoothNormals`, `aiProcess_ForceFlatNormals` и задание угла сглаживания). Флаги зашиты в `SkeletalLoaderAssimp.cpp:73`.
+    - `Import materials / Import textures`: селективное отключение генерации материалов (сейчас `ModelImport::CreateMaterials` безусловно вызывается в `SceneAssets.cpp:208`).
+    - `Flip UV / Merge meshes`: проброс флагов `aiProcess_FlipUVs` и оптимизаций объединения мешей.
+    - `Текстуры (sRGB, mipmaps, Flip vertical, Flip Y, Wrap, Filter)`: в `TextureLoader.cpp:63` формат жестко захардкожен как `DXGI_FORMAT_R8G8B8A8_UNORM`, мип-цепочка генерируется безусловно, нет проброса настроек из C-ABI.
+    - `Звуки (Volume, Loop)`: параметры есть в `AudioEngine`, но отсутствуют в C-ABI `EngineAudioPreviewApi` (`SceneEditAudio.cpp:36`).
+    - `Звуки (Force mono, Trim start/end)`: отсутствуют в движке (декодеры не выполняют микширование каналов и обрезку семплов).
+    - **Предложенная архитектурная правка C-ABI:** версионированное сервисное расширение `EngineAssetImportExtension` (`"Engine.Asset.Import"`) с методом `importAssetWithOptions(void* context, const char* source, uint32_t kind, const char* optionsJson, char* virtualPath, uint32_t pathCapacity, char* error, uint32_t errorCapacity)`.
 
 ---
 
@@ -296,6 +325,8 @@
 - Карточки инспектора и высота полей 22px при выделении объекта сцены.
 - Перетаскивание объекта за центральный кубический манипулятор гизмо (свободное перемещение в плоскости экрана для Move и равномерный масштаб для Scale) в запущенном интерактивном окне.
 - Переключение режима сглаживания через пункт меню "Вид -> Сглаживание -> Выкл / FXAA" в запущенном GUI с визуальной оценкой пикселей.
+- Реимпорт модели (`UpdateAsset`): подтверждение на живом проекте, что реальный вызов `UpdateAsset` через движок не перезаписывает `.importsettings.json` и сохраняет масштаб объектов на сцене (в юнит-тестах проверена эмуляция семантики копирования каталога `AssetUpdate::Run`).
+- Показ ровно одного модального окна `QMessageBox::warning` при пакетном спавне/импорте N файлов с битыми sidecar: коалесцирование с кулдауном 3 секунды реализовано в `ImportCommands.cpp`, но автотест с подсчётом модальных окон отсутствует (проверить вручную при пакетном спавне поврежденных файлов).
 
 ## Интеграция main в editor-v2 — 31.10.2026
 
@@ -427,3 +458,14 @@
   - Причина: В `ObjectInspectorPanel.cpp:42` на `NoWheelDoubleSpinBox` локально вызывался `setStyleSheet("border-left: none; ...")`, который в Qt перетирал все каскадные стили `QDoubleSpinBox::up-button`, `::down-button`, `::up-arrow`, `::down-arrow`. Кроме того, декларация `image: url(...)` в `EditorStyles.cpp` без явного `subcontrol-origin`/`subcontrol-position` приводила к сбоям рендеринга растровых/SVG стрелок в Qt.
   - Исправление: Создан `Editor/UI/SpinBoxArrowStyle.h` — кастомный `QProxyStyle`, рисующий векторные шевроны стрелок через `QPainter` (antialiased) цветом текста темы (`#ECEFF4` в Dark, `#1F2328` в Light, с акцентом при hover и бледным при disabled). Базовый стиль обёрнут в `EditorTheme.cpp`. В `ObjectInspectorPanel.cpp` локальный `setStyleSheet` заменен на динамическое свойство `spin->setProperty("axisCell", true)` с правилом в глобальном QSS. В `EditorStyles.cpp` удалены `image: url(...)`, так что Qt делегирует отрисовку примитивов `PE_IndicatorSpinUp`/`PE_IndicatorSpinDown` в `SpinBoxArrowStyle`.
   - Тестирование: Добавлен тест с `spin.grab()` в `UiSmokeTests.h`: подтверждено 114 контрастных пикселей в зоне кнопок в темной теме, 190 пикселей в светлой теме при переключении на лету. Проверено в `check.ps1` (244 checks passed) и на живом запуске Проекта 14 (`run-editor.ps1 -Fast`). Коммит `2f6832c`.
+
+---
+
+## Чек-лист среза S16: Настройки импорта моделей (Sidecar .importsettings.json, Scale, пресеты)
+
+- [x] **Шаг 16.1 (feat(core)):** `Editor/Core/ImportSettings.h/.cpp`. Структура `ImportSettings` (scale), загрузка и сохранение JSON через `QJsonDocument`, вещественные числа в C-локали, валидация scale в диапазоне `[1e-4, 1e4]`. Запись только через `FileService` с логом. Юнит-тесты в `CoreTests`: round-trip, битый JSON (лог + дефолт, без молчаливого fallback), выход за диапазон (418/418 PASS).
+- [x] **fix(core):** Семантика `ImportSettingsFile::Load`: `LoadResult::NotFound` (scale 1.0, лог Info, без Error); битый JSON и scale вне диапазона возвращают `LoadResult::Error`. Добавлен метод `FileService::FileExists`. Тесты обновлены (429/429 PASS).
+- [x] **Шаг 16.2 (feat(ui)):** Тонкий виджет/диалог `ImportSettingsDialog` в `Editor/UI/`, без логики. Поля: Scale (`QDoubleSpinBox` с `objectName="ImportScaleSpin"`) + кнопки пресетов `1` / `0.1` / `0.01` (`Preset1`, `Preset01`, `Preset001`) + OK/Cancel (`ImportOkBtn`, `ImportCancelBtn`). Показывается при импорте моделей (один диалог на всю пачку при мультивыборе). Вызов через команду `Assets.Import` в `CommandRegistry`, прямой вызов `ImportAsset` из FileBrowser убран. Локализация через `Tr()`. Добавлено поле `importScale` в `EditorCommand`. Тесты в `UiTests` через `UiTestHelper` (13/13 PASS).
+- [x] **refactor(ui):** Вынос регистрации команды `Assets.Import` и её обработчика в отдельный файл `Editor/Source/ImportCommands.cpp`. `MainWindow.cpp` сокращён до 1450 строк (лимит 1460, на main было 1453), `AssetTools.cpp` сокращён до 387 строк (лимит 500). Поведение сохранено.
+- [x] **Шаг 16.3 (feat(host)):** Реализован `EditorCore::ModelImportSidecar` (helper в `Core/`). После успешного импорта модели сохранение `<asset>.importsettings.json` через `FileService` со scale из `EditorCommand.importScale`. При создании объекта на сцене (`UseAsset` в `AssetTools.cpp`) чтение scale через `ReadSpawnScale` (`ImportSettingsFile::Load`) и выставление `c.transform.scale = {s, s, s}` (один раз при создании, вне горячего пути). 7 тестов без GPU в `CoreTests` (450/450 PASS).
+- [x] **Шаг 16.4 (test):** Регрессионные тесты: спавн модели со scale 0.01 из sidecar выставляет `transform.scale = {0.01, 0.01, 0.01}`; отсутствие sidecar даёт scale 1.0 и `[Info]`; битый sidecar даёт scale 1.0 и `[Error]`; реимпорт сохраняет существующий sidecar и масштаб объектов на сцене не сбрасывается. Тест пакета из 3 файлов на уровне Host с сохранением и проверкой sidecar для каждого файла. Подмена модального `exec()` через `SetExecHookForTesting` в `ImportSettingsDialog`, тест Cancel на реальной функции принятия решений `ResolveModelImportScale`. Ограничение показа модальных окон при пакетных ошибках sidecar.

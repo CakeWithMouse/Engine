@@ -4,6 +4,7 @@
 #include "QtHost.h"
 #include "MainWindow.h"
 #include "IconProvider.h"
+#include "CommandRegistry.h"
 #include <QAbstractFileIconProvider>
 
 #include <QClipboard>
@@ -116,19 +117,19 @@ void FileBrowserDock::BuildUi()
     actImportModel_ = importMenu->addAction(QString());
     actImportModel_->setEnabled(host_->HasScene());
     connect(actImportModel_, &QAction::triggered, this, [this] {
-        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(false);
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 0}});
     });
 
     actImportTexture_ = importMenu->addAction(QString());
     actImportTexture_->setEnabled(host_->HasScene());
     connect(actImportTexture_, &QAction::triggered, this, [this] {
-        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(1);
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 1}});
     });
 
     actImportAudio_ = importMenu->addAction(QString());
     actImportAudio_->setEnabled(host_->HasScene());
     connect(actImportAudio_, &QAction::triggered, this, [this] {
-        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(2);
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 2}});
     });
 
     imports_->setMenu(importMenu);

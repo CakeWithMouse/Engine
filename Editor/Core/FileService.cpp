@@ -159,6 +159,16 @@ bool FileService::DeleteFile(const QString& path, QString* outError)
     return true;
 }
 
+bool FileService::FileExists(const QString& path) const
+{
+    const QString resolved = ResolveSandboxPath(path);
+    if (resolved.isEmpty())
+    {
+        return false;
+    }
+    return QFile::exists(resolved);
+}
+
 bool FileService::DirectoryExists(const QString& path) const
 {
     const QString resolved = ResolveSandboxPath(path);

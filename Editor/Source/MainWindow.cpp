@@ -70,6 +70,7 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
 }
 
 EditorMainWindow::~EditorMainWindow() {
+    UnregisterAssetCommands();
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("UI.Create"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("UI.OpenEditor"));
     if (host_) host_->SetUiListener(nullptr);
@@ -340,11 +341,7 @@ void EditorMainWindow::BuildSceneMenu()
 
     sceneMenu_->addSeparator();
 
-    resourcesSubMenu_ = sceneMenu_->addMenu(Tr("Ресурсы", "Assets"));
-    actAddModel_ = resourcesSubMenu_->addAction(Tr("Добавить модель…", "Add Model…"), this, [this] { AddModel(); });
-    actImportModel_ = resourcesSubMenu_->addAction(Tr("Импорт модели…", "Import Model…"), this, [this] { ImportAsset(0); });
-    actImportTexture_ = resourcesSubMenu_->addAction(Tr("Импорт текстуры…", "Import Texture…"), this, [this] { ImportAsset(1); });
-    actImportAudio_ = resourcesSubMenu_->addAction(Tr("Импорт аудио…", "Import Audio…"), this, [this] { ImportAsset(2); });
+    BuildResourcesMenu(sceneMenu_);
 
     actReloadShaders_ = sceneMenu_->addAction(Tr("Перекомпилировать шейдеры", "Reload Shaders"), this, [this] {
         ReloadShaders();
@@ -610,7 +607,7 @@ void EditorMainWindow::ConnectPanels()
             });
 
     connect(sceneObjectsPanel_, &SceneObjectsPanel::AddModelRequested, this, [this] { AddModel(); });
-    connect(sceneObjectsPanel_, &SceneObjectsPanel::ImportModelRequested, this, [this] { ImportAsset(0); });
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::ImportModelRequested, this, [this] { CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 0}}); });
     connect(sceneObjectsPanel_, &SceneObjectsPanel::DuplicateRequested, this, [this] { SubmitObjectCommand(EditorCommand::DuplicateObject); });
     connect(sceneObjectsPanel_, &SceneObjectsPanel::RemoveRequested, this, [this] { SubmitObjectCommand(EditorCommand::RemoveObject); });
 
@@ -1211,6 +1208,7 @@ void EditorMainWindow::CommandFinished(
 
         if (command.type == EditorCommand::ImportModel && command.path.startsWith(QStringLiteral("/Game/")))
         {
+            HandleModelImported(command);
             QFile metadata(QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(command.path.mid(6) + QStringLiteral(".import.json")));
             if (metadata.open(QIODevice::ReadOnly))
             {
