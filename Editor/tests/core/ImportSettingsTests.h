@@ -125,12 +125,48 @@ inline void RunImportSettingsTests(int& outChecks)
     check(saveOk, "ImportSettingsFile::Save succeeded via FileService");
     check(saveErr.isEmpty(), "No error on save");
 
+    // FileExists checks
+    check(fs.FileExists(sidecarRel), "FileExists returns true for existing file");
+    check(!fs.FileExists(QStringLiteral("NonExistent.json")), "FileExists returns false for missing file");
+    check(!fs.FileExists(QStringLiteral("../Outside.json")), "FileExists returns false outside sandbox");
+
+    // Load existing valid file
     ImportSettings loadSet;
     QString loadErr;
-    const bool loadOk = ImportSettingsFile::Load(fs, sidecarRel, loadSet, &loadErr);
-    check(loadOk, "ImportSettingsFile::Load succeeded via FileService");
+    const auto loadOk = ImportSettingsFile::Load(fs, sidecarRel, loadSet, &loadErr);
+    check(loadOk == ImportSettingsFile::LoadResult::Success, "ImportSettingsFile::Load succeeded via FileService");
     check(loadErr.isEmpty(), "No error on load");
     check(std::abs(loadSet.scale - 0.1f) < 1e-6f, "Loaded scale matches saved scale 0.1");
+
+    // Load missing file (returns NotFound, scale = 1.0f, no error exception)
+    ImportSettings missingSet;
+    missingSet.scale = 42.0f;
+    QString missingLoadErr;
+    const auto missingRes = ImportSettingsFile::Load(fs, QStringLiteral("Models/Missing/none.glb.importsettings.json"), missingSet, &missingLoadErr);
+    check(missingRes == ImportSettingsFile::LoadResult::NotFound, "Load missing file returns NotFound");
+    check(std::abs(missingSet.scale - 1.0f) < 1e-6f, "Missing file resets scale to default 1.0f");
+    check(missingLoadErr.contains(QStringLiteral("sidecar not found")), "Missing file error message contains info");
+
+    // Load corrupt file (returns Error, scale = 1.0f)
+    const QString corruptRel = QStringLiteral("Models/Corrupt/corrupt.importsettings.json");
+    fs.WriteFileAtomic(corruptRel, QByteArray("not a valid json { broken"));
+    ImportSettings corruptSet;
+    corruptSet.scale = 42.0f;
+    QString corruptLoadErr;
+    const auto corruptRes = ImportSettingsFile::Load(fs, corruptRel, corruptSet, &corruptLoadErr);
+    check(corruptRes == ImportSettingsFile::LoadResult::Error, "Load corrupt file returns Error");
+    check(std::abs(corruptSet.scale - 1.0f) < 1e-6f, "Corrupt file resets scale to default 1.0f");
+    check(corruptLoadErr.contains(QStringLiteral("JSON parse error")), "Corrupt file error message contains parse error");
+
+    // Load out-of-range file (returns Error, scale = 1.0f)
+    const QString outOfRangeRel = QStringLiteral("Models/Range/range.importsettings.json");
+    fs.WriteFileAtomic(outOfRangeRel, QByteArray("{\"version\": 1, \"scale\": -10.0}"));
+    ImportSettings rangeSet;
+    rangeSet.scale = 42.0f;
+    QString rangeLoadErr;
+    const auto rangeRes = ImportSettingsFile::Load(fs, outOfRangeRel, rangeSet, &rangeLoadErr);
+    check(rangeRes == ImportSettingsFile::LoadResult::Error, "Load out-of-range file returns Error");
+    check(std::abs(rangeSet.scale - 1.0f) < 1e-6f, "Out-of-range file resets scale to default 1.0f");
 
     // Rejection on Save with invalid scale
     const ImportSettings badSaveSet{-1.0f};

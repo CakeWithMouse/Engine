@@ -23,6 +23,7 @@ public:
     bool ReadFile(const QString& path, QByteArray& outData, QString* outError = nullptr) const;
     bool WriteFileAtomic(const QString& path, const QByteArray& data, QString* outError = nullptr);
     bool DeleteFile(const QString& path, QString* outError = nullptr);
+    bool FileExists(const QString& path) const;
     bool DirectoryExists(const QString& path) const;
     bool CreateDirectoryPath(const QString& path, QString* outError = nullptr);
 

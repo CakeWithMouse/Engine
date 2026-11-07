@@ -86,13 +86,27 @@ bool ImportSettingsFile::Parse(const QByteArray& data, ImportSettings& outSettin
     return true;
 }
 
-bool ImportSettingsFile::Load(FileService& fileService, const QString& relPath, ImportSettings& outSettings, QString* outError)
+ImportSettingsFile::LoadResult ImportSettingsFile::Load(FileService& fileService, const QString& relPath, ImportSettings& outSettings, QString* outError)
 {
     outSettings = ImportSettings{};
+
+    if (!fileService.FileExists(relPath))
+    {
+        const QString infoStr = QStringLiteral("ImportSettings: sidecar not found for '%1', using default settings").arg(relPath);
+        Logger::Instance().Info(infoStr);
+        if (outError)
+            *outError = infoStr;
+        return LoadResult::NotFound;
+    }
+
     QByteArray data;
     if (!fileService.ReadFile(relPath, data, outError))
-        return false;
-    return Parse(data, outSettings, outError);
+        return LoadResult::Error;
+
+    if (!Parse(data, outSettings, outError))
+        return LoadResult::Error;
+
+    return LoadResult::Success;
 }
 
 bool ImportSettingsFile::Save(FileService& fileService, const QString& relPath, const ImportSettings& settings, QString* outError)
