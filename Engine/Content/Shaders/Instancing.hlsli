@@ -61,13 +61,15 @@ float2 DitherPhase(float3 worldPosition)
 void ClipByFade(float signedFade, float2 pixelPosition)
 {
     const float weight = abs(signedFade);
-    if (weight >= 0.999f)
+    if (weight >= 1.0f)
     {
         return;
     }
 
     const float threshold = DitherThreshold(pixelPosition);
-    clip(signedFade < 0.0f ? threshold - (1.0f - weight) : weight - threshold);
+    // Equality belongs only to the outgoing level. clip(0) keeps a pixel, so using subtraction
+    // on both sides would blend both transparent LODs at every exact Bayer threshold.
+    clip(signedFade < 0.0f ? (threshold > (1.0f - weight) ? 1.0f : -1.0f) : weight - threshold);
 }
 
 #endif

@@ -188,6 +188,18 @@ bool Material::CompileSet(const std::string& surface, uint32_t variant, ShaderSe
         return false;
     }
 
+    if (state.Blend == MaterialBlendMode::Translucent || state.Blend == MaterialBlendMode::Additive)
+    {
+        auto peelOptions = shadowOptions;
+        peelOptions.Defines.pop_back(); // MATERIAL_SHADOW
+        peelOptions.Defines.emplace_back("MATERIAL_TRANSPARENCY", "1");
+        auto peel = ShaderCompiler::Compile(templatePath, "PSMain", "ps_5_0", peelOptions);
+        if (!peel.Succeeded()) { errors = peel.Errors; return false; }
+        if (FAILED(Device->CreatePixelShader(peel.Blob->GetBufferPointer(), peel.Blob->GetBufferSize(), nullptr,
+                                             output.TransparencyPixelShader.GetAddressOf())))
+        { errors = "Failed to create transparency material shader"; return false; }
+    }
+
     // Only a shader with the full G-buffer signature may be used by the geometry pass.
     Microsoft::WRL::ComPtr<ID3D11ShaderReflection> gbufferReflection = ReflectBlob(gbuffer.Blob.Get());
     if (gbufferReflection && CountRenderTargets(gbufferReflection.Get()) >= 3 &&
@@ -198,9 +210,10 @@ bool Material::CompileSet(const std::string& surface, uint32_t variant, ShaderSe
         return false;
     }
 
-    // Skinned vertices need their bone palette even for an opaque silhouette.
-    // Ordinary opaque meshes still share the engine's position-only depth shader.
-    if (state.Blend == MaterialBlendMode::Masked || (variant & MaterialVariant::Skinned))
+    // Skinning needs the palette; instancing needs the LOD dither even for opaque silhouettes.
+    // Ordinary non-instanced opaque meshes still share the position-only depth shader.
+    if (state.Blend == MaterialBlendMode::Masked ||
+        (variant & (MaterialVariant::Skinned | MaterialVariant::Instanced)))
     {
         ShaderCompiler::CompileResult shadowVertex = ShaderCompiler::Compile(templatePath, "VSMain", "vs_5_0", shadowOptions);
         ShaderCompiler::CompileResult shadowPixel = ShaderCompiler::Compile(templatePath, "PSMain", "ps_5_0", shadowOptions);
@@ -250,12 +263,14 @@ bool Material::Compile(ID3D11Device* device, ID3D11DeviceContext* context)
     std::vector<std::string> dependencies;
     std::string errors;
     // Parameters are reflected once: every set declares the same surface.
-    bool bCompiled = CompileSet(SurfacePath, MaterialVariant::Mesh, sets[MaterialVariant::Mesh], errors, &forwardBlob, &dependencies) &&
-                     Reflect(forwardBlob.Get(), errors);
+    bool bCompiled = CompileSet(SurfacePath, MaterialVariant::Mesh, sets[MaterialVariant::Mesh], errors, &forwardBlob, &dependencies);
     for (uint32_t variant = 1; bCompiled && variant < MaterialVariant::Count; ++variant)
     {
         bCompiled = !IsVariantRequired(variant) || CompileSet(SurfacePath, variant, sets[variant], errors);
     }
+    // Reflection commits the editable bindings. A failure in a later variant must not erase the
+    // last working values before the user has fixed that variant.
+    bCompiled = bCompiled && Reflect(forwardBlob.Get(), errors);
     // Known even after a failure, so a fix of any of these files can trigger a recompilation.
     Dependencies = dependencies;
 
@@ -391,6 +406,11 @@ bool Material::Reflect(ID3DBlob* pixelShader, std::string& errors)
             binding.BindPoint < FirstTextureSlot)
         {
             continue;
+        }
+        if (binding.BindPoint == 32)
+        {
+            errors = "Material textures cannot use register(t32): it is reserved for point shadows";
+            return false;
         }
         MaterialTexture texture;
         texture.Name = binding.Name;

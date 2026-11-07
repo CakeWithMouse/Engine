@@ -158,6 +158,15 @@ int wmain(int argc,wchar_t** argv){try{
     auto* particles=dynamic_cast<ParticleSystemComponent*>(game.GetScene().FindComponentByName("Particles"));particles->SetParticleCount(127);particles->SetBrightness(7);
     auto all=game.Saves().Capture();game.Saves().Restore(all);
     Check(dynamic_cast<MeshComponent*>(game.GetScene().FindComponentByName("Mesh"))->GetMesh().Indices.size()>0,"procedural mesh restored");
+    const auto& restoredMesh=dynamic_cast<MeshComponent*>(game.GetScene().FindComponentByName("Mesh"))->GetMesh();
+    const auto expectedMesh=MeshPrimitives::Cube();
+    Check(restoredMesh.Vertices.size()==expectedMesh.Vertices.size(),"saved mesh vertex count preserved");
+    for(size_t i=0;i<restoredMesh.Vertices.size();++i){
+        const auto& actual=restoredMesh.Vertices[i].Tangent;
+        const auto& expected=expectedMesh.Vertices[i].Tangent;
+        Check(std::abs(actual.x-expected.x)<1e-5f&&std::abs(actual.y-expected.y)<1e-5f&&
+              std::abs(actual.z-expected.z)<1e-5f&&actual.w==expected.w,"saved mesh tangent regenerated with handedness");
+    }
     Check(dynamic_cast<UIComponent*>(game.GetScene().FindComponentByName("UI"))->Find<UILabel>("saved-label")->GetText()=="Сохранено","UI state and Unicode restored");
     instances=dynamic_cast<InstancedMeshComponent*>(game.GetScene().FindComponentByName("Instances"));
     Check(instances->GetMeshInstanceCount()==1&&instances->GetMeshInstance(0).Position==instance.Position&&instances->GetMeshInstance(0).AnimationPhase==.7f&&instances->GetIndexCount()>0,"instance geometry, transform and animation phase restored");

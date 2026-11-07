@@ -54,9 +54,12 @@ public:
     bool SetSkinnedLod(int level, const std::vector<SkinnedVertex>& vertices, const std::vector<uint32_t>& indices);
     int GetLodCount() const { return LodCount; }
 
-    /** Sets animation matrix texture baked by SkeletalBaker (RGBA32F matrix texture). */
-    void SetAnimationTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, const std::vector<BakedClipInfo>& clips = {});
-    void SetAnimationTexture(ID3D11ShaderResourceView* srv, const std::vector<BakedClipInfo>& clips = {});
+    /** Sets a baked RGBA32F matrix texture. boundsRadius covers every pose from model origin;
+     * zero/invalid means unknown (conservative culling). Changing any LOD invalidates it. */
+    void SetAnimationTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv,
+                             const std::vector<BakedClipInfo>& clips = {}, float boundsRadius = 0.0f);
+    void SetAnimationTexture(ID3D11ShaderResourceView* srv,
+                             const std::vector<BakedClipInfo>& clips = {}, float boundsRadius = 0.0f);
     bool HasAnimationTexture() const { return AnimationTextureSRV != nullptr; }
     void SetAnimationLerp(bool enabled) { bAnimationLerp = enabled; }
     /**
@@ -122,9 +125,10 @@ public:
      * Adds a generated sprite level behind the mesh levels: the model is rendered from a set of
      * angles once at load and far units are drawn as camera-facing quads. Needs one more entry in
      * SetLodScreenHeights (the mesh to sprite threshold).
+     * Translucent/additive materials keep the last mesh LOD: the atlas cannot preserve their alpha.
      */
     void SetImpostorEnabled(bool enabled, const ImpostorAtlasSettings& settings = ImpostorAtlasSettings{});
-    bool HasImpostor() const { return bImpostorEnabled && Impostor.IsValid(); }
+    bool HasImpostor() const { return bImpostorEnabled && !HasOpacity() && Impostor.IsValid(); }
     /** Diagnostics: writes the baked sprite atlas to BMP files next to the executable. */
     bool DumpImpostorAtlas(const std::string& pathPrefix);
     /**
@@ -187,7 +191,8 @@ public:
     bool SupportsFrustumCulling() const override { return false; }
     /**
      * A material draws every mesh level and the masked shadows; the sprite level is baked through
-     * it (albedo, normal, coverage) and rebaked when the material changes. Animated copies use
+     * it (albedo, normal, coverage) and rebaked when the material changes. Transparent materials
+     * keep mesh LODs and participate per copy in the global back-to-front queue. Animated copies use
      * the skinned set of the material (MaterialInput.InstanceData is then zero).
      */
     bool SupportsMaterials() const override { return true; }
@@ -196,6 +201,8 @@ public:
     int GetIndexCount() override { return TotalIndexCount; }
 
 private:
+    friend class Game;
+    int TransparentLod = -1; // selected with the base instance range by the transparent pass
     LodDiagnostics Diagnostics;
     struct LodLevel
     {
@@ -211,6 +218,7 @@ private:
         std::vector<InstData> ColorStaging;
         Microsoft::WRL::ComPtr<ID3D11Buffer> ColorBuffer;
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> ColorSRV;
+        std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> ColorRangeViews;
         size_t ColorCapacity = 0;
         std::vector<InstData> ShadowStaging[MaxShadowCascades];
         Microsoft::WRL::ComPtr<ID3D11Buffer> ShadowBuffer[MaxShadowCascades];
@@ -239,7 +247,7 @@ private:
     void CollectShadowCasters(const MeshInstance& instance, InstData data, int meshLevel, float radius,
                               const glm::vec3& lightDirection, const DirectX::XMFLOAT4* cascadeSpheres, int cascadeLimit);
     void CollectPointCasters(const MeshInstance& instance, InstData data, int meshLevel, float radius,
-                             const DirectX::XMFLOAT4* lightSpheres, int lightCount);
+                             const DirectX::XMFLOAT4* lightSpheres, int lightCount, float signedFade);
     /** Shaders and constants of a masked material for a depth pass; false: the pass keeps its own. */
     bool BindMaterialShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass);
     void UnbindMaterialShadow(ID3D11DeviceContext* context);
@@ -292,7 +300,8 @@ private:
     size_t StaticShadowCapacity = 0;
     int StaticShadowLevel = 0;
     bool bStaticShadowDataDirty = true;
-    float MeshRadius = 0.0f;   // local radius of LOD 0, unscaled
+    float MeshRadius = 0.0f;   // unscaled LOD0 radius; drives screen-size LOD selection
+    float AnimationBoundsRadius = 0.0f; // conservative root-origin VAT envelope; zero means unknown
     int TotalIndexCount = 0;   // LOD 0, for diagnostics only
 
     Microsoft::WRL::ComPtr<ID3D11Texture2D> AnimationTexture;

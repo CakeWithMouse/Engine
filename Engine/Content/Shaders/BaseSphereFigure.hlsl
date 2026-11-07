@@ -1,3 +1,5 @@
+#include "ShadowDepth.hlsli"
+
 cbuffer ConstantBuffer: register (b0)
 {
     float4x4 worldMatrix;
@@ -64,13 +66,6 @@ PS_IN VSMain(VS_IN input)
     return output;
 }
 
-int SelectCascade(float viewDepth)
-{
-    if (viewDepth < CascadeSplits.x) return 0;
-    if (viewDepth < CascadeSplits.y) return 1;
-    return 2;
-}
-
 float ComputeShadowFactor(float3 worldPos, float3 normal, float3 toLightDir, float viewDepth)
 {
     if (ShadowParams.x < 0.5f)
@@ -78,7 +73,7 @@ float ComputeShadowFactor(float3 worldPos, float3 normal, float3 toLightDir, flo
         return 1.0f;
     }
 
-    int cascadeIndex = SelectCascade(viewDepth);
+    int cascadeIndex = SelectShadowCascade(viewDepth, CascadeSplits);
     float4 lightPos = mul(float4(worldPos, 1.0f), LightViewProjection[cascadeIndex]);
     float3 projCoords = lightPos.xyz / max(lightPos.w, 0.0001f);
 
@@ -171,7 +166,7 @@ float4 PSMain(PS_IN input) : SV_Target
     }
 
     float3 directionalToLight = normalize(-LightDirection.xyz);
-    float viewDepth = length(CameraPosition.xyz - input.worldPos);
+    float viewDepth = ShadowViewDepth(input.worldPos, viewMatrix);
     float shadow = ComputeShadowFactor(input.worldPos, normal, directionalToLight, viewDepth);
 
     float3 directionalColor = DirectionalLightColorIntensity.rgb;

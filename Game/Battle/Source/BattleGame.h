@@ -54,6 +54,9 @@ public:
         bool DumpImpostors = false;
         // Diagnostics: writes the finished frame to this BMP file, then keeps running.
         std::string DumpFrame;
+        // Deterministic camera motion, one frame and matrix sample per step (60..180).
+        std::string CameraSequence;
+        std::string CameraMotion = "orbit";
         // Ignores the mouse and the keyboard, so two runs of the same scene frame it identically.
         // Screenshots taken for comparison are only readable with this on.
         bool LockCamera = false;
@@ -139,6 +142,7 @@ private:
     // Measurements of this run (skipping the first frames, which include resource creation).
     uint64_t FrameLimit = 0;
     uint64_t UpdateCount = 0; // Local benchmark progress; independent of the renderer's frame index.
+    float SequenceCameraRadius = 0.0f;
     uint64_t MeasuredFrames = 0;
     double FrameMsSum = 0.0;
     double GpuMsSum = 0.0;

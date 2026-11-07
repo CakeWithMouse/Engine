@@ -1,0 +1,45 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "caster": "crowd",
+    "frames": [
+        {
+            "count": 0,
+            "cubes": [
+            ],
+            "directionalShadows": false,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-two-lights\\single-packaged\\global-off-r1-scene0-00.bmp",
+            "lights": [
+                {
+                    "enabled": true,
+                    "index": 0,
+                    "intensity": 2,
+                    "position": [
+                        0,
+                        4,
+                        0
+                    ],
+                    "radius": 30,
+                    "slot": -1
+                }
+            ],
+            "lod": {
+                "distance": 21.840330123901367,
+                "drawn": 1,
+                "fade": 0,
+                "perLod": [
+                    1,
+                    0,
+                    0
+                ],
+                "screenSize": false
+            },
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "time": 0.5
+        }
+    ],
+    "ok": true
+}

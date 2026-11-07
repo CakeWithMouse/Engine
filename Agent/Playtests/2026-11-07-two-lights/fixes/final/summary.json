@@ -1,0 +1,139 @@
+{
+  "passed": 22,
+  "total": 22,
+  "frames": 366,
+  "cases": [
+    {
+      "name": "slots-r0-mesh",
+      "frames": 13,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "slots-r0-skeletal",
+      "frames": 13,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "slots-r0-crowd",
+      "frames": 13,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "fade-r0-0",
+      "frames": 18,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "fade-r0-0-material",
+      "frames": 18,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "fade-r0-1",
+      "frames": 18,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "fade-r0-1-material",
+      "frames": 18,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "distance-r0-import0",
+      "frames": 7,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "distance-r0-import1",
+      "frames": 7,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "joint-r0-skeletal",
+      "frames": 29,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "joint-r0-crowd",
+      "frames": 29,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "slots-r1-mesh",
+      "frames": 13,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "slots-r1-skeletal",
+      "frames": 13,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "slots-r1-crowd",
+      "frames": 13,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "fade-r1-0",
+      "frames": 18,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "fade-r1-0-material",
+      "frames": 18,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "fade-r1-1",
+      "frames": 18,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "fade-r1-1-material",
+      "frames": 18,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "distance-r1-import0",
+      "frames": 7,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "distance-r1-import1",
+      "frames": 7,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "joint-r1-skeletal",
+      "frames": 29,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "joint-r1-crowd",
+      "frames": 29,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    }
+  ]
+}

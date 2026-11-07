@@ -424,7 +424,7 @@ protected:
     void SetFullViewport();
     void RenderShadowMaps();
     void RenderPointShadowMaps();
-    void UpdatePointShadows();
+    void UpdatePointShadows(bool enabled);
     bool InitPointShadowResources();
     enum class OpaqueFilter { All, DeferredCapable, ForwardOnly };
     void RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant);
@@ -587,6 +587,8 @@ protected:
     DirectX::XMFLOAT4X4 CascadeLightViewProjection[MaxShadowCascades] = {};
     // World sphere covered by each cascade, filled by UpdateShadowCascades.
     DirectX::XMFLOAT4 CascadeSpheres[MaxShadowCascades] = {};
+    // Retain projection scale during small camera moves; grow/shrink only outside its margin.
+    float StableCascadeRadii[MaxShadowCascades] = {};
     Microsoft::WRL::ComPtr<ID3D11Texture2D> shadowTexture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV;
     Microsoft::WRL::ComPtr<ID3D11DepthStencilView> shadowDSVs[MaxShadowCascades];
@@ -624,6 +626,18 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11BlendState> transparentBlendState;
     Microsoft::WRL::ComPtr<ID3D11BlendState> additiveBlendState; // ONE + ONE
     Microsoft::WRL::ComPtr<ID3D11BlendState> opaqueBlendState;
+
+    // Bounded front-to-back peeling; remaining distant fragments use the sorted queue.
+    static constexpr int TransparentPeelLayers = 16;
+    bool EnsureTransparencyResources();
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> TransparentDepth[2], TransparentLayer, TransparentAccum;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> TransparentDepthRTV[2], TransparentLayerRTV, TransparentAccumRTV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> TransparentDepthSRV[2], TransparentLayerSRV, TransparentAccumSRV;
+    Microsoft::WRL::ComPtr<ID3D11BlendState> TransparentMinBlend, TransparentPremultBlend, TransparentFrontBlend;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> TransparentPassCB;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> TransparentCompositeVS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> TransparentCompositePS;
+    Microsoft::WRL::ComPtr<ID3D11Predicate> TransparentOccupied[TransparentPeelLayers];
 
     // Frame data and diagnostics
     FrameConstants CurrentFrame{};

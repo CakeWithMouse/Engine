@@ -36,6 +36,109 @@ $tool = 'Game/build/x64/Release/Runtime/EngineCommandlets.exe'
 
 ## Команды
 
+### Движение точечных теней
+
+`render.point-shadows` создаёт приёмник, одну лампу и отбрасыватель на настоящем
+D3D11 устройстве. `caster`: `mesh`, `skeletal` или `crowd`; последние два по
+умолчанию используют куб с движущейся костью (travel=6, duration=1 s), либо
+импортируют абсолютный `model` с анимацией. `manualTexture:true` проверяет
+низкоуровневый VAT API без известных bounds. `replaceLodOffset:[x,y,z]` заменяет
+LOD0 после bake для проверки сброса устаревшего envelope. `rendering`: 0 Forward / 1 Deferred;
+`sceneLighting:true` проверяет сцену без солнца. По умолчанию `globalShadows:true`;
+в программном режиме без сценового света `false` отключает все тени.
+`scale`, `radius`, `intensity`, `camera`, `target`, `width`, `height` задают сцену.
+
+`frames` содержит 1..64 состояния: `time` (секунды первой анимации), `position`
+отбрасывателя, `light` (позиция лампы), `shadows` и необязательный `image`
+(новый абсолютный BMP, родитель уже существует). `probes` — до 64 мировых
+точек на запрос или кадр. Выход: adapter, число активных shadow lights,
+SHA-256 и число занятых texels каждой из шести граней, проецированная глубина
+проб, raw-depth `occluded`, `directionalShadows` (каскады активны). `occluded` не моделирует PCF/bias
+цветового прохода; видимость проверяется отдельно по BMP. Файлы не перезаписываются.
+
+```powershell
+python Editor/tests/PointShadowMotionTests.py --tool Game/build/x64/Release/Runtime/EngineCommandlets.exe --output E:/scratch/point-motion --model Game/Battle/Content/Models/CesiumMan.glb
+```
+
+Скрипт требует новый output-каталог; сохраняет запросы, результаты и кадры.
+Он сравнивает анимационные карты с rigid-reference, проверяет возвращение
+идентичных кадров и различие shadow-on/off в Forward/Deferred.
+
+Для нескольких источников задайте `lights` (1..4 объектов): `position`, `color`,
+`intensity`, `radius`, `enabled`, `shadows`. Порядок регистрации сохраняется.
+В каждом кадре необязательный `lights` содержит столько же объектов; указанные
+поля обновляются, остальные сохраняются. Это позволяет проверить и третьего
+кандидата при лимите двух теневых карт. Старые `light`/`shadows` работают в
+одноламповом режиме. Выход `cubes` содержит каждый активный куб с полем `slot`;
+верхние `faces`, `probes`, `light` сохранены как данные первого куба.
+`lights` в результате кадра показывает позицию и shader slot каждой лампы
+(−1 — тени нет). Пробы проверяются отдельно относительно каждого куба.
+
+Для crowd доступны `lodDistances`, `lodScreenHeights`, `lodFade` (0..0.5),
+`lodScales` (масштабы диагностических копий исходной геометрии по уровням).
+`material:true` назначает стандартный материал, иначе сохраняется legacy path.
+`materialAsset` — абсолютный путь `.mat`, загружаемого штатным `Game::LoadMaterial`.
+Он имеет приоритет над `material:true`. Кадр может содержать `materialParams`:
+объект имя → число или массив 1–4 чисел; значения применяются перед отрисовкой.
+Неизвестный параметр или ошибка загрузки/компиляции дают диагностическую ошибку.
+Результат каждого кадра с `materialAsset` содержит `material.errors`, `gbuffer`
+и `castsShadow`. `Editor/tests/MaterialRenderTests.py` использует этот контракт
+для проверки сочетаний материалов по BMP-пикселям и глубине обеих теневых карт.
+Кадр может менять `camera`/`target`; поля `lod.perLod`, `distance`, `screenSize`
+и `fade` показывают реальный выбор цветового прохода. Два ненулевых buckets
+означают cross-fade, а не два разных экземпляра. Обычный skeletal-компонент
+LOD не поддерживает; он используется как контроль анимации и слотов.
+
+```powershell
+python Editor/tests/PointShadowSlotsLodTests.py --tool Game/build/x64/Release/Runtime/EngineCommandlets.exe --output E:/scratch/two-lights --model Game/Battle/Content/Models/CesiumMan.glb
+```
+
+### Прозрачные слои и движение камеры
+
+`render.transparency` создаёт реальные D3D11-плоскости и рендерит их обычными проходами
+движка. JSON: `rendering` (0 Forward, 1 Deferred), `width`/`height` (по умолчанию 320×256),
+`orthographic` (высота 8) и `groups` (1–16 групп). Группа содержит абсолютный путь `.mat`
+в `material`, `kind` (`mesh`, `copies`, `instances`, `skeletal`, `crowd`), размеры плоскости
+`width`/`height` и 1–512 `layers`: `position:[x,y,z]`, `color:[r,g,b]`, `alpha:0..1`.
+У слоя есть `rotation:[pitch,yaw,roll]` в градусах (instances/crowd поддерживают только yaw).
+`geometry:"plane"|"cross"` выбирает плоскость либо две пересекающиеся плоскости в одном
+мешe; у второй UV.x смещён на 2 для назначения отдельного цвета через Surface.
+`copies` использует CreateInstance; `crowd` — настоящую VAT-текстуру анимированной плоскости.
+Для batch доступны `lods:1..3` (одинаковая геометрия для проверки неизменности alpha),
+`lodDistances`, `lodScreenHeights`, `fade:0..0.5`, `impostor`.
+
+`frames` (1–128): `camera`, `target`, `time`, новый абсолютный BMP `image`; необязательный
+`positions` заменяет позиции всех layers в порядке групп. `fadeWeight:0..1` для
+orthographic подбирает screen-height threshold, позволяющий проверить точные границы
+Bayer-маски. Выход содержит adapter, BMP, per-LOD counts, impostor level и draw calls.
+`width`/`height` внутри frame изменяют размер viewport (100..1920 × 100..1080).
+Редактор не требуется; нужны Qt, GPU и hidden HWND. Файлы не перезаписываются.
+
+```powershell
+python Editor/tests/TransparencyTests.py --tool Game/build/x64/Release/Runtime/EngineCommandlets.exe --output E:/scratch/transparency-new
+python Editor/tests/TransparencyIntersectionTests.py --tool Game/build/x64/Release/Runtime/EngineCommandlets.exe --output E:/scratch/intersections-new
+```
+
+Runner проверяет source-over/additive по 256 пикселям каждого кадра; ожидаемый цвет
+вычисляется независимо от renderer. Проверяет pan/orbit/dolly, смену порядка движущихся
+слоёв, равную глубину, opaque occlusion, разные батчи/LOD, рост stream и cross-fade.
+Intersection runner независимо пересекает лучи камеры с повёрнутыми поверхностями и
+проверяет цвет по геометрической глубине: оба порядка регистрации, orbit с обеих сторон,
+самопересечения, текущую анимацию, additive/opaque/нулевую alpha, resize, 16 глубин и
+дальний остаток. Пограничные пиксели силуэта/совпадающей глубины исключаются из численного
+сравнения; их BMP остаются для визуального осмотра.
+
+### Тангенты меша
+
+`mesh.tangents` вызывает `GenerateTangents` без GPU. Вход: `vertices` — массив
+объектов `{position:[x,y,z], normal:[x,y,z], uv:[u,v]}`, `indices` — тройки
+индексов треугольников. Выход `tangents` содержит `[x,y,z,w]` для каждой вершины;
+`w=0` означает вырожденные UV и запасной путь шейдера. Максимум 100000 вершин и
+300000 индексов, нечисловые значения и индексы вне массива отклоняются с exit 2.
+Проверки: `Editor/tests/TangentCommandletTests.ps1`. GPU-передачу атрибута и
+зеркальный масштаб проверяет `MaterialMirroredNormalMap` в EngineTests;
+успешный CPU-командлет сам по себе не доказывает работу normal map на GPU.
+
 ### Игровой ввод и диагностика рендера
 
 `project.input` загружает настоящую игровую DLL из `project` (абсолютный путь к
@@ -137,6 +240,9 @@ Offscreen Qt не предоставляет HWND для native preview; ком�
 локальной позицией, `selected`, `canUndo`, `canRedo`. Неуспех отдельной операции
 сохраняется в её `status`, проверяйте его даже при exit 0 сценария.
 Изменения существуют в открытой сессии до явно запрошенного `save`.
+С 2026.11.07.0 хост командлета передаёт расширение PointLightV2: одиночное
+дублирование лампы сохраняет `castShadows`, включая последующие Save/New/Load.
+Регрессия: `Editor/tests/PointLightCloneCommandletTests.ps1`.
 В restricted Windows host установите writable `TEMP`/`TMP`, как для hot reload.
 `SceneCommandletTests.ps1 -Project <scratch Project.json>` проверяет 16 операций:
 группу, nudge, историю, иерархию, duplicate, Save As/New/Load и удаление.

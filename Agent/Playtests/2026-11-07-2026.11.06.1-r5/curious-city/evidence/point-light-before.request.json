@@ -1,0 +1,29 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261107-r5\\curious-city\\final-city\\Project.json",
+  "steps": [
+    {
+      "action": "duplicate",
+      "target": "Warm Light",
+      "name": "Warm Light Copy"
+    },
+    {
+      "action": "save",
+      "path": "E:/Engine/Engine/build/playtests/20261107-r5/curious-city/ShadowProbe.scene.json"
+    },
+    {
+      "action": "delete",
+      "target": "Cool Light"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "action": "load",
+      "path": "E:/Engine/Engine/build/playtests/20261107-r5/curious-city/ShadowProbe.scene.json"
+    },
+    {
+      "action": "delete",
+      "target": "Warm Light"
+    }
+  ]
+}

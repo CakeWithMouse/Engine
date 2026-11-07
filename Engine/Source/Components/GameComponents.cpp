@@ -569,6 +569,7 @@ bool GameComponent::UploadInstanceData(ID3D11DeviceContext* context)
         srvDesc.Buffer.FirstElement = 0;
         srvDesc.Buffer.NumElements = static_cast<UINT>(newCapacity);
 
+        InstanceRangeViews.clear();
         instanceSRV.Reset();
         instanceBuffer.Reset();
         InstanceCapacity = 0;
@@ -602,6 +603,30 @@ bool GameComponent::UploadInstanceData(ID3D11DeviceContext* context)
     return true;
 }
 
+ID3D11ShaderResourceView* GameComponent::InstanceRangeView(ID3D11DeviceContext* context,
+    ID3D11Buffer* buffer, ID3D11ShaderResourceView* fullView, size_t capacity,
+    std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>>& ranges)
+{
+    if (!TransparentInstanceCount || !TransparentInstanceFirst) return fullView;
+    if (!buffer || TransparentInstanceFirst >= capacity) return nullptr;
+    // SV_InstanceID starts at zero even with StartInstanceLocation. Offset the structured view
+    // instead, so material and legacy shaders both see the selected range without a new cbuffer.
+    const UINT first = TransparentInstanceFirst;
+    if (ranges.size() <= first) ranges.resize(size_t(first) + 1);
+    if (!ranges[first])
+    {
+        Microsoft::WRL::ComPtr<ID3D11Device> device;
+        context->GetDevice(device.GetAddressOf());
+        D3D11_SHADER_RESOURCE_VIEW_DESC desc{};
+        desc.Format = DXGI_FORMAT_UNKNOWN;
+        desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+        desc.Buffer.FirstElement = first;
+        desc.Buffer.NumElements = static_cast<UINT>(capacity - first);
+        if (FAILED(device->CreateShaderResourceView(buffer, &desc, ranges[first].GetAddressOf()))) return nullptr;
+    }
+    return ranges[first].Get();
+}
+
 void GameComponent::BindMaterialResources(ID3D11DeviceContext* context)
 {
     ID3D11ShaderResourceView* texture = textureSRV.Get();
@@ -618,7 +643,7 @@ void GameComponent::BindMaterialResources(ID3D11DeviceContext* context)
         context->PSSetSamplers(1, 1, &cubeMapSamplerState);
     }
 
-    if (GamePtr && GamePtr->AreShadowsActive())
+    if (GamePtr && (GamePtr->AreShadowsActive() || GamePtr->GetPointShadowCount() > 0))
     {
         ID3D11ShaderResourceView* shadowMapSRV = GamePtr->GetShadowMapSRV();
         ID3D11SamplerState* shadowMapSampler = GamePtr->GetShadowSampler();
@@ -725,11 +750,14 @@ void GameComponent::Render(ID3D11DeviceContext* Context)
             Context->VSSetConstantBuffers(0, 1, inst_Basecb.GetAddressOf());
             Context->PSSetConstantBuffers(0, 1, inst_Basecb.GetAddressOf());
 
-            ID3D11ShaderResourceView* srv = instanceSRV.Get();
+            ID3D11ShaderResourceView* srv = InstanceRangeView(Context, instanceBuffer.Get(), instanceSRV.Get(), InstanceCapacity, InstanceRangeViews);
             Context->VSSetShaderResources(0, 1, &srv);
-            const UINT instanceCount = static_cast<UINT>(InstanceArray.size());
-            Context->DrawIndexedInstanced(GetIndexCount(), instanceCount, 0, 0, 0);
-            if (GamePtr) GamePtr->CountDraw(GetIndexCount(), instanceCount);
+            const UINT instanceCount = TransparentInstanceCount ? TransparentInstanceCount : static_cast<UINT>(InstanceArray.size());
+            if (srv)
+            {
+                Context->DrawIndexedInstanced(GetIndexCount(), instanceCount, 0, 0, 0);
+                if (GamePtr) GamePtr->CountDraw(GetIndexCount(), instanceCount);
+            }
 
             ID3D11ShaderResourceView* nullSRV = nullptr;
             Context->VSSetShaderResources(0, 1, &nullSRV);

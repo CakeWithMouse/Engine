@@ -1,0 +1,36 @@
+Project: Runtime Example
+Mode: game
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/build/releases/PainEngine-2026.11.07.0-win64/Runtime/EngineContent'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/releases/PainEngine-2026.11.07.0-win64/Runtime/Projects/RuntimeExample/Content'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+GameCreate
+GameSceneLoaded
+GameStart
+Runtime Example
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsService] first read via module: /Engine/Shaders/RotatedFigure.hlsl
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.0-win64/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.0-win64/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[RuntimeExample] SkeletalMesh loaded: bones=19 clip=2.00s
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdate
+EngineFrame (game window)
+EngineFrameEnd (game window)
+GameUpdates=3
+GameStop
+GameDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped

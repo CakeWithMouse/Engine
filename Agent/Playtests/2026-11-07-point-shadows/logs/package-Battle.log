@@ -1,0 +1,29 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.2-win64/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.2-win64/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Tank LOD0: 2160 triangles
+Tank LOD1: 240 triangles
+Tank LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Apc LOD0: 3024 triangles
+Apc LOD1: 336 triangles
+Apc LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Truck LOD0: 2592 triangles
+Truck LOD1: 288 triangles
+Truck LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Artillery LOD0: 2160 triangles
+Artillery LOD1: 240 triangles
+Artillery LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Baked shadow map: 4 static components at 4096 px.
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.2-win64/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.2-win64/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.2-win64/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.2-win64/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.2-win64/Battle/EngineContent/Shaders/Impostor.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.2-win64/Battle/EngineContent/Shaders/Impostor.hlsl [VARIANT_DEFERRED_GBUFFER]
+battle-measurement units=30000 types=4 scenery=300 mode=deferred shading=materials shadows=on anim=off sprites=on frames=20 frame_ms=1.91 fps=522.2 gpu_ms=0.69 draws=58.0 instances=39680 visible=16158 vertices=1615800 lod0=0 lod1=0 lod2=0 sprite=16158 culled=13842 gpu=NVIDIA GeForce RTX 4070 Laptop GPU

@@ -1,0 +1,17 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "caster": "mesh",
+    "frames": [
+        {
+            "count": 0,
+            "image": "",
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "time": 0
+        }
+    ],
+    "ok": true
+}

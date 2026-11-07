@@ -1,0 +1,159 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Editor.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator.vcxproj -> E:\Engine\Engine\build\x64\Release\ComponentGenerator.exe
+  ComponentGenerator: 2 component(s), RuntimeExample
+  RuntimeExample.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Projects\RuntimeExample\Game.dll
+  SceneProject.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Templates\SceneProject\Game.dll
+  EngineRuntime.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\EngineRuntime.exe
+  EngineLauncher.vcxproj -> E:\Engine\Game\build\x64\Release\EngineLauncher.exe
+
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  SceneProject.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Templates\SceneProject\Game.dll
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\CompatibilityTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\CompatibilityTests.exp
+  CompatibilityTests.vcxproj -> E:\Engine\Engine\build\x64\Release\CompatibilityTests.exe
+
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 640x480
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] FXAA pipeline and shaders compiled successfully
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+CompatibilityTests: 116 checks passed
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\EditorUiTests.exe
+
+Cube initialized with 8 vertices and 36 indices
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'view/grid'
+[Info] SettingsService: Set 'view/gizmo'
+[Info] SettingsService: Set 'view/icons'
+[Info] SettingsService: Set 'view/overlays'
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 0, handler = 0000000000000000
+EditorStart
+UI test
+E:\Engine\Engine\build\compat\a874ca43\projects\Old project\Project.json
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=0 | snapObjs=1 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=0 | tris=0
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+EditorSceneViewportAttach ok
+[Info] Camera: zero
+Cube initialized with 8 vertices and 36 indices
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=0 | snapObjs=2 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=0 | tris=0
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=0 | snapObjs=2 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=0 | tris=0
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=0 | snapObjs=2 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=0 | tris=0
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Cube initialized with 8 vertices and 36 indices
+Cube initialized with 8 vertices and 36 indices
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] SettingsService: Set 'layout/83e7b0bf24d6/state'
+[Info] SettingsService: Set 'layout/83e7b0bf24d6/geometry'
+EditorRequestExit
+[Info] Viewport overlay service: NOT FOUND (version 0)
+EditorUpdates=342
+EditorStop
+Legacy EditorUiTests: 388 checks passed
+[Info] Viewport overlay service: NOT FOUND (version 0)
+Frozen release compatibility passed. Fixtures: E:\Engine\Engine\build\compat\a874ca43

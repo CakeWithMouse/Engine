@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 
 #include <algorithm>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
@@ -127,7 +128,7 @@ bool MaterialAsset::Load(const std::string& matPath, MaterialAsset& asset, std::
     {
         document = Json::parse(text);
     }
-    catch (const Json::parse_error& parseError)
+    catch (const Json::exception& parseError)
     {
         return fail(std::string("invalid JSON: ") + parseError.what());
     }
@@ -146,7 +147,8 @@ bool MaterialAsset::Load(const std::string& matPath, MaterialAsset& asset, std::
         {
             return fail("\"version\" must be an integer");
         }
-        if (version.get<int>() < 1 || version.get<int>() > CurrentVersion)
+        // Check before narrowing: a large JSON integer must not wrap into a supported version.
+        if (version.get<double>() < 1 || version.get<double>() > CurrentVersion)
         {
             return fail("unsupported version " + version.dump() + " (this engine reads version " + std::to_string(CurrentVersion) + ")");
         }
@@ -239,6 +241,10 @@ bool MaterialAsset::Load(const std::string& matPath, MaterialAsset& asset, std::
             else
             {
                 return fail("params." + item.key() + " must be a number or an array of 1-4 numbers");
+            }
+            if (!std::all_of(values.begin(), values.end(), [](float value) { return std::isfinite(value); }))
+            {
+                return fail("params." + item.key() + " must contain finite float values");
             }
             result.Params.emplace_back(item.key(), std::move(values));
         }

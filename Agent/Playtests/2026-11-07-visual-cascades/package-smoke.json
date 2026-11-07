@@ -1,0 +1,50 @@
+[
+  {
+    "test": "BasicExamples",
+    "exit": 0
+  },
+  {
+    "test": "Pong",
+    "exit": 0
+  },
+  {
+    "test": "SunGame",
+    "exit": 0
+  },
+  {
+    "test": "Battle",
+    "exit": 0
+  },
+  {
+    "test": "Katamari",
+    "exit": 0
+  },
+  {
+    "test": "RuntimeExample",
+    "exit": 0
+  },
+  {
+    "test": "BasicExamples-editor",
+    "exit": 0
+  },
+  {
+    "test": "RuntimeExample-editor",
+    "exit": 0
+  },
+  {
+    "test": "create",
+    "exit": 0
+  },
+  {
+    "test": "code",
+    "exit": 0
+  },
+  {
+    "test": "project-game",
+    "exit": 0
+  },
+  {
+    "test": "project-editor",
+    "exit": 0
+  }
+]

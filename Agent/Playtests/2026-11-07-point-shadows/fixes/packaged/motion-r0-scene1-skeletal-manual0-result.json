@@ -1,0 +1,683 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "caster": "skeletal",
+    "frames": [
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 6446,
+                    "sha256": "9da197cb26290c68dd294f8e32c17586e73b6f54edf5f1ec19a2d635736eddc8"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12300,
+                    "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "cc69497b3b548511f9a51d8c6fda2f90eab234ba7aa7a1ad451b00b0301a3ea3"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\motion-r0-scene1-skeletal-manual0-00.bmp",
+            "light": [
+                0,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                },
+                {
+                    "depth": 0.9533898830413818,
+                    "face": 0,
+                    "occluded": false,
+                    "position": [
+                        8,
+                        0,
+                        0
+                    ],
+                    "stored": 1
+                },
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                },
+                {
+                    "depth": 0.932203471660614,
+                    "face": 0,
+                    "occluded": false,
+                    "position": [
+                        6,
+                        0,
+                        0
+                    ],
+                    "stored": 1
+                }
+            ],
+            "time": 0
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 18284,
+                    "sha256": "d9e093aa112c3f55fce1556d1178e7980cedb7f52b6ba15fbc8c0095917d0453"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12300,
+                    "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "358a4b0eea491d1a7e0e5fe734d6c64bf1985267f505f899d5968b2b5485a9c2"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\motion-r0-scene1-skeletal-manual0-01.bmp",
+            "light": [
+                0,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                },
+                {
+                    "depth": 0.9533898830413818,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        8,
+                        0,
+                        0
+                    ],
+                    "stored": 0.9245351552963257
+                },
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                },
+                {
+                    "depth": 0.932203471660614,
+                    "face": 0,
+                    "occluded": false,
+                    "position": [
+                        6,
+                        0,
+                        0
+                    ],
+                    "stored": 1
+                }
+            ],
+            "time": 0.5
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 1,
+                    "occupied": 5120,
+                    "sha256": "1eb61a81b2d16da462fa877ef4b0ce3d74b01be8af372c9ad8d90cecfee7e3d4"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "cc69497b3b548511f9a51d8c6fda2f90eab234ba7aa7a1ad451b00b0301a3ea3"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\motion-r0-scene1-skeletal-manual0-02.bmp",
+            "light": [
+                6,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.932203471660614,
+                    "face": 1,
+                    "occluded": false,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 1
+                },
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        8,
+                        0,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                },
+                {
+                    "depth": 0.9533898830413818,
+                    "face": 1,
+                    "occluded": false,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "stored": 1
+                },
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        6,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.5
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 1,
+                    "occupied": 16958,
+                    "sha256": "2e5ab742f5f6698014fc9db4990c9088782e8602196db721b16d86ac8526a2f8"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "358a4b0eea491d1a7e0e5fe734d6c64bf1985267f505f899d5968b2b5485a9c2"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\motion-r0-scene1-skeletal-manual0-03.bmp",
+            "light": [
+                6,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.932203471660614,
+                    "face": 1,
+                    "occluded": false,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 1
+                },
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        8,
+                        0,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                },
+                {
+                    "depth": 0.9533898830413818,
+                    "face": 1,
+                    "occluded": true,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "stored": 0.9245351552963257
+                },
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        6,
+                        0,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                }
+            ],
+            "time": 0
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 6446,
+                    "sha256": "9da197cb26290c68dd294f8e32c17586e73b6f54edf5f1ec19a2d635736eddc8"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12300,
+                    "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "cc69497b3b548511f9a51d8c6fda2f90eab234ba7aa7a1ad451b00b0301a3ea3"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\motion-r0-scene1-skeletal-manual0-04.bmp",
+            "light": [
+                0,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                },
+                {
+                    "depth": 0.9533898830413818,
+                    "face": 0,
+                    "occluded": false,
+                    "position": [
+                        8,
+                        0,
+                        0
+                    ],
+                    "stored": 1
+                },
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                },
+                {
+                    "depth": 0.932203471660614,
+                    "face": 0,
+                    "occluded": false,
+                    "position": [
+                        6,
+                        0,
+                        0
+                    ],
+                    "stored": 1
+                }
+            ],
+            "time": 0
+        },
+        {
+            "count": 0,
+            "directionalShadows": false,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\motion-r0-scene1-skeletal-manual0-05.bmp",
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "time": 0
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 6446,
+                    "sha256": "9da197cb26290c68dd294f8e32c17586e73b6f54edf5f1ec19a2d635736eddc8"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12300,
+                    "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "cc69497b3b548511f9a51d8c6fda2f90eab234ba7aa7a1ad451b00b0301a3ea3"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\motion-r0-scene1-skeletal-manual0-06.bmp",
+            "light": [
+                0,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                },
+                {
+                    "depth": 0.9533898830413818,
+                    "face": 0,
+                    "occluded": false,
+                    "position": [
+                        8,
+                        0,
+                        0
+                    ],
+                    "stored": 1
+                },
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                },
+                {
+                    "depth": 0.932203471660614,
+                    "face": 0,
+                    "occluded": false,
+                    "position": [
+                        6,
+                        0,
+                        0
+                    ],
+                    "stored": 1
+                }
+            ],
+            "time": 0
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 6446,
+                    "sha256": "9da197cb26290c68dd294f8e32c17586e73b6f54edf5f1ec19a2d635736eddc8"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12300,
+                    "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "cc69497b3b548511f9a51d8c6fda2f90eab234ba7aa7a1ad451b00b0301a3ea3"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\motion-r0-scene1-skeletal-manual0-07.bmp",
+            "light": [
+                0,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                },
+                {
+                    "depth": 0.9533898830413818,
+                    "face": 0,
+                    "occluded": false,
+                    "position": [
+                        8,
+                        0,
+                        0
+                    ],
+                    "stored": 1
+                },
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        -2,
+                        0,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                },
+                {
+                    "depth": 0.932203471660614,
+                    "face": 0,
+                    "occluded": false,
+                    "position": [
+                        6,
+                        0,
+                        0
+                    ],
+                    "stored": 1
+                }
+            ],
+            "time": 0
+        }
+    ],
+    "ok": true
+}

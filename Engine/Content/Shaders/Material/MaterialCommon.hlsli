@@ -30,7 +30,7 @@
 
 #define MATERIAL_BLEND_OPAQUE      0
 #define MATERIAL_BLEND_MASKED      1 // opaque, pixels with alpha below the threshold are discarded
-#define MATERIAL_BLEND_TRANSLUCENT 2 // alpha blended, sorted back to front, no depth write
+#define MATERIAL_BLEND_TRANSLUCENT 2 // alpha blended by per-pixel depth layers, no scene depth write
 #define MATERIAL_BLEND_ADDITIVE    3 // colour * alpha added to the scene
 
 #ifndef MATERIAL_BLEND

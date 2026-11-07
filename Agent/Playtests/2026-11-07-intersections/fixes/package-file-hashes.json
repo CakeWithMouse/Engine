@@ -1,0 +1,50 @@
+[
+  {
+    "file": "Runtime/SDK/lib/Engine.lib",
+    "sha256": "10961d167c48804910c7c343407ead2c7a62f90fccefcd1acc756a1d3c3eb275"
+  },
+  {
+    "file": "Runtime/EngineCommandlets.exe",
+    "sha256": "81c96dc74ba7d66e1be0081376d1326a1af8f5c5ee521fca2381d9d9069b08e5"
+  },
+  {
+    "file": "Runtime/SDK/include/Engine/MainGame/BaseGameClass/Game.h",
+    "sha256": "9f65338bddbc0b938e8f1b57ab37b2b832554748e220eaa66b88c4b348fcd0a3"
+  },
+  {
+    "file": "Runtime/SDK/include/Engine/Render/Material.h",
+    "sha256": "5665d65f01a8b45f7e8002014a89c713ed6f447d9a3eb08e13e95e03b320daaa"
+  },
+  {
+    "file": "Runtime/EngineContent/Shaders/TransparencyComposite.hlsl",
+    "sha256": "94a0f869f0abcb869e785847ddc4a7b7b707cd19becb747b7c0c34a67221463d"
+  },
+  {
+    "file": "Runtime/EngineContent/Shaders/Material/MaterialTemplate.hlsl",
+    "sha256": "995e6b50b0cce79642ac97ef00d08a39ea2c5c37e89217e0722433d30a65a28f"
+  },
+  {
+    "file": "Runtime/EngineContent/Shaders/Material/MaterialCommon.hlsli",
+    "sha256": "0d1e3a31af03574a8c51946da759c5c72a697d472954a55acc4f8b93c800db1d"
+  },
+  {
+    "file": "Docs/MATERIALS.md",
+    "sha256": "3bbb014aba2d2ebf25f67128e2bd8de6fff18430dbd4e5d5cbcb4fb2676cc037"
+  },
+  {
+    "file": "Runtime/SDK/docs/MATERIALS.md",
+    "sha256": "3bbb014aba2d2ebf25f67128e2bd8de6fff18430dbd4e5d5cbcb4fb2676cc037"
+  },
+  {
+    "file": "Docs/RENDERING.md",
+    "sha256": "340b30bd41f9321a271419c00ad17e056e280bef08d000057b5c4e0b66dc7daf"
+  },
+  {
+    "file": "Docs/API-REFERENCE.html",
+    "sha256": "cc91c87c7cdc3fe9d7f39c9958c2d7a6e298da57828a279b510ad4f46baf37d8"
+  },
+  {
+    "file": "Diagnostics/TransparencyIntersectionTests.py",
+    "sha256": "69e4441e4124d39133680f92d0ed1abec9ad870e5110607989ab724aefe50e7f"
+  }
+]

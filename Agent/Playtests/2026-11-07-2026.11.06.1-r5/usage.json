@@ -1,0 +1,34 @@
+{
+  "bucket": "codex",
+  "windowDurationMins": 10080,
+  "resetsAt": 1794317816,
+  "baselineUsedPercent": 50,
+  "stopNewWorkAt": 75,
+  "maximumUsedPercent": 80,
+  "checkpoints": [
+    {
+      "phase": "start",
+      "usedPercent": 50
+    },
+    {
+      "phase": "initial-build",
+      "usedPercent": 51
+    },
+    {
+      "phase": "regressions",
+      "usedPercent": 52
+    },
+    {
+      "phase": "roles-complete-and-package",
+      "usedPercent": 53
+    },
+    {
+      "usedPercent": 54,
+      "phase": "final-fix-and-archive"
+    }
+  ],
+  "note": "Shared account window; not exact chat usage.",
+  "finalUsedPercent": 54,
+  "observedIncreasePercentagePoints": 4,
+  "stoppedForBudget": false
+}

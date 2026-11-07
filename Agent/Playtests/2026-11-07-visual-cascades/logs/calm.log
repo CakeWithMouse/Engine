@@ -1,0 +1,229 @@
+Project: Calm City r5
+Mode: editor
+PreviewScene: none
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Game/build/x64/Release/Runtime/EngineContent'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/playtests/20261107-r5/calm-city/CalmCityFinal/Content'
+[VfsRead] using local VFS (no host service)
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+EditorCreate
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 0, handler = 0000000000000000
+EditorStart
+Calm City r5
+E:\Engine\Engine\build\playtests\20261107-r5\calm-city\CalmCityFinal\Project.json
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=0 | snapObjs=19 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=2 | tris=0
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+EditorSceneViewportAttach ok
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=19 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=2 | tris=0
+Texture loaded: E:/Engine/Engine/build/playtests/20261107-r5/calm-city/CalmCityFinal/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=138, billboardCount=2, backbuffer 713x423
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 713x423
+EngineFrame (edit scene API)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=19 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=2 | tris=0
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 121: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 241: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 361: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 481: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 601: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 841: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 961: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 1081: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 1201: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 1321: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 1441: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 1561: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 1681: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 1801: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 1921: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 2041: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 2161: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 2281: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 2401: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 2521: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 2641: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 2761: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 2881: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 3001: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 3121: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 3241: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 3361: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 3481: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 3601: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 3721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 3841: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 3961: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 4081: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 4201: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 4321: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 713x423
+[Info] Frame 4441: AntialiasingMode = 1 (FXAA), bb = 713x423
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=23 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=5 | tris=0
+auto-lod mesh LOD1: 528 -> 264 triangles (target 264, error 0.0236867, silhouette drift 0%)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Texture loaded: E:/Engine/Engine/build/playtests/20261107-r5/calm-city/CalmCityFinal/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] EditorOverlay pipeline and shaders compiled successfully (E:\Engine\Game\build\x64\Release\Runtime\EngineContent\Shaders\EditorOverlay.hlsl)
+FontAtlas: 161 glyphs at 14 px in a 512x128 atlas.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/UI.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 4561: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 4681: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 4801: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 4921: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 5041: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 5161: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 5281: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 5401: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 5521: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 5641: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 5761: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 5881: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 6001: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 6121: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 6241: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 6361: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 6481: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 6601: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 713x423
+[Info] Frame 6721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[ResizeDiag] ViewportResize executed: total=1 size=1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 6841: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 6961: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 7081: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 7201: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 7321: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 7441: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 7561: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 7681: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 7801: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 7921: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 8041: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 8161: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 8281: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 8401: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 8521: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 8641: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 8761: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 8881: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=5, backbuffer 1073x423
+[Info] Frame 9001: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=19 | lines=140 (grid=140, gizmo=0, dir=0) | bbs=2 | tris=0
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 1073x423
+[Info] Frame 9121: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 1073x423
+[Info] Frame 9241: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 1073x423
+[Info] Frame 9361: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 1073x423
+[Info] Frame 9481: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 1073x423
+[Info] Frame 9601: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 1073x423
+[Info] Frame 9721: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] Overlay: entered, pipelineReady=1, lineCount=140, billboardCount=2, backbuffer 1073x423
+[Info] Frame 9841: AntialiasingMode = 1 (FXAA), bb = 1073x423
+[Info] SettingsService: Set 'layout/628b49050451/state'
+[Info] SettingsService: Set 'layout/628b49050451/geometry'
+EditorRequestExit
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+EditorUpdates=9959
+EditorStop
+EditorDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped

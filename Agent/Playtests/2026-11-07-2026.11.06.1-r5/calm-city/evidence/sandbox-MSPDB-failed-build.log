@@ -1,0 +1,10 @@
+﻿
+  ComponentGenerator: 3 component(s), Project
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\20261107-r5\calm-city\CalmCity\Binaries\Release\b282661589bc43f186d48622a6f0337b\Game.lib и объект E:\Engine\Engine\build\playtests\20261107-r5\calm-city\CalmCity\Binaries\Release\b282661589bc43f186d48622a6f0337b\Game.exp
+LINK : fatal error LNK1101: неправильная версия MSPDB140.DLL; перепроверьте установку этого продукта [E:\Engine\Engine\build\playtests\20261107-r5\calm-city\CalmCity\Game.vcxproj]

@@ -753,6 +753,18 @@ int wmain(int argc, wchar_t** argv)
             Check(!Tex::RemoveSlot(mixed, QStringLiteral("C"), problem) && mixed == untouched, "expression with other logic is not cut");
             QString noSurface = QStringLiteral("float4 Other() { return 0; }\n");
             Check(!Tex::AddSlot(noSurface, QStringLiteral("A"), Tex::Role::Color, problem), "no Surface function");
+            QString boundary = QStringLiteral("Texture2D Prior : register(t31);\nvoid Surface(MaterialInput i, inout MaterialOutput o) {}\n");
+            Check(Tex::AddSlot(boundary, QStringLiteral("Safe"), Tex::Role::Color, problem) &&
+                boundary.contains(QStringLiteral("Safe : register(t33)")), "HLSL texture tools skip point shadow register");
+            QString crowded = QStringLiteral("void Surface(MaterialInput i, inout MaterialOutput o) {}\n");
+            for (int i = 0; i < 121; ++i)
+                Check(Tex::AddSlot(crowded, QStringLiteral("Map%1").arg(i), Tex::Role::Color, problem), "available HLSL texture slot allocated");
+            const QString unchanged = crowded;
+            Check(!Tex::AddSlot(crowded, QStringLiteral("Overflow"), Tex::Role::Color, problem) && crowded == unchanged && !problem.isEmpty(),
+                "exhausted texture slots fail without changing HLSL");
+            QString high = QStringLiteral("Texture2D Prior : register(t127);\nvoid Surface(MaterialInput i, inout MaterialOutput o) {}\n");
+            Check(Tex::AddSlot(high, QStringLiteral("Low"), Tex::Role::Color, problem) &&
+                high.contains(QStringLiteral("Low : register(t6)")), "HLSL texture slots wrap into available gap");
         }
         const auto paintFile = root / "Content/Materials/Paint.mat", redSource = root / L"outside-red.bmp";
         auto textureField = [&](const QString& slot) { QString value; Ui([&](auto* w) { if (auto* field = qobject_cast<QLineEdit*>(editorWidget(w, QStringLiteral("MaterialTexture_") + slot))) value = field->text(); }); return value; };

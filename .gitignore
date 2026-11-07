@@ -61,3 +61,8 @@ Agent/Archive/
 
 # Hot-reload shadow cache
 **/.shadow_cache/
+
+# Python diagnostic runner caches
+__pycache__/
+*.pyc
+*.pyo

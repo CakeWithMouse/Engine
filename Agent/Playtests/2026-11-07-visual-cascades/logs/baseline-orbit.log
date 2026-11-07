@@ -1,0 +1,148 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Tank LOD0: 2160 triangles
+Tank LOD1: 240 triangles
+Tank LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Apc LOD0: 3024 triangles
+Apc LOD1: 336 triangles
+Apc LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Truck LOD0: 2592 triangles
+Truck LOD1: 288 triangles
+Truck LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Artillery LOD0: 2160 triangles
+Artillery LOD1: 240 triangles
+Artillery LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Baked shadow map: 4 static components at 4096 px.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-000.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-001.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-002.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-003.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-004.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-005.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-006.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-007.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-008.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-009.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-010.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-011.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-012.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-013.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-014.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-015.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-016.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-017.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-018.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-019.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-020.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-021.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-022.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-023.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-024.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-025.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-026.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-027.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-028.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-029.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-030.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-031.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-032.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-033.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-034.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-035.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-036.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-037.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-038.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-039.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-040.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-041.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-042.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-043.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-044.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-045.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-046.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-047.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-048.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-049.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-050.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-051.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-052.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-053.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-054.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-055.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-056.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-057.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-058.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-059.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-060.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-061.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-062.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-063.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-064.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-065.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-066.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-067.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-068.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-069.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-070.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-071.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-072.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-073.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-074.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-075.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-076.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-077.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-078.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-079.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-080.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-081.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-082.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-083.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-084.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-085.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-086.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-087.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-088.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-089.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-090.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-091.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-092.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-093.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-094.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-095.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-096.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-097.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-098.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-099.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-100.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-101.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-102.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-103.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-104.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-105.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-106.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-107.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-108.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-109.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-110.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-111.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-112.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-113.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-114.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-115.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-116.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-117.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-118.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-119.bmp written=1 size=1000x500
+frame-dump E:/Engine/Engine/build/playtests/20261107-visual/baseline-orbit/frame-120.bmp written=1 size=1000x500
+battle-measurement units=1000 types=4 scenery=300 mode=deferred shading=materials shadows=on anim=off sprites=on frames=172 frame_ms=3.28 fps=305.3 gpu_ms=2.18 draws=29.0 instances=2750 visible=755 vertices=75500 lod0=4 lod1=724 lod2=124 sprite=0 culled=245 gpu=NVIDIA GeForce RTX 4070 Laptop GPU

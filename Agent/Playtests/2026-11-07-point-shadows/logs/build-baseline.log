@@ -1,0 +1,9 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  EngineCommandlets.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineCommandlets.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineCommandlets.exp
+  Создание кода
+  Создание кода завершено
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\EngineCommandlets.exe
+

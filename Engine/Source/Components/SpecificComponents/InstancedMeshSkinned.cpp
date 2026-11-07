@@ -15,6 +15,8 @@ bool InstancedMeshComponent::SetSkinnedLod(int level, const std::vector<CrowdSki
         return false;
     }
 
+    // A changed LOD can introduce vertices/weights outside a previously supplied VAT envelope.
+    AnimationBoundsRadius = 0.0f;
     bIsSkinned = true;
     bIsCrowdVertex = true;
 
@@ -62,6 +64,7 @@ bool InstancedMeshComponent::SetSkinnedLod(int level, const std::vector<SkinnedV
         return false;
     }
 
+    AnimationBoundsRadius = 0.0f;
     bIsSkinned = true;
     bIsCrowdVertex = false;
 
@@ -96,8 +99,11 @@ bool InstancedMeshComponent::SetSkinnedLod(int level, const std::vector<SkinnedV
     return true;
 }
 
-void InstancedMeshComponent::SetAnimationTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv, const std::vector<BakedClipInfo>& clips)
+void InstancedMeshComponent::SetAnimationTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv,
+                                                 const std::vector<BakedClipInfo>& clips, float boundsRadius)
 {
+    AnimationBoundsRadius = srv.Get() != nullptr && std::isfinite(boundsRadius) && boundsRadius > 0.0f
+        ? boundsRadius : 0.0f;
     AnimationTextureSRV = std::move(srv);
     AnimationClips = clips;
     if (GamePtr && GamePtr->GetDevice())
@@ -106,9 +112,10 @@ void InstancedMeshComponent::SetAnimationTexture(Microsoft::WRL::ComPtr<ID3D11Sh
     }
 }
 
-void InstancedMeshComponent::SetAnimationTexture(ID3D11ShaderResourceView* srv, const std::vector<BakedClipInfo>& clips)
+void InstancedMeshComponent::SetAnimationTexture(ID3D11ShaderResourceView* srv,
+                                                 const std::vector<BakedClipInfo>& clips, float boundsRadius)
 {
-    SetAnimationTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>(srv), clips);
+    SetAnimationTexture(Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>(srv), clips, boundsRadius);
 }
 
 bool InstancedMeshComponent::SetAnimatedModel(ID3D11Device* device, const SkeletalModel& model, float sampleFps)
@@ -151,7 +158,6 @@ bool InstancedMeshComponent::SetAnimatedModel(ID3D11Device* device, const Skelet
         SetSkinnedLod(2, lod2Vertices, lod2Indices);
     }
 
-
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
     if (!CreateBakedTextureResource(device, bakeResult.Texture, AnimationTexture, srv))
     {
@@ -159,7 +165,7 @@ bool InstancedMeshComponent::SetAnimatedModel(ID3D11Device* device, const Skelet
         return false;
     }
 
-    SetAnimationTexture(srv, bakeResult.Texture.Clips);
+    SetAnimationTexture(srv, bakeResult.Texture.Clips, bakeResult.AnimationBoundsRadius);
     return true;
 }
 

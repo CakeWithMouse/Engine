@@ -53,6 +53,40 @@ inline void RunMaterialGraphTests()
     {
         MaterialGraphModel model;
         model.SetupDefaultMasterNode();
+        const int texture = model.AddNode(QStringLiteral("Texture2D"), QStringLiteral("Shadow slot"), QPointF(),
+            {{QStringLiteral("textureName"), QStringLiteral("SafeMap")}, {QStringLiteral("slot"), 32}});
+        model.RemoveConnection(2, QStringLiteral("RGB"), 1, QStringLiteral("Albedo"));
+        model.AddConnection(texture, QStringLiteral("RGB"), 1, QStringLiteral("Albedo"));
+        const QString hlsl = HlslGraphCompiler::CompileGraphToHlsl(model);
+        CheckMatGraph(hlsl.contains(QStringLiteral("SafeMap : register(t33)")), "Texture allocator skips point shadow t32");
+    }
+    {
+        MaterialGraphModel model;
+        model.SetupDefaultMasterNode();
+        for (int i = 0; i < 122; ++i)
+        {
+            const int node = model.AddNode(QStringLiteral("Texture2D"), QStringLiteral("Map"), QPointF(),
+                {{QStringLiteral("textureName"), QStringLiteral("Map%1").arg(i)}, {QStringLiteral("slot"), 2147483647}});
+            if (i == 0)
+            {
+                const auto result = HlslGraphCompiler::Compile(model);
+                CheckMatGraph(result.hlsl.contains(QStringLiteral("Map0 : register(t127)")), "Out of range slot is clamped");
+            }
+            if (i == 120)
+            {
+                const auto result = HlslGraphCompiler::Compile(model);
+                CheckMatGraph(result.problems.isEmpty(), "All 121 free texture registers can be allocated");
+                CheckMatGraph(!result.hlsl.contains(QStringLiteral("register(t32)")), "Overflow allocation also skips t32");
+                CheckMatGraph(!result.hlsl.contains(QStringLiteral("register(t128)")), "Allocation wraps within D3D11 limit");
+            }
+            if (i == 121)
+                CheckMatGraph(HlslGraphCompiler::Compile(model).problems.contains(node), "Exhausted texture registers report a graph error");
+        }
+    }
+
+    {
+        MaterialGraphModel model;
+        model.SetupDefaultMasterNode();
 
         // Add Texture2D for BaseMap
         QVariantMap texProps;
