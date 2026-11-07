@@ -87,7 +87,7 @@ inline void Run()
         check(s.importMaterials == true, "Default importMaterials is true");
         check(s.importTextures == true, "Default importTextures is true");
         check(s.flipUv == false, "Default flipUv is false");
-        check(s.mergeMeshes == false, "Default mergeMeshes is false");
+        check(s.mergeMeshes == true, "Default mergeMeshes is true");
     }
 
     // 4. Legacy with unknown fields: {"scale": 0.01, "foo": 1}
@@ -96,6 +96,7 @@ inline void Run()
         std::string err;
         check(ModelImportSettings::Parse(kLegacyWithUnknown, s, &err), "Parse legacy with unknown succeeded");
         check(std::abs(s.scale - 0.01f) < 1e-6f, "Legacy with unknown scale is 0.01");
+        check(s.mergeMeshes == true, "Legacy with unknown mergeMeshes defaults to true");
     }
 
     // 5. Valid v1 with unknown fields
@@ -104,6 +105,7 @@ inline void Run()
         std::string err;
         check(ModelImportSettings::Parse(kValidWithUnknownFields, s, &err), "Parse v1 with unknown fields succeeded");
         check(std::abs(s.scale - 2.0f) < 1e-6f, "Scale is 2.0");
+        check(s.mergeMeshes == true, "v1 without mergeMeshes field defaults to true");
     }
 
     // 6. Broken JSON
@@ -244,56 +246,72 @@ inline void Run()
                 out << kTestObj;
             }
 
-            // 12a. Absent sidecar: default flags (flipUv=false -> V ~ 0.7, mergeMeshes=false -> 2 meshes)
+            // 12a. Absent sidecar: default flags (flipUv=false -> V ~ 0.7, mergeMeshes=true -> 1 mesh, 9 vertices)
             const SkeletalLoadResult resDefault = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
             check(resDefault.Success, "Load default box.obj succeeded");
             check(resDefault.Model != nullptr, "resDefault Model is not null");
-            check(resDefault.Model->Meshes.size() == 2, "Default sidecar preserves 2 distinct meshes (mergeMeshes=false)");
-            check(!resDefault.Model->Meshes[0].Vertices.empty(), "Mesh 0 has vertices");
+            check(resDefault.Model->Meshes.size() == 1, "Default sidecar merges 2 meshes into 1 (mergeMeshes=true by default)");
+            check(resDefault.Model->Meshes[0].Vertices.size() == 9, "Default sidecar produces 9 vertices (identical to pre-ea10cf0 baseline)");
+            check(resDefault.Model->TotalIndexCount == 9, "Total index count is 9 (6 from MeshA + 3 from MeshB)");
             check(std::abs(resDefault.Model->Meshes[0].Vertices[0].TexCoord.y - 0.7f) < 0.01f, "Default flipUv=false flips UV: 1.0 - 0.3 = 0.7");
 
-            // 12b. Explicit default sidecar must yield identical output to absent sidecar
+            // 12b. Explicit default sidecar (mergeMeshes=true) must yield identical output to absent sidecar
             {
                 std::ofstream out(tempRoot / "box.obj.importsettings.json");
-                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":false}}";
+                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":true}}";
             }
             const SkeletalLoadResult resExplicitDefault = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
             check(resExplicitDefault.Success, "Load with explicit default sidecar succeeded");
-            check(resExplicitDefault.Model->Meshes.size() == resDefault.Model->Meshes.size(), "Mesh count matches between absent and default sidecar");
-            check(resExplicitDefault.Model->Meshes[0].Vertices.size() == resDefault.Model->Meshes[0].Vertices.size(), "Vertex count matches");
+            check(resExplicitDefault.Model->Meshes.size() == resDefault.Model->Meshes.size(), "Mesh count matches between absent and default sidecar (1)");
+            check(resExplicitDefault.Model->Meshes[0].Vertices.size() == resDefault.Model->Meshes[0].Vertices.size(), "Vertex count matches (9)");
             check(std::memcmp(resExplicitDefault.Model->Meshes[0].Vertices.data(), resDefault.Model->Meshes[0].Vertices.data(),
                               resDefault.Model->Meshes[0].Vertices.size() * sizeof(SkinnedVertex)) == 0,
                   "Vertices bit-for-bit identical with default sidecar");
 
-            // 12c. flipUv=true: V coordinate is NOT flipped (V ~ 0.3)
+            // 12c. Sidecar without mergeMeshes field defaults to mergeMeshes=true (1 mesh, 9 vertices, memcmp)
             {
                 std::ofstream out(tempRoot / "box.obj.importsettings.json");
-                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":true,\"mergeMeshes\":false}}";
+                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0}}";
+            }
+            const SkeletalLoadResult resNoMergeField = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
+            check(resNoMergeField.Success, "Load with sidecar missing mergeMeshes succeeded");
+            check(resNoMergeField.Model->Meshes.size() == 1, "Sidecar without mergeMeshes yields 1 merged mesh");
+            check(resNoMergeField.Model->Meshes[0].Vertices.size() == 9, "Sidecar without mergeMeshes yields 9 vertices");
+            check(std::memcmp(resNoMergeField.Model->Meshes[0].Vertices.data(), resDefault.Model->Meshes[0].Vertices.data(),
+                              resDefault.Model->Meshes[0].Vertices.size() * sizeof(SkinnedVertex)) == 0,
+                  "Sidecar without mergeMeshes is bit-for-bit identical to default");
+
+            // 12d. mergeMeshes=false: preserves 2 distinct meshes (KEEP_HIERARCHY=1)
+            {
+                std::ofstream out(tempRoot / "box.obj.importsettings.json");
+                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":false}}";
+            }
+            const SkeletalLoadResult resSeparate = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
+            check(resSeparate.Success, "Load with mergeMeshes=false succeeded");
+            check(resSeparate.Model->Meshes.size() == 2, "mergeMeshes=false preserves 2 distinct meshes");
+            check(resSeparate.Model->Meshes[0].Vertices.size() == 6, "Mesh 0 has 6 vertices (MeshA)");
+            check(resSeparate.Model->Meshes[1].Vertices.size() == 3, "Mesh 1 has 3 vertices (MeshB)");
+
+            // 12e. flipUv=true: V coordinate is NOT flipped (V ~ 0.3)
+            {
+                std::ofstream out(tempRoot / "box.obj.importsettings.json");
+                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":true,\"mergeMeshes\":true}}";
             }
             const SkeletalLoadResult resFlipUv = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
             check(resFlipUv.Success, "Load with flipUv=true succeeded");
             check(std::abs(resFlipUv.Model->Meshes[0].Vertices[0].TexCoord.y - 0.3f) < 0.01f, "flipUv=true keeps original V: 0.3");
 
-            // 12d. mergeMeshes=true: meshes with same material merged into 1 mesh
+            // 12f. normals="flat" vs normals="smooth"
             {
                 std::ofstream out(tempRoot / "box.obj.importsettings.json");
-                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":true}}";
-            }
-            const SkeletalLoadResult resMerge = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
-            check(resMerge.Success, "Load with mergeMeshes=true succeeded");
-            check(resMerge.Model->Meshes.size() == 1, "mergeMeshes=true merges 2 meshes into 1");
-
-            // 12e. normals="flat" vs normals="smooth"
-            {
-                std::ofstream out(tempRoot / "box.obj.importsettings.json");
-                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"flat\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":false}}";
+                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"flat\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":true}}";
             }
             const SkeletalLoadResult resFlat = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
             check(resFlat.Success, "Load with normals='flat' succeeded");
 
             {
                 std::ofstream out(tempRoot / "box.obj.importsettings.json");
-                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"smooth\",\"smoothingAngle\":100.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":false}}";
+                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"smooth\",\"smoothingAngle\":100.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":true}}";
             }
             const SkeletalLoadResult resSmooth = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
             check(resSmooth.Success, "Load with normals='smooth' succeeded");

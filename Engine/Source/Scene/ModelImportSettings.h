@@ -17,7 +17,7 @@ struct ModelImportSettings
     bool importMaterials = true;
     bool importTextures = true;
     bool flipUv = false;
-    bool mergeMeshes = false;
+    bool mergeMeshes = true;
 
     static constexpr float MinScale = 1e-4f;
     static constexpr float MaxScale = 1e4f;

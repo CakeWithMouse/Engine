@@ -332,7 +332,7 @@ void Test_GlbImport()
 
         {
             std::ofstream out(sidecarDiskPath);
-            out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":false}}";
+            out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":true}}";
         }
 
         SkeletalLoadResult sidecarResult = LoadSkeletalModelFromVfs("/Game/Models/CesiumMan.glb");

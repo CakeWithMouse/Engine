@@ -237,7 +237,7 @@ bool ModelImportSettings::Parse(std::string_view jsonText, ModelImportSettings& 
             outSettings.flipUv = val.get<bool>();
         }
 
-        // mergeMeshes (optional, bool, default false)
+        // mergeMeshes (optional, bool, default true)
         if (modelObj.contains("mergeMeshes"))
         {
             const auto& val = modelObj["mergeMeshes"];

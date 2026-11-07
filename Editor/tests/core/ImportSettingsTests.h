@@ -125,7 +125,7 @@ inline void RunImportSettingsTests(int& outChecks)
     check(sLegacyPure.model.importMaterials == true, "kLegacyScale importMaterials true");
     check(sLegacyPure.model.importTextures == true, "kLegacyScale importTextures true");
     check(sLegacyPure.model.flipUv == false, "kLegacyScale flipUv false");
-    check(sLegacyPure.model.mergeMeshes == false, "kLegacyScale mergeMeshes false");
+    check(sLegacyPure.model.mergeMeshes == true, "kLegacyScale mergeMeshes true");
 
     ImportSettings sLegacy;
     QString legacyErr;
@@ -140,7 +140,7 @@ inline void RunImportSettingsTests(int& outChecks)
     check(sLegacy.model.importMaterials == true, "Legacy sidecar importMaterials defaults to true");
     check(sLegacy.model.importTextures == true, "Legacy sidecar importTextures defaults to true");
     check(sLegacy.model.flipUv == false, "Legacy sidecar flipUv defaults to false");
-    check(sLegacy.model.mergeMeshes == false, "Legacy sidecar mergeMeshes defaults to false");
+    check(sLegacy.model.mergeMeshes == true, "Legacy sidecar mergeMeshes defaults to true");
     check(sLegacy.extraFields.contains(QStringLiteral("foo")), "Legacy extra field foo captured");
     check(sLegacy.extraFields.value(QStringLiteral("foo")).toInt() == 1, "Legacy extra field foo value is 1");
 
@@ -156,6 +156,7 @@ inline void RunImportSettingsTests(int& outChecks)
     check(sUnknown.extraFields.value(QStringLiteral("custom_root")).toInt() == 12345, "Root extra field value matches");
     check(sUnknown.model.extraFields.contains(QStringLiteral("custom_model_meta")), "Model extra fields captured");
     check(sUnknown.model.extraFields.value(QStringLiteral("custom_model_meta")).toString() == QStringLiteral("keep_me"), "Model extra field value matches");
+    check(sUnknown.model.mergeMeshes == true, "Sidecar without mergeMeshes field defaults to true");
 
     const QByteArray reserialized = ImportSettingsFile::Serialize(sUnknown);
     const QJsonDocument reDoc = QJsonDocument::fromJson(reserialized);

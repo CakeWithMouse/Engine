@@ -17,7 +17,7 @@ struct ModelImportSettings
     bool importMaterials = true;
     bool importTextures = true;
     bool flipUv = false;
-    bool mergeMeshes = false;
+    bool mergeMeshes = true;
     QJsonObject extraFields;
 };
 

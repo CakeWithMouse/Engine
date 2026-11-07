@@ -314,7 +314,7 @@ bool ImportSettingsFile::Parse(const QByteArray& data, ImportSettings& outSettin
         outSettings.model.flipUv = modelObj.value(QStringLiteral("flipUv")).toBool();
     }
 
-    // mergeMeshes (optional, bool, default false)
+    // mergeMeshes (optional, bool, default true)
     if (modelObj.contains(QStringLiteral("mergeMeshes")))
     {
         if (!modelObj.value(QStringLiteral("mergeMeshes")).isBool())
