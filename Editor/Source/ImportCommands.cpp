@@ -3,10 +3,13 @@
 #include "QtHost.h"
 #include "CommandRegistry.h"
 #include "ImportSettingsDialog.h"
+#include "ModelImportSidecar.h"
+#include "Logger.h"
 
 #include <QAction>
 #include <QFileDialog>
 #include <QMenu>
+#include <QMessageBox>
 
 void EditorMainWindow::RegisterAssetCommands()
 {
@@ -125,3 +128,45 @@ void EditorMainWindow::ImportAsset(int kind, const QString& source)
     }
     CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), params);
 }
+
+void EditorMainWindow::HandleModelImported(const EditorCommand& command)
+{
+    if (command.type != EditorCommand::ImportModel || !command.path.startsWith(QStringLiteral("/Game/")))
+    {
+        return;
+    }
+
+    const QString projectDir = QFileInfo(ProjectPath()).dir().absolutePath();
+    const QString contentRoot = QString::fromUtf8(host_->host().contentRoot);
+    FileService fs(&Logger::Instance(), this);
+    fs.SetProjectRoot(projectDir);
+
+    QString sidecarError;
+    if (!EditorCore::ModelImportSidecar::WriteSidecar(fs, command.path, command.importScale, contentRoot, &sidecarError))
+    {
+        AppendLine(QStringLiteral("[Error] Не удалось сохранить настройки импорта для %1: %2").arg(command.path, sidecarError));
+        QMessageBox::warning(this, Tr("Настройки импорта", "Import Settings"),
+                             Tr("Не удалось сохранить настройки импорта (.importsettings.json): %1",
+                                "Failed to save import settings (.importsettings.json): %1").arg(sidecarError));
+    }
+}
+
+float EditorMainWindow::GetModelSpawnScale(const QString& path)
+{
+    const QString projectDir = QFileInfo(ProjectPath()).dir().absolutePath();
+    const QString contentRoot = QString::fromUtf8(host_->host().contentRoot);
+    FileService fs(&Logger::Instance(), this);
+    fs.SetProjectRoot(projectDir);
+
+    EditorCore::ImportSettingsFile::LoadResult res;
+    QString loadError;
+    const float scale = EditorCore::ModelImportSidecar::ReadSpawnScale(fs, path, contentRoot, &res, &loadError);
+    if (res == EditorCore::ImportSettingsFile::LoadResult::Error)
+    {
+        QMessageBox::warning(this, Tr("Настройки модели", "Model Settings"),
+                             Tr("Ошибка при чтении настроек модели: %1. Использован масштаб 1.0.",
+                                "Error reading model settings: %1. Default scale 1.0 used.").arg(loadError));
+    }
+    return scale;
+}
+

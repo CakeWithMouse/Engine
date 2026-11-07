@@ -1208,6 +1208,7 @@ void EditorMainWindow::CommandFinished(
 
         if (command.type == EditorCommand::ImportModel && command.path.startsWith(QStringLiteral("/Game/")))
         {
+            HandleModelImported(command);
             QFile metadata(QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(command.path.mid(6) + QStringLiteral(".import.json")));
             if (metadata.open(QIODevice::ReadOnly))
             {

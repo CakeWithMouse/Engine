@@ -130,6 +130,11 @@ void EditorMainWindow::UseAsset(const QString& path)
 
         for (int i = 0; i < 3; ++i)
             c.transform.position[i] = static_cast<float>(spawn[i]);
+
+        const float s = GetModelSpawnScale(path);
+        c.transform.scale[0] = s;
+        c.transform.scale[1] = s;
+        c.transform.scale[2] = s;
     }
     else
     {

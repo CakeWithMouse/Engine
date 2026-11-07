@@ -105,6 +105,8 @@ private:
     void BuildToolsMenu();
     void RegisterAssetCommands();
     void UnregisterAssetCommands();
+    void HandleModelImported(const EditorCommand& command);
+    float GetModelSpawnScale(const QString& path);
     void ConnectPanels();
 
     void ApplyDefaultLayout();
