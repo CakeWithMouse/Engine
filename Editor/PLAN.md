@@ -100,10 +100,10 @@
 |---|---|---|
 | Сборка `EditorModule` (Debug) | **PASS** | 0 ошибок, 0 новых warnings |
 | Сборка `EditorModule` (Release) | **PASS** | Собрано MSBuild x64 |
-| `Editor/tests/CoreTests.exe` | **474/474 PASS** | Все тесты Core пройдены (`CoreTests: 474 checks passed.`) |
+| `Editor/tests/CoreTests.exe` | **529/529 PASS** | 474 baseline + S17.1-17.2 тесты sidecar (`CoreTests: 529 checks passed.`) |
 | `Editor/tests/HostTests.exe` | **102/102 PASS** | 78 regression + 18 overlay + 6 history (`HostTests: 102 checks passed.`) |
 | `Editor/tests/UiTests.exe` | **274/274 PASS** | 15 helper + 14 import settings dialog + 245 smoke (`UiSmokeTests: 245 checks passed`) |
-| `Engine/tests/run.ps1` (Debug) | **70/70 PASS** | Тесты ядра Engine (`70/70 tests passed; 0 skipped; 0 failed`) |
+| `Engine/tests/run.ps1` (Debug) | **71/71 PASS** | 70 baseline + S17.2 тест парсера sidecar (`71/71 tests passed; 0 skipped; 0 failed`) |
 | `Engine/tests/component-generation/run.ps1` | **24/24 PASS** | Генератор компонентов и контракты (`Compiler contract: 4 expected rejections + empty catalog passed`) |
 | `Engine/tests/edit-session/run.ps1` (Debug) | **651/651 PASS** | C-ABI сессии сцены (`Edit session: 651 checks passed (no editor)`) |
 | `Engine/tests/scene-module/run.ps1` (Debug) | **109/109 PASS** | C-ABI сцены (`Scene module: 109 checks passed; no editor/window/GPU`) |
@@ -491,7 +491,7 @@
 ## Чек-лист среза S17: Полный пайплайн импорта моделей
 - [x] **Шаг 17.0 (analysis):** Фаза 0: Диагностика и согласование архитектуры S17 с архитектором (принято).
 - [x] **Шаг 17.1 (feat(core)):** Расширить `ImportSettings` до v1 (`version`, `kind`, `model{scale,useFileUnitScale,normals,smoothingAngle,importMaterials,importTextures,flipUv,mergeMeshes}`). Миграция legacy `{"scale"}` с записью `[Info]`. Валидация диапазонов (`smoothingAngle` 0..175, `normals` enum), сохранение неизвестных полей JSON при перезаписи, битый sidecar = `[Error]` и дефолты. Тесты в `CoreTests` (518/518 PASS). Только `Editor/`.
-- [ ] **Шаг 17.2 (feat(engine)):** Парсер sidecar в Engine (`nlohmann::json`, тот же формат, те же дефолты, ошибки в лог) + тест Engine на дефолты, legacy `{"scale"}`, битый файл, неизвестные поля. Чтение через VFS.
+- [x] **Шаг 17.2 (feat(engine)):** Парсер sidecar в Engine (`ModelImportSettings.h/.cpp` в `Engine/Source/Scene/`, `nlohmann::json`, тот же формат, те же дефолты, ошибки в лог stderr `[Error]`, legacy migration `[Info]`). Чтение через VFS `VfsRead::Active().Exists(sidecarPath)` и `ReadBytes`. Общий тестовый набор `ImportSettingsTestCases.h` в `Engine/tests/` подключён в `CoreTests` (529 checks PASS) и `EngineTests` (71/71 PASS).
 - [ ] **Шаг 17.3 (feat(engine)):** Флаги Assimp в `SkeletalLoaderAssimp.cpp` из sidecar: `Normals` (file = текущее поведение; flat = `DropNormals|GenNormals`; smooth = `DropNormals|GenSmoothNormals` + `AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE`), `flipUv` (убрать `FlipUVs` из `ConvertToLeftHanded`, дефолт не меняет результат), `mergeMeshes` (`OptimizeMeshes` только при `!skinned`), `useFileUnitScale` (нормализация FBX на основе `UnitScaleFactor`). Тесты Engine на реальное изменение результата (число вершин, V-координата, число мешей). Скелетные тесты 8/8 остаются зелёными.
 - [ ] **Шаг 17.4 (feat(engine)):** Sidecar до импорта: согласование точного механизма до реализации. Реализация `importMaterials`/`importTextures` в `CreateMaterials`, тесты (при false нет `.mat` и текстур).
 - [ ] **Шаг 17.5 (feat(engine)):** `AssetUpdate.cpp`: ремаппинг `.importsettings.json` при смене имени и защита от перезаписи при реимпорте. Тест.

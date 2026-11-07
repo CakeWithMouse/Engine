@@ -4,6 +4,7 @@
 #include "../../Core/Logger.h"
 #include "../../Core/ImportSettings.h"
 #include "../../Core/ModelImportSidecar.h"
+#include "../../../Engine/tests/ImportSettingsTestCases.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -12,9 +13,15 @@
 #include <cstdio>
 #include <cstdlib>
 #include <limits>
+#include <string_view>
 
 namespace
 {
+
+inline QByteArray ToQByteArray(std::string_view sv)
+{
+    return QByteArray(sv.data(), static_cast<int>(sv.size()));
+}
 
 void CheckImportSettings(bool cond, const char* msg)
 {
@@ -99,7 +106,7 @@ inline void RunImportSettingsTests(int& outChecks)
     // 2b. Migration of legacy S16 format {"scale": 0.01, "foo": 1} with unknown fields preservation
     ImportSettings sLegacy;
     QString legacyErr;
-    const bool legacyOk = ImportSettingsFile::Parse(QByteArray("{\"scale\": 0.01, \"foo\": 1}"), sLegacy, &legacyErr);
+    const bool legacyOk = ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kLegacyWithUnknown), sLegacy, &legacyErr);
     check(legacyOk, "Parse succeeded on legacy S16 sidecar with foo");
     check(sLegacy.version == 1, "Legacy sidecar migrated to version 1");
     check(sLegacy.kind == QStringLiteral("model"), "Legacy sidecar migrated to kind model");
@@ -121,17 +128,7 @@ inline void RunImportSettingsTests(int& outChecks)
 
     // 2c. Preservation of unknown fields (root and model)
     ImportSettings sUnknown;
-    const QByteArray unknownJson =
-        "{\n"
-        "  \"version\": 1,\n"
-        "  \"kind\": \"model\",\n"
-        "  \"custom_root\": 12345,\n"
-        "  \"model\": {\n"
-        "    \"scale\": 2.0,\n"
-        "    \"custom_model_meta\": \"keep_me\"\n"
-        "  }\n"
-        "}";
-    check(ImportSettingsFile::Parse(unknownJson, sUnknown), "Parse succeeds with unknown fields");
+    check(ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kValidWithUnknownFields), sUnknown), "Parse succeeds with unknown fields");
     check(sUnknown.extraFields.contains(QStringLiteral("custom_root")), "Root extra fields captured");
     check(sUnknown.extraFields.value(QStringLiteral("custom_root")).toInt() == 12345, "Root extra field value matches");
     check(sUnknown.model.extraFields.contains(QStringLiteral("custom_model_meta")), "Model extra fields captured");
@@ -147,7 +144,7 @@ inline void RunImportSettingsTests(int& outChecks)
     ImportSettings sBroken;
     sBroken.model.scale = 42.0f;
     QString brokenErr;
-    const bool brokenOk = ImportSettingsFile::Parse(QByteArray("not a valid json { broken"), sBroken, &brokenErr);
+    const bool brokenOk = ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kBrokenJson), sBroken, &brokenErr);
     check(!brokenOk, "Parse fails on broken JSON");
     check(!brokenErr.isEmpty(), "Error message populated for broken JSON");
     check(std::abs(sBroken.model.scale - 1.0f) < 1e-6f, "Scale reset to default 1.0 on broken JSON");
@@ -155,36 +152,46 @@ inline void RunImportSettingsTests(int& outChecks)
     // 4. Missing required fields in modern v1 format
     ImportSettings sMissingKind;
     QString missingKindErr;
-    check(!ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"model\": {\"scale\": 1.0}}"), sMissingKind, &missingKindErr), "Parse fails on missing kind");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kMissingKind), sMissingKind, &missingKindErr), "Parse fails on missing kind");
     check(!missingKindErr.isEmpty(), "Error populated for missing kind");
 
     ImportSettings sMissingModel;
     QString missingModelErr;
-    check(!ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"kind\": \"model\"}"), sMissingModel, &missingModelErr), "Parse fails on missing model object");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kMissingModel), sMissingModel, &missingModelErr), "Parse fails on missing model object");
     check(!missingModelErr.isEmpty(), "Error populated for missing model object");
 
     ImportSettings sMissingScale;
     QString missingScaleErr;
-    check(!ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"kind\": \"model\", \"model\": {}}"), sMissingScale, &missingScaleErr), "Parse fails on missing scale");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kMissingScale), sMissingScale, &missingScaleErr), "Parse fails on missing scale");
     check(!missingScaleErr.isEmpty(), "Error populated for missing scale");
+
+    ImportSettings sUnsupportedKind;
+    QString unsupportedKindErr;
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kUnsupportedKind), sUnsupportedKind, &unsupportedKindErr), "Parse fails on unsupported kind");
+    check(!unsupportedKindErr.isEmpty(), "Error populated for unsupported kind");
 
     // 5. Invalid types
     ImportSettings sBadType;
     QString badTypeErr;
-    check(!ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"kind\": \"model\", \"model\": {\"scale\": \"big\"}}"), sBadType, &badTypeErr), "Parse fails on string scale");
-    check(!ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"kind\": \"model\", \"model\": {\"scale\": 1.0, \"normals\": 123}}"), sBadType, &badTypeErr), "Parse fails on number normals");
-    check(!ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"kind\": \"model\", \"model\": {\"scale\": 1.0, \"smoothingAngle\": \"sharp\"}}"), sBadType, &badTypeErr), "Parse fails on string smoothingAngle");
-    check(!ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"kind\": \"model\", \"model\": {\"scale\": 1.0, \"importMaterials\": \"yes\"}}"), sBadType, &badTypeErr), "Parse fails on string importMaterials");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kBadTypeScale), sBadType, &badTypeErr), "Parse fails on string scale");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kBadTypeNormals), sBadType, &badTypeErr), "Parse fails on number normals");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kBadTypeSmoothingAngle), sBadType, &badTypeErr), "Parse fails on string smoothingAngle");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kBadTypeImportMaterials), sBadType, &badTypeErr), "Parse fails on string importMaterials");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kBadTypeUseFileUnitScale), sBadType, &badTypeErr), "Parse fails on int useFileUnitScale");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kBadTypeFlipUv), sBadType, &badTypeErr), "Parse fails on string flipUv");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kBadTypeMergeMeshes), sBadType, &badTypeErr), "Parse fails on array mergeMeshes");
 
     // 6. Out of range values
     ImportSettings sOutOfRange;
     QString rangeErr;
-    check(!ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"kind\": \"model\", \"model\": {\"scale\": 0.0}}"), sOutOfRange, &rangeErr), "Parse fails on scale 0.0");
-    check(!ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"kind\": \"model\", \"model\": {\"scale\": -5.0}}"), sOutOfRange, &rangeErr), "Parse fails on negative scale");
-    check(!ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"kind\": \"model\", \"model\": {\"scale\": 100000.0}}"), sOutOfRange, &rangeErr), "Parse fails on scale > 1e4");
-    check(!ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"kind\": \"model\", \"model\": {\"scale\": 1.0, \"smoothingAngle\": -10.0}}"), sOutOfRange, &rangeErr), "Parse fails on negative angle");
-    check(!ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"kind\": \"model\", \"model\": {\"scale\": 1.0, \"smoothingAngle\": 180.0}}"), sOutOfRange, &rangeErr), "Parse fails on angle > 175");
-    check(!ImportSettingsFile::Parse(QByteArray("{\"version\": 1, \"kind\": \"model\", \"model\": {\"scale\": 1.0, \"normals\": \"invalid_enum\"}}"), sOutOfRange, &rangeErr), "Parse fails on invalid normals enum");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kOutOfRangeScaleZero), sOutOfRange, &rangeErr), "Parse fails on scale 0.0");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kOutOfRangeScaleNegative), sOutOfRange, &rangeErr), "Parse fails on negative scale");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kOutOfRangeScaleHuge), sOutOfRange, &rangeErr), "Parse fails on scale > 1e4");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kOutOfRangeAngleNegative), sOutOfRange, &rangeErr), "Parse fails on negative angle");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kOutOfRangeAngleHuge), sOutOfRange, &rangeErr), "Parse fails on angle > 175");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kInvalidNormalsEnum), sOutOfRange, &rangeErr), "Parse fails on invalid normals enum");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kLegacyBadScale), sOutOfRange, &rangeErr), "Parse fails on bad legacy scale");
+    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kLegacyOutOfRangeScale), sOutOfRange, &rangeErr), "Parse fails on out of range legacy scale");
 
     // 7. Sidecar path helper
     check(ImportSettingsFile::SidecarPathForAsset(QStringLiteral("Content/Models/Hero/Hero.glb")) ==
