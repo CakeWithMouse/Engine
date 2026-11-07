@@ -138,7 +138,8 @@ void EditorMainWindow::HandleModelImported(const EditorCommand& command)
     QString sidecarError;
     if (!EditorCore::ModelImportSidecar::WriteSidecar(fs, command.path, command.importScale, contentRoot, &sidecarError))
     {
-        AppendLine(QStringLiteral("[Error] Не удалось сохранить настройки импорта для %1: %2").arg(command.path, sidecarError));
+        AppendLine(Tr("[Error] Не удалось сохранить настройки импорта для %1: %2",
+                      "[Error] Failed to save import settings for %1: %2").arg(command.path, sidecarError));
         static auto s_lastImportWarningTime = std::chrono::steady_clock::time_point{};
         const auto now = std::chrono::steady_clock::now();
         if (now - s_lastImportWarningTime > std::chrono::seconds(3))
@@ -163,7 +164,8 @@ float EditorMainWindow::GetModelSpawnScale(const QString& path)
     const float scale = EditorCore::ModelImportSidecar::ReadSpawnScale(fs, path, contentRoot, &res, &loadError);
     if (res == EditorCore::ImportSettingsFile::LoadResult::Error)
     {
-        AppendLine(QStringLiteral("[Error] Ошибка при чтении настроек модели для %1: %2").arg(path, loadError));
+        AppendLine(Tr("[Error] Ошибка при чтении настроек модели для %1: %2",
+                      "[Error] Error reading model settings for %1: %2").arg(path, loadError));
         static auto s_lastSpawnWarningTime = std::chrono::steady_clock::time_point{};
         const auto now = std::chrono::steady_clock::now();
         if (now - s_lastSpawnWarningTime > std::chrono::seconds(3))

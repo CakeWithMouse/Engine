@@ -1,5 +1,5 @@
 # План разработки PainEngine Editor v2
-> **Ветка:** `feat/import-settings`  
+> **Ветка:** `feat/import-pipeline`  
 > **Архитектор:** Юрий  
 > **Инженер-исполнитель:** Antigravity  
 > **Протокол:** `engine-work-protocol`
@@ -94,23 +94,24 @@
 
 ---
 
-## Эталон тестов (Baseline S16 на ветке main)
+## Эталон тестов (Baseline S16 на ветке main @ d74aebb)
 
 | Тест / Скрипт | Результат на `main` (эталон) | Примечание |
 |---|---|---|
 | Сборка `EditorModule` (Debug) | **PASS** | 0 ошибок, 0 новых warnings |
 | Сборка `EditorModule` (Release) | **PASS** | Собрано MSBuild x64 |
-| `Editor/tests/CoreTests.exe` | **374/374 PASS** | Все тесты Core пройдены |
-| `Editor/tests/HostTests.exe` | **69/69 PASS** | 45 regression + 18 overlay + 6 history |
-| `Editor/tests/UiTests.exe` | **260/260 PASS** | 15 helper + 245 smoke (90 RU strings) |
-| `Engine/tests/run.ps1` (Debug) | **59/59 PASS** | Тесты ядра Engine |
-| `Engine/tests/component-generation/run.ps1` | **24/24 PASS** | Генератор компонентов и контракты |
-| `Engine/tests/edit-session/run.ps1` (Debug) | **651/651 PASS** | C-ABI сессии сцены |
-| `Engine/tests/scene-module/run.ps1` (Debug) | **109/109 PASS** | C-ABI сцены |
-| `Engine/tests/run-viewport.ps1` (Debug) | **7/7 PASS** | Рендеринг и вьюпорт |
-| `Engine/tests/skeletal/run.ps1` (Debug) | **8/8 PASS** | Скелетная анимация |
-| `Engine/tests/code-projects/class-names.ps1` | **27/27 PASS** | Имена классов |
-| `Engine/tests/run-runtime.ps1` (Debug) | **18/18 PASS** | Runtime тесты |
+| `Editor/tests/CoreTests.exe` | **474/474 PASS** | Все тесты Core пройдены (`CoreTests: 474 checks passed.`) |
+| `Editor/tests/HostTests.exe` | **102/102 PASS** | 78 regression + 18 overlay + 6 history (`HostTests: 102 checks passed.`) |
+| `Editor/tests/UiTests.exe` | **274/274 PASS** | 15 helper + 14 import settings dialog + 245 smoke (`UiSmokeTests: 245 checks passed`) |
+| `Engine/tests/run.ps1` (Debug) | **70/70 PASS** | Тесты ядра Engine (`70/70 tests passed; 0 skipped; 0 failed`) |
+| `Engine/tests/component-generation/run.ps1` | **24/24 PASS** | Генератор компонентов и контракты (`Compiler contract: 4 expected rejections + empty catalog passed`) |
+| `Engine/tests/edit-session/run.ps1` (Debug) | **651/651 PASS** | C-ABI сессии сцены (`Edit session: 651 checks passed (no editor)`) |
+| `Engine/tests/scene-module/run.ps1` (Debug) | **109/109 PASS** | C-ABI сцены (`Scene module: 109 checks passed; no editor/window/GPU`) |
+| `Engine/tests/run-viewport.ps1` (Debug) | **7/7 PASS** | Рендеринг и вьюпорт (`PASS: GameSettings in standalone and embedded...`) |
+| `Engine/tests/skeletal/run.ps1` (Debug) | **8/8 PASS** | Скелетная анимация (`=== Skeletal Tests: 8/8 passed ===`) |
+| `Engine/tests/code-projects/class-names.ps1` | **27/27 PASS** | Имена классов (`Class names: 27 checks passed.`) |
+| `Engine/tests/run-runtime.ps1` (Debug) | **18/18 PASS** | Runtime тесты (`18 runtime checks passed.`) |
+| `Engine/tests/compatibility/run.ps1` | **116/116 PASS** | Тесты обратной совместимости (`CompatibilityTests: 116 checks passed`) |
 | `Editor/tools/check.ps1 -Quick` | **FAIL (Красная база)** | `FAIL: Legacy file Editor/Source/MaterialEditorWindow.cpp exceeded Cyrillic ratchet limit (1380 > 800)` |
 | `Game/tests/run-games.ps1` | **FAIL (Красная база)** | `Expected 1, got -1073741515: BasicExamples.exe --smoke` (отсутствие assimp.dll в фикстуре, 25/27 PASS) |
 | `Editor/tests/run.ps1` (`EditorUiTests.exe`) | **FAIL (Красная база)** | `preview clears to its background` (падение grabWindow в фоновом окружении) |
@@ -209,6 +210,18 @@
     - Прогон `check.ps1` на ветке `main` зафиксировал 4 эталонных падения: локализация в `MaterialEditorWindow.cpp`, отсутствие `assimp.dll` в фикстуре `run-games.ps1`, 4 скрипта тестов без BOM в PS 5.1, падение `grabWindow` в UI-тесте окна материалов. База признана эталоном и не исправляется в рамках задачи.
 26. **Запретные зоны:**
     - `Engine/`, `Game/`, `build.ps1` не модифицируются.
+27. **Решения по срезу S17 (Полный пайплайн импорта моделей):**
+    - **Unit scale:** Вариант 1 (нормализация геометрии в Assimp). Дефолт `useFileUnitScale = false` (сохраняем текущее поведение; включение по желанию пользователя).
+    - **Import materials / textures:** Вариант А (sidecar до импорта). Вариант В отвергнут.
+    - **Область правок Engine/:** Разрешены правки `Engine/` ТОЛЬКО в пяти точках:
+      1) `Engine/Source/Render/SkeletalLoaderAssimp.cpp`
+      2) `Engine/Source/Scene/ModelImport.cpp`
+      3) `Engine/Source/Scene/SceneAssets.cpp`
+      4) `Engine/Source/Scene/AssetUpdate.cpp` (ремаппинг и защита importsettings.json)
+      5) новый маленький файл парсера sidecar в `Engine/Source/Scene/`
+    - `EditSessionApi.h` и размер структуры 320 байт строго не трогать.
+    - `Game/`, `build.ps1` не трогать.
+    - Ветка: `feat/import-pipeline`, без push. Красная база остаётся эталоном.
 
 ---
 
@@ -469,3 +482,25 @@
 - [x] **refactor(ui):** Вынос регистрации команды `Assets.Import` и её обработчика в отдельный файл `Editor/Source/ImportCommands.cpp`. `MainWindow.cpp` сокращён до 1450 строк (лимит 1460, на main было 1453), `AssetTools.cpp` сокращён до 387 строк (лимит 500). Поведение сохранено.
 - [x] **Шаг 16.3 (feat(host)):** Реализован `EditorCore::ModelImportSidecar` (helper в `Core/`). После успешного импорта модели сохранение `<asset>.importsettings.json` через `FileService` со scale из `EditorCommand.importScale`. При создании объекта на сцене (`UseAsset` в `AssetTools.cpp`) чтение scale через `ReadSpawnScale` (`ImportSettingsFile::Load`) и выставление `c.transform.scale = {s, s, s}` (один раз при создании, вне горячего пути). 7 тестов без GPU в `CoreTests` (450/450 PASS).
 - [x] **Шаг 16.4 (test):** Регрессионные тесты: спавн модели со scale 0.01 из sidecar выставляет `transform.scale = {0.01, 0.01, 0.01}`; отсутствие sidecar даёт scale 1.0 и `[Info]`; битый sidecar даёт scale 1.0 и `[Error]`; реимпорт сохраняет существующий sidecar и масштаб объектов на сцене не сбрасывается. Тест пакета из 3 файлов на уровне Host с сохранением и проверкой sidecar для каждого файла. Подмена модального `exec()` через `SetExecHookForTesting` в `ImportSettingsDialog`, тест Cancel на реальной функции принятия решений `ResolveModelImportScale`. Ограничение показа модальных окон при пакетных ошибках sidecar.
+
+---
+
+## Чек-лист среза S17: Полный пайплайн импорта моделей
+- [x] **Шаг 17.0 (analysis):** Фаза 0: Диагностика и согласование архитектуры S17 с архитектором (принято).
+- [x] **Шаг 17.1 (feat(core)):** Расширить `ImportSettings` до v1 (`version`, `kind`, `model{scale,useFileUnitScale,normals,smoothingAngle,importMaterials,importTextures,flipUv,mergeMeshes}`). Миграция legacy `{"scale"}` с записью `[Info]`. Валидация диапазонов (`smoothingAngle` 0..175, `normals` enum), сохранение неизвестных полей JSON при перезаписи, битый sidecar = `[Error]` и дефолты. Тесты в `CoreTests` (518/518 PASS). Только `Editor/`.
+- [ ] **Шаг 17.2 (feat(engine)):** Парсер sidecar в Engine (`nlohmann::json`, тот же формат, те же дефолты, ошибки в лог) + тест Engine на дефолты, legacy `{"scale"}`, битый файл, неизвестные поля. Чтение через VFS.
+- [ ] **Шаг 17.3 (feat(engine)):** Флаги Assimp в `SkeletalLoaderAssimp.cpp` из sidecar: `Normals` (file = текущее поведение; flat = `DropNormals|GenNormals`; smooth = `DropNormals|GenSmoothNormals` + `AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE`), `flipUv` (убрать `FlipUVs` из `ConvertToLeftHanded`, дефолт не меняет результат), `mergeMeshes` (`OptimizeMeshes` только при `!skinned`), `useFileUnitScale` (нормализация FBX на основе `UnitScaleFactor`). Тесты Engine на реальное изменение результата (число вершин, V-координата, число мешей). Скелетные тесты 8/8 остаются зелёными.
+- [ ] **Шаг 17.4 (feat(engine)):** Sidecar до импорта: согласование точного механизма до реализации. Реализация `importMaterials`/`importTextures` в `CreateMaterials`, тесты (при false нет `.mat` и текстур).
+- [ ] **Шаг 17.5 (feat(engine)):** `AssetUpdate.cpp`: ремаппинг `.importsettings.json` при смене имени и защита от перезаписи при реимпорте. Тест.
+- [ ] **Шаг 17.6 (feat(ui)):** `ImportSettingsDialog` для моделей: группы Базовые/Расширенные (расширенные свёрнуты), зависимости, кнопка «Сбросить», сохранение последних значений через `SettingsService` с логом, Tabler-иконки через `IconProvider`.
+- [ ] **Шаг 17.7 (test):** Регрессионное тестирование на уровне Host/Core без раздувания `EditorUiTests.cpp`.
+
+---
+
+## Чек-лист среза S18: Настройки импорта текстур
+> **Статус:** Позже (после приёмки S17).
+
+---
+
+## Чек-лист среза S19: Настройки импорта звуков
+> **Статус:** Позже (после приёмки S18).
