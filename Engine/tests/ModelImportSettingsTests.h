@@ -319,6 +319,68 @@ inline void Run()
             check(resFlat.Model->Meshes[0].Vertices.size() > resSmooth.Model->Meshes[0].Vertices.size(),
                   "normals='flat' has more vertices than normals='smooth' due to unwelded sharp edge");
 
+            // 12g. Format without unit scale (box.obj): useFileUnitScale=true leaves geometry bit-for-bit identical
+            {
+                std::ofstream out(tempRoot / "box.obj.importsettings.json");
+                out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":true,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":true}}";
+            }
+            const SkeletalLoadResult resObjUnitScale = LoadSkeletalModelFromVfs("/TestFlagsVfs/box.obj");
+            check(resObjUnitScale.Success, "Load box.obj with useFileUnitScale=true succeeded");
+            check(resObjUnitScale.Model->Meshes.size() == resDefault.Model->Meshes.size(), "Mesh count matches");
+            check(std::memcmp(resObjUnitScale.Model->Meshes[0].Vertices.data(), resDefault.Model->Meshes[0].Vertices.data(),
+                              resDefault.Model->Meshes[0].Vertices.size() * sizeof(SkinnedVertex)) == 0,
+                  "Vertices bit-for-bit identical for format without unit scale when useFileUnitScale=true");
+
+            // 12h. Static FBX (Blender with 100 node scale): test 190m (false/default) vs 1.9m (true)
+            const std::filesystem::path blenderFbxSource = "C:/Users/Yuri/Downloads/0dae7c1fa11c828a43de24a048fa49f2.fbx";
+            if (std::filesystem::exists(blenderFbxSource))
+            {
+                std::filesystem::copy_file(blenderFbxSource, tempRoot / "blender.fbx", std::filesystem::copy_options::overwrite_existing);
+
+                auto calcMaxDim = [](const std::shared_ptr<SkeletalModel>& model) -> float {
+                    float minX = 1e30f, minY = 1e30f, minZ = 1e30f;
+                    float maxX = -1e30f, maxY = -1e30f, maxZ = -1e30f;
+                    for (const auto& mesh : model->Meshes)
+                    {
+                        for (const auto& v : mesh.Vertices)
+                        {
+                            minX = std::min(minX, v.Position.x); minY = std::min(minY, v.Position.y); minZ = std::min(minZ, v.Position.z);
+                            maxX = std::max(maxX, v.Position.x); maxY = std::max(maxY, v.Position.y); maxZ = std::max(maxZ, v.Position.z);
+                        }
+                    }
+                    return std::max({maxX - minX, maxY - minY, maxZ - minZ});
+                };
+
+                // Default (no sidecar) -> ~190m
+                const SkeletalLoadResult resFbxDefault = LoadSkeletalModelFromVfs("/TestFlagsVfs/blender.fbx");
+                check(resFbxDefault.Success, "Load blender.fbx default succeeded");
+                const float maxDimDefault = calcMaxDim(resFbxDefault.Model);
+                check(std::abs(maxDimDefault - 190.0f) < 1.0f, "Blender FBX default gives ~190m");
+
+                // Explicit useFileUnitScale=false -> ~190m (memcmp with default)
+                {
+                    std::ofstream out(tempRoot / "blender.fbx.importsettings.json");
+                    out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false}}";
+                }
+                const SkeletalLoadResult resFbxFalse = LoadSkeletalModelFromVfs("/TestFlagsVfs/blender.fbx");
+                check(resFbxFalse.Success, "Load blender.fbx useFileUnitScale=false succeeded");
+                const float maxDimFalse = calcMaxDim(resFbxFalse.Model);
+                check(std::abs(maxDimFalse - 190.0f) < 1.0f, "Blender FBX with useFileUnitScale=false gives ~190m");
+                check(std::memcmp(resFbxFalse.Model->Meshes[0].Vertices.data(), resFbxDefault.Model->Meshes[0].Vertices.data(),
+                                  resFbxDefault.Model->Meshes[0].Vertices.size() * sizeof(SkinnedVertex)) == 0,
+                      "Blender FBX vertices bit-for-bit identical between absent sidecar and useFileUnitScale=false");
+
+                // Explicit useFileUnitScale=true -> ~1.9m
+                {
+                    std::ofstream out(tempRoot / "blender.fbx.importsettings.json");
+                    out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":true}}";
+                }
+                const SkeletalLoadResult resFbxTrue = LoadSkeletalModelFromVfs("/TestFlagsVfs/blender.fbx");
+                check(resFbxTrue.Success, "Load blender.fbx with useFileUnitScale=true succeeded");
+                const float maxDimTrue = calcMaxDim(resFbxTrue.Model);
+                check(std::abs(maxDimTrue - 1.9f) < 0.1f, "Blender FBX with useFileUnitScale=true gives ~1.9m");
+            }
+
             VfsRead::GetVFS().Unmount("/TestFlagsVfs");
             std::filesystem::remove_all(tempRoot);
         }

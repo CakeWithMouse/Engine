@@ -222,6 +222,12 @@
     - `EditSessionApi.h` и размер структуры 320 байт строго не трогать.
     - `Game/`, `build.ps1` не трогать.
     - Ветка: `feat/import-pipeline`, без push. Красная база остаётся эталоном.
+28. **Дефолт mergeMeshes = true (Шаг 17.3b):**
+    - Воспроизводит историческое поведение движка `PretransformVertices` без `KEEP_HIERARCHY`. При `mergeMeshes = false` выставляется `AI_CONFIG_PP_PTV_KEEP_HIERARCHY = 1`.
+29. **Реализация useFileUnitScale через aiProcess_GlobalScale (Шаг 17.3c):**
+    - `useFileUnitScale` в `SkeletalLoaderAssimp.cpp` подключается через выставление флага `aiProcess_GlobalScale`.
+    - Значение `scale` из sidecar в Assimp не передаётся (остаётся на Transform при спавне объекта во избежание двойного применения).
+    - При `useFileUnitScale = false` флаги Assimp не изменяются, сохраняя 100% побитовую совместимость с ранее импортированными моделями.
 
 ---
 
@@ -344,6 +350,7 @@
 - Переключение режима сглаживания через пункт меню "Вид -> Сглаживание -> Выкл / FXAA" в запущенном GUI с визуальной оценкой пикселей.
 - Реимпорт модели (`UpdateAsset`): подтверждение на живом проекте, что реальный вызов `UpdateAsset` через движок не перезаписывает `.importsettings.json` и сохраняет масштаб объектов на сцене (в юнит-тестах проверена эмуляция семантики копирования каталога `AssetUpdate::Run`).
 - Показ ровно одного модального окна `QMessageBox::warning` при пакетном спавне/импорте N файлов с битыми sidecar: коалесцирование с кулдауном 3 секунды реализовано в `ImportCommands.cpp`, но автотест с подсчётом модальных окон отсутствует (проверить вручную при пакетном спавне поврежденных файлов).
+- FBX из 3ds Max / Maya с отличающимися настройками осей и системных единиц (например, дюймы или сантиметры без промежуточного скейла 100 в узле): в тестах проверен Blender FBX (100 в узле, UnitScaleFactor 1.0) и glTF/OBJ.
 
 ## Интеграция main в editor-v2 — 31.10.2026
 
@@ -495,6 +502,7 @@
 - [x] **Шаг 17.2 (feat(engine)):** Парсер sidecar в Engine (`ModelImportSettings.h/.cpp` в `Engine/Source/Scene/`, `nlohmann::json`, тот же формат, те же дефолты, ошибки в лог stderr `[Error]`, legacy migration `[Info]`). Чтение через VFS `VfsRead::Active().Exists(sidecarPath)` и `ReadBytes`. Общий тестовый набор `ImportSettingsTestCases.h` в `Engine/tests/` подключён в `CoreTests` (529 checks PASS) и `EngineTests` (71/71 PASS).
 - [x] **Шаг 17.3 (feat(engine)):** Флаги Assimp в `SkeletalLoaderAssimp.cpp` из sidecar: `normals` (file = текущее поведение; flat = `DropNormals|GenNormals`; smooth = `DropNormals|GenSmoothNormals` + `AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE`), `flipUv` (управление `FlipUVs`, дефолт `false` сохраняет текущее поведение), `mergeMeshes` (`AI_CONFIG_PP_PTV_KEEP_HIERARCHY` и `OptimizeMeshes` только при `!skinned`), `useFileUnitScale` (предложение на ревью Юрия, до одобрения не подключено). Тесты в `EngineTests` на реальное изменение результата (число вершин flat vs smooth, V-координата flipUv, число мешей mergeMeshes) и побитовую идентичность с дефолтным sidecar на `CesiumMan.glb` в `SkeletalTests`. Скелетные тесты 8/8 и EngineTests 71/71 PASS.
 - [x] **Шаг 17.3b (fix(engine)):** Восстановление дефолтного объединения мешей: дефолт схемы `mergeMeshes = true` (воспроизводит историческое поведение движка `PretransformVertices` без `KEEP_HIERARCHY`). При `mergeMeshes = false` выставляется `AI_CONFIG_PP_PTV_KEEP_HIERARCHY = 1`. Синхронное обновление в Editor/Engine/тестах. Тест 12 на `box.obj`: дефолт даёт 1 меш, 9 вершин и 9 индексов (memcmp с эталоном), отсутствие поля `mergeMeshes` читается как `true`, `mergeMeshes = false` сохраняет 2 меша (6 и 3 вершины). CoreTests (549), EngineTests (71/71), SkeletalTests (8/8) PASS.
+- [x] **Шаг 17.3c (feat(engine)):** Реализация `useFileUnitScale` через `aiProcess_GlobalScale` в `SkeletalLoaderAssimp.cpp`. `scale` из sidecar в Assimp не передаётся (остаётся на Transform). При `useFileUnitScale=false` флаги Assimp без изменений. Тесты: статический FBX (Blender с 100 в узле) даёт ~1.9м при true и ~190м при false/дефолте (memcmp с эталоном); скелетная модель (`CesiumMan.glb`) и формат без единиц (`box.obj`) с true побитово не меняются (memcmp). EngineTests (71/71), SkeletalTests (8/8), CoreTests (549), HostTests (102), UiTests (274) PASS.
 - [ ] **Шаг 17.4 (feat(engine)):** Sidecar до импорта: согласование точного механизма до реализации. Реализация `importMaterials`/`importTextures` в `CreateMaterials`, тесты (при false нет `.mat` и текстур).
 - [ ] **Шаг 17.5 (feat(engine)):** `AssetUpdate.cpp`: ремаппинг `.importsettings.json` при смене имени и защита от перезаписи при реимпорте. Тест.
 - [ ] **Шаг 17.6 (feat(ui)):** `ImportSettingsDialog` для моделей: группы Базовые/Расширенные (расширенные свёрнуты), зависимости, кнопка «Сбросить», сохранение последних значений через `SettingsService` с логом, Tabler-иконки через `IconProvider`.

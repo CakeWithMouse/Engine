@@ -86,6 +86,11 @@ static SkeletalLoadResult LoadModel(
             flags |= aiProcess_FlipUVs;
         }
 
+        if (settings.useFileUnitScale)
+        {
+            flags |= aiProcess_GlobalScale;
+        }
+
         if (settings.normals == "flat")
         {
             flags |= aiProcess_DropNormals | aiProcess_GenNormals;

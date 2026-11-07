@@ -367,6 +367,25 @@ void Test_GlbImport()
         TEST_CHECK(sidecarResult.Model->TotalIndexCount == result.Model->TotalIndexCount, "TotalIndexCount identical");
         TEST_CHECK(sidecarResult.Model->BoundingRadius == result.Model->BoundingRadius, "BoundingRadius identical");
         TEST_CHECK(std::memcmp(&sidecarResult.Model->MeshToModel, &result.Model->MeshToModel, sizeof(XMFLOAT4X4)) == 0, "MeshToModel bit-for-bit identical");
+
+        // Verify that useFileUnitScale=true does not modify glTF/CesiumMan (glTF has no unit scaling)
+        {
+            std::ofstream out(sidecarDiskPath);
+            out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":true,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":true}}";
+        }
+
+        SkeletalLoadResult unitScaleResult = LoadSkeletalModelFromVfs("/Game/Models/CesiumMan.glb");
+        TEST_CHECK(unitScaleResult.Success, "CesiumMan.glb load with useFileUnitScale=true succeeded");
+        TEST_CHECK(unitScaleResult.Model != nullptr, "CesiumMan.glb model with useFileUnitScale=true not null");
+        TEST_CHECK(unitScaleResult.Model->Meshes.size() == result.Model->Meshes.size(), "Mesh count identical with useFileUnitScale=true");
+        for (size_t m = 0; m < result.Model->Meshes.size(); ++m)
+        {
+            const auto& mOrig = result.Model->Meshes[m];
+            const auto& mUnit = unitScaleResult.Model->Meshes[m];
+            TEST_CHECK(mOrig.Vertices.size() == mUnit.Vertices.size(), "Mesh vertex count identical");
+            TEST_CHECK(std::memcmp(mOrig.Vertices.data(), mUnit.Vertices.data(), mOrig.Vertices.size() * sizeof(SkinnedVertex)) == 0,
+                       "Mesh vertices bit-for-bit identical with useFileUnitScale=true");
+        }
     }
 
     const size_t boneCount = result.Model->ModelSkeleton.Bones.size();
