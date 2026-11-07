@@ -1,67 +1,24 @@
 #pragma once
 
+#include "Graph/GraphDocument.h"
+
 #include <QColor>
-#include <QPointF>
-#include <QString>
-#include <QVariantMap>
-#include <QVector>
 
 namespace EditorCore
 {
 
-struct GraphPin
-{
-    QString name;
-    bool isInput = false;
-    QString type = QStringLiteral("float"); // float, float2, float3, float4
-    QPointF localPos;
-};
-
-struct GraphNodeData
-{
-    int id = 0;
-    QString type;   // MaterialOutput, ColorParam, ScalarParam, Texture2D, NormalMap, Time, UVCoord, Panner, Multiply, Add, Lerp, OneMinus, Sine, Fresnel
-    QString title;
-    QPointF pos;
-    QVariantMap properties;
-};
-
-struct GraphConnectionData
-{
-    int fromNode = 0;
-    QString fromPin;
-    int toNode = 0;
-    QString toPin;
-};
-
-class MaterialGraphModel
+// Граф материала: документ в формате Legacy (*.mat.graph.json) с правилами прежней модели.
+// Полей сверх GraphDocument не добавляет, поэтому свободно приводится к нему и обратно копированием.
+class MaterialGraphModel : public GraphDocument
 {
 public:
     MaterialGraphModel() = default;
+    MaterialGraphModel(const GraphDocument& document) : GraphDocument(document) {}
 
-    int AddNode(const QString& type, const QString& title, const QPointF& pos, const QVariantMap& props = {});
-    bool RemoveNode(int nodeId);
-
+    // У входа материала одна связь: занятый вход отклоняет новую.
     bool AddConnection(int fromNode, const QString& fromPin, int toNode, const QString& toPin);
-    bool RemoveConnection(int fromNode, const QString& fromPin, int toNode, const QString& toPin);
 
-    void Clear();
     void SetupDefaultMasterNode();
-
-    const GraphNodeData* FindNode(int id) const;
-    GraphNodeData* FindNode(int id);
-
-    const QVector<GraphNodeData>& Nodes() const { return nodes_; }
-    const QVector<GraphConnectionData>& Connections() const { return connections_; }
-    int NextNodeId() const { return nextNodeId_; }
-
-    QString ExportToJson() const;
-    bool ImportFromJson(const QString& jsonString);
-
-private:
-    QVector<GraphNodeData> nodes_;
-    QVector<GraphConnectionData> connections_;
-    int nextNodeId_ = 1;
 };
 
 } // namespace EditorCore

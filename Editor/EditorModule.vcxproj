@@ -186,6 +186,7 @@
         <ClCompile Include="Source/MaterialEditorWindow.cpp"/>
         <ClCompile Include="Source/MaterialTextureTools.cpp"/>
         <ClCompile Include="Source/MaterialGraphWidget.cpp"/>
+        <ClCompile Include="Source/GraphEditorWidget.cpp"/>
         <ClCompile Include="Core/Logger.cpp"/>
         <ClCompile Include="Core/CommandRegistry.cpp"/>
         <ClCompile Include="Core/FileService.cpp"/>
@@ -199,6 +200,11 @@
         <ClCompile Include="Core/AssetOps.cpp"/>
         <ClCompile Include="Core/HlslGraphCompiler.cpp"/>
         <ClCompile Include="Core/MaterialGraphModel.cpp"/>
+        <ClCompile Include="Core/Graph/GraphDocument.cpp"/>
+        <ClCompile Include="Core/Graph/GraphSchema.cpp"/>
+        <ClCompile Include="Core/Graph/GraphHistory.cpp"/>
+        <ClCompile Include="Core/Graph/GraphClipboard.cpp"/>
+        <ClCompile Include="Core/MaterialGraphSchema.cpp"/>
         <ClCompile Include="Core/SceneFile.cpp"/>
         <ClCompile Include="Core/ImportSettings.cpp"/>
         <ClCompile Include="Core/ModelImportSidecar.cpp"/>
@@ -266,6 +272,11 @@
         <ClInclude Include="Core/AssetOps.h"/>
         <ClInclude Include="Core/HlslGraphCompiler.h"/>
         <ClInclude Include="Core/MaterialGraphModel.h"/>
+        <ClInclude Include="Core/Graph/GraphDocument.h"/>
+        <ClInclude Include="Core/Graph/GraphSchema.h"/>
+        <ClInclude Include="Core/Graph/GraphHistory.h"/>
+        <ClInclude Include="Core/Graph/GraphClipboard.h"/>
+        <ClInclude Include="Core/MaterialGraphSchema.h"/>
         <ClInclude Include="Core/SceneFile.h"/>
         <ClInclude Include="Core/ImportSettings.h"/>
         <ClInclude Include="Core/ModelImportSidecar.h"/>
@@ -315,6 +326,7 @@
         <ClInclude Include="Include/FileBrowser.h"/>
         <ClInclude Include="Include/MaterialTextureTools.h"/>
         <ClInclude Include="Include/MaterialGraphWidget.h"/>
+        <ClInclude Include="Include/GraphEditorWidget.h"/>
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->
         <CustomBuild Include="Include/MainWindow.h">
             <FileType>Document</FileType>

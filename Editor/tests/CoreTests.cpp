@@ -9,6 +9,7 @@
 #include "../Core/MaterialGraphModel.h"
 #include "../Core/HlslGraphCompiler.h"
 #include "core/MaterialGraphTests.h"
+#include "core/GraphCoreTests.h"
 #include "../Core/SceneFile.h"
 #include "core/SceneFileTests.h"
 #include "../Core/Terminal.h"
@@ -275,6 +276,11 @@ void TestMaterialGraph()
     gChecks += 18;
 }
 
+void TestGraphCore()
+{
+    gChecks += RunGraphCoreTests();
+}
+
 void TestSceneFile()
 {
     RunSceneFileTests();
@@ -403,6 +409,10 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestMaterialGraph...\n");
     std::fflush(stdout);
     TestMaterialGraph();
+
+    std::printf("[Test] TestGraphCore...\n");
+    std::fflush(stdout);
+    TestGraphCore();
 
     std::printf("[Test] TestSceneFile...\n");
     std::fflush(stdout);

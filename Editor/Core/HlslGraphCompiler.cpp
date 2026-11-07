@@ -188,7 +188,7 @@ QString HlslGraphCompiler::NameProblem(const QString& name)
     return {};
 }
 
-GraphCompileResult HlslGraphCompiler::Compile(const MaterialGraphModel& model)
+GraphCompileResult HlslGraphCompiler::Compile(const GraphDocument& model)
 {
     GraphCompileResult result;
     QVector<QPair<QString, int>> cbufferParams;       // строка и нода
