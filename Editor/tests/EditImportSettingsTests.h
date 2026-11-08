@@ -9,6 +9,8 @@
 #include "Logger.h"
 
 #include <QCheckBox>
+#include <QComboBox>
+#include <QLabel>
 #include <QPushButton>
 #include <QTemporaryDir>
 #include <QFile>
@@ -255,6 +257,40 @@ inline void Run()
         f.open(QIODevice::ReadOnly);
         Check(f.readAll() == original, "Sidecar content unmodified after Cancel");
         ImportSettingsDialog::SetExecHookForTesting(nullptr);
+        ++checks;
+    }
+
+    // 8. Smoothing angle and label muted when Normals != Smooth
+    {
+        SettingsService::Instance().Remove(QStringLiteral("import/model/normals"));
+        ImportSettingsDialog dlg;
+        auto* comboNormals = UiTestHelper::Require<QComboBox>(&dlg, QStringLiteral("NormalsCombo"));
+        auto* spinAngle = UiTestHelper::Require<QDoubleSpinBox>(&dlg, QStringLiteral("SmoothingAngleSpin"));
+        auto* labelAngle = UiTestHelper::Require<QLabel>(&dlg, QStringLiteral("SmoothingAngleLabel"));
+
+        // Normals is File -> spin and label must be disabled, tooltip present
+        UiTestHelper::SelectComboBoxData(&dlg, QStringLiteral("NormalsCombo"), static_cast<int>(EditorCore::ModelNormalsMode::File));
+        Check(!spinAngle->isEnabled(), "SmoothingAngle spin is disabled when normals != Smooth");
+        Check(!labelAngle->isEnabled(), "SmoothingAngle label is disabled when normals != Smooth");
+        Check(!spinAngle->toolTip().isEmpty(), "SmoothingAngle spin has tooltip when disabled");
+        Check(spinAngle->toolTip().contains(QStringLiteral("нормал")) || spinAngle->toolTip().contains(QStringLiteral("Smooth")),
+              "SmoothingAngle spin tooltip explains dependency");
+        Check(labelAngle->toolTip() == spinAngle->toolTip(), "SmoothingAngle label tooltip matches spin tooltip");
+        ++checks;
+
+        // Switch to Flat -> still disabled
+        const int flatIdx = comboNormals->findData(static_cast<int>(EditorCore::ModelNormalsMode::Flat));
+        comboNormals->setCurrentIndex(flatIdx);
+        Check(!spinAngle->isEnabled(), "SmoothingAngle spin is disabled when normals is Flat");
+        Check(!labelAngle->isEnabled(), "SmoothingAngle label is disabled when normals is Flat");
+        ++checks;
+
+        // Switch to Smooth -> enabled, tooltip is smoothing description
+        const int smoothIdx = comboNormals->findData(static_cast<int>(EditorCore::ModelNormalsMode::Smooth));
+        comboNormals->setCurrentIndex(smoothIdx);
+        Check(spinAngle->isEnabled(), "SmoothingAngle spin is enabled when normals is Smooth");
+        Check(labelAngle->isEnabled(), "SmoothingAngle label is enabled when normals is Smooth");
+        Check(!spinAngle->toolTip().contains(QStringLiteral("Доступно только")), "SmoothingAngle spin tooltip reset when enabled");
         ++checks;
     }
 

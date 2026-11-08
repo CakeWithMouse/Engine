@@ -238,6 +238,15 @@ void ImportSettingsDialog::UpdateDependencies()
         spinSmoothingAngle_->setEnabled(isSmooth);
         if (labelSmoothingAngle_)
             labelSmoothingAngle_->setEnabled(isSmooth);
+
+        const QString tip = isSmooth
+            ? Tr("Максимальный угол между смежными гранями для сглаживания нормалей",
+                 "Maximum angle between adjacent faces for smooth normals")
+            : Tr("Доступно только при сглаженных нормалях",
+                 "Available only when normals are set to Smooth");
+        spinSmoothingAngle_->setToolTip(tip);
+        if (labelSmoothingAngle_)
+            labelSmoothingAngle_->setToolTip(tip);
     }
 }
 
@@ -380,6 +389,7 @@ void ImportSettingsDialog::BuildUi()
     spinSmoothingAngle_->setToolTip(Tr("Максимальный угол между смежными гранями для сглаживания нормалей",
                                        "Maximum angle between adjacent faces for smooth normals"));
     labelSmoothingAngle_ = new QLabel(Tr("Угол сглаживания (°):", "Smoothing angle (°):"), advancedCard_->Content());
+    labelSmoothingAngle_->setObjectName(QStringLiteral("SmoothingAngleLabel"));
     advForm->addRow(labelSmoothingAngle_, spinSmoothingAngle_);
 
     // Flip UV
