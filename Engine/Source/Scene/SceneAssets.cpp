@@ -161,7 +161,7 @@ void Apply(GameComponent& object, const std::string& model, const std::string& t
     ValidateMaterialPath(material);
     if (!object.SetMaterialAsset(material)) throw std::runtime_error("This object cannot take a material");
 }
-std::string Import(const fs::path& content, const fs::path& source, Kind kind)
+std::string Import(const fs::path& content, const fs::path& source, Kind kind, std::string_view optionsJson)
 {
     if (!source.is_absolute() || !fs::is_regular_file(source) || !fs::is_directory(content))
         throw std::runtime_error("Select an existing file and configure the project Content directory");
@@ -179,6 +179,13 @@ std::string Import(const fs::path& content, const fs::path& source, Kind kind)
     }
     else if (kind != Model || (extension != ".glb" && extension != ".gltf" && extension != ".obj" && extension != ".fbx" && extension != ".blend"))
         throw std::runtime_error("Supported models: GLB, glTF, OBJ, FBX, BLEND (requires Blender)");
+    ModelImportSettings settings{};
+    if (kind == Model && !optionsJson.empty())
+    {
+        std::string parseErr;
+        if (!ModelImportSettings::Parse(optionsJson, settings, &parseErr))
+            throw std::runtime_error("Invalid model import options: " + parseErr);
+    }
     CheckedSize(source);
     const auto group = content / (kind == Model ? "Models" : kind == Texture ? "Textures" : "Audio");
     if (!Inside(content, group)) throw std::runtime_error("Asset directory is outside project Content");
@@ -203,9 +210,29 @@ std::string Import(const fs::path& content, const fs::path& source, Kind kind)
             if (kind == Model)
             {
                 if (extension == ".gltf") CopyGltfDependencies(source, target);
+                const auto sidecarPath = fs::u8path(file.u8string() + ".importsettings.json");
+                nlohmann::json sidecarDoc = {
+                    {"version", settings.version > 0 ? settings.version : 1},
+                    {"kind", settings.kind.empty() ? "model" : settings.kind},
+                    {"model", {
+                        {"scale", settings.scale},
+                        {"useFileUnitScale", settings.useFileUnitScale},
+                        {"normals", settings.normals},
+                        {"smoothingAngle", settings.smoothingAngle},
+                        {"importMaterials", settings.importMaterials},
+                        {"importTextures", settings.importTextures},
+                        {"flipUv", settings.flipUv},
+                        {"mergeMeshes", settings.mergeMeshes}
+                    }}
+                };
+                std::ofstream sidecarOut(sidecarPath, std::ios::binary);
+                sidecarOut.exceptions(std::ios::failbit | std::ios::badbit);
+                sidecarOut << sidecarDoc.dump(2) << "\n";
+                sidecarOut.close();
+
                 CreateModel(virtualPath); // Validate geometry before reporting success.
                 if (extension == ".fbx" || extension == ".blend" || extension == ".glb" || extension == ".gltf")
-                    ModelImport::CreateMaterials(source, target, virtualPath);
+                    ModelImport::CreateMaterials(source, target, virtualPath, settings);
             }
             std::ofstream metadata(fs::u8path(file.u8string()+".source.json"),std::ios::binary);
             metadata.exceptions(std::ios::failbit|std::ios::badbit);
@@ -217,6 +244,7 @@ std::string Import(const fs::path& content, const fs::path& source, Kind kind)
         {
             // Only the new path created by this import is rolled back.
             std::error_code ignored;
+            if (kind == Model) fs::remove(fs::u8path(file.u8string() + ".importsettings.json"), ignored);
             if ((kind == Model || copied) && Inside(content, target)) fs::remove_all(target, ignored);
             if (kind == Texture && copied) fs::remove(fs::u8path(file.u8string()+".source.json"), ignored);
             throw;

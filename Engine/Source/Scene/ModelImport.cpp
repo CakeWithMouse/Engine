@@ -108,15 +108,26 @@ void Surface(MaterialInput i, inout MaterialOutput o)
 #endif
 }
 
-void ModelImport::CreateMaterials(const fs::path& source, const fs::path& destination, const std::string& modelPath)
+void ModelImport::CreateMaterials(const fs::path& source, const fs::path& destination, const std::string& modelPath, const ModelImportSettings& settings)
 {
 #if defined(ENGINE_ENABLE_ASSIMP)
+    if (!settings.importMaterials)
+    {
+        // importMaterials=false: skip Materials/ and Textures/ generation entirely
+        Json manifest = {{"version", 2}, {"materials", Json::array()}, {"materialSlots", Json::object()}};
+        Write(fs::u8path((destination / fs::u8path(modelPath).filename()).u8string() + ".import.json"), manifest.dump(2) + "\n");
+        return;
+    }
+
     Assimp::Importer importer;
     importer.SetIOHandler(new AssimpVfsIO(modelPath));
     const aiScene* scene = importer.ReadFile(modelPath, 0);
     if (!scene || !scene->mRootNode) throw std::runtime_error("Cannot read model materials: " + std::string(importer.GetErrorString()));
     fs::create_directory(destination / "Materials");
-    fs::create_directory(destination / "Textures");
+    if (settings.importTextures)
+    {
+        fs::create_directory(destination / "Textures");
+    }
     Write(destination / "Materials/Imported.hlsl", Surface);
     std::map<std::string, std::string> textures;
     std::set<unsigned> written;
@@ -134,7 +145,7 @@ void ModelImport::CreateMaterials(const fs::path& source, const fs::path& destin
         const auto type = material.GetTextureCount(aiTextureType_BASE_COLOR) ? aiTextureType_BASE_COLOR : aiTextureType_DIFFUSE;
         unsigned uv = 0;
         std::string texturePath;
-        if (material.GetTexture(type, 0, &reference, nullptr, &uv) == AI_SUCCESS)
+        if (settings.importTextures && material.GetTexture(type, 0, &reference, nullptr, &uv) == AI_SUCCESS)
         {
             if (uv != 0) throw std::runtime_error("Base-color texture requires UV channel " + std::to_string(uv) + "; only UV0 is supported");
             const aiTexture* embedded = scene->GetEmbeddedTexture(reference.C_Str());
@@ -163,7 +174,7 @@ void ModelImport::CreateMaterials(const fs::path& source, const fs::path& destin
     }
     Write(fs::u8path((destination / fs::u8path(modelPath).filename()).u8string() + ".import.json"), manifest.dump(2) + "\n");
 #else
-    (void)source; (void)destination; (void)modelPath;
+    (void)source; (void)destination; (void)modelPath; (void)settings;
     throw std::runtime_error("Model import requires an engine built with Assimp");
 #endif
 }

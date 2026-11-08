@@ -5,6 +5,7 @@
 #include "../Source/Resources/VfsRead.h"
 #include <Engine/Render/SkeletalLoader.h>
 #include <Engine/Render/SkeletalData.h>
+#include <Engine/Runtime/SceneEditSession.h>
 
 #include <cmath>
 #include <cstring>
@@ -387,6 +388,133 @@ inline void Run()
         catch (...)
         {
             VfsRead::GetVFS().Unmount("/TestFlagsVfs");
+            std::filesystem::remove_all(tempRoot);
+            throw;
+        }
+    }
+
+    // 13. Step 17.4 tests: Engine.Asset.Import extension, sidecar pre-write, and import options
+    {
+        // 13a. ABI invariants
+        static_assert(sizeof(EngineEditSessionApi) == 320, "EngineEditSessionApi size frozen at 320 bytes");
+        static_assert(sizeof(EngineAssetImportApi) == 24, "EngineAssetImportApi size is 24 bytes (version, context, importWithOptions)");
+
+        // 13b. SceneEditSession::GetAssetImportApi()
+        SceneEditSession session({});
+        const auto importApi = session.GetAssetImportApi();
+        check(importApi.version == 1, "EngineAssetImportApi version is 1");
+        check(importApi.context != nullptr, "EngineAssetImportApi context is non-null");
+        check(importApi.importWithOptions != nullptr, "importWithOptions function pointer is non-null");
+
+        // 13c. Parameter validation
+        char dummyPath[4096]{}, dummyErr[1024]{};
+        check(importApi.importWithOptions(nullptr, "foo", 0, nullptr, dummyPath, sizeof(dummyPath), dummyErr, sizeof(dummyErr)) == EngineSceneInvalidArgument,
+              "importWithOptions rejects null context");
+        check(importApi.importWithOptions(importApi.context, nullptr, 0, nullptr, dummyPath, sizeof(dummyPath), dummyErr, sizeof(dummyErr)) == EngineSceneInvalidArgument,
+              "importWithOptions rejects null source");
+        check(importApi.importWithOptions(importApi.context, "foo", 3, nullptr, dummyPath, sizeof(dummyPath), dummyErr, sizeof(dummyErr)) == EngineSceneInvalidArgument,
+              "importWithOptions rejects invalid kind (3)");
+        check(importApi.importWithOptions(importApi.context, "foo", 0, nullptr, nullptr, 0, dummyErr, sizeof(dummyErr)) == EngineSceneInvalidArgument,
+              "importWithOptions rejects null path buffer");
+
+        // Set up temporary content and VFS mount for live import testing
+        const auto testTime = static_cast<unsigned long long>(std::time(nullptr));
+        const auto tempRoot = std::filesystem::temp_directory_path() / ("ImportPipelineTest_" + std::to_string(testTime));
+        const auto contentRoot = tempRoot / "Content";
+        std::filesystem::create_directories(contentRoot);
+
+        char setContentErr[1024]{};
+        auto sessionApi = session.GetApi();
+        check(sessionApi.setContentRoot(sessionApi.context, contentRoot.u8string().c_str(), setContentErr, sizeof(setContentErr)) == EngineSceneOk,
+              "setContentRoot succeeds on temp content folder");
+
+        // Prepare source model fixture
+        const std::filesystem::path fixturePath =
+            std::filesystem::path(__FILE__).parent_path() / "assets" / "fixtures" / "blender-scale100.fbx";
+        check(std::filesystem::exists(fixturePath), "Fixture blender-scale100.fbx exists");
+        const auto sourceFbx = tempRoot / "source.fbx";
+        std::filesystem::copy_file(fixturePath, sourceFbx, std::filesystem::copy_options::overwrite_existing);
+
+        try
+        {
+            // 13d. Old importAsset path: verifies defaults (materials and textures enabled, sidecar created before CreateModel)
+            char oldPath[4096]{}, oldErr[1024]{};
+            const auto oldStatus = sessionApi.importAsset(sessionApi.context, sourceFbx.u8string().c_str(), 0,
+                                                          oldPath, sizeof(oldPath), oldErr, sizeof(oldErr));
+            check(oldStatus == EngineSceneOk, "old importAsset succeeds");
+            const std::string oldVirtPath = oldPath;
+            check(oldVirtPath.rfind("/Game/Models/source", 0) == 0, "imported path is in /Game/Models/source");
+            const auto oldDiskFolder = contentRoot / "Models" / "source";
+            const auto oldSidecar = oldDiskFolder / "source.fbx.importsettings.json";
+            check(std::filesystem::exists(oldSidecar), "old importAsset creates .importsettings.json sidecar");
+
+            // Verify sidecar contents
+            ModelImportSettings oldSettings;
+            std::string oldSidecarErr;
+            const auto oldSidecarText = VfsRead::Active().ReadBytes(oldVirtPath + ".importsettings.json");
+            check(ModelImportSettings::Parse(std::string_view(reinterpret_cast<const char*>(oldSidecarText.data()), oldSidecarText.size()),
+                                             oldSettings, &oldSidecarErr), "old importAsset sidecar parses cleanly");
+            check(oldSettings.scale == 1.0f, "default scale is 1.0");
+            check(oldSettings.mergeMeshes == true, "default mergeMeshes is true");
+            check(oldSettings.importMaterials == true, "default importMaterials is true");
+            check(oldSettings.importTextures == true, "default importTextures is true");
+
+            // 13e. importWithOptions with importMaterials=false: skips Materials/ generation entirely
+            char noMatPath[4096]{}, noMatErr[1024]{};
+            const char* noMatJson = R"({"version":1,"kind":"model","model":{"scale":2.5,"importMaterials":false,"importTextures":false}})";
+            const auto noMatStatus = importApi.importWithOptions(importApi.context, sourceFbx.u8string().c_str(), 0,
+                                                                 noMatJson, noMatPath, sizeof(noMatPath), noMatErr, sizeof(noMatErr));
+            check(noMatStatus == EngineSceneOk, "importWithOptions with importMaterials=false succeeds");
+            const std::string noMatVirtPath = noMatPath;
+            const auto noMatDiskFolder = contentRoot / "Models" / "source_1";
+            check(std::filesystem::exists(noMatDiskFolder / "source.fbx.importsettings.json"), "sidecar exists for importMaterials=false");
+            check(!std::filesystem::exists(noMatDiskFolder / "Materials"), "Materials folder is skipped when importMaterials=false");
+            check(!std::filesystem::exists(noMatDiskFolder / "Textures"), "Textures folder is skipped when importMaterials=false");
+
+            // Verify sidecar recorded importMaterials=false and scale=2.5
+            ModelImportSettings noMatSettings;
+            const auto noMatSidecarText = VfsRead::Active().ReadBytes(noMatVirtPath + ".importsettings.json");
+            check(ModelImportSettings::Parse(std::string_view(reinterpret_cast<const char*>(noMatSidecarText.data()), noMatSidecarText.size()),
+                                             noMatSettings), "sidecar with importMaterials=false parses cleanly");
+            check(std::abs(noMatSettings.scale - 2.5f) < 1e-4f, "scale 2.5 recorded in sidecar");
+            check(noMatSettings.importMaterials == false, "importMaterials=false recorded in sidecar");
+
+            // 13f. importWithOptions with importTextures=false: generates Materials/ but skips Textures/
+            char noTexPath[4096]{}, noTexErr[1024]{};
+            const char* noTexJson = R"({"version":1,"kind":"model","model":{"scale":1.0,"importMaterials":true,"importTextures":false}})";
+            const auto noTexStatus = importApi.importWithOptions(importApi.context, sourceFbx.u8string().c_str(), 0,
+                                                                 noTexJson, noTexPath, sizeof(noTexPath), noTexErr, sizeof(noTexErr));
+            check(noTexStatus == EngineSceneOk, "importWithOptions with importTextures=false succeeds");
+            const auto noTexDiskFolder = contentRoot / "Models" / "source_2";
+            check(std::filesystem::exists(noTexDiskFolder / "Materials"), "Materials folder is created when importMaterials=true");
+            check(!std::filesystem::exists(noTexDiskFolder / "Textures"), "Textures folder is skipped when importTextures=false");
+
+            // 13g. Rollback on failed import: corrupt file cleans up sidecar and folder
+            const auto corruptFile = tempRoot / "corrupt.fbx";
+            {
+                std::ofstream out(corruptFile);
+                out << "corrupt data that is not a valid 3D model";
+            }
+            char failPath[4096]{}, failErr[1024]{};
+            const auto failStatus = importApi.importWithOptions(importApi.context, corruptFile.u8string().c_str(), 0,
+                                                                nullptr, failPath, sizeof(failPath), failErr, sizeof(failErr));
+            check(failStatus != EngineSceneOk, "import of corrupt file fails");
+            check(!std::filesystem::exists(contentRoot / "Models" / "corrupt"), "corrupt target directory is removed on rollback");
+            check(!std::filesystem::exists(contentRoot / "Models" / "corrupt" / "corrupt.fbx.importsettings.json"),
+                  "sidecar is removed on rollback");
+
+            // 13h. Invalid options JSON rejected before any files created
+            char badJsonPath[4096]{}, badJsonErr[1024]{};
+            const auto badJsonStatus = importApi.importWithOptions(importApi.context, sourceFbx.u8string().c_str(), 0,
+                                                                   "{broken-json", badJsonPath, sizeof(badJsonPath), badJsonErr, sizeof(badJsonErr));
+            check(badJsonStatus != EngineSceneOk, "invalid options JSON is rejected");
+            check(std::string(badJsonErr).find("Invalid") != std::string::npos ||
+                  std::string(badJsonErr).find("JSON") != std::string::npos, "error message mentions invalid JSON");
+
+            std::filesystem::remove_all(tempRoot);
+        }
+        catch (...)
+        {
             std::filesystem::remove_all(tempRoot);
             throw;
         }

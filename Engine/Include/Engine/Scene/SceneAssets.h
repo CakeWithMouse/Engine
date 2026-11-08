@@ -21,5 +21,7 @@ namespace SceneAssets
     void Apply(GameComponent& object, const std::string& model, const std::string& texture,
                const std::string& material = {});
     // Copies into a new uniquely named location; never overwrites existing assets.
-    std::string Import(const std::filesystem::path& content, const std::filesystem::path& source, Kind kind);
+    // optionsJson: optional UTF-8 JSON settings string (e.g. for ModelImportSettings).
+    std::string Import(const std::filesystem::path& content, const std::filesystem::path& source, Kind kind,
+                       std::string_view optionsJson = {});
 }
