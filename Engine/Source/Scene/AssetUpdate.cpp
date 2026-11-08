@@ -79,8 +79,9 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
                     if(entry.path()==imported)relative=file.filename();
                     if(entry.path()==fs::u8path(imported.u8string()+".source.json"))relative=fs::u8path(file.filename().u8string()+".source.json");
                     if(entry.path()==fs::u8path(imported.u8string()+".import.json"))relative=fs::u8path(file.filename().u8string()+".import.json");
+                    if(entry.path()==fs::u8path(imported.u8string()+".importsettings.json"))relative=fs::u8path(file.filename().u8string()+".importsettings.json");
                     const auto dest=candidate/relative;
-                    if(fs::exists(dest)&&(entry.path().extension()==".mat"||entry.path().extension()==".hlsl"||entry.path().u8string().find(".import.json")!=std::string::npos))continue;
+                    if(fs::exists(dest)&&(entry.path().extension()==".mat"||entry.path().extension()==".hlsl"||entry.path().u8string().find(".import.json")!=std::string::npos||entry.path().u8string().find(".importsettings.json")!=std::string::npos))continue;
                     Copy(entry.path(),dest);
                 }
             } else Copy(imported,candidate);
@@ -97,13 +98,13 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
             target=content/fs::u8path(argument.substr(6));targetRoot=model?target.parent_path():target;
             if(!Inside(target,content)||Extension(target)!=ext||fs::exists(targetRoot))throw std::runtime_error("Choose a new destination inside Content with the same extension");
             if(model && target.filename()!=file.filename())throw std::runtime_error("Rename/move the model's folder; keep the model filename");
-            if(!model)for(const auto* suffix:{".source.json",".import.json"})if(fs::exists(fs::u8path(target.u8string()+suffix)))throw std::runtime_error("Destination metadata already exists");
+            if(!model)for(const auto* suffix:{".source.json",".import.json",".importsettings.json"})if(fs::exists(fs::u8path(target.u8string()+suffix)))throw std::runtime_error("Destination metadata already exists");
             if(model && Inside(targetRoot,sourceRoot))throw std::runtime_error("Destination cannot be inside the moved folder");
             before=model?path.substr(0,path.find_last_of('/')):path;
             after=model?argument.substr(0,argument.find_last_of('/')):argument;
             Copy(sourceRoot,backup/"original");
             fs::create_directories(targetRoot.parent_path());fs::rename(sourceRoot,targetRoot);moved=true;installed=true;
-            if(!model) for(const auto* suffix:{".source.json",".import.json"}) {
+            if(!model) for(const auto* suffix:{".source.json",".import.json",".importsettings.json"}) {
                 const auto old=fs::u8path(file.u8string()+suffix),next=fs::u8path(target.u8string()+suffix);
                 if(fs::exists(old)){Copy(old,backup/suffix);changed.push_back({old,backup/suffix});changed.push_back({next,{}});Copy(old,next);fs::remove(old);}
             }
@@ -134,8 +135,8 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
             if(operation==0){if(installed)fs::remove_all(sourceRoot);fs::rename(backup/"original",sourceRoot);}
             else if(installed)fs::rename(targetRoot,sourceRoot);
         }
-        if(!importRoot.empty()){std::error_code ec;fs::remove_all(importRoot,ec);fs::remove(fs::u8path(imported.u8string()+".source.json"),ec);}
+        if(!importRoot.empty()){std::error_code ec;fs::remove_all(importRoot,ec);fs::remove(fs::u8path(imported.u8string()+".source.json"),ec);fs::remove(fs::u8path(imported.u8string()+".importsettings.json"),ec);}
         throw;
     }
-    if(!importRoot.empty()){std::error_code ec;fs::remove_all(importRoot,ec);fs::remove(fs::u8path(imported.u8string()+".source.json"),ec);}
+    if(!importRoot.empty()){std::error_code ec;fs::remove_all(importRoot,ec);fs::remove(fs::u8path(imported.u8string()+".source.json"),ec);fs::remove(fs::u8path(imported.u8string()+".importsettings.json"),ec);}
 }
