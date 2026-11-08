@@ -1,4 +1,5 @@
 #include "ImportSettingsDialog.h"
+#include <QTimer>
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
 #include "IconProvider.h"
@@ -404,6 +405,15 @@ void ImportSettingsDialog::SetupConnections()
 
     connect(checkImportMaterials_, &QCheckBox::toggled, this, &ImportSettingsDialog::UpdateDependencies);
     connect(comboNormals_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ImportSettingsDialog::UpdateDependencies);
+
+    if (advancedCard_)
+    {
+        advancedCard_->SetToggledCallback([this](bool /*exp*/) {
+            QTimer::singleShot(0, this, [this] {
+                adjustSize();
+            });
+        });
+    }
 
     connect(buttonBox_, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(buttonBox_, &QDialogButtonBox::rejected, this, &QDialog::reject);

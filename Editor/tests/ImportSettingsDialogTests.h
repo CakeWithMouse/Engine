@@ -305,6 +305,30 @@ inline void Run()
         ++checks;
     }
 
+    // 18. Dialog resize behavior on expand and collapse
+    {
+        ImportSettingsDialog testDlg;
+        testDlg.show();
+        QCoreApplication::processEvents();
+        const int hBefore = testDlg.height();
+
+        auto* card = UiTestHelper::Require<QFrame>(&testDlg, QStringLiteral("AdvancedSettingsCard"));
+        auto* headerBtn = UiTestHelper::Require<QPushButton>(card, QStringLiteral("CardHeaderBtn"));
+
+        headerBtn->click(); // expand
+        QCoreApplication::processEvents();
+        const int hExpanded = testDlg.height();
+
+        headerBtn->click(); // collapse
+        QCoreApplication::processEvents();
+        const int hAfter = testDlg.height();
+
+        std::cout << "[DialogResizeDiag] before: " << hBefore << ", expanded: " << hExpanded << ", after: " << hAfter << std::endl;
+        Check(hExpanded > hBefore, "Dialog expands when advanced card is opened");
+        Check(std::abs(hAfter - hBefore) <= 2, "Dialog height returns to initial after collapsing");
+        ++checks;
+    }
+
     std::cout << "ImportSettingsDialogTests: " << checks << " checks passed." << std::endl;
 }
 
