@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Работа с кодом — PainEngine</title><style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101d28;color:#e7eef4;font:18px/1.65 Segoe UI,Arial,sans-serif}main,nav,footer{max-width:1100px;margin:auto;padding:24px 32px}nav{display:flex;flex-wrap:wrap;gap:18px;border-bottom:1px solid #3a5264}a{color:#8ce1db}h1{font-size:46px;line-height:1.15}h2{color:#8ce1db;margin-top:42px}h3{font-size:22px}pre{background:#08121b;padding:22px;overflow:auto;font:15px/1.55 Consolas,monospace;border-left:3px solid #5cc2b9}li{margin:14px 0}.lead{font-size:24px;color:#b9d0df}.meta,footer{color:#a4b7c5;font-size:14px}section{border-bottom:1px solid #294151;padding-bottom:24px}code{overflow-wrap:anywhere}table{border-collapse:collapse}td,th{padding:12px;text-align:left;border:1px solid #42596b}@media(max-width:650px){main,nav,footer{padding:18px}h1{font-size:34px}}@media print{body{background:white;color:black}nav{display:none}a,h2{color:#064c50}pre{white-space:pre-wrap;background:#eee;color:black}section{break-inside:avoid}}</style></head><body><nav aria-label="Документация"><a href="index.html">Начать здесь</a><a href="API-REFERENCE.html">API Reference</a><a href="editor.html">Работа редактора</a><a href="materials.html">Материалы и редактор материалов</a><a href="audio.html">Звук и работа с ним</a><a href="code.html">Работа с кодом</a><a href="assets.html">Импорт ассетов</a><a href="scene.html">Настройка сцены</a></nav><main><p class="meta">PainEngine 2026.11.07.7 · Windows x64 · 7 ноября 2026</p><h1>Работа с кодом</h1><p class="lead">Создание проекта, компоненты, сборка и отладка.</p><section><h2>C++ проект</h2><ol><li>Для разработки установите Visual Studio C++ Build Tools и Windows SDK. Runtime и SDK должны относиться к одному выпуску. Для запуска готовых DLL компилятор не требуется.</li><li>В лаунчере создайте проект с C++ либо добавьте C++ к существующему. CLI выполняет --create-project &lt;новая папка&gt; &lt;имя&gt;, затем --enable-code &lt;Project.json&gt;. Команды --create-code-project нет.</li><li>Source содержит ProjectGame, Module и RotatingCube. Новые .cpp/.h в Source автоматически участвуют в сборке. ENGINE_COMPONENT регистрирует класс; сохраняйте стабильный ID при переименовании.</li><li>Из папки проекта выполните ./Build.ps1 -Runtime &lt;папка выпуска&gt;/Runtime. В редакторе используйте Ctrl+Alt+R после Stop. Кандидат проходит проверку перед активацией.</li><li>При ошибке прочитайте CodeBuild.log и validate/startup logs каталога кандидата. Game.sln удобен для редактирования и отладки, но активацию DLL выполняйте Build.ps1.</li></ol></section><section><h2>Вращающийся куб</h2><p>Ниже полный минимальный вариант файлов RotatingCube. В новом C++ шаблоне одноимённый класс уже существует: замените его учебную копию или изучите её, не создавайте второе определение. Добавьте куб из каталога проекта, нажмите Play. Поворот Y увеличивается на 90 градусов в секунду.</p><h3>RotatingCube.h</h3><a download href="tutorial/examples/RotatingCube.h">Скачать исходник</a><pre><code>#pragma once
+#include &lt;Engine/Components/ComponentAnnotations.h&gt;
+#include &lt;Engine/Components/SpecificComponents/CubeComponent.h&gt;
+
+ENGINE_COMPONENT(&quot;RotatingCube&quot;)
+class RotatingCube : public CubeComponent
+{
+public:
+    RotatingCube();
+    void Tick(float deltaTime) override;
+};
+</code></pre><h3>RotatingCube.cpp</h3><a download href="tutorial/examples/RotatingCube.cpp">Скачать исходник</a><pre><code>#include &quot;RotatingCube.h&quot;
+#include &lt;cmath&gt;
+
+RotatingCube::RotatingCube()
+{
+
+    SetColor({1.0f, 0.65f, 0.2f, 1.0f});
+}
+
+void RotatingCube::Tick(float deltaTime)
+{
+    CubeComponent::Tick(deltaTime);
+    auto rotation = GetRotation();
+    // SetRotation uses degrees. deltaTime is scaled simulation time.
+    rotation.y = std::fmod(rotation.y + 90.0f * deltaTime, 360.0f);
+    SetRotation(rotation);
+}
+</code></pre></section><section><h2>Жизненный цикл и отладка</h2><p>Конструктор работает без Game и GPU. BeginPlay вызывается перед игровым вводом и Tick, Tick получает simulation deltaTime. Вызывайте непосредственную базу. Для спавна используйте Scene::AddComponent и проверяйте SceneResult. После удаления, загрузки SaveGame или hot reload прежние указатели могут быть недействительны.</p><p>Собирайте Debug с согласованным Debug SDK, подключайте Visual Studio debugger к EngineRuntime.exe и загружайте PDB своего модуля. Не смешивайте библиотеки Debug/Release. Для аппаратных проблем начните с логов и render diagnostics F7/F8.</p><p>Полные дополнительные примеры: InputCube для R/N, ModelExample для ресурсов, UI для HUD и PropertyTutorial для свойств. Они входят в комплект туториалов. В API Reference доступны полный код и объявления заголовков.</p></section><section><h2>Источники реализации</h2><ul><li><code>Engine/BuildSupport/ProjectTools.ps1</code></li><li><code>Editor/Source/CodeTools.cpp</code></li><li><code>Engine/Include/Engine/Components/GameComponents.h</code></li><li><code>Engine/docs/CODE-PROJECTS.md</code></li></ul></section></main><footer>Офлайн-документация. Источник истины: реализация текущего выпуска. Примеры и ресурсы доступны рядом с HTML.</footer></body></html>

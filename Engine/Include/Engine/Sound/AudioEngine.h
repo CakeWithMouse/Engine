@@ -66,6 +66,8 @@ namespace audio
         bool Initialize();
         void Shutdown();
         void Update();
+        // Freeze every voice (including streams) without losing playback position.
+        bool SetPaused(bool paused);
 
         SoundId LoadSound(const std::wstring& filePath);
 
@@ -92,6 +94,7 @@ namespace audio
         void StopAll();
 
     private:
+        friend struct AudioTestAccess;
         struct SoundAsset final
         {
             AudioBytes audioData;
@@ -135,5 +138,6 @@ namespace audio
 
         bool ownsCom_ = false;
         bool x3dAvailable_ = false;
+        bool paused_ = false;
     };
 }

@@ -1,4 +1,4 @@
-HUD проекта — редакция 6, движок 2026.10.31.3
+HUD проекта — редакция 8, движок 2026.11.07.6
 
 Обычное подключение не требует C++
 1. Скопируйте Content/UI/Hud.ui из этого примера в Content/UI своего проекта.
@@ -13,7 +13,7 @@ HUD проекта — редакция 6, движок 2026.10.31.3
 компонента. BindClick("add", handler) назначается один раз; SetLabelText("clicks",
 text) и SetBarFill("load", value) обновляют значения по именам. Эти методы
 не требуют ручной перепривязки после сохранения файла. Нужны актуальные
-заголовки и Engine.lib из SDK 2026.10.31.3. Старый C++ проект пересоберите.
+заголовки и Engine.lib из SDK 2026.11.07.6. Старый C++ проект пересоберите.
 
 Опциональный пример собственного компонента на C++
 TutorialHud.h/.cpp демонстрируют кнопку-счётчик и полосу прогресса.
@@ -21,12 +21,13 @@ TutorialHud.h/.cpp демонстрируют кнопку-счётчик и п�
 компонент и тот же HUD в настройках, иначе получите два интерфейса.
 
 Скопируйте TutorialHud.h/.cpp в Source, Hud.ui — в Content/UI.
-В ProjectGame.cpp подключите TutorialHud.h. В AfterInitialize после
+В ProjectGame.cpp подключите TutorialHud.h и <Engine/Runtime/ModuleVfs.h>. В AfterInitialize после
 Game::AfterInitialize(), до возможных ранних return, добавьте:
 
-  AttachTutorialHud(*this, "C:/Games/Demo/Content/UI/Hud.ui");
+  AttachTutorialHud(*this, std::filesystem::u8path(
+      EngineModuleVfs::Resolve("/Game/UI/Hud.ui")));
 
-Замените путь существующим физическим путём; для переносимой игры получите
+Resolve возвращает физический путь для переносимой игры: получите
 его от каталога Content проекта. LoadMarkup сам не разрешает /Game.
 BindClick хранится вне дерева. Счётчик clicks_ переживает обновление разметки,
 но новый запуск игры начинает счёт заново. Старый низкоуровневый Find/OnClick

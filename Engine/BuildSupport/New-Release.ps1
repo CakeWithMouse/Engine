@@ -85,6 +85,8 @@ function Smoke([string[]]$arguments) {
     if ($p.ExitCode) { throw "Packaged smoke failed: $arguments ($($p.ExitCode))" }
 }
 $env:ENGINE_CONTENT_ROOT = $null; $env:GAME_CONTENT_ROOT = $null
+& "$PSScriptRoot/tests/Test-ToolchainSelection.ps1"
+& "$PSScriptRoot/tests/Test-ProjectToolchains.ps1" -Runtime "$package/Runtime" -OutputDirectory "$work/toolchain-projects" -RequireAllToolsets
 foreach ($game in @('BasicExamples','Pong','SunGame','Battle','Katamari','RuntimeExample')) { Smoke @('--smoke',$game) }
 foreach ($game in @('BasicExamples','Pong','SunGame','Battle','RuntimeExample')) { Smoke @('--smoke-editor',$game) }
 $fresh = Join-Path $work 'current-project'

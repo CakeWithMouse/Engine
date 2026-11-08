@@ -1,5 +1,6 @@
 #include "IconProvider.h"
 #include "EditorIconData.h"
+#include "EditorIconFallbacks.h"
 #include "EditorTheme.h"
 #include "IEditorHost.h"
 #ifdef ENGINE_HAS_QTSVG
@@ -12,6 +13,19 @@
 
 namespace
 {
+    QImage RenderFallback(const char* svgData, const QColor& color, int size)
+    {
+        const auto asset = EditorIconFallbacks::Find(svgData);
+        QImage image = QImage::fromData(asset.data, asset.size, "PNG");
+        if (image.isNull()) return {};
+        image = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+        QPainter painter(&image);
+        painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        painter.fillRect(image.rect(), color);
+        painter.end();
+        return image.scaled(size, size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+
     const char* GetTablerSvg(const QString& name)
     {
         if (name == QLatin1String("player-play") || name == QLatin1String("play")) return EditorIcons::TABLER_PLAYER_PLAY;
@@ -73,7 +87,7 @@ namespace
         {
             return QPixmap::fromImage(img.scaled(size, size, Qt::KeepAspectRatio, Qt::SmoothTransformation));
         }
-        return pix;
+        return QPixmap::fromImage(RenderFallback(svgData, color, size));
     }
 }
 
@@ -165,6 +179,7 @@ void IconProvider::UploadIcons(IEditorHost* host, bool force)
 #else
         QImage glyph;
         glyph.loadFromData(bytes, "SVG");
+        if (glyph.isNull()) glyph = RenderFallback(svgData, QColor(0x1A, 0x1A, 0x1E), size - 28);
         if (!glyph.isNull())
         {
             p.drawImage(QRect(14, 14, size - 28, size - 28), glyph);

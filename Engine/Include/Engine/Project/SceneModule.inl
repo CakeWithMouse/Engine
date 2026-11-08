@@ -203,6 +203,9 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetGameSceneApi(uint32_t vers
                 if (!file.is_absolute()) return failure(EngineSceneInvalidArgument, "Expected absolute path");
                 auto data = SceneDocument::Read(file);
                 auto candidate = SCENE_MODULE_CREATE_GAME();
+                // A custom Game factory starts in legacy lighting mode. Apply the
+                // scene contract to the replacement too, just as editor Play does.
+                candidate->SetSceneLightingEnabled(true);
                 candidate->AttachSession(s.gameSession);
                 candidate->Saves().SetCatalog(ProjectComponentTypes());
                 SceneDocument::Restore(data, ProjectComponentTypes(), candidate->GetScene());

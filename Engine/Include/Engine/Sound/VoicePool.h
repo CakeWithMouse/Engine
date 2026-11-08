@@ -55,6 +55,7 @@ namespace audio {
         void ReleaseAllActive();
 
     private:
+        friend struct AudioTestAccess;
         void MoveEndedVoicesToFreeList();
 
         IXAudio2* xaudio_ = nullptr;

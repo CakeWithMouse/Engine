@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Звук и работа с ним — PainEngine</title><style>:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#101d28;color:#e7eef4;font:18px/1.65 Segoe UI,Arial,sans-serif}main,nav,footer{max-width:1100px;margin:auto;padding:24px 32px}nav{display:flex;flex-wrap:wrap;gap:18px;border-bottom:1px solid #3a5264}a{color:#8ce1db}h1{font-size:46px;line-height:1.15}h2{color:#8ce1db;margin-top:42px}h3{font-size:22px}pre{background:#08121b;padding:22px;overflow:auto;font:15px/1.55 Consolas,monospace;border-left:3px solid #5cc2b9}li{margin:14px 0}.lead{font-size:24px;color:#b9d0df}.meta,footer{color:#a4b7c5;font-size:14px}section{border-bottom:1px solid #294151;padding-bottom:24px}code{overflow-wrap:anywhere}table{border-collapse:collapse}td,th{padding:12px;text-align:left;border:1px solid #42596b}@media(max-width:650px){main,nav,footer{padding:18px}h1{font-size:34px}}@media print{body{background:white;color:black}nav{display:none}a,h2{color:#064c50}pre{white-space:pre-wrap;background:#eee;color:black}section{break-inside:avoid}}</style></head><body><nav aria-label="Документация"><a href="index.html">Начать здесь</a><a href="API-REFERENCE.html">API Reference</a><a href="editor.html">Работа редактора</a><a href="materials.html">Материалы и редактор материалов</a><a href="audio.html">Звук и работа с ним</a><a href="code.html">Работа с кодом</a><a href="assets.html">Импорт ассетов</a><a href="scene.html">Настройка сцены</a></nav><main><p class="meta">PainEngine 2026.11.07.7 · Windows x64 · 7 ноября 2026</p><h1>Звук и работа с ним</h1><p class="lead">Импорт, предпрослушивание и игровой код.</p><section><h2>Импорт и проверка</h2><ol><li>В Edit выберите «Сцена → Ресурсы → Импорт аудио…» или «Аудио…» в меню импорта файловой панели.</li><li>Выберите WAV, OGG, MP3 или FLAC. Файл копируется в Content/Audio; совпадающее имя получает числовой суффикс.</li><li>ПКМ по файлу в Content → «Прослушать». Следующее предпрослушивание останавливает предыдущее. «Остановить звук» завершает его вручную.</li><li>Начните с PCM WAV. WAV декодируется встроенным декодером, остальные файлы передаются Windows Media Foundation. Наличие расширения в диалоге не гарантирует доступность декодера.</li><li>Импорт не создаёт звуковой компонент сцены. Для игрового события добавьте вызов аудио API из своего компонента.</li></ol></section><section><h2>Готовый компонент</h2><p>Создайте C++ проект. Скопируйте AudioTutorial.h/.cpp в Source и tutorial.wav из прилагаемых учебных ресурсов в Content/Audio. Выполните Build.ps1, откройте редактор, добавьте «Audio tutorial» из каталога классов, сохраните сцену и нажмите Play. Должен прозвучать короткий тон один раз при BeginPlay.</p><h3>AudioTutorial.h</h3><a download href="tutorial/examples/AudioTutorial.h">Скачать исходник</a><pre><code>#pragma once
+#include &lt;Engine/Components/ComponentAnnotations.h&gt;
+#include &lt;Engine/Components/GameComponents.h&gt;
+
+ENGINE_COMPONENT(&quot;Audio tutorial&quot;, &quot;Tutorial.Audio&quot;)
+class AudioTutorial : public GameComponent {
+public:
+    void BeginPlay() override;
+};
+</code></pre><h3>AudioTutorial.cpp</h3><a download href="tutorial/examples/AudioTutorial.cpp">Скачать исходник</a><pre><code>#include &quot;AudioTutorial.h&quot;
+#include &lt;Engine/MainGame/BaseGameClass/Game.h&gt;
+#include &lt;Engine/Runtime/ModuleVfs.h&gt;
+#include &lt;Engine/Sound/AudioEngine.h&gt;
+#include &lt;filesystem&gt;
+#include &lt;stdexcept&gt;
+
+void AudioTutorial::BeginPlay() {
+    GameComponent::BeginPlay();
+    auto* game = GetGame();
+    auto* sound = game ? game-&gt;GetAudioEngine() : nullptr;
+    if (!sound) return; // The scene also runs on a machine without an audio device.
+    const auto file = EngineModuleVfs::Resolve(&quot;/Game/Audio/tutorial.wav&quot;);
+    if (file.empty()) throw std::runtime_error(&quot;Import tutorial.wav into Content/Audio&quot;);
+    const auto id = sound-&gt;LoadSound(std::filesystem::u8path(file).wstring());
+    if (!id.IsValid()) throw std::runtime_error(&quot;Cannot decode tutorial.wav&quot;);
+    audio::AudioEngine::PlayOptions options;
+    options.volume = 0.25f;
+    if (!sound-&gt;Play2D(id, options)) throw std::runtime_error(&quot;Cannot play tutorial.wav&quot;);
+}
+</code></pre></section><section><h2>2D, 3D и музыка</h2><p>Game уже владеет AudioEngine и вызывает Update. GetAudioEngine может вернуть nullptr при недоступном устройстве. SoundId принадлежит конкретному AudioEngine; после его пересоздания загрузите звук заново.</p><p>LoadSound принимает физический std::wstring путь. Преобразуйте /Game через EngineModuleVfs::Resolve, затем filesystem::u8path(...).wstring(). Для коротких звуков повторно используйте SoundId. Play2D принимает volume, pitchSemitones и loop. Play3D дополнительно принимает AudioEmitter3D, который копируется: публичного handle для движения уже играющего источника нет.</p><p>PlayStream читает музыку потоково и возвращает StreamHandle. StopStream останавливает этот поток. StopAll влияет на все звуки данного AudioEngine. SetListener задаёт слушателя, положение и ориентацию. Используйте mono WAV для первого 3D-примера.</p></section><section><h2>Если звука нет</h2><p>Проверьте устройство вывода Windows, ненулевой GetAudioEngine, SoundId::IsValid и результат Play2D. Затем проверьте физический путь и PCM WAV. Проигрывание без ошибки не доказывает слышимость на выбранных колонках. После Stop начните новый Play для повторного BeginPlay.</p></section><section><h2>Источники реализации</h2><ul><li><code>Engine/Include/Engine/Sound/AudioEngine.h</code></li><li><code>Engine/Include/Engine/Sound/Audio3D.h</code></li><li><code>Engine/Source/Sound/DecoderFactory.cpp</code></li><li><code>Engine/Source/Runtime/SceneEditAudio.cpp</code></li><li><code>Editor/Source/FileBrowser.cpp</code></li></ul></section></main><footer>Офлайн-документация. Источник истины: реализация текущего выпуска. Примеры и ресурсы доступны рядом с HTML.</footer></body></html>

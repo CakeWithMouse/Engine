@@ -1,0 +1,345 @@
+{
+  "title": "PainEngine\nИзменения выпуска",
+  "date": "2026-11-07",
+  "revision": 1,
+  "engineVersion": "2026.11.07.6",
+  "editorialPolicy": "editorial-policy.json",
+  "sourceCommit": "a7f8c8d89cc4061c155715008d257cb3cd229d60",
+  "outputPrefix": "PainEngine-Changes",
+  "slides": [
+    {
+      "type": "cover",
+      "title": "PainEngine\nИзменения выпуска",
+      "subtitle": "После туториала от 1 ноября\nРедакторы, код, звук и материалы",
+      "image": "r8/editor-assets.png",
+      "sources": [
+        "Engine/Version.json",
+        "Engine/docs/tutorial/examples/README.txt"
+      ],
+      "notes": "Практический маршрут прежнего туториала сохранён. Новые разделы дополняют его после основного курса. Полные исходники находятся в tutorial/examples. Снимки интерфейса сняты с текущего редактора; Qt grab не захватывает D3D viewport."
+    },
+    {
+      "type": "rows",
+      "title": "Редактор: схемы и раскладка",
+      "items": [
+        [
+          "Управление",
+          "Две схемы: Unreal / Unity и Blender. Выбор находится в меню «Правка»."
+        ],
+        [
+          "Окна",
+          "Перенос и сохранение панелей, темы, язык и сброс раскладки через «Вид»."
+        ],
+        [
+          "Viewport",
+          "Gizmo, сетка и FXAA получили исправления выбора, глубины и очистки кадра."
+        ]
+      ],
+      "sources": [
+        "Editor/Source/MainWindow.cpp",
+        "Editor/Core/GizmoMath.cpp",
+        "Editor/Core/ViewportOverlay.cpp"
+      ],
+      "notes": "Изменения после r7: редактор v2, локализация, единые иконки, исправления gizmo и FXAA. Для проверки измените transform, отмените действие и перезапустите редактор.",
+      "foot": ""
+    },
+    {
+      "type": "shot",
+      "title": "Материалы: узловой граф",
+      "image": "r8/editor-material-graph.png",
+      "items": [
+        [
+          "Ноды и связи",
+          "Tab открывает поиск. Соедините выход ноды со входом Surface."
+        ],
+        [
+          "Результат",
+          "Граф создаёт HLSL. Сохраните .mat и .mat.graph.json вместе."
+        ]
+      ],
+      "sources": [
+        "Editor/Source/MaterialGraphWidget.cpp",
+        "Editor/Core/HlslGraphCompiler.cpp"
+      ],
+      "notes": "Ранее материал настраивался через параметры и ручной HLSL. Теперь граф генерирует HLSL, поддерживает текстуры и вычисления. Полный маршрут: materials.html.",
+      "foot": ""
+    },
+    {
+      "type": "shot",
+      "title": "Граф: поиск, отмена и ошибки",
+      "image": "r8/editor-material-graph-error.png",
+      "items": [
+        [
+          "Правки",
+          "Ctrl+Z / Ctrl+Y, копирование, вставка и дублирование нод."
+        ],
+        [
+          "Диагностика",
+          "Проверьте ошибку графа. Откат восстанавливает согласованные файлы."
+        ]
+      ],
+      "sources": [
+        "Editor/Source/MaterialEditorWindow.cpp",
+        "Editor/Core/MaterialGraphModel.cpp"
+      ],
+      "notes": "Исправлены согласованность rollback и сохранение пресетов проекта. Поиск принимает русские названия и английские типы. F показывает граф целиком.",
+      "foot": ""
+    },
+    {
+      "type": "rows",
+      "title": "Материалы импортированных моделей",
+      "items": [
+        [
+          "Раньше",
+          "Общий материал мог скрывать различия между частями модели."
+        ],
+        [
+          "Теперь",
+          "Каждый source material ID имеет отдельный .mat. Слоты сохраняются в сцене и SaveGame."
+        ],
+        [
+          "Практика",
+          "Меняйте слот в свойствах модели. Снимите общий override, чтобы увидеть отдельные назначения."
+        ]
+      ],
+      "sources": [
+        "Engine/Source/Scene/ModelImport.cpp",
+        "Engine/Include/Engine/Components/SpecificComponents/SkeletalMeshComponent.h"
+      ],
+      "notes": "FBX, BLEND, GLB и glTF переносят базовый цвет и изображения. ID слотов могут иметь пропуски. Это не полный перенос PBR и Blender node graph.",
+      "foot": ""
+    },
+    {
+      "type": "rows",
+      "title": "Звук в редакторе",
+      "items": [
+        [
+          "Импорт",
+          "Сцена → Ресурсы → Импорт аудио… Файл попадёт в Content/Audio."
+        ],
+        [
+          "Прослушивание",
+          "ПКМ по файлу → Прослушать. Для остановки выберите «Остановить звук»."
+        ],
+        [
+          "Форматы",
+          "Для первого опыта PCM WAV. MP3, FLAC и OGG зависят от декодеров Windows."
+        ]
+      ],
+      "sources": [
+        "Editor/Source/FileBrowser.cpp",
+        "Editor/Source/AssetTools.cpp",
+        "Engine/Source/Runtime/SceneEditAudio.cpp"
+      ],
+      "notes": "Предпрослушивание доступно в Edit. Импорт не добавляет звуковой компонент автоматически. В учебных ресурсах приложен tutorial.wav.",
+      "foot": ""
+    },
+    {
+      "type": "code",
+      "title": "Звук из игрового C++",
+      "code": "auto* audio = GetGame()->GetAudioEngine();\nif (!audio) return;\nauto path = EngineModuleVfs::Resolve(\n    \"/Game/Audio/tutorial.wav\");\nauto id = audio->LoadSound(\n    std::filesystem::u8path(path).wstring());\nif (!id.IsValid()) return;\naudio::AudioEngine::PlayOptions options;\noptions.volume = 0.25f;\naudio->Play2D(id, options);",
+      "aside": "Фрагмент BeginPlay.\n\nПолный класс и includes:\nAudioTutorial.h/.cpp\n\nGame управляет временем жизни AudioEngine.",
+      "sources": [
+        "Engine/docs/tutorial/examples/AudioTutorial.h",
+        "Engine/docs/tutorial/examples/AudioTutorial.cpp",
+        "Engine/Include/Engine/Sound/AudioEngine.h"
+      ],
+      "notes": "Добавьте Audio tutorial в сцену после сборки. BeginPlay воспроизводит тон один раз. SoundId принадлежит создавшему его AudioEngine. Полный компонент проверяет ошибки."
+    },
+    {
+      "type": "rows",
+      "title": "3D-звук и потоковая музыка",
+      "items": [
+        [
+          "Короткий эффект",
+          "LoadSound и Play3D используют SoundId и копию AudioEmitter3D."
+        ],
+        [
+          "Музыка",
+          "PlayStream читает файл потоково. Сохраните StreamHandle для StopStream."
+        ],
+        [
+          "Ограничение",
+          "Для активного 3D-источника пока нет публичного handle перемещения."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/Sound/AudioEngine.h",
+        "Engine/Include/Engine/Sound/Audio3D.h",
+        "Engine/Source/Sound/AudioEngine.cpp"
+      ],
+      "notes": "Game обновляет listener по камере. PlayOptions задаёт volume, pitchSemitones и loop. StopAll останавливает всё в текущем AudioEngine. Физический wide path получают через VFS и filesystem.",
+      "foot": ""
+    },
+    {
+      "type": "rows",
+      "title": "Игровые подсистемы",
+      "items": [
+        [
+          "Один экземпляр",
+          "ENGINE_SUBSYSTEM создаёт GameSubsystem на игровую сессию."
+        ],
+        [
+          "Смена сцены",
+          "Экземпляр сохраняется. OnSceneReady и OnSceneClosing обновляют ссылки."
+        ],
+        [
+          "Stop и Reload",
+          "Stop уничтожает подсистемы. Hot Reload не переносит их состояние."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/MainGame/GameSubsystem.h",
+        "Engine/docs/GAME-SUBSYSTEMS.md"
+      ],
+      "notes": "По умолчанию bTickEnabled=false. GetSubsystem возвращает заимствованный указатель. Edit и material preview не создают игровые подсистемы. Пример SessionCounterSubsystem входит в SDK.",
+      "foot": ""
+    },
+    {
+      "type": "rows",
+      "title": "SaveGame: прогресс между запусками",
+      "items": [
+        [
+          "Запрос",
+          "Game::Saves().RequestSave / RequestLoad ставят операцию в очередь."
+        ],
+        [
+          "Результат",
+          "Проверяйте LastResult: Saved, Loaded или Failed. Не считайте Accepted завершением."
+        ],
+        [
+          "Свои данные",
+          "SerializeSaveGame вызывает базу, затем Section, Version и Field."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/SaveGame/SaveGame.h",
+        "Engine/docs/SAVEGAME.md"
+      ],
+      "notes": "Сохраняются сцена, свойства и поддержанное runtime-состояние. Configure задаёт стабильный gameId. После Load прежние указатели недействительны. Сохранение редакторской сцены и SaveGame решают разные задачи.",
+      "foot": ""
+    },
+    {
+      "type": "rows",
+      "title": "Код и диагностика",
+      "items": [
+        [
+          "CLI",
+          "--help и понятные ошибки. Создание C++: create-project, затем enable-code."
+        ],
+        [
+          "Hot Reload",
+          "Ошибки кандидата видны пользователю. Рабочая DLL остаётся активной."
+        ],
+        [
+          "Рендер",
+          "F7/F8 и командлеты помогают проверить LOD, draw calls, ввод и материалы."
+        ]
+      ],
+      "sources": [
+        "Game/Launcher/Source/Main.cpp",
+        "Editor/Source/CodeTools.cpp",
+        "Engine/docs/RENDER-DIAGNOSTICS.md"
+      ],
+      "notes": "Не смешивайте runtime, Engine.lib и заголовки разных выпусков. После изменения C++ API пересоберите проект. Командлеты описаны в COMMANDLETS.md.",
+      "foot": ""
+    },
+    {
+      "type": "rows",
+      "title": "Исправления теней и нормалей",
+      "items": [
+        [
+          "Каскады",
+          "Исправлены выбор и устойчивость каскадов при изменении камеры."
+        ],
+        [
+          "Точечный свет",
+          "Две теневые лампы, обновление движущихся источников и кастеров."
+        ],
+        [
+          "Normal map",
+          "GPU получает TANGENT. Зеркальный масштаб корректирует знак базиса."
+        ]
+      ],
+      "sources": [
+        "Engine/docs/ENGINE-VERSIONS.md",
+        "Engine/docs/MATERIALS.md",
+        "Agent/Tasks/068-point-shadow-slots-lod.md"
+      ],
+      "notes": "MeshVertex изменился до 64 байт: требуется пересборка C++ модулей. Для skeletal normal map остаётся путь через производные UV. Тени не означают наличие физики или коллизий.",
+      "foot": ""
+    },
+    {
+      "type": "rows",
+      "title": "Прозрачность и границы LOD",
+      "items": [
+        [
+          "Порядок слоёв",
+          "Единая очередь объектов и экземпляров. Исправлено двойное смешивание LOD."
+        ],
+        [
+          "Пересечения",
+          "Версия 2026.11.07.6 обрабатывает 16 ближайших глубин по каждому пикселю."
+        ],
+        [
+          "Границы",
+          "Дальний остаток и legacy/custom PS сохраняют ограничения сортировки."
+        ]
+      ],
+      "sources": [
+        "Engine/docs/MATERIALS.md",
+        "Engine/docs/ENGINE-VERSIONS.md",
+        "Agent/Tasks/071-transparent-intersections.md"
+      ],
+      "notes": "Translucent и Additive используют последний mesh LOD вместо несовместимого impostor. Обработка пересечений имеет стоимость; не считать её бесконечным точным порядком всех поверхностей.",
+      "foot": ""
+    },
+    {
+      "type": "rows",
+      "title": "Четыре проекта для изучения",
+      "items": [
+        [
+          "Город",
+          "CalmCity: движение и SaveGame. CuriousCity: размещение домов и экономика."
+        ],
+        [
+          "Игровое действие",
+          "TiredBomber: сброс бомбы и попадание. AITrash: броски предметов и счёт."
+        ],
+        [
+          "Исходники",
+          "Это проекты агентского прогона r5. В комплекте есть Source, Content и README."
+        ]
+      ],
+      "sources": [
+        "Agent/Playtests/2026-11-07-2026.11.06.1-r5/report.md"
+      ],
+      "notes": "Проекты восстанавливаются из сохранённых архивов ролей, затем пересобираются текущим SDK. Не являются обещанием законченных коммерческих игр.",
+      "foot": ""
+    },
+    {
+      "type": "rows",
+      "title": "Учебный комплект",
+      "items": [
+        [
+          "Документация",
+          "index.html и шесть руководств. API Reference содержит объявления и поиск."
+        ],
+        [
+          "Код и ресурсы",
+          "Вращение, ввод, модели, материалы, HUD, свойства и AudioTutorial."
+        ],
+        [
+          "Первый запуск",
+          "README в корне архива объясняет запуск, сборку и четыре примера."
+        ]
+      ],
+      "sources": [
+        "Engine/docs/build-guides.mjs",
+        "Engine/docs/tutorial/examples/README.txt"
+      ],
+      "notes": "Документация читается офлайн. Для BLEND нужен отдельный Blender. Для изменения C++ нужны Visual Studio C++ tools и Windows SDK.",
+      "foot": ""
+    }
+  ]
+}

@@ -70,6 +70,7 @@
 #include <fstream>
 #include <cstdio>
 #include <stdexcept>
+#include "ViewportDpiTests.h"
 namespace
 {
 int checks = 0;
@@ -192,6 +193,15 @@ int wmain(int argc, wchar_t** argv)
 {
     try
     {
+        if (argc == 2 && std::wstring(argv[1]) == L"--viewport-dpi")
+        {
+            int qtArgc = 1;
+            char name[] = "ViewportDpiTests";
+            char* qtArgv[] = {name, nullptr};
+            QApplication app(qtArgc, qtArgv);
+            ViewportDpiTests::Run();
+            return 0;
+        }
         Check(argc == 3 || argc == 4, "usage: EditorUiTests <project directory> <EngineContent> [model]");
         const auto root = std::filesystem::absolute(argv[1]);
         // Isolate persisted UI preferences from the user's registry and other test runs.

@@ -69,6 +69,9 @@ protected:
 private:
     void SendAttach();
     void SendResize();
+    void RequestResize();
+    bool RefreshCameraInfo();
+    QPointF ToCameraPixels(const QPointF& logicalPos) const;
 
     void SendCursor(QPointF point, bool valid);
     uint32_t PhysW() const;

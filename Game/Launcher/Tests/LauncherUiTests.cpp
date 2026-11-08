@@ -1,5 +1,6 @@
 #define NOMINMAX
 #include "../Source/LaunchSplash.h"
+#include "../Source/ProjectLibrary.h"
 #include <filesystem>
 #include <iostream>
 #include <vector>
@@ -15,6 +16,39 @@ int wmain(int argc,wchar_t** argv) {
     auto check=[&](bool ok,const char* message){if(!ok)throw std::runtime_error(message);++checks;};
     try {
         check(argc==2,"usage: LauncherUiTests screenshot.png");
+        const auto fixture = std::filesystem::temp_directory_path() /
+            (L"LauncherCatalog-" + std::to_wstring(GetCurrentProcessId()));
+        check(std::filesystem::create_directory(fixture), "exclusive catalog fixture");
+        struct Cleanup { std::filesystem::path path; ~Cleanup() { std::error_code ec; std::filesystem::remove_all(path, ec); } } cleanup{fixture};
+        check(ProjectLibrary::CollectProjects(fixture, {}).empty(), "absent bundle folders allowed");
+        for (const auto* relative : {L"Examples/City", L"Examples/Bomber", L"Tutorials/Lab", L"Examples/Incomplete"})
+            std::filesystem::create_directories(fixture / relative);
+        for (const auto* relative : {L"Examples/City/Project.json", L"Examples/Bomber/Project.json", L"Tutorials/Lab/Project.json"})
+            std::ofstream(fixture / relative) << "{}";
+        const auto personal = fixture / "Personal/Project.json";
+        const auto projects = ProjectLibrary::CollectProjects(fixture,
+            {fixture / "Examples/City/Project.json", personal, fixture / "EXAMPLES/CITY/Project.json"});
+        check(projects.size() == 4, "bundle discovery merges registry without duplicates");
+        check(projects[0] == fixture / "Examples/Bomber/Project.json" && projects[2] == fixture / "Tutorials/Lab/Project.json",
+            "examples and tutorials have deterministic ordering");
+        check(projects.back() == personal, "personal entries retained after bundled projects");
+        const auto moved = fixture / L"Перенесённая сборка";
+        std::filesystem::create_directory(moved);
+        std::filesystem::rename(fixture / "Examples", moved / "Examples");
+        const auto relocated = ProjectLibrary::CollectProjects(moved, {});
+        check(relocated.size() == 2 && relocated[0] == moved / "Examples/Bomber/Project.json", "relocated bundle needs no registry");
+        EngineRelease current{"2026.11.07.6", "Release", moved / "Runtime"};
+        RuntimeProject bundled;
+        bundled.file = relocated[0]; bundled.engineVersion = current.version; bundled.engineConfiguration = current.configuration;
+        check(ProjectLibrary::UsesBundledRuntime(bundled, current), "bundled project prefers portable runtime over installed copy");
+        bundled.file = moved / "Tutorials/Lab/Project.json";
+        check(ProjectLibrary::UsesBundledRuntime(bundled, current), "tutorial prefers portable runtime");
+        bundled.engineVersion = "2026.10.31.3";
+        check(!ProjectLibrary::UsesBundledRuntime(bundled, current), "different version retains engine pin");
+        bundled.engineVersion = current.version; bundled.engineConfiguration = "Debug";
+        check(!ProjectLibrary::UsesBundledRuntime(bundled, current), "different configuration retains engine pin");
+        bundled.engineConfiguration = current.configuration; bundled.file = personal;
+        check(!ProjectLibrary::UsesBundledRuntime(bundled, current), "personal project retains installed engine selection");
         const auto owner=CreateWindowW(L"STATIC",L"Test owner",WS_OVERLAPPEDWINDOW,0,0,800,450,nullptr,nullptr,GetModuleHandleW(nullptr),nullptr);
         check(owner!=nullptr,"owner created");
         {

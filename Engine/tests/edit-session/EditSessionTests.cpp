@@ -136,6 +136,7 @@ static void Exercise(const EngineEditSessionApi& api, const char* type)
 #include "StartupSceneTests.h"
 #include "GameStartupTests.h"
 #include "RuntimeRenderTests.h"
+void ExerciseModeParity(const std::filesystem::path& content);
 int wmain(int argc, wchar_t** argv)
 {
     try
@@ -145,6 +146,7 @@ int wmain(int argc, wchar_t** argv)
         const auto content = std::filesystem::absolute(argv[2]);
         EnginePaths::SetContentRoot(content);
         ExerciseRuntimeRender(content);
+        ExerciseModeParity(content);
         {
             SceneEditSession jsonSession({types, 1});
             ExerciseJson(jsonSession.GetApi(), "Probe", true);

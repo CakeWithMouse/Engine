@@ -66,5 +66,41 @@
     "examples": "releases/PainEngine-Tutorial-2026-11-01-r7-examples.zip",
     "content": "releases/PainEngine-Tutorial-2026-11-01-r7.content.json",
     "summary": "Готовые примитивы без ручной инициализации геометрии; обновлены C++ примеры, аннотации свойств и настройка игрока/камеры через инспектор. Прежние опубликованные редакции сохранены."
+  },
+  {
+    "engineVersion": "2026.11.07.6",
+    "date": "2026-11-07",
+    "revision": 8,
+    "sourceCommit": "a7f8c8d89cc4061c155715008d257cb3cd229d60",
+    "slideCount": 61,
+    "presentation": "releases/PainEngine-Tutorial-2026-11-07-r8-v3-final.pptx",
+    "pdf": "releases/PainEngine-Tutorial-2026-11-07-r8-v3-final.pdf",
+    "content": "releases/PainEngine-Tutorial-2026-11-07-r8.content.json",
+    "examples": "releases/PainEngine-Tutorial-2026-11-07-r8-examples.zip",
+    "summary": "Прежний учебный маршрут сохранён; 14 новых слайдов о редакторах, материалах, звуке, коде и исправлениях. Текущие Qt-снимки, отдельный обзор изменений и полный код упражнений."
+  },
+  {
+    "engineVersion": "2026.11.07.6",
+    "date": "2026-11-07",
+    "revision": 9,
+    "sourceCommit": "a7f8c8d89cc4061c155715008d257cb3cd229d60",
+    "slideCount": 71,
+    "presentation": "releases/PainEngine-Tutorial-2026-11-07-r9-v3-final.pptx",
+    "pdf": "releases/PainEngine-Tutorial-2026-11-07-r9-v3-final.pdf",
+    "kind": "Tutorial",
+    "content": "releases/PainEngine-Tutorial-2026-11-07-r9.content.json",
+    "summary": "Снимки материалов и звука, C++ подсистем и SaveGame, команды и диагностика, подробности теней, измеренные метрики прозрачности, четыре проекта и расположение учебного комплекта."
+  },
+  {
+    "engineVersion": "2026.11.07.6",
+    "date": "2026-11-07",
+    "revision": 2,
+    "sourceCommit": "a7f8c8d89cc4061c155715008d257cb3cd229d60",
+    "slideCount": 25,
+    "presentation": "releases/PainEngine-Changes-2026-11-07-r2-v3-final.pptx",
+    "pdf": "releases/PainEngine-Changes-2026-11-07-r2-v3-final.pdf",
+    "kind": "Changes",
+    "content": "releases/PainEngine-Changes-2026-11-07-r2.content.json",
+    "summary": "Снимки материалов и звука, C++ подсистем и SaveGame, команды и диагностика, подробности теней, измеренные метрики прозрачности, четыре проекта и расположение учебного комплекта."
   }
 ]

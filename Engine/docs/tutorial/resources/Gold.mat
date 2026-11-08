@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "shader": "Gold.hlsl",
+  "params": { "Tint": [1.0, 0.72, 0.28, 1.0], "Gloss": 1.0, "Rim": 0.45 }
+}

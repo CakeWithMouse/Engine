@@ -10,16 +10,12 @@ param([Parameter(Mandatory=$true)][string]$Project,
 $ErrorActionPreference = 'Stop'
 $vswhere = Join-Path ([Environment]::GetEnvironmentVariable('ProgramFiles(x86)')) 'Microsoft Visual Studio\Installer\vswhere.exe'
 if (!(Test-Path -LiteralPath $vswhere)) { throw 'Visual Studio with C++ tools and Windows SDK is required (vswhere.exe not found).' }
-$msbuild = & $vswhere -latest -products '*' -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' | Select-Object -First 1
-if (!$msbuild) { throw 'MSBuild with C++ tools and Windows SDK is required.' }
-if ($PlatformToolset -eq 'auto') {
-    $installation = & $vswhere -latest -products '*' -requires Microsoft.Component.MSBuild -property installationPath | Select-Object -First 1
-    $PlatformToolset = @('v145','v143') | Where-Object {
-        @(Get-ChildItem -Path (Join-Path $installation "MSBuild/Microsoft/VC/*/Platforms/x64/PlatformToolsets/$_/Toolset.props") -ErrorAction SilentlyContinue).Count -gt 0
-    } | Select-Object -First 1
-    if (!$PlatformToolset) { throw 'No supported C++ toolset found (v145 or v143). Install C++ tools or pass -PlatformToolset explicitly.' }
-    Write-Output "Using installed platform toolset: $PlatformToolset"
-}
+. "$PSScriptRoot/Toolchain.ps1"
+$family = if ($PlatformToolset -eq 'auto') { '' } else { $PlatformToolset }
+$toolchain = Resolve-EngineToolchain -Toolset $family
+$PlatformToolset = $toolchain.toolset
+$msbuild = $toolchain.msbuild
+Write-Output "Using $PlatformToolset / MSVC $($toolchain.version) / Windows SDK $($toolchain.windowsSdk.version)"
 # Windows PowerShell 5.1 cannot even read ProcessStartInfo.EnvironmentVariables
 # when the parent supplied both Path and PATH. Normalize duplicate names first.
 $environmentSnapshot = [Environment]::GetEnvironmentVariables()
@@ -54,16 +50,6 @@ if ($env:VCPKG_ROOT) {
     [Environment]::SetEnvironmentVariable('VCPKG_ROOT', $env:VCPKG_ROOT, 'Process')
 }
 
-$start = [Diagnostics.ProcessStartInfo]::new()
-$start.FileName = $msbuild
-$start.UseShellExecute = $false
-$start.RedirectStandardOutput = $true
-$start.RedirectStandardError = $true
-# The desktop host may supply both PATH and Path. Normalize keys for MSBuild's CL task.
-$start.EnvironmentVariables.Clear()
-foreach ($entry in [Environment]::GetEnvironmentVariables().GetEnumerator()) {
-    $start.EnvironmentVariables[$entry.Key.ToUpperInvariant()] = $entry.Value
-}
 $useAssimp = if ($PSBoundParameters.ContainsKey('EnableAssimp')) {
     $EnableAssimp.IsPresent
 } else {
@@ -73,16 +59,15 @@ $useAssimp = if ($PSBoundParameters.ContainsKey('EnableAssimp')) {
 }
 $assimp = $useAssimp.ToString().ToLowerInvariant()
 Write-Output "Assimp enabled: $assimp"
-$vcpkgClean = if ($env:VCPKG_ROOT) { $env:VCPKG_ROOT.TrimEnd('\') } else { $null }
-$vcpkgParam = if ($vcpkgClean) { ' "/p:VcpkgRoot=' + $vcpkgClean + '\\"' } else { '' }
-$start.Arguments = '"' + $Project + '" /nologo /verbosity:minimal /m:1 /nr:false /p:UseStructuredOutput=false /p:PreferredToolArchitecture=x64 /p:Platform=x64 /p:Configuration=' + $Configuration + ' /p:PlatformToolset=' + $PlatformToolset + ' /p:EngineEnableAssimp=' + $assimp + $vcpkgParam
-if ($SkipProjectReferences) { $start.Arguments += ' /p:BuildProjectReferences=false' }
-if ($EditorUiTest) { $start.Arguments += ' /p:EditorUiTest=true' }
-if ($EngineCommandlet) { $start.Arguments += ' /p:EngineCommandlet=true' }
-$process = [Diagnostics.Process]::Start($start)
-$output = $process.StandardOutput.ReadToEndAsync()
-$errors = $process.StandardError.ReadToEndAsync()
-$process.WaitForExit()
-Write-Output $output.GetAwaiter().GetResult()
-if ($errors.GetAwaiter().GetResult()) { Write-Output $errors.GetAwaiter().GetResult() }
-if ($process.ExitCode -ne 0) { throw "MSBuild failed: $($process.ExitCode)" }
+$arguments = @($Project, '/nologo', '/verbosity:minimal', '/m:1', '/nr:false', '/p:UseStructuredOutput=false',
+    (ConvertTo-MSBuildProperty 'Configuration' $Configuration), (ConvertTo-MSBuildProperty 'EngineEnableAssimp' $assimp))
+$arguments += @(Get-EngineToolchainArguments $toolchain)
+if ($env:VCPKG_ROOT) { $arguments += ConvertTo-MSBuildProperty 'VcpkgRoot' ($env:VCPKG_ROOT.TrimEnd('\','/')+'\') }
+if ($useAssimp) { $arguments += ConvertTo-MSBuildProperty 'IncludePath' ((Get-EngineToolchainProperties $toolchain).IncludePath + ';' + (Join-Path $PSScriptRoot '../vcpkg_installed/x64-windows/include')) }
+if ($SkipProjectReferences) { $arguments += '/p:BuildProjectReferences=false' }
+if ($EditorUiTest) { $arguments += '/p:EditorUiTest=true' }
+if ($EngineCommandlet) { $arguments += '/p:EngineCommandlet=true' }
+$result = Invoke-ToolchainProcess $msbuild $arguments -Timeout 3600000
+Write-Output $result.stdout
+if ($result.stderr) { Write-Output $result.stderr }
+if ($result.exitCode) { throw "MSBuild failed: $($result.exitCode)" }
