@@ -6,6 +6,7 @@
 #include <Engine/Components/EditorProperties.h>
 #include <Engine/Components/PropertyMacros.h>
 #include <Engine/Components/Character.h>
+#include <Engine/Render/SkeletalLoader.h>
 #include <Engine/Scene/SceneAssets.h>
 #include <Engine/Scene/SceneDocument.h>
 #include "../ThirdParty/nlohmann/json.hpp"
@@ -138,11 +139,20 @@ void AuthoringTests(){
     const auto oldMat=Read(mat),oldShader=Read(shader),oldModel=Read(modelFile);
     const auto sidecarPath=fs::u8path(modelFile.u8string()+".importsettings.json");
     Write(sidecarPath,R"({"version":1,"kind":"model","model":{"scale":0.01,"mergeMeshes":false}})");
-    Write(root/"mesh.obj","v 0 0 0\nv 2 0 0\nv 0 2 0\nf 1 2 3\n");
+    Write(root/"mesh.obj","g MeshA\nv 0 0 0\nv 2 0 0\nv 0 2 0\nf 1 2 3\ng MeshB\nv 3 0 0\nv 5 0 0\nv 3 2 0\nf 4 5 6\n");
     CHECK(author.asset(author.context,0,model.c_str(),"",error,sizeof(error))==EngineSceneOk);
     CHECK(Read(modelFile)!=oldModel);CHECK(Read(mat)==oldMat);CHECK(Read(shader)==oldShader);
     CHECK(Read(sidecarPath).find("0.01")!=std::string::npos && Read(sidecarPath).find("false")!=std::string::npos);
+    const auto resSeparate=LoadSkeletalModelFromVfs(model);
+    CHECK(resSeparate.Success && resSeparate.Model && resSeparate.Model->Meshes.size()==2);
     bool found=false;for(const auto& row:Rows(api))if(row.name=="Mesh"){CHECK(row.model==model&&row.material==material&&row.x==3);found=true;}CHECK(found);
+    fs::remove(sidecarPath);
+    CHECK(author.asset(author.context,0,model.c_str(),"",error,sizeof(error))==EngineSceneOk);
+    const auto resDefault=LoadSkeletalModelFromVfs(model);
+    CHECK(resDefault.Success && resDefault.Model && resDefault.Model->Meshes.size()==1);
+    CHECK(Read(mat)==oldMat);
+    for(const auto& row:Rows(api))if(row.name=="Mesh")CHECK(row.model==model&&row.material==material&&row.x==3);
+    Write(sidecarPath,R"({"version":1,"kind":"model","model":{"scale":0.01,"mergeMeshes":false}})");
     const auto validModel=Read(modelFile);Write(root/"mesh.obj","broken geometry");
     CHECK(author.asset(author.context,0,model.c_str(),"",error,sizeof(error))!=EngineSceneOk);CHECK(Read(modelFile)==validModel);
     Write(root/"different_source.obj","v 0 0 0\nv 3 0 0\nv 0 3 0\nf 1 2 3\n");

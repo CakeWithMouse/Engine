@@ -1,5 +1,6 @@
 #define NOMINMAX
 #include "AssetUpdate.h"
+#include "ModelImportSettings.h"
 #include <Engine/Scene/SceneAssets.h>
 #include "../../ThirdParty/nlohmann/json.hpp"
 #include <Windows.h>
@@ -68,7 +69,24 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
             const auto original=fs::u8path(source);
             if(!original.is_absolute() || !fs::is_regular_file(original))throw std::runtime_error("Original source is missing; choose its new location");
             if(Inside(original,sourceRoot.parent_path()) && (original==file || (model&&Inside(original,sourceRoot))))throw std::runtime_error("Choose the external original, not a file inside this import");
-            const auto virtualImport=SceneAssets::Import(content,original,model?SceneAssets::Model:audio?SceneAssets::Audio:SceneAssets::Texture);
+            std::string importOptions;
+            if(model) {
+                const auto sidecar=fs::u8path(file.u8string()+".importsettings.json");
+                if(fs::is_regular_file(sidecar)) {
+                    std::ifstream in(sidecar,std::ios::binary);
+                    if(in) {
+                        const std::string text((std::istreambuf_iterator<char>(in)),std::istreambuf_iterator<char>());
+                        ModelImportSettings parsed{};
+                        std::string err;
+                        if(ModelImportSettings::Parse(text,parsed,&err)) {
+                            importOptions=text;
+                        } else {
+                            std::fprintf(stderr,"[Error] AssetUpdate: broken sidecar '%s': %s\n",sidecar.u8string().c_str(),err.c_str());
+                        }
+                    }
+                }
+            }
+            const auto virtualImport=SceneAssets::Import(content,original,model?SceneAssets::Model:audio?SceneAssets::Audio:SceneAssets::Texture,importOptions);
             imported=content/fs::u8path(virtualImport.substr(6));importRoot=model?imported.parent_path():imported;
             if(Extension(imported)!=ext)throw std::runtime_error("Reimport must keep the asset format (BLEND is converted to GLB)");
             const auto candidate=backup/"candidate";
