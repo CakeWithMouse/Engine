@@ -1,6 +1,8 @@
 #include "AssetCommandHandler.h"
 #include <Engine/Runtime/EditorReloadApi.h>
 #include <QFile>
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 AssetCommandHandler::AssetCommandHandler() = default;
 
@@ -56,13 +58,50 @@ void AssetCommandHandler::Handle(const EditorCommand& cmd,
         char errBuf[1024]{};
         const uint32_t kind =
             cmd.type == EditorCommand::ImportTexture ? 1 : cmd.type == EditorCommand::ImportAudio ? 2 : 0;
-        result = ctx.scene.importAsset(ctx.scene.context,
-                                       cmd.path.toUtf8().constData(),
-                                       kind,
-                                       path,
-                                       sizeof(path),
-                                       errBuf,
-                                       sizeof(errBuf));
+
+        EngineAssetImportApi importApi = ctx.assetImport;
+        if (!importApi.importWithOptions && ctx.scene.context && ctx.scene.createModel)
+        {
+            HMODULE hMod = nullptr;
+            if (GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                reinterpret_cast<LPCWSTR>(ctx.scene.createModel), &hMod) && hMod)
+            {
+                const auto query = reinterpret_cast<EngineGetEditExtensionFn>(GetProcAddress(hMod, "EngineGetEditExtension"));
+                if (query)
+                {
+                    EngineAssetImportApi queried{};
+                    if (query(ctx.scene.context, EngineAssetImportExtension, 1, sizeof(queried), &queried) &&
+                        queried.version == 1 && queried.importWithOptions)
+                    {
+                        importApi = queried;
+                    }
+                }
+            }
+        }
+
+        if (importApi.importWithOptions)
+        {
+            const QByteArray optionsUtf8 = cmd.importOptionsJson.toUtf8();
+            const char* optionsCStr = optionsUtf8.isEmpty() ? nullptr : optionsUtf8.constData();
+            result = importApi.importWithOptions(importApi.context,
+                                                 cmd.path.toUtf8().constData(),
+                                                 kind,
+                                                 optionsCStr,
+                                                 path,
+                                                 sizeof(path),
+                                                 errBuf,
+                                                 sizeof(errBuf));
+        }
+        else
+        {
+            result = ctx.scene.importAsset(ctx.scene.context,
+                                           cmd.path.toUtf8().constData(),
+                                           kind,
+                                           path,
+                                           sizeof(path),
+                                           errBuf,
+                                           sizeof(errBuf));
+        }
         if (result == EngineSceneOk)
             completedCmd.path = QString::fromUtf8(path);
         error = QString::fromUtf8(errBuf);

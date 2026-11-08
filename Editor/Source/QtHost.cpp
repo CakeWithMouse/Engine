@@ -354,6 +354,7 @@ void EditorQtHost::DrainCommands()
                 selection_,
                 viewportInput_,
                 audio_,
+                assetImport_,
                 [this](const char* msg) { Log(msg); },
                 [this](const auto& s, const auto& d, const auto& sel, const auto& in, const auto& audio) {
                     recovery_.RefreshBuild();

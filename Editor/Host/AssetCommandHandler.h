@@ -8,12 +8,13 @@ class AssetCommandHandler
 public:
     struct Context
     {
-        EngineModuleHost host;
-        EngineEditSessionApi scene;
-        EngineProjectDataApi projectData;
-        EngineSelectionApi selection;
-        EngineViewportInputApi viewportInput;
-        EngineAudioPreviewApi audio;
+        EngineModuleHost host{};
+        EngineEditSessionApi scene{};
+        EngineProjectDataApi projectData{};
+        EngineSelectionApi selection{};
+        EngineViewportInputApi viewportInput{};
+        EngineAudioPreviewApi audio{};
+        EngineAssetImportApi assetImport{};
         std::function<void(const char*)> log;
         std::function<void(const EngineEditSessionApi&, const EngineProjectDataApi&, const EngineSelectionApi&, const EngineViewportInputApi&, const EngineAudioPreviewApi&)> onReloadBindings;
         std::function<std::string()> getSelectedObjectName;

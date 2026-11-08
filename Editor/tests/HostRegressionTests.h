@@ -248,6 +248,78 @@ inline int Run() {
             check(std::abs(scale - batch[i].scale) < 1e-5f, "Sidecar scale matches completedCmd.importScale");
         }
     }
+
+    // Test AssetCommandHandler with Engine.Asset.Import extension vs legacy fallback
+    {
+        AssetCommandHandler assetHandler;
+        EditorHistory hist;
+
+        // Case A: Modern Engine with Engine.Asset.Import extension
+        {
+            static bool s_extensionCalled = false;
+            static std::string s_lastOptionsJson;
+            s_extensionCalled = false;
+            s_lastOptionsJson.clear();
+
+            AssetCommandHandler::Context modernCtx;
+            modernCtx.scene.context = &s;
+            modernCtx.assetImport.version = 1;
+            modernCtx.assetImport.context = &s;
+            modernCtx.assetImport.importWithOptions = [](void*, const char*, uint32_t,
+                const char* optionsJson, char* outPath, uint32_t outCapacity, char*, uint32_t) -> uint32_t {
+                s_extensionCalled = true;
+                if (optionsJson) s_lastOptionsJson = optionsJson;
+                strncpy_s(outPath, outCapacity, "/Game/Models/Modern/Modern.glb", _TRUNCATE);
+                return EngineSceneOk;
+            };
+
+            EditorCommand cmd;
+            cmd.type = EditorCommand::ImportModel;
+            cmd.path = QStringLiteral("C:/Sources/Modern.glb");
+            cmd.importScale = 2.0f;
+            cmd.importOptionsJson = QStringLiteral("{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":2.0}}");
+
+            EditorCommand completedCmd;
+            uint32_t res = 999;
+            QString err;
+            assetHandler.Handle(cmd, modernCtx, hist, IEditorHost::Edit, nullptr, 0, 0, completedCmd, res, err);
+
+            check(res == EngineSceneOk, "Modern AssetCommandHandler succeeds");
+            check(s_extensionCalled, "importWithOptions was called via extension");
+            check(s_lastOptionsJson.find("\"scale\":2.0") != std::string::npos, "optionsJson forwarded to extension");
+            check(completedCmd.path == QStringLiteral("/Game/Models/Modern/Modern.glb"), "completedCmd path updated");
+        }
+
+        // Case B: Old Engine without extension (fallback path)
+        {
+            static bool s_legacyCalled = false;
+            s_legacyCalled = false;
+
+            AssetCommandHandler::Context legacyCtx;
+            legacyCtx.scene.context = &s;
+            legacyCtx.scene.importAsset = [](void*, const char*, uint32_t,
+                char* outPath, uint32_t outCapacity, char*, uint32_t) -> uint32_t {
+                s_legacyCalled = true;
+                strncpy_s(outPath, outCapacity, "/Game/Models/Legacy/Legacy.glb", _TRUNCATE);
+                return EngineSceneOk;
+            };
+
+            EditorCommand cmd;
+            cmd.type = EditorCommand::ImportModel;
+            cmd.path = QStringLiteral("C:/Sources/Legacy.glb");
+            cmd.importScale = 1.0f;
+            cmd.importOptionsJson = QStringLiteral("{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0}}");
+
+            EditorCommand completedCmd;
+            uint32_t res = 999;
+            QString err;
+            assetHandler.Handle(cmd, legacyCtx, hist, IEditorHost::Edit, nullptr, 0, 0, completedCmd, res, err);
+
+            check(res == EngineSceneOk, "Legacy AssetCommandHandler succeeds without extension");
+            check(s_legacyCalled, "ctx.scene.importAsset fallback was called");
+            check(completedCmd.path == QStringLiteral("/Game/Models/Legacy/Legacy.glb"), "completedCmd path updated via fallback");
+        }
+    }
     std::cout<<"Host regression checks: "<<checks<<std::endl;return checks;
 }
 }

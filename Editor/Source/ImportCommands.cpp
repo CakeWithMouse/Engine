@@ -56,6 +56,7 @@ void EditorMainWindow::RegisterAssetCommands()
             }
 
             float scale = 1.0f;
+            QString optionsJson;
             if (kind == 0)
             {
                 const auto decision = ResolveModelImportScale(ctx.parameters, !source.isEmpty(), this);
@@ -64,6 +65,16 @@ void EditorMainWindow::RegisterAssetCommands()
                     return false;
                 }
                 scale = decision.scale;
+                if (ctx.parameters.contains(QStringLiteral("options")))
+                {
+                    optionsJson = ctx.parameters.value(QStringLiteral("options")).toString();
+                }
+                else
+                {
+                    EditorCore::ImportSettings settings;
+                    settings.model.scale = scale;
+                    optionsJson = QString::fromUtf8(EditorCore::ImportSettingsFile::Serialize(settings));
+                }
             }
 
             for (const auto& path : paths)
@@ -76,6 +87,7 @@ void EditorMainWindow::RegisterAssetCommands()
                                  : EditorCommand::ImportModel;
                 c.path = path;
                 c.importScale = scale;
+                c.importOptionsJson = optionsJson;
                 host_->PostCommand(c);
             }
             return true;
@@ -135,19 +147,26 @@ void EditorMainWindow::HandleModelImported(const EditorCommand& command)
     FileService fs(&Logger::Instance(), this);
     fs.SetProjectRoot(projectDir);
 
-    QString sidecarError;
-    if (!EditorCore::ModelImportSidecar::WriteSidecar(fs, command.path, command.importScale, contentRoot, &sidecarError))
+    // If sidecar already exists on disk (written by modern Engine before CreateModel), preserve all its settings
+    EditorCore::ImportSettingsFile::LoadResult res;
+    QString loadErr;
+    EditorCore::ModelImportSidecar::ReadSettings(fs, command.path, contentRoot, &res, &loadErr);
+    if (res != EditorCore::ImportSettingsFile::LoadResult::Success)
     {
-        AppendLine(Tr("[Error] Не удалось сохранить настройки импорта для %1: %2",
-                      "[Error] Failed to save import settings for %1: %2").arg(command.path, sidecarError));
-        static auto s_lastImportWarningTime = std::chrono::steady_clock::time_point{};
-        const auto now = std::chrono::steady_clock::now();
-        if (now - s_lastImportWarningTime > std::chrono::seconds(3))
+        QString sidecarError;
+        if (!EditorCore::ModelImportSidecar::WriteSidecar(fs, command.path, command.importScale, contentRoot, &sidecarError))
         {
-            s_lastImportWarningTime = now;
-            QMessageBox::warning(this, Tr("Настройки импорта", "Import Settings"),
-                                 Tr("Не удалось сохранить настройки импорта (.importsettings.json): %1",
-                                    "Failed to save import settings (.importsettings.json): %1").arg(sidecarError));
+            AppendLine(Tr("[Error] Не удалось сохранить настройки импорта для %1: %2",
+                          "[Error] Failed to save import settings for %1: %2").arg(command.path, sidecarError));
+            static auto s_lastImportWarningTime = std::chrono::steady_clock::time_point{};
+            const auto now = std::chrono::steady_clock::now();
+            if (now - s_lastImportWarningTime > std::chrono::seconds(3))
+            {
+                s_lastImportWarningTime = now;
+                QMessageBox::warning(this, Tr("Настройки импорта", "Import Settings"),
+                                     Tr("Не удалось сохранить настройки импорта (.importsettings.json): %1",
+                                        "Failed to save import settings (.importsettings.json): %1").arg(sidecarError));
+            }
         }
     }
 }
