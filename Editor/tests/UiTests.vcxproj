@@ -88,6 +88,7 @@
         <ClCompile Include="../Source/ObjectInspectorPanel.cpp"/>
         <ClCompile Include="../Source/ProjectProperties.cpp"/>
         <ClCompile Include="../Core/ImportSettings.cpp"/>
+        <ClCompile Include="../Core/AssetOps.cpp"/>
         <ClCompile Include="../UI/ImportSettingsDialog.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_Logger.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_CommandRegistry.cpp"/>
@@ -102,6 +103,7 @@
         <ClInclude Include="UiTestHelperTests.h"/>
         <ClInclude Include="ImportSettingsDialogTests.h"/>
         <ClInclude Include="EditImportSettingsTests.h"/>
+        <ClInclude Include="AssetDeleteTests.h"/>
         <ClInclude Include="UiSmokeTests.h"/>
     </ItemGroup>
 

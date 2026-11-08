@@ -5,6 +5,7 @@
 #include "ImportSettingsDialog.h"
 #include "ModelImportSidecar.h"
 #include "RecoveryStore.h"
+#include "AssetOps.h"
 #include "Logger.h"
 
 #include <QAction>
@@ -122,12 +123,40 @@ void EditorMainWindow::RegisterAssetCommands()
             return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit;
         }
     });
+
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("Assets.Delete"),
+        QStringLiteral("Delete Asset"),
+        QString(),
+        QStringLiteral("Delete an asset and its companion files from the project"),
+        [this](const CommandContext& ctx) {
+            if (!host_->HasScene() ||
+                sceneBusy_ ||
+                host_->PlayState() != EditorQtHost::EditorState::Edit)
+            {
+                return false;
+            }
+
+            const QString path = ctx.parameters.value(QStringLiteral("path")).toString();
+            if (path.isEmpty())
+            {
+                return false;
+            }
+
+            const bool skipPrompt = ctx.parameters.value(QStringLiteral("skipPrompt"), false).toBool();
+            return DeleteAsset(path, skipPrompt);
+        },
+        [this]() {
+            return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit;
+        }
+    });
 }
 
 void EditorMainWindow::UnregisterAssetCommands()
 {
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Import"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.EditImportSettings"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Delete"));
 }
 
 void EditorMainWindow::BuildResourcesMenu(QMenu* sceneMenu)
@@ -357,5 +386,89 @@ float EditorMainWindow::GetModelSpawnScale(const QString& path)
         }
     }
     return scale;
+}
+
+bool EditorMainWindow::DeleteAsset(const QString& path, bool skipPrompt)
+{
+    if (path.isEmpty() || !host_)
+    {
+        return false;
+    }
+
+    const QString projectDir = QFileInfo(ProjectPath()).dir().absolutePath();
+    const QString contentRoot = QString::fromUtf8(host_->host().contentRoot);
+    FileService fs(&Logger::Instance(), this);
+    fs.SetProjectRoot(projectDir);
+
+    const QString relPath = QDir(projectDir).relativeFilePath(path);
+    if (relPath.startsWith(QStringLiteral("..")) || QDir::isAbsolutePath(relPath))
+    {
+        Logger::Instance().Error(QStringLiteral("DeleteAsset: path '%1' is outside project sandbox").arg(path));
+        return false;
+    }
+
+    EditorCore::AssetOps ops(&fs);
+    if (!ops.Exists(relPath))
+    {
+        Logger::Instance().Error(QStringLiteral("DeleteAsset: asset does not exist: %1").arg(path));
+        return false;
+    }
+
+    const QString fileName = QFileInfo(path).fileName();
+    const QString vfsPath = QStringLiteral("/Game/") + QDir::fromNativeSeparators(QDir(contentRoot).relativeFilePath(path));
+    int usedCount = 0;
+    const auto snapshot = host_->ReadSnapshot();
+    for (const auto& obj : snapshot.objects)
+    {
+        const QString m = QString::fromUtf8(obj.modelAsset.c_str());
+        const QString t = QString::fromUtf8(obj.textureAsset.c_str());
+        const QString mat = QString::fromUtf8(obj.materialAsset.c_str());
+        if ((!m.isEmpty() && (m == vfsPath || m.endsWith(fileName))) ||
+            (!t.isEmpty() && (t == vfsPath || t.endsWith(fileName))) ||
+            (!mat.isEmpty() && (mat == vfsPath || mat.endsWith(fileName))))
+        {
+            ++usedCount;
+        }
+    }
+
+    if (!skipPrompt)
+    {
+        QMessageBox::StandardButton btn;
+        if (usedCount > 0)
+        {
+            btn = QMessageBox::warning(
+                this,
+                Tr("Удаление ассета", "Delete Asset"),
+                Tr("Ассет используется на сцене: %1 объектов. Удалить файл и сопутствующие настройки?",
+                   "Asset is currently used on the scene: %1 objects. Delete the file and companion settings?").arg(usedCount),
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::No);
+        }
+        else
+        {
+            btn = QMessageBox::question(
+                this,
+                Tr("Удаление ассета", "Delete Asset"),
+                Tr("Удалить ассет '%1' и сопутствующие файлы?",
+                   "Delete asset '%1' and companion files?").arg(fileName),
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::Yes);
+        }
+
+        if (btn != QMessageBox::Yes)
+        {
+            return false;
+        }
+    }
+
+    QString error;
+    if (!ops.Delete(relPath, &error, true))
+    {
+        Logger::Instance().Error(QStringLiteral("DeleteAsset: failed to delete '%1': %2").arg(path, error));
+        return false;
+    }
+
+    Logger::Instance().Info(QStringLiteral("DeleteAsset: successfully deleted '%1' and companion files").arg(path));
+    return true;
 }
 

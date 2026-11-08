@@ -57,6 +57,7 @@ public:
     void OpenScene(const QString& path = {});
     void UpdateAsset(const QString& path, bool move, const QString& supplied = {});
     bool EditModelImportSettings(const QString& path, bool showDialog = true, const QVariantMap& overrideParams = {});
+    bool DeleteAsset(const QString& path, bool skipPrompt = false);
     // kind: 0 model, 1 texture, 2 audio.
     void ImportAsset(int kind, const QString& source = {});
     void AddModel(const QString& path = {});

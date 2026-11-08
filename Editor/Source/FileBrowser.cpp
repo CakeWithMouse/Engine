@@ -16,6 +16,7 @@
 #include <QGuiApplication>
 #include <QHeaderView>
 #include <QHBoxLayout>
+#include <QKeyEvent>
 #include <QLineEdit>
 #include <QMenu>
 #include <QProcess>
@@ -272,6 +273,7 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     const bool asset=hasFile&&!model_->isDir(index)&&QStringList{"fbx","obj","gltf","glb","png","jpg","jpeg","bmp","tga","mat"}.contains(QFileInfo(path).suffix().toLower());
     QAction* reimport=asset&&!isMaterial&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переимпортировать…", "Reimport…")):nullptr;
     QAction* move=asset&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переместить / переименовать…", "Move / Rename…")):nullptr;
+    QAction* deleteAction = hasFile && !model_->isDir(index) ? menu.addAction(Tr("Удалить", "Delete")) : nullptr;
 
     QAction* picked = menu.exec(view_->viewport()->mapToGlobal(pos));
     if (!picked)
@@ -280,6 +282,10 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     if (picked == editSettings)
     {
         CommandRegistry::Instance().Execute(QStringLiteral("Assets.EditImportSettings"), {{QStringLiteral("path"), path}});
+    }
+    else if (picked == deleteAction)
+    {
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Delete"), {{QStringLiteral("path"), path}});
     }
     else if (picked == playAudio || picked == stopAudio)
     {
@@ -314,4 +320,23 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
         QGuiApplication::clipboard()->setText(path);
     else if (picked == refresh)
         model_->setRootPath(model_->rootPath());
+}
+
+void FileBrowserDock::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_Delete)
+    {
+        const QModelIndex current = proxy_->mapToSource(view_->currentIndex());
+        if (current.isValid() && !model_->isDir(current))
+        {
+            const QString path = model_->filePath(current);
+            if (!path.isEmpty())
+            {
+                CommandRegistry::Instance().Execute(QStringLiteral("Assets.Delete"), {{QStringLiteral("path"), path}});
+                event->accept();
+                return;
+            }
+        }
+    }
+    QDockWidget::keyPressEvent(event);
 }
