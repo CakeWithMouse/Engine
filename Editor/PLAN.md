@@ -228,8 +228,8 @@
     - `useFileUnitScale` в `SkeletalLoaderAssimp.cpp` подключается через выставление флага `aiProcess_GlobalScale`.
     - Значение `scale` из sidecar в Assimp не передаётся (остаётся на Transform при спавне объекта во избежание двойного применения).
     - При `useFileUnitScale = false` флаги Assimp не изменяются, сохраняя 100% побитовую совместимость с ранее импортированными моделями.
-30. **Дефолт useFileUnitScale в UI (Шаг 17.6b):**
-    - Дефолт `useFileUnitScale = true` ТОЛЬКО в диалоге `ImportSettingsDialog` (при новом открытии и по кнопке «Сбросить к умолчанию»).
+30. **Дефолт useFileUnitScale в UI (Шаг 17.6b, 17.6d):**
+    - Дефолт `useFileUnitScale = true` во ВСЕХ путях `ImportSettingsDialog` (единый метод `DefaultSettings()`, при открытии диалога, в `Prompt()`, в `PromptScale()`, по кнопке «Сбросить к умолчанию» и при формировании JSON из диалога).
     - Схема `ImportSettings`, Engine-парсер `ModelImportSettings`, общий набор `ImportSettingsTestCases.h` и чтение существующих sidecar без поля `useFileUnitScale` строго остаются `false` (ранее импортированные модели и проекты не меняются).
 31. **Редактирование настроек импорта модели («Настройки импорта…») (Шаг 17.6c):**
     - Команда `Assets.EditImportSettings` в `CommandRegistry` и пункт контекстного меню Content Browser для моделей (`FileBrowser.cpp`).
@@ -237,6 +237,19 @@
     - Открытие `ImportSettingsDialog` в режиме редактирования (`SetEditMode(true)`): чекбоксы `importMaterials` и `importTextures` отключены с поясняющими всплывающими подсказками (материалы и текстуры создаются движком однократно при первичном импорте и живут независимой жизнью в проекте).
     - При нажатии OK: сохранение `.importsettings.json` через `FileService` с сохранением неизвестных полей JSON, проверка наличия исходника из `.source.json` (диалог выбора файла при отсутствии), вызов `UpdateAsset` с перезагрузкой геометрии движком (`AssetUpdate.cpp`) с новыми настройками и сохранением позиций и компонентов объектов на сцене.
     - При нажатии Cancel: sidecar не модифицируется, транзакция реимпорта не запускается.
+32. **Отмена решения S16 «scale только на Transform» (Новое решение Юрия):**
+    - Решение S16 («масштаб модели выставляется только на уровне Transform при спавне») отменено по решению архитектора Юрия.
+    - Цель: в редакторе у импортированных объектов `Transform.Scale = [1, 1, 1]`. Размер корректируется при импорте на уровне геометрии.
+    - Пресеты Scale (1 / 0.1 / 0.01) и ручной ввод Scale теперь должны запекаться в геометрию меша при импорте/реимпорте в движке, а не применяться к `Transform.scale` сцены. (Правки в Engine ожидают согласования архитектора после диагностики C).
+33. **Визуальное отключение угла сглаживания (Шаг 17.6e):**
+    - При `Normals != Smooth` поле ввода угла сглаживания и его текстовая метка становятся неактивными (`setEnabled(false)`, muted-стиль палитры темы) и получают подсказку `Tr("Доступно только при сглаженных нормалях", "Available only when normals are set to Smooth")`.
+34. **Скрытие служебных файлов импорта в Content Browser (Шаг 17.6f):**
+    - В `ProjectFilesFilter` (`FileBrowser.h/.cpp`) отфильтровываются файлы с суффиксами `.import.json`, `.importsettings.json`, `.source.json`. Модель видна в браузере как 1 элемент.
+35. **Удаление ассетов с очисткой сопутствующих файлов (Шаг 17.6g):**
+    - Команда `Assets.Delete` в `CommandRegistry`, пункт контекстного меню Content Browser «Удалить» и клавиша `Delete`.
+    - Удаление в пределах песочницы проекта через `FileService` и `AssetOps`.
+    - При удалении модели автоматически удаляются сопутствующие sidecar-файлы (`.importsettings.json`, `.source.json`, `.import.json`).
+    - Проверка наличия ассета на сцене (`Snapshot.objects`): при обнаружении ссылок выводится предупреждающий диалог подтверждения.
 
 ---
 
@@ -522,7 +535,11 @@
 - [x] **Шаг 17.6 (feat(ui)):** `ImportSettingsDialog` для моделей: группы Базовые/Расширенные (расширенные свёрнуты), зависимости (`importTextures` от `importMaterials`, `smoothingAngle` от `normals=smooth`), кнопка «Сбросить», сохранение последних значений через `SettingsService` с логом, Tabler-иконки через `IconProvider`, типизированный `ModelNormalsMode`. Коммит `a754eb9`. CoreTests (553), HostTests (109), UiTests (277) PASS.
 - [x] **fix(ui):** Сворачивание карточки «Расширенные» в `ImportSettingsDialog`: отложенный `adjustSize()` через `QTimer::singleShot(0)` после layout hide, гарантирующий возврат к исходной компактной высоте окна (0 px дельта). Коммит `f8a956f`.
 - [x] **Шаг 17.6b (feat(engine)):** Чтение существующего `.importsettings.json` и передача в `SceneAssets::Import` при реимпорте модели в `AssetUpdate.cpp`. Тесты в `AuthoringTests.cpp`: reimport с `mergeMeshes=false` даёт 2 меша, без sidecar 1 меш, материалы `.mat` не перезаписываются, Transform объектов сцены не изменяется. Коммит `e20d169`.
-- [x] **Шаг 17.6c (feat(ui)):** Команда `Assets.EditImportSettings`, пункт контекстного меню Content Browser «Настройки импорта…», открытие `ImportSettingsDialog` в режиме редактирования (материалы/текстуры отключены с подсказками), сохранение sidecar с сохранением неизвестных полей, обработка отсутствия исходника (`.source.json`), вызов реимпорта. Тесты в `EditImportSettingsTests.h` (7 секций, 21 проверка).
+- [x] **Шаг 17.6c (feat(ui)):** Команда `Assets.EditImportSettings`, пункт контекстного меню Content Browser «Настройки импорта…», открытие `ImportSettingsDialog` в режиме редактирования (материалы/текстуры отключены с подсказками), сохранение sidecar с сохранением неизвестных полей, обработка отсутствия исходника (`.source.json`), вызов реимпорта. Тесты в `EditImportSettingsTests.h` (7 секций, 21 проверка). Коммит `fad8c52`.
+- [x] **Шаг 17.6d (fix(ui)):** Дефолт `useFileUnitScale = true` во всех путях `ImportSettingsDialog` (единый `DefaultSettings()`, открытие, `Prompt`, `PromptScale`, сброс). Тест в `EditImportSettingsTests.h`: открытие без сброса даёт `true`, парсер sidecar без поля даёт `false`. Коммит `acfde31`.
+- [x] **Шаг 17.6e (fix(ui)):** Поле угла сглаживания и его текстовая метка визуально неактивны (`setEnabled(false)`, цвет `Disabled`, подсказка «Доступно только при сглаженных нормалях») при `Normals != Smooth`. Тест состояния в `EditImportSettingsTests.h`. Коммит `393bd72`.
+- [x] **Шаг 17.6f (feat(ui)):** Скрытие служебных sidecar (`.import.json`, `.importsettings.json`, `.source.json`) в Content Browser через `ProjectFilesFilter`. Расширение `AssetOps` поддержкой сопутствующих файлов на переименование, дублирование и удаление. Тесты в `AssetOpsTests.h` и `EditImportSettingsTests.h`. Коммит `ed42c59`.
+- [x] **Шаг 17.6g (feat(ui)):** Удаление ассетов в Content Browser (`Assets.Delete`, пункт меню «Удалить», клавиша `Delete`), подтверждение, предупреждение при наличии объекта на сцене (`Snapshot.objects`), удаление сопутствующих sidecar через `AssetOps` в песочнице проекта. Юнит-тесты в `AssetDeleteTests.h` (7 проверок). Коммит `4ea3409`.
 - [ ] **Шаг 17.7 (test):** Регрессионное тестирование на уровне Host/Core без раздувания `EditorUiTests.cpp`.
 
 ---
