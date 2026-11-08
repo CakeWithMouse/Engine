@@ -181,12 +181,12 @@ bool EditorMainWindow::EditModelImportSettings(const QString& path, bool showDia
     if (loadRes == EditorCore::ImportSettingsFile::LoadResult::Error)
     {
         Logger::Instance().Error(QStringLiteral("ImportSettings: failed to load sidecar for '%1': %2").arg(path, loadErr));
-        settings = EditorCore::ImportSettings{};
+        settings = ImportSettingsDialog::DefaultSettings();
     }
     else if (loadRes == EditorCore::ImportSettingsFile::LoadResult::NotFound)
     {
         Logger::Instance().Info(QStringLiteral("ImportSettings: sidecar not found for '%1', using default settings").arg(path));
-        settings = EditorCore::ImportSettings{};
+        settings = ImportSettingsDialog::DefaultSettings();
     }
 
     if (showDialog)

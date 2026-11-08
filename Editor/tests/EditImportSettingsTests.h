@@ -51,6 +51,22 @@ inline void Run()
         btnReset->click();
         Check(checkUnitScale->isChecked(), "ResetDefaultsBtn resets useFileUnitScale to true in dialog");
         ++checks;
+
+        Check(ImportSettingsDialog::DefaultSettings().model.useFileUnitScale, "ImportSettingsDialog::DefaultSettings useFileUnitScale is true");
+        ++checks;
+
+        // Prompt without initialSettings opens with useFileUnitScale == true without pressing reset
+        bool promptDefaultUnitScale = false;
+        ImportSettingsDialog::SetExecHookForTesting([&promptDefaultUnitScale](ImportSettingsDialog& dialog) {
+            auto* cb = UiTestHelper::Require<QCheckBox>(&dialog, QStringLiteral("UseFileUnitScaleCheck"));
+            promptDefaultUnitScale = cb->isChecked();
+            UiTestHelper::ClickButton(&dialog, QStringLiteral("ImportCancelBtn"));
+            return dialog.result();
+        });
+        ImportSettingsDialog::Prompt();
+        ImportSettingsDialog::SetExecHookForTesting(nullptr);
+        Check(promptDefaultUnitScale, "Prompt opens with useFileUnitScale true without reset");
+        ++checks;
     }
 
     // 2. Schema and sidecar parser without field gives false

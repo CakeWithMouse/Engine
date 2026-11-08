@@ -36,12 +36,19 @@ int ImportSettingsDialog::exec()
     return QDialog::exec();
 }
 
-ModelImportDecision ImportSettingsDialog::Prompt(QWidget* parent, const EditorCore::ImportSettings& initialSettings)
+EditorCore::ImportSettings ImportSettingsDialog::DefaultSettings()
+{
+    EditorCore::ImportSettings s;
+    s.model.useFileUnitScale = true;
+    return s;
+}
+
+ModelImportDecision ImportSettingsDialog::Prompt(QWidget* parent, const std::optional<EditorCore::ImportSettings>& initialSettings)
 {
     ImportSettingsDialog dialog(parent);
-    if (ImportSettingsFile::IsValidScale(initialSettings.model.scale))
+    if (initialSettings.has_value())
     {
-        dialog.SetSettings(initialSettings);
+        dialog.SetSettings(*initialSettings);
     }
 
     const int res = dialog.exec();
@@ -56,7 +63,7 @@ ModelImportDecision ImportSettingsDialog::Prompt(QWidget* parent, const EditorCo
 
 ImportScalePromptResult ImportSettingsDialog::PromptScale(QWidget* parent, float initialScale)
 {
-    EditorCore::ImportSettings s;
+    EditorCore::ImportSettings s = DefaultSettings();
     s.model.scale = initialScale;
     const auto res = Prompt(parent, s);
     return { res.proceed, res.scale };
@@ -207,9 +214,7 @@ void ImportSettingsDialog::SetEditMode(bool editMode)
 
 void ImportSettingsDialog::ResetToDefaults()
 {
-    EditorCore::ImportSettings s{};
-    s.model.useFileUnitScale = true;
-    SetSettings(s);
+    SetSettings(DefaultSettings());
 }
 
 void ImportSettingsDialog::UpdateDependencies()
@@ -239,7 +244,7 @@ void ImportSettingsDialog::UpdateDependencies()
 void ImportSettingsDialog::LoadFromSettingsService()
 {
     auto& s = SettingsService::Instance();
-    EditorCore::ImportSettings settings;
+    EditorCore::ImportSettings settings = DefaultSettings();
 
     if (s.Contains(QStringLiteral("import/model/scale")))
         settings.model.scale = static_cast<float>(s.GetValue(QStringLiteral("import/model/scale"), 1.0).toDouble());

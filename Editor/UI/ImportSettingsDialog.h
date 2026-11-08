@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QVariantMap>
 #include <functional>
+#include <optional>
 
 class QCheckBox;
 class QComboBox;
@@ -55,7 +56,8 @@ public:
     void accept() override;
 
     static void SetExecHookForTesting(ExecHook hook);
-    static ModelImportDecision Prompt(QWidget* parent = nullptr, const EditorCore::ImportSettings& initialSettings = {});
+    static EditorCore::ImportSettings DefaultSettings();
+    static ModelImportDecision Prompt(QWidget* parent = nullptr, const std::optional<EditorCore::ImportSettings>& initialSettings = std::nullopt);
     static ImportScalePromptResult PromptScale(QWidget* parent = nullptr, float initialScale = 1.0f);
 
 private:
