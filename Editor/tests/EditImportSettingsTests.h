@@ -2,6 +2,7 @@
 
 #include "UiTestHelper.h"
 #include "ImportSettingsDialog.h"
+#include "FileBrowser.h"
 #include "ImportSettings.h"
 #include "ModelImportSidecar.h"
 #include "CommandRegistry.h"
@@ -291,6 +292,18 @@ inline void Run()
         Check(spinAngle->isEnabled(), "SmoothingAngle spin is enabled when normals is Smooth");
         Check(labelAngle->isEnabled(), "SmoothingAngle label is enabled when normals is Smooth");
         Check(!spinAngle->toolTip().contains(QStringLiteral("Доступно только")), "SmoothingAngle spin tooltip reset when enabled");
+        ++checks;
+    }
+
+    // 9. ProjectFilesFilter hides companion service files (.import.json, .importsettings.json, .source.json)
+    {
+        Check(ProjectFilesFilter::IsHiddenServiceFile(QStringLiteral("Hero.fbx.importsettings.json")), "Hides .importsettings.json");
+        Check(ProjectFilesFilter::IsHiddenServiceFile(QStringLiteral("Hero.fbx.source.json")), "Hides .source.json");
+        Check(ProjectFilesFilter::IsHiddenServiceFile(QStringLiteral("Hero.fbx.import.json")), "Hides .import.json");
+        Check(!ProjectFilesFilter::IsHiddenServiceFile(QStringLiteral("Hero.fbx")), "Shows model .fbx");
+        Check(!ProjectFilesFilter::IsHiddenServiceFile(QStringLiteral("Hero.glb")), "Shows model .glb");
+        Check(!ProjectFilesFilter::IsHiddenServiceFile(QStringLiteral("Hero.obj")), "Shows model .obj");
+        Check(!ProjectFilesFilter::IsHiddenServiceFile(QStringLiteral("Main.scene.json")), "Shows scene .scene.json");
         ++checks;
     }
 

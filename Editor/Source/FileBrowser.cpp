@@ -43,26 +43,6 @@ public:
     }
 };
 
-class ProjectFilesFilter final : public QSortFilterProxyModel
-{
-public:
-    QString project, content;
-    bool full = false;
-    using QSortFilterProxyModel::QSortFilterProxyModel;
-    void ShowFull(bool value) { full = value; invalidateFilter(); }
-    // Перетаскивание только копирует: файл проекта не должен уехать в проводник.
-    Qt::DropActions supportedDragActions() const override { return Qt::CopyAction; }
-protected:
-    bool filterAcceptsRow(int row, const QModelIndex& parent) const override {
-        const auto* files = static_cast<QFileSystemModel*>(sourceModel());
-        if (!full && QDir::cleanPath(files->filePath(parent)) == project) {
-            const auto index = files->index(row, 0, parent);
-            return files->isDir(index) && (files->fileName(index) == "Source" || QDir::cleanPath(files->filePath(index)) == content);
-        }
-        return true;
-    }
-};
-
 FileBrowserDock::FileBrowserDock(EditorQtHost* host, QWidget* parent)
     : QDockWidget(Tr("Контент", "Content Browser"), parent)
     , host_(host)
