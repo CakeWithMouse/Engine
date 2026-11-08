@@ -32,9 +32,49 @@ bool ImportSettingsFile::IsValidSmoothingAngle(float angle)
 
 bool ImportSettingsFile::IsValidNormals(const QString& normals)
 {
-    return normals == QStringLiteral("file") ||
-           normals == QStringLiteral("flat") ||
-           normals == QStringLiteral("smooth");
+    ModelNormalsMode mode{};
+    return NormalsModeFromString(normals, mode);
+}
+
+bool ImportSettingsFile::IsValidNormalsMode(ModelNormalsMode mode)
+{
+    return mode == ModelNormalsMode::File ||
+           mode == ModelNormalsMode::Flat ||
+           mode == ModelNormalsMode::Smooth;
+}
+
+QString ImportSettingsFile::NormalsModeToString(ModelNormalsMode mode)
+{
+    switch (mode)
+    {
+    case ModelNormalsMode::Flat:
+        return QStringLiteral("flat");
+    case ModelNormalsMode::Smooth:
+        return QStringLiteral("smooth");
+    case ModelNormalsMode::File:
+    default:
+        return QStringLiteral("file");
+    }
+}
+
+bool ImportSettingsFile::NormalsModeFromString(const QString& str, ModelNormalsMode& outMode)
+{
+    if (str == QStringLiteral("file"))
+    {
+        outMode = ModelNormalsMode::File;
+        return true;
+    }
+    if (str == QStringLiteral("flat"))
+    {
+        outMode = ModelNormalsMode::Flat;
+        return true;
+    }
+    if (str == QStringLiteral("smooth"))
+    {
+        outMode = ModelNormalsMode::Smooth;
+        return true;
+    }
+    return false;
 }
 
 QByteArray ImportSettingsFile::Serialize(const ImportSettings& settings)
@@ -46,7 +86,7 @@ QByteArray ImportSettingsFile::Serialize(const ImportSettings& settings)
     QJsonObject modelObj = settings.model.extraFields;
     modelObj[QStringLiteral("scale")] = static_cast<double>(IsValidScale(settings.model.scale) ? settings.model.scale : DefaultScale);
     modelObj[QStringLiteral("useFileUnitScale")] = settings.model.useFileUnitScale;
-    modelObj[QStringLiteral("normals")] = IsValidNormals(settings.model.normals) ? settings.model.normals : QStringLiteral("file");
+    modelObj[QStringLiteral("normals")] = NormalsModeToString(IsValidNormalsMode(settings.model.normals) ? settings.model.normals : ModelNormalsMode::File);
     modelObj[QStringLiteral("smoothingAngle")] = static_cast<double>(IsValidSmoothingAngle(settings.model.smoothingAngle) ? settings.model.smoothingAngle : DefaultSmoothingAngle);
     modelObj[QStringLiteral("importMaterials")] = settings.model.importMaterials;
     modelObj[QStringLiteral("importTextures")] = settings.model.importTextures;
@@ -234,7 +274,8 @@ bool ImportSettingsFile::Parse(const QByteArray& data, ImportSettings& outSettin
             return false;
         }
         const QString normalsStr = modelObj.value(QStringLiteral("normals")).toString();
-        if (!IsValidNormals(normalsStr))
+        ModelNormalsMode mode{};
+        if (!NormalsModeFromString(normalsStr, mode))
         {
             const QString errStr = QStringLiteral("ImportSettings: invalid normals mode '%1' (must be 'file', 'flat', or 'smooth')").arg(normalsStr);
             Logger::Instance().Error(errStr);
@@ -242,7 +283,7 @@ bool ImportSettingsFile::Parse(const QByteArray& data, ImportSettings& outSettin
                 *outError = errStr;
             return false;
         }
-        outSettings.model.normals = normalsStr;
+        outSettings.model.normals = mode;
     }
 
     // smoothingAngle (optional, float [0, 175], default 60.0)
@@ -396,9 +437,9 @@ bool ImportSettingsFile::Save(FileService& fileService, const QString& relPath, 
             *outError = errStr;
         return false;
     }
-    if (!IsValidNormals(settings.model.normals))
+    if (!IsValidNormalsMode(settings.model.normals))
     {
-        const QString errStr = QStringLiteral("ImportSettings: cannot save invalid normals '%1'").arg(settings.model.normals);
+        const QString errStr = QStringLiteral("ImportSettings: cannot save invalid normals '%1'").arg(NormalsModeToString(settings.model.normals));
         Logger::Instance().Error(errStr);
         if (outError)
             *outError = errStr;

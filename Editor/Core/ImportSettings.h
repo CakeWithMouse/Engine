@@ -8,11 +8,18 @@
 namespace EditorCore
 {
 
+enum class ModelNormalsMode
+{
+    File = 0,
+    Flat,
+    Smooth
+};
+
 struct ModelImportSettings
 {
     float scale = 1.0f;
     bool useFileUnitScale = false;
-    QString normals = QStringLiteral("file"); // "file" | "flat" | "smooth"
+    ModelNormalsMode normals = ModelNormalsMode::File;
     float smoothingAngle = 60.0f;             // [0.0, 175.0]
     bool importMaterials = true;
     bool importTextures = true;
@@ -55,6 +62,9 @@ public:
 
     static bool IsValidSmoothingAngle(float angle);
     static bool IsValidNormals(const QString& normals);
+    static bool IsValidNormalsMode(ModelNormalsMode mode);
+    static QString NormalsModeToString(ModelNormalsMode mode);
+    static bool NormalsModeFromString(const QString& str, ModelNormalsMode& outMode);
 
     static QByteArray Serialize(const ImportSettings& settings);
     static bool Parse(const QByteArray& data, ImportSettings& outSettings, QString* outError = nullptr);

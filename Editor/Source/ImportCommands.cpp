@@ -59,7 +59,7 @@ void EditorMainWindow::RegisterAssetCommands()
             QString optionsJson;
             if (kind == 0)
             {
-                const auto decision = ResolveModelImportScale(ctx.parameters, !source.isEmpty(), this);
+                const auto decision = ResolveModelImportDecision(ctx.parameters, !source.isEmpty(), this);
                 if (!decision.proceed)
                 {
                     return false;
@@ -71,9 +71,7 @@ void EditorMainWindow::RegisterAssetCommands()
                 }
                 else
                 {
-                    EditorCore::ImportSettings settings;
-                    settings.model.scale = scale;
-                    optionsJson = QString::fromUtf8(EditorCore::ImportSettingsFile::Serialize(settings));
+                    optionsJson = QString::fromUtf8(EditorCore::ImportSettingsFile::Serialize(decision.settings));
                 }
             }
 
@@ -154,7 +152,17 @@ void EditorMainWindow::HandleModelImported(const EditorCommand& command)
     if (res != EditorCore::ImportSettingsFile::LoadResult::Success)
     {
         QString sidecarError;
-        if (!EditorCore::ModelImportSidecar::WriteSidecar(fs, command.path, command.importScale, contentRoot, &sidecarError))
+        EditorCore::ImportSettings sidecarSettings;
+        if (!command.importOptionsJson.isEmpty())
+        {
+            EditorCore::ImportSettingsFile::Parse(command.importOptionsJson.toUtf8(), sidecarSettings);
+        }
+        else
+        {
+            sidecarSettings.model.scale = command.importScale;
+        }
+
+        if (!EditorCore::ModelImportSidecar::WriteSidecar(fs, command.path, sidecarSettings, contentRoot, &sidecarError))
         {
             AppendLine(Tr("[Error] Не удалось сохранить настройки импорта для %1: %2",
                           "[Error] Failed to save import settings for %1: %2").arg(command.path, sidecarError));

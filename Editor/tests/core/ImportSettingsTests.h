@@ -72,12 +72,16 @@ inline void RunImportSettingsTests(int& outChecks)
     check(ImportSettingsFile::IsValidNormals(QStringLiteral("smooth")), "Normals 'smooth' is valid");
     check(!ImportSettingsFile::IsValidNormals(QStringLiteral("unknown")), "Normals 'unknown' is invalid");
     check(!ImportSettingsFile::IsValidNormals(QStringLiteral("")), "Empty normals string is invalid");
+    check(ImportSettingsFile::IsValidNormalsMode(ModelNormalsMode::File), "Mode File is valid");
+    check(ImportSettingsFile::IsValidNormalsMode(ModelNormalsMode::Flat), "Mode Flat is valid");
+    check(ImportSettingsFile::IsValidNormalsMode(ModelNormalsMode::Smooth), "Mode Smooth is valid");
+    check(!ImportSettingsFile::IsValidNormalsMode(static_cast<ModelNormalsMode>(999)), "Mode 999 is invalid");
 
     // 2. Round-trip serialization (v1 full schema)
     ImportSettings s1;
     s1.model.scale = 0.05f;
     s1.model.useFileUnitScale = true;
-    s1.model.normals = QStringLiteral("smooth");
+    s1.model.normals = ModelNormalsMode::Smooth;
     s1.model.smoothingAngle = 45.0f;
     s1.model.importMaterials = false;
     s1.model.importTextures = false;
@@ -96,7 +100,7 @@ inline void RunImportSettingsTests(int& outChecks)
     check(s1Loaded.kind == QStringLiteral("model"), "Loaded kind is model");
     check(std::abs(s1Loaded.model.scale - 0.05f) < 1e-6f, "Loaded scale matches 0.05");
     check(s1Loaded.model.useFileUnitScale == true, "Loaded useFileUnitScale matches true");
-    check(s1Loaded.model.normals == QStringLiteral("smooth"), "Loaded normals matches smooth");
+    check(s1Loaded.model.normals == ModelNormalsMode::Smooth, "Loaded normals matches smooth");
     check(std::abs(s1Loaded.model.smoothingAngle - 45.0f) < 1e-6f, "Loaded smoothingAngle matches 45.0");
     check(s1Loaded.model.importMaterials == false, "Loaded importMaterials matches false");
     check(s1Loaded.model.importTextures == false, "Loaded importTextures matches false");
@@ -111,7 +115,7 @@ inline void RunImportSettingsTests(int& outChecks)
     check(sValidV1.version == 1 && sValidV1.kind == QStringLiteral("model"), "kValidV1 header correct");
     check(std::abs(sValidV1.model.scale - 0.05f) < 1e-6f, "kValidV1 scale 0.05");
     check(sValidV1.model.useFileUnitScale == true, "kValidV1 useFileUnitScale true");
-    check(sValidV1.model.normals == QStringLiteral("smooth"), "kValidV1 normals smooth");
+    check(sValidV1.model.normals == ModelNormalsMode::Smooth, "kValidV1 normals smooth");
 
     // 2b. Migration of legacy S16 format {"scale": 0.01} and {"scale": 0.01, "foo": 1}
     ImportSettings sLegacyPure;
@@ -120,7 +124,7 @@ inline void RunImportSettingsTests(int& outChecks)
     check(sLegacyPure.version == 1 && sLegacyPure.kind == QStringLiteral("model"), "kLegacyScale header correct");
     check(std::abs(sLegacyPure.model.scale - 0.01f) < 1e-6f, "kLegacyScale scale 0.01");
     check(sLegacyPure.model.useFileUnitScale == false, "kLegacyScale useFileUnitScale false");
-    check(sLegacyPure.model.normals == QStringLiteral("file"), "kLegacyScale normals file");
+    check(sLegacyPure.model.normals == ModelNormalsMode::File, "kLegacyScale normals file");
     check(std::abs(sLegacyPure.model.smoothingAngle - 60.0f) < 1e-6f, "kLegacyScale smoothingAngle 60.0");
     check(sLegacyPure.model.importMaterials == true, "kLegacyScale importMaterials true");
     check(sLegacyPure.model.importTextures == true, "kLegacyScale importTextures true");
@@ -135,7 +139,7 @@ inline void RunImportSettingsTests(int& outChecks)
     check(sLegacy.kind == QStringLiteral("model"), "Legacy sidecar migrated to kind model");
     check(std::abs(sLegacy.model.scale - 0.01f) < 1e-6f, "Legacy sidecar scale loaded as 0.01");
     check(sLegacy.model.useFileUnitScale == false, "Legacy sidecar useFileUnitScale defaults to false");
-    check(sLegacy.model.normals == QStringLiteral("file"), "Legacy sidecar normals defaults to file");
+    check(sLegacy.model.normals == ModelNormalsMode::File, "Legacy sidecar normals defaults to file");
     check(std::abs(sLegacy.model.smoothingAngle - 60.0f) < 1e-6f, "Legacy sidecar smoothingAngle defaults to 60.0");
     check(sLegacy.model.importMaterials == true, "Legacy sidecar importMaterials defaults to true");
     check(sLegacy.model.importTextures == true, "Legacy sidecar importTextures defaults to true");
@@ -237,7 +241,7 @@ inline void RunImportSettingsTests(int& outChecks)
     ImportSettings saveSet;
     saveSet.model.scale = 0.1f;
     saveSet.model.smoothingAngle = 45.0f;
-    saveSet.model.normals = QStringLiteral("flat");
+    saveSet.model.normals = ModelNormalsMode::Flat;
     QString saveErr;
     const bool saveOk = ImportSettingsFile::Save(fs, sidecarRel, saveSet, &saveErr);
     check(saveOk, "ImportSettingsFile::Save succeeded via FileService");
@@ -255,7 +259,7 @@ inline void RunImportSettingsTests(int& outChecks)
     check(loadOk == ImportSettingsFile::LoadResult::Success, "ImportSettingsFile::Load succeeded via FileService");
     check(loadErr.isEmpty(), "No error on load");
     check(std::abs(loadSet.model.scale - 0.1f) < 1e-6f, "Loaded scale matches saved scale 0.1");
-    check(loadSet.model.normals == QStringLiteral("flat"), "Loaded normals matches saved flat");
+    check(loadSet.model.normals == ModelNormalsMode::Flat, "Loaded normals matches saved flat");
     check(std::abs(loadSet.model.smoothingAngle - 45.0f) < 1e-6f, "Loaded smoothingAngle matches saved 45.0");
 
     // Load missing file (returns NotFound, scale = 1.0f, no error exception)
@@ -299,7 +303,7 @@ inline void RunImportSettingsTests(int& outChecks)
     check(!ImportSettingsFile::Save(fs, sidecarRel, badSaveAngle, &badSaveErr), "Save fails for invalid angle");
 
     ImportSettings badSaveNormals;
-    badSaveNormals.model.normals = QStringLiteral("bad");
+    badSaveNormals.model.normals = static_cast<ModelNormalsMode>(999);
     check(!ImportSettingsFile::Save(fs, sidecarRel, badSaveNormals, &badSaveErr), "Save fails for invalid normals");
 
     // --- ModelImportSidecar Tests ---
