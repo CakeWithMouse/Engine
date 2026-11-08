@@ -287,6 +287,8 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     QAction* reveal = hasFile ? menu.addAction(Tr("Показать в проводнике", "Reveal in Explorer")) : nullptr;
     QAction* copy = hasFile ? menu.addAction(Tr("Копировать путь", "Copy Path")) : nullptr;
     QAction* refresh = menu.addAction(Tr("Обновить", "Refresh"));
+    const bool isModel = hasFile && !model_->isDir(index) && QStringList{"fbx", "obj", "gltf", "glb", "blend"}.contains(QFileInfo(path).suffix().toLower());
+    QAction* editSettings = isModel && host_->ReadSnapshot().authoring ? menu.addAction(Tr("Настройки импорта…", "Import Settings…")) : nullptr;
     const bool asset=hasFile&&!model_->isDir(index)&&QStringList{"fbx","obj","gltf","glb","png","jpg","jpeg","bmp","tga","mat"}.contains(QFileInfo(path).suffix().toLower());
     QAction* reimport=asset&&!isMaterial&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переимпортировать…", "Reimport…")):nullptr;
     QAction* move=asset&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переместить / переименовать…", "Move / Rename…")):nullptr;
@@ -295,7 +297,11 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     if (!picked)
         return;
 
-    if (picked == playAudio || picked == stopAudio)
+    if (picked == editSettings)
+    {
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.EditImportSettings"), {{QStringLiteral("path"), path}});
+    }
+    else if (picked == playAudio || picked == stopAudio)
     {
         const QString relative = QDir(contentDir_).relativeFilePath(path);
         EditorCommand c;

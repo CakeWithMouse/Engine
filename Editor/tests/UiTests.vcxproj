@@ -101,6 +101,7 @@
         <ClInclude Include="UiTestHelper.h"/>
         <ClInclude Include="UiTestHelperTests.h"/>
         <ClInclude Include="ImportSettingsDialogTests.h"/>
+        <ClInclude Include="EditImportSettingsTests.h"/>
         <ClInclude Include="UiSmokeTests.h"/>
     </ItemGroup>
 

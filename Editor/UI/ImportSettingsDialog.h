@@ -46,8 +46,12 @@ public:
     float Scale() const;
     void SetScale(float scale);
 
+    void SetEditMode(bool editMode);
+    bool IsEditMode() const { return isEditMode_; }
+
     void ResetToDefaults();
 
+    int exec() override;
     void accept() override;
 
     static void SetExecHookForTesting(ExecHook hook);
@@ -81,6 +85,7 @@ private:
     // Action buttons
     QPushButton* btnResetDefaults_ = nullptr;
     QDialogButtonBox* buttonBox_ = nullptr;
+    bool isEditMode_ = false;
 };
 
 ModelImportDecision ResolveModelImportDecision(

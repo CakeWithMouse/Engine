@@ -93,9 +93,9 @@ inline void Run()
     Check(btnCancel != nullptr, "ImportCancelBtn exists");
     ++checks;
 
-    // 2. Default schema values
+    // 2. Default values in dialog
     Check(std::abs(dlg.Scale() - 1.0f) < 1e-5f, "Default scale is 1.0");
-    Check(!checkUnitScale->isChecked(), "Default useFileUnitScale is false");
+    Check(checkUnitScale->isChecked(), "Default useFileUnitScale in dialog is true");
     Check(checkMaterials->isChecked(), "Default importMaterials is true");
     Check(checkTextures->isChecked(), "Default importTextures is true");
     Check(comboNormals->currentData().toInt() == static_cast<int>(EditorCore::ModelNormalsMode::File), "Default normals is file");
@@ -169,7 +169,7 @@ inline void Run()
     UiTestHelper::ClickButton(&dlg, QStringLiteral("ResetDefaultsBtn"));
 
     Check(std::abs(dlg.Scale() - 1.0f) < 1e-5f, "Reset restores scale 1.0");
-    Check(!checkUnitScale->isChecked(), "Reset restores useFileUnitScale false");
+    Check(checkUnitScale->isChecked(), "Reset restores useFileUnitScale true");
     Check(checkMaterials->isChecked(), "Reset restores importMaterials true");
     Check(checkTextures->isEnabled(), "Reset restores importTextures enabled");
     Check(checkTextures->isChecked(), "Reset restores importTextures true");

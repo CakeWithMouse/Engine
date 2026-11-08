@@ -4,6 +4,7 @@
 #include "CommandRegistry.h"
 #include "ImportSettingsDialog.h"
 #include "ModelImportSidecar.h"
+#include "RecoveryStore.h"
 #include "Logger.h"
 
 #include <QAction>
@@ -94,11 +95,39 @@ void EditorMainWindow::RegisterAssetCommands()
             return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit;
         }
     });
+
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("Assets.EditImportSettings"),
+        QStringLiteral("Edit Model Import Settings"),
+        QString(),
+        QStringLiteral("Edit import settings for an existing model and update its geometry"),
+        [this](const CommandContext& ctx) {
+            if (!host_->HasScene() ||
+                sceneBusy_ ||
+                host_->PlayState() != EditorQtHost::EditorState::Edit)
+            {
+                return false;
+            }
+
+            const QString path = ctx.parameters.value(QStringLiteral("path")).toString();
+            if (path.isEmpty())
+            {
+                return false;
+            }
+
+            const bool showDialog = ctx.parameters.value(QStringLiteral("showDialog"), true).toBool();
+            return EditModelImportSettings(path, showDialog, ctx.parameters);
+        },
+        [this]() {
+            return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit;
+        }
+    });
 }
 
 void EditorMainWindow::UnregisterAssetCommands()
 {
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Import"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.EditImportSettings"));
 }
 
 void EditorMainWindow::BuildResourcesMenu(QMenu* sceneMenu)
@@ -131,6 +160,130 @@ void EditorMainWindow::ImportAsset(int kind, const QString& source)
         params[QStringLiteral("source")] = source;
     }
     CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), params);
+}
+
+bool EditorMainWindow::EditModelImportSettings(const QString& path, bool showDialog, const QVariantMap& overrideParams)
+{
+    if (path.isEmpty() || !host_)
+    {
+        return false;
+    }
+
+    const QString projectDir = QFileInfo(ProjectPath()).dir().absolutePath();
+    const QString contentRoot = QString::fromUtf8(host_->host().contentRoot);
+    FileService fs(&Logger::Instance(), this);
+    fs.SetProjectRoot(projectDir);
+
+    EditorCore::ImportSettingsFile::LoadResult loadRes;
+    QString loadErr;
+    EditorCore::ImportSettings settings = EditorCore::ModelImportSidecar::ReadSettings(fs, path, contentRoot, &loadRes, &loadErr);
+
+    if (loadRes == EditorCore::ImportSettingsFile::LoadResult::Error)
+    {
+        Logger::Instance().Error(QStringLiteral("ImportSettings: failed to load sidecar for '%1': %2").arg(path, loadErr));
+        settings = EditorCore::ImportSettings{};
+    }
+    else if (loadRes == EditorCore::ImportSettingsFile::LoadResult::NotFound)
+    {
+        Logger::Instance().Info(QStringLiteral("ImportSettings: sidecar not found for '%1', using default settings").arg(path));
+        settings = EditorCore::ImportSettings{};
+    }
+
+    if (showDialog)
+    {
+        ImportSettingsDialog dlg(this);
+        dlg.SetEditMode(true);
+        dlg.SetSettings(settings);
+        if (dlg.exec() != QDialog::Accepted)
+        {
+            return false;
+        }
+        settings = dlg.Settings();
+    }
+    else
+    {
+        if (overrideParams.contains(QStringLiteral("options")))
+        {
+            const QString optJson = overrideParams.value(QStringLiteral("options")).toString();
+            EditorCore::ImportSettings parsed;
+            QString parseErr;
+            if (EditorCore::ImportSettingsFile::Parse(optJson.toUtf8(), parsed, &parseErr))
+            {
+                settings = parsed;
+            }
+        }
+        if (overrideParams.contains(QStringLiteral("scale")))
+        {
+            settings.model.scale = static_cast<float>(overrideParams.value(QStringLiteral("scale")).toDouble());
+        }
+        if (overrideParams.contains(QStringLiteral("mergeMeshes")))
+        {
+            settings.model.mergeMeshes = overrideParams.value(QStringLiteral("mergeMeshes")).toBool();
+        }
+        if (overrideParams.contains(QStringLiteral("useFileUnitScale")))
+        {
+            settings.model.useFileUnitScale = overrideParams.value(QStringLiteral("useFileUnitScale")).toBool();
+        }
+        if (overrideParams.contains(QStringLiteral("normals")))
+        {
+            EditorCore::ModelNormalsMode mode{};
+            if (EditorCore::ImportSettingsFile::NormalsModeFromString(overrideParams.value(QStringLiteral("normals")).toString(), mode))
+            {
+                settings.model.normals = mode;
+            }
+        }
+    }
+
+    QString saveErr;
+    if (!EditorCore::ModelImportSidecar::WriteSidecar(fs, path, settings, contentRoot, &saveErr))
+    {
+        Logger::Instance().Error(QStringLiteral("ImportSettings: failed to save sidecar for '%1': %2").arg(path, saveErr));
+        return false;
+    }
+
+    const QString sourceMetaPath = path + QStringLiteral(".source.json");
+    QString sourceFile;
+    if (QFileInfo::exists(sourceMetaPath))
+    {
+        const auto metadata = RecoveryStore::Read(sourceMetaPath);
+        sourceFile = metadata.value(QStringLiteral("source")).toString();
+    }
+
+    if (sourceFile.isEmpty() || !QFileInfo::exists(sourceFile))
+    {
+        if (showDialog)
+        {
+            const QString missingPath = sourceFile.isEmpty() ? Tr("(путь не указан)", "(path not specified)") : sourceFile;
+            const auto choice = QMessageBox::question(this,
+                Tr("Исходный файл недоступен", "Source File Unavailable"),
+                Tr("Исходный файл модели не найден по прежнему пути:\n%1\n\nНастройки сохранены в .importsettings.json.\nУказать расположение исходного файла для переимпорта геометрии?",
+                   "Model source file was not found at:\n%1\n\nSettings have been saved to .importsettings.json.\nWould you like to select the source file to reimport geometry?").arg(missingPath),
+                QMessageBox::Yes | QMessageBox::No);
+
+            if (choice == QMessageBox::Yes)
+            {
+                sourceFile = QFileDialog::getOpenFileName(this,
+                    Tr("Исходный файл для переимпорта", "Source File for Reimport"),
+                    sourceFile,
+                    Tr("Ресурсы (*.fbx *.blend *.glb *.gltf *.obj)", "Models (*.fbx *.blend *.glb *.gltf *.obj)"));
+                if (sourceFile.isEmpty())
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                return true;
+            }
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    UpdateAsset(path, false, sourceFile);
+    return true;
 }
 
 void EditorMainWindow::HandleModelImported(const EditorCommand& command)

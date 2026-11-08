@@ -27,6 +27,15 @@ void ImportSettingsDialog::SetExecHookForTesting(ExecHook hook)
     s_execHookForTesting = std::move(hook);
 }
 
+int ImportSettingsDialog::exec()
+{
+    if (s_execHookForTesting)
+    {
+        return s_execHookForTesting(*this);
+    }
+    return QDialog::exec();
+}
+
 ModelImportDecision ImportSettingsDialog::Prompt(QWidget* parent, const EditorCore::ImportSettings& initialSettings)
 {
     ImportSettingsDialog dialog(parent);
@@ -35,15 +44,7 @@ ModelImportDecision ImportSettingsDialog::Prompt(QWidget* parent, const EditorCo
         dialog.SetSettings(initialSettings);
     }
 
-    int res = QDialog::Rejected;
-    if (s_execHookForTesting)
-    {
-        res = s_execHookForTesting(dialog);
-    }
-    else
-    {
-        res = dialog.exec();
-    }
+    const int res = dialog.exec();
 
     if (res == QDialog::Accepted)
     {
@@ -178,16 +179,52 @@ void ImportSettingsDialog::SetSettings(const EditorCore::ImportSettings& setting
     UpdateDependencies();
 }
 
+void ImportSettingsDialog::SetEditMode(bool editMode)
+{
+    isEditMode_ = editMode;
+    if (checkImportMaterials_)
+    {
+        checkImportMaterials_->setEnabled(!editMode);
+        if (editMode)
+        {
+            checkImportMaterials_->setToolTip(Tr(
+                "Материалы уже созданы. Для пересоздания выполните полный реимпорт.",
+                "Materials already exist. To recreate them, perform a full reimport."));
+        }
+    }
+    if (checkImportTextures_)
+    {
+        checkImportTextures_->setEnabled(!editMode);
+        if (editMode)
+        {
+            checkImportTextures_->setToolTip(Tr(
+                "Текстуры уже созданы. Для пересоздания выполните полный реимпорт.",
+                "Textures already exist. To recreate them, perform a full reimport."));
+        }
+    }
+    UpdateDependencies();
+}
+
 void ImportSettingsDialog::ResetToDefaults()
 {
-    SetSettings(EditorCore::ImportSettings{});
+    EditorCore::ImportSettings s{};
+    s.model.useFileUnitScale = true;
+    SetSettings(s);
 }
 
 void ImportSettingsDialog::UpdateDependencies()
 {
     if (checkImportMaterials_ && checkImportTextures_)
     {
-        checkImportTextures_->setEnabled(checkImportMaterials_->isChecked());
+        if (isEditMode_)
+        {
+            checkImportMaterials_->setEnabled(false);
+            checkImportTextures_->setEnabled(false);
+        }
+        else
+        {
+            checkImportTextures_->setEnabled(checkImportMaterials_->isChecked());
+        }
     }
 
     if (comboNormals_ && spinSmoothingAngle_)
@@ -206,8 +243,7 @@ void ImportSettingsDialog::LoadFromSettingsService()
 
     if (s.Contains(QStringLiteral("import/model/scale")))
         settings.model.scale = static_cast<float>(s.GetValue(QStringLiteral("import/model/scale"), 1.0).toDouble());
-    if (s.Contains(QStringLiteral("import/model/useFileUnitScale")))
-        settings.model.useFileUnitScale = s.GetValue(QStringLiteral("import/model/useFileUnitScale"), false).toBool();
+    settings.model.useFileUnitScale = s.GetValue(QStringLiteral("import/model/useFileUnitScale"), true).toBool();
     if (s.Contains(QStringLiteral("import/model/importMaterials")))
         settings.model.importMaterials = s.GetValue(QStringLiteral("import/model/importMaterials"), true).toBool();
     if (s.Contains(QStringLiteral("import/model/importTextures")))
@@ -288,7 +324,7 @@ void ImportSettingsDialog::BuildUi()
     // Use file unit scale
     checkUseFileUnitScale_ = new QCheckBox(Tr("Учитывать масштаб из файла", "Use file unit scale"), basicGroup);
     checkUseFileUnitScale_->setObjectName(QStringLiteral("UseFileUnitScaleCheck"));
-    checkUseFileUnitScale_->setChecked(false);
+    checkUseFileUnitScale_->setChecked(true);
     checkUseFileUnitScale_->setToolTip(Tr("Учитывать единицы измерения из файла. Исправляет увеличение в 100 раз у FBX из Blender.",
                                           "Apply unit scale from file metadata. Fixes 100x scale factor on FBX exported from Blender."));
     basicForm->addRow(QString(), checkUseFileUnitScale_);
