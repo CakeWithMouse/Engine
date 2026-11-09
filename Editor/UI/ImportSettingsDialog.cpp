@@ -135,7 +135,7 @@ void ImportSettingsDialog::SetScale(float scale)
 EditorCore::ImportSettings ImportSettingsDialog::Settings() const
 {
     EditorCore::ImportSettings s;
-    s.version = 1;
+    s.version = 2;
     s.kind = QStringLiteral("model");
     s.model.scale = Scale();
     s.model.useFileUnitScale = checkUseFileUnitScale_ ? checkUseFileUnitScale_->isChecked() : false;

@@ -93,6 +93,11 @@ float ModelImportSidecar::ReadSpawnScale(FileService& fileService,
                                         QString* outError)
 {
     const ImportSettings settings = ReadSettings(fileService, assetPath, contentRoot, outResult, outError);
+    // R1: version >= 2 bakes scale into geometry, so the spawned Transform stays at 1.
+    if (settings.AppliesGeometryScale())
+    {
+        return 1.0f;
+    }
     return settings.model.scale;
 }
 

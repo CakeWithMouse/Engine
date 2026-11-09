@@ -37,6 +37,9 @@ struct ImportSettings
 
     ImportSettings() = default;
     explicit ImportSettings(float s) { model.scale = s; }
+
+    // R1: version >= 2 bakes model.scale into geometry at load time; the spawned Transform stays at 1.
+    bool AppliesGeometryScale() const { return version >= 2; }
 };
 
 class ImportSettingsFile

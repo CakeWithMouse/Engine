@@ -171,6 +171,7 @@
         <ClCompile Include="UI/MainToolBar.cpp"/>
         <ClCompile Include="UI/IconProvider.cpp"/>
         <ClCompile Include="UI/ImportSettingsDialog.cpp"/>
+        <ClCompile Include="UI/ModelImportEditFlow.cpp"/>
         <ClCompile Include="UI/PlaySettingsDialog.cpp"/>
         <ClCompile Include="UI/ExternalGameRunner.cpp"/>
         <ClCompile Include="Source/MainWindow.cpp"/>

@@ -3,6 +3,7 @@
 #include "QtHost.h"
 #include "CommandRegistry.h"
 #include "ImportSettingsDialog.h"
+#include "ModelImportEditFlow.h"
 #include "ModelImportSidecar.h"
 #include "RecoveryStore.h"
 #include "AssetOps.h"
@@ -221,8 +222,7 @@ bool EditorMainWindow::EditModelImportSettings(const QString& path, bool showDia
     if (showDialog)
     {
         ImportSettingsDialog dlg(this);
-        dlg.SetEditMode(true);
-        dlg.SetSettings(settings);
+        ModelImportEditFlow::PrepareForEdit(dlg, settings);
         if (dlg.exec() != QDialog::Accepted)
         {
             return false;

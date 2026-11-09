@@ -26,6 +26,7 @@
 #include "VfsProxyLifecycleTests.h"
 #include "ModelImportSettingsTests.h"
 #include "ModelGeometryScaleTests.h"
+#include "ModelReimportScaleTests.h"
 #include <cmath>
 #include <cstring>
 #include <d3dcompiler.h>
@@ -2249,7 +2250,8 @@ int main()
         {"vfs proxy lifecycle: sessions and rejection", VfsProxyLifecycle_SessionsAndRejection},
         {"vfs proxy lifecycle: read parity and allocator", VfsProxyLifecycle_ReadParityAndAllocator},
         {"model import sidecar parser and VFS", ModelImportSettingsTests::Run},
-        {"model import geometry scale v1 vs v2 (static and skeletal)", ModelGeometryScaleTests::Run}
+        {"model import geometry scale v1 vs v2 (static and skeletal)", ModelGeometryScaleTests::Run},
+        {"model reimport via author.asset changes geometry bounds and preserves Transform", ModelReimportScaleTests::Run}
     };
     int failures = 0, skipped = 0;
     for (const auto& test : tests)
