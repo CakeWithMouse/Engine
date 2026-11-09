@@ -25,6 +25,7 @@
 #include "VfsServiceTests.h"
 #include "VfsProxyLifecycleTests.h"
 #include "ModelImportSettingsTests.h"
+#include "ModelGeometryScaleTests.h"
 #include <cmath>
 #include <cstring>
 #include <d3dcompiler.h>
@@ -2247,7 +2248,8 @@ int main()
         {"vfs service: mounts and unsupported stubs", VfsService_GetMountsAndStubs},
         {"vfs proxy lifecycle: sessions and rejection", VfsProxyLifecycle_SessionsAndRejection},
         {"vfs proxy lifecycle: read parity and allocator", VfsProxyLifecycle_ReadParityAndAllocator},
-        {"model import sidecar parser and VFS", ModelImportSettingsTests::Run}
+        {"model import sidecar parser and VFS", ModelImportSettingsTests::Run},
+        {"model import geometry scale v1 vs v2 (static and skeletal)", ModelGeometryScaleTests::Run}
     };
     int failures = 0, skipped = 0;
     for (const auto& test : tests)

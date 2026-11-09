@@ -64,6 +64,56 @@ namespace
         }
         return nullptr;
     }
+
+    void ScaleMatrixTranslation(DirectX::XMFLOAT4X4& mat, float scale)
+    {
+        mat.m[3][0] *= scale;
+        mat.m[3][1] *= scale;
+        mat.m[3][2] *= scale;
+    }
+
+    // R2: bake a uniform scale into the loaded geometry. Only translational data scales
+    // (vertices, bone bind/local translations, rest translation, mesh-to-model, animation
+    // position keys); rotations, scales, normals, weights and UVs stay untouched, which keeps
+    // the skinning math consistent (bind pose still resolves to identity at rest).
+    void ApplyGeometryScale(SkeletalModel& model, float scale)
+    {
+        if (scale == 1.0f)
+        {
+            return;
+        }
+        for (auto& mesh : model.Meshes)
+        {
+            for (auto& vertex : mesh.Vertices)
+            {
+                vertex.Position.x *= scale;
+                vertex.Position.y *= scale;
+                vertex.Position.z *= scale;
+            }
+        }
+        for (auto& bone : model.ModelSkeleton.Bones)
+        {
+            ScaleMatrixTranslation(bone.InverseBindPose, scale);
+            ScaleMatrixTranslation(bone.LocalTransform, scale);
+            bone.RestTranslation.x *= scale;
+            bone.RestTranslation.y *= scale;
+            bone.RestTranslation.z *= scale;
+        }
+        ScaleMatrixTranslation(model.MeshToModel, scale);
+        for (auto& clip : model.Clips)
+        {
+            for (auto& channel : clip.Channels)
+            {
+                for (auto& key : channel.PositionKeys)
+                {
+                    key.Value.x *= scale;
+                    key.Value.y *= scale;
+                    key.Value.z *= scale;
+                }
+            }
+        }
+        model.BoundingRadius *= scale;
+    }
 }
 
 static SkeletalLoadResult LoadModel(
@@ -348,6 +398,10 @@ static SkeletalLoadResult LoadModel(
         }
 
         if (model->TotalIndexCount == 0) { result.ErrorMessage = "Model contains no triangles"; return result; }
+        if (settings.AppliesGeometryScale())
+        {
+            ApplyGeometryScale(*model, settings.scale);
+        }
         result.Success = true;
         result.Model = model;
     }

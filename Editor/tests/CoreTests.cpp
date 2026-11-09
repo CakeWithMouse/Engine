@@ -18,6 +18,7 @@
 #include "core/GizmoGeometryTests.h"
 #include "../Core/ImportSettings.h"
 #include "core/ImportSettingsTests.h"
+#include "core/ImportSettingsV2Tests.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
@@ -419,6 +420,10 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestImportSettings...\n");
     std::fflush(stdout);
     RunImportSettingsTests(gChecks);
+
+    std::printf("[Test] TestImportSettingsV2...\n");
+    std::fflush(stdout);
+    ImportSettingsV2Tests::Run(gChecks);
 
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);

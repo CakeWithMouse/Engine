@@ -39,6 +39,38 @@ R"({
   }
 })";
 
+// 4b. Valid modern v2 schema (R1: geometry scale). Same fields as v1, version 2.
+inline constexpr std::string_view kValidV2 =
+R"({
+  "version": 2,
+  "kind": "model",
+  "model": {
+    "scale": 0.01,
+    "useFileUnitScale": true,
+    "normals": "smooth",
+    "smoothingAngle": 45.0,
+    "importMaterials": false,
+    "importTextures": false,
+    "flipUv": true,
+    "mergeMeshes": true
+  }
+})";
+
+// 4c. v2 with unknown fields in root and model (must be preserved by both parsers)
+inline constexpr std::string_view kValidV2WithUnknownFields =
+R"({
+  "version": 2,
+  "kind": "model",
+  "custom_root": 12345,
+  "model": {
+    "scale": 2.0,
+    "custom_model_meta": "keep_me"
+  }
+})";
+
+// 4d. Minimal v2 (only required scale); optional fields fall back to defaults
+inline constexpr std::string_view kValidV2Minimal = R"({"version": 2, "kind": "model", "model": {"scale": 0.01}})";
+
 // 5. Broken JSON syntax
 inline constexpr std::string_view kBrokenJson = "not a valid json { broken";
 

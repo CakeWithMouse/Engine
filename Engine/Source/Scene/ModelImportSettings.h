@@ -19,6 +19,10 @@ struct ModelImportSettings
     bool flipUv = false;
     bool mergeMeshes = true;
 
+    // R1: version >= 2 means Engine bakes model.scale into geometry at load time and the
+    // spawned Transform stays at 1. Version 1 / legacy keeps scale on the Transform only.
+    bool AppliesGeometryScale() const { return version >= 2; }
+
     static constexpr float MinScale = 1e-4f;
     static constexpr float MaxScale = 1e4f;
     static constexpr float DefaultScale = 1.0f;
