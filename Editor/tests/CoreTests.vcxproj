@@ -136,6 +136,7 @@
         <ClInclude Include="../Core/ModelImportSidecar.h"/>
         <ClInclude Include="../Core/ModelImportSidecarTransaction.h"/>
         <ClInclude Include="core/SidecarTransactionTests.h"/>
+        <ClInclude Include="core/ImportReimportChainTests.h"/>
         <ClInclude Include="../Core/Terminal.h"/>
         <ClInclude Include="core/GizmoMathTests.h"/>
         <ClInclude Include="core/MaterialGraphTests.h"/>
