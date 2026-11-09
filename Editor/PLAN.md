@@ -557,7 +557,7 @@
 - [x] **Шаг 17.6e (fix(ui)):** Поле угла сглаживания и его текстовая метка визуально неактивны (`setEnabled(false)`, цвет `Disabled`, подсказка «Доступно только при сглаженных нормалях») при `Normals != Smooth`. Тест состояния в `EditImportSettingsTests.h`. Коммит `393bd72`.
 - [x] **Шаг 17.6f (feat(ui)):** Скрытие служебных sidecar (`.import.json`, `.importsettings.json`, `.source.json`) в Content Browser через `ProjectFilesFilter`. Расширение `AssetOps` поддержкой сопутствующих файлов на переименование, дублирование и удаление. Тесты в `AssetOpsTests.h` и `EditImportSettingsTests.h`. Коммит `ed42c59`.
 - [x] **Шаг 17.6g (feat(ui)):** Удаление ассетов в Content Browser (`Assets.Delete`, пункт меню «Удалить», клавиша `Delete`), подтверждение, предупреждение при наличии объекта на сцене (`Snapshot.objects`), удаление сопутствующих sidecar через `AssetOps` в песочнице проекта. Юнит-тесты в `AssetDeleteTests.h` (7 проверок). Коммит `4ea3409`.
-- [ ] **Шаг 17.7 (test):** Регрессионное тестирование на уровне Host/Core без раздувания `EditorUiTests.cpp`.
+- [x] **Шаг 17.7 (test):** Регрессионное тестирование на уровне Host/Core без раздувания `EditorUiTests.cpp`. Реализовано в T7 (коммит `d9b6c3f`): новая цепочка `Editor/tests/core/ImportReimportChainTests.h` (20 проверок), `EditorUiTests.cpp` не тронут.
 
 ---
 
@@ -569,7 +569,7 @@
 - [x] **T4 (feat(host)):** R4 транзакционность «Настройки импорта…»: бэкап sidecar в памяти до записи (`Editor/Core/ModelImportSidecarTransaction.h/.cpp`), при ошибке `UpdateAsset` восстановление прежнего содержимого, одно сообщение через `Tr()`. Тест `Editor/tests/core/SidecarTransactionTests.h` (38 проверок, mock-ошибка `UpdateAsset` -> файл возвращён к прежнему содержимому). Логика в новых файлах, `ImportCommands.cpp` не раздут (480 строк). Коммит `7efe9ad`.
 - [x] **T5 (test(engine)):** Регрессия плоских нормалей (П3): фикстура `Engine/tests/fixtures/folded-smooth.obj` (в репозитории, не TEMP; два треугольника с общим ребром, согнутые на 90 градусов, все углы с одним smooth `vn`) и тест `Engine/tests/ModelFlatNormalsTests.h`. `flat` даёт больше вершин, чем файл, и 100% плоских граней с различными нормалями; `smooth` на дефолтном угле не сваривает складку; `smooth` на 175 градусах сваривает обратно до 4 вершин. Тест падает при отсутствии фикстуры. Вывод по П3 зафиксирован в «Решения» (п. 37): НЕ воспроизведён, первый черновик падал из-за отсутствия обязательного `model.scale` в sidecar (баг обвязки). Коммит `2592da2`. EngineTests 74/74 PASS.
 - [x] **T6 (chore):** Актуализация `Editor/PLAN.md`: решения R1-R5 (п. 36), вывод по П3 (п. 37), чек-лист S17.8, Backlog (сироты sidecar при rename/move через AssetOps companions, `contains("..")` в Engine `ResolveSidecarPath`, смена числа материальных слотов ломает реимпорт), «Не проверено в рантайме» (перерисовка вьюпорта после реимпорта, реальный FBX Юрия для flat/scale, scale-в-геометрию в живом GUI, иконки без Qt6Svg).
-- [ ] **T7 (test):** Регрессия 17.7 Host/Core: импорт с v2 sidecar -> спавн `Transform = 1` -> реимпорт не сбрасывает `Transform`; в новых файлах.
+- [x] **T7 (test):** Регрессия 17.7 Host/Core: импорт с v2 sidecar -> спавн `Transform = 1` -> реимпорт не сбрасывает `Transform`; в новых файлах. Новый тест `Editor/tests/core/ImportReimportChainTests.h` (20 проверок) связывает R1 (v2 -> `ReadSpawnScale = 1`, геометрия хранит scale) и R4 (транзакционный откат sidecar при ошибке `UpdateAsset`); подключён в `CoreTests.cpp` и `CoreTests.vcxproj`. CoreTests 653 (Debug и Release). Коммит `d9b6c3f`.
 
 ---
 
