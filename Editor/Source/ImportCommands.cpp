@@ -5,6 +5,7 @@
 #include "ImportSettingsDialog.h"
 #include "ModelImportEditFlow.h"
 #include "ModelImportSidecar.h"
+#include "ModelImportSidecarTransaction.h"
 #include "RecoveryStore.h"
 #include "AssetOps.h"
 #include "Logger.h"
@@ -263,10 +264,12 @@ bool EditorMainWindow::EditModelImportSettings(const QString& path, bool showDia
         }
     }
 
+    sidecarTx_.Begin(fs, path, contentRoot);
     QString saveErr;
     if (!EditorCore::ModelImportSidecar::WriteSidecar(fs, path, settings, contentRoot, &saveErr))
     {
         Logger::Instance().Error(QStringLiteral("ImportSettings: failed to save sidecar for '%1': %2").arg(path, saveErr));
+        sidecarTx_.Commit();
         return false;
     }
 
@@ -297,16 +300,19 @@ bool EditorMainWindow::EditModelImportSettings(const QString& path, bool showDia
                     Tr("Ресурсы (*.fbx *.blend *.glb *.gltf *.obj)", "Models (*.fbx *.blend *.glb *.gltf *.obj)"));
                 if (sourceFile.isEmpty())
                 {
+                    sidecarTx_.Commit();
                     return true;
                 }
             }
             else
             {
+                sidecarTx_.Commit();
                 return true;
             }
         }
         else
         {
+            sidecarTx_.Commit();
             return true;
         }
     }

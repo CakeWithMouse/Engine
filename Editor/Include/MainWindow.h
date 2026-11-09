@@ -8,6 +8,7 @@
 
 #include "ObjectInspectorPanel.h"
 #include "IEditorHost.h"
+#include "ModelImportSidecarTransaction.h"
 
 class QTreeWidget;
 class QLineEdit;
@@ -219,6 +220,8 @@ private:
     bool sceneBusy_ = false;
     bool closing_ = false;
     bool checkingChanges_ = false;
+
+    EditorCore::SidecarTransaction sidecarTx_;
 
     std::function<void()> afterSave_;
     std::function<void()> afterCheck_;
