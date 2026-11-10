@@ -4,6 +4,7 @@
 #include "Logger.h"
 #include "FileService.h"
 #include "AssetOps.h"
+#include "AssetDeletePrompt.h"
 
 #include <QDir>
 #include <QFileInfo>
@@ -43,10 +44,10 @@ bool PromptDeleteConfirmation(QWidget* parent, const QString& path, bool isDir, 
 {
     const QString itemName = QFileInfo(path).fileName();
     auto warn = [parent](const QString& title, const QString& text) {
-        return QMessageBox::warning(parent, title, text, QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes;
+        return EditorUI::ExecDeleteConfirmation(parent, QMessageBox::Warning, title, text);
     };
     auto ask = [parent](const QString& title, const QString& text) {
-        return QMessageBox::question(parent, title, text, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes) == QMessageBox::Yes;
+        return EditorUI::ExecDeleteConfirmation(parent, QMessageBox::Question, title, text);
     };
 
     if (isDir)

@@ -315,6 +315,7 @@
         <ClInclude Include="UI/ViewportOverlayHelper.h"/>
         <ClInclude Include="UI/SpinBoxArrowStyle.h"/>
         <ClInclude Include="UI/ImportSettingsDialog.h"/>
+        <ClInclude Include="Include/AssetDeletePrompt.h"/>
         <ClInclude Include="Include/CodeClassDialog.h"/>
         <ClInclude Include="Include/FileBrowser.h"/>
         <ClInclude Include="Include/MaterialTextureTools.h"/>

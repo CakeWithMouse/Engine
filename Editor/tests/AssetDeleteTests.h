@@ -4,9 +4,13 @@
 #include "FileService.h"
 #include "AssetOps.h"
 #include "Logger.h"
+#include "AssetDeletePrompt.h"
 
 #include <QTemporaryDir>
 #include <QFile>
+#include <QApplication>
+#include <QKeyEvent>
+#include <QTimer>
 #include <iostream>
 #include <stdexcept>
 
@@ -216,6 +220,47 @@ inline void Run()
         Check(!fs.IsProtectedDirectory(subUpperSource), "Subfolder Content/SOURCE is NOT protected");
         Check(fs.DeleteDirectory(QStringLiteral("Content/SOURCE"), &err), "Deleting Content/SOURCE succeeds");
         Check(!QDir(subUpperSource).exists(), "Content/SOURCE removed");
+        ++checks;
+    }
+
+    // 7. Delete confirmation dialog: Enter defaults to Yes, Escape to No
+    {
+        // 7.1 Verify default and escape buttons configuration
+        auto* box = EditorUI::CreateDeleteConfirmationBox(nullptr, QMessageBox::Question, QStringLiteral("Title"), QStringLiteral("Prompt"));
+        Check(box->defaultButton() != nullptr, "Default button is configured");
+        Check(box->defaultButton() == box->button(QMessageBox::Yes), "Default button is Yes");
+        Check(box->escapeButton() == box->button(QMessageBox::No), "Escape button is No");
+
+        // 7.2 Return key triggers default button (Yes)
+        QTimer::singleShot(20, [box] {
+            QKeyEvent ev(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier);
+            QApplication::sendEvent(box, &ev);
+        });
+        const int resReturn = box->exec();
+        Check(resReturn == QMessageBox::Yes, "Key_Return triggers Yes");
+        delete box;
+        ++checks;
+
+        // 7.3 Enter keypad key also triggers default button (Yes)
+        auto* boxEnter = EditorUI::CreateDeleteConfirmationBox(nullptr, QMessageBox::Warning, QStringLiteral("Title"), QStringLiteral("Prompt"));
+        QTimer::singleShot(20, [boxEnter] {
+            QKeyEvent ev(QEvent::KeyPress, Qt::Key_Enter, Qt::NoModifier);
+            QApplication::sendEvent(boxEnter, &ev);
+        });
+        const int resEnter = boxEnter->exec();
+        Check(resEnter == QMessageBox::Yes, "Key_Enter triggers Yes");
+        delete boxEnter;
+        ++checks;
+
+        // 7.4 Escape key triggers escape button (No)
+        auto* boxEsc = EditorUI::CreateDeleteConfirmationBox(nullptr, QMessageBox::Warning, QStringLiteral("Title"), QStringLiteral("Prompt"));
+        QTimer::singleShot(20, [boxEsc] {
+            QKeyEvent ev(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
+            QApplication::sendEvent(boxEsc, &ev);
+        });
+        const int resEsc = boxEsc->exec();
+        Check(resEsc == QMessageBox::No, "Key_Escape triggers No");
+        delete boxEsc;
         ++checks;
     }
 
