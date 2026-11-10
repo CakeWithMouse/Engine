@@ -102,7 +102,7 @@
 | Сборка `EditorModule` (Release) | **PASS** | Собрано MSBuild x64 |
 | `Editor/tests/CoreTests.exe` | **656/656 PASS** | 656 checks passed |
 | `Editor/tests/HostTests.exe` | **109/109 PASS** | 109 checks passed |
-| `Editor/tests/UiTests.exe` | **306/306 PASS** | 15 helper + 18 dialog + 18 edit + 3 v2 + 7 delete + 245 smoke = 306 checks passed (после шага 1: 308 checks) |
+| `Editor/tests/UiTests.exe` | **310/310 PASS** | 15 helper + 20 dialog + 18 edit + 3 v2 + 9 delete + 245 smoke = 310 checks passed |
 | `Engine/tests/run.ps1` (Debug) | **74/74 PASS** | 74/74 tests passed; 0 skipped; 0 failed |
 | `Engine/tests/skeletal/run.ps1` (Debug) | **8/8 PASS** | 8/8 passed |
 | `Engine/tests/edit-session/run.ps1` (Debug) | **651/651 PASS** | 651 checks passed |
@@ -256,6 +256,14 @@
     - П3 на файле Юрия НЕ закрыт: найден отдельный дефект парсеров Engine и Editor — поле `model.scale` было ошибочно обязательным (без него `Parse` возвращал false и лоадер молча откатывался к дефолтам `normals="file"`). Дефект обязательного scale исправлен: поле сделано опциональным со значением 1.0 по умолчанию, кейс "нет scale, normals=flat" читается как flat, а любая ошибка парсинга логирует `[Error]` с именем поля.
     - На синтетической фикстуре `Engine/tests/fixtures/folded-smooth.obj` (два согнутых треугольника с общим smooth vn) режим `flat` корректно разделяет общее ребро и строит плоские нормали граней как с указанием scale, так и без него.
     - Поведение на реальном проблемном файле FBX Юрия исследуется: на синтетических моделях Assimp корректно дропает нормали и генерирует плоские, но на реальном файле в редакторе требуется дополнительная верификация цепочки Editor и структуры меша FBX.
+38. **Решения по срезу S17.10 (Удаление папок, staging, миграция Game.dll, оптимизация реимпорта) — утверждены архитектором Юрием:**
+    - **Шаг 1 (Удаление папок):** Разрешено удалять любые папки в Content Browser, кроме защищенных системных корней (`Content`, `Source` и корень проекта). Удаление безвозвратное через `FileService::DeleteDirectory` в песочнице с записью в лог. Диалог подтверждения обязателен: предупреждение, если папка используется на сцене или не пуста, вопрос — если пуста.
+    - **Шаг 2 (Staging реимпорта):** Промежуточный каталог реимпорта переносится в `.painengine/staging/` в корне проекта (вне видимости Content Browser), исключая появление артефактов `<stem>_1`. Правки в Engine разрешены только в `Engine/Source/Scene/AssetUpdate.cpp` и `SceneAssets.cpp`.
+    - **Шаг 3 (Миграция старых проектов):** При обнаружении отсутствия расширения `Engine.Asset.Import`:
+      - No-code проект: автообновление `Game.dll` из шаблона `Runtime/Templates/SceneProject/Game.dll` с созданием бэкапа старой DLL, записью в лог и явным уведомлением пользователя.
+      - C++ проект: диалог с выбором «Собрать проект» или «Открыть как есть».
+      - При отказе пользователя или ошибке сборки: fallback на дефолтный импорт с явным предупреждающим сообщением о недоступности кастомных опций (не молча). Формат sidecar/проекта не менять.
+    - **Шаг 4 (Оптимизация реимпорта и устранение лагов):** Сначала строгий замер FPS/времени кадра и ресурсов до и после реимпорта. Затем: исключение повторного прохода Assimp для создания материалов, пропуск загрузки модели в `Commit` для сцен без ссылок на ассет, сохранение выделения объекта и истории Undo. Правки в Engine разрешены строго в `SceneAssets.cpp`, `AssetUpdate.cpp`, `SceneAuthoring.cpp`, `SceneEditSession.cpp`, `ModelImport.cpp`, `SkeletalLoaderAssimp.cpp`.
 
 ---
 
@@ -574,6 +582,15 @@
 - [x] **Шаг 17.9a (fix(ui)):** Стили `:disabled` для спинбоксов, комбобоксов и меток в `EditorStyles.cpp`. Добавлены селекторы `:disabled` с цветом `%12` (`textDisabled`), фоном `%8` и границей `%6` для `QLineEdit`, `QSpinBox`, `QDoubleSpinBox`, `QComboBox`, а также для `QLabel`, `QLabel#CardFieldLabel` и меток внутри `QFrame#CollapsibleCard`. Объединены дублирующиеся стили `QMainWindow::separator` и `QSplitter::handle` для соблюдения лимита (492 строки <= 500). Юнит-тест в `ImportSettingsDialogTests.h` (347 строк <= 500) проверяет наличие правил в темной и светлой теме. `UiTests.exe` 308/308 PASS.
 - [x] **Шаг 17.9b (test(host)):** Красный тест хостового пути импорта: проверка в `HostRegressionTests.h` (Case C), что при наличии `cmd.importOptionsJson` отсутствие расширения `Engine.Asset.Import` (`importWithOptions`) не приводит к молчаливому сбросу опций на дефолты через `ctx.scene.importAsset`, а отклоняет операцию со статусом `EngineSceneFailure` без вызова legacy `importAsset` и без выставления `completedCmd.path`. Тест проверен и подтверждён красным на текущем коде (`AssetCommandHandler rejects optionsJson when extension missing`, exit code 1).
 - [x] **Шаг 17.9c (fix(engine) + fix(host)):** Проброс `EngineBindAssetImport` в `Engine/Source/Base/Base.cpp` и удаление молчаливого fallback в `AssetCommandHandler.cpp`. В `Base.cpp` при наличии `editApi->createModel` запрашивается расширение `EngineAssetImportExtension` из модуля Game (`EngineGetEditExtension`) и связывается с `Editor.dll` через экспорт `EngineBindAssetImport`. В `AssetCommandHandler.cpp` удален молчаливый сброс опций: при наличии `cmd.importOptionsJson` и отсутствии `importWithOptions` операция отклоняется с `EngineSceneFailure` и ошибкой. Добавлен юнит-тест `EditorQtHost::SetAssetImportApi` в `HostTests.cpp`. Все 8 тестовых наборов (74 Engine, 8 Skeletal, 651 Edit-session, 109 Scene-module, 116 Compatibility, 656 Core, 116 Host, 308 UI) PASS в Debug и Release.
+
+---
+
+## Чек-лист среза S17.10: Стабилизация конвейера импорта, очистка staging и удаление папок (4 шага)
+
+- [x] **Шаг 17.10.1 (fix(editor)):** Удаление папок в Content Browser: снят запрет `!model_->isDir(index)` в `FileBrowser.cpp`, защита системных корней (`Content`, `Source` и корень проекта) централизована в `FileService::IsProtectedDirectory` и `FileService::DeleteDirectory` (вложенные папки `Content/Source` и `Content/Content` не защищены). `FileBrowser` и команда удаления делегируют проверку в Core без дублирования. Логика удаления вынесена в `Editor/Source/AssetDeleteCommand.cpp` (119 строк, функции <= 42 строк), `ImportCommands.cpp` сокращён до 398 строк. Юнит-тесты в `AssetDeleteTests.h` (9/9 checks PASS).
+- [ ] **Шаг 17.10.2 (fix(engine)):** Перенос staging реимпорта в `.painengine/staging/` в корне проекта (вне зоны видимости Content Browser) в `Engine/Source/Scene/AssetUpdate.cpp` и `SceneAssets.cpp`. Устранение дублирующих папок `<stem>_1`.
+- [ ] **Шаг 17.10.3 (feat(editor)):** Миграция старых `Game.dll`: автообновление для no-code проектов из шаблона с бэкапом и логом; диалог «Собрать проект» для C++ проектов; явный fallback с предупреждением при отказе.
+- [ ] **Шаг 17.10.4 (perf(engine) + fix(editor)):** Замеры FPS/ресурсов до/после реимпорта; исключение повторного прохода Assimp в материалах; пропуск загрузки нерелевантных сцен в `Commit`; сохранение выделения и Undo.
 
 ---
 

@@ -113,6 +113,73 @@ inline void Run()
         ++checks;
     }
 
+    // 5. FileService::DeleteDirectory sandbox and direct behavior
+    {
+        QTemporaryDir tempDir;
+        Logger logger;
+        FileService fs(&logger);
+        fs.SetProjectRoot(tempDir.path());
+
+        QString err;
+        Check(!fs.DeleteDirectory(QStringLiteral("../outside"), &err), "DeleteDirectory outside sandbox rejected");
+        Check(fs.DeleteDirectory(QStringLiteral("nonexistent_dir"), &err), "DeleteDirectory nonexistent returns true");
+
+        const QString subDirPath = QDir(tempDir.path()).filePath(QStringLiteral("TestDir/Nested"));
+        QDir().mkpath(subDirPath);
+        QFile file(QDir(subDirPath).filePath(QStringLiteral("data.bin")));
+        file.open(QIODevice::WriteOnly);
+        file.write("hello");
+        file.close();
+
+        Check(QDir(subDirPath).exists(), "Subdirectory created");
+        Check(fs.DeleteDirectory(QStringLiteral("TestDir"), &err), "DeleteDirectory succeeded");
+        Check(!QDir(tempDir.path() + QStringLiteral("/TestDir")).exists(), "Directory removed from filesystem");
+        ++checks;
+    }
+
+    // 6. Protection check for Content, Source, and Project root (in Core)
+    {
+        QTemporaryDir tempDir;
+        Logger logger;
+        FileService fs(&logger);
+        const QString projectDir = tempDir.path();
+        const QString contentDir = QDir(projectDir).filePath(QStringLiteral("Content"));
+        const QString sourceDir = QDir(projectDir).filePath(QStringLiteral("Source"));
+        QDir().mkpath(contentDir);
+        QDir().mkpath(sourceDir);
+
+        fs.SetProjectRoot(projectDir);
+        fs.SetContentRoot(contentDir);
+
+        Check(fs.IsProtectedDirectory(projectDir), "Project root is protected");
+        Check(fs.IsProtectedDirectory(contentDir), "Content root is protected");
+        Check(fs.IsProtectedDirectory(sourceDir), "Source root is protected");
+
+        QString err;
+        Check(!fs.DeleteDirectory(QStringLiteral("Content"), &err), "Cannot delete root Content");
+        Check(QDir(contentDir).exists(), "Root Content directory still exists");
+        Check(!fs.DeleteDirectory(QStringLiteral("Source"), &err), "Cannot delete root Source");
+        Check(QDir(sourceDir).exists(), "Root Source directory still exists");
+        Check(!fs.DeleteDirectory(QStringLiteral(""), &err), "Cannot delete project root");
+
+        // Subfolder named "Source" inside Content MUST NOT be protected and can be deleted
+        const QString subSource = QDir(contentDir).filePath(QStringLiteral("Source"));
+        QDir().mkpath(subSource);
+        Check(QDir(subSource).exists(), "Subfolder Content/Source created");
+        Check(!fs.IsProtectedDirectory(subSource), "Content/Source is NOT protected");
+        Check(fs.DeleteDirectory(QStringLiteral("Content/Source"), &err), "Deleting Content/Source succeeds");
+        Check(!QDir(subSource).exists(), "Content/Source removed");
+
+        // Subfolder named "Content" inside Content MUST NOT be protected and can be deleted
+        const QString subContent = QDir(contentDir).filePath(QStringLiteral("Content"));
+        QDir().mkpath(subContent);
+        Check(QDir(subContent).exists(), "Subfolder Content/Content created");
+        Check(!fs.IsProtectedDirectory(subContent), "Content/Content is NOT protected");
+        Check(fs.DeleteDirectory(QStringLiteral("Content/Content"), &err), "Deleting Content/Content succeeds");
+        Check(!QDir(subContent).exists(), "Content/Content removed");
+        ++checks;
+    }
+
     std::cout << "AssetDeleteTests: " << checks << " checks passed." << std::endl;
 }
 

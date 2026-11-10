@@ -267,13 +267,7 @@ bool AssetOps::Delete(const QString& relPath, QString* outError, bool deleteComp
 
     if (info.isDir())
     {
-        QDir dir(absPath);
-        if (!dir.removeRecursively())
-        {
-            if (outError) *outError = QStringLiteral("Failed to remove directory: %1").arg(relPath);
-            return false;
-        }
-        return true;
+        return fileService_->DeleteDirectory(absPath, outError);
     }
 
     const bool ok = fileService_->DeleteFile(absPath, outError);

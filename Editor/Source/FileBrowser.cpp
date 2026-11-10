@@ -1,5 +1,6 @@
 #include "EditorTheme.h"
 #include "FileBrowser.h"
+#include "FileService.h"
 #include "EditorLocale.h"
 #include "QtHost.h"
 #include "MainWindow.h"
@@ -273,7 +274,7 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     const bool asset=hasFile&&!model_->isDir(index)&&QStringList{"fbx","obj","gltf","glb","png","jpg","jpeg","bmp","tga","mat"}.contains(QFileInfo(path).suffix().toLower());
     QAction* reimport=asset&&!isMaterial&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переимпортировать…", "Reimport…")):nullptr;
     QAction* move=asset&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переместить / переименовать…", "Move / Rename…")):nullptr;
-    QAction* deleteAction = hasFile && !model_->isDir(index) ? menu.addAction(Tr("Удалить", "Delete")) : nullptr;
+    QAction* deleteAction = hasFile && !IsProtectedPath(path) ? menu.addAction(Tr("Удалить", "Delete")) : nullptr;
 
     QAction* picked = menu.exec(view_->viewport()->mapToGlobal(pos));
     if (!picked)
@@ -327,10 +328,10 @@ void FileBrowserDock::keyPressEvent(QKeyEvent* event)
     if (event->key() == Qt::Key_Delete)
     {
         const QModelIndex current = proxy_->mapToSource(view_->currentIndex());
-        if (current.isValid() && !model_->isDir(current))
+        if (current.isValid())
         {
             const QString path = model_->filePath(current);
-            if (!path.isEmpty())
+            if (!path.isEmpty() && !IsProtectedPath(path))
             {
                 CommandRegistry::Instance().Execute(QStringLiteral("Assets.Delete"), {{QStringLiteral("path"), path}});
                 event->accept();
@@ -339,4 +340,9 @@ void FileBrowserDock::keyPressEvent(QKeyEvent* event)
         }
     }
     QDockWidget::keyPressEvent(event);
+}
+
+bool FileBrowserDock::IsProtectedPath(const QString& path) const
+{
+    return path.isEmpty() || FileService::IsProtectedDirectory(path, projectDir_, contentDir_);
 }

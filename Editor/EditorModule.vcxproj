@@ -177,6 +177,7 @@
         <ClCompile Include="Source/MainWindow.cpp"/>
         <ClCompile Include="Source/AssetTools.cpp"/>
         <ClCompile Include="Source/ImportCommands.cpp"/>
+        <ClCompile Include="Source/AssetDeleteCommand.cpp"/>
         <ClCompile Include="Source/FileBrowser.cpp"/>
         <ClCompile Include="Source/ViewportWidget.cpp"/>
         <ClCompile Include="Source/ViewportWidget_Input.cpp"/>
