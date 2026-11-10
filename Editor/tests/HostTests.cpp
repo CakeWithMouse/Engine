@@ -129,6 +129,28 @@ int main(int argc, char** argv)
         checksPassed += 1;
     }
 
+    // Test 4: EditorQtHost SetAssetImportApi binds table and exposes importWithOptions
+    {
+        EngineModuleHost callbacks{};
+        EditorQtHost host(callbacks);
+        CHECK(host.AssetImportApi() == nullptr);
+
+        EngineAssetImportApi api{};
+        api.version = 1;
+        api.context = &host;
+        api.importWithOptions = [](void*, const char*, uint32_t, const char*, char*, uint32_t, char*, uint32_t) -> uint32_t {
+            return EngineSceneOk;
+        };
+
+        host.SetAssetImportApi(api);
+        CHECK(host.AssetImportApi() != nullptr);
+        CHECK(host.AssetImportApi()->importWithOptions != nullptr);
+
+        host.SetAssetImportApi({});
+        CHECK(host.AssetImportApi() == nullptr);
+        checksPassed += 4;
+    }
+
     checksPassed += HostRegressionTests::Run();
     checksPassed += OverlayHostTests::Run();
     std::cout << "HostTests: " << checksPassed << " checks passed." << std::endl;

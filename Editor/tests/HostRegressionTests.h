@@ -346,7 +346,7 @@ inline int Run() {
 
             check(res == EngineSceneFailure, "AssetCommandHandler rejects optionsJson when extension missing");
             check(!s_legacyCalled, "ctx.scene.importAsset MUST NOT be called when optionsJson cannot be applied");
-            check(completedCmd.path.isEmpty(), "completedCmd path must be empty on failure");
+            check(completedCmd.path == cmd.path, "completedCmd path not updated to virtual destination on failure");
         }
     }
     std::cout<<"Host regression checks: "<<checks<<std::endl;return checks;

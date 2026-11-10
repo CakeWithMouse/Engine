@@ -92,6 +92,12 @@ void AssetCommandHandler::Handle(const EditorCommand& cmd,
                                                  errBuf,
                                                  sizeof(errBuf));
         }
+        else if (!cmd.importOptionsJson.isEmpty())
+        {
+            result = EngineSceneFailure;
+            error = QStringLiteral("AssetCommandHandler: importWithOptions required for optionsJson but not available");
+            return;
+        }
         else
         {
             result = ctx.scene.importAsset(ctx.scene.context,
