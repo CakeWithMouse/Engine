@@ -65,6 +65,7 @@
 #define QT_WIDGETS_LIB
 #endif
 #include <qtestmouse.h>
+#include <qtestkeyboard.h>
 #include <QTabBar>
 #include <QMenu>
 #include <chrono>
@@ -643,6 +644,15 @@ int wmain(int argc, wchar_t** argv)
         {
             const size_t objectCountBefore = host.ReadSnapshot().objects.size();
             Check(objectCountBefore > 0, "scene has objects before asset delete");
+            const auto targetObj = host.ReadSnapshot().objects.front();
+            {
+                EditorCommand sel;
+                sel.type = EditorCommand::SelectObject;
+                sel.objectId = targetObj.id;
+                host.PostCommand(sel);
+            }
+            until([&] { return host.ReadSnapshot().selected == targetObj.id; });
+            Check(host.ReadSnapshot().selected == targetObj.id, "scene object selected before delete");
 
             // --- Column 0 test ---
             const auto delImg0 = root / "Content/Textures/del_col0.bmp";
@@ -683,12 +693,14 @@ int wmain(int argc, wchar_t** argv)
                     }
                 });
 
-                QKeyEvent keyDel(QEvent::KeyPress, Qt::Key_Delete, Qt::NoModifier);
-                QApplication::sendEvent(files, &keyDel);
+                QTest::keyClick(files, Qt::Key_Delete);
             });
 
             until([&] { return !std::filesystem::exists(delImg0); });
-            Check(host.ReadSnapshot().objects.size() == objectCountBefore, "scene object NOT deleted on asset col 0 delete");
+            Check(host.ReadSnapshot().objects.size() == objectCountBefore, "scene object count unchanged on asset col 0 delete");
+            bool objExists0 = false;
+            for (const auto& o : host.ReadSnapshot().objects) if (o.id == targetObj.id) { objExists0 = true; break; }
+            Check(objExists0, "selected scene object NOT deleted on asset col 0 delete");
 
             // --- Column 1 test ---
             const auto delImg1 = root / "Content/Textures/del_col1.bmp";
@@ -729,12 +741,14 @@ int wmain(int argc, wchar_t** argv)
                     }
                 });
 
-                QKeyEvent keyDel(QEvent::KeyPress, Qt::Key_Delete, Qt::NoModifier);
-                QApplication::sendEvent(files, &keyDel);
+                QTest::keyClick(files, Qt::Key_Delete);
             });
 
             until([&] { return !std::filesystem::exists(delImg1); });
-            Check(host.ReadSnapshot().objects.size() == objectCountBefore, "scene object NOT deleted on asset col 1 delete");
+            Check(host.ReadSnapshot().objects.size() == objectCountBefore, "scene object count unchanged on asset col 1 delete");
+            bool objExists1 = false;
+            for (const auto& o : host.ReadSnapshot().objects) if (o.id == targetObj.id) { objExists1 = true; break; }
+            Check(objExists1, "selected scene object NOT deleted on asset col 1 delete");
         }
         // Material editor: template from Files, live parameter, HLSL errors, recompiled parameters, save and discard.
         const auto materialFile = root / "Content/Materials/Tint.mat", surfaceFile = root / "Content/Materials/Tint.hlsl";
