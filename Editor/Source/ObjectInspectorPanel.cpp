@@ -268,18 +268,14 @@ void ObjectInspectorPanel::BuildCharacterCard(QVBoxLayout* layout)
 
     auto* rowSpeed = new QWidget(cardCharacter_->Content());
     auto* lSpeed = new QHBoxLayout(rowSpeed);
-    lSpeed->setContentsMargins(0, 0, 0, 0);
-    lSpeed->setSpacing(6);
-
+    lSpeed->setContentsMargins(0, 0, 0, 0); lSpeed->setSpacing(6);
     characterSpeedLabel_ = new QLabel(Tr("Скорость, ед/с", "Speed, u/s"), rowSpeed);
     characterSpeedLabel_->setObjectName(QStringLiteral("CardFieldLabel"));
     lSpeed->addWidget(characterSpeedLabel_);
 
     characterSpeed_ = new NoWheelDoubleSpinBox(rowSpeed);
     characterSpeed_->setObjectName(QStringLiteral("CharacterSpeed"));
-    characterSpeed_->setFixedHeight(22);
-    characterSpeed_->setRange(0, 10000);
-    characterSpeed_->setKeyboardTracking(false);
+    characterSpeed_->setFixedHeight(22); characterSpeed_->setRange(0, 10000); characterSpeed_->setKeyboardTracking(false);
     connect(characterSpeed_, &QDoubleSpinBox::editingFinished, this, [this] {
         if (!refreshing_ && selectedId_) emit CharacterSpeedEditingFinished(selectedId_, characterSpeed_->value());
     });
@@ -316,31 +312,35 @@ void ObjectInspectorPanel::RetranslateUi()
         Refresh(lastSnapshot_, selectedId_, true);
 }
 
+void ObjectInspectorPanel::InvalidateAssetCache()
+{
+    if (cardGeometry_) cardGeometry_->InvalidateCache();
+    if (cardMaterial_) cardMaterial_->InvalidateCache();
+    if (selectedId_ != 0 && !lastSnapshot_.objects.empty())
+        Refresh(lastSnapshot_, selectedId_, true);
+}
+
 void ObjectInspectorPanel::ClearFocusIfInside()
 {
-    if (auto* focus = QApplication::focusWidget(); focus && isAncestorOf(focus))
-        focus->clearFocus();
+    if (auto* focus = QApplication::focusWidget(); focus && isAncestorOf(focus)) focus->clearFocus();
 }
 
 bool ObjectInspectorPanel::HasFocusedChild() const
 {
-    const auto* focus = QApplication::focusWidget();
-    return focus && isAncestorOf(focus);
+    const auto* focus = QApplication::focusWidget(); return focus && isAncestorOf(focus);
 }
 
 InspectorTransformValue ObjectInspectorPanel::CurrentTransformValue() const
 {
     InspectorTransformValue value;
-    if (cardTransform_)
-        cardTransform_->GetValues(value.position.data(), value.euler.data(), value.scale.data());
+    if (cardTransform_) cardTransform_->GetValues(value.position.data(), value.euler.data(), value.scale.data());
     return value;
 }
 
 InspectorPointLightValue ObjectInspectorPanel::CurrentPointLightValue() const
 {
     InspectorPointLightValue value;
-    for (int i = 0; i < 3; ++i)
-        value.color[i] = lightValues_[i]->value();
+    for (int i = 0; i < 3; ++i) value.color[i] = lightValues_[i]->value();
     value.intensity = lightValues_[3]->value();
     value.radius = lightValues_[4]->value();
     value.enabled = lightEnabled_->isChecked();

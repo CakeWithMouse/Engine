@@ -2,6 +2,7 @@
 
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
+#include "EditorTheme.h"
 
 #include <QDir>
 #include <QFileInfo>
@@ -36,7 +37,7 @@ public:
             }
             if (!cachedModelExists_)
             {
-                modelAsset_->setStyleSheet(QStringLiteral("color: #E06C75;"));
+                modelAsset_->setStyleSheet(QStringLiteral("color: %1;").arg(EditorTheme::Instance().AccentColor().name()));
                 modelAsset_->setToolTip(Tr("Файл модели не найден на диске", "Model file not found on disk"));
             }
             else
@@ -69,7 +70,7 @@ public:
             }
             if (!cachedTextureExists_)
             {
-                textureAsset_->setStyleSheet(QStringLiteral("color: #E06C75;"));
+                textureAsset_->setStyleSheet(QStringLiteral("color: %1;").arg(EditorTheme::Instance().AccentColor().name()));
                 textureAsset_->setToolTip(Tr("Файл текстуры не найден на диске", "Texture file not found on disk"));
             }
             else
@@ -85,6 +86,12 @@ public:
             textureAsset_->setStyleSheet(QString());
             textureAsset_->setToolTip(QString());
         }
+    }
+
+    void InvalidateCache()
+    {
+        cachedModelPath_.clear();
+        cachedTexturePath_.clear();
     }
 
     void Clear()

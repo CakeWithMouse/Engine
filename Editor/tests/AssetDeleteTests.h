@@ -294,7 +294,7 @@ inline void Run()
             geomCard.SetData(QStringLiteral("/Game/Models/Missing.fbx"), true, contentRoot, true);
             auto* edit = geomCard.findChild<QLineEdit*>(QStringLiteral("ModelAsset"));
             Check(edit != nullptr, "ModelAsset edit found");
-            Check(edit->styleSheet().contains(QStringLiteral("#E06C75")), "Missing model colored in red (#E06C75)");
+            Check(edit->styleSheet().contains(EditorTheme::Instance().AccentColor().name()), "Missing model colored with theme accent token");
             Check(!edit->toolTip().isEmpty(), "Missing model has tooltip");
 
             // Valid model clears color and tooltip
@@ -315,7 +315,7 @@ inline void Run()
             auto* edit = matCard.findChild<QLineEdit*>(QStringLiteral("MaterialAsset"));
             auto* btn = matCard.findChild<QPushButton*>(QStringLiteral("EditMaterial"));
             Check(edit != nullptr && btn != nullptr, "MaterialCard widgets found");
-            Check(edit->styleSheet().contains(QStringLiteral("#E06C75")), "Missing material colored in red (#E06C75)");
+            Check(edit->styleSheet().contains(EditorTheme::Instance().AccentColor().name()), "Missing material colored with theme accent token");
             Check(!edit->toolTip().isEmpty(), "Missing material has tooltip");
             Check(!btn->isEnabled(), "Edit button is DISABLED for missing material");
             Check(!btn->toolTip().isEmpty(), "Edit button explains missing material file");
@@ -325,6 +325,28 @@ inline void Run()
             Check(edit->styleSheet().isEmpty(), "Valid material styleSheet is clear");
             Check(edit->toolTip().isEmpty(), "Valid material tooltip is empty");
             Check(btn->isEnabled(), "Edit button is ENABLED for valid material");
+            ++checks;
+        }
+
+        // 8.3 InvalidateCache immediately updates missing file status with same selection
+        {
+            GeometryCard geomCard;
+            geomCard.SetData(QStringLiteral("/Game/") + validModelRel, true, contentRoot, true);
+            auto* edit = geomCard.findChild<QLineEdit*>(QStringLiteral("ModelAsset"));
+            Check(edit->styleSheet().isEmpty(), "Initial valid model has empty stylesheet");
+
+            // Delete the file from disk while still pointing to same path
+            QFile::remove(validModelPath);
+
+            // Without invalidate/forceCheck, cached status is still valid
+            geomCard.SetData(QStringLiteral("/Game/") + validModelRel, true, contentRoot, false);
+            Check(edit->styleSheet().isEmpty(), "Before invalidate, cached status still reports valid");
+
+            // Calling InvalidateCache() and re-evaluating immediately flags the missing file
+            geomCard.InvalidateCache();
+            geomCard.SetData(QStringLiteral("/Game/") + validModelRel, true, contentRoot, true);
+            Check(edit->styleSheet().contains(EditorTheme::Instance().AccentColor().name()),
+                  "After InvalidateCache, missing file immediately turns red with theme accent at same selection");
             ++checks;
         }
     }

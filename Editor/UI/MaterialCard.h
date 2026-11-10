@@ -2,6 +2,7 @@
 
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
+#include "EditorTheme.h"
 
 #include <QDir>
 #include <QFileInfo>
@@ -46,7 +47,7 @@ public:
             }
             if (!cachedMaterialExists_)
             {
-                materialAsset_->setStyleSheet(QStringLiteral("color: #E06C75;"));
+                materialAsset_->setStyleSheet(QStringLiteral("color: %1;").arg(EditorTheme::Instance().AccentColor().name()));
                 materialAsset_->setToolTip(Tr("Файл материала не найден на диске", "Material file not found on disk"));
                 editMaterialButton_->setEnabled(false);
                 editMaterialButton_->setToolTip(Tr("Файл материала не найден на диске", "Material file not found on disk"));
@@ -71,6 +72,11 @@ public:
                      "Create material in Content/Materials, assign to object and open editor")
                 : QString());
         }
+    }
+
+    void InvalidateCache()
+    {
+        cachedMaterialPath_.clear();
     }
 
     void Clear()

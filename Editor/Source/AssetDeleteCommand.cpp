@@ -115,5 +115,7 @@ bool EditorMainWindow::DeleteAsset(const QString& path, bool skipPrompt)
     }
 
     Logger::Instance().Info(QStringLiteral("DeleteAsset: successfully deleted %1 '%2'").arg(isDir ? QStringLiteral("directory") : QStringLiteral("file"), path));
+    if (objectInspectorPanel_)
+        objectInspectorPanel_->InvalidateAssetCache();
     return true;
 }
