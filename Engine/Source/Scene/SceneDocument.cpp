@@ -6,6 +6,7 @@
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
 #include <Engine/Scene/SceneAssets.h>
+#include "../Resources/VfsRead.h"
 #include "../../ThirdParty/nlohmann/json.hpp"
 #include <atomic>
 #include <cmath>
@@ -253,6 +254,40 @@ void SceneDocument::Validate(const SceneSnapshot& data, ComponentTypeCatalog cat
         if (o.typeName != SceneAssets::ModelType && !catalog.Find(o.typeName))
             throw SceneDocumentError(EngineSceneUnknownType, "Unknown component type: " + o.typeName);
 }
+static std::unique_ptr<GameComponent> CreateMissingModelPlaceholder(const std::string& modelAsset, const std::string& projectData)
+{
+    auto dummy = std::make_unique<SkeletalMeshComponent>();
+    auto model = std::make_shared<SkeletalModel>();
+    if (!projectData.empty())
+    {
+        try
+        {
+            const auto json = Json::parse(projectData);
+            if (json.is_object() && json.contains("materialSlots") && json["materialSlots"].is_object())
+            {
+                for (auto it = json["materialSlots"].begin(); it != json["materialSlots"].end(); ++it)
+                {
+                    SkeletalMesh mesh;
+                    mesh.MaterialIndex = static_cast<uint32_t>(std::stoul(it.key()));
+                    model->Meshes.push_back(std::move(mesh));
+                }
+            }
+        }
+        catch (const std::exception& e)
+        {
+            std::printf("[Error] SceneDocument: cannot parse placeholder materialSlots for '%s': %s\n",
+                modelAsset.c_str(), e.what());
+        }
+        catch (...)
+        {
+            std::printf("[Error] SceneDocument: unknown error parsing placeholder materialSlots for '%s'\n",
+                modelAsset.c_str());
+        }
+    }
+    dummy->SetAssetModel(modelAsset, std::move(model));
+    return dummy;
+}
+
 void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog catalog, Scene& target)
 {
     Validate(data, catalog); // No constructors before all data and keys have been checked.
@@ -272,28 +307,18 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
             }
             catch (const std::exception& e)
             {
-                std::printf("[Error] SceneDocument: missing model '%s': %s\n", o.modelAsset.c_str(), e.what());
-                auto dummy = std::make_unique<SkeletalMeshComponent>();
-                auto model = std::make_shared<SkeletalModel>();
-                if (!o.projectData.empty())
-                {
-                    try
-                    {
-                        const auto json = Json::parse(o.projectData);
-                        if (json.is_object() && json.contains("materialSlots") && json["materialSlots"].is_object())
-                        {
-                            for (auto it = json["materialSlots"].begin(); it != json["materialSlots"].end(); ++it)
-                            {
-                                SkeletalMesh mesh;
-                                mesh.MaterialIndex = static_cast<uint32_t>(std::stoul(it.key()));
-                                model->Meshes.push_back(std::move(mesh));
-                            }
-                        }
-                    }
-                    catch (...) {}
+                bool physicallyExists = false;
+                try {
+                    physicallyExists = VfsRead::Active().Exists(o.modelAsset);
+                } catch (...) {
+                    physicallyExists = false;
                 }
-                dummy->SetAssetModel(o.modelAsset, std::move(model));
-                object = std::move(dummy);
+                if (physicallyExists)
+                {
+                    throw;
+                }
+                std::printf("[Error] SceneDocument: missing model '%s': %s\n", o.modelAsset.c_str(), e.what());
+                object = CreateMissingModelPlaceholder(o.modelAsset, o.projectData);
                 placeholder = true;
             }
         }
@@ -305,7 +330,7 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
         // Engine.Model is already loaded by its factory; project subclasses are not.
         // Their material-slot codec validates source IDs against the loaded geometry.
         const bool skeletal = dynamic_cast<SkeletalMeshComponent*>(object.get()) != nullptr;
-        if (skeletal)
+        if (placeholder)
         {
             try
             {
@@ -313,31 +338,24 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
             }
             catch (const std::exception& e)
             {
-                std::printf("[Error] SceneDocument: cannot apply model '%s' to '%s': %s\n",
+                std::printf("[Error] SceneDocument: cannot apply model '%s' to placeholder '%s': %s\n",
                     o.modelAsset.c_str(), o.name.c_str(), e.what());
             }
+            try
+            {
+                object->LoadProjectData(o.projectData);
+            }
+            catch (const std::exception& e)
+            {
+                std::printf("[Error] SceneDocument: cannot load project data for placeholder '%s': %s\n",
+                    o.name.c_str(), e.what());
+            }
         }
-        try
+        else
         {
+            if (skeletal) SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
             object->LoadProjectData(o.projectData);
-        }
-        catch (const std::exception& e)
-        {
-            if (!placeholder) throw;
-            std::printf("[Error] SceneDocument: cannot load project data for placeholder '%s': %s\n",
-                o.name.c_str(), e.what());
-        }
-        if (!skeletal)
-        {
-            try
-            {
-                SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
-            }
-            catch (const std::exception& e)
-            {
-                std::printf("[Error] SceneDocument: cannot apply model '%s' to '%s': %s\n",
-                    o.modelAsset.c_str(), o.name.c_str(), e.what());
-            }
+            if (!skeletal) SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
         }
         auto added = target.AddComponent(o.name, object, o.typeName);
         if (added.result != SceneResult::Ok || target.SetTransform(added.id, o.transform) != SceneResult::Ok)

@@ -6,6 +6,7 @@
 #include <Engine/Components/EditorProperties.h>
 #include <Engine/Components/PropertyMacros.h>
 #include <Engine/Components/Character.h>
+#include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
 #include <Engine/Render/SkeletalLoader.h>
 #include <Engine/Scene/SceneAssets.h>
 #include <Engine/Scene/SceneDocument.h>
@@ -177,4 +178,91 @@ void AuthoringTests(){
     CHECK(author.asset(author.context,1,moved.c_str(),"/Game/Models/Rejected/mesh.obj",error,sizeof(error))!=EngineSceneOk);
     CHECK(fs::exists(content/"Models/Renamed/mesh.obj")&&!fs::exists(content/"Models/Rejected"));CHECK(Read(saved)==sceneBefore);
     CHECK(author.asset(author.context,1,moved.c_str(),"/Game/../Escape/mesh.obj",error,sizeof(error))!=EngineSceneOk);
+
+    // --- Missing and Corrupted Model Tests (a, b, c, d, e) ---
+    fs::remove(content/"Scenes/Broken.scene.json");
+    const auto missingModelVirtual = "/Game/Models/NonExistentModel.obj";
+    const auto missingModelPhysical = content/"Models/NonExistentModel.obj";
+    CHECK(!fs::exists(missingModelPhysical));
+
+    const auto missingSceneFile = content/"Scenes/MissingModelTest.scene.json";
+    SceneSnapshot missingSnap;
+    missingSnap.name = "MissingModelScene";
+    missingSnap.documentVersion = 3;
+    SceneComponentSnapshot comp;
+    comp.id = 100;
+    comp.name = "MissingObject";
+    comp.typeName = SceneAssets::ModelType;
+    comp.modelAsset = missingModelVirtual;
+    comp.textureAsset = "/Game/Images/Renamed.bmp";
+    comp.materialAsset = "/Game/Materials/Texture.mat";
+    comp.projectData = R"({"version":1,"materialSlots":{"0":"/Game/Materials/Texture.mat"}})";
+    missingSnap.components.push_back(comp);
+    Write(missingSceneFile, SceneDocument::Serialize(missingSnap));
+
+    // (a) Сцена с удалённой моделью открывается без исключений и создаёт плейсхолдер
+    const auto snapshotMissing = SceneDocument::Read(missingSceneFile);
+    Scene restoredMissingScene("RestoredMissing");
+    SceneDocument::Restore(snapshotMissing, {}, restoredMissingScene);
+    auto* placeholderComp = dynamic_cast<SkeletalMeshComponent*>(restoredMissingScene.FindComponentByName("MissingObject"));
+    CHECK(placeholderComp != nullptr);
+    CHECK(placeholderComp->GetModelAsset() == missingModelVirtual);
+
+    // (b) Сохранение этой сцены сохраняет modelAsset, textureAsset и materialAsset без потерь
+    const auto resavedSnapshot = SceneTestAccess::Snapshot(restoredMissingScene);
+    const auto resavedJson = SceneDocument::Serialize(resavedSnapshot);
+    CHECK(resavedJson.find(missingModelVirtual) != std::string::npos);
+    CHECK(resavedJson.find("/Game/Images/Renamed.bmp") != std::string::npos);
+    CHECK(resavedJson.find("/Game/Materials/Texture.mat") != std::string::npos);
+    CHECK(resavedJson.find("materialSlots") != std::string::npos);
+
+    // (c) Play запускается и останавливается на сессии со сценой с отсутствующей моделью
+    uint64_t missingSceneId = 0;
+    CHECK(api.loadScene(api.context, missingSceneFile.u8string().c_str(), &missingSceneId, error, sizeof(error)) == EngineSceneOk);
+    CHECK(api.control(api.context, EnginePlay) == EngineSceneOk);
+    CHECK(api.control(api.context, EngineStop) == EngineSceneOk);
+
+    // (d) Реимпорт другого ассета проходит (SceneAuthoring валидирует все сцены, включая MissingModelTest.scene.json)
+    CHECK(author.asset(author.context, 1, "/Game/Images/Renamed.bmp", "/Game/Images/Renamed2.bmp", error, sizeof(error)) == EngineSceneOk);
+    CHECK(author.asset(author.context, 1, "/Game/Images/Renamed2.bmp", "/Game/Images/Renamed.bmp", error, sizeof(error)) == EngineSceneOk);
+
+    // (e) п.1: Реимпорт/валидация существующего, но битого файла модели откатывается
+    const auto corruptModelVirtual = "/Game/Models/CorruptMesh.obj";
+    const auto corruptModelPhysical = content/"Models/CorruptMesh.obj";
+    Write(corruptModelPhysical, "THIS IS CORRUPT GEOMETRY THAT CANNOT BE LOADED");
+    CHECK(fs::exists(corruptModelPhysical));
+
+    const auto corruptSceneFile = content/"Scenes/CorruptScene.scene.json";
+    SceneSnapshot corruptSnap;
+    corruptSnap.name = "CorruptModelScene";
+    corruptSnap.documentVersion = 3;
+    SceneComponentSnapshot corruptComp;
+    corruptComp.id = 200;
+    corruptComp.name = "CorruptObject";
+    corruptComp.typeName = SceneAssets::ModelType;
+    corruptComp.modelAsset = corruptModelVirtual;
+    corruptSnap.components.push_back(corruptComp);
+    Write(corruptSceneFile, SceneDocument::Serialize(corruptSnap));
+
+    // Для существующего битого файла SceneDocument::Restore ОБЯЗАН выбрасывать исключение
+    const auto snapshotCorrupt = SceneDocument::Read(corruptSceneFile);
+    Scene restoredCorruptScene("RestoredCorrupt");
+    bool threwOnExistingCorrupt = false;
+    try {
+        SceneDocument::Restore(snapshotCorrupt, {}, restoredCorruptScene);
+    } catch (const std::runtime_error&) {
+        threwOnExistingCorrupt = true;
+    }
+    CHECK(threwOnExistingCorrupt);
+
+    // Наличие существующей битой модели на сцене в проекте блокирует валидацию и откатывает реимпорт
+    const auto sceneBeforeReimport = Read(missingSceneFile);
+    CHECK(author.asset(author.context, 1, "/Game/Images/Renamed.bmp", "/Game/Images/MustRollback.bmp", error, sizeof(error)) != EngineSceneOk);
+    CHECK(!fs::exists(content/"Images/MustRollback.bmp"));
+    CHECK(Read(missingSceneFile) == sceneBeforeReimport);
+
+    // Очистка тестовых файлов
+    fs::remove(corruptSceneFile);
+    fs::remove(corruptModelPhysical);
+    fs::remove(missingSceneFile);
 }
