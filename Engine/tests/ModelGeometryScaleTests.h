@@ -268,6 +268,77 @@ inline void Run()
             throw;
         }
     }
+
+    // ---- FBX blender-scale100: useFileUnitScale (false/true) x scale (1.0 / 0.01 / 2.0) ----
+    {
+        const auto fixture = fs::path(__FILE__).parent_path() / "assets" / "fixtures" / "blender-scale100.fbx";
+        Check(fs::exists(fixture), "blender-scale100.fbx fixture exists");
+        const auto tempRoot = fs::temp_directory_path() / ("GeomScaleFbx_" + stamp);
+        fs::create_directories(tempRoot);
+        try
+        {
+            VfsRead::GetVFS().Mount("/GeomScaleFbx", tempRoot);
+            fs::copy_file(fixture, tempRoot / "scale100.fbx", fs::copy_options::overwrite_existing);
+            const std::string vpath = "/GeomScaleFbx/scale100.fbx";
+            const auto sidecar = tempRoot / "scale100.fbx.importsettings.json";
+
+            // Matrix: useFileUnitScale false/true x scale 1.0 / 0.01 / 2.0
+            // Raw Blender box with 100x node scale has dimension 200x200x200 (maxDim = 200.0).
+            // useFileUnitScale=true normalizes node scale to 2x2x2 (maxDim = 2.0).
+            // version:2 applies geometry scale on top.
+
+            // 1. useFileUnitScale=false, scale=1.0 -> 200.0
+            WriteText(sidecar, R"({"version":2,"kind":"model","model":{"scale":1.0,"useFileUnitScale":false}})");
+            const Box bFalse1 = ModelBox(*Load(vpath).Model);
+            const float dimFalse1 = (std::max)({Size(bFalse1, 0), Size(bFalse1, 1), Size(bFalse1, 2)});
+            Check(Near(dimFalse1, 200.0f, 1e-2f), "FBX useFileUnitScale=false scale=1.0 dimension is 200.0");
+
+            // 2. useFileUnitScale=false, scale=0.01 -> 200.0 * 0.01 = 2.0
+            WriteText(sidecar, R"({"version":2,"kind":"model","model":{"scale":0.01,"useFileUnitScale":false}})");
+            const Box bFalse001 = ModelBox(*Load(vpath).Model);
+            const float dimFalse001 = (std::max)({Size(bFalse001, 0), Size(bFalse001, 1), Size(bFalse001, 2)});
+            Check(Near(dimFalse001, 2.0f, 1e-2f), "FBX useFileUnitScale=false scale=0.01 dimension is 2.0");
+
+            // 3. useFileUnitScale=false, scale=2.0 -> 200.0 * 2.0 = 400.0
+            WriteText(sidecar, R"({"version":2,"kind":"model","model":{"scale":2.0,"useFileUnitScale":false}})");
+            const Box bFalse2 = ModelBox(*Load(vpath).Model);
+            const float dimFalse2 = (std::max)({Size(bFalse2, 0), Size(bFalse2, 1), Size(bFalse2, 2)});
+            Check(Near(dimFalse2, 400.0f, 1e-2f), "FBX useFileUnitScale=false scale=2.0 dimension is 400.0");
+
+            // 4. useFileUnitScale=true, scale=1.0 -> 2.0 (unit normalized)
+            WriteText(sidecar, R"({"version":2,"kind":"model","model":{"scale":1.0,"useFileUnitScale":true}})");
+            const Box bTrue1 = ModelBox(*Load(vpath).Model);
+            const float dimTrue1 = (std::max)({Size(bTrue1, 0), Size(bTrue1, 1), Size(bTrue1, 2)});
+            Check(Near(dimTrue1, 2.0f, 1e-2f), "FBX useFileUnitScale=true scale=1.0 dimension is 2.0");
+
+            // 5. useFileUnitScale=true, scale=0.01 -> 2.0 * 0.01 = 0.02
+            WriteText(sidecar, R"({"version":2,"kind":"model","model":{"scale":0.01,"useFileUnitScale":true}})");
+            const Box bTrue001 = ModelBox(*Load(vpath).Model);
+            const float dimTrue001 = (std::max)({Size(bTrue001, 0), Size(bTrue001, 1), Size(bTrue001, 2)});
+            Check(Near(dimTrue001, 0.02f, 1e-2f), "FBX useFileUnitScale=true scale=0.01 dimension is 0.02");
+
+            // 6. useFileUnitScale=true, scale=2.0 -> 2.0 * 2.0 = 4.0
+            WriteText(sidecar, R"({"version":2,"kind":"model","model":{"scale":2.0,"useFileUnitScale":true}})");
+            const Box bTrue2 = ModelBox(*Load(vpath).Model);
+            const float dimTrue2 = (std::max)({Size(bTrue2, 0), Size(bTrue2, 1), Size(bTrue2, 2)});
+            Check(Near(dimTrue2, 4.0f, 1e-2f), "FBX useFileUnitScale=true scale=2.0 dimension is 4.0");
+
+            // 7. FBX normals flat: verify flat mode on FBX loads successfully and generates geometry
+            WriteText(sidecar, R"({"version":2,"kind":"model","model":{"scale":1.0,"normals":"flat"}})");
+            const auto fbxFlat = Load(vpath);
+            Check(fbxFlat.Success && fbxFlat.Model && !fbxFlat.Model->Meshes.empty(), "FBX loads with flat normals");
+            Check(!fbxFlat.Model->Meshes[0].Vertices.empty(), "FBX has vertices with flat normals");
+
+            VfsRead::GetVFS().Unmount("/GeomScaleFbx");
+            fs::remove_all(tempRoot);
+        }
+        catch (...)
+        {
+            VfsRead::GetVFS().Unmount("/GeomScaleFbx");
+            fs::remove_all(tempRoot);
+            throw;
+        }
+    }
 #endif
 }
 
