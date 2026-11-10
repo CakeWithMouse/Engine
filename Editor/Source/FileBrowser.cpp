@@ -351,17 +351,6 @@ void FileBrowserDock::DeleteCurrentAsset()
     }
 }
 
-void FileBrowserDock::keyPressEvent(QKeyEvent* event)
-{
-    if (event->key() == Qt::Key_Delete)
-    {
-        DeleteCurrentAsset();
-        event->accept();
-        return;
-    }
-    QDockWidget::keyPressEvent(event);
-}
-
 bool FileBrowserDock::IsProtectedPath(const QString& path) const
 {
     return path.isEmpty() || FileService::IsProtectedDirectory(path, projectDir_, contentDir_);

@@ -25,3 +25,4 @@ inline bool ExecDeleteConfirmation(QWidget* parent, QMessageBox::Icon icon, cons
 }
 
 } // namespace EditorUI
+
