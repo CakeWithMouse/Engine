@@ -5,6 +5,8 @@
 #include "AssetOps.h"
 #include "Logger.h"
 #include "AssetDeletePrompt.h"
+#include "GeometryCard.h"
+#include "MaterialCard.h"
 
 #include <QTemporaryDir>
 #include <QFile>
@@ -262,6 +264,69 @@ inline void Run()
         Check(resEsc == QMessageBox::No, "Key_Escape triggers No");
         delete boxEsc;
         ++checks;
+    }
+
+    // 8. Missing asset indicator in Inspector (GeometryCard & MaterialCard with cache)
+    {
+        QTemporaryDir tempContent;
+        const QString contentRoot = tempContent.path();
+        const QString validModelRel = QStringLiteral("Models/Valid.fbx");
+        const QString validModelPath = QDir(contentRoot).filePath(validModelRel);
+        QDir().mkpath(QFileInfo(validModelPath).absolutePath());
+        {
+            QFile f(validModelPath);
+            f.open(QIODevice::WriteOnly);
+            f.write("FBX");
+        }
+
+        const QString validMatRel = QStringLiteral("Materials/Valid.mat");
+        const QString validMatPath = QDir(contentRoot).filePath(validMatRel);
+        QDir().mkpath(QFileInfo(validMatPath).absolutePath());
+        {
+            QFile f(validMatPath);
+            f.open(QIODevice::WriteOnly);
+            f.write("MAT");
+        }
+
+        // 8.1 GeometryCard: missing model shows color and tooltip
+        {
+            GeometryCard geomCard;
+            geomCard.SetData(QStringLiteral("/Game/Models/Missing.fbx"), true, contentRoot, true);
+            auto* edit = geomCard.findChild<QLineEdit*>(QStringLiteral("ModelAsset"));
+            Check(edit != nullptr, "ModelAsset edit found");
+            Check(edit->styleSheet().contains(QStringLiteral("#E06C75")), "Missing model colored in red (#E06C75)");
+            Check(!edit->toolTip().isEmpty(), "Missing model has tooltip");
+
+            // Valid model clears color and tooltip
+            geomCard.SetData(QStringLiteral("/Game/") + validModelRel, true, contentRoot, true);
+            Check(edit->styleSheet().isEmpty(), "Valid model styleSheet is clear");
+            Check(edit->toolTip().isEmpty(), "Valid model tooltip is empty");
+
+            // Cache check: without forceCheck and without path change, no re-check
+            geomCard.SetData(QStringLiteral("/Game/") + validModelRel, true, contentRoot, false);
+            Check(edit->styleSheet().isEmpty(), "Cached valid model remains clear");
+            ++checks;
+        }
+
+        // 8.2 MaterialCard: missing material shows color, tooltip, and disables Edit button
+        {
+            MaterialCard matCard;
+            matCard.SetData(QStringLiteral("/Game/Materials/Missing.mat"), false, contentRoot, true);
+            auto* edit = matCard.findChild<QLineEdit*>(QStringLiteral("MaterialAsset"));
+            auto* btn = matCard.findChild<QPushButton*>(QStringLiteral("EditMaterial"));
+            Check(edit != nullptr && btn != nullptr, "MaterialCard widgets found");
+            Check(edit->styleSheet().contains(QStringLiteral("#E06C75")), "Missing material colored in red (#E06C75)");
+            Check(!edit->toolTip().isEmpty(), "Missing material has tooltip");
+            Check(!btn->isEnabled(), "Edit button is DISABLED for missing material");
+            Check(!btn->toolTip().isEmpty(), "Edit button explains missing material file");
+
+            // Valid material enables button and clears color
+            matCard.SetData(QStringLiteral("/Game/") + validMatRel, false, contentRoot, true);
+            Check(edit->styleSheet().isEmpty(), "Valid material styleSheet is clear");
+            Check(edit->toolTip().isEmpty(), "Valid material tooltip is empty");
+            Check(btn->isEnabled(), "Edit button is ENABLED for valid material");
+            ++checks;
+        }
     }
 
     std::cout << "AssetDeleteTests: " << checks << " checks passed." << std::endl;

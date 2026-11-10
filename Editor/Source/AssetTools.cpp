@@ -225,6 +225,19 @@ void EditorMainWindow::OpenMaterialEditor(const QString& path)
         material = QStringLiteral("/Game/") + relative;
     }
 
+    const QString content = QString::fromUtf8(host_->host().contentRoot);
+    const QString rel = material.startsWith(QStringLiteral("/Game/")) ? material.mid(6) : material;
+    const QString diskPath = QDir(content).filePath(rel);
+    if (!QFileInfo::exists(diskPath))
+    {
+        QMessageBox::warning(
+            this,
+            Tr("Файл не найден", "File Not Found"),
+            Tr("Файл материала не найден на диске: %1", "Material file not found on disk: %1").arg(diskPath)
+        );
+        return;
+    }
+
     // Скрытое окно уже закрывается: превью отпускается, новое окно встанет в очередь после него.
     const QString key = material.toLower();
     if (MaterialEditorWindow* open = materialEditors_.value(key); open && open->isVisible())

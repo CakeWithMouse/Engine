@@ -58,16 +58,8 @@ ObjectInspectorPanel::ObjectInspectorPanel(QWidget* parent)
 
 ObjectInspectorPanel::~ObjectInspectorPanel()
 {
-    if (langSubId_)
-    {
-        EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
-        langSubId_ = 0;
-    }
-    if (themeSubId_)
-    {
-        EditorTheme::Instance().UnsubscribeThemeChanged(themeSubId_);
-        themeSubId_ = 0;
-    }
+    if (langSubId_) EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
+    if (themeSubId_) EditorTheme::Instance().UnsubscribeThemeChanged(themeSubId_);
 }
 
 void ObjectInspectorPanel::SetEnabled(bool enabled)
@@ -458,12 +450,13 @@ void ObjectInspectorPanel::Refresh(
         const bool showMaterial = isModel || isPrimitive;
         const bool showProperties = (!isModel && !isPrimitive && !isPointLight && !isDirLight && !isCamera && !isParticles);
 
+        const QString cr = property("contentRoot").toString();
         cardGeometry_->setVisible(showGeometry);
         if (showGeometry) {
-            cardGeometry_->SetData(QString::fromStdString(object.modelAsset), true);
-            cardGeometry_->SetTexture(QString::fromStdString(object.textureAsset));
+            cardGeometry_->SetData(QString::fromStdString(object.modelAsset), true, cr, selectionChanged);
+            cardGeometry_->SetTexture(QString::fromStdString(object.textureAsset), cr, selectionChanged);
         }
-        cardMaterial_->SetData(QString::fromStdString(object.materialAsset), isPointLight || isDirLight);
+        cardMaterial_->SetData(QString::fromStdString(object.materialAsset), isPointLight || isDirLight, cr, selectionChanged);
         cardMaterial_->setVisible(showMaterial);
         properties_->setVisible(showProperties);
 
@@ -473,11 +466,7 @@ void ObjectInspectorPanel::Refresh(
 
             const auto& transform = object.transform;
             const QQuaternion rotation(
-                transform.rotation[3],
-                transform.rotation[0],
-                transform.rotation[1],
-                transform.rotation[2]
-            );
+                transform.rotation[3], transform.rotation[0], transform.rotation[1], transform.rotation[2]);
 
             const auto euler = rotation.toEulerAngles();
             const double pos[3] = {transform.position[0], transform.position[1], transform.position[2]};

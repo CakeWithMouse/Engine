@@ -750,6 +750,21 @@ int wmain(int argc, wchar_t** argv)
             for (const auto& o : host.ReadSnapshot().objects) if (o.id == targetObj.id) { objExists1 = true; break; }
             Check(objExists1, "selected scene object NOT deleted on asset col 1 delete");
         }
+
+        // Step C: OpenMaterialEditor on nonexistent file shows warning and does NOT open window
+        Ui([&](auto* w) {
+            bool warningShown = false;
+            QTimer::singleShot(50, w, [&] {
+                if (auto* mb = qobject_cast<QMessageBox*>(QApplication::activeModalWidget())) {
+                    warningShown = true;
+                    mb->accept();
+                }
+            });
+            w->OpenMaterialEditor(QStringLiteral("/Game/Materials/NonExistent_12345.mat"));
+            Check(warningShown, "warning dialog shown for nonexistent material");
+            Check(w->template findChild<MaterialEditorWindow*>() == nullptr, "no MaterialEditorWindow created for nonexistent material");
+        });
+
         // Material editor: template from Files, live parameter, HLSL errors, recompiled parameters, save and discard.
         const auto materialFile = root / "Content/Materials/Tint.mat", surfaceFile = root / "Content/Materials/Tint.hlsl";
         auto editorWidget = [](auto* w, const QString& name) -> QWidget* {

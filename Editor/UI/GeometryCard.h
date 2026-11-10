@@ -3,6 +3,8 @@
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
 
+#include <QDir>
+#include <QFileInfo>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -18,14 +20,72 @@ public:
         BuildCard();
     }
 
-    void SetData(const QString& model, bool canChooseModel)
+    void SetData(const QString& model, bool canChooseModel, const QString& contentRoot = QString(), bool forceCheck = false)
     {
         modelAsset_->setText(model);
         chooseModel_->setEnabled(canChooseModel);
         clearModel_->setEnabled(!model.isEmpty());
+
+        if (!model.isEmpty() && !contentRoot.isEmpty())
+        {
+            if (forceCheck || model != cachedModelPath_)
+            {
+                cachedModelPath_ = model;
+                const QString rel = model.startsWith(QStringLiteral("/Game/")) ? model.mid(6) : model;
+                cachedModelExists_ = QFileInfo::exists(QDir(contentRoot).filePath(rel));
+            }
+            if (!cachedModelExists_)
+            {
+                modelAsset_->setStyleSheet(QStringLiteral("color: #E06C75;"));
+                modelAsset_->setToolTip(Tr("Файл модели не найден на диске", "Model file not found on disk"));
+            }
+            else
+            {
+                modelAsset_->setStyleSheet(QString());
+                modelAsset_->setToolTip(QString());
+            }
+        }
+        else
+        {
+            cachedModelPath_.clear();
+            cachedModelExists_ = true;
+            modelAsset_->setStyleSheet(QString());
+            modelAsset_->setToolTip(QString());
+        }
     }
 
-    void SetTexture(const QString& texture) { textureAsset_->setText(texture); clearTexture_->setEnabled(!texture.isEmpty()); }
+    void SetTexture(const QString& texture, const QString& contentRoot = QString(), bool forceCheck = false)
+    {
+        textureAsset_->setText(texture);
+        clearTexture_->setEnabled(!texture.isEmpty());
+
+        if (!texture.isEmpty() && !contentRoot.isEmpty())
+        {
+            if (forceCheck || texture != cachedTexturePath_)
+            {
+                cachedTexturePath_ = texture;
+                const QString rel = texture.startsWith(QStringLiteral("/Game/")) ? texture.mid(6) : texture;
+                cachedTextureExists_ = QFileInfo::exists(QDir(contentRoot).filePath(rel));
+            }
+            if (!cachedTextureExists_)
+            {
+                textureAsset_->setStyleSheet(QStringLiteral("color: #E06C75;"));
+                textureAsset_->setToolTip(Tr("Файл текстуры не найден на диске", "Texture file not found on disk"));
+            }
+            else
+            {
+                textureAsset_->setStyleSheet(QString());
+                textureAsset_->setToolTip(QString());
+            }
+        }
+        else
+        {
+            cachedTexturePath_.clear();
+            cachedTextureExists_ = true;
+            textureAsset_->setStyleSheet(QString());
+            textureAsset_->setToolTip(QString());
+        }
+    }
 
     void Clear()
     {
@@ -33,6 +93,14 @@ public:
         SetTexture({});
         chooseModel_->setEnabled(false);
         clearModel_->setEnabled(false);
+        cachedModelPath_.clear();
+        cachedModelExists_ = true;
+        cachedTexturePath_.clear();
+        cachedTextureExists_ = true;
+        modelAsset_->setStyleSheet(QString());
+        modelAsset_->setToolTip(QString());
+        textureAsset_->setStyleSheet(QString());
+        textureAsset_->setToolTip(QString());
     }
 
     void RetranslateUi()
@@ -104,5 +172,9 @@ private:
     QLineEdit* modelAsset_ = nullptr;
     QPushButton* chooseModel_ = nullptr;
     QPushButton* clearModel_ = nullptr;
+    QString cachedModelPath_;
+    bool cachedModelExists_ = true;
+    QString cachedTexturePath_;
+    bool cachedTextureExists_ = true;
 };
 
