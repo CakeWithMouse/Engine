@@ -162,6 +162,32 @@ inline void Run()
         Check(QDir(sourceDir).exists(), "Root Source directory still exists");
         Check(!fs.DeleteDirectory(QStringLiteral(""), &err), "Cannot delete project root");
 
+        // Bypass tests: case-insensitivity on Windows, trailing slashes, dots and dot-dots
+        Check(!fs.DeleteDirectory(QStringLiteral("content"), &err), "content (lowercase) is protected");
+        Check(!fs.DeleteDirectory(QStringLiteral("CONTENT"), &err), "CONTENT (uppercase) is protected");
+        Check(!fs.DeleteDirectory(QStringLiteral("source"), &err), "source (lowercase) is protected");
+        Check(!fs.DeleteDirectory(QStringLiteral("SOURCE"), &err), "SOURCE (uppercase) is protected");
+        Check(!fs.DeleteDirectory(QStringLiteral("Content/"), &err), "Content/ (trailing slash) is protected");
+        Check(!fs.DeleteDirectory(QStringLiteral("Content\\"), &err), "Content\\ (trailing backslash) is protected");
+        Check(!fs.DeleteDirectory(QStringLiteral("Content/."), &err), "Content/. is protected");
+        Check(!fs.DeleteDirectory(QStringLiteral("Content/../Content"), &err), "Content/../Content is protected");
+        Check(!fs.DeleteDirectory(QStringLiteral("Source/."), &err), "Source/. is protected");
+        Check(!fs.DeleteDirectory(QStringLiteral("Source/../Source"), &err), "Source/../Source is protected");
+        Check(!fs.DeleteDirectory(QStringLiteral("."), &err), ". (project root) is protected");
+        Check(!fs.DeleteDirectory(QStringLiteral("./"), &err), "./ (project root) is protected");
+        Check(!fs.DeleteDirectory(QStringLiteral("Content/.."), &err), "Content/.. (project root) is protected");
+
+        // Instance test without manual SetContentRoot
+        {
+            FileService fsAuto(&logger);
+            fsAuto.SetProjectRoot(projectDir);
+            Check(fsAuto.GetContentRoot() == contentDir, "Default content root initialized to <projectDir>/Content");
+            Check(!fsAuto.DeleteDirectory(QStringLiteral("Content"), &err), "Cannot delete Content on auto-initialized instance");
+            Check(!fsAuto.DeleteDirectory(QStringLiteral("content"), &err), "Cannot delete lowercase content on auto-initialized instance");
+            Check(!fsAuto.DeleteDirectory(QStringLiteral("Source"), &err), "Cannot delete Source on auto-initialized instance");
+            Check(QDir(contentDir).exists(), "Content directory preserved");
+        }
+
         // Subfolder named "Source" inside Content MUST NOT be protected and can be deleted
         const QString subSource = QDir(contentDir).filePath(QStringLiteral("Source"));
         QDir().mkpath(subSource);
@@ -177,6 +203,19 @@ inline void Run()
         Check(!fs.IsProtectedDirectory(subContent), "Content/Content is NOT protected");
         Check(fs.DeleteDirectory(QStringLiteral("Content/Content"), &err), "Deleting Content/Content succeeds");
         Check(!QDir(subContent).exists(), "Content/Content removed");
+
+        // Subfolder with different case inside Content (CONTENT and SOURCE)
+        const QString subUpperContent = QDir(contentDir).filePath(QStringLiteral("CONTENT"));
+        QDir().mkpath(subUpperContent);
+        Check(!fs.IsProtectedDirectory(subUpperContent), "Subfolder Content/CONTENT is NOT protected");
+        Check(fs.DeleteDirectory(QStringLiteral("Content/CONTENT"), &err), "Deleting Content/CONTENT succeeds");
+        Check(!QDir(subUpperContent).exists(), "Content/CONTENT removed");
+
+        const QString subUpperSource = QDir(contentDir).filePath(QStringLiteral("SOURCE"));
+        QDir().mkpath(subUpperSource);
+        Check(!fs.IsProtectedDirectory(subUpperSource), "Subfolder Content/SOURCE is NOT protected");
+        Check(fs.DeleteDirectory(QStringLiteral("Content/SOURCE"), &err), "Deleting Content/SOURCE succeeds");
+        Check(!QDir(subUpperSource).exists(), "Content/SOURCE removed");
         ++checks;
     }
 

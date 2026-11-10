@@ -15,6 +15,10 @@ FileService::FileService(Logger* logger, QObject* parent)
 void FileService::SetProjectRoot(const QString& projectRoot)
 {
     projectRoot_ = QDir::cleanPath(QFileInfo(projectRoot).absoluteFilePath());
+    if (contentRoot_.isEmpty() || !contentRoot_.startsWith(projectRoot_, Qt::CaseInsensitive))
+    {
+        contentRoot_ = QDir::cleanPath(QDir(projectRoot_).filePath(QStringLiteral("Content")));
+    }
     LogInfo(QStringLiteral("FileService: sandbox root set to '%1'").arg(projectRoot_));
 }
 
@@ -64,7 +68,8 @@ bool FileService::IsInSandbox(const QString& path) const
     }
 
     const QString clean = QDir::cleanPath(QFileInfo(path).absoluteFilePath());
-    return clean == projectRoot_ || clean.startsWith(projectRoot_ + QStringLiteral("/"), Qt::CaseInsensitive);
+    return clean.compare(projectRoot_, Qt::CaseInsensitive) == 0 ||
+           clean.startsWith(projectRoot_ + QStringLiteral("/"), Qt::CaseInsensitive);
 }
 
 QString FileService::ResolveSandboxPath(const QString& relativeOrAbsolutePath) const
