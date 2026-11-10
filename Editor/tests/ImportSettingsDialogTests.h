@@ -7,6 +7,7 @@
 #include "UiTestHelper.h"
 #include "CommandRegistry.h"
 #include "IEditorHost.h"
+#include "EditorStyles.h"
 
 #include <QCheckBox>
 #include <QComboBox>
@@ -156,6 +157,17 @@ inline void Run()
     UiTestHelper::SelectComboBoxData(&dlg, QStringLiteral("NormalsCombo"), static_cast<int>(EditorCore::ModelNormalsMode::File));
     Check(!spinSmoothing->isEnabled(), "SmoothingAngle disabled again when normals is File");
     ++checks;
+
+    // 7b. EditorStyles: disabled stylesheet rules exist for spinbox and labels in dark & light
+    for (const auto mode : {ThemeMode::Dark, ThemeMode::Light})
+    {
+        const QString qss = EditorStyles::BuildStyleSheet(mode, QColor(0, 122, 204), QStringLiteral("up"), QStringLiteral("down"), QStringLiteral("right"));
+        Check(qss.contains(QStringLiteral("QDoubleSpinBox:disabled")), "StyleSheet contains QDoubleSpinBox:disabled");
+        Check(qss.contains(QStringLiteral("QLabel:disabled")), "StyleSheet contains QLabel:disabled");
+        Check(qss.contains(QStringLiteral("QLabel#CardFieldLabel:disabled")), "StyleSheet contains QLabel#CardFieldLabel:disabled");
+        Check(qss.contains(QStringLiteral("QFrame#CollapsibleCard QDoubleSpinBox:disabled")), "StyleSheet contains CollapsibleCard QDoubleSpinBox:disabled");
+        ++checks;
+    }
 
     // 8. Reset to defaults restores all 8 parameters to schema defaults
     dlg.SetScale(0.05f);

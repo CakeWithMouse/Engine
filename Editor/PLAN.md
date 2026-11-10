@@ -94,24 +94,20 @@
 
 ---
 
-## Эталон тестов (Baseline S16 на ветке main @ d74aebb)
+## Эталон тестов (Baseline ветки feat/import-pipeline @ ddec269 перед шагами исправления)
 
-| Тест / Скрипт | Результат на `main` (эталон) | Примечание |
+| Тест / Скрипт | Результат (эталон) | Примечание |
 |---|---|---|
 | Сборка `EditorModule` (Debug) | **PASS** | 0 ошибок, 0 новых warnings |
 | Сборка `EditorModule` (Release) | **PASS** | Собрано MSBuild x64 |
-| `Editor/tests/CoreTests.exe` | **549/549 PASS** | 474 baseline + S17.1-17.3b тесты sidecar (`CoreTests: 549 checks passed.`) |
-| `Editor/tests/HostTests.exe` | **102/102 PASS** | 78 regression + 18 overlay + 6 history (`HostTests: 102 checks passed.`) |
-| `Editor/tests/UiTests.exe` | **274/274 PASS** | 15 helper + 14 import settings dialog + 245 smoke (`UiSmokeTests: 245 checks passed`) |
-| `Engine/tests/run.ps1` (Debug) | **71/71 PASS** | 70 baseline + S17.2 тест парсера sidecar (`71/71 tests passed; 0 skipped; 0 failed`) |
-| `Engine/tests/component-generation/run.ps1` | **24/24 PASS** | Генератор компонентов и контракты (`Compiler contract: 4 expected rejections + empty catalog passed`) |
-| `Engine/tests/edit-session/run.ps1` (Debug) | **651/651 PASS** | C-ABI сессии сцены (`Edit session: 651 checks passed (no editor)`) |
-| `Engine/tests/scene-module/run.ps1` (Debug) | **109/109 PASS** | C-ABI сцены (`Scene module: 109 checks passed; no editor/window/GPU`) |
-| `Engine/tests/run-viewport.ps1` (Debug) | **7/7 PASS** | Рендеринг и вьюпорт (`PASS: GameSettings in standalone and embedded...`) |
-| `Engine/tests/skeletal/run.ps1` (Debug) | **8/8 PASS** | Скелетная анимация (`=== Skeletal Tests: 8/8 passed ===`) |
-| `Engine/tests/code-projects/class-names.ps1` | **27/27 PASS** | Имена классов (`Class names: 27 checks passed.`) |
-| `Engine/tests/run-runtime.ps1` (Debug) | **18/18 PASS** | Runtime тесты (`18 runtime checks passed.`) |
-| `Engine/tests/compatibility/run.ps1` | **116/116 PASS** | Тесты обратной совместимости (`CompatibilityTests: 116 checks passed`) |
+| `Editor/tests/CoreTests.exe` | **656/656 PASS** | 656 checks passed |
+| `Editor/tests/HostTests.exe` | **109/109 PASS** | 109 checks passed |
+| `Editor/tests/UiTests.exe` | **306/306 PASS** | 15 helper + 18 dialog + 18 edit + 3 v2 + 7 delete + 245 smoke = 306 checks passed (после шага 1: 308 checks) |
+| `Engine/tests/run.ps1` (Debug) | **74/74 PASS** | 74/74 tests passed; 0 skipped; 0 failed |
+| `Engine/tests/skeletal/run.ps1` (Debug) | **8/8 PASS** | 8/8 passed |
+| `Engine/tests/edit-session/run.ps1` (Debug) | **651/651 PASS** | 651 checks passed |
+| `Engine/tests/scene-module/run.ps1` (Debug) | **109/109 PASS** | 109 checks passed |
+| `Engine/tests/compatibility/run.ps1` | **116/116 PASS** | 116 checks passed |
 | `Editor/tools/check.ps1 -Quick` | **FAIL (Красная база)** | `FAIL: Legacy file Editor/Source/MaterialEditorWindow.cpp exceeded Cyrillic ratchet limit (1380 > 800)` |
 | `Game/tests/run-games.ps1` | **FAIL (Красная база)** | `Expected 1, got -1073741515: BasicExamples.exe --smoke` (отсутствие assimp.dll в фикстуре, 25/27 PASS) |
 | `Editor/tests/run.ps1` (`EditorUiTests.exe`) | **FAIL (Красная база)** | `preview clears to its background` (падение grabWindow в фоновом окружении) |
@@ -570,6 +566,14 @@
 - [x] **T5 (test(engine)):** Регрессия плоских нормалей (П3): фикстура `Engine/tests/fixtures/folded-smooth.obj` (в репозитории, не TEMP; два треугольника с общим ребром, согнутые на 90 градусов, все углы с одним smooth `vn`) и тест `Engine/tests/ModelFlatNormalsTests.h`. `flat` даёт больше вершин, чем файл, и 100% плоских граней с различными нормалями; `smooth` на дефолтном угле не сваривает складку; `smooth` на 175 градусах сваривает обратно до 4 вершин. Тест падает при отсутствии фикстуры. Вывод по П3 зафиксирован в «Решения» (п. 37): НЕ воспроизведён, первый черновик падал из-за отсутствия обязательного `model.scale` в sidecar (баг обвязки). Коммит `2592da2`. EngineTests 74/74 PASS.
 - [x] **T6 (chore):** Актуализация `Editor/PLAN.md`: решения R1-R5 (п. 36), вывод по П3 (п. 37), чек-лист S17.8, Backlog (сироты sidecar при rename/move через AssetOps companions, `contains("..")` в Engine `ResolveSidecarPath`, смена числа материальных слотов ломает реимпорт), «Не проверено в рантайме» (перерисовка вьюпорта после реимпорта, реальный FBX Юрия для flat/scale, scale-в-геометрию в живом GUI, иконки без Qt6Svg).
 - [x] **T7 (test):** Регрессия 17.7 Host/Core: импорт с v2 sidecar -> спавн `Transform = 1` -> реимпорт не сбрасывает `Transform`; в новых файлах. Новый тест `Editor/tests/core/ImportReimportChainTests.h` (20 проверок) связывает R1 (v2 -> `ReadSpawnScale = 1`, геометрия хранит scale) и R4 (транзакционный откат sidecar при ошибке `UpdateAsset`); подключён в `CoreTests.cpp` и `CoreTests.vcxproj`. CoreTests 653 (Debug и Release). Коммит `d9b6c3f`.
+
+---
+
+## Чек-лист среза S17.9: Исправление дефектов приёмки S17.8 (3 бага живого тестирования)
+
+- [x] **Шаг 17.9a (fix(ui)):** Стили `:disabled` для спинбоксов, комбобоксов и меток в `EditorStyles.cpp`. Добавлены селекторы `:disabled` с цветом `%12` (`textDisabled`), фоном `%8` и границей `%6` для `QLineEdit`, `QSpinBox`, `QDoubleSpinBox`, `QComboBox`, а также для `QLabel`, `QLabel#CardFieldLabel` и меток внутри `QFrame#CollapsibleCard`. Объединены дублирующиеся стили `QMainWindow::separator` и `QSplitter::handle` для соблюдения лимита (492 строки <= 500). Юнит-тест в `ImportSettingsDialogTests.h` (347 строк <= 500) проверяет наличие правил в темной и светлой теме. `UiTests.exe` 308/308 PASS.
+- [ ] **Шаг 17.9b (test(host)):** Красный тест хостового пути импорта: проверка, что при наличии `importOptionsJson` отсутствие `importWithOptions` не приводит к молчаливому фоллбэку на дефолты или созданию дефолтного sidecar, а возвращает ошибку; либо проверка контракта передачи опций через `AssetCommandHandler`.
+- [ ] **Шаг 17.9c (fix(engine) + fix(host)):** Проброс `EngineBindAssetImport` в `Engine/Source/Base/Base.cpp` и удаление молчаливого fallback в `AssetCommandHandler.cpp`.
 
 ---
 
