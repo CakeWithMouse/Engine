@@ -215,38 +215,37 @@ bool ImportSettingsFile::Parse(const QByteArray& data, ImportSettings& outSettin
 
     const QJsonObject modelObj = root.value(QStringLiteral("model")).toObject();
 
-    // scale (required in model)
-    if (!modelObj.contains(QStringLiteral("scale")))
+    // scale (optional in model, default 1.0)
+    if (modelObj.contains(QStringLiteral("scale")))
     {
-        const QString errStr = QStringLiteral("ImportSettings: missing 'scale' in model settings");
-        Logger::Instance().Error(errStr);
-        if (outError)
-            *outError = errStr;
-        return false;
+        const QJsonValue mScaleVal = modelObj.value(QStringLiteral("scale"));
+        if (!mScaleVal.isDouble())
+        {
+            const QString errStr = QStringLiteral("ImportSettings: 'scale' must be a number");
+            Logger::Instance().Error(errStr);
+            if (outError)
+                *outError = errStr;
+            return false;
+        }
+        const double dScale = mScaleVal.toDouble();
+        const float fScale = static_cast<float>(dScale);
+        if (!IsValidScale(fScale))
+        {
+            const QString errStr = QStringLiteral("ImportSettings: scale %1 is out of allowed range [%2, %3]")
+                .arg(dScale, 0, 'g', 6)
+                .arg(static_cast<double>(MinScale), 0, 'g', 6)
+                .arg(static_cast<double>(MaxScale), 0, 'g', 6);
+            Logger::Instance().Error(errStr);
+            if (outError)
+                *outError = errStr;
+            return false;
+        }
+        outSettings.model.scale = fScale;
     }
-    const QJsonValue mScaleVal = modelObj.value(QStringLiteral("scale"));
-    if (!mScaleVal.isDouble())
+    else
     {
-        const QString errStr = QStringLiteral("ImportSettings: 'scale' is not a number, using default 1.0");
-        Logger::Instance().Error(errStr);
-        if (outError)
-            *outError = errStr;
-        return false;
+        outSettings.model.scale = 1.0f;
     }
-    const double dScale = mScaleVal.toDouble();
-    const float fScale = static_cast<float>(dScale);
-    if (!IsValidScale(fScale))
-    {
-        const QString errStr = QStringLiteral("ImportSettings: scale %1 is out of allowed range [%2, %3], using default 1.0")
-            .arg(dScale, 0, 'g', 6)
-            .arg(static_cast<double>(MinScale), 0, 'g', 6)
-            .arg(static_cast<double>(MaxScale), 0, 'g', 6);
-        Logger::Instance().Error(errStr);
-        if (outError)
-            *outError = errStr;
-        return false;
-    }
-    outSettings.model.scale = fScale;
 
     // useFileUnitScale (optional, bool, default false)
     if (modelObj.contains(QStringLiteral("useFileUnitScale")))

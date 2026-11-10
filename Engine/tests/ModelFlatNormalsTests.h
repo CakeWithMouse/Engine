@@ -120,6 +120,11 @@ inline void Run()
         Check(!NormalEqual(flatStats.normals[0], flatStats.normals[1]),
               "flat: the two faces keep distinct normals, the fold stays visible");
 
+        // "flat" without scale field: scale is optional, must not fall back to defaults ("file")
+        WriteText(sidecar, R"({"version":1,"kind":"model","model":{"normals":"flat"}})");
+        const auto flatNoScale = Load(vpath);
+        Check(TotalVertices(*flatNoScale.Model) > fileVertices, "flat without scale still splits shared edge");
+
         // "smooth" at the default 60 degrees: the 90-degree crease is above the angle, so it is not welded.
         WriteText(sidecar, R"({"version":1,"kind":"model","model":{"scale":1.0,"normals":"smooth"}})");
         const auto smooth = Load(vpath);

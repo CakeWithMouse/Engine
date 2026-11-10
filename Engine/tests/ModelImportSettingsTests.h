@@ -124,22 +124,37 @@ inline void Run()
         ModelImportSettings s;
         std::string err;
         check(!ModelImportSettings::Parse(kMissingKind, s, &err), "Parse failed on missing kind");
+        check(err.find("kind") != std::string::npos, "Error names field 'kind'");
         check(!ModelImportSettings::Parse(kMissingModel, s, &err), "Parse failed on missing model object");
-        check(!ModelImportSettings::Parse(kMissingScale, s, &err), "Parse failed on missing scale");
+        check(err.find("model") != std::string::npos, "Error names field 'model'");
         check(!ModelImportSettings::Parse(kUnsupportedKind, s, &err), "Parse failed on unsupported kind");
+        check(err.find("kind") != std::string::npos, "Error names field 'kind'");
+    }
+
+    // 7b. Optional scale in model (defaults to 1.0, normals=flat is preserved)
+    {
+        ModelImportSettings s;
+        std::string err;
+        check(ModelImportSettings::Parse(kNoScaleDefaults, s, &err), "Parse succeeds without scale");
+        check(std::abs(s.scale - 1.0f) < 1e-6f, "Default scale is 1.0 when missing");
+
+        ModelImportSettings sFlat;
+        check(ModelImportSettings::Parse(kNoScaleWithFlatNormals, sFlat, &err), "Parse succeeds without scale with flat normals");
+        check(std::abs(sFlat.scale - 1.0f) < 1e-6f, "Scale is 1.0 when missing with flat normals");
+        check(sFlat.normals == "flat", "Normals preserved as flat when scale missing");
     }
 
     // 8. Bad types
     {
         ModelImportSettings s;
         std::string err;
-        check(!ModelImportSettings::Parse(kBadTypeScale, s, &err), "Parse failed on bad scale type");
-        check(!ModelImportSettings::Parse(kBadTypeNormals, s, &err), "Parse failed on bad normals type");
-        check(!ModelImportSettings::Parse(kBadTypeSmoothingAngle, s, &err), "Parse failed on bad smoothingAngle type");
-        check(!ModelImportSettings::Parse(kBadTypeImportMaterials, s, &err), "Parse failed on bad importMaterials type");
-        check(!ModelImportSettings::Parse(kBadTypeUseFileUnitScale, s, &err), "Parse failed on bad useFileUnitScale type");
-        check(!ModelImportSettings::Parse(kBadTypeFlipUv, s, &err), "Parse failed on bad flipUv type");
-        check(!ModelImportSettings::Parse(kBadTypeMergeMeshes, s, &err), "Parse failed on bad mergeMeshes type");
+        check(!ModelImportSettings::Parse(kBadTypeScale, s, &err) && err.find("scale") != std::string::npos, "Parse failed on bad scale type with 'scale' in error");
+        check(!ModelImportSettings::Parse(kBadTypeNormals, s, &err) && err.find("normals") != std::string::npos, "Parse failed on bad normals type with 'normals' in error");
+        check(!ModelImportSettings::Parse(kBadTypeSmoothingAngle, s, &err) && err.find("smoothingAngle") != std::string::npos, "Parse failed on bad smoothingAngle type with 'smoothingAngle' in error");
+        check(!ModelImportSettings::Parse(kBadTypeImportMaterials, s, &err) && err.find("importMaterials") != std::string::npos, "Parse failed on bad importMaterials type with 'importMaterials' in error");
+        check(!ModelImportSettings::Parse(kBadTypeUseFileUnitScale, s, &err) && err.find("useFileUnitScale") != std::string::npos, "Parse failed on bad useFileUnitScale type with 'useFileUnitScale' in error");
+        check(!ModelImportSettings::Parse(kBadTypeFlipUv, s, &err) && err.find("flipUv") != std::string::npos, "Parse failed on bad flipUv type with 'flipUv' in error");
+        check(!ModelImportSettings::Parse(kBadTypeMergeMeshes, s, &err) && err.find("mergeMeshes") != std::string::npos, "Parse failed on bad mergeMeshes type with 'mergeMeshes' in error");
     }
 
     // 9. Out of range values

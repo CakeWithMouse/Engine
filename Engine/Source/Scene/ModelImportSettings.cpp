@@ -127,28 +127,30 @@ bool ModelImportSettings::Parse(std::string_view jsonText, ModelImportSettings& 
 
         const auto& modelObj = root["model"];
 
-        // scale (required in model)
-        if (!modelObj.contains("scale"))
+        // scale (optional in model, default 1.0)
+        if (modelObj.contains("scale"))
         {
-            reportError("ModelImportSettings: missing 'scale' in model settings");
-            return false;
+            const auto& mScaleVal = modelObj["scale"];
+            if (!mScaleVal.is_number())
+            {
+                reportError("ModelImportSettings: 'scale' must be a number");
+                return false;
+            }
+            const float fScale = mScaleVal.get<float>();
+            if (!IsValidScale(fScale))
+            {
+                char buf[160];
+                std::snprintf(buf, sizeof(buf), "ModelImportSettings: scale %g is out of allowed range [%g, %g]",
+                    static_cast<double>(fScale), static_cast<double>(MinScale), static_cast<double>(MaxScale));
+                reportError(buf);
+                return false;
+            }
+            outSettings.scale = fScale;
         }
-        const auto& mScaleVal = modelObj["scale"];
-        if (!mScaleVal.is_number())
+        else
         {
-            reportError("ModelImportSettings: 'scale' is not a number, using default 1.0");
-            return false;
+            outSettings.scale = 1.0f;
         }
-        const float fScale = mScaleVal.get<float>();
-        if (!IsValidScale(fScale))
-        {
-            char buf[160];
-            std::snprintf(buf, sizeof(buf), "ModelImportSettings: scale %g is out of allowed range [%g, %g], using default 1.0",
-                static_cast<double>(fScale), static_cast<double>(MinScale), static_cast<double>(MaxScale));
-            reportError(buf);
-            return false;
-        }
-        outSettings.scale = fScale;
 
         // useFileUnitScale (optional, bool, default false)
         if (modelObj.contains("useFileUnitScale"))
@@ -292,6 +294,7 @@ ModelImportSettings ModelImportSettings::ReadFromVfs(std::string_view assetPath)
         std::string parseErr;
         if (!Parse(text, settings, &parseErr))
         {
+            std::fprintf(stderr, "[Error] ModelImportSettings: failed to parse sidecar '%s': %s, using default settings\n", sidecarPath.c_str(), parseErr.c_str());
             return ModelImportSettings{};
         }
         return settings;

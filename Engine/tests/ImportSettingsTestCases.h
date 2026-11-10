@@ -80,8 +80,9 @@ inline constexpr std::string_view kMissingKind = R"({"version": 1, "model": {"sc
 // 7. Missing required 'model' object in v1
 inline constexpr std::string_view kMissingModel = R"({"version": 1, "kind": "model"})";
 
-// 8. Missing required 'scale' in model
-inline constexpr std::string_view kMissingScale = R"({"version": 1, "kind": "model", "model": {}})";
+// 8. Optional 'scale' in model: defaults to 1.0; normals can be set without specifying scale
+inline constexpr std::string_view kNoScaleDefaults = R"({"version": 1, "kind": "model", "model": {}})";
+inline constexpr std::string_view kNoScaleWithFlatNormals = R"({"version": 1, "kind": "model", "model": {"normals": "flat"}})";
 
 // 9. Unsupported kind
 inline constexpr std::string_view kUnsupportedKind = R"({"version": 1, "kind": "audio", "model": {"scale": 1.0}})";

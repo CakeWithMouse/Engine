@@ -181,22 +181,27 @@ inline void RunImportSettingsTests(int& outChecks)
     ImportSettings sMissingKind;
     QString missingKindErr;
     check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kMissingKind), sMissingKind, &missingKindErr), "Parse fails on missing kind");
-    check(!missingKindErr.isEmpty(), "Error populated for missing kind");
+    check(missingKindErr.contains(QLatin1String("kind")), "Error names kind");
 
     ImportSettings sMissingModel;
     QString missingModelErr;
     check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kMissingModel), sMissingModel, &missingModelErr), "Parse fails on missing model object");
-    check(!missingModelErr.isEmpty(), "Error populated for missing model object");
-
-    ImportSettings sMissingScale;
-    QString missingScaleErr;
-    check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kMissingScale), sMissingScale, &missingScaleErr), "Parse fails on missing scale");
-    check(!missingScaleErr.isEmpty(), "Error populated for missing scale");
+    check(missingModelErr.contains(QLatin1String("model")), "Error names model");
 
     ImportSettings sUnsupportedKind;
     QString unsupportedKindErr;
     check(!ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kUnsupportedKind), sUnsupportedKind, &unsupportedKindErr), "Parse fails on unsupported kind");
-    check(!unsupportedKindErr.isEmpty(), "Error populated for unsupported kind");
+    check(unsupportedKindErr.contains(QLatin1String("kind")), "Error names kind");
+
+    // 4b. Optional scale in model (defaults to 1.0, normals=flat is preserved)
+    ImportSettings sNoScale;
+    check(ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kNoScaleDefaults), sNoScale), "Parse succeeds without scale");
+    check(std::abs(sNoScale.model.scale - 1.0f) < 1e-6f, "Default scale is 1.0");
+
+    ImportSettings sNoScaleFlat;
+    check(ImportSettingsFile::Parse(ToQByteArray(ImportSettingsTestCases::kNoScaleWithFlatNormals), sNoScaleFlat), "Parse succeeds without scale with flat normals");
+    check(std::abs(sNoScaleFlat.model.scale - 1.0f) < 1e-6f, "Scale is 1.0 with flat normals");
+    check(sNoScaleFlat.model.normals == ModelNormalsMode::Flat, "Normals flat preserved without scale");
 
     // 5. Invalid types
     ImportSettings sBadType;
