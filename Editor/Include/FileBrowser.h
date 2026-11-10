@@ -72,6 +72,7 @@ private:
     void OnDoubleClicked(const QModelIndex& index);
     void OnContextMenu(const QPoint& pos);
     void ApplyFilter(const QString& text);
+    void DeleteCurrentAsset();
     bool IsProtectedPath(const QString& path) const;
 
     EditorQtHost* host_ = nullptr;

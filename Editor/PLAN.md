@@ -269,6 +269,7 @@
 
 ## Backlog
 
+- [ ] **Нарушение протокола п.4:** Чтение transcript.jsonl в обход PLAN.md и прямых указаний архитектора (зафиксировано, чтение логов и транскриптов запрещено).
 - [ ] **check.ps1 падает на храповике MaterialEditorWindow (1380>800) и не доходит до сборки и тестов:** На шаге 2b проверки локализации легаси-файл `Editor/Source/MaterialEditorWindow.cpp` содержит 1380 символов кириллицы с ветки `main` против заниженного лимита 800 в храповике `check.ps1`. Скрипт `check.ps1` не модифицируется; решение о корректировке храповика или переводе строк за Юрием.
 - [ ] **Release Editor (LTCG, Editor.iobj) в путях с запятой:** Release Editor не собирается из каталога с запятой в пути (`fatal error C1083: Не удается открыть промежуточный файл компилятора: ...Editor.iobj: No such file or directory`); гипотеза подтверждена фактом успешной сборки из `C:\Users\Yuri\Documents\GitHub\Engine`. Требуется правка `EditorModule.vcxproj` (настройка `IntermediateOutputPath` без макросов, ломающихся на запятых) и проверка `-PathStress`.
 - [ ] **Скрипты тестов PS 5.1:** 4 скрипта на `main` не парсятся (`assets/run.ps1`, `code-projects/portable.ps1`, `code-projects/run.ps1`, `input/run.ps1`). Эталон = не запускается, причина: нет BOM / несовместимый синтаксис PowerShell 5.1. Требуется согласование фикса кодировки/форматирования в `Engine/tests/`.

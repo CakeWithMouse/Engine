@@ -56,6 +56,8 @@
 #include <QToolButton>
 #include <QGroupBox>
 #include <QTreeView>
+#include <QFileSystemModel>
+#include <QSortFilterProxyModel>
 #include "ViewportWidget.h"
 #include "SceneObjectsPanel.h"
 #include "CollapsibleCard.h"
@@ -636,6 +638,104 @@ int wmain(int argc, wchar_t** argv)
         until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.textureAsset.empty()) return false; return true; });
         Ui([](auto* w) { Action(w, QStringLiteral("Повторить"))->trigger(); });
         until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.textureAsset.empty()) return true; return false; });
+
+        // Content Browser Delete key test (column 0 and column 1)
+        {
+            const size_t objectCountBefore = host.ReadSnapshot().objects.size();
+            Check(objectCountBefore > 0, "scene has objects before asset delete");
+
+            // --- Column 0 test ---
+            const auto delImg0 = root / "Content/Textures/del_col0.bmp";
+            QImage img0(4, 4, QImage::Format_RGB32);
+            img0.fill(Qt::yellow);
+            Check(img0.save(QString::fromStdWString(delImg0.wstring())), "save del_col0.bmp");
+            until([&] { return std::filesystem::exists(delImg0); });
+
+            until([&] {
+                bool ready = false;
+                Ui([&](auto* w) {
+                    auto* files = w->template findChild<QTreeView*>("ProjectFiles");
+                    auto* proxy = files ? static_cast<QSortFilterProxyModel*>(files->model()) : nullptr;
+                    auto* fsModel = proxy ? static_cast<QFileSystemModel*>(proxy->sourceModel()) : nullptr;
+                    if (fsModel && proxy) {
+                        const auto idx = fsModel->index(QString::fromStdWString(delImg0.wstring()));
+                        ready = idx.isValid() && proxy->mapFromSource(idx).isValid();
+                    }
+                });
+                return ready;
+            });
+
+            Ui([&](auto* w) {
+                auto* files = w->template findChild<QTreeView*>("ProjectFiles");
+                auto* proxy = static_cast<QSortFilterProxyModel*>(files->model());
+                auto* fsModel = static_cast<QFileSystemModel*>(proxy->sourceModel());
+                const QModelIndex srcIdx = fsModel->index(QString::fromStdWString(delImg0.wstring()));
+                const QModelIndex proxyIdx = proxy->mapFromSource(srcIdx);
+                const QModelIndex col0 = proxyIdx.sibling(proxyIdx.row(), 0);
+                files->setCurrentIndex(col0);
+                files->setFocus();
+                Check(files->currentIndex().column() == 0, "del_col0 selected in column 0");
+
+                QTimer::singleShot(60, w, [] {
+                    if (auto* mb = qobject_cast<QMessageBox*>(QApplication::activeModalWidget())) {
+                        if (auto* btn = mb->button(QMessageBox::Yes)) btn->click();
+                        else mb->accept();
+                    }
+                });
+
+                QKeyEvent keyDel(QEvent::KeyPress, Qt::Key_Delete, Qt::NoModifier);
+                QApplication::sendEvent(files, &keyDel);
+            });
+
+            until([&] { return !std::filesystem::exists(delImg0); });
+            Check(host.ReadSnapshot().objects.size() == objectCountBefore, "scene object NOT deleted on asset col 0 delete");
+
+            // --- Column 1 test ---
+            const auto delImg1 = root / "Content/Textures/del_col1.bmp";
+            QImage img1(4, 4, QImage::Format_RGB32);
+            img1.fill(Qt::cyan);
+            Check(img1.save(QString::fromStdWString(delImg1.wstring())), "save del_col1.bmp");
+            until([&] { return std::filesystem::exists(delImg1); });
+
+            until([&] {
+                bool ready = false;
+                Ui([&](auto* w) {
+                    auto* files = w->template findChild<QTreeView*>("ProjectFiles");
+                    auto* proxy = files ? static_cast<QSortFilterProxyModel*>(files->model()) : nullptr;
+                    auto* fsModel = proxy ? static_cast<QFileSystemModel*>(proxy->sourceModel()) : nullptr;
+                    if (fsModel && proxy) {
+                        const auto idx = fsModel->index(QString::fromStdWString(delImg1.wstring()));
+                        ready = idx.isValid() && proxy->mapFromSource(idx).isValid();
+                    }
+                });
+                return ready;
+            });
+
+            Ui([&](auto* w) {
+                auto* files = w->template findChild<QTreeView*>("ProjectFiles");
+                auto* proxy = static_cast<QSortFilterProxyModel*>(files->model());
+                auto* fsModel = static_cast<QFileSystemModel*>(proxy->sourceModel());
+                const QModelIndex srcIdx = fsModel->index(QString::fromStdWString(delImg1.wstring()));
+                const QModelIndex proxyIdx = proxy->mapFromSource(srcIdx);
+                const QModelIndex col1 = proxyIdx.sibling(proxyIdx.row(), 1);
+                files->setCurrentIndex(col1);
+                files->setFocus();
+                Check(files->currentIndex().column() == 1, "del_col1 selected in column 1");
+
+                QTimer::singleShot(60, w, [] {
+                    if (auto* mb = qobject_cast<QMessageBox*>(QApplication::activeModalWidget())) {
+                        if (auto* btn = mb->button(QMessageBox::Yes)) btn->click();
+                        else mb->accept();
+                    }
+                });
+
+                QKeyEvent keyDel(QEvent::KeyPress, Qt::Key_Delete, Qt::NoModifier);
+                QApplication::sendEvent(files, &keyDel);
+            });
+
+            until([&] { return !std::filesystem::exists(delImg1); });
+            Check(host.ReadSnapshot().objects.size() == objectCountBefore, "scene object NOT deleted on asset col 1 delete");
+        }
         // Material editor: template from Files, live parameter, HLSL errors, recompiled parameters, save and discard.
         const auto materialFile = root / "Content/Materials/Tint.mat", surfaceFile = root / "Content/Materials/Tint.hlsl";
         auto editorWidget = [](auto* w, const QString& name) -> QWidget* {

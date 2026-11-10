@@ -178,6 +178,13 @@ void FileBrowserDock::BuildUi()
             [this](const QModelIndex& i) { OnDoubleClicked(i); });
     connect(view_, &QTreeView::customContextMenuRequested, this,
             [this](const QPoint& p) { OnContextMenu(p); });
+
+    auto* actDelete = new QAction(view_);
+    actDelete->setShortcut(QKeySequence::Delete);
+    actDelete->setShortcutContext(Qt::WidgetShortcut);
+    view_->addAction(actDelete);
+    connect(actDelete, &QAction::triggered, this, [this] { DeleteCurrentAsset(); });
+
     layout->addWidget(view_);
 
     setWidget(panel);
@@ -220,7 +227,8 @@ void FileBrowserDock::ApplyFilter(const QString& text)
 
 void FileBrowserDock::OnDoubleClicked(const QModelIndex& proxyIndex)
 {
-    const auto index = proxy_->mapToSource(proxyIndex);
+    const auto col0 = proxyIndex.sibling(proxyIndex.row(), 0);
+    const auto index = proxy_->mapToSource(col0);
     if (!index.isValid() || model_->isDir(index))
         return;
 
@@ -249,7 +257,9 @@ void FileBrowserDock::OnDoubleClicked(const QModelIndex& proxyIndex)
 
 void FileBrowserDock::OnContextMenu(const QPoint& pos)
 {
-    const QModelIndex index = proxy_->mapToSource(view_->indexAt(pos));
+    const QModelIndex clicked = view_->indexAt(pos);
+    const QModelIndex col0 = clicked.isValid() ? clicked.sibling(clicked.row(), 0) : QModelIndex();
+    const QModelIndex index = proxy_->mapToSource(col0);
     const bool hasFile = index.isValid();
     const QString path = hasFile ? model_->filePath(index) : QString();
 
@@ -323,21 +333,31 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
         model_->setRootPath(model_->rootPath());
 }
 
+void FileBrowserDock::DeleteCurrentAsset()
+{
+    const QModelIndex viewIndex = view_->currentIndex();
+    if (!viewIndex.isValid())
+        return;
+
+    const QModelIndex col0 = viewIndex.sibling(viewIndex.row(), 0);
+    const QModelIndex current = proxy_->mapToSource(col0);
+    if (!current.isValid())
+        return;
+
+    const QString path = model_->filePath(current);
+    if (!path.isEmpty() && !IsProtectedPath(path))
+    {
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Delete"), {{QStringLiteral("path"), path}});
+    }
+}
+
 void FileBrowserDock::keyPressEvent(QKeyEvent* event)
 {
     if (event->key() == Qt::Key_Delete)
     {
-        const QModelIndex current = proxy_->mapToSource(view_->currentIndex());
-        if (current.isValid())
-        {
-            const QString path = model_->filePath(current);
-            if (!path.isEmpty() && !IsProtectedPath(path))
-            {
-                CommandRegistry::Instance().Execute(QStringLiteral("Assets.Delete"), {{QStringLiteral("path"), path}});
-                event->accept();
-                return;
-            }
-        }
+        DeleteCurrentAsset();
+        event->accept();
+        return;
     }
     QDockWidget::keyPressEvent(event);
 }
