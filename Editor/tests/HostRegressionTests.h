@@ -290,7 +290,7 @@ inline int Run() {
             check(completedCmd.path == QStringLiteral("/Game/Models/Modern/Modern.glb"), "completedCmd path updated");
         }
 
-        // Case B: Old Engine without extension (fallback path)
+        // Case B: Old Engine without extension (legacy caller without options)
         {
             static bool s_legacyCalled = false;
             s_legacyCalled = false;
@@ -308,7 +308,7 @@ inline int Run() {
             cmd.type = EditorCommand::ImportModel;
             cmd.path = QStringLiteral("C:/Sources/Legacy.glb");
             cmd.importScale = 1.0f;
-            cmd.importOptionsJson = QStringLiteral("{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0}}");
+            cmd.importOptionsJson.clear();
 
             EditorCommand completedCmd;
             uint32_t res = 999;
@@ -318,6 +318,35 @@ inline int Run() {
             check(res == EngineSceneOk, "Legacy AssetCommandHandler succeeds without extension");
             check(s_legacyCalled, "ctx.scene.importAsset fallback was called");
             check(completedCmd.path == QStringLiteral("/Game/Models/Legacy/Legacy.glb"), "completedCmd path updated via fallback");
+        }
+
+        // Case C: Engine without extension when optionsJson is specified -> MUST NOT silently fall back, must reject
+        {
+            static bool s_legacyCalled = false;
+            s_legacyCalled = false;
+
+            AssetCommandHandler::Context legacyCtx;
+            legacyCtx.scene.context = &s;
+            legacyCtx.scene.importAsset = [](void*, const char*, uint32_t,
+                char*, uint32_t, char*, uint32_t) -> uint32_t {
+                s_legacyCalled = true;
+                return EngineSceneOk;
+            };
+
+            EditorCommand cmd;
+            cmd.type = EditorCommand::ImportModel;
+            cmd.path = QStringLiteral("C:/Sources/Custom.glb");
+            cmd.importScale = 0.01f;
+            cmd.importOptionsJson = QStringLiteral("{\"version\":2,\"kind\":\"model\",\"model\":{\"scale\":0.01,\"normals\":\"flat\"}}");
+
+            EditorCommand completedCmd;
+            uint32_t res = 999;
+            QString err;
+            assetHandler.Handle(cmd, legacyCtx, hist, IEditorHost::Edit, nullptr, 0, 0, completedCmd, res, err);
+
+            check(res == EngineSceneFailure, "AssetCommandHandler rejects optionsJson when extension missing");
+            check(!s_legacyCalled, "ctx.scene.importAsset MUST NOT be called when optionsJson cannot be applied");
+            check(completedCmd.path.isEmpty(), "completedCmd path must be empty on failure");
         }
     }
     std::cout<<"Host regression checks: "<<checks<<std::endl;return checks;

@@ -572,7 +572,7 @@
 ## Чек-лист среза S17.9: Исправление дефектов приёмки S17.8 (3 бага живого тестирования)
 
 - [x] **Шаг 17.9a (fix(ui)):** Стили `:disabled` для спинбоксов, комбобоксов и меток в `EditorStyles.cpp`. Добавлены селекторы `:disabled` с цветом `%12` (`textDisabled`), фоном `%8` и границей `%6` для `QLineEdit`, `QSpinBox`, `QDoubleSpinBox`, `QComboBox`, а также для `QLabel`, `QLabel#CardFieldLabel` и меток внутри `QFrame#CollapsibleCard`. Объединены дублирующиеся стили `QMainWindow::separator` и `QSplitter::handle` для соблюдения лимита (492 строки <= 500). Юнит-тест в `ImportSettingsDialogTests.h` (347 строк <= 500) проверяет наличие правил в темной и светлой теме. `UiTests.exe` 308/308 PASS.
-- [ ] **Шаг 17.9b (test(host)):** Красный тест хостового пути импорта: проверка, что при наличии `importOptionsJson` отсутствие `importWithOptions` не приводит к молчаливому фоллбэку на дефолты или созданию дефолтного sidecar, а возвращает ошибку; либо проверка контракта передачи опций через `AssetCommandHandler`.
+- [x] **Шаг 17.9b (test(host)):** Красный тест хостового пути импорта: проверка в `HostRegressionTests.h` (Case C), что при наличии `cmd.importOptionsJson` отсутствие расширения `Engine.Asset.Import` (`importWithOptions`) не приводит к молчаливому сбросу опций на дефолты через `ctx.scene.importAsset`, а отклоняет операцию со статусом `EngineSceneFailure` без вызова legacy `importAsset` и без выставления `completedCmd.path`. Тест проверен и подтверждён красным на текущем коде (`AssetCommandHandler rejects optionsJson when extension missing`, exit code 1).
 - [ ] **Шаг 17.9c (fix(engine) + fix(host)):** Проброс `EngineBindAssetImport` в `Engine/Source/Base/Base.cpp` и удаление молчаливого fallback в `AssetCommandHandler.cpp`.
 
 ---
