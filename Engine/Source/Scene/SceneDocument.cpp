@@ -9,6 +9,7 @@
 #include "../../ThirdParty/nlohmann/json.hpp"
 #include <atomic>
 #include <cmath>
+#include <cstdio>
 #include <fstream>
 #include <set>
 
@@ -261,14 +262,83 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
     std::map<ComponentId, ComponentId> ids;
     for (const auto& o : data.components)
     {
-        auto object = o.typeName == SceneAssets::ModelType ? SceneAssets::CreateModel(o.modelAsset, false) : catalog.Find(o.typeName)->create();
+        std::unique_ptr<GameComponent> object;
+        bool placeholder = false;
+        if (o.typeName == SceneAssets::ModelType)
+        {
+            try
+            {
+                object = SceneAssets::CreateModel(o.modelAsset, false);
+            }
+            catch (const std::exception& e)
+            {
+                std::printf("[Error] SceneDocument: missing model '%s': %s\n", o.modelAsset.c_str(), e.what());
+                auto dummy = std::make_unique<SkeletalMeshComponent>();
+                auto model = std::make_shared<SkeletalModel>();
+                if (!o.projectData.empty())
+                {
+                    try
+                    {
+                        const auto json = Json::parse(o.projectData);
+                        if (json.is_object() && json.contains("materialSlots") && json["materialSlots"].is_object())
+                        {
+                            for (auto it = json["materialSlots"].begin(); it != json["materialSlots"].end(); ++it)
+                            {
+                                SkeletalMesh mesh;
+                                mesh.MaterialIndex = static_cast<uint32_t>(std::stoul(it.key()));
+                                model->Meshes.push_back(std::move(mesh));
+                            }
+                        }
+                    }
+                    catch (...) {}
+                }
+                dummy->SetAssetModel(o.modelAsset, std::move(model));
+                object = std::move(dummy);
+                placeholder = true;
+            }
+        }
+        else
+        {
+            object = catalog.Find(o.typeName)->create();
+        }
         if (!object) throw std::runtime_error("Component factory returned null");
         // Engine.Model is already loaded by its factory; project subclasses are not.
         // Their material-slot codec validates source IDs against the loaded geometry.
         const bool skeletal = dynamic_cast<SkeletalMeshComponent*>(object.get()) != nullptr;
-        if (skeletal) SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
-        object->LoadProjectData(o.projectData);
-        if (!skeletal) SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
+        if (skeletal)
+        {
+            try
+            {
+                SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
+            }
+            catch (const std::exception& e)
+            {
+                std::printf("[Error] SceneDocument: cannot apply model '%s' to '%s': %s\n",
+                    o.modelAsset.c_str(), o.name.c_str(), e.what());
+            }
+        }
+        try
+        {
+            object->LoadProjectData(o.projectData);
+        }
+        catch (const std::exception& e)
+        {
+            if (!placeholder) throw;
+            std::printf("[Error] SceneDocument: cannot load project data for placeholder '%s': %s\n",
+                o.name.c_str(), e.what());
+        }
+        if (!skeletal)
+        {
+            try
+            {
+                SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
+            }
+            catch (const std::exception& e)
+            {
+                std::printf("[Error] SceneDocument: cannot apply model '%s' to '%s': %s\n",
+                    o.modelAsset.c_str(), o.name.c_str(), e.what());
+            }
+        }
         auto added = target.AddComponent(o.name, object, o.typeName);
         if (added.result != SceneResult::Ok || target.SetTransform(added.id, o.transform) != SceneResult::Ok)
             throw std::runtime_error("Cannot restore object: " + o.name);
