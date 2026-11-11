@@ -90,6 +90,10 @@ inline void Run()
         svc.SetValue(QStringLiteral("import/model/mergeMeshes"), true);
 
         ImportSettingsDialog dlg;
+        Check(!svc.Contains(QStringLiteral("import/model/scale")), "Edit-mode dialog open removes legacy import/model/scale");
+        Check(!svc.Contains(QStringLiteral("import/model/flipUv")), "Edit-mode dialog open removes legacy import/model/flipUv");
+        ++checks;
+
         EditorCore::ImportSettings v2;
         v2.version = 2;
         v2.model.scale = 0.05f;
@@ -107,8 +111,6 @@ inline void Run()
         Check(shown.model.flipUv, "Edit dialog shows sidecar flipUv true, not default false");
         Check(!shown.model.mergeMeshes, "Edit dialog shows sidecar mergeMeshes false, not stored true");
 
-        svc.Remove(QStringLiteral("import/model/scale"));
-        svc.Remove(QStringLiteral("import/model/flipUv"));
         svc.Remove(QStringLiteral("import/model/normals"));
         svc.Remove(QStringLiteral("import/model/mergeMeshes"));
         ++checks;

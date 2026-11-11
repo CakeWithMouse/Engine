@@ -272,6 +272,13 @@ void ImportSettingsDialog::UpdateDependencies()
 void ImportSettingsDialog::LoadFromSettingsService()
 {
     auto& s = SettingsService::Instance();
+
+    // Легаси-ключи до шага 17.10.D удаляются один раз; SettingsService::Remove пишет удаление в лог.
+    if (s.Contains(QStringLiteral("import/model/scale")))
+        s.Remove(QStringLiteral("import/model/scale"));
+    if (s.Contains(QStringLiteral("import/model/flipUv")))
+        s.Remove(QStringLiteral("import/model/flipUv"));
+
     EditorCore::ImportSettings settings = DefaultSettings();
 
     // scale and flipUv are per-asset (sidecar), never restored from global preferences:

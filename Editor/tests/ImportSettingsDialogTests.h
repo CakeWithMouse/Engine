@@ -258,9 +258,13 @@ inline void Run()
         Check(n2->currentData().toInt() == static_cast<int>(EditorCore::ModelNormalsMode::Smooth), "Restored normals is Smooth");
         auto* m2 = UiTestHelper::Require<QCheckBox>(&dlg2, QStringLiteral("MergeMeshesCheck"));
         Check(!m2->isChecked(), "Restored mergeMeshes is false");
+        Check(!svc.Contains(QStringLiteral("import/model/scale")), "Dialog open removes legacy import/model/scale");
+        Check(!svc.Contains(QStringLiteral("import/model/flipUv")), "Dialog open removes legacy import/model/flipUv");
+        ++checks;
 
-        svc.Remove(QStringLiteral("import/model/scale"));
-        svc.Remove(QStringLiteral("import/model/flipUv"));
+        ImportSettingsDialog dlg3;
+        Check(!svc.Contains(QStringLiteral("import/model/scale")), "Repeated open keeps import/model/scale absent (cleanup runs once)");
+        Check(!svc.Contains(QStringLiteral("import/model/flipUv")), "Repeated open keeps import/model/flipUv absent (cleanup runs once)");
         ++checks;
     }
 
@@ -361,9 +365,8 @@ inline void Run()
         Check(def.model.importTextures, "Default settings importTextures is true");
         Check(!def.model.flipUv, "Default settings flipUv is false");
         Check(!def.model.mergeMeshes, "Default settings mergeMeshes is false");
-
-        svc.Remove(QStringLiteral("import/model/scale"));
-        svc.Remove(QStringLiteral("import/model/flipUv"));
+        Check(!svc.Contains(QStringLiteral("import/model/scale")), "Fresh open removes poisoned import/model/scale");
+        Check(!svc.Contains(QStringLiteral("import/model/flipUv")), "Fresh open removes poisoned import/model/flipUv");
         ++checks;
     }
 
