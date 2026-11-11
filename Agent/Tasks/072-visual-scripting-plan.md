@@ -1,6 +1,6 @@
 # 072 — Визуальный редактор кода на нодах
 
-Статус на 2026-11-11: план согласован; этапы 1–4 выполнены, этап 5 не начат.
+Статус на 2026-11-11: все пять этапов выполнены; выпуск 2026.11.11.0 собран и проверен локально, архив не создавался.
 
 ## Границы задачи
 
@@ -330,6 +330,28 @@ Engine/Script/            каталог нод, ScriptProgram, интерпре
 **Проверки:** project workflow — проект без кода со скриптом, `--smoke-project` и `--smoke-project-editor`; C++-проект пересобран с SDK; Release runtime/launcher/editor.
 
 `run.ps1` с кириллицей в Windows PowerShell 5.1 не парсится: шаги запускать вручную. Для AssetTests добавлять в PATH `Engine/vcpkg_installed/x64-windows/debug/bin`.
+
+**Результат этапа 5:**
+- **Пример:** сцена «Скрипты» в BasicExamples (`--scene scripts`, кнопка в окне выбора). Скрипты
+  `Spin`/`Bob`/`Move.vscript` в `Content/Scripts`, без игрового C++. В режиме `--smoke` пример проверяет, что все
+  скрипты работают и куб повернулся.
+- **Документация:**
+  - [VISUAL-SCRIPTING](../../Engine/docs/VISUAL-SCRIPTING.md): пример, работа в окне, формат, ноды, API, совместимость,
+    границы, проверки;
+  - ссылки в `Engine/docs/README.md`, `Game/README.md`, README задач;
+  - раздел выпуска в ENGINE-VERSIONS.
+- **Выпуск 2026.11.11.0:** номер в `Engine/Version.json`. `TemplateCompatibility.json` не менялся: хеш шаблона
+  2026.11.07.6 добавляется из опубликованного архива при выпуске (`New-Release.ps1`), локально его не получить.
+- **Проверки Release (MSVC v145, Assimp):**
+  - сборка всех целей, включая SDK и шаблон SceneProject;
+  - EngineTests 71/71, теперь со сборкой скриптов примера;
+  - BasicExamples `--scene scripts --smoke`;
+  - проект без кода: `--check-project`, `--smoke-project`, `--smoke-project-editor`;
+  - то же для проекта без кода со скриптом в `assets.script` стартовой сцены;
+  - C++-проект: `--enable-code` с новым SDK, `--check-project`, `--smoke-project`.
+- **Не прогнаны:**
+  - ProjectWorkflowTests, HudTests и InputCharacterTests: в их проектах жёстко прописан `assimp-vc143`, а на машине `vc145`;
+  - архив выпуска: `New-Release.ps1` требует опубликованные архивы прошлых версий и WinRAR.
 
 ## Откладываем
 

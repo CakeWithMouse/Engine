@@ -1,0 +1,189 @@
+{
+    "format": "ITMOEngine.Graph",
+    "version": 1,
+    "schema": "code",
+    "schemaVersion": 1,
+    "variables": [
+        {
+            "name": "Start",
+            "type": "vec3",
+            "value": [
+                0,
+                0,
+                0
+            ]
+        }
+    ],
+    "nodes": [
+        {
+            "id": 1,
+            "type": "Event.BeginPlay",
+            "title": "",
+            "x": 0,
+            "y": 0,
+            "properties": {}
+        },
+        {
+            "id": 2,
+            "type": "Object.GetPosition",
+            "title": "",
+            "x": 0,
+            "y": 120,
+            "properties": {}
+        },
+        {
+            "id": 3,
+            "type": "Variable.Set",
+            "title": "",
+            "x": 260,
+            "y": 0,
+            "properties": {
+                "variable": "Start"
+            }
+        },
+        {
+            "id": 4,
+            "type": "Event.Tick",
+            "title": "",
+            "x": 0,
+            "y": 300,
+            "properties": {}
+        },
+        {
+            "id": 5,
+            "type": "Math.Time",
+            "title": "",
+            "x": 0,
+            "y": 420,
+            "properties": {}
+        },
+        {
+            "id": 6,
+            "type": "Math.Multiply",
+            "title": "",
+            "x": 200,
+            "y": 420,
+            "properties": {
+                "inputs": {
+                    "B": 2
+                }
+            }
+        },
+        {
+            "id": 7,
+            "type": "Math.Sin",
+            "title": "",
+            "x": 400,
+            "y": 420,
+            "properties": {}
+        },
+        {
+            "id": 8,
+            "type": "Math.Multiply",
+            "title": "",
+            "x": 600,
+            "y": 420,
+            "properties": {
+                "inputs": {
+                    "B": 0.6
+                }
+            }
+        },
+        {
+            "id": 9,
+            "type": "Vec3.Make",
+            "title": "",
+            "x": 800,
+            "y": 420,
+            "properties": {}
+        },
+        {
+            "id": 10,
+            "type": "Variable.Get",
+            "title": "",
+            "x": 800,
+            "y": 300,
+            "properties": {
+                "variable": "Start"
+            }
+        },
+        {
+            "id": 11,
+            "type": "Vec3.Add",
+            "title": "",
+            "x": 1000,
+            "y": 360,
+            "properties": {}
+        },
+        {
+            "id": 12,
+            "type": "Action.SetPosition",
+            "title": "",
+            "x": 1200,
+            "y": 300,
+            "properties": {}
+        }
+    ],
+    "connections": [
+        {
+            "fromNode": 1,
+            "fromPin": "then",
+            "toNode": 3,
+            "toPin": "exec"
+        },
+        {
+            "fromNode": 2,
+            "fromPin": "Position",
+            "toNode": 3,
+            "toPin": "Value"
+        },
+        {
+            "fromNode": 4,
+            "fromPin": "then",
+            "toNode": 12,
+            "toPin": "exec"
+        },
+        {
+            "fromNode": 5,
+            "fromPin": "Seconds",
+            "toNode": 6,
+            "toPin": "A"
+        },
+        {
+            "fromNode": 6,
+            "fromPin": "Out",
+            "toNode": 7,
+            "toPin": "In"
+        },
+        {
+            "fromNode": 7,
+            "fromPin": "Out",
+            "toNode": 8,
+            "toPin": "A"
+        },
+        {
+            "fromNode": 8,
+            "fromPin": "Out",
+            "toNode": 9,
+            "toPin": "Y"
+        },
+        {
+            "fromNode": 10,
+            "fromPin": "Value",
+            "toNode": 11,
+            "toPin": "A"
+        },
+        {
+            "fromNode": 9,
+            "fromPin": "Vector",
+            "toNode": 11,
+            "toPin": "B"
+        },
+        {
+            "fromNode": 11,
+            "fromPin": "Out",
+            "toNode": 12,
+            "toPin": "Position"
+        }
+    ]
+}

@@ -569,10 +569,34 @@ void ExtensionChecks()
     SCRIPT_CHECK(script.set(script.context, first, "", error, sizeof(error)) == EngineSceneOk);
     SCRIPT_CHECK(script.get(script.context, first, text, &assigned) == EngineSceneOk && assigned.empty());
 }
+// The shipped example scripts compile with the current catalog.
+void ExampleScriptChecks()
+{
+    std::filesystem::path folder;
+    for (auto dir = std::filesystem::current_path(); !dir.empty(); dir = dir.parent_path())
+    {
+        if (std::filesystem::is_directory(dir / "Game/BasicExamples/Content/Scripts")) { folder = dir / "Game/BasicExamples/Content/Scripts"; break; }
+        if (dir == dir.parent_path()) break;
+    }
+    SCRIPT_CHECK(!folder.empty()); // run from the repository
+    int count = 0;
+    for (const auto& entry : std::filesystem::directory_iterator(folder))
+    {
+        if (entry.path().extension() != ".vscript") continue;
+        std::ifstream input(entry.path(), std::ios::binary);
+        const std::string text((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+        const auto result = Script::Compile(text);
+        if (!result.program)
+            throw std::runtime_error("example " + entry.path().filename().u8string() + ": " + result.problems.front().message);
+        ++count;
+    }
+    SCRIPT_CHECK(count >= 3);
+}
 } // namespace
 
 void ScriptTests()
 {
+    ExampleScriptChecks();
     CatalogChecks();
     CompileProblemChecks();
     InterpreterChecks();
