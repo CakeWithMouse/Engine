@@ -2,6 +2,7 @@
 #include "AssetUpdate.h"
 #include "ModelImportSettings.h"
 #include <Engine/Scene/SceneAssets.h>
+#include "../Resources/VfsRead.h"
 #include "../../ThirdParty/nlohmann/json.hpp"
 #include <Windows.h>
 #include <fstream>
@@ -26,6 +27,11 @@ void Copy(const fs::path& source,const fs::path& target) {
     } else {fs::create_directories(target.parent_path());fs::copy_file(source,target,fs::copy_options::overwrite_existing);}
 }
 void Write(const fs::path& path,const Json& json){std::ofstream f(path,std::ios::binary);f.exceptions(std::ios::failbit|std::ios::badbit);f<<json.dump(2)<<'\n';f.close();}
+constexpr std::string_view kStagingRoot=SceneAssets::StagingRoot;
+struct StagingMount {
+    explicit StagingMount(const fs::path& dir){VfsRead::GetVFS().Mount(kStagingRoot,dir);}
+    ~StagingMount(){VfsRead::GetVFS().Unmount(kStagingRoot);}
+};
 void RemapJson(Json& json,const std::string& before,const std::string& after) {
     if(json.is_string())json=AssetUpdate::Remap(json.get<std::string>(),before,after);
     else if(json.is_structured())for(auto& item:json)RemapJson(item,before,after);
@@ -55,7 +61,7 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
     struct Guard{HANDLE h;~Guard(){CloseHandle(h);}} guard{lock};
     const auto backup=work/"AssetBackups"/(std::to_string(GetCurrentProcessId())+"-"+std::to_string(GetTickCount64()));
     fs::create_directories(backup);
-    auto target=file,targetRoot=sourceRoot;std::string before,after;fs::path imported,importRoot;
+    auto target=file,targetRoot=sourceRoot;std::string before,after;fs::path imported,importRoot,staging;
     std::vector<std::pair<fs::path,fs::path>> changed;
     bool moved=false,installed=false;
     try {
@@ -86,8 +92,14 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
                     }
                 }
             }
-            const auto virtualImport=SceneAssets::Import(content,original,model?SceneAssets::Model:audio?SceneAssets::Audio:SceneAssets::Texture,importOptions);
-            imported=content/fs::u8path(virtualImport.substr(6));importRoot=model?imported.parent_path():imported;
+            staging=work/"Staging"/(std::to_string(GetCurrentProcessId())+"-"+std::to_string(GetTickCount64()));
+            fs::create_directories(staging);
+            std::string virtualImport;
+            {
+                StagingMount mount(staging);
+                virtualImport=SceneAssets::Import(content,original,model?SceneAssets::Model:audio?SceneAssets::Audio:SceneAssets::Texture,importOptions,staging,kStagingRoot);
+            }
+            imported=staging/fs::u8path(virtualImport.substr(kStagingRoot.size()+1));importRoot=model?imported.parent_path():imported;
             if(Extension(imported)!=ext)throw std::runtime_error("Reimport must keep the asset format (BLEND is converted to GLB)");
             const auto candidate=backup/"candidate";
             Copy(sourceRoot,candidate);
@@ -153,8 +165,8 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
             if(operation==0){if(installed)fs::remove_all(sourceRoot);fs::rename(backup/"original",sourceRoot);}
             else if(installed)fs::rename(targetRoot,sourceRoot);
         }
-        if(!importRoot.empty()){std::error_code ec;fs::remove_all(importRoot,ec);fs::remove(fs::u8path(imported.u8string()+".source.json"),ec);fs::remove(fs::u8path(imported.u8string()+".importsettings.json"),ec);}
+        if(!staging.empty()){std::error_code ec;fs::remove_all(staging,ec);}
         throw;
     }
-    if(!importRoot.empty()){std::error_code ec;fs::remove_all(importRoot,ec);fs::remove(fs::u8path(imported.u8string()+".source.json"),ec);fs::remove(fs::u8path(imported.u8string()+".importsettings.json"),ec);}
+    if(!staging.empty()){std::error_code ec;fs::remove_all(staging,ec);}
 }
