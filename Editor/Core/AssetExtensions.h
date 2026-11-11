@@ -89,7 +89,7 @@ inline QString DialogFilter(AssetKind kind)
 inline bool ReimportSourceMatches(const QString& assetPath, const QString& sourcePath)
 {
     const AssetKind kind = KindForFile(assetPath);
-    return kind == AssetKind::Unknown || KindForFile(sourcePath) == kind;
+    return kind != AssetKind::Unknown && KindForFile(sourcePath) == kind;
 }
 
 } // namespace EditorCore

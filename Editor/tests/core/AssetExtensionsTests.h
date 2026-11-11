@@ -96,8 +96,8 @@ inline void Run(int& outChecks)
           "Material kind matches material source");
     check(!ReimportSourceMatches(QStringLiteral("/Game/Materials/A.mat"), QStringLiteral("C:/Source/B.fbx")),
           "Material kind rejects model source");
-    check(ReimportSourceMatches(QStringLiteral("/Game/Notes.txt"), QStringLiteral("C:/Source/Anything.fbx")),
-          "Unknown asset kind keeps legacy behavior (engine decides)");
+    check(!ReimportSourceMatches(QStringLiteral("/Game/Notes.txt"), QStringLiteral("C:/Source/Anything.fbx")),
+          "Unknown asset kind is rejected (editor shows a clear error)");
     check(ReimportSourceMatches(QStringLiteral("/Game/Models/A.FBX"), QStringLiteral("C:/Source/B.Obj")),
           "ReimportSourceMatches is case-insensitive");
 
