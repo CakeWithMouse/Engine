@@ -36,6 +36,7 @@ struct EditorCommand
         ImportModel, ImportTexture, ImportAudio, CreateModel, SetTexture, SetPointLight, SetMaterial, SetProjectData,
         PlayAudio, StopAudio,
         RunTask, WriteRecovery, DiscardRecovery, SetProperty, UpdateAsset,
+        SetScript, // path: /Game путь .vscript, пустой — снять скрипт
     };
 
     Type type = None;
@@ -90,6 +91,7 @@ public:
         bool lightCastShadows = false;
         EngineScenePointLight pointLight{};
         std::string materialAsset;
+        std::string scriptAsset; // визуальный скрипт; пусто без него
         std::string projectData;
         uint32_t gameplayKind = 0;
         std::string propertySchema;
@@ -108,6 +110,7 @@ public:
         bool dirty = false, canUndo = false, canRedo = false;
         std::vector<uint64_t> selectedIds;
         bool batchEditing = false, authoring = false;
+        bool scripts = false; // игровой модуль поддерживает визуальные скрипты (Engine.Scene.Script)
     };
 
     virtual void PostCommand(const EditorCommand& c) = 0;

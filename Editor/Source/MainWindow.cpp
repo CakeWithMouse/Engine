@@ -728,6 +728,29 @@ void EditorMainWindow::ConnectPanels()
             CreateMaterialForSelection();
     });
 
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::OpenScriptRequested, this, [this](const QString& script)
+    {
+        if (!script.isEmpty()) OpenScriptEditor(script);
+        else CreateScriptForSelection();
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseScriptRequested, this, [this]
+    {
+        if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
+        const QString path = QFileDialog::getOpenFileName(this, Tr("Скрипт из проекта", "Script from the project"),
+            QString::fromUtf8(host_->host().contentRoot), Tr("Визуальные скрипты (*.vscript)", "Visual scripts (*.vscript)"));
+        if (!path.isEmpty()) UseAsset(path);
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearScriptRequested, this, [this]
+    {
+        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
+        EditorCommand c;
+        c.type = EditorCommand::SetScript;
+        c.objectId = selectedId_;
+        host_->PostCommand(c);
+    });
+
     connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearMaterialRequested, this, [this]
     {
         if (!selectedId_ ||

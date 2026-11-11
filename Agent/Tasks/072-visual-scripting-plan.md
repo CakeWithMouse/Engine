@@ -1,6 +1,6 @@
 # 072 — Визуальный редактор кода на нодах
 
-Статус на 2026-11-08: план согласован; этапы 1 и 2 выполнены, этапы 3–5 не начаты.
+Статус на 2026-11-11: план согласован; этапы 1–4 выполнены, этап 5 не начат.
 
 ## Границы задачи
 
@@ -275,6 +275,23 @@ Engine/Script/            каталог нод, ScriptProgram, интерпре
 - CompatibilityTests: frozen DLL без расширения, новый шаблон с ним, старая сцена в новом runtime, новая сцена в старом runtime;
 - EditorUiTests: version/size расширения.
 
+**Результат этапа 3 (Debug, MSVC v145, Qt 6.7):**
+- **Сцена:** `assets.script` в снимке, JSON и `Restore`. Пишется только при назначенном скрипте.
+  Старый runtime отклоняет сцену со скриптом, как раньше с материалом: формат строгий.
+- **Расширение `Engine.Scene.Script` v1:** `describe`, `get`, `set`, `check`, `readProblems`.
+  `SceneEditSession` → `SceneModule.inl` → `GameEditModule` → сервис `EngineScriptService`.
+- **Редактор:**
+  - команда `SetScript`: Undo через снимок сцены, в Play только чтение;
+  - `scriptAsset` и `scripts` в снимке для интерфейса;
+  - дублирование переносит скрипт.
+- **Проверки:**
+  - EngineTests 71/71 (документ сцены и расширение на edit-сессии с Play);
+  - HostTests 117;
+  - CompatibilityTests 120;
+  - CoreTests, UiTests;
+  - EditorUiTests: standard 4877, authoring 219, layout 240, reload 350, workflow, recovery.
+- **Не прогнаны:** HudTests и InputCharacterTests, причина та же — `assimp-vc143`.
+
 ### 4. Редактор скриптов
 
 `CodeSchema` из `describeNodes`, `ScriptEditorWindow`, Files, поле «Скрипт», переменные, валидация, ошибки Play на нодах.
@@ -285,6 +302,24 @@ Engine/Script/            каталог нод, ScriptProgram, интерпре
 - UiTests: создание из Files, поиск и добавление нод, связи, Undo/Redo, копирование между окнами;
 - UiTests: назначение в свойствах, Play и чтение позиции через Scene API, красная нода при ошибке;
 - `ScriptCommandletTests.ps1`.
+
+**Результат этапа 4 (Debug, MSVC v145, Qt 6.7):**
+- `CodeGraphSchema` (Editor/Core): схема из каталога движка; пины по свойствам и переменным, правила exec и данных.
+- `ScriptGraphWidget` и `ScriptEditorWindow`:
+  - содержимое и свойства нод, переменные с Undo;
+  - запись файла на каждую правку и проверка движком (`check`);
+  - ошибки Play на нодах (`readProblems`).
+- Подключение к редактору:
+  - карточка «Скрипт» в свойствах объекта: создать, открыть, выбрать, убрать;
+  - Files: двойной щелчок, назначить, новый скрипт;
+  - главное окно: `OpenScriptEditor`, `CreateScript`, `CreateScriptForSelection`.
+- **Проверки — полный прогон 2026-11-11:**
+  - CoreTests 566, HostTests 117, UiTests;
+  - EngineTests 71/71;
+  - EditorUiTests standard 5464 (со сценарием скрипта: от создания до вращения в Play и ошибки на ноде), authoring 220,
+    layout 242, reload 350, workflow, recovery.
+- **Не прогнан:** HudTests, причина та же — `assimp-vc143`. Прогон проходит, только когда другой редактор не открыт:
+  иначе он держит `EngineRuntime.exe` и фокус окна.
 
 ### 5. Документация, пример, выпуск
 

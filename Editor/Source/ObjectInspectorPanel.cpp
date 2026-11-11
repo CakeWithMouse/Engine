@@ -2,6 +2,7 @@
 #include "CollapsibleCard.h"
 #include "TransformCard.h"
 #include "MaterialCard.h"
+#include "ScriptCard.h"
 #include "GeometryCard.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "EditorLocale.h"
@@ -128,9 +129,16 @@ void ObjectInspectorPanel::BuildUi()
     cardMaterial_->onChooseMaterial = [this] { emit ChooseMaterialRequested(); };
     cardMaterial_->onClearMaterial = [this] { emit ClearMaterialRequested(); };
 
+    cardScript_ = new ScriptCard(this);
+    cardScript_->setObjectName(QStringLiteral("ScriptCard"));
+    cardScript_->onOpenScript = [this](const QString& path) { emit OpenScriptRequested(path); };
+    cardScript_->onChooseScript = [this] { emit ChooseScriptRequested(); };
+    cardScript_->onClearScript = [this] { emit ClearScriptRequested(); };
+
     BuildPointLightCard(inspectorLayout);
     inspectorLayout->addWidget(cardGeometry_);
     inspectorLayout->addWidget(cardMaterial_);
+    inspectorLayout->addWidget(cardScript_);
     BuildCharacterCard(inspectorLayout);
     inspectorLayout->addWidget(properties_);
 
@@ -138,6 +146,7 @@ void ObjectInspectorPanel::BuildUi()
     cardTransform_->hide();
     cardGeometry_->hide();
     cardMaterial_->hide();
+    cardScript_->hide();
     lightInspector_->hide();
     characterInspector_->hide();
     noSelectionLabel_->show();
@@ -307,6 +316,7 @@ void ObjectInspectorPanel::RetranslateUi()
     if (cardTransform_) cardTransform_->RetranslateUi();
     if (cardGeometry_) cardGeometry_->RetranslateUi();
     if (cardMaterial_) cardMaterial_->RetranslateUi();
+    if (cardScript_) cardScript_->RetranslateUi();
 
     if (lightEnabled_) lightEnabled_->setText(Tr("Включён", "Enabled"));
     if (lightShadows_) lightShadows_->setText(Tr("Тени", "Shadows"));
@@ -388,7 +398,7 @@ void ObjectInspectorPanel::Refresh(
         noSelectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
         noSelectionLabel_->show();
         cardGeneral_->hide(); cardTransform_->hide(); cardGeometry_->hide();
-        cardMaterial_->hide(); lightInspector_->hide(); characterInspector_->hide();
+        cardMaterial_->hide(); cardScript_->hide(); lightInspector_->hide(); characterInspector_->hide();
         refreshing_ = false;
         return;
     }
@@ -465,6 +475,9 @@ void ObjectInspectorPanel::Refresh(
         }
         cardMaterial_->SetData(QString::fromStdString(object.materialAsset), isPointLight || isDirLight);
         cardMaterial_->setVisible(showMaterial);
+        // Скрипт — у любого объекта сцены, если игровой модуль их поддерживает.
+        cardScript_->SetData(QString::fromStdString(object.scriptAsset), true);
+        cardScript_->setVisible(view.scripts);
         properties_->setVisible(showProperties);
 
         if (canReplaceWholeInspector)

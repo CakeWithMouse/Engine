@@ -10,6 +10,7 @@
 #include "../Core/HlslGraphCompiler.h"
 #include "core/MaterialGraphTests.h"
 #include "core/GraphCoreTests.h"
+#include "core/CodeGraphSchemaTests.h"
 #include "../Core/SceneFile.h"
 #include "core/SceneFileTests.h"
 #include "../Core/Terminal.h"
@@ -279,6 +280,7 @@ void TestMaterialGraph()
 void TestGraphCore()
 {
     gChecks += RunGraphCoreTests();
+    gChecks += RunCodeGraphSchemaTests();
 }
 
 void TestSceneFile()

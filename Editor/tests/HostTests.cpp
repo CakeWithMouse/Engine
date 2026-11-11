@@ -5,6 +5,7 @@
 #include <chrono>
 #include <QCoreApplication>
 #include "HostRegressionTests.h"
+#include "HostScriptTests.h"
 #include "OverlayHostTests.h"
 
 int main(int argc, char** argv)
@@ -130,6 +131,7 @@ int main(int argc, char** argv)
     }
 
     checksPassed += HostRegressionTests::Run();
+    checksPassed += HostScriptTests::Run();
     checksPassed += OverlayHostTests::Run();
     std::cout << "HostTests: " << checksPassed << " checks passed." << std::endl;
     return 0;

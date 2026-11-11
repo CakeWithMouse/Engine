@@ -42,7 +42,7 @@ bool EditorQtHost::Start()
 
     if (HasScene())
     {
-        SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};
+        SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), ScriptApi()};
         sceneHandler_.PublishScene(sctx, playState_.load());
     }
 
@@ -284,7 +284,7 @@ void EditorQtHost::DrainCommands()
             result = playState_.load() == Edit && api && api->asset ? api->asset(api->context, cmd.w, cmd.path.toUtf8().constData(), cmd.name.toUtf8().constData(), detail, sizeof(detail)) : EngineSceneReadOnly;
             if (result == EngineSceneOk) {
                 history_.Reset();
-                SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};
+                SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), ScriptApi()};
                 sceneHandler_.SetSelectedId(0);
                 sceneHandler_.MarkDirty();
                 sceneHandler_.PublishScene(ctx, playState_.load());
@@ -320,7 +320,7 @@ void EditorQtHost::DrainCommands()
                 viewportInput_,
                 [this](const char* msg) { Log(msg); },
                 [this] {
-                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};
+                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), ScriptApi()};
                     sceneHandler_.PublishScene(sctx, playState_.load());
                 }
             };
@@ -339,7 +339,7 @@ void EditorQtHost::DrainCommands()
             }
             if (cmd.type == EditorCommand::PickObject) {
                 sceneHandler_.PickSelection(sel, cmd.name == "toggle" && BatchApi());
-                SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};
+                SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), ScriptApi()};
                 sceneHandler_.PublishScene(ctx, playState_.load());
             }
             if (cmd.type == EditorCommand::TogglePlay && result == EngineSceneOk) InvalidateOverlays();
@@ -366,7 +366,7 @@ void EditorQtHost::DrainCommands()
                 [this] { return sceneHandler_.GetSelectedObjectName(); },
                 [this](uint64_t id) { sceneHandler_.SetSelectedId(id); },
                 [this] {
-                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};
+                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), ScriptApi()};
                     sceneHandler_.PublishScene(sctx, playState_.load());
                 }
             };
@@ -379,7 +379,7 @@ void EditorQtHost::DrainCommands()
         }
         else if (sceneHandler_.CanHandle(cmd.type))
         {
-            SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};
+            SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), ScriptApi()};
             sceneHandler_.Handle(cmd, sctx, history_, playState_.load(), result, error);
             if (result == EngineSceneOk) {
                 if (cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene || cmd.type == EditorCommand::Undo || cmd.type == EditorCommand::Redo) InvalidateOverlays();

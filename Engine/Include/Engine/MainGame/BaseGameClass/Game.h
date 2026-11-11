@@ -61,6 +61,7 @@ enum class RegisterResult
 const char* ToString(RegisterResult result);
 
 class GameComponent;
+namespace Script { struct Problem; }
 class Material;
 class PointLightComponent;
 class UIComponent;
@@ -219,6 +220,8 @@ public:
     bool UnregisterComponent(const std::string& Name);
     GameComponent* FindComponent(const std::string& Name) const;
     Scene& GetScene() noexcept { return scene; }
+    /** Why the script at this /Game path did not start in this game; empty if it compiled or was never started. */
+    std::vector<Script::Problem> GetScriptProblems(const std::string& asset) const;
     const Scene& GetScene() const noexcept { return scene; }
 
     bool CreateProceduralCubeMap(const std::string& cubeMapName, CubeMapPreset preset, int faceSize = 256);

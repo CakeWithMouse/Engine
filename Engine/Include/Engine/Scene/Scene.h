@@ -52,6 +52,7 @@ struct SceneComponentSnapshot
     };
     std::optional<PointLight> pointLight;
     std::string projectData; // module-defined UTF-8 JSON; scene format 3
+    std::string scriptAsset; // /Game path of a .vscript, empty without one ("assets.script")
 };
 struct SceneSnapshot
 {
@@ -95,6 +96,7 @@ public:
     SceneResult ClearParent(ComponentId child);
     SceneResult SetTextureAsset(ComponentId id, const std::string& path);
     SceneResult SetMaterialAsset(ComponentId id, const std::string& path);
+    SceneResult SetScriptAsset(ComponentId id, const std::string& path);
     SceneResult SetPointLight(ComponentId id, const SceneComponentSnapshot::PointLight& light);
     void SetDocumentVersion(uint32_t version);
 

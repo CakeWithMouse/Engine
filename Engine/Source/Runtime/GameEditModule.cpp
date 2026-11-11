@@ -89,6 +89,14 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
             {
                 if (plV2.version == 1 && plV2.set) pointLightV2_ = plV2;
             }
+            EngineScriptApi script{};
+            if (query && query(extensionContext, EngineScriptExtension, 1, sizeof(script), &script))
+            {
+                if (script.version != 1 || script.context != extensionContext || !script.describe || !script.get || !script.set ||
+                    !script.check || !script.readProblems)
+                    throw std::runtime_error("Invalid script API");
+                script_ = script;
+            }
             EngineAudioPreviewApi audio{};
             if (query && query(extensionContext, EngineAudioPreviewExtension, 1, sizeof(audio), &audio))
             {

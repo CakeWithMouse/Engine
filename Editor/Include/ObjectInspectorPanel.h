@@ -18,6 +18,7 @@ class NoWheelDoubleSpinBox;
 class CollapsibleCard;
 class TransformCard;
 class MaterialCard;
+class ScriptCard;
 class GeometryCard;
 
 struct EditorSnapshot;
@@ -83,6 +84,9 @@ signals:
     void ChooseMaterialRequested();
     void EditMaterialRequested(const QString& virtualPath);
     void ClearMaterialRequested();
+    void OpenScriptRequested(const QString& virtualPath); // пустой путь: создать скрипт для объекта
+    void ChooseScriptRequested();
+    void ClearScriptRequested();
 
 private:
     void BuildUi();
@@ -116,6 +120,7 @@ private:
     TransformCard* cardTransform_ = nullptr;
     GeometryCard* cardGeometry_ = nullptr;
     MaterialCard* cardMaterial_ = nullptr;
+    ScriptCard* cardScript_ = nullptr;
     CollapsibleCard* cardLight_ = nullptr;
     CollapsibleCard* cardCharacter_ = nullptr;
 

@@ -5,6 +5,10 @@
 #include "MaterialEditorWindow.h"
 #include "MaterialTextureTools.h"
 #include "MaterialGraphWidget.h"
+#include "ScriptEditorWindow.h"
+#include "ScriptGraphWidget.h"
+#include <QTableWidget>
+#include <atomic>
 #include "HlslGraphCompiler.h"
 #include "UIEditorWindow.h"
 #include <Engine/UI/UIMarkup.h>
@@ -253,6 +257,15 @@ int wmain(int argc, wchar_t** argv)
             Check(!query(api.context,EngineViewportCursorExtension,1,sizeof(rejected)-1,&rejected)&&rejected.version==99,"cursor extension size rejected");}
         EngineViewportInputApi viewportInput{};
         if (!legacy && query && query(api.context,EngineViewportInputExtension,1,sizeof(viewportInput),&viewportInput)) host.SetViewportInputApi(viewportInput);
+        EngineScriptApi script{};
+        if (!legacy && query && query(api.context,EngineScriptExtension,1,sizeof(script),&script)) host.SetScriptApi(script);
+        if (!legacy) {
+            Check(script.version==1 && script.set && script.get && script.describe && script.check && script.readProblems,"current module supplies the script extension");
+            EngineScriptApi rejected{99,nullptr};
+            Check(!query(api.context,EngineScriptExtension,2,sizeof(rejected),&rejected)&&rejected.version==99,"script extension version rejected");
+            Check(!query(api.context,EngineScriptExtension,1,sizeof(rejected)-1,&rejected)&&rejected.version==99,"script extension size rejected");
+            Check(host.ScriptApi() && host.ScriptApi()->set==script.set,"host exposes the script extension");
+        }
         struct HostCleanup
         {
             EditorQtHost& host; EngineEditModuleApi factory; void*& context;
@@ -1345,6 +1358,152 @@ int wmain(int argc, wchar_t** argv)
             Check(!std::filesystem::exists(graphJson) && readText(graphHlsl) == savedHlsl, "retry deletes new graph and restores original code material");
         }
         Ui([](auto* w) { w->activateWindow(); });
+
+        // Visual script: created from the inspector, edited in its window, checked by the engine, run in Play.
+        {
+            Ui([](auto* w) {
+                auto* tree = w->findChild<QTreeWidget*>();
+                for (int i = 0; i < tree->topLevelItemCount(); ++i) if (tree->topLevelItem(i)->text(1) == QStringLiteral("Primitive.Sphere")) tree->setCurrentItem(tree->topLevelItem(i));
+            });
+            until([&] { return host.ReadSnapshot().selected != 0; });
+            const uint64_t sphere = host.ReadSnapshot().selected;
+            std::string sphereName;
+            for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere) sphereName = o.name;
+            Check(host.ReadSnapshot().scripts, "current module publishes script support");
+            Ui([](auto* w) {
+                auto* card = w->template findChild<QWidget*>(QStringLiteral("ScriptCard"));
+                auto* open = w->template findChild<QPushButton*>(QStringLiteral("OpenScript"));
+                Check(card && card->isVisible() && open && open->isEnabled() && open->text() == QStringLiteral("Создать"), "script card offers to create a script");
+                open->click();
+            });
+            std::string script;
+            until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere) script = o.scriptAsset; return !script.empty(); });
+            const QString scriptPath = QString::fromStdString(script);
+            const auto scriptFile = root / "Content" / std::filesystem::u8path(script.substr(6));
+            Check(script.rfind("/Game/Scripts/", 0) == 0 && std::filesystem::exists(scriptFile), "new script created in Content/Scripts and assigned");
+            auto window = [&](auto* w) { return w->ScriptEditor(scriptPath); };
+            until([&] { bool ready = false; Ui([&](auto* w) { ready = window(w) && window(w)->IsReady(); }); return ready; });
+            auto readText = [](const std::filesystem::path& file) { QFile f(QString::fromStdWString(file.wstring())); f.open(QIODevice::ReadOnly); return QString::fromUtf8(f.readAll()); };
+
+            int begin = 0, tick = 0, spin = 0, scale = 0, rotate = 0, pressed = 0, print = 0;
+            int checksBefore = 0;
+            Ui([&](auto* w) {
+                auto* e = window(w);
+                auto* g = e->Graph();
+                Check(!e->IsReadOnly() && g->isEnabled(), "script window is editable");
+                for (const auto& n : g->Document().Nodes())
+                {
+                    if (n.type == QStringLiteral("Event.BeginPlay")) begin = n.id;
+                    if (n.type == QStringLiteral("Event.Tick")) tick = n.id;
+                }
+                Check(begin && tick && g->Document().Nodes().size() == 2, "new script starts with Begin play and Every frame");
+                spin = g->AddNode(QStringLiteral("Const.Vec3"), QPointF(0, 400), {{QStringLiteral("value"), QVariantList{0.0, 90.0, 0.0}}});
+                scale = g->AddNode(QStringLiteral("Vec3.Scale"), QPointF(250, 300));
+                rotate = g->AddNode(QStringLiteral("Action.Rotate"), QPointF(500, 200));
+                Check(g->Connect(tick, QStringLiteral("then"), rotate, QStringLiteral("exec")) &&
+                      g->Connect(spin, QStringLiteral("Value"), scale, QStringLiteral("Vector")) &&
+                      g->Connect(tick, QStringLiteral("DeltaTime"), scale, QStringLiteral("Factor")) &&
+                      g->Connect(scale, QStringLiteral("Out"), rotate, QStringLiteral("Degrees")), "connect the rotation graph");
+                Check(!g->Connect(spin, QStringLiteral("Value"), rotate, QStringLiteral("exec")), "a value cannot feed the flow");
+                Check(!g->Connect(tick, QStringLiteral("DeltaTime"), scale, QStringLiteral("Vector")), "a number cannot feed a vector input");
+                g->Undo();
+                Check(g->Document().Connections().size() == 3, "undo removes the last link");
+                g->Redo();
+                Check(g->Document().Connections().size() == 4, "redo restores it");
+                pressed = g->AddNode(QStringLiteral("Event.KeyPressed"), QPointF(0, 700));
+                print = g->AddNode(QStringLiteral("Action.Print"), QPointF(300, 700), {{QStringLiteral("inputs"), QVariantMap{{QStringLiteral("Text"), QStringLiteral("pressed")}}}});
+                Check(g->Document().FindNode(pressed)->properties.value(QStringLiteral("key")).toString() == QStringLiteral("Space"), "key event defaults to Space");
+                Check(g->Connect(pressed, QStringLiteral("then"), print, QStringLiteral("exec")) && g->Connect(begin, QStringLiteral("then"), print, QStringLiteral("exec")),
+                      "an exec input takes several links");
+                Check(g->NodeSummary(*g->Document().FindNode(print)).join(QLatin1Char(' ')).contains(QStringLiteral("pressed")), "the node shows its input value");
+
+                // Variables: added through the panel, undone with the graph.
+                auto* table = e->template findChild<QTableWidget*>(QStringLiteral("ScriptVariables"));
+                e->template findChild<QPushButton*>(QStringLiteral("ScriptAddVariable"))->click();
+                Check(table->rowCount() == 1 && g->Document().Variables().size() == 1, "variable added");
+                g->Undo();
+                Check(table->rowCount() == 0 && g->Document().Variables().isEmpty(), "variable addition undone");
+                g->Redo();
+                Check(table->rowCount() == 1, "variable addition redone");
+                checksBefore = e->CheckCount();
+                e->SaveNow();
+            });
+            until([&] { bool done = false; Ui([&](auto* w) { done = window(w)->CheckCount() > checksBefore; }); return done; });
+            Ui([&](auto* w) {
+                Check(window(w)->Problems().isEmpty(), "engine accepts the graph");
+                Check(readText(scriptFile).contains(QStringLiteral("Action.Rotate")), "edits are written to the file");
+            });
+
+            // Nodes copied from one script are pasted into another.
+            Ui([&](auto* w) {
+                auto* g = window(w)->Graph();
+                Check(g->CopyNodes({spin, scale}), "copy script nodes");
+                Check(!w->CreateScript({}, QStringLiteral("SecondScript")).isEmpty(), "second script created from the main window");
+            });
+            until([&] { bool ready = false; Ui([&](auto* w) { ready = w->ScriptEditor(QStringLiteral("/Game/Scripts/SecondScript.vscript")) &&
+                                                                        w->ScriptEditor(QStringLiteral("/Game/Scripts/SecondScript.vscript"))->IsReady(); }); return ready; });
+            Ui([&](auto* w) {
+                auto* second = w->ScriptEditor(QStringLiteral("/Game/Scripts/SecondScript.vscript"));
+                const auto created = second->Graph()->PasteNodes(QPointF(0, 500));
+                Check(created.size() == 2 && second->Graph()->Document().Connections().size() == 1, "pasted nodes keep their link");
+                second->close();
+            });
+
+            // Play runs the script: the sphere turns.
+            auto rotation = [&] {
+                struct Read { std::string name; float w = 2; } read{sphereName};
+                std::atomic<bool> done{false};
+                EditorCommand c;
+                c.type = EditorCommand::RunTask;
+                c.task = [&](const EngineEditSessionApi& api) {
+                    EngineSceneInfo info{};
+                    api.readActiveScene(api.context, &info, [](void* p, const EngineSceneObjectInfo* o) {
+                        auto& r = *static_cast<Read*>(p);
+                        if (r.name == o->name) r.w = o->transform.rotation[3];
+                    }, &read);
+                    done = true;
+                };
+                host.PostCommand(c);
+                until([&] { return done.load(); });
+                return read.w;
+            };
+            const float before = rotation();
+            Ui([](auto* w) { Action(w, QStringLiteral("▶ Play"))->trigger(); });
+            until([&] { return host.PlayState() == EditorQtHost::Play; });
+            until([&] { return std::abs(rotation() - before) > 0.01f; });
+            Ui([](auto* w) { Action(w, QStringLiteral("⏹ Stop"))->trigger(); });
+            until([&] { return host.PlayState() == EditorQtHost::Edit; });
+            Check(std::abs(rotation() - before) < 1e-5f, "Stop returns the edit scene untouched");
+
+            // A runtime error is shown on its node; fixing the graph clears it.
+            int divide = 0;
+            Ui([&](auto* w) {
+                auto* g = window(w)->Graph();
+                divide = g->AddNode(QStringLiteral("Math.Divide"), QPointF(0, 900), {{QStringLiteral("inputs"), QVariantMap{{QStringLiteral("A"), 1.0}}}});
+                Check(g->Connect(divide, QStringLiteral("Out"), print, QStringLiteral("Text")), "feed the division into Print");
+                window(w)->SaveNow();
+            });
+            for (int i = 0; i < 30; ++i) pump();
+            Ui([](auto* w) { Action(w, QStringLiteral("▶ Play"))->trigger(); });
+            until([&] { return host.PlayState() == EditorQtHost::Play; });
+            until([&] { bool shown = false; Ui([&](auto* w) { shown = window(w)->Problems().value(divide).contains(QStringLiteral("division by zero")); }); return shown; });
+            Ui([&](auto* w) {
+                bool marked = false;
+                for (auto* item : window(w)->Graph()->View()->scene()->items()) marked = marked || item->toolTip().contains(QStringLiteral("division by zero"));
+                Check(marked, "the failing node shows the Play error");
+                Check(window(w)->grab().save(QString::fromStdWString((root / "editor-script-error.png").wstring())), "save script error");
+            });
+            Ui([](auto* w) { Action(w, QStringLiteral("⏹ Stop"))->trigger(); });
+            until([&] { return host.PlayState() == EditorQtHost::Edit; });
+            Ui([&](auto* w) {
+                window(w)->Graph()->RemoveNodes({divide});
+                Check(w->grab().save(QString::fromStdWString((root / "editor-script-card.png").wstring())), "save script card");
+                w->template findChild<QPushButton*>(QStringLiteral("ClearScript"))->click();
+            });
+            until([&] { bool cleared = false; for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere) cleared = o.scriptAsset.empty(); return cleared; });
+            Ui([&](auto* w) { window(w)->close(); });
+            for (int i = 0; i < 20; ++i) pump();
+        }
 
         // "Редактировать" on the default material: a new material is created, assigned and opened.
         Ui([](auto* w) {

@@ -2,7 +2,10 @@
 #include <Engine/Components/GameComponents.h>
 #include <Engine/InputDevice/Keys.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/Scene/Scene.h>
+#include <Engine/Scene/SceneDocument.h>
+#include "SceneTestAccess.h"
 #include <Engine/Script/ScriptRuntime.h>
 #include <nlohmann/json.hpp>
 
@@ -436,6 +439,136 @@ void PerformanceChecks()
     SCRIPT_CHECK(std::abs(fixture.scene.FindComponentByName("Cube0")->GetRotation().y - 90.0f) < 0.01f);
     SCRIPT_CHECK(perFrame < 50.0); // generous: Debug builds and shared CI machines
 }
+// "assets.script" in scene files: written only when assigned, restored, validated.
+void SceneDocumentChecks()
+{
+    const ComponentType box{"Test.Box", "Box", [] { return std::make_unique<GameComponent>(); }};
+    Scene scene("Scripts");
+    std::unique_ptr<GameComponent> plain = std::make_unique<GameComponent>(), scripted = std::make_unique<GameComponent>();
+    GameComponent* scriptedRaw = scripted.get();
+    SCRIPT_CHECK(scene.AddComponent("Plain", plain, box.typeName).result == SceneResult::Ok);
+    const auto added = scene.AddComponent("Scripted", scripted, box.typeName);
+    SCRIPT_CHECK(added.result == SceneResult::Ok);
+    const uint64_t revision = SceneTestAccess::Revision(scene);
+    SCRIPT_CHECK(scene.SetScriptAsset(added.id, "/Game/Scripts/Spin.vscript") == SceneResult::Ok);
+    SCRIPT_CHECK(SceneTestAccess::Revision(scene) > revision && scriptedRaw->GetScriptAsset() == "/Game/Scripts/Spin.vscript");
+    SCRIPT_CHECK(scene.SetScriptAsset(999999, "") == SceneResult::NotFound);
+
+    const std::string text = SceneDocument::Serialize(SceneTestAccess::Snapshot(scene));
+    const Json json = Json::parse(text);
+    for (const auto& object : json["objects"])
+    {
+        if (object["name"] == "Plain") SCRIPT_CHECK(!object.contains("assets")); // old builds keep reading such objects
+        if (object["name"] == "Scripted")
+            SCRIPT_CHECK(object["assets"]["script"] == "/Game/Scripts/Spin.vscript" && object["assets"]["model"] == "" && !object["assets"].contains("material"));
+    }
+    Scene restored("Restored");
+    SceneDocument::Restore(SceneDocument::Parse(text), {&box, 1}, restored);
+    SCRIPT_CHECK(restored.FindComponentByName("Scripted")->GetScriptAsset() == "/Game/Scripts/Spin.vscript");
+    SCRIPT_CHECK(restored.FindComponentByName("Plain")->GetScriptAsset().empty());
+
+    auto rejects = [&](const std::string& assets) {
+        Json document = json;
+        for (auto& object : document["objects"])
+            if (object["name"] == "Scripted") object["assets"] = Json::parse(assets);
+        try { SceneDocument::Parse(document.dump()); return false; }
+        catch (const SceneDocumentError&) { return true; }
+    };
+    SCRIPT_CHECK(rejects(R"({"model":"","texture":"","script":5})"));
+    SCRIPT_CHECK(rejects(R"({"model":"","texture":"","script":"/Game/../Outside.vscript"})"));
+    SCRIPT_CHECK(rejects(R"({"model":"","texture":"","sound":"/Game/a.wav"})")); // the format stays strict
+    SCRIPT_CHECK(rejects(R"({"texture":"","script":"/Game/Scripts/Spin.vscript"})"));
+    SCRIPT_CHECK(!rejects(R"({"model":"","texture":"","material":"/Game/M.mat","script":"/Game/Scripts/Spin.vscript"})"));
+}
+
+// Engine.Scene.Script v1 on an edit session: catalog, assignment, checks, Play problems.
+void ExtensionChecks()
+{
+    const ComponentType box{"Test.Box", "Box", [] { return std::make_unique<GameComponent>(); }};
+    SceneEditSession session({&box, 1});
+    const auto api = session.GetApi();
+    const auto script = session.GetScriptApi();
+    SCRIPT_CHECK(script.version == 1 && script.context && script.describe && script.get && script.set && script.check && script.readProblems);
+
+    const auto root = std::filesystem::temp_directory_path() / ("EngineScriptSession-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+    const auto content = root / "Content";
+    std::filesystem::create_directories(content / "Scripts");
+    struct Cleanup { std::filesystem::path path; ~Cleanup() { std::error_code e; std::filesystem::remove_all(path, e); } } cleanup{root};
+    char error[1024]{};
+    SCRIPT_CHECK(api.setContentRoot(api.context, content.u8string().c_str(), error, sizeof(error)) == EngineSceneOk);
+
+    auto text = [](void* user, const char* value) { *static_cast<std::string*>(user) = value; };
+    std::string catalog;
+    SCRIPT_CHECK(script.describe(script.context, text, &catalog) == EngineSceneOk && Json::parse(catalog)["schema"] == Script::SchemaId);
+
+    Graph good;
+    const int begin = good.Node("Event.BeginPlay");
+    const int print = good.Node("Action.Print", {{"inputs", {{"Text", "started"}}}});
+    good.Link(begin, "then", print, "exec");
+    WriteText(content / "Scripts/Good.vscript", good.Text());
+    Graph divide;
+    const int start = divide.Node("Event.BeginPlay");
+    const int out = divide.Node("Action.Print");
+    const int zero = divide.Node("Math.Divide", {{"inputs", {{"A", 1}}}});
+    divide.Link(start, "then", out, "exec");
+    divide.Link(zero, "Out", out, "Text");
+    WriteText(content / "Scripts/Divide.vscript", divide.Text());
+    WriteText(content / "Scripts/Broken.vscript", R"({"format":"ITMOEngine.Graph","version":1,"schema":"code","schemaVersion":1,"nodes":[{"id":7,"type":"Teleport"}]})");
+
+    EngineSceneTransform t{{0, 0, 0}, {0, 0, 0, 1}, {1, 1, 1}};
+    uint64_t first = 0, second = 0, third = 0;
+    SCRIPT_CHECK(api.scene.createObject(api.scene.context, box.typeName, "First", &t, &first) == EngineSceneOk);
+    SCRIPT_CHECK(api.scene.createObject(api.scene.context, box.typeName, "Second", &t, &second) == EngineSceneOk);
+    SCRIPT_CHECK(api.scene.createObject(api.scene.context, box.typeName, "Third", &t, &third) == EngineSceneOk);
+
+    SCRIPT_CHECK(script.set(script.context, first, "/Game/Scripts/Good.png", error, sizeof(error)) == EngineSceneInvalidArgument && std::string(error).find(".vscript") != std::string::npos);
+    SCRIPT_CHECK(script.set(script.context, first, "/Game/Scripts/Missing.vscript", error, sizeof(error)) == EngineSceneInvalidArgument);
+    SCRIPT_CHECK(script.set(script.context, 999999, "", error, sizeof(error)) == EngineSceneNotFound);
+    SCRIPT_CHECK(script.set(script.context, first, "/Game/Scripts/Good.vscript", error, sizeof(error)) == EngineSceneOk);
+    SCRIPT_CHECK(script.set(script.context, second, "/Game/Scripts/Divide.vscript", error, sizeof(error)) == EngineSceneOk);
+    SCRIPT_CHECK(script.set(script.context, third, "/Game/Scripts/Broken.vscript", error, sizeof(error)) == EngineSceneOk);
+    std::string assigned;
+    SCRIPT_CHECK(script.get(script.context, first, text, &assigned) == EngineSceneOk && assigned == "/Game/Scripts/Good.vscript");
+
+    struct Problems { std::vector<EngineScriptProblem> items; std::vector<std::string> names, messages; };
+    auto collect = [](void* user, const EngineScriptProblem* problem) {
+        auto& problems = *static_cast<Problems*>(user);
+        problems.items.push_back(*problem);
+        problems.names.push_back(problem->objectName);
+        problems.messages.push_back(problem->message);
+    };
+    Problems checked;
+    SCRIPT_CHECK(script.check(script.context, "/Game/Scripts/Broken.vscript", collect, &checked) == EngineSceneOk);
+    SCRIPT_CHECK(checked.items.size() == 1 && checked.items[0].node == 7 && checked.items[0].objectId == 0 && checked.messages[0].find("unknown node type") != std::string::npos);
+    Problems clean;
+    SCRIPT_CHECK(script.check(script.context, "/Game/Scripts/Good.vscript", collect, &clean) == EngineSceneOk && clean.items.empty());
+    Problems missing;
+    SCRIPT_CHECK(script.check(script.context, "/Game/Scripts/Nope.vscript", collect, &missing) == EngineSceneOk && missing.items.size() == 1);
+
+    const auto saved = content / "Scenes/Main.scene.json";
+    std::filesystem::create_directories(saved.parent_path());
+    SCRIPT_CHECK(api.saveScene(api.context, saved.u8string().c_str(), error, sizeof(error)) == EngineSceneOk);
+    std::ifstream file(saved);
+    const Json document = Json::parse(file);
+    SCRIPT_CHECK(std::count_if(document["objects"].begin(), document["objects"].end(), [](const Json& o) { return o.contains("assets") && o["assets"].contains("script"); }) == 3);
+
+    Problems none;
+    SCRIPT_CHECK(script.readProblems(script.context, collect, &none) == EngineSceneOk && none.items.empty()); // Edit: nothing runs
+    SCRIPT_CHECK(api.control(api.context, EnginePlay) == EngineSceneOk);
+    SCRIPT_CHECK(script.set(script.context, first, "", error, sizeof(error)) == EngineSceneReadOnly);
+    Problems play;
+    SCRIPT_CHECK(script.readProblems(script.context, collect, &play) == EngineSceneOk && play.items.size() == 2);
+    for (size_t i = 0; i < play.items.size(); ++i)
+    {
+        if (play.names[i] == "Second")
+            SCRIPT_CHECK(play.items[i].runtime == 1 && play.items[i].objectId == second && play.items[i].node == zero && play.messages[i].find("division by zero") != std::string::npos);
+        else
+            SCRIPT_CHECK(play.names[i] == "Third" && play.items[i].runtime == 0 && play.items[i].objectId == third && play.items[i].node == 7);
+    }
+    SCRIPT_CHECK(api.control(api.context, EngineStop) == EngineSceneOk);
+    SCRIPT_CHECK(script.set(script.context, first, "", error, sizeof(error)) == EngineSceneOk);
+    SCRIPT_CHECK(script.get(script.context, first, text, &assigned) == EngineSceneOk && assigned.empty());
+}
 } // namespace
 
 void ScriptTests()
@@ -445,4 +578,6 @@ void ScriptTests()
     InterpreterChecks();
     GameLifecycleChecks();
     PerformanceChecks();
+    SceneDocumentChecks();
+    ExtensionChecks();
 }

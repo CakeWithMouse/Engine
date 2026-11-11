@@ -258,6 +258,11 @@ void FileBrowserDock::OnDoubleClicked(const QModelIndex& proxyIndex)
         if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenMaterialEditor(path);
         return;
     }
+    if (path.endsWith(QStringLiteral(".vscript"), Qt::CaseInsensitive))
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenScriptEditor(path);
+        return;
+    }
     const QByteArray utf8 = path.toUtf8();
     const std::string msg = "EditorOpenAsset: " + std::string(utf8.constData(), utf8.size());
     host_->Log(msg.c_str());
@@ -273,9 +278,14 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
 
     QMenu menu(this);
     const bool isMaterial = hasFile && path.endsWith(QStringLiteral(".mat"), Qt::CaseInsensitive);
-    QAction* use = hasFile && !model_->isDir(index) ? menu.addAction(isMaterial ? Tr("Назначить материал", "Assign Material")
-                                                                               : Tr("Добавить модель / назначить текстуру", "Add Model / Assign Texture")) : nullptr;
+    const bool isScript = hasFile && path.endsWith(QStringLiteral(".vscript"), Qt::CaseInsensitive);
+    const bool scripts = host_->ReadSnapshot().scripts;
+    QAction* use = hasFile && !model_->isDir(index) && (!isScript || scripts)
+        ? menu.addAction(isMaterial ? Tr("Назначить материал", "Assign Material")
+                         : isScript ? Tr("Назначить скрипт выделенному объекту", "Assign Script to Selection")
+                                    : Tr("Добавить модель / назначить текстуру", "Add Model / Assign Texture")) : nullptr;
     QAction* editMaterial = isMaterial && host_->HasMaterials() ? menu.addAction(Tr("Редактировать материал", "Edit Material")) : nullptr;
+    QAction* editScript = isScript ? menu.addAction(Tr("Редактировать скрипт", "Edit Script")) : nullptr;
     const bool isAudio = hasFile && !model_->isDir(index) &&
         QStringList{"wav", "ogg", "mp3", "flac"}.contains(QFileInfo(path).suffix().toLower());
     const bool contentAudio = isAudio && !contentDir_.isEmpty() &&
@@ -283,6 +293,7 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     QAction* playAudio = contentAudio && host_->AudioApi() ? menu.addAction(Tr("Прослушать", "Play Audio Preview")) : nullptr;
     QAction* stopAudio = host_->AudioApi() ? menu.addAction(Tr("Остановить звук", "Stop Audio Preview")) : nullptr;
     QAction* newMaterial = host_->HasMaterials() ? menu.addAction(Tr("Новый материал…", "New Material…")) : nullptr;
+    QAction* newScript = scripts ? menu.addAction(Tr("Новый скрипт…", "New Script…")) : nullptr;
     QAction* open = hasFile ? menu.addAction(Tr("Открыть в приложении", "Open in External App")) : nullptr;
     QAction* reveal = hasFile ? menu.addAction(Tr("Показать в проводнике", "Reveal in Explorer")) : nullptr;
     QAction* copy = hasFile ? menu.addAction(Tr("Копировать путь", "Copy Path")) : nullptr;
@@ -313,6 +324,15 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     else if (picked == editMaterial)
     {
         if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenMaterialEditor(path);
+    }
+    else if (picked == editScript)
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenScriptEditor(path);
+    }
+    else if (picked == newScript)
+    {
+        const QString directory = !hasFile ? QString() : model_->isDir(index) ? path : QFileInfo(path).absolutePath();
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->CreateScript(directory);
     }
     else if (picked == newMaterial)
     {

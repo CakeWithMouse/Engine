@@ -30,7 +30,7 @@ class Game;
 class Material;
 class SaveArchive;
 struct MeshLodData;
-namespace Script { class Instance; }
+namespace Script { class Instance; struct Problem; }
 
 /** Shader pair of one pass variant, resolved lazily by Game::BindComponentShaders. */
 struct ComponentShaderVariant

@@ -688,6 +688,7 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
         if (serviceId == EngineViewportOverlayService && minVersion <= 3 && engine->editModule && engine->editModule->ViewportOverlayApi().getCamera) return &engine->editModule->ViewportOverlayApi();
         if (serviceId == EngineViewportCursorService && minVersion <= 1 && engine->editModule && engine->editModule->ViewportCursorApi().set) return &engine->editModule->ViewportCursorApi();
         if (serviceId == EnginePointLightV2Service && minVersion <= 1 && engine->editModule && engine->editModule->PointLightV2Api().set) return &engine->editModule->PointLightV2Api();
+        if (serviceId == EngineScriptService && minVersion <= 1 && engine->editModule && engine->editModule->ScriptApi().set) return &engine->editModule->ScriptApi();
         if(serviceId==EngineAuthoringService && minVersion<=1 && engine->editModule && engine->editModule->AuthoringApi().describe) return &engine->editModule->AuthoringApi();
         if (serviceId == EngineEditorBatchService && minVersion <= 1 && engine->editModule && engine->editModule->BatchApi().apply) return &engine->editModule->BatchApi();
         if (serviceId == ENGINE_SERVICE_VFS && minVersion <= ENGINE_VFS_API_VERSION)

@@ -33,6 +33,7 @@ static void ExerciseModule(const fs::path& file, const fs::path& runtime, bool l
     GameEditModule module(project.module,runtime / "EngineContent",project.content);
     const auto& api = module.Api(); char error[2048]{}; uint64_t id = 0;
     Check(bool(module.ViewportCursorApi().set)==hasCursor,"optional cursor capability matches module generation");
+    Check(bool(module.ScriptApi().set)==hasCursor,"visual scripts only in modules of the current template");
     Check(bool(api.scene.setPointLight) == lights,"legacy light capability is absent; current capability is present");
     if (module.PreferredSceneVersion() == 2)
     {
@@ -45,6 +46,13 @@ static void ExerciseModule(const fs::path& file, const fs::path& runtime, bool l
         EngineViewportCursorApi cursor{99,nullptr,nullptr};
         if(!hasCursor)Check(!query(api.context,EngineViewportCursorExtension,1,sizeof(cursor),&cursor)&&cursor.version==99,"old DLL rejects cursor extension without touching output");
         else Check(query(api.context,EngineViewportCursorExtension,1,sizeof(cursor),&cursor)&&cursor.version==1&&cursor.set,"upgraded module supplies cursor extension");
+        EngineScriptApi script{99,nullptr};
+        if(!hasCursor)Check(!query(api.context,EngineScriptExtension,1,sizeof(script),&script)&&script.version==99,"old DLL rejects script extension without touching output");
+        else {
+            Check(!query(api.context,EngineScriptExtension,2,sizeof(script),&script)&&script.version==99,"script extension version checked");
+            Check(!query(api.context,EngineScriptExtension,1,sizeof(script)-1,&script)&&script.version==99,"script extension size checked");
+            Check(query(api.context,EngineScriptExtension,1,sizeof(script),&script)&&script.version==1&&script.set&&script.readProblems,"upgraded module supplies script extension");
+        }
         Check(!query(api.context,EnginePointLightExtension,2,sizeof(capability),&capability) && capability.version == 99,"unknown extension version rejected");
         Check(!query(api.context,EnginePointLightExtension,1,sizeof(capability)-1,&capability) && capability.version == 99,"extension size checked");
         Check(query(api.context,EnginePointLightExtension,1,sizeof(capability),&capability) && capability.version == 1 && capability.set,"independent light extension query");

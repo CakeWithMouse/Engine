@@ -4121,6 +4121,20 @@ struct Game::CachedScript
     std::vector<Script::Problem> problems;
 };
 
+std::vector<Script::Problem> Game::GetScriptProblems(const std::string& asset) const
+{
+    std::string physical = VfsRead::Active().Resolve(asset);
+    if (physical.empty()) physical = asset;
+    const auto cached = scriptCache.find(ShaderCompiler::NormalizePath(physical));
+    if (cached == scriptCache.end())
+    {
+        std::error_code error;
+        if (std::filesystem::is_regular_file(std::filesystem::u8path(physical), error)) return {};
+        return {{0, "cannot read the file"}};
+    }
+    return cached->second->problems;
+}
+
 void Game::StartScript(GameComponent& component)
 {
     component.ScriptState.reset();
