@@ -22,6 +22,8 @@
 #include "core/ImportSettingsSpawnV2Tests.h"
 #include "core/SidecarTransactionTests.h"
 #include "core/ImportReimportChainTests.h"
+#include "../Core/AssetExtensions.h"
+#include "core/AssetExtensionsTests.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
@@ -439,6 +441,10 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestImportReimportChain...\n");
     std::fflush(stdout);
     ImportReimportChainTests::Run(gChecks);
+
+    std::printf("[Test] TestAssetExtensions...\n");
+    std::fflush(stdout);
+    AssetExtensionsTests::Run(gChecks);
 
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);

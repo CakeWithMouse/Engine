@@ -3,6 +3,7 @@
 #include "SceneObjectsPanel.h"
 #include "QtHost.h"
 #include "MaterialEditorWindow.h"
+#include "AssetExtensions.h"
 
 #include <QDir>
 #include <QFileDialog>
@@ -33,8 +34,13 @@ void EditorMainWindow::UpdateAsset(const QString& path,bool move,const QString& 
         const auto metadata=RecoveryStore::Read(path+".source.json");
         const auto original=metadata["source"].toString();
         argument=QFileDialog::getOpenFileName(this,Tr("Исходный файл для переимпорта", "Source File for Reimport"),original,
-            Tr("Ресурсы (*.fbx *.blend *.glb *.gltf *.obj *.png *.jpg *.jpeg *.bmp *.tga)", "Assets (*.fbx *.blend *.glb *.gltf *.obj *.png *.jpg *.jpeg *.bmp *.tga)"));
+            EditorCore::DialogFilter(EditorCore::KindForFile(path)));
         if(argument.isEmpty())return;
+        if(!EditorCore::ReimportSourceMatches(path,argument)) {
+            QMessageBox::warning(this,Tr("Переимпорт ресурса", "Reimport Asset"),
+                Tr("Выбранный файл не соответствует типу ресурса. Переимпорт отменён.", "The selected file does not match the asset type. Reimport cancelled."));
+            return;
+        }
         if(QMessageBox::question(this,Tr("Переимпорт ресурса", "Reimport Asset"),Tr("Обновить ресурс во всех сценах? Назначения и правки материалов сохранятся. История Undo сцены будет очищена. Прежние файлы останутся в .painengine/AssetBackups.", "Update asset across all scenes? Material assignments and edits will be preserved. Scene undo history will be cleared. Old files will remain in .painengine/AssetBackups."))!=QMessageBox::Yes)return;
     }
     if(move) {argument=QDir::fromNativeSeparators(argument);if(!argument.startsWith("/Game/"))argument="/Game/"+argument;}

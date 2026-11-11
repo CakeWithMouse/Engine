@@ -8,6 +8,7 @@
 #include "ModelImportSidecarTransaction.h"
 #include "RecoveryStore.h"
 #include "AssetOps.h"
+#include "AssetExtensions.h"
 #include "Logger.h"
 
 #include <QAction>
@@ -297,9 +298,18 @@ bool EditorMainWindow::EditModelImportSettings(const QString& path, bool showDia
                 sourceFile = QFileDialog::getOpenFileName(this,
                     Tr("Исходный файл для переимпорта", "Source File for Reimport"),
                     sourceFile,
-                    Tr("Ресурсы (*.fbx *.blend *.glb *.gltf *.obj)", "Models (*.fbx *.blend *.glb *.gltf *.obj)"));
+                    EditorCore::DialogFilter(EditorCore::AssetKind::Model));
                 if (sourceFile.isEmpty())
                 {
+                    sidecarTx_.Commit();
+                    return true;
+                }
+                if (EditorCore::KindForFile(sourceFile) != EditorCore::AssetKind::Model)
+                {
+                    QMessageBox::warning(this,
+                        Tr("Переимпорт модели", "Model Reimport"),
+                        Tr("Выбранный файл не является моделью. Настройки сохранены, переимпорт отменён.",
+                           "The selected file is not a model. Settings were saved, reimport cancelled."));
                     sidecarTx_.Commit();
                     return true;
                 }
