@@ -117,6 +117,8 @@
 | `Engine/tests/input/run.ps1` | **FAIL (Красная база)** | `ParserError: Unexpected token 'std::unique_ptr<CharacterController>'` (нет BOM) |
 | Храповик строк `EditorUiTests.cpp` в `check.ps1:220` | **FAIL при модификации (Красная база)** | Реальный размер файла 1662 строки (на `main` 1674) против заниженного храповика 1045. При чистом diff `check.ps1` проходит, но любая правка файла роняет проверку line count |
 
+Подтверждение базы перед Шагом 17.10.D (HEAD `a6319a1`, дерево чистое): CoreTests 656, HostTests 116, UiTests 316 (15+20+18+3+15+245), EngineTests 74/74, Skeletal 8/8, EditSession 651, SceneModule 109, Compatibility 116 — совпадает с эталоном задания; красная база без изменений.
+
 ---
 
 ## Решения
@@ -218,8 +220,9 @@
     - `EditSessionApi.h` и размер структуры 320 байт строго не трогать.
     - `Game/`, `build.ps1` не трогать.
     - Ветка: `feat/import-pipeline`, без push. Красная база остаётся эталоном.
-28. **Дефолт mergeMeshes = true (Шаг 17.3b):**
+28. **Дефолт mergeMeshes = true (Шаг 17.3b; уточнено в Шаге 17.10.D):**
     - Воспроизводит историческое поведение движка `PretransformVertices` без `KEEP_HIERARCHY`. При `mergeMeshes = false` выставляется `AI_CONFIG_PP_PTV_KEEP_HIERARCHY = 1`.
+    - Уточнение Юрия (Шаг 17.10.D): дефолт `true` сохраняется в схеме `ImportSettings` и Engine-парсере; в ДИАЛОГЕ импорта дефолт `mergeMeshes = false` (единый `DefaultSettings()`), чтобы новый импорт по умолчанию сохранял иерархию узлов файла.
 29. **Реализация useFileUnitScale через aiProcess_GlobalScale (Шаг 17.3c):**
     - `useFileUnitScale` в `SkeletalLoaderAssimp.cpp` подключается через выставление флага `aiProcess_GlobalScale`.
     - Значение `scale` из sidecar в Assimp не передаётся (остаётся на Transform при спавне объекта во избежание двойного применения).
@@ -276,6 +279,14 @@
     - **Строгая проверка физического отсутствия:** заглушка создаётся ТОЛЬКО если файл физически отсутствует на диске (`!VfsRead::Active().Exists(o.modelAsset)`). Если файл существует, но повреждён/не может быть загружен, исключение пробрасывается дальше (`throw;`), благодаря чему `SceneAuthoring.test_all_scenes` корректно откатывает реимпорт повреждённой модели.
     - **Изоляция обработки ошибок:** `try/catch` вокруг `SceneAssets::Apply` и `LoadProjectData` применяется исключительно для плейсхолдера (`if (placeholder)`); для обычных объектов сохранено штатное поведение без подавления ошибок.
     - **Логирование:** пустой `catch (...)` в `CreateMissingModelPlaceholder` удалён, ошибки парсинга слотов логируются с указанием причины через `std::printf`. Покрыто тестами (a-e) в `AuthoringTests.cpp`.
+40. **Дефолты диалога импорта модели (Шаг 17.10.D) — утверждено архитектором Юрием:**
+    - Единый `ImportSettingsDialog::DefaultSettings()`: `scale=1.0`, `useFileUnitScale=true`, `importMaterials=true`, `importTextures=true`, `flipUv=false`, `mergeMeshes=false`. Используется при открытии диалога и кнопкой «Сбросить к умолчанию». Схема `ImportSettings` и Engine-парсер не меняются (дефолты схемы: `useFileUnitScale=false`, `mergeMeshes=true`, см. решения 28/30).
+    - `SettingsService` больше НЕ сохраняет и НЕ восстанавливает `import/model/scale` и `import/model/flipUv` (это per-asset значения из sidecar). Причина дефекта: сохранённый `scale=0.01` восстанавливался при открытии диалога и вместе с `useFileUnitScale=true` давал двойное уменьшение (`aiProcess_GlobalScale` нормализует см→м, затем version 2 запекал ещё ×0.01 в геометрию). Глобально сохраняются только `useFileUnitScale`, `importMaterials`, `importTextures`, `normals`, `smoothingAngle`, `mergeMeshes`.
+    - Ответ на вопрос «почему чекбокс flipUv выглядит включённым при дефолте false»: причина — восстановление `import/model/flipUv` из `SettingsService`, а НЕ инверсия в UI (маппинг прямой в обе стороны). Семантика поля sidecar не меняется: `flipUv=false` → движок применяет `aiProcess_FlipUVs` (`SkeletalLoaderAssimp.cpp`). Подпись чекбокса изменена на «Не инвертировать UV (сырой V)» / «Do not invert UVs (raw V)»: включено = `flipUv=true` = V как в файле.
+    - Существующая сворачиваемая карточка «Расширенные настройки» переименована в «Дополнительно» / «Additional» (objectName `AdvancedSettingsCard` сохранён); внутри остаются `normals`, `smoothingAngle`, `flipUv`, `mergeMeshes`.
+    - Пресеты масштаба (1 / 0.1 / 0.01) заблокированы с подсказкой при включённом «Учитывать масштаб из файла» и работают при выключенном.
+    - Диалог «Настройки импорта…» существующей модели читает sidecar, а не дефолты и не `SettingsService` (тест в `ImportSettingsV2EditTests.h`).
+    - Числовой тест (разрешён Юрием как исключение в `Engine/tests`): кейс 8 в `ModelGeometryScaleTests.h` — точный JSON дефолтов диалога (включая `mergeMeshes=false`) для FBX в сантиметрах даёт размер 2.0 м без двойного уменьшения; отдельный коммит `test(engine)`.
 
 ---
 
@@ -415,6 +426,7 @@
 - Реальный FBX Юрия для flat/scale (П3 и R2): проверка режима `flat` и `useFileUnitScale` выполнена на синтетической фикстуре `folded-smooth.obj`, `CesiumMan.glb` и Blender-FBX (100 в узле); на реальном проблемном файле Юрия (сантиметры из Max/Maya, где «плоские нормали не работают») поведение не проверено — нужен сам файл.
 - Scale в геометрию (R1) в живом редакторе: спавн модели с sidecar `version 2` даёт `Transform.scale = {1,1,1}` и запечённый в геометрию масштаб; подтверждено юнит-тестами (`ModelGeometryScaleTests`, `ImportSettingsSpawnV2Tests`), но сквозной сценарий «импорт FBX в сантиметрах с пресетом 0.01 -> спавн -> визуальный размер во вьюпорте» в живом GUI не проверен.
 - Поведение иконок без Qt6Svg в рантайме: векторные иконки в сборке без Qt6Svg отображаются как прозрачные пиксмапы (`RenderSvgPixmap`), текстовый фолбэк есть только у кнопок и заголовков карточек; полноценная работа интерфейса без Qt6Svg в рантайме не проверена.
+- Шаг 17.10.D в живом GUI: импорт реального FBX в сантиметрах с дефолтами диалога (размер в метрах, `Transform=1`, без двойного уменьшения), кнопка «Сбросить к умолчанию», визуальное состояние заблокированных пресетов с подсказкой, открытие «Настройки импорта…» существующей модели со значениями sidecar, подписи «Не инвертировать UV (сырой V)» и «Дополнительно» в RU/EN — проверено только юнит-тестами (`ImportSettingsDialogTests`, `ImportSettingsV2EditTests`, кейс 8 `ModelGeometryScaleTests`).
 
 ## Интеграция main в editor-v2 — 31.10.2026
 
@@ -608,7 +620,7 @@
 - [x] **Шаг 17.10.B (fix(ui)):** Enter по умолчанию «Да» в диалоге подтверждения удаления ассета (Escape = «Нет»). Выделен хелпер `EditorUI::CreateDeleteConfirmationBox`/`ExecDeleteConfirmation` в `Editor/Include/AssetDeletePrompt.h`, в `AssetDeleteCommand.cpp` диалоги предупреждения и вопроса используют `setDefaultButton(Yes)` и `setEscapeButton(No)`. Юнит-тесты в `AssetDeleteTests.h` (проверка конфигурации кнопок, срабатывание Yes по Return и Keypad Enter, срабатывание No по Escape, 12/12 checks PASS).
 - [x] **Шаг 17.10.C (fix(editor)):** Обработка удаления ассета, используемого на сцене: объект сцены сохраняется; в инспекторе путь подсвечивается акцентным цветом темы (`EditorTheme::Instance().AccentColor().name()`) с подсказкой и кэшированием проверки диска; при удалении ассета кэш немедленно инвалидируется (`InvalidateAssetCache()`) и виджет инспектора сразу обновляет подсветку без сброса выделения; кнопка «Изменить» материала неактивна с подсказкой; `OpenMaterialEditor` проверяет наличие файла на диске до создания окна и показывает предупреждение через `Tr()`, не создавая окно и не вызывая `saveMaterial`. Тесты в `AssetDeleteTests.h` (15/15 checks PASS: стили, токен темы, кэш, мгновенное обновление при том же выделении, блокировка кнопки) и `EditorUiTests.cpp` (проверка предупреждения при вызове `OpenMaterialEditor` для отсутствующего файла). Коммиты `6bfcec6` и последующий.
 - [x] **Шаг 17.10.0 (fix(engine)):** Устойчивость `SceneDocument::Restore` к отсутствующим моделям: создание плейсхолдера `SkeletalMeshComponent` с dummy `SkeletalModel` через `dummy->SetAssetModel(o.modelAsset, std::move(model))` с сохранением пути ассета (`GetModelAsset() == o.modelAsset`), логирование ошибки `[Error] SceneDocument: missing model...` через `std::printf`, сохранение слотов материалов из `projectData`. Исключено падение реимпорта других ассетов с кодом 6 (`EngineSceneSimulationFailed`) при валидации сцен через `Restore`.
-- [ ] **Шаг 17.10.D (fix(ui)):** Унификация дефолтов диалога импорта в единый `DefaultSettings()`, запрет перезаписи `scale`/`flipUv` через `SettingsService`, блокировка пресетов масштаба при включённых единицах файла, перенос `flipUv` и `mergeMeshes` в «Дополнительно».
+- [x] **Шаг 17.10.D (fix(ui)):** Унификация дефолтов диалога импорта в единый `DefaultSettings()` (`scale=1.0`, `useFileUnitScale=true`, `importMaterials=true`, `importTextures=true`, `flipUv=false`, `mergeMeshes=false`); `SettingsService` больше не сохраняет/восстанавливает `scale`/`flipUv` (устранено двойное уменьшение см-моделей); пресеты масштаба заблокированы с подсказкой при `useFileUnitScale=true`; карточка «Расширенные настройки» переименована в «Дополнительно» (внутри `normals`, `smoothingAngle`, `flipUv`, `mergeMeshes`); подпись flipUv «Не инвертировать UV (сырой V)». Тесты: `ImportSettingsDialogTests` 24 checks (секции 14-17: чистые дефолты, пресеты, подписи/карточка, цепочка JSON→sidecar→spawn scale), `ImportSettingsV2EditTests` 4 checks (sidecar побеждает дефолты и SettingsService). Решение 40, уточнено решение 28. Числовой кейс в `Engine/tests/ModelGeometryScaleTests.h` — отдельным коммитом `test(engine)`.
 - [ ] **Шаг 17.10.E (fix(ui)):** Строгая фильтрация типов в диалоге реимпорта по центральному реестру расширений Core.
 - [ ] **Шаг 17.10.2 (fix(engine)):** Перенос staging реимпорта в `.painengine/staging/` в корне проекта (вне зоны видимости Content Browser) в `Engine/Source/Scene/AssetUpdate.cpp` и `SceneAssets.cpp`. Устранение дублирующих папок `<stem>_1`.
 - [ ] **Шаг 17.10.3 (feat(editor)):** Миграция старых `Game.dll`: автообновление для no-code проектов из шаблона с бэкапом и логом; диалог «Собрать проект» для C++ проектов; явный fallback с предупреждением при отказе.

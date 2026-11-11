@@ -39,7 +39,12 @@ int ImportSettingsDialog::exec()
 EditorCore::ImportSettings ImportSettingsDialog::DefaultSettings()
 {
     EditorCore::ImportSettings s;
+    s.model.scale = 1.0f;
     s.model.useFileUnitScale = true;
+    s.model.importMaterials = true;
+    s.model.importTextures = true;
+    s.model.flipUv = false;
+    s.model.mergeMeshes = false;
     return s;
 }
 
@@ -154,7 +159,7 @@ EditorCore::ImportSettings ImportSettingsDialog::Settings() const
 
     s.model.smoothingAngle = spinSmoothingAngle_ ? static_cast<float>(spinSmoothingAngle_->value()) : ImportSettingsFile::DefaultSmoothingAngle;
     s.model.flipUv = checkFlipUv_ ? checkFlipUv_->isChecked() : false;
-    s.model.mergeMeshes = checkMergeMeshes_ ? checkMergeMeshes_->isChecked() : true;
+    s.model.mergeMeshes = checkMergeMeshes_ ? checkMergeMeshes_->isChecked() : false;
     return s;
 }
 
@@ -219,6 +224,20 @@ void ImportSettingsDialog::ResetToDefaults()
 
 void ImportSettingsDialog::UpdateDependencies()
 {
+    if (checkUseFileUnitScale_ && btnPreset1_ && btnPreset01_ && btnPreset001_)
+    {
+        const bool presetsEnabled = !checkUseFileUnitScale_->isChecked();
+        const QString presetTip = presetsEnabled
+            ? QString()
+            : Tr("Доступно только при выключенном «Учитывать масштаб из файла»",
+                 "Available only when 'Use file unit scale' is off");
+        for (auto* btn : {btnPreset1_, btnPreset01_, btnPreset001_})
+        {
+            btn->setEnabled(presetsEnabled);
+            btn->setToolTip(presetTip);
+        }
+    }
+
     if (checkImportMaterials_ && checkImportTextures_)
     {
         if (isEditMode_)
@@ -255,8 +274,8 @@ void ImportSettingsDialog::LoadFromSettingsService()
     auto& s = SettingsService::Instance();
     EditorCore::ImportSettings settings = DefaultSettings();
 
-    if (s.Contains(QStringLiteral("import/model/scale")))
-        settings.model.scale = static_cast<float>(s.GetValue(QStringLiteral("import/model/scale"), 1.0).toDouble());
+    // scale and flipUv are per-asset (sidecar), never restored from global preferences:
+    // a stored scale would shrink the model twice together with useFileUnitScale.
     settings.model.useFileUnitScale = s.GetValue(QStringLiteral("import/model/useFileUnitScale"), true).toBool();
     if (s.Contains(QStringLiteral("import/model/importMaterials")))
         settings.model.importMaterials = s.GetValue(QStringLiteral("import/model/importMaterials"), true).toBool();
@@ -270,10 +289,8 @@ void ImportSettingsDialog::LoadFromSettingsService()
     }
     if (s.Contains(QStringLiteral("import/model/smoothingAngle")))
         settings.model.smoothingAngle = static_cast<float>(s.GetValue(QStringLiteral("import/model/smoothingAngle"), 60.0).toDouble());
-    if (s.Contains(QStringLiteral("import/model/flipUv")))
-        settings.model.flipUv = s.GetValue(QStringLiteral("import/model/flipUv"), false).toBool();
     if (s.Contains(QStringLiteral("import/model/mergeMeshes")))
-        settings.model.mergeMeshes = s.GetValue(QStringLiteral("import/model/mergeMeshes"), true).toBool();
+        settings.model.mergeMeshes = s.GetValue(QStringLiteral("import/model/mergeMeshes"), false).toBool();
 
     SetSettings(settings);
 }
@@ -282,13 +299,11 @@ void ImportSettingsDialog::SaveToSettingsService()
 {
     const auto s = Settings();
     auto& svc = SettingsService::Instance();
-    svc.SetValue(QStringLiteral("import/model/scale"), static_cast<double>(s.model.scale));
     svc.SetValue(QStringLiteral("import/model/useFileUnitScale"), s.model.useFileUnitScale);
     svc.SetValue(QStringLiteral("import/model/importMaterials"), s.model.importMaterials);
     svc.SetValue(QStringLiteral("import/model/importTextures"), s.model.importTextures);
     svc.SetValue(QStringLiteral("import/model/normals"), ImportSettingsFile::NormalsModeToString(s.model.normals));
     svc.SetValue(QStringLiteral("import/model/smoothingAngle"), static_cast<double>(s.model.smoothingAngle));
-    svc.SetValue(QStringLiteral("import/model/flipUv"), s.model.flipUv);
     svc.SetValue(QStringLiteral("import/model/mergeMeshes"), s.model.mergeMeshes);
 }
 
@@ -362,7 +377,7 @@ void ImportSettingsDialog::BuildUi()
     rootLayout->addWidget(basicGroup);
 
     // --- Advanced group (collapsible, collapsed by default) ---
-    advancedCard_ = new CollapsibleCard(Tr("Расширенные настройки", "Advanced Settings"), this, false);
+    advancedCard_ = new CollapsibleCard(Tr("Дополнительно", "Additional"), this, false);
     advancedCard_->setObjectName(QStringLiteral("AdvancedSettingsCard"));
 
     auto* advForm = new QFormLayout;
@@ -392,18 +407,18 @@ void ImportSettingsDialog::BuildUi()
     labelSmoothingAngle_->setObjectName(QStringLiteral("SmoothingAngleLabel"));
     advForm->addRow(labelSmoothingAngle_, spinSmoothingAngle_);
 
-    // Flip UV
-    checkFlipUv_ = new QCheckBox(Tr("Перевернуть UV (V)", "Flip UVs (V)"), advancedCard_->Content());
+    // Flip UV: checked = flipUv=true = raw V (engine applies aiProcess_FlipUVs when unchecked)
+    checkFlipUv_ = new QCheckBox(Tr("Не инвертировать UV (сырой V)", "Do not invert UVs (raw V)"), advancedCard_->Content());
     checkFlipUv_->setObjectName(QStringLiteral("FlipUvCheck"));
     checkFlipUv_->setChecked(false);
-    checkFlipUv_->setToolTip(Tr("Инвертировать координату текстуры V (Y)",
-                                "Invert texture V (Y) coordinate"));
+    checkFlipUv_->setToolTip(Tr("Включено: координата V остаётся как в файле. Выключено: движок инвертирует V при импорте.",
+                                "Checked: the V coordinate stays as in the file. Unchecked: the engine inverts V on import."));
     advForm->addRow(QString(), checkFlipUv_);
 
     // Merge meshes
     checkMergeMeshes_ = new QCheckBox(Tr("Склеивать меши", "Merge meshes"), advancedCard_->Content());
     checkMergeMeshes_->setObjectName(QStringLiteral("MergeMeshesCheck"));
-    checkMergeMeshes_->setChecked(true);
+    checkMergeMeshes_->setChecked(false);
     checkMergeMeshes_->setToolTip(Tr("Склеивать меши с одним материалом в единый буфер геометрии",
                                      "Merge submeshes sharing the same material into a single geometry buffer"));
     advForm->addRow(QString(), checkMergeMeshes_);
@@ -455,6 +470,7 @@ void ImportSettingsDialog::SetupConnections()
     connect(btnResetDefaults_, &QPushButton::clicked, this, &ImportSettingsDialog::ResetToDefaults);
 
     connect(checkImportMaterials_, &QCheckBox::toggled, this, &ImportSettingsDialog::UpdateDependencies);
+    connect(checkUseFileUnitScale_, &QCheckBox::toggled, this, &ImportSettingsDialog::UpdateDependencies);
     connect(comboNormals_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ImportSettingsDialog::UpdateDependencies);
 
     if (advancedCard_)

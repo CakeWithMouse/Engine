@@ -8,11 +8,17 @@
 #include "CommandRegistry.h"
 #include "IEditorHost.h"
 #include "EditorStyles.h"
+#include "ModelImportSidecar.h"
+#include "Logger.h"
 
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QPushButton>
+#include <QDir>
+#include <QTemporaryDir>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <iostream>
 #include <cmath>
 #include <vector>
@@ -102,11 +108,12 @@ inline void Run()
     Check(comboNormals->currentData().toInt() == static_cast<int>(EditorCore::ModelNormalsMode::File), "Default normals is file");
     Check(std::abs(spinSmoothing->value() - 60.0) < 1e-5, "Default smoothingAngle is 60.0");
     Check(!checkFlipUv->isChecked(), "Default flipUv is false");
-    Check(checkMergeMeshes->isChecked(), "Default mergeMeshes is true");
+    Check(!checkMergeMeshes->isChecked(), "Default mergeMeshes is false");
     Check(!advCard->IsExpanded(), "Advanced settings card is collapsed by default");
     ++checks;
 
-    // 3. Preset buttons set exact scale values
+    // 3. Preset buttons set exact scale values (presets require useFileUnitScale off, Step D)
+    checkUnitScale->setChecked(false);
     UiTestHelper::ClickButton(&dlg, QStringLiteral("Preset01"));
     Check(std::abs(dlg.Scale() - 0.1f) < 1e-5f, "Preset 0.1 sets scale to 0.1");
     Check(std::abs(spin->value() - 0.1) < 1e-5, "SpinBox reflects 0.1");
@@ -121,6 +128,7 @@ inline void Run()
     Check(std::abs(dlg.Scale() - 1.0f) < 1e-5f, "Preset 1 sets scale to 1.0");
     Check(std::abs(spin->value() - 1.0) < 1e-5, "SpinBox reflects 1.0");
     ++checks;
+    checkUnitScale->setChecked(true);
 
     // 4. Decimals precision: enough for 0.0254 (inches to meters)
     UiTestHelper::SetSpinBox(&dlg, QStringLiteral("ImportScaleSpin"), 0.0254);
@@ -189,7 +197,7 @@ inline void Run()
     Check(!spinSmoothing->isEnabled(), "Reset disables smoothingAngle for file normals");
     Check(std::abs(spinSmoothing->value() - 60.0) < 1e-5, "Reset restores smoothingAngle 60.0");
     Check(!checkFlipUv->isChecked(), "Reset restores flipUv false");
-    Check(checkMergeMeshes->isChecked(), "Reset restores mergeMeshes true");
+    Check(!checkMergeMeshes->isChecked(), "Reset restores mergeMeshes false");
     ++checks;
 
     // 9. Cancel button rejects dialog
@@ -232,10 +240,16 @@ inline void Run()
     Check(jsonStr.contains(QStringLiteral("\"mergeMeshes\": false")), "JSON contains mergeMeshes false");
     ++checks;
 
-    // 11. SettingsService persistence: reopening dialog restores last accepted values
+    // 11. SettingsService persistence: preferences are restored, scale/flipUv are never restored
     {
+        auto& svc = SettingsService::Instance();
+        svc.SetValue(QStringLiteral("import/model/scale"), 0.01);
+        svc.SetValue(QStringLiteral("import/model/flipUv"), true);
+
         ImportSettingsDialog dlg2;
-        Check(std::abs(dlg2.Scale() - 0.05f) < 1e-5f, "Restored scale from SettingsService is 0.05");
+        Check(std::abs(dlg2.Scale() - 1.0f) < 1e-5f, "Scale is not restored from SettingsService (opens at 1.0)");
+        auto* f2 = UiTestHelper::Require<QCheckBox>(&dlg2, QStringLiteral("FlipUvCheck"));
+        Check(!f2->isChecked(), "flipUv is not restored from SettingsService (opens at false)");
         auto* u2 = UiTestHelper::Require<QCheckBox>(&dlg2, QStringLiteral("UseFileUnitScaleCheck"));
         Check(u2->isChecked(), "Restored useFileUnitScale from SettingsService is true");
         auto* t2 = UiTestHelper::Require<QCheckBox>(&dlg2, QStringLiteral("ImportTexturesCheck"));
@@ -244,6 +258,9 @@ inline void Run()
         Check(n2->currentData().toInt() == static_cast<int>(EditorCore::ModelNormalsMode::Smooth), "Restored normals is Smooth");
         auto* m2 = UiTestHelper::Require<QCheckBox>(&dlg2, QStringLiteral("MergeMeshesCheck"));
         Check(!m2->isChecked(), "Restored mergeMeshes is false");
+
+        svc.Remove(QStringLiteral("import/model/scale"));
+        svc.Remove(QStringLiteral("import/model/flipUv"));
         ++checks;
     }
 
@@ -284,8 +301,10 @@ inline void Run()
         std::vector<EditorCommand> postedCommands;
 
         ScopedImportDialogHook hook([](ImportSettingsDialog& dialog) {
+            auto* unit = UiTestHelper::Require<QCheckBox>(&dialog, QStringLiteral("UseFileUnitScaleCheck"));
+            unit->setChecked(false); // presets require file units off (Step D)
             UiTestHelper::ClickButton(&dialog, QStringLiteral("Preset001"));
-            UiTestHelper::Require<QCheckBox>(&dialog, QStringLiteral("UseFileUnitScaleCheck"))->setChecked(true);
+            unit->setChecked(true);
             UiTestHelper::Require<QCheckBox>(&dialog, QStringLiteral("MergeMeshesCheck"))->setChecked(false);
             UiTestHelper::ClickButton(&dialog, QStringLiteral("ImportOkBtn"));
             return dialog.result();
@@ -314,6 +333,101 @@ inline void Run()
         Check(std::abs(postedCommands[0].importScale - 0.01f) < 1e-5f, "Command has importScale 0.01");
         Check(postedCommands[0].importOptionsJson.contains(QStringLiteral("\"useFileUnitScale\": true")), "Command optionsJson has useFileUnitScale true");
         Check(postedCommands[0].importOptionsJson.contains(QStringLiteral("\"mergeMeshes\": false")), "Command optionsJson has mergeMeshes false");
+        ++checks;
+    }
+
+    // 14. Step D: stored legacy scale/flipUv never override the dialog defaults
+    {
+        auto& svc = SettingsService::Instance();
+        svc.Remove(QStringLiteral("import/model/useFileUnitScale"));
+        svc.Remove(QStringLiteral("import/model/importMaterials"));
+        svc.Remove(QStringLiteral("import/model/importTextures"));
+        svc.Remove(QStringLiteral("import/model/normals"));
+        svc.Remove(QStringLiteral("import/model/smoothingAngle"));
+        svc.Remove(QStringLiteral("import/model/mergeMeshes"));
+        svc.SetValue(QStringLiteral("import/model/scale"), 0.01);
+        svc.SetValue(QStringLiteral("import/model/flipUv"), true);
+
+        ImportSettingsDialog freshDlg;
+        Check(std::abs(freshDlg.Scale() - 1.0f) < 1e-5f, "Stored scale 0.01 is ignored, dialog opens with 1.0");
+        auto* flip = UiTestHelper::Require<QCheckBox>(&freshDlg, QStringLiteral("FlipUvCheck"));
+        Check(!flip->isChecked(), "Stored flipUv true is ignored, dialog opens with false");
+
+        const auto def = freshDlg.Settings();
+        Check(def.version == 2, "Default settings are version 2");
+        Check(std::abs(def.model.scale - 1.0f) < 1e-5f, "Default settings scale is 1.0");
+        Check(def.model.useFileUnitScale, "Default settings useFileUnitScale is true");
+        Check(def.model.importMaterials, "Default settings importMaterials is true");
+        Check(def.model.importTextures, "Default settings importTextures is true");
+        Check(!def.model.flipUv, "Default settings flipUv is false");
+        Check(!def.model.mergeMeshes, "Default settings mergeMeshes is false");
+
+        svc.Remove(QStringLiteral("import/model/scale"));
+        svc.Remove(QStringLiteral("import/model/flipUv"));
+        ++checks;
+    }
+
+    // 15. Step D: scale presets disabled while useFileUnitScale is on, working when off
+    {
+        ImportSettingsDialog presetDlg;
+        auto* unit = UiTestHelper::Require<QCheckBox>(&presetDlg, QStringLiteral("UseFileUnitScaleCheck"));
+        auto* p1 = UiTestHelper::Require<QPushButton>(&presetDlg, QStringLiteral("Preset1"));
+        auto* p01 = UiTestHelper::Require<QPushButton>(&presetDlg, QStringLiteral("Preset01"));
+        auto* p001 = UiTestHelper::Require<QPushButton>(&presetDlg, QStringLiteral("Preset001"));
+
+        Check(unit->isChecked(), "useFileUnitScale is on by default");
+        Check(!p1->isEnabled() && !p01->isEnabled() && !p001->isEnabled(), "Presets disabled while useFileUnitScale is on");
+        Check(!p001->toolTip().isEmpty(), "Disabled preset has an explanatory tooltip");
+
+        unit->setChecked(false);
+        Check(p1->isEnabled() && p01->isEnabled() && p001->isEnabled(), "Presets enabled when useFileUnitScale is off");
+        UiTestHelper::ClickButton(&presetDlg, QStringLiteral("Preset001"));
+        Check(std::abs(presetDlg.Scale() - 0.01f) < 1e-5f, "Preset 0.01 works when useFileUnitScale is off");
+
+        unit->setChecked(true);
+        Check(!p1->isEnabled() && !p01->isEnabled() && !p001->isEnabled(), "Presets disabled again when useFileUnitScale is on");
+        ++checks;
+    }
+
+    // 16. Step D: flipUv caption reads "do not invert", collapsible card is titled "Дополнительно"
+    {
+        ImportSettingsDialog labelDlg;
+        auto* flip = UiTestHelper::Require<QCheckBox>(&labelDlg, QStringLiteral("FlipUvCheck"));
+        Check(flip->text().contains(QStringLiteral("Не инвертировать")) || flip->text().contains(QStringLiteral("Do not invert")),
+              "flipUv caption says 'do not invert UVs (raw V)'");
+        auto* cardFrame = UiTestHelper::Require<QFrame>(&labelDlg, QStringLiteral("AdvancedSettingsCard"));
+        auto* card = static_cast<CollapsibleCard*>(cardFrame);
+        auto* headerBtn = UiTestHelper::Require<QPushButton>(cardFrame, QStringLiteral("CardHeaderBtn"));
+        Check(headerBtn->text().contains(QStringLiteral("Дополнительно")) || headerBtn->text().contains(QStringLiteral("Additional")),
+              "Collapsible card is titled 'Дополнительно'/'Additional'");
+        Check(flip->parent() == card->Content(), "flipUv lives inside the collapsible card");
+        auto* merge = UiTestHelper::Require<QCheckBox>(&labelDlg, QStringLiteral("MergeMeshesCheck"));
+        Check(merge->parent() == card->Content(), "mergeMeshes lives inside the collapsible card");
+        ++checks;
+    }
+
+    // 17. Step D numeric chain: defaults -> v2 sidecar scale 1.0 -> spawn Transform 1 (no double shrink)
+    {
+        QTemporaryDir tempDir;
+        Check(tempDir.isValid(), "Temporary directory created");
+        Logger logger;
+        FileService fs(&logger);
+        fs.SetProjectRoot(tempDir.path());
+        const QString contentRoot = QDir(tempDir.path()).filePath(QStringLiteral("Content"));
+        fs.CreateDirectoryPath(QStringLiteral("Content/Models"));
+
+        ImportSettingsDialog numDlg;
+        const auto def = numDlg.Settings();
+        const QByteArray json = EditorCore::ImportSettingsFile::Serialize(def);
+        const auto modelObj = QJsonDocument::fromJson(json).object().value(QStringLiteral("model")).toObject();
+        Check(std::abs(static_cast<float>(modelObj.value(QStringLiteral("scale")).toDouble()) - 1.0f) < 1e-6f,
+              "Default options JSON scale is exactly 1.0 (no leftover 0.01)");
+        Check(modelObj.value(QStringLiteral("useFileUnitScale")).toBool(), "Default options JSON useFileUnitScale is true");
+
+        const QString vpath = QStringLiteral("/Game/Defaults/CmModel.fbx");
+        Check(EditorCore::ModelImportSidecar::WriteSidecar(fs, vpath, def, contentRoot), "Write default v2 sidecar");
+        Check(std::abs(EditorCore::ModelImportSidecar::ReadSpawnScale(fs, vpath, contentRoot) - 1.0f) < 1e-6f,
+              "Default v2 sidecar spawns at Transform 1 (scale applied once, in geometry)");
         ++checks;
     }
 

@@ -3,6 +3,7 @@
 #include "ImportSettingsDialog.h"
 #include "ModelImportEditFlow.h"
 #include "ImportSettings.h"
+#include "SettingsService.h"
 #include "UiTestHelper.h"
 
 #include <QDoubleSpinBox>
@@ -77,6 +78,39 @@ inline void Run()
         Check(std::abs(dlg.Scale() - 0.01f) < 1e-5f, "v2 edit shows the stored geometry scale 0.01");
         Check(dlg.findChild<QLabel*>(QStringLiteral("LegacyScaleNotice")) == nullptr, "v2 edit has no legacy notice");
         Check(dlg.Settings().version == 2, "v2 edit settings stay version 2");
+        ++checks;
+    }
+
+    // 4. Step D: edit mode reads the sidecar, not defaults or SettingsService leftovers.
+    {
+        auto& svc = SettingsService::Instance();
+        svc.SetValue(QStringLiteral("import/model/scale"), 0.01);
+        svc.SetValue(QStringLiteral("import/model/flipUv"), true);
+        svc.SetValue(QStringLiteral("import/model/normals"), QStringLiteral("smooth"));
+        svc.SetValue(QStringLiteral("import/model/mergeMeshes"), true);
+
+        ImportSettingsDialog dlg;
+        EditorCore::ImportSettings v2;
+        v2.version = 2;
+        v2.model.scale = 0.05f;
+        v2.model.useFileUnitScale = false;
+        v2.model.normals = EditorCore::ModelNormalsMode::Flat;
+        v2.model.flipUv = true;
+        v2.model.mergeMeshes = false;
+
+        const bool legacy = ModelImportEditFlow::PrepareForEdit(dlg, v2);
+        Check(!legacy, "Sidecar v2 is not legacy");
+        Check(std::abs(dlg.Scale() - 0.05f) < 1e-5f, "Edit dialog shows sidecar scale 0.05, not default 1.0 or stored 0.01");
+        const auto shown = dlg.Settings();
+        Check(!shown.model.useFileUnitScale, "Edit dialog shows sidecar useFileUnitScale false, not default true");
+        Check(shown.model.normals == EditorCore::ModelNormalsMode::Flat, "Edit dialog shows sidecar normals Flat, not stored Smooth");
+        Check(shown.model.flipUv, "Edit dialog shows sidecar flipUv true, not default false");
+        Check(!shown.model.mergeMeshes, "Edit dialog shows sidecar mergeMeshes false, not stored true");
+
+        svc.Remove(QStringLiteral("import/model/scale"));
+        svc.Remove(QStringLiteral("import/model/flipUv"));
+        svc.Remove(QStringLiteral("import/model/normals"));
+        svc.Remove(QStringLiteral("import/model/mergeMeshes"));
         ++checks;
     }
 

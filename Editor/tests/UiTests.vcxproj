@@ -88,6 +88,7 @@
         <ClCompile Include="../Source/ObjectInspectorPanel.cpp"/>
         <ClCompile Include="../Source/ProjectProperties.cpp"/>
         <ClCompile Include="../Core/ImportSettings.cpp"/>
+        <ClCompile Include="../Core/ModelImportSidecar.cpp"/>
         <ClCompile Include="../Core/AssetOps.cpp"/>
         <ClCompile Include="../UI/ImportSettingsDialog.cpp"/>
         <ClCompile Include="../UI/ModelImportEditFlow.cpp"/>
