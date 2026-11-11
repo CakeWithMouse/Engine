@@ -329,6 +329,12 @@ inline void Run()
             Check(fbxFlat.Success && fbxFlat.Model && !fbxFlat.Model->Meshes.empty(), "FBX loads with flat normals");
             Check(!fbxFlat.Model->Meshes[0].Vertices.empty(), "FBX has vertices with flat normals");
 
+            // 8. Step D: exact dialog defaults normalize a centimeter FBX to meters exactly once
+            WriteText(sidecar, R"({"version":2,"kind":"model","model":{"scale":1.0,"useFileUnitScale":true,"normals":"file","smoothingAngle":60.0,"importMaterials":true,"importTextures":true,"flipUv":false,"mergeMeshes":false}})");
+            const Box bDefaults = ModelBox(*Load(vpath).Model);
+            const float dimDefaults = (std::max)({Size(bDefaults, 0), Size(bDefaults, 1), Size(bDefaults, 2)});
+            Check(Near(dimDefaults, 2.0f, 1e-2f), "FBX with dialog defaults dimension is 2.0 m (no double shrink)");
+
             VfsRead::GetVFS().Unmount("/GeomScaleFbx");
             fs::remove_all(tempRoot);
         }
