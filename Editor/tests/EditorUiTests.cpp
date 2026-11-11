@@ -1793,6 +1793,34 @@ int wmain(int argc, wchar_t** argv)
         Ui([](auto* w) { auto* projection=w->template findChild<QComboBox*>("Property/orthographic"); auto* plane=w->template findChild<QComboBox*>("Property/viewPlane"); Check(projection && plane && projection->count()==2 && plane->count()==4,"camera projection and 2D plane choices"); projection->setCurrentIndex(1); QMetaObject::invokeMethod(projection,"activated",Q_ARG(int,1)); });
         until([&]{for(const auto& o:host.ReadSnapshot().objects)if(o.gameplayKind==2)return QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object()["orthographic"].toBool();return false;});
         Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); }); until([&] { return !host.ReadSnapshot().dirty; });
+        // Regression: an inactive window reports no focus widget, so CommitPendingEdits
+        // posts the transform directly. With an unchanged transform the receiver must drop
+        // it and create no Undo entry. Reload clears history so canUndo is a clean baseline.
+        {
+            EditorCommand load; load.type = EditorCommand::LoadScene;
+            load.path = QString::fromStdWString(sceneFile.wstring());
+            host.PostCommand(load);
+            until([&] { return !host.ReadSnapshot().canUndo && !host.ReadSnapshot().objects.empty(); });
+            Check(!host.ReadSnapshot().canUndo, "history cleared before inactive-window save test");
+            Ui([](auto* w) {
+                auto* tree = w->findChild<QTreeWidget*>();
+                for (int i = 0; i < tree->topLevelItemCount(); ++i)
+                    if (tree->topLevelItem(i)->text(1) == QStringLiteral("Primitive.Sphere")) tree->setCurrentItem(tree->topLevelItem(i));
+            });
+            until([&] { return host.ReadSnapshot().selected != 0; });
+            for (int i = 0; i < 10; ++i) pump();
+            auto selectedXNow = [&] { const auto view = host.ReadSnapshot(); for (const auto& o : view.objects) if (o.id == view.selected) return o.transform.position[0]; return -999.0f; };
+            const float startX = selectedXNow();
+            Ui([](auto* w) {
+                auto* viewport = w->findChild<ViewportWidget*>(); viewport->setFocus();
+                auto* panel = w->findChild<ObjectInspectorPanel*>();
+                Check(panel && !panel->isAncestorOf(QApplication::focusWidget()), "focus moved outside the inspector");
+                Action(w, QStringLiteral("Сохранить сцену"))->trigger();
+            });
+            for (int i = 0; i < 30; ++i) pump();
+            Check(!host.ReadSnapshot().canUndo, "inactive-window save of unchanged transform adds no Undo entry");
+            Check(selectedXNow() == startX, "inactive-window no-op save leaves transform unchanged");
+        }
         Ui([](auto* w) { w->close(); });
         until([&] { return exit; });
         host.SetModuleApi({}); factory.destroy(api.context); sessionGuard.context = nullptr; host.Stop();
