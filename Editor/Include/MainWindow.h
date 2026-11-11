@@ -94,6 +94,10 @@ private:
     int controlSchemeSubId_ = 0;
     void BuildCodeTools();
     void RunCodeTool(const QString& action, const QStringList& extra = {});
+    // Старые Game.dll без Engine.Asset.Import: no-code — автообновление из шаблона,
+    // C++ — диалог «Собрать проект» / «Открыть как есть».
+    enum class ImportSupport { Options, Defaults, Cancelled };
+    ImportSupport EnsureModelImportSupport();
     void ShowProjectTypes();
     void BuildUi();
     void BuildToolBar();

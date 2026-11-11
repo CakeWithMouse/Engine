@@ -64,19 +64,38 @@ void EditorMainWindow::RegisterAssetCommands()
             QString optionsJson;
             if (kind == 0)
             {
-                const auto decision = ResolveModelImportDecision(ctx.parameters, !source.isEmpty(), this);
-                if (!decision.proceed)
+                bool defaultsFallback = false;
+                if (!host_->AssetImportApi())
                 {
-                    return false;
+                    const auto support = EnsureModelImportSupport();
+                    if (support == ImportSupport::Cancelled)
+                    {
+                        return false;
+                    }
+                    defaultsFallback = support == ImportSupport::Defaults;
                 }
-                scale = decision.scale;
-                if (ctx.parameters.contains(QStringLiteral("options")))
+                if (defaultsFallback)
                 {
-                    optionsJson = ctx.parameters.value(QStringLiteral("options")).toString();
+                    QMessageBox::information(this, Tr("Импорт модели", "Model Import"),
+                        Tr("Game.dll проекта не поддерживает настройки импорта. Модель импортируется с настройками по умолчанию.",
+                           "The project's Game.dll does not support import settings. The model is imported with default settings."));
                 }
                 else
                 {
-                    optionsJson = QString::fromUtf8(EditorCore::ImportSettingsFile::Serialize(decision.settings));
+                    const auto decision = ResolveModelImportDecision(ctx.parameters, !source.isEmpty(), this);
+                    if (!decision.proceed)
+                    {
+                        return false;
+                    }
+                    scale = decision.scale;
+                    if (ctx.parameters.contains(QStringLiteral("options")))
+                    {
+                        optionsJson = ctx.parameters.value(QStringLiteral("options")).toString();
+                    }
+                    else
+                    {
+                        optionsJson = QString::fromUtf8(EditorCore::ImportSettingsFile::Serialize(decision.settings));
+                    }
                 }
             }
 

@@ -318,6 +318,7 @@
         <ClInclude Include="UI/ImportSettingsDialog.h"/>
         <ClInclude Include="Include/AssetDeletePrompt.h"/>
         <ClInclude Include="Include/CodeClassDialog.h"/>
+        <ClInclude Include="Include/ImportMigration.h"/>
         <ClInclude Include="Include/FileBrowser.h"/>
         <ClInclude Include="Include/MaterialTextureTools.h"/>
         <ClInclude Include="Include/MaterialGraphWidget.h"/>
@@ -407,6 +408,6 @@
         <Copy Condition="'$(EngineCommandlet)'=='true'" SourceFiles="$(QtInstallDir)/plugins/platforms/qoffscreen.dll" DestinationFiles="$(OutDir)platforms/qoffscreen.dll" SkipUnchangedFiles="true"/>
     </Target>
     <ImportGroup Label="ExtensionTargets"/>
-  <ItemGroup><ClCompile Include="Source/CodeTools.cpp" /></ItemGroup>
+  <ItemGroup><ClCompile Include="Source/CodeTools.cpp" /><ClCompile Include="Source/ImportMigration.cpp" /></ItemGroup>
     <Import Project="../Engine/BuildSupport/AssimpRuntime.targets" />
 </Project>

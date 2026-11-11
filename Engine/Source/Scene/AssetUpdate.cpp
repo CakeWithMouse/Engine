@@ -88,6 +88,7 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
             if(!original.is_absolute() || !fs::is_regular_file(original))throw std::runtime_error("Original source is missing; choose its new location");
             if(Inside(original,sourceRoot.parent_path()) && (original==file || (model&&Inside(original,sourceRoot))))throw std::runtime_error("Choose the external original, not a file inside this import");
             std::string importOptions;
+            bool normalizeSidecar=false;
             if(model) {
                 const auto sidecar=fs::u8path(file.u8string()+".importsettings.json");
                 if(fs::is_regular_file(sidecar)) {
@@ -99,9 +100,13 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
                         if(ModelImportSettings::Parse(text,parsed,&err)) {
                             importOptions=text;
                         } else {
-                            std::fprintf(stderr,"[Error] AssetUpdate: broken sidecar '%s': %s\n",sidecar.u8string().c_str(),err.c_str());
+                            std::fprintf(stderr,"[Error] AssetUpdate: broken sidecar '%s': %s; normalizing to defaults\n",sidecar.u8string().c_str(),err.c_str());
+                            Copy(sidecar,backup/"importsettings.broken.json");
+                            normalizeSidecar=true;
                         }
                     }
+                } else {
+                    std::fprintf(stderr,"[Info] AssetUpdate: sidecar missing for '%s', using defaults\n",file.u8string().c_str());
                 }
             }
             staging=work/"Staging"/(std::to_string(GetCurrentProcessId())+"-"+std::to_string(GetTickCount64()));
@@ -123,7 +128,8 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
                     if(entry.path()==fs::u8path(imported.u8string()+".import.json"))relative=fs::u8path(file.filename().u8string()+".import.json");
                     if(entry.path()==fs::u8path(imported.u8string()+".importsettings.json"))relative=fs::u8path(file.filename().u8string()+".importsettings.json");
                     const auto dest=candidate/relative;
-                    if(fs::exists(dest)&&(entry.path().extension()==".mat"||entry.path().extension()==".hlsl"||entry.path().u8string().find(".import.json")!=std::string::npos||entry.path().u8string().find(".importsettings.json")!=std::string::npos))continue;
+                    const auto name=entry.path().u8string();
+                    if(fs::exists(dest)&&(entry.path().extension()==".mat"||entry.path().extension()==".hlsl"||name.find(".import.json")!=std::string::npos||(name.find(".importsettings.json")!=std::string::npos&&!normalizeSidecar)))continue;
                     Copy(entry.path(),dest);
                 }
             } else Copy(imported,candidate);
