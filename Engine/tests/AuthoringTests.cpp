@@ -210,11 +210,21 @@ void AuthoringTests(){
 
     // (b) Сохранение этой сцены сохраняет modelAsset, textureAsset и materialAsset без потерь
     const auto resavedSnapshot = SceneTestAccess::Snapshot(restoredMissingScene);
-    const auto resavedJson = SceneDocument::Serialize(resavedSnapshot);
-    CHECK(resavedJson.find(missingModelVirtual) != std::string::npos);
-    CHECK(resavedJson.find("/Game/Images/Renamed.bmp") != std::string::npos);
-    CHECK(resavedJson.find("/Game/Materials/Texture.mat") != std::string::npos);
-    CHECK(resavedJson.find("materialSlots") != std::string::npos);
+    CHECK(resavedSnapshot.components.size() == 1);
+    const auto& resavedComp = resavedSnapshot.components.front();
+    CHECK(resavedComp.modelAsset == missingModelVirtual);
+    CHECK(resavedComp.textureAsset == "/Game/Images/Renamed.bmp");
+    CHECK(resavedComp.materialAsset == "/Game/Materials/Texture.mat");
+    CHECK(resavedComp.projectData.find("materialSlots") != std::string::npos);
+
+    // Round-trip через Parse(Serialize) также строго сохраняет поля в снапшоте
+    const auto roundTripSnapshot = SceneDocument::Parse(SceneDocument::Serialize(resavedSnapshot));
+    CHECK(roundTripSnapshot.components.size() == 1);
+    const auto& roundTripComp = roundTripSnapshot.components.front();
+    CHECK(roundTripComp.modelAsset == missingModelVirtual);
+    CHECK(roundTripComp.textureAsset == "/Game/Images/Renamed.bmp");
+    CHECK(roundTripComp.materialAsset == "/Game/Materials/Texture.mat");
+    CHECK(roundTripComp.projectData.find("materialSlots") != std::string::npos);
 
     // (c) Play запускается и останавливается на сессии со сценой с отсутствующей моделью
     uint64_t missingSceneId = 0;
@@ -261,8 +271,22 @@ void AuthoringTests(){
     CHECK(!fs::exists(content/"Images/MustRollback.bmp"));
     CHECK(Read(missingSceneFile) == sceneBeforeReimport);
 
+    // Реимпорт САМОЙ модели с новым битым исходником откатывается: код ошибки, старый файл модели и sidecar как до
+    const auto movedModelFile = content/"Models/Renamed/mesh.obj";
+    const auto movedSidecarFile = content/"Models/Renamed/mesh.obj.importsettings.json";
+    CHECK(fs::exists(movedModelFile));
+    CHECK(fs::exists(movedSidecarFile));
+    const auto modelFileBefore = Read(movedModelFile);
+    const auto sidecarBefore = Read(movedSidecarFile);
+    const auto brokenSource = root/"broken_source_replacement.obj";
+    Write(brokenSource, "NOT A VALID 3D OBJ GEOMETRY");
+    CHECK(author.asset(author.context, 0, moved.c_str(), brokenSource.u8string().c_str(), error, sizeof(error)) != EngineSceneOk);
+    CHECK(Read(movedModelFile) == modelFileBefore);
+    CHECK(Read(movedSidecarFile) == sidecarBefore);
+
     // Очистка тестовых файлов
     fs::remove(corruptSceneFile);
     fs::remove(corruptModelPhysical);
     fs::remove(missingSceneFile);
+    fs::remove(brokenSource);
 }

@@ -254,6 +254,24 @@ void SceneDocument::Validate(const SceneSnapshot& data, ComponentTypeCatalog cat
         if (o.typeName != SceneAssets::ModelType && !catalog.Find(o.typeName))
             throw SceneDocumentError(EngineSceneUnknownType, "Unknown component type: " + o.typeName);
 }
+static bool CheckModelPhysicallyExists(const std::string& modelAsset)
+{
+    try
+    {
+        return VfsRead::Active().Exists(modelAsset);
+    }
+    catch (const std::exception& e)
+    {
+        std::printf("[Error] SceneDocument: VFS Exists failed for '%s': %s\n", modelAsset.c_str(), e.what());
+        throw;
+    }
+    catch (...)
+    {
+        std::printf("[Error] SceneDocument: unknown VFS Exists error for '%s'\n", modelAsset.c_str());
+        throw;
+    }
+}
+
 static std::unique_ptr<GameComponent> CreateMissingModelPlaceholder(const std::string& modelAsset, const std::string& projectData)
 {
     auto dummy = std::make_unique<SkeletalMeshComponent>();
@@ -307,13 +325,7 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
             }
             catch (const std::exception& e)
             {
-                bool physicallyExists = false;
-                try {
-                    physicallyExists = VfsRead::Active().Exists(o.modelAsset);
-                } catch (...) {
-                    physicallyExists = false;
-                }
-                if (physicallyExists)
+                if (CheckModelPhysicallyExists(o.modelAsset))
                 {
                     throw;
                 }
