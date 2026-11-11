@@ -64,6 +64,9 @@ public:
     QSize minimumSizeHint() const override { return QSize(60, 40); }
     QSize sizeHint() const override { return QSize(250, 180); }
 
+protected:
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
 private:
     void BuildUi();
     void OnDoubleClicked(const QModelIndex& index);

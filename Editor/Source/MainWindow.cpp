@@ -832,7 +832,7 @@ void EditorMainWindow::MaybeSave(std::function<void()> after)
         return;
 
     if (objectInspectorPanel_)
-        objectInspectorPanel_->ClearFocusIfInside();
+        objectInspectorPanel_->CommitPendingEdits();
 
     checkingChanges_ = true;
     afterCheck_ = std::move(after);
@@ -850,7 +850,7 @@ void EditorMainWindow::SaveScene(bool saveAs, std::function<void()> after)
         return;
 
     if (objectInspectorPanel_)
-        objectInspectorPanel_->ClearFocusIfInside();
+        objectInspectorPanel_->CommitPendingEdits();
 
     QString path = scenePath_;
 

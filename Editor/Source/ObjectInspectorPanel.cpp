@@ -325,6 +325,20 @@ void ObjectInspectorPanel::ClearFocusIfInside()
     if (auto* focus = QApplication::focusWidget(); focus && isAncestorOf(focus)) focus->clearFocus();
 }
 
+void ObjectInspectorPanel::CommitPendingEdits()
+{
+    if (HasFocusedChild())
+    {
+        ClearFocusIfInside();
+        return;
+    }
+    // An inactive window reports no focus widget on Windows, so clearing focus
+    // cannot fire editingFinished. Commit the transform directly; the receiver
+    // drops no-op changes.
+    if (!refreshing_ && selectedId_ != 0 && cardTransform_ && cardTransform_->isVisible())
+        emit TransformEditingFinished(selectedId_, CurrentTransformValue());
+}
+
 bool ObjectInspectorPanel::HasFocusedChild() const
 {
     const auto* focus = QApplication::focusWidget(); return focus && isAncestorOf(focus);

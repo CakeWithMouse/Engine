@@ -179,11 +179,9 @@ void FileBrowserDock::BuildUi()
     connect(view_, &QTreeView::customContextMenuRequested, this,
             [this](const QPoint& p) { OnContextMenu(p); });
 
-    auto* actDelete = new QAction(view_);
-    actDelete->setShortcut(QKeySequence::Delete);
-    actDelete->setShortcutContext(Qt::WidgetShortcut);
-    view_->addAction(actDelete);
-    connect(actDelete, &QAction::triggered, this, [this] { DeleteCurrentAsset(); });
+    // Handle Delete via event filter: a WidgetShortcut action stops firing once Windows deactivates the window.
+    view_->installEventFilter(this);
+    view_->viewport()->installEventFilter(this);
 
     layout->addWidget(view_);
 
@@ -354,4 +352,18 @@ void FileBrowserDock::DeleteCurrentAsset()
 bool FileBrowserDock::IsProtectedPath(const QString& path) const
 {
     return path.isEmpty() || FileService::IsProtectedDirectory(path, projectDir_, contentDir_);
+}
+
+bool FileBrowserDock::eventFilter(QObject* watched, QEvent* event)
+{
+    if ((watched == view_ || watched == view_->viewport()) && event->type() == QEvent::KeyPress)
+    {
+        auto* ke = static_cast<QKeyEvent*>(event);
+        if (ke->key() == Qt::Key_Delete)
+        {
+            DeleteCurrentAsset();
+            return true;
+        }
+    }
+    return QDockWidget::eventFilter(watched, event);
 }
