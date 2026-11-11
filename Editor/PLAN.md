@@ -308,6 +308,9 @@
     - Общий корень `SceneAssets::StagingRoot = "/_staging"` в `SceneAssets.h`; физический каталог `.painengine/Staging/<pid>-<tick>` (имена утверждены Юрием).
     - `ValidPath` обобщён в `ValidPathUnder(path, root)`; `CreateModel` принимает `/_staging`-пути, т.к. в `Import` он выполняется до `CreateMaterials` и `.import.json` ещё нет (комментарий о порядке добавлен).
     - Тест «во время импорта» — `ReadDirectoryChangesW`-наблюдатель за Content (`Engine/tests/ModelStagingTests.h`): ни одного `<stem>_1` при импорте и двух реимпортах, Staging пуст после.
+44. **Retry copy_file (Шаг 17.10.2b) — решения приняты самостоятельно:**
+    - `CopyFileWithRetry` в `AssetUpdate.cpp`: повтор только при `ERROR_SHARING_VIOLATION`, 3 попытки с паузой 200 мс; логируется каждая неудачная попытка (`[Warn] ... attempt N/3`), успешные копии молчат (иначе шум на каждом файле).
+    - Тест `AssetUpdateRetryTests.h`: реимпорт аудио (без Assimp-валидации) с эксклюзивным удержанием ассета 300 мс — попытки 1-2 падают, 3-я успешна; EngineTests 76/76 Release.
 
 ---
 

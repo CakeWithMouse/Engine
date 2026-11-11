@@ -28,6 +28,7 @@
 #include "ModelGeometryScaleTests.h"
 #include "ModelReimportScaleTests.h"
 #include "ModelStagingTests.h"
+#include "AssetUpdateRetryTests.h"
 #include "ModelFlatNormalsTests.h"
 #include <cmath>
 #include <cstring>
@@ -2255,6 +2256,7 @@ int main()
         {"model import geometry scale v1 vs v2 (static and skeletal)", ModelGeometryScaleTests::Run},
         {"model reimport via author.asset changes geometry bounds and preserves Transform", ModelReimportScaleTests::Run},
         {"reimport staging keeps Content free of <stem>_1 artifacts", ModelStagingTests::Run},
+        {"reimport retries copy_file on sharing violation", AssetUpdateRetryTests::Run},
         {"flat normals split a folded smooth-vn fixture (P3 regression)", ModelFlatNormalsTests::Run}
     };
     int failures = 0, skipped = 0;

@@ -19,12 +19,24 @@ bool Inside(const fs::path& child,const fs::path& root) {
     auto relative=fs::weakly_canonical(child).lexically_relative(fs::canonical(root));
     return !relative.empty()&&!relative.is_absolute()&&*relative.begin()!="..";
 }
+void CopyFileWithRetry(const fs::path& source,const fs::path& target) {
+    // Antivirus/indexer can hold a freshly written file open for a moment.
+    std::error_code ec;
+    for(int attempt=1;attempt<=3;++attempt) {
+        fs::copy_file(source,target,fs::copy_options::overwrite_existing,ec);
+        if(!ec)return;
+        std::fprintf(stderr,"[Warn] AssetUpdate: copy attempt %d/3 failed for '%s': %s\n",attempt,source.u8string().c_str(),ec.message().c_str());
+        if(ec.value()!=ERROR_SHARING_VIOLATION||attempt==3)break;
+        Sleep(200);
+    }
+    throw fs::filesystem_error("copy_file",source,target,ec);
+}
 void Copy(const fs::path& source,const fs::path& target) {
     if(GetFileAttributesW(source.c_str())&FILE_ATTRIBUTE_REPARSE_POINT)throw std::runtime_error("Linked assets cannot be updated");
     if(fs::is_directory(source)) {
         fs::create_directories(target);
         for(const auto& entry:fs::directory_iterator(source))Copy(entry.path(),target/entry.path().filename());
-    } else {fs::create_directories(target.parent_path());fs::copy_file(source,target,fs::copy_options::overwrite_existing);}
+    } else {fs::create_directories(target.parent_path());CopyFileWithRetry(source,target);}
 }
 void Write(const fs::path& path,const Json& json){std::ofstream f(path,std::ios::binary);f.exceptions(std::ios::failbit|std::ios::badbit);f<<json.dump(2)<<'\n';f.close();}
 constexpr std::string_view kStagingRoot=SceneAssets::StagingRoot;
