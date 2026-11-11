@@ -86,6 +86,7 @@
         <ClCompile Include="../UI/MainToolBar.cpp"/>
         <ClCompile Include="../Source/SceneObjectsPanel.cpp"/>
         <ClCompile Include="../Source/ObjectInspectorPanel.cpp"/>
+        <ClCompile Include="../Source/ObjectInspectorLight.cpp"/>
         <ClCompile Include="../Source/ProjectProperties.cpp"/>
         <ClCompile Include="../Core/ImportSettings.cpp"/>
         <ClCompile Include="../Core/ModelImportSidecar.cpp"/>

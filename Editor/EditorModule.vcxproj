@@ -183,6 +183,7 @@
         <ClCompile Include="Source/ViewportWidget_Input.cpp"/>
         <ClCompile Include="UI/ViewportOverlayHelper.cpp"/>
         <ClCompile Include="Source/ObjectInspectorPanel.cpp"/>
+        <ClCompile Include="Source/ObjectInspectorLight.cpp"/>
         <ClCompile Include="Source/ProjectProperties.cpp"/>
         <ClCompile Include="Source/SceneObjectsPanel.cpp"/>
         <ClCompile Include="Source/MaterialEditorWindow.cpp"/>
