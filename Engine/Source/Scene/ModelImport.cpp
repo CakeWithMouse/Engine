@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <fstream>
 #include <map>
+#include <memory>
 #include <set>
 
 #if defined(ENGINE_ENABLE_ASSIMP)
@@ -17,6 +18,33 @@
 
 namespace fs = std::filesystem;
 using Json = nlohmann::json;
+namespace
+{
+// One-shot importer capture, armed by Import around CreateModel. Type-erased so
+// non-Assimp builds still link the arm/clear pair.
+std::string g_capturePath;
+std::shared_ptr<void> g_capture;
+}
+namespace ModelImport
+{
+void ArmSceneCapture(const std::string& modelPath) { g_capturePath = modelPath; g_capture.reset(); }
+void ClearSceneCapture() { g_capturePath.clear(); g_capture.reset(); }
+}
+#if defined(ENGINE_ENABLE_ASSIMP)
+namespace ModelImport
+{
+void OfferSceneCapture(const std::string& modelPath, std::unique_ptr<Assimp::Importer> importer)
+{
+    if (!g_capturePath.empty() && g_capturePath == modelPath)
+        g_capture = std::shared_ptr<void>(importer.release(), [](void* p) { delete static_cast<Assimp::Importer*>(p); });
+}
+const aiScene* CapturedScene(const std::string& modelPath)
+{
+    if (g_capturePath != modelPath || !g_capture) return nullptr;
+    return static_cast<Assimp::Importer*>(g_capture.get())->GetScene();
+}
+}
+#endif
 namespace
 {
 constexpr size_t MaxFileSize = 256u * 1024 * 1024;
@@ -119,9 +147,16 @@ void ModelImport::CreateMaterials(const fs::path& source, const fs::path& destin
         return;
     }
 
+    // Reuse the geometry load's aiScene when Import armed the capture; materials
+    // are unaffected by the loader's postprocessing. Fall back to a fresh parse
+    // for callers outside Import.
+    const aiScene* scene = CapturedScene(modelPath);
     Assimp::Importer importer;
-    importer.SetIOHandler(new AssimpVfsIO(modelPath));
-    const aiScene* scene = importer.ReadFile(modelPath, 0);
+    if (!scene)
+    {
+        importer.SetIOHandler(new AssimpVfsIO(modelPath));
+        scene = importer.ReadFile(modelPath, 0);
+    }
     if (!scene || !scene->mRootNode) throw std::runtime_error("Cannot read model materials: " + std::string(importer.GetErrorString()));
     fs::create_directory(destination / "Materials");
     if (settings.importTextures)

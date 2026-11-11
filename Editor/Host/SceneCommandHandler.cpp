@@ -352,6 +352,19 @@ void SceneCommandHandler::SetSelectedId(uint64_t id)
     selectedIds_.clear();
 }
 
+void SceneCommandHandler::SelectByName(const Context& ctx, const std::string& name)
+{
+    uint64_t id = 0;
+    if (!name.empty() && ctx.scene.context)
+    {
+        IEditorHost::Snapshot view;
+        EngineSceneInfo sinfo{};
+        if (ctx.scene.readActiveScene(ctx.scene.context, &sinfo, SceneVisitor, &view) == EngineSceneOk)
+            for (const auto& o : view.objects) if (o.name == name) { id = o.id; break; }
+    }
+    SetSelectedId(id);
+}
+
 void SceneCommandHandler::PickSelection(uint64_t id, bool toggle)
 {
     selectedId_ = id;

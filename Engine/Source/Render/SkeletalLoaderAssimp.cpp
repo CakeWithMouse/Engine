@@ -15,9 +15,17 @@
 #include <algorithm>
 #include <cmath>
 #include <map>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+namespace ModelImport
+{
+// Defined in ModelImport.cpp: retains this import's importer so CreateMaterials
+// reuses the first aiScene instead of parsing the file a second time.
+void OfferSceneCapture(const std::string& modelPath, std::unique_ptr<Assimp::Importer> importer);
+}
 
 namespace
 {
@@ -118,12 +126,14 @@ namespace
 
 static SkeletalLoadResult LoadModel(
     const std::function<const aiScene*(Assimp::Importer&, unsigned)>& read,
-    const ModelImportSettings& settings = {})
+    const ModelImportSettings& settings = {},
+    const std::string& capturePath = {})
 {
     SkeletalLoadResult result;
     try
     {
-        Assimp::Importer importer;
+        auto importerOwner = std::make_unique<Assimp::Importer>();
+        Assimp::Importer& importer = *importerOwner;
         unsigned int flags =
             aiProcess_Triangulate |
             aiProcess_LimitBoneWeights |
@@ -402,6 +412,7 @@ static SkeletalLoadResult LoadModel(
         {
             ApplyGeometryScale(*model, settings.scale);
         }
+        if (!capturePath.empty()) ModelImport::OfferSceneCapture(capturePath, std::move(importerOwner));
         result.Success = true;
         result.Model = model;
     }
@@ -433,6 +444,6 @@ SkeletalLoadResult LoadSkeletalModelFromVfs(std::string_view vpath)
     return LoadModel([&](Assimp::Importer& importer, unsigned flags) {
         importer.SetIOHandler(new AssimpVfsIO(vpath));
         return importer.ReadFile(std::string(vpath), flags);
-    }, settings);
+    }, settings, std::string(vpath));
 }
 #endif

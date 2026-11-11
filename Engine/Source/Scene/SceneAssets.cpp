@@ -12,6 +12,13 @@
 #include <cctype>
 
 namespace fs = std::filesystem;
+namespace ModelImport
+{
+// Defined in ModelImport.cpp: one-shot aiScene capture between CreateModel and
+// CreateMaterials (declared here to keep ModelImport.h untouched).
+void ArmSceneCapture(const std::string& modelPath);
+void ClearSceneCapture();
+}
 namespace
 {
 std::string Extension(const fs::path& path)
@@ -244,9 +251,11 @@ std::string Import(const fs::path& content, const fs::path& source, Kind kind, s
                 // CreateModel must run before CreateMaterials: it validates geometry
                 // while .import.json does not exist yet, so MaterialSlots stays empty
                 // and no /Game material validation hits transient staging paths.
+                ModelImport::ArmSceneCapture(virtualPath);
                 CreateModel(virtualPath); // Validate geometry before reporting success.
                 if (extension == ".fbx" || extension == ".blend" || extension == ".glb" || extension == ".gltf")
                     ModelImport::CreateMaterials(source, target, virtualPath, settings);
+                ModelImport::ClearSceneCapture();
             }
             std::ofstream metadata(fs::u8path(file.u8string()+".source.json"),std::ios::binary);
             metadata.exceptions(std::ios::failbit|std::ios::badbit);
@@ -257,6 +266,7 @@ std::string Import(const fs::path& content, const fs::path& source, Kind kind, s
         catch (...)
         {
             // Only the new path created by this import is rolled back.
+            ModelImport::ClearSceneCapture();
             std::error_code ignored;
             if (kind == Model) fs::remove(fs::u8path(file.u8string() + ".importsettings.json"), ignored);
             if ((kind == Model || copied) && Inside(base, target)) fs::remove_all(target, ignored);

@@ -7,6 +7,7 @@
 #include "HostRegressionTests.h"
 #include "OverlayHostTests.h"
 #include "ImportMigrationTests.h"
+#include "AssetUpdateHostTests.h"
 
 int main(int argc, char** argv)
 {
@@ -155,6 +156,7 @@ int main(int argc, char** argv)
     checksPassed += HostRegressionTests::Run();
     checksPassed += OverlayHostTests::Run();
     checksPassed += ImportMigrationTests::Run();
+    checksPassed += AssetUpdateHostTests::Run();
     std::cout << "HostTests: " << checksPassed << " checks passed." << std::endl;
     return 0;
     } catch (const std::exception& e) { std::cerr << e.what() << std::endl; return 1; }
