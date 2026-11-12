@@ -63,6 +63,8 @@ public:
     // Только точный дубль отклоняется: сколько связей допускает пин, решает схема.
     bool AddConnection(int fromNode, const QString& fromPin, int toNode, const QString& toPin, const QVariantMap& props = {});
     bool RemoveConnection(int fromNode, const QString& fromPin, int toNode, const QString& toPin);
+    // Свойства связи целиком (пустые значения не пишутся в файл); false — связи нет.
+    bool SetConnectionProperties(int fromNode, const QString& fromPin, int toNode, const QString& toPin, const QVariantMap& props);
 
     void Clear(); // ноды и связи; заголовок и переменные остаются
 

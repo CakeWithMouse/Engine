@@ -84,6 +84,8 @@
         <ClCompile Include="../Core/Graph/GraphSchema.cpp"/>
         <ClCompile Include="../Core/Graph/GraphHistory.cpp"/>
         <ClCompile Include="../Core/Graph/GraphClipboard.cpp"/>
+        <ClCompile Include="../Core/Graph/GraphSchemaRegistry.cpp"/>
+        <ClCompile Include="../Core/Graph/GraphLayout.cpp"/>
         <ClCompile Include="../Core/MaterialGraphSchema.cpp"/>
         <ClCompile Include="../Core/CodeGraphSchema.cpp"/>
         <ClCompile Include="../Core/ScriptMessages.cpp"/>
@@ -141,6 +143,8 @@
         <ClInclude Include="../Core/Graph/GraphSchema.h"/>
         <ClInclude Include="../Core/Graph/GraphHistory.h"/>
         <ClInclude Include="../Core/Graph/GraphClipboard.h"/>
+        <ClInclude Include="../Core/Graph/GraphSchemaRegistry.h"/>
+        <ClInclude Include="../Core/Graph/GraphLayout.h"/>
         <ClInclude Include="../Core/MaterialGraphSchema.h"/>
         <ClInclude Include="../Core/CodeGraphSchema.h"/>
         <ClInclude Include="../Core/ScriptMessages.h"/>
@@ -153,6 +157,7 @@
         <ClInclude Include="core/GraphCoreTests.h"/>
         <ClInclude Include="core/CodeGraphSchemaTests.h"/>
         <ClInclude Include="core/ScriptMessagesTests.h"/>
+        <ClInclude Include="core/GraphToolsTests.h"/>
         <ClInclude Include="core/SceneFileTests.h"/>
         <ClInclude Include="core/TerminalTests.h"/>
         <ClInclude Include="core/AssetOpsTests.h"/>

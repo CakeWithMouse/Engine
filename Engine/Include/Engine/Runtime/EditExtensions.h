@@ -65,6 +65,43 @@ struct EngineScriptApi
     uint32_t (ENGINE_MODULE_CALL *readProblems)(void*, EngineScriptProblemVisitor, void* user);
 };
 
+// Live state of graph nodes in the running Play scene, for debugging in graph editors. Today the graphs are
+// visual scripts; other graph runtimes (behavior trees, state machines) report through the same table and add
+// states. Nothing is reported in Edit. Modules without this extension have no trace.
+constexpr const char* EngineGraphTraceExtension = "Engine.Scene.GraphTrace";
+constexpr uint32_t EngineGraphTraceService = 0x01475452u;
+enum EngineGraphNodeState : uint32_t
+{
+    EngineGraphNodeRan = 1,    // ran or was evaluated at least once
+    EngineGraphNodeFailed = 2, // the graph of this object stopped on this node
+};
+// An object of the Play scene that runs a graph asset. objectId — the edit-scene object of the same name
+// (as in EngineScriptProblem); text is valid during the call only.
+struct EngineGraphTraceObject
+{
+    uint64_t objectId;
+    const char* objectName;
+    uint32_t failed; // 1: the graph of this object is stopped
+};
+struct EngineGraphTraceNode
+{
+    int32_t node;       // node id in the file
+    uint32_t state;     // EngineGraphNodeState
+    uint32_t framesAgo; // 0: during the latest frame
+    uint32_t count;     // runs since Play started (saturates)
+};
+using EngineGraphTraceObjectVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineGraphTraceObject* object);
+using EngineGraphTraceNodeVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineGraphTraceNode* node);
+struct EngineGraphTraceApi
+{
+    uint32_t version; // 1
+    void* context;
+    // Objects of the running Play scene that run the graph asset (/Game path).
+    uint32_t (ENGINE_MODULE_CALL *listObjects)(void*, const char* asset, EngineGraphTraceObjectVisitor, void* user);
+    // Nodes of the asset that ran for objectId (0: the first object running it). NotFound: no such object runs it.
+    uint32_t (ENGINE_MODULE_CALL *read)(void*, const char* asset, uint64_t objectId, EngineGraphTraceNodeVisitor, void* user);
+};
+
 // Audio asset preview: decodes and plays a /Game audio file through the edit scene's
 // audio engine. Edit state only — Play owns its game audio.
 constexpr const char* EngineAudioPreviewExtension = "Engine.Scene.AudioPreview";

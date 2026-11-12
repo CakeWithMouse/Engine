@@ -103,3 +103,61 @@ EngineScriptApi SceneEditSession::GetScriptApi() noexcept
     };
     return api;
 }
+
+EngineGraphTraceApi SceneEditSession::GetGraphTraceApi() noexcept
+{
+    EngineGraphTraceApi api{};
+    api.version = 1;
+    api.context = this;
+    api.listObjects = [](void* context, const char* asset, EngineGraphTraceObjectVisitor visitor, void* user) -> uint32_t {
+        if (!asset || !visitor) return EngineSceneInvalidArgument;
+        return Invoke(context, [&](SceneEditSession& s) -> uint32_t {
+            if (!s.play_) return EngineSceneOk;
+            for (const auto& entry : s.play_->GetScene().GetComponents())
+            {
+                const GameComponent& object = *entry.second;
+                const auto* instance = object.GetScriptInstance();
+                if (!instance || object.GetScriptAsset() != asset) continue;
+                const auto* edited = s.edit_->GetScene().FindComponentByName(entry.first);
+                const EngineGraphTraceObject item{edited ? edited->GetComponentId() : 0, entry.first.c_str(), instance->Failed() ? 1u : 0u};
+                visitor(user, &item);
+            }
+            return EngineSceneOk;
+        });
+    };
+    api.read = [](void* context, const char* asset, uint64_t objectId, EngineGraphTraceNodeVisitor visitor, void* user) -> uint32_t {
+        if (!asset || !visitor) return EngineSceneInvalidArgument;
+        return Invoke(context, [&](SceneEditSession& s) -> uint32_t {
+            if (!s.play_) return EngineSceneNotFound;
+            for (const auto& entry : s.play_->GetScene().GetComponents())
+            {
+                const GameComponent& object = *entry.second;
+                const auto* instance = object.GetScriptInstance();
+                if (!instance || object.GetScriptAsset() != asset) continue;
+                if (objectId)
+                {
+                    const auto* edited = s.edit_->GetScene().FindComponentByName(entry.first);
+                    if (!edited || edited->GetComponentId() != objectId) continue;
+                }
+                const int failedNode = instance->Failed() ? instance->Error().node : 0;
+                bool failedSeen = false;
+                for (const auto& trace : instance->Trace())
+                {
+                    const bool failed = trace.node == failedNode;
+                    failedSeen = failedSeen || failed;
+                    const EngineGraphTraceNode item{trace.node, failed ? uint32_t(EngineGraphNodeFailed) : uint32_t(EngineGraphNodeRan),
+                                                    trace.framesAgo, trace.count};
+                    visitor(user, &item);
+                }
+                if (failedNode && !failedSeen)
+                {
+                    const EngineGraphTraceNode item{failedNode, EngineGraphNodeFailed, 0, 0};
+                    visitor(user, &item);
+                }
+                return EngineSceneOk;
+            }
+            return EngineSceneNotFound;
+        });
+    };
+    return api;
+}

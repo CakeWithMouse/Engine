@@ -183,6 +183,34 @@ void InterpreterChecks()
         script.BeginPlay(); // once only
         SCRIPT_CHECK((script.Printed() == std::vector<std::string>{"a", "b", "c"}));
         SCRIPT_CHECK(cube->GetLocalPosition() == glm::vec3(1, 0, 0));
+
+        // Trace for the editor: every node of the chain ran once during BeginPlay; framesAgo grows with Tick.
+        auto traced = [&](int id) {
+            for (const auto& entry : script.Trace()) if (entry.node == id) return entry;
+            return Script::Instance::NodeTrace{};
+        };
+        SCRIPT_CHECK(script.Trace().size() == 6 && traced(begin).count == 1 && traced(move).count == 1 && traced(move).framesAgo == 0);
+        script.Tick(0.1f);
+        script.Tick(0.1f);
+        SCRIPT_CHECK(traced(prints[1]).node == prints[1] && traced(prints[1]).framesAgo == 2 && traced(prints[1]).count == 1);
+    }
+
+    // Reading an event's value (DeltaTime) is not a run: Every frame counts once per frame.
+    {
+        Fixture fixture;
+        GameComponent* cube = fixture.Add("Cube");
+        Graph graph;
+        const int tick = graph.Node("Event.Tick");
+        const int scale = graph.Node("Vec3.Scale", {{"inputs", {{"Vector", {0, 90, 0}}}}});
+        const int rotate = graph.Node("Action.Rotate");
+        graph.Link(tick, "then", rotate, "exec");
+        graph.Link(tick, "DeltaTime", scale, "Factor");
+        graph.Link(scale, "Out", rotate, "Degrees");
+        Script::Instance script(Build(graph), *cube, "/Game/Scripts/TraceSpin.vscript");
+        script.BeginPlay();
+        for (int i = 0; i < 3; ++i) script.Tick(0.1f);
+        for (const auto& entry : script.Trace()) SCRIPT_CHECK(entry.count == 3 && entry.framesAgo == 0);
+        SCRIPT_CHECK(script.Trace().size() == 3);
     }
 
     // Tick with DeltaTime, variables, comparison and Branch.
@@ -565,7 +593,33 @@ void ExtensionChecks()
         else
             SCRIPT_CHECK(play.names[i] == "Third" && play.items[i].runtime == 0 && play.items[i].objectId == third && play.items[i].node == 7);
     }
+    // Engine.Scene.GraphTrace: which objects run a graph and which nodes ran, in the edit-scene ids.
+    const auto trace = session.GetGraphTraceApi();
+    SCRIPT_CHECK(trace.version == 1 && trace.context && trace.listObjects && trace.read);
+    struct Traced { std::vector<EngineGraphTraceObject> objects; std::vector<std::string> names; std::vector<EngineGraphTraceNode> nodes; };
+    auto object = [](void* user, const EngineGraphTraceObject* item) {
+        static_cast<Traced*>(user)->objects.push_back(*item);
+        static_cast<Traced*>(user)->names.push_back(item->objectName);
+    };
+    auto node = [](void* user, const EngineGraphTraceNode* item) { static_cast<Traced*>(user)->nodes.push_back(*item); };
+    auto stateOf = [](const Traced& traced, int id) {
+        for (const auto& item : traced.nodes) if (item.node == id) return item;
+        return EngineGraphTraceNode{};
+    };
+    Traced goodTrace;
+    SCRIPT_CHECK(trace.listObjects(trace.context, "/Game/Scripts/Good.vscript", object, &goodTrace) == EngineSceneOk &&
+                 goodTrace.objects.size() == 1 && goodTrace.objects[0].objectId == first && goodTrace.names[0] == "First" && goodTrace.objects[0].failed == 0);
+    SCRIPT_CHECK(trace.read(trace.context, "/Game/Scripts/Good.vscript", first, node, &goodTrace) == EngineSceneOk && goodTrace.nodes.size() == 2);
+    SCRIPT_CHECK(stateOf(goodTrace, begin).state == EngineGraphNodeRan && stateOf(goodTrace, print).count == 1 && stateOf(goodTrace, print).framesAgo == 0);
+    Traced divided;
+    SCRIPT_CHECK(trace.listObjects(trace.context, "/Game/Scripts/Divide.vscript", object, &divided) == EngineSceneOk && divided.objects.size() == 1 &&
+                 divided.objects[0].failed == 1);
+    SCRIPT_CHECK(trace.read(trace.context, "/Game/Scripts/Divide.vscript", 0, node, &divided) == EngineSceneOk &&
+                 stateOf(divided, zero).state == EngineGraphNodeFailed);
+    Traced untraced;
+    SCRIPT_CHECK(trace.read(trace.context, "/Game/Scripts/Good.vscript", second, node, &untraced) == EngineSceneNotFound && untraced.nodes.empty());
     SCRIPT_CHECK(api.control(api.context, EngineStop) == EngineSceneOk);
+    SCRIPT_CHECK(trace.read(trace.context, "/Game/Scripts/Good.vscript", first, node, &untraced) == EngineSceneNotFound); // nothing in Edit
 
     // Moving a script (Engine.Scene.Authoring, operation 1) rewrites the live object and saved scenes.
     const auto author = session.GetAuthoringApi();

@@ -1,6 +1,17 @@
 #include "GraphEditorWidget.h"
 #include "EditorLocale.h"
 #include "Graph/GraphClipboard.h"
+#include "Graph/GraphLayout.h"
+#include "Graph/GraphSchemaRegistry.h"
+
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QDoubleSpinBox>
+#include <QFormLayout>
+#include <QPainterPathStroker>
+#include <QToolTip>
 
 #include <QClipboard>
 #include <QCursor>
@@ -32,6 +43,7 @@
 #include <cmath>
 #include <tuple>
 
+using EditorCore::GraphConnectionData;
 using EditorCore::GraphDocument;
 using EditorCore::GraphNodeData;
 using EditorCore::GraphPin;
@@ -267,7 +279,9 @@ public:
 
     const GraphNodeData& Data() const { return data_; }
 
-    QRectF boundingRect() const override { return QRectF(-6, 0, width_ + 12, height_); }
+    // С запасом сверху и снизу: рамка состояния (отладка) рисуется вокруг ноды.
+    QRectF boundingRect() const override { return QRectF(-6, -5, width_ + 12, height_ + 10); }
+    QSizeF BodySize() const { return QSizeF(width_, height_); }
 
     QPointF PinPos(const QString& name) const
     {
@@ -300,6 +314,32 @@ public:
         painter->setRenderHint(QPainter::Antialiasing);
         QPainterPath body;
         body.addRoundedRect(0, 0, width_, height_, 6, 6);
+        const GraphNodeStatus status = owner_->statuses_.value(data_.id);
+        if (status.state != GraphNodeState::None)
+        {
+            // Рамка состояния снаружи ноды: выделение и ошибка внутри неё остаются видны.
+            QColor ring;
+            switch (status.state)
+            {
+            case GraphNodeState::Active:
+            case GraphNodeState::Success: ring = QColor(0x22, 0xC5, 0x5E); break;
+            case GraphNodeState::Done: ring = QColor(0x22, 0xC5, 0x5E, 110); break;
+            case GraphNodeState::Running: ring = QColor(0xF5, 0x9E, 0x0B); break;
+            default: ring = QColor(0xEF, 0x44, 0x44); break;
+            }
+            QPainterPath outline;
+            outline.addRoundedRect(-3, -3, width_ + 6, height_ + 6, 8, 8);
+            if (status.state == GraphNodeState::Active || status.state == GraphNodeState::Running)
+            {
+                QColor glow = ring;
+                glow.setAlpha(70);
+                painter->setPen(QPen(glow, 6.0));
+                painter->drawPath(outline);
+            }
+            painter->setPen(QPen(ring, status.state == GraphNodeState::Done ? 1.5 : 2.5));
+            painter->setBrush(Qt::NoBrush);
+            painter->drawPath(outline);
+        }
         painter->fillPath(body, QColor(0x18, 0x1B, 0x22));
         const QColor problemColor(0xEF, 0x44, 0x44);
         painter->setPen(isSelected() ? QPen(QColor(0x38, 0xBD, 0xF8), 2.0)
@@ -354,6 +394,14 @@ public:
         const QRectF content(8, contentTop_, width_ - 16, height_ - contentTop_ - 6);
         painter->setPen(QColor(0x94, 0xA3, 0xB8));
         owner_->PaintNodeContent(painter, data_, content, decoration_);
+
+        if (!status.badge.isEmpty())
+        {
+            font.setPixelSize(9);
+            painter->setFont(font);
+            painter->setPen(QColor(0x86, 0xEF, 0xAC));
+            painter->drawText(QRectF(4, height_ - 14, width_ - 8, 12), Qt::AlignRight | Qt::AlignVCenter, status.badge);
+        }
     }
 
 protected:
@@ -397,6 +445,89 @@ private:
     QVariant decoration_;
     qreal width_ = 150, height_ = 80, contentTop_ = 40;
 };
+
+// Связь на холсте: выделяется щелчком или рамкой, ловится в полосе шире линии, несёт подпись схемы.
+class GraphEditorWidget::LinkItem final : public QGraphicsPathItem
+{
+public:
+    LinkItem(const GraphConnectionData& link, const QPainterPath& path, const QColor& color, const QString& label, GraphEditorWidget* owner)
+        : QGraphicsPathItem(path), link_(link), color_(color), label_(label), owner_(owner)
+    {
+        setFlags(ItemIsSelectable);
+        setZValue(0);
+        if (!label_.isEmpty()) setToolTip(label_);
+    }
+
+    const GraphConnectionData& Link() const { return link_; }
+
+    QPainterPath shape() const override
+    {
+        QPainterPathStroker stroker;
+        stroker.setWidth(12);
+        return stroker.createStroke(path());
+    }
+
+    QRectF boundingRect() const override
+    {
+        QRectF bounds = QGraphicsPathItem::boundingRect().adjusted(-8, -8, 8, 8);
+        if (!label_.isEmpty()) bounds |= LabelRect();
+        return bounds;
+    }
+
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) override
+    {
+        painter->setRenderHint(QPainter::Antialiasing);
+        if (isSelected())
+        {
+            painter->setPen(QPen(QColor(0xE0, 0xF2, 0xFE, 90), 8.0, Qt::SolidLine, Qt::RoundCap));
+            painter->drawPath(path());
+        }
+        painter->setPen(QPen(isSelected() ? color_.lighter(140) : color_, isSelected() ? 3.5 : 2.5));
+        painter->setBrush(Qt::NoBrush);
+        painter->drawPath(path());
+        if (label_.isEmpty()) return;
+        // Подпись (условие перехода) на середине кривой.
+        const QRectF box = LabelRect();
+        painter->setPen(QPen(isSelected() ? color_.lighter(140) : color_, 1.0));
+        painter->setBrush(QColor(0x11, 0x14, 0x1A, 230));
+        painter->drawRoundedRect(box, 4, 4);
+        QFont font = painter->font();
+        font.setPixelSize(10);
+        painter->setFont(font);
+        painter->setPen(QColor(0xE2, 0xE8, 0xF0));
+        painter->drawText(box, Qt::AlignCenter, label_);
+    }
+
+protected:
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override
+    {
+        QTimer::singleShot(0, owner_, [owner = owner_, link = link_] { owner->EditLink(link); });
+        event->accept();
+    }
+
+private:
+    QRectF LabelRect() const
+    {
+        QFont font;
+        font.setPixelSize(10);
+        const qreal width = QFontMetricsF(font).horizontalAdvance(label_) + 12;
+        const QPointF middle = path().pointAtPercent(0.5);
+        return QRectF(middle.x() - width / 2, middle.y() - 9, width, 18);
+    }
+
+    GraphConnectionData link_;
+    QColor color_;
+    QString label_;
+    GraphEditorWidget* owner_ = nullptr;
+};
+
+namespace
+{
+bool SameLink(const GraphConnectionData& a, const GraphConnectionData& b)
+{
+    return a.fromNode == b.fromNode && a.fromPin == b.fromPin && a.toNode == b.toNode && a.toPin == b.toPin;
+}
+} // namespace
 
 GraphEditorWidget::GraphEditorWidget(const GraphSchema& schema, QWidget* parent)
     : QWidget(parent), schema_(schema)
@@ -463,6 +594,15 @@ void GraphEditorWidget::BuildUi()
     frame->setToolTip(Tr("Уместить граф в окно, а при выделении — выделенные ноды (F)", "Fit the graph, or the selection, into view (F)"));
     connect(frame, &QToolButton::clicked, this, [this] { FrameNodes(); });
     toolbar_->addWidget(frame);
+    auto* arrange = new QToolButton(this);
+    arrange->setObjectName(prefix + QStringLiteral("Arrange"));
+    arrange->setText(Tr("Упорядочить", "Arrange"));
+    arrange->setToolTip(schema_.LayoutStyle() == EditorCore::GraphLayoutStyle::Tree
+                            ? Tr("Разложить дерево сверху вниз: дети под родителем в прежнем порядке слева направо",
+                                 "Lay the tree out top to bottom: children under their parent, keeping their left-to-right order")
+                            : Tr("Разложить граф слева направо по связям", "Lay the graph out left to right along the links"));
+    connect(arrange, &QToolButton::clicked, this, [this] { ArrangeNodes(); });
+    toolbar_->addWidget(arrange);
     toolbarIndex_ = toolbar_->count();
 
     toolbar_->addStretch(1);
@@ -554,6 +694,7 @@ QPointF GraphEditorWidget::PinScenePos(int nodeId, const QString& pin) const
 
 void GraphEditorWidget::UpdateConnections()
 {
+    const QVector<GraphConnectionData> selected = SelectedLinks();
     for (auto* link : links_)
     {
         scene_->removeItem(link);
@@ -570,9 +711,11 @@ void GraphEditorWidget::UpdateConnections()
         if (!from || !to) continue;
         const GraphPin* output = from->Pin(c.fromPin, false);
         const QColor color = output ? schema_.LinkColor(*output) : QColor(0x38, 0xBD, 0xF8);
-        auto* link = scene_->addPath(LinkPath(from->mapToScene(from->PinPos(c.fromPin)), to->mapToScene(to->PinPos(c.toPin))),
-                                     QPen(color, 2.5));
-        link->setZValue(0);
+        auto* link = new LinkItem(c, LinkPath(from->mapToScene(from->PinPos(c.fromPin)), to->mapToScene(to->PinPos(c.toPin))),
+                                  color, schema_.LinkLabel(c), this);
+        scene_->addItem(link);
+        for (const auto& was : selected)
+            if (SameLink(was, c)) link->setSelected(true);
         links_.push_back(link);
     }
 }
@@ -650,7 +793,16 @@ bool GraphEditorWidget::RenameNode(int nodeId, const QString& name)
 
 void GraphEditorWidget::DeleteSelected()
 {
-    RemoveNodes(SelectedNodes());
+    // Выделенные связи и ноды — один шаг отмены; обязательные ноды остаются.
+    const QVector<GraphConnectionData> links = SelectedLinks();
+    QList<int> nodes = SelectedNodes();
+    nodes.erase(std::remove_if(nodes.begin(), nodes.end(), [this](int id) { return IsFixed(id); }), nodes.end());
+    if (links.isEmpty() && nodes.isEmpty()) return;
+    Checkpoint();
+    for (const auto& link : links) document_.RemoveConnection(link.fromNode, link.fromPin, link.toNode, link.toPin);
+    for (const int id : nodes) document_.RemoveNode(id);
+    RebuildScene();
+    NotifyStructure();
 }
 
 void GraphEditorWidget::NotifyStructure()
@@ -825,11 +977,17 @@ bool GraphEditorWidget::eventFilter(QObject* watched, QEvent* event)
                 const QPointF scenePos = view_->mapToScene(mouse->position().toPoint());
                 const QPoint screen = mouse->globalPosition().toPoint();
                 NodeItem* node = nullptr;
+                LinkItem* link = nullptr;
                 for (auto* item : scene_->items(scenePos))
+                {
                     if ((node = dynamic_cast<NodeItem*>(item))) break;
+                    if (!link) link = dynamic_cast<LinkItem*>(item);
+                }
                 // Меню из очереди: команда меню перестраивает сцену.
                 if (node)
                     QTimer::singleShot(0, this, [this, screen, id = node->Data().id] { ShowNodeMenu(screen, id); });
+                else if (link)
+                    QTimer::singleShot(0, this, [this, screen, data = link->Link()] { ShowLinkMenu(screen, data); });
                 else
                     QTimer::singleShot(0, this, [this, screen, scenePos] { ShowNodeSearch(screen, scenePos); });
             }
@@ -988,7 +1146,32 @@ bool GraphEditorWidget::CanPaste() const
 
 QList<int> GraphEditorWidget::PasteNodes(const QPointF& topLeft)
 {
-    return InsertNodes(ClipboardGraph(), topLeft);
+    const QString json = ClipboardGraph();
+    if (json.isEmpty())
+    {
+        Notice(ForeignClipboardNotice());
+        return {};
+    }
+    return InsertNodes(json, topLeft);
+}
+
+QString GraphEditorWidget::ForeignClipboardNotice() const
+{
+    const QMimeData* mime = QGuiApplication::clipboard()->mimeData();
+    if (!mime) return {};
+    const auto& registry = EditorCore::GraphSchemaRegistry::Instance();
+    const EditorCore::GraphSchemaEntry* other = registry.ForClipboard(mime->text().toUtf8());
+    if (!other || other->clipboardMarker == schema_.ClipboardMarker()) return {};
+    return Tr("В буфере обмена ноды графа «%1»: в граф «%2» их не вставить.",
+              "The clipboard holds nodes of a \"%1\" graph: they cannot be pasted into a \"%2\" graph.")
+        .arg(registry.DisplayName(other->id), registry.DisplayName(schema_.Id()));
+}
+
+void GraphEditorWidget::Notice(const QString& text)
+{
+    if (text.isEmpty()) return;
+    lastNotice_ = text;
+    QToolTip::showText(QCursor::pos(), text, view_);
 }
 
 QList<int> GraphEditorWidget::DuplicateNodes(const QList<int>& ids)
@@ -1071,4 +1254,151 @@ void GraphEditorWidget::FocusNode(int nodeId)
     SelectNodes({nodeId});
     view_->centerOn(item);
     view_->setFocus();
+}
+
+void GraphEditorWidget::SetNodeStatuses(const QHash<int, GraphNodeStatus>& statuses)
+{
+    if (statuses == statuses_) return;
+    statuses_ = statuses;
+    for (auto* item : scene_->items())
+        if (dynamic_cast<NodeItem*>(item)) item->update();
+}
+
+QVector<GraphConnectionData> GraphEditorWidget::SelectedLinks() const
+{
+    QVector<GraphConnectionData> links;
+    for (auto* item : scene_->selectedItems())
+        if (auto* link = dynamic_cast<LinkItem*>(item)) links.push_back(link->Link());
+    return links;
+}
+
+void GraphEditorWidget::SelectLink(const GraphConnectionData& link)
+{
+    scene_->clearSelection();
+    for (auto* item : links_)
+        if (auto* candidate = dynamic_cast<LinkItem*>(item); candidate && SameLink(candidate->Link(), link)) candidate->setSelected(true);
+}
+
+void GraphEditorWidget::RemoveLinks(const QVector<GraphConnectionData>& links)
+{
+    bool any = false;
+    for (const auto& link : links)
+        for (const auto& c : document_.Connections()) any = any || SameLink(c, link);
+    if (!any) return;
+    Checkpoint();
+    for (const auto& link : links) document_.RemoveConnection(link.fromNode, link.fromPin, link.toNode, link.toPin);
+    UpdateConnections();
+    NotifyStructure();
+}
+
+bool GraphEditorWidget::SetLinkProperties(const GraphConnectionData& link, const QVariantMap& properties)
+{
+    for (const auto& c : document_.Connections())
+        if (SameLink(c, link))
+        {
+            if (c.properties == properties) return true;
+            Checkpoint();
+            document_.SetConnectionProperties(link.fromNode, link.fromPin, link.toNode, link.toPin, properties);
+            UpdateConnections();
+            NotifyStructure();
+            return true;
+        }
+    return false;
+}
+
+void GraphEditorWidget::EditLink(const GraphConnectionData& link)
+{
+    const QVector<EditorCore::GraphLinkField> fields = schema_.LinkFields(document_, link);
+    if (fields.isEmpty()) return;
+    QVariantMap properties = link.properties;
+    for (const auto& c : document_.Connections())
+        if (SameLink(c, link)) properties = c.properties;
+
+    QDialog dialog(this);
+    dialog.setObjectName(schema_.ObjectPrefix() + QStringLiteral("LinkProperties"));
+    dialog.setWindowTitle(Tr("Свойства связи", "Link properties"));
+    auto* form = new QFormLayout(&dialog);
+    QVector<std::function<QVariant()>> readers;
+    for (const auto& field : fields)
+    {
+        const QVariant value = properties.contains(field.key) ? properties.value(field.key) : field.value;
+        QWidget* editor = nullptr;
+        if (field.type == QStringLiteral("bool"))
+        {
+            auto* box = new QCheckBox(&dialog);
+            box->setChecked(value.toBool());
+            readers.push_back([box] { return QVariant(box->isChecked()); });
+            editor = box;
+        }
+        else if (field.type == QStringLiteral("number"))
+        {
+            auto* spin = new QDoubleSpinBox(&dialog);
+            spin->setRange(-1e6, 1e6);
+            spin->setDecimals(3);
+            spin->setValue(value.toDouble());
+            readers.push_back([spin] { return QVariant(spin->value()); });
+            editor = spin;
+        }
+        else if (field.type == QStringLiteral("choice"))
+        {
+            auto* combo = new QComboBox(&dialog);
+            combo->addItems(field.options);
+            combo->setCurrentText(value.toString());
+            readers.push_back([combo] { return QVariant(combo->currentText()); });
+            editor = combo;
+        }
+        else
+        {
+            auto* line = new QLineEdit(value.toString(), &dialog);
+            readers.push_back([line] { return QVariant(line->text().trimmed()); });
+            editor = line;
+        }
+        editor->setObjectName(QStringLiteral("LinkField_") + field.key);
+        form->addRow(field.label, editor);
+    }
+    auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    form->addRow(buttons);
+    if (dialog.exec() != QDialog::Accepted) return;
+    for (int i = 0; i < fields.size(); ++i)
+    {
+        const QVariant value = readers[i]();
+        // Пустая строка снимает поле: в файл попадают только заданные свойства.
+        if (value.typeId() == QMetaType::QString && value.toString().isEmpty()) properties.remove(fields[i].key);
+        else properties.insert(fields[i].key, value);
+    }
+    SetLinkProperties(link, properties);
+}
+
+void GraphEditorWidget::ShowLinkMenu(const QPoint& screenPos, const GraphConnectionData& link)
+{
+    bool selected = false;
+    for (const auto& other : SelectedLinks()) selected = selected || SameLink(other, link);
+    if (!selected) SelectLink(link);
+    QMenu menu(this);
+    const bool editable = !schema_.LinkFields(document_, link).isEmpty();
+    menu.addAction(Tr("Свойства связи…", "Link properties…"), this, [this, link] { EditLink(link); })->setEnabled(editable);
+    menu.addSeparator();
+    menu.addAction(Tr("Удалить связь\tDel", "Delete link\tDel"), this, [this] { RemoveLinks(SelectedLinks()); });
+    menu.exec(screenPos);
+}
+
+bool GraphEditorWidget::ArrangeNodes()
+{
+    if (dragLink_ || document_.Nodes().isEmpty()) return false;
+    const QHash<int, QPointF> placed = EditorCore::ArrangeGraph(document_, schema_.LayoutStyle(), [this](const GraphNodeData& node) {
+        const NodeItem* item = FindItem(node.id);
+        return item ? item->BodySize() : QSizeF(150, 80);
+    }, GridStep);
+    bool changed = false;
+    for (const auto& node : document_.Nodes()) changed = changed || placed.value(node.id, node.pos) != node.pos;
+    if (!changed) return false;
+    Checkpoint();
+    for (auto it = placed.begin(); it != placed.end(); ++it)
+        if (GraphNodeData* node = document_.FindNode(it.key())) node->pos = it.value();
+    RebuildScene();
+    FrameNodes();
+    if (layoutChanged) layoutChanged();
+    return true;
 }

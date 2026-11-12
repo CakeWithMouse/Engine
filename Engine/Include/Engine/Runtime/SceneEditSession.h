@@ -35,6 +35,7 @@ public:
     EnginePointLightV2Api GetPointLightV2Api() noexcept;
     EngineAudioPreviewApi GetAudioPreviewApi() noexcept;
     EngineScriptApi GetScriptApi() noexcept;
+    EngineGraphTraceApi GetGraphTraceApi() noexcept;
     SceneEditSession(const SceneEditSession&) = delete;
     SceneEditSession& operator=(const SceneEditSession&) = delete;
 private:

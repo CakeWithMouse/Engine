@@ -3,6 +3,7 @@
 #include "GraphDocument.h"
 
 #include <QColor>
+#include <QVariant>
 #include <QStringList>
 
 namespace EditorCore
@@ -15,6 +16,23 @@ struct GraphNodeGroup
     QString searchText; // имена группы на всех языках для поиска
     QStringList types;
     QColor color;
+};
+
+// Поле свойств связи (условие или приоритет перехода автомата): что и как правится в окне свойств связи.
+struct GraphLinkField
+{
+    QString key;     // ключ в GraphConnectionData::properties
+    QString label;   // на языке редактора
+    QString type;    // "bool", "number", "string", "choice"
+    QVariant value;  // значение по умолчанию, пока поле не задано
+    QStringList options; // для "choice"
+};
+
+// Как раскладывать граф по кнопке «Упорядочить».
+enum class GraphLayoutStyle
+{
+    Layered, // слева направо по связям (код, материал)
+    Tree,    // дерево сверху вниз, дети в порядке X (дерево поведения)
 };
 
 // Схема графа: какие ноды бывают, какие у них пины, что с чем соединяется и что значит имя ноды.
@@ -54,6 +72,13 @@ public:
     virtual bool AllowsCycle(const GraphPin& output, const GraphPin& input) const { return false; }
     // Дополнительная проверка схемы (типы пинов): пустая строка — связь допустима.
     virtual QString LinkProblem(const GraphPin& output, const GraphPin& input) const { return {}; }
+
+    // Свойства связи: пустой список — у связи их нет (в меню связи только «Удалить»).
+    virtual QVector<GraphLinkField> LinkFields(const GraphDocument& document, const GraphConnectionData& link) const { return {}; }
+    // Подпись на кривой связи (условие перехода); пустая — без подписи.
+    virtual QString LinkLabel(const GraphConnectionData& link) const { return {}; }
+
+    virtual GraphLayoutStyle LayoutStyle() const { return GraphLayoutStyle::Layered; }
 
     // Обязательная нода (выход материала): не удаляется, не копируется и есть в графе всегда.
     virtual bool IsFixed(const GraphNodeData& node) const { return false; }

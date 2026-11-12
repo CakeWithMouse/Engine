@@ -41,6 +41,16 @@ Instance::Instance(std::shared_ptr<const Program> program, GameComponent& self, 
 {
     for (const auto& variable : program_->variables) variables_.push_back(variable.initial);
     keyWasDown_.assign(program_->keyEvents.size(), false);
+    ranAt_.assign(program_->nodes.size(), 0);
+    runs_.assign(program_->nodes.size(), 0);
+}
+
+std::vector<Instance::NodeTrace> Instance::Trace() const
+{
+    std::vector<NodeTrace> trace;
+    for (size_t i = 0; i < ranAt_.size(); ++i)
+        if (ranAt_[i]) trace.push_back({program_->nodes[i].id, static_cast<uint32_t>(frame_ + 1 - ranAt_[i]), runs_[i]});
+    return trace;
 }
 
 Instance::~Instance() = default;
@@ -83,7 +93,9 @@ void Instance::BeginPlay()
 
 void Instance::Tick(float deltaTime)
 {
-    if (!started_ || failed_) return;
+    if (!started_) return;
+    ++frame_; // also after a failure: the trace shows how long ago the nodes ran
+    if (failed_) return;
     elapsed_ += deltaTime;
     Event event;
     event.deltaTime = deltaTime;
@@ -127,8 +139,13 @@ void Instance::Run(int node, const Event& event)
     }
 }
 
-void Instance::Step(int node)
+void Instance::Step(int node, bool traced)
 {
+    if (traced)
+    {
+        ranAt_[node] = frame_ + 1;
+        if (runs_[node] != UINT32_MAX) ++runs_[node];
+    }
     if (++steps_ > StepLimit)
         Raise(program_->nodes[node].id, "more than " + std::to_string(StepLimit) + " steps in one event: probably an endless loop");
 }
@@ -206,8 +223,10 @@ void Instance::Execute(int index, const Event& event, int depth)
 
 Value Instance::Evaluate(int index, int output, const Event& event, int depth)
 {
-    Step(index);
     const CompiledNode& node = program_->nodes[index];
+    // Reading an event's value (DeltaTime) is not a run of the event: the trace counts its runs only.
+    const bool isEvent = node.op == Op::BeginPlay || node.op == Op::Tick || node.op == Op::KeyPressed || node.op == Op::KeyReleased;
+    Step(index, !isEvent);
     const int id = node.id;
     auto in = [&](int input) { return Input(index, input, event, depth); };
     auto num = [&](int input) { return As<float>(in(input), id); };

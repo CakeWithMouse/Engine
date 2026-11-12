@@ -111,6 +111,16 @@ public:
     const std::vector<std::string>& Printed() const { return printed_; }
     Value GetVariable(const std::string& name) const;
 
+    // Debug trace for the editor (Engine.Scene.GraphTrace): nodes that ran or were evaluated at least once.
+    // framesAgo 0 — during the latest frame (BeginPlay counts as the first one).
+    struct NodeTrace
+    {
+        int node = 0; // node id in the file
+        uint32_t framesAgo = 0;
+        uint32_t count = 0;
+    };
+    std::vector<NodeTrace> Trace() const;
+
 private:
     struct Event;
     void Run(int node, const Event& event);
@@ -119,7 +129,7 @@ private:
     Value Input(int node, int input, const Event& event, int depth);
     GameComponent* Resolve(const ObjectRef& object, int node) const;
     bool KeyDown(int key) const;
-    void Step(int node);
+    void Step(int node, bool traced = true);
     void Fail(const Problem& problem);
     void Print(const std::string& text);
 
@@ -128,6 +138,9 @@ private:
     std::string source_;
     std::vector<Value> variables_;
     std::vector<bool> keyWasDown_; // per key event node
+    uint64_t frame_ = 0;              // Tick calls since BeginPlay
+    std::vector<uint64_t> ranAt_;     // per program node: frame_ + 1 of the last run, 0 — never
+    std::vector<uint32_t> runs_;
     float elapsed_ = 0.0f;
     int steps_ = 0;
     bool failed_ = false;

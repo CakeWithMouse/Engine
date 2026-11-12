@@ -2,6 +2,7 @@
 #include "EditorLocale.h"
 #include "ScriptGraphWidget.h"
 #include "ScriptMessages.h"
+#include "Graph/GraphSchemaRegistry.h"
 
 #include <QComboBox>
 #include <QDir>
@@ -158,6 +159,24 @@ void ScriptEditorWindow::BuildUi()
     playTimer_->setInterval(1000);
     connect(playTimer_, &QTimer::timeout, this, [this] { PollPlayProblems(); });
 
+    // Отладка в Play: какие ноды выполняются у выбранного объекта.
+    traceLabel_ = new QLabel(Tr("Объект в Play:", "Play object:"), this);
+    traceObjects_ = new QComboBox(this);
+    traceObjects_->setObjectName(QStringLiteral("ScriptTraceObject"));
+    traceObjects_->setToolTip(Tr("Чьё выполнение показывать на нодах: зелёная рамка — нода работала только что, ×N — сколько раз",
+                                 "Whose execution the nodes show: a green frame — the node ran just now, ×N — how many times"));
+    traceObjects_->setMinimumContentsLength(14);
+    connect(traceObjects_, QOverload<int>::of(&QComboBox::activated), this, [this](int index) {
+        TraceObject(traceObjects_->itemData(index).toULongLong());
+    });
+    statusBar()->addPermanentWidget(traceLabel_);
+    statusBar()->addPermanentWidget(traceObjects_);
+    traceLabel_->hide();
+    traceObjects_->hide();
+    traceTimer_ = new QTimer(this);
+    traceTimer_->setInterval(200);
+    connect(traceTimer_, &QTimer::timeout, this, [this] { PollTrace(); });
+
     graph_->structureChanged = [this] { saveTimer_->start(); };
     graph_->layoutChanged = [this] { WriteFile(); };
     graph_->variablesChanged = [this] { RefreshVariables(); };
@@ -203,7 +222,15 @@ void ScriptEditorWindow::LoadFile(const QString& catalog)
     if (!file.open(QIODevice::ReadOnly) || !document.ImportFromJson(QString::fromUtf8(file.readAll())))
         return SetReadOnly(Tr("Файл %1 не читается как граф.", "Cannot read %1 as a graph.").arg(script_));
     if (document.FileFormat() != GraphDocument::Format::V1 || document.Schema() != schema_->Id())
+    {
+        // Чужой граф называется по реестру схем: «это граф „Материал“».
+        const auto& registry = EditorCore::GraphSchemaRegistry::Instance();
+        const QString kind = document.FileFormat() == GraphDocument::Format::Legacy ? QString() : document.Schema();
+        if (registry.Find(kind))
+            return SetReadOnly(Tr("%1 — граф «%2», а не визуальный скрипт.", "%1 is a \"%2\" graph, not a visual script.")
+                                   .arg(script_, registry.DisplayName(kind)));
         return SetReadOnly(Tr("%1 — не визуальный скрипт.", "%1 is not a visual script.").arg(script_));
+    }
 
     graph_->LoadDocument(document);
     ready_ = true;
@@ -215,6 +242,7 @@ void ScriptEditorWindow::LoadFile(const QString& catalog)
     statusBar()->showMessage(Tr("Правки сохраняются сразу; Play берёт файл при запуске.", "Edits are saved at once; Play reads the file when it starts."));
     Check();
     playTimer_->start();
+    traceTimer_->start();
 }
 
 void ScriptEditorWindow::SetReadOnly(const QString& reason)
@@ -285,6 +313,78 @@ void ScriptEditorWindow::PollPlayProblems()
             self->playProblems_.clear();
             for (const auto& row : rows) self->playProblems_.append({row.node, row.object, row.message, true});
             self->ShowProblems();
+        });
+    };
+    host_->PostCommand(c);
+}
+
+void ScriptEditorWindow::TraceObject(quint64 objectId)
+{
+    tracedObject_ = objectId;
+    PollTrace();
+}
+
+void ScriptEditorWindow::PollTrace()
+{
+    const bool playing = host_->PlayState() != EditorQtHost::Edit;
+    if (!playing || !host_->GraphTraceApi())
+    {
+        // После Stop нода не «работает»: рамки снимаются, выбор объекта прячется.
+        graph_->SetNodeStatuses({});
+        traceLabel_->hide();
+        traceObjects_->hide();
+        return;
+    }
+    if (tracePending_) return;
+    tracePending_ = true;
+    QPointer<ScriptEditorWindow> self(this);
+    EditorQtHost* host = host_;
+    const std::string script = script_.toStdString();
+    const quint64 wanted = tracedObject_;
+    EditorCommand c;
+    c.type = EditorCommand::RunTask;
+    c.task = [self, host, script, wanted](const EngineEditSessionApi&) {
+        struct Object { quint64 id; QString name; bool failed; };
+        struct Collected { QVector<Object> objects; QVector<EngineGraphTraceNode> nodes; } collected;
+        if (const EngineGraphTraceApi* api = host->GraphTraceApi())
+        {
+            api->listObjects(api->context, script.c_str(), [](void* user, const EngineGraphTraceObject* object) {
+                static_cast<Collected*>(user)->objects.push_back({object->objectId, QString::fromUtf8(object->objectName), object->failed != 0});
+            }, &collected);
+            // Выбранного объекта больше нет — показывается первый.
+            quint64 id = 0;
+            for (const auto& object : collected.objects)
+                if (object.id == wanted) id = wanted;
+            api->read(api->context, script.c_str(), id, [](void* user, const EngineGraphTraceNode* node) {
+                static_cast<Collected*>(user)->nodes.push_back(*node);
+            }, &collected);
+        }
+        host->RunOnUi([self, collected] {
+            if (!self) return;
+            self->tracePending_ = false;
+            if (self->host_->PlayState() == EditorQtHost::Edit) return self->PollTrace();
+            QComboBox* combo = self->traceObjects_;
+            const quint64 current = combo->currentIndex() >= 0 ? combo->currentData().toULongLong() : 0;
+            combo->blockSignals(true);
+            combo->clear();
+            for (const auto& object : collected.objects)
+                combo->addItem(object.failed ? Tr("%1 (остановлен)", "%1 (stopped)").arg(object.name) : object.name, object.id);
+            int index = combo->findData(self->tracedObject_ ? self->tracedObject_ : current);
+            combo->setCurrentIndex(index >= 0 ? index : 0);
+            combo->blockSignals(false);
+            self->traceLabel_->setVisible(!collected.objects.isEmpty());
+            combo->setVisible(!collected.objects.isEmpty());
+
+            QHash<int, GraphNodeStatus> statuses;
+            for (const auto& node : collected.nodes)
+            {
+                GraphNodeStatus status;
+                status.state = node.state == EngineGraphNodeFailed ? GraphNodeState::Failed
+                             : node.framesAgo <= ActiveFrames ? GraphNodeState::Active : GraphNodeState::Done;
+                if (node.count) status.badge = QStringLiteral("\u00d7%1").arg(node.count);
+                statuses.insert(node.node, status);
+            }
+            self->graph_->SetNodeStatuses(statuses);
         });
     };
     host_->PostCommand(c);

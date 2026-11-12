@@ -116,6 +116,17 @@ bool GraphDocument::RemoveConnection(int fromNode, const QString& fromPin, int t
     return false;
 }
 
+bool GraphDocument::SetConnectionProperties(int fromNode, const QString& fromPin, int toNode, const QString& toPin, const QVariantMap& props)
+{
+    for (auto& c : connections_)
+        if (c.fromNode == fromNode && c.fromPin == fromPin && c.toNode == toNode && c.toPin == toPin)
+        {
+            c.properties = props;
+            return true;
+        }
+    return false;
+}
+
 void GraphDocument::Clear()
 {
     nodes_.clear();

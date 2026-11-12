@@ -97,6 +97,12 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
                     throw std::runtime_error("Invalid script API");
                 script_ = script;
             }
+            EngineGraphTraceApi trace{};
+            if (query && query(extensionContext, EngineGraphTraceExtension, 1, sizeof(trace), &trace))
+            {
+                // Debugging only: a broken table switches the trace off instead of rejecting the module.
+                if (trace.version == 1 && trace.context == extensionContext && trace.listObjects && trace.read) graphTrace_ = trace;
+            }
             EngineAudioPreviewApi audio{};
             if (query && query(extensionContext, EngineAudioPreviewExtension, 1, sizeof(audio), &audio))
             {

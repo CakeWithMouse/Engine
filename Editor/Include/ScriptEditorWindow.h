@@ -9,6 +9,7 @@
 #include <QVector>
 #include <memory>
 
+class QComboBox;
 class QLabel;
 class QListWidget;
 class QTableWidget;
@@ -20,7 +21,8 @@ class ScriptGraphWidget;
 // Каталог нод и проверка графа приходят из игрового модуля (расширение Engine.Scene.Script), поэтому
 // редактор и Play собирают граф одним компилятором. Каждая правка сразу записывается в файл (как граф
 // материала) и проверяется; ошибки показываются на нодах и в списке под холстом. Во время Play окно
-// показывает ошибки выполнения этого скрипта на объектах сцены.
+// показывает ошибки выполнения этого скрипта на объектах сцены и выполнение нод у выбранного объекта
+// (расширение Engine.Scene.GraphTrace): рамка у нод, сработавших недавно, и число запусков.
 class ScriptEditorWindow : public QMainWindow
 {
 public:
@@ -40,6 +42,12 @@ public:
     // Записать файл и проверить его движком сразу, не дожидаясь паузы в правках.
     void SaveNow();
 
+    // Объект Play, чьё выполнение показано на нодах (id edit-сцены; 0 — первый с этим скриптом).
+    quint64 TracedObject() const { return tracedObject_; }
+    void TraceObject(quint64 objectId);
+    // Нода считается сработавшей «сейчас», если выполнялась не больше этого числа кадров назад.
+    static constexpr quint32 ActiveFrames = 12;
+
 private:
     struct Problem
     {
@@ -56,6 +64,7 @@ private:
     bool WriteFile();
     void Check();
     void PollPlayProblems();
+    void PollTrace();
     void ShowProblems();
     void RefreshVariables();
     void EditVariables(int row, int column);
@@ -72,6 +81,11 @@ private:
     QLabel* banner_ = nullptr;
     QTimer* saveTimer_ = nullptr;
     QTimer* playTimer_ = nullptr;
+    QTimer* traceTimer_ = nullptr;
+    QComboBox* traceObjects_ = nullptr;
+    QLabel* traceLabel_ = nullptr;
+    quint64 tracedObject_ = 0;
+    bool tracePending_ = false;
     QVector<Problem> checkProblems_, playProblems_;
     QString status_;
     bool ready_ = false, readOnly_ = false, refreshingVariables_ = false;

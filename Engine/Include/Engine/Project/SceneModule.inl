@@ -291,6 +291,11 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetEditExtension(void* contex
         *static_cast<EngineScriptApi*>(output) = static_cast<SceneEditSession*>(context)->GetScriptApi();
         return 1;
     }
+    if (std::strcmp(name, EngineGraphTraceExtension) == 0 && size == sizeof(EngineGraphTraceApi))
+    {
+        *static_cast<EngineGraphTraceApi*>(output) = static_cast<SceneEditSession*>(context)->GetGraphTraceApi();
+        return 1;
+    }
     if (std::strcmp(name, EnginePointLightExtension) != 0 || size != sizeof(EnginePointLightApi)) return 0;
     const auto scene = static_cast<SceneEditSession*>(context)->GetApi().scene;
     *static_cast<EnginePointLightApi*>(output) = {1, scene.context, scene.setPointLight};

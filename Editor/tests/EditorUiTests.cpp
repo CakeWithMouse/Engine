@@ -8,6 +8,9 @@
 #include "ScriptEditorWindow.h"
 #include "ScriptGraphWidget.h"
 #include "ScriptMessages.h"
+#include "Graph/GraphClipboard.h"
+#include "Graph/GraphSchemaRegistry.h"
+#include "MaterialGraphSchema.h"
 #include <QPlainTextEdit>
 #include <QTableWidget>
 #include <atomic>
@@ -267,6 +270,14 @@ int wmain(int argc, wchar_t** argv)
             Check(!query(api.context,EngineScriptExtension,2,sizeof(rejected),&rejected)&&rejected.version==99,"script extension version rejected");
             Check(!query(api.context,EngineScriptExtension,1,sizeof(rejected)-1,&rejected)&&rejected.version==99,"script extension size rejected");
             Check(host.ScriptApi() && host.ScriptApi()->set==script.set,"host exposes the script extension");
+        }
+        EngineGraphTraceApi trace{};
+        if (!legacy && query && query(api.context,EngineGraphTraceExtension,1,sizeof(trace),&trace)) host.SetGraphTraceApi(trace);
+        if (!legacy) {
+            Check(trace.version==1 && trace.context==script.context && trace.listObjects && trace.read,"current module supplies the graph trace extension");
+            EngineGraphTraceApi rejected{99,nullptr};
+            Check(!query(api.context,EngineGraphTraceExtension,1,sizeof(rejected)-1,&rejected)&&rejected.version==99,"graph trace extension size rejected");
+            Check(host.GraphTraceApi() && host.GraphTraceApi()->read==trace.read,"host exposes the graph trace");
         }
         struct HostCleanup
         {
@@ -1434,6 +1445,36 @@ int wmain(int argc, wchar_t** argv)
             Ui([&](auto* w) {
                 Check(window(w)->Problems().isEmpty(), "engine accepts the graph");
                 Check(readText(scriptFile).contains(QStringLiteral("Action.Rotate")), "edits are written to the file");
+
+                auto* g = window(w)->Graph();
+                // A link is selected and deleted with Del; undo brings it back.
+                const EditorCore::GraphConnectionData flow{tick, QStringLiteral("then"), rotate, QStringLiteral("exec"), {}};
+                g->SelectLink(flow);
+                Check(g->SelectedLinks().size() == 1 && g->SelectedNodes().isEmpty(), "a link can be selected");
+                const int links = g->Document().Connections().size();
+                QKeyEvent del(QEvent::KeyPress, Qt::Key_Delete, Qt::NoModifier);
+                QApplication::sendEvent(g->View(), &del);
+                Check(g->Document().Connections().size() == links - 1, "Del removes the selected link");
+                g->Undo();
+                Check(g->Document().Connections().size() == links, "undo restores the link");
+
+                // «Упорядочить»: the flow goes left to right in one undo step.
+                const QString arranged = g->Document().ExportToJson();
+                Check(g->ArrangeNodes(), "arrange moves the nodes");
+                const auto x = [&](int id) { return g->Document().FindNode(id)->pos.x(); };
+                Check(x(tick) < x(rotate) && x(scale) < x(rotate) && x(begin) < x(print), "arranged left to right along the links");
+                Check(!g->ArrangeNodes(), "arranging twice changes nothing");
+                g->Undo();
+                Check(g->Document().ExportToJson() == arranged, "arrange is one undo step");
+
+                // Material nodes in the clipboard are named instead of being silently ignored.
+                EditorCore::GraphDocument material;
+                material.AddNode(QStringLiteral("Constant"), {}, QPointF(0, 0));
+                QGuiApplication::clipboard()->setText(EditorCore::GraphClipboard::Encode(material, {1},
+                    EditorCore::MaterialGraphSchema::Instance().ClipboardMarker(), {}));
+                const int nodes = g->Document().Nodes().size();
+                Check(g->PasteNodes(QPointF(0, 0)).isEmpty() && g->Document().Nodes().size() == nodes, "material nodes are not pasted");
+                Check(g->LastNotice().contains(EditorCore::GraphSchemaRegistry::Instance().DisplayName(QString())), "the notice names the material graph");
             });
 
             // Nodes copied from one script are pasted into another.
@@ -1473,9 +1514,29 @@ int wmain(int argc, wchar_t** argv)
             Ui([](auto* w) { Action(w, QStringLiteral("▶ Play"))->trigger(); });
             until([&] { return host.PlayState() == EditorQtHost::Play; });
             until([&] { return std::abs(rotation() - before) > 0.01f; });
+            // Engine.Scene.GraphTrace: the open window shows which nodes of the sphere's script run.
+            Check(host.GraphTraceApi() != nullptr, "current module supplies the graph trace");
+            until([&] {
+                bool shown = false;
+                Ui([&](auto* w) {
+                    const auto& statuses = window(w)->Graph()->NodeStatuses();
+                    shown = statuses.value(tick).state == GraphNodeState::Active && statuses.value(rotate).state == GraphNodeState::Active &&
+                            statuses.value(begin).state == GraphNodeState::Done && statuses.value(begin).badge == QStringLiteral("\u00d71") &&
+                            !statuses.contains(pressed);
+                });
+                return shown;
+            });
+            Ui([&](auto* w) {
+                auto* objects = window(w)->template findChild<QComboBox*>(QStringLiteral("ScriptTraceObject"));
+                Check(objects && objects->isVisible() && objects->count() == 1 && objects->currentText() == QString::fromStdString(sphereName),
+                      "the traced object is chosen in the status bar");
+                Check(window(w)->Graph()->Document().FindNode(rotate) != nullptr, "trace does not touch the graph");
+                Check(window(w)->grab().save(QString::fromStdWString((root / "editor-script-trace.png").wstring())), "save script trace");
+            });
             Ui([](auto* w) { Action(w, QStringLiteral("⏹ Stop"))->trigger(); });
             until([&] { return host.PlayState() == EditorQtHost::Edit; });
             Check(std::abs(rotation() - before) < 1e-5f, "Stop returns the edit scene untouched");
+            until([&] { bool cleared = false; Ui([&](auto* w) { cleared = window(w)->Graph()->NodeStatuses().isEmpty(); }); return cleared; });
 
             // A runtime error is shown on its node; fixing the graph clears it.
             int divide = 0;
