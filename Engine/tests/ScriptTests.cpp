@@ -566,6 +566,22 @@ void ExtensionChecks()
             SCRIPT_CHECK(play.names[i] == "Third" && play.items[i].runtime == 0 && play.items[i].objectId == third && play.items[i].node == 7);
     }
     SCRIPT_CHECK(api.control(api.context, EngineStop) == EngineSceneOk);
+
+    // Moving a script (Engine.Scene.Authoring, operation 1) rewrites the live object and saved scenes.
+    const auto author = session.GetAuthoringApi();
+    if (author.asset(author.context, 1, "/Game/Scripts/Good.vscript", "/Game/Logic/Renamed.vscript", error, sizeof(error)) != EngineSceneOk)
+        throw std::runtime_error(std::string("script move failed: ") + error);
+    SCRIPT_CHECK(!std::filesystem::exists(content / "Scripts/Good.vscript") && std::filesystem::is_regular_file(content / "Logic/Renamed.vscript"));
+    SCRIPT_CHECK(script.get(script.context, first, text, &assigned) == EngineSceneOk && assigned == "/Game/Logic/Renamed.vscript");
+    {
+        std::ifstream input(saved, std::ios::binary);
+        const std::string scene((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+        SCRIPT_CHECK(scene.find("/Game/Logic/Renamed.vscript") != std::string::npos && scene.find("/Game/Scripts/Good.vscript") == std::string::npos);
+    }
+    SCRIPT_CHECK(author.asset(author.context, 1, "/Game/Logic/Renamed.vscript", "/Game/Logic/Renamed.mat", error, sizeof(error)) != EngineSceneOk);
+    SCRIPT_CHECK(author.asset(author.context, 0, "/Game/Logic/Renamed.vscript", "", error, sizeof(error)) != EngineSceneOk); // no reimport
+    SCRIPT_CHECK(std::filesystem::is_regular_file(content / "Logic/Renamed.vscript"));
+
     SCRIPT_CHECK(script.set(script.context, first, "", error, sizeof(error)) == EngineSceneOk);
     SCRIPT_CHECK(script.get(script.context, first, text, &assigned) == EngineSceneOk && assigned.empty());
 }

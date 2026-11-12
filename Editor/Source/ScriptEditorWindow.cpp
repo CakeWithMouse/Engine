@@ -1,6 +1,7 @@
 #include "ScriptEditorWindow.h"
 #include "EditorLocale.h"
 #include "ScriptGraphWidget.h"
+#include "ScriptMessages.h"
 
 #include <QComboBox>
 #include <QDir>
@@ -67,7 +68,8 @@ struct ProblemRow
 void ENGINE_MODULE_CALL CollectProblem(void* user, const EngineScriptProblem* problem)
 {
     static_cast<QVector<ProblemRow>*>(user)->append({problem->node, QString::fromUtf8(problem->objectName),
-                                                     QString::fromUtf8(problem->message), problem->runtime != 0});
+                                                     EditorCore::LocalizeScriptMessage(QString::fromUtf8(problem->message)),
+                                                     problem->runtime != 0});
 }
 } // namespace
 
@@ -195,6 +197,9 @@ void ScriptEditorWindow::LoadFile(const QString& catalog)
 
     QFile file(PhysicalPath());
     GraphDocument document;
+    if (!file.exists())
+        return SetReadOnly(Tr("Файл %1 не найден: его переименовали или удалили. Назначьте объекту скрипт заново.",
+                              "%1 was not found: it was renamed or deleted. Assign the script to the object again.").arg(script_));
     if (!file.open(QIODevice::ReadOnly) || !document.ImportFromJson(QString::fromUtf8(file.readAll())))
         return SetReadOnly(Tr("Файл %1 не читается как граф.", "Cannot read %1 as a graph.").arg(script_));
     if (document.FileFormat() != GraphDocument::Format::V1 || document.Schema() != schema_->Id())

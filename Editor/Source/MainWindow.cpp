@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include <QDateTime>
 #include "QtHost.h"
+#include "ScriptMessages.h"
 #include "FileBrowser.h"
 #include "ViewportWidget.h"
 #include "SceneObjectsPanel.h"
@@ -60,6 +61,9 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     auto* timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &EditorMainWindow::RefreshStats);
     timer->start(250);
+    auto* scriptProblems = new QTimer(this);
+    connect(scriptProblems, &QTimer::timeout, this, &EditorMainWindow::PollScriptProblems);
+    scriptProblems->start(1000);
 
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] { RetranslateUi(); });
     themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
@@ -455,6 +459,43 @@ void EditorMainWindow::RefreshStats()
                                   ? QStringLiteral("Play")
                                   : QStringLiteral("Pause"))
     );
+}
+
+void EditorMainWindow::PollScriptProblems()
+{
+    const bool playing = host_->PlayState() != EditorQtHost::Edit;
+    if (playing && !scriptProblemsPlaying_) reportedScriptProblems_.clear(); // каждый Play сообщает заново
+    scriptProblemsPlaying_ = playing;
+    if (!playing || pollingScriptProblems_ || !host_->ScriptApi()) return;
+    pollingScriptProblems_ = true;
+    QPointer<EditorMainWindow> self(this);
+    EditorQtHost* host = host_;
+    EditorCommand c;
+    c.type = EditorCommand::RunTask;
+    c.task = [self, host](const EngineEditSessionApi&) {
+        struct Row { QString script, object, message; int node = 0; };
+        QVector<Row> rows;
+        if (const EngineScriptApi* api = host->ScriptApi())
+            api->readProblems(api->context, [](void* user, const EngineScriptProblem* problem) {
+                static_cast<QVector<Row>*>(user)->append({QString::fromUtf8(problem->script), QString::fromUtf8(problem->objectName),
+                                                          EditorCore::LocalizeScriptMessage(QString::fromUtf8(problem->message)), problem->node});
+            }, &rows);
+        host->RunOnUi([self, rows] {
+            if (!self) return;
+            self->pollingScriptProblems_ = false;
+            for (const auto& row : rows)
+            {
+                QString where = row.script;
+                if (!row.object.isEmpty()) where += QStringLiteral(" · ") + row.object;
+                if (row.node) where += QStringLiteral(" · ") + Tr("нода %1", "node %1").arg(row.node);
+                const QString line = Tr("[Скрипт] %1: %2", "[Script] %1: %2").arg(where, row.message);
+                if (self->reportedScriptProblems_.contains(line)) continue;
+                self->reportedScriptProblems_.insert(line);
+                self->host_->Log(line.toUtf8().constData());
+            }
+        });
+    };
+    host_->PostCommand(c);
 }
 
 void EditorMainWindow::ShowViewportContextMenu(const QPoint& globalPos)
@@ -1171,6 +1212,13 @@ void EditorMainWindow::CommandFinished(
         command.type == EditorCommand::NewScene || command.type == EditorCommand::UpdateAsset)
     {
         sceneBusy_ = false;
+    }
+
+    if (command.type == EditorCommand::UpdateAsset && !reopenScriptAfterMove_.isEmpty())
+    {
+        const QString script = status == EngineSceneOk && command.w == 1 ? command.name : reopenScriptAfterMove_;
+        reopenScriptAfterMove_.clear();
+        OpenScriptEditor(script);
     }
 
     if (status != EngineSceneOk)

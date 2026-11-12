@@ -7,6 +7,8 @@
 #include "MaterialGraphWidget.h"
 #include "ScriptEditorWindow.h"
 #include "ScriptGraphWidget.h"
+#include "ScriptMessages.h"
+#include <QPlainTextEdit>
 #include <QTableWidget>
 #include <atomic>
 #include "HlslGraphCompiler.h"
@@ -1378,7 +1380,7 @@ int wmain(int argc, wchar_t** argv)
             });
             std::string script;
             until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere) script = o.scriptAsset; return !script.empty(); });
-            const QString scriptPath = QString::fromStdString(script);
+            QString scriptPath = QString::fromStdString(script); // меняется после переноса файла
             const auto scriptFile = root / "Content" / std::filesystem::u8path(script.substr(6));
             Check(script.rfind("/Game/Scripts/", 0) == 0 && std::filesystem::exists(scriptFile), "new script created in Content/Scripts and assigned");
             auto window = [&](auto* w) { return w->ScriptEditor(scriptPath); };
@@ -1486,15 +1488,33 @@ int wmain(int argc, wchar_t** argv)
             for (int i = 0; i < 30; ++i) pump();
             Ui([](auto* w) { Action(w, QStringLiteral("▶ Play"))->trigger(); });
             until([&] { return host.PlayState() == EditorQtHost::Play; });
-            until([&] { bool shown = false; Ui([&](auto* w) { shown = window(w)->Problems().value(divide).contains(QStringLiteral("division by zero")); }); return shown; });
+            // Текст движка показывается на языке редактора (по-русски — «деление на ноль»).
+            const QString divisionByZero = EditorCore::LocalizeScriptMessage(QStringLiteral("division by zero"));
+            until([&] { bool shown = false; Ui([&](auto* w) { shown = window(w)->Problems().value(divide).contains(divisionByZero); }); return shown; });
+            // Та же ошибка один раз попадает в Console главного окна, даже без открытого окна скрипта.
+            until([&] {
+                int lines = 0;
+                Ui([&](auto* w) { for (auto* console : w->template findChildren<QPlainTextEdit*>())
+                    for (const QString& line : console->toPlainText().split(QLatin1Char('\n')))
+                        if (line.contains(divisionByZero) && line.contains(QStringLiteral(".vscript"))) ++lines; });
+                return lines == 1;
+            });
             Ui([&](auto* w) {
                 bool marked = false;
-                for (auto* item : window(w)->Graph()->View()->scene()->items()) marked = marked || item->toolTip().contains(QStringLiteral("division by zero"));
+                for (auto* item : window(w)->Graph()->View()->scene()->items()) marked = marked || item->toolTip().contains(divisionByZero);
                 Check(marked, "the failing node shows the Play error");
                 Check(window(w)->grab().save(QString::fromStdWString((root / "editor-script-error.png").wstring())), "save script error");
             });
             Ui([](auto* w) { Action(w, QStringLiteral("⏹ Stop"))->trigger(); });
             until([&] { return host.PlayState() == EditorQtHost::Edit; });
+            // Files → «Переместить / переименовать…» с открытым окном: объект и сцена идут за файлом,
+            // окно закрывается и открывается по новому пути.
+            const auto movedFile = root / "Content/Logic/Moved.vscript";
+            Ui([&](auto* w) { w->UpdateAsset(QString::fromStdWString(scriptFile.wstring()), true, QStringLiteral("Logic/Moved.vscript")); });
+            until([&] { std::string now; for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere) now = o.scriptAsset; return now == "/Game/Logic/Moved.vscript"; });
+            Check(std::filesystem::exists(movedFile) && !std::filesystem::exists(scriptFile), "script file moved with its references");
+            scriptPath = QStringLiteral("/Game/Logic/Moved.vscript");
+            until([&] { bool reopened = false; Ui([&](auto* w) { reopened = window(w) && window(w)->IsReady() && !w->ScriptEditor(QString::fromStdString(script)); }); return reopened; });
             Ui([&](auto* w) {
                 window(w)->Graph()->RemoveNodes({divide});
                 Check(w->grab().save(QString::fromStdWString((root / "editor-script-card.png").wstring())), "save script card");

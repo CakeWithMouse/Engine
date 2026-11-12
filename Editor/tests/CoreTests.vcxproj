@@ -86,6 +86,7 @@
         <ClCompile Include="../Core/Graph/GraphClipboard.cpp"/>
         <ClCompile Include="../Core/MaterialGraphSchema.cpp"/>
         <ClCompile Include="../Core/CodeGraphSchema.cpp"/>
+        <ClCompile Include="../Core/ScriptMessages.cpp"/>
         <ClCompile Include="../Core/SceneFile.cpp"/>
         <ClCompile Include="../Core/ImportSettings.cpp"/>
         <ClCompile Include="../Core/ModelImportSidecar.cpp"/>
@@ -142,6 +143,7 @@
         <ClInclude Include="../Core/Graph/GraphClipboard.h"/>
         <ClInclude Include="../Core/MaterialGraphSchema.h"/>
         <ClInclude Include="../Core/CodeGraphSchema.h"/>
+        <ClInclude Include="../Core/ScriptMessages.h"/>
         <ClInclude Include="../Core/SceneFile.h"/>
         <ClInclude Include="../Core/ImportSettings.h"/>
         <ClInclude Include="../Core/ModelImportSidecar.h"/>
@@ -150,6 +152,7 @@
         <ClInclude Include="core/MaterialGraphTests.h"/>
         <ClInclude Include="core/GraphCoreTests.h"/>
         <ClInclude Include="core/CodeGraphSchemaTests.h"/>
+        <ClInclude Include="core/ScriptMessagesTests.h"/>
         <ClInclude Include="core/SceneFileTests.h"/>
         <ClInclude Include="core/TerminalTests.h"/>
         <ClInclude Include="core/AssetOpsTests.h"/>

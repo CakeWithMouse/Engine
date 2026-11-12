@@ -3,6 +3,7 @@
 #include <QMainWindow>
 #include <QHash>
 #include <QPointer>
+#include <QSet>
 #include <functional>
 #include <cstdint>
 
@@ -123,6 +124,13 @@ private:
     QString ProjectPath() const;
 
     void RefreshSceneUi();
+    // Ошибки скриптов в Play пишутся в Console, даже если окно скрипта закрыто.
+    void PollScriptProblems();
+    QSet<QString> reportedScriptProblems_;
+    bool pollingScriptProblems_ = false;
+    bool scriptProblemsPlaying_ = false;
+    // Окно скрипта, закрытое на время переноса файла: открывается снова по новому пути.
+    QString reopenScriptAfterMove_;
 
     void SaveScene(bool saveAs = false, std::function<void()> after = {});
     void SetStartupScene();

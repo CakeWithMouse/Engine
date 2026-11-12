@@ -40,6 +40,9 @@ void EditorMainWindow::UpdateAsset(const QString& path,bool move,const QString& 
         if(QMessageBox::question(this,Tr("Переимпорт ресурса", "Reimport Asset"),Tr("Обновить ресурс во всех сценах? Назначения и правки материалов сохранятся. История Undo сцены будет очищена. Прежние файлы останутся в .painengine/AssetBackups.", "Update asset across all scenes? Material assignments and edits will be preserved. Scene undo history will be cleared. Old files will remain in .painengine/AssetBackups."))!=QMessageBox::Yes)return;
     }
     if(move) {argument=QDir::fromNativeSeparators(argument);if(!argument.startsWith("/Game/"))argument="/Game/"+argument;}
+    // Окно переносимого скрипта дописывает файл и закрывается: после переноса оно откроется по новому пути.
+    const QString asset="/Game/"+QDir::fromNativeSeparators(relative);
+    if(ScriptEditorWindow* open=ScriptEditor(asset)) {open->SaveNow();open->close();reopenScriptAfterMove_=asset;}
     // Material preview detaches are queued first; the asset operation then runs
     // on the engine thread with no preview holding the replaced resources.
     EditorCommand c;c.type=EditorCommand::UpdateAsset;c.w=move?1:0;c.path="/Game/"+QDir::fromNativeSeparators(relative);c.name=argument;

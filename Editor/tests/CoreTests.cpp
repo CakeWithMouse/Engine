@@ -11,6 +11,7 @@
 #include "core/MaterialGraphTests.h"
 #include "core/GraphCoreTests.h"
 #include "core/CodeGraphSchemaTests.h"
+#include "core/ScriptMessagesTests.h"
 #include "../Core/SceneFile.h"
 #include "core/SceneFileTests.h"
 #include "../Core/Terminal.h"
@@ -281,6 +282,7 @@ void TestGraphCore()
 {
     gChecks += RunGraphCoreTests();
     gChecks += RunCodeGraphSchemaTests();
+    gChecks += RunScriptMessagesTests();
 }
 
 void TestSceneFile()
