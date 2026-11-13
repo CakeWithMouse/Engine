@@ -621,7 +621,9 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
             return 2;
         }
         LocalFree(argv); argv = nullptr;
-        InstallEngineRelease(ExampleDeployment::ExecutableDirectory() / "Runtime");
+        const auto runtime = ExampleDeployment::ExecutableDirectory() / "Runtime";
+        // The games can run from a local build without Qt. Only complete runtimes go in the engine store.
+        if (std::filesystem::is_regular_file(runtime / "Editor.dll")) InstallEngineRelease(runtime);
         WNDCLASSW wc{};
         wc.lpfnWndProc = WindowProc;
         wc.hInstance = instance;

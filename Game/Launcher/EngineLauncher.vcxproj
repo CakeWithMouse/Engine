@@ -29,8 +29,11 @@
     <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(RepositoryRoot)Game/AiTutorial/Create.ps1&quot; -Destination &quot;$(OutDir)Tutorials\AiTutorial&quot; -Runtime &quot;$(OutDir)Runtime&quot; -Bundled" />
   </Target>
   <Target Name="DeployProjectSdk" AfterTargets="DeployTutorials">
+    <PropertyGroup>
+      <ProjectSdkOptions Condition="'$(Configuration)'=='Debug'">-UseBuildToolset</ProjectSdkOptions>
+    </PropertyGroup>
     <MSBuild Projects="../../Engine/Tools/ComponentGenerator/ComponentGenerator.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform);PlatformToolset=$(PlatformToolset)" />
-    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(RepositoryRoot)Engine/BuildSupport/New-ProjectSdk.ps1&quot; -Runtime &quot;$(OutDir)Runtime&quot; -Configuration $(Configuration) -PlatformToolset $(PlatformToolset) -Assimp $(EngineEnableAssimp)" />
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(RepositoryRoot)Engine/BuildSupport/New-ProjectSdk.ps1&quot; -Runtime &quot;$(OutDir)Runtime&quot; -Configuration $(Configuration) -PlatformToolset $(PlatformToolset) -Assimp $(EngineEnableAssimp) $(ProjectSdkOptions)" />
   </Target>
 
 </Project>
