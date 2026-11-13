@@ -63,6 +63,10 @@ struct EngineScriptApi
     uint32_t (ENGINE_MODULE_CALL *check)(void*, const char* path, EngineScriptProblemVisitor, void* user);
     // Problems of the scripts in the running Play scene: stopped scripts and scripts that did not start.
     uint32_t (ENGINE_MODULE_CALL *readProblems)(void*, EngineScriptProblemVisitor, void* user);
+    // Values of script variables for one object: a JSON object {"Speed": 45}, "" — the script's defaults
+    // ("assets.scriptVariables"). Any state for get; set only in Edit, "" clears.
+    uint32_t (ENGINE_MODULE_CALL *getVariables)(void*, uint64_t id, EngineScriptTextVisitor, void* user);
+    uint32_t (ENGINE_MODULE_CALL *setVariables)(void*, uint64_t id, const char* json, char* error, uint32_t capacity);
 };
 
 // Live state of graph nodes in the running Play scene, for debugging in graph editors. Today the graphs are
@@ -90,8 +94,16 @@ struct EngineGraphTraceNode
     uint32_t framesAgo; // 0: during the latest frame
     uint32_t count;     // runs since Play started (saturates)
 };
+// The last value a data output gave to a reader; text is valid during the call only.
+struct EngineGraphTraceValue
+{
+    int32_t node;
+    const char* pin;
+    const char* text;
+};
 using EngineGraphTraceObjectVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineGraphTraceObject* object);
 using EngineGraphTraceNodeVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineGraphTraceNode* node);
+using EngineGraphTraceValueVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineGraphTraceValue* value);
 struct EngineGraphTraceApi
 {
     uint32_t version; // 1
@@ -100,6 +112,8 @@ struct EngineGraphTraceApi
     uint32_t (ENGINE_MODULE_CALL *listObjects)(void*, const char* asset, EngineGraphTraceObjectVisitor, void* user);
     // Nodes of the asset that ran for objectId (0: the first object running it). NotFound: no such object runs it.
     uint32_t (ENGINE_MODULE_CALL *read)(void*, const char* asset, uint64_t objectId, EngineGraphTraceNodeVisitor, void* user);
+    // Values on the data outputs for the same object, as read() chooses it.
+    uint32_t (ENGINE_MODULE_CALL *readValues)(void*, const char* asset, uint64_t objectId, EngineGraphTraceValueVisitor, void* user);
 };
 
 // Audio asset preview: decodes and plays a /Game audio file through the edit scene's

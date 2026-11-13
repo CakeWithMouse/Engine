@@ -222,6 +222,11 @@ public:
     Scene& GetScene() noexcept { return scene; }
     /** Why the script at this /Game path did not start in this game; empty if it compiled or was never started. */
     std::vector<Script::Problem> GetScriptProblems(const std::string& asset) const;
+    // Visual scripts (Spawn copy): a copy of source — its type, model/texture/material, project data, script,
+    // rotation and scale — at position, named "<source>_N". Added like any object added during play (its own
+    // BeginPlay and script start next frame). Parent, children and light settings are not copied.
+    // Returns the new id; 0 and error when the type is unknown to this game.
+    uint64_t SpawnCopy(const GameComponent& source, const glm::vec3& position, std::string& error);
     const Scene& GetScene() const noexcept { return scene; }
 
     bool CreateProceduralCubeMap(const std::string& cubeMapName, CubeMapPreset preset, int faceSize = 256);

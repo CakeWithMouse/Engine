@@ -95,8 +95,12 @@ public:
      */
     void SetScriptAsset(const std::string& path) { ScriptAssetPath = path; }
     const std::string& GetScriptAsset() const { return ScriptAssetPath; }
+    // Values of script variables for this object: a JSON object {"Speed": 45}; "" — the script's defaults.
+    void SetScriptVariables(const std::string& json) { ScriptVariableValues = json; }
+    const std::string& GetScriptVariables() const { return ScriptVariableValues; }
     /** The running script of this play session; null in Edit, without a script or when it did not compile. */
     const Script::Instance* GetScriptInstance() const { return ScriptState.get(); }
+    Script::Instance* GetScriptInstance() { return ScriptState.get(); }
     /** Drawn only through a material: without one of its own, the game uses its default material. */
     virtual bool RequiresMaterial() const { return false; }
     /** MaterialVariant flags of the shader set this component draws with (instances, skinning). */
@@ -349,6 +353,7 @@ private:
     std::string SceneName;
     std::string SceneTypeName; // assigned by Scene on addition, independent of instance name
     std::string ScriptAssetPath;
+    std::string ScriptVariableValues;
     std::unique_ptr<Script::Instance> ScriptState; // created by Game at BeginPlay, ticked by Scene
     Game* RenderOwner = nullptr;
     std::string VertexShaderName;

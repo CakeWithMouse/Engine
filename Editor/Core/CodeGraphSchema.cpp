@@ -225,11 +225,90 @@ void CodeGraphSchema::PrepareNewNode(const GraphDocument&, const QString& type, 
         if (property.kind == QStringLiteral("key")) fallback(property.name, QStringLiteral("Space"));
         else if (property.kind == QStringLiteral("variable") && !variableOrder_.isEmpty()) fallback(property.name, variableOrder_.first());
         else if (property.kind == QStringLiteral("outputs")) fallback(property.name, 2);
+        else if (property.name == QStringLiteral("seconds")) fallback(property.name, 1.0);
+        else if (property.name == QStringLiteral("event")) fallback(property.name, QStringLiteral("Event"));
         else if (property.kind == QStringLiteral("float")) fallback(property.name, 0.0);
         else if (property.kind == QStringLiteral("bool")) fallback(property.name, false);
         else if (property.kind == QStringLiteral("vec3")) fallback(property.name, QVariantList{0.0, 0.0, 0.0});
         else if (property.kind == QStringLiteral("string")) fallback(property.name, QString());
     }
+    // Входы, у которых 0 по умолчанию бесполезен: «Случайное число» от 0 до 0, задержка 0 с.
+    static const QHash<QString, QVariantMap> inputDefaults{
+        {QStringLiteral("Math.Random"), {{QStringLiteral("Max"), 1.0}}},
+        {QStringLiteral("Flow.Delay"), {{QStringLiteral("Seconds"), 1.0}}},
+        {QStringLiteral("Flow.For"), {{QStringLiteral("Last"), 9.0}}},
+    };
+    if (inputDefaults.contains(type))
+    {
+        QVariantMap inputs = properties.value(QStringLiteral("inputs")).toMap();
+        const QVariantMap defaults = inputDefaults.value(type);
+        for (auto it = defaults.begin(); it != defaults.end(); ++it)
+            if (!inputs.contains(it.key())) inputs.insert(it.key(), it.value());
+        properties[QStringLiteral("inputs")] = inputs;
+    }
+}
+
+
+QHash<int, QString> CodeGraphSchema::Warnings(const GraphDocument& document) const
+{
+    QHash<int, QString> warnings;
+    auto warn = [&](int node, const QString& text) {
+        if (!warnings.contains(node)) warnings.insert(node, text);
+    };
+    auto linkedInput = [&](int node, const QString& pin) {
+        for (const auto& c : document.Connections())
+            if (c.toNode == node && c.toPin == pin) return true;
+        return false;
+    };
+    auto linkedOutput = [&](int node, const QString& pin) {
+        for (const auto& c : document.Connections())
+            if (c.fromNode == node && c.fromPin == pin) return true;
+        return false;
+    };
+    // Значение входа без связи: из properties.inputs, иначе 0.
+    auto inputNumber = [&](const GraphNodeData& node, const QString& pin) {
+        return node.properties.value(QStringLiteral("inputs")).toMap().value(pin, 0.0).toDouble();
+    };
+    for (const auto& node : document.Nodes())
+    {
+        const Node* info = FindNode(node.type);
+        if (!info) continue; // неизвестную ноду отклонит движок
+        const QVector<GraphPin> pins = Pins(node);
+        bool execIn = false, execOut = false, dataOut = false, anyExecOutLinked = false, anyDataOutLinked = false;
+        for (const auto& pin : pins)
+        {
+            const bool exec = pin.type == QStringLiteral("exec");
+            if (pin.isInput && exec) execIn = true;
+            if (!pin.isInput && exec)
+            {
+                execOut = true;
+                anyExecOutLinked = anyExecOutLinked || linkedOutput(node.id, pin.name);
+            }
+            if (!pin.isInput && !exec)
+            {
+                dataOut = true;
+                anyDataOutLinked = anyDataOutLinked || linkedOutput(node.id, pin.name);
+            }
+        }
+        if (node.type == QStringLiteral("Math.Random") && !linkedInput(node.id, QStringLiteral("Min")) && !linkedInput(node.id, QStringLiteral("Max")) &&
+            inputNumber(node, QStringLiteral("Min")) == inputNumber(node, QStringLiteral("Max")))
+            warn(node.id, Tr("Min и Max равны (%1): число всегда одно и то же. Задайте их двойным щелчком по ноде.",
+                             "Min and Max are equal (%1): the number never changes. Set them by double-clicking the node.")
+                              .arg(inputNumber(node, QStringLiteral("Min"))));
+        if (node.type == QStringLiteral("Math.Divide") && !linkedInput(node.id, QStringLiteral("B")) && inputNumber(node, QStringLiteral("B")) == 0.0)
+            warn(node.id, Tr("B не подключён и равен 0: в Play будет ошибка «деление на ноль».",
+                             "B is not connected and is 0: Play will stop with \"division by zero\"."));
+        if (info->event && execOut && !anyExecOutLinked)
+            warn(node.id, Tr("Событие ни к чему не ведёт: подключите к его выходу действие.",
+                             "The event leads nowhere: connect an action to its output."));
+        else if (execIn && !linkedInput(node.id, QStringLiteral("exec")))
+            warn(node.id, Tr("Нода не выполнится: к входу exec ничего не подключено.",
+                             "The node never runs: nothing is connected to its exec input."));
+        else if (!info->event && !execIn && !execOut && dataOut && !anyDataOutLinked)
+            warn(node.id, Tr("Результат никуда не идёт: нода не влияет на скрипт.",
+                             "The result goes nowhere: the node does not affect the script."));
+    }
+    return warnings;
 }
 
 } // namespace EditorCore

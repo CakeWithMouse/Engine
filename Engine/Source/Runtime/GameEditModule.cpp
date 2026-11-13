@@ -93,7 +93,7 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
             if (query && query(extensionContext, EngineScriptExtension, 1, sizeof(script), &script))
             {
                 if (script.version != 1 || script.context != extensionContext || !script.describe || !script.get || !script.set ||
-                    !script.check || !script.readProblems)
+                    !script.check || !script.readProblems || !script.getVariables || !script.setVariables)
                     throw std::runtime_error("Invalid script API");
                 script_ = script;
             }
@@ -101,7 +101,7 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
             if (query && query(extensionContext, EngineGraphTraceExtension, 1, sizeof(trace), &trace))
             {
                 // Debugging only: a broken table switches the trace off instead of rejecting the module.
-                if (trace.version == 1 && trace.context == extensionContext && trace.listObjects && trace.read) graphTrace_ = trace;
+                if (trace.version == 1 && trace.context == extensionContext && trace.listObjects && trace.read && trace.readValues) graphTrace_ = trace;
             }
             EngineAudioPreviewApi audio{};
             if (query && query(extensionContext, EngineAudioPreviewExtension, 1, sizeof(audio), &audio))

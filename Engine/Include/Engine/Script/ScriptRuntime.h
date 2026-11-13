@@ -4,6 +4,7 @@
 #include <memory>
 #include <random>
 #include <string>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 #include <glm/glm.hpp>
@@ -27,6 +28,7 @@ constexpr const char* SchemaId = "code";
 constexpr int SchemaVersion = 1;
 constexpr int StepLimit = 10000;  // nodes run or evaluated per event before "probably an endless loop"
 constexpr int MaxSequenceOutputs = 8;
+constexpr int MaxEventDepth = 16; // Call event inside Call event…: deeper is "events call each other too deeply"
 
 // Variable: the pin takes the type of the variable named by the node's "variable" property.
 enum class ValueType : uint8_t { Exec, Bool, Float, Vec3, String, Object, Any, Variable };
@@ -103,6 +105,8 @@ public:
 
     void BeginPlay();
     void Tick(float deltaTime);
+    // Custom events named name (Action.CallEvent of this or another object); false: none ran.
+    bool Trigger(const std::string& name);
 
     bool Failed() const { return failed_; }
     const Problem& Error() const { return error_; }
@@ -120,6 +124,14 @@ public:
         uint32_t count = 0;
     };
     std::vector<NodeTrace> Trace() const;
+    // The last value every data output gave to a reader since Play started.
+    struct OutputValue
+    {
+        int node = 0;      // node id in the file
+        std::string pin;   // output name
+        std::string text;  // ToText of the value
+    };
+    std::vector<OutputValue> Values() const;
 
 private:
     struct Event;
@@ -141,6 +153,17 @@ private:
     uint64_t frame_ = 0;              // Tick calls since BeginPlay
     std::vector<uint64_t> ranAt_;     // per program node: frame_ + 1 of the last run, 0 — never
     std::vector<uint32_t> runs_;
+    std::vector<std::vector<Value>> outputs_; // per program node, per data output; monostate — never read
+    std::vector<float> nodeNumber_;  // per node: Every timer, For index, FlipFlop side (1 — A)
+    std::vector<uint8_t> nodeFlag_;  // per node: DoOnce done, Delay waiting, FlipFlop next side
+    struct Pending
+    {
+        int node; // Delay node index
+        float due;
+    };
+    std::vector<Pending> delays_;
+    std::unordered_map<int, uint64_t> spawned_; // Spawn node index -> the object it created last
+    void Continue(int node, const Event& event); // runs a chain that does not start at an event
     float elapsed_ = 0.0f;
     int steps_ = 0;
     bool failed_ = false;

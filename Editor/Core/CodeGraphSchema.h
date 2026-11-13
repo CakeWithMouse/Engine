@@ -67,6 +67,10 @@ public:
 
     void PrepareNewNode(const GraphDocument& document, const QString& type, QVariantMap& properties, QString& title) const override;
 
+    // Предупреждения: граф собирается, но, скорее всего, делает не то, что задумано (нода -> текст на языке
+    // редактора). Ошибки сборки проверяет движок; здесь — только подозрительное.
+    QHash<int, QString> Warnings(const GraphDocument& document) const;
+
     static QColor TypeColor(const QString& type);
     static QString TypeLabel(const QString& type); // имя типа на языке редактора
 

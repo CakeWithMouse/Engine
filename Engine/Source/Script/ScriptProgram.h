@@ -14,7 +14,11 @@ enum class Op : uint16_t
     MakeVec3, BreakVec3, Vec3Add, Vec3Subtract, Vec3Scale,
     Add, Subtract, Multiply, Divide, Sin, Lerp, Clamp, Random, Time,
     Less, Greater, Equal, And, Or, Not,
-    KeyDown
+    KeyDown,
+    // Timers, flow with state, objects, more math (2026.11.13).
+    Every, CustomEvent, Delay, DoOnce, FlipFlop, For,
+    CallEvent, Spawn, Destroy,
+    MousePosition, Distance, Vec3Length, Vec3Normalize, Vec3Lerp, Abs, Cos, Min, Max
 };
 
 // Catalog entry with its operation (the public NodeInfo has none).
@@ -43,9 +47,11 @@ struct CompiledNode
     std::string type;
     std::vector<InputSlot> inputs; // data inputs in pin order
     std::vector<int> next;         // exec outputs in pin order: target node index, -1 when unconnected
+    std::vector<std::string> outputNames; // data outputs in pin order (debug values)
     Value constant;
     int variable = -1;
     int key = 0;
+    std::string text; // custom event name (Event.Custom, Action.CallEvent)
 };
 
 struct Variable
@@ -60,9 +66,12 @@ class Program
 public:
     std::vector<CompiledNode> nodes;
     std::vector<Variable> variables;
-    std::vector<int> beginPlay, tick, keyEvents; // node indices
+    std::vector<int> beginPlay, tick, keyEvents, every, customEvents; // node indices
     int FindVariable(const std::string& name) const; // -1: none
 };
 
 Value DefaultValue(ValueType type);
+// Values from a JSON object {"name": literal} replace initial values of the program's variables. Unknown names
+// and literals of another type are skipped (the script's own default stays).
+void ApplyVariableValues(const Program& program, const std::string& json, std::vector<Value>& values);
 } // namespace Script

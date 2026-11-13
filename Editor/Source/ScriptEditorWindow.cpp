@@ -345,7 +345,8 @@ void ScriptEditorWindow::PollTrace()
     c.type = EditorCommand::RunTask;
     c.task = [self, host, script, wanted](const EngineEditSessionApi&) {
         struct Object { quint64 id; QString name; bool failed; };
-        struct Collected { QVector<Object> objects; QVector<EngineGraphTraceNode> nodes; } collected;
+        struct Value { int node; QString pin, text; };
+        struct Collected { QVector<Object> objects; QVector<EngineGraphTraceNode> nodes; QVector<Value> values; } collected;
         if (const EngineGraphTraceApi* api = host->GraphTraceApi())
         {
             api->listObjects(api->context, script.c_str(), [](void* user, const EngineGraphTraceObject* object) {
@@ -357,6 +358,9 @@ void ScriptEditorWindow::PollTrace()
                 if (object.id == wanted) id = wanted;
             api->read(api->context, script.c_str(), id, [](void* user, const EngineGraphTraceNode* node) {
                 static_cast<Collected*>(user)->nodes.push_back(*node);
+            }, &collected);
+            api->readValues(api->context, script.c_str(), id, [](void* user, const EngineGraphTraceValue* value) {
+                static_cast<Collected*>(user)->values.push_back({value->node, QString::fromUtf8(value->pin), QString::fromUtf8(value->text)});
             }, &collected);
         }
         host->RunOnUi([self, collected] {
@@ -384,6 +388,7 @@ void ScriptEditorWindow::PollTrace()
                 if (node.count) status.badge = QStringLiteral("\u00d7%1").arg(node.count);
                 statuses.insert(node.node, status);
             }
+            for (const auto& value : collected.values) statuses[value.node].values.insert(value.pin, value.text);
             self->graph_->SetNodeStatuses(statuses);
         });
     };
@@ -405,6 +410,7 @@ QHash<int, QString> ScriptEditorWindow::Problems() const
 
 void ScriptEditorWindow::ShowProblems()
 {
+    warnings_ = schema_->Warnings(graph_->Document());
     problemList_->clear();
     for (const auto* list : {&checkProblems_, &playProblems_})
         for (const auto& problem : *list)
@@ -414,6 +420,15 @@ void ScriptEditorWindow::ShowProblems()
             auto* item = new QListWidgetItem(QStringLiteral("%1: %2").arg(where, problem.message), problemList_);
             item->setData(Qt::UserRole, problem.node);
         }
+    QList<int> warned = warnings_.keys();
+    std::sort(warned.begin(), warned.end());
+    for (const int node : warned)
+    {
+        auto* item = new QListWidgetItem(Tr("Предупреждение · нода %1: %2", "Warning · node %1: %2").arg(node).arg(warnings_.value(node)), problemList_);
+        item->setData(Qt::UserRole, node);
+        item->setForeground(QColor(0xEA, 0xB3, 0x08));
+    }
+    graph_->SetNodeWarnings(warnings_);
     graph_->SetNodeProblems(Problems());
     if (problemList_->count() == 0)
         (new QListWidgetItem(Tr("Ошибок нет", "No problems"), problemList_))->setFlags(Qt::NoItemFlags);

@@ -74,6 +74,8 @@ const QVector<Rule>& Rules()
         add("input (.*) takes (\\w+), got (\\w+)", "вход %1 принимает тип «%2», а подключён «%3»", {2, 3});
         add("input (.*) has more than one link", "у входа %1 больше одной связи");
         add("the value depends on itself \\(a data cycle\\)", "значение зависит само от себя (цикл по данным)");
+        add("\"seconds\" must be a number greater than 0", "интервал должен быть числом больше 0");
+        add("name the event", "задайте имя события");
         // Выполнение в Play.
         add("more than (\\d+) steps in one event: probably an endless loop", "больше %1 шагов за одно событие: вероятно, бесконечный цикл");
         add("no object \\(the Target input is empty or the object was not found\\)",
@@ -81,6 +83,11 @@ const QVector<Rule>& Rules()
         add("object #(\\d+) is no longer in the scene", "объекта #%1 больше нет в сцене");
         add("division by zero", "деление на ноль");
         add("Min is greater than Max", "Min больше Max");
+        add("events call each other too deeply \\(more than (\\d+)\\)", "события вызывают друг друга слишком глубоко (больше %1 раз)");
+        add("cannot spawn a copy: the template is not in the scene", "копия не создана: образца нет в сцене");
+        add("cannot spawn a copy: the object type \"(.*)\" cannot be created here", "копия не создана: объект типа «%1» здесь создать нельзя");
+        add("cannot spawn a copy: (.*)", "копия не создана: %1");
+        add("cannot spawn a copy", "копия не создана");
         add("unexpected error: (.*)", "непредвиденная ошибка: %1");
         add("internal: (.*)", "внутренняя ошибка: %1");
         return list;

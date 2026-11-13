@@ -40,7 +40,7 @@ NodeSpec Spec(Op op, const char* type, const char* group, const char* nameRu, co
 
 std::vector<NodeSpec> BuildSpecs()
 {
-    const PropertyInfo key{"key", "key"}, variable{"variable", "variable"};
+    const PropertyInfo key{"key", "key"}, variable{"variable", "variable"}, eventName{"event", "string"};
     return {
         Spec(Op::BeginPlay, "Event.BeginPlay", "Events", "Начало игры", "Begin play", "Один раз при запуске игры или Play.",
              "Once when the game or Play starts.", Pins({}, {"then:exec"}), {}, true),
@@ -51,10 +51,26 @@ std::vector<NodeSpec> BuildSpecs()
         Spec(Op::KeyReleased, "Event.KeyReleased", "Events", "Клавиша отпущена", "Key released", "Когда клавиша отпущена.", "When the key goes up.",
              Pins({}, {"then:exec"}), {key}, true),
 
+        Spec(Op::Every, "Event.Every", "Events", "Каждые N секунд", "Every N seconds", "Срабатывает раз в интервал (секунды > 0).",
+             "Fires once per interval (seconds > 0).", Pins({}, {"then:exec"}), {{"seconds", "float"}}, true),
+        Spec(Op::CustomEvent, "Event.Custom", "Events", "Своё событие", "Custom event",
+             "Срабатывает, когда этот или другой объект вызывает событие с таким именем («Вызвать событие»).",
+             "Fires when this or another object calls the event by this name (Call event).", Pins({}, {"then:exec"}), {eventName}, true),
+
         Spec(Op::Branch, "Flow.Branch", "Flow", "Ветвление", "Branch", "True, если условие выполнено, иначе False.",
              "True when the condition holds, False otherwise.", Pins({"exec:exec", "Condition:bool"}, {"True:exec", "False:exec"})),
         Spec(Op::Sequence, "Flow.Sequence", "Flow", "Последовательность", "Sequence", "Выходы по очереди: then0, then1…",
              "Runs the outputs in order: then0, then1…", Pins({"exec:exec"}, {}), {{"outputs", "outputs"}}),
+        Spec(Op::Delay, "Flow.Delay", "Flow", "Задержка", "Delay",
+             "Продолжает через Seconds секунд; пока ждёт, повторный вход не учитывается.",
+             "Continues after Seconds; while waiting, entering again is ignored.", Pins({"exec:exec", "Seconds:float"}, {"then:exec"})),
+        Spec(Op::DoOnce, "Flow.DoOnce", "Flow", "Один раз", "Do once", "Пропускает поток только в первый раз за Play.",
+             "Lets the flow through only the first time in Play.", Pins({"exec:exec"}, {"then:exec"})),
+        Spec(Op::FlipFlop, "Flow.FlipFlop", "Flow", "Попеременно", "Flip flop", "По очереди: A, B, A, B…; IsA — прошёл ли поток в A.",
+             "In turn: A, B, A, B…; IsA tells whether the flow went to A.", Pins({"exec:exec"}, {"A:exec", "B:exec", "IsA:bool"})),
+        Spec(Op::For, "Flow.For", "Flow", "Цикл", "For loop", "Body для Index от First до Last включительно, затем Completed.",
+             "Body for Index from First to Last inclusive, then Completed.",
+             Pins({"exec:exec", "First:float", "Last:float"}, {"Body:exec", "Completed:exec", "Index:float"})),
 
         Spec(Op::Print, "Action.Print", "Actions", "Вывести в консоль", "Print", "Пишет значение в консоль редактора и журнал игры.",
              "Writes the value to the editor console and the game log.", Pins({"exec:exec", "Text:any"}, {"then:exec"})),
@@ -68,6 +84,16 @@ std::vector<NodeSpec> BuildSpecs()
              Pins({"exec:exec", "Target:object", "Offset:vec3"}, {"then:exec"})),
         Spec(Op::Rotate, "Action.Rotate", "Actions", "Повернуть", "Rotate", "Прибавляет градусы к повороту.", "Adds the degrees to the rotation.",
              Pins({"exec:exec", "Target:object", "Degrees:vec3"}, {"then:exec"})),
+        Spec(Op::CallEvent, "Action.CallEvent", "Actions", "Вызвать событие", "Call event",
+             "Запускает «Своё событие» с этим именем в скрипте объекта Target (пустой — сам объект).",
+             "Runs the Custom event of this name in the script of Target (empty — this object).",
+             Pins({"exec:exec", "Target:object"}, {"then:exec"}), {eventName}),
+        Spec(Op::Spawn, "Action.Spawn", "Actions", "Создать копию", "Spawn copy",
+             "Копия объекта Template (модель, материал, скрипт, настройки) в точке Position; Object — новый объект.",
+             "A copy of Template (model, material, script, settings) at Position; Object is the new object.",
+             Pins({"exec:exec", "Template:object", "Position:vec3"}, {"then:exec", "Object:object"})),
+        Spec(Op::Destroy, "Action.Destroy", "Actions", "Удалить объект", "Destroy", "Убирает объект Target из сцены в конце кадра.",
+             "Removes Target from the scene at the end of the frame.", Pins({"exec:exec", "Target:object"}, {"then:exec"})),
         Spec(Op::SetVariable, "Variable.Set", "Variables", "Задать переменную", "Set variable", "Новое значение переменной скрипта.",
              "A new value of a script variable.", Pins({"exec:exec", "Value:variable"}, {"then:exec"}), {variable}),
 
@@ -92,6 +118,14 @@ std::vector<NodeSpec> BuildSpecs()
 
         Spec(Op::MakeVec3, "Vec3.Make", "Vectors", "Собрать вектор", "Make vector", "Вектор из X, Y, Z.", "A vector from X, Y, Z.",
              Pins({"X:float", "Y:float", "Z:float"}, {"Vector:vec3"})),
+        Spec(Op::Vec3Length, "Vec3.Length", "Vectors", "Длина вектора", "Vector length", "Длина вектора.", "Length of the vector.",
+             Pins({"Vector:vec3"}, {"Length:float"})),
+        Spec(Op::Vec3Normalize, "Vec3.Normalize", "Vectors", "Направление", "Normalize", "Вектор длины 1 в ту же сторону; нулевой остаётся нулевым.",
+             "A vector of length 1 in the same direction; zero stays zero.", Pins({"Vector:vec3"}, {"Out:vec3"})),
+        Spec(Op::Vec3Lerp, "Vec3.Lerp", "Vectors", "Смешивание векторов", "Lerp vectors", "A при Alpha = 0, B при Alpha = 1.", "A at Alpha 0, B at Alpha 1.",
+             Pins({"A:vec3", "B:vec3", "Alpha:float"}, {"Out:vec3"})),
+        Spec(Op::Distance, "Vec3.Distance", "Vectors", "Расстояние", "Distance", "Расстояние между точками A и B.", "Distance between points A and B.",
+             Pins({"A:vec3", "B:vec3"}, {"Distance:float"})),
         Spec(Op::BreakVec3, "Vec3.Break", "Vectors", "Разобрать вектор", "Break vector", "X, Y, Z вектора.", "X, Y, Z of a vector.",
              Pins({"Vector:vec3"}, {"X:float", "Y:float", "Z:float"})),
         Spec(Op::Vec3Add, "Vec3.Add", "Vectors", "Сложение векторов", "Add vectors", "A + B.", "A + B.", Pins({"A:vec3", "B:vec3"}, {"Out:vec3"})),
@@ -105,6 +139,10 @@ std::vector<NodeSpec> BuildSpecs()
         Spec(Op::Divide, "Math.Divide", "Math", "Деление", "Divide", "A / B; деление на 0 — ошибка.", "A / B; division by 0 is an error.",
              Pins({"A:float", "B:float"}, {"Out:float"})),
         Spec(Op::Sin, "Math.Sin", "Math", "Синус", "Sine", "sin(In), In в радианах.", "sin(In), In in radians.", Pins({"In:float"}, {"Out:float"})),
+        Spec(Op::Cos, "Math.Cos", "Math", "Косинус", "Cosine", "cos(In), In в радианах.", "cos(In), In in radians.", Pins({"In:float"}, {"Out:float"})),
+        Spec(Op::Abs, "Math.Abs", "Math", "Модуль", "Absolute", "|In|.", "|In|.", Pins({"In:float"}, {"Out:float"})),
+        Spec(Op::Min, "Math.Min", "Math", "Минимум", "Min", "Меньшее из A и B.", "The smaller of A and B.", Pins({"A:float", "B:float"}, {"Out:float"})),
+        Spec(Op::Max, "Math.Max", "Math", "Максимум", "Max", "Большее из A и B.", "The larger of A and B.", Pins({"A:float", "B:float"}, {"Out:float"})),
         Spec(Op::Lerp, "Math.Lerp", "Math", "Смешивание (lerp)", "Lerp", "A при Alpha = 0, B при Alpha = 1.", "A at Alpha 0, B at Alpha 1.",
              Pins({"A:float", "B:float", "Alpha:float"}, {"Out:float"})),
         Spec(Op::Clamp, "Math.Clamp", "Math", "Ограничение", "Clamp", "Value между Min и Max.", "Value between Min and Max.",
@@ -124,6 +162,10 @@ std::vector<NodeSpec> BuildSpecs()
 
         Spec(Op::KeyDown, "Input.KeyDown", "Input", "Клавиша зажата", "Key down", "Клавиша сейчас нажата.", "The key is down now.",
              Pins({}, {"Down:bool"}), {key}),
+        Spec(Op::MousePosition, "Input.MousePosition", "Input", "Позиция мыши", "Mouse position",
+             "Курсор в пикселях окна игры от левого верхнего угла; Valid — курсор над окном. Кнопки мыши — клавиши LeftButton, RightButton.",
+             "The cursor in game window pixels from the top-left corner; Valid — the cursor is over the window. Mouse buttons are the LeftButton, RightButton keys.",
+             Pins({}, {"X:float", "Y:float", "Valid:bool"})),
     };
 }
 

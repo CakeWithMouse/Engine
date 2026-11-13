@@ -1,8 +1,10 @@
 #pragma once
 
+#include <QColor>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QPointF>
+#include <QRectF>
 #include <QString>
 #include <QVariantMap>
 #include <QVector>
@@ -38,6 +40,15 @@ struct GraphConnectionData
     QVariantMap properties; // условия переходов и т.п.; пустые не пишутся в файл
 };
 
+// Комментарий на холсте: рамка с подписью вокруг группы нод. На результат графа не влияет.
+struct GraphCommentData
+{
+    int id = 0;
+    QRectF rect;
+    QString text;
+    QColor color = QColor(0x47, 0x55, 0x69);
+};
+
 // Документ графа: ноды, связи, переменные и заголовок файла. Правила связей и смысл нод — в GraphSchema.
 //
 // Два формата файла:
@@ -66,7 +77,14 @@ public:
     // Свойства связи целиком (пустые значения не пишутся в файл); false — связи нет.
     bool SetConnectionProperties(int fromNode, const QString& fromPin, int toNode, const QString& toPin, const QVariantMap& props);
 
-    void Clear(); // ноды и связи; заголовок и переменные остаются
+    void Clear(); // ноды, связи и комментарии; заголовок и переменные остаются
+
+    // Комментарии («comments» в файле; пишутся, только когда есть).
+    int AddComment(const QRectF& rect, const QString& text, const QColor& color = QColor(0x47, 0x55, 0x69));
+    bool RemoveComment(int id);
+    GraphCommentData* FindComment(int id);
+    const GraphCommentData* FindComment(int id) const;
+    const QVector<GraphCommentData>& Comments() const { return comments_; }
 
     const GraphNodeData* FindNode(int id) const;
     GraphNodeData* FindNode(int id);
@@ -94,7 +112,9 @@ public:
 private:
     QVector<GraphNodeData> nodes_;
     QVector<GraphConnectionData> connections_;
+    QVector<GraphCommentData> comments_;
     int nextNodeId_ = 1;
+    int nextCommentId_ = 1;
 
     Format format_ = Format::Legacy;
     int version_ = FormatVersion;

@@ -26,7 +26,8 @@ struct GraphNodeStatus
 {
     GraphNodeState state = GraphNodeState::None;
     QString badge; // «×12»; пустая — без подписи
-    bool operator==(const GraphNodeStatus& other) const { return state == other.state && badge == other.badge; }
+    QHash<QString, QString> values; // выход -> последнее значение («Out» -> «37.2»): подпись справа от пина
+    bool operator==(const GraphNodeStatus& other) const { return state == other.state && badge == other.badge && values == other.values; }
 };
 
 // Общий нодовый редактор: холст с сеткой, ноды и связи, выделение, история, буфер обмена, поиск нод,
@@ -74,6 +75,9 @@ public:
 
     // Ошибки на нодах: красная рамка, значок, текст в подсказке. Ключ — id ноды.
     void SetNodeProblems(const QHash<int, QString>& problems);
+    // Предупреждения: жёлтая рамка и значок; у ноды с ошибкой показывается ошибка.
+    void SetNodeWarnings(const QHash<int, QString>& warnings);
+    const QHash<int, QString>& NodeWarnings() const { return warnings_; }
     void FocusNode(int nodeId);
 
     // Состояние нод в игре: перерисовка без пересборки сцены, история не меняется. Ключ — id ноды.
@@ -90,6 +94,12 @@ public:
     // «Упорядочить»: автораскладка по стилю схемы — один шаг отмены; false — раскладка не изменилась.
     bool ArrangeNodes();
 
+    // Комментарии: рамка с подписью. Новая — вокруг выделенных нод или в центре вида; id нового комментария.
+    int AddComment(const QString& text = {});
+    bool SetCommentText(int commentId, const QString& text);
+    QList<int> SelectedComments() const;
+    void SelectComment(int commentId);
+
     // Последнее сообщение пользователю (вставка чужих нод и т.п.); показывается подсказкой у курсора.
     const QString& LastNotice() const { return lastNotice_; }
 
@@ -101,6 +111,7 @@ public:
 
     class NodeItem;
     class LinkItem;
+    class CommentItem;
 
 protected:
     // Внешний вид ноды. decoration — данные, посчитанные один раз при построении ноды (миниатюра и т.п.).
@@ -145,6 +156,8 @@ private:
     void FinishLink(const QPointF& scenePos);
     void ShowNodeMenu(const QPoint& screenPos, int nodeId);
     void ShowLinkMenu(const QPoint& screenPos, const EditorCore::GraphConnectionData& link);
+    void EditComment(int commentId);
+    void CommentChanged(int commentId, const QRectF& rect); // перетаскивание или новый размер
     void Notice(const QString& text);
     QString ForeignClipboardNotice() const;
     void DeleteSelected();
@@ -181,6 +194,7 @@ private:
     int linkSerial_ = 0;
     QHash<int, QString> problems_;
     QHash<int, GraphNodeStatus> statuses_;
+    QHash<int, QString> warnings_;
     QString lastNotice_;
     QToolButton* undoButton_ = nullptr;
     QToolButton* redoButton_ = nullptr;

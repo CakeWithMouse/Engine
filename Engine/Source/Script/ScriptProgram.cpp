@@ -88,6 +88,20 @@ const PinInfo* FindPin(const std::vector<PinInfo>& pins, const std::string& name
 }
 } // namespace
 
+void ApplyVariableValues(const Program& program, const std::string& json, std::vector<Value>& values)
+{
+    if (json.empty()) return;
+    const Json root = Json::parse(json, nullptr, false);
+    if (!root.is_object()) return;
+    for (auto it = root.begin(); it != root.end(); ++it)
+    {
+        const int index = program.FindVariable(it.key());
+        if (index < 0 || size_t(index) >= values.size()) continue;
+        Value value;
+        if (ParseLiteral(it.value(), program.variables[index].type, value)) values[index] = value;
+    }
+}
+
 int Program::FindVariable(const std::string& name) const
 {
     for (size_t i = 0; i < variables.size(); ++i)
@@ -195,6 +209,18 @@ CompileResult Compile(const std::string& text)
                 node.variable = program->FindVariable(name);
                 if (node.variable < 0) problem(id, name.empty() ? std::string("choose a variable") : "no variable \"" + name + "\"");
             }
+            else if (property.name == "seconds")
+            {
+                const Json& seconds = properties.value("seconds", Json(1.0));
+                if (!seconds.is_number() || !(seconds.get<double>() > 0.0)) problem(id, "\"seconds\" must be a number greater than 0");
+                else node.constant = float(seconds.get<double>());
+            }
+            else if (property.name == "event")
+            {
+                const Json& name = properties.value("event", Json(std::string()));
+                node.text = name.is_string() ? name.get<std::string>() : std::string();
+                if (node.text.empty()) problem(id, "name the event");
+            }
             else if (property.name == "value")
             {
                 ValueType type = ValueType::Float;
@@ -218,7 +244,11 @@ CompileResult Compile(const std::string& text)
                 if (!pin.input) node.next.push_back(-1);
                 continue;
             }
-            if (!pin.input) continue;
+            if (!pin.input)
+            {
+                node.outputNames.push_back(pin.name);
+                continue;
+            }
             InputSlot slot;
             slot.type = pin.type;
             slot.fallback = DefaultValue(pin.type == ValueType::Any ? ValueType::String : pin.type);
@@ -303,6 +333,8 @@ CompileResult Compile(const std::string& text)
         if (op == Op::BeginPlay) program->beginPlay.push_back(int(i));
         else if (op == Op::Tick) program->tick.push_back(int(i));
         else if (op == Op::KeyPressed || op == Op::KeyReleased) program->keyEvents.push_back(int(i));
+        else if (op == Op::Every) program->every.push_back(int(i));
+        else if (op == Op::CustomEvent) program->customEvents.push_back(int(i));
     }
 
     if (result.problems.empty()) result.program = std::move(program);

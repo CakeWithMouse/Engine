@@ -203,6 +203,7 @@ SceneSnapshot Scene::GetSnapshot() const
             result.components.back().pointLight = {light->GetLightColor(), light->GetIntensity(), light->GetRadius(), light->IsEnabled(), light->CastsShadow()};
         result.components.back().projectData = c.SaveProjectData();
         result.components.back().scriptAsset = c.GetScriptAsset();
+        result.components.back().scriptVariables = c.GetScriptVariables();
         if (!result.components.back().projectData.empty()) result.documentVersion = 3;
     }
     return result;
@@ -253,6 +254,16 @@ SceneResult Scene::SetMaterialAsset(ComponentId id, const std::string& path)
     auto* object = FindComponent(id);
     if (!object) return SceneResult::NotFound;
     if (!object->SetMaterialAsset(path)) throw std::runtime_error("This object cannot take a material");
+    ++revision_;
+    return SceneResult::Ok;
+}
+
+SceneResult Scene::SetScriptVariables(ComponentId id, const std::string& json)
+{
+    if (IsUpdating()) return SceneResult::Busy;
+    auto* object = FindComponent(id);
+    if (!object) return SceneResult::NotFound;
+    object->SetScriptVariables(json);
     ++revision_;
     return SceneResult::Ok;
 }

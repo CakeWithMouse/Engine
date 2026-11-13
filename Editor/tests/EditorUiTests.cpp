@@ -1475,7 +1475,58 @@ int wmain(int argc, wchar_t** argv)
                 const int nodes = g->Document().Nodes().size();
                 Check(g->PasteNodes(QPointF(0, 0)).isEmpty() && g->Document().Nodes().size() == nodes, "material nodes are not pasted");
                 Check(g->LastNotice().contains(EditorCore::GraphSchemaRegistry::Instance().DisplayName(QString())), "the notice names the material graph");
+
+                // The finished graph has no warnings; a lonely random number has (Min = Max = 0 unless set).
+                Check(window(w)->Warnings().isEmpty(), "a connected graph has no warnings");
+                const int lonely = g->AddNode(QStringLiteral("Math.Random"), QPointF(900, 900));
+                Check(g->Document().FindNode(lonely)->properties.value(QStringLiteral("inputs")).toMap().value(QStringLiteral("Max")).toDouble() == 1.0,
+                      "a new Random gets Max = 1");
+                window(w)->SaveNow();
             });
+            until([&] { bool warned = false; Ui([&](auto* w) { warned = !window(w)->Warnings().isEmpty() && window(w)->Graph()->NodeWarnings().size() == 1; }); return warned; });
+            Ui([&](auto* w) {
+                auto* g = window(w)->Graph();
+                g->Undo(); // the lonely node goes away
+
+                // A comment frames the selected node; undo removes it.
+                g->SelectNodes({rotate});
+                const int comment = g->AddComment(QStringLiteral("Поворот"));
+                Check(g->Document().Comments().size() == 1 && g->Document().FindComment(comment)->rect.contains(g->Document().FindNode(rotate)->pos),
+                      "the comment frames the selected node");
+                Check(g->SetCommentText(comment, QStringLiteral("Вращение")) && g->Document().FindComment(comment)->text == QStringLiteral("Вращение"),
+                      "the comment text changes");
+                g->Undo();
+                g->Undo();
+                Check(g->Document().Comments().isEmpty(), "undo removes the comment");
+                window(w)->SaveNow();
+            });
+
+            // Variables of this object: the script card edits values for the sphere only; scene undo restores them.
+            auto sphereVariables = [&] {
+                std::string values = "?";
+                for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere) values = o.scriptVariables;
+                return values;
+            };
+            until([&] { bool shown = false; Ui([&](auto* w) { shown = w->template findChild<QLineEdit*>(QStringLiteral("ScriptVariable_Var")) != nullptr; }); return shown; });
+            Ui([&](auto* w) {
+                auto* field = w->template findChild<QLineEdit*>(QStringLiteral("ScriptVariable_Var"));
+                Check(field->text().isEmpty() && field->placeholderText() == QStringLiteral("0"), "the field shows the script's value as a hint");
+                field->setText(QStringLiteral("5,5"));
+                QMetaObject::invokeMethod(field, "editingFinished");
+            });
+            until([&] { return sphereVariables() == R"({"Var":5.5})"; });
+            Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
+            until([&] { return sphereVariables().empty(); });
+            Ui([](auto* w) { Action(w, QStringLiteral("Повторить"))->trigger(); });
+            until([&] { return sphereVariables() == R"({"Var":5.5})"; });
+            {
+                EditorCommand select; select.type = EditorCommand::SelectObject; select.objectId = sphere; host.PostCommand(select);
+            }
+            until([&] { bool shown = false; Ui([&](auto* w) {
+                auto* reset = w->template findChild<QToolButton*>(QStringLiteral("ScriptVariableReset_Var"));
+                shown = host.ReadSnapshot().selected == sphere && reset && !reset->isHidden(); }); return shown; });
+            Ui([](auto* w) { w->template findChild<QToolButton*>(QStringLiteral("ScriptVariableReset_Var"))->click(); });
+            until([&] { return sphereVariables().empty(); });
 
             // Nodes copied from one script are pasted into another.
             Ui([&](auto* w) {
@@ -1522,7 +1573,8 @@ int wmain(int argc, wchar_t** argv)
                     const auto& statuses = window(w)->Graph()->NodeStatuses();
                     shown = statuses.value(tick).state == GraphNodeState::Active && statuses.value(rotate).state == GraphNodeState::Active &&
                             statuses.value(begin).state == GraphNodeState::Done && statuses.value(begin).badge == QStringLiteral("\u00d71") &&
-                            !statuses.contains(pressed);
+                            !statuses.contains(pressed) && statuses.value(scale).values.contains(QStringLiteral("Out")) &&
+                            statuses.value(tick).values.contains(QStringLiteral("DeltaTime"));
                 });
                 return shown;
             });

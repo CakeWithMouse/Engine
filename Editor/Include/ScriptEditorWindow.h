@@ -37,6 +37,8 @@ public:
     const QString& Status() const { return status_; } // почему окно только для чтения
     // Ошибки сборки после последней проверки и ошибки Play: нода -> текст.
     QHash<int, QString> Problems() const;
+    // Предупреждения последней правки (CodeGraphSchema::Warnings): нода -> текст.
+    const QHash<int, QString>& Warnings() const { return warnings_; }
     int CheckCount() const { return checks_; }        // сколько проверок файла завершилось
 
     // Записать файл и проверить его движком сразу, не дожидаясь паузы в правках.
@@ -87,6 +89,7 @@ private:
     quint64 tracedObject_ = 0;
     bool tracePending_ = false;
     QVector<Problem> checkProblems_, playProblems_;
+    QHash<int, QString> warnings_;
     QString status_;
     bool ready_ = false, readOnly_ = false, refreshingVariables_ = false;
     int checks_ = 0;

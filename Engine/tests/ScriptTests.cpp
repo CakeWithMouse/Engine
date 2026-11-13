@@ -5,6 +5,8 @@
 #include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/Scene/Scene.h>
 #include <Engine/Scene/SceneDocument.h>
+#include <Engine/SaveGame/SaveGame.h>
+#include <Engine/Components/ComponentType.h>
 #include "SceneTestAccess.h"
 #include <Engine/Script/ScriptRuntime.h>
 #include <nlohmann/json.hpp>
@@ -618,8 +620,27 @@ void ExtensionChecks()
                  stateOf(divided, zero).state == EngineGraphNodeFailed);
     Traced untraced;
     SCRIPT_CHECK(trace.read(trace.context, "/Game/Scripts/Good.vscript", second, node, &untraced) == EngineSceneNotFound && untraced.nodes.empty());
+    // Values on outputs: Print read its default only, so nothing is traced for Good; Divide read 0 from its B.
+    struct Values { std::vector<std::string> items; };
+    auto valueVisitor = [](void* user, const EngineGraphTraceValue* item) {
+        static_cast<Values*>(user)->items.push_back(std::to_string(item->node) + ":" + item->pin + "=" + item->text);
+    };
+    Values goodValues, divideValues;
+    SCRIPT_CHECK(trace.readValues && trace.readValues(trace.context, "/Game/Scripts/Good.vscript", first, valueVisitor, &goodValues) == EngineSceneOk &&
+                 goodValues.items.empty());
+    SCRIPT_CHECK(trace.readValues(trace.context, "/Game/Scripts/Divide.vscript", 0, valueVisitor, &divideValues) == EngineSceneOk);
+    SCRIPT_CHECK(trace.readValues(trace.context, "/Game/Scripts/Good.vscript", second, valueVisitor, &goodValues) == EngineSceneNotFound);
     SCRIPT_CHECK(api.control(api.context, EngineStop) == EngineSceneOk);
     SCRIPT_CHECK(trace.read(trace.context, "/Game/Scripts/Good.vscript", first, node, &untraced) == EngineSceneNotFound); // nothing in Edit
+
+    // Variable values of an object: Edit only, a JSON object of literals, {} clears.
+    std::string values;
+    SCRIPT_CHECK(script.setVariables(script.context, first, R"({"Speed": 3})", error, sizeof(error)) == EngineSceneOk);
+    SCRIPT_CHECK(script.getVariables(script.context, first, text, &values) == EngineSceneOk && values == R"({"Speed":3})");
+    SCRIPT_CHECK(script.setVariables(script.context, first, "[1]", error, sizeof(error)) == EngineSceneInvalidArgument);
+    SCRIPT_CHECK(script.setVariables(script.context, first, "{}", error, sizeof(error)) == EngineSceneOk);
+    SCRIPT_CHECK(script.getVariables(script.context, first, text, &values) == EngineSceneOk && values.empty());
+    SCRIPT_CHECK(script.setVariables(script.context, 999999, "", error, sizeof(error)) == EngineSceneNotFound);
 
     // Moving a script (Engine.Scene.Authoring, operation 1) rewrites the live object and saved scenes.
     const auto author = session.GetAuthoringApi();
@@ -639,6 +660,231 @@ void ExtensionChecks()
     SCRIPT_CHECK(script.set(script.context, first, "", error, sizeof(error)) == EngineSceneOk);
     SCRIPT_CHECK(script.get(script.context, first, text, &assigned) == EngineSceneOk && assigned.empty());
 }
+// Delay, timers, flow with state and the new math nodes (2026.11.13).
+void FlowAndMathChecks()
+{
+    // Delay continues later; Every fires once per interval; DoOnce lets one run through; FlipFlop alternates.
+    {
+        Fixture fixture;
+        GameComponent* cube = fixture.Add("Cube");
+        Graph graph;
+        const int begin = graph.Node("Event.BeginPlay");
+        const int delay = graph.Node("Flow.Delay", {{"inputs", {{"Seconds", 0.5}}}});
+        const int late = graph.Node("Action.Print", {{"inputs", {{"Text", "late"}}}});
+        graph.Link(begin, "then", delay, "exec");
+        graph.Link(delay, "then", late, "exec");
+        const int every = graph.Node("Event.Every", {{"seconds", 1.0}});
+        const int tickPrint = graph.Node("Action.Print", {{"inputs", {{"Text", "every"}}}});
+        graph.Link(every, "then", tickPrint, "exec");
+        const int tick = graph.Node("Event.Tick");
+        const int once = graph.Node("Flow.DoOnce");
+        const int first = graph.Node("Action.Print", {{"inputs", {{"Text", "once"}}}});
+        const int flip = graph.Node("Flow.FlipFlop");
+        const int a = graph.Node("Action.Print", {{"inputs", {{"Text", "A"}}}});
+        const int b = graph.Node("Action.Print", {{"inputs", {{"Text", "B"}}}});
+        const int sequence = graph.Node("Flow.Sequence", {{"outputs", 2}});
+        graph.Link(tick, "then", sequence, "exec");
+        graph.Link(sequence, "then0", once, "exec");
+        graph.Link(once, "then", first, "exec");
+        graph.Link(sequence, "then1", flip, "exec");
+        graph.Link(flip, "A", a, "exec");
+        graph.Link(flip, "B", b, "exec");
+        Script::Instance script(Build(graph), *cube, "/Game/Scripts/Flow.vscript");
+        script.BeginPlay();
+        SCRIPT_CHECK(script.Printed().empty()); // the delay waits
+        script.Tick(0.3f);
+        SCRIPT_CHECK((script.Printed() == std::vector<std::string>{"once", "A"}));
+        script.Tick(0.3f);
+        SCRIPT_CHECK((script.Printed() == std::vector<std::string>{"once", "A", "late", "B"}));
+        script.Tick(0.5f);
+        SCRIPT_CHECK((script.Printed() == std::vector<std::string>{"once", "A", "late", "B", "every", "A"}));
+        script.Tick(0.1f);
+        script.Tick(5.0f); // a long frame fires Every once, not five times
+        const auto& printed = script.Printed();
+        SCRIPT_CHECK(std::count(printed.begin(), printed.end(), "every") == 2 && std::count(printed.begin(), printed.end(), "once") == 1);
+        SCRIPT_CHECK(std::count(printed.begin(), printed.end(), "late") == 1);
+    }
+
+    // For: Index from First to Last inclusive, then Completed; the values of outputs are traced.
+    {
+        Fixture fixture;
+        GameComponent* cube = fixture.Add("Cube");
+        Graph graph;
+        const int begin = graph.Node("Event.BeginPlay");
+        const int loop = graph.Node("Flow.For", {{"inputs", {{"First", 1}, {"Last", 3}}}});
+        const int body = graph.Node("Action.Print");
+        const int done = graph.Node("Action.Print", {{"inputs", {{"Text", "done"}}}});
+        graph.Link(begin, "then", loop, "exec");
+        graph.Link(loop, "Body", body, "exec");
+        graph.Link(loop, "Index", body, "Text");
+        graph.Link(loop, "Completed", done, "exec");
+        Script::Instance script(Build(graph), *cube, "/Game/Scripts/Loop.vscript");
+        script.BeginPlay();
+        SCRIPT_CHECK((script.Printed() == std::vector<std::string>{"1", "2", "3", "done"}));
+        bool traced = false;
+        for (const auto& value : script.Values()) traced = traced || (value.node == loop && value.pin == "Index" && value.text == "3");
+        SCRIPT_CHECK(traced);
+    }
+
+    // Math: Distance, Abs, Min, Max, Cos, vector length, direction and lerp.
+    {
+        Fixture fixture;
+        GameComponent* cube = fixture.Add("Cube");
+        Graph graph;
+        const int begin = graph.Node("Event.BeginPlay");
+        int last = begin;
+        auto print = [&](int value, const std::string& pin) {
+            const int node = graph.Node("Action.Print");
+            graph.Link(last, "then", node, "exec");
+            graph.Link(value, pin, node, "Text");
+            last = node;
+        };
+        print(graph.Node("Vec3.Distance", {{"inputs", {{"A", {0, 0, 0}}, {"B", {3, 4, 0}}}}}), "Distance");
+        print(graph.Node("Math.Abs", {{"inputs", {{"In", -2}}}}), "Out");
+        print(graph.Node("Math.Min", {{"inputs", {{"A", 2}, {"B", -1}}}}), "Out");
+        print(graph.Node("Math.Max", {{"inputs", {{"A", 2}, {"B", -1}}}}), "Out");
+        print(graph.Node("Math.Cos", {{"inputs", {{"In", 0}}}}), "Out");
+        print(graph.Node("Vec3.Length", {{"inputs", {{"Vector", {0, 0, 2}}}}}), "Length");
+        print(graph.Node("Vec3.Normalize", {{"inputs", {{"Vector", {0, 0, 2}}}}}), "Out");
+        print(graph.Node("Vec3.Normalize"), "Out"); // zero stays zero
+        print(graph.Node("Vec3.Lerp", {{"inputs", {{"A", {0, 0, 0}}, {"B", {2, 4, 6}}, {"Alpha", 0.5}}}}), "Out");
+        Script::Instance script(Build(graph), *cube, "/Game/Scripts/Math.vscript");
+        script.BeginPlay();
+        SCRIPT_CHECK((script.Printed() == std::vector<std::string>{"5", "2", "-1", "2", "1", "2", "(0, 0, 1)", "(0, 0, 0)", "(1, 2, 3)"}));
+    }
+
+    // New properties are checked at compile time; comments in the file do not matter.
+    {
+        Graph graph;
+        graph.Node("Event.Every", {{"seconds", 0}});
+        graph.Node("Event.Custom", {{"event", ""}});
+        const auto result = Script::Compile(graph.Text());
+        SCRIPT_CHECK(!result.program && HasProblem(result, 1, "greater than 0") && HasProblem(result, 2, "name the event"));
+        Graph commented;
+        commented.Node("Event.BeginPlay");
+        Json file = Json::parse(commented.Text());
+        file["comments"] = Json::array({{{"id", 1}, {"x", 0}, {"y", 0}, {"width", 300}, {"height", 200}, {"text", "Start"}}});
+        SCRIPT_CHECK(Script::Compile(file.dump()).program != nullptr);
+    }
+
+    // Variable values of an object replace the script's defaults; unknown names and wrong types are skipped.
+    {
+        Fixture fixture;
+        GameComponent* cube = fixture.Add("Cube");
+        cube->SetScriptVariables(R"({"Speed": 5, "Name": 7, "Missing": 1, "Up": [0, 2, 0]})");
+        Graph graph;
+        graph.Variable("Speed", "float", 1);
+        graph.Variable("Name", "string", "box");
+        graph.Variable("Up", "vec3", {0, 1, 0});
+        Script::Instance script(Build(graph), *cube, "/Game/Scripts/Values.vscript");
+        SCRIPT_CHECK(std::get<float>(script.GetVariable("Speed")) == 5.0f);
+        SCRIPT_CHECK(std::get<std::string>(script.GetVariable("Name")) == "box");
+        SCRIPT_CHECK(std::get<glm::vec3>(script.GetVariable("Up")) == glm::vec3(0, 2, 0));
+    }
+}
+
+// Events between objects, spawning and destroying in a running game.
+void ObjectNodeChecks()
+{
+    const auto folder = std::filesystem::temp_directory_path() / ("EngineScriptObjects-" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
+    std::filesystem::create_directories(folder);
+    struct Cleanup { std::filesystem::path path; ~Cleanup() { std::error_code e; std::filesystem::remove_all(path, e); } } cleanup{folder};
+
+    // The caller: calls "Hit" on Door, spawns a copy of Crate at (5, 0, 0) and destroys Crate.
+    Graph caller;
+    // On the first frame: by then every object's script has started (objects begin in name order).
+    const int tick = caller.Node("Event.Tick");
+    const int once = caller.Node("Flow.DoOnce");
+    const int door = caller.Node("Object.Find", {{"inputs", {{"Name", "Door"}}}});
+    const int call = caller.Node("Action.CallEvent", {{"event", "Hit"}});
+    caller.Link(tick, "then", once, "exec");
+    const int crate = caller.Node("Object.Find", {{"inputs", {{"Name", "Crate"}}}});
+    const int spawn = caller.Node("Action.Spawn", {{"inputs", {{"Position", {5, 0, 0}}}}});
+    const int kill = caller.Node("Action.Destroy");
+    const int said = caller.Node("Action.Print");
+    caller.Link(once, "then", call, "exec");
+    caller.Link(door, "Object", call, "Target");
+    caller.Link(call, "then", spawn, "exec");
+    caller.Link(crate, "Object", spawn, "Template");
+    caller.Link(spawn, "then", said, "exec");
+    caller.Link(spawn, "Object", said, "Text");
+    caller.Link(said, "then", kill, "exec");
+    caller.Link(crate, "Object", kill, "Target");
+    const auto callerFile = folder / "Caller.vscript";
+    WriteText(callerFile, caller.Text());
+
+    // The door: prints on "Hit"; "Loop" calls itself forever.
+    Graph doorScript;
+    const int hit = doorScript.Node("Event.Custom", {{"event", "Hit"}});
+    const int opened = doorScript.Node("Action.Print", {{"inputs", {{"Text", "opened"}}}});
+    doorScript.Link(hit, "then", opened, "exec");
+    const int loop = doorScript.Node("Event.Custom", {{"event", "Loop"}});
+    const int again = doorScript.Node("Action.CallEvent", {{"event", "Loop"}});
+    doorScript.Link(loop, "then", again, "exec");
+    const auto doorFile = folder / "Door.vscript";
+    WriteText(doorFile, doorScript.Text());
+
+    const ComponentType box{"Test.Box", "Box", [] { return std::make_unique<GameComponent>(); }};
+    Game game;
+    game.Saves().SetCatalog({&box, 1});
+    auto add = [&](const std::string& name, const std::filesystem::path& script, glm::vec3 scale) {
+        std::unique_ptr<GameComponent> owned = std::make_unique<GameComponent>();
+        GameComponent* raw = owned.get();
+        if (!script.empty()) raw->SetScriptAsset(script.generic_u8string());
+        raw->SetScale(scale);
+        SCRIPT_CHECK(game.GetScene().AddComponent(name, owned, box.typeName).result == SceneResult::Ok);
+        return raw;
+    };
+    GameComponent* doorObject = add("Door", doorFile, glm::vec3(1));
+    add("Crate", {}, glm::vec3(2, 3, 4));
+    GameComponent* callerObject = add("Caller", callerFile, glm::vec3(1));
+    game.InitializeGameplay();
+    game.StepProjectSimulation(0.1f);
+
+    const Script::Instance* door_ = doorObject->GetScriptInstance();
+    const Script::Instance* caller_ = callerObject->GetScriptInstance();
+    SCRIPT_CHECK(door_ && caller_ && !caller_->Failed());
+    SCRIPT_CHECK((door_->Printed() == std::vector<std::string>{"opened"}));
+    SCRIPT_CHECK(caller_->Printed().size() == 1 && caller_->Printed()[0].rfind("object #", 0) == 0);
+    SCRIPT_CHECK(game.GetScene().FindComponentByName("Crate") == nullptr); // removed at the end of the frame
+    const GameComponent* copy = game.GetScene().FindComponentByName("Crate_1");
+    SCRIPT_CHECK(copy && copy->GetLocalPosition() == glm::vec3(5, 0, 0) && copy->GetScale() == glm::vec3(2, 3, 4));
+
+    // An event that calls itself stops at the depth limit instead of overflowing the stack.
+    SCRIPT_CHECK(doorObject->GetScriptInstance()->Trigger("Loop"));
+    SCRIPT_CHECK(door_->Failed() && door_->Error().message.find("too deeply") != std::string::npos && door_->Error().node == again);
+
+    // Without the type in the game's catalog the copy is refused with a message.
+    Game bare;
+    std::unique_ptr<GameComponent> lone = std::make_unique<GameComponent>();
+    GameComponent* loneRaw = lone.get();
+    SCRIPT_CHECK(bare.GetScene().AddComponent("Lone", lone, box.typeName).result == SceneResult::Ok);
+    std::string error;
+    SCRIPT_CHECK(bare.SpawnCopy(*loneRaw, glm::vec3(0), error) == 0 && error.find("Test.Box") != std::string::npos);
+}
+
+// assets.scriptVariables in the scene document.
+void VariableValueDocumentChecks()
+{
+    Scene scene;
+    std::unique_ptr<GameComponent> owned = std::make_unique<GameComponent>();
+    owned->SetScriptAsset("/Game/Scripts/Spin.vscript");
+    owned->SetScriptVariables(R"({"Speed":45})");
+    SCRIPT_CHECK(scene.AddComponent("Spinner", owned, "Test.Box").result == SceneResult::Ok);
+    const std::string text = SceneDocument::Serialize(SceneTestAccess::Snapshot(scene));
+    const Json json = Json::parse(text);
+    SCRIPT_CHECK(json["objects"][0]["assets"]["scriptVariables"] == Json::parse(R"({"Speed":45})"));
+    SCRIPT_CHECK(SceneDocument::Parse(text).components[0].scriptVariables == R"({"Speed":45})");
+    Json bad = json;
+    bad["objects"][0]["assets"]["scriptVariables"] = 5;
+    bool rejected = false;
+    try { SceneDocument::Parse(bad.dump()); } catch (const SceneDocumentError&) { rejected = true; }
+    SCRIPT_CHECK(rejected);
+    Json empty = json;
+    empty["objects"][0]["assets"].erase("scriptVariables");
+    SCRIPT_CHECK(SceneDocument::Parse(empty.dump()).components[0].scriptVariables.empty());
+}
+
 // The shipped example scripts compile with the current catalog.
 void ExampleScriptChecks()
 {
@@ -674,4 +920,7 @@ void ScriptTests()
     PerformanceChecks();
     SceneDocumentChecks();
     ExtensionChecks();
+    FlowAndMathChecks();
+    ObjectNodeChecks();
+    VariableValueDocumentChecks();
 }

@@ -261,14 +261,15 @@ class GraphEditorWidget::NodeItem final : public QGraphicsItem
 {
 public:
     NodeItem(const GraphNodeData& data, GraphEditorWidget* owner, const QString& problem)
-        : data_(data), owner_(owner), problem_(problem)
+        : data_(data), owner_(owner), problem_(problem), warning_(problem.isEmpty() ? owner->warnings_.value(data.id) : QString())
     {
         const GraphSchema& schema = owner_->schema_;
         decoration_ = owner_->NodeDecoration(data_);
         title_ = schema.NodeTitle(data_);
         color_ = schema.NodeColor(data_);
         const QString hint = schema.Hint(data_.type);
-        setToolTip(problem_.isEmpty() ? hint : problem_ + (hint.isEmpty() ? QString() : QStringLiteral("\n\n") + hint));
+        const QString notice = problem_.isEmpty() ? warning_ : problem_;
+        setToolTip(notice.isEmpty() ? hint : notice + (hint.isEmpty() ? QString() : QStringLiteral("\n\n") + hint));
         Layout();
         setPos(data.pos);
         setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges);
@@ -279,8 +280,31 @@ public:
 
     const GraphNodeData& Data() const { return data_; }
 
-    // С запасом сверху и снизу: рамка состояния (отладка) рисуется вокруг ноды.
-    QRectF boundingRect() const override { return QRectF(-6, -5, width_ + 12, height_ + 10); }
+    // С запасом сверху и снизу: рамка состояния (отладка) рисуется вокруг ноды; справа — значения выходов.
+    QRectF boundingRect() const override { return QRectF(-6, -5, width_ + 12 + valuesWidth_, height_ + 10); }
+
+    // Значения выходов в игре меняют ширину ноды на холсте.
+    void StatusChanged()
+    {
+        const GraphNodeStatus status = owner_->statuses_.value(data_.id);
+        QFont font;
+        font.setPixelSize(10);
+        const QFontMetricsF metrics(font);
+        qreal width = 0;
+        for (auto it = status.values.begin(); it != status.values.end(); ++it)
+            width = std::max(width, metrics.horizontalAdvance(ValueText(it.value())) + 16);
+        if (width != valuesWidth_)
+        {
+            prepareGeometryChange();
+            valuesWidth_ = width;
+        }
+        update();
+    }
+
+    static QString ValueText(const QString& value)
+    {
+        return value.size() > 28 ? value.left(27) + QChar(0x2026) : value;
+    }
     QSizeF BodySize() const { return QSizeF(width_, height_); }
 
     QPointF PinPos(const QString& name) const
@@ -341,9 +365,10 @@ public:
             painter->drawPath(outline);
         }
         painter->fillPath(body, QColor(0x18, 0x1B, 0x22));
-        const QColor problemColor(0xEF, 0x44, 0x44);
+        const QColor problemColor = problem_.isEmpty() && !warning_.isEmpty() ? QColor(0xEA, 0xB3, 0x08) : QColor(0xEF, 0x44, 0x44);
+        const bool marked = !problem_.isEmpty() || !warning_.isEmpty();
         painter->setPen(isSelected() ? QPen(QColor(0x38, 0xBD, 0xF8), 2.0)
-                        : !problem_.isEmpty() ? QPen(problemColor, 2.0) : QPen(QColor(0x2D, 0x33, 0x42), 1.0));
+                        : marked ? QPen(problemColor, 2.0) : QPen(QColor(0x2D, 0x33, 0x42), 1.0));
         painter->drawPath(body);
 
         QPainterPath header;
@@ -361,10 +386,10 @@ public:
         font.setPixelSize(11);
         painter->setFont(font);
         painter->setPen(Qt::white);
-        const qreal badge = problem_.isEmpty() ? 0.0 : 18.0;
+        const qreal badge = marked ? 18.0 : 0.0;
         painter->drawText(QRectF(8, 2, width_ - 16 - badge, 20), Qt::AlignLeft | Qt::AlignVCenter,
                           painter->fontMetrics().elidedText(title_, Qt::ElideRight, static_cast<int>(width_ - 16 - badge)));
-        if (!problem_.isEmpty())
+        if (marked)
         {
             // Значок ошибки в заголовке: подробности в подсказке и в списке ошибок окна.
             const QRectF mark(width_ - 21, 4, 16, 16);
@@ -394,6 +419,25 @@ public:
         const QRectF content(8, contentTop_, width_ - 16, height_ - contentTop_ - 6);
         painter->setPen(QColor(0x94, 0xA3, 0xB8));
         owner_->PaintNodeContent(painter, data_, content, decoration_);
+
+        // Значения выходов: плашка справа от пина.
+        if (!status.values.isEmpty())
+        {
+            font.setPixelSize(10);
+            painter->setFont(font);
+            const QFontMetricsF metrics(font);
+            for (const auto& pin : pins_)
+            {
+                if (pin.isInput || !status.values.contains(pin.name)) continue;
+                const QString text = ValueText(status.values.value(pin.name));
+                const QRectF box(width_ + 9, pin.localPos.y() - 8, metrics.horizontalAdvance(text) + 10, 16);
+                painter->setPen(QPen(QColor(0x22, 0xC5, 0x5E, 160), 1.0));
+                painter->setBrush(QColor(0x0B, 0x1F, 0x14, 235));
+                painter->drawRoundedRect(box, 4, 4);
+                painter->setPen(QColor(0xBB, 0xF7, 0xD0));
+                painter->drawText(box, Qt::AlignCenter, text);
+            }
+        }
 
         if (!status.badge.isEmpty())
         {
@@ -439,11 +483,11 @@ private:
 
     GraphNodeData data_;
     GraphEditorWidget* owner_ = nullptr;
-    QString problem_, title_;
+    QString problem_, warning_, title_;
     QColor color_;
     QVector<GraphPin> pins_;
     QVariant decoration_;
-    qreal width_ = 150, height_ = 80, contentTop_ = 40;
+    qreal width_ = 150, height_ = 80, contentTop_ = 40, valuesWidth_ = 0;
 };
 
 // Связь на холсте: выделяется щелчком или рамкой, ловится в полосе шире линии, несёт подпись схемы.
@@ -519,6 +563,117 @@ private:
     QColor color_;
     QString label_;
     GraphEditorWidget* owner_ = nullptr;
+};
+
+// Комментарий: полупрозрачная рамка за нодами с подписью сверху. Перетаскивание за рамку двигает и ноды
+// внутри неё; правый нижний угол меняет размер; двойной щелчок — текст.
+class GraphEditorWidget::CommentItem final : public QGraphicsItem
+{
+public:
+    CommentItem(const EditorCore::GraphCommentData& data, GraphEditorWidget* owner) : data_(data), owner_(owner)
+    {
+        setPos(data_.rect.topLeft());
+        size_ = data_.rect.size();
+        setFlags(ItemIsMovable | ItemIsSelectable | ItemSendsGeometryChanges);
+        setZValue(-1);
+        setToolTip(Tr("Комментарий: перетащите рамку вместе с нодами, угол — размер, двойной щелчок — текст",
+                      "Comment: drag the frame with its nodes, the corner to resize, double-click for the text"));
+    }
+
+    int Id() const { return data_.id; }
+    QRectF boundingRect() const override { return QRectF(QPointF(0, 0), size_); }
+
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) override
+    {
+        painter->setRenderHint(QPainter::Antialiasing);
+        QColor fill = data_.color;
+        fill.setAlpha(45);
+        painter->setBrush(fill);
+        painter->setPen(QPen(isSelected() ? QColor(0x38, 0xBD, 0xF8) : data_.color.lighter(130), isSelected() ? 2.0 : 1.2));
+        painter->drawRoundedRect(boundingRect().adjusted(1, 1, -1, -1), 8, 8);
+        QColor header = data_.color;
+        header.setAlpha(170);
+        QPainterPath top;
+        top.addRoundedRect(QRectF(1, 1, size_.width() - 2, HeaderHeight), 8, 8);
+        painter->fillPath(top, header);
+        QFont font = painter->font();
+        font.setBold(true);
+        font.setPixelSize(12);
+        painter->setFont(font);
+        painter->setPen(Qt::white);
+        painter->drawText(QRectF(10, 1, size_.width() - 20, HeaderHeight), Qt::AlignLeft | Qt::AlignVCenter,
+                          painter->fontMetrics().elidedText(data_.text, Qt::ElideRight, static_cast<int>(size_.width() - 20)));
+        // Уголок для смены размера.
+        painter->setPen(QPen(data_.color.lighter(160), 1.5));
+        const QPointF corner(size_.width() - 4, size_.height() - 4);
+        painter->drawLine(corner - QPointF(10, 0), corner - QPointF(0, 10));
+        painter->drawLine(corner - QPointF(5, 0), corner - QPointF(0, 5));
+    }
+
+protected:
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override
+    {
+        if (change == ItemPositionChange && scene()) return GraphEditorWidget::Snap(value.toPointF());
+        if (change == ItemPositionHasChanged && scene() && owner_ && !resizing_)
+        {
+            // Ноды внутри рамки на момент нажатия едут вместе с ней.
+            const QPointF delta = pos() - pressPos_;
+            for (auto it = carried_.begin(); it != carried_.end(); ++it)
+                if (NodeItem* node = owner_->FindItem(it.key())) node->setPos(it.value() + delta);
+            owner_->CommentChanged(data_.id, QRectF(pos(), size_));
+        }
+        return QGraphicsItem::itemChange(change, value);
+    }
+
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override
+    {
+        resizing_ = event->button() == Qt::LeftButton &&
+                    QRectF(size_.width() - 16, size_.height() - 16, 16, 16).contains(event->pos());
+        pressPos_ = pos();
+        pressSize_ = size_;
+        carried_.clear();
+        if (!resizing_)
+            for (auto* item : scene()->items(sceneBoundingRect(), Qt::ContainsItemShape))
+                if (auto* node = dynamic_cast<NodeItem*>(item); node && !node->isSelected()) carried_.insert(node->Data().id, node->pos());
+        if (resizing_)
+        {
+            event->accept();
+            return;
+        }
+        QGraphicsItem::mousePressEvent(event);
+    }
+
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override
+    {
+        if (!resizing_) return QGraphicsItem::mouseMoveEvent(event);
+        const QPointF size = GraphEditorWidget::Snap(QPointF(pressSize_.width(), pressSize_.height()) +
+                                                     event->scenePos() - event->buttonDownScenePos(Qt::LeftButton));
+        prepareGeometryChange();
+        size_ = QSizeF(std::max(120.0, size.x()), std::max(60.0, size.y()));
+        owner_->CommentChanged(data_.id, QRectF(pos(), size_));
+    }
+
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override
+    {
+        resizing_ = false;
+        carried_.clear();
+        QGraphicsItem::mouseReleaseEvent(event);
+    }
+
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override
+    {
+        QTimer::singleShot(0, owner_, [owner = owner_, id = data_.id] { owner->EditComment(id); });
+        event->accept();
+    }
+
+private:
+    static constexpr qreal HeaderHeight = 24;
+    EditorCore::GraphCommentData data_;
+    GraphEditorWidget* owner_ = nullptr;
+    QSizeF size_, pressSize_;
+    QPointF pressPos_;
+    QHash<int, QPointF> carried_;
+    bool resizing_ = false;
 };
 
 namespace
@@ -603,6 +758,13 @@ void GraphEditorWidget::BuildUi()
                             : Tr("Разложить граф слева направо по связям", "Lay the graph out left to right along the links"));
     connect(arrange, &QToolButton::clicked, this, [this] { ArrangeNodes(); });
     toolbar_->addWidget(arrange);
+    auto* comment = new QToolButton(this);
+    comment->setObjectName(prefix + QStringLiteral("Comment"));
+    comment->setText(Tr("Комментарий", "Comment"));
+    comment->setToolTip(Tr("Рамка с подписью вокруг выделенных нод (без выделения — в центре вида)",
+                           "A captioned frame around the selected nodes (without a selection — in the middle of the view)"));
+    connect(comment, &QToolButton::clicked, this, [this] { AddComment(); });
+    toolbar_->addWidget(comment);
     toolbarIndex_ = toolbar_->count();
 
     toolbar_->addStretch(1);
@@ -672,9 +834,20 @@ void GraphEditorWidget::RebuildScene()
     // Сначала связи: scene_->clear() удаляет и их.
     links_.clear();
     dragLink_ = nullptr;
+    const QList<int> comments = SelectedComments();
     scene_->clear();
+    for (const auto& comment : document_.Comments())
+    {
+        auto* item = new CommentItem(comment, this);
+        scene_->addItem(item);
+        item->setSelected(comments.contains(comment.id));
+    }
     for (const auto& node : document_.Nodes())
-        scene_->addItem(new NodeItem(node, this, problems_.value(node.id)));
+    {
+        auto* item = new NodeItem(node, this, problems_.value(node.id));
+        scene_->addItem(item);
+        if (statuses_.contains(node.id)) item->StatusChanged();
+    }
     UpdateConnections();
     SelectNodes(selected);
 }
@@ -797,8 +970,10 @@ void GraphEditorWidget::DeleteSelected()
     const QVector<GraphConnectionData> links = SelectedLinks();
     QList<int> nodes = SelectedNodes();
     nodes.erase(std::remove_if(nodes.begin(), nodes.end(), [this](int id) { return IsFixed(id); }), nodes.end());
-    if (links.isEmpty() && nodes.isEmpty()) return;
+    const QList<int> comments = SelectedComments();
+    if (links.isEmpty() && nodes.isEmpty() && comments.isEmpty()) return;
     Checkpoint();
+    for (const int id : comments) document_.RemoveComment(id);
     for (const auto& link : links) document_.RemoveConnection(link.fromNode, link.fromPin, link.toNode, link.toPin);
     for (const int id : nodes) document_.RemoveNode(id);
     RebuildScene();
@@ -1247,6 +1422,13 @@ void GraphEditorWidget::SetNodeProblems(const QHash<int, QString>& problems)
     RebuildScene();
 }
 
+void GraphEditorWidget::SetNodeWarnings(const QHash<int, QString>& warnings)
+{
+    if (warnings == warnings_) return;
+    warnings_ = warnings;
+    RebuildScene();
+}
+
 void GraphEditorWidget::FocusNode(int nodeId)
 {
     NodeItem* item = FindItem(nodeId);
@@ -1261,7 +1443,7 @@ void GraphEditorWidget::SetNodeStatuses(const QHash<int, GraphNodeStatus>& statu
     if (statuses == statuses_) return;
     statuses_ = statuses;
     for (auto* item : scene_->items())
-        if (dynamic_cast<NodeItem*>(item)) item->update();
+        if (auto* node = dynamic_cast<NodeItem*>(item)) node->StatusChanged();
 }
 
 QVector<GraphConnectionData> GraphEditorWidget::SelectedLinks() const
@@ -1401,4 +1583,66 @@ bool GraphEditorWidget::ArrangeNodes()
     FrameNodes();
     if (layoutChanged) layoutChanged();
     return true;
+}
+
+int GraphEditorWidget::AddComment(const QString& text)
+{
+    QRectF bounds;
+    for (auto* item : scene_->selectedItems())
+        if (dynamic_cast<NodeItem*>(item)) bounds |= item->sceneBoundingRect();
+    if (bounds.isNull())
+    {
+        const QPointF centre = view_->mapToScene(view_->viewport()->rect().center());
+        bounds = QRectF(centre - QPointF(160, 100), QSizeF(320, 200));
+    }
+    else bounds.adjust(-GridStep, -2 * GridStep - 8, GridStep, GridStep);
+    const QPointF topLeft = Snap(bounds.topLeft()), bottomRight = Snap(bounds.bottomRight());
+    Checkpoint();
+    const int id = document_.AddComment(QRectF(topLeft, bottomRight), text.isEmpty() ? Tr("Комментарий", "Comment") : text);
+    RebuildScene();
+    SelectComment(id);
+    if (layoutChanged) layoutChanged();
+    return id;
+}
+
+bool GraphEditorWidget::SetCommentText(int commentId, const QString& text)
+{
+    EditorCore::GraphCommentData* comment = document_.FindComment(commentId);
+    if (!comment) return false;
+    if (comment->text == text) return true;
+    Checkpoint();
+    document_.FindComment(commentId)->text = text;
+    RebuildScene();
+    if (layoutChanged) layoutChanged();
+    return true;
+}
+
+QList<int> GraphEditorWidget::SelectedComments() const
+{
+    QList<int> ids;
+    for (auto* item : scene_->selectedItems())
+        if (auto* comment = dynamic_cast<CommentItem*>(item)) ids << comment->Id();
+    return ids;
+}
+
+void GraphEditorWidget::SelectComment(int commentId)
+{
+    scene_->clearSelection();
+    for (auto* item : scene_->items())
+        if (auto* comment = dynamic_cast<CommentItem*>(item); comment && comment->Id() == commentId) comment->setSelected(true);
+}
+
+void GraphEditorWidget::EditComment(int commentId)
+{
+    const EditorCore::GraphCommentData* comment = document_.FindComment(commentId);
+    if (!comment) return;
+    bool accepted = false;
+    const QString text = QInputDialog::getText(this, Tr("Комментарий", "Comment"), Tr("Текст:", "Text:"), QLineEdit::Normal, comment->text, &accepted);
+    if (accepted) SetCommentText(commentId, text.trimmed());
+}
+
+void GraphEditorWidget::CommentChanged(int commentId, const QRectF& rect)
+{
+    if (EditorCore::GraphCommentData* comment = document_.FindComment(commentId)) comment->rect = rect;
+    moved_ = true; // отпускание кнопки: один шаг отмены и запись файла, как при перетаскивании нод
 }

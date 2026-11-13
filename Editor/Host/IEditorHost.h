@@ -37,6 +37,7 @@ struct EditorCommand
         PlayAudio, StopAudio,
         RunTask, WriteRecovery, DiscardRecovery, SetProperty, UpdateAsset,
         SetScript, // path: /Game путь .vscript, пустой — снять скрипт
+        SetScriptVariables, // name: значения переменных скрипта у объекта, JSON {"Speed": 45}; пустой — значения скрипта
     };
 
     Type type = None;
@@ -92,6 +93,7 @@ public:
         EngineScenePointLight pointLight{};
         std::string materialAsset;
         std::string scriptAsset; // визуальный скрипт; пусто без него
+        std::string scriptVariables; // значения переменных скрипта у объекта (JSON-объект); пусто — как в скрипте
         std::string projectData;
         uint32_t gameplayKind = 0;
         std::string propertySchema;

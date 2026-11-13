@@ -134,6 +134,7 @@ void ObjectInspectorPanel::BuildUi()
     cardScript_->onOpenScript = [this](const QString& path) { emit OpenScriptRequested(path); };
     cardScript_->onChooseScript = [this] { emit ChooseScriptRequested(); };
     cardScript_->onClearScript = [this] { emit ClearScriptRequested(); };
+    cardScript_->onVariablesChanged = [this](const QString& json) { emit ScriptVariablesChanged(json); };
 
     BuildPointLightCard(inspectorLayout);
     inspectorLayout->addWidget(cardGeometry_);
@@ -477,6 +478,8 @@ void ObjectInspectorPanel::Refresh(
         cardMaterial_->setVisible(showMaterial);
         // Скрипт — у любого объекта сцены, если игровой модуль их поддерживает.
         cardScript_->SetData(QString::fromStdString(object.scriptAsset), true);
+        cardScript_->SetVariables(QString::fromStdString(object.scriptAsset), QString::fromStdString(object.scriptVariables),
+                                  true);
         cardScript_->setVisible(view.scripts);
         properties_->setVisible(showProperties);
 
@@ -505,4 +508,9 @@ void ObjectInspectorPanel::Refresh(
 
     lightInspector_->setVisible(selectedLight);
     refreshing_ = false;
+}
+
+void ObjectInspectorPanel::SetScriptVariablesReader(std::function<QJsonArray(const QString&)> reader)
+{
+    if (cardScript_) cardScript_->readVariables = std::move(reader);
 }

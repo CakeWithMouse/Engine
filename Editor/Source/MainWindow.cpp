@@ -30,6 +30,7 @@
 #include <QToolBar>
 #include <QProcess>
 #include <QPoint>
+#include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QComboBox>
@@ -783,6 +784,22 @@ void EditorMainWindow::ConnectPanels()
         if (!path.isEmpty()) UseAsset(path);
     });
 
+    // Переменные скрипта у объекта: карточка читает их список из файла скрипта.
+    objectInspectorPanel_->SetScriptVariablesReader([this](const QString& script) {
+        QFile file(QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(script.mid(6)));
+        if (!script.startsWith(QStringLiteral("/Game/")) || !file.open(QIODevice::ReadOnly)) return QJsonArray();
+        return QJsonDocument::fromJson(file.readAll()).object().value(QStringLiteral("variables")).toArray();
+    });
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ScriptVariablesChanged, this, [this](const QString& json)
+    {
+        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
+        EditorCommand c;
+        c.type = EditorCommand::SetScriptVariables;
+        c.objectId = selectedId_;
+        c.name = json;
+        host_->PostCommand(c);
+    });
+
     connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearScriptRequested, this, [this]
     {
         if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
@@ -1111,6 +1128,7 @@ static bool IsUserFacingCommand(EditorCommand::Type t)
     case EditorCommand::DuplicateObject: case EditorCommand::SetParent: case EditorCommand::SetProperty:
     case EditorCommand::SetModel: case EditorCommand::SetTexture: case EditorCommand::SetMaterial:
     case EditorCommand::SetPointLight: case EditorCommand::SetProjectData: case EditorCommand::UpdateAsset:
+    case EditorCommand::SetScriptVariables:
     case EditorCommand::ImportModel: case EditorCommand::ImportTexture: case EditorCommand::ImportAudio:
     case EditorCommand::SaveScene:
     case EditorCommand::LoadScene: case EditorCommand::NewScene: case EditorCommand::ReloadProject: return true;

@@ -143,6 +143,71 @@ int RunGraphToolsTests()
     }
 
     CheckGraphTool(ArrangeGraph(GraphDocument(), GraphLayoutStyle::Layered, nodeSize).isEmpty(), "empty graph");
+
+    // Комментарии: в файле только когда есть, читаются обратно, id продолжаются.
+    {
+        GraphDocument document;
+        document.SetSchema(QStringLiteral("code"), 1);
+        document.AddNode(QStringLiteral("Event.Tick"), {}, QPointF(0, 0));
+        CheckGraphTool(!document.ExportToJson().contains(QStringLiteral("comments")), "no comments key without comments");
+        const int first = document.AddComment(QRectF(-20, -40, 300, 200), QStringLiteral("Движение"), QColor(0x22, 0x55, 0x88));
+        CheckGraphTool(first == 1 && document.Comments().size() == 1, "comment added");
+        GraphDocument loaded;
+        CheckGraphTool(loaded.ImportFromJson(document.ExportToJson()) && loaded.Comments().size() == 1, "comment survives the file");
+        const GraphCommentData& comment = loaded.Comments().first();
+        CheckGraphTool(comment.rect == QRectF(-20, -40, 300, 200) && comment.text == QStringLiteral("Движение") &&
+                       comment.color == QColor(0x22, 0x55, 0x88), "comment rect, text and colour");
+        CheckGraphTool(loaded.AddComment(QRectF(0, 0, 10, 10), QStringLiteral("x")) == 2, "comment ids continue after loading");
+        CheckGraphTool(loaded.RemoveComment(1) && !loaded.RemoveComment(1) && loaded.Comments().size() == 1, "comment removed once");
+        loaded.Clear();
+        CheckGraphTool(loaded.Comments().isEmpty(), "Clear removes comments");
+    }
+
+    // Предупреждения графа кода: подозрительно, но собирается.
+    {
+        const char* catalog = R"json({
+          "format": "ITMOEngine.Graph", "formatVersion": 1, "schema": "code", "schemaVersion": 1, "maxSequenceOutputs": 8, "keys": [],
+          "nodes": [
+            {"type": "Event.Tick", "group": "Events", "name": {"ru": "", "en": ""}, "hint": {"ru": "", "en": ""}, "event": true,
+             "pins": [{"name": "then", "input": false, "type": "exec"}, {"name": "DeltaTime", "input": false, "type": "float"}], "properties": []},
+            {"type": "Action.Print", "group": "Actions", "name": {"ru": "", "en": ""}, "hint": {"ru": "", "en": ""}, "event": false,
+             "pins": [{"name": "exec", "input": true, "type": "exec"}, {"name": "Text", "input": true, "type": "any"}, {"name": "then", "input": false, "type": "exec"}],
+             "properties": []},
+            {"type": "Math.Random", "group": "Math", "name": {"ru": "", "en": ""}, "hint": {"ru": "", "en": ""}, "event": false,
+             "pins": [{"name": "Min", "input": true, "type": "float"}, {"name": "Max", "input": true, "type": "float"}, {"name": "Out", "input": false, "type": "float"}],
+             "properties": []},
+            {"type": "Math.Divide", "group": "Math", "name": {"ru": "", "en": ""}, "hint": {"ru": "", "en": ""}, "event": false,
+             "pins": [{"name": "A", "input": true, "type": "float"}, {"name": "B", "input": true, "type": "float"}, {"name": "Out", "input": false, "type": "float"}],
+             "properties": []}
+          ]})json";
+        CodeGraphSchema schema;
+        CheckGraphTool(schema.LoadCatalog(QString::fromUtf8(catalog)), "warning test catalog loads");
+        GraphDocument document;
+        document.SetSchema(QStringLiteral("code"), 1);
+        const int tick = document.AddNode(QStringLiteral("Event.Tick"), {}, QPointF(0, 0));
+        const int lonelyTick = document.AddNode(QStringLiteral("Event.Tick"), {}, QPointF(0, 300));
+        const int print = document.AddNode(QStringLiteral("Action.Print"), {}, QPointF(300, 0));
+        const int unreachable = document.AddNode(QStringLiteral("Action.Print"), {}, QPointF(300, 300));
+        const int random = document.AddNode(QStringLiteral("Math.Random"), {}, QPointF(0, 150));
+        const int unused = document.AddNode(QStringLiteral("Math.Random"), {}, QPointF(0, 450), {{QStringLiteral("inputs"), QVariantMap{{QStringLiteral("Max"), 10.0}}}});
+        const int divide = document.AddNode(QStringLiteral("Math.Divide"), {}, QPointF(150, 150));
+        document.AddConnection(tick, QStringLiteral("then"), print, QStringLiteral("exec"));
+        document.AddConnection(random, QStringLiteral("Out"), divide, QStringLiteral("A"));
+        document.AddConnection(divide, QStringLiteral("Out"), print, QStringLiteral("Text"));
+        const auto warnings = schema.Warnings(document);
+        CheckGraphTool(warnings.contains(lonelyTick) && !warnings.contains(tick) && !warnings.contains(print), "an event leading nowhere is warned");
+        CheckGraphTool(warnings.contains(unreachable), "an action without flow is warned");
+        CheckGraphTool(warnings.value(random).contains(QStringLiteral("Min")), "Random with Min = Max is warned");
+        CheckGraphTool(warnings.contains(unused) && !warnings.value(unused).contains(QStringLiteral("Min")), "an unused result is warned");
+        CheckGraphTool(warnings.contains(divide), "division by an unconnected zero is warned");
+        CheckGraphTool(warnings.size() == 5, "nothing else is warned");
+
+        // Новая нода получает полезные значения по умолчанию: Max = 1 у «Случайного числа».
+        QVariantMap properties;
+        QString title;
+        schema.PrepareNewNode(document, QStringLiteral("Math.Random"), properties, title);
+        CheckGraphTool(properties.value(QStringLiteral("inputs")).toMap().value(QStringLiteral("Max")).toDouble() == 1.0, "new Random has Max = 1");
+    }
     return gGraphToolChecks;
 }
 

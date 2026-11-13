@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QJsonArray>
+#include <functional>
 #include <QWidget>
 #include <QString>
 #include <QColor>
@@ -43,7 +45,9 @@ class ObjectInspectorPanel : public QWidget
 {
     Q_OBJECT
 
-public:
+public:
+    // Список переменных скрипта (из его файла) для карточки «Скрипт»: /Game путь -> [{"name","type","value"}].
+    void SetScriptVariablesReader(std::function<QJsonArray(const QString&)> reader);
     explicit ObjectInspectorPanel(QWidget* parent = nullptr);
     ~ObjectInspectorPanel() override;
 
@@ -87,6 +91,7 @@ signals:
     void OpenScriptRequested(const QString& virtualPath); // пустой путь: создать скрипт для объекта
     void ChooseScriptRequested();
     void ClearScriptRequested();
+    void ScriptVariablesChanged(const QString& json); // значения переменных скрипта у объекта; пустая — как в скрипте
 
 private:
     void BuildUi();

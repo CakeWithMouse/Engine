@@ -4,14 +4,16 @@
 #include <QJsonDocument>
 #include <QJsonValue>
 
+#include <algorithm>
+
 namespace EditorCore
 {
 
 namespace
 {
-const QStringList LegacyRootKeys{QStringLiteral("version"), QStringLiteral("nodes"), QStringLiteral("connections")};
+const QStringList LegacyRootKeys{QStringLiteral("version"), QStringLiteral("nodes"), QStringLiteral("connections"), QStringLiteral("comments")};
 const QStringList RootKeys{QStringLiteral("format"), QStringLiteral("version"), QStringLiteral("schema"), QStringLiteral("schemaVersion"),
-                           QStringLiteral("variables"), QStringLiteral("nodes"), QStringLiteral("connections")};
+                           QStringLiteral("variables"), QStringLiteral("nodes"), QStringLiteral("connections"), QStringLiteral("comments")};
 const QStringList NodeKeys{QStringLiteral("id"), QStringLiteral("type"), QStringLiteral("title"), QStringLiteral("x"), QStringLiteral("y"),
                            QStringLiteral("properties")};
 const QStringList LinkKeys{QStringLiteral("fromNode"), QStringLiteral("fromPin"), QStringLiteral("toNode"), QStringLiteral("toPin"),
@@ -131,7 +133,45 @@ void GraphDocument::Clear()
 {
     nodes_.clear();
     connections_.clear();
+    comments_.clear();
     nextNodeId_ = 1;
+    nextCommentId_ = 1;
+}
+
+int GraphDocument::AddComment(const QRectF& rect, const QString& text, const QColor& color)
+{
+    GraphCommentData comment;
+    comment.id = nextCommentId_++;
+    comment.rect = rect.normalized();
+    comment.text = text;
+    comment.color = color;
+    comments_.append(comment);
+    return comment.id;
+}
+
+bool GraphDocument::RemoveComment(int id)
+{
+    for (int i = 0; i < comments_.size(); ++i)
+        if (comments_[i].id == id)
+        {
+            comments_.removeAt(i);
+            return true;
+        }
+    return false;
+}
+
+const GraphCommentData* GraphDocument::FindComment(int id) const
+{
+    for (const auto& comment : comments_)
+        if (comment.id == id) return &comment;
+    return nullptr;
+}
+
+GraphCommentData* GraphDocument::FindComment(int id)
+{
+    for (auto& comment : comments_)
+        if (comment.id == id) return &comment;
+    return nullptr;
 }
 
 const GraphNodeData* GraphDocument::FindNode(int id) const
@@ -198,6 +238,15 @@ QString GraphDocument::ExportToJson() const
         connections.append(link);
     }
     root[QStringLiteral("connections")] = connections;
+    if (!comments_.isEmpty())
+    {
+        QJsonArray comments;
+        for (const auto& comment : comments_)
+            comments.append(QJsonObject{{QStringLiteral("id"), comment.id}, {QStringLiteral("x"), comment.rect.x()}, {QStringLiteral("y"), comment.rect.y()},
+                                        {QStringLiteral("width"), comment.rect.width()}, {QStringLiteral("height"), comment.rect.height()},
+                                        {QStringLiteral("text"), comment.text}, {QStringLiteral("color"), comment.color.name()}});
+        root[QStringLiteral("comments")] = comments;
+    }
     Merge(root, extra_);
 
     return QString::fromUtf8(QJsonDocument(root).toJson(QJsonDocument::Indented));
@@ -245,6 +294,21 @@ bool GraphDocument::ImportFromJson(const QString& jsonString)
         link.toPin = object.value(QStringLiteral("toPin")).toString();
         link.properties = PropertiesFromJson(object.value(QStringLiteral("properties")).toObject(), legacy);
         loaded.connections_.append(link);
+    }
+
+    for (const auto& value : root.value(QStringLiteral("comments")).toArray())
+    {
+        const QJsonObject object = value.toObject();
+        GraphCommentData comment;
+        comment.id = object.value(QStringLiteral("id")).toInt();
+        comment.rect = QRectF(object.value(QStringLiteral("x")).toDouble(), object.value(QStringLiteral("y")).toDouble(),
+                              object.value(QStringLiteral("width")).toDouble(200), object.value(QStringLiteral("height")).toDouble(120)).normalized();
+        comment.text = object.value(QStringLiteral("text")).toString();
+        const QColor color(object.value(QStringLiteral("color")).toString());
+        if (color.isValid()) comment.color = color;
+        if (comment.id <= 0) comment.id = loaded.nextCommentId_;
+        loaded.comments_.append(comment);
+        loaded.nextCommentId_ = std::max(loaded.nextCommentId_, comment.id + 1);
     }
 
     // Наследник (MaterialGraphModel) не добавляет полей: присваивание базовой части полное.

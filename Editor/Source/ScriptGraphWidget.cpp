@@ -178,6 +178,9 @@ QStringList ScriptGraphWidget::NodeSummary(const GraphNodeData& node) const
         if (property.kind == QStringLiteral("key")) lines << Tr("Клавиша: %1", "Key: %1").arg(value.toString());
         else if (property.kind == QStringLiteral("variable"))
             lines << (value.toString().isEmpty() ? Tr("Переменная не выбрана", "No variable") : value.toString());
+        else if (property.name == QStringLiteral("seconds")) lines << Tr("каждые %1 с", "every %1 s").arg(ValueText(value, property.kind));
+        else if (property.name == QStringLiteral("event"))
+            lines << (value.toString().isEmpty() ? Tr("Имя события не задано", "No event name") : Tr("Событие: %1", "Event: %1").arg(value.toString()));
         else if (property.kind != QStringLiteral("outputs")) lines << ValueText(value, property.kind);
     }
     const QVariantMap defaults = node.properties.value(QStringLiteral("inputs")).toMap();
@@ -254,7 +257,9 @@ void ScriptGraphWidget::EditNode(int nodeId)
         else
         {
             editor = ValueEditor(&dialog, name, property.kind, current, read);
-            label = Tr("Значение", "Value");
+            label = property.name == QStringLiteral("seconds") ? Tr("Интервал, с", "Interval, s")
+                  : property.name == QStringLiteral("event") ? Tr("Имя события", "Event name")
+                                                              : Tr("Значение", "Value");
         }
         form->addRow(label, editor);
         properties.append({property.name, read});

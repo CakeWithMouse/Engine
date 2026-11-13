@@ -1,6 +1,7 @@
 #include <Engine/Runtime/SceneEditSession.h>
 #include <Engine/Scene/SceneAssets.h>
 #include <Engine/Script/ScriptRuntime.h>
+#include <nlohmann/json.hpp>
 #include "../Resources/VfsRead.h"
 
 #include <cstdio>
@@ -78,6 +79,41 @@ EngineScriptApi SceneEditSession::GetScriptApi() noexcept
             return EngineSceneOk;
         });
     };
+    api.getVariables = [](void* context, uint64_t id, EngineScriptTextVisitor visitor, void* user) -> uint32_t {
+        if (!visitor) return EngineSceneInvalidArgument;
+        return Invoke(context, [&](SceneEditSession& s) -> uint32_t {
+            const auto* object = s.Active().GetScene().FindComponent(id);
+            if (!object) return EngineSceneNotFound;
+            visitor(user, object->GetScriptVariables().c_str());
+            return EngineSceneOk;
+        });
+    };
+    api.setVariables = [](void* context, uint64_t id, const char* json, char* error, uint32_t capacity) -> uint32_t {
+        if (!json || (capacity && !error)) return EngineSceneInvalidArgument;
+        if (capacity) error[0] = 0;
+        return Invoke(context, [&](SceneEditSession& s) -> uint32_t {
+            if (s.state_ != EngineEditing) return EngineSceneReadOnly;
+            auto& scene = s.edit_->GetScene();
+            if (!scene.FindComponent(id)) return EngineSceneNotFound;
+            std::string text = json;
+            if (!text.empty())
+            {
+                // The same rules as the scene file: an object of literals; {} clears.
+                const auto values = nlohmann::json::parse(text, nullptr, false);
+                bool valid = values.is_object() && text.size() <= 65536;
+                if (valid)
+                    for (const auto& value : values)
+                        valid = valid && (value.is_boolean() || value.is_number() || value.is_string() || value.is_array());
+                if (!valid)
+                {
+                    if (capacity) std::snprintf(error, capacity, "%s", "Script variables must be a JSON object of values");
+                    return EngineSceneInvalidArgument;
+                }
+                text = values.empty() ? std::string() : values.dump();
+            }
+            return scene.SetScriptVariables(id, text) == SceneResult::Ok ? EngineSceneOk : EngineSceneFailure;
+        });
+    };
     api.readProblems = [](void* context, EngineScriptProblemVisitor visitor, void* user) -> uint32_t {
         if (!visitor) return EngineSceneInvalidArgument;
         return Invoke(context, [&](SceneEditSession& s) -> uint32_t {
@@ -104,6 +140,27 @@ EngineScriptApi SceneEditSession::GetScriptApi() noexcept
     return api;
 }
 
+namespace
+{
+// The Play object running asset that the trace shows: objectId (edit-scene id), or the first one for 0.
+const Script::Instance* TracedInstance(Game& play, Scene& edit, const char* asset, uint64_t objectId)
+{
+    for (const auto& entry : play.GetScene().GetComponents())
+    {
+        const GameComponent& object = *entry.second;
+        const auto* instance = object.GetScriptInstance();
+        if (!instance || object.GetScriptAsset() != asset) continue;
+        if (objectId)
+        {
+            const auto* edited = edit.FindComponentByName(entry.first);
+            if (!edited || edited->GetComponentId() != objectId) continue;
+        }
+        return instance;
+    }
+    return nullptr;
+}
+} // namespace
+
 EngineGraphTraceApi SceneEditSession::GetGraphTraceApi() noexcept
 {
     EngineGraphTraceApi api{};
@@ -129,16 +186,8 @@ EngineGraphTraceApi SceneEditSession::GetGraphTraceApi() noexcept
         if (!asset || !visitor) return EngineSceneInvalidArgument;
         return Invoke(context, [&](SceneEditSession& s) -> uint32_t {
             if (!s.play_) return EngineSceneNotFound;
-            for (const auto& entry : s.play_->GetScene().GetComponents())
+            if (const auto* instance = TracedInstance(*s.play_, s.edit_->GetScene(), asset, objectId))
             {
-                const GameComponent& object = *entry.second;
-                const auto* instance = object.GetScriptInstance();
-                if (!instance || object.GetScriptAsset() != asset) continue;
-                if (objectId)
-                {
-                    const auto* edited = s.edit_->GetScene().FindComponentByName(entry.first);
-                    if (!edited || edited->GetComponentId() != objectId) continue;
-                }
                 const int failedNode = instance->Failed() ? instance->Error().node : 0;
                 bool failedSeen = false;
                 for (const auto& trace : instance->Trace())
@@ -157,6 +206,20 @@ EngineGraphTraceApi SceneEditSession::GetGraphTraceApi() noexcept
                 return EngineSceneOk;
             }
             return EngineSceneNotFound;
+        });
+    };
+    api.readValues = [](void* context, const char* asset, uint64_t objectId, EngineGraphTraceValueVisitor visitor, void* user) -> uint32_t {
+        if (!asset || !visitor) return EngineSceneInvalidArgument;
+        return Invoke(context, [&](SceneEditSession& s) -> uint32_t {
+            if (!s.play_) return EngineSceneNotFound;
+            const auto* instance = TracedInstance(*s.play_, s.edit_->GetScene(), asset, objectId);
+            if (!instance) return EngineSceneNotFound;
+            for (const auto& value : instance->Values())
+            {
+                const EngineGraphTraceValue item{value.node, value.pin.c_str(), value.text.c_str()};
+                visitor(user, &item);
+            }
+            return EngineSceneOk;
         });
     };
     return api;
