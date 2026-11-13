@@ -18,7 +18,9 @@ enum class Op : uint16_t
     // Timers, flow with state, objects, more math (2026.11.13).
     Every, CustomEvent, Delay, DoOnce, FlipFlop, For,
     CallEvent, Spawn, Destroy,
-    MousePosition, Distance, Vec3Length, Vec3Normalize, Vec3Lerp, Abs, Cos, Min, Max
+    MousePosition, Distance, Vec3Length, Vec3Normalize, Vec3Lerp, Abs, Cos, Min, Max,
+    // AI state machines of AI characters (Engine/docs/AI-FSM.md).
+    SendAiEvent, SetAiMemory, AiMemoryNumber, AiMemoryBool, AiMemoryVector, AiMemoryObject, AiState, AiInState
 };
 
 // Catalog entry with its operation (the public NodeInfo has none).

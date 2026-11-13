@@ -76,6 +76,8 @@ const QVector<Rule>& Rules()
         add("the value depends on itself \\(a data cycle\\)", "значение зависит само от себя (цикл по данным)");
         add("\"seconds\" must be a number greater than 0", "интервал должен быть числом больше 0");
         add("name the event", "задайте имя события");
+        add("name the AI memory key", "задайте ключ памяти ИИ");
+        add("the object is not an AI character", "объект — не ИИ-персонаж: события и память ИИ есть только у «ИИ-персонажа»");
         // Выполнение в Play.
         add("more than (\\d+) steps in one event: probably an endless loop", "больше %1 шагов за одно событие: вероятно, бесконечный цикл");
         add("no object \\(the Target input is empty or the object was not found\\)",

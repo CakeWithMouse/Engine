@@ -1,5 +1,7 @@
 #include "ScriptProgram.h"
 
+#include <Engine/AI/AiCharacter.h>
+#include <Engine/AI/Controller.h>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/InputDevice/Keys.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
@@ -317,6 +319,35 @@ void Instance::Execute(int index, const Event& event, int depth)
             index = node.next[1];
             continue;
         }
+        case Op::SendAiEvent:
+        case Op::SetAiMemory:
+        {
+            GameComponent* target = Resolve(As<ObjectRef>(in(0), id), index);
+            auto* character = dynamic_cast<AiCharacter*>(target);
+            if (!character) Raise(id, "the object is not an AI character");
+            // No controller yet (its BeginPlay comes later this frame) or the player: nothing to tell.
+            if (Ai::Controller* ai = character->GetAi())
+            {
+                if (node.op == Op::SendAiEvent) ai->SendEvent(Ai::Event{node.text.c_str()});
+                else
+                {
+                    Ai::Blackboard& memory = ai->Memory();
+                    const Ai::Key<int> asInt{node.text.c_str()};
+                    const Value value = in(1);
+                    if (const bool* b = std::get_if<bool>(&value)) memory.Set(Ai::Key<bool>{node.text.c_str()}, *b);
+                    else if (const float* f = std::get_if<float>(&value))
+                    {
+                        // A whole-number key stays whole: Lives = 2.
+                        if (memory.Has(asInt)) memory.Set(asInt, static_cast<int>(std::lround(*f)));
+                        else memory.Set(Ai::Key<float>{node.text.c_str()}, *f);
+                    }
+                    else if (const glm::vec3* v = std::get_if<glm::vec3>(&value)) memory.Set(Ai::Key<glm::vec3>{node.text.c_str()}, *v);
+                    else if (const std::string* s = std::get_if<std::string>(&value)) memory.Set(Ai::Key<std::string>{node.text.c_str()}, *s);
+                    else if (const ObjectRef* o = std::get_if<ObjectRef>(&value)) memory.Set(Ai::Key<Ai::ObjectRef>{node.text.c_str()}, Ai::ObjectRef{o->id});
+                }
+            }
+            break;
+        }
         case Op::CallEvent:
         {
             GameComponent* target = Resolve(As<ObjectRef>(in(0), id), index);
@@ -430,6 +461,51 @@ Value Instance::Evaluate(int index, int output, const Event& event, int depth)
         if (output == 0) return cursor.valid ? cursor.x : 0.0f;
         if (output == 1) return cursor.valid ? cursor.y : 0.0f;
         return cursor.valid;
+    }
+    case Op::AiMemoryNumber:
+    case Op::AiMemoryBool:
+    case Op::AiMemoryVector:
+    case Op::AiMemoryObject:
+    case Op::AiState:
+    case Op::AiInState:
+    {
+        auto* character = dynamic_cast<AiCharacter*>(Resolve(As<ObjectRef>(in(0), id), index));
+        if (!character) Raise(id, "the object is not an AI character");
+        const Ai::Controller* ai = character->GetAi();
+        if (node.op == Op::AiState) return output == 0 ? Value(ai ? ai->ActiveState() : std::string()) : Value(ai && ai->IsRunning());
+        if (node.op == Op::AiInState)
+        {
+            const std::string active = ai ? ai->ActiveState() : std::string(), state = As<std::string>(in(1), id);
+            // "Combat" is active while "Combat/Chase" is.
+            return !state.empty() && (active == state || active.rfind(state + "/", 0) == 0);
+        }
+        static const std::map<std::string, Ai::Blackboard::Value, std::less<>> none;
+        const auto& values = ai ? ai->Memory().Values() : none;
+        const auto found = values.find(node.text);
+        const Ai::Blackboard::Value* stored = found != values.end() ? &found->second : nullptr;
+        bool has = false;
+        Value result;
+        switch (node.op)
+        {
+        case Op::AiMemoryNumber:
+            if (const float* f = stored ? std::get_if<float>(stored) : nullptr) { result = *f; has = true; }
+            else if (const int* i = stored ? std::get_if<int>(stored) : nullptr) { result = static_cast<float>(*i); has = true; }
+            else result = 0.0f;
+            break;
+        case Op::AiMemoryBool:
+            if (const bool* b = stored ? std::get_if<bool>(stored) : nullptr) { result = *b; has = true; }
+            else result = false;
+            break;
+        case Op::AiMemoryVector:
+            if (const glm::vec3* v = stored ? std::get_if<glm::vec3>(stored) : nullptr) { result = *v; has = true; }
+            else result = glm::vec3(0.0f);
+            break;
+        default:
+            if (const Ai::ObjectRef* o = stored ? std::get_if<Ai::ObjectRef>(stored) : nullptr) { result = ObjectRef{o->id}; has = o->id != 0; }
+            else result = ObjectRef{};
+            break;
+        }
+        return output == 0 ? result : Value(has);
     }
     case Op::Distance: return glm::length(vec(0) - vec(1));
     case Op::Vec3Length: return glm::length(vec(0));

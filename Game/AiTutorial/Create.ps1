@@ -11,6 +11,8 @@ $p=Start-Process -FilePath $launcher -ArgumentList @('--create-project',('"'+$De
 if($p.ExitCode){throw 'Cannot create the tutorial project'}
 New-Item -ItemType Directory -Path "$Destination/Content/AI" -Force | Out-Null
 Copy-Item -Path "$PSScriptRoot/Content/AI/*.fsm" -Destination "$Destination/Content/AI" -Force
+New-Item -ItemType Directory -Path "$Destination/Content/Scripts" -Force | Out-Null
+Copy-Item -Path "$PSScriptRoot/Content/Scripts/*.vscript" -Destination "$Destination/Content/Scripts" -Force
 Copy-Item -LiteralPath "$PSScriptRoot/Content/Scenes/Main.scene.json" -Destination "$Destination/Content/Scenes/Main.scene.json" -Force
 foreach($file in @('README.md','OpenEditor.ps1','Открыть редактор.cmd')){Copy-Item -LiteralPath (Join-Path $PSScriptRoot $file) -Destination $Destination}
 $project=Get-Content -LiteralPath "$Destination/Project.json" -Raw | ConvertFrom-Json

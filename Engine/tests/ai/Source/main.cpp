@@ -56,6 +56,7 @@ void MachineRegistryTests();
 void SmartObjectTests();
 void MachineFileTests();
 void TutorialSceneTests();
+void ScriptLinkTests();
 int RunBench(int soldiers, float seconds, bool profile);
 
 int main(int argc, char** argv)
@@ -118,6 +119,7 @@ int main(int argc, char** argv)
         {"stage12 smart objects: claim, use, release", SmartObjectTests},
         {"stage13 machines from .fsm files and blocks", MachineFileTests},
         {"stage14 AI tutorial scene: guard and visitor", TutorialSceneTests},
+        {"stage15 visual scripts and machines talk", ScriptLinkTests},
         {"stage3 turret focus and the player", TurretAndPlayerTests},
     };
     const char* filter = argc > 1 ? argv[1] : "";

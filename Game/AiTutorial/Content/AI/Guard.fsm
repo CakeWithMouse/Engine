@@ -4,56 +4,473 @@
     "schema": "ai.fsm",
     "schemaVersion": 1,
     "variables": [
-        {"name": "Player", "type": "object"},
-        {"name": "LastSeen", "type": "vec3"},
-        {"name": "PostA", "type": "vec3", "value": [-8, 0, -8]},
-        {"name": "PostB", "type": "vec3", "value": [8, 0, -8]},
-        {"name": "Home", "type": "vec3", "value": [0, 0, -8]}
+        {
+            "name": "Player",
+            "type": "object"
+        },
+        {
+            "name": "LastSeen",
+            "type": "vec3"
+        },
+        {
+            "name": "PostA",
+            "type": "vec3",
+            "value": [
+                -8,
+                0,
+                -8
+            ]
+        },
+        {
+            "name": "PostB",
+            "type": "vec3",
+            "value": [
+                8,
+                0,
+                -8
+            ]
+        },
+        {
+            "name": "Home",
+            "type": "vec3",
+            "value": [
+                0,
+                0,
+                -8
+            ]
+        },
+        {
+            "name": "NoiseAt",
+            "type": "vec3"
+        }
     ],
-    "settings": {"targetKey": "Player", "lastSeenKey": "LastSeen", "thinkInterval": 0.1},
+    "settings": {
+        "targetKey": "Player",
+        "lastSeenKey": "LastSeen",
+        "thinkInterval": 0.1
+    },
     "nodes": [
-        {"id": 1, "type": "Fsm.State", "title": "Patrol", "x": 0, "y": 0,
-         "properties": {"name": "Patrol"}},
-        {"id": 2, "type": "Fsm.State", "title": "GoToA", "x": 0, "y": 120,
-         "properties": {"name": "GoToA", "parent": 1, "tasks": [{"type": "Ai.MoveTo", "target": "PostA", "radius": 0.5}]}},
-        {"id": 3, "type": "Fsm.State", "title": "LookAroundA", "x": 0, "y": 240,
-         "properties": {"name": "LookAroundA", "parent": 1, "tasks": [{"type": "Ai.WaitRandom", "minimum": 1, "maximum": 2.5}]}},
-        {"id": 4, "type": "Fsm.State", "title": "GoToB", "x": 0, "y": 360,
-         "properties": {"name": "GoToB", "parent": 1, "tasks": [{"type": "Ai.MoveTo", "target": "PostB", "radius": 0.5}]}},
-        {"id": 5, "type": "Fsm.State", "title": "LookAroundB", "x": 0, "y": 480,
-         "properties": {"name": "LookAroundB", "parent": 1, "tasks": [{"type": "Ai.WaitRandom", "minimum": 1, "maximum": 2.5}]}},
-        {"id": 6, "type": "Fsm.Next", "title": "", "x": 340, "y": 240, "properties": {}},
-        {"id": 10, "type": "Fsm.State", "title": "Chase", "x": 640, "y": 0,
-         "properties": {"name": "Chase", "tasks": [{"type": "Ai.MoveTo", "target": "Player", "radius": 1.5}]}},
-        {"id": 11, "type": "Fsm.State", "title": "Caught", "x": 1000, "y": 0,
-         "properties": {"name": "Caught", "tasks": [{"type": "Ai.LookAt", "target": "Player"}, {"type": "Ai.Wait", "seconds": 1.5}]}},
-        {"id": 12, "type": "Fsm.State", "title": "Search", "x": 640, "y": 240,
-         "properties": {"name": "Search", "tasks": [{"type": "Ai.MoveTo", "target": "LastSeen", "radius": 1}]}},
-        {"id": 13, "type": "Fsm.State", "title": "LookAround", "x": 640, "y": 400,
-         "properties": {"name": "LookAround", "tasks": [{"type": "Ai.Wait", "seconds": 3}]}},
-        {"id": 14, "type": "Fsm.State", "title": "Return", "x": 640, "y": 560,
-         "properties": {"name": "Return", "tasks": [{"type": "Ai.MoveTo", "target": "Home", "radius": 0.5}]}}
+        {
+            "id": 1,
+            "type": "Fsm.State",
+            "title": "Patrol",
+            "x": 0,
+            "y": 0,
+            "properties": {
+                "name": "Patrol"
+            }
+        },
+        {
+            "id": 2,
+            "type": "Fsm.State",
+            "title": "GoToA",
+            "x": 0,
+            "y": 120,
+            "properties": {
+                "name": "GoToA",
+                "parent": 1,
+                "tasks": [
+                    {
+                        "type": "Ai.MoveTo",
+                        "target": "PostA",
+                        "radius": 0.5
+                    }
+                ]
+            }
+        },
+        {
+            "id": 3,
+            "type": "Fsm.State",
+            "title": "LookAroundA",
+            "x": 0,
+            "y": 240,
+            "properties": {
+                "name": "LookAroundA",
+                "parent": 1,
+                "tasks": [
+                    {
+                        "type": "Ai.WaitRandom",
+                        "minimum": 1,
+                        "maximum": 2.5
+                    }
+                ]
+            }
+        },
+        {
+            "id": 4,
+            "type": "Fsm.State",
+            "title": "GoToB",
+            "x": 0,
+            "y": 360,
+            "properties": {
+                "name": "GoToB",
+                "parent": 1,
+                "tasks": [
+                    {
+                        "type": "Ai.MoveTo",
+                        "target": "PostB",
+                        "radius": 0.5
+                    }
+                ]
+            }
+        },
+        {
+            "id": 5,
+            "type": "Fsm.State",
+            "title": "LookAroundB",
+            "x": 0,
+            "y": 480,
+            "properties": {
+                "name": "LookAroundB",
+                "parent": 1,
+                "tasks": [
+                    {
+                        "type": "Ai.WaitRandom",
+                        "minimum": 1,
+                        "maximum": 2.5
+                    }
+                ]
+            }
+        },
+        {
+            "id": 6,
+            "type": "Fsm.Next",
+            "title": "",
+            "x": 340,
+            "y": 240,
+            "properties": {}
+        },
+        {
+            "id": 10,
+            "type": "Fsm.State",
+            "title": "Chase",
+            "x": 640,
+            "y": 0,
+            "properties": {
+                "name": "Chase",
+                "tasks": [
+                    {
+                        "type": "Ai.MoveTo",
+                        "target": "Player",
+                        "radius": 1.5
+                    }
+                ]
+            }
+        },
+        {
+            "id": 11,
+            "type": "Fsm.State",
+            "title": "Caught",
+            "x": 1000,
+            "y": 0,
+            "properties": {
+                "name": "Caught",
+                "tasks": [
+                    {
+                        "type": "Ai.LookAt",
+                        "target": "Player"
+                    },
+                    {
+                        "type": "Ai.Wait",
+                        "seconds": 1.5
+                    }
+                ]
+            }
+        },
+        {
+            "id": 12,
+            "type": "Fsm.State",
+            "title": "Search",
+            "x": 640,
+            "y": 240,
+            "properties": {
+                "name": "Search",
+                "tasks": [
+                    {
+                        "type": "Ai.MoveTo",
+                        "target": "LastSeen",
+                        "radius": 1
+                    }
+                ]
+            }
+        },
+        {
+            "id": 13,
+            "type": "Fsm.State",
+            "title": "LookAround",
+            "x": 640,
+            "y": 400,
+            "properties": {
+                "name": "LookAround",
+                "tasks": [
+                    {
+                        "type": "Ai.Wait",
+                        "seconds": 3
+                    }
+                ]
+            }
+        },
+        {
+            "id": 14,
+            "type": "Fsm.State",
+            "title": "Return",
+            "x": 640,
+            "y": 560,
+            "properties": {
+                "name": "Return",
+                "tasks": [
+                    {
+                        "type": "Ai.MoveTo",
+                        "target": "Home",
+                        "radius": 0.5
+                    }
+                ]
+            }
+        },
+        {
+            "id": 15,
+            "type": "Fsm.State",
+            "title": "Investigate",
+            "x": 1000,
+            "y": 400,
+            "properties": {
+                "name": "Investigate",
+                "tasks": [
+                    {
+                        "type": "Ai.MoveTo",
+                        "target": "NoiseAt",
+                        "radius": 1
+                    }
+                ]
+            }
+        },
+        {
+            "id": 16,
+            "type": "Fsm.State",
+            "title": "Report",
+            "x": 1000,
+            "y": 160,
+            "properties": {
+                "name": "Report",
+                "tasks": [
+                    {
+                        "type": "Ai.CallScriptEvent",
+                        "event": "OnCaught",
+                        "target": "Player"
+                    }
+                ]
+            }
+        }
     ],
     "connections": [
-        {"fromNode": 2, "fromPin": "out", "toNode": 6, "toPin": "in"},
-        {"fromNode": 3, "fromPin": "out", "toNode": 6, "toPin": "in"},
-        {"fromNode": 4, "fromPin": "out", "toNode": 6, "toPin": "in"},
-        {"fromNode": 5, "fromPin": "out", "toNode": 2, "toPin": "in"},
-        {"fromNode": 1, "fromPin": "out", "toNode": 10, "toPin": "in",
-         "properties": {"trigger": "tick", "conditions": [{"type": "Ai.CanSee", "target": "Player"}]}},
-        {"fromNode": 10, "fromPin": "out", "toNode": 12, "toPin": "in",
-         "properties": {"trigger": "tick", "conditions": [{"type": "Ai.CanSee", "target": "Player", "not": true}], "delay": 1, "priority": -1}},
-        {"fromNode": 10, "fromPin": "out", "toNode": 11, "toPin": "in", "properties": {"trigger": "succeeded"}},
-        {"fromNode": 10, "fromPin": "out", "toNode": 12, "toPin": "in", "properties": {"trigger": "failed"}},
-        {"fromNode": 11, "fromPin": "out", "toNode": 10, "toPin": "in", "properties": {"trigger": "completed"}},
-        {"fromNode": 12, "fromPin": "out", "toNode": 10, "toPin": "in",
-         "properties": {"trigger": "tick", "conditions": [{"type": "Ai.CanSee", "target": "Player"}]}},
-        {"fromNode": 12, "fromPin": "out", "toNode": 13, "toPin": "in", "properties": {"trigger": "completed"}},
-        {"fromNode": 13, "fromPin": "out", "toNode": 10, "toPin": "in",
-         "properties": {"trigger": "tick", "conditions": [{"type": "Ai.CanSee", "target": "Player"}]}},
-        {"fromNode": 13, "fromPin": "out", "toNode": 14, "toPin": "in", "properties": {"trigger": "completed"}},
-        {"fromNode": 14, "fromPin": "out", "toNode": 10, "toPin": "in",
-         "properties": {"trigger": "tick", "conditions": [{"type": "Ai.CanSee", "target": "Player"}]}},
-        {"fromNode": 14, "fromPin": "out", "toNode": 1, "toPin": "in", "properties": {"trigger": "completed"}}
+        {
+            "fromNode": 2,
+            "fromPin": "out",
+            "toNode": 6,
+            "toPin": "in"
+        },
+        {
+            "fromNode": 3,
+            "fromPin": "out",
+            "toNode": 6,
+            "toPin": "in"
+        },
+        {
+            "fromNode": 4,
+            "fromPin": "out",
+            "toNode": 6,
+            "toPin": "in"
+        },
+        {
+            "fromNode": 5,
+            "fromPin": "out",
+            "toNode": 2,
+            "toPin": "in"
+        },
+        {
+            "fromNode": 1,
+            "fromPin": "out",
+            "toNode": 10,
+            "toPin": "in",
+            "properties": {
+                "trigger": "tick",
+                "conditions": [
+                    {
+                        "type": "Ai.CanSee",
+                        "target": "Player"
+                    }
+                ]
+            }
+        },
+        {
+            "fromNode": 10,
+            "fromPin": "out",
+            "toNode": 12,
+            "toPin": "in",
+            "properties": {
+                "trigger": "tick",
+                "conditions": [
+                    {
+                        "type": "Ai.CanSee",
+                        "target": "Player",
+                        "not": true
+                    }
+                ],
+                "delay": 1,
+                "priority": -1
+            }
+        },
+        {
+            "fromNode": 10,
+            "fromPin": "out",
+            "toNode": 11,
+            "toPin": "in",
+            "properties": {
+                "trigger": "succeeded"
+            }
+        },
+        {
+            "fromNode": 10,
+            "fromPin": "out",
+            "toNode": 12,
+            "toPin": "in",
+            "properties": {
+                "trigger": "failed"
+            }
+        },
+        {
+            "fromNode": 11,
+            "fromPin": "out",
+            "toNode": 16,
+            "toPin": "in",
+            "properties": {
+                "trigger": "completed"
+            }
+        },
+        {
+            "fromNode": 12,
+            "fromPin": "out",
+            "toNode": 10,
+            "toPin": "in",
+            "properties": {
+                "trigger": "tick",
+                "conditions": [
+                    {
+                        "type": "Ai.CanSee",
+                        "target": "Player"
+                    }
+                ]
+            }
+        },
+        {
+            "fromNode": 12,
+            "fromPin": "out",
+            "toNode": 13,
+            "toPin": "in",
+            "properties": {
+                "trigger": "completed"
+            }
+        },
+        {
+            "fromNode": 13,
+            "fromPin": "out",
+            "toNode": 10,
+            "toPin": "in",
+            "properties": {
+                "trigger": "tick",
+                "conditions": [
+                    {
+                        "type": "Ai.CanSee",
+                        "target": "Player"
+                    }
+                ]
+            }
+        },
+        {
+            "fromNode": 13,
+            "fromPin": "out",
+            "toNode": 14,
+            "toPin": "in",
+            "properties": {
+                "trigger": "completed"
+            }
+        },
+        {
+            "fromNode": 14,
+            "fromPin": "out",
+            "toNode": 10,
+            "toPin": "in",
+            "properties": {
+                "trigger": "tick",
+                "conditions": [
+                    {
+                        "type": "Ai.CanSee",
+                        "target": "Player"
+                    }
+                ]
+            }
+        },
+        {
+            "fromNode": 14,
+            "fromPin": "out",
+            "toNode": 1,
+            "toPin": "in",
+            "properties": {
+                "trigger": "completed"
+            }
+        },
+        {
+            "fromNode": 16,
+            "fromPin": "out",
+            "toNode": 12,
+            "toPin": "in",
+            "properties": {
+                "trigger": "completed"
+            }
+        },
+        {
+            "fromNode": 1,
+            "fromPin": "out",
+            "toNode": 15,
+            "toPin": "in",
+            "properties": {
+                "trigger": "event",
+                "event": "Noise"
+            }
+        },
+        {
+            "fromNode": 14,
+            "fromPin": "out",
+            "toNode": 15,
+            "toPin": "in",
+            "properties": {
+                "trigger": "event",
+                "event": "Noise"
+            }
+        },
+        {
+            "fromNode": 15,
+            "fromPin": "out",
+            "toNode": 10,
+            "toPin": "in",
+            "properties": {
+                "trigger": "tick",
+                "conditions": [
+                    {
+                        "type": "Ai.CanSee",
+                        "target": "Player"
+                    }
+                ]
+            }
+        },
+        {
+            "fromNode": 15,
+            "fromPin": "out",
+            "toNode": 13,
+            "toPin": "in",
+            "properties": {
+                "trigger": "completed"
+            }
+        }
     ]
 }

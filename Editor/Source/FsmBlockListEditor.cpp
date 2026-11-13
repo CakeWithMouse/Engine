@@ -127,7 +127,7 @@ bool FsmBlockListEditor::AddBlock(const QString& type)
     QVariantMap item{{QStringLiteral("type"), type}};
     // Ключ подставляется сразу, если подходит единственная переменная.
     for (const auto& param : block->params)
-        if (param.type.startsWith(QStringLiteral("key")))
+        if (param.type.startsWith(QStringLiteral("key")) && param.required)
         {
             const QStringList keys = schema_.KeysFor(param.type);
             if (!keys.isEmpty()) item.insert(param.name, keys.first());
@@ -255,14 +255,17 @@ void FsmBlockListEditor::ShowParams()
             {
                 auto* combo = new QComboBox(params_);
                 const QStringList keys = schema_.KeysFor(param.type);
-                combo->addItems(keys);
+                // Необязательный ключ (чей скрипт): пусто — сам персонаж.
+                if (!param.required) combo->addItem(Tr("— сам персонаж —", "— the character itself —"), QString());
+                for (const QString& name : keys) combo->addItem(name, name);
                 const QString chosen = current.toString();
-                if (!chosen.isEmpty() && !keys.contains(chosen)) combo->addItem(chosen); // ключа нет в памяти: загрузчик скажет
-                combo->setCurrentIndex(chosen.isEmpty() ? -1 : combo->findText(chosen));
+                if (!chosen.isEmpty() && !keys.contains(chosen)) combo->addItem(chosen, chosen); // ключа нет в памяти: загрузчик скажет
+                combo->setCurrentIndex(chosen.isEmpty() ? (param.required ? -1 : 0) : combo->findData(chosen));
                 combo->setToolTip(Tr("Ключи памяти подходящего типа. Новый ключ добавляется на панели «Память».",
                                      "Memory keys of a fitting type. Add a key on the Memory panel."));
-                connect(combo, &QComboBox::textActivated, this, [this, row, n = param.name](const QString& key) {
-                    SetParam(row, n, key);
+                connect(combo, QOverload<int>::of(&QComboBox::activated), this, [this, row, combo, n = param.name](int index) {
+                    const QString key = combo->itemData(index).toString();
+                    SetParam(row, n, key.isEmpty() ? QVariant() : QVariant(key));
                     QTimer::singleShot(0, this, [this] { ShowParams(); }); // значение (value) зависит от типа ключа; не из сигнала поля
                 });
                 editor = combo;

@@ -2,6 +2,7 @@
 #include "TestSupport.h"
 #include <Engine/Project/StandardTypes.h>
 #include <Engine/Scene/SceneDocument.h>
+#include <Engine/Script/ScriptRuntime.h>
 #include <filesystem>
 
 namespace
@@ -50,7 +51,8 @@ void TutorialSceneTests()
     guard.stateMachine = (content / "AI/Guard.fsm").u8string();
     visitor.stateMachine = (content / "AI/Visitor.fsm").u8string();
     auto* player = dynamic_cast<Character*>(game.GetScene().FindComponentByName("Игрок"));
-    CHECK(player && player->playerControlled);
+    CHECK(player && player->playerControlled && player->GetScriptAsset() == "/Game/Scripts/Player.vscript");
+    player->SetScriptAsset((content / "Scripts/Player.vscript").u8string());
 
     game.InitializeGameplay();
     game.StepProjectSimulation(0.05f);
@@ -69,11 +71,18 @@ void TutorialSceneTests()
     player->SetPosition({at.x + 4, player->GetWorldPosition().y, at.z});
     CHECK(StepUntil(game, *guardAi, "Chase", 2));
     CHECK(StepUntil(game, *guardAi, "Caught", 6));
-    // The player runs behind the wall: the guard searches where he saw him, looks around and goes back.
-    player->SetPosition({0, player->GetWorldPosition().y, 12});
-    CHECK(StepUntil(game, *guardAi, "Search", 6) || guardAi->ActiveState() == "LookAround" || guardAi->ActiveState() == "Return");
+    // Caught: the machine calls the player's script ("OnCaught"), which sends the player back to the south edge;
+    // the guard searches where he saw him, looks around and goes back.
+    CHECK(StepUntil(game, *guardAi, "Report", 4));
+    CHECK(StepUntil(game, *guardAi, "Search", 2));
+    const Script::Instance* playerScript = player->GetScriptInstance();
+    CHECK(playerScript && !playerScript->Failed() && std::abs(player->GetWorldPosition().z - 10.0f) < 0.01f);
     CHECK(StepUntil(game, *guardAi, "Return", 15));
     CHECK(StepUntil(game, *guardAi, "Patrol", 20));
+    // E: the player's script writes the noise point into the guard's memory and sends "Noise"; he goes to check.
+    CHECK(player->GetScriptInstance()->Trigger("MakeNoise"));
+    CHECK(StepUntil(game, *guardAi, "Investigate", 1));
+    CHECK(guardAi->Memory().Get(Ai::Key<glm::vec3>{"NoiseAt"}) == player->GetLocalPosition());
 
     // The visitor went to a bench, then to the well.
     CHECK(StepUntil(game, *visitorAi, "DrinkWater", 30));

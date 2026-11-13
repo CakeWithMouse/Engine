@@ -382,6 +382,11 @@
       "projectData": {
         "version": 1,
         "moveSpeed": 6
+      },
+      "assets": {
+        "model": "",
+        "texture": "",
+        "script": "/Game/Scripts/Player.vscript"
       }
     },
     {

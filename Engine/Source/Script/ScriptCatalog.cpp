@@ -40,7 +40,7 @@ NodeSpec Spec(Op op, const char* type, const char* group, const char* nameRu, co
 
 std::vector<NodeSpec> BuildSpecs()
 {
-    const PropertyInfo key{"key", "key"}, variable{"variable", "variable"}, eventName{"event", "string"};
+    const PropertyInfo key{"key", "key"}, variable{"variable", "variable"}, eventName{"event", "string"}, memory{"memory", "string"};
     return {
         Spec(Op::BeginPlay, "Event.BeginPlay", "Events", "Начало игры", "Begin play", "Один раз при запуске игры или Play.",
              "Once when the game or Play starts.", Pins({}, {"then:exec"}), {}, true),
@@ -94,6 +94,30 @@ std::vector<NodeSpec> BuildSpecs()
              Pins({"exec:exec", "Template:object", "Position:vec3"}, {"then:exec", "Object:object"})),
         Spec(Op::Destroy, "Action.Destroy", "Actions", "Удалить объект", "Destroy", "Убирает объект Target из сцены в конце кадра.",
              "Removes Target from the scene at the end of the frame.", Pins({"exec:exec", "Target:object"}, {"then:exec"})),
+        // Автоматы ИИ: Target — ИИ-персонаж (пустой — сам объект).
+        Spec(Op::SendAiEvent, "Ai.SendEvent", "AI", "Отправить событие ИИ", "Send AI event",
+             "Событие автомату ИИ-персонажа Target: сработают его переходы «по событию» (в следующем решении).",
+             "An event to the state machine of the AI character Target: its event transitions fire (at the next think).",
+             Pins({"exec:exec", "Target:object"}, {"then:exec"}), {eventName}),
+        Spec(Op::SetAiMemory, "Ai.SetMemory", "AI", "Записать в память ИИ", "Set AI memory",
+             "Значение в память ИИ-персонажа Target по ключу (число, логическое, вектор, строка или объект).",
+             "A value into the memory of the AI character Target under the key (number, bool, vector, string or object).",
+             Pins({"exec:exec", "Target:object", "Value:any"}, {"then:exec"}), {memory}),
+        Spec(Op::AiMemoryNumber, "Ai.GetNumber", "AI", "Память ИИ: число", "AI memory: number",
+             "Число из памяти ИИ-персонажа (целое тоже); Has — есть ли такое значение.", "A number from the AI character's memory (an int too); Has — whether it is there.",
+             Pins({"Target:object"}, {"Value:float", "Has:bool"}), {memory}),
+        Spec(Op::AiMemoryBool, "Ai.GetBool", "AI", "Память ИИ: логическое", "AI memory: bool", "Логическое из памяти ИИ-персонажа.",
+             "A bool from the AI character's memory.", Pins({"Target:object"}, {"Value:bool", "Has:bool"}), {memory}),
+        Spec(Op::AiMemoryVector, "Ai.GetVector", "AI", "Память ИИ: вектор", "AI memory: vector", "Вектор (точка) из памяти ИИ-персонажа.",
+             "A vector (a point) from the AI character's memory.", Pins({"Target:object"}, {"Value:vec3", "Has:bool"}), {memory}),
+        Spec(Op::AiMemoryObject, "Ai.GetObject", "AI", "Память ИИ: объект", "AI memory: object",
+             "Объект из памяти ИИ-персонажа (например, кого он видит).", "An object from the AI character's memory (for example, whom it sees).",
+             Pins({"Target:object"}, {"Value:object", "Has:bool"}), {memory}),
+        Spec(Op::AiState, "Ai.State", "AI", "Состояние ИИ", "AI state", "Активный путь автомата («Patrol/GoToA»); Running — работает ли автомат.",
+             "The machine's active path (\"Patrol/GoToA\"); Running — whether the machine runs.", Pins({"Target:object"}, {"State:string", "Running:bool"})),
+        Spec(Op::AiInState, "Ai.InState", "AI", "ИИ в состоянии", "AI in state",
+             "Истина, если состояние State активно (само или как родитель активного).", "True when State is active (itself or as a parent of the active one).",
+             Pins({"Target:object", "State:string"}, {"Value:bool"})),
         Spec(Op::SetVariable, "Variable.Set", "Variables", "Задать переменную", "Set variable", "Новое значение переменной скрипта.",
              "A new value of a script variable.", Pins({"exec:exec", "Value:variable"}, {"then:exec"}), {variable}),
 

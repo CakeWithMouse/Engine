@@ -215,6 +215,12 @@ CompileResult Compile(const std::string& text)
                 if (!seconds.is_number() || !(seconds.get<double>() > 0.0)) problem(id, "\"seconds\" must be a number greater than 0");
                 else node.constant = float(seconds.get<double>());
             }
+            else if (property.name == "memory")
+            {
+                const Json& name = properties.value("memory", Json(std::string()));
+                node.text = name.is_string() ? name.get<std::string>() : std::string();
+                if (node.text.empty()) problem(id, "name the AI memory key");
+            }
             else if (property.name == "event")
             {
                 const Json& name = properties.value("event", Json(std::string()));

@@ -28,7 +28,8 @@ const QHash<QString, GroupStyle>& GroupStyles()
         {QStringLiteral("Vectors"), {"Векторы", QColor(0xA1, 0x62, 0x07)}},
         {QStringLiteral("Math"), {"Математика", QColor(0x15, 0x80, 0x3D)}},
         {QStringLiteral("Logic"), {"Логика", QColor(0xBE, 0x18, 0x5D)}},
-        {QStringLiteral("Input"), {"Ввод", QColor(0xC2, 0x41, 0x0C)}}};
+        {QStringLiteral("Input"), {"Ввод", QColor(0xC2, 0x41, 0x0C)}},
+        {QStringLiteral("AI"), {"ИИ", QColor(0x0F, 0x76, 0x6E)}}};
     return styles;
 }
 } // namespace
@@ -227,6 +228,7 @@ void CodeGraphSchema::PrepareNewNode(const GraphDocument&, const QString& type, 
         else if (property.kind == QStringLiteral("outputs")) fallback(property.name, 2);
         else if (property.name == QStringLiteral("seconds")) fallback(property.name, 1.0);
         else if (property.name == QStringLiteral("event")) fallback(property.name, QStringLiteral("Event"));
+        else if (property.name == QStringLiteral("memory")) fallback(property.name, QStringLiteral("Target")); // ключ цели восприятия по умолчанию
         else if (property.kind == QStringLiteral("float")) fallback(property.name, 0.0);
         else if (property.kind == QStringLiteral("bool")) fallback(property.name, false);
         else if (property.kind == QStringLiteral("vec3")) fallback(property.name, QVariantList{0.0, 0.0, 0.0});

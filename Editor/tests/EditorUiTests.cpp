@@ -1574,6 +1574,13 @@ int wmain(int argc, wchar_t** argv)
                 Check(g->Connect(pressed, QStringLiteral("then"), print, QStringLiteral("exec")) && g->Connect(begin, QStringLiteral("then"), print, QStringLiteral("exec")),
                       "an exec input takes several links");
                 Check(g->NodeSummary(*g->Document().FindNode(print)).join(QLatin1Char(' ')).contains(QStringLiteral("pressed")), "the node shows its input value");
+                {
+                    // AI nodes come from the engine catalog in their own group; a new one reads the perception target key.
+                    const int memory = g->AddNode(QStringLiteral("Ai.GetObject"), QPointF(900, 600));
+                    Check(memory && g->Schema().DisplayName(QStringLiteral("Ai.SendEvent")) == QStringLiteral("Отправить событие ИИ"), "AI nodes are in the script catalog");
+                    Check(g->NodeSummary(*g->Document().FindNode(memory)).join(QLatin1Char(' ')).contains(QStringLiteral("Ключ: Target")), "an AI memory node shows its key");
+                    g->Undo();
+                }
 
                 // Variables: added through the panel, undone with the graph.
                 auto* table = e->template findChild<QTableWidget*>(QStringLiteral("ScriptVariables"));

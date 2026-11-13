@@ -54,6 +54,8 @@ int RunScriptMessagesTests()
         "unknown node type \"Action.Fly\"",
         "\"outputs\" must be a whole number from 1 to 8",
         "choose a key",
+        "name the AI memory key",
+        "the object is not an AI character",
         "unknown key \"Hyper\"",
         "choose a variable",
         "no variable \"Speed\"",

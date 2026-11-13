@@ -76,8 +76,8 @@ ParamSpec Float(std::string name, std::string labelRu, std::string labelEn, floa
 ParamSpec Vec3(std::string name, std::string labelRu, std::string labelEn, glm::vec3 fallback = glm::vec3(0));
 ParamSpec String(std::string name, std::string labelRu, std::string labelEn, std::string fallback = {}, bool required = false);
 ParamSpec Event(std::string name, std::string labelRu, std::string labelEn);
-/** type is one of the Key* types. */
-ParamSpec Key(std::string name, ParamType type, std::string labelRu, std::string labelEn);
+/** type is one of the Key* types. An optional key may be left out: the factory gets "" (String) and no KeyType. */
+ParamSpec Key(std::string name, ParamType type, std::string labelRu, std::string labelEn, bool required = true);
 ParamSpec Value(std::string name, std::string labelRu, std::string labelEn);
 }
 

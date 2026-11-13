@@ -259,6 +259,7 @@ bool Loader::ReadParams(const Json& entry, const BlockSpec& block, int node, con
         default: // keys
         {
             const std::string name = json.is_string() ? json.get<std::string>() : std::string();
+            if (name.empty() && !param.required) { params.Set(param.name, std::string()); break; }
             if (name.empty()) { Problem(node, what + " is not set: name a memory key"); break; }
             const auto variable = variables_.find(name);
             if (variable == variables_.end()) { Problem(node, what + ": no variable " + Quote(name) + "; declare it in \"variables\""); break; }

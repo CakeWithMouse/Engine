@@ -4,6 +4,7 @@
 #include <Engine/AI/Tasks.h>
 #include <Engine/AI/World.h>
 #include <Engine/Scene/Scene.h>
+#include <Engine/Script/ScriptRuntime.h>
 #include <Engine/Components/GameComponents.h>
 #include <nlohmann/json.hpp>
 #include <cmath>
@@ -73,6 +74,29 @@ public:
     std::string Name() const override { return "FindObject " + object_; }
 private:
     std::string object_, key_;
+};
+
+// The object a script block works on: the key's object, or the character itself when the key is not set.
+GameComponent* ScriptObject(Context& ctx, const std::string& key)
+{
+    if (key.empty()) return ctx.OwnerComponent();
+    return ctx.ResolveComponent(ctx.Memory().Get(Key<ObjectRef>{key.c_str()}));
+}
+
+// Runs a Custom event of the object's visual script; fails when the object, its script or the event is missing.
+class CallScriptEvent final : public Task<>
+{
+public:
+    CallScriptEvent(std::string event, std::string target) : event_(std::move(event)), target_(std::move(target)) {}
+    Status Enter(Context& ctx, NoData&) const override
+    {
+        GameComponent* object = ScriptObject(ctx, target_);
+        Script::Instance* script = object ? object->GetScriptInstance() : nullptr;
+        return script && !script->Failed() && script->Trigger(event_) ? Status::Succeeded : Status::Failed;
+    }
+    std::string Name() const override { return "CallScriptEvent " + event_; }
+private:
+    std::string event_, target_;
 };
 
 using Registry = std::map<std::string, BlockSpec, std::less<>>;
@@ -191,7 +215,51 @@ void AddBuiltIns(Registry& blocks)
         "Находит ближайший свободный умный объект с меткой, идёт к нему и использует.",
         "Finds the nearest free smart object with the tag, walks there and uses it."));
 
+    Add(blocks, TaskBlock("Ai.CallScriptEvent", "Выполнить событие скрипта", "Call script event",
+        {Param::String("event", "Событие скрипта («Своё событие»)", "Script event (Custom event)", {}, true),
+         Param::Key("target", ParamType::KeyObject, "Чей скрипт (пусто — свой)", "Whose script (empty — own)", false)},
+        [](const Params& p) { return std::make_shared<CallScriptEvent>(p.String("event"), p.String("target")); },
+        "Запускает «Своё событие» с этим именем в визуальном скрипте персонажа или объекта из памяти и сразу завершается. "
+        "Провал — у объекта нет скрипта или такого события.",
+        "Runs the Custom event of this name in the visual script of the character or of an object from memory and finishes at once. "
+        "Fails when the object has no script or no such event."));
+
     // Conditions
+    Add(blocks, ConditionBlock("Ai.ScriptVariable", "Переменная скрипта", "Script variable",
+        {Param::String("variable", "Переменная скрипта", "Script variable", {}, true),
+         Param::String("op", "Сравнение (<, <=, ==, !=, >=, >)", "Comparison (<, <=, ==, !=, >=, >)", "=="),
+         Param::Float("value", "С чем (логическое: 1 — да)", "Value (bool: 1 — true)", 1),
+         Param::Key("target", ParamType::KeyObject, "Чей скрипт (пусто — свой)", "Whose script (empty — own)", false)},
+        [](const Params& p) {
+            const std::string op = p.String("op");
+            int code = -1;
+            const char* ops[] = {"<", "<=", "==", "!=", ">=", ">"};
+            for (int i = 0; i < 6; ++i) if (op == ops[i]) code = i;
+            if (code < 0) throw std::invalid_argument("\"op\" must be one of <, <=, ==, !=, >=, >");
+            return ConditionFn([variable = p.String("variable"), target = p.String("target"), code, value = p.Float("value")](Context& ctx) {
+                GameComponent* object = ScriptObject(ctx, target);
+                const Script::Instance* script = object ? object->GetScriptInstance() : nullptr;
+                if (!script) return false;
+                const Script::Value current = script->GetVariable(variable);
+                float x = 0;
+                if (const float* f = std::get_if<float>(&current)) x = *f;
+                else if (const bool* b = std::get_if<bool>(&current)) x = *b ? 1.0f : 0.0f;
+                else return false;
+                switch (code)
+                {
+                case 0: return x < value;
+                case 1: return x <= value;
+                case 2: return x == value;
+                case 3: return x != value;
+                case 4: return x >= value;
+                default: return x > value;
+                }
+            });
+        },
+        "Число или логическое значение переменной визуального скрипта персонажа (или объекта из памяти) сравнивается со значением. "
+        "Нет скрипта или переменной — ложь.",
+        "Compares a number or bool variable of the visual script of the character (or of an object from memory) with a value. "
+        "No script or no variable — false."));
     Add(blocks, ConditionBlock("Ai.HasKey", "Ключ задан", "Has key", {Param::Key("key", ParamType::Key, "Ключ", "Key")},
         [](const Params& p) {
             return ConditionFn([key = p.String("key"), type = p.KeyType("key")](Context& ctx) { return HasOfType(ctx.Memory(), key, type); });
@@ -307,10 +375,10 @@ ParamSpec String(std::string name, std::string ru, std::string en, std::string f
 { return Make(std::move(name), ParamType::String, std::move(ru), std::move(en), std::move(fallback), -INFINITY, INFINITY, required); }
 ParamSpec Event(std::string name, std::string ru, std::string en)
 { return Make(std::move(name), ParamType::Event, std::move(ru), std::move(en), std::string(), -INFINITY, INFINITY, true); }
-ParamSpec Key(std::string name, ParamType type, std::string ru, std::string en)
+ParamSpec Key(std::string name, ParamType type, std::string ru, std::string en, bool required)
 {
     if (!IsKey(type)) throw std::invalid_argument("Ai::Param::Key(\"" + name + "\"): the type must be one of the Key types");
-    return Make(std::move(name), type, std::move(ru), std::move(en), std::string(), -INFINITY, INFINITY, true);
+    return Make(std::move(name), type, std::move(ru), std::move(en), std::string(), -INFINITY, INFINITY, required);
 }
 ParamSpec Value(std::string name, std::string ru, std::string en)
 { return Make(std::move(name), ParamType::Value, std::move(ru), std::move(en), false, -INFINITY, INFINITY, false); }
@@ -424,7 +492,7 @@ std::string MachineCatalogJson()
         for (const ParamSpec& param : block->params)
         {
             Json item{{"name", param.name}, {"type", ToString(param.type)}, {"labelRu", param.labelRu}, {"labelEn", param.labelEn},
-                      {"required", param.required || IsKey(param.type) || param.type == ParamType::Event}};
+                      {"required", param.required || param.type == ParamType::Event}};
             if (param.type != ParamType::Value && !IsKey(param.type) && param.type != ParamType::Event) item["default"] = ValueJson(param.fallback);
             if (std::isfinite(param.minimum)) item["min"] = param.minimum;
             if (std::isfinite(param.maximum)) item["max"] = param.maximum;
