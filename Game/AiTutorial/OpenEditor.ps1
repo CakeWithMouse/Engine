@@ -2,6 +2,10 @@ $ErrorActionPreference='Stop'
 $pin=Get-Content -LiteralPath "$PSScriptRoot/Engine.lock.json" -Raw | ConvertFrom-Json
 $store=if($env:PAINENGINE_ENGINE_STORE){$env:PAINENGINE_ENGINE_STORE}else{Join-Path $env:LOCALAPPDATA 'PainEngine/Engines'}
 $runtime=Join-Path $store ($pin.engineVersion+'/'+$pin.engineConfiguration)
+# The launcher's own copy (Tutorials/AiTutorial beside EngineLauncher.exe) runs on the launcher's runtime.
+$bundled=Join-Path $PSScriptRoot '../../Runtime'
+if((Split-Path -Leaf (Split-Path $PSScriptRoot)) -eq 'Tutorials' -and (Test-Path -LiteralPath "$bundled/EngineVersion.json") -and
+   (Get-Content -LiteralPath "$bundled/EngineVersion.json" -Raw | ConvertFrom-Json).version -eq $pin.engineVersion){$runtime=$bundled}
 if(!(Test-Path -LiteralPath "$runtime/EngineRuntime.exe")){throw "Install PainEngine $($pin.engineVersion) $($pin.engineConfiguration) through EngineLauncher first."}
 $launch=New-Object System.Diagnostics.ProcessStartInfo
 $launch.FileName="$runtime/EngineRuntime.exe"

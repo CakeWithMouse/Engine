@@ -131,6 +131,19 @@ int wmain(int argc, wchar_t** argv)
         const auto installed = InstallEngineRelease(runtime);
         Check(ResolveEngineRelease(settings,runtime).runtime == installed.runtime,"prefer preserved installed release");
         Check(InstallEngineRelease(runtime).runtime == installed.runtime,"installation is idempotent");
+        {
+            // A local rebuild of the same version: the old copy stays, the new build goes under the next build
+            // number once, and new projects are pinned to that installed copy, not to the manifest's version.
+            { std::ofstream older(installed.runtime / "Editor.dll", std::ios::binary | std::ios::app); older << "older build"; }
+            const auto rebuilt = InstallEngineRelease(runtime);
+            Check(rebuilt.version != release.version && rebuilt.runtime != installed.runtime, "rebuilt version installed side by side");
+            Check(InstallEngineRelease(runtime).runtime == rebuilt.runtime, "rebuilt version reused, not installed again");
+            const auto pinned = ReadRuntimeProject(ProjectLibrary::Create(root / "Pinned project", "Pinned", runtime / "Templates/SceneProject/Game.dll", &rebuilt));
+            Check(pinned.engineVersion == rebuilt.version && ResolveEngineRelease(pinned, runtime).runtime == rebuilt.runtime, "new project pinned to the installed rebuild");
+            std::filesystem::remove_all(rebuilt.runtime.parent_path());
+            std::filesystem::copy_file(runtime / "Editor.dll", installed.runtime / "Editor.dll", std::filesystem::copy_options::overwrite_existing);
+            Check(InstallEngineRelease(runtime).runtime == installed.runtime, "restored release found again");
+        }
         ProjectUpgrade::Copy(current,root / "MigratedLights",runtime);
         const auto litScene = SceneDocument::Read(root / "MigratedLights/Content/Scenes/Main.scene.json");
         size_t lightCount = 0;
