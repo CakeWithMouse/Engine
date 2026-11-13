@@ -15,11 +15,13 @@ class AiCharacter : public Character
 {
 public:
     std::string stateMachine;        // name given to Ai::RegisterMachine ("Guard") or a .fsm path; empty: SetupAi decides
+    std::string machineMemory;       // memory values of this object for a .fsm: JSON {"key": value}; empty: as in the file
     int team = 0;
     float sightRadius = 0, fieldOfView = 120, hearingRadius = 0;
 
     ENGINE_PROPERTIES(Character,
         ENGINE_PROPERTY_FIELD(stateMachine, "Автомат (имя из C++ или путь к .fsm)")
+        ENGINE_PROPERTY_FIELD(machineMemory, "Значения памяти автомата (JSON)")
         ENGINE_PROPERTY_FIELD(team, "Команда", 0, 255)
         ENGINE_PROPERTY_FIELD(sightRadius, "Радиус зрения (0 — не видит)", 0, 10000)
         ENGINE_PROPERTY_FIELD(fieldOfView, "Угол обзора, градусов", 1, 360)

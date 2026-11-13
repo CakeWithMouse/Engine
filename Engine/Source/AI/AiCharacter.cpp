@@ -38,7 +38,7 @@ void AiCharacter::BeginPlay()
                     if (loaded.problems.size() > 3) message += " (and " + std::to_string(loaded.problems.size() - 3) + " more)";
                     throw std::invalid_argument(message);
                 }
-                loaded.asset->Run(ai);
+                loaded.asset->Run(ai, machineMemory);
             }
             else ai.Run(Ai::GetMachine(stateMachine));
         }

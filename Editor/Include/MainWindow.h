@@ -79,6 +79,9 @@ public:
     QString CreateScript(const QString& directory, const QString& name = {});
     // Новый скрипт в Content/Scripts для выделенного объекта: создание, назначение и окно.
     void CreateScriptForSelection();
+    // Автомат ИИ (.fsm) выделенного «ИИ-персонажа»: новый файл в Content/AI, выбор файла, открытие.
+    void CreateAiMachineForSelection();
+    void SetSelectedProperty(const QString& path, const QString& text); // строковое свойство выделенного объекта, через Undo
     // Открытое окно скрипта (/Game путь) или nullptr.
     ScriptEditorWindow* ScriptEditor(const QString& script) const;
     // F6: перекомпилировать все шейдеры и материалы с диска во всех сценах и превью.

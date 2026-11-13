@@ -1667,6 +1667,109 @@ int wmain(int argc, wchar_t** argv)
             Ui([](auto* w) { w->template findChild<QToolButton*>(QStringLiteral("ScriptVariableReset_Var"))->click(); });
             until([&] { return sphereVariables().empty(); });
 
+            // AI character: the "AI State Machine" card creates a .fsm, edits memory values of this object, undo works.
+            {
+                const auto count = host.ReadSnapshot().objects.size();
+                Ui([](auto* w) { CreateAction(w, "Gameplay.AiCharacter")->trigger(); });
+                until([&] { return host.ReadSnapshot().objects.size() == count + 1; });
+            }
+            uint64_t guard = 0;
+            for (const auto& o : host.ReadSnapshot().objects) if (o.type == "Gameplay.AiCharacter") guard = o.id;
+            Check(guard != 0, "an AI character is placed");
+            auto selectGuard = [&] {
+                EditorCommand none; none.type = EditorCommand::SelectObject; none.objectId = 0; host.PostCommand(none);
+                EditorCommand select; select.type = EditorCommand::SelectObject; select.objectId = guard; host.PostCommand(select);
+            };
+            auto guardData = [&] {
+                for (const auto& o : host.ReadSnapshot().objects)
+                    if (o.id == guard) return QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object();
+                return QJsonObject();
+            };
+            auto cardShown = [&] {
+                bool shown = false;
+                Ui([&](auto* w) {
+                    auto* card = w->template findChild<QWidget*>(QStringLiteral("AiMachineCard"));
+                    shown = host.ReadSnapshot().selected == guard && card && !card->isHidden();
+                });
+                return shown;
+            };
+            selectGuard();
+            until(cardShown);
+            Ui([](auto* w) {
+                Check(!w->template findChild<QWidget*>(QStringLiteral("Property/stateMachine")) && !w->template findChild<QWidget*>(QStringLiteral("Property/machineMemory")),
+                      "the AI card replaces the raw machine properties");
+                Check(w->template findChild<QWidget*>(QStringLiteral("Property/sightRadius")) != nullptr, "other AI properties stay in the list");
+                auto* create = w->template findChild<QPushButton*>(QStringLiteral("AiMachineOpen"));
+                Check(create && create->text() == QStringLiteral("Создать") && create->isEnabled(), "an empty machine offers Create");
+                create->click();
+            });
+            until([&] { return guardData().value(QStringLiteral("stateMachine")).toString().startsWith(QStringLiteral("/Game/AI/")); });
+            const QString machine = guardData().value(QStringLiteral("stateMachine")).toString();
+            const auto machineFile = root / "Content" / std::filesystem::u8path(machine.mid(6).toStdString());
+            QJsonObject fsm;
+            {
+                QFile file(QString::fromStdWString(machineFile.wstring()));
+                Check(file.open(QIODevice::ReadOnly), "the machine file is created");
+                fsm = QJsonDocument::fromJson(file.readAll()).object();
+            }
+            Check(fsm.value(QStringLiteral("schema")).toString() == QStringLiteral("ai.fsm") &&
+                  fsm.value(QStringLiteral("nodes")).toArray().at(0).toObject().value(QStringLiteral("type")).toString() == QStringLiteral("Fsm.State"),
+                  "a new machine is an ai.fsm graph with one state");
+
+            // Variables of the file become fields; an object key has no literal and is not shown.
+            fsm[QStringLiteral("variables")] = QJsonArray{
+                QJsonObject{{QStringLiteral("name"), QStringLiteral("Target")}, {QStringLiteral("type"), QStringLiteral("object")}},
+                QJsonObject{{QStringLiteral("name"), QStringLiteral("Speed")}, {QStringLiteral("type"), QStringLiteral("float")}, {QStringLiteral("value"), 2}},
+                QJsonObject{{QStringLiteral("name"), QStringLiteral("Lives")}, {QStringLiteral("type"), QStringLiteral("int")}, {QStringLiteral("value"), 3}}};
+            {
+                QFile file(QString::fromStdWString(machineFile.wstring()));
+                Check(file.open(QIODevice::WriteOnly | QIODevice::Truncate) && file.write(QJsonDocument(fsm).toJson()) > 0, "the machine file is rewritten");
+            }
+            selectGuard();
+            until([&] { bool shown = cardShown(); if (shown) Ui([&](auto* w) { shown = w->template findChild<QLineEdit*>(QStringLiteral("AiMemory_Speed")) != nullptr; }); return shown; });
+            Ui([](auto* w) {
+                Check(!w->template findChild<QWidget*>(QStringLiteral("AiMemory_Target")), "an object key is not editable as a value");
+                Check(w->template findChild<QPushButton*>(QStringLiteral("AiMachineOpen"))->text() == QStringLiteral("Открыть"), "an assigned machine offers Open");
+                auto* lives = w->template findChild<QLineEdit*>(QStringLiteral("AiMemory_Lives"));
+                Check(lives && lives->placeholderText() == QStringLiteral("3"), "the field shows the file's value as a hint");
+                lives->setText(QStringLiteral("1.5"));
+                QMetaObject::invokeMethod(lives, "editingFinished");
+                Check(lives->text().isEmpty(), "a fraction is refused for an int key");
+                auto* speed = w->template findChild<QLineEdit*>(QStringLiteral("AiMemory_Speed"));
+                speed->setText(QStringLiteral("3,5"));
+                QMetaObject::invokeMethod(speed, "editingFinished");
+            });
+            until([&] { return guardData().value(QStringLiteral("machineMemory")).toString() == QStringLiteral(R"({"Speed":3.5})"); });
+            Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
+            until([&] { return guardData().value(QStringLiteral("machineMemory")).toString().isEmpty(); });
+            Ui([](auto* w) { Action(w, QStringLiteral("Повторить"))->trigger(); });
+            until([&] { return guardData().value(QStringLiteral("machineMemory")).toString() == QStringLiteral(R"({"Speed":3.5})"); });
+
+            // A C++ machine name is typed in the same field; "Clear" removes the machine.
+            selectGuard();
+            until(cardShown);
+            Ui([](auto* w) {
+                auto* field = w->template findChild<QLineEdit*>(QStringLiteral("AiMachine"));
+                field->setText(QStringLiteral("Guard"));
+                QMetaObject::invokeMethod(field, "editingFinished");
+            });
+            until([&] { return guardData().value(QStringLiteral("stateMachine")).toString() == QStringLiteral("Guard"); });
+            until([&] { bool shown = false; Ui([&](auto* w) {
+                auto* status = w->template findChild<QLabel*>(QStringLiteral("AiMachineStatus"));
+                auto* memory = w->template findChild<QWidget*>(QStringLiteral("AiMemoryValues"));
+                shown = status && !status->isHidden() && status->text().contains(QStringLiteral("C++")) && memory && memory->isHidden(); }); return shown; });
+            Ui([](auto* w) { w->template findChild<QPushButton*>(QStringLiteral("AiMachineClear"))->click(); });
+            until([&] { return guardData().value(QStringLiteral("stateMachine")).toString().isEmpty(); });
+            // The checks below expect the scene as it was: the character and its file go away, the sphere is selected again.
+            {
+                const auto count = host.ReadSnapshot().objects.size();
+                EditorCommand remove; remove.type = EditorCommand::RemoveObject; remove.objectId = guard; host.PostCommand(remove);
+                until([&] { return host.ReadSnapshot().objects.size() == count - 1; });
+                std::filesystem::remove(machineFile);
+                EditorCommand select; select.type = EditorCommand::SelectObject; select.objectId = sphere; host.PostCommand(select);
+                until([&] { return host.ReadSnapshot().selected == sphere; });
+            }
+
             // Nodes copied from one script are pasted into another.
             Ui([&](auto* w) {
                 auto* g = window(w)->Graph();

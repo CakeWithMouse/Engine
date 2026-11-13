@@ -151,11 +151,16 @@ struct MachineProblem
 struct MachineAsset
 {
     MachinePtr machine;
+    std::vector<std::pair<std::string, VariableType>> variables;   // every declared memory key, in file order
     std::vector<std::pair<std::string, Blackboard::Value>> memory; // variables that have a value
     std::string targetKey, lastSeenKey;                            // perception writes here; empty: nowhere
     float thinkInterval = -1;                                      // below 0: the controller keeps its own
-    /** Sets the memory values and the settings, then runs the machine. */
-    void Run(Controller& controller) const;
+    /**
+     * Sets the memory values and the settings, then runs the machine. values: JSON object {"key": literal} of one
+     * object (AiCharacter's "machineMemory"), applied over the file's values; undeclared keys and literals of
+     * another type are skipped, text that is not a JSON object is ignored.
+     */
+    void Run(Controller& controller, const std::string& values = {}) const;
 };
 
 struct MachineLoadResult

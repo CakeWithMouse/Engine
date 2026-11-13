@@ -347,6 +347,8 @@
         <ClInclude Include="Include/ScriptGraphWidget.h"/>
         <ClInclude Include="Include/ScriptEditorWindow.h"/>
         <ClInclude Include="UI/ScriptCard.h"/>
+        <ClInclude Include="UI/AiMachineCard.h"/>
+        <ClInclude Include="UI/VariableValuesEditor.h"/>
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->
         <CustomBuild Include="Include/MainWindow.h">
             <FileType>Document</FileType>

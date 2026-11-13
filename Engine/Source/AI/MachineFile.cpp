@@ -500,6 +500,7 @@ MachineLoadResult Loader::Load(const std::string& text, const std::string& name)
             continue;
         }
         variables_.emplace(variable, parsed);
+        asset->variables.emplace_back(variable, parsed);
         if (!item.contains("value")) continue;
         Blackboard::Value value;
         if (parsed == VariableType::Object) Problem(0, "variable " + Quote(variable) + ": an object has no starting value");
@@ -817,10 +818,20 @@ MachineLoadResult LoadMachineFile(const std::string& path)
     return (cache[physical] = std::move(entry)).result;
 }
 
-void MachineAsset::Run(Controller& controller) const
+void MachineAsset::Run(Controller& controller, const std::string& values) const
 {
     if (!machine) throw std::invalid_argument("MachineAsset::Run: no machine");
     for (const auto& [key, value] : memory) SetMemory(controller.Memory(), key, value);
+    if (!values.empty())
+    {
+        const Json overrides = Json::parse(values, nullptr, false);
+        if (overrides.is_object())
+            for (const auto& [key, type] : variables)
+            {
+                Blackboard::Value value;
+                if (overrides.contains(key) && ParseLiteral(overrides[key], type, value)) SetMemory(controller.Memory(), key, value);
+            }
+    }
     if (!targetKey.empty()) controller.GetPerception().WriteTargetTo(Key<ObjectRef>{targetKey.c_str()});
     if (!lastSeenKey.empty()) controller.GetPerception().WriteLastSeenTo(Key<glm::vec3>{lastSeenKey.c_str()});
     if (thinkInterval >= 0) controller.SetThinkInterval(thinkInterval);

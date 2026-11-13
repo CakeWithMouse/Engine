@@ -139,11 +139,12 @@ void RunChecks()
     file["connections"] = {LinkOf(2, 3, {{"trigger", "succeeded"}}), LinkOf(3, 2, {{"trigger", "tick"}, {"conditions", {{{"type", "Ai.TimeInState"}, {"seconds", 0.3}}}}})};
     const auto asset = Built(file);
     CHECK(asset->machine->Name() == "Test" && asset->machine->Find("Patrol/Walk") >= 0);
-    CHECK(asset->memory.size() == 3 && asset->targetKey == "target" && asset->thinkInterval == 0);
+    CHECK(asset->memory.size() == 3 && asset->variables.size() == 4 && asset->variables[3].second == Ai::VariableType::Object);
+    CHECK(asset->targetKey == "target" && asset->thinkInterval == 0);
 
     Ai::World world;
     Ai::Controller& ai = world.SpawnDirector("patrol");
-    asset->Run(ai);
+    asset->Run(ai, "not json");                                                // ignored
     CHECK(ai.Memory().Get(Ai::Key<float>{"speed"}) == 2.5f && ai.Memory().Get(Ai::Key<glm::vec3>{"home"}) == glm::vec3(1, 2, 3));
     CHECK(!ai.Memory().Has(Ai::Key<Ai::ObjectRef>{"target"}));                 // an object has no starting value
     world.Tick(0.1f);
@@ -157,7 +158,9 @@ void RunChecks()
     // Moving Rest above Walk changes which child starts.
     file["nodes"][1]["y"] = 50;
     Ai::Controller& other = world.SpawnDirector("rest first");
-    Built(file)->Run(other);
+    Built(file)->Run(other, R"({"speed": 4, "home": [0, 0, 7], "walks": 1.5})");   // an int key takes no fraction
+    CHECK(other.Memory().Get(Ai::Key<float>{"speed"}) == 4.0f && other.Memory().Get(Ai::Key<glm::vec3>{"home"}) == glm::vec3(0, 0, 7));
+    CHECK(Count(other, "walks") == 0);
     world.Tick(0.1f);
     CHECK(other.ActiveState() == "Patrol/Rest");
 }
@@ -353,10 +356,13 @@ void SceneChecks()
         AiCharacter& guard = AddToScene<AiCharacter>(game, "Guard");
         guard.stateMachine = name;
         guard.sightRadius = 10;
+        // Values of this object over the file's: an unknown key and a literal of another type are skipped.
+        guard.machineMemory = R"({"visits": 10, "nobody": 1, "seen": "here"})";
         game.InitializeGameplay();
         game.StepProjectSimulation(0.05f);
         Ai::Controller* ai = guard.GetAi();
-        CHECK(ai && ai->ActiveState() == "Watch" && ai->ThinkInterval() == 0.1f && Count(*ai, "visits") == 1);
+        CHECK(ai && ai->ActiveState() == "Watch" && ai->ThinkInterval() == 0.1f && Count(*ai, "visits") == 11);
+        CHECK(!ai->Memory().Has(Ai::Key<int>{"nobody"}) && !ai->Memory().Has(Ai::Key<std::string>{"seen"}));
     }
 
     // A broken file: the start stops with the problems in the message.

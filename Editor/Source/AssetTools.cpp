@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QInputDialog>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QLineEdit>
@@ -495,6 +496,57 @@ void EditorMainWindow::CreateScriptForSelection()
     c.objectId = snapshot.selected;
     c.path = QStringLiteral("/Game/Scripts/") + name + QStringLiteral(".vscript");
     host_->PostCommand(c);
+}
+
+void EditorMainWindow::SetSelectedProperty(const QString& path, const QString& text)
+{
+    if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
+    const QByteArray json = QJsonDocument(QJsonArray{text}).toJson(QJsonDocument::Compact);
+    EditorCommand c;
+    c.type = EditorCommand::SetProperty;
+    c.objectId = selectedId_;
+    c.path = path;
+    c.name = QString::fromUtf8(json.mid(1, json.size() - 2)); // значение свойства как JSON: строка в кавычках
+    host_->PostCommand(c);
+}
+
+void EditorMainWindow::CreateAiMachineForSelection()
+{
+    const auto snapshot = host_->ReadSnapshot();
+    if (sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit || !snapshot.selected) return;
+    QString base = QStringLiteral("Machine");
+    for (const auto& object : snapshot.objects)
+    {
+        const QString objectName = QString::fromStdString(object.name);
+        if (object.id == snapshot.selected && MaterialNamePattern().match(objectName).hasMatch()) base = objectName;
+    }
+    const QDir folder(QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(QStringLiteral("AI")));
+    QString name = base;
+    for (int i = 2; QFileInfo::exists(folder.filePath(name + QStringLiteral(".fsm"))); ++i) name = base + QStringLiteral("_") + QString::number(i);
+    const QString file = folder.filePath(name + QStringLiteral(".fsm"));
+
+    // Новый автомат: одно состояние, которое ждёт; ключ Target, куда восприятие пишет увиденную цель.
+    EditorCore::GraphDocument document;
+    document.SetSchema(QStringLiteral("ai.fsm"), 1);
+    document.SetVariables(QJsonArray{QJsonObject{{QStringLiteral("name"), QStringLiteral("Target")}, {QStringLiteral("type"), QStringLiteral("object")}}});
+    document.AddNode(QStringLiteral("Fsm.State"), QStringLiteral("Idle"), QPointF(0, 0),
+                     {{QStringLiteral("name"), QStringLiteral("Idle")},
+                      {QStringLiteral("tasks"), QVariantList{QVariantMap{{QStringLiteral("type"), QStringLiteral("Ai.Wait")}, {QStringLiteral("seconds"), 1.0}}}}});
+    QString problem;
+    if (!QDir().mkpath(folder.path())) problem = Tr("Не удалось создать каталог %1.", "Failed to create directory %1.").arg(folder.path());
+    else
+    {
+        QSaveFile output(file);
+        if (!output.open(QIODevice::WriteOnly) || output.write(document.ExportToJson().toUtf8()) < 0 || !output.commit())
+            problem = Tr("Не удалось записать %1.", "Failed to write %1.").arg(file);
+    }
+    if (!problem.isEmpty())
+    {
+        QMessageBox::warning(this, Tr("Новый автомат ИИ", "New AI State Machine"), problem);
+        return;
+    }
+    AppendLine(Tr("Создан автомат ИИ %1.", "Created AI state machine %1.").arg(QStringLiteral("/Game/AI/") + name + QStringLiteral(".fsm")));
+    SetSelectedProperty(QStringLiteral("/stateMachine"), QStringLiteral("/Game/AI/") + name + QStringLiteral(".fsm"));
 }
 
 void EditorMainWindow::ReloadShaders()

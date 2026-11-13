@@ -21,6 +21,7 @@ class CollapsibleCard;
 class TransformCard;
 class MaterialCard;
 class ScriptCard;
+class AiMachineCard;
 class GeometryCard;
 
 struct EditorSnapshot;
@@ -48,6 +49,8 @@ class ObjectInspectorPanel : public QWidget
 public:
     // Список переменных скрипта (из его файла) для карточки «Скрипт»: /Game путь -> [{"name","type","value"}].
     void SetScriptVariablesReader(std::function<QJsonArray(const QString&)> reader);
+    // Схема свойств типа со stateMachine и machineMemory: их правит карточка «Автомат ИИ», а не общий список свойств.
+    static bool HasAiMachine(const std::string& propertySchema);
     explicit ObjectInspectorPanel(QWidget* parent = nullptr);
     ~ObjectInspectorPanel() override;
 
@@ -94,6 +97,9 @@ signals:
     void ChooseScriptRequested();
     void ClearScriptRequested();
     void ScriptVariablesChanged(const QString& json); // значения переменных скрипта у объекта; пустая — как в скрипте
+    void CreateAiMachineRequested();                  // создать .fsm и назначить выделенному «ИИ-персонажу»
+    void OpenAiMachineRequested(const QString& virtualPath);
+    void ChooseAiMachineRequested();
 
 private:
     void BuildUi();
@@ -128,6 +134,7 @@ private:
     GeometryCard* cardGeometry_ = nullptr;
     MaterialCard* cardMaterial_ = nullptr;
     ScriptCard* cardScript_ = nullptr;
+    AiMachineCard* cardAi_ = nullptr;
     CollapsibleCard* cardLight_ = nullptr;
     CollapsibleCard* cardCharacter_ = nullptr;
 

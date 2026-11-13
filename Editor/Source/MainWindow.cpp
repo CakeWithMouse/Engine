@@ -37,7 +37,9 @@
 #include <QMessageBox>
 #include <QComboBox>
 #include <QDoubleSpinBox>
+#include <QDesktopServices>
 #include <QFileDialog>
+#include <QUrl>
 #include <QLineEdit>
 #include <QTreeWidget>
 #include <QPushButton>
@@ -800,6 +802,30 @@ void EditorMainWindow::ConnectPanels()
         c.objectId = selectedId_;
         c.name = json;
         host_->PostCommand(c);
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::CreateAiMachineRequested, this, [this] { CreateAiMachineForSelection(); });
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseAiMachineRequested, this, [this]
+    {
+        if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
+        const QString root = QString::fromUtf8(host_->host().contentRoot);
+        const QString path = QFileDialog::getOpenFileName(this, Tr("Автомат ИИ из проекта", "AI state machine from the project"), root,
+                                                          Tr("Автоматы ИИ (*.fsm)", "AI state machines (*.fsm)"));
+        if (path.isEmpty()) return;
+        const QString relative = QDir(root).relativeFilePath(path);
+        if (relative.startsWith(QStringLiteral("..")) || QDir::isAbsolutePath(relative))
+        {
+            AppendLine(Tr("Автомат должен лежать в Content проекта.", "The machine must be inside the project's Content."));
+            return;
+        }
+        SetSelectedProperty(QStringLiteral("/stateMachine"), QStringLiteral("/Game/") + QDir::fromNativeSeparators(relative));
+    });
+    // Окна автомата ещё нет: файл открывается программой, назначенной для .fsm в системе.
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::OpenAiMachineRequested, this, [this](const QString& machine)
+    {
+        const QString file = QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(machine.mid(6));
+        if (!machine.startsWith(QStringLiteral("/Game/")) || !QDesktopServices::openUrl(QUrl::fromLocalFile(file)))
+            AppendLine(Tr("Не удалось открыть %1.", "Failed to open %1.").arg(machine));
     });
 
     connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearScriptRequested, this, [this]
