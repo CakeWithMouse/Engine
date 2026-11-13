@@ -7,6 +7,7 @@
 #include "DockRedockTests.h"
 #include "ViewportBillboardTests.h"
 #include "UiSmokeTests.h"
+#include "ContentBrowserTests.h"
 #include "EditorTheme.h"
 #include <QApplication>
 #include <iostream>
@@ -28,6 +29,7 @@ int main(int argc, char* argv[])
         InspectorRefreshTests::RunMouseRefreshJitter();
         DockRedockTests::Run();
         ViewportBillboardTests::Run();
+        ContentBrowserTests::Run();
         UiSmokeTests::Run();
         return 0;
     }

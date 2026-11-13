@@ -75,6 +75,7 @@
 #include <stdexcept>
 #include "ViewportDpiTests.h"
 #include "ViewportCompletionTests.h"
+#include "ContentBrowserTests.h"
 namespace
 {
 int checks = 0;
@@ -312,6 +313,8 @@ int wmain(int argc, wchar_t** argv)
         until([&] { return host.ViewportActive(); });
         Ui([](auto* window) { ViewportCompletionTests::Run(window); });
         if (argc == 4 && std::wstring(argv[3]) == L"--viewport-completion") return 0;
+        Ui([](auto* window) { ContentBrowserTests::RunNative(window); });
+        if (argc == 4 && std::wstring(argv[3]) == L"--content-browser") return 0;
         if (argc == 4 && std::wstring(argv[3]) == L"--hud-restart") {
             std::fprintf(stderr,"HUD restart: viewport ready\n");
             Ui([&](auto* w) {

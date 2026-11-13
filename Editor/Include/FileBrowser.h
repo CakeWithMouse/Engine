@@ -4,6 +4,8 @@
 #include <QSortFilterProxyModel>
 #include <QFileSystemModel>
 #include <QDir>
+#include "IconProvider.h"
+#include "EditorTheme.h"
 
 class QComboBox;
 class QLineEdit;
@@ -17,7 +19,20 @@ class ProjectFilesFilter final : public QSortFilterProxyModel
 public:
     QString project, content;
     bool full = false;
-    using QSortFilterProxyModel::QSortFilterProxyModel;
+    explicit ProjectFilesFilter(QObject* parent = nullptr) : QSortFilterProxyModel(parent)
+    {
+        RefreshIcons();
+        themeSubscription_ = EditorTheme::Instance().SubscribeThemeChanged([this] { RefreshIcons(); });
+    }
+    ~ProjectFilesFilter() override { EditorTheme::Instance().UnsubscribeThemeChanged(themeSubscription_); }
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
+    {
+        if (index.isValid() && index.column() == 0 && role == Qt::DecorationRole) {
+            const auto* files = static_cast<QFileSystemModel*>(sourceModel());
+            return files->isDir(mapToSource(index)) ? folderIcon_ : fileIcon_;
+        }
+        return QSortFilterProxyModel::data(index, role);
+    }
     void ShowFull(bool value) { full = value; invalidateFilter(); }
     Qt::DropActions supportedDragActions() const override { return Qt::CopyAction; }
 
@@ -50,6 +65,16 @@ protected:
         }
         return true;
     }
+
+private:
+    void RefreshIcons()
+    {
+        folderIcon_ = IconProvider::FolderIcon();
+        fileIcon_ = IconProvider::FileIcon();
+        if (sourceModel() && rowCount() > 0) emit dataChanged(index(0, 0), index(rowCount() - 1, 0), {Qt::DecorationRole});
+    }
+    QIcon folderIcon_, fileIcon_;
+    int themeSubscription_ = 0;
 };
 
 class FileBrowserDock : public QDockWidget
