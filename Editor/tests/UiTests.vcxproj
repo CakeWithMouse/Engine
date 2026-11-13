@@ -93,6 +93,11 @@
         <ClCompile Include="../Core/AssetOps.cpp"/>
         <ClCompile Include="../UI/ImportSettingsDialog.cpp"/>
         <ClCompile Include="../UI/ModelImportEditFlow.cpp"/>
+        <ClCompile Include="../UI/ViewportOverlayHelper.cpp"/>
+        <ClCompile Include="../Core/ViewportOverlay.cpp"/>
+        <ClCompile Include="../Core/GizmoGeometry.cpp"/>
+        <ClCompile Include="../Core/GizmoTriangles.cpp"/>
+        <ClCompile Include="../Core/GizmoMath.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_Logger.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_CommandRegistry.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_FileService.cpp"/>
@@ -111,6 +116,7 @@
         <ClInclude Include="AssetDeleteTests.h"/>
         <ClInclude Include="InspectorRefreshTests.h"/>
         <ClInclude Include="DockRedockTests.h"/>
+        <ClInclude Include="ViewportBillboardTests.h"/>
         <ClInclude Include="UiSmokeTests.h"/>
     </ItemGroup>
 

@@ -149,7 +149,7 @@ void ViewportOverlayHelper::UpdateOverlays(
                 EngineOverlayBillboard bb{};
                 bb.iconId = iconId;
                 bb.x = obj.transform.position[0];
-                bb.y = obj.transform.position[1] + (obj.hasPointLight ? 0.3f : 0.0f);
+                bb.y = obj.transform.position[1];
                 bb.z = obj.transform.position[2];
                 bb.sizePixels = 32.0f;
                 bb.rgbaTint = iconColor;
@@ -277,7 +277,7 @@ uint64_t ViewportOverlayHelper::HitTestBillboard(
 
         float pos[3] = {
             obj.transform.position[0],
-            obj.transform.position[1] + (obj.hasPointLight ? 0.3f : 0.0f),
+            obj.transform.position[1],
             obj.transform.position[2]
         };
 

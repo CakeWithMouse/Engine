@@ -5,6 +5,7 @@
 #include "AssetDeleteTests.h"
 #include "InspectorRefreshTests.h"
 #include "DockRedockTests.h"
+#include "ViewportBillboardTests.h"
 #include "UiSmokeTests.h"
 #include "EditorTheme.h"
 #include <QApplication>
@@ -25,6 +26,7 @@ int main(int argc, char* argv[])
         AssetDeleteTests::Run();
         InspectorRefreshTests::Run();
         DockRedockTests::Run();
+        ViewportBillboardTests::Run();
         UiSmokeTests::Run();
         return 0;
     }
