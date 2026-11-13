@@ -1062,6 +1062,10 @@ void EditorMainWindow::CommandFinished(
     const QString& error
 )
 {
+    if (status == EngineSceneOk &&
+        (command.type == EditorCommand::InputCursor || command.type == EditorCommand::ViewportCamera))
+        return;
+
     if (command.type == EditorCommand::ReloadProject) {
         sceneBusy_ = false; UpdatePlayButtons();
         if (status != EngineSceneOk && !command.name.isEmpty()) {
