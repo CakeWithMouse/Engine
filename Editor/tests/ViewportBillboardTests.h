@@ -4,9 +4,11 @@
 #include "IEditorHost.h"
 #include "SettingsService.h"
 #include "GizmoGeometry.h"
+#include "BillboardMetrics.h"
 
 #include <QTemporaryDir>
 #include <QSettings>
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <stdexcept>
@@ -19,6 +21,11 @@ namespace ViewportBillboardTests
 inline void Check(bool ok, const char* message)
 {
     if (!ok) throw std::runtime_error(message);
+}
+
+inline bool Near(float a, float b)
+{
+    return std::fabs(a - b) < 1e-3f;
 }
 
 // Captures the real billboards produced by ViewportOverlayHelper::UpdateOverlays.
@@ -129,5 +136,35 @@ inline void Run()
     Check(hit == 1, "clicking the projected source selects the point light");
 
     std::printf("Viewport billboard position checks: PASS\n");
+
+    // Size = 2.2% of the physical viewport height, clamped in physical pixels.
+    // Physical height = logical height * devicePixelRatio.
+    const float logicalHeights[] = {1080.0f, 1440.0f};
+    const float dprs[] = {1.0f, 1.5f, 2.0f};
+    for (float logical : logicalHeights)
+    {
+        for (float dpr : dprs)
+        {
+            const float physical = logical * dpr;
+            const float expected = std::clamp(physical * 0.022f, 16.0f, 64.0f);
+            Check(Near(BillboardMetrics::SizePixels(physical), expected),
+                "billboard size matches 2.2% of physical height with clamp");
+        }
+    }
+    Check(Near(BillboardMetrics::SizePixels(100.0f), 16.0f), "size clamps to minimum on tiny viewport");
+    Check(Near(BillboardMetrics::SizePixels(10000.0f), 64.0f), "size clamps to maximum on huge viewport");
+
+    Check(lb && Near(lb->sizePixels, std::clamp(600.0f * 0.022f, 16.0f, 64.0f)),
+        "billboard sizePixels derived from physical camera height");
+
+    // A viewport height change must re-upload billboards at the new size (height is hashed).
+    host.camera.height = 1080;
+    ViewportOverlayHelper::UpdateOverlays(&host, host.camera, true,
+        GizmoGeometry::Handle::None, 0, false, hash, GizmoGeometry::Handle::None);
+    const auto* resized = Find(host, 1);
+    Check(resized && Near(resized->sizePixels, std::clamp(1080.0f * 0.022f, 16.0f, 64.0f)),
+        "viewport height change re-uploads billboards at the new size");
+
+    std::printf("Viewport billboard size checks: PASS\n");
 }
 } // namespace ViewportBillboardTests

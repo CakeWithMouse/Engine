@@ -3,6 +3,7 @@
 #include "IconProvider.h"
 #include "EditorIconData.h"
 #include "ViewportOverlay.h"
+#include "BillboardMetrics.h"
 #include "IEditorHost.h"
 #include "SettingsService.h"
 
@@ -114,7 +115,8 @@ void ViewportOverlayHelper::UpdateOverlays(
         objRot,
         static_cast<int>(hoveredHandle),
         static_cast<int>(activeHandle),
-        lightRad
+        lightRad,
+        hasCamera ? cam.height : 0u
     );
 
     if (hash == inOutHash)
@@ -151,7 +153,7 @@ void ViewportOverlayHelper::UpdateOverlays(
                 bb.x = obj.transform.position[0];
                 bb.y = obj.transform.position[1];
                 bb.z = obj.transform.position[2];
-                bb.sizePixels = 32.0f;
+                bb.sizePixels = BillboardMetrics::SizePixels(static_cast<float>(cam.height));
                 bb.rgbaTint = iconColor;
                 bb.objectId = obj.id;
                 billboards.push_back(bb);

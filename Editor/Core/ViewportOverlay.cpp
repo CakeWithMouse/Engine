@@ -139,7 +139,8 @@ namespace ViewportOverlay
         const float objRot[4],
         int hoverHandle,
         int activeHandle,
-        float lightRadius)
+        float lightRadius,
+        uint32_t viewportHeight)
     {
         uint64_t h = 14695981039346656037ull;
         auto hashBytes = [&](const void* ptr, size_t size) {
@@ -163,6 +164,7 @@ namespace ViewportOverlay
         hashBytes(&hoverHandle, sizeof(int));
         hashBytes(&activeHandle, sizeof(int));
         hashBytes(&lightRadius, sizeof(float));
+        hashBytes(&viewportHeight, sizeof(uint32_t));
         return h;
     }
 }

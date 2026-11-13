@@ -54,7 +54,8 @@ namespace ViewportOverlay
         const float objRot[4],
         int hoverHandle,
         int activeHandle,
-        float lightRadius
+        float lightRadius,
+        uint32_t viewportHeight
     );
 }
 
