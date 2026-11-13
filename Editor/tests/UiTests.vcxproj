@@ -110,6 +110,7 @@
         <ClInclude Include="..\Include\AssetDeletePrompt.h"/>
         <ClInclude Include="AssetDeleteTests.h"/>
         <ClInclude Include="InspectorRefreshTests.h"/>
+        <ClInclude Include="DockRedockTests.h"/>
         <ClInclude Include="UiSmokeTests.h"/>
     </ItemGroup>
 

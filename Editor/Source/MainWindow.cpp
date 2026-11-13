@@ -512,7 +512,7 @@ void EditorMainWindow::BuildSceneDocks()
 {
     sceneObjectsDock_ = new QDockWidget(Tr("Сцена / объекты", "Scene / Objects"), this);
     sceneObjectsDock_->setObjectName(QStringLiteral("SceneObjectsDock"));
-    sceneObjectsDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    sceneObjectsDock_->setAllowedAreas(Qt::AllDockWidgetAreas);
     sceneObjectsDock_->setFeatures(
         QDockWidget::DockWidgetMovable |
         QDockWidget::DockWidgetFloatable |
@@ -521,7 +521,7 @@ void EditorMainWindow::BuildSceneDocks()
 
     inspectorDock_ = new QDockWidget(Tr("Инспектор", "Inspector"), this);
     inspectorDock_->setObjectName(QStringLiteral("InspectorDock"));
-    inspectorDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    inspectorDock_->setAllowedAreas(Qt::AllDockWidgetAreas);
     inspectorDock_->setFeatures(
         QDockWidget::DockWidgetMovable |
         QDockWidget::DockWidgetFloatable |

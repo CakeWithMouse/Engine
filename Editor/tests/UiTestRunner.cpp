@@ -4,6 +4,7 @@
 #include "ImportSettingsV2EditTests.h"
 #include "AssetDeleteTests.h"
 #include "InspectorRefreshTests.h"
+#include "DockRedockTests.h"
 #include "UiSmokeTests.h"
 #include "EditorTheme.h"
 #include <QApplication>
@@ -23,6 +24,7 @@ int main(int argc, char* argv[])
         ImportSettingsV2EditTests::Run();
         AssetDeleteTests::Run();
         InspectorRefreshTests::Run();
+        DockRedockTests::Run();
         UiSmokeTests::Run();
         return 0;
     }

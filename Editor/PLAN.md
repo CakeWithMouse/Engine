@@ -131,7 +131,7 @@
 ## Задачи T1–T9 (сессия fix/editor-ui-bugfix, протокол engine-work-protocol)
 
 ### T1 — Инспектор: дёргание карточек Геометрия/Материал — СДЕЛАНО
-- **Коммит:** `fix(editor): dirty-check inspector geometry/material cards on tick` (HEAD ветки, хэш в git log).
+- **Коммит:** `74ec340` `fix(editor): dirty-check inspector geometry/material cards on tick`.
 - **Диагноз (подтверждено строками):**
   - H1 да: `ObjectInspectorPanel.cpp:287-288` `Clear()` карточек каждый тик + `:351-354` безусловные `SetData/SetTexture`; `GeometryCard.h:26-28,40-46` и `MaterialCard.h:37-38,50-60` без сравнения значений (setText/setStyleSheet/setToolTip/setEnabled каждый тик).
   - H2 да: `ObjectInspectorPanel.cpp:286` `cardMaterial_->show()` до `:355 setVisible(showMaterial)` → Show/Hide каждый тик для света/камеры/партиклов.
@@ -145,6 +145,23 @@
 - **Затронутые файлы:** `Editor/Include/ObjectInspectorPanel.h`, `Editor/Source/ObjectInspectorPanel.cpp`, `Editor/UI/CollapsibleCard.h`, `Editor/tests/InspectorRefreshTests.h` (new), `Editor/tests/UiTestRunner.cpp`, `Editor/tests/UiTests.vcxproj`.
 - **Не проверено в рантайме:** живое мигание при 10 с удержания модели/примитива; смена выделения; dir light (карточка света).
 - **В Backlog:** (1) `UpdateLightColorButton` `ObjectInspectorLight.cpp:128` setStyleSheet каждый тик — churn карточки света, вне T1. (2) Конфликт видимости `properties_`: `ProjectProperties.cpp:40` (по fields) vs `ObjectInspectorPanel.cpp:356` (showProperties) для моделей со схемой. (3) `MaterialCard::SetMaterialsAvailable` вызывается каждый тик `MainWindow.cpp:821` — Qt early-out по isEnabled/toolTip, отдельный guard не добавлял (вне пути Refresh теста).
+
+### T2 — Docking: возврат Сцены/Инспектора в раскладку — СДЕЛАНО
+- **Коммит:** `fix(editor): allow scene/inspector docks in all areas for re-dock` (хэш в git log).
+- **Диагноз:**
+  - H1 да (первично): `MainWindow.cpp:515/524` `allowedAreas=Left|Right`, но `DockLayoutManager::ApplyDefaultLayout` ставит Сцену/Инспектор в **Top**-область через split (`DockLayoutManager.cpp:75-89`). Противоречие: интерактивный drag назад не имеет Top-цели → док не вернуть в раскладку.
+  - H2 да (усугубляет): `MainWindow.cpp:131-132` вьюпорт-док в Top на всю ширину, `setCentralWidget(nullptr)` → боковые зоны сдавлены.
+  - H3 нет: `setTitleBarWidget` нет (grep пуст), заголовки штатные, двойной клик работает.
+  - H4 частично: рассинхрон allowedAreas и фактической Top-раскладки; правка allowedAreas снимает.
+  - H5 частично: `dockOptions` без GroupedDragging (`:92`); View-меню `toggleViewAction` есть (`:235`), но плавающую панель не re-dock'ает. Не первичная причина, GroupedDragging не добавлял (вне минимальной правки).
+- **Правка (2 строки):** `MainWindow.cpp:515/524` `setAllowedAreas(Qt::AllDockWidgetAreas)` у Сцены и Инспектора (как у Viewport/Content). DockLayoutManager не переписан.
+- **Тест:** `Editor/tests/DockRedockTests.h` (7 проверок): реальный `ApplyDefaultLayout`, у всех 5 доков allowedAreas содержит Left|Right|Top|Bottom и features Movable|Floatable; Сцена/Инспектор `setFloating(true)->false` → `isFloating()==false`, `dockWidgetArea != NoDockWidgetArea`. Локаторы по objectName.
+- **Нюанс (эмпирически):** программный `setFloating(false)` возвращает док в прежнюю область ДАЖЕ при Left|Right (allowedAreas ограничивает только интерактивный drag, DBG: area=4 Top). Поэтому страж регрессии — проверка allowedAreas всех четырёх областей; setFloating-критерий приёмки выполняется, но сам по себе откат не ловит.
+- **Проверки:** EditorModule Debug OK; CoreTests 712, HostTests 140, UiTests 458 (443+8+7); `git diff -- Engine Game build.ps1` пуст; MainWindow.cpp diff 2/2 (net-zero строк).
+- **Красный храповик (база, не регрессия):** `MainWindow.cpp` 1475 строк > лимит 1460 (`check.ps1:216`). Подтверждено `git show HEAD/HEAD~1` = 1475 до правки; T2 добавляет 0 строк. check.ps1 -Quick падает раньше на кириллице MaterialEditorWindow, поэтому храповик строк MainWindow не всплывал. Аналог EditorUiTests 1045/1831. **Решение о лимите за Юрием, check.ps1 не модифицирован.**
+- **Затронутые файлы:** `Editor/Source/MainWindow.cpp`, `Editor/tests/DockRedockTests.h` (new), `Editor/tests/UiTestRunner.cpp`, `Editor/tests/UiTests.vcxproj`.
+- **Не проверено в рантайме:** интерактивный drag Сцены/Инспектора обратно в лево/право/низ/верх, двойной клик по заголовку, Reset Layout после возврата.
+- **Ограничение теста:** EditorMainWindow не линкуется в UiTests (тяжёлые зависимости), конфигурация доков в тесте зеркалит продакшен; фактические строки MainWindow проверены grep/diff.
 
 ---
 
