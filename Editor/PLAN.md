@@ -236,6 +236,16 @@
 - **Проверки протокола:** запрещённые widget-типы в `Core/` — пусто; изменённые файлы <500 строк (кроме известного храповика `MainWindow.cpp` 1475>1460, решение за Юрием); `git diff -- Engine Game build.ps1` пуст.
 - **T4.2/T4.3 — БЛОКИРОВАНО на момент этой остановки** (правка `Engine/Content/Shaders/EditorOverlay.hlsl` + решение о категориальных слотах `ThemePalette`), ждали разрешения Юрия; код Editor не менялся. **Впоследствии снято:** разрешение получено, T4.2 (`486ae79`) и T4.3 (`b15f7bc`) — СДЕЛАНО, см. выше.
 
+### T5 — Сборка: run-editor -Fast не стартует (post-build SDK требует v142) — СДЕЛАНО
+- **Коммит:** `chore(build): install v142 toolset for SDK post-build (T5)` (только `Editor/PLAN.md`, правок кода нет).
+- **Симптом:** `run-editor.ps1 -Fast` падал на post-build `EngineLauncher.vcxproj:29` (MSB3073, exit 1) → `run-editor.ps1:176` «Build failed with exit code 1». Все проекты собирались; версия 2026.11.07.7.
+- **Причина (прямой запуск New-ProjectSdk.ps1 с теми же параметрами, настоящий stderr):** `New-ProjectSdk.ps1:8` требует `Resolve-EngineToolchain -Toolset 'v142'` (введено коммитом `8989565` от 08.11 — SDK на базлайне VS2019 для потребителей только с VS2019). В окружении был только VS2026 18.5 с MSVC v143 14.44.35207 / v145 14.50.35717 → throw `Toolchain.ps1:100`: «No compatible x64 C++ tools. Required MSVC >= 14.29.30133, v142. Found: v143 14.44.35207, v145 14.50.35717», exit 1. Гипотезы (b)–(e) (занятые файлы/процессы, vcpkg/assimp, пути/кодировка, Version.json/кэш движка) исключены: падение на строке 8 происходит до любого обращения к файлам, процессам и кэшу.
+- **Фикс (окружение, без правок кода):** установлен компонент `Microsoft.VisualStudio.Component.VC.14.29.16.11.x86.x64` (MSVC 14.29.30133) в VS2026 через VS Installer (`setup.exe modify --add …`, потребовался UAC). Кодовый обход не проходит лимит «ровно 1 файл BuildSupport»: требование v142 продублировано в `Test-SdkCompatibility.ps1:11` (throw при отсутствии v142) — потребовало бы правки 2 файлов.
+- **Проверки:** `Get-EngineToolchains` → v142 14.29.30133 / v143 14.44.35207 / v145 14.50.35717. `run-editor.ps1 -Fast`: сборка 79.45 с; post-build SDK собран на v142 (`build/sdk/x64/Debug/14.29.30133/Engine.lib`), опубликован (format 2, toolset v142, version 2026.11.07.7, assimp true); пробы совместимости v142/v143/v145 — wholeArchiveLink passed; шаг 6 `Starting: EngineLauncher.exe` → `=== Completed successfully ===`, exit 0; EngineLauncher PID 30488 жив.
+- **Engine-тесты не запускались:** код не менялся (`git diff -- Engine Game build.ps1` пуст), действует правило протокола. Окружение для красной базы `Engine/tests/compatibility` (отсутствие v142, строка эталона выше) восстановлено; сам тест не перезапускался — результат не подтверждён.
+- **Затронутые файлы:** только `Editor/PLAN.md`.
+- **Не проверено в рантайме:** живой GUI редактора (открытие проекта из лаунчера, ручные сценарии протокола).
+
 ---
 
 ## Решения
