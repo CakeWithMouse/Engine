@@ -190,11 +190,16 @@
 - **Затронутые файлы:** `Editor/UI/ViewportOverlayHelper.cpp`, `Editor/tests/ViewportBillboardTests.h` (new), `Editor/tests/UiTestRunner.cpp`, `Editor/tests/UiTests.vcxproj`.
 - **Не проверено в рантайме:** визуальное положение иконки света точно в точке источника в живом GUI (вынесено в ручные сценарии полной остановки после T4).
 
-#### T4.2 — Размер иконки от высоты вьюпорта — БЛОКИРОВАНО (Engine shader)
-- **Решение:** код Editor не менялся. Поле размера в ABI **есть** (`EngineOverlayBillboard::sizePixels`, `Engine/Include/Engine/Runtime/ViewportOverlayApi.h:23-30`), Editor заполняет `bb.sizePixels = 32.0f` (`ViewportOverlayHelper.cpp:154`), **но шейдер его игнорирует**.
-- **Доказательство (запрещённая зона, read-only):** `VSBillboard` (`Engine/Content/Shaders/EditorOverlay.hlsl:116-127`) вычисляет `currentHalf = max(abs(baseOffset.x/y))` из `sizePixels`, затем `effectiveScale = clampedHalf / currentHalf`, где `clampedHalf = clamp(lerp(9,10,saturate(dist/3)),9,10)` → `pixelOffset = baseOffset * effectiveScale`. `sizePixels` **делится обратно** — диаметр всегда 18–20px независимо от значения Editor. Любая правка размера на стороне Editor — чистый no-op.
-- **Доп. препятствие Editor-стороны:** `ComputeOverlayHash` (`Editor/Core/ViewportOverlay.cpp:130-167`) не включает width/height вьюпорта, `overlayHash_` не сбрасывается на resize — размер-как-доля-высоты не запускал бы повторную загрузку оверлея без правки хеша. Но это бессмысленно без правки шейдера.
-- **Точная правка в Engine:** см. «Нужно в ABI» п. 11. **БЛОКИРОВАНО** — требуется правка `EditorOverlay.hlsl` (запрещённая зона без явного разрешения Юрия).
+#### T4.2 — Размер иконки от высоты вьюпорта — СДЕЛАНО
+- **Коммит:** `486ae79` `fix(editor): drive billboard icon size from physical viewport height (T4.2)`.
+- **Разрешение Юрия:** правка ровно одного файла вне Editor/ — `Engine/Content/Shaders/EditorOverlay.hlsl`. Структура `EngineOverlayBillboard` не менялась (поле `sizePixels` уже было в ABI).
+- **Правка шейдера (`VSBillboard`):** убрано обратное деление `sizePixels` и кламп 18–20px (`currentHalf`/`effectiveScale`/`clampedHalf`). Теперь `float2 pixelOffset = input.Offset;` — диаметр квада берётся напрямую из `sizePixels` (движок заполняет `Offset = sizePixels/2` в физических px). `ndcOffset` без изменений.
+- **Правка Editor:** новый `Editor/Core/BillboardMetrics.h` (header-only, чистый std, Core-safe) — именованные константы `kHeightFraction = 0.022f`, `kMinPixels = 16.0f`, `kMaxPixels = 64.0f`; `SizePixels(physicalHeight) = clamp(physicalHeight * 0.022, 16, 64)`. `ViewportOverlayHelper.cpp:156`: `bb.sizePixels = 32.0f` заменено на `BillboardMetrics::SizePixels(static_cast<float>(cam.height))`. `cam.height` — **физическая** высота фреймбуфера (devicePixelRatio уже учтён движком), поэтому доля считается от физических px, а не логических.
+- **Сброс оверлея на resize:** `ComputeOverlayHash` (`ViewportOverlay.cpp/.h`) получил параметр `uint32_t viewportHeight` и `hashBytes(&viewportHeight, …)`; единственный вызов (`ViewportOverlayHelper.cpp:119`) передаёт `hasCamera ? cam.height : 0u`. Смена высоты вьюпорта меняет хеш, поэтому билборды перезагружаются с новым размером.
+- **Тест (`ViewportBillboardTests.h`, лёгкий `UiTests.exe`):** +10 проверок размера — матрица logical 1080/1440 × dpr 1.0/1.5/2.0 (`SizePixels(logical*dpr) == clamp(physical*0.022,16,64)`); кламп min на 100px→16, max на 10000px→64; `sizePixels` билборда из физической высоты камеры (600→16); смена `camera.height` 600→1080 перезагружает билборд с новым размером (хеш высоты). Итого 16 проверок (6 позиция + 10 размер).
+- **Проверки:** EditorModule Debug OK; CoreTests 712, HostTests 140, UiTests 474 (458+16); `git diff -- Engine Game build.ps1` — только `EditorOverlay.hlsl` (4+/12−); `BillboardMetrics.h` 18, `ViewportOverlay.cpp` 171, `ViewportOverlayHelper.cpp` 301, `ViewportBillboardTests.h` 169, `EditorOverlay.hlsl` 195 строк (<500); Core/ без запрещённых типов. Engine-тесты после коммита — см. сводку T4.
+- **Затронутые файлы:** `Engine/Content/Shaders/EditorOverlay.hlsl`, `Editor/Core/BillboardMetrics.h` (new), `Editor/Core/ViewportOverlay.cpp`, `Editor/Core/ViewportOverlay.h`, `Editor/UI/ViewportOverlayHelper.cpp`, `Editor/tests/ViewportBillboardTests.h`.
+- **Не проверено в рантайме:** визуальный размер иконки на 1080p/1440p и масштабе 150% в живом GUI (ручные сценарии полной остановки после T4).
 
 #### T4.3 — Стиль/тинт иконки из EditorTheme — БЛОКИРОВАНО (Engine shader + палитра)
 - **Решение:** код Editor не менялся. Editor-сторона тинта **уже подключена** (`GetBillboardIcon`, `ViewportOverlayHelper.cpp:16-58`: PointLight из `obj.pointLight.color`, SunSky `0xFF30D0FF`, Camera `0xFFE0E0E0`, GameCamera `0xFF80E080`, Particles `0xFFE080FF`, Character `0xFF50E050` → `rgbaTint`), **но видимый результат определяется шейдером и белой плашкой текстуры**.
@@ -202,8 +207,8 @@
 - **Препятствие Editor-стороны:** `EditorTheme::ThemePalette` (`EditorTheme.h`) **не имеет категориальных слотов цвета иконок** (только text/bg/border/accent/axisX/Y/Z). Верные theme-тинты потребовали бы изобретения новых полей палитры (дизайн-решение), и даже тогда шейдер вымывает переданный тинт.
 - **Точная правка в Engine + решение по палитре:** см. «Нужно в ABI» п. 12. **БЛОКИРОВАНО** — требуется правка `EditorOverlay.hlsl` (запрещённая зона) и решение Юрия о категориальных слотах `ThemePalette`.
 
-- **Проверки T4 (сводно):** EditorModule Debug OK; CoreTests 712, HostTests 140, UiTests 464; `git diff -- Engine Game build.ps1` пуст (T4.2/T4.3 — без правки кода). Красная база без изменений.
-- **Открытые вопросы:** T4.2/T4.3 ждут разрешения Юрия на правку `Engine/Content/Shaders/EditorOverlay.hlsl` (и, для T4.3, решения о категориальных слотах палитры). До разрешения — БЛОКИРОВАНО, код Editor не меняется.
+- **Проверки T4 (сводно):** T4.1 (`b078a87`) + T4.2 (`486ae79`) — EditorModule Debug OK; CoreTests 712, HostTests 140, UiTests 474 (458+16 billboard); `git diff -- Engine Game build.ps1` — только `EditorOverlay.hlsl` (T4.2, 4+/12−). Engine-тесты после коммита T4.2: run.ps1 / skeletal / edit-session / scene-module — см. ниже. Красная база без изменений. T4.3 — в работе.
+- **Открытые вопросы:** T4.3 (theme-aware тинт) — разрешение Юрия на правку `EditorOverlay.hlsl` получено; категориальные слоты `ThemePalette` добавляются в Editor. Новое поле ABI для цвета плашки не требуется (плашка = tint, контраст глифа выводится в шейдере).
 
 ---
 
@@ -535,10 +540,9 @@
     - `Звуки (Volume, Loop)`: параметры есть в `AudioEngine`, но отсутствуют в C-ABI `EngineAudioPreviewApi` (`SceneEditAudio.cpp:36`).
     - `Звуки (Force mono, Trim start/end)`: отсутствуют в движке (декодеры не выполняют микширование каналов и обрезку семплов).
     - **Предложенная архитектурная правка C-ABI:** версионированное сервисное расширение `EngineAssetImportExtension` (`"Engine.Asset.Import"`) с методом `importAssetWithOptions(void* context, const char* source, uint32_t kind, const char* optionsJson, char* virtualPath, uint32_t pathCapacity, char* error, uint32_t errorCapacity)`.
-11. **Размер билборда иконки (`sizePixels`) — T4.2:**
-    - `VSBillboard` в `Engine/Content/Shaders/EditorOverlay.hlsl:116-127` делит `sizePixels` обратно (`effectiveScale = clampedHalf / currentHalf`, `clampedHalf = clamp(lerp(9,10,saturate(dist/3)),9,10)`) и жёстко клампит диаметр в 18–20px, игнорируя значение из Editor (`bb.sizePixels = 32.0f`, `ViewportOverlayHelper.cpp:154`).
-    - Требуется: уважать `bb.sizePixels` как целевой диаметр в **физических** пикселях (min/max clamp на стороне шейдера либо доверять Editor-значению), чтобы Editor мог задавать размер как долю физической высоты вьюпорта (~2.2%) с clamp в физических px.
-    - Сопутствующее (Editor-сторона, бессмысленно без правки шейдера): `ComputeOverlayHash` (`Editor/Core/ViewportOverlay.cpp:130-167`) не включает width/height вьюпорта — при размере-от-высоты нужен сброс `overlayHash_` на resize, иначе оверлей не перезагрузится.
+11. **Размер билборда иконки (`sizePixels`) — T4.2 — СНЯТО (коммит `486ae79`):**
+    - Реализовано с разрешения Юрия (правка ровно `Engine/Content/Shaders/EditorOverlay.hlsl`, структура `EngineOverlayBillboard` не менялась). `VSBillboard` больше не делит `sizePixels` обратно и не клампит в 18–20px: `float2 pixelOffset = input.Offset;` — диаметр берётся из Editor-значения.
+    - Editor: `BillboardMetrics::SizePixels(physicalHeight) = clamp(physicalHeight * 0.022, 16, 64)` (физические px, dpr учтён в `cam.height`); `ComputeOverlayHash` включает высоту вьюпорта → сброс оверлея на resize. Подробности и тесты — см. T4.2.
 12. **Стиль/тинт билборда иконки — T4.3:**
     - `PSBillboard` в `Engine/Content/Shaders/EditorOverlay.hlsl:140-178` затирает `input.Tint` белой плашкой текстуры (`finalRgb = lerp(plateColor, texColor.rgb, texColor.a)`, alpha плашки 220/255 ≈ 0.86 → тинт вымывается ~86%), жёстко задаёт тёмный обод `float3(0.12,0.12,0.14)` (dist>0.44) и процедурную «лампочку» `float3(1,1,1)` (dist<0.22 при `texColor.a<=0.1`).
     - Требуется: применять тинт к плашке без вымывания (умножение/сохранение насыщенности), сделать обод и внутренний символ theme-aware (цвета через ABI/константы, а не хардкод).
