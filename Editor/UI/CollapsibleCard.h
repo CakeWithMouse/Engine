@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 #include <QString>
+#include <functional>
 #include "EditorTheme.h"
 #include "IconProvider.h"
 
@@ -65,6 +66,15 @@ public:
         expanded_ = exp;
         content_->setVisible(expanded_);
         UpdateHeaderText();
+        if (toggledCallback_)
+        {
+            toggledCallback_(expanded_);
+        }
+    }
+
+    void SetToggledCallback(std::function<void(bool)> callback)
+    {
+        toggledCallback_ = std::move(callback);
     }
 
     bool IsExpanded() const { return expanded_; }
@@ -88,4 +98,5 @@ private:
     QWidget* content_ = nullptr;
     QVBoxLayout* contentLayout_ = nullptr;
     int subId_ = 0;
+    std::function<void(bool)> toggledCallback_;
 };

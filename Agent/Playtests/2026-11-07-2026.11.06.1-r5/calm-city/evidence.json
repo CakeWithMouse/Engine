@@ -1,0 +1,56 @@
+[
+  {
+    "feature_id": "tangent-transform-negative-scale",
+    "action": "Код-ревью MaterialTemplate.hlsl:108-111 и MaterialCommon.hlsli:86-90; аналитический basis check для N=+Z,T=+X,B=+Y,w=+1 при scale=(-2,3,1).",
+    "expected": "Tangent w меняет знак при отрицательном determinant, поэтому reconstructed bitangent совпадает с transform исходного bitangent.",
+    "actual": "Шейдер передаёт vertexTangent.w без изменения. При reflection reconstructed bitangent направлен противоположно преобразованному.",
+    "status": "partial",
+    "evidence": "../../../../Engine/Content/Shaders/Material/MaterialTemplate.hlsl:111; ../../../../Engine/Content/Shaders/Material/MaterialCommon.hlsli:89; diary.md",
+    "classification": "candidate-defect; requires coordinator GPU-pixel regression/new Runtime"
+  },
+  {
+    "feature_id": "tangent-transform-nonuniform-scale",
+    "action": "Код-ревью transform normal/tangent paths MaterialTemplate.hlsl:108-111.",
+    "expected": "При положительном неравномерном масштабе нормаль через inverse-transpose и tangent через world matrix остаются перпендикулярны после re-orthogonalization.",
+    "actual": "Реализация соответствует ожидаемому преобразованию по коду; игровой пиксель не наблюдался.",
+    "status": "partial",
+    "evidence": "../../../../Engine/Content/Shaders/Material/MaterialTemplate.hlsl:108-111; diary.md",
+    "classification": "code-review-only"
+  },
+  {
+    "feature_id": "tangent-fallback-and-savegame-rebuild",
+    "action": "Проверены GenerateTangents MeshData.cpp:87-147 и MeshState SaveState.cpp:12-21.",
+    "expected": "Вырожденный UV получает w=0 и конечное перпендикулярное направление; при чтении SaveGame tangent восстанавливается из сохранённых 12 floats и индексов.",
+    "actual": "Логика обнаружена в коде; фактический mesh roundtrip в новом Runtime ещё не выполнялся.",
+    "status": "partial",
+    "evidence": "../../../../Engine/Source/Render/MeshData.cpp:87-147; ../../../../Engine/Source/MainGame/SaveState.cpp:12-21",
+    "classification": "code-review-only"
+  },
+  {
+    "feature_id": "r3-calm-city-copy-and-cli-rebuild",
+    "action": "Распакован источник r3 в изолированный каталог проекта.",
+    "expected": "Получить свежий CLI проект, перенести Source/Content, пересобрать и повторить сцену на новой Runtime.",
+    "actual": "Свежий CLI проект создан; enable-code и build проекта прошли после повтора вне sandbox; upgrade в новую CalmCityFinal и её build на Runtime 2026.11.07.0 прошли. Runtime .06.1 сыграл 30 кадров, финальный Save/Load .07.0 проверен отдельно.",
+    "status": "passed",
+    "evidence": "../../../Engine/build/playtests/20261107-r5/calm-city/CalmCity; ../../../Engine/build/playtests/20261107-r5/calm-city/CalmCityFinal; REBUILD.md; evidence/CodeBuild.log",
+    "classification": "pending-runtime"
+  },
+  {
+    "feature_id": "city-runtime-and-savegame-cross-process",
+    "action": "Runtime .06.1: CalmCity --mode game --frames 30; затем upgrade/build новой копии CalmCityFinal на .07.0 и два процесса --frames 180 с CALM_SAVE_TEST save/load.",
+    "expected": "Сцена запускается; SaveGame возвращает машину к сохранённой позиции, после загрузки маршрут продолжается.",
+    "actual": "Оба build exit 0; runtime 30 кадров exit 0; Save и Load exit 0. Лог: saved positionX=5.6, advancedX=3.1; process=new loadedX=5.6 continuedX=5.35 PASS. Новый процессный BMP просмотрен: квартал, машина, свет, тени, LOD overlay.",
+    "status": "passed",
+    "evidence": "evidence/SaveGameSelfTest.log; evidence/save.stdout.txt; evidence/load.stdout.txt; evidence/save-load-new-process.bmp; REBUILD.md",
+    "classification": "passed; visual frame observed, tangent normal mapping not covered"
+  },
+  {
+    "feature_id": "normal-map-negative-scale-gpu-integration",
+    "action": "Планировался A/B material normal-map при scale=(2,3,1) и scale=(-2,3,1).",
+    "expected": "Ориентация tangent basis сохраняется/меняется корректно при положительном неравномерном масштабе и отражении.",
+    "actual": "В проекте не было создано/подключено тестовое normal-map material; визуально и численно normal-map output не измерен. Координатор выполняет собственный GPU pixel regression.",
+    "status": "not-tested",
+    "evidence": "diary.md; feedback.md",
+    "classification": "not-tested; candidate negative-determinant defect remains separately under coordinator test"
+  }
+]

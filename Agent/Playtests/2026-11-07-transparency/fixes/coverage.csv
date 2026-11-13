@@ -1,0 +1,10 @@
+function_or_bug,command,expected,test
+TR-001 view-depth sorting,render.transparency,pan does not reverse parallel layers,TransparencyTests pan/orbit
+TR-002 global instance and LOD ordering,render.transparency,source-over correct across batches and LOD,TransparencyTests copies/instances/crowd/interleave/lod-order
+TR-003 dither equality and constant weights,render.transparency,exactly one LOD contributes each pixel,TransparencyTests fade/dolly/orbit
+TR-004 transparent impostor,render.transparency,keep last mesh and preserve alpha/color,TransparencyTests impostor
+Range SRV lifetime,render.transparency,correct pixels after 2 to 300 to 2 visible instances,TransparencyTests stream-growth
+Depth and ties,render.transparency,opaque depth rejects rear layers and equal depths stay stable,TransparencyTests opaque-occlusion/equal-depth
+Existing materials,EngineTests and MaterialRenderTests,no loss of previous material fixes,70 runtime and 48 material cases
+Existing point shadows,render.point-shadows,no regressions from shared LOD dither,PointShadowSlotsLodTests and PointShadowMotionTests
+SDK and release,compatibility and package validation,old modules and new C++ projects work,116 compatibility and 12 packaged launches

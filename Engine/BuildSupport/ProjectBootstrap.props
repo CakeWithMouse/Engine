@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- The IDE is a build entry point, not a second toolchain selector. The child
+       build gets explicit global properties from ProjectTools.ps1. -->
+  <PropertyGroup Condition="'$(EngineToolchainSelected)'!='true'">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+    <VCToolsVersion></VCToolsVersion>
+    <NMakeBuildCommandLine>powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(EngineSdk)\ProjectTools.ps1&quot; -Action Build -Project &quot;$(MSBuildProjectDirectory)\Project.json&quot; -Runtime &quot;$(EngineSdk)\..&quot;</NMakeBuildCommandLine>
+    <NMakeReBuildCommandLine>$(NMakeBuildCommandLine) -Rebuild</NMakeReBuildCommandLine>
+    <NMakeCleanCommandLine>powershell.exe -NoProfile -Command &quot;Write-Output 'Use Rebuild to regenerate project code. Active and previous modules are preserved.'&quot;</NMakeCleanCommandLine>
+    <NMakeOutput>$(MSBuildProjectDirectory)\Project.code.json</NMakeOutput>
+    <NMakeIncludeSearchPath>$(EngineSdk)\Include;$(MSBuildProjectDirectory)\Source;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+  </PropertyGroup>
+</Project>

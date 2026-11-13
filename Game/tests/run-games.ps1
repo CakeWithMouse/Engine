@@ -64,6 +64,10 @@ Invoke-CheckedProcess $fixtureLauncher '--check BasicExamples' 1 # missing exe
 $fixtureGame = Join-Path $fixture 'BasicExamples'
 New-Item -ItemType Directory -Path $fixtureGame -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $output 'BasicExamples/BasicExamples.exe') -Destination (Join-Path $fixtureGame 'BasicExamples.exe')
+# Keep native dependencies so the missing-content check reaches the engine.
+# With Assimp enabled, an EXE-only fixture fails in the Windows loader instead.
+Get-ChildItem -LiteralPath (Join-Path $output 'BasicExamples') -Filter '*.dll' -File |
+    ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $fixtureGame }
 Invoke-CheckedProcess $fixtureLauncher '--check BasicExamples' 1 # missing manifest
 Set-Content -LiteralPath (Join-Path $fixtureGame 'RequiredFiles.txt') -Value 'EngineContent/Shaders/Common.hlsli' -Encoding ascii
 Invoke-CheckedProcess $fixtureLauncher '--check BasicExamples' 1 # missing shader

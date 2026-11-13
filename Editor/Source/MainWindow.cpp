@@ -10,6 +10,8 @@
 #include "ExternalGameRunner.h"
 #include "EditorTheme.h"
 #include "EditorLocale.h"
+#include "FileService.h"
+#include "Logger.h"
 #include "ViewportCommands.h"
 #include "ViewportHeaderBar.h"
 #include "UIEditorWindow.h"
@@ -70,6 +72,7 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
 }
 
 EditorMainWindow::~EditorMainWindow() {
+    UnregisterAssetCommands();
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("UI.Create"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("UI.OpenEditor"));
     if (host_) host_->SetUiListener(nullptr);
@@ -340,11 +343,7 @@ void EditorMainWindow::BuildSceneMenu()
 
     sceneMenu_->addSeparator();
 
-    resourcesSubMenu_ = sceneMenu_->addMenu(Tr("Ресурсы", "Assets"));
-    actAddModel_ = resourcesSubMenu_->addAction(Tr("Добавить модель…", "Add Model…"), this, [this] { AddModel(); });
-    actImportModel_ = resourcesSubMenu_->addAction(Tr("Импорт модели…", "Import Model…"), this, [this] { ImportAsset(0); });
-    actImportTexture_ = resourcesSubMenu_->addAction(Tr("Импорт текстуры…", "Import Texture…"), this, [this] { ImportAsset(1); });
-    actImportAudio_ = resourcesSubMenu_->addAction(Tr("Импорт аудио…", "Import Audio…"), this, [this] { ImportAsset(2); });
+    BuildResourcesMenu(sceneMenu_);
 
     actReloadShaders_ = sceneMenu_->addAction(Tr("Перекомпилировать шейдеры", "Reload Shaders"), this, [this] {
         ReloadShaders();
@@ -610,7 +609,7 @@ void EditorMainWindow::ConnectPanels()
             });
 
     connect(sceneObjectsPanel_, &SceneObjectsPanel::AddModelRequested, this, [this] { AddModel(); });
-    connect(sceneObjectsPanel_, &SceneObjectsPanel::ImportModelRequested, this, [this] { ImportAsset(0); });
+    connect(sceneObjectsPanel_, &SceneObjectsPanel::ImportModelRequested, this, [this] { CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 0}}); });
     connect(sceneObjectsPanel_, &SceneObjectsPanel::DuplicateRequested, this, [this] { SubmitObjectCommand(EditorCommand::DuplicateObject); });
     connect(sceneObjectsPanel_, &SceneObjectsPanel::RemoveRequested, this, [this] { SubmitObjectCommand(EditorCommand::RemoveObject); });
 
@@ -833,7 +832,7 @@ void EditorMainWindow::MaybeSave(std::function<void()> after)
         return;
 
     if (objectInspectorPanel_)
-        objectInspectorPanel_->ClearFocusIfInside();
+        objectInspectorPanel_->CommitPendingEdits();
 
     checkingChanges_ = true;
     afterCheck_ = std::move(after);
@@ -851,7 +850,7 @@ void EditorMainWindow::SaveScene(bool saveAs, std::function<void()> after)
         return;
 
     if (objectInspectorPanel_)
-        objectInspectorPanel_->ClearFocusIfInside();
+        objectInspectorPanel_->CommitPendingEdits();
 
     QString path = scenePath_;
 
@@ -1153,6 +1152,28 @@ void EditorMainWindow::CommandFinished(
         sceneBusy_ = false;
     }
 
+    if (command.type == EditorCommand::UpdateAsset && sidecarTx_.active())
+    {
+        const QString projectDir = QFileInfo(ProjectPath()).dir().absolutePath();
+        FileService fs(&Logger::Instance(), this);
+        fs.SetProjectRoot(projectDir);
+        QString txError;
+        const auto txResult = sidecarTx_.FinishUpdate(fs, command.path, QString::fromUtf8(host_->host().contentRoot),
+                                                      status == EngineSceneOk, &txError);
+        if (txResult == EditorCore::SidecarUpdateResult::RolledBack ||
+            txResult == EditorCore::SidecarUpdateResult::RollbackFailed)
+        {
+            const QString message = txResult == EditorCore::SidecarUpdateResult::RolledBack
+                ? Tr("Не удалось переимпортировать модель с новыми настройками импорта. Прежние настройки восстановлены.",
+                     "Failed to reimport the model with the new import settings. The previous settings have been restored.")
+                : Tr("Не удалось переимпортировать модель с новыми настройками импорта. Не удалось восстановить прежние настройки: %1",
+                     "Failed to reimport the model with the new import settings. Restoring the previous settings failed: %1").arg(txError);
+            AppendLine(message);
+            QMessageBox::warning(this, Tr("Настройки импорта", "Import Settings"), message);
+            return;
+        }
+    }
+
     if (status != EngineSceneOk)
     {
         afterSave_ = {};
@@ -1211,6 +1232,7 @@ void EditorMainWindow::CommandFinished(
 
         if (command.type == EditorCommand::ImportModel && command.path.startsWith(QStringLiteral("/Game/")))
         {
+            HandleModelImported(command);
             QFile metadata(QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(command.path.mid(6) + QStringLiteral(".import.json")));
             if (metadata.open(QIODevice::ReadOnly))
             {

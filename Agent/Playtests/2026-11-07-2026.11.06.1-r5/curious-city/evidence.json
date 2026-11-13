@@ -1,0 +1,134 @@
+{
+  "persona": "curious-city",
+  "baseline": {
+    "head": "55d3b0ceea1723c88ffd51d701787f87ccbb6fc4",
+    "usageStartPercent": 50,
+    "usageLatestPercent": 54,
+    "usageWindowMins": 10080,
+    "usageResetsAt": 1794317816
+  },
+  "runtime": {
+    "version": "2026.11.07.0",
+    "runtimeExe": "Game/build/x64/Release/Runtime/EngineRuntime.exe",
+    "launcherExe": "Game/build/x64/Release/EngineLauncher.exe",
+    "project": "Engine/build/playtests/20261107-r5/curious-city/final-city",
+    "projectStore": "Engine/build/playtests/20261107-r5/curious-city/EngineStore"
+  },
+  "source": {
+    "archive": "Agent/Playtests/2026-11-07-2026.11.06.1-r5/curious-city/CuriousCity-r3-source.zip",
+    "staging": "Engine/build/playtests/20261107-r5/curious-city/staged",
+    "originalR3Modified": false
+  },
+  "buildRuns": [
+    {
+      "action": "--create-project fresh-city CuriousCityR5",
+      "exitCode": 0,
+      "evidence": "Agent/Playtests/2026-11-07-2026.11.06.1-r5/curious-city/evidence/fresh-create.*"
+    },
+    {
+      "action": "--enable-code Project.json initial sandbox attempt",
+      "exitCode": "not-captured-after-command-session-cancel",
+      "actual": "CodeBuild.log ended with LNK1101 incorrect MSPDB140.DLL; retry was performed by instruction",
+      "log": "Engine/build/playtests/20261107-r5/curious-city/fresh-city/CodeBuild.log"
+    },
+    {
+      "action": "--enable-code Project.json escalated retry",
+      "exitCode": 0,
+      "evidence": "Agent/Playtests/2026-11-07-2026.11.06.1-r5/curious-city/evidence/fresh-enable-retry.*"
+    },
+    {
+      "action": "--build-project r3 source on pinned 2026.11.06.1 SDK",
+      "exitCode": 0,
+      "evidence": "Agent/Playtests/2026-11-07-2026.11.06.1-r5/curious-city/evidence/r3-project-build-retry.*"
+    },
+    {
+      "action": "--upgrade-project old project to new final-city copy",
+      "exitCode": 0,
+      "engineVersion": "2026.11.07.0",
+      "evidence": "Agent/Playtests/2026-11-07-2026.11.06.1-r5/curious-city/evidence/upgrade-final2.*"
+    },
+    {
+      "action": "--build-project final-city on 2026.11.07.0 SDK",
+      "exitCode": 0,
+      "evidence": "Agent/Playtests/2026-11-07-2026.11.06.1-r5/curious-city/evidence/final-project-build.*"
+    },
+    {
+      "action": "--check-project and --smoke-project final-city",
+      "exitCodes": [0, 0],
+      "evidence": "Agent/Playtests/2026-11-07-2026.11.06.1-r5/curious-city/evidence/final-{check,smoke}.*"
+    }
+  ],
+  "checks": [
+    {
+      "featureId": "city-house-money-save-load",
+      "action": "project.input drove ground cursor click (500,400), build click (70,120), save click (145,120), then load click (250,120) in a 640x480 viewport.",
+      "expected": "Two successful purchases add two houses and charge $100 each; Save/Load restores the saved balance and house count.",
+      "actual": "exit 0. Log: initial $500/0; raycast purchase $400/1; build button purchase $300/2; save and load callbacks ran; restored state $300/2. Result contains House_1 and House_2.",
+      "status": "passed-runtime",
+      "visualStatus": "unverified",
+      "evidence": [
+        "Engine/build/playtests/20261107-r5/curious-city/city-placement.request.json",
+        "Engine/build/playtests/20261107-r5/curious-city/city-placement.result.json",
+        "Agent/Playtests/2026-11-07-2026.11.06.1-r5/curious-city/evidence/city-placement.log",
+        "Agent/Playtests/2026-11-07-2026.11.06.1-r5/curious-city/evidence/city-placement.exitcode.txt",
+        "Engine/build/playtests/20261107-r5/curious-city/UI-Saves/curious-city-r2/default/city.save.json"
+      ],
+      "frameDump": "requested but not produced"
+    },
+    {
+      "featureId": "city-house-money-save-load-long-cycle",
+      "action": "project.input ran 130 frames with the project's existing CURIOUS_CITY_CYCLE=first SaveGame exercise.",
+      "expected": "Save $400/1 house, add a second house after income, load prior state, and resume income.",
+      "actual": "exit 0. Log records saved $400/1, temporary 2-house state, load restored $400/1 at frame 64, then income reached $410 at frame 125.",
+      "status": "passed-runtime-automation",
+      "visualStatus": "unverified",
+      "evidence": [
+        "Engine/build/playtests/20261107-r5/curious-city/city-cycle1.request.json",
+        "Engine/build/playtests/20261107-r5/curious-city/city-cycle1.result.json",
+        "Agent/Playtests/2026-11-07-2026.11.06.1-r5/curious-city/evidence/city-cycle1.log",
+        "Engine/build/playtests/20261107-r5/curious-city/Saves/curious-city-r2/default/city.save.json"
+      ]
+    },
+    {
+      "featureId": "point-light-duplicate-save-load",
+      "action": "Set castShadows true for Warm Light and Cool Light in the isolated Main scene, then project.scene duplicated Warm Light, saved, deleted Cool Light, made a new scene, loaded the saved scene, and deleted Warm Light.",
+      "expected": "Clone retains the source light's castShadows=true value, color and radius, with the duplicate command's expected +1 X offset; Save/Load retains the clone; deletion removes only the selected light.",
+      "actual": "Before fix: project.scene exit 0 and all six operation statuses 0; clone Warm Light 2 omitted castShadows. After coordinator rebuilt EngineCommandlets: same request, new save path, exit 0 and all six statuses 0; original lights and clone serialize castShadows=true; New/Load restores the clone, and delete removes only Warm Light. Regular editor clone and GPU visual behavior were not tested.",
+      "status": "passed-after-fix-BUG-R5-003",
+      "visualStatus": "unverified",
+      "evidence": [
+        "Engine/build/playtests/20261107-r5/curious-city/point-light.scene.request.json",
+        "Engine/build/playtests/20261107-r5/curious-city/point-light.scene.result.json",
+        "Engine/build/playtests/20261107-r5/curious-city/ShadowProbe.scene.json",
+        "Agent/Playtests/2026-11-07-2026.11.06.1-r5/curious-city/evidence/point-light.scene.exitcode.txt",
+        "Engine/build/playtests/20261107-r5/curious-city/point-light.scene.after.request.json",
+        "Engine/build/playtests/20261107-r5/curious-city/point-light.scene.after.result.json",
+        "Engine/build/playtests/20261107-r5/curious-city/ShadowProbe-after.scene.json",
+        "Agent/Playtests/2026-11-07-2026.11.06.1-r5/curious-city/evidence/point-light.scene.after.exitcode.txt",
+        "Engine/Source/Scene/SceneDocument.cpp:155-168"
+      ]
+    },
+    {
+      "featureId": "mesh-tangents-standard-and-mirrored-uv",
+      "action": "Called mesh.tangents in final 2026.11.07.0 EngineCommandlets with two non-degenerate triangles: one standard UV mapping and one mirrored U mapping.",
+      "expected": "Standard triangle yields +X tangent with handedness +1; mirrored triangle yields -X tangent with handedness -1.",
+      "actual": "exit 0, ok=true. All first-triangle vertices returned [1,0,0,1]; all mirrored-triangle vertices returned [-1,0,0,-1]. CPU geometry only; no GPU/normal-map visual claim.",
+      "status": "passed-cpu",
+      "visualStatus": "unverified",
+      "evidence": [
+        "Engine/build/playtests/20261107-r5/curious-city/mesh-tangents.request.json",
+        "Engine/build/playtests/20261107-r5/curious-city/mesh-tangents.result.json",
+        "Agent/Playtests/2026-11-07-2026.11.06.1-r5/curious-city/evidence/mesh-tangents.exitcode.txt"
+      ]
+    },
+    {
+      "featureId": "shadow-cascades-camera-bounds",
+      "action": "Reviewed task 063 and RENDERING.md; prepared camera motion / FOV / shadow-distance scenario.",
+      "expected": "Three cascade intervals cover the visible declared shadow area and texel snapping avoids visible shimmer.",
+      "actual": "No cascade GPU image, moving-camera sequence, or direct camera property test captured.",
+      "status": "not-tested",
+      "visualStatus": "unverified",
+      "evidence": ["Agent/Tasks/063-shadow-cascades-and-tangents.md", "Engine/docs/RENDERING.md"]
+    }
+  ]
+}

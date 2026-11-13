@@ -137,9 +137,10 @@ void MeshComponent::DrawGeometry(ID3D11DeviceContext* context)
     {
         return;
     }
-    ID3D11ShaderResourceView* srv = instanceSRV.Get();
+    ID3D11ShaderResourceView* srv = InstanceRangeView(context, instanceBuffer.Get(), instanceSRV.Get(), InstanceCapacity, InstanceRangeViews);
+    if (!srv) return;
     context->VSSetShaderResources(0, 1, &srv);
-    const UINT instanceCount = static_cast<UINT>(InstanceArray.size());
+    const UINT instanceCount = TransparentInstanceCount ? TransparentInstanceCount : static_cast<UINT>(InstanceArray.size());
     context->DrawIndexedInstanced(static_cast<UINT>(indexCount), instanceCount, 0, 0, 0);
     if (GamePtr) GamePtr->CountDraw(static_cast<uint32_t>(indexCount), instanceCount);
     ID3D11ShaderResourceView* nullSRV = nullptr;

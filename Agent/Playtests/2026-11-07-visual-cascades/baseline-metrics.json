@@ -1,0 +1,80 @@
+[
+  {
+    "sequence": "Engine\\build\\playtests\\20261107-visual\\baseline-orbit",
+    "cascades": [
+      {
+        "cascade": 0,
+        "frames": 121,
+        "scaleChanges": 2,
+        "maxFractionalTexelDrift": 0.43728568319993144,
+        "worstFrame": 12
+      },
+      {
+        "cascade": 1,
+        "frames": 121,
+        "scaleChanges": 3,
+        "maxFractionalTexelDrift": 0.4088040652800089,
+        "worstFrame": 4
+      },
+      {
+        "cascade": 2,
+        "frames": 121,
+        "scaleChanges": 3,
+        "maxFractionalTexelDrift": 0.3802276864000049,
+        "worstFrame": 60
+      }
+    ]
+  },
+  {
+    "sequence": "Engine\\build\\playtests\\20261107-visual\\baseline-pan",
+    "cascades": [
+      {
+        "cascade": 0,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 3.788800000847914e-06,
+        "worstFrame": 103
+      },
+      {
+        "cascade": 1,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 4.812799998532569e-07,
+        "worstFrame": 33
+      },
+      {
+        "cascade": 2,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 0.0,
+        "worstFrame": 0
+      }
+    ]
+  },
+  {
+    "sequence": "Engine\\build\\playtests\\20261107-visual\\baseline-dolly",
+    "cascades": [
+      {
+        "cascade": 0,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 1.9456000011075503e-06,
+        "worstFrame": 98
+      },
+      {
+        "cascade": 1,
+        "frames": 121,
+        "scaleChanges": 1,
+        "maxFractionalTexelDrift": 0.4088040652800089,
+        "worstFrame": 58
+      },
+      {
+        "cascade": 2,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 0.0,
+        "worstFrame": 0
+      }
+    ]
+  }
+]

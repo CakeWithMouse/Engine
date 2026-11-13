@@ -30,7 +30,8 @@ void InstancedMeshComponent::Tick(float deltaTime)
 
     const Material* material = GetMaterial();
     const bool bStale = material != BakedMaterial || (material && material->GetRevision() != BakedMaterialRevision);
-    if (bImpostorEnabled && LodCount > 0 && bStale && (Impostor.IsValid() || bImpostorBuildFailed))
+    if (bImpostorEnabled && !HasOpacity() && LodCount > 0 &&
+        (bStale || (!Impostor.IsValid() && !bImpostorBuildFailed)))
     {
         Impostor = ImpostorAtlas{};
         bImpostorBuildFailed = false;
@@ -40,7 +41,7 @@ void InstancedMeshComponent::Tick(float deltaTime)
 
 void InstancedMeshComponent::BuildImpostorAtlas()
 {
-    if (!bImpostorEnabled || bImpostorBuildFailed || Impostor.IsValid() || LodCount == 0 || GamePtr == nullptr)
+    if (!bImpostorEnabled || HasOpacity() || bImpostorBuildFailed || Impostor.IsValid() || LodCount == 0 || GamePtr == nullptr)
     {
         return;
     }

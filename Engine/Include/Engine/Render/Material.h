@@ -123,11 +123,13 @@ public:
     ID3D11VertexShader* GetVertexShader(uint32_t variant = MaterialVariant::Mesh) const { return Sets[variant].VertexShader.Get(); }
     /** deferredGBuffer: the shader of the G-buffer pass, null if the material cannot write it. */
     ID3D11PixelShader* GetPixelShader(bool deferredGBuffer, uint32_t variant = MaterialVariant::Mesh) const;
+    /** Per-pixel depth peeling for translucent/additive surfaces; null for other materials. */
+    ID3D11PixelShader* GetTransparencyPixelShader(uint32_t variant) const { return Sets[variant].TransparencyPixelShader.Get(); }
     bool WritesGBuffer() const { return Sets[MaterialVariant::Mesh].GBufferPixelShader != nullptr; }
 
     /**
-     * Masked materials and skinned variants draw their own shadow (clip and bone palette).
-     * Ordinary opaque meshes use the engine's depth shader. Valid while HasShadowShaders(variant).
+     * Masked, skinned and instanced variants draw their own shadow (clip, palette, LOD dither).
+     * Other opaque meshes use the engine's depth shader. Valid while HasShadowShaders(variant).
      */
     bool HasShadowShaders(uint32_t variant = MaterialVariant::Mesh) const { return Sets[variant].ShadowPixelShader != nullptr; }
     ID3D11VertexShader* GetShadowVertexShader(uint32_t variant = MaterialVariant::Mesh) const { return Sets[variant].ShadowVertexShader.Get(); }
@@ -154,6 +156,7 @@ private:
     {
         Microsoft::WRL::ComPtr<ID3D11VertexShader> VertexShader;
         Microsoft::WRL::ComPtr<ID3D11PixelShader> ForwardPixelShader;
+        Microsoft::WRL::ComPtr<ID3D11PixelShader> TransparencyPixelShader;
         Microsoft::WRL::ComPtr<ID3D11PixelShader> GBufferPixelShader; // null: forward-only
         Microsoft::WRL::ComPtr<ID3D11VertexShader> ShadowVertexShader; // masked only
         Microsoft::WRL::ComPtr<ID3D11PixelShader> ShadowPixelShader;

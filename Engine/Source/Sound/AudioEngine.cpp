@@ -184,6 +184,7 @@ namespace audio
 
         xaudio_.Reset();
         x3dAvailable_ = false;
+        paused_ = false;
 
         if (ownsCom_)
         {
@@ -197,6 +198,15 @@ namespace audio
         Update3D();
         voicePool_.Update();
         UpdateStreams();
+    }
+
+    bool AudioEngine::SetPaused(bool paused)
+    {
+        if (!xaudio_ || paused_ == paused) return true;
+        if (paused) xaudio_->StopEngine();
+        else if (FAILED(xaudio_->StartEngine())) return false;
+        paused_ = paused;
+        return true;
     }
 
     AudioEngine::SoundId AudioEngine::LoadSound(const std::wstring& filePath)

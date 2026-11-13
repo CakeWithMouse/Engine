@@ -16,11 +16,21 @@
 #include <Engine/Render/ShaderCompiler.h>
 #include <Engine/Render/PointShadow.h>
 #include <Engine/Render/ShadowCascades.h>
+#include "ShadowCascadeStabilityTests.h"
+#include "ShadowCascadeSelectionTests.h"
+#include "SkeletalAnimationBoundsTests.h"
 #include "../Source/Resources/VfsRead.h"
 #include "VfsLifecycleTests.h"
 #include <algorithm>
 #include "VfsServiceTests.h"
 #include "VfsProxyLifecycleTests.h"
+#include "ModelImportSettingsTests.h"
+#include "ModelGeometryScaleTests.h"
+#include "ModelReimportScaleTests.h"
+#include "ModelStagingTests.h"
+#include "AssetUpdateRetryTests.h"
+#include "AssetSidecarNormalizeTests.h"
+#include "ModelFlatNormalsTests.h"
 #include <cmath>
 #include <cstring>
 #include <d3dcompiler.h>
@@ -680,10 +690,59 @@ void MaterialOffscreenRendering()
     CHECK(errorPixel == 0xffff00ffu || errorPixel == 0xff140014u);
 }
 
+// Exercise the production vertex/pixel shaders, not a CPU copy of the tangent math.
+void MaterialMirroredNormalMap()
+{
+    TestGame game;
+    CHECK(game.CreateInputLayouts());
+    game.SetCamera({0.0f, 3.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f});
+    auto* plane = new MeshComponent(glm::vec3(0), glm::vec3(0), glm::vec3(1), glm::vec4(1));
+    plane->SetMesh(MeshPrimitives::Plane(2.0f, 2.0f));
+    CHECK(game.RegisterComponent("normal-map-plane", plane) == RegisterResult::Ok);
+    TempShaderDir dir;
+    MaterialRenderState state;
+    state.bUnlit = true;
+    Material material(dir.Write("NormalBasis.hlsl",
+        "void Surface(MaterialInput i, inout MaterialOutput o) { "
+        "o.Albedo = abs(i.Tangent.w) < 0.5 ? float3(1, 0, 1) : "
+        "NormalFromMap(i, float3(0.5, 1, 0.5), 1) * 0.5 + 0.5; }\n"), state);
+    CHECK(material.Compile(game.GetDevice(), game.GetContext()));
+    auto draw = [&](const glm::vec3& scale)
+    {
+        plane->SetScale(scale);
+        return RenderOffscreen(game, *plane, D3D11_CULL_NONE, [&](ID3D11DeviceContext* context)
+        {
+            plane->SetVertexShader(material.GetVertexShader());
+            plane->SetPixelShader(material.GetPixelShader(false));
+            material.Bind(context);
+        })[32 * 64 + 32];
+    };
+    const uint32_t original = draw({1, 1, 1});
+    CHECK((original >> 24) == 255); // actual covered pixel
+    CHECK(original != 0xffff00ffu); // the vertex tangent reached the shader; no derivative fallback
+    // Reflecting X changes +U, but must leave the world direction of +V unchanged.
+    CHECK(draw({-1, 1, 1}) == original);
+    CHECK(draw({-2, 1, 0.5f}) == original);
+    // Reflecting Z reverses +V; its encoded blue channel must complement the original.
+    const uint32_t flippedV = draw({1, 1, -1});
+    CHECK(((flippedV >> 16) & 255) + ((original >> 16) & 255) == 255);
+}
+
 std::string ReadAll(const std::string& path)
 {
     std::ifstream input(std::filesystem::u8path(path), std::ios::binary);
     return std::string(std::istreambuf_iterator<char>(input), std::istreambuf_iterator<char>());
+}
+
+void MaterialAssetNumericFailure(const std::string& text, const std::string& expected)
+{
+    TempShaderDir dir;
+    MaterialAsset asset;
+    asset.Shader = "Previous.hlsl";
+    std::string error;
+    CHECK(!MaterialAsset::Load(dir.Write("Numeric.mat", text), asset, error));
+    CHECK(error.find(expected) != std::string::npos && error.find("Numeric.mat") != std::string::npos);
+    CHECK(asset.Shader == "Previous.hlsl");
 }
 
 void MaterialAssetFormat()
@@ -1104,6 +1163,95 @@ void InstancedMaterials()
     CHECK(depth[32 * 64 + 40] < 1.0f && depth[32 * 64 + 49] == 1.0f);  // right copy
     std::vector<float> plainDepth = RenderShadowDepth(game, *copies, -1); // opaque material: whole copies
     CHECK(plainDepth[32 * 64 + 24] < 1.0f && plainDepth[32 * 64 + 49] < 1.0f);
+}
+
+void MaterialInstanceParameters()
+{
+    TestGame game;
+    CHECK(game.CreateInputLayouts());
+    game.SetCamera({0.0f, 3.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f});
+    TempShaderDir dir;
+    MaterialRenderState state;
+    state.bUnlit = true;
+    auto material = std::make_shared<Material>(dir.Write("InstanceParams.hlsl",
+        "cbuffer MaterialParams : register(b1) { float4 Tint = float4(1,0,0,1); };\n"
+        "Texture2D BaseMap : register(t6);\n"
+        "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = i.InstanceData.x * Tint.rgb * BaseMap.Sample(MaterialSampler, i.UV).rgb; }\n"), state);
+    CHECK(material->Compile(game.GetDevice(), game.GetContext()));
+    CHECK(material->SetParameter("Tint", {0, 1, 0, 1}));
+    CHECK(material->SetTexture("BaseMap", WriteTga(dir, "white.tga", 255, 255, 255)));
+    auto* units = new InstancedMeshComponent();
+    CHECK(units->SetLod(0, MeshPrimitives::Plane(0.8f, 0.8f)));
+    MeshInstance instance;
+    instance.CustomData = {1, 0, 0};
+    units->AddInstance(instance);
+    CHECK(game.RegisterComponent("parameter-units", units) == RegisterResult::Ok);
+    CHECK(units->SetMaterial(material));
+    CHECK(RenderOffscreen(game, *units, D3D11_CULL_BACK)[32 * 64 + 32] == 0xff00ff00u);
+    CHECK(material->SetParameter("Tint", {1, 0, 0, 1}));
+    CHECK(RenderOffscreen(game, *units, D3D11_CULL_BACK)[32 * 64 + 32] == 0xff0000ffu);
+}
+
+void MaterialFailedVariantPreservesBindings()
+{
+    TestGame game;
+    TempShaderDir dir;
+    const std::string source =
+        "cbuffer MaterialParams : register(b1) { float4 Tint = float4(1,0,0,1); };\n"
+        "Texture2D BaseMap : register(t6);\n"
+        "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = Tint.rgb * BaseMap.Sample(MaterialSampler, i.UV).rgb; }\n";
+    Material material(dir.Write("Variant.hlsl", source));
+    material.RequireVariant(MaterialVariant::Instanced);
+    CHECK(material.Compile(game.GetDevice(), game.GetContext()));
+    CHECK(material.SetParameter("Tint", {0, 1, 0, 1}));
+    const std::string texture = WriteTga(dir, "blue.tga", 0, 0, 255);
+    CHECK(material.SetTexture("BaseMap", texture));
+    dir.Write("Variant.hlsl",
+        "#if defined(MATERIAL_INSTANCED)\n#error Deliberately broken instanced variant\n#endif\n"
+        "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = float3(1,1,1); }\n");
+    CHECK(!material.Compile(game.GetDevice(), game.GetContext()));
+    std::array<float, 4> value{};
+    CHECK(material.GetParameter("Tint", value) && value[1] == 1.0f);
+    CHECK(material.GetTextures().size() == 1 && material.GetTextures()[0].Path == texture);
+    dir.Write("Variant.hlsl", source);
+    CHECK(material.Compile(game.GetDevice(), game.GetContext()));
+    CHECK(material.GetParameter("Tint", value) && value[1] == 1.0f);
+    CHECK(material.GetTextures()[0].Path == texture);
+}
+
+void MaterialTextureSlots()
+{
+    TestGame game;
+    CHECK(game.CreateInputLayouts());
+    game.SetCamera({0, 3, 0}, {0, 0, 0}, {0, 0, 1});
+    TempShaderDir dir;
+    MaterialRenderState state;
+    state.bUnlit = true;
+    const auto surface = [](int slot) {
+        return "Texture2D Detail : register(t" + std::to_string(slot) + ");\n"
+            "void Surface(MaterialInput i, inout MaterialOutput o) { o.Albedo = Detail.Sample(MaterialSampler, i.UV).rgb; }\n";
+    };
+    auto material = std::make_shared<Material>(dir.Write("Slots.hlsl", surface(31)), state);
+    auto* plane = new MeshComponent(glm::vec3(0), glm::vec3(0), glm::vec3(1), glm::vec4(1));
+    plane->SetMesh(MeshPrimitives::Plane(2, 2));
+    CHECK(game.RegisterComponent("slots", plane) == RegisterResult::Ok);
+    CHECK(plane->SetMaterial(material));
+    const std::string blue = WriteTga(dir, "blue.tga", 0, 0, 255);
+    for (int slot : {31, 33, 127})
+    {
+        dir.Write("Slots.hlsl", surface(slot));
+        CHECK(material->Compile(game.GetDevice(), game.GetContext()));
+        CHECK(material->SetTexture("Detail", blue));
+        CHECK(RenderOffscreen(game, *plane, D3D11_CULL_BACK)[32 * 64 + 32] == 0xffff0000u);
+    }
+    // Unlit strips the engine cube from the PS, so D3DCompile alone cannot catch this collision.
+    dir.Write("Slots.hlsl", surface(32));
+    CHECK(!material->Compile(game.GetDevice(), game.GetContext()));
+    CHECK(material->GetErrors().find("reserved for point shadows") != std::string::npos);
+    CHECK(material->GetTextures().size() == 1 && material->GetTextures()[0].Path == blue);
+    state.bUnlit = false;
+    material->SetRenderState(state);
+    CHECK(!material->Compile(game.GetDevice(), game.GetContext()));
 }
 
 // One bone that the only clip holds 0.6 to the right (+X) of the bind pose; a 0.8 quad facing +Y on it.
@@ -2062,9 +2210,18 @@ int main()
         {"mesh primitives: normals, uvs, winding", MeshPrimitivesGeometry}, {"mesh component offscreen rendering", MeshComponentRendering},
         {"material compilation, parameters, errors", MaterialCompilationAndParameters}, {"material offscreen rendering", MaterialOffscreenRendering},
         {".mat format: load, validate, save", MaterialAssetFormat}, {"game material cache and reload", GameMaterialCache},
+        {"material JSON numeric overflow is an error", [] { MaterialAssetNumericFailure(R"({"shader":"a","params":{"X":1e999}})", "invalid JSON"); }},
+        {"material parameters must fit a finite float", [] {
+            MaterialAssetNumericFailure(R"({"shader":"a","params":{"X":1e100}})", "params.X");
+            MaterialAssetNumericFailure(R"({"shader":"a","params":{"X":[1,-1e100]}})", "params.X");
+        }},
+        {"material version cannot wrap around an integer", [] { MaterialAssetNumericFailure(R"({"shader":"a","version":4294967297})", "unsupported version"); }},
         {"materials on components and passes", MaterialComponentIntegration},
         {"masked material shadows", MaskedMaterialShadows},
         {"instanced materials: copies, custom data, shadows", InstancedMaterials},
+        {"material parameters and textures multiplied by instance data", MaterialInstanceParameters},
+        {"failed material variant keeps parameters and textures", MaterialFailedVariantPreservesBindings},
+        {"material texture slots respect point shadow resources", MaterialTextureSlots},
         {"impostor atlas baked through a material", ImpostorBakedThroughMaterial}, {"skinned materials: bone palette and crowd", SkinnedMaterials},
         {"particle GPU indexing", ParticleShaderIndexing}, {"particle component sorting modes", ParticleComponentModes},
         {"WM_QUIT exit code", QuitMessage}, {"virtual file system (VFS)", VirtualFileSystemTests},
@@ -2079,7 +2236,15 @@ int main()
         {"mesh tangent basis and mirrored uv", MeshTangentBasis},
         {"tangents through primitives and simplifier", MeshTangentsThroughPipeline},
         {"shadow cascade range and splits", ShadowCascadeRanges},
+        {"shadow cascade projection stable under yaw", ShadowCascadeStabilityTests::SphereFitProjectionStableUnderYaw},
+        {"shadow cascade radius hysteresis and coverage", ShadowCascadeStabilityTests::AdaptiveSphereRadiusHysteresisPreservesCoverage},
+        {"shadow cascade off-axis selection on GPU", [] {
+            TestGame game;
+            ShadowCascadeSelectionTests::OffAxisAndOnAxisSelectByViewDepth(game.GetDevice(), game.GetContext());
+        }},
         {"point shadow faces match cube sampling", PointShadowMath},
+        {"VAT bounds contain quantized poses and interpolation", SkeletalAnimationBoundsTests::AnimatedCrowdBoundsContainSamplesAndInterpolation},
+        {"normal map survives mirrored world scale", MaterialMirroredNormalMap},
         {"vfs service: resolve and toVirtual", VfsService_ResolveAndToVirtual},
         {"vfs service: exists and stat", VfsService_ExistsAndStat},
         {"vfs service: readFile and allocator", VfsService_ReadFileAndAllocator},
@@ -2087,7 +2252,14 @@ int main()
         {"vfs service: callback reentrancy without deadlock", VfsService_CallbackReentrancyAndNoDeadlock},
         {"vfs service: mounts and unsupported stubs", VfsService_GetMountsAndStubs},
         {"vfs proxy lifecycle: sessions and rejection", VfsProxyLifecycle_SessionsAndRejection},
-        {"vfs proxy lifecycle: read parity and allocator", VfsProxyLifecycle_ReadParityAndAllocator}
+        {"vfs proxy lifecycle: read parity and allocator", VfsProxyLifecycle_ReadParityAndAllocator},
+        {"model import sidecar parser and VFS", ModelImportSettingsTests::Run},
+        {"model import geometry scale v1 vs v2 (static and skeletal)", ModelGeometryScaleTests::Run},
+        {"model reimport via author.asset changes geometry bounds and preserves Transform", ModelReimportScaleTests::Run},
+        {"reimport staging keeps Content free of <stem>_1 artifacts", ModelStagingTests::Run},
+        {"reimport retries copy_file on sharing violation", AssetUpdateRetryTests::Run},
+        {"reimport normalizes broken or missing sidecar with backup", AssetSidecarNormalizeTests::Run},
+        {"flat normals split a folded smooth-vn fixture (P3 regression)", ModelFlatNormalsTests::Run}
     };
     int failures = 0, skipped = 0;
     for (const auto& test : tests)

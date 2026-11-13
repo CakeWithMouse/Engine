@@ -51,6 +51,9 @@ struct SkeletalBakeResult
     bool Success = false;
     std::string ErrorMessage;
     BakedAnimationTexture Texture;
+    // Root-origin sphere covering every skinned crowd vertex in every sampled pose.
+    // Linear interpolation between baked rows remains inside this sphere.
+    float AnimationBoundsRadius = 0.0f;
 };
 
 /**

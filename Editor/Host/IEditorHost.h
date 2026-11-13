@@ -53,6 +53,8 @@ struct EditorCommand
     bool castShadows = false;
     EditorGizmoMode gizmo = EditorGizmoTranslate;
     QString name;
+    float importScale = 1.0f;
+    QString importOptionsJson;
 
     // RunTask: выполняется в потоке движка, если есть сессия сцены (редактор материалов)
     std::function<void(const EngineEditSessionApi&)> task;

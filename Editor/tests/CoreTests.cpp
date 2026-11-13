@@ -16,6 +16,14 @@
 #include "../Core/AssetOps.h"
 #include "core/AssetOpsTests.h"
 #include "core/GizmoGeometryTests.h"
+#include "../Core/ImportSettings.h"
+#include "core/ImportSettingsTests.h"
+#include "core/ImportSettingsV2Tests.h"
+#include "core/ImportSettingsSpawnV2Tests.h"
+#include "core/SidecarTransactionTests.h"
+#include "core/ImportReimportChainTests.h"
+#include "../Core/AssetExtensions.h"
+#include "core/AssetExtensionsTests.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
@@ -413,6 +421,30 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestAssetOps...\n");
     std::fflush(stdout);
     TestAssetOps();
+
+    std::printf("[Test] TestImportSettings...\n");
+    std::fflush(stdout);
+    RunImportSettingsTests(gChecks);
+
+    std::printf("[Test] TestImportSettingsV2...\n");
+    std::fflush(stdout);
+    ImportSettingsV2Tests::Run(gChecks);
+
+    std::printf("[Test] TestImportSettingsSpawnV2...\n");
+    std::fflush(stdout);
+    ImportSettingsSpawnV2Tests::Run(gChecks);
+
+    std::printf("[Test] TestSidecarTransaction...\n");
+    std::fflush(stdout);
+    SidecarTransactionTests::Run(gChecks);
+
+    std::printf("[Test] TestImportReimportChain...\n");
+    std::fflush(stdout);
+    ImportReimportChainTests::Run(gChecks);
+
+    std::printf("[Test] TestAssetExtensions...\n");
+    std::fflush(stdout);
+    AssetExtensionsTests::Run(gChecks);
 
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);

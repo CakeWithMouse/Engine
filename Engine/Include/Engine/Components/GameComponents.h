@@ -242,12 +242,18 @@ protected:
     void UpdateInstanceTransform();
     InstData GetInstanceData() const;
     bool UploadInstanceData(ID3D11DeviceContext* context);
+    ID3D11ShaderResourceView* InstanceRangeView(ID3D11DeviceContext* context, ID3D11Buffer* buffer,
+        ID3D11ShaderResourceView* fullView, size_t capacity,
+        std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>>& ranges);
     void BindMaterialResources(ID3D11DeviceContext* context);
     void UnbindMaterialResources(ID3D11DeviceContext* context);
     void CreateSamplerState();
     void LoadPendingTexture();
 
     std::vector<std::unique_ptr<GameComponent>> InstanceArray;
+    // Internal range selected by Game's global transparent queue; zero count draws the whole batch.
+    uint32_t TransparentInstanceFirst = 0;
+    uint32_t TransparentInstanceCount = 0;
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
@@ -296,6 +302,7 @@ protected:
     // Instance stream: capacity grows geometrically, count is InstanceArray.size().
     Microsoft::WRL::ComPtr<ID3D11Buffer> instanceBuffer;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> instanceSRV;
+    std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> InstanceRangeViews;
     size_t InstanceCapacity = 0;
     uint64_t InstanceUploadFrame = UINT64_MAX;
     std::vector<InstData> InstanceStaging;

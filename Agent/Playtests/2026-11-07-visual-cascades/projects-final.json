@@ -1,0 +1,34 @@
+[
+  {
+    "path": "E:\\Engine/Engine/build/playtests/20261107-visual/verified-calm",
+    "upgrade": 0,
+    "build": 0,
+    "game": 0,
+    "editor": 0,
+    "project": "calm"
+  },
+  {
+    "path": "E:\\Engine/Engine/build/playtests/20261107-visual/verified-curious",
+    "upgrade": 0,
+    "build": 0,
+    "game": 0,
+    "editor": 0,
+    "project": "curious"
+  },
+  {
+    "path": "E:\\Engine/Engine/build/playtests/20261107-visual/verified-bomber",
+    "upgrade": 0,
+    "build": 0,
+    "game": 0,
+    "editor": 0,
+    "project": "bomber"
+  },
+  {
+    "path": "E:\\Engine/Engine/build/playtests/20261107-visual/verified-trash",
+    "upgrade": 0,
+    "build": 0,
+    "game": 0,
+    "editor": 0,
+    "project": "trash"
+  }
+]

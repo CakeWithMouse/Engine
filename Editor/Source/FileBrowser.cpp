@@ -1,9 +1,11 @@
 #include "EditorTheme.h"
 #include "FileBrowser.h"
+#include "FileService.h"
 #include "EditorLocale.h"
 #include "QtHost.h"
 #include "MainWindow.h"
 #include "IconProvider.h"
+#include "CommandRegistry.h"
 #include <QAbstractFileIconProvider>
 
 #include <QClipboard>
@@ -15,6 +17,7 @@
 #include <QGuiApplication>
 #include <QHeaderView>
 #include <QHBoxLayout>
+#include <QKeyEvent>
 #include <QLineEdit>
 #include <QMenu>
 #include <QProcess>
@@ -39,26 +42,6 @@ public:
     {
         if (info.isDir()) return IconProvider::FolderIcon();
         return IconProvider::FileIcon();
-    }
-};
-
-class ProjectFilesFilter final : public QSortFilterProxyModel
-{
-public:
-    QString project, content;
-    bool full = false;
-    using QSortFilterProxyModel::QSortFilterProxyModel;
-    void ShowFull(bool value) { full = value; invalidateFilter(); }
-    // Перетаскивание только копирует: файл проекта не должен уехать в проводник.
-    Qt::DropActions supportedDragActions() const override { return Qt::CopyAction; }
-protected:
-    bool filterAcceptsRow(int row, const QModelIndex& parent) const override {
-        const auto* files = static_cast<QFileSystemModel*>(sourceModel());
-        if (!full && QDir::cleanPath(files->filePath(parent)) == project) {
-            const auto index = files->index(row, 0, parent);
-            return files->isDir(index) && (files->fileName(index) == "Source" || QDir::cleanPath(files->filePath(index)) == content);
-        }
-        return true;
     }
 };
 
@@ -116,19 +99,19 @@ void FileBrowserDock::BuildUi()
     actImportModel_ = importMenu->addAction(QString());
     actImportModel_->setEnabled(host_->HasScene());
     connect(actImportModel_, &QAction::triggered, this, [this] {
-        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(false);
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 0}});
     });
 
     actImportTexture_ = importMenu->addAction(QString());
     actImportTexture_->setEnabled(host_->HasScene());
     connect(actImportTexture_, &QAction::triggered, this, [this] {
-        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(1);
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 1}});
     });
 
     actImportAudio_ = importMenu->addAction(QString());
     actImportAudio_->setEnabled(host_->HasScene());
     connect(actImportAudio_, &QAction::triggered, this, [this] {
-        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(2);
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 2}});
     });
 
     imports_->setMenu(importMenu);
@@ -195,6 +178,11 @@ void FileBrowserDock::BuildUi()
             [this](const QModelIndex& i) { OnDoubleClicked(i); });
     connect(view_, &QTreeView::customContextMenuRequested, this,
             [this](const QPoint& p) { OnContextMenu(p); });
+
+    // Handle Delete via event filter: a WidgetShortcut action stops firing once Windows deactivates the window.
+    view_->installEventFilter(this);
+    view_->viewport()->installEventFilter(this);
+
     layout->addWidget(view_);
 
     setWidget(panel);
@@ -237,7 +225,8 @@ void FileBrowserDock::ApplyFilter(const QString& text)
 
 void FileBrowserDock::OnDoubleClicked(const QModelIndex& proxyIndex)
 {
-    const auto index = proxy_->mapToSource(proxyIndex);
+    const auto col0 = proxyIndex.sibling(proxyIndex.row(), 0);
+    const auto index = proxy_->mapToSource(col0);
     if (!index.isValid() || model_->isDir(index))
         return;
 
@@ -266,7 +255,9 @@ void FileBrowserDock::OnDoubleClicked(const QModelIndex& proxyIndex)
 
 void FileBrowserDock::OnContextMenu(const QPoint& pos)
 {
-    const QModelIndex index = proxy_->mapToSource(view_->indexAt(pos));
+    const QModelIndex clicked = view_->indexAt(pos);
+    const QModelIndex col0 = clicked.isValid() ? clicked.sibling(clicked.row(), 0) : QModelIndex();
+    const QModelIndex index = proxy_->mapToSource(col0);
     const bool hasFile = index.isValid();
     const QString path = hasFile ? model_->filePath(index) : QString();
 
@@ -286,15 +277,26 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     QAction* reveal = hasFile ? menu.addAction(Tr("Показать в проводнике", "Reveal in Explorer")) : nullptr;
     QAction* copy = hasFile ? menu.addAction(Tr("Копировать путь", "Copy Path")) : nullptr;
     QAction* refresh = menu.addAction(Tr("Обновить", "Refresh"));
+    const bool isModel = hasFile && !model_->isDir(index) && QStringList{"fbx", "obj", "gltf", "glb", "blend"}.contains(QFileInfo(path).suffix().toLower());
+    QAction* editSettings = isModel && host_->ReadSnapshot().authoring ? menu.addAction(Tr("Настройки импорта…", "Import Settings…")) : nullptr;
     const bool asset=hasFile&&!model_->isDir(index)&&QStringList{"fbx","obj","gltf","glb","png","jpg","jpeg","bmp","tga","mat"}.contains(QFileInfo(path).suffix().toLower());
     QAction* reimport=asset&&!isMaterial&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переимпортировать…", "Reimport…")):nullptr;
     QAction* move=asset&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переместить / переименовать…", "Move / Rename…")):nullptr;
+    QAction* deleteAction = hasFile && !IsProtectedPath(path) ? menu.addAction(Tr("Удалить", "Delete")) : nullptr;
 
     QAction* picked = menu.exec(view_->viewport()->mapToGlobal(pos));
     if (!picked)
         return;
 
-    if (picked == playAudio || picked == stopAudio)
+    if (picked == editSettings)
+    {
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.EditImportSettings"), {{QStringLiteral("path"), path}});
+    }
+    else if (picked == deleteAction)
+    {
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Delete"), {{QStringLiteral("path"), path}});
+    }
+    else if (picked == playAudio || picked == stopAudio)
     {
         const QString relative = QDir(contentDir_).relativeFilePath(path);
         EditorCommand c;
@@ -327,4 +329,41 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
         QGuiApplication::clipboard()->setText(path);
     else if (picked == refresh)
         model_->setRootPath(model_->rootPath());
+}
+
+void FileBrowserDock::DeleteCurrentAsset()
+{
+    const QModelIndex viewIndex = view_->currentIndex();
+    if (!viewIndex.isValid())
+        return;
+
+    const QModelIndex col0 = viewIndex.sibling(viewIndex.row(), 0);
+    const QModelIndex current = proxy_->mapToSource(col0);
+    if (!current.isValid())
+        return;
+
+    const QString path = model_->filePath(current);
+    if (!path.isEmpty() && !IsProtectedPath(path))
+    {
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Delete"), {{QStringLiteral("path"), path}});
+    }
+}
+
+bool FileBrowserDock::IsProtectedPath(const QString& path) const
+{
+    return path.isEmpty() || FileService::IsProtectedDirectory(path, projectDir_, contentDir_);
+}
+
+bool FileBrowserDock::eventFilter(QObject* watched, QEvent* event)
+{
+    if ((watched == view_ || watched == view_->viewport()) && event->type() == QEvent::KeyPress)
+    {
+        auto* ke = static_cast<QKeyEvent*>(event);
+        if (ke->key() == Qt::Key_Delete)
+        {
+            DeleteCurrentAsset();
+            return true;
+        }
+    }
+    return QDockWidget::eventFilter(watched, event);
 }

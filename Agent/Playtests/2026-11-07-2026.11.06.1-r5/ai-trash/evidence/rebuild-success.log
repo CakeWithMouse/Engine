@@ -1,0 +1,16 @@
+﻿
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 9 component(s), Project
+  GeneratedComponents.cpp
+  BucketParts.cpp
+  ImportedTrashProjectile.cpp
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  RotatingCube.cpp
+  ThrowLane.cpp
+  ThrowLedger.cpp
+  TrashProjectile.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\20261107-r5\ai-trash\TrashGame\Binaries\Release\ee124cd06f97437fbbb5e44311b0f074\Game.lib и объект E:\Engine\Engine\build\playtests\20261107-r5\ai-trash\TrashGame\Binaries\Release\ee124cd06f97437fbbb5e44311b0f074\Game.exp
+  Game.vcxproj -> E:\Engine\Engine\build\playtests\20261107-r5\ai-trash\TrashGame\Binaries\Release\ee124cd06f97437fbbb5e44311b0f074\Game.dll

@@ -1,0 +1,18 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "caster": "crowd",
+    "frames": [
+        {
+            "count": 0,
+            "directionalShadows": false,
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\global-off-r0-scene0-00.bmp",
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "time": 0.5
+        }
+    ],
+    "ok": true
+}

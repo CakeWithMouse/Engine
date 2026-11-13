@@ -1,0 +1,69 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "caster": "crowd",
+    "frames": [
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 1,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "7cafeef2669aacb68ee0ea4edba952fc65268de1667b569dc4e646efe9aa1cd2"
+                },
+                {
+                    "face": 4,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 5,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\final-motion\\radius-r0-manual1-00.bmp",
+            "light": [
+                0,
+                4,
+                0,
+                5
+            ],
+            "position": [
+                -6,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.9722222685813904,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8889247179031372
+                }
+            ],
+            "time": 0.5
+        }
+    ],
+    "ok": true
+}

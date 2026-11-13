@@ -170,15 +170,20 @@
         <ClCompile Include="UI/DockLayoutManager.cpp"/>
         <ClCompile Include="UI/MainToolBar.cpp"/>
         <ClCompile Include="UI/IconProvider.cpp"/>
+        <ClCompile Include="UI/ImportSettingsDialog.cpp"/>
+        <ClCompile Include="UI/ModelImportEditFlow.cpp"/>
         <ClCompile Include="UI/PlaySettingsDialog.cpp"/>
         <ClCompile Include="UI/ExternalGameRunner.cpp"/>
         <ClCompile Include="Source/MainWindow.cpp"/>
         <ClCompile Include="Source/AssetTools.cpp"/>
+        <ClCompile Include="Source/ImportCommands.cpp"/>
+        <ClCompile Include="Source/AssetDeleteCommand.cpp"/>
         <ClCompile Include="Source/FileBrowser.cpp"/>
         <ClCompile Include="Source/ViewportWidget.cpp"/>
         <ClCompile Include="Source/ViewportWidget_Input.cpp"/>
         <ClCompile Include="UI/ViewportOverlayHelper.cpp"/>
         <ClCompile Include="Source/ObjectInspectorPanel.cpp"/>
+        <ClCompile Include="Source/ObjectInspectorLight.cpp"/>
         <ClCompile Include="Source/ProjectProperties.cpp"/>
         <ClCompile Include="Source/SceneObjectsPanel.cpp"/>
         <ClCompile Include="Source/MaterialEditorWindow.cpp"/>
@@ -198,6 +203,9 @@
         <ClCompile Include="Core/HlslGraphCompiler.cpp"/>
         <ClCompile Include="Core/MaterialGraphModel.cpp"/>
         <ClCompile Include="Core/SceneFile.cpp"/>
+        <ClCompile Include="Core/ImportSettings.cpp"/>
+        <ClCompile Include="Core/ModelImportSidecar.cpp"/>
+        <ClCompile Include="Core/ModelImportSidecarTransaction.cpp"/>
         <ClCompile Include="Core/Terminal.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_Logger.cpp">
             <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -263,6 +271,9 @@
         <ClInclude Include="Core/HlslGraphCompiler.h"/>
         <ClInclude Include="Core/MaterialGraphModel.h"/>
         <ClInclude Include="Core/SceneFile.h"/>
+        <ClInclude Include="Core/ImportSettings.h"/>
+        <ClInclude Include="Core/ModelImportSidecar.h"/>
+        <ClInclude Include="Core/ModelImportSidecarTransaction.h"/>
         <ClInclude Include="Core/Terminal.h"/>
         <CustomBuild Include="Core/Logger.h">
             <FileType>Document</FileType>
@@ -304,7 +315,10 @@
         <ClInclude Include="UI/IconProvider.h"/>
         <ClInclude Include="UI/ViewportOverlayHelper.h"/>
         <ClInclude Include="UI/SpinBoxArrowStyle.h"/>
+        <ClInclude Include="UI/ImportSettingsDialog.h"/>
+        <ClInclude Include="Include/AssetDeletePrompt.h"/>
         <ClInclude Include="Include/CodeClassDialog.h"/>
+        <ClInclude Include="Include/ImportMigration.h"/>
         <ClInclude Include="Include/FileBrowser.h"/>
         <ClInclude Include="Include/MaterialTextureTools.h"/>
         <ClInclude Include="Include/MaterialGraphWidget.h"/>
@@ -394,6 +408,6 @@
         <Copy Condition="'$(EngineCommandlet)'=='true'" SourceFiles="$(QtInstallDir)/plugins/platforms/qoffscreen.dll" DestinationFiles="$(OutDir)platforms/qoffscreen.dll" SkipUnchangedFiles="true"/>
     </Target>
     <ImportGroup Label="ExtensionTargets"/>
-  <ItemGroup><ClCompile Include="Source/CodeTools.cpp" /></ItemGroup>
+  <ItemGroup><ClCompile Include="Source/CodeTools.cpp" /><ClCompile Include="Source/ImportMigration.cpp" /></ItemGroup>
     <Import Project="../Engine/BuildSupport/AssimpRuntime.targets" />
 </Project>

@@ -1,0 +1,18 @@
+
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 7 component(s), Project
+  CalmLodRow.cpp
+  CarMover.cpp
+  CityBuilding.cpp
+  CityRoad.cpp
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\20261107-r5\calm-city\CalmCityFinal\Binaries\Release\586eafcd96e34edcb09303f656531205\Game.lib и объект E:\Engine\Engine\build\playtests\20261107-r5\calm-city\CalmCityFinal\Binaries\Release\586eafcd96e34edcb09303f656531205\Game.exp
+  Game.vcxproj -> E:\Engine\Engine\build\playtests\20261107-r5\calm-city\CalmCityFinal\Binaries\Release\586eafcd96e34edcb09303f656531205\Game.dll
+
+Full build log: E:\Engine\Engine\build\playtests\20261107-r5\calm-city\CalmCityFinal\Binaries\Release\586eafcd96e34edcb09303f656531205\build.log
+Build validated and activated. Use Hot Reload in the editor, or reopen the project.

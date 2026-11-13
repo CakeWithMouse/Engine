@@ -17,7 +17,7 @@
       <Optimization Condition="'$(Configuration)'=='Debug'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)'=='Release'">MaxSpeed</Optimization>
     </ClCompile>
-    <Link><AdditionalLibraryDirectories>$(EngineSdk)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories><AdditionalDependencies>Engine.lib;d3d11.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies></Link>
+    <Link><AdditionalLibraryDirectories>$(EngineSdk)\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories><AdditionalDependencies>Engine.lib;d3d11.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;user32.lib;gdi32.lib;ole32.lib;%(AdditionalDependencies)</AdditionalDependencies></Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ProjectSdkLibrary Include="$(EngineSdk)\Lib\*.lib" Exclude="$(EngineSdk)\Lib\Engine.lib" />

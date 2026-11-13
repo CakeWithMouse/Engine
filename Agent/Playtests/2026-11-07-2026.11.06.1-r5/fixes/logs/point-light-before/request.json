@@ -1,0 +1,24 @@
+{
+  "steps": [
+    {
+      "target": "Warm Light",
+      "action": "duplicate"
+    },
+    {
+      "action": "save",
+      "path": "E:/Engine/Engine/build/playtests/20261107-r5/point-light-before2/cloned.scene.json"
+    },
+    {
+      "action": "new"
+    },
+    {
+      "action": "load",
+      "path": "E:/Engine/Engine/build/playtests/20261107-r5/point-light-before2/cloned.scene.json"
+    },
+    {
+      "action": "save",
+      "path": "E:/Engine/Engine/build/playtests/20261107-r5/point-light-before2/reloaded.scene.json"
+    }
+  ],
+  "project": "E:/Engine/Engine/build/playtests/20261107-r5/point-light-before2/project/Project.json"
+}

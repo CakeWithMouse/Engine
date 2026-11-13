@@ -1,0 +1,106 @@
+[
+  {
+    "sequence": "Engine\\build\\playtests\\20261107-visual\\final-orbit",
+    "cascades": [
+      {
+        "cascade": 0,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 5.120000139413605e-07,
+        "worstFrame": 2
+      },
+      {
+        "cascade": 1,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 2.3551999994708694e-07,
+        "worstFrame": 22
+      },
+      {
+        "cascade": 2,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 5.9391999984725885e-08,
+        "worstFrame": 52
+      }
+    ]
+  },
+  {
+    "sequence": "Engine\\build\\playtests\\20261107-visual\\final-pan",
+    "cascades": [
+      {
+        "cascade": 0,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 5.120000139413605e-07,
+        "worstFrame": 3
+      },
+      {
+        "cascade": 1,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 0.0,
+        "worstFrame": 0
+      },
+      {
+        "cascade": 2,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 5.9391999984725885e-08,
+        "worstFrame": 33
+      }
+    ]
+  },
+  {
+    "sequence": "Engine\\build\\playtests\\20261107-visual\\final-dolly",
+    "cascades": [
+      {
+        "cascade": 0,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 5.120000139413605e-07,
+        "worstFrame": 31
+      },
+      {
+        "cascade": 1,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 0.0,
+        "worstFrame": 0
+      },
+      {
+        "cascade": 2,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 0.0,
+        "worstFrame": 0
+      }
+    ]
+  },
+  {
+    "sequence": "Engine\\build\\playtests\\20261107-visual\\final-forward",
+    "cascades": [
+      {
+        "cascade": 0,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 5.120000139413605e-07,
+        "worstFrame": 2
+      },
+      {
+        "cascade": 1,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 2.3551999994708694e-07,
+        "worstFrame": 22
+      },
+      {
+        "cascade": 2,
+        "frames": 121,
+        "scaleChanges": 0,
+        "maxFractionalTexelDrift": 5.9391999984725885e-08,
+        "worstFrame": 52
+      }
+    ]
+  }
+]

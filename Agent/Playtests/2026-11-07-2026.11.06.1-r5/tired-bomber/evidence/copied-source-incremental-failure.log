@@ -1,0 +1,17 @@
+﻿
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 12 component(s), Project
+  BomberTarget.cpp
+  R3WizardProbe.cpp
+  RenderHostProbe.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\20261107-r5\tired-bomber\BomberCleanR5\Binaries\Release\8ae817d2523548329a06dae94086afb3\Game.lib и объект E:\Engine\Engine\build\playtests\20261107-r5\tired-bomber\BomberCleanR5\Binaries\Release\8ae817d2523548329a06dae94086afb3\Game.exp
+GeneratedComponents.obj : error LNK2001: неразрешенный внешний символ "public: virtual bool __cdecl BomberSessionDiagnostics::Initialize(struct SubsystemContext &,class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > &)" (?Initialize@BomberSessionDiagnostics@@UEAA_NAEAUSubsystemContext@@AEAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z). [E:\Engine\Engine\build\playtests\20261107-r5\tired-bomber\BomberCleanR5\Game.vcxproj]
+GeneratedComponents.obj : error LNK2001: неразрешенный внешний символ "public: virtual void __cdecl BomberSessionDiagnostics::OnSceneReady(class Scene &)" (?OnSceneReady@BomberSessionDiagnostics@@UEAAXAEAVScene@@@Z). [E:\Engine\Engine\build\playtests\20261107-r5\tired-bomber\BomberCleanR5\Game.vcxproj]
+GeneratedComponents.obj : error LNK2001: неразрешенный внешний символ "public: virtual void __cdecl BomberSessionDiagnostics::OnSceneClosing(class Scene &)" (?OnSceneClosing@BomberSessionDiagnostics@@UEAAXAEAVScene@@@Z). [E:\Engine\Engine\build\playtests\20261107-r5\tired-bomber\BomberCleanR5\Game.vcxproj]
+GeneratedComponents.obj : error LNK2001: неразрешенный внешний символ "public: virtual void __cdecl BomberSessionDiagnostics::Tick(float)" (?Tick@BomberSessionDiagnostics@@UEAAXM@Z). [E:\Engine\Engine\build\playtests\20261107-r5\tired-bomber\BomberCleanR5\Game.vcxproj]
+GeneratedComponents.obj : error LNK2001: неразрешенный внешний символ "public: virtual void __cdecl ProjectGame::SerializeSaveGame(class SaveArchive &)" (?SerializeSaveGame@ProjectGame@@UEAAXAEAVSaveArchive@@@Z). [E:\Engine\Engine\build\playtests\20261107-r5\tired-bomber\BomberCleanR5\Game.vcxproj]
+GeneratedComponents.obj : error LNK2001: неразрешенный внешний символ "public: virtual void __cdecl ProjectGame::OnSaveGameLoaded(void)" (?OnSaveGameLoaded@ProjectGame@@UEAAXXZ). [E:\Engine\Engine\build\playtests\20261107-r5\tired-bomber\BomberCleanR5\Game.vcxproj]
+GeneratedComponents.obj : error LNK2001: неразрешенный внешний символ "protected: virtual void __cdecl ProjectGame::PreUpdate(float)" (?PreUpdate@ProjectGame@@MEAAXM@Z). [E:\Engine\Engine\build\playtests\20261107-r5\tired-bomber\BomberCleanR5\Game.vcxproj]
+E:\Engine\Engine\build\playtests\20261107-r5\tired-bomber\BomberCleanR5\Binaries\Release\8ae817d2523548329a06dae94086afb3\Game.dll : fatal error LNK1120: неразрешенных внешних элементов: 7 [E:\Engine\Engine\build\playtests\20261107-r5\tired-bomber\BomberCleanR5\Game.vcxproj]

@@ -283,12 +283,14 @@ void EditorQtHost::DrainCommands()
             const auto name = sceneHandler_.GetSelectedObjectName();
             result = playState_.load() == Edit && api && api->asset ? api->asset(api->context, cmd.w, cmd.path.toUtf8().constData(), cmd.name.toUtf8().constData(), detail, sizeof(detail)) : EngineSceneReadOnly;
             if (result == EngineSceneOk) {
-                history_.Reset();
+                // Rename/move remaps asset paths, so old checkpoints go stale and
+                // history must be dropped explicitly. Reimport keeps paths: the
+                // checkpoints stay valid, only transform coalescing breaks.
+                if (cmd.w == 1) history_.Reset();
+                else history_.BreakCoalescing();
                 SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api()};
-                sceneHandler_.SetSelectedId(0);
+                sceneHandler_.SelectByName(ctx, name);
                 sceneHandler_.MarkDirty();
-                sceneHandler_.PublishScene(ctx, playState_.load());
-                for (const auto& o : sceneHandler_.ReadSnapshot().objects) if (o.name == name) sceneHandler_.SetSelectedId(o.id);
                 sceneHandler_.PublishScene(ctx, playState_.load());
                 recovery_.Clear(); WriteRecovery();
             }
@@ -354,6 +356,7 @@ void EditorQtHost::DrainCommands()
                 selection_,
                 viewportInput_,
                 audio_,
+                assetImport_,
                 [this](const char* msg) { Log(msg); },
                 [this](const auto& s, const auto& d, const auto& sel, const auto& in, const auto& audio) {
                     recovery_.RefreshBuild();

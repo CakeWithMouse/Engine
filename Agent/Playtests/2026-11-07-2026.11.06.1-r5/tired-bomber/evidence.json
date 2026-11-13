@@ -1,0 +1,63 @@
+{
+  "run": "2026-11-07-2026.11.06.1-r5/tired-bomber",
+  "version": "2026.11.07.0",
+  "head": "55d3b0ceea1723c88ffd51d701787f87ccbb6fc4",
+  "usage_start_percent": 50,
+  "usage_checkpoint_percent": 53,
+  "usage_window_minutes": 10080,
+  "stop_threshold_percent": 75,
+  "project": "Engine/build/playtests/20261107-r5/tired-bomber/BomberFinalR5",
+  "source_archive": "Engine/build/playtests/20261107-r5/tired-bomber/tired-bomber-r5-source.zip",
+  "confirmed_defects": [],
+  "observations": [
+    {
+      "feature_id": "clean-cli-create-enable-build",
+      "status": "passed",
+      "action": "Created BomberCleanR5 with EngineLauncher --create-project; enabled C++ and built after fresh SDK upgrade in BomberFinalR5.",
+      "expected": "A new project is created without overwriting existing files, uses the current SDK and produces an activated game DLL.",
+      "actual": "Create exit 0. Initial enable build hit environment LNK1101 MSPDB140.DLL, then elevated exact retry exited 0. Upgrade to 2026.11.07.0 and final build exited 0; final build log lists the source files and output DLL.",
+      "evidence_paths": ["evidence/environment-linker-failure.log", "evidence/final-build-r5.log"]
+    },
+    {
+      "feature_id": "bomber-gameplay-hit",
+      "status": "passed",
+      "action": "Ran actual standalone EngineRuntime --mode game --frames 220 with the migrated BomberFinalR5.",
+      "expected": "A moving bomb reaches a moving unit, exact scene trace registers the hit and the HUD hit count/effect update.",
+      "actual": "Runtime exit 0 on NVIDIA GeForce RTX 4070 Laptop GPU. Bomb released at t=1.01667 s; `[TiredBomber] HIT unit id=7 t=1.95s trace=Hit queries=58 triangles=28`; hit frame was written at 1000x500. Coordinator visually checked that frame and reported readable HUD `hits 1 misses 0`, targets, colored groups, lighting/shadows and LOD overlay.",
+      "evidence_paths": ["evidence/game-run-r5.stdout.log", "evidence/game-hit-r5.bmp"]
+    },
+    {
+      "feature_id": "project-input-commandlet-play-hit",
+      "status": "partial",
+      "action": "EngineCommandlets.exe project.input ran Play/focus/600 frames/Pause/4 frames against the project.",
+      "expected": "Game play updates produce a bomb release and hit, then pause holds state.",
+      "actual": "Commandlet exit 0, result ok=true and frames=604, but no bomb release/hit appeared in the process log and authoring scene snapshots retained initial unit positions. This is not counted as gameplay evidence; further investigation needed before classifying the API behavior.",
+      "evidence_paths": ["evidence/project-input-request.json", "evidence/project-input-result.json"]
+    },
+    {
+      "feature_id": "point-light-instanced-shadow-code-review",
+      "status": "partial",
+      "action": "Read Game.cpp, InstancedMeshComponent.cpp, InstancedMeshShadows.cpp, PointShadow.h and Common.hlsli at HEAD.",
+      "expected": "Current code updates cube maps each frame, filters instanced casters by cube face and honors castShadows.",
+      "actual": "Code paths show per-frame point-shadow map update, up to two enabled shadow lights, per-face instanced staging and CastsShadow guard. No A/B observation of moving caster/light, castShadows, or Forward/Deferred was completed.",
+      "evidence_paths": ["Engine/Source/MainGame/BaseGameClass/Game.cpp", "Engine/Source/Components/SpecificComponents/InstancedMeshShadows.cpp", "Engine/Source/Components/SpecificComponents/InstancedMeshComponent.cpp", "Engine/Content/Shaders/Common.hlsli"]
+    },
+    {
+      "feature_id": "game-window-visual",
+      "status": "passed",
+      "action": "Coordinator visually inspected game-hit-r5.bmp.",
+      "expected": "Scene and hit HUD remain readable in the gameplay capture.",
+      "actual": "Coordinator observed a readable 1000x500 frame with hits=1/misses=0, target groups, lighting/shadows and LOD overlay. The frame does not isolate or prove point-light shadow correctness.",
+      "evidence_paths": ["evidence/game-hit-r5.bmp"]
+    },
+    {
+      "feature_id": "editor-edit-visual",
+      "status": "not-tested",
+      "action": "No edit-window image observed by this role or coordinator.",
+      "expected": "Edit view opens Main scene and exposes point-light castShadows state.",
+      "actual": "Not observed.",
+      "evidence_paths": []
+    }
+  ],
+  "visual_status": {"game": "passed", "point_shadow_ab": "visual-unverified", "edit": "visual-unverified"}
+}

@@ -316,13 +316,16 @@ void InstancedMeshComponent::BuildVisibleSets()
     const bool orthographic = GamePtr->GetPlayer()->IsOrthographic();
     const DirectX::XMFLOAT4* cascadeSpheres = GamePtr->GetCascadeSpheres();
     const DirectX::XMFLOAT4* pointSpheres = GamePtr->GetPointShadowSpheres();
-    const int pointLightCount = bCastsShadow ? GamePtr->GetPointShadowCount() : 0;
+    const int pointLightCount = CastsShadow() ? GamePtr->GetPointShadowCount() : 0;
     const int cascadeLimit = ShadowCascadeLimit > 0 ? std::min(ShadowCascadeLimit, MaxShadowCascades) : MaxShadowCascades;
     const DirectX::XMFLOAT4& lightDirectionValue = GamePtr->GetDirectionalLightDirection();
     glm::vec3 lightDirection(lightDirectionValue.x, lightDirectionValue.y, lightDirectionValue.z);
     const float lightLength = glm::length(lightDirection);
     lightDirection = lightLength > 0.0001f ? lightDirection / lightLength : glm::vec3(0.0f, -1.0f, 0.0f);
     const bool bAnimated = (AnimationTextureSRV != nullptr);
+    const bool bAnimationBoundsKnown = !bAnimated || AnimationBoundsRadius > 0.0f;
+    const float animationRadius = bAnimated && bAnimationBoundsKnown
+        ? (std::max)(MeshRadius, AnimationBoundsRadius) : MeshRadius;
 
     const float shadowFadeStart = ShadowDistance * (1.0f - ShadowDistanceFade);
     const float shadowFadeStartSq = shadowFadeStart * shadowFadeStart;
@@ -349,14 +352,21 @@ void InstancedMeshComponent::BuildVisibleSets()
         }
 
         const float radius = MeshRadius * instance.Scale;
-        bool bInsideFrustum = true;
-        for (const DirectX::XMFLOAT4& plane : frame.FrustumPlanes)
+        const float shadowBoundsRadius = animationRadius * instance.Scale;
+        // Manual VAT textures have no CPU pose envelope. Keep them conservative until the caller
+        // supplies one; the known envelope is used only for culling, not screen-size LOD selection.
+        bool bInsideFrustum = bAnimated && !bAnimationBoundsKnown;
+        if (!bInsideFrustum)
         {
-            if (plane.x * instance.Position.x + plane.y * instance.Position.y +
-                plane.z * instance.Position.z + plane.w < -radius)
+            bInsideFrustum = true;
+            for (const DirectX::XMFLOAT4& plane : frame.FrustumPlanes)
             {
-                bInsideFrustum = false;
-                break;
+                if (plane.x * instance.Position.x + plane.y * instance.Position.y +
+                    plane.z * instance.Position.z + plane.w < -shadowBoundsRadius)
+                {
+                    bInsideFrustum = false;
+                    break;
+                }
             }
         }
 
@@ -376,11 +386,11 @@ void InstancedMeshComponent::BuildVisibleSets()
             }
         }
         // A point light reaches casters the camera does not see, so they stay in the frame.
-        bool bPointCaster = false;
+        bool bPointCaster = bAnimated && !bAnimationBoundsKnown && pointLightCount > 0;
         for (int light = 0; light < pointLightCount && !bPointCaster; ++light)
         {
             const glm::vec3 toLight = instance.Position - glm::vec3(pointSpheres[light].x, pointSpheres[light].y, pointSpheres[light].z);
-            const float reach = pointSpheres[light].w + radius;
+            const float reach = pointSpheres[light].w + shadowBoundsRadius;
             bPointCaster = glm::dot(toLight, toLight) <= reach * reach;
         }
         if (!bInsideFrustum && !bWantsShadow && !bPointCaster)
@@ -464,11 +474,20 @@ void InstancedMeshComponent::BuildVisibleSets()
         if (bWantsShadow)
         {
             const int meshLevel = std::min(level, LodCount - 1);
-            CollectShadowCasters(instance, data, meshLevel, radius, lightDirection, cascadeSpheres, cascadeLimit);
+            CollectShadowCasters(instance, data, meshLevel, shadowBoundsRadius,
+                                 lightDirection, cascadeSpheres, cascadeLimit);
         }
         if (bPointCaster)
         {
-            CollectPointCasters(instance, data, std::min(level, LodCount - 1), radius, pointSpheres, pointLightCount);
+            // The point silhouette follows the same pair and weights as colour. Keep the last
+            // mesh fully casting when colour fades into an impostor (there is no sprite caster).
+            const bool meshFade = fadePartner >= 0 && fadePartner < LodCount && level < LodCount;
+            if (!meshFade || levelFade > 0.0f)
+                CollectPointCasters(instance, data, std::min(level, LodCount - 1), shadowBoundsRadius,
+                                    pointSpheres, pointLightCount, meshFade ? levelFade : 1.0f);
+            if (meshFade && partnerFade > 0.0f)
+                CollectPointCasters(instance, data, fadePartner, shadowBoundsRadius,
+                                    pointSpheres, pointLightCount, -partnerFade);
         }
     }
 
@@ -551,7 +570,9 @@ void InstancedMeshComponent::EnsureFrameData(ID3D11DeviceContext* context)
     for (int level = 0; level < LodCount; ++level)
     {
         LodLevel& lod = Lods[level];
+        const auto* previousColorBuffer = lod.ColorBuffer.Get();
         UploadStream(context, lod.ColorStaging, lod.ColorBuffer, lod.ColorSRV, lod.ColorCapacity);
+        if (previousColorBuffer != lod.ColorBuffer.Get()) lod.ColorRangeViews.clear();
         for (int cascade = 0; cascade < MaxShadowCascades; ++cascade)
         {
             UploadStream(context, lod.ShadowStaging[cascade], lod.ShadowBuffer[cascade],
@@ -583,10 +604,10 @@ void InstancedMeshComponent::Render(ID3D11DeviceContext* context)
 
     EnsureFrameData(context);
 
-    ID3D11Device* device = nullptr;
-    context->GetDevice(&device);
+    Microsoft::WRL::ComPtr<ID3D11Device> device;
+    context->GetDevice(device.GetAddressOf());
 
-    const bool bUseSkinned = (AnimationTextureSRV != nullptr) && EnsureSkinnedShaders(device);
+    const bool bUseSkinned = (AnimationTextureSRV != nullptr) && EnsureSkinnedShaders(device.Get());
 
     if (bUseSkinned)
     {
@@ -629,14 +650,16 @@ void InstancedMeshComponent::Render(ID3D11DeviceContext* context)
     for (int level = 0; level < LodCount; ++level)
     {
         LodLevel& lod = Lods[level];
-        const UINT instanceCount = static_cast<UINT>(lod.ColorStaging.size());
+        if (TransparentLod >= 0 && level != TransparentLod) continue;
+        const UINT instanceCount = TransparentInstanceCount ? TransparentInstanceCount : static_cast<UINT>(lod.ColorStaging.size());
         if (instanceCount == 0 || !lod.VertexBuffer || !lod.IndexBuffer || !lod.ColorSRV)
         {
             continue;
         }
 
         ID3D11Buffer* vertexBuffers[] = {lod.VertexBuffer.Get()};
-        ID3D11ShaderResourceView* instanceSRV = lod.ColorSRV.Get();
+        ID3D11ShaderResourceView* instanceSRV = InstanceRangeView(context, lod.ColorBuffer.Get(), lod.ColorSRV.Get(), lod.ColorCapacity, lod.ColorRangeViews);
+        if (!instanceSRV) continue;
         const UINT stride = lod.VertexStride;
         context->IASetVertexBuffers(0, 1, vertexBuffers, &stride, &offset);
         context->IASetIndexBuffer(lod.IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
@@ -645,7 +668,7 @@ void InstancedMeshComponent::Render(ID3D11DeviceContext* context)
         if (GamePtr) GamePtr->CountDraw(lod.IndexCount, instanceCount);
     }
 
-    DrawImpostors(context);
+    if (TransparentLod < 0) DrawImpostors(context);
 
     ID3D11ShaderResourceView* nullSRVs[2] = {nullptr, nullptr};
     context->VSSetShaderResources(0, 2, nullSRVs);

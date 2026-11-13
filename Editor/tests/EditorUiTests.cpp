@@ -56,6 +56,8 @@
 #include <QToolButton>
 #include <QGroupBox>
 #include <QTreeView>
+#include <QFileSystemModel>
+#include <QSortFilterProxyModel>
 #include "ViewportWidget.h"
 #include "SceneObjectsPanel.h"
 #include "CollapsibleCard.h"
@@ -63,6 +65,7 @@
 #define QT_WIDGETS_LIB
 #endif
 #include <qtestmouse.h>
+#include <qtestkeyboard.h>
 #include <QTabBar>
 #include <QMenu>
 #include <chrono>
@@ -70,6 +73,7 @@
 #include <fstream>
 #include <cstdio>
 #include <stdexcept>
+#include "ViewportDpiTests.h"
 namespace
 {
 int checks = 0;
@@ -192,6 +196,15 @@ int wmain(int argc, wchar_t** argv)
 {
     try
     {
+        if (argc == 2 && std::wstring(argv[1]) == L"--viewport-dpi")
+        {
+            int qtArgc = 1;
+            char name[] = "ViewportDpiTests";
+            char* qtArgv[] = {name, nullptr};
+            QApplication app(qtArgc, qtArgv);
+            ViewportDpiTests::Run();
+            return 0;
+        }
         Check(argc == 3 || argc == 4, "usage: EditorUiTests <project directory> <EngineContent> [model]");
         const auto root = std::filesystem::absolute(argv[1]);
         // Isolate persisted UI preferences from the user's registry and other test runs.
@@ -636,6 +649,132 @@ int wmain(int argc, wchar_t** argv)
         until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.textureAsset.empty()) return false; return true; });
         Ui([](auto* w) { Action(w, QStringLiteral("Повторить"))->trigger(); });
         until([&] { for (const auto& o : host.ReadSnapshot().objects) if (!o.textureAsset.empty()) return true; return false; });
+
+        // Content Browser Delete key test (column 0 and column 1)
+        {
+            const size_t objectCountBefore = host.ReadSnapshot().objects.size();
+            Check(objectCountBefore > 0, "scene has objects before asset delete");
+            const auto targetObj = host.ReadSnapshot().objects.front();
+            {
+                EditorCommand sel;
+                sel.type = EditorCommand::SelectObject;
+                sel.objectId = targetObj.id;
+                host.PostCommand(sel);
+            }
+            until([&] { return host.ReadSnapshot().selected == targetObj.id; });
+            Check(host.ReadSnapshot().selected == targetObj.id, "scene object selected before delete");
+
+            // --- Column 0 test ---
+            const auto delImg0 = root / "Content/Textures/del_col0.bmp";
+            QImage img0(4, 4, QImage::Format_RGB32);
+            img0.fill(Qt::yellow);
+            Check(img0.save(QString::fromStdWString(delImg0.wstring())), "save del_col0.bmp");
+            until([&] { return std::filesystem::exists(delImg0); });
+
+            until([&] {
+                bool ready = false;
+                Ui([&](auto* w) {
+                    auto* files = w->template findChild<QTreeView*>("ProjectFiles");
+                    auto* proxy = files ? static_cast<QSortFilterProxyModel*>(files->model()) : nullptr;
+                    auto* fsModel = proxy ? static_cast<QFileSystemModel*>(proxy->sourceModel()) : nullptr;
+                    if (fsModel && proxy) {
+                        const auto idx = fsModel->index(QString::fromStdWString(delImg0.wstring()));
+                        ready = idx.isValid() && proxy->mapFromSource(idx).isValid();
+                    }
+                });
+                return ready;
+            });
+
+            Ui([&](auto* w) {
+                auto* files = w->template findChild<QTreeView*>("ProjectFiles");
+                auto* proxy = static_cast<QSortFilterProxyModel*>(files->model());
+                auto* fsModel = static_cast<QFileSystemModel*>(proxy->sourceModel());
+                const QModelIndex srcIdx = fsModel->index(QString::fromStdWString(delImg0.wstring()));
+                const QModelIndex proxyIdx = proxy->mapFromSource(srcIdx);
+                const QModelIndex col0 = proxyIdx.sibling(proxyIdx.row(), 0);
+                files->setCurrentIndex(col0);
+                files->setFocus();
+                Check(files->currentIndex().column() == 0, "del_col0 selected in column 0");
+
+                QTimer::singleShot(60, w, [] {
+                    if (auto* mb = qobject_cast<QMessageBox*>(QApplication::activeModalWidget())) {
+                        if (auto* btn = mb->button(QMessageBox::Yes)) btn->click();
+                        else mb->accept();
+                    }
+                });
+
+                QTest::keyClick(files, Qt::Key_Delete);
+            });
+
+            until([&] { return !std::filesystem::exists(delImg0); });
+            Check(host.ReadSnapshot().objects.size() == objectCountBefore, "scene object count unchanged on asset col 0 delete");
+            bool objExists0 = false;
+            for (const auto& o : host.ReadSnapshot().objects) if (o.id == targetObj.id) { objExists0 = true; break; }
+            Check(objExists0, "selected scene object NOT deleted on asset col 0 delete");
+
+            // --- Column 1 test ---
+            const auto delImg1 = root / "Content/Textures/del_col1.bmp";
+            QImage img1(4, 4, QImage::Format_RGB32);
+            img1.fill(Qt::cyan);
+            Check(img1.save(QString::fromStdWString(delImg1.wstring())), "save del_col1.bmp");
+            until([&] { return std::filesystem::exists(delImg1); });
+
+            until([&] {
+                bool ready = false;
+                Ui([&](auto* w) {
+                    auto* files = w->template findChild<QTreeView*>("ProjectFiles");
+                    auto* proxy = files ? static_cast<QSortFilterProxyModel*>(files->model()) : nullptr;
+                    auto* fsModel = proxy ? static_cast<QFileSystemModel*>(proxy->sourceModel()) : nullptr;
+                    if (fsModel && proxy) {
+                        const auto idx = fsModel->index(QString::fromStdWString(delImg1.wstring()));
+                        ready = idx.isValid() && proxy->mapFromSource(idx).isValid();
+                    }
+                });
+                return ready;
+            });
+
+            Ui([&](auto* w) {
+                auto* files = w->template findChild<QTreeView*>("ProjectFiles");
+                auto* proxy = static_cast<QSortFilterProxyModel*>(files->model());
+                auto* fsModel = static_cast<QFileSystemModel*>(proxy->sourceModel());
+                const QModelIndex srcIdx = fsModel->index(QString::fromStdWString(delImg1.wstring()));
+                const QModelIndex proxyIdx = proxy->mapFromSource(srcIdx);
+                const QModelIndex col1 = proxyIdx.sibling(proxyIdx.row(), 1);
+                files->setCurrentIndex(col1);
+                files->setFocus();
+                Check(files->currentIndex().column() == 1, "del_col1 selected in column 1");
+
+                QTimer::singleShot(60, w, [] {
+                    if (auto* mb = qobject_cast<QMessageBox*>(QApplication::activeModalWidget())) {
+                        if (auto* btn = mb->button(QMessageBox::Yes)) btn->click();
+                        else mb->accept();
+                    }
+                });
+
+                QTest::keyClick(files, Qt::Key_Delete);
+            });
+
+            until([&] { return !std::filesystem::exists(delImg1); });
+            Check(host.ReadSnapshot().objects.size() == objectCountBefore, "scene object count unchanged on asset col 1 delete");
+            bool objExists1 = false;
+            for (const auto& o : host.ReadSnapshot().objects) if (o.id == targetObj.id) { objExists1 = true; break; }
+            Check(objExists1, "selected scene object NOT deleted on asset col 1 delete");
+        }
+
+        // Step C: OpenMaterialEditor on nonexistent file shows warning and does NOT open window
+        Ui([&](auto* w) {
+            bool warningShown = false;
+            QTimer::singleShot(50, w, [&] {
+                if (auto* mb = qobject_cast<QMessageBox*>(QApplication::activeModalWidget())) {
+                    warningShown = true;
+                    mb->accept();
+                }
+            });
+            w->OpenMaterialEditor(QStringLiteral("/Game/Materials/NonExistent_12345.mat"));
+            Check(warningShown, "warning dialog shown for nonexistent material");
+            Check(w->template findChild<MaterialEditorWindow*>() == nullptr, "no MaterialEditorWindow created for nonexistent material");
+        });
+
         // Material editor: template from Files, live parameter, HLSL errors, recompiled parameters, save and discard.
         const auto materialFile = root / "Content/Materials/Tint.mat", surfaceFile = root / "Content/Materials/Tint.hlsl";
         auto editorWidget = [](auto* w, const QString& name) -> QWidget* {
@@ -753,6 +892,18 @@ int wmain(int argc, wchar_t** argv)
             Check(!Tex::RemoveSlot(mixed, QStringLiteral("C"), problem) && mixed == untouched, "expression with other logic is not cut");
             QString noSurface = QStringLiteral("float4 Other() { return 0; }\n");
             Check(!Tex::AddSlot(noSurface, QStringLiteral("A"), Tex::Role::Color, problem), "no Surface function");
+            QString boundary = QStringLiteral("Texture2D Prior : register(t31);\nvoid Surface(MaterialInput i, inout MaterialOutput o) {}\n");
+            Check(Tex::AddSlot(boundary, QStringLiteral("Safe"), Tex::Role::Color, problem) &&
+                boundary.contains(QStringLiteral("Safe : register(t33)")), "HLSL texture tools skip point shadow register");
+            QString crowded = QStringLiteral("void Surface(MaterialInput i, inout MaterialOutput o) {}\n");
+            for (int i = 0; i < 121; ++i)
+                Check(Tex::AddSlot(crowded, QStringLiteral("Map%1").arg(i), Tex::Role::Color, problem), "available HLSL texture slot allocated");
+            const QString unchanged = crowded;
+            Check(!Tex::AddSlot(crowded, QStringLiteral("Overflow"), Tex::Role::Color, problem) && crowded == unchanged && !problem.isEmpty(),
+                "exhausted texture slots fail without changing HLSL");
+            QString high = QStringLiteral("Texture2D Prior : register(t127);\nvoid Surface(MaterialInput i, inout MaterialOutput o) {}\n");
+            Check(Tex::AddSlot(high, QStringLiteral("Low"), Tex::Role::Color, problem) &&
+                high.contains(QStringLiteral("Low : register(t6)")), "HLSL texture slots wrap into available gap");
         }
         const auto paintFile = root / "Content/Materials/Paint.mat", redSource = root / L"outside-red.bmp";
         auto textureField = [&](const QString& slot) { QString value; Ui([&](auto* w) { if (auto* field = qobject_cast<QLineEdit*>(editorWidget(w, QStringLiteral("MaterialTexture_") + slot))) value = field->text(); }); return value; };
@@ -1652,6 +1803,34 @@ int wmain(int argc, wchar_t** argv)
         Ui([](auto* w) { auto* projection=w->template findChild<QComboBox*>("Property/orthographic"); auto* plane=w->template findChild<QComboBox*>("Property/viewPlane"); Check(projection && plane && projection->count()==2 && plane->count()==4,"camera projection and 2D plane choices"); projection->setCurrentIndex(1); QMetaObject::invokeMethod(projection,"activated",Q_ARG(int,1)); });
         until([&]{for(const auto& o:host.ReadSnapshot().objects)if(o.gameplayKind==2)return QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object()["orthographic"].toBool();return false;});
         Ui([](auto* w) { Action(w,QStringLiteral("Сохранить сцену"))->trigger(); }); until([&] { return !host.ReadSnapshot().dirty; });
+        // Regression: an inactive window reports no focus widget, so CommitPendingEdits
+        // posts the transform directly. With an unchanged transform the receiver must drop
+        // it and create no Undo entry. Reload clears history so canUndo is a clean baseline.
+        {
+            EditorCommand load; load.type = EditorCommand::LoadScene;
+            load.path = QString::fromStdWString(sceneFile.wstring());
+            host.PostCommand(load);
+            until([&] { return !host.ReadSnapshot().canUndo && !host.ReadSnapshot().objects.empty(); });
+            Check(!host.ReadSnapshot().canUndo, "history cleared before inactive-window save test");
+            Ui([](auto* w) {
+                auto* tree = w->findChild<QTreeWidget*>();
+                for (int i = 0; i < tree->topLevelItemCount(); ++i)
+                    if (tree->topLevelItem(i)->text(1) == QStringLiteral("Primitive.Sphere")) tree->setCurrentItem(tree->topLevelItem(i));
+            });
+            until([&] { return host.ReadSnapshot().selected != 0; });
+            for (int i = 0; i < 10; ++i) pump();
+            auto selectedXNow = [&] { const auto view = host.ReadSnapshot(); for (const auto& o : view.objects) if (o.id == view.selected) return o.transform.position[0]; return -999.0f; };
+            const float startX = selectedXNow();
+            Ui([](auto* w) {
+                auto* viewport = w->findChild<ViewportWidget*>(); viewport->setFocus();
+                auto* panel = w->findChild<ObjectInspectorPanel*>();
+                Check(panel && !panel->isAncestorOf(QApplication::focusWidget()), "focus moved outside the inspector");
+                Action(w, QStringLiteral("Сохранить сцену"))->trigger();
+            });
+            for (int i = 0; i < 30; ++i) pump();
+            Check(!host.ReadSnapshot().canUndo, "inactive-window save of unchanged transform adds no Undo entry");
+            Check(selectedXNow() == startX, "inactive-window no-op save leaves transform unchanged");
+        }
         Ui([](auto* w) { w->close(); });
         until([&] { return exit; });
         host.SetModuleApi({}); factory.destroy(api.context); sessionGuard.context = nullptr; host.Stop();

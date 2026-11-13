@@ -3,19 +3,29 @@
 #if defined(ENGINE_ENABLE_ASSIMP)
 
 #include <assimp/Importer.hpp>
+#include <assimp/config.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <assimp/material.h>
 #include "AssimpVfsIO.h"
 #include <functional>
 #include "../Resources/VfsRead.h"
+#include "../Scene/ModelImportSettings.h"
 
 #include <algorithm>
 #include <cmath>
 #include <map>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+namespace ModelImport
+{
+// Defined in ModelImport.cpp: retains this import's importer so CreateMaterials
+// reuses the first aiScene instead of parsing the file a second time.
+void OfferSceneCapture(const std::string& modelPath, std::unique_ptr<Assimp::Importer> importer);
+}
 
 namespace
 {
@@ -62,20 +72,98 @@ namespace
         }
         return nullptr;
     }
+
+    void ScaleMatrixTranslation(DirectX::XMFLOAT4X4& mat, float scale)
+    {
+        mat.m[3][0] *= scale;
+        mat.m[3][1] *= scale;
+        mat.m[3][2] *= scale;
+    }
+
+    // R2: bake a uniform scale into the loaded geometry. Only translational data scales
+    // (vertices, bone bind/local translations, rest translation, mesh-to-model, animation
+    // position keys); rotations, scales, normals, weights and UVs stay untouched, which keeps
+    // the skinning math consistent (bind pose still resolves to identity at rest).
+    void ApplyGeometryScale(SkeletalModel& model, float scale)
+    {
+        if (scale == 1.0f)
+        {
+            return;
+        }
+        for (auto& mesh : model.Meshes)
+        {
+            for (auto& vertex : mesh.Vertices)
+            {
+                vertex.Position.x *= scale;
+                vertex.Position.y *= scale;
+                vertex.Position.z *= scale;
+            }
+        }
+        for (auto& bone : model.ModelSkeleton.Bones)
+        {
+            ScaleMatrixTranslation(bone.InverseBindPose, scale);
+            ScaleMatrixTranslation(bone.LocalTransform, scale);
+            bone.RestTranslation.x *= scale;
+            bone.RestTranslation.y *= scale;
+            bone.RestTranslation.z *= scale;
+        }
+        ScaleMatrixTranslation(model.MeshToModel, scale);
+        for (auto& clip : model.Clips)
+        {
+            for (auto& channel : clip.Channels)
+            {
+                for (auto& key : channel.PositionKeys)
+                {
+                    key.Value.x *= scale;
+                    key.Value.y *= scale;
+                    key.Value.z *= scale;
+                }
+            }
+        }
+        model.BoundingRadius *= scale;
+    }
 }
 
-static SkeletalLoadResult LoadModel(const std::function<const aiScene*(Assimp::Importer&, unsigned)>& read)
+static SkeletalLoadResult LoadModel(
+    const std::function<const aiScene*(Assimp::Importer&, unsigned)>& read,
+    const ModelImportSettings& settings = {},
+    const std::string& capturePath = {})
 {
     SkeletalLoadResult result;
     try
     {
-        Assimp::Importer importer;
-        const unsigned int flags =
+        auto importerOwner = std::make_unique<Assimp::Importer>();
+        Assimp::Importer& importer = *importerOwner;
+        unsigned int flags =
             aiProcess_Triangulate |
-            aiProcess_GenNormals |
             aiProcess_LimitBoneWeights |
             aiProcess_JoinIdenticalVertices |
-            aiProcess_ConvertToLeftHanded;
+            aiProcess_MakeLeftHanded |
+            aiProcess_FlipWindingOrder;
+
+        if (!settings.flipUv)
+        {
+            flags |= aiProcess_FlipUVs;
+        }
+
+        if (settings.useFileUnitScale)
+        {
+            flags |= aiProcess_GlobalScale;
+        }
+
+        if (settings.normals == "flat")
+        {
+            flags |= aiProcess_DropNormals | aiProcess_GenNormals;
+        }
+        else if (settings.normals == "smooth")
+        {
+            flags |= aiProcess_DropNormals | aiProcess_GenSmoothNormals;
+            importer.SetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, settings.smoothingAngle);
+        }
+        else
+        {
+            flags |= aiProcess_GenNormals;
+        }
 
         const aiScene* scene = read(importer, flags);
         if (!scene || (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !scene->mRootNode)
@@ -88,7 +176,16 @@ static SkeletalLoadResult LoadModel(const std::function<const aiScene*(Assimp::I
         for (unsigned m = 0; m < scene->mNumMeshes; ++m) skinned |= scene->mMeshes[m]->HasBones();
         if (!skinned)
         {
-            scene = importer.ApplyPostProcessing(aiProcess_PreTransformVertices);
+            if (!settings.mergeMeshes)
+            {
+                importer.SetPropertyInteger(AI_CONFIG_PP_PTV_KEEP_HIERARCHY, 1);
+            }
+            unsigned int postFlags = aiProcess_PreTransformVertices;
+            if (settings.mergeMeshes)
+            {
+                postFlags |= aiProcess_OptimizeMeshes;
+            }
+            scene = importer.ApplyPostProcessing(postFlags);
             if (!scene) { result.ErrorMessage = importer.GetErrorString(); return result; }
         }
         auto model = std::make_shared<SkeletalModel>();
@@ -311,6 +408,11 @@ static SkeletalLoadResult LoadModel(const std::function<const aiScene*(Assimp::I
         }
 
         if (model->TotalIndexCount == 0) { result.ErrorMessage = "Model contains no triangles"; return result; }
+        if (settings.AppliesGeometryScale())
+        {
+            ApplyGeometryScale(*model, settings.scale);
+        }
+        if (!capturePath.empty()) ModelImport::OfferSceneCapture(capturePath, std::move(importerOwner));
         result.Success = true;
         result.Model = model;
     }
@@ -333,13 +435,15 @@ SkeletalLoadResult LoadSkeletalModelFromMemory(const void* data, size_t size, st
     if (!data || !size) return {false, "Empty input data for model", {}};
     return LoadModel([&](Assimp::Importer& importer, unsigned flags) {
         return importer.ReadFileFromMemory(data, size, flags, std::string(hint).c_str());
-    });
+    }, ModelImportSettings{});
 }
+
 SkeletalLoadResult LoadSkeletalModelFromVfs(std::string_view vpath)
 {
+    const ModelImportSettings settings = ModelImportSettings::ReadFromVfs(vpath);
     return LoadModel([&](Assimp::Importer& importer, unsigned flags) {
         importer.SetIOHandler(new AssimpVfsIO(vpath));
         return importer.ReadFile(std::string(vpath), flags);
-    });
+    }, settings, std::string(vpath));
 }
 #endif

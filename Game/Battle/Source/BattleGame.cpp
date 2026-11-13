@@ -20,6 +20,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <glm/trigonometric.hpp>
 #include <iostream>
 #include <memory>
@@ -332,7 +333,8 @@ void BattleGame::BuildScene(const Settings& settings)
     player->SetCameraMode(CameraMode::Orbital);
     player->SetOrbitTarget(glm::vec3(0.0f, 0.0f, 0.0f));
     player->SetMinMaximalOrbitRadius(40.0f, std::max(600.0f, fieldSize * 1.5f));
-    player->SetOrbitRadius(Config.CameraRadius > 0.0f ? Config.CameraRadius : std::max(180.0f, fieldSize * 0.37f));
+    SequenceCameraRadius = Config.CameraRadius > 0.0f ? Config.CameraRadius : std::max(180.0f, fieldSize * 0.37f);
+    player->SetOrbitRadius(SequenceCameraRadius);
     player->SetRotate(0.8f, glm::radians(std::max(10.0f, std::min(Config.CameraPitch, 85.0f))));
     // StopRotate enables the mouse control; a locked camera keeps the same framing between runs.
     player->StopRotate(!Config.LockCamera, !Config.LockCamera);
@@ -476,6 +478,38 @@ void BattleGame::PreUpdate(float deltaTime)
 {
     ++UpdateCount;
     Game::PreUpdate(deltaTime);
+    if (!Config.CameraSequence.empty())
+    {
+        const auto directory = std::filesystem::u8path(Config.CameraSequence);
+        // These are the matrices of the preceding completed render, paired with its BMP.
+        if (UpdateCount >= 61 && UpdateCount <= 181)
+        {
+            std::ofstream samples(directory / "matrices.csv", UpdateCount == 61 ? std::ios::trunc : std::ios::app);
+            if (!samples) throw std::runtime_error("Cannot write camera sequence matrices.csv");
+            samples << std::setprecision(9);
+            if (UpdateCount == 61) samples << "frame,cascade,m00,m01,m02,m03,m10,m11,m12,m13,m20,m21,m22,m23,m30,m31,m32,m33\n";
+            for (int cascade = 0; cascade < MaxShadowCascades; ++cascade)
+            {
+                samples << (UpdateCount - 61) << ',' << cascade;
+                const auto& matrix = GetShadowMatrices()[cascade];
+                for (int row = 0; row < 4; ++row)
+                    for (int col = 0; col < 4; ++col) samples << ',' << matrix.m[row][col];
+                samples << '\n';
+            }
+        }
+        if (UpdateCount >= 60 && UpdateCount <= 180)
+        {
+            const float step = static_cast<float>(UpdateCount - 60);
+            auto* camera = GetPlayer();
+            camera->SetRotate(0.8f + (Config.CameraMotion == "orbit" ? step * 0.0005f : 0.0f),
+                              glm::radians(std::max(10.0f, std::min(Config.CameraPitch, 85.0f))));
+            camera->SetOrbitTarget(glm::vec3(Config.CameraMotion == "pan" ? step * 0.01f : 0.0f, 0.0f, 0.0f));
+            camera->SetOrbitRadius(SequenceCameraRadius + (Config.CameraMotion == "dolly" ? step * 0.01f : 0.0f));
+            std::ostringstream name;
+            name << "frame-" << std::setw(3) << std::setfill('0') << (UpdateCount - 60) << ".bmp";
+            RequestFrameDump((directory / name.str()).generic_u8string());
+        }
+    }
     UpdateHotkeys();
     if (Config.Ai && !bAiReady) SetupAi();
     LastAiMs = bAiReady ? Ai::Get(*this).GetStats().totalMs : 0.0;

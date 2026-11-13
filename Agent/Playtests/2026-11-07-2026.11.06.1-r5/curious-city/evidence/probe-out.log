@@ -1,0 +1,39 @@
+PainEngine Launcher
+Usage: EngineLauncher.exe <command> [arguments]
+Without arguments: open the launcher GUI.
+
+Commands:
+  --help
+  -h
+  /?
+  --create-project <NEW-folder> <name>
+  --enable-code <Project.json>
+  --build-project <Project.json>
+  --install-engine <Runtime-folder>
+  --upgrade-project <Project.json> <NEW-copy-folder>
+  --check-project <Project.json>
+  --smoke-project <Project.json>
+  --smoke-project-editor <Project.json>
+  --smoke-project-current <Project.json>
+  --smoke-project-editor-current <Project.json>
+  --smoke-project-prompt <Project.json>
+  --smoke-project-editor-prompt <Project.json>
+  --check <example>
+  --smoke <example>
+  --check-editor <example>
+  --smoke-editor <example>
+
+Create a C++ project (the parent folder must exist):
+  EngineLauncher.exe --create-project "E:\Games\MyCity" "My City"
+  EngineLauncher.exe --enable-code "E:\Games\MyCity\Project.json"
+  EngineLauncher.exe --build-project "E:\Games\MyCity\Project.json"
+  EngineLauncher.exe --smoke-project "E:\Games\MyCity\Project.json"
+The project folder must be NEW, even if an existing folder is empty.
+C++ requires Visual Studio C++ tools, Windows SDK and the pinned engine's SDK.
+Build diagnostics: CodeBuild.log in the project folder.
+Default project smoke uses the pinned engine; -current uses this launcher's Runtime.
+Smoke runs 3 frames. Only -prompt smoke options display the upgrade dialog.
+Exit codes: 0 success, 1 operation failed, 2 invalid command/arguments/example.
+Output: stdout for help; stderr for errors; redirected text is UTF-8.
+PowerShell: use Start-Process -Wait -PassThru (GUI executable); read ExitCode.
+Guide: Engine/docs/LAUNCHER-CLI.md

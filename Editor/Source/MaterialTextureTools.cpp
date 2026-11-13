@@ -80,10 +80,20 @@ int LineStart(const QString& source, int position)
 int NextTextureRegister(const QString& source)
 {
     static const QRegularExpression used(QStringLiteral(R"(register\s*\(\s*t(\d+)\s*\))"));
-    int last = 5; // t0-t5 заняты движком
+    QSet<int> occupied{32}; // t0-t5 and point shadow t32 belong to the engine.
+    int last = 5;
     for (auto match = used.globalMatch(source); match.hasNext();)
-        last = std::max(last, match.next().captured(1).toInt());
-    return last + 1;
+    {
+        const int slot = match.next().captured(1).toInt();
+        occupied.insert(slot);
+        if (slot >= 6 && slot < 128) last = std::max(last, slot);
+    }
+    for (int offset = 0; offset < 122; ++offset)
+    {
+        const int slot = 6 + (last - 5 + offset) % 122;
+        if (!occupied.contains(slot)) return slot;
+    }
+    return -1;
 }
 
 QPixmap SlotImage(const QString& path, const QString& file, int size)
@@ -165,6 +175,12 @@ bool AddSlot(QString& source, const QString& name, Role role, QString& error)
 {
     error = NameProblem(source, name);
     if (!error.isEmpty()) return false;
+    const int slot = NextTextureRegister(source);
+    if (slot < 0)
+    {
+        error = QStringLiteral("Нет свободных слотов текстур материала (максимум 121).");
+        return false;
+    }
 
     const auto surface = SurfacePattern().match(source);
     const int end = surface.hasMatch() ? FunctionEnd(source, static_cast<int>(surface.capturedEnd())) : -1;
@@ -195,7 +211,7 @@ bool AddSlot(QString& source, const QString& name, Role role, QString& error)
     for (const QString& line : lines) body += QStringLiteral("    ") + line + QLatin1Char('\n');
     source.replace(bodyEnd, end - bodyEnd, body);
 
-    const QString declaration = QStringLiteral("Texture2D %1 : register(t%2);\n").arg(name).arg(NextTextureRegister(source));
+    const QString declaration = QStringLiteral("Texture2D %1 : register(t%2);\n").arg(name).arg(slot);
     static const QRegularExpression texture(QStringLiteral(R"(^[ \t]*Texture2D\b[^\n]*\n)"), QRegularExpression::MultilineOption);
     int afterTextures = -1;
     for (auto match = texture.globalMatch(source); match.hasNext();)

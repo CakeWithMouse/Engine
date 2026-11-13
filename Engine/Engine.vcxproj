@@ -49,6 +49,8 @@
     <ClCompile Include="Source\Scene\SceneDocument.cpp" />
     <ClCompile Include="Source\Scene\SceneAssets.cpp" />
     <ClCompile Include="Source\Scene\ModelImport.cpp" />
+    <ClCompile Include="Source\Scene\ModelImportSettings.cpp" />
+    <ClInclude Include="Source\Scene\ModelImportSettings.h" />
     <ClCompile Include="Source\Scene\BlendImport.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditAssets.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditAudio.cpp" />

@@ -1,0 +1,6 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  EngineTests.vcxproj -> E:\Engine\Engine\build\x64\Release\EngineTests.exe
+

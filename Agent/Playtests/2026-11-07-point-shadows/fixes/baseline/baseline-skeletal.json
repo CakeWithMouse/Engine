@@ -1,0 +1,25 @@
+{
+  "probes": [
+    [
+      0,
+      0,
+      0
+    ],
+    [
+      8,
+      0,
+      0
+    ]
+  ],
+  "frames": [
+    {
+      "image": "E:/Engine/Engine/build/playtests/20261107-point/baseline-skeletal-0.bmp",
+      "time": 0
+    },
+    {
+      "image": "E:/Engine/Engine/build/playtests/20261107-point/baseline-skeletal-5.bmp",
+      "time": 0.5
+    }
+  ],
+  "caster": "skeletal"
+}

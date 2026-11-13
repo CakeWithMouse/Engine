@@ -1,0 +1,113 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261107-r5\\curious-city\\final-city\\Project.json",
+  "steps": [
+    {
+      "action": "play",
+      "kind": "control"
+    },
+    {
+      "kind": "focus",
+      "enabled": true
+    },
+    {
+      "count": 3,
+      "kind": "frames"
+    },
+    {
+      "valid": true,
+      "x": 500,
+      "y": 400,
+      "kind": "cursor"
+    },
+    {
+      "key": 500,
+      "down": true,
+      "kind": "key"
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 500,
+      "down": false,
+      "kind": "key"
+    },
+    {
+      "count": 3,
+      "kind": "frames"
+    },
+    {
+      "valid": true,
+      "x": 70,
+      "y": 120,
+      "kind": "cursor"
+    },
+    {
+      "key": 500,
+      "down": true,
+      "kind": "key"
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 500,
+      "down": false,
+      "kind": "key"
+    },
+    {
+      "count": 3,
+      "kind": "frames"
+    },
+    {
+      "valid": true,
+      "x": 145,
+      "y": 120,
+      "kind": "cursor"
+    },
+    {
+      "key": 500,
+      "down": true,
+      "kind": "key"
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 500,
+      "down": false,
+      "kind": "key"
+    },
+    {
+      "count": 3,
+      "kind": "frames"
+    },
+    {
+      "valid": true,
+      "x": 250,
+      "y": 120,
+      "kind": "cursor"
+    },
+    {
+      "key": 500,
+      "down": true,
+      "kind": "key"
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 500,
+      "down": false,
+      "kind": "key"
+    },
+    {
+      "count": 3,
+      "kind": "frames"
+    }
+  ]
+}

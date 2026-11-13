@@ -1,0 +1,181 @@
+{
+  "passed": 4,
+  "total": 14,
+  "frames": 178,
+  "cases": [
+    {
+      "name": "slots-r0-mesh",
+      "frames": 13,
+      "errors": [
+        "frame 7: slots [0, 1, -1] != [-1, 0, 1]",
+        "frame 7: cube 0 wrong owner",
+        "frame 7: owner 1 lost shadow",
+        "frame 7: owner 1 stale/cross-wired cube",
+        "frame 7: cube 1 wrong owner",
+        "frame 7: owner 2 lost shadow",
+        "frame 7: owner 2 stale/cross-wired cube",
+        "frame 8: count 2 != 1",
+        "frame 8: slots [0, 1, -1] != [-1, -1, 0]",
+        "frame 8: cube 0 wrong owner",
+        "frame 8: owner 2 lost shadow",
+        "frame 8: owner 2 stale/cross-wired cube"
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "slots-r0-skeletal",
+      "frames": 13,
+      "errors": [
+        "frame 7: slots [0, 1, -1] != [-1, 0, 1]",
+        "frame 7: cube 0 wrong owner",
+        "frame 7: owner 1 lost shadow",
+        "frame 7: owner 1 stale/cross-wired cube",
+        "frame 7: cube 1 wrong owner",
+        "frame 7: owner 2 lost shadow",
+        "frame 7: owner 2 stale/cross-wired cube",
+        "frame 8: count 2 != 1",
+        "frame 8: slots [0, 1, -1] != [-1, -1, 0]",
+        "frame 8: cube 0 wrong owner",
+        "frame 8: owner 2 lost shadow",
+        "frame 8: owner 2 stale/cross-wired cube"
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "slots-r0-crowd",
+      "frames": 13,
+      "errors": [
+        "frame 7: slots [0, 1, -1] != [-1, 0, 1]",
+        "frame 7: cube 0 wrong owner",
+        "frame 7: owner 1 lost shadow",
+        "frame 7: owner 1 stale/cross-wired cube",
+        "frame 7: cube 1 wrong owner",
+        "frame 7: owner 2 lost shadow",
+        "frame 7: owner 2 stale/cross-wired cube",
+        "frame 8: count 2 != 1",
+        "frame 8: slots [0, 1, -1] != [-1, -1, 0]",
+        "frame 8: cube 0 wrong owner",
+        "frame 8: owner 2 lost shadow",
+        "frame 8: owner 2 stale/cross-wired cube"
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "fade-r0-0",
+      "frames": 18,
+      "errors": [
+        "cube 0: only 2 depth states across 9 LOD-fade frames (hard pop)",
+        "cube 1: only 2 depth states across 9 LOD-fade frames (hard pop)"
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "fade-r0-1",
+      "frames": 18,
+      "errors": [
+        "cube 0: only 2 depth states across 9 LOD-fade frames (hard pop)",
+        "cube 1: only 2 depth states across 9 LOD-fade frames (hard pop)"
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "distance-r0-import0",
+      "frames": 7,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "distance-r0-import1",
+      "frames": 7,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "slots-r1-mesh",
+      "frames": 13,
+      "errors": [
+        "frame 7: slots [0, 1, -1] != [-1, 0, 1]",
+        "frame 7: cube 0 wrong owner",
+        "frame 7: owner 1 lost shadow",
+        "frame 7: owner 1 stale/cross-wired cube",
+        "frame 7: cube 1 wrong owner",
+        "frame 7: owner 2 lost shadow",
+        "frame 7: owner 2 stale/cross-wired cube",
+        "frame 8: count 2 != 1",
+        "frame 8: slots [0, 1, -1] != [-1, -1, 0]",
+        "frame 8: cube 0 wrong owner",
+        "frame 8: owner 2 lost shadow",
+        "frame 8: owner 2 stale/cross-wired cube"
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "slots-r1-skeletal",
+      "frames": 13,
+      "errors": [
+        "frame 7: slots [0, 1, -1] != [-1, 0, 1]",
+        "frame 7: cube 0 wrong owner",
+        "frame 7: owner 1 lost shadow",
+        "frame 7: owner 1 stale/cross-wired cube",
+        "frame 7: cube 1 wrong owner",
+        "frame 7: owner 2 lost shadow",
+        "frame 7: owner 2 stale/cross-wired cube",
+        "frame 8: count 2 != 1",
+        "frame 8: slots [0, 1, -1] != [-1, -1, 0]",
+        "frame 8: cube 0 wrong owner",
+        "frame 8: owner 2 lost shadow",
+        "frame 8: owner 2 stale/cross-wired cube"
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "slots-r1-crowd",
+      "frames": 13,
+      "errors": [
+        "frame 7: slots [0, 1, -1] != [-1, 0, 1]",
+        "frame 7: cube 0 wrong owner",
+        "frame 7: owner 1 lost shadow",
+        "frame 7: owner 1 stale/cross-wired cube",
+        "frame 7: cube 1 wrong owner",
+        "frame 7: owner 2 lost shadow",
+        "frame 7: owner 2 stale/cross-wired cube",
+        "frame 8: count 2 != 1",
+        "frame 8: slots [0, 1, -1] != [-1, -1, 0]",
+        "frame 8: cube 0 wrong owner",
+        "frame 8: owner 2 lost shadow",
+        "frame 8: owner 2 stale/cross-wired cube"
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "fade-r1-0",
+      "frames": 18,
+      "errors": [
+        "cube 0: only 2 depth states across 9 LOD-fade frames (hard pop)",
+        "cube 1: only 2 depth states across 9 LOD-fade frames (hard pop)"
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "fade-r1-1",
+      "frames": 18,
+      "errors": [
+        "cube 0: only 2 depth states across 9 LOD-fade frames (hard pop)",
+        "cube 1: only 2 depth states across 9 LOD-fade frames (hard pop)"
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "distance-r1-import0",
+      "frames": 7,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "distance-r1-import1",
+      "frames": 7,
+      "errors": [],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    }
+  ]
+}

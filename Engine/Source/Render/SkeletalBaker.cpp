@@ -85,6 +85,19 @@ SkeletalBakeResult BakeSkeletalModel(const SkeletalModel& model, float sampleFps
 
     std::vector<XMFLOAT4X4> palette;
     palette.reserve(boneCount);
+    float animationBoundsRadiusSq = 0.0f;
+
+    // Match the vertex format actually consumed by VAT rendering. In particular, crowd bone
+    // weights are quantized to UNORM8 before reaching SkinVertex, so bounds from source floats
+    // alone could miss a small amount of the rendered hull.
+    std::vector<CrowdSkinnedVertex> boundsVertices;
+    for (const SkeletalMesh& mesh : model.Meshes)
+    {
+        for (const SkinnedVertex& vertex : mesh.Vertices)
+        {
+            boundsVertices.push_back(ConvertToCrowdVertex(vertex));
+        }
+    }
 
     for (size_t clipIndex = 0; clipIndex < model.Clips.size(); ++clipIndex)
     {
@@ -105,6 +118,43 @@ SkeletalBakeResult BakeSkeletalModel(const SkeletalModel& model, float sampleFps
             {
                 result.ErrorMessage = "Failed to evaluate skeletal animation at frame " + std::to_string(frame);
                 return result;
+            }
+
+            for (const CrowdSkinnedVertex& vertex : boundsVertices)
+            {
+                float totalWeight = 0.0f;
+                for (uint8_t weight : vertex.BoneWeights)
+                {
+                    totalWeight += static_cast<float>(weight) / 255.0f;
+                }
+
+                float x = 0.0f, y = 0.0f, z = 0.0f;
+                if (totalWeight < 0.0001f)
+                {
+                    x = vertex.Position.x;
+                    y = vertex.Position.y;
+                    z = vertex.Position.z;
+                }
+                else
+                {
+                    for (int influence = 0; influence < 4; ++influence)
+                    {
+                        const float weight = static_cast<float>(vertex.BoneWeights[influence]) / 255.0f;
+                        if (weight <= 0.0001f) continue;
+
+                        const uint32_t bone = vertex.BoneIndices[influence];
+                        if (bone >= palette.size()) continue; // Texture2D.Load outside the VAT is zero.
+                        const XMFLOAT4X4& matrix = palette[bone];
+                        x += weight * (vertex.Position.x * matrix._11 + vertex.Position.y * matrix._21 +
+                                       vertex.Position.z * matrix._31 + matrix._41);
+                        y += weight * (vertex.Position.x * matrix._12 + vertex.Position.y * matrix._22 +
+                                       vertex.Position.z * matrix._32 + matrix._42);
+                        z += weight * (vertex.Position.x * matrix._13 + vertex.Position.y * matrix._23 +
+                                       vertex.Position.z * matrix._33 + matrix._43);
+                    }
+                }
+
+                animationBoundsRadiusSq = (std::max)(animationBoundsRadiusSq, x * x + y * y + z * z);
             }
 
             const uint32_t y = info.StartRow + frame;
@@ -142,6 +192,8 @@ SkeletalBakeResult BakeSkeletalModel(const SkeletalModel& model, float sampleFps
 
     result.Success = true;
     result.Texture = std::move(baked);
+    // A small relative margin covers float rounding in the CPU/GPU dot products and interpolation.
+    result.AnimationBoundsRadius = std::sqrt(animationBoundsRadiusSq) * 1.00001f + 1e-5f;
     return result;
 }
 

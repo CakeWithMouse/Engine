@@ -1,0 +1,6 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.0-win64/Pong/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.0-win64/Pong/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Pong: 30 frames, normal shutdown

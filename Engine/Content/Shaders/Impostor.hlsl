@@ -26,7 +26,7 @@ struct PS_IN
     float3 worldPos : TEXCOORD2;
     float3 axisRight : TEXCOORD3;
     float3 axisForward : TEXCOORD4;
-    float fade : TEXCOORD5; // signed LOD cross-fade of the copy, see InstData.Params
+    nointerpolation float fade : TEXCOORD5; // signed per-copy LOD weight, see InstData.Params
     float4 color : COLOR;
 };
 

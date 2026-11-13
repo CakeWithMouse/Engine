@@ -1,0 +1,14 @@
+﻿
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 12 component(s), Project
+  BomberTarget.cpp
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  R3WizardProbe.cpp
+  RenderHostProbe.cpp
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\20261107-r5\tired-bomber\BomberFinalR5\Binaries\Release\5d62b47a9ebc4cfb873351f92b658de0\Game.lib и объект E:\Engine\Engine\build\playtests\20261107-r5\tired-bomber\BomberFinalR5\Binaries\Release\5d62b47a9ebc4cfb873351f92b658de0\Game.exp
+  Game.vcxproj -> E:\Engine\Engine\build\playtests\20261107-r5\tired-bomber\BomberFinalR5\Binaries\Release\5d62b47a9ebc4cfb873351f92b658de0\Game.dll
