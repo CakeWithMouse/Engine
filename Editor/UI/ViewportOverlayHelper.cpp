@@ -2,6 +2,7 @@
 #include "GizmoTriangles.h"
 #include "IconProvider.h"
 #include "EditorIconData.h"
+#include "EditorTheme.h"
 #include "ViewportOverlay.h"
 #include "BillboardMetrics.h"
 #include "IEditorHost.h"
@@ -14,44 +15,50 @@
 
 namespace
 {
-    inline uint32_t GetBillboardIcon(const IEditorHost::SceneObject& obj, uint32_t& outColor)
+    inline uint32_t TintFromColor(const QColor& c)
+    {
+        return ViewportOverlay::MakeRgba(
+            static_cast<uint8_t>(c.red()),
+            static_cast<uint8_t>(c.green()),
+            static_cast<uint8_t>(c.blue()),
+            255);
+    }
+
+    inline uint32_t GetBillboardIcon(const IEditorHost::SceneObject& obj, const ThemePalette& pal, uint32_t& outColor)
     {
         if (obj.hasPointLight || obj.type == "Light.Point" || obj.name.find("Light") != std::string::npos)
         {
-            uint8_t r = static_cast<uint8_t>(std::clamp(obj.pointLight.color[0] * 255.0f, 0.0f, 255.0f));
-            uint8_t g = static_cast<uint8_t>(std::clamp(obj.pointLight.color[1] * 255.0f, 0.0f, 255.0f));
-            uint8_t b = static_cast<uint8_t>(std::clamp(obj.pointLight.color[2] * 255.0f, 0.0f, 255.0f));
-            outColor = ViewportOverlay::MakeRgba(r, g, b, 255);
+            outColor = TintFromColor(pal.iconPointLight);
             return static_cast<uint32_t>(EditorIcons::IconId::PointLight);
         }
 
         if (obj.type == "Light.Directional" || obj.type == "Environment.Sky" || obj.name.find("Sky") != std::string::npos || obj.name.find("Sun") != std::string::npos)
         {
-            outColor = 0xFF30D0FF;
+            outColor = TintFromColor(pal.iconSunSky);
             return static_cast<uint32_t>(EditorIcons::IconId::SunSky);
         }
 
         if (obj.gameplayKind != 2 && (obj.type == "Camera" || obj.name.find("Camera") != std::string::npos))
         {
-            outColor = 0xFFE0E0E0;
+            outColor = TintFromColor(pal.iconCamera);
             return static_cast<uint32_t>(EditorIcons::IconId::Camera);
         }
 
         if (obj.gameplayKind == 2 || obj.type == "Gameplay.Camera" || obj.type == "GameCamera")
         {
-            outColor = 0xFF80E080;
+            outColor = TintFromColor(pal.iconGameCamera);
             return static_cast<uint32_t>(EditorIcons::IconId::GameCamera);
         }
 
         if (obj.type.rfind("Particle.", 0) == 0 || obj.type == "Particles" || obj.name.find("Particle") != std::string::npos)
         {
-            outColor = 0xFFE080FF;
+            outColor = TintFromColor(pal.iconParticles);
             return static_cast<uint32_t>(EditorIcons::IconId::Particles);
         }
 
         if (obj.gameplayKind == 1 || obj.type == "Character" || obj.type == "Player" || obj.name.find("Player") != std::string::npos)
         {
-            outColor = 0xFF50E050;
+            outColor = TintFromColor(pal.iconCharacter);
             return static_cast<uint32_t>(EditorIcons::IconId::Character);
         }
 
@@ -116,7 +123,8 @@ void ViewportOverlayHelper::UpdateOverlays(
         static_cast<int>(hoveredHandle),
         static_cast<int>(activeHandle),
         lightRad,
-        hasCamera ? cam.height : 0u
+        hasCamera ? cam.height : 0u,
+        static_cast<uint32_t>(EditorTheme::Instance().Mode())
     );
 
     if (hash == inOutHash)
@@ -142,10 +150,11 @@ void ViewportOverlayHelper::UpdateOverlays(
 
     if (iconsEnabled)
     {
+        const ThemePalette iconPalette = EditorTheme::Instance().Palette();
         for (const auto& obj : snapshot.objects)
         {
             uint32_t iconColor = 0xFFFFFFFF;
-            uint32_t iconId = GetBillboardIcon(obj, iconColor);
+            uint32_t iconId = GetBillboardIcon(obj, iconPalette, iconColor);
             if (iconId != 0)
             {
                 EngineOverlayBillboard bb{};
@@ -271,10 +280,11 @@ uint64_t ViewportOverlayHelper::HitTestBillboard(
     float bestDist = tolerancePixels;
     uint64_t bestId = 0;
 
+    const ThemePalette iconPalette = EditorTheme::Instance().Palette();
     for (const auto& obj : snapshot.objects)
     {
         uint32_t col = 0;
-        if (GetBillboardIcon(obj, col) == 0)
+        if (GetBillboardIcon(obj, iconPalette, col) == 0)
             continue;
 
         float pos[3] = {

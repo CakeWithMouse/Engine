@@ -55,7 +55,8 @@ namespace ViewportOverlay
         int hoverHandle,
         int activeHandle,
         float lightRadius,
-        uint32_t viewportHeight
+        uint32_t viewportHeight,
+        uint32_t themeKey
     );
 }
 

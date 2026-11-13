@@ -5,6 +5,8 @@
 #include "SettingsService.h"
 #include "GizmoGeometry.h"
 #include "BillboardMetrics.h"
+#include "EditorTheme.h"
+#include "ViewportOverlay.h"
 
 #include <QTemporaryDir>
 #include <QSettings>
@@ -166,5 +168,46 @@ inline void Run()
         "viewport height change re-uploads billboards at the new size");
 
     std::printf("Viewport billboard size checks: PASS\n");
+
+    // T4.3: categorical plate tint comes from the ThemePalette, per object kind.
+    EditorTheme::Instance().SetMode(ThemeMode::Dark);
+    host.snapshot.objects.push_back(MakeObject(4, "Gameplay.Camera", 10.0f, 0.0f, 0.0f));
+    host.snapshot.objects.push_back(MakeObject(5, "Particles", 11.0f, 0.0f, 0.0f));
+    host.snapshot.objects.push_back(MakeObject(6, "Character", 12.0f, 0.0f, 0.0f));
+    hash = 0;
+    ViewportOverlayHelper::UpdateOverlays(&host, host.camera, true,
+        GizmoGeometry::Handle::None, 0, false, hash, GizmoGeometry::Handle::None);
+
+    const ThemePalette darkPal = EditorTheme::Instance().Palette();
+    auto tintOf = [](const QColor& c) {
+        return ViewportOverlay::MakeRgba(static_cast<uint8_t>(c.red()),
+            static_cast<uint8_t>(c.green()), static_cast<uint8_t>(c.blue()), 255);
+    };
+    const auto* lbD = Find(host, 1);
+    const auto* dbD = Find(host, 2);
+    const auto* cbD = Find(host, 3);
+    const auto* gbD = Find(host, 4);
+    const auto* pbD = Find(host, 5);
+    const auto* chD = Find(host, 6);
+    Check(lbD && lbD->rgbaTint == tintOf(darkPal.iconPointLight), "point light tint from dark palette");
+    Check(dbD && dbD->rgbaTint == tintOf(darkPal.iconSunSky), "sun/sky tint from dark palette");
+    Check(cbD && cbD->rgbaTint == tintOf(darkPal.iconCamera), "camera tint from dark palette");
+    Check(gbD && gbD->rgbaTint == tintOf(darkPal.iconGameCamera), "game camera tint from dark palette");
+    Check(pbD && pbD->rgbaTint == tintOf(darkPal.iconParticles), "particles tint from dark palette");
+    Check(chD && chD->rgbaTint == tintOf(darkPal.iconCharacter), "character tint from dark palette");
+
+    // Switching theme must change the tint AND force a re-upload (theme is hashed).
+    const uint64_t hashDark = hash;
+    EditorTheme::Instance().SetMode(ThemeMode::Light);
+    ViewportOverlayHelper::UpdateOverlays(&host, host.camera, true,
+        GizmoGeometry::Handle::None, 0, false, hash, GizmoGeometry::Handle::None);
+    Check(hash != hashDark, "theme change re-uploads billboards (theme hashed)");
+    const ThemePalette lightPal = EditorTheme::Instance().Palette();
+    const auto* lbL = Find(host, 1);
+    Check(lbL && lbL->rgbaTint == tintOf(lightPal.iconPointLight), "point light tint from light palette");
+    Check(lbL && lbL->rgbaTint != tintOf(darkPal.iconPointLight), "theme switch changes the tint");
+
+    EditorTheme::Instance().SetMode(ThemeMode::Dark);
+    std::printf("Viewport billboard tint checks: PASS\n");
 }
 } // namespace ViewportBillboardTests

@@ -158,31 +158,27 @@ void IconProvider::UploadIcons(IEditorHost* host, bool force)
         QPainter p(&image);
         p.setRenderHint(QPainter::Antialiasing, true);
 
-        // Circular badge plate (white, will be tinted by billboard tint in shader)
-        const QRectF plateRect(3.0, 3.0, size - 6.0, size - 6.0);
-        p.setBrush(QColor(255, 255, 255, 220));
-        p.setPen(QPen(QColor(255, 255, 255, 255), 2.5));
-        p.drawEllipse(plateRect);
-
+        // Theme-neutral glyph alpha mask: no plate, white ink. The billboard
+        // shader supplies the categorical plate tint and derives a contrasting
+        // glyph color from it, so this texture stays valid for both themes.
         const char* svgStart = std::strstr(svgData, "<svg");
         QByteArray bytes(svgStart ? svgStart : svgData);
-        bytes.replace("stroke=\"#FFFFFF\"", "stroke=\"#1A1A1E\"");
-        bytes.replace("stroke=\"currentColor\"", "stroke=\"#1A1A1E\"");
+        bytes.replace("stroke=\"currentColor\"", "stroke=\"#FFFFFF\"");
 
 #ifdef ENGINE_HAS_QTSVG
         QSvgRenderer renderer(bytes);
         if (renderer.isValid())
         {
-            const QRectF iconRect(14.0, 14.0, size - 28.0, size - 28.0);
+            const QRectF iconRect(12.0, 12.0, size - 24.0, size - 24.0);
             renderer.render(&p, iconRect);
         }
 #else
         QImage glyph;
         glyph.loadFromData(bytes, "SVG");
-        if (glyph.isNull()) glyph = RenderFallback(svgData, QColor(0x1A, 0x1A, 0x1E), size - 28);
+        if (glyph.isNull()) glyph = RenderFallback(svgData, QColor(0xFF, 0xFF, 0xFF), size - 24);
         if (!glyph.isNull())
         {
-            p.drawImage(QRect(14, 14, size - 28, size - 28), glyph);
+            p.drawImage(QRect(12, 12, size - 24, size - 24), glyph);
         }
 #endif
         p.end();

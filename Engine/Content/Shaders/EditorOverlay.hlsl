@@ -139,31 +139,26 @@ float4 PSBillboard(BillboardPSInput input) : SV_Target
     }
 
     float4 texColor = IconTexture.Sample(IconSampler, input.UV);
-    
-    // Contrast circular plate with antialiased edge
+
+    // Antialiased circular edge.
     float edgeAlpha = 1.0f - smoothstep(0.47f, 0.50f, dist);
-    
-    // Background badge plate: tinted light body with dark outer ring
+
+    // Plate is the categorical tint supplied by the Editor (ThemePalette); the
+    // outer rim is a darker shade of the same tint, so it adapts to the theme.
     float3 plateColor = input.Tint.rgb;
     if (dist > 0.44f)
     {
-        // Dark contrast rim for visibility against any background
-        plateColor = float3(0.12f, 0.12f, 0.14f);
+        plateColor = input.Tint.rgb * 0.45f;
     }
-    
-    // If texture has glyph content (alpha > 0.1), blend it over the plate
+
+    // The texture is a theme-neutral glyph alpha mask. Pick a contrasting ink
+    // from the plate luminance so the icon reads on both dark and light themes.
     float3 finalRgb = plateColor;
     if (texColor.a > 0.1f)
     {
-        finalRgb = lerp(plateColor, texColor.rgb, texColor.a);
-    }
-    else
-    {
-        // Procedural inner bulb / point symbol if texture alpha is zero
-        if (dist < 0.22f)
-        {
-            finalRgb = float3(1.0f, 1.0f, 1.0f);
-        }
+        float lum = dot(input.Tint.rgb, float3(0.299f, 0.587f, 0.114f));
+        float3 glyphColor = (lum > 0.5f) ? float3(0.10f, 0.10f, 0.12f) : float3(0.95f, 0.95f, 0.97f);
+        finalRgb = lerp(plateColor, glyphColor, texColor.a);
     }
 
     return float4(finalRgb, edgeAlpha * input.Tint.a);
