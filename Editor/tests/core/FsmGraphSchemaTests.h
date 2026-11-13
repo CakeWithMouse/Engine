@@ -132,6 +132,18 @@ int RunFsmGraphSchemaTests()
     CheckFsm(warnings.value(chase).isEmpty() || !warnings.value(chase).contains(QStringLiteral("никто")), "a state with a transition into it runs");
     CheckFsm(warnings.value(walk).contains(QStringLiteral("никто")), "a second child without transitions never runs");
     CheckFsm(warnings.value(deep).contains(QStringLiteral("нет задач")), "a leaf without tasks does nothing");
+    {
+        // «Следующее» ведёт в следующего соседа: в него переходят, предупреждения нет.
+        GraphDocument chain;
+        chain.SetSchema(schema.Id(), 1);
+        const QVariantList wait{QVariantMap{{"type", "Ai.Wait"}}};
+        const int first = chain.AddNode(QStringLiteral("Fsm.State"), QStringLiteral("First"), QPointF(0, 0), {{"name", "First"}, {"tasks", wait}});
+        const int second = chain.AddNode(QStringLiteral("Fsm.State"), QStringLiteral("Second"), QPointF(0, 100), {{"name", "Second"}, {"tasks", wait}});
+        const int next = chain.AddNode(QStringLiteral("Fsm.Next"), {}, QPointF(300, 0));
+        chain.AddConnection(first, QStringLiteral("out"), next, QStringLiteral("in"));
+        chain.AddConnection(second, QStringLiteral("out"), first, QStringLiteral("in"));
+        CheckFsm(schema.Warnings(chain).isEmpty(), "a state reached through Next is not reported");
+    }
 
     // Реестр схем знает автомат.
     const auto* entry = GraphSchemaRegistry::Instance().Find(QStringLiteral("ai.fsm"));

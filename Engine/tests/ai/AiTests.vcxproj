@@ -41,6 +41,7 @@
     <ClCompile Include="Source\MachineRegistryTests.cpp" />
     <ClCompile Include="Source\SmartObjectTests.cpp" />
     <ClCompile Include="Source\MachineFileTests.cpp" />
+    <ClCompile Include="Source\TutorialSceneTests.cpp" />
   </ItemGroup>
   <ItemGroup><ProjectReference Include="..\..\Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project></ProjectReference></ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

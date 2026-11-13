@@ -341,6 +341,17 @@ QHash<int, QString> FsmGraphSchema::Warnings(const GraphDocument& document) cons
     QSet<int> targets;
     for (const auto& link : document.Connections()) targets.insert(link.toNode);
     const QList<int> roots = Children(document, 0);
+    // Переход в «Следующее» ведёт в следующего соседа своего состояния.
+    for (const auto& link : document.Connections())
+    {
+        const GraphNodeData* to = document.FindNode(link.toNode);
+        const GraphNodeData* from = document.FindNode(link.fromNode);
+        if (!to || !from || to->type != QLatin1String(NextType)) continue;
+        const int parent = from->properties.value(QStringLiteral("parent")).toInt();
+        const QList<int> siblings = parent ? Children(document, parent) : roots;
+        const int at = siblings.indexOf(from->id);
+        if (at >= 0 && at + 1 < siblings.size()) targets.insert(siblings[at + 1]);
+    }
     for (const auto& node : document.Nodes())
     {
         if (node.type == QLatin1String(StateType))

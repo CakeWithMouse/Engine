@@ -9,8 +9,24 @@
 void AiCharacter::BeginPlay()
 {
     Character::BeginPlay();
-    if (playerControlled) return; // the player is never driven by AI
     Ai::World& world = Ai::Get(*GetGame());
+    if (playerControlled)
+    {
+        // The player is never driven by AI, but AI senses see it as a member of its team.
+        world.AddTarget(*this, {static_cast<uint8_t>(std::clamp(team, 0, 255))});
+        return;
+    }
+    // Players the game did not register (a plain Gameplay.Player in a project without C++) are seen as team 1.
+    // The character's own scene: while a save game loads, the world may still point to the old one.
+    if (Scene* scene = &GetGame()->GetScene())
+        for (const auto& [id, component] : scene->GetComponentsById())
+        {
+            auto* character = dynamic_cast<Character*>(component);
+            // While a save game loads, an object may be listed before it gets its id: it is skipped (the next unit adds it).
+            if (character && character->playerControlled && character->GetComponentId() == id && !dynamic_cast<AiCharacter*>(character) &&
+                !world.IsTarget(id))
+                world.AddTarget(*character, {static_cast<uint8_t>(PlayerTeam)});
+        }
     if (world.Find(GetComponentId())) return;
     Ai::Controller& ai = world.Spawn(*this, CreateController(world));
     Ai::Perception& senses = ai.GetPerception();

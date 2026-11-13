@@ -165,7 +165,8 @@ QStringList FsmGraphWidget::NodeSummary(const GraphNodeData& node) const
         lines << QStringLiteral("⟳ ") + schema_.BlockSummary(service.toMap());
     const QString linked = node.properties.value(QStringLiteral("linked")).toString();
     if (!linked.isEmpty()) lines << QStringLiteral("⇢ ") + linked;
-    if (lines.isEmpty()) lines << Tr("нет задач", "no tasks");
+    if (lines.isEmpty())
+        lines << (FsmGraphSchema::Children(Document(), node.id).isEmpty() ? Tr("нет задач", "no tasks") : Tr("состояния внутри рамки", "states inside the frame"));
     return lines;
 }
 

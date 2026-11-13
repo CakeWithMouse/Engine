@@ -100,6 +100,7 @@ void SaveAndLoadTests()
     keeper->Memory().Set(Mark, glm::vec3(1, 2, 3));
     keeper->visits = 3;
     const ComponentId oldBuddy = buddy.GetComponentId();
+    const ComponentId oldSaver = saver.GetComponentId();
     const glm::vec3 savedAt = saver.GetWorldPosition();
 
     const std::string snapshot = game.Saves().Capture();
@@ -120,7 +121,8 @@ void SaveAndLoadTests()
     CHECK(loaded && loadedBuddy);
     CHECK(loadedBuddy->GetComponentId() != oldBuddy);              // new objects, new IDs
     auto* restored = dynamic_cast<Keeper*>(loaded->GetAi());
-    CHECK(restored && restored != keeper);
+    // A new object with its own controller. Not "restored != keeper": the new controller may reuse the freed one's address.
+    CHECK(restored && loaded->GetComponentId() != oldSaver);
     CHECK(restored->ActiveState() == "Patrol/Walk");
     CHECK(restored->Memory().Get(Counter) == 7);
     CHECK(restored->Memory().Get(Mark) == glm::vec3(1, 2, 3));
