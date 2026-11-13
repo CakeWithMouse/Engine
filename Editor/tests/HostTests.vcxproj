@@ -69,6 +69,7 @@
     <ItemGroup>
         <ClCompile Include="HostTests.cpp"/>
         <ClCompile Include="../Source/QtHost.cpp"/>
+        <ClCompile Include="../Source/ImportMigration.cpp"/>
         <ClCompile Include="../Host/ViewportCommandHandler.cpp"/>
         <ClCompile Include="../Host/AssetCommandHandler.cpp"/>
         <ClCompile Include="../Host/EditorHistory.cpp"/>

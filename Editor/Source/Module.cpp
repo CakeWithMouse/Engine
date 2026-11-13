@@ -136,6 +136,13 @@ extern "C" __declspec(dllexport) int __cdecl EngineBindAudioPreview(uint32_t ver
     return 1;
 }
 
+extern "C" __declspec(dllexport) int __cdecl EngineBindAssetImport(uint32_t version, uint32_t size, void* instance, const EngineAssetImportApi* api)
+{
+    if (version != 1 || size != sizeof(EngineAssetImportApi) || !instance) return 0;
+    static_cast<EditorQtHost*>(instance)->SetAssetImportApi(api ? *api : EngineAssetImportApi{});
+    return 1;
+}
+
 extern "C" __declspec(dllexport) int __cdecl EngineBindViewportInput(uint32_t version, uint32_t size, void* instance, const EngineViewportInputApi* api)
 {
     if (version != 1 || size != sizeof(EngineViewportInputApi) || !instance) return 0;

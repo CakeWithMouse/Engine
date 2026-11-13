@@ -34,6 +34,7 @@ public:
     EngineViewportOverlayApi GetViewportOverlayApi() noexcept;
     EnginePointLightV2Api GetPointLightV2Api() noexcept;
     EngineAudioPreviewApi GetAudioPreviewApi() noexcept;
+    EngineAssetImportApi GetAssetImportApi() noexcept;
     SceneEditSession(const SceneEditSession&) = delete;
     SceneEditSession& operator=(const SceneEditSession&) = delete;
 private:

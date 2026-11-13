@@ -1,15 +1,56 @@
 #pragma once
 
 #include <QDockWidget>
+#include <QSortFilterProxyModel>
+#include <QFileSystemModel>
+#include <QDir>
 
 class QComboBox;
-class QFileSystemModel;
 class QLineEdit;
 class QTreeView;
 class QToolButton;
 class QAction;
-class ProjectFilesFilter;
 class EditorQtHost;
+
+class ProjectFilesFilter final : public QSortFilterProxyModel
+{
+public:
+    QString project, content;
+    bool full = false;
+    using QSortFilterProxyModel::QSortFilterProxyModel;
+    void ShowFull(bool value) { full = value; invalidateFilter(); }
+    Qt::DropActions supportedDragActions() const override { return Qt::CopyAction; }
+
+    static bool IsHiddenServiceFile(const QString& name)
+    {
+        return name.endsWith(QLatin1String(".import.json"), Qt::CaseInsensitive) ||
+               name.endsWith(QLatin1String(".importsettings.json"), Qt::CaseInsensitive) ||
+               name.endsWith(QLatin1String(".source.json"), Qt::CaseInsensitive);
+    }
+
+protected:
+    bool filterAcceptsRow(int row, const QModelIndex& parent) const override
+    {
+        const auto* files = static_cast<QFileSystemModel*>(sourceModel());
+        if (!files)
+        {
+            return true;
+        }
+        const auto index = files->index(row, 0, parent);
+        if (!files->isDir(index))
+        {
+            if (IsHiddenServiceFile(files->fileName(index)))
+            {
+                return false;
+            }
+        }
+        if (!full && QDir::cleanPath(files->filePath(parent)) == project)
+        {
+            return files->isDir(index) && (files->fileName(index) == QStringLiteral("Source") || QDir::cleanPath(files->filePath(index)) == content);
+        }
+        return true;
+    }
+};
 
 class FileBrowserDock : public QDockWidget
 {
@@ -23,11 +64,16 @@ public:
     QSize minimumSizeHint() const override { return QSize(60, 40); }
     QSize sizeHint() const override { return QSize(250, 180); }
 
+protected:
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
 private:
     void BuildUi();
     void OnDoubleClicked(const QModelIndex& index);
     void OnContextMenu(const QPoint& pos);
     void ApplyFilter(const QString& text);
+    void DeleteCurrentAsset();
+    bool IsProtectedPath(const QString& path) const;
 
     EditorQtHost* host_ = nullptr;
     QFileSystemModel* model_ = nullptr;

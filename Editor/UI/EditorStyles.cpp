@@ -121,6 +121,14 @@ QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {
 QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {
     border-color: %2;
 }
+QLineEdit:disabled, QSpinBox:disabled, QDoubleSpinBox:disabled, QComboBox:disabled {
+    color: %12;
+    background-color: %8;
+    border-color: %6;
+}
+QLabel:disabled {
+    color: %12;
+}
 QTreeView, QTreeWidget, QListView, QListWidget, QPlainTextEdit, QTextEdit {
     background-color: %5;
     border: 1px solid %6;
@@ -198,63 +206,34 @@ QDockWidget::title {
     height: 20px;
     text-align: left;
 }
-QMainWindow::separator {
+QMainWindow::separator, QSplitter::handle {
     background: transparent;
 }
-QMainWindow::separator:horizontal {
+QMainWindow::separator:horizontal, QSplitter::handle:horizontal {
     height: 4px;
     border-top: 1px solid transparent;
     border-bottom: 2px solid transparent;
     background-color: %14;
     background-clip: content;
 }
-QMainWindow::separator:vertical {
+QMainWindow::separator:vertical, QSplitter::handle:vertical {
     width: 4px;
     border-left: 1px solid transparent;
     border-right: 2px solid transparent;
     background-color: %14;
     background-clip: content;
 }
-QMainWindow::separator:horizontal:hover {
+QMainWindow::separator:horizontal:hover, QSplitter::handle:horizontal:hover {
     height: 4px;
     border-top: 1px solid transparent;
     border-bottom: 1px solid transparent;
     background-color: %15;
     background-clip: content;
 }
-QMainWindow::separator:vertical:hover {
+QMainWindow::separator:vertical:hover, QSplitter::handle:vertical:hover {
     width: 4px;
     border-left: 1px solid transparent;
     border-right: 1px solid transparent;
-    background-color: %15;
-    background-clip: content;
-}
-QSplitter::handle {
-    background: transparent;
-}
-QSplitter::handle:horizontal {
-    width: 4px;
-    border-left: 1px solid transparent;
-    border-right: 2px solid transparent;
-    background-color: %14;
-    background-clip: content;
-}
-QSplitter::handle:vertical {
-    height: 4px;
-    border-top: 1px solid transparent;
-    border-bottom: 2px solid transparent;
-    background-color: %14;
-    background-clip: content;
-}
-QSplitter::handle:horizontal:hover {
-    border-left: 1px solid transparent;
-    border-right: 1px solid transparent;
-    background-color: %15;
-    background-clip: content;
-}
-QSplitter::handle:vertical:hover {
-    border-top: 1px solid transparent;
-    border-bottom: 1px solid transparent;
     background-color: %15;
     background-clip: content;
 }
@@ -347,6 +326,10 @@ QLabel#CardFieldLabel {
     font-size: 11px;
     font-weight: normal;
 }
+QLabel#CardFieldLabel:disabled,
+QFrame#CollapsibleCard QLabel:disabled {
+    color: %12;
+}
 QFrame#CollapsibleCard QLineEdit,
 QFrame#CollapsibleCard QSpinBox,
 QFrame#CollapsibleCard QDoubleSpinBox,
@@ -356,6 +339,14 @@ QFrame#CollapsibleCard QComboBox {
     padding: 1px 4px;
     font-size: 11px;
     color: %1;
+}
+QFrame#CollapsibleCard QLineEdit:disabled,
+QFrame#CollapsibleCard QSpinBox:disabled,
+QFrame#CollapsibleCard QDoubleSpinBox:disabled,
+QFrame#CollapsibleCard QComboBox:disabled {
+    color: %12;
+    background-color: %8;
+    border-color: %6;
 }
 QFrame#CollapsibleCard QWidget#CardContent QPushButton {
     min-height: 24px;

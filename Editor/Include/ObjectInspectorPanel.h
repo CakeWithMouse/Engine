@@ -56,7 +56,9 @@ public:
     );
 
     void ClearFocusIfInside();
+    void CommitPendingEdits();
     void RetranslateUi();
+    void InvalidateAssetCache();
     QSize minimumSizeHint() const override { return QSize(80, 60); }
 
 signals:

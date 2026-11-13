@@ -12,6 +12,13 @@
 #include <cctype>
 
 namespace fs = std::filesystem;
+namespace ModelImport
+{
+// Defined in ModelImport.cpp: one-shot aiScene capture between CreateModel and
+// CreateMaterials (declared here to keep ModelImport.h untouched).
+void ArmSceneCapture(const std::string& modelPath);
+void ClearSceneCapture();
+}
 namespace
 {
 std::string Extension(const fs::path& path)
@@ -43,6 +50,21 @@ bool Inside(const fs::path& root, const fs::path& path)
     if (relative.empty() || relative.is_absolute()) return false;
     for (const auto& part : relative) if (part == "..") return false;
     return true;
+}
+bool ValidPathUnder(std::string_view path, std::string_view root)
+{
+    if (path.empty()) return true;
+    if (path.size() > 2048 || path.rfind(root, 0) != 0 || path.size() == root.size() ||
+        path.find_first_of("\\:\0", 0, 3) != std::string_view::npos || path.back() == '/') return false;
+    size_t begin = root.size();
+    while (begin < path.size())
+    {
+        auto end = path.find('/', begin); if (end == std::string_view::npos) end = path.size();
+        auto part = path.substr(begin, end - begin);
+        if (part.empty() || part == "." || part == "..") return false;
+        begin = end + 1;
+    }
+    return MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path.data(), static_cast<int>(path.size()), nullptr, 0) != 0;
 }
 std::string DecodeUri(const std::string& uri)
 {
@@ -87,18 +109,7 @@ namespace SceneAssets
 {
 bool ValidPath(std::string_view path)
 {
-    if (path.empty()) return true;
-    if (path.size() > 2048 || path.rfind("/Game/", 0) != 0 || path.size() == 6 ||
-        path.find_first_of("\\:\0", 0, 3) != std::string_view::npos || path.back() == '/') return false;
-    size_t begin = 6;
-    while (begin < path.size())
-    {
-        auto end = path.find('/', begin); if (end == std::string_view::npos) end = path.size();
-        auto part = path.substr(begin, end - begin);
-        if (part.empty() || part == "." || part == "..") return false;
-        begin = end + 1;
-    }
-    return MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path.data(), static_cast<int>(path.size()), nullptr, 0) != 0;
+    return ValidPathUnder(path, "/Game/");
 }
 void ValidateTexture(std::string_view path)
 {
@@ -108,7 +119,9 @@ void ValidateTexture(std::string_view path)
 }
 std::unique_ptr<GameComponent> CreateModel(const std::string& path, bool useImportedMaterial)
 {
-    if (path.empty() || !ValidPath(path)) throw std::runtime_error("Expected a model path inside /Game");
+    const std::string stagingPrefix = std::string(StagingRoot) + "/";
+    if (path.empty() || !(ValidPath(path) || ValidPathUnder(path, stagingPrefix)))
+        throw std::runtime_error("Expected a model path inside /Game");
     auto model = LoadSkeletalModelFromVfs(path);
     if (!model.Success || !model.Model)
     {
@@ -161,9 +174,12 @@ void Apply(GameComponent& object, const std::string& model, const std::string& t
     ValidateMaterialPath(material);
     if (!object.SetMaterialAsset(material)) throw std::runtime_error("This object cannot take a material");
 }
-std::string Import(const fs::path& content, const fs::path& source, Kind kind)
+std::string Import(const fs::path& content, const fs::path& source, Kind kind, std::string_view optionsJson,
+                   const fs::path& stagingRoot, std::string_view virtualRoot)
 {
-    if (!source.is_absolute() || !fs::is_regular_file(source) || !fs::is_directory(content))
+    const bool staged = !stagingRoot.empty();
+    const auto base = staged ? stagingRoot : content;
+    if (!source.is_absolute() || !fs::is_regular_file(source) || !fs::is_directory(base))
         throw std::runtime_error("Select an existing file and configure the project Content directory");
     const auto extension = Extension(source);
     if (kind == Texture)
@@ -179,20 +195,29 @@ std::string Import(const fs::path& content, const fs::path& source, Kind kind)
     }
     else if (kind != Model || (extension != ".glb" && extension != ".gltf" && extension != ".obj" && extension != ".fbx" && extension != ".blend"))
         throw std::runtime_error("Supported models: GLB, glTF, OBJ, FBX, BLEND (requires Blender)");
+    ModelImportSettings settings{};
+    if (kind == Model && !optionsJson.empty())
+    {
+        std::string parseErr;
+        if (!ModelImportSettings::Parse(optionsJson, settings, &parseErr))
+            throw std::runtime_error("Invalid model import options: " + parseErr);
+    }
     CheckedSize(source);
-    const auto group = content / (kind == Model ? "Models" : kind == Texture ? "Textures" : "Audio");
-    if (!Inside(content, group)) throw std::runtime_error("Asset directory is outside project Content");
+    const auto group = base / (kind == Model ? "Models" : kind == Texture ? "Textures" : "Audio");
+    if (!Inside(base, group)) throw std::runtime_error("Asset directory is outside project Content");
     fs::create_directories(group);
     for (unsigned suffix = 0; suffix < 10000; ++suffix)
     {
         const auto name = source.stem().u8string() + (suffix ? "_" + std::to_string(suffix) : "");
         const auto target = group / fs::u8path(kind == Model ? name : name + extension);
-        if (!Inside(content, target)) throw std::runtime_error("Invalid asset destination");
+        if (!Inside(base, target)) throw std::runtime_error("Invalid asset destination");
         if (fs::exists(target)) continue;
         const auto filename = extension == ".blend" ? fs::u8path(source.stem().u8string() + ".glb") : source.filename();
         const auto file = kind == Model ? target / filename : target;
-        const auto virtualPath = "/Game/" + file.lexically_relative(content).generic_u8string();
-        if (!ValidPath(virtualPath)) throw std::runtime_error("Asset filename is not a valid project path");
+        const auto virtualPath = std::string(virtualRoot) + "/" + file.lexically_relative(base).generic_u8string();
+        const std::string stagingPrefix = std::string(StagingRoot) + "/";
+        if (!(staged ? ValidPathUnder(virtualPath, stagingPrefix) : ValidPath(virtualPath)))
+            throw std::runtime_error("Asset filename is not a valid project path");
         if (kind == Model && !fs::create_directory(target)) continue;
         bool copied = false;
         try
@@ -203,9 +228,34 @@ std::string Import(const fs::path& content, const fs::path& source, Kind kind)
             if (kind == Model)
             {
                 if (extension == ".gltf") CopyGltfDependencies(source, target);
+                const auto sidecarPath = fs::u8path(file.u8string() + ".importsettings.json");
+                nlohmann::json sidecarDoc = {
+                    {"version", settings.version > 0 ? settings.version : 1},
+                    {"kind", settings.kind.empty() ? "model" : settings.kind},
+                    {"model", {
+                        {"scale", settings.scale},
+                        {"useFileUnitScale", settings.useFileUnitScale},
+                        {"normals", settings.normals},
+                        {"smoothingAngle", settings.smoothingAngle},
+                        {"importMaterials", settings.importMaterials},
+                        {"importTextures", settings.importTextures},
+                        {"flipUv", settings.flipUv},
+                        {"mergeMeshes", settings.mergeMeshes}
+                    }}
+                };
+                std::ofstream sidecarOut(sidecarPath, std::ios::binary);
+                sidecarOut.exceptions(std::ios::failbit | std::ios::badbit);
+                sidecarOut << sidecarDoc.dump(2) << "\n";
+                sidecarOut.close();
+
+                // CreateModel must run before CreateMaterials: it validates geometry
+                // while .import.json does not exist yet, so MaterialSlots stays empty
+                // and no /Game material validation hits transient staging paths.
+                ModelImport::ArmSceneCapture(virtualPath);
                 CreateModel(virtualPath); // Validate geometry before reporting success.
                 if (extension == ".fbx" || extension == ".blend" || extension == ".glb" || extension == ".gltf")
-                    ModelImport::CreateMaterials(source, target, virtualPath);
+                    ModelImport::CreateMaterials(source, target, virtualPath, settings);
+                ModelImport::ClearSceneCapture();
             }
             std::ofstream metadata(fs::u8path(file.u8string()+".source.json"),std::ios::binary);
             metadata.exceptions(std::ios::failbit|std::ios::badbit);
@@ -216,8 +266,10 @@ std::string Import(const fs::path& content, const fs::path& source, Kind kind)
         catch (...)
         {
             // Only the new path created by this import is rolled back.
+            ModelImport::ClearSceneCapture();
             std::error_code ignored;
-            if ((kind == Model || copied) && Inside(content, target)) fs::remove_all(target, ignored);
+            if (kind == Model) fs::remove(fs::u8path(file.u8string() + ".importsettings.json"), ignored);
+            if ((kind == Model || copied) && Inside(base, target)) fs::remove_all(target, ignored);
             if (kind == Texture && copied) fs::remove(fs::u8path(file.u8string()+".source.json"), ignored);
             throw;
         }

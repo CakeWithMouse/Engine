@@ -10,6 +10,8 @@
 #include "ExternalGameRunner.h"
 #include "EditorTheme.h"
 #include "EditorLocale.h"
+#include "FileService.h"
+#include "Logger.h"
 #include "ViewportCommands.h"
 #include "ViewportHeaderBar.h"
 #include "UIEditorWindow.h"
@@ -830,7 +832,7 @@ void EditorMainWindow::MaybeSave(std::function<void()> after)
         return;
 
     if (objectInspectorPanel_)
-        objectInspectorPanel_->ClearFocusIfInside();
+        objectInspectorPanel_->CommitPendingEdits();
 
     checkingChanges_ = true;
     afterCheck_ = std::move(after);
@@ -848,7 +850,7 @@ void EditorMainWindow::SaveScene(bool saveAs, std::function<void()> after)
         return;
 
     if (objectInspectorPanel_)
-        objectInspectorPanel_->ClearFocusIfInside();
+        objectInspectorPanel_->CommitPendingEdits();
 
     QString path = scenePath_;
 
@@ -1148,6 +1150,28 @@ void EditorMainWindow::CommandFinished(
         command.type == EditorCommand::NewScene || command.type == EditorCommand::UpdateAsset)
     {
         sceneBusy_ = false;
+    }
+
+    if (command.type == EditorCommand::UpdateAsset && sidecarTx_.active())
+    {
+        const QString projectDir = QFileInfo(ProjectPath()).dir().absolutePath();
+        FileService fs(&Logger::Instance(), this);
+        fs.SetProjectRoot(projectDir);
+        QString txError;
+        const auto txResult = sidecarTx_.FinishUpdate(fs, command.path, QString::fromUtf8(host_->host().contentRoot),
+                                                      status == EngineSceneOk, &txError);
+        if (txResult == EditorCore::SidecarUpdateResult::RolledBack ||
+            txResult == EditorCore::SidecarUpdateResult::RollbackFailed)
+        {
+            const QString message = txResult == EditorCore::SidecarUpdateResult::RolledBack
+                ? Tr("Не удалось переимпортировать модель с новыми настройками импорта. Прежние настройки восстановлены.",
+                     "Failed to reimport the model with the new import settings. The previous settings have been restored.")
+                : Tr("Не удалось переимпортировать модель с новыми настройками импорта. Не удалось восстановить прежние настройки: %1",
+                     "Failed to reimport the model with the new import settings. Restoring the previous settings failed: %1").arg(txError);
+            AppendLine(message);
+            QMessageBox::warning(this, Tr("Настройки импорта", "Import Settings"), message);
+            return;
+        }
     }
 
     if (status != EngineSceneOk)

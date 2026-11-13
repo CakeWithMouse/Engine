@@ -143,6 +143,50 @@ inline void RunAssetOpsTests()
         // Delete outside sandbox fails
         CheckAsset(!ops.Delete(QStringLiteral("../outside.txt"), &error), "Delete outside sandbox fails");
     }
+
+    // 8. Companion sidecar handling on Rename, Duplicate, Delete
+    {
+        QString error;
+        const QString modelPath = QStringLiteral("Models/Hero.glb");
+        CheckAsset(ops.CreateFile(modelPath, "HERO_DATA", &error), "Create model file");
+        CheckAsset(ops.CreateFile(modelPath + QStringLiteral(".importsettings.json"), "{\"scale\":1.0}", &error), "Create companion importsettings");
+        CheckAsset(ops.CreateFile(modelPath + QStringLiteral(".source.json"), "{\"src\":\"Hero.fbx\"}", &error), "Create companion source");
+        CheckAsset(ops.CreateFile(modelPath + QStringLiteral(".import.json"), "{\"hash\":123}", &error), "Create companion import");
+
+        // Companion suffixes check
+        const auto& suffixes = AssetOps::CompanionSuffixes();
+        CheckAsset(suffixes.size() == 3, "AssetOps provides 3 companion suffixes");
+
+        // Duplicate with companions
+        QString dupCreated;
+        const QString dupPath = QStringLiteral("Models/Hero_Copy.glb");
+        CheckAsset(ops.Duplicate(modelPath, dupPath, &error, &dupCreated, true), "Duplicate model with companions");
+        CheckAsset(ops.Exists(dupPath), "Duplicated model exists");
+        CheckAsset(ops.Exists(dupPath + QStringLiteral(".importsettings.json")), "Duplicated companion importsettings exists");
+        CheckAsset(ops.Exists(dupPath + QStringLiteral(".source.json")), "Duplicated companion source exists");
+        CheckAsset(ops.Exists(dupPath + QStringLiteral(".import.json")), "Duplicated companion import exists");
+
+        // Rename with companions
+        const QString renPath = QStringLiteral("Models/Hero_Renamed.glb");
+        CheckAsset(ops.Rename(dupPath, renPath, &error, true), "Rename model with companions");
+        CheckAsset(!ops.Exists(dupPath), "Old duplicated model removed");
+        CheckAsset(!ops.Exists(dupPath + QStringLiteral(".importsettings.json")), "Old duplicated companion importsettings removed");
+        CheckAsset(ops.Exists(renPath), "Renamed model exists");
+        CheckAsset(ops.Exists(renPath + QStringLiteral(".importsettings.json")), "Renamed companion importsettings exists");
+        CheckAsset(ops.Exists(renPath + QStringLiteral(".source.json")), "Renamed companion source exists");
+        CheckAsset(ops.Exists(renPath + QStringLiteral(".import.json")), "Renamed companion import exists");
+
+        // Delete with companions
+        CheckAsset(ops.Delete(renPath, &error, true), "Delete model with companions");
+        CheckAsset(!ops.Exists(renPath), "Renamed model deleted");
+        CheckAsset(!ops.Exists(renPath + QStringLiteral(".importsettings.json")), "Companion importsettings deleted");
+        CheckAsset(!ops.Exists(renPath + QStringLiteral(".source.json")), "Companion source deleted");
+        CheckAsset(!ops.Exists(renPath + QStringLiteral(".import.json")), "Companion import deleted");
+
+        // Original model and its companions still intact
+        CheckAsset(ops.Exists(modelPath), "Original model still exists");
+        CheckAsset(ops.Exists(modelPath + QStringLiteral(".importsettings.json")), "Original companion still exists");
+    }
 }
 
 } // namespace

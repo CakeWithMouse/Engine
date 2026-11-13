@@ -123,6 +123,8 @@ class BaseEngine::LoadedSession
     EngineBindViewportInputFn bindViewportInput = nullptr;
     EngineBindViewportOverlayFn bindViewportOverlay = nullptr;
     EngineBindAudioPreviewFn bindAudioPreview = nullptr;
+    using EngineBindAssetImportFn = int (ENGINE_MODULE_CALL *)(uint32_t, uint32_t, void*, const EngineAssetImportApi*);
+    EngineBindAssetImportFn bindAssetImport = nullptr;
     std::function<void()> releaseEdit;
     void* session = nullptr;
     bool started = false;
@@ -270,6 +272,26 @@ class BaseEngine::LoadedSession
             if (bindAudioPreview && audioPreview && audioPreview->play &&
                 !bindAudioPreview(1, sizeof(*audioPreview), session, audioPreview))
                 throw std::runtime_error("Cannot bind audio preview API");
+            bindAssetImport = reinterpret_cast<EngineBindAssetImportFn>(GetProcAddress(library, "EngineBindAssetImport"));
+            if (bindAssetImport && editApi && editApi->createModel)
+            {
+                HMODULE hGame = nullptr;
+                if (GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                    reinterpret_cast<LPCWSTR>(editApi->createModel), &hGame) && hGame)
+                {
+                    const auto query = reinterpret_cast<EngineGetEditExtensionFn>(GetProcAddress(hGame, "EngineGetEditExtension"));
+                    if (query)
+                    {
+                        EngineAssetImportApi assetImport{};
+                        if (query(editApi->context, EngineAssetImportExtension, 1, sizeof(assetImport), &assetImport) &&
+                            assetImport.version == 1 && assetImport.importWithOptions)
+                        {
+                            if (!bindAssetImport(1, sizeof(assetImport), session, &assetImport))
+                                throw std::runtime_error("Cannot bind asset import API");
+                        }
+                    }
+                }
+            }
             bindEdit = reinterpret_cast<EngineBindEditSessionFn>(GetProcAddress(library, "EngineBindEditSession"));
             if (kind != ENGINE_MODULE_EDITOR || !bindEdit ||
                 !bindEdit(ENGINE_EDIT_API_VERSION, sizeof(*editApi), session, editApi))
@@ -400,6 +422,8 @@ public:
         bindProjectData = nullptr;
         if (session && bindAudioPreview) bindAudioPreview(1, sizeof(EngineAudioPreviewApi), session, nullptr);
         bindAudioPreview = nullptr;
+        if (session && bindAssetImport) bindAssetImport(1, sizeof(EngineAssetImportApi), session, nullptr);
+        bindAssetImport = nullptr;
         if (session && bindViewportOverlay) bindViewportOverlay(1, sizeof(EngineViewportOverlayApi), session, nullptr);
         bindViewportOverlay = nullptr;
         if (session && bindViewportInput) bindViewportInput(1, sizeof(EngineViewportInputApi), session, nullptr);

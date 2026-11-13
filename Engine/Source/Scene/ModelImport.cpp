@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <fstream>
 #include <map>
+#include <memory>
 #include <set>
 
 #if defined(ENGINE_ENABLE_ASSIMP)
@@ -17,6 +18,33 @@
 
 namespace fs = std::filesystem;
 using Json = nlohmann::json;
+namespace
+{
+// One-shot importer capture, armed by Import around CreateModel. Type-erased so
+// non-Assimp builds still link the arm/clear pair.
+std::string g_capturePath;
+std::shared_ptr<void> g_capture;
+}
+namespace ModelImport
+{
+void ArmSceneCapture(const std::string& modelPath) { g_capturePath = modelPath; g_capture.reset(); }
+void ClearSceneCapture() { g_capturePath.clear(); g_capture.reset(); }
+}
+#if defined(ENGINE_ENABLE_ASSIMP)
+namespace ModelImport
+{
+void OfferSceneCapture(const std::string& modelPath, std::unique_ptr<Assimp::Importer> importer)
+{
+    if (!g_capturePath.empty() && g_capturePath == modelPath)
+        g_capture = std::shared_ptr<void>(importer.release(), [](void* p) { delete static_cast<Assimp::Importer*>(p); });
+}
+const aiScene* CapturedScene(const std::string& modelPath)
+{
+    if (g_capturePath != modelPath || !g_capture) return nullptr;
+    return static_cast<Assimp::Importer*>(g_capture.get())->GetScene();
+}
+}
+#endif
 namespace
 {
 constexpr size_t MaxFileSize = 256u * 1024 * 1024;
@@ -108,15 +136,33 @@ void Surface(MaterialInput i, inout MaterialOutput o)
 #endif
 }
 
-void ModelImport::CreateMaterials(const fs::path& source, const fs::path& destination, const std::string& modelPath)
+void ModelImport::CreateMaterials(const fs::path& source, const fs::path& destination, const std::string& modelPath, const ModelImportSettings& settings)
 {
 #if defined(ENGINE_ENABLE_ASSIMP)
+    if (!settings.importMaterials)
+    {
+        // importMaterials=false: skip Materials/ and Textures/ generation entirely
+        Json manifest = {{"version", 2}, {"materials", Json::array()}, {"materialSlots", Json::object()}};
+        Write(fs::u8path((destination / fs::u8path(modelPath).filename()).u8string() + ".import.json"), manifest.dump(2) + "\n");
+        return;
+    }
+
+    // Reuse the geometry load's aiScene when Import armed the capture; materials
+    // are unaffected by the loader's postprocessing. Fall back to a fresh parse
+    // for callers outside Import.
+    const aiScene* scene = CapturedScene(modelPath);
     Assimp::Importer importer;
-    importer.SetIOHandler(new AssimpVfsIO(modelPath));
-    const aiScene* scene = importer.ReadFile(modelPath, 0);
+    if (!scene)
+    {
+        importer.SetIOHandler(new AssimpVfsIO(modelPath));
+        scene = importer.ReadFile(modelPath, 0);
+    }
     if (!scene || !scene->mRootNode) throw std::runtime_error("Cannot read model materials: " + std::string(importer.GetErrorString()));
     fs::create_directory(destination / "Materials");
-    fs::create_directory(destination / "Textures");
+    if (settings.importTextures)
+    {
+        fs::create_directory(destination / "Textures");
+    }
     Write(destination / "Materials/Imported.hlsl", Surface);
     std::map<std::string, std::string> textures;
     std::set<unsigned> written;
@@ -134,7 +180,7 @@ void ModelImport::CreateMaterials(const fs::path& source, const fs::path& destin
         const auto type = material.GetTextureCount(aiTextureType_BASE_COLOR) ? aiTextureType_BASE_COLOR : aiTextureType_DIFFUSE;
         unsigned uv = 0;
         std::string texturePath;
-        if (material.GetTexture(type, 0, &reference, nullptr, &uv) == AI_SUCCESS)
+        if (settings.importTextures && material.GetTexture(type, 0, &reference, nullptr, &uv) == AI_SUCCESS)
         {
             if (uv != 0) throw std::runtime_error("Base-color texture requires UV channel " + std::to_string(uv) + "; only UV0 is supported");
             const aiTexture* embedded = scene->GetEmbeddedTexture(reference.C_Str());
@@ -163,7 +209,7 @@ void ModelImport::CreateMaterials(const fs::path& source, const fs::path& destin
     }
     Write(fs::u8path((destination / fs::u8path(modelPath).filename()).u8string() + ".import.json"), manifest.dump(2) + "\n");
 #else
-    (void)source; (void)destination; (void)modelPath;
+    (void)source; (void)destination; (void)modelPath; (void)settings;
     throw std::runtime_error("Model import requires an engine built with Assimp");
 #endif
 }
