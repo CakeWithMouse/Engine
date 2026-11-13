@@ -72,6 +72,12 @@ void Game::DebugDrawTrace(const Trace::Ray &input, const Trace::Result &result, 
         }
     }
 }
+void Game::DebugDrawLine(const glm::vec3 &from, const glm::vec3 &to, uint32_t abgr)
+{
+    if (!Trace::Finite(from) || !Trace::Finite(to) || FrameDebugLines.size() >= 65536)
+        return;
+    FrameDebugLines.push_back({from.x, from.y, from.z, to.x, to.y, to.z, abgr, 2u | (2u << 8)});
+}
 void Game::ClearDebugTraces()
 {
     TraceDebugLines.clear();

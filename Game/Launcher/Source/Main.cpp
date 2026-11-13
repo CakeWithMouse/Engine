@@ -247,7 +247,7 @@ std::filesystem::path GameDirectory(const GameEntry& entry)
 
 std::filesystem::path Validate(const GameEntry& entry, bool editor = false)
 {
-    if (editor && !entry.preview) throw std::runtime_error("Preview is unavailable for this project (Katamari requires Assimp and a scene adapter)");
+    if (editor && !entry.preview) throw std::runtime_error("Preview is unavailable for this example");
     if (entry.runtime || editor)
     {
         const auto runtime = ExampleDeployment::ExecutableDirectory() / "Runtime";
@@ -585,13 +585,15 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
             { LocalFree(argv); return 2; }
             const bool smoke = std::wstring(argv[1]) == L"--smoke" || std::wstring(argv[1]) == L"--smoke-editor";
             const bool editor = std::wstring(argv[1]) == L"--check-editor" || std::wstring(argv[1]) == L"--smoke-editor";
-            const std::wstring name = argv[2];
+            std::wstring name = argv[2];
+            if (name == L"Battle-Anim" || name == L"Battle (Animated Crowd)") name = L"BattleAnim";
             LocalFree(argv); argv = nullptr;
             for (const auto& entry : Games)
             {
                 const bool hasExtra = (entry.extraArgs && *entry.extraArgs);
                 if (name == entry.title ||
-                    (hasExtra && (name == L"BattleAnim" || name == L"Battle-Anim" || name == L"Battle (Animated Crowd)" || name == (std::wstring(entry.directory) + L" " + entry.extraArgs))) ||
+                    (*entry.cliName && name == entry.cliName) ||
+                    (hasExtra && name == (std::wstring(entry.directory) + L" " + entry.extraArgs)) ||
                     (!hasExtra && name == entry.directory))
                 {
                     Validate(entry, editor);

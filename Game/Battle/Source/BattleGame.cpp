@@ -1,5 +1,6 @@
 #include "../../../Engine/Source/Components/ComponentInternal.h"
 #include "BattleGame.h"
+#include <Engine/AI/Ai.h>
 
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/SpecificComponents/CubeComponent.h>
@@ -28,6 +29,8 @@
 
 namespace
 {
+    constexpr float ArmyGap = 48.0f; // distance from the centre line to the first row on either side
+
     double NowMs()
     {
         using Clock = std::chrono::steady_clock;
@@ -93,6 +96,12 @@ InstancedMeshComponent* BattleGame::CreateUnitBatch(UnitMesh::VehicleType type, 
 void BattleGame::BuildScene(const Settings& settings)
 {
     Config = settings;
+    if (Config.Ai)
+    {
+        // The AI owns the vehicles, and its seconds must be real seconds.
+        Config.Moving = false;
+        SetSimulationTimeScale(1.0f);
+    }
     GetSettings().SetRenderingType(Config.Forward ? Forward : Deffered);
 
     // One sun with cascaded shadows: the light model of a strategy battlefield.
@@ -103,8 +112,22 @@ void BattleGame::BuildScene(const Settings& settings)
     SetDeferredDebugOverlay(false);
 
     const int unitsPerRow = std::max(1, static_cast<int>(std::ceil(std::sqrt(static_cast<float>(Config.UnitCount)))));
-    const float fieldSize = unitsPerRow * Config.Spacing;
+    const float fieldSize = unitsPerRow * Config.Spacing + (Config.Ai ? 2.0f * ArmyGap : 0.0f);
     FieldHalfSize = fieldSize * 0.5f;
+    const int firstArmySize = (Config.UnitCount + 1) / 2;
+    // In the AI demo each army fills its own rows, from the front line outwards.
+    const auto spawn = [&](int index, float xJitter, float zJitter) {
+        if (Config.Ai)
+        {
+            const bool secondArmy = index >= firstArmySize;
+            const int member = secondArmy ? index - firstArmySize : index;
+            const float x = (member % unitsPerRow - (unitsPerRow - 1) * 0.5f + xJitter) * Config.Spacing;
+            const float z = ArmyGap + (member / unitsPerRow + 0.5f + zJitter) * Config.Spacing;
+            return glm::vec3(x, 0.0f, secondArmy ? z : -z);
+        }
+        return glm::vec3((index % unitsPerRow - unitsPerRow * 0.5f + xJitter) * Config.Spacing, 0.0f,
+                         (index / unitsPerRow - unitsPerRow * 0.5f + zJitter) * Config.Spacing);
+    };
     const std::string unitShaderPath = EnginePaths::Shader("InstancedMesh.hlsl").generic_u8string();
     std::shared_ptr<Material> unitMaterial;
     std::shared_ptr<Material> buildingMaterial;
@@ -223,14 +246,13 @@ void BattleGame::BuildScene(const Settings& settings)
         for (int index = 0; index < Config.UnitCount; ++index)
         {
             const int row = index / unitsPerRow;
-            const int column = index % unitsPerRow;
-
-            const bool bSecondArmy = (row - unitsPerRow * 0.5f) > 0.0f;
             const float unitSpeed = speed(rng);
             MeshInstance instance;
-            instance.Position = glm::vec3((column - unitsPerRow * 0.5f + jitter(rng)) * Config.Spacing, 0.0f,
-                                          (row - unitsPerRow * 0.5f + jitter(rng)) * Config.Spacing);
-            instance.Yaw = bSecondArmy ? 1.5707963f : -1.5707963f;
+            const float zJitter = jitter(rng);
+            instance.Position = spawn(index, jitter(rng), zJitter);
+            const bool bSecondArmy = Config.Ai ? instance.Position.z > 0.0f : row > unitsPerRow * 0.5f;
+            instance.Yaw = Config.Ai ? (bSecondArmy ? glm::pi<float>() : 0.0f)
+                                     : (bSecondArmy ? 1.5707963f : -1.5707963f);
             instance.Scale = 1.0f;
             instance.Color = teamColors[bSecondArmy ? 1 : 0];
             instance.ClipId = 0;
@@ -267,7 +289,9 @@ void BattleGame::BuildScene(const Settings& settings)
         std::uniform_real_distribution<float> yawJitter(-0.14f, 0.14f);
         std::uniform_real_distribution<float> speed(4.0f, 9.0f);
         std::uniform_real_distribution<float> wear(0.0f, 1.0f);
-        const glm::vec4 teamColors[2] = {glm::vec4(0.35f, 0.42f, 0.30f, 1.0f), glm::vec4(0.45f, 0.33f, 0.28f, 1.0f)};
+        const glm::vec4 teamColors[2] = {
+            Config.Ai ? glm::vec4(0.28f, 0.48f, 0.75f, 1.0f) : glm::vec4(0.35f, 0.42f, 0.30f, 1.0f),
+            Config.Ai ? glm::vec4(0.73f, 0.30f, 0.23f, 1.0f) : glm::vec4(0.45f, 0.33f, 0.28f, 1.0f)};
 
         for (int index = 0; index < Config.UnitCount; ++index)
         {
@@ -278,10 +302,8 @@ void BattleGame::BuildScene(const Settings& settings)
             const float rowStagger = (row % 2 == 0) ? 0.0f : 0.5f;
 
             MeshInstance instance;
-            instance.Position = glm::vec3(
-                (column - unitsPerRow * 0.5f + rowStagger + jitterAcross(rng)) * Config.Spacing,
-                0.0f,
-                (row - unitsPerRow * 0.5f + jitterAlong(rng)) * Config.Spacing);
+            const float zJitter = jitterAlong(rng);
+            instance.Position = spawn(index, rowStagger + jitterAcross(rng), zJitter);
             // Two armies facing each other across the middle of the field.
             const bool bSecondArmy = instance.Position.z > 0.0f;
             instance.Yaw = (bSecondArmy ? 3.14159f : 0.0f) + yawJitter(rng);
@@ -358,7 +380,13 @@ void BattleGame::BindHud()
     HudFrameLabel = Hud->Find<UILabel>("frame");
     HudDrawLabel = Hud->Find<UILabel>("draws");
     HudUnitLabel = Hud->Find<UILabel>("units");
-    HudHintLabel = Hud->Find<UILabel>("hint");
+    HudAiStats = Hud->Find<UILabel>("aiStats");
+    HudAiState = Hud->Find<UILabel>("aiState");
+    HudAiAlive = Hud->Find<UILabel>("aiAlive");
+    HudAiCombat = Hud->Find<UILabel>("aiCombat");
+    if (auto* aiPanel = Hud->Find<UIPanel>("aiPanel")) aiPanel->bVisible = Config.Ai;
+    if (auto* hint = Hud->Find<UILabel>("hint"); hint && Config.Ai)
+        hint->SetText("F6 — уровни детализации   F7 — панели   F9 — отладчик ИИ   WASD — камера");
     HudFrameBar = Hud->Find<UIBar>("load");
     for (int level = 0; level < 4; ++level)
     {
@@ -416,6 +444,7 @@ void BattleGame::UpdateHud()
         HudUnitLabel->SetText("Техники: " + std::to_string(Config.UnitCount) +
                               "   отсечено: " + std::to_string(LastFrameStats.CulledInstances));
     }
+    if (bAiReady) UpdateAiHud();
 
     if (HudFrameBar != nullptr)
     {
@@ -448,6 +477,8 @@ void BattleGame::PreUpdate(float deltaTime)
     ++UpdateCount;
     Game::PreUpdate(deltaTime);
     UpdateHotkeys();
+    if (Config.Ai && !bAiReady) SetupAi();
+    LastAiMs = bAiReady ? Ai::Get(*this).GetStats().totalMs : 0.0;
     if (Config.Moving)
     {
         UpdateUnits(deltaTime);
@@ -494,6 +525,7 @@ void BattleGame::PreUpdate(float deltaTime)
             Bench.RecordGpuSamples(GpuTimerSamplesReady, LastGpuFrameMs);
 
             ++MeasuredFrames;
+            AiMsSum += LastAiMs;
             FrameMsSum += (LastTimestampMs > 0.0 ? (now - LastTimestampMs) : 0.0);
             GpuMsSum += LastGpuFrameMs;
             DrawCallSum += LastFrameStats.DrawCalls;
@@ -507,6 +539,7 @@ void BattleGame::PreUpdate(float deltaTime)
         if (LastTimestampMs > 0.0 && UpdateCount > WarmupFrames)
         {
             ++MeasuredFrames;
+            AiMsSum += LastAiMs;
             FrameMsSum += now - LastTimestampMs;
             GpuMsSum += LastGpuFrameMs;
             DrawCallSum += LastFrameStats.DrawCalls;
@@ -521,7 +554,7 @@ void BattleGame::PreUpdate(float deltaTime)
     }
 
     // Late enough that the scene has settled and the frame time on screen is the real one.
-    if (!Config.DumpFrame.empty() && UpdateCount == 60)
+    if (!Config.DumpFrame.empty() && UpdateCount == Config.DumpFrameAt)
     {
         RequestFrameDump(Config.DumpFrame);
     }
@@ -538,6 +571,12 @@ void BattleGame::PreUpdate(float deltaTime)
     {
         PostQuitMessage(0);
     }
+}
+
+void BattleGame::TickComponents(float deltaTime)
+{
+    Game::TickComponents(deltaTime);
+    if (bAiReady) UpdateCombatEffects(deltaTime);
 }
 
 void BattleGame::UpdateUnits(float deltaTime)
@@ -594,6 +633,14 @@ void BattleGame::UpdateHotkeys()
         Hud->SetVisible(!Hud->IsVisible());
     }
     bHudKeyWasDown = bHudDown;
+
+    // F9: what the AI is doing. The regiment nearest the centre of the field is selected.
+    const bool bAiDebugDown = input->IsKeyDown(Keys::F9);
+    if (bAiDebugDown && !bAiDebugKeyWasDown && bAiReady)
+    {
+        ShowAiDebug(!Ai::Get(*this).Debug().IsVisible());
+    }
+    bAiDebugKeyWasDown = bAiDebugDown;
 }
 
 uint32_t BattleGame::CountForLod(int level) const
@@ -630,7 +677,15 @@ std::string BattleGame::BuildBenchReport() const
     char extra[256];
     std::snprintf(extra, sizeof(extra), " visible=%u draws=%.1f vertices=%llu",
                   visible, avgDraws, static_cast<unsigned long long>(drawnVertices));
-    return bench + extra;
+    std::string report = bench + extra;
+    if (Config.Ai)
+    {
+        char ai[96];
+        std::snprintf(ai, sizeof(ai), " ai_ms=%.3f regiments=%zu", AiMsSum / frames, Regiments);
+        report += ai;
+        report += DescribeAiStates();
+    }
+    return report;
 }
 
 std::string BattleGame::BuildReport() const
@@ -672,5 +727,13 @@ std::string BattleGame::BuildReport() const
                   static_cast<unsigned long long>(drawnVertices),
                   CountForLod(0), CountForLod(1), CountForLod(2), sprites, culled,
                   GetAdapterName().c_str());
-    return buffer;
+    std::string report = buffer;
+    if (bAiReady)
+    {
+        char ai[96];
+        std::snprintf(ai, sizeof(ai), " ai_ms=%.3f regiments=%zu", AiMsSum / frames, Regiments);
+        report += ai;
+        report += DescribeAiStates();
+    }
+    return report;
 }

@@ -9,9 +9,12 @@
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <array>
 #include <filesystem>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
+
+namespace Ai { class Context; class Group; }
 
 /**
  * Measurement scene for mass vehicle rendering: a field of instanced units of several types seen
@@ -54,6 +57,8 @@ public:
         bool DumpImpostors = false;
         // Diagnostics: writes the finished frame to this BMP file, then keeps running.
         std::string DumpFrame;
+        // The frame that DumpFrame saves.
+        uint64_t DumpFrameAt = 60;
         // Ignores the mouse and the keyboard, so two runs of the same scene frame it identically.
         // Screenshots taken for comparison are only readable with this on.
         bool LockCamera = false;
@@ -72,6 +77,10 @@ public:
         std::filesystem::path ContentRoot;
         // Animated crowd using GPU baked VAT (CesiumMan).
         bool Animated = false;
+        // Regiments driven by the engine AI: advance, engage, fire and withdraw.
+        bool Ai = false;
+        // The AI debugger is on from the first frame (as after F9).
+        bool AiDebug = false;
     };
 
     void BuildScene(const Settings& settings);
@@ -90,6 +99,7 @@ public:
 
 protected:
     void PreUpdate(float deltaTime) override;
+    void TickComponents(float deltaTime) override;
     std::array<float, 4> GetClearColor() const override { return {0.42f, 0.52f, 0.62f, 1.0f}; }
 
 private:
@@ -117,12 +127,36 @@ private:
      */
     void BindHud();
     void UpdateHud();
+    /** Navigation from the field and the buildings, regiments from the vehicles; once, after Play starts. */
+    void SetupAi();
+    void UpdateAiHud();
+    void UpdateCombatEffects(float deltaTime);
+    void FireSalvo(Ai::Context& ctx, Ai::Group& regiment, Ai::Group& enemy);
+    /** " ai_states=Maneuver/Hold:12,..." for the result line: how many regiments are in each state. */
+    std::string DescribeAiStates() const;
+    /** Shows or hides the AI debugger; the regiment nearest the centre of the field is selected. */
+    void ShowAiDebug(bool visible);
+
+    class FireAtEnemy;
+    struct ShotEffect
+    {
+        glm::vec3 from;
+        glm::vec3 to;
+        uint32_t targetRegiment = 0;
+        size_t targetMember = 0;
+        float age = 0.0f;
+        bool hit = false;
+        bool destroyed = false;
+    };
 
     UIComponent* Hud = nullptr;
     UILabel* HudFrameLabel = nullptr;
     UILabel* HudDrawLabel = nullptr;
     UILabel* HudUnitLabel = nullptr;
-    UILabel* HudHintLabel = nullptr;
+    UILabel* HudAiStats = nullptr;
+    UILabel* HudAiState = nullptr;
+    UILabel* HudAiAlive = nullptr;
+    UILabel* HudAiCombat = nullptr;
     UILabel* HudLodLabels[4] = {};
     UIBar* HudFrameBar = nullptr;
     double HudFrameMs = 0.0;
@@ -151,4 +185,16 @@ private:
     uint64_t WarmupFrames = 10;
 
     int UnitVertexCount = 0;
+
+    bool bAiReady = false;
+    bool bAiDebugKeyWasDown = false;
+    size_t Regiments = 0;
+    double LastAiMs = 0.0;
+    double AiMsSum = 0.0;
+    std::map<uint32_t, std::vector<int>> HealthByRegiment;
+    std::vector<ShotEffect> ShotEffects;
+    std::array<int, 2> AliveByTeam{};
+    int ShotsFired = 0;
+    int Hits = 0;
+    int Destroyed = 0;
 };

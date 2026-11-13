@@ -73,12 +73,15 @@ int main(int argc, char** argv)
             if (argument == "--dump-frame" && i + 1 < argc) { settings.DumpFrame = argv[++i]; continue; }
             if (argument == "--legacy-shaders") { settings.Materials = false; continue; }
             if (argument == "--anim") { settings.Animated = true; continue; }
+            if (argument == "--ai") { settings.Ai = true; continue; }
+            if (argument == "--ai-debug") { settings.Ai = true; settings.AiDebug = true; continue; }
+            if (argument == "--dump-at" && i + 1 < argc) { settings.DumpFrameAt = static_cast<uint64_t>(ParseInt(argv[++i], "--dump-at")); continue; }
             throw std::runtime_error(
                 "Usage: Battle.exe [--bench N] [--warmup N] [--units N] [--types N] [--spacing N] [--camera N]\n"
                 "        [--frames N] [--detail N] [--scenery N] [--sprite-px N] [--sun N] [--shadow-distance N]\n"
                 "        [--no-shadows] [--no-baked-shadows] [--no-impostors] [--forward] [--static] [--lod-debug]\n"
-                "        [--legacy-shaders] [--anim] [--lock-camera] [--auto-lod] [--validate] [--hud|--no-hud] [--no-point-light] [--no-point-shadow]\n"
-                "        [--dump-shadows] [--dump-impostors] [--dump-frame FILE] [--smoke]");
+                "        [--legacy-shaders] [--anim] [--ai|--ai-debug] [--lock-camera] [--auto-lod] [--validate] [--hud|--no-hud] [--no-point-light] [--no-point-shadow]\n"
+                "        [--dump-shadows] [--dump-impostors] [--dump-frame FILE] [--dump-at N] [--smoke]");
         }
         if (settings.UnitCount < 1) throw std::runtime_error("--units must be positive");
         if (smoke && frameLimit == 0) frameLimit = 30;

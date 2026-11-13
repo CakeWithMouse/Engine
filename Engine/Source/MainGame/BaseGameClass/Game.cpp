@@ -3,6 +3,8 @@
 #include <Engine/Render/ShadowCascades.h>
 #include <Engine/SaveGame/SaveGame.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/AI/Debugger.h>
+#include <Engine/AI/World.h>
 #include <Engine/MainGame/CharacterController.h>
 #include <Engine/Components/Character.h>
 #include <Engine/Components/SpecificComponents/UIComponent.h>
@@ -3206,9 +3208,9 @@ void Game::RenderEditorOverlay()
 {
     static int sOverlayFrameCounter = 0;
     ++sOverlayFrameCounter;
-    const bool logPeriodic = (sOverlayFrameCounter % 120 == 1);
+    const bool logPeriodic = bEmbedded && (sOverlayFrameCounter % 120 == 1);   // editor diagnostics only
 
-    if (!bEmbedded && TraceDebugLines.empty())
+    if (!bEmbedded && TraceDebugLines.empty() && FrameDebugLines.empty())
     {
         if (logPeriodic) { std::printf("[Info] Overlay: early return (!bEmbedded)\n"); std::fflush(stdout); }
         return;
@@ -3247,6 +3249,7 @@ void Game::RenderEditorOverlay()
 
     auto overlayLines=PendingOverlayLines;
     auto debugLines=CollectTraceDebugLines();overlayLines.insert(overlayLines.end(),debugLines.begin(),debugLines.end());
+    overlayLines.insert(overlayLines.end(),FrameDebugLines.begin(),FrameDebugLines.end());
     if (overlayLines.empty() && PendingOverlayBillboards.empty() && PendingOverlayTriangles.empty())
     {
         if (logPeriodic) { std::printf("[Info] Overlay: early return (empty lines and billboards)\n"); std::fflush(stdout); }
@@ -3969,6 +3972,7 @@ void Game::ProcessHotkeys()
 
 void Game::UpdateFrame(float realDeltaTime)
 {
+    FrameDebugLines.clear();
     SynchronizeSceneResources();
     const float deltaTime = realDeltaTime * SimulationTimeScale;
     RealTime += realDeltaTime;
@@ -4111,6 +4115,8 @@ void Game::StartGameplayComponents()
 void Game::PrepareRenderFrame()
 {
     SynchronizeSceneResources(); // Includes additions committed after gameplay callbacks.
+    // The AI debugger adds its lines every frame, also while paused.
+    if (auto* ai = GetSubsystem<Ai::Subsystem>()) ai->GetWorld().Debug().Draw(*this);
     DirectionalLightComponent* sun = nullptr;
     for (const auto& entry : scene.GetComponents())
         if ((sun = dynamic_cast<DirectionalLightComponent*>(entry.second.get()))) break;
@@ -4292,6 +4298,10 @@ void Game::RenderFrame()
     {
         RenderEditorSelection();
         RenderEditorOverlay();
+    }
+    else if (!TraceDebugLines.empty() || !FrameDebugLines.empty())
+    {
+        RenderEditorOverlay(); // debug lines are useful in a standalone game too
     }
     if (fxaaReady)
     {
