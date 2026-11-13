@@ -196,4 +196,62 @@ inline void Run()
     std::cout << "InspectorRefreshTests: " << checks << " checks passed." << std::endl;
 }
 
+// Regression for the mouse-move card jitter (T1 repeat). A selected object that
+// carries a property schema but whose generic properties card is suppressed
+// (showProperties=false, e.g. Light.Directional) used to be re-shown by
+// RefreshProjectProperties and re-hidden by Refresh on EVERY refresh. Each
+// viewport mouse-move posts InputCursor -> Complete -> RefreshSceneUi -> Refresh,
+// so that show/hide churn invalidated the scroll layout once per move and the
+// cards oscillated in height near the vertical-scrollbar threshold. Repeated
+// identical-data Refresh must now be a layout no-op.
+inline void RunMouseRefreshJitter()
+{
+    std::cout << "[Test] Running InspectorRefresh mouse-move jitter regression..." << std::endl;
+    int checks = 0;
+
+    QTemporaryDir root;
+    Check(root.isValid(), "jitter: temp content root created");
+
+    EditorQtHost::Snapshot snap;
+    EditorQtHost::SceneObject light;
+    light.id = 5;
+    light.type = "Light.Directional";
+    light.name = "Sun";
+    light.transform.rotation[3] = 1.0f;
+    light.transform.scale[0] = light.transform.scale[1] = light.transform.scale[2] = 1.0f;
+    light.propertySchema = R"({"version":1,"fields":[
+        {"path":"/enabled","type":"bool","label":"Enabled","group":"Directional Light"},
+        {"path":"/intensity","type":"number","label":"Intensity","min":0,"max":1000,"step":0.1,"group":"Directional Light"}]})";
+    light.projectData = R"({"enabled":true,"intensity":1.0})";
+    snap.objects = {light};
+    snap.selected = 5;
+
+    ObjectInspectorPanel panel;
+    panel.setProperty("contentRoot", root.path());
+    // Height where the vertical scrollbar sits at the content-height threshold:
+    // the pre-fix churn oscillated the cards here on every refresh.
+    panel.resize(300, 430);
+    panel.show();
+    panel.Refresh(snap, 5, true);
+    for (int i = 0; i < 20; ++i)
+        QApplication::processEvents();
+
+    auto* content = panel.findChild<QWidget*>(QStringLiteral("InspectorScrollContent"));
+    Check(content != nullptr, "jitter: scroll content located by objectName");
+
+    CardEventCounter counter;
+    InstallCounter(content, &counter);
+    for (int move = 0; move < 30; ++move)
+    {
+        panel.Refresh(snap, 5, false);
+        QApplication::processEvents();
+    }
+    Check(counter.shows == 0, "jitter: no properties re-show churn over 30 mouse-move refreshes");
+    Check(counter.hides == 0, "jitter: no properties re-hide churn over 30 mouse-move refreshes");
+    Check(counter.resizes == 0, "jitter: no card height oscillation over 30 mouse-move refreshes");
+    ++checks;
+
+    std::cout << "InspectorRefresh mouse-move jitter regression: " << checks << " checks passed." << std::endl;
+}
+
 } // namespace InspectorRefreshTests

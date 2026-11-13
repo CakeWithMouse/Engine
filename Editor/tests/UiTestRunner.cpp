@@ -25,6 +25,7 @@ int main(int argc, char* argv[])
         ImportSettingsV2EditTests::Run();
         AssetDeleteTests::Run();
         InspectorRefreshTests::Run();
+        InspectorRefreshTests::RunMouseRefreshJitter();
         DockRedockTests::Run();
         ViewportBillboardTests::Run();
         UiSmokeTests::Run();
