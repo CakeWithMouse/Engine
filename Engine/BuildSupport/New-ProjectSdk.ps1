@@ -1,11 +1,12 @@
 param([Parameter(Mandatory=$true)][string]$Runtime, [ValidateSet('Debug','Release')][string]$Configuration='Debug',
-    [string]$PlatformToolset='v145', [ValidateSet('auto','true','false')][string]$Assimp='auto')
+    [string]$PlatformToolset='v145', [ValidateSet('auto','true','false')][string]$Assimp='auto', [switch]$UseBuildToolset)
 $ErrorActionPreference = 'Stop'
 $engineRoot = Split-Path $PSScriptRoot
 . "$PSScriptRoot/Toolchain.ps1"
-# SDK consumers may have only VS 2019. Never publish the editor's newer Engine.lib.
-# Fail before touching the installed SDK if the release-builder lacks the baseline.
-$sdkToolchain = Resolve-EngineToolchain -Toolset 'v142'
+# Distributable SDKs must link with VS 2019. A local Debug SDK can use the build's tools.
+if ($UseBuildToolset -and $Configuration -ne 'Debug') { throw '-UseBuildToolset is only for local Debug SDKs.' }
+$sdkFamily = if ($UseBuildToolset) { $PlatformToolset } else { 'v142' }
+$sdkToolchain = Resolve-EngineToolchain -Toolset $sdkFamily
 $baselineDir = Join-Path $engineRoot "build/sdk/x64/$Configuration/$($sdkToolchain.version)"
 [IO.Directory]::CreateDirectory($baselineDir) | Out-Null
 $baselineLog = Join-Path $baselineDir 'build.log'
@@ -19,18 +20,18 @@ $buildArgs = @((Join-Path $engineRoot 'Engine.vcxproj'), '/nologo', '/m:1', '/nr
     '/p:VcpkgEnableManifest=false', '/p:WholeProgramOptimization=false')
 $buildArgs += @(Get-EngineToolchainArguments $sdkToolchain)
 if ($useAssimp) { $buildArgs += ConvertTo-MSBuildProperty 'IncludePath' ((Get-EngineToolchainProperties $sdkToolchain).IncludePath + ";$engineRoot/vcpkg_installed/x64-windows/include") }
-Write-Output "Building distributable SDK with $($sdkToolchain.toolset) / MSVC $($sdkToolchain.version)."
+Write-Output "Building $Configuration SDK with $($sdkToolchain.toolset) / MSVC $($sdkToolchain.version)."
 $baselineBuild = Invoke-ToolchainProcess $sdkToolchain.msbuild $buildArgs -Timeout 1800000
 if ($baselineBuild.exitCode) {
     if (Test-Path -LiteralPath $baselineLog) { Get-Content -LiteralPath $baselineLog -Encoding UTF8 | Select-Object -Last 50 }
-    throw "VS 2019 SDK build failed. Existing SDK preserved. See $baselineLog"
+    throw "SDK build failed with $($sdkToolchain.toolset). Existing SDK preserved. See $baselineLog"
 }
 $generatorArgs = @($buildArgs)
 $generatorArgs[0] = Join-Path $engineRoot 'Tools/ComponentGenerator/ComponentGenerator.vcxproj'
 $generatorArgs += ConvertTo-MSBuildProperty 'IntDir' ($baselineDir+'/generator-obj/')
 $generatorArgs += "/flp:LogFile=$baselineDir/generator.log;Encoding=UTF-8;Verbosity=minimal"
 $generatorBuild = Invoke-ToolchainProcess $sdkToolchain.msbuild $generatorArgs -Timeout 180000
-if ($generatorBuild.exitCode) { throw "VS 2019 component generator build failed. See $baselineDir/generator.log" }
+if ($generatorBuild.exitCode) { throw "SDK component generator build failed with $($sdkToolchain.toolset). See $baselineDir/generator.log" }
 $runtimeRoot = [IO.Path]::GetFullPath($Runtime).TrimEnd('\','/')
 $release = Get-Content -LiteralPath "$runtimeRoot/EngineVersion.json" -Raw | ConvertFrom-Json
 $publishedSdk = Join-Path $runtimeRoot 'SDK'
@@ -86,7 +87,9 @@ $manifest = @{format=2;version=$release.version;configuration=$Configuration;pla
     assimp=$useAssimp;engineLibrarySha256=(Get-FileHash -LiteralPath "$sdk/Lib/Engine.lib").Hash}
 [IO.File]::WriteAllText("$sdk/Sdk.json", ($manifest | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
 # Reject too-new dependencies or incompatible public headers before publication.
-& "$PSScriptRoot/Test-SdkCompatibility.ps1" -Sdk $sdk -OutputDirectory "$baselineDir/validation"
+$validationArgs = @{ Sdk = $sdk; OutputDirectory = "$baselineDir/validation" }
+if ($UseBuildToolset) { $validationArgs['Toolsets'] = @($sdkToolchain.toolset) }
+& "$PSScriptRoot/Test-SdkCompatibility.ps1" @validationArgs
 Copy-Item -LiteralPath "$baselineDir/validation/results.json" -Destination "$sdk/Compatibility.json"
 # Publish complete headers and library together. If the SDK is in use and cannot be
 # renamed, fail with the previous SDK intact, rather than mixing two C++ layouts.

@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PainEngine · ИИ — схема</title>
+<style>
+:root{color-scheme:light dark;
+--bg:light-dark(#f5f5f0,#141917);--fg:light-dark(#202b26,#e7eee9);--muted:light-dark(#52655b,#a4b9ac);
+--line:light-dark(#b8c6bc,#475b4d);--panel:light-dark(#ffffff,#1c2421);
+--eng:light-dark(#dcecff,#1b3244);--eng-line:light-dark(#3f7cb3,#6ea8d8);
+--str:light-dark(#e4e0fb,#2c2748);--str-line:light-dark(#6a5cc0,#9d90e6);
+--game:light-dark(#fdecd2,#3f301a);--game-line:light-dark(#b57d27,#d9a85a);
+--old:light-dark(#ecefe9,#262f2b);--old-line:light-dark(#8fa196,#6c8275)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 system-ui,sans-serif}
+main{max-width:1120px;margin:auto;padding:36px 24px 60px}
+h1{margin:.1em 0 .1em;font-size:2.2rem;line-height:1.15}
+h2{margin:2.4em 0 .25em;font-size:1.35rem}
+p{margin:.4em 0}
+code{font:.92em ui-monospace,Consolas,monospace}
+.eyebrow{color:var(--muted);font-size:.85rem;letter-spacing:.03em}
+.lead{font-size:1.12rem;margin:.2em 0 .7em}
+.notice{border-left:4px solid var(--eng-line);background:var(--panel);padding:.6em .9em;border-radius:0 8px 8px 0}
+.sub{color:var(--muted);margin-bottom:1em}
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin:1.1em 0 0;font-size:.9rem}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.legend i{width:16px;height:16px;border-radius:4px;border-width:1.5px;border-style:solid}
+.k-old{background:var(--old);border-color:var(--old-line)}
+.k-eng{background:var(--eng);border-color:var(--eng-line)}
+.k-str{background:var(--str);border-color:var(--str-line)}
+.k-game{background:var(--game);border-color:var(--game-line)}
+
+.band{border:1.5px solid var(--line);border-radius:12px;padding:12px;background:var(--panel)}
+.band-title{font-weight:650;margin-bottom:10px}
+.row{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr))}
+.row.three{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr))}
+.box{border-width:1.5px;border-style:solid;border-radius:9px;padding:9px 11px;min-width:0}
+.box strong{display:block;font-size:.95rem}
+.box small{display:block;color:var(--muted);font-size:.83rem;line-height:1.4;margin-top:3px}
+.box em{display:block;color:var(--muted);font-size:.78rem;font-style:normal;margin-top:4px}
+.link{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 34px;padding:8px 0;color:var(--muted);font-size:.88rem}
+.link b{color:var(--fg)}
+
+.frame{list-style:none;display:flex;flex-wrap:wrap;gap:6px;padding:0;margin:0}
+.frame li{border:1.5px solid var(--old-line);background:var(--old);border-radius:8px;padding:5px 10px;font:.86rem ui-monospace,Consolas,monospace}
+.frame li.hot{background:var(--eng);border-color:var(--eng-line);font-weight:700}
+.zoom{margin:10px 0 8px;color:var(--muted);font-size:.9rem}
+.steps{list-style:none;counter-reset:s;display:grid;gap:8px;padding:0;margin:0;grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr))}
+.steps li{counter-increment:s;border:1.5px solid var(--eng-line);background:var(--eng);border-radius:9px;padding:8px 11px 9px;min-width:0}
+.steps li::before{content:counter(s);display:inline-grid;place-items:center;width:21px;height:21px;margin-right:7px;border-radius:50%;background:var(--eng-line);color:var(--bg);font-size:.78rem;font-weight:700}
+.steps strong{font-size:.95rem}
+.steps small{display:block;color:var(--muted);font-size:.83rem;line-height:1.4;margin-top:3px}
+.steps code{display:block;margin-top:4px;font-size:.8rem;overflow-wrap:anywhere}
+.steps.code{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.steps.code li{background:var(--game);border-color:var(--game-line)}
+.steps.code li::before{background:var(--game-line)}
+
+.life{display:flex;flex-wrap:wrap;align-items:stretch;gap:6px;margin:0}
+.life .box{flex:1 1 130px}
+.life>span{align-self:center;color:var(--muted)}
+
+.paths{display:grid;grid-template-columns:150px 1fr 1fr;gap:7px;align-items:stretch}
+.paths .head{font-weight:650;padding:4px 11px}
+.paths .tag{color:var(--muted);font-size:.86rem;padding:8px 8px 8px 0;text-align:right}
+.paths .cell{border:1.5px solid var(--eng-line);background:var(--eng);border-radius:9px;padding:8px 11px;font-size:.92rem;line-height:1.42;min-width:0}
+.paths .cell.strcell{background:var(--str);border-color:var(--str-line)}
+.paths .cell.gamecell{background:var(--game);border-color:var(--game-line)}
+.paths .cell.oldcell{background:var(--old);border-color:var(--old-line)}
+.paths .wide{grid-column:2 / span 2;text-align:center}
+.paths .plain{background:var(--panel);border-color:var(--line)}
+
+.fig{margin:0;background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:12px}
+.fig figcaption{font-weight:650;margin-bottom:6px}
+.fig figcaption small{display:block;font-weight:400;color:var(--muted);font-size:.86rem}
+.fig+.fig{margin-top:12px}
+svg{display:block;width:100%;height:auto;max-width:760px;margin:auto}
+svg .st rect{fill:var(--game);stroke:var(--game-line);stroke-width:1.6}
+svg .st.any rect{fill:none;stroke:var(--muted);stroke-dasharray:5 4}
+svg .st.end rect{fill:var(--old);stroke:var(--old-line)}
+svg .parent rect{fill:none;stroke:var(--game-line);stroke-width:1.6}
+svg .ptitle{fill:var(--fg);font:650 14px system-ui,sans-serif}
+svg .psub{fill:var(--muted);font:11.5px system-ui,sans-serif;text-anchor:end}
+svg .name{fill:var(--fg);font:650 14px system-ui,sans-serif;text-anchor:middle}
+svg .ru{fill:var(--muted);font:11.5px system-ui,sans-serif;text-anchor:middle}
+svg .edge{fill:none;stroke:var(--muted);stroke-width:1.5}
+svg .tip{fill:var(--muted)}
+svg .lbl{fill:var(--fg);font:12.5px system-ui,sans-serif;text-anchor:middle;paint-order:stroke;stroke:var(--panel);stroke-width:5px;stroke-linejoin:round}
+
+@media (max-width:720px){
+.paths{grid-template-columns:1fr}
+.paths .tag{text-align:left;padding:8px 0 0}
+.paths .wide{grid-column:auto}
+.paths .spacer{display:none}
+}
+</style>
+</head>
+<body><main>
+<header>
+<div class="eyebrow">PainEngine / предложение · 07.11.2026</div>
+<h1>ИИ</h1>
+<p class="lead">Общий инструмент на state machine как в Unreal и стратегический слой поверх него.</p>
+<p class="notice">Это предложение: ни один новый класс со схемы пока не существует. Архитектура и этапы — в <a href="AI-DESIGN.md">AI-DESIGN.md</a>, примеры кода — в <a href="AI-CPP-GUIDE.md">AI-CPP-GUIDE.md</a>.</p>
+<div class="legend">
+<span><i class="k-old"></i>Уже есть в движке</span>
+<span><i class="k-eng"></i>Новое: общий ИИ</span>
+<span><i class="k-str"></i>Новое: стратегия</span>
+<span><i class="k-game"></i>Код игры</span>
+</div>
+</header>
+
+<section>
+<h2>1. Слои</h2>
+<p class="sub">Общий инструмент подходит для любого жанра. Стратегия только дополняет его. Движок не знает о врагах и морали.</p>
+
+<div class="band">
+<div class="band-title">Game/&lt;Name&gt; — правила конкретной игры</div>
+<div class="row three">
+<div class="box k-game"><strong>Юниты</strong><small>Guard : AiCharacter, Turret : CubeComponent. Появляются в палитре редактора</small></div>
+<div class="box k-game"><strong>Автоматы</strong><small>Какие состояния есть и как они сменяются</small></div>
+<div class="box k-game"><strong>Свои задачи и условия</strong><small>Attack, IsWounded: всё, что относится к правилам игры</small></div>
+</div>
+</div>
+
+<div class="link"><span><b>↓</b> использует</span></div>
+
+<div class="band">
+<div class="band-title">Engine/AI — стратегия: отряды и толпа</div>
+<div class="row three">
+<div class="box k-str"><strong>Ai::Group</strong><small>Контроллер отряда: те же автоматы и задачи</small></div>
+<div class="box k-str"><strong>FlowField</strong><small>Одно поле направлений на цель, кэш, расчёт порциями</small></div>
+<div class="box k-str"><strong>Слоты и бойцы</strong><small>Лёгкие записи без контроллера, тело — MeshInstance</small></div>
+</div>
+</div>
+
+<div class="link"><span><b>↓</b> построена на</span></div>
+
+<div class="band">
+<div class="band-title">Engine/AI — общий инструмент</div>
+<div class="row three">
+<div class="box k-eng"><strong>Ai::StateMachine</strong><small>Иерархический автомат, один на тип юнита</small><em>StateTree</em></div>
+<div class="box k-eng"><strong>Ai::Controller</strong><small>Мозг: запускает автомат, держит память и чувства</small><em>AIController</em></div>
+<div class="box k-eng"><strong>Ai::Blackboard</strong><small>Память юнита с типизированными ключами</small><em>Blackboard</em></div>
+<div class="box k-eng"><strong>Ai::Perception</strong><small>Зрение, слух, урон, команды</small><em>AI Perception</em></div>
+<div class="box k-eng"><strong>NavGrid, A*, MoveTo</strong><small>Навигация и движение по пути</small><em>NavMesh, PathFollowing</em></div>
+<div class="box k-eng"><strong>Ai::Query, Debugger</strong><small>Поиск лучшей точки, отладка поведения</small><em>EQS, Gameplay Debugger</em></div>
+</div>
+</div>
+
+<div class="link"><span><b>↓</b> опирается на</span></div>
+
+<div class="band">
+<div class="band-title">Engine — то, что уже работает</div>
+<div class="row">
+<div class="box k-old"><strong>Character</strong><small>Move, базовый класс юнита</small></div>
+<div class="box k-old"><strong>InstancedMesh<wbr>Component</strong><small>Массовые юниты</small></div>
+<div class="box k-old"><strong>GameSession</strong><small>Тик подсистем, Pause</small></div>
+<div class="box k-old"><strong>Scene</strong><small>ComponentId, удаление</small></div>
+<div class="box k-old"><strong>SaveArchive</strong><small>Сохранение, ссылки</small></div>
+</div>
+</div>
+</section>
+
+<section>
+<h2>2. Что внутри ИИ юнита</h2>
+<p class="sub">Как в Unreal: мозг отделён от тела. Один и тот же контроллер управляет персонажем, турелью, отрядом или работает вообще без объекта сцены.</p>
+<div class="box k-old"><strong>Мир</strong><small>Цели, шум, урон, события других юнитов</small></div>
+<div class="link"><span><b>↓</b> что заметили</span></div>
+<div class="band">
+<div class="band-title">Ai::Controller — мозг одного юнита</div>
+<div class="row">
+<div class="box k-eng"><strong>Восприятие</strong><small>Видит цели, шлёт события</small></div>
+<div class="box k-eng"><strong>Память</strong><small>Target, LastSeen, Health</small></div>
+<div class="box k-eng"><strong>Автомат</strong><small>Выбирает состояние по условиям и событиям</small></div>
+<div class="box k-eng"><strong>Задачи</strong><small>Выполняют активные состояния</small></div>
+<div class="box k-eng"><strong>Движение</strong><small>Ищет путь, обходит соседей</small></div>
+</div>
+</div>
+<div class="link"><span><b>↓</b> куда идти и куда смотреть</span></div>
+<div class="row">
+<div class="box k-old"><strong>Character</strong><small>Ходит через Move</small></div>
+<div class="box k-old"><strong>Любой компонент</strong><small>Турель: видит и думает, но не ходит</small></div>
+<div class="box k-str"><strong>Отряд</strong><small>Бойцы через SetInstancePosition</small></div>
+<div class="box k-old"><strong>Нет тела</strong><small>Сценарий боя, фазы босса</small></div>
+</div>
+</section>
+
+<section>
+<h2>3. Иерархический автомат</h2>
+<p class="sub">Стражник из руководства. Родитель сам не выполняется и входит в первого подходящего ребёнка, его задачи работают, пока активен любой ребёнок. Старт: Patrol, затем Walk.</p>
+<figure class="fig">
+<figcaption>Автомат Guard<small>Рамка — родитель, блок — состояние, внизу блока — его задача</small></figcaption>
+<svg viewBox="0 0 680 335" role="img" aria-label="Автомат стражника: Patrol содержит Walk и Rest, Combat содержит Chase и Hit, отдельно Search. Spotted ведёт в Chase, Lost ведёт в Search, Search возвращается в Patrol">
+<defs><marker id="tipA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="tip" d="M0 0L10 5L0 10z"/></marker></defs>
+<g class="parent"><rect x="10" y="12" width="290" height="140" rx="12"/></g><text class="ptitle" x="24" y="35">Patrol</text>
+<g class="parent"><rect x="380" y="12" width="290" height="140" rx="12"/></g><text class="ptitle" x="394" y="35">Combat</text><text class="psub" x="656" y="35">LookAt Target</text>
+<g class="st"><rect x="24" y="52" width="104" height="72" rx="10"/><text class="name" x="76" y="82">Walk</text><text class="ru" x="76" y="102">FollowRoute</text></g>
+<g class="st"><rect x="186" y="52" width="104" height="72" rx="10"/><text class="name" x="238" y="82">Rest</text><text class="ru" x="238" y="102">Wait 2 с</text></g>
+<g class="st"><rect x="394" y="52" width="104" height="72" rx="10"/><text class="name" x="446" y="82">Chase</text><text class="ru" x="446" y="102">MoveTo Target</text></g>
+<g class="st"><rect x="556" y="52" width="104" height="72" rx="10"/><text class="name" x="608" y="82">Hit</text><text class="ru" x="608" y="102">Attack</text></g>
+<g class="st"><rect x="200" y="250" width="130" height="72" rx="10"/><text class="name" x="265" y="280">Search</text><text class="ru" x="265" y="300">MoveTo LastSeen</text></g>
+
+<path class="edge" marker-end="url(#tipA)" d="M128 74H184"/><text class="lbl" x="157" y="66">успех</text>
+<path class="edge" marker-end="url(#tipA)" d="M186 102H130"/><text class="lbl" x="157" y="118">готово</text>
+<path class="edge" marker-end="url(#tipA)" d="M498 74H554"/><text class="lbl" x="526" y="66">дошёл</text>
+<path class="edge" marker-end="url(#tipA)" d="M556 102H500"/><text class="lbl" x="528" y="118">далеко</text>
+<path class="edge" marker-end="url(#tipA)" d="M300 88H392"/><text class="lbl" x="340" y="80">Spotted</text>
+<path class="edge" marker-end="url(#tipA)" d="M520 152V300H332"/><text class="lbl" x="440" y="316">Lost</text>
+<path class="edge" marker-end="url(#tipA)" d="M330 270H446V126"/><text class="lbl" x="385" y="262">Spotted</text>
+<path class="edge" marker-end="url(#tipA)" d="M200 286H155V154"/><text class="lbl" x="155" y="222">готово</text>
+</svg>
+</figure>
+<figure class="fig">
+<figcaption>Жизнь задачи<small>Все задачи состояния работают одновременно, первая завершившаяся завершает состояние</small></figcaption>
+<div class="life">
+<div class="box k-eng"><strong>Enter</strong><small>Вход в состояние</small></div><span>→</span>
+<div class="box k-eng"><strong>Tick</strong><small>Пока статус Running</small></div><span>→</span>
+<div class="box k-game"><strong>Succeeded, Failed</strong><small>Или прервал переход</small></div><span>→</span>
+<div class="box k-eng"><strong>Exit</strong><small>Вызывается всегда</small></div><span>→</span>
+<div class="box k-eng"><strong>Переход</strong><small>От листа к корню</small></div>
+</div>
+</figure>
+</section>
+
+<section>
+<h2>4. Как написать ИИ на C++</h2>
+<p class="sub">Четыре шага в коде. Подсистему объявлять не нужно, регистрировать классы вручную тоже.</p>
+<ol class="steps code">
+<li><strong>Память</strong><small>Ключи: имя и тип значения</small><code>Ai::Key&lt;Ai::ObjectRef&gt; Target{"Target"};</code></li>
+<li><strong>Задачи и условия</strong><small>Только то, что относится к правилам игры</small><code>class Attack : public Ai::Task&lt;AttackData&gt;</code></li>
+<li><strong>Автомат</strong><small>Состояния, задачи и переходы</small><code>chase.GoTo("Hit").OnSucceeded();</code></li>
+<li><strong>Юнит</strong><small>Настройка чувств и запуск автомата</small><code>class Guard final : public AiCharacter</code></li>
+<li><strong>Сборка</strong><small>Генератор сам добавит класс в палитру, а поля — в инспектор</small><code>ENGINE_COMPONENT("Стражник")</code></li>
+<li><strong>Play и отладка</strong><small>Состояние над юнитом и журнал переходов</small><code>ai.ActiveState(); ai.History();</code></li>
+</ol>
+</section>
+
+<section>
+<h2>5. Один кадр</h2>
+<p class="sub">ИИ встаёт в существующий шаг <code>Session-&gt;Tick</code>, цикл кадра не меняется. В Pause и в Edit он не работает.</p>
+<ol class="frame">
+<li>PreUpdate</li><li>ActionInput.Tick</li><li class="hot">Session-&gt;Tick</li><li>Controller-&gt;Tick</li><li>UpdateCamera</li><li>TickComponents</li><li>RenderFrame</li>
+</ol>
+<p class="zoom">Внутри <code>Session-&gt;Tick</code> встроенная подсистема вызывает <code>Ai::World::Tick(dt)</code>:</p>
+<ol class="steps">
+<li><strong>Снять позиции</strong><small>Убрать контроллеры удалённых объектов</small></li>
+<li><strong>Обновить соседей</strong><small>SpatialHash пересобирается один раз</small></li>
+<li><strong>Восприятие</strong><small>Проверки видимости по кругу, с бюджетом</small></li>
+<li><strong>Подумать</strong><small>Службы, задачи, переходы</small></li>
+<li><strong>Поиск в рамках бюджета</strong><small>A*, поля и запросы, не больше N за кадр</small></li>
+<li><strong>Желаемая скорость</strong><small>Из пути, из поля или к своему слоту</small></li>
+<li><strong>Избегание</strong><small>Разведение с соседями, запрет занятых клеток</small></li>
+<li><strong>Записать</strong><small>Character::Move или SetInstancePosition</small></li>
+</ol>
+</section>
+
+<section>
+<h2>6. Как приказ становится движением</h2>
+<p class="sub">Различаются только источник направления и способ записи. Автоматы, задачи и избегание общие.</p>
+<div class="paths">
+<div class="spacer"></div><div class="head">Одиночный юнит (Character)</div><div class="head">Толпа: отряд из MeshInstance</div>
+
+<div class="tag">Кто решает</div>
+<div class="cell wide gamecell">Задача автомата: <code>Ai::Tasks::MoveTo</code></div>
+
+<div class="tag">Приказ</div>
+<div class="cell"><code>Controller::MoveTo(point)</code></div>
+<div class="cell strcell"><code>Group::MoveTo(point)</code></div>
+
+<div class="tag">Поиск</div>
+<div class="cell">A* по NavGrid, запрос встаёт в очередь</div>
+<div class="cell strcell">Волна от цели, одно поле на цель и класс размера</div>
+
+<div class="tag">Результат</div>
+<div class="cell">Ломаная, спрямлённая по прямой видимости</div>
+<div class="cell strcell">Направление в каждой клетке; боец читает его за O(1)</div>
+
+<div class="tag">Следование</div>
+<div class="cell">К очередной точке. Нет продвижения — новый запрос</div>
+<div class="cell strcell">По полю, пока свой слот не станет виден напрямую</div>
+
+<div class="tag">Избегание</div>
+<div class="cell wide">Разведение через SpatialHash, запрет занятых клеток через NavGrid</div>
+
+<div class="tag">Запись</div>
+<div class="cell oldcell"><code>Character::Move(direction, dt)</code> и поворот</div>
+<div class="cell oldcell"><code>SetInstancePosition</code>, <code>SetInstanceYaw</code></div>
+
+<div class="tag">Ответ автомату</div>
+<div class="cell wide">Статус: Waiting, Moving, Arrived, Unreachable, Stuck</div>
+
+<div class="tag">Цена растёт с</div>
+<div class="cell plain">числом юнитов: один поиск на каждого</div>
+<div class="cell plain">числом разных целей: от числа бойцов почти не зависит</div>
+</div>
+</section>
+
+<section>
+<h2>7. Автомат отряда</h2>
+<p class="sub">Пример игрового кода для стратегии. Механизм тот же, что у стражника, но автомат один на сотню бойцов.</p>
+<figure class="fig">
+<svg viewBox="0 0 600 350" role="img" aria-label="Автомат отряда: Hold и March сменяют друг друга, оба переходят в Engage, Engage возвращается в Hold или переходит в Rout, Rout возвращается в Hold, из любого состояния переход в Destroyed">
+<defs><marker id="tipB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="tip" d="M0 0L10 5L0 10z"/></marker></defs>
+<g class="st"><rect x="10" y="70" width="120" height="50" rx="10"/><text class="name" x="70" y="92">Hold</text><text class="ru" x="70" y="109">стоит</text></g>
+<g class="st"><rect x="240" y="70" width="120" height="50" rx="10"/><text class="name" x="300" y="92">March</text><text class="ru" x="300" y="109">марш</text></g>
+<g class="st"><rect x="450" y="70" width="120" height="50" rx="10"/><text class="name" x="510" y="92">Engage</text><text class="ru" x="510" y="109">бой</text></g>
+<g class="st"><rect x="240" y="190" width="120" height="50" rx="10"/><text class="name" x="300" y="212">Rout</text><text class="ru" x="300" y="229">бегство</text></g>
+<g class="st any"><rect x="10" y="288" width="120" height="50" rx="10"/><text class="name" x="70" y="318">из любого</text></g>
+<g class="st end"><rect x="240" y="288" width="120" height="50" rx="10"/><text class="name" x="300" y="310">Destroyed</text><text class="ru" x="300" y="327">разбит</text></g>
+
+<path class="edge" marker-end="url(#tipB)" d="M530 70V24Q530 14 520 14H60Q50 14 50 24V68"/><text class="lbl" x="290" y="18">врагов нет</text>
+<path class="edge" marker-end="url(#tipB)" d="M90 70V52Q90 42 100 42H480Q490 42 490 52V68"/><text class="lbl" x="290" y="46">враг рядом</text>
+<path class="edge" marker-end="url(#tipB)" d="M130 85H238"/><text class="lbl" x="185" y="76">приказ</text>
+<path class="edge" marker-end="url(#tipB)" d="M240 105H132"/><text class="lbl" x="185" y="124">все в слотах</text>
+<path class="edge" marker-end="url(#tipB)" d="M360 95H448"/><text class="lbl" x="405" y="86">враг рядом</text>
+<path class="edge" marker-end="url(#tipB)" d="M490 120L362 205"/><text class="lbl" x="432" y="163">мораль упала</text>
+<path class="edge" marker-end="url(#tipB)" d="M240 205L92 122"/><text class="lbl" x="166" y="168">мораль вернулась</text>
+<path class="edge" marker-end="url(#tipB)" d="M130 313H238"/><text class="lbl" x="185" y="304">нет бойцов</text>
+</svg>
+</figure>
+</section>
+</main></body>
+</html>

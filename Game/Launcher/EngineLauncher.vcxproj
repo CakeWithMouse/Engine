@@ -25,8 +25,11 @@
   <ItemGroup><ProjectReference Include="../../Engine/Runtime/EngineRuntime.vcxproj"><Project>{30B3ACB8-B4EF-5CF4-8E65-FA5CB8AC1DC6}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference></ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="DeployProjectSdk" AfterTargets="Build">
+    <PropertyGroup>
+      <ProjectSdkOptions Condition="'$(Configuration)'=='Debug'">-UseBuildToolset</ProjectSdkOptions>
+    </PropertyGroup>
     <MSBuild Projects="../../Engine/Tools/ComponentGenerator/ComponentGenerator.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform);PlatformToolset=$(PlatformToolset)" />
-    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(RepositoryRoot)Engine/BuildSupport/New-ProjectSdk.ps1&quot; -Runtime &quot;$(OutDir)Runtime&quot; -Configuration $(Configuration) -PlatformToolset $(PlatformToolset) -Assimp $(EngineEnableAssimp)" />
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(RepositoryRoot)Engine/BuildSupport/New-ProjectSdk.ps1&quot; -Runtime &quot;$(OutDir)Runtime&quot; -Configuration $(Configuration) -PlatformToolset $(PlatformToolset) -Assimp $(EngineEnableAssimp) $(ProjectSdkOptions)" />
   </Target>
 
 </Project>
