@@ -2,7 +2,10 @@
 
 #include "CollapsibleCard.h"
 #include "EditorLocale.h"
+#include "EditorTheme.h"
 
+#include <QDir>
+#include <QFileInfo>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -29,15 +32,51 @@ public:
             materialAsset_->setEnabled(available);
     }
 
-    void SetData(const QString& material, bool hasPointLight)
+    void SetData(const QString& material, bool hasPointLight, const QString& contentRoot = QString(), bool forceCheck = false)
     {
         materialAsset_->setText(material);
-        editMaterialButton_->setEnabled(!material.isEmpty() || !hasPointLight);
-        editMaterialButton_->setToolTip(material.isEmpty()
-            ? Tr("Создать материал в Content/Materials, назначить его объекту и открыть редактор",
-                 "Create material in Content/Materials, assign to object and open editor")
-            : QString());
         clearMaterialButton_->setEnabled(!material.isEmpty());
+
+        if (!material.isEmpty() && !contentRoot.isEmpty())
+        {
+            if (forceCheck || material != cachedMaterialPath_)
+            {
+                cachedMaterialPath_ = material;
+                const QString rel = material.startsWith(QStringLiteral("/Game/")) ? material.mid(6) : material;
+                cachedMaterialExists_ = QFileInfo::exists(QDir(contentRoot).filePath(rel));
+            }
+            if (!cachedMaterialExists_)
+            {
+                materialAsset_->setStyleSheet(QStringLiteral("color: %1;").arg(EditorTheme::Instance().AccentColor().name()));
+                materialAsset_->setToolTip(Tr("Файл материала не найден на диске", "Material file not found on disk"));
+                editMaterialButton_->setEnabled(false);
+                editMaterialButton_->setToolTip(Tr("Файл материала не найден на диске", "Material file not found on disk"));
+            }
+            else
+            {
+                materialAsset_->setStyleSheet(QString());
+                materialAsset_->setToolTip(QString());
+                editMaterialButton_->setEnabled(true);
+                editMaterialButton_->setToolTip(QString());
+            }
+        }
+        else
+        {
+            cachedMaterialPath_.clear();
+            cachedMaterialExists_ = true;
+            materialAsset_->setStyleSheet(QString());
+            materialAsset_->setToolTip(QString());
+            editMaterialButton_->setEnabled(!hasPointLight);
+            editMaterialButton_->setToolTip(material.isEmpty()
+                ? Tr("Создать материал в Content/Materials, назначить его объекту и открыть редактор",
+                     "Create material in Content/Materials, assign to object and open editor")
+                : QString());
+        }
+    }
+
+    void InvalidateCache()
+    {
+        cachedMaterialPath_.clear();
     }
 
     void Clear()
@@ -45,6 +84,10 @@ public:
         materialAsset_->clear();
         editMaterialButton_->setEnabled(false);
         clearMaterialButton_->setEnabled(false);
+        cachedMaterialPath_.clear();
+        cachedMaterialExists_ = true;
+        materialAsset_->setStyleSheet(QString());
+        materialAsset_->setToolTip(QString());
     }
 
     void RetranslateUi()
@@ -115,4 +158,6 @@ private:
     QPushButton* chooseMaterialButton_ = nullptr;
     QPushButton* clearMaterialButton_ = nullptr;
     QLabel* labelMatTitle_ = nullptr;
+    QString cachedMaterialPath_;
+    bool cachedMaterialExists_ = true;
 };

@@ -5,6 +5,7 @@
 #include "MaterialEditorWindow.h"
 #include "ScriptEditorWindow.h"
 #include "Graph/GraphDocument.h"
+#include "AssetExtensions.h"
 
 #include <QDir>
 #include <QFileDialog>
@@ -31,13 +32,27 @@ void EditorMainWindow::UpdateAsset(const QString& path,bool move,const QString& 
         argument=QInputDialog::getText(this,Tr("Переместить ресурс", "Move Asset"),
             Tr("Новый путь относительно Content. Для модели перемещается вся её папка; имя файла модели сохраняется.\nСсылки в сценах и материалах будут обновлены. История Undo сцены будет очищена.", "New path relative to Content. For a model, its entire folder is moved; the model file name is preserved.\nReferences in scenes and materials will be updated. Scene undo history will be cleared."),QLineEdit::Normal,relative,&ok);
         if(!ok||argument.isEmpty())return;
-    } else if(!move && argument.isEmpty()) {
-        const auto metadata=RecoveryStore::Read(path+".source.json");
-        const auto original=metadata["source"].toString();
-        argument=QFileDialog::getOpenFileName(this,Tr("Исходный файл для переимпорта", "Source File for Reimport"),original,
-            Tr("Ресурсы (*.fbx *.blend *.glb *.gltf *.obj *.png *.jpg *.jpeg *.bmp *.tga)", "Assets (*.fbx *.blend *.glb *.gltf *.obj *.png *.jpg *.jpeg *.bmp *.tga)"));
-        if(argument.isEmpty())return;
-        if(QMessageBox::question(this,Tr("Переимпорт ресурса", "Reimport Asset"),Tr("Обновить ресурс во всех сценах? Назначения и правки материалов сохранятся. История Undo сцены будет очищена. Прежние файлы останутся в .painengine/AssetBackups.", "Update asset across all scenes? Material assignments and edits will be preserved. Scene undo history will be cleared. Old files will remain in .painengine/AssetBackups."))!=QMessageBox::Yes)return;
+    } else if(!move) {
+        const EditorCore::AssetKind kind=EditorCore::KindForFile(path);
+        if(kind==EditorCore::AssetKind::Unknown) {
+            QMessageBox::warning(this,Tr("Переимпорт ресурса", "Reimport Asset"),
+                Tr("Переимпорт этого типа ресурсов не поддерживается.", "Reimport of this asset type is not supported."));
+            return;
+        }
+        const bool interactive=argument.isEmpty();
+        if(interactive) {
+            const auto metadata=RecoveryStore::Read(path+".source.json");
+            const auto original=metadata["source"].toString();
+            argument=QFileDialog::getOpenFileName(this,Tr("Исходный файл для переимпорта", "Source File for Reimport"),original,
+                EditorCore::DialogFilter(kind));
+            if(argument.isEmpty())return;
+        }
+        if(!EditorCore::ReimportSourceMatches(path,argument)) {
+            QMessageBox::warning(this,Tr("Переимпорт ресурса", "Reimport Asset"),
+                Tr("Выбранный файл не соответствует типу ресурса. Переимпорт отменён.", "The selected file does not match the asset type. Reimport cancelled."));
+            return;
+        }
+        if(interactive && QMessageBox::question(this,Tr("Переимпорт ресурса", "Reimport Asset"),Tr("Обновить ресурс во всех сценах? Назначения и правки материалов сохранятся. История Undo сцены будет очищена. Прежние файлы останутся в .painengine/AssetBackups.", "Update asset across all scenes? Material assignments and edits will be preserved. Scene undo history will be cleared. Old files will remain in .painengine/AssetBackups."))!=QMessageBox::Yes)return;
     }
     if(move) {argument=QDir::fromNativeSeparators(argument);if(!argument.startsWith("/Game/"))argument="/Game/"+argument;}
     // Окно переносимого скрипта дописывает файл и закрывается: после переноса оно откроется по новому пути.
@@ -241,6 +256,19 @@ void EditorMainWindow::OpenMaterialEditor(const QString& path)
         }
 
         material = QStringLiteral("/Game/") + relative;
+    }
+
+    const QString content = QString::fromUtf8(host_->host().contentRoot);
+    const QString rel = material.startsWith(QStringLiteral("/Game/")) ? material.mid(6) : material;
+    const QString diskPath = QDir(content).filePath(rel);
+    if (!QFileInfo::exists(diskPath))
+    {
+        QMessageBox::warning(
+            this,
+            Tr("Файл не найден", "File Not Found"),
+            Tr("Файл материала не найден на диске: %1", "Material file not found on disk: %1").arg(diskPath)
+        );
+        return;
     }
 
     // Скрытое окно уже закрывается: превью отпускается, новое окно встанет в очередь после него.

@@ -12,8 +12,9 @@ const skill = process.env.PRESENTATIONS_SKILL;
 if (!runtimeModules || !python || !skill) throw new Error('Set RUNTIME_NODE_MODULES, RUNTIME_PYTHON and PRESENTATIONS_SKILL from load_workspace_dependencies and the installed presentation skill.');
 const { Presentation, PresentationFile } = await import(pathToFileURL(path.join(runtimeModules, '@oai/artifact-tool/dist/artifact_tool.mjs')).href);
 const { finalizePresentation } = await import(pathToFileURL(path.join(skill, 'container_tools/artifact_tool_utils.mjs')).href);
-const data = JSON.parse(await fs.readFile(path.join(workspaceDir, 'content.json'), 'utf8'));
-const stem = `PainEngine-Tutorial-${data.date}-r${data.revision}`;
+const contentFile = process.env.TUTORIAL_CONTENT || 'content.json';
+const data = JSON.parse(await fs.readFile(path.join(workspaceDir, contentFile), 'utf8'));
+const stem = `${data.outputPrefix || 'PainEngine-Tutorial'}-${data.date}-r${data.revision}`;
 let buildDir = path.join(workspaceDir, '.build', stem);
 // Finalized artifacts are immutable, including drafts not yet published in current.json.
 let output = path.join(workspaceDir, 'releases', stem + '-final.pptx');
@@ -51,11 +52,15 @@ for (const [index,d] of data.slides.entries()) {
     text(slide,d.title,48,90,405,280,52,'#FFFFFF',true);
     text(slide,d.subtitle,48,430,390,110,29,'#BFE0E5');
     await picture(slide,d.image,{left:510,top:130,width:730,height:440});
+    text(slide,'Снимки показывают Qt-панели; D3D viewport не входит в захват.',510,586,730,45,18,'#A6C5D1');
     text(slide,`${data.engineVersion}  /  ${data.date.split('-').reverse().join('.')}`,48,628,650,38,22,'#A6C5D1');
   } else {
     block(slide,0,0,1280,124,dark?'#183449':'#D1E3E8');
     text(slide,d.title,48,35,1184,80,40,titleColor,true);
-    if(d.type==='table') {
+    if(d.type==='evidence') {
+      for(const im of d.images||[]) await picture(slide,im.file,{left:im.x,top:im.y,width:im.w,height:im.h});
+      for(const t of d.texts||[]) text(slide,t.text,t.x,t.y,t.w,t.h,t.size||26,t.color||'#243646',t.bold||false,t.face||font);
+    } else if(d.type==='table') {
       tableSlides.push(index+1);
       const cols=d.headers.length, rows=d.rows.length+1;
       const widths=cols===2?[430,722]:[270,400,482];
@@ -92,7 +97,7 @@ for (const [index,d] of data.slides.entries()) {
     if(d.foot) text(slide,d.foot,48,640,1138,55,20,dark?'#B1C5D2':'#4D6272');
     text(slide,String(index+1).padStart(2,'0'),1180,684,40,24,16,dark?'#9BB3C4':'#66808F');
   }
-  slide.speakerNotes.text=d.notes+'\n\nИсточники в репозитории O:/Engine/Engine:\n'+d.sources.join('\n');
+  slide.speakerNotes.text=d.notes+'\n\nИсточники относительно корня репозитория:\n'+d.sources.join('\n');
   await fs.writeFile(path.join(buildDir,`slide-${String(index+1).padStart(2,'0')}.png`),new Uint8Array(await (await deck.export({slide,format:'png',scale:2})).arrayBuffer()));
   console.log(`Rendered slide ${index+1}/${data.slides.length}`);
 }
@@ -139,6 +144,6 @@ for(const relative of sourcePaths) {
 await fs.writeFile(path.join(buildDir,'pending-current.json'),JSON.stringify({
   title:data.title.replace('\n',' — '),engineVersion:data.engineVersion,date:data.date,revision:data.revision,sourceCommit:data.sourceCommit,
   slideCount:data.slides.length,presentation:path.relative(workspaceDir,output).replaceAll('\\','/'),
-  pdf:path.relative(workspaceDir,pdfPath).replaceAll('\\','/'),content:'content.json',builder:'build.mjs',editorialPolicy:'editorial-policy.json',sources
+  pdf:path.relative(workspaceDir,pdfPath).replaceAll('\\','/'),content:contentFile,builder:'build.mjs',editorialPolicy:'editorial-policy.json',sources
 },null,2));
 console.log(`Finalized ${output}. Review every rendered slide, then publish pending-current.json as current.json.`);

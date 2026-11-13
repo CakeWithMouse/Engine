@@ -9,6 +9,7 @@
 
 #include "ObjectInspectorPanel.h"
 #include "IEditorHost.h"
+#include "ModelImportSidecarTransaction.h"
 
 class QTreeWidget;
 class QLineEdit;
@@ -58,6 +59,8 @@ public:
 
     void OpenScene(const QString& path = {});
     void UpdateAsset(const QString& path, bool move, const QString& supplied = {});
+    bool EditModelImportSettings(const QString& path, bool showDialog = true, const QVariantMap& overrideParams = {});
+    bool DeleteAsset(const QString& path, bool skipPrompt = false);
     // kind: 0 model, 1 texture, 2 audio.
     void ImportAsset(int kind, const QString& source = {});
     void AddModel(const QString& path = {});
@@ -101,6 +104,10 @@ private:
     int controlSchemeSubId_ = 0;
     void BuildCodeTools();
     void RunCodeTool(const QString& action, const QStringList& extra = {});
+    // Старые Game.dll без Engine.Asset.Import: no-code — автообновление из шаблона,
+    // C++ — диалог «Собрать проект» / «Открыть как есть».
+    enum class ImportSupport { Options, Defaults, Cancelled };
+    ImportSupport EnsureModelImportSupport();
     void ShowProjectTypes();
     void BuildUi();
     void BuildToolBar();
@@ -235,6 +242,8 @@ private:
     bool sceneBusy_ = false;
     bool closing_ = false;
     bool checkingChanges_ = false;
+
+    EditorCore::SidecarTransaction sidecarTx_;
 
     std::function<void()> afterSave_;
     std::function<void()> afterCheck_;

@@ -3,9 +3,12 @@ param(
     [Parameter(Mandatory=$true)][string]$Project,
     [string]$Runtime='', [string]$Name='',
     [ValidateSet('Component','Character','Game','Object')][string]$Kind='Component',
-    [string]$Base='', [string]$BaseHeader=''
+    [string]$Base='', [string]$BaseHeader='',
+    [ValidateSet('','v142','v143','v145')][string]$Toolset='',
+    [string]$VCToolsVersion='', [switch]$Rebuild
 )
 $ErrorActionPreference='Stop'
+. "$PSScriptRoot/Toolchain.ps1"
 # The editor and launcher consume UTF-8, including PowerShell diagnostics.
 $OutputEncoding = [Text.UTF8Encoding]::new($false)
 [Console]::OutputEncoding = $OutputEncoding
@@ -214,6 +217,7 @@ static std::unique_ptr<Game> ProjectGameFactory() { return SelectProjectGame(Eng
 </PropertyGroup>
 <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
 <PropertyGroup Label="Configuration"><ConfigurationType>DynamicLibrary</ConfigurationType><PlatformToolset>$(EngineSdkToolset)</PlatformToolset><CharacterSet>Unicode</CharacterSet></PropertyGroup>
+<Import Project="$(EngineSdk)\Build\ProjectBootstrap.props" Condition="Exists('$(EngineSdk)\Build\ProjectBootstrap.props')" />
 <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
 <Import Project="$(EngineSdk)\Build\ProjectSdk.props" />
 <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
@@ -251,9 +255,36 @@ if(!$Runtime){
     WriteJson $codeFile @{format=1;state='prepared';originalModule=$manifest.module;sdk=$pin.engineVersion}
 }
 if (!(Test-Path -LiteralPath $codeFile)) { throw 'Enable C++ first' }
+if (Test-Path -LiteralPath "$sdk/Build/ProjectBootstrap.props") {
+    # Upgrade existing generated projects without replacing user property groups.
+    $vcxproj = Join-Path $projectRoot 'Game.vcxproj'
+    $document = New-Object Xml.XmlDocument
+    $document.PreserveWhitespace = $true
+    $document.Load($vcxproj)
+    $ns = New-Object Xml.XmlNamespaceManager($document.NameTable)
+    $ns.AddNamespace('m', 'http://schemas.microsoft.com/developer/msbuild/2003')
+    $imports = @($document.SelectNodes('/m:Project/m:Import', $ns))
+    if (!($imports | Where-Object { $_.GetAttribute('Project') -match 'ProjectBootstrap\.props$' })) {
+        $cpp = @($imports | Where-Object { $_.GetAttribute('Project') -match '[\\/]Microsoft\.Cpp\.props$' })
+        if ($cpp.Count -ne 1) { throw 'Cannot locate Microsoft.Cpp.props in Game.vcxproj to configure automatic IDE builds; project preserved.' }
+        $bootstrap = $document.CreateElement('Import', $document.DocumentElement.NamespaceURI)
+        $bootstrap.SetAttribute('Project', '$(EngineSdk)\Build\ProjectBootstrap.props')
+        $bootstrap.SetAttribute('Condition', "Exists('`$(EngineSdk)\Build\ProjectBootstrap.props')")
+        [void]$document.DocumentElement.InsertBefore($bootstrap, $cpp[0])
+        Copy-Item -LiteralPath $vcxproj -Destination ($vcxproj+'.before-toolchain') -Force
+        $document.Save($vcxproj)
+    }
+}
 if ($Action -eq 'AddClass') { AddClass $Name $Kind $Base $BaseHeader; return }
 
-$fingerprintParts = @($sdkInfo.version,$sdkInfo.configuration,(Get-FileHash -LiteralPath "$sdk/Lib/Engine.lib").Hash)
+$toolchain = Resolve-EngineToolchain $sdkInfo -Toolset $Toolset -ExactVersion $VCToolsVersion
+Write-Output "Using $($toolchain.toolset), MSVC $($toolchain.version), Windows SDK $($toolchain.windowsSdk.version)."
+Write-Output "MSBuild: $($toolchain.msbuild)"
+$toolchainIdentity = $toolchain | ConvertTo-Json -Depth 5 -Compress
+$fingerprintParts = @($sdkInfo.version,$sdkInfo.configuration,$toolchainIdentity)
+foreach ($inputFile in @(Get-Item -LiteralPath "$sdk/Sdk.json","$sdk/Toolchain.ps1","$sdk/ProjectTools.ps1","$sdk/Tools/ComponentGenerator.exe") + @(Get-ChildItem -LiteralPath "$sdk/Lib" -Filter '*.lib') + @(Get-ChildItem -LiteralPath "$sdk/Build" -File)) {
+    $fingerprintParts += $inputFile.Name,(Get-FileHash -LiteralPath $inputFile.FullName).Hash
+}
 foreach($source in (Get-ChildItem -LiteralPath (Join-Path $projectRoot 'Source') -File -Recurse | Sort-Object FullName)) {
     $fingerprintParts += $source.FullName.Substring($projectRoot.Length),(Get-FileHash -LiteralPath $source.FullName).Hash
 }
@@ -261,37 +292,29 @@ $fingerprintParts += (Get-FileHash -LiteralPath (Join-Path $projectRoot 'Game.vc
 $fingerprint = [Convert]::ToBase64String([Security.Cryptography.SHA256]::Create().ComputeHash($encoding.GetBytes(($fingerprintParts -join "`n"))))
 $codeState = Get-Content -LiteralPath $codeFile -Raw -Encoding UTF8 | ConvertFrom-Json
 $currentManifest = Get-Content -LiteralPath $projectFile -Raw -Encoding UTF8 | ConvertFrom-Json
-if ($codeState.state -eq 'ready' -and $codeState.module -eq $currentManifest.module -and $codeState.fingerprint -eq $fingerprint -and (Test-Path -LiteralPath (Join-Path $projectRoot $currentManifest.module))) { Write-Output 'Project is already up to date'; return }
+if (!$Rebuild -and $codeState.state -eq 'ready' -and $codeState.module -eq $currentManifest.module -and $codeState.fingerprint -eq $fingerprint -and (Test-Path -LiteralPath (Join-Path $projectRoot $currentManifest.module))) { Write-Output 'Project is already up to date'; return }
 
-$vswhere = Join-Path ([Environment]::GetEnvironmentVariable('ProgramFiles(x86)')) 'Microsoft Visual Studio/Installer/vswhere.exe'
-if (!(Test-Path -LiteralPath $vswhere)) { throw 'Install Visual Studio C++ tools and Windows SDK to build this project' }
-$msbuild = & $vswhere -latest -products '*' -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' | Select-Object -First 1
-if (!$msbuild) { throw 'MSBuild is unavailable' }
+$msbuild = $toolchain.msbuild
 $buildId = [guid]::NewGuid().ToString('N')
 $output = Join-Path $projectRoot ('Binaries/'+$pin.engineConfiguration+'/'+$buildId)
 [IO.Directory]::CreateDirectory($output) | Out-Null
-# Explicit arguments, no command-string evaluation; inherited duplicate PATH keys
-# are normalized before MSBuild starts its compiler tasks.
-foreach($group in ([Environment]::GetEnvironmentVariables().Keys | Group-Object { $_.ToUpperInvariant() } | Where-Object Count -gt 1)) {
- $value=[Environment]::GetEnvironmentVariable($group.Group[0]); foreach($key in $group.Group){[Environment]::SetEnvironmentVariable($key,$null,'Process')}; [Environment]::SetEnvironmentVariable($group.Name,$value,'Process')
-}
-$start = [Diagnostics.ProcessStartInfo]::new()
-$start.FileName=$msbuild; $start.UseShellExecute=$false
-$start.RedirectStandardOutput=$true; $start.RedirectStandardError=$true
-$start.EnvironmentVariables.Clear()
-foreach($entry in [Environment]::GetEnvironmentVariables().GetEnumerator()) { $start.EnvironmentVariables[$entry.Key.ToUpperInvariant()]=$entry.Value }
-$buildLog=Join-Path $output 'build.log'
-# MSBuild owns decoding its native compiler tasks. Its explicit UTF-8 file logger
-# avoids guessing OEM/ANSI encodings of redirected console bytes in PowerShell.
-$start.Arguments='"'+(Join-Path $projectRoot 'Game.vcxproj')+'" /nologo /m:1 /nr:false /noconsolelogger "/flp:LogFile='+$buildLog+';Encoding=UTF-8;Verbosity=minimal" /p:Platform=x64 /p:Configuration='+$pin.engineConfiguration+' /p:PlatformToolset='+$sdkInfo.toolset+' "/p:EngineSdk='+$sdk+'" "/p:ProjectBuildOutput='+$output+'"'
-$buildProcess=[Diagnostics.Process]::Start($start)
-$buildOutput=$buildProcess.StandardOutput.ReadToEndAsync(); $buildErrors=$buildProcess.StandardError.ReadToEndAsync()
-$buildProcess.WaitForExit()
-$startupOutput=$buildOutput.GetAwaiter().GetResult()+[Environment]::NewLine+$buildErrors.GetAwaiter().GetResult()
-$buildText=if(Test-Path -LiteralPath $buildLog){[IO.File]::ReadAllText($buildLog,[Text.Encoding]::UTF8)}else{$startupOutput}
+$buildLog = Join-Path $output 'build.log'
+$identity = ([BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash($encoding.GetBytes($toolchainIdentity)))).Replace('-','').Substring(0,16)
+$arguments = @((Join-Path $projectRoot 'Game.vcxproj'), '/nologo', '/m:1', '/nr:false', '/noconsolelogger',
+    "/flp:LogFile=$buildLog;Encoding=UTF-8;Verbosity=minimal",
+    (ConvertTo-MSBuildProperty 'Configuration' $pin.engineConfiguration),
+    (ConvertTo-MSBuildProperty 'EngineSdk' $sdk), (ConvertTo-MSBuildProperty 'ProjectBuildOutput' $output),
+    (ConvertTo-MSBuildProperty 'IntDir' (Join-Path $projectRoot ("Intermediate/"+$pin.engineConfiguration+"/$identity/"))))
+$arguments += @(Get-EngineToolchainArguments $toolchain)
+# Copied/restored sources can be older than their existing .obj files. The
+# content fingerprint, not filesystem timestamps, decides whether they changed.
+if ($Rebuild -or $codeState.fingerprint -ne $fingerprint) { $arguments += '/t:Rebuild' }
+WriteJson (Join-Path $output 'toolchain.json') $toolchain
+$result = Invoke-ToolchainProcess $msbuild $arguments -Timeout 1800000
+$buildText = if(Test-Path -LiteralPath $buildLog){[IO.File]::ReadAllText($buildLog,[Text.Encoding]::UTF8)}else{$result.stdout+[Environment]::NewLine+$result.stderr}
 Write-Output $buildText
 Write-Output "Full build log: $buildLog"
-if ($buildProcess.ExitCode) { throw 'Project build failed; previous module preserved' }
+if ($result.exitCode) { throw 'Project build failed; previous module preserved' }
 Copy-Item -Path "$Runtime/Templates/SceneProject/*.dll" -Destination $output -Exclude Game.dll -Force
 $manifest = Get-Content -LiteralPath $projectFile -Raw -Encoding UTF8 | ConvertFrom-Json
 $previous = $manifest.module

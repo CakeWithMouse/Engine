@@ -12,7 +12,7 @@
 <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
 <Import Project="..\..\BuildSupport\Cpp.props" />
   <ItemDefinitionGroup Condition="'$(EngineEnableAssimp)'=='true'"><Link><AdditionalDependencies>$(EngineAssimpLib);%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
-<ItemGroup><ClCompile Include="EditSessionTests.cpp" /><ClCompile Include="..\..\Runtime\Project.cpp" /></ItemGroup>
+<ItemGroup><ClCompile Include="EditSessionTests.cpp" /><ClCompile Include="ModeParityTests.cpp" /><ClCompile Include="..\..\Runtime\Project.cpp" /></ItemGroup>
 <ItemGroup>
 <ProjectReference Include="..\..\Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project></ProjectReference>
 <ProjectReference Include="..\..\..\Game\RuntimeExample\RuntimeExample.vcxproj"><Project>{7A86EB5A-6C85-5FFA-8266-59398BABE19F}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference>

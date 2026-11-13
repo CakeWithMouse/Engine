@@ -51,7 +51,7 @@ function codeBlock(id) {
 }
 function renderPage(p) {
  return `<article class="page" id="${p.id}" data-page="${p.id}">
- <div class="eyebrow">${esc(groups[p.group])} <span>/</span> ${p.header?'C++ API':'Руководство'}</div>
+ <div class="eyebrow"><a href="index.html">Руководства</a> / ${esc(groups[p.group])} <span>/</span> ${p.header?'C++ API':'Руководство'}</div>
  <h1 tabindex="-1">${esc(p.title)}</h1><p class="lead">${esc(p.summary)}</p>
  ${p.id==='overview'?`<figure class="engine-cover"><img src="${cover}" width="1672" height="941" alt="Куб, сфера и цилиндр на сетке в синем освещении"><figcaption>Иллюстрация PainEngine · базовые формы игрового мира</figcaption></figure>`:''}
  ${p.header?`<a class="include" href="${sourceHref(p.header)}"><span>#include</span> &lt;Engine/${esc(p.header)}&gt; <b>Открыть исходник ↗</b></a>`:''}

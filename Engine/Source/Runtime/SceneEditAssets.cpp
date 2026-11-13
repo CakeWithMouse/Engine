@@ -124,3 +124,28 @@ void SceneEditSession::AddAssetApi(EngineEditSessionApi& api) noexcept
         });
     };
 }
+
+EngineAssetImportApi SceneEditSession::GetAssetImportApi() noexcept
+{
+    EngineAssetImportApi api{};
+    api.version = 1;
+    api.context = this;
+    api.importWithOptions = [](void* p, const char* source, uint32_t kind,
+        const char* optionsJson, char* path, uint32_t pathCapacity,
+        char* error, uint32_t capacity) -> uint32_t {
+        if (path && pathCapacity) path[0] = 0;
+        if (!path || pathCapacity < 4096 || kind > 2 || !Text(source)) return EngineSceneInvalidArgument;
+        return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+            if (s.state_ != EngineEditing) return EngineSceneReadOnly;
+            return AssetCall(error, capacity, [&]() -> uint32_t {
+                const auto result = SceneAssets::Import(s.contentRoot_, std::filesystem::u8path(source),
+                    static_cast<SceneAssets::Kind>(kind),
+                    optionsJson ? std::string_view(optionsJson) : std::string_view{});
+                std::memcpy(path, result.c_str(), result.size() + 1);
+                return EngineSceneOk;
+            });
+        });
+    };
+    return api;
+}
+

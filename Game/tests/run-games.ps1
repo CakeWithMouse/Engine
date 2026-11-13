@@ -9,7 +9,7 @@ $launcher = Join-Path $output 'EngineLauncher.exe'
 $fixture = Join-Path $repository ('build/launcher-checks/' + [guid]::NewGuid().ToString())
 New-Item -ItemType Directory -Path $fixture -Force | Out-Null
 
-function Invoke-CheckedProcess([string]$File, [string]$Arguments, [int]$Expected = 0) {
+function Invoke-CheckedProcess([string]$File, [string]$Arguments, [int]$Expected = 0, [string]$ExpectedLog = '') {
     $info = New-Object Diagnostics.ProcessStartInfo
     $info.FileName = $File
     $info.Arguments = $Arguments
@@ -25,6 +25,7 @@ function Invoke-CheckedProcess([string]$File, [string]$Arguments, [int]$Expected
     $log = $stdout.GetAwaiter().GetResult() + $stderr.GetAwaiter().GetResult()
     $log | Set-Content -LiteralPath (Join-Path $fixture ((Split-Path $File -Leaf) + '-' + ($Arguments -replace '[^a-zA-Z0-9]', '_') + '.log'))
     if ($process.ExitCode -ne $Expected) { throw "Expected $Expected, got $($process.ExitCode): $File $Arguments`n$log" }
+    if ($ExpectedLog -and $log -notmatch $ExpectedLog) { throw "Expected '$ExpectedLog': $File $Arguments`n$log" }
     Write-Host "PASS: $(Split-Path $File -Leaf) $Arguments => $Expected"
     $process.Dispose()
 }
@@ -43,6 +44,10 @@ Invoke-CheckedProcess (Join-Path $output 'Battle/Battle.exe') '--units 5000 --fr
 # Detail levels built from LOD0 instead of supplied, with the asset report switched on.
 Invoke-CheckedProcess (Join-Path $output 'Battle/Battle.exe') '--units 2000 --auto-lod --validate --frames 40 --lock-camera'
 Invoke-CheckedProcess (Join-Path $output 'Battle/Battle.exe') '--units 0 --smoke' 1
+Invoke-CheckedProcess $launcher '--check BattleAi'
+# Also run Battle directly so the test can capture the child's AI report.
+Invoke-CheckedProcess $launcher '--smoke BattleAi'
+Invoke-CheckedProcess (Join-Path $output 'Battle/Battle.exe') '--ai-debug --hud --units 1200 --scenery 35 --camera 235 --smoke' 0 'regiments=[1-9]\d* ai_states=\S+ shots=\d+ hits=\d+ destroyed=\d+ alive_blue=\d+ alive_red=\d+'
 if (Test-Path -LiteralPath (Join-Path $output 'Katamari/Katamari.exe')) {
     Invoke-CheckedProcess (Join-Path $output 'Katamari/Katamari.exe') '--smoke'
     Invoke-CheckedProcess $launcher '--smoke Katamari'
@@ -59,6 +64,10 @@ Invoke-CheckedProcess $fixtureLauncher '--check BasicExamples' 1 # missing exe
 $fixtureGame = Join-Path $fixture 'BasicExamples'
 New-Item -ItemType Directory -Path $fixtureGame -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $output 'BasicExamples/BasicExamples.exe') -Destination (Join-Path $fixtureGame 'BasicExamples.exe')
+# Keep native dependencies so the missing-content check reaches the engine.
+# With Assimp enabled, an EXE-only fixture fails in the Windows loader instead.
+Get-ChildItem -LiteralPath (Join-Path $output 'BasicExamples') -Filter '*.dll' -File |
+    ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination $fixtureGame }
 Invoke-CheckedProcess $fixtureLauncher '--check BasicExamples' 1 # missing manifest
 Set-Content -LiteralPath (Join-Path $fixtureGame 'RequiredFiles.txt') -Value 'EngineContent/Shaders/Common.hlsli' -Encoding ascii
 Invoke-CheckedProcess $fixtureLauncher '--check BasicExamples' 1 # missing shader

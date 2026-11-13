@@ -79,6 +79,8 @@ public:
     void SetAudioPreviewApi(const EngineAudioPreviewApi& api) { audio_ = api; }
     // Доступен только если игровой модуль реализует EngineAudioPreviewExtension.
     const EngineAudioPreviewApi* AudioApi() const { return audio_.play ? &audio_ : nullptr; }
+    void SetAssetImportApi(const EngineAssetImportApi& api) { assetImport_ = api; }
+    const EngineAssetImportApi* AssetImportApi() const { return assetImport_.importWithOptions ? &assetImport_ : nullptr; }
     void InitializeRecovery();
     void SetBatchApi(const EngineSceneBatchApi& api) { batch_ = api; }
     void SetAuthoringApi(const EngineAuthoringApi& api) { authoring_ = api; }
@@ -135,6 +137,7 @@ private:
     bool viewportFocused_ = false;
     EngineViewportOverlayApi overlay_{};
     EngineAudioPreviewApi audio_{};
+    EngineAssetImportApi assetImport_{};
     uint32_t antialiasingMode_ = 1;
 
     struct PendingIcon

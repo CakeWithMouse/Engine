@@ -45,7 +45,7 @@ class ObjectInspectorPanel : public QWidget
 {
     Q_OBJECT
 
-public:
+public:
     // Список переменных скрипта (из его файла) для карточки «Скрипт»: /Game путь -> [{"name","type","value"}].
     void SetScriptVariablesReader(std::function<QJsonArray(const QString&)> reader);
     explicit ObjectInspectorPanel(QWidget* parent = nullptr);
@@ -61,7 +61,9 @@ public:
     );
 
     void ClearFocusIfInside();
+    void CommitPendingEdits();
     void RetranslateUi();
+    void InvalidateAssetCache();
     QSize minimumSizeHint() const override { return QSize(80, 60); }
 
 signals:

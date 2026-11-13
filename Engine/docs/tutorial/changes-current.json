@@ -1,0 +1,197 @@
+{
+  "title": "PainEngine — Изменения выпуска",
+  "engineVersion": "2026.11.07.6",
+  "date": "2026-11-07",
+  "revision": 2,
+  "sourceCommit": "a7f8c8d89cc4061c155715008d257cb3cd229d60",
+  "slideCount": 25,
+  "presentation": "releases/PainEngine-Changes-2026-11-07-r2-v3-final.pptx",
+  "pdf": "releases/PainEngine-Changes-2026-11-07-r2-v3-final.pdf",
+  "content": "changes.json",
+  "builder": "build.mjs",
+  "editorialPolicy": "editorial-policy.json",
+  "sources": [
+    {
+      "path": "Engine/Version.json",
+      "sha256": "da6356147c5b76398e6d0c2fdcd1f48b7e2eb53f0b985423592e975c881336aa"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/README.txt",
+      "sha256": "f4d0bbb2122e157aa8f6f57a83936996043a8285cf0771ef3b9ffe83f97dd59c"
+    },
+    {
+      "path": "Editor/Source/MainWindow.cpp",
+      "sha256": "927a2cd53b56fff5eb5247dc088bfed4ea7b22063ffd88cd39367a0826ddd82a"
+    },
+    {
+      "path": "Editor/Core/GizmoMath.cpp",
+      "sha256": "c83633f62f7dcb6dfdb8c5543cf06a99c88061a199e23361cfb546799adfb43e"
+    },
+    {
+      "path": "Editor/Core/ViewportOverlay.cpp",
+      "sha256": "e5e1a4a5854710e74d188252e9561d166c1e0a2e3e0de1bc9878b1f8b019cb2e"
+    },
+    {
+      "path": "Editor/Source/MaterialGraphWidget.cpp",
+      "sha256": "81302c89c04c765bef7ea47c12aa0734f8ba61442c046a05ebdbeb414d29dc24"
+    },
+    {
+      "path": "Editor/Core/HlslGraphCompiler.cpp",
+      "sha256": "c8463c5265b219b3a28588cd7d6e975089d007890873f2ee314fe2d48b9137c2"
+    },
+    {
+      "path": "Editor/Source/MaterialEditorWindow.cpp",
+      "sha256": "c8522ed1a06f0763167e1eb017b418284061f367ed69d517d34caa183e906637"
+    },
+    {
+      "path": "Editor/Core/MaterialGraphModel.cpp",
+      "sha256": "d718c21445c1af9a77d979f01c67cab5977111dd4be120247f222f2df5764fa6"
+    },
+    {
+      "path": "Editor/Source/FileBrowser.cpp",
+      "sha256": "500f5e01beb59ea4b8ed2a3b437cf694371782357417f18a033239d4d662d018"
+    },
+    {
+      "path": "Editor/Source/ObjectInspectorPanel.cpp",
+      "sha256": "1f9a25c27fb8a0ac3f42fdfd385dd1553f89ac6b3180a67c27a4620a5669f8e4"
+    },
+    {
+      "path": "Editor/UI/MaterialCard.h",
+      "sha256": "de90b88e6a7ce92c4fb96fb97beaf38ec41fe5bd2e686671538e22e1aa0056e8"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/PresentationSources/ProjectGame.cpp",
+      "sha256": "eefd60e4fb0d4ba1470b53225d556c27caa5cc5766a8ceedc6773021d6a487bb"
+    },
+    {
+      "path": "Engine/Include/Engine/Components/SpecificComponents/SkeletalMeshComponent.h",
+      "sha256": "7b188f3c139e76ef7c5a0833103123a33f2da512ab84650cd0a715f4db103a1e"
+    },
+    {
+      "path": "Editor/Source/AssetTools.cpp",
+      "sha256": "42f7dfef92692011d65e867d8170e9270eca92ccb46ca74dc5a22d2012354fa2"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/AudioTutorial.cpp",
+      "sha256": "694e96ecaf8fee0d6e751d31674e6596455400d1d7572e8f11cddbeb09457748"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/AudioTutorial.h",
+      "sha256": "ab069eb4fa132b3e64921c04084702875116cfbf635469c6e367a7b9b213c372"
+    },
+    {
+      "path": "Engine/Include/Engine/Sound/AudioEngine.h",
+      "sha256": "832c6b6ab20608a283a19e4ebd0f91266b391444368ebdc361874cd0a1eb07aa"
+    },
+    {
+      "path": "Engine/Include/Engine/Sound/Audio3D.h",
+      "sha256": "4d5d1ff60d502d831a62b80e28b58a5d0c640523a24b3edd55e42d19bc0d61b5"
+    },
+    {
+      "path": "Engine/Source/Sound/AudioEngine.cpp",
+      "sha256": "b843ad02d125f14a4e971f7667c57715e66ea5f17cc488f8d342cff42c35e42c"
+    },
+    {
+      "path": "Game/BasicExamples/Source/SessionCounterSubsystem.h",
+      "sha256": "fb993624dbaa121d5e766b3314a6b21eaa797f52d6ab1462efad9d5ba8cb7e4b"
+    },
+    {
+      "path": "Engine/Include/Engine/MainGame/GameSubsystem.h",
+      "sha256": "b4b462f82f7cdf1d21a31f4571690ab764b92e7c9862fbfd845ca132bde57307"
+    },
+    {
+      "path": "Engine/Include/Engine/MainGame/BaseGameClass/Game.h",
+      "sha256": "9f65338bddbc0b938e8f1b57ab37b2b832554748e220eaa66b88c4b348fcd0a3"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/PresentationSources/PresentationSnippets.cpp",
+      "sha256": "1233452b82f39abaed612d7367ca4118a3c8553639e4ba5b24f291d484df0a2a"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/PresentationSources/CityEconomySubsystem.cpp",
+      "sha256": "f0056ec13792fd64aba58765eafd3f81cff8fac41f20a17f8d8931a1df8678d2"
+    },
+    {
+      "path": "Engine/Include/Engine/SaveGame/SaveArchive.h",
+      "sha256": "ddec01ca71304e970623b45704e5eb50192659f2cd35c4687b30f1a671b7b56f"
+    },
+    {
+      "path": "Engine/Include/Engine/SaveGame/SaveGame.h",
+      "sha256": "afab34ab95fddbcd1b82dd4de13807ad011a485c3d757b5086d678cec82171fb"
+    },
+    {
+      "path": "Engine/docs/tutorial/examples/PresentationSources/CityInteractionComponent.cpp",
+      "sha256": "937bed6383988dbda2940d2b7745b333e2488fd8aa3b0685ccec5b010720e984"
+    },
+    {
+      "path": "Game/Launcher/Source/Main.cpp",
+      "sha256": "648ca32b7d29ad5982516f4bdf017696d01263c8206a734b2eba74a67763b7ae"
+    },
+    {
+      "path": "Editor/Source/CodeTools.cpp",
+      "sha256": "d3c44a478dbd494187997aeb9b3f945b0accbf62c1426b74b42b509fe8213d89"
+    },
+    {
+      "path": "Engine/docs/RENDER-DIAGNOSTICS.md",
+      "sha256": "945407ba88c9e6695016e069e5519dfa5e46c130beec1ea7bfd6e6c552884c02"
+    },
+    {
+      "path": "Engine/docs/ENGINE-VERSIONS.md",
+      "sha256": "6e4343823201604571d073a701e3abd610142b9c64d94154d54d7c3d5daffb50"
+    },
+    {
+      "path": "Engine/docs/MATERIALS.md",
+      "sha256": "3bbb014aba2d2ebf25f67128e2bd8de6fff18430dbd4e5d5cbcb4fb2676cc037"
+    },
+    {
+      "path": "Agent/Playtests/2026-11-07-point-shadows/report.md",
+      "sha256": "b33dbc2e4d47a3a3c79ebd0d2acaa8096347ef171f3d5e2bf183441c17642078"
+    },
+    {
+      "path": "Agent/Tasks/068-point-shadow-slots-lod.md",
+      "sha256": "4ba904df701d721361e80bc47e41421b9cb6ff1a8afa84e8f013993fadd267f8"
+    },
+    {
+      "path": "Engine/Include/Engine/Components/Light/PointLightComponent.h",
+      "sha256": "5eb62445c688c209fb08b3b615182dc21d5f64ed74ad1403d172929098335b79"
+    },
+    {
+      "path": "Agent/Tasks/064-soft-shadows-and-point-light-shadows.md",
+      "sha256": "01270ebf31034380220b36e17b6ac1cd79ea941787310b89d7d999f2c522eb91"
+    },
+    {
+      "path": "Engine/Include/Engine/Scene/Scene.h",
+      "sha256": "a90437093b2069fcca4787c87867ce0f40fbb297cdd501c328c1cbf4880ecf27"
+    },
+    {
+      "path": "Engine/Include/Engine/Project/StandardTypes.h",
+      "sha256": "eb33f9b2d3d47bdb85339d21bac1d7160ec39ecbf5cd8959a841cf1a535b29e3"
+    },
+    {
+      "path": "Agent/Playtests/2026-11-07-intersections/report.md",
+      "sha256": "c8de17a4394b6af41a20f8b6f8b3cbaa3734360563cba5c9372f0c6e32877005"
+    },
+    {
+      "path": "Agent/Playtests/2026-11-07-transparency/report.md",
+      "sha256": "1157f41a690efa49e8e7eb4e3fd67c162b7541cb719363557aef68456ba7525c"
+    },
+    {
+      "path": "Agent/Playtests/2026-11-07-intersections/fixes/intersections-final-summary.json",
+      "sha256": "53cd2abf47cf159b2d2f6b1819592e4ae79b6ec36f8d531c399e7a504cb4878c"
+    },
+    {
+      "path": "Agent/Playtests/2026-11-07-2026.11.06.1-r5/report.md",
+      "sha256": "6d499fd9159b5120a3fa0554b457b7eacb06a8032d7955b37f2c95eb0ba06a1a"
+    }
+  ],
+  "review": {
+    "slidesReviewed": 71,
+    "changesSlides": 25,
+    "original47PixelIdentical": true,
+    "changesBodyPixelMatchesTutorial": true,
+    "nativePowerPointRenderingVerified": false,
+    "pdf": "raster slide export; editable text in PPTX",
+    "compiledFullSnippets": true
+  },
+  "sourceBundle": "releases/PainEngine-Presentations-2026-11-07-r9-r2.zip"
+}

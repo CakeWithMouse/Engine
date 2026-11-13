@@ -128,3 +128,14 @@ struct EngineAudioPreviewApi
 };
 // Optional Editor export; nullptr unbinds before stop/destroy. Editor must copy the table.
 typedef int (ENGINE_MODULE_CALL *EngineBindAudioPreviewFn)(uint32_t, uint32_t, void* editorSession, const EngineAudioPreviewApi*);
+
+// Asset import with options: enables passing serialization options (e.g. sidecar JSON)
+// to model/asset importers without changing the frozen EngineEditSessionApi layout.
+constexpr const char* EngineAssetImportExtension = "Engine.Asset.Import";
+struct EngineAssetImportApi
+{
+    uint32_t version; // 1
+    void* context;
+    uint32_t (ENGINE_MODULE_CALL *importWithOptions)(void* context, const char* source, uint32_t kind,
+        const char* optionsJson, char* virtualPath, uint32_t pathCapacity, char* error, uint32_t errorCapacity);
+};

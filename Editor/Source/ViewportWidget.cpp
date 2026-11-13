@@ -35,6 +35,7 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
         setAttribute(Qt::WA_NoSystemBackground, true);
     }
     setFocusPolicy(Qt::StrongFocus);
+    setMouseTracking(true);
     updateGizmoToolTip();
 
     schemeSubId_ = EditorSettings::Instance().SubscribeControlSchemeChanged([this](ControlScheme s) { if (headerBar_) headerBar_->SetControlScheme(s); });
@@ -53,6 +54,10 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
         const float dt = std::min(0.05f, static_cast<float>(elapsed->restart()) / 1000.0f);
         const int state = host_->PlayState();
         if (inputState_ != state) { inputState_ = state; keys_.clear(); looking_ = rmbPressed_ = false; EndObjectDrag(); }
+        // A monitor change can change physical size without a QWidget resize.
+        // Keep this independent of focus (including Play and inactive windows).
+        if (attached_ && !isResizing_ && (PhysW() != lastSentW_ || PhysH() != lastSentH_))
+            RequestResize();
         if (!attached_ || !hasFocus() || !isActiveWindow()) return;
         SendCursor(mapFromGlobal(QCursor::pos()), true); // refresh after Play/resume, resize and DPI changes
         if (state != EditorQtHost::Edit && host_->HasScene()) return;
@@ -75,7 +80,7 @@ ViewportWidget::ViewportWidget(EditorQtHost* host, QWidget* parent)
                 if (c.right || c.up || c.forward) host_->PostCommand(c);
             }
         }
-        hasCameraInfo_ = host_->GetCamera(lastCameraInfo_);
+        RefreshCameraInfo();
         if (hasCameraInfo_)
         {
             for (int i = 0; i < 3; ++i) camPos_[i] = lastCameraInfo_.position[i];
@@ -144,8 +149,17 @@ void ViewportWidget::resizeEvent(QResizeEvent* e)
             SendAttach();
         return;
     }
-    if (PhysW() == 0 || PhysH() == 0) return;
+    RequestResize();
+}
+
+void ViewportWidget::RequestResize()
+{
+    if (!attached_ || !resizeTimer_ || PhysW() == 0 || PhysH() == 0) return;
     if (PhysW() == lastSentW_ && PhysH() == lastSentH_) return;
+    if (draggingSelectedObject_) EndObjectDrag();
+    hoveredHandle_ = GizmoGeometry::Handle::None;
+    setCursor(Qt::ArrowCursor);
+    hasCameraInfo_ = false;
     isResizing_ = true;
     resizeTimer_->start(120);
 }
@@ -199,6 +213,24 @@ void ViewportWidget::SendResize()
 uint32_t ViewportWidget::PhysW() const { return static_cast<uint32_t>(std::lround(width() * devicePixelRatioF())); }
 uint32_t ViewportWidget::PhysH() const { return static_cast<uint32_t>(std::lround(height() * devicePixelRatioF())); }
 
+bool ViewportWidget::RefreshCameraInfo()
+{
+    // The engine consumes resize commands asynchronously. Do not pick with the
+    // previous camera while the new framebuffer size is still being applied.
+    hasCameraInfo_ = attached_ && !isResizing_ &&
+        PhysW() == lastSentW_ && PhysH() == lastSentH_ &&
+        host_->GetCamera(lastCameraInfo_) &&
+        lastCameraInfo_.width == lastSentW_ && lastCameraInfo_.height == lastSentH_;
+    return hasCameraInfo_;
+}
+
+QPointF ViewportWidget::ToCameraPixels(const QPointF& logicalPos) const
+{
+    // Use the actual framebuffer dimensions, including fractional-DPI rounding.
+    return QPointF(logicalPos.x() * lastCameraInfo_.width / std::max(width(), 1),
+                   logicalPos.y() * lastCameraInfo_.height / std::max(height(), 1));
+}
+
 void ViewportWidget::setGizmoMode(EditorGizmoMode mode)
 {
     if (gizmoMode_ == mode) return;
@@ -242,7 +274,7 @@ bool ViewportWidget::SelectedTransform(uint64_t& id, EngineSceneTransform& trans
     return true;
 }
 
-bool ViewportWidget::BeginGizmoDragGesture(const QPointF& pos, GizmoGeometry::Handle handle)
+bool ViewportWidget::BeginGizmoDragGesture(const QPointF& logicalPos, GizmoGeometry::Handle handle)
 {
     if (draggingSelectedObject_) return true;
     if (!attached_ || !host_->HasScene() || host_->PlayState() != EditorQtHost::Edit) return false;
@@ -250,8 +282,9 @@ bool ViewportWidget::BeginGizmoDragGesture(const QPointF& pos, GizmoGeometry::Ha
 
     draggingSelectedObject_ = true;
     activeGizmoHandle_ = handle;
-    dragStartPos_ = pos;
-    lastDragPos_ = pos;
+    dragStartPos_ = logicalPos;
+    lastDragPos_ = logicalPos;
+    const QPointF pos = ToCameraPixels(logicalPos);
 
     if (handle == GizmoGeometry::Handle::AxisX || handle == GizmoGeometry::Handle::PlaneYZ) activeAxis_ = GizmoMath::AxisLock::X;
     else if (handle == GizmoGeometry::Handle::AxisY || handle == GizmoGeometry::Handle::PlaneXZ) activeAxis_ = GizmoMath::AxisLock::Y;
@@ -337,9 +370,10 @@ bool ViewportWidget::BeginGizmoDragGesture(const QPointF& pos, GizmoGeometry::Ha
     return true;
 }
 
-void ViewportWidget::ApplyGizmoDragGesture(const QPointF& pos)
+void ViewportWidget::ApplyGizmoDragGesture(const QPointF& logicalPos)
 {
     if (!draggingSelectedObject_ || !dragObjectId_ || !hasCameraInfo_) return;
+    const QPointF pos = ToCameraPixels(logicalPos);
 
     float rayOrig[3], rayDir[3];
     if (!GizmoGeometry::ScreenToWorldRay(static_cast<float>(pos.x()), static_cast<float>(pos.y()), lastCameraInfo_, rayOrig, rayDir))

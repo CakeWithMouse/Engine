@@ -203,6 +203,9 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetGameSceneApi(uint32_t vers
                 if (!file.is_absolute()) return failure(EngineSceneInvalidArgument, "Expected absolute path");
                 auto data = SceneDocument::Read(file);
                 auto candidate = SCENE_MODULE_CREATE_GAME();
+                // A custom Game factory starts in legacy lighting mode. Apply the
+                // scene contract to the replacement too, just as editor Play does.
+                candidate->SetSceneLightingEnabled(true);
                 candidate->AttachSession(s.gameSession);
                 candidate->Saves().SetCatalog(ProjectComponentTypes());
                 SceneDocument::Restore(data, ProjectComponentTypes(), candidate->GetScene());
@@ -294,6 +297,11 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetEditExtension(void* contex
     if (std::strcmp(name, EngineGraphTraceExtension) == 0 && size == sizeof(EngineGraphTraceApi))
     {
         *static_cast<EngineGraphTraceApi*>(output) = static_cast<SceneEditSession*>(context)->GetGraphTraceApi();
+        return 1;
+    }
+    if (std::strcmp(name, EngineAssetImportExtension) == 0 && size == sizeof(EngineAssetImportApi))
+    {
+        *static_cast<EngineAssetImportApi*>(output) = static_cast<SceneEditSession*>(context)->GetAssetImportApi();
         return 1;
     }
     if (std::strcmp(name, EnginePointLightExtension) != 0 || size != sizeof(EnginePointLightApi)) return 0;

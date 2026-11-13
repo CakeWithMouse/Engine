@@ -1,4 +1,5 @@
 #include <Engine/MainGame/GameSession.h>
+#include <Engine/AI/World.h>
 #include <algorithm>
 #include <cassert>
 #include <stdexcept>
@@ -36,6 +37,9 @@ bool GameSession::Initialize(GameSubsystemCatalog catalog, std::string& error)
         std::sort(types.begin(), types.end(), [](const auto& a, const auto& b) { return std::strcmp(a.key,b.key) < 0; });
         for (size_t i = 1; i < types.size(); ++i)
             if (std::strcmp(types[i-1].key, types[i].key) == 0) throw std::runtime_error("Duplicate subsystem key");
+        // The engine AI is built in and comes first: game subsystems may use it in OnSceneReady,
+        // and it is the last to be destroyed.
+        types.insert(types.begin(), GameSubsystemType{"Engine.Ai", &CreateGameSubsystem<Ai::Subsystem>});
         for (const auto& type : types) {
             auto object = type.create();
             if (!object) throw std::runtime_error("Null subsystem factory result");

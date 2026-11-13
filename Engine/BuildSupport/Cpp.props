@@ -31,7 +31,8 @@
       <RuntimeLibrary Condition="'$(Configuration)'=='Release'">MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Release'">NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <WholeProgramOptimization Condition="'$(Configuration)'!='Release'">false</WholeProgramOptimization>
+      <!-- Engine.lib is also consumed by other supported compiler versions. -->
+      <WholeProgramOptimization Condition="'$(Configuration)'!='Release' or '$(MSBuildProjectName)'=='Engine'">false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

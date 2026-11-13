@@ -9,6 +9,8 @@
 #include <Engine/Components/Light/CubeMap.h>
 #include <Engine/Resources/Paths.h>
 #include <Engine/Components/Character.h>
+#include <Engine/AI/AiCharacter.h>
+#include <Engine/AI/SmartObject.h>
 
 // CPU geometry only. Scene/Game creates GPU resources when a viewport is attached.
 namespace SceneProject
@@ -122,7 +124,10 @@ inline ComponentTypeCatalog GetComponentTypes()
         {"Gameplay.Character", "Персонаж", EngineComponentDetail::Create<Character>},
         {"Gameplay.Camera", "Камера Play", EngineComponentDetail::Create<SceneCamera>},
         {"Gameplay.PlaySettings", "Настройки Play", EngineComponentDetail::Create<PlaySettings>},
-        {"Gameplay.Player", "Игрок", EngineComponentDetail::Create<PlayerCharacter>}
+        {"Gameplay.Player", "Игрок", EngineComponentDetail::Create<PlayerCharacter>},
+        {"Gameplay.AiCharacter", "ИИ-персонаж", EngineComponentDetail::Create<AiCharacter>},
+        {"Gameplay.NavVolume", "Объём навигации", EngineComponentDetail::Create<NavVolume>},
+        {"Gameplay.SmartObject", "Умный объект", EngineComponentDetail::Create<Ai::SmartObject>}
     };
     return {types, sizeof(types) / sizeof(types[0])};
 }

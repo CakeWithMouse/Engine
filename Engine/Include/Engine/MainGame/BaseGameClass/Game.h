@@ -237,6 +237,9 @@ public:
     Trace::Result RaycastScreen(Trace::ViewportPoint point,const Trace::Query& query={});
     Trace::Result RaycastCursor(const Trace::Query& query={});
     void DebugDrawTrace(const Trace::Ray&,const Trace::Result&,float lifetime=1);
+    /** A world-space line for one frame, colour 0xAABBGGRR. Drawn in Play and in standalone games. */
+    void DebugDrawLine(const glm::vec3& from, const glm::vec3& to, uint32_t abgr);
+    size_t GetFrameDebugLineCount() const { return FrameDebugLines.size(); }
     void ClearDebugTraces();
     size_t GetDebugTraceLineCount();
     Player* GetPlayer() const { return FirstPlayer.get(); }
@@ -725,6 +728,7 @@ protected:
 
     struct TimedTraceLine {EngineOverlayLine line;double expiry;};
     std::vector<TimedTraceLine> TraceDebugLines;
+    std::vector<EngineOverlayLine> FrameDebugLines;
     std::vector<EngineOverlayLine> CollectTraceDebugLines();
     std::vector<EngineOverlayLine> PendingOverlayLines;
     float OverlayLineThickness = 1.0f;

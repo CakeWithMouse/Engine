@@ -26,7 +26,7 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="DeployProjectSdk" AfterTargets="Build">
     <MSBuild Projects="../../Engine/Tools/ComponentGenerator/ComponentGenerator.vcxproj" Targets="Build" Properties="Configuration=$(Configuration);Platform=$(Platform);PlatformToolset=$(PlatformToolset)" />
-    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(RepositoryRoot)Engine/BuildSupport/New-ProjectSdk.ps1&quot; -Runtime &quot;$(OutDir)Runtime&quot; -Configuration $(Configuration) -PlatformToolset $(PlatformToolset)" />
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(RepositoryRoot)Engine/BuildSupport/New-ProjectSdk.ps1&quot; -Runtime &quot;$(OutDir)Runtime&quot; -Configuration $(Configuration) -PlatformToolset $(PlatformToolset) -Assimp $(EngineEnableAssimp)" />
   </Target>
 
 </Project>

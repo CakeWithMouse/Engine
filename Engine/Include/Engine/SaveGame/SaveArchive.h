@@ -21,6 +21,8 @@ public:
     }
     bool IsReading() const { return mode_ == Mode::Read; }
     bool IsWriting() const { return mode_ == Mode::Write; }
+    // Data of this archive level. For deferred restores: copy it now, read it later without remapping.
+    const Json& Raw() const { return data_; }
     template<class T> void Field(const char* name, T& value) {
         if (IsWriting()) { data_[name] = value; Check(data_[name]); return; }
         if (!data_.contains(name)) return; // New fields keep constructor defaults.
