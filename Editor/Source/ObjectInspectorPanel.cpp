@@ -427,6 +427,16 @@ void ObjectInspectorPanel::SetScriptVariablesReader(std::function<QJsonArray(con
     if (cardScript_) cardScript_->readVariables = std::move(reader);
 }
 
+void ObjectInspectorPanel::SetAiMachineProblems(const QString& machine, const QStringList& lines)
+{
+    if (cardAi_) cardAi_->SetProblems(machine, lines);
+}
+
+void ObjectInspectorPanel::SetAiMachineLive(const QStringList& lines)
+{
+    if (cardAi_) cardAi_->SetLive(lines);
+}
+
 bool ObjectInspectorPanel::HasAiMachine(const std::string& propertySchema)
 {
     return propertySchema.find("\"/stateMachine\"") != std::string::npos && propertySchema.find("\"/machineMemory\"") != std::string::npos;

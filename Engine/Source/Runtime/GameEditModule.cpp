@@ -103,6 +103,14 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
                 // Debugging only: a broken table switches the trace off instead of rejecting the module.
                 if (trace.version == 1 && trace.context == extensionContext && trace.listObjects && trace.read && trace.readValues) graphTrace_ = trace;
             }
+            EngineAiMachineApi ai{};
+            if (query && query(extensionContext, EngineAiMachineExtension, 1, sizeof(ai), &ai))
+            {
+                // Editor support only: a broken table switches it off instead of rejecting the module.
+                if (ai.version == 1 && ai.context == extensionContext && ai.describe && ai.check && ai.listUnits && ai.readStates &&
+                    ai.readMemory && ai.readHistory)
+                    aiMachine_ = ai;
+            }
             EngineAudioPreviewApi audio{};
             if (query && query(extensionContext, EngineAudioPreviewExtension, 1, sizeof(audio), &audio))
             {

@@ -136,6 +136,10 @@ private:
     void RefreshSceneUi();
     // Ошибки скриптов в Play пишутся в Console, даже если окно скрипта закрыто.
     void PollScriptProblems();
+    // Карточка «Автомат ИИ» выделенного персонажа: проверка .fsm движком в Edit, состояние в Play.
+    void PollAiMachine();
+    bool pollingAiMachine_ = false;
+    QString aiMachineChecked_; // путь и время файла последней проверки
     QSet<QString> reportedScriptProblems_;
     bool pollingScriptProblems_ = false;
     bool scriptProblemsPlaying_ = false;

@@ -733,6 +733,13 @@ MachineLoadResult Loader::Load(const std::string& text, const std::string& name)
         Problem(0, error.what());
         return finish();
     }
+    // Paths of the file's own states, for the editor's debugger.
+    for (const auto& [id, state] : states)
+    {
+        std::string path = state.name;
+        for (int parent = state.parent; parent; parent = states.at(parent).parent) path = states.at(parent).name + "/" + path;
+        asset->stateNodes.emplace(std::move(path), id);
+    }
     result.asset = std::move(asset);
     }
     catch (const Json::exception& error)

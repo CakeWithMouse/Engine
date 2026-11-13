@@ -37,6 +37,7 @@ public:
     const EnginePointLightV2Api& PointLightV2Api() const noexcept { return pointLightV2_; }
     const EngineScriptApi& ScriptApi() const noexcept { return script_; }
     const EngineGraphTraceApi& GraphTraceApi() const noexcept { return graphTrace_; }
+    const EngineAiMachineApi& AiMachineApi() const noexcept { return aiMachine_; }
     const EngineAudioPreviewApi& AudioPreviewApi() const noexcept { return audio_; }
     const EngineAuthoringApi& AuthoringApi() const noexcept { return authoring_; }
     const EngineSceneBatchApi& BatchApi() const noexcept { return batch_; }
@@ -56,6 +57,7 @@ private:
     EnginePointLightV2Api pointLightV2_{};
     EngineScriptApi script_{};
     EngineGraphTraceApi graphTrace_{};
+    EngineAiMachineApi aiMachine_{};
     EngineAudioPreviewApi audio_{};
     EngineLegacyV4::Factory legacyFactory_{};
     std::unique_ptr<EngineLegacyV4::EditApi> legacy_ = std::make_unique<EngineLegacyV4::EditApi>();

@@ -40,6 +40,20 @@ public:
         status_->hide();
         layout->addWidget(status_);
 
+        // Ошибки файла по проверке движка (Edit) и состояние персонажа в Play.
+        problems_ = new QLabel(Content());
+        problems_->setObjectName(QStringLiteral("AiMachineProblems"));
+        problems_->setWordWrap(true);
+        problems_->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        problems_->hide();
+        layout->addWidget(problems_);
+        live_ = new QLabel(Content());
+        live_->setObjectName(QStringLiteral("AiMachineLive"));
+        live_->setWordWrap(true);
+        live_->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        live_->hide();
+        layout->addWidget(live_);
+
         auto* actions = new QWidget(Content());
         auto* row = new QHBoxLayout(actions);
         row->setContentsMargins(0, 0, 0, 0);
@@ -91,10 +105,26 @@ public:
         status_->setText(status);
         status_->setVisible(!status.isEmpty());
 
+        ShowProblems();
         const QJsonArray declared = exists && readVariables ? readVariables(machine) : QJsonArray();
         const bool shown = memory_->Set(declared, memory, editable);
         memoryLabel_->setVisible(shown);
         memory_->setVisible(shown);
+    }
+
+    // Ошибки файла machine (строки уже переведены). Показываются, пока карточка показывает этот же файл.
+    void SetProblems(const QString& machine, const QStringList& lines)
+    {
+        problemsFor_ = machine;
+        problemLines_ = lines;
+        ShowProblems();
+    }
+
+    // Строки о персонаже в Play: активное состояние, память, переходы; пустой список — скрыть.
+    void SetLive(const QStringList& lines)
+    {
+        live_->setText(lines.join(QLatin1Char('\n')));
+        live_->setVisible(!lines.isEmpty());
     }
 
     void RetranslateUi()
@@ -128,7 +158,23 @@ private:
         return button;
     }
 
-    QString shown_, memoryShown_;
+    void ShowProblems()
+    {
+        const bool relevant = !problemLines_.isEmpty() && problemsFor_ == shown_;
+        if (relevant)
+        {
+            QStringList shown = problemLines_.mid(0, 3);
+            if (problemLines_.size() > 3) shown << Tr("…и ещё %1", "…and %1 more").arg(problemLines_.size() - 3);
+            problems_->setText(Tr("Ошибки в автомате (Play не начнётся):", "Errors in the machine (Play will not start):") + QLatin1Char('\n') +
+                               shown.join(QLatin1Char('\n')));
+        }
+        problems_->setVisible(relevant);
+    }
+
+    QString shown_, memoryShown_, problemsFor_;
+    QStringList problemLines_;
+    QLabel* problems_ = nullptr;
+    QLabel* live_ = nullptr;
     QLabel* label_ = nullptr;
     QLineEdit* machine_ = nullptr;
     QLabel* status_ = nullptr;

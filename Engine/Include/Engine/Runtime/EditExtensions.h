@@ -116,6 +116,63 @@ struct EngineGraphTraceApi
     uint32_t (ENGINE_MODULE_CALL *readValues)(void*, const char* asset, uint64_t objectId, EngineGraphTraceValueVisitor, void* user);
 };
 
+// AI state machines (.fsm, see Engine/docs/AI-FSM.md) for the AI editor: the block catalog, a check of a file by
+// the loader Play uses and, in Play, the AI characters with their active states, memory and transition history.
+// Modules without this extension have no AI editor support; .fsm files still run in them if the engine has AI.
+constexpr const char* EngineAiMachineExtension = "Engine.Scene.AiMachine";
+constexpr uint32_t EngineAiMachineService = 0x0141494Du;
+// Text valid during the call only.
+using EngineAiTextVisitor = void (ENGINE_MODULE_CALL *)(void* user, const char* utf8);
+// A problem of a .fsm: node 0 is the file as a whole. Messages are English; the editor translates them.
+struct EngineAiProblem
+{
+    int32_t node;
+    const char* message;
+};
+// An AI character of the running Play scene. objectId — the edit-scene object of the same name (0 without one).
+struct EngineAiUnit
+{
+    uint64_t objectId;
+    const char* objectName;
+    const char* machine;    // the character's "stateMachine": a .fsm /Game path or a C++ machine name
+    const char* activePath; // "Combat/Chase"; "" when nothing is active
+    uint32_t running;       // 0: no machine runs (finished, stopped or never started)
+};
+// One state of the active chain, the outermost first.
+struct EngineAiState
+{
+    int32_t node;      // node id in the .fsm; 0 for a C++ machine or a state of a linked machine
+    const char* name;
+    const char* path;  // "Combat/Chase"
+};
+// One memory value: type is bool, int, float, vec3, string or object; text is readable (an object by its name).
+struct EngineAiMemoryValue
+{
+    const char* key;
+    const char* type;
+    const char* text;
+};
+using EngineAiProblemVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineAiProblem* problem);
+using EngineAiUnitVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineAiUnit* unit);
+using EngineAiStateVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineAiState* state);
+using EngineAiMemoryVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineAiMemoryValue* value);
+struct EngineAiMachineApi
+{
+    uint32_t version; // 1
+    void* context;
+    // Node types, triggers, variable types and every block with its parameters as JSON. Any state.
+    uint32_t (ENGINE_MODULE_CALL *describe)(void*, EngineAiTextVisitor, void* user);
+    // Loads the .fsm (/Game path) now with the loader Play uses; every problem is visited. Ok even with problems.
+    uint32_t (ENGINE_MODULE_CALL *check)(void*, const char* path, EngineAiProblemVisitor, void* user);
+    // AI characters of the running Play scene whose "stateMachine" equals machine ("" — every one). Nothing in Edit.
+    uint32_t (ENGINE_MODULE_CALL *listUnits)(void*, const char* machine, EngineAiUnitVisitor, void* user);
+    // For one character (objectId as listUnits gives it): the active chain, the memory, the history lines oldest
+    // first ("  1.20  Patrol -> Chase   event Ai.Spotted"). NotFound: no such AI character in Play.
+    uint32_t (ENGINE_MODULE_CALL *readStates)(void*, uint64_t objectId, EngineAiStateVisitor, void* user);
+    uint32_t (ENGINE_MODULE_CALL *readMemory)(void*, uint64_t objectId, EngineAiMemoryVisitor, void* user);
+    uint32_t (ENGINE_MODULE_CALL *readHistory)(void*, uint64_t objectId, EngineAiTextVisitor, void* user);
+};
+
 // Audio asset preview: decodes and plays a /Game audio file through the edit scene's
 // audio engine. Edit state only — Play owns its game audio.
 constexpr const char* EngineAudioPreviewExtension = "Engine.Scene.AudioPreview";

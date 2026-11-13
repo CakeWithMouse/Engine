@@ -2185,6 +2185,7 @@ void PrimitiveApiTests();
 void GameSettingsTests();
 
 void ScriptTests();
+void AiMachineExtensionTests();
 
 int main()
 {
@@ -2205,6 +2206,7 @@ int main()
         {"wav decoder: RIFF parsing, read, seek", SoundDecoderTests},
         {"typed properties and transactional asset updates", AuthoringTests},
         {"visual scripts: catalog, compilation, interpreter, Game lifecycle", ScriptTests},
+        {"AI state machines: Engine.Scene.AiMachine on an edit session", AiMachineExtensionTests},
         {"registry ownership", RegistryOwnership}, {"registration failure ownership", RegistryFailures},
         {"transform hierarchy and cache", TransformHierarchy}, {"unregister hierarchy and instances", UnregisterHierarchyAndInstances},
         {"frame light snapshot", LightSnapshot}, {"forward/deferred shader variants", ShaderVariants},

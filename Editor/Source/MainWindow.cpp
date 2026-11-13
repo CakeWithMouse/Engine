@@ -68,6 +68,7 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     timer->start(250);
     auto* scriptProblems = new QTimer(this);
     connect(scriptProblems, &QTimer::timeout, this, &EditorMainWindow::PollScriptProblems);
+    connect(scriptProblems, &QTimer::timeout, this, &EditorMainWindow::PollAiMachine);
     scriptProblems->start(1000);
 
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] { RetranslateUi(); });
@@ -498,6 +499,93 @@ void EditorMainWindow::PollScriptProblems()
                 self->reportedScriptProblems_.insert(line);
                 self->host_->Log(line.toUtf8().constData());
             }
+        });
+    };
+    host_->PostCommand(c);
+}
+
+void EditorMainWindow::PollAiMachine()
+{
+    if (pollingAiMachine_ || !objectInspectorPanel_ || !host_->AiMachineApi()) return;
+    const auto snapshot = host_->ReadSnapshot();
+    const quint64 selected = snapshot.selected;
+    QString machine;
+    for (const auto& object : snapshot.objects)
+        if (object.id == selected && ObjectInspectorPanel::HasAiMachine(object.propertySchema))
+            machine = QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object().value(QStringLiteral("stateMachine")).toString();
+    const bool playing = host_->PlayState() != EditorQtHost::Edit;
+    if (!playing) objectInspectorPanel_->SetAiMachineLive({});
+    if (machine.isEmpty()) return;
+
+    // Edit: файл проверяется движком, когда он или выбор меняется.
+    QString checkKey;
+    if (!playing)
+    {
+        const QFileInfo file(QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(machine.mid(6)));
+        if (!machine.endsWith(QStringLiteral(".fsm"), Qt::CaseInsensitive) || !machine.startsWith(QStringLiteral("/Game/")) || !file.exists())
+        {
+            objectInspectorPanel_->SetAiMachineProblems(machine, {});
+            aiMachineChecked_.clear();
+            return;
+        }
+        checkKey = machine + QChar(1) + QString::number(file.lastModified().toMSecsSinceEpoch()) + QChar(1) + QString::number(file.size());
+        if (checkKey == aiMachineChecked_) return;
+    }
+
+    pollingAiMachine_ = true;
+    QPointer<EditorMainWindow> self(this);
+    EditorQtHost* host = host_;
+    const QByteArray path = machine.toUtf8();
+    EditorCommand c;
+    c.type = EditorCommand::RunTask;
+    c.task = [self, host, path, machine, selected, playing, checkKey](const EngineEditSessionApi&) {
+        QStringList lines;
+        const EngineAiMachineApi* api = host->AiMachineApi();
+        if (api && !playing)
+        {
+            api->check(api->context, path.constData(), [](void* user, const EngineAiProblem* problem) {
+                const QString message = EditorCore::LocalizeScriptMessage(QString::fromUtf8(problem->message));
+                static_cast<QStringList*>(user)->append(problem->node ? Tr("нода %1: %2", "node %1: %2").arg(problem->node).arg(message) : message);
+            }, &lines);
+        }
+        else if (api)
+        {
+            struct Unit { bool found = false, running = false; QString active; quint64 wanted = 0; } unit;
+            unit.wanted = selected;
+            api->listUnits(api->context, path.constData(), [](void* user, const EngineAiUnit* item) {
+                auto& u = *static_cast<Unit*>(user);
+                if (item->objectId != u.wanted) return;
+                u.found = true;
+                u.running = item->running != 0;
+                u.active = QString::fromUtf8(item->activePath);
+            }, &unit);
+            if (unit.found)
+            {
+                lines << (unit.running ? Tr("Сейчас: %1", "Now: %1").arg(QString(unit.active).replace(QLatin1Char('/'), QStringLiteral(" › ")))
+                                       : Tr("Автомат не работает: закончился или не запустился.", "The machine is not running: finished or did not start."));
+                QStringList memory;
+                api->readMemory(api->context, selected, [](void* user, const EngineAiMemoryValue* value) {
+                    static_cast<QStringList*>(user)->append(QStringLiteral("%1 = %2").arg(QString::fromUtf8(value->key), QString::fromUtf8(value->text)));
+                }, &memory);
+                if (!memory.isEmpty()) lines << Tr("Память: %1", "Memory: %1").arg(memory.join(QStringLiteral("; ")));
+                QStringList history;
+                api->readHistory(api->context, selected, [](void* user, const char* line) {
+                    static_cast<QStringList*>(user)->append(QString::fromUtf8(line).simplified());
+                }, &history);
+                if (!history.isEmpty()) lines << Tr("Переходы:", "Transitions:") << history.mid(std::max<qsizetype>(0, history.size() - 3));
+            }
+            else lines << Tr("В Play этот персонаж не управляется ИИ.", "In Play this character is not driven by AI.");
+        }
+        host->RunOnUi([self, machine, lines, playing, checkKey] {
+            if (!self) return;
+            self->pollingAiMachine_ = false;
+            if (playing)
+            {
+                if (self->host_->PlayState() != EditorQtHost::Edit) self->objectInspectorPanel_->SetAiMachineLive(lines);
+                return;
+            }
+            self->aiMachineChecked_ = checkKey;
+            self->objectInspectorPanel_->SetAiMachineProblems(machine, lines);
         });
     };
     host_->PostCommand(c);

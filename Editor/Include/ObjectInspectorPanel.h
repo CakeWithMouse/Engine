@@ -51,6 +51,9 @@ public:
     void SetScriptVariablesReader(std::function<QJsonArray(const QString&)> reader);
     // Схема свойств типа со stateMachine и machineMemory: их правит карточка «Автомат ИИ», а не общий список свойств.
     static bool HasAiMachine(const std::string& propertySchema);
+    // Карточка «Автомат ИИ»: ошибки файла machine по проверке движка и состояние персонажа в Play (пустое — скрыть).
+    void SetAiMachineProblems(const QString& machine, const QStringList& lines);
+    void SetAiMachineLive(const QStringList& lines);
     explicit ObjectInspectorPanel(QWidget* parent = nullptr);
     ~ObjectInspectorPanel() override;
 

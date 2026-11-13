@@ -152,6 +152,7 @@ struct MachineAsset
 {
     MachinePtr machine;
     std::vector<std::pair<std::string, VariableType>> variables;   // every declared memory key, in file order
+    std::map<std::string, int, std::less<>> stateNodes;            // state path ("Combat/Chase") -> node id in the file
     std::vector<std::pair<std::string, Blackboard::Value>> memory; // variables that have a value
     std::string targetKey, lastSeenKey;                            // perception writes here; empty: nowhere
     float thinkInterval = -1;                                      // below 0: the controller keeps its own

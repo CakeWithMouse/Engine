@@ -55,6 +55,7 @@
     <ClCompile Include="Source\Runtime\SceneEditAssets.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditAudio.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditScripts.cpp" />
+    <ClCompile Include="Source\Runtime\SceneEditAi.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditMaterials.cpp" />
     <ClInclude Include="Include\Engine\Scene\SceneDocument.h" />
     <ClCompile Include="Source\Runtime\SceneEditSession.cpp" />

@@ -286,6 +286,8 @@ int wmain(int argc, wchar_t** argv)
         }
         EngineGraphTraceApi trace{};
         if (!legacy && query && query(api.context,EngineGraphTraceExtension,1,sizeof(trace),&trace)) host.SetGraphTraceApi(trace);
+        EngineAiMachineApi aiMachine{};
+        if (!legacy && query && query(api.context,EngineAiMachineExtension,1,sizeof(aiMachine),&aiMachine)) host.SetAiMachineApi(aiMachine);
         if (!legacy) {
             Check(trace.version==1 && trace.context==script.context && trace.listObjects && trace.read,"current module supplies the graph trace extension");
             EngineGraphTraceApi rejected{99,nullptr};
@@ -1744,6 +1746,54 @@ int wmain(int argc, wchar_t** argv)
             until([&] { return guardData().value(QStringLiteral("machineMemory")).toString().isEmpty(); });
             Ui([](auto* w) { Action(w, QStringLiteral("Повторить"))->trigger(); });
             until([&] { return guardData().value(QStringLiteral("machineMemory")).toString() == QStringLiteral(R"({"Speed":3.5})"); });
+
+            // Engine.Scene.AiMachine: the engine checks the file; errors appear under the card and go away when fixed.
+            auto writeMachine = [&](const QJsonObject& json) {
+                QFile file(QString::fromStdWString(machineFile.wstring()));
+                Check(file.open(QIODevice::WriteOnly | QIODevice::Truncate) && file.write(QJsonDocument(json).toJson()) > 0, "the machine file is written");
+            };
+            Check(host.AiMachineApi() != nullptr, "current module supplies the AI machine extension");
+            {
+                QJsonObject broken = fsm;
+                QJsonArray nodes = broken[QStringLiteral("nodes")].toArray();
+                QJsonObject state = nodes[0].toObject();
+                QJsonObject properties = state[QStringLiteral("properties")].toObject();
+                properties[QStringLiteral("tasks")] = QJsonArray{QJsonObject{{QStringLiteral("type"), QStringLiteral("Ai.Fly")}}};
+                state[QStringLiteral("properties")] = properties;
+                nodes[0] = state;
+                broken[QStringLiteral("nodes")] = nodes;
+                writeMachine(broken);
+            }
+            selectGuard();
+            auto problemsText = [&] {
+                QString text;
+                Ui([&](auto* w) {
+                    auto* problems = w->template findChild<QLabel*>(QStringLiteral("AiMachineProblems"));
+                    text = problems && !problems->isHidden() ? problems->text() : QString();
+                });
+                return text;
+            };
+            until([&] { return problemsText().contains(QStringLiteral("Ai.Fly")); });
+            writeMachine(fsm);
+            until([&] { return problemsText().isEmpty(); });
+
+            // Play: the card shows the character's active state, its memory and the transitions.
+            selectGuard();
+            until(cardShown);
+            Ui([](auto* w) { Action(w, QStringLiteral("▶ Play"))->trigger(); });
+            until([&] { return host.PlayState() == EditorQtHost::Play; });
+            auto liveText = [&] {
+                QString text;
+                Ui([&](auto* w) {
+                    auto* live = w->template findChild<QLabel*>(QStringLiteral("AiMachineLive"));
+                    text = live && !live->isHidden() ? live->text() : QString();
+                });
+                return text;
+            };
+            until([&] { const QString text = liveText(); return text.contains(QStringLiteral("Idle")) && text.contains(QStringLiteral("Speed = 3.5")); });
+            Ui([](auto* w) { Action(w, QStringLiteral("⏹ Stop"))->trigger(); });
+            until([&] { return host.PlayState() == EditorQtHost::Edit; });
+            until([&] { return liveText().isEmpty(); });
 
             // A C++ machine name is typed in the same field; "Clear" removes the machine.
             selectGuard();
