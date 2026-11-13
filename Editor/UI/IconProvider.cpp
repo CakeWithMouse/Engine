@@ -151,7 +151,8 @@ void IconProvider::UploadIcons(IEditorHost* host, bool force)
     (void)force;
 
     auto renderSvg = [](const char* svgData, EditorIcons::IconId id, int size = 64) -> QImage {
-        (void)id;
+        const int inset = (id == EditorIcons::IconId::PointLight || id == EditorIcons::IconId::SunSky) ? 8 : 12;
+        const int glyphSize = size - 2 * inset;
         QImage image(size, size, QImage::Format_RGBA8888);
         image.fill(Qt::transparent);
 
@@ -169,16 +170,16 @@ void IconProvider::UploadIcons(IEditorHost* host, bool force)
         QSvgRenderer renderer(bytes);
         if (renderer.isValid())
         {
-            const QRectF iconRect(12.0, 12.0, size - 24.0, size - 24.0);
+            const QRectF iconRect(inset, inset, glyphSize, glyphSize);
             renderer.render(&p, iconRect);
         }
 #else
         QImage glyph;
         glyph.loadFromData(bytes, "SVG");
-        if (glyph.isNull()) glyph = RenderFallback(svgData, QColor(0xFF, 0xFF, 0xFF), size - 24);
+        if (glyph.isNull()) glyph = RenderFallback(svgData, QColor(0xFF, 0xFF, 0xFF), glyphSize);
         if (!glyph.isNull())
         {
-            p.drawImage(QRect(12, 12, size - 24, size - 24), glyph);
+            p.drawImage(QRect(inset, inset, glyphSize, glyphSize), glyph);
         }
 #endif
         p.end();

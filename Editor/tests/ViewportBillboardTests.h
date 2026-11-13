@@ -7,6 +7,8 @@
 #include "BillboardMetrics.h"
 #include "EditorTheme.h"
 #include "ViewportOverlay.h"
+#include "IconProvider.h"
+#include "EditorIconData.h"
 
 #include <QTemporaryDir>
 #include <QSettings>
@@ -37,6 +39,7 @@ public:
     Snapshot snapshot;
     EngineCameraInfo camera{};
     std::vector<EngineOverlayBillboard> billboards;
+    std::vector<QImage> icons;
 
     Host()
     {
@@ -57,7 +60,11 @@ public:
     void SetOverlayBillboards(const std::vector<EngineOverlayBillboard>& bb) override { billboards = bb; }
     void SetOverlayLines(const std::vector<EngineOverlayLine>&, float) override {}
     void SetOverlayTriangles(const std::vector<EngineOverlayTriangle>&) override {}
-    void SetOverlayIcon(uint32_t, uint32_t, uint32_t, const uint8_t*) override {}
+    void SetOverlayIcon(uint32_t id, uint32_t width, uint32_t height, const uint8_t* data) override
+    {
+        if (icons.size() <= id) icons.resize(id + 1);
+        icons[id] = QImage(data, width, height, QImage::Format_RGBA8888).copy();
+    }
 
     void PostCommand(const EditorCommand&) override {}
     void Log(const char*) override {}
@@ -107,6 +114,20 @@ inline void Run()
     SettingsService::Instance().SetValue(QStringLiteral("view/overlays"), true);
 
     Host host;
+    IconProvider::UploadIcons(&host);
+    for (auto id : {EditorIcons::IconId::PointLight, EditorIcons::IconId::SunSky})
+    {
+        const auto& icon = host.icons.at(static_cast<size_t>(id));
+        QRect ink;
+        for (int y = 0; y < icon.height(); ++y)
+            for (int x = 0; x < icon.width(); ++x)
+                if (icon.pixelColor(x, y).alpha() >= 128) ink |= QRect(x, y, 1, 1);
+        std::printf("Light icon %u alpha bounds: %dx%d of %dx%d\n",
+            static_cast<unsigned>(id), ink.width(), ink.height(), icon.width(), icon.height());
+        Check(ink.width() >= 38 && ink.height() >= 38, "light glyph occupies at least 59% of the plate");
+        Check(ink.left() >= 8 && ink.top() >= 8 && ink.right() < 56 && ink.bottom() < 56,
+            "light glyph keeps transparent margins without clipping");
+    }
     auto light = MakeObject(1, "Light.Point", 1.0f, 2.0f, 3.0f);
     light.hasPointLight = true;
     light.pointLight.color[0] = light.pointLight.color[1] = light.pointLight.color[2] = 1.0f;
@@ -139,7 +160,7 @@ inline void Run()
 
     std::printf("Viewport billboard position checks: PASS\n");
 
-    // Size = 2.2% of the physical viewport height, clamped in physical pixels.
+    // Size = 2.4% of the physical viewport height, clamped in physical pixels.
     // Physical height = logical height * devicePixelRatio.
     const float logicalHeights[] = {1080.0f, 1440.0f};
     const float dprs[] = {1.0f, 1.5f, 2.0f};
@@ -148,15 +169,15 @@ inline void Run()
         for (float dpr : dprs)
         {
             const float physical = logical * dpr;
-            const float expected = std::clamp(physical * 0.022f, 16.0f, 64.0f);
+            const float expected = std::clamp(physical * 0.024f, 16.0f, 80.0f);
             Check(Near(BillboardMetrics::SizePixels(physical), expected),
-                "billboard size matches 2.2% of physical height with clamp");
+                "billboard size matches 2.4% of physical height with clamp");
         }
     }
     Check(Near(BillboardMetrics::SizePixels(100.0f), 16.0f), "size clamps to minimum on tiny viewport");
-    Check(Near(BillboardMetrics::SizePixels(10000.0f), 64.0f), "size clamps to maximum on huge viewport");
+    Check(Near(BillboardMetrics::SizePixels(10000.0f), 80.0f), "size clamps to maximum on huge viewport");
 
-    Check(lb && Near(lb->sizePixels, std::clamp(600.0f * 0.022f, 16.0f, 64.0f)),
+    Check(lb && Near(lb->sizePixels, std::clamp(600.0f * 0.024f, 16.0f, 80.0f)),
         "billboard sizePixels derived from physical camera height");
 
     // A viewport height change must re-upload billboards at the new size (height is hashed).
@@ -164,7 +185,7 @@ inline void Run()
     ViewportOverlayHelper::UpdateOverlays(&host, host.camera, true,
         GizmoGeometry::Handle::None, 0, false, hash, GizmoGeometry::Handle::None);
     const auto* resized = Find(host, 1);
-    Check(resized && Near(resized->sizePixels, std::clamp(1080.0f * 0.022f, 16.0f, 64.0f)),
+    Check(resized && Near(resized->sizePixels, std::clamp(1080.0f * 0.024f, 16.0f, 80.0f)),
         "viewport height change re-uploads billboards at the new size");
 
     std::printf("Viewport billboard size checks: PASS\n");
