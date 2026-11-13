@@ -1,5 +1,5 @@
 # План разработки PainEngine Editor v2
-> **Ветка:** `feat/import-pipeline`  
+> **Ветка:** `fix/editor-ui-bugfix`  
 > **Архитектор:** Юрий  
 > **Инженер-исполнитель:** Antigravity  
 > **Протокол:** `engine-work-protocol`
@@ -94,28 +94,39 @@
 
 ---
 
-## Эталон тестов (Baseline ветки feat/import-pipeline @ ddec269 перед шагами исправления)
+## Эталон тестов (Baseline ветки fix/editor-ui-bugfix @ ac1a165 перед шагами исправления)
 
 | Тест / Скрипт | Результат (эталон) | Примечание |
 |---|---|---|
-| Сборка `EditorModule` (Debug) | **PASS** | 0 ошибок, 0 новых warnings |
-| Сборка `EditorModule` (Release) | **PASS** | Собрано MSBuild x64 |
-| `Editor/tests/CoreTests.exe` | **656/656 PASS** | 656 checks passed |
-| `Editor/tests/HostTests.exe` | **109/109 PASS** | 109 checks passed |
-| `Editor/tests/UiTests.exe` | **315/315 PASS** | 15 helper + 20 dialog + 18 edit + 3 v2 + 14 delete + 245 smoke = 315 checks passed |
-| `Engine/tests/run.ps1` (Debug) | **74/74 PASS** | 74/74 tests passed; 0 skipped; 0 failed |
+| Сборка `EditorModule` (Debug) | **PASS** | 0 ошибок, 0 новых warnings (MSBuild x64) |
+| Сборка `EditorModule` (Release) | **PASS** | 0 ошибок (MSBuild x64, LTCG) |
+| `Editor/tests/CoreTests.exe` | **712/712 PASS** | 712 checks passed |
+| `Editor/tests/HostTests.exe` | **140/140 PASS** | 140 checks passed |
+| `Editor/tests/UiTests.exe` | **443/443 PASS** | 15 helper + 25 import settings + 18 edit import + 5 v2 + 15 delete + 365 smoke = 443 checks passed |
+| `Engine/tests/run.ps1` (Debug) | **77/77 PASS** | 77/77 tests passed; 0 skipped; 0 failed |
 | `Engine/tests/skeletal/run.ps1` (Debug) | **8/8 PASS** | 8/8 passed |
 | `Engine/tests/edit-session/run.ps1` (Debug) | **651/651 PASS** | 651 checks passed |
 | `Engine/tests/scene-module/run.ps1` (Debug) | **109/109 PASS** | 109 checks passed |
-| `Engine/tests/compatibility/run.ps1` | **116/116 PASS** | 116 checks passed |
 | `Editor/tools/check.ps1 -Quick` | **FAIL (Красная база)** | `FAIL: Legacy file Editor/Source/MaterialEditorWindow.cpp exceeded Cyrillic ratchet limit (1380 > 800)` |
+| `Engine/tests/compatibility/run.ps1` | **FAIL (Красная база окружения)** | Отсутствует тулсет v142 (VS 2019) в окружении (установлены v143 и v145) |
 | `Game/tests/run-games.ps1` | **FAIL (Красная база)** | `Expected 1, got -1073741515: BasicExamples.exe --smoke` (отсутствие assimp.dll в фикстуре, 25/27 PASS) |
-| `Editor/tests/run.ps1` (`EditorUiTests.exe`) | **PASS (нестабильность устранена)** | Причина двух падений — потеря OS-активации окна после закрытия модальных диалогов (дефект продукта, не теста): (1) шаг 11, Delete в Content Browser (строка 699) — `QAction` с `Qt::WidgetShortcut` не срабатывает, когда окно не активно; исправлено `eventFilter` на `view_`/viewport. (2) сохранение с фокусом в поле трансформации (строка 1605, `selectedX()==4.5 && !dirty`) — `ClearFocusIfInside` через `QApplication::focusWidget()` возвращает null на неактивном окне, `editingFinished` не срабатывает; исправлено `CommitPendingEdits`. Строка 1624 — более поздний шаг Undo цвета света, не точка падения. После фикса: 5 зелёных Release подряд 5094/5094/5096/5095/5096; после шага E — 5098. Проверки не ослаблены, таймауты не увеличены |
 | `Engine/tests/assets/run.ps1` | **FAIL (Красная база)** | `ParserError: Unexpected token '' + [guid]::NewGuid().ToString(''` (нет BOM в PS 5.1) |
 | `Engine/tests/code-projects/portable.ps1` | **FAIL (Красная база)** | `Join-Path : A positional parameter cannot be found that accepts argument 'С‹РїСѓСЃРє'` (нет BOM) |
 | `Engine/tests/code-projects/run.ps1` | **FAIL (Красная база)** | `ParserError: An expression was expected after '('` (нет BOM) |
 | `Engine/tests/input/run.ps1` | **FAIL (Красная база)** | `ParserError: Unexpected token 'std::unique_ptr<CharacterController>'` (нет BOM) |
-| Храповик строк `EditorUiTests.cpp` в `check.ps1:220` | **FAIL (Красная база)** | Файл модифицирован разрешённым тестом Undo на неактивном окне (шаг 17.10.F): 1831 строка против заниженного храповика 1045. Проверка line count красная; принято Юрием осознанно |
+| Храповик строк `EditorUiTests.cpp` в `check.ps1:220` | **FAIL (Красная база)** | 1831 строка против заниженного храповика 1045. Проверка line count красная; принято Юрием осознанно |
+
+---
+
+## Чек-лист срезов (fix/editor-ui-bugfix, срезы 1-5)
+
+- [ ] **Срез 1 (Инспектор):** Вкладки/карточки геометрии и материала, диагностика и оптимизация перестройки на тике (250мс) и `selectionChanged`.
+- [ ] **Срез 2 (Material Graph):** Параметры геометрии, привязка кнопок выбора модели/текстуры.
+- [ ] **Срез 3 (Content Browser):** Определение типа файлов (FBX = "Unknown" в `QFileSystemModel`), интеграция с `AssetExtensions`, создание папок через `AssetOps`/команду, окраска Tabler-иконок под тему.
+- [ ] **Срез 4 (Docking):** Конфигурация `QDockWidget`, `features`, `allowedAreas`, корректная обработка drop плавающих панелей.
+- [ ] **Срез 5 (Viewport):** Учет `devicePixelRatio` при создании и ресайзе D3D11 swapchain, рендеринг и якоря иконок света и неба в экранных пикселях (Engine overlay).
+
+---
 
 Подтверждение базы перед Шагом 17.10.D (HEAD `a6319a1`, дерево чистое): CoreTests 656, HostTests 116, UiTests 316 (15+20+18+3+15+245), EngineTests 74/74, Skeletal 8/8, EditSession 651, SceneModule 109, Compatibility 116 — совпадает с эталоном задания; красная база без изменений.
 
