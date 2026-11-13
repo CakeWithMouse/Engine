@@ -190,6 +190,7 @@ void FileBrowserDock::BuildUi()
 
 void FileBrowserDock::RetranslateUi()
 {
+    if (view_) view_->viewport()->update();
     setWindowTitle(Tr("Контент-браузер", "Content Browser"));
     if (imports_) imports_->setText(Tr("Импорт…", "Import…"));
     if (actImportModel_) actImportModel_->setText(Tr("Модель…", "Model…"));

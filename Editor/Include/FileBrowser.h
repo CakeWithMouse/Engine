@@ -6,6 +6,7 @@
 #include <QDir>
 #include "IconProvider.h"
 #include "EditorTheme.h"
+#include "ProjectFileTypeStrings.h"
 
 class QComboBox;
 class QLineEdit;
@@ -23,15 +24,33 @@ public:
     {
         RefreshIcons();
         themeSubscription_ = EditorTheme::Instance().SubscribeThemeChanged([this] { RefreshIcons(); });
+        languageSubscription_ = EditorLocale::Instance().SubscribeLanguageChanged([this] {
+            emit headerDataChanged(Qt::Horizontal, 2, 2);
+            if (sourceModel() && rowCount() > 0) emit dataChanged(index(0, 2), index(rowCount() - 1, 2), {Qt::DisplayRole});
+        });
     }
-    ~ProjectFilesFilter() override { EditorTheme::Instance().UnsubscribeThemeChanged(themeSubscription_); }
+    ~ProjectFilesFilter() override
+    {
+        EditorTheme::Instance().UnsubscribeThemeChanged(themeSubscription_);
+        EditorLocale::Instance().UnsubscribeLanguageChanged(languageSubscription_);
+    }
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override
     {
         if (index.isValid() && index.column() == 0 && role == Qt::DecorationRole) {
             const auto* files = static_cast<QFileSystemModel*>(sourceModel());
             return files->isDir(mapToSource(index)) ? folderIcon_ : fileIcon_;
         }
+        if (index.isValid() && index.column() == 2 && role == Qt::DisplayRole) {
+            const auto* files = static_cast<QFileSystemModel*>(sourceModel());
+            const auto source = mapToSource(index).siblingAtColumn(0);
+            return ProjectFileTypeStrings::Type(files->fileName(source), files->isDir(source));
+        }
         return QSortFilterProxyModel::data(index, role);
+    }
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override
+    {
+        if (section == 2 && orientation == Qt::Horizontal && role == Qt::DisplayRole) return ProjectFileTypeStrings::Header();
+        return QSortFilterProxyModel::headerData(section, orientation, role);
     }
     void ShowFull(bool value) { full = value; invalidateFilter(); }
     Qt::DropActions supportedDragActions() const override { return Qt::CopyAction; }
@@ -75,6 +94,7 @@ private:
     }
     QIcon folderIcon_, fileIcon_;
     int themeSubscription_ = 0;
+    int languageSubscription_ = 0;
 };
 
 class FileBrowserDock : public QDockWidget
