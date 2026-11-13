@@ -263,6 +263,39 @@
 - **Затронутые файлы:** только `Editor/PLAN.md`.
 - **Не проверено в рантайме:** живой GUI редактора (открытие проекта из лаунчера, ручные сценарии протокола).
 
+### Поручение 13.11.2026 — задача 1: Debug SDK без v142 (вариант B) — СДЕЛАНО
+- [x] Диагностика до правок и эталон на чистом `69e9979`, ветка `fix/editor-ui-bugfix`.
+- [x] Две точки одного разрешённого файла `Engine/BuildSupport/New-ProjectSdk.ps1`: выбор тулсета и параметры проб совместимости.
+- [x] Debug без v142: настоящий SDK собран новейшим установленным тулсетом, предупреждение о несовместимости с VS 2019 и запрете публикации, whole-archive link PASS.
+- [x] Debug с v142: полный `EngineLauncher.vcxproj` post-build PASS; Release с/без v142 проверен отдельно.
+- [x] Debug/Release EditorModule, CoreTests/HostTests/UiTests и Engine 77/8/651/109 до/после правки; слои, размеры файлов, запретные зоны.
+- [ ] Задача 2: воспроизведение провала FPS и покадровые замеры — после команды на продолжение; затем обязательная полная остановка.
+- [ ] Задача 3: размеры плашки/глифа света — после задачи 2 и команды на продолжение.
+- **Коммит:** `fix(build): allow local Debug SDK builds without v142` (один коммит задачи, вместе с этой записью).
+- **Диагноз:** исходная строка 8 безусловно требовала v142; исходная строка 89 оставляла `Toolsets` по умолчанию. `Test-SdkCompatibility.ps1:9-15` обходит только переданные семейства; требование v142 на строке 11 не выполняется, если Debug передал выбранный v145. Историческое утверждение T5 о необходимости двух правок BuildSupport неверно для явного `-Toolsets`.
+- **Решение Юрия B:** Debug предпочитает v142; только при его отсутствии вызывает существующий `Resolve-EngineToolchain` без фильтра семейства (сортировка версий уже в `Toolchain.ps1:93-117`). Release по-прежнему строго выбирает v142 и оставляет исходные defaults совместимости v142/v143/v145. Новых путей/версий и параметров запуска нет; `Test-SdkCompatibility.ps1` не изменён.
+- **Реальный фрагмент:** `if ($Configuration -eq 'Debug') { $validationArgs.Toolsets = @($sdkToolchain.toolset) }`; вызов compatibility получил `@validationArgs`, в Release это пустой splat.
+- **Эталон этого шага:** EditorModule Debug/Release exit 0; CoreTests 712, HostTests 140, UiTests 484 (15+25+18+5+15+8+1+7+25+365), Debug/Release PASS; Engine Debug 77/77, skeletal 8/8, edit-session 651, scene-module 109, все exit 0. До/после результат совпал. Прочие скрипты и тяжёлый EditorUiTests в этом шаге не запускались; прежние записи о них не являются новым подтверждением.
+- **Симуляция:** переменная процесса `PAINENGINE_TEST_HIDE_V142=1` и breakpoint `Toolchain.ps1:63`: при `$family -eq 'v142'` → `Set-Variable complete $false -Scope 1`. Обнаружение вернуло только v143 14.44.35207/v145 14.50.35717, сборки и linker настоящие, файлы установленного тулсета не удалялись и не изменялись. Breakpoint/переменная убраны в finally. SDK и логи: `Engine/build/task1-sdk-dc7d3f74305746abbc630c07f249e1cc`.
+- **Сырой вывод проверки SDK:**
+  ```text
+  Debug SDK uses v145 / MSVC 14.50.35717; it is not compatible with VS 2019 and must not be published.
+  Building distributable SDK with v145 / MSVC 14.50.35717.
+  SDK compatibility: v145 / 14.50.35717 headers and whole-archive link passed.
+  DEBUG WITHOUT V142: PASS producer=v145 version=14.50.35717 probes=v145
+  RELEASE WITHOUT V142: PASS rejected before touching SDK
+  LAUNCHER DEBUG EXIT=0
+  RELEASE WITH V142: PASS producer=v142 version=14.29.30133 probes=v142,v143,v145
+  77/77 tests passed; 0 skipped; 0 failed
+  === Skeletal Tests: 8/8 passed ===
+  Edit session: 651 checks passed (no editor)
+  Scene module: 109 checks passed; no editor/window/GPU
+  ```
+- **check.ps1:** до правок `-Quick`, после `-Quick -AllowEngine` — exit 1, одинаковая красная база `FAIL: Legacy file Editor/Source/MaterialEditorWindow.cpp exceeded Cyrillic ratchet limit (1380 > 800)`. Скрипт не ослаблялся. `-AllowEngine` только для разрешённого изменения; отдельно проверены пустые `git diff --stat -- Game build.ps1` и `git diff --stat -- Engine ':!Engine/BuildSupport/New-ProjectSdk.ps1'`; Core без запрещённых типов/includes, Host без UI includes. `wc -l`: New-ProjectSdk.ps1 112; PLAN.md исторически >500 строк. Кодовый diff только 9+/2− в разрешённом файле.
+- **Логи эталона/после:** `Engine/build/task1-baseline-6ec2b1cf5e7f4b61b9071d55a768c68a` / `Engine/build/task1-after-2a7f0661d81f4be582ff4ec12c855bf2`; журналы лёгких тестов указаны в `EditorTests-Debug.log`/`EditorTests-Release.log`. Первое прямое перенаправление EngineTests в PS 5.1 ошибочно превратило stderr в NativeCommandError; повтор с настоящим process stdout/stderr exit 0. Проверка Release metadata исправлена в диагностической команде (PS 5.1 вложенный JSON-массив), продукт не менялся.
+- **Не проверено в рантайме:** весь лаунчер в отдельном процессе без v142 (без v142 проверен непосредственно его post-build скрипт, полный launcher — с установленным v142); машина только с v143; интерактивный GUI/открытие проекта. Ручной сценарий: запустить Debug лаунчер, открыть проект, убедиться в старте редактора без ошибки SDK. `run-editor.ps1` не запускался: он удаляет пользовательский кэш и останавливает чужие процессы.
+- **Риски/Backlog:** fallback Debug SDK нельзя распространять потребителям VS 2019; предупреждение информирует, но технического запрета публикации Debug вне этого скрипта задача не добавляет. `check.ps1` остаётся красным на прежней локализации. После коммита — повтор проверок и остановка перед задачей 2.
+
 ---
 
 ## Решения

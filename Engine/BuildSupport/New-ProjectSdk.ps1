@@ -5,7 +5,12 @@ $engineRoot = Split-Path $PSScriptRoot
 . "$PSScriptRoot/Toolchain.ps1"
 # SDK consumers may have only VS 2019. Never publish the editor's newer Engine.lib.
 # Fail before touching the installed SDK if the release-builder lacks the baseline.
-$sdkToolchain = Resolve-EngineToolchain -Toolset 'v142'
+$sdkToolchain = if ($Configuration -eq 'Debug' -and !(Get-EngineToolchains | Where-Object toolset -eq 'v142')) {
+    Resolve-EngineToolchain
+} else { Resolve-EngineToolchain -Toolset 'v142' }
+if ($Configuration -eq 'Debug' -and $sdkToolchain.toolset -ne 'v142') {
+    Write-Warning "Debug SDK uses $($sdkToolchain.toolset) / MSVC $($sdkToolchain.version); it is not compatible with VS 2019 and must not be published."
+}
 $baselineDir = Join-Path $engineRoot "build/sdk/x64/$Configuration/$($sdkToolchain.version)"
 [IO.Directory]::CreateDirectory($baselineDir) | Out-Null
 $baselineLog = Join-Path $baselineDir 'build.log'
@@ -86,7 +91,9 @@ $manifest = @{format=2;version=$release.version;configuration=$Configuration;pla
     assimp=$useAssimp;engineLibrarySha256=(Get-FileHash -LiteralPath "$sdk/Lib/Engine.lib").Hash}
 [IO.File]::WriteAllText("$sdk/Sdk.json", ($manifest | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
 # Reject too-new dependencies or incompatible public headers before publication.
-& "$PSScriptRoot/Test-SdkCompatibility.ps1" -Sdk $sdk -OutputDirectory "$baselineDir/validation"
+$validationArgs = @{}
+if ($Configuration -eq 'Debug') { $validationArgs.Toolsets = @($sdkToolchain.toolset) }
+& "$PSScriptRoot/Test-SdkCompatibility.ps1" -Sdk $sdk -OutputDirectory "$baselineDir/validation" @validationArgs
 Copy-Item -LiteralPath "$baselineDir/validation/results.json" -Destination "$sdk/Compatibility.json"
 # Publish complete headers and library together. If the SDK is in use and cannot be
 # renamed, fail with the previous SDK intact, rather than mixing two C++ layouts.
