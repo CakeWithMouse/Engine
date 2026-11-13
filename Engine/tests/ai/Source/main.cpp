@@ -54,6 +54,7 @@ void WindowedFieldTests();
 void StaggeredReplanTests();
 void MachineRegistryTests();
 void SmartObjectTests();
+void MachineFileTests();
 int RunBench(int soldiers, float seconds, bool profile);
 
 int main(int argc, char** argv)
@@ -114,6 +115,7 @@ int main(int argc, char** argv)
         {"stage10 squad at 60 FPS: re-planning in turns", StaggeredReplanTests},
         {"stage11 machines by name, AiCharacter property", MachineRegistryTests},
         {"stage12 smart objects: claim, use, release", SmartObjectTests},
+        {"stage13 machines from .fsm files and blocks", MachineFileTests},
         {"stage3 turret focus and the player", TurretAndPlayerTests},
     };
     const char* filter = argc > 1 ? argv[1] : "";

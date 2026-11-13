@@ -1,4 +1,5 @@
 #include <Engine/AI/AiCharacter.h>
+#include <Engine/AI/MachineFile.h>
 #include <Engine/AI/SmartObject.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <algorithm>
@@ -20,7 +21,27 @@ void AiCharacter::BeginPlay()
     // A machine started by SetupAi wins; otherwise the one named in the property runs.
     if (!ai.IsRunning() && !stateMachine.empty())
     {
-        try { ai.Run(Ai::GetMachine(stateMachine)); }
+        try
+        {
+            if (Ai::IsMachineFile(stateMachine))
+            {
+                // A .fsm from the AI editor: every problem is listed, the first ones in the message.
+                const Ai::MachineLoadResult loaded = Ai::LoadMachineFile(stateMachine);
+                if (!loaded.asset)
+                {
+                    std::string message = stateMachine + ":";
+                    for (size_t i = 0; i < loaded.problems.size() && i < 3; ++i)
+                    {
+                        const auto& problem = loaded.problems[i];
+                        message += (i ? "; " : " ") + (problem.node ? "node " + std::to_string(problem.node) + ": " : std::string()) + problem.message;
+                    }
+                    if (loaded.problems.size() > 3) message += " (and " + std::to_string(loaded.problems.size() - 3) + " more)";
+                    throw std::invalid_argument(message);
+                }
+                loaded.asset->Run(ai);
+            }
+            else ai.Run(Ai::GetMachine(stateMachine));
+        }
         catch (const std::exception& error) { throw std::invalid_argument("AiCharacter (" + ai.Name() + "): " + error.what()); }
     }
 }

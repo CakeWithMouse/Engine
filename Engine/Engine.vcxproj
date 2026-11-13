@@ -102,6 +102,8 @@
     <ClCompile Include="Source\AI\Controller.cpp" />
     <ClCompile Include="Source\AI\Debugger.cpp" />
     <ClCompile Include="Source\AI\Group.cpp" />
+    <ClCompile Include="Source\AI\MachineBlocks.cpp" />
+    <ClCompile Include="Source\AI\MachineFile.cpp" />
     <ClCompile Include="Source\AI\MachineInstance.cpp" />
     <ClCompile Include="Source\AI\Navigation.cpp" />
     <ClCompile Include="Source\AI\Query.cpp" />
@@ -117,6 +119,7 @@
     <ClInclude Include="Include\Engine\AI\Controller.h" />
     <ClInclude Include="Include\Engine\AI\Debugger.h" />
     <ClInclude Include="Include\Engine\AI\Group.h" />
+    <ClInclude Include="Include\Engine\AI\MachineFile.h" />
     <ClInclude Include="Include\Engine\AI\MachineInstance.h" />
     <ClInclude Include="Include\Engine\AI\Navigation.h" />
     <ClInclude Include="Include\Engine\AI\Perception.h" />

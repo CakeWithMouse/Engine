@@ -8,18 +8,18 @@
 /**
  * Character driven by AI. BeginPlay creates its controller and calls SetupAi; subclasses
  * describe senses and run a state machine there. Without a subclass, the "stateMachine" property
- * names a machine registered in C++ (Ai::RegisterMachine, ENGINE_AI_MACHINE); it runs when SetupAi
- * has started none. A character with "Игрок" checked is never driven by AI.
+ * names a machine registered in C++ (Ai::RegisterMachine, ENGINE_AI_MACHINE) or a .fsm file of the
+ * AI editor (/Game/AI/Guard.fsm, see Ai::LoadMachineFile); it runs when SetupAi has started none. A character with "Игрок" checked is never driven by AI.
  */
 class AiCharacter : public Character
 {
 public:
-    std::string stateMachine;        // name given to Ai::RegisterMachine, for example "Guard"; empty: SetupAi decides
+    std::string stateMachine;        // name given to Ai::RegisterMachine ("Guard") or a .fsm path; empty: SetupAi decides
     int team = 0;
     float sightRadius = 0, fieldOfView = 120, hearingRadius = 0;
 
     ENGINE_PROPERTIES(Character,
-        ENGINE_PROPERTY_FIELD(stateMachine, "Автомат (имя из C++)")
+        ENGINE_PROPERTY_FIELD(stateMachine, "Автомат (имя из C++ или путь к .fsm)")
         ENGINE_PROPERTY_FIELD(team, "Команда", 0, 255)
         ENGINE_PROPERTY_FIELD(sightRadius, "Радиус зрения (0 — не видит)", 0, 10000)
         ENGINE_PROPERTY_FIELD(fieldOfView, "Угол обзора, градусов", 1, 360)
