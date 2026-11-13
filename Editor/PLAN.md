@@ -146,6 +146,23 @@
 - **Не проверено в рантайме:** живое мигание при 10 с удержания модели/примитива; смена выделения; dir light (карточка света).
 - **В Backlog:** (1) `UpdateLightColorButton` `ObjectInspectorLight.cpp:128` setStyleSheet каждый тик — churn карточки света, вне T1. (2) Конфликт видимости `properties_`: `ProjectProperties.cpp:40` (по fields) vs `ObjectInspectorPanel.cpp:356` (showProperties) для моделей со схемой. (3) `MaterialCard::SetMaterialsAvailable` вызывается каждый тик `MainWindow.cpp:821` — Qt early-out по isEnabled/toolTip, отдельный guard не добавлял (вне пути Refresh теста).
 
+### T1 repeat — Инспектор: дёргание карточек при движении мыши — СДЕЛАНО
+- **Коммит:** `8104133` `fix(editor): single-owner properties_ visibility stops inspector card jitter (T1 repeat)`. Закрывает Backlog-пункт (2) T1.
+- **Почему T1 не помог:** dirty-check T1 покрывает карточки, но `RefreshProjectProperties` (`ObjectInspectorPanel.cpp:299`) вызывается безусловно каждый Refresh и находился вне dirty-check.
+- **Диагноз (подтверждён сырым логом событий, лёгкий UiTests + event filter на карточках/родителях):**
+  - Триггер — конфликт видимости `properties_`: `ProjectProperties.cpp:40` `setVisible(!fields.isEmpty())` (показать) против `ObjectInspectorPanel.cpp:380-381` `setVisible(showProperties)` (скрыть). Для объектов со схемой и `showProperties=false` (**Light.Directional** — 5 полей, есть в каждой дефолтной сцене; skeletal-модели) это Show→Hide на каждом Refresh.
+  - Цепочка: viewport MouseMove → `SendCursor` → InputCursor → Complete → `RefreshSceneUi` (`MainWindow.cpp:1278`) → Refresh — по одному на каждое движение мыши.
+  - Усилитель: бистабильность высот строк TransformCard (QSS `min/max-height:22px` против `setFixedHeight(22)`, `TransformCard.h:83`) + порог вертикального скроллбара → осцилляция высоты карточки 140↔114, строк 32↔23/24.
+  - Сырой лог: примитив со схемой, панель 300x430, 30 Refresh = **1238 Resize** (осцилляция); Character (`showProperties=true`, конфликта нет) = **4 Resize** (разовый settle). После правки = **4 Resize**, Show/Hide=0.
+  - Опровергнуто экспериментом: QSS `:hover` меняет только цвет (геометрии нет); у CollapsibleCard нет enterEvent/анимации.
+- **Правка (1 строка):** удалён `properties_->setVisible(!fields.isEmpty())` из `ProjectProperties.cpp:40`; видимость владеет только панель (`ObjectInspectorPanel.cpp:380-381`, идемпотентно). Итоговые состояния видимости для всех типов объектов не изменились.
+- **Тест:** `InspectorRefreshTests.h::RunMouseRefreshJitter` (+1 проверка, UiTests 484): Light.Directional со схемой, панель 300x430 (порог скроллбара), 30 Refresh идентичными данными → 0 Show/Hide/Resize на InspectorScrollContent+детях. Проверено, что тест ПАДАЕТ при возврате удалённой строки (re-show churn). Локаторы по objectName.
+- **Проверки:** EditorModule Debug OK (warnings C4996 MainWindow.cpp — база); CoreTests 712, HostTests 140, UiTests 484 (483+1); Core без запрещённых типов; `git diff -- Engine Game build.ps1` пуст; wc -l: ProjectProperties.cpp 148, InspectorRefreshTests.h 256, UiTestRunner.cpp 39.
+- **Затронутые файлы:** `Editor/Source/ProjectProperties.cpp` (−1), `Editor/tests/InspectorRefreshTests.h` (+58), `Editor/tests/UiTestRunner.cpp` (+1).
+- **Не проверено в рантайме:** живое мигание при 20 с движения мыши по инспектору/viewport с выделенным объектом (Light.Directional / skeletal-модель) — ручной сценарий полной остановки после A.
+- **Фокус-тест «refresh does not steal property focus»:** к этой причине НЕ относится — он на Character/moveSpeed (`showProperties=true`, конфликт не срабатывает), защита фокуса `ObjectInspectorPanel.cpp:265-270` не тронута; нестабильность средовая (см. focus-check verdict), не от `properties_`.
+- **Осталось в Backlog (вне минимальной правки):** (1) churn карточки света — `UpdateLightColorButton` setStyleSheet + `lightValues_[4]->setRange/setSingleStep` каждый тик (`ObjectInspectorPanel.cpp:327`): даёт LayoutRequest, но НЕ Resize (для размера benign); guard прототипирован и откачен ради минимальности. (4) Бистабильность высот строк TransformCard (QSS min/max vs setFixedHeight) — усилитель, без триггера устойчивой осцилляции нет; может проявляться при реальном resize.
+
 ### T2 — Docking: возврат Сцены/Инспектора в раскладку — СДЕЛАНО
 - **Коммит:** `2530fd2` `fix(editor): allow scene/inspector docks in all areas for re-dock`.
 - **Диагноз:**
