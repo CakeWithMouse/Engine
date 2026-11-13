@@ -250,20 +250,35 @@ void EditorQtHost::DrainCommands()
         pending.swap(commands_);
     }
 
+    // Gizmo ticks carry absolute transforms and plain refreshes only republish, so a newer one
+    // supersedes older ones; cursor moves between ticks do not break the run.
     int lastResize = -1;
+    bool laterRefresh = false;
+    uint64_t gizmoTarget = 0;
     for (int i = static_cast<int>(pending.size()) - 1; i >= 0; --i)
     {
-        if (pending[i].type == EditorCommand::ViewportResize)
-        {
+        EditorCommand& c = pending[i];
+        if (c.type == EditorCommand::ViewportResize && lastResize < 0)
             lastResize = i;
-            break;
+        if (c.type == EditorCommand::RefreshScene && c.name.isEmpty())
+        {
+            if (laterRefresh) c.type = EditorCommand::None;
+            laterRefresh = true;
         }
+        else if (c.type == EditorCommand::UpdateObjectTransform && c.path == QLatin1String("gizmo"))
+        {
+            if (c.objectId != 0 && c.objectId == gizmoTarget) c.type = EditorCommand::None;
+            gizmoTarget = c.objectId;
+        }
+        else if (c.type != EditorCommand::InputCursor)
+            gizmoTarget = 0;
     }
 
     for (size_t i = 0; i < pending.size(); ++i)
     {
         const EditorCommand& cmd = pending[i];
-        if (cmd.type == EditorCommand::ViewportResize && static_cast<int>(i) != lastResize)
+        if (cmd.type == EditorCommand::None ||
+            (cmd.type == EditorCommand::ViewportResize && static_cast<int>(i) != lastResize))
             continue;
 
         uint32_t result = EngineSceneOk;

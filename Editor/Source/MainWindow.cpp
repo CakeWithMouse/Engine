@@ -62,6 +62,10 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     auto* timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &EditorMainWindow::RefreshStats);
     timer->start(250);
+    gizmoRefreshTimer_ = new QTimer(this);
+    gizmoRefreshTimer_->setSingleShot(true);
+    gizmoRefreshTimer_->setInterval(33);
+    connect(gizmoRefreshTimer_, &QTimer::timeout, this, &EditorMainWindow::RefreshSceneUi);
 
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] { RetranslateUi(); });
     themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
@@ -1055,6 +1059,13 @@ void EditorMainWindow::CommandFinished(
     if (status == EngineSceneOk &&
         (command.type == EditorCommand::InputCursor || command.type == EditorCommand::ViewportCamera))
         return;
+    // Gizmo drags complete at mouse rate; panels follow at <= ~30 Hz and once after the last tick.
+    if (status == EngineSceneOk && command.type == EditorCommand::UpdateObjectTransform &&
+        command.path == QLatin1String("gizmo"))
+    {
+        if (!gizmoRefreshTimer_->isActive()) gizmoRefreshTimer_->start();
+        return;
+    }
 
     if (command.type == EditorCommand::ReloadProject) {
         sceneBusy_ = false; UpdatePlayButtons();

@@ -75,6 +75,7 @@
 #include <stdexcept>
 #include "ViewportDpiTests.h"
 #include "ViewportCompletionTests.h"
+#include "GizmoCompletionTests.h"
 #include "ContentBrowserTests.h"
 #include "ContentBrowserTypeTests.h"
 #include "FolderCreationTests.h"
@@ -314,6 +315,7 @@ int wmain(int argc, wchar_t** argv)
         };
         until([&] { return host.ViewportActive(); });
         Ui([](auto* window) { ViewportCompletionTests::Run(window); });
+        Ui([](auto* window) { GizmoCompletionTests::Run(window); });
         if (argc == 4 && std::wstring(argv[3]) == L"--viewport-completion") return 0;
         Ui([](auto* window) { ContentBrowserTests::RunNative(window); });
         if (argc == 4 && std::wstring(argv[3]) == L"--content-browser") return 0;
@@ -1606,16 +1608,28 @@ int wmain(int argc, wchar_t** argv)
         EditorQtHost::SceneObject sphere;
         for (const auto& o : host.ReadSnapshot().objects) if (o.type == "Primitive.Sphere") sphere = o;
         Check(sphere.id != 0, "gizmo target exists after undo/redo");
+        Ui([](auto* w) {
+            auto* tree = w->findChild<QTreeWidget*>();
+            for (int i = 0; i < tree->topLevelItemCount(); ++i) if (tree->topLevelItem(i)->text(1) == QStringLiteral("Primitive.Sphere")) tree->setCurrentItem(tree->topLevelItem(i));
+        });
+        until([&] { return host.ReadSnapshot().selected == sphere.id; });
+        QDoubleSpinBox* inspectorX = nullptr;
+        Ui([&](auto* w) { inspectorX = w->findChild<QDoubleSpinBox*>(QStringLiteral("Transform0")); });
+        Check(inspectorX != nullptr, "inspector position field exists before the drag");
         EditorCommand drag; drag.type = EditorCommand::BeginGizmoDrag; drag.objectId = sphere.id;
         host.PostCommand(drag);
         EditorCommand transform; transform.type = EditorCommand::UpdateObjectTransform;
         transform.objectId = sphere.id; transform.path = QStringLiteral("gizmo"); transform.transform = sphere.transform;
+        for (int i = 1; i <= 200; ++i) { transform.transform.position[0] = sphere.transform.position[0] + i * 0.01f; host.PostCommand(transform); }
+        const float dragX = transform.transform.position[0];
         transform.transform.scale[0] = 2; host.PostCommand(transform);
         transform.transform.scale[0] = 3; host.PostCommand(transform);
         drag.type = EditorCommand::EndGizmoDrag; host.PostCommand(drag);
-        until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere.id) return o.transform.scale[0] == 3; return false; });
+        until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere.id) return o.transform.scale[0] == 3 && o.transform.position[0] == dragX; return false; });
+        until([&] { double shown = 0; Ui([&](auto* w) { if (auto* x = w->findChild<QDoubleSpinBox*>(QStringLiteral("Transform0"))) shown = x->value(); }); return std::abs(shown - dragX) < 0.01; });
+        Ui([&](auto* w) { Check(w->findChild<QDoubleSpinBox*>(QStringLiteral("Transform0")) == inspectorX, "gizmo drag updates inspector Transform fields without rebuilding them"); });
         Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
-        until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.name == sphere.name) return o.transform.scale[0] == sphere.transform.scale[0]; return false; });
+        until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.name == sphere.name) return o.transform.scale[0] == sphere.transform.scale[0] && o.transform.position[0] == sphere.transform.position[0]; return false; });
         Check(true, "one Undo restores the transform before the whole gizmo drag");
         // Select the sphere through the actual tree before testing a focused-field save.
         Ui([](auto* w) {
