@@ -276,6 +276,7 @@ void ObjectInspectorPanel::Refresh(
         noSelectionLabel_->show();
         cardGeneral_->hide(); cardTransform_->hide(); cardGeometry_->hide();
         cardMaterial_->hide(); lightInspector_->hide(); characterInspector_->hide();
+        lastCardsValid_ = false;
         refreshing_ = false;
         return;
     }
@@ -283,9 +284,10 @@ void ObjectInspectorPanel::Refresh(
     noSelectionLabel_->hide();
     cardGeneral_->show();
     cardTransform_->show();
-    cardMaterial_->show();
-    cardGeometry_->Clear();
-    cardMaterial_->Clear();
+    if (selectionChanged) {
+        cardGeometry_->Clear();
+        cardMaterial_->Clear();
+    }
 
     bool selectedLight = false;
 
@@ -346,14 +348,37 @@ void ObjectInspectorPanel::Refresh(
         const bool showProperties = (!isModel && !isPrimitive && !isPointLight && !isDirLight && !isCamera && !isParticles);
 
         const QString cr = property("contentRoot").toString();
-        cardGeometry_->setVisible(showGeometry);
-        if (showGeometry) {
-            cardGeometry_->SetData(QString::fromStdString(object.modelAsset), true, cr, selectionChanged);
-            cardGeometry_->SetTexture(QString::fromStdString(object.textureAsset), cr, selectionChanged);
+        const QString modelPath = QString::fromStdString(object.modelAsset);
+        const QString texturePath = QString::fromStdString(object.textureAsset);
+        const QString materialPath = QString::fromStdString(object.materialAsset);
+        const bool materialLight = isPointLight || isDirLight;
+        const bool cardsDirty = !lastCardsValid_ || selectionChanged
+            || showGeometry != lastCardsShowGeometry_
+            || showMaterial != lastCardsShowMaterial_
+            || modelPath != lastCardsModel_
+            || texturePath != lastCardsTexture_
+            || materialPath != lastCardsMaterial_
+            || materialLight != lastCardsMaterialLight_
+            || cr != lastCardsRoot_;
+        if (cardsDirty) {
+            cardGeometry_->setVisible(showGeometry);
+            if (showGeometry) {
+                cardGeometry_->SetData(modelPath, true, cr, selectionChanged);
+                cardGeometry_->SetTexture(texturePath, cr, selectionChanged);
+            }
+            cardMaterial_->SetData(materialPath, materialLight, cr, selectionChanged);
+            cardMaterial_->setVisible(showMaterial);
+            lastCardsShowGeometry_ = showGeometry;
+            lastCardsShowMaterial_ = showMaterial;
+            lastCardsModel_ = modelPath;
+            lastCardsTexture_ = texturePath;
+            lastCardsMaterial_ = materialPath;
+            lastCardsMaterialLight_ = materialLight;
+            lastCardsRoot_ = cr;
+            lastCardsValid_ = true;
         }
-        cardMaterial_->SetData(QString::fromStdString(object.materialAsset), isPointLight || isDirLight, cr, selectionChanged);
-        cardMaterial_->setVisible(showMaterial);
-        properties_->setVisible(showProperties);
+        if (properties_->isHidden() == showProperties)
+            properties_->setVisible(showProperties);
 
         if (canReplaceWholeInspector)
         {

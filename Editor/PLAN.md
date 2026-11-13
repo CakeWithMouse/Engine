@@ -128,6 +128,26 @@
 
 ---
 
+## Задачи T1–T9 (сессия fix/editor-ui-bugfix, протокол engine-work-protocol)
+
+### T1 — Инспектор: дёргание карточек Геометрия/Материал — СДЕЛАНО
+- **Коммит:** `fix(editor): dirty-check inspector geometry/material cards on tick` (HEAD ветки, хэш в git log).
+- **Диагноз (подтверждено строками):**
+  - H1 да: `ObjectInspectorPanel.cpp:287-288` `Clear()` карточек каждый тик + `:351-354` безусловные `SetData/SetTexture`; `GeometryCard.h:26-28,40-46` и `MaterialCard.h:37-38,50-60` без сравнения значений (setText/setStyleSheet/setToolTip/setEnabled каждый тик).
+  - H2 да: `ObjectInspectorPanel.cpp:286` `cardMaterial_->show()` до `:355 setVisible(showMaterial)` → Show/Hide каждый тик для света/камеры/партиклов.
+  - H3 нет: `MainWindow.h:222 uint64_t selectedId_` vs `IEditorHost.h:108 uint64_t selected`, `MainWindow.cpp:813` сравнение корректно.
+  - H4 да (без анимации): `CollapsibleCard.h:64-73 SetExpanded` без early-out → `UpdateHeaderText`/`setIcon` + callback каждый вызов; `ObjectInspectorPanel.cpp:327` для dir light каждый тик.
+  - H5 нет (первично): QLineEdit фикс. высоты, sizeHint не зависит от текста; churn от мутаторов (H1).
+  - H6 нет: `ProjectProperties.cpp:41-46` уже dirty-check по `propertiesKey_`.
+- **Правка:** dirty-check сигнатуры карточек в `Refresh` (поля `lastCards*` в `ObjectInspectorPanel.h`); `Clear()` только при `selectionChanged`; убран преждевременный `cardMaterial_->show()`; `properties_->setVisible` по `isHidden()`; early-out в `CollapsibleCard::SetExpanded`. Защита фокуса `ObjectInspectorPanel.cpp:265-270` не тронута.
+- **Тест:** `Editor/tests/InspectorRefreshTests.h` (8 проверок): event filter на карточках+детях, 0 LayoutRequest/Show/Hide/Resize за 20 Refresh без изменений (модель и свет), применение изменений без selectionChanged, round-trip типа, защита фокуса Transform0. Локаторы по objectName.
+- **Проверки:** EditorModule Debug OK (warnings C4996 MainWindow.cpp — база); CoreTests 712, HostTests 140, UiTests 451 (443+8); Core без запрещённых типов; `git diff -- Engine Game build.ps1` пуст; wc -l: ObjectInspectorPanel.cpp 404, .h 147, CollapsibleCard.h 104, InspectorRefreshTests.h 198.
+- **Затронутые файлы:** `Editor/Include/ObjectInspectorPanel.h`, `Editor/Source/ObjectInspectorPanel.cpp`, `Editor/UI/CollapsibleCard.h`, `Editor/tests/InspectorRefreshTests.h` (new), `Editor/tests/UiTestRunner.cpp`, `Editor/tests/UiTests.vcxproj`.
+- **Не проверено в рантайме:** живое мигание при 10 с удержания модели/примитива; смена выделения; dir light (карточка света).
+- **В Backlog:** (1) `UpdateLightColorButton` `ObjectInspectorLight.cpp:128` setStyleSheet каждый тик — churn карточки света, вне T1. (2) Конфликт видимости `properties_`: `ProjectProperties.cpp:40` (по fields) vs `ObjectInspectorPanel.cpp:356` (showProperties) для моделей со схемой. (3) `MaterialCard::SetMaterialsAvailable` вызывается каждый тик `MainWindow.cpp:821` — Qt early-out по isEnabled/toolTip, отдельный guard не добавлял (вне пути Refresh теста).
+
+---
+
 Подтверждение базы перед Шагом 17.10.D (HEAD `a6319a1`, дерево чистое): CoreTests 656, HostTests 116, UiTests 316 (15+20+18+3+15+245), EngineTests 74/74, Skeletal 8/8, EditSession 651, SceneModule 109, Compatibility 116 — совпадает с эталоном задания; красная база без изменений.
 
 Подтверждение после Шага 17.10.E: CoreTests 712 (656 + 56 `AssetExtensionsTests`), HostTests 116, UiTests 323 (15+25+18+5+15+245), EngineTests 74/74, Skeletal 8/8, EditSession 651, SceneModule 109, Compatibility 116 — Debug и Release; красная база без изменений.

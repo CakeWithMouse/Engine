@@ -3,6 +3,7 @@
 #include "EditImportSettingsTests.h"
 #include "ImportSettingsV2EditTests.h"
 #include "AssetDeleteTests.h"
+#include "InspectorRefreshTests.h"
 #include "UiSmokeTests.h"
 #include "EditorTheme.h"
 #include <QApplication>
@@ -21,6 +22,7 @@ int main(int argc, char* argv[])
         EditImportSettingsTests::Run();
         ImportSettingsV2EditTests::Run();
         AssetDeleteTests::Run();
+        InspectorRefreshTests::Run();
         UiSmokeTests::Run();
         return 0;
     }

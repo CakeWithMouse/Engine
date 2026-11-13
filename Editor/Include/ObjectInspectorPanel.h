@@ -106,6 +106,11 @@ private:
     quint64 selectedId_ = 0; std::string selectedType_;
     EditorQtHost::Snapshot lastSnapshot_;
     bool refreshing_ = false;
+    QString lastCardsModel_, lastCardsTexture_, lastCardsMaterial_, lastCardsRoot_;
+    bool lastCardsShowGeometry_ = false;
+    bool lastCardsShowMaterial_ = false;
+    bool lastCardsMaterialLight_ = false;
+    bool lastCardsValid_ = false;
     int langSubId_ = 0;
     int themeSubId_ = 0;
     QMap<QString, QJsonValue> pendingProperties_;
