@@ -179,6 +179,32 @@
 - **Не проверено в рантайме:** фактический клик/захват гизмо/резкость на физическом 2K-мониторе при 100/125/150% и перетаскивание окна между мониторами — вынесено в ручные сценарии полной остановки после T4.
 - **Открытых вопросов нет.** Engine/ABI-причин не выявлено, БЛОКИРОВАНО не требуется.
 
+### T4 — Иконки объектов в viewport (4.1 смещение, 4.2 размер, 4.3 стиль)
+
+#### T4.1 — Смещение иконки точечного света — СДЕЛАНО
+- **Коммит:** `b078a87` `fix(editor): place viewport billboards at the world source position`.
+- **Причина:** иконка `Light.Point` приподнималась на `+0.3f` мировых единиц по Y в двух местах — `UpdateOverlays` (`ViewportOverlayHelper.cpp:152`) и инициализатор `pos[3]` в `HitTestBillboard` (`ViewportOverlayHelper.cpp:~280`). `VSBillboard` центрирует иконку на мировой позиции (`EditorOverlay.hlsl:107,131`: `clipCenter = mul(Position, ViewProjection)`), а `Game.cpp:3595-3605` строит симметричный квад `-half..+half` вокруг `(x,y,z)` — подъём был чисто эстетическим и заставлял иконку «висеть» над источником. Смещение не компенсировало ничего.
+- **Правка:** `bb.y = obj.transform.position[1] + (obj.hasPointLight ? 0.3f : 0.0f)` → `bb.y = obj.transform.position[1]` в обоих местах. Прочие типы иконок (directional/sky/camera/game-camera/particles/character) использовали сырую позицию трансформа без условных смещений — grep подтвердил, что `+0.3f` был единственным таким offset.
+- **Тест:** `Editor/tests/ViewportBillboardTests.h` (new, 132 строки, лёгкий `UiTests.exe`, минимальный double `IEditorHost`), 6 проверок: ровно 3 билборда на 3 иконочных объекта; позиция билборда точечного света == мировой источник `(1,2,3)` (y==2, не 2.3); directional == `(4,5,6)`; camera == `(7,8,9)`; `ProjectPointToScreen` источника успешен; `HitTestBillboard` по спроецированному источнику выбирает свет (id 1). Линковка: `UiTests.vcxproj` +5 ClCompile (`ViewportOverlayHelper`, `ViewportOverlay`, `GizmoGeometry`, `GizmoTriangles`, `GizmoMath` — dependency-clean, QtCore+ABI+std), `UiTestRunner.cpp` +include/вызов.
+- **Проверки:** EditorModule Debug OK; CoreTests 712, HostTests 140, UiTests 464 (443+8+7+6); `git diff -- Engine Game build.ps1` пуст; `ViewportOverlayHelper.cpp` 299 строк (<500).
+- **Затронутые файлы:** `Editor/UI/ViewportOverlayHelper.cpp`, `Editor/tests/ViewportBillboardTests.h` (new), `Editor/tests/UiTestRunner.cpp`, `Editor/tests/UiTests.vcxproj`.
+- **Не проверено в рантайме:** визуальное положение иконки света точно в точке источника в живом GUI (вынесено в ручные сценарии полной остановки после T4).
+
+#### T4.2 — Размер иконки от высоты вьюпорта — БЛОКИРОВАНО (Engine shader)
+- **Решение:** код Editor не менялся. Поле размера в ABI **есть** (`EngineOverlayBillboard::sizePixels`, `Engine/Include/Engine/Runtime/ViewportOverlayApi.h:23-30`), Editor заполняет `bb.sizePixels = 32.0f` (`ViewportOverlayHelper.cpp:154`), **но шейдер его игнорирует**.
+- **Доказательство (запрещённая зона, read-only):** `VSBillboard` (`Engine/Content/Shaders/EditorOverlay.hlsl:116-127`) вычисляет `currentHalf = max(abs(baseOffset.x/y))` из `sizePixels`, затем `effectiveScale = clampedHalf / currentHalf`, где `clampedHalf = clamp(lerp(9,10,saturate(dist/3)),9,10)` → `pixelOffset = baseOffset * effectiveScale`. `sizePixels` **делится обратно** — диаметр всегда 18–20px независимо от значения Editor. Любая правка размера на стороне Editor — чистый no-op.
+- **Доп. препятствие Editor-стороны:** `ComputeOverlayHash` (`Editor/Core/ViewportOverlay.cpp:130-167`) не включает width/height вьюпорта, `overlayHash_` не сбрасывается на resize — размер-как-доля-высоты не запускал бы повторную загрузку оверлея без правки хеша. Но это бессмысленно без правки шейдера.
+- **Точная правка в Engine:** см. «Нужно в ABI» п. 11. **БЛОКИРОВАНО** — требуется правка `EditorOverlay.hlsl` (запрещённая зона без явного разрешения Юрия).
+
+#### T4.3 — Стиль/тинт иконки из EditorTheme — БЛОКИРОВАНО (Engine shader + палитра)
+- **Решение:** код Editor не менялся. Editor-сторона тинта **уже подключена** (`GetBillboardIcon`, `ViewportOverlayHelper.cpp:16-58`: PointLight из `obj.pointLight.color`, SunSky `0xFF30D0FF`, Camera `0xFFE0E0E0`, GameCamera `0xFF80E080`, Particles `0xFFE080FF`, Character `0xFF50E050` → `rgbaTint`), **но видимый результат определяется шейдером и белой плашкой текстуры**.
+- **Доказательство (запрещённая зона, read-only):** `PSBillboard` (`Engine/Content/Shaders/EditorOverlay.hlsl:140-178`): `plateColor = input.Tint.rgb`, затем `finalRgb = lerp(plateColor, texColor.rgb, texColor.a)`, где `texColor` — белая плашка (`IconProvider.cpp:148-213` рисует `QColor(255,255,255,220)`, alpha ≈ 0.86) → тинт **вымывается ~86%**. Обод захардкожен `float3(0.12,0.12,0.14)` (dist>0.44), процедурная «лампочка» `float3(1,1,1)` (dist<0.22 при `texColor.a<=0.1`). Глиф `#1A1A1E`.
+- **Препятствие Editor-стороны:** `EditorTheme::ThemePalette` (`EditorTheme.h`) **не имеет категориальных слотов цвета иконок** (только text/bg/border/accent/axisX/Y/Z). Верные theme-тинты потребовали бы изобретения новых полей палитры (дизайн-решение), и даже тогда шейдер вымывает переданный тинт.
+- **Точная правка в Engine + решение по палитре:** см. «Нужно в ABI» п. 12. **БЛОКИРОВАНО** — требуется правка `EditorOverlay.hlsl` (запрещённая зона) и решение Юрия о категориальных слотах `ThemePalette`.
+
+- **Проверки T4 (сводно):** EditorModule Debug OK; CoreTests 712, HostTests 140, UiTests 464; `git diff -- Engine Game build.ps1` пуст (T4.2/T4.3 — без правки кода). Красная база без изменений.
+- **Открытые вопросы:** T4.2/T4.3 ждут разрешения Юрия на правку `Engine/Content/Shaders/EditorOverlay.hlsl` (и, для T4.3, решения о категориальных слотах палитры). До разрешения — БЛОКИРОВАНО, код Editor не меняется.
+
 ---
 
 Подтверждение базы перед Шагом 17.10.D (HEAD `a6319a1`, дерево чистое): CoreTests 656, HostTests 116, UiTests 316 (15+20+18+3+15+245), EngineTests 74/74, Skeletal 8/8, EditSession 651, SceneModule 109, Compatibility 116 — совпадает с эталоном задания; красная база без изменений.
@@ -500,6 +526,14 @@
     - `Звуки (Volume, Loop)`: параметры есть в `AudioEngine`, но отсутствуют в C-ABI `EngineAudioPreviewApi` (`SceneEditAudio.cpp:36`).
     - `Звуки (Force mono, Trim start/end)`: отсутствуют в движке (декодеры не выполняют микширование каналов и обрезку семплов).
     - **Предложенная архитектурная правка C-ABI:** версионированное сервисное расширение `EngineAssetImportExtension` (`"Engine.Asset.Import"`) с методом `importAssetWithOptions(void* context, const char* source, uint32_t kind, const char* optionsJson, char* virtualPath, uint32_t pathCapacity, char* error, uint32_t errorCapacity)`.
+11. **Размер билборда иконки (`sizePixels`) — T4.2:**
+    - `VSBillboard` в `Engine/Content/Shaders/EditorOverlay.hlsl:116-127` делит `sizePixels` обратно (`effectiveScale = clampedHalf / currentHalf`, `clampedHalf = clamp(lerp(9,10,saturate(dist/3)),9,10)`) и жёстко клампит диаметр в 18–20px, игнорируя значение из Editor (`bb.sizePixels = 32.0f`, `ViewportOverlayHelper.cpp:154`).
+    - Требуется: уважать `bb.sizePixels` как целевой диаметр в **физических** пикселях (min/max clamp на стороне шейдера либо доверять Editor-значению), чтобы Editor мог задавать размер как долю физической высоты вьюпорта (~2.2%) с clamp в физических px.
+    - Сопутствующее (Editor-сторона, бессмысленно без правки шейдера): `ComputeOverlayHash` (`Editor/Core/ViewportOverlay.cpp:130-167`) не включает width/height вьюпорта — при размере-от-высоты нужен сброс `overlayHash_` на resize, иначе оверлей не перезагрузится.
+12. **Стиль/тинт билборда иконки — T4.3:**
+    - `PSBillboard` в `Engine/Content/Shaders/EditorOverlay.hlsl:140-178` затирает `input.Tint` белой плашкой текстуры (`finalRgb = lerp(plateColor, texColor.rgb, texColor.a)`, alpha плашки 220/255 ≈ 0.86 → тинт вымывается ~86%), жёстко задаёт тёмный обод `float3(0.12,0.12,0.14)` (dist>0.44) и процедурную «лампочку» `float3(1,1,1)` (dist<0.22 при `texColor.a<=0.1`).
+    - Требуется: применять тинт к плашке без вымывания (умножение/сохранение насыщенности), сделать обод и внутренний символ theme-aware (цвета через ABI/константы, а не хардкод).
+    - Editor-сторона: `IconProvider.cpp:148-213` рисует белую плашку `QColor(255,255,255,220)` + тёмный глиф `#1A1A1E`; `EditorTheme::ThemePalette` не имеет категориальных слотов цвета иконок (только text/bg/border/accent/axisX/Y/Z) — верные theme-тинты требуют решения Юрия о новых полях палитры.
 
 ---
 
