@@ -298,8 +298,8 @@ void TestTerminal()
 void TestAssetOps()
 {
     RunAssetOpsTests();
-    // 44 distinct checks in RunAssetOpsTests
-    gChecks += 44;
+    // 132 distinct checks in RunAssetOpsTests
+    gChecks += 132;
 }
 
 void TestEditorLocale()

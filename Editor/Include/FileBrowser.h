@@ -4,6 +4,9 @@
 #include <QSortFilterProxyModel>
 #include <QFileSystemModel>
 #include <QDir>
+#include <QPersistentModelIndex>
+#include <QPointer>
+#include <functional>
 #include "IconProvider.h"
 #include "EditorTheme.h"
 #include "ProjectFileTypeStrings.h"
@@ -52,6 +55,25 @@ public:
         if (section == 2 && orientation == Qt::Horizontal && role == Qt::DisplayRole) return ProjectFileTypeStrings::Header();
         return QSortFilterProxyModel::headerData(section, orientation, role);
     }
+    Qt::ItemFlags flags(const QModelIndex& index) const override
+    {
+        auto result = QSortFilterProxyModel::flags(index) & ~Qt::ItemIsEditable;
+        if (index.isValid() && index == folderRenameIndex_) result |= Qt::ItemIsEditable;
+        return result;
+    }
+    bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override
+    {
+        if (role != Qt::EditRole) return QSortFilterProxyModel::setData(index, value, role);
+        if (index != folderRenameIndex_ || !renameFolder_) return false;
+        const auto rename = renameFolder_;
+        return rename(value.toString());
+    }
+    void BeginFolderRename(const QModelIndex& index, std::function<bool(const QString&)> rename)
+    {
+        folderRenameIndex_ = index;
+        renameFolder_ = std::move(rename);
+    }
+    void EndFolderRename() { folderRenameIndex_ = QPersistentModelIndex(); renameFolder_ = {}; }
     void ShowFull(bool value) { full = value; invalidateFilter(); }
     Qt::DropActions supportedDragActions() const override { return Qt::CopyAction; }
 
@@ -92,6 +114,8 @@ private:
         fileIcon_ = IconProvider::FileIcon();
         if (sourceModel() && rowCount() > 0) emit dataChanged(index(0, 0), index(rowCount() - 1, 0), {Qt::DecorationRole});
     }
+    QPersistentModelIndex folderRenameIndex_;
+    std::function<bool(const QString&)> renameFolder_;
     QIcon folderIcon_, fileIcon_;
     int themeSubscription_ = 0;
     int languageSubscription_ = 0;
@@ -105,6 +129,7 @@ public:
 
     void SetRootPath(const QString& path);
     void RetranslateUi();
+    void BeginInlineRename(const QString& absolutePath);
 
     QSize minimumSizeHint() const override { return QSize(60, 40); }
     QSize sizeHint() const override { return QSize(250, 180); }
@@ -119,6 +144,8 @@ private:
     void ApplyFilter(const QString& text);
     void DeleteCurrentAsset();
     bool IsProtectedPath(const QString& path) const;
+    void TryBeginInlineRename();
+    void EndInlineRename();
 
     EditorQtHost* host_ = nullptr;
     QFileSystemModel* model_ = nullptr;
@@ -130,6 +157,9 @@ private:
     QAction* actImportModel_ = nullptr;
     QAction* actImportTexture_ = nullptr;
     QAction* actImportAudio_ = nullptr;
+    QString pendingRenamePath_;
+    QPersistentModelIndex renameIndex_;
+    QPointer<QLineEdit> renameEditor_;
     int langSubId_ = 0;
     int themeSubId_ = 0;
     QString projectDir_;

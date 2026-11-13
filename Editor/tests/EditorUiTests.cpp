@@ -77,6 +77,7 @@
 #include "ViewportCompletionTests.h"
 #include "ContentBrowserTests.h"
 #include "ContentBrowserTypeTests.h"
+#include "FolderCreationTests.h"
 namespace
 {
 int checks = 0;
@@ -318,6 +319,8 @@ int wmain(int argc, wchar_t** argv)
         if (argc == 4 && std::wstring(argv[3]) == L"--content-browser") return 0;
         Ui([](auto* window) { ContentBrowserTypeTests::RunNative(window); });
         if (argc == 4 && std::wstring(argv[3]) == L"--file-types") return 0;
+        Ui([](auto* window) { FolderCreationTests::RunNative(window); });
+        if (argc == 4 && std::wstring(argv[3]) == L"--create-folder") return 0;
         if (argc == 4 && std::wstring(argv[3]) == L"--hud-restart") {
             std::fprintf(stderr,"HUD restart: viewport ready\n");
             Ui([&](auto* w) {

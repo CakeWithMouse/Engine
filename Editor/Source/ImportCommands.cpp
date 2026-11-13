@@ -10,6 +10,7 @@
 #include "AssetOps.h"
 #include "AssetExtensions.h"
 #include "Logger.h"
+#include "FolderCommands.h"
 
 #include <QAction>
 #include <QFileDialog>
@@ -19,6 +20,10 @@
 
 void EditorMainWindow::RegisterAssetCommands()
 {
+    FolderCommands::Register(fileDock_, QFileInfo(ProjectPath()).dir().absolutePath(),
+        QString::fromUtf8(host_->host().contentRoot), [this] {
+            return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit;
+        });
     CommandRegistry::Instance().RegisterCommand({
         QStringLiteral("Assets.Import"),
         QStringLiteral("Import Assets"),
@@ -179,6 +184,8 @@ void EditorMainWindow::UnregisterAssetCommands()
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Import"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.EditImportSettings"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Delete"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.CreateFolder"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.RenameFolder"));
 }
 
 void EditorMainWindow::BuildResourcesMenu(QMenu* sceneMenu)
