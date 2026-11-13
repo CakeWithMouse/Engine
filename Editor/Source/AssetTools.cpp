@@ -4,6 +4,7 @@
 #include "QtHost.h"
 #include "MaterialEditorWindow.h"
 #include "ScriptEditorWindow.h"
+#include "AiMachineEditorWindow.h"
 #include "Graph/GraphDocument.h"
 #include "AssetExtensions.h"
 
@@ -523,19 +524,43 @@ void EditorMainWindow::CreateAiMachineForSelection()
     const QDir folder(QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(QStringLiteral("AI")));
     QString name = base;
     for (int i = 2; QFileInfo::exists(folder.filePath(name + QStringLiteral(".fsm"))); ++i) name = base + QStringLiteral("_") + QString::number(i);
-    const QString file = folder.filePath(name + QStringLiteral(".fsm"));
+    const QString machine = CreateAiMachine(folder.path(), name);
+    if (machine.isEmpty()) return;
+    SetSelectedProperty(QStringLiteral("/stateMachine"), machine);
+    OpenAiMachineEditor(machine);
+}
 
-    // Новый автомат: одно состояние, которое ждёт; ключ Target, куда восприятие пишет увиденную цель.
-    EditorCore::GraphDocument document;
-    document.SetSchema(QStringLiteral("ai.fsm"), 1);
-    document.SetVariables(QJsonArray{QJsonObject{{QStringLiteral("name"), QStringLiteral("Target")}, {QStringLiteral("type"), QStringLiteral("object")}}});
-    document.AddNode(QStringLiteral("Fsm.State"), QStringLiteral("Idle"), QPointF(0, 0),
-                     {{QStringLiteral("name"), QStringLiteral("Idle")},
-                      {QStringLiteral("tasks"), QVariantList{QVariantMap{{QStringLiteral("type"), QStringLiteral("Ai.Wait")}, {QStringLiteral("seconds"), 1.0}}}}});
+QString EditorMainWindow::CreateAiMachine(const QString& directory, const QString& name)
+{
+    const QString content = QString::fromUtf8(host_->host().contentRoot);
+    QString target = directory;
+    if (target.isEmpty() || ContentRelativePath(content, target).isEmpty()) target = QDir(content).filePath(QStringLiteral("AI"));
+    QString base = name;
+    if (base.isEmpty())
+    {
+        bool accepted = false;
+        base = QInputDialog::getText(this, Tr("Новый автомат ИИ", "New AI State Machine"), Tr("Имя автомата:", "Machine Name:"),
+                                     QLineEdit::Normal, QStringLiteral("NewMachine"), &accepted).trimmed();
+        if (!accepted || base.isEmpty()) return {};
+    }
+    const QString file = QDir(target).filePath(base + QStringLiteral(".fsm"));
     QString problem;
-    if (!QDir().mkpath(folder.path())) problem = Tr("Не удалось создать каталог %1.", "Failed to create directory %1.").arg(folder.path());
+    if (!MaterialNamePattern().match(base).hasMatch())
+        problem = Tr("Имя может содержать латинские буквы, цифры, «_», «-» и «.».", "Name can contain latin letters, digits, _, - and .");
+    else if (QFileInfo::exists(file))
+        problem = Tr("В каталоге уже есть %1.fsm.", "Directory already contains %1.fsm.").arg(base);
+    else if (!QDir().mkpath(target))
+        problem = Tr("Не удалось создать каталог %1.", "Failed to create directory %1.").arg(target);
     else
     {
+        // Новый автомат: одно состояние, которое ждёт; ключ Target, куда восприятие пишет увиденную цель.
+        EditorCore::GraphDocument document;
+        document.SetSchema(QStringLiteral("ai.fsm"), 1);
+        document.SetVariables(QJsonArray{QJsonObject{{QStringLiteral("name"), QStringLiteral("Target")}, {QStringLiteral("type"), QStringLiteral("object")}}});
+        document.SetExtra(QStringLiteral("settings"), QJsonObject{{QStringLiteral("targetKey"), QStringLiteral("Target")}});
+        document.AddNode(QStringLiteral("Fsm.State"), QStringLiteral("Idle"), QPointF(0, 0),
+                         {{QStringLiteral("name"), QStringLiteral("Idle")},
+                          {QStringLiteral("tasks"), QVariantList{QVariantMap{{QStringLiteral("type"), QStringLiteral("Ai.Wait")}, {QStringLiteral("seconds"), 1.0}}}}});
         QSaveFile output(file);
         if (!output.open(QIODevice::WriteOnly) || output.write(document.ExportToJson().toUtf8()) < 0 || !output.commit())
             problem = Tr("Не удалось записать %1.", "Failed to write %1.").arg(file);
@@ -543,10 +568,45 @@ void EditorMainWindow::CreateAiMachineForSelection()
     if (!problem.isEmpty())
     {
         QMessageBox::warning(this, Tr("Новый автомат ИИ", "New AI State Machine"), problem);
+        return {};
+    }
+    const QString machine = QStringLiteral("/Game/") + ContentRelativePath(content, file);
+    AppendLine(Tr("Создан автомат ИИ %1.", "Created AI state machine %1.").arg(machine));
+    return machine;
+}
+
+AiMachineEditorWindow* EditorMainWindow::AiMachineEditor(const QString& machine) const
+{
+    AiMachineEditorWindow* window = aiMachineEditors_.value(machine.toLower());
+    return window && window->isVisible() ? window : nullptr;
+}
+
+void EditorMainWindow::OpenAiMachineEditor(const QString& path)
+{
+    QString machine = path;
+    if (!machine.startsWith(QStringLiteral("/Game/")))
+    {
+        const QString relative = ContentRelativePath(QString::fromUtf8(host_->host().contentRoot), path);
+        if (relative.isEmpty())
+        {
+            QMessageBox::warning(this, Tr("Автомат вне проекта", "Machine Outside Project"),
+                Tr("Редактировать можно только автоматы из Content проекта.", "Only machines from the project Content folder can be edited."));
+            return;
+        }
+        machine = QStringLiteral("/Game/") + relative;
+    }
+    const QString key = machine.toLower();
+    if (AiMachineEditorWindow* open = aiMachineEditors_.value(key); open && open->isVisible())
+    {
+        open->showNormal();
+        open->raise();
+        open->activateWindow();
         return;
     }
-    AppendLine(Tr("Создан автомат ИИ %1.", "Created AI state machine %1.").arg(QStringLiteral("/Game/AI/") + name + QStringLiteral(".fsm")));
-    SetSelectedProperty(QStringLiteral("/stateMachine"), QStringLiteral("/Game/AI/") + name + QStringLiteral(".fsm"));
+    auto* editor = new AiMachineEditorWindow(host_, machine, this);
+    editor->setWindowFlag(Qt::Window);
+    aiMachineEditors_.insert(key, editor);
+    editor->show();
 }
 
 void EditorMainWindow::ReloadShaders()

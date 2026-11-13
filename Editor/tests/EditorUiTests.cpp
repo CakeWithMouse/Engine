@@ -6,6 +6,9 @@
 #include "MaterialTextureTools.h"
 #include "MaterialGraphWidget.h"
 #include "ScriptEditorWindow.h"
+#include "AiMachineEditorWindow.h"
+#include "FsmBlockListEditor.h"
+#include "FsmGraphWidget.h"
 #include "ScriptGraphWidget.h"
 #include "ScriptMessages.h"
 #include "Graph/GraphClipboard.h"
@@ -13,6 +16,7 @@
 #include "MaterialGraphSchema.h"
 #include <QPlainTextEdit>
 #include <QTableWidget>
+#include <QHeaderView>
 #include <atomic>
 #include "HlslGraphCompiler.h"
 #include "UIEditorWindow.h"
@@ -1579,6 +1583,10 @@ int wmain(int argc, wchar_t** argv)
                 Check(table->rowCount() == 0 && g->Document().Variables().isEmpty(), "variable addition undone");
                 g->Redo();
                 Check(table->rowCount() == 1, "variable addition redone");
+                e->template findChild<QPushButton*>(QStringLiteral("ScriptAddVariable"))->click();
+                auto* second = qobject_cast<QLineEdit*>(table->cellWidget(1, 0));
+                Check(table->rowCount() == 2 && second && second->text() == QStringLiteral("Var2") && second->isVisible(), "every variable row shows its name");
+                g->Undo();
                 checksBefore = e->CheckCount();
                 e->SaveNow();
             });
@@ -1707,6 +1715,8 @@ int wmain(int argc, wchar_t** argv)
             });
             until([&] { return guardData().value(QStringLiteral("stateMachine")).toString().startsWith(QStringLiteral("/Game/AI/")); });
             const QString machine = guardData().value(QStringLiteral("stateMachine")).toString();
+            until([&] { bool open = false; Ui([&](auto* w) { open = w->AiMachineEditor(machine) != nullptr; }); return open; });
+            Ui([&](auto* w) { w->AiMachineEditor(machine)->close(); });
             const auto machineFile = root / "Content" / std::filesystem::u8path(machine.mid(6).toStdString());
             QJsonObject fsm;
             {
@@ -1794,6 +1804,121 @@ int wmain(int argc, wchar_t** argv)
             Ui([](auto* w) { Action(w, QStringLiteral("⏹ Stop"))->trigger(); });
             until([&] { return host.PlayState() == EditorQtHost::Edit; });
             until([&] { return liveText().isEmpty(); });
+
+            // The AI editor window: "Open" in the card, edits are saved and checked by the engine, undo works.
+            selectGuard();
+            until(cardShown);
+            Ui([](auto* w) { w->template findChild<QPushButton*>(QStringLiteral("AiMachineOpen"))->click(); });
+            auto fsmWindow = [&](auto* w) { return w->AiMachineEditor(machine); };
+            until([&] { bool ready = false; Ui([&](auto* w) { ready = fsmWindow(w) && fsmWindow(w)->IsReady() && fsmWindow(w)->CheckCount() > 0; }); return ready; });
+            int chase = 0, checks = 0;
+            Ui([&](auto* w) {
+                auto* window = fsmWindow(w);
+                auto* g = window->Graph();
+                Check(!window->IsReadOnly() && window->Problems().isEmpty(), "the machine window opens a valid machine");
+                Check(g->Document().Nodes().size() == 1 && g->Schema().NodeName(g->Document().Nodes().first()) == QStringLiteral("Idle"), "the window shows the file's state");
+                chase = g->AddNode(QStringLiteral("Fsm.State"), QPointF(400, 0), {{QStringLiteral("name"), QStringLiteral("Chase")},
+                    {QStringLiteral("tasks"), QVariantList{QVariantMap{{QStringLiteral("type"), QStringLiteral("Ai.MoveTo")}, {QStringLiteral("target"), QStringLiteral("Target")}}}}});
+                Check(g->Connect(1, QStringLiteral("out"), chase, QStringLiteral("in")) && g->Connect(chase, QStringLiteral("out"), 1, QStringLiteral("in")), "transitions both ways");
+                EditorCore::GraphConnectionData link;
+                link.fromNode = 1; link.fromPin = QStringLiteral("out"); link.toNode = chase; link.toPin = QStringLiteral("in");
+                Check(g->SetLinkProperties(link, {{QStringLiteral("trigger"), QStringLiteral("tick")},
+                    {QStringLiteral("conditions"), QVariantList{QVariantMap{{QStringLiteral("type"), QStringLiteral("Ai.CanSee")}, {QStringLiteral("target"), QStringLiteral("Target")}}}}}),
+                      "transition properties");
+                checks = window->CheckCount();
+                window->SaveNow();
+            });
+            until([&] { bool done = false; Ui([&](auto* w) { done = fsmWindow(w)->CheckCount() > checks; }); return done; });
+            Ui([&](auto* w) {
+                auto* window = fsmWindow(w);
+                Check(window->Problems().isEmpty(), "two states with transitions pass the engine's check");
+                QFile file(QString::fromStdWString(machineFile.wstring()));
+                Check(file.open(QIODevice::ReadOnly), "the machine file is saved");
+                const QJsonObject saved = QJsonDocument::fromJson(file.readAll()).object();
+                Check(saved.value(QStringLiteral("nodes")).toArray().size() == 2 && saved.value(QStringLiteral("connections")).toArray().size() == 2, "the file has both states and transitions");
+                // A key the memory does not have: the engine's error lands on the node, in Russian.
+                auto* g = window->Graph();
+                QVariantMap properties = g->Document().FindNode(chase)->properties;
+                properties[QStringLiteral("tasks")] = QVariantList{QVariantMap{{QStringLiteral("type"), QStringLiteral("Ai.MoveTo")}, {QStringLiteral("target"), QStringLiteral("Nowhere")}}};
+                Check(g->SetNodeProperties(chase, properties), "state properties change");
+                checks = window->CheckCount();
+                window->SaveNow();
+            });
+            until([&] { bool done = false; Ui([&](auto* w) { done = fsmWindow(w)->CheckCount() > checks; }); return done; });
+            Ui([&](auto* w) {
+                auto* window = fsmWindow(w);
+                Check(window->Problems().value(chase).contains(QStringLiteral("нет переменной «Nowhere»")), "the engine's problem is shown on the node in Russian");
+                window->Graph()->Undo();
+                checks = window->CheckCount();
+                window->SaveNow();
+            });
+            until([&] { bool done = false; Ui([&](auto* w) { done = fsmWindow(w)->CheckCount() > checks; }); return done; });
+            Ui([&](auto* w) {
+                auto* window = fsmWindow(w);
+                auto* g = window->Graph();
+                Check(window->Problems().isEmpty(), "undo brings the valid machine back");
+                // Memory and settings go to the file and through undo; a renamed key is renamed in the blocks too.
+                const int keys = static_cast<int>(g->Document().Variables().size());
+                window->AddVariable();
+                Check(g->Document().Variables().size() == keys + 1, "a memory key is added");
+                QJsonArray variables = g->Document().Variables();
+                QJsonObject target = variables[0].toObject();
+                target[QStringLiteral("name")] = QStringLiteral("Enemy");
+                variables[0] = target;
+                g->SetVariables(variables, {{QStringLiteral("Target"), QStringLiteral("Enemy")}});
+                Check(g->Document().FindNode(chase)->properties.value(QStringLiteral("tasks")).toList().first().toMap().value(QStringLiteral("target")) == QStringLiteral("Enemy"),
+                      "renaming a key renames it in the blocks");
+                Check(g->Settings().value(QStringLiteral("targetKey")).toString() == QStringLiteral("Enemy"), "and in the settings");
+                {
+                    auto* table = window->template findChild<QTableWidget*>(QStringLiteral("FsmVariables"));
+                    const QJsonArray shown = g->Document().Variables();
+                    QStringList names, expected;
+                    for (int row = 0; row < table->rowCount(); ++row) { auto* field = qobject_cast<QLineEdit*>(table->cellWidget(row, 0)); names << (field ? field->text() : QStringLiteral("<none>")); }
+                    for (const auto& v : shown) expected << v.toObject().value(QStringLiteral("name")).toString();
+                    if (names != expected) std::printf("memory table: [%s] vs [%s]\n", names.join(',').toUtf8().constData(), expected.join(',').toUtf8().constData());
+                    Check(names == expected, "the memory table shows every key");
+                }
+                QJsonObject settings = g->Settings();
+                settings[QStringLiteral("thinkInterval")] = 0.25;
+                g->SetSettings(settings);
+                Check(g->Settings().value(QStringLiteral("thinkInterval")).toDouble() == 0.25, "settings change");
+                g->Undo();
+                Check(!g->Settings().contains(QStringLiteral("thinkInterval")), "settings go through undo");
+                // A child state: the parent is framed on the canvas.
+                const int child = g->AddNode(QStringLiteral("Fsm.State"), QPointF(400, 200), {{QStringLiteral("name"), QStringLiteral("Strafe")},
+                    {QStringLiteral("parent"), chase}, {QStringLiteral("tasks"), QVariantList{QVariantMap{{QStringLiteral("type"), QStringLiteral("Ai.Wait")}}}}});
+                int frames = 0;
+                for (auto* item : g->View()->scene()->items()) if (item->data(0).toString() == QStringLiteral("frame")) ++frames;
+                Check(child && frames == 1, "a parent state is framed with its children");
+                g->RemoveNodes({chase});
+                Check(!g->Document().FindNode(child)->properties.contains(QStringLiteral("parent")), "removing a parent moves its children to the top");
+                g->Undo();
+                Check(g->Document().FindNode(child)->properties.value(QStringLiteral("parent")).toInt() == chase, "undo restores the parent");
+                checks = window->CheckCount();
+                window->SaveNow();
+
+                // The block list editor: blocks from the catalog with typed parameter fields.
+                FsmBlockListEditor blocks(window->Schema(), QStringLiteral("task"), QStringLiteral("TestBlocks"));
+                Check(blocks.AddBlock(QStringLiteral("Ai.Wait")) && !blocks.AddBlock(QStringLiteral("Ai.CanSee")), "only blocks of the editor's kind are added");
+                auto* seconds = blocks.template findChild<QDoubleSpinBox*>(QStringLiteral("TestBlocksParam_seconds"));
+                Check(seconds && seconds->value() == 1.0, "a parameter shows the catalog default");
+                seconds->setValue(2.5);
+                Check(blocks.Blocks().first().toMap().value(QStringLiteral("seconds")).toDouble() == 2.5, "a parameter field writes the block");
+                Check(blocks.AddBlock(QStringLiteral("Ai.MoveTo")) && blocks.Blocks().last().toMap().value(QStringLiteral("target")).toString() == QStringLiteral("Enemy"),
+                      "a key parameter starts with the first fitting key");
+                auto* key = blocks.template findChild<QComboBox*>(QStringLiteral("TestBlocksParam_target"));
+                Check(key && key->findText(QStringLiteral("Enemy")) >= 0 && key->findText(QStringLiteral("Speed")) < 0, "a key parameter offers only fitting keys");
+            });
+            until([&] { bool done = false; Ui([&](auto* w) { done = fsmWindow(w)->CheckCount() > checks; }); return done; });
+            Ui([&](auto* w) {
+                Check(fsmWindow(w)->Problems().isEmpty(), "a parent with a child passes the engine's check");
+                fsmWindow(w)->Graph()->FrameNodes();
+            });
+            for (int i = 0; i < 20; ++i) pump();
+            Ui([&](auto* w) {
+                fsmWindow(w)->grab().save(QString::fromStdWString((root / "ai-machine-window.png").wstring()));
+                fsmWindow(w)->close();
+            });
 
             // A C++ machine name is typed in the same field; "Clear" removes the machine.
             selectGuard();

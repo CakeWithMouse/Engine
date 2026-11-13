@@ -105,6 +105,15 @@ public:
     const QJsonArray& Variables() const { return variables_; }
     void SetVariables(const QJsonArray& variables) { variables_ = variables; }
 
+    // Поля корня, которых ядро не знает (настройки автомата ИИ «settings»): пишутся как есть.
+    // Пустое значение (Undefined, Null, пустой объект) убирает поле.
+    QJsonValue Extra(const QString& key) const { return extra_.value(key); }
+    void SetExtra(const QString& key, const QJsonValue& value)
+    {
+        if (value.isUndefined() || value.isNull() || (value.isObject() && value.toObject().isEmpty())) extra_.remove(key);
+        else extra_.insert(key, value);
+    }
+
     QString ExportToJson() const;
     // false: не JSON-объект. Прежнее содержимое при ошибке не меняется.
     bool ImportFromJson(const QString& jsonString);

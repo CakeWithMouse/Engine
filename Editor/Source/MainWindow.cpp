@@ -908,12 +908,9 @@ void EditorMainWindow::ConnectPanels()
         }
         SetSelectedProperty(QStringLiteral("/stateMachine"), QStringLiteral("/Game/") + QDir::fromNativeSeparators(relative));
     });
-    // Окна автомата ещё нет: файл открывается программой, назначенной для .fsm в системе.
     connect(objectInspectorPanel_, &ObjectInspectorPanel::OpenAiMachineRequested, this, [this](const QString& machine)
     {
-        const QString file = QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(machine.mid(6));
-        if (!machine.startsWith(QStringLiteral("/Game/")) || !QDesktopServices::openUrl(QUrl::fromLocalFile(file)))
-            AppendLine(Tr("Не удалось открыть %1.", "Failed to open %1.").arg(machine));
+        if (machine.startsWith(QStringLiteral("/Game/"))) OpenAiMachineEditor(machine);
     });
 
     connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearScriptRequested, this, [this]

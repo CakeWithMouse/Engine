@@ -1,6 +1,7 @@
 #include "GraphSchemaRegistry.h"
 
 #include "../CodeGraphSchema.h"
+#include "../FsmGraphSchema.h"
 #include "../EditorLocale.h"
 #include "../MaterialGraphSchema.h"
 
@@ -23,6 +24,9 @@ GraphSchemaRegistry::GraphSchemaRegistry()
     const CodeGraphSchema code;
     Register({code.Id(), QStringLiteral("Скрипт"), QStringLiteral("Script"), code.ClipboardMarker(), QStringLiteral(".vscript"),
               [] { return std::make_unique<CodeGraphSchema>(); }});
+    const FsmGraphSchema fsm;
+    Register({fsm.Id(), QStringLiteral("Автомат ИИ"), QStringLiteral("AI State Machine"), fsm.ClipboardMarker(), QStringLiteral(".fsm"),
+              [] { return std::make_unique<FsmGraphSchema>(); }});
 }
 
 void GraphSchemaRegistry::Register(GraphSchemaEntry entry)

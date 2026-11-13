@@ -13,6 +13,7 @@
 #include <QHeaderView>
 #include <QJsonObject>
 #include <QLabel>
+#include <QLineEdit>
 #include <QListWidget>
 #include <QPointer>
 #include <QPushButton>
@@ -438,22 +439,30 @@ void ScriptEditorWindow::RefreshVariables()
 {
     refreshingVariables_ = true;
     const QJsonArray list = graph_->Document().Variables();
+    variables_->setRowCount(0);
     variables_->setRowCount(list.size());
+    // Ячейки — поля ввода: текстовые элементы таблицы рядом с выпадающими списками в этой теме не рисовались
+    // (видна была только первая строка).
     for (int row = 0; row < list.size(); ++row)
     {
         const QJsonObject variable = list[row].toObject();
         const QString name = variable.value(QStringLiteral("name")).toString();
         const QString type = variable.value(QStringLiteral("type")).toString();
-        auto* nameItem = new QTableWidgetItem(name);
-        nameItem->setData(Qt::UserRole, name); // прежнее имя: переименование переносится на ноды
-        variables_->setItem(row, 0, nameItem);
-        auto* combo = new QComboBox(variables_);
+        auto* nameField = new QLineEdit(name);
+        nameField->setObjectName(QStringLiteral("ScriptVariableName_%1").arg(row));
+        nameField->setProperty("previous", name); // прежнее имя: переименование переносится на ноды
+        connect(nameField, &QLineEdit::editingFinished, this, [this, row] { EditVariables(row, 0); });
+        variables_->setCellWidget(row, 0, nameField);
+        auto* combo = new QComboBox;
         combo->setObjectName(QStringLiteral("ScriptVariableType_%1").arg(row));
         for (const QString& candidate : CodeGraphSchema::VariableTypes()) combo->addItem(CodeGraphSchema::TypeLabel(candidate), candidate);
         combo->setCurrentIndex(std::max(0, combo->findData(type)));
         connect(combo, &QComboBox::currentIndexChanged, this, [this, row] { EditVariables(row, 1); });
         variables_->setCellWidget(row, 1, combo);
-        variables_->setItem(row, 2, new QTableWidgetItem(VariableText(variable.value(QStringLiteral("value")), type)));
+        auto* valueField = new QLineEdit(VariableText(variable.value(QStringLiteral("value")), type));
+        valueField->setObjectName(QStringLiteral("ScriptVariableValue_%1").arg(row));
+        connect(valueField, &QLineEdit::editingFinished, this, [this, row] { EditVariables(row, 2); });
+        variables_->setCellWidget(row, 2, valueField);
     }
     refreshingVariables_ = false;
 }
@@ -466,18 +475,19 @@ void ScriptEditorWindow::EditVariables(int, int)
     QHash<QString, QString> renames;
     for (int row = 0; row < variables_->rowCount(); ++row)
     {
-        const auto* nameItem = variables_->item(row, 0);
-        const auto* combo = static_cast<QComboBox*>(variables_->cellWidget(row, 1));
-        const auto* valueItem = variables_->item(row, 2);
-        if (!nameItem || !combo) continue;
-        const QString name = nameItem->text().trimmed(), old = nameItem->data(Qt::UserRole).toString();
+        const auto* nameField = qobject_cast<QLineEdit*>(variables_->cellWidget(row, 0));
+        const auto* combo = qobject_cast<QComboBox*>(variables_->cellWidget(row, 1));
+        const auto* valueField = qobject_cast<QLineEdit*>(variables_->cellWidget(row, 2));
+        if (!nameField || !combo) continue;
+        const QString name = nameField->text().trimmed(), old = nameField->property("previous").toString();
         const QString type = combo->currentData().toString();
         const QString oldType = row < before.size() ? before[row].toObject().value(QStringLiteral("type")).toString() : type;
         // Новый тип начинает с нуля: число "5" не превращается в вектор.
-        const QJsonValue value = type == oldType ? VariableValue(valueItem ? valueItem->text() : QString(), type) : VariableValue(QString(), type);
+        const QJsonValue value = type == oldType ? VariableValue(valueField ? valueField->text() : QString(), type) : VariableValue(QString(), type);
         list.append(QJsonObject{{QStringLiteral("name"), name}, {QStringLiteral("type"), type}, {QStringLiteral("value"), value}});
         if (!old.isEmpty() && old != name) renames.insert(old, name);
     }
+    if (list == before && renames.isEmpty()) return; // уход фокуса без правки — без шага отмены
     // Перестройка таблицы из обработчика её же сигнала — после возврата из него.
     QTimer::singleShot(0, this, [this, list, renames] { graph_->SetVariables(list, renames); });
 }

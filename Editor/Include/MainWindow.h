@@ -28,6 +28,7 @@ class QAction;
 class SceneObjectsPanel;
 class MaterialEditorWindow;
 class ScriptEditorWindow;
+class AiMachineEditorWindow;
 class MainToolBar;
 class ExternalGameRunner;
 class UIEditorWindow;
@@ -81,6 +82,11 @@ public:
     void CreateScriptForSelection();
     // Автомат ИИ (.fsm) выделенного «ИИ-персонажа»: новый файл в Content/AI, выбор файла, открытие.
     void CreateAiMachineForSelection();
+    // Новый .fsm в каталоге (пустой — Content/AI); без имени спрашивает его. Возвращает /Game путь; пустой — отказ.
+    QString CreateAiMachine(const QString& directory, const QString& name = {});
+    // Окно автомата ИИ: /Game путь или файл в Content.
+    void OpenAiMachineEditor(const QString& path);
+    AiMachineEditorWindow* AiMachineEditor(const QString& machine) const;
     void SetSelectedProperty(const QString& path, const QString& text); // строковое свойство выделенного объекта, через Undo
     // Открытое окно скрипта (/Game путь) или nullptr.
     ScriptEditorWindow* ScriptEditor(const QString& script) const;
@@ -162,6 +168,7 @@ private:
     bool CloseMaterialEditors(std::function<void()> afterSave = {});
     QHash<QString, QPointer<MaterialEditorWindow>> materialEditors_;
     QHash<QString, QPointer<ScriptEditorWindow>> scriptEditors_;
+    QHash<QString, QPointer<AiMachineEditorWindow>> aiMachineEditors_;
     QHash<QString, QPointer<UIEditorWindow>> uiEditors_;
 
     EditorQtHost* host_ = nullptr;

@@ -833,6 +833,7 @@ void GraphEditorWidget::RebuildScene()
     const QList<int> selected = SelectedNodes();
     // Сначала связи: scene_->clear() удаляет и их.
     links_.clear();
+    frames_.clear();
     dragLink_ = nullptr;
     const QList<int> comments = SelectedComments();
     scene_->clear();
@@ -849,7 +850,45 @@ void GraphEditorWidget::RebuildScene()
         if (statuses_.contains(node.id)) item->StatusChanged();
     }
     UpdateConnections();
+    UpdateFrames();
     SelectNodes(selected);
+}
+
+void GraphEditorWidget::UpdateFrames()
+{
+    for (auto* frame : frames_)
+    {
+        scene_->removeItem(frame);
+        delete frame;
+    }
+    frames_.clear();
+    const QVector<GraphNodeFrame> frames = NodeFrames();
+    if (frames.isEmpty()) return;
+    QHash<int, NodeItem*> items;
+    for (auto* item : scene_->items())
+        if (auto* node = dynamic_cast<NodeItem*>(item)) items.insert(node->Data().id, node);
+    for (const auto& frame : frames)
+    {
+        QRectF bounds;
+        for (const int id : frame.nodes)
+            if (NodeItem* item = items.value(id)) bounds |= item->sceneBoundingRect();
+        if (bounds.isNull()) continue;
+        const qreal margin = 10 + 12 * frame.level;
+        QPainterPath path;
+        path.addRoundedRect(bounds.adjusted(-margin, -margin, margin, margin), 10, 10);
+        auto* item = new QGraphicsPathItem(path);
+        QColor fill = frame.color;
+        fill.setAlpha(28);
+        QColor border = frame.color;
+        border.setAlpha(150);
+        item->setBrush(fill);
+        item->setPen(QPen(border, 1.5, Qt::DashLine));
+        item->setZValue(-5 - frame.level);
+        item->setAcceptedMouseButtons(Qt::NoButton);
+        item->setData(0, QStringLiteral("frame"));
+        scene_->addItem(item);
+        frames_.push_back(item);
+    }
 }
 
 GraphEditorWidget::NodeItem* GraphEditorWidget::FindItem(int nodeId) const
@@ -898,6 +937,7 @@ void GraphEditorWidget::NodeMoved(int nodeId, const QPointF& pos)
     if (GraphNodeData* node = document_.FindNode(nodeId)) node->pos = pos;
     moved_ = true;
     UpdateConnections();
+    UpdateFrames();
 }
 
 bool GraphEditorWidget::IsFixed(int nodeId) const

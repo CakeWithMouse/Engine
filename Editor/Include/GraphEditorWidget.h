@@ -30,6 +30,14 @@ struct GraphNodeStatus
     bool operator==(const GraphNodeStatus& other) const { return state == other.state && badge == other.badge && values == other.values; }
 };
 
+// Рамка вокруг группы нод (состояние автомата и его дети): рисуется под нодами, следует за ними, мышь не ловит.
+struct GraphNodeFrame
+{
+    QList<int> nodes; // ноды внутри рамки
+    QColor color;
+    int level = 0;    // сколько рамок вложено внутрь этой: внешние рамки шире
+};
+
 // Общий нодовый редактор: холст с сеткой, ноды и связи, выделение, история, буфер обмена, поиск нод,
 // ошибки на нодах. Что за ноды и что с чем соединяется, говорит GraphSchema; как выглядит содержимое
 // ноды и как правятся её свойства, решает наследник (MaterialGraphWidget, редактор скрипта).
@@ -121,6 +129,8 @@ protected:
     virtual void PaintNodeContent(QPainter* painter, const EditorCore::GraphNodeData& node, const QRectF& content,
                                   const QVariant& decoration) const {}
 
+    // Рамки групп нод; пересчитываются при перестройке сцены и перемещении нод.
+    virtual QVector<GraphNodeFrame> NodeFrames() const { return {}; }
     // Свойства ноды: двойной щелчок и первый пункт меню ноды.
     virtual void EditNode(int nodeId) {}
     virtual QString EditActionText(const EditorCore::GraphNodeData& node) const;
@@ -149,6 +159,7 @@ protected:
 private:
     void BuildUi();
     void UpdateConnections();
+    void UpdateFrames();
     NodeItem* FindItem(int nodeId) const;
     // Пин под точкой сцены: id ноды и имя; false — пусто.
     bool PinAt(const QPointF& scenePos, int& nodeId, QString& pin, bool& input) const;
@@ -178,6 +189,7 @@ private:
     QHBoxLayout* toolbar_ = nullptr;
     int toolbarIndex_ = 0;
     QList<QGraphicsPathItem*> links_;
+    QList<QGraphicsPathItem*> frames_;
 
     // Тянущаяся связь: от выхода (linkFromInput_ == false) или от входа.
     QGraphicsPathItem* dragLink_ = nullptr;
