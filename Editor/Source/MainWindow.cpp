@@ -692,16 +692,6 @@ void EditorMainWindow::ConnectPanels()
             c.path = QString::fromUtf8(QJsonDocument(data).toJson()); host_->PostCommand(c);
         }
     });
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseTextureRequested, this, [this] {
-        if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
-        const QString p = QFileDialog::getOpenFileName(this, QStringLiteral("Текстура из проекта"), QString::fromUtf8(host_->host().contentRoot), QStringLiteral("Текстуры (*.png *.jpg *.jpeg *.bmp *.tga)"));
-        if (!p.isEmpty()) UseAsset(p);
-    });
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearTextureRequested, this, [this] {
-        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
-        EditorCommand c; c.type = EditorCommand::SetTexture; c.objectId = selectedId_; host_->PostCommand(c);
-    });
-
     connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseMaterialRequested, this, [this]
     {
         if (!host_->HasScene() ||

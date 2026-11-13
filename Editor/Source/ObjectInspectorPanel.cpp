@@ -88,8 +88,6 @@ void ObjectInspectorPanel::BuildUi()
     cardGeometry_ = new GeometryCard(this);
     cardGeometry_->onChooseModel = [this] { emit ChooseModelRequested(); };
     cardGeometry_->onClearModel = [this] { emit ClearModelRequested(); };
-    cardGeometry_->onChooseTexture = [this] { emit ChooseTextureRequested(); };
-    cardGeometry_->onClearTexture = [this] { emit ClearTextureRequested(); };
 
     cardMaterial_ = new MaterialCard(this);
     cardMaterial_->onEditMaterial = [this](const QString& path) { emit EditMaterialRequested(path); };

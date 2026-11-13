@@ -80,8 +80,6 @@ signals:
     void ChooseModelRequested();
     void ClearModelRequested();
     void CharacterSpeedEditingFinished(quint64 objectId, double speed);
-    void ChooseTextureRequested();
-    void ClearTextureRequested();
     void ChooseMaterialRequested();
     void EditMaterialRequested(const QString& virtualPath);
     void ClearMaterialRequested();

@@ -9,6 +9,7 @@
 #include "UiSmokeTests.h"
 #include "ContentBrowserTests.h"
 #include "ContentBrowserTypeTests.h"
+#include "GeometryTextureActionTests.h"
 #include "EditorTheme.h"
 #include <QApplication>
 #include <iostream>
@@ -32,6 +33,7 @@ int main(int argc, char* argv[])
         ViewportBillboardTests::Run();
         ContentBrowserTests::Run();
         ContentBrowserTypeTests::RunStandalone();
+        GeometryTextureActionTests::Run();
         UiSmokeTests::Run();
         return 0;
     }
