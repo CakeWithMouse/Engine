@@ -1,5 +1,6 @@
 #pragma once
 #include "QtHost.h"
+#include "../Host/ModelReplacement.h"
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -41,6 +42,7 @@ struct Scene {
                 rows.append(o);
             }
             QJsonObject root;
+            root["version"] = 1;
             root["objects"] = rows;
             QFile f(QString::fromUtf8(path));
             return f.open(QIODevice::WriteOnly) && f.write(QJsonDocument(root).toJson()) > 0 ? EngineSceneOk : EngineSceneIoError;
@@ -94,7 +96,7 @@ inline int Run() {
     // 2. Replace model on Engine.Model (id=1)
     EditorCommand select;
     select.type = EditorCommand::SelectObject;
-    select.objectId = 1;
+    select.objectId = 2;
     host.PostCommand(select);
 
     EditorCommand cmd;
@@ -105,7 +107,8 @@ inline int Run() {
     host.Update(0.016);
 
     check(s.objects[1].model == "/Game/Models/Hero.fbx", "Model replaced to Hero.fbx");
-    check(host.ReadSnapshot().canUndo, "Exactly one Undo point recorded");
+    check(host.ReadSnapshot().canUndo, "Undo point recorded");
+    check(host.ReadSnapshot().selected == 1, "Explicit model target selected instead of prior primitive");
 
     // 3. Undo rolls back to original model
     EditorCommand undoCmd;
@@ -114,6 +117,7 @@ inline int Run() {
     host.Update(0.016);
 
     check(s.objects[1].model == "/Game/Models/CesiumMan.glb", "Undo restored original model CesiumMan");
+    check(!host.ReadSnapshot().canUndo, "Exactly one Undo point: none remain after undo");
     check(host.ReadSnapshot().canRedo, "canRedo is true after undo");
 
     // 4. Redo reapplies replaced model
@@ -145,6 +149,37 @@ inline int Run() {
     host.Update(0.016);
 
     check(s.objects[2].type == "Primitive.Cube", "Primitive is not mutated when replace is blocked");
+
+    // Unsupported representations fail before loadScene, with type/version context.
+    EditorHistory history;
+    check(history.Initialize(), "Initialize validation history");
+    const auto checkpoint = history.Checkpoint(s.api);
+    QFile saved(checkpoint);
+    check(saved.open(QIODevice::ReadOnly), "Read validation checkpoint");
+    const auto valid = QJsonDocument::fromJson(saved.readAll()).object(); saved.close();
+    auto rejected = [&](const QString& type, int version, bool malformed, const char* expected) {
+        auto root = valid; root["version"] = version;
+        auto rows = root["objects"].toArray(); auto object = rows[0].toObject();
+        object["type"] = type;
+        if (malformed) object["assets"] = QJsonArray();
+        rows[0] = object; root["objects"] = rows;
+        check(saved.open(QIODevice::WriteOnly | QIODevice::Truncate), "Write unsupported checkpoint");
+        saved.write(QJsonDocument(root).toJson()); saved.close();
+        bool refused = false;
+        try { EditorHost::ReplaceModel(s.api, history, checkpoint, cmd); }
+        catch (const std::exception& e) {
+            const QString message = QString::fromUtf8(e.what());
+            refused = message.contains(expected) && (type.startsWith("Primitive.") || !message.contains("C-ABI"));
+        }
+        check(refused, "Unsupported representation has precise diagnostic");
+        check(s.objects[1].model == modelBeforeEmpty, "Unsupported checkpoint leaves scene untouched");
+    };
+    rejected("Engine.Model", 1, true, "assets.model");
+    rejected("Engine.Model", 99, false, "version 99");
+    rejected("Project.Model", 1, false, "Project.Model");
+    rejected("Light.Point", 1, false, "Light.Point");
+    rejected("Primitive.Cube", 1, false, "C-ABI");
+    QFile::remove(checkpoint);
 
     return checks;
 }

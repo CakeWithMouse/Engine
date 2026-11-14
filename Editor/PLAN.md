@@ -1038,3 +1038,34 @@
 
 ## Чек-лист среза S19: Настройки импорта звуков
 > **Статус:** Позже (после приёмки S18).
+
+## Проверка замены модели в старых проектах — 2026-11-14
+
+- [x] Диагностика по всем 24 tracked `*.scene.json`, включая `Game/**/Main.scene.json`, примеры и архивы playtest. У всех 10 объектов с непустым `assets.model` тип **`Engine.Model`** (версии сцен 1 и 3); legacy-алиасов моделей не найдено. Шаблон `Game/Launcher/Source/ProjectLibrary.h` создаёт `Primitive.Plane`, `Primitive.Cube`, `Light.Point`, моделей в начальной сцене нет.
+- [x] Реальная старая fixture: `Agent/Playtests/2026-11-05-2026.11.05.1-r2/curious-city/evidence/final-probes/texture-final5-main.scene.json`. Исходный JSON: version=1, id=4, type=`Engine.Model`, model=`/Game/Models/CesiumMan/CesiumMan.glb`. После загрузки настоящим Game.dll: snapshot id=4, type=`Engine.Model`; JSON checkpoint также id=4, type=`Engine.Model`. Остальные snapshot-типы: id=1 `Primitive.Plane`, id=2/3 `Light.Point`, id=5/6 `Primitive.Cube`.
+- [x] Прослежен источник типа: `SceneDocument::Parse` читает `type` без переименования; `Restore` сохраняет его в компоненте; `Scene::GetSnapshot` → `SceneCommands::ReadScene` → `SceneCommandHandler::SceneVisitor` → инспектор передают тот же тип. Миграции версий 1–3 не содержат alias модели. Наличие геометрии у проектного компонента само по себе не делает его `Engine.Model`.
+- [x] Сообщение разработчика о несовместимом legacy-типе **не воспроизведено**. Замена архивной модели проходит и на исходном коде текущей ветки. В PR ранее был dangling pointer из `FindObject(host_->ReadSnapshot(), id)`; его lifetime уже исправлен merge-коммитом `c5f52d2`. Это возможное объяснение поведения старого Editor.dll, но DLL и конкретная проблемная сцена пользователя не исследованы, поэтому причиной инцидента это не объявляется.
+- [x] Единый `EditorCore::IsModelObjectType` используется инспектором, командой `Scene.ReplaceModel` и Host-путём `SceneCommandHandler` через `ModelReplacement.h`. Команда требует явный `objectId`, не подставляет текущий выбор. После перезагрузки выбирается именно её объект по позиции в документе, а не предыдущий выбор/неуникальное имя.
+- [x] Только примитивы получают сообщение C-ABI; для иных типов указано имя типа, для неподдерживаемого checkpoint-представления — тип, версия и требование `assets.model`. Проверка выполняется до загрузки кандидата, отклонённые операции не пополняют Undo и удаляют checkpoint. Изменяется только `assets.model`, новые поля/aliases/миграции не добавлены.
+- [x] Ограничение существующего движка: `Scene::GetSnapshot` уже **до замены** выдаёт version=3 при непустом `SaveProjectData` (включая эту старую сцену). Исправление сохраняет формат полученного checkpoint; исходный файл v1 не переписывается. Обещания сохранить v1 при последующем обычном Save нет: поведение сериализации Engine не менялось.
+
+Реально встречающиеся типы во всех проверенных сценах (число объектов):
+
+| Тип | Количество |
+| --- | ---: |
+| Engine.Model | 10 |
+| Primitive.Plane / Cube / Sphere / Cylinder / Cone / Pyramid | 17 / 18 / 1 / 6 / 1 / 1 |
+| Light.Point / Directional | 40 / 1 |
+| CalmCity.Building / Street / CarMover | 9 / 1 / 1 |
+| CuriousCity.CityRules / ProjectComponent / RotatingCube | 1 / 1 / 4 |
+| Gameplay.NavVolume / SmartObject / Player / AiCharacter | 2 / 3 / 1 / 2 |
+| RuntimeExample::MovingCube | 1 |
+
+Проверки:
+
+- Debug EditorModule собран. CoreTests **1057**, HostTests **197**, UiTests **655** (сумма опубликованных счётчиков, плюс отдельная проверка viewport) — PASS; минимумы 810/163/643 не снижены. Логи: `Engine/build/editor-regression/Debug-2d27a0d7360042c2a419c1cb76f70842`.
+- `Editor/tools/test-model-replacement.ps1 -Configuration Debug`: **35 проверок**, настоящие Game.dll, инспектор и CommandRegistry; реальная fixture скопирована побайтно, GLB взят из того же архива. Неархивированная текстура Renamed.bmp заменена тестовой checker.bmp из репозитория по тому же пути, JSON не редактируется. Замена → одна точка Undo → полный откат JSON; выбор другого объекта перед командой, отсутствие ID, примитив и свет, отсутствие новых Undo при отказе. PASS: `Engine/build/model-replacement/5afff79016c547a680b7a8593ffc3e4e`.
+- Red/green подтверждён возвратом трёх production-файлов к HEAD: старый код падает на восстановлении выбранного объекта (`replacement selects its target and records undo`), после возврата правки PASS. Red-лог: `Engine/build/model-replacement/21ac75a3681345f29e2a97028c8fe0a1`. Это регрессия явного target ID, не доказательство legacy-алиаса.
+- Слои Core/Host и `git diff --check` — PASS; все изменённые C++ файлы ≤500 строк (максимум 494). Изменения задачи только в Editor; `Engine`, `Game`, `build.ps1` в коммит не входят. Уже существующие изменения Launcher сохранены.
+
+Ручной сценарий: закрыть старый редактор, запустить собранный Debug Runtime с новым Editor.dll; открыть копию старого проекта; выбрать импортированный `Engine.Model` → «Заменить модель…» → другую модель; проверить геометрию и выбранный объект; один Undo возвращает исходное состояние. Выбрать куб/плоскость — кнопка замены недоступна. При повторении исходного сообщения зафиксировать `type` и id объекта в сцене и путь/версию фактически загруженного Editor.dll.

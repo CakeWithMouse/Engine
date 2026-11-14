@@ -1,9 +1,6 @@
 #include "SceneCommandHandler.h"
+#include "ModelReplacement.h"
 #include <QFile>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QTemporaryFile>
 #include <algorithm>
 #include <chrono>
 
@@ -134,50 +131,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
         }
         else if (cmd.type == EditorCommand::SetModel)
         {
-            if (cmd.path.trimmed().isEmpty()) {
-                result = EngineSceneInvalidArgument;
-                error = QStringLiteral("Путь к модели не может быть пустым.");
-                return;
-            }
-            const auto selectedName = GetSelectedObjectName();
-            QFile input(checkpoint);
-            if (!input.open(QIODevice::ReadOnly)) throw std::runtime_error("Cannot read model change checkpoint");
-            auto document = QJsonDocument::fromJson(input.readAll()).object();
-            auto objects = document["objects"].toArray();
-            bool found = false;
-            for (int i = 0; i < objects.size(); ++i) {
-                auto object = objects[i].toObject();
-                if (object["id"].toInteger() != static_cast<qint64>(cmd.objectId)) continue;
-                if (object["type"].toString() != "Engine.Model") {
-                    result = EngineSceneFailure;
-                    error = QStringLiteral("Замена геометрии примитива на модель заблокирована (требуется C-ABI).");
-                    return;
-                }
-                auto assets = object["assets"].toObject();
-                assets["model"] = cmd.path;
-                if (!assets.contains("texture")) assets["texture"] = "";
-                object["assets"] = assets;
-                objects[i] = object;
-                found = true;
-                break;
-            }
-            if (!found) throw std::runtime_error("Object no longer exists");
-            document["objects"] = objects;
-
-            QTemporaryFile candidate(history.GetTemporaryFilePath(QStringLiteral("model-XXXXXX.scene.json")));
-            const auto bytes = QJsonDocument(document).toJson();
-            if (!candidate.open() || candidate.write(bytes) != bytes.size() || !candidate.flush())
-                throw std::runtime_error("Cannot write model change candidate");
-            candidate.close();
-            uint64_t id = 0;
-            result = ctx.scene.loadScene(ctx.scene.context, candidate.fileName().toUtf8().constData(), &id, errorBuf, sizeof(errorBuf));
-            if (result == EngineSceneOk) {
-                IEditorHost::Snapshot restored;
-                EngineSceneInfo sinfo{};
-                ctx.scene.readActiveScene(ctx.scene.context, &sinfo, SceneVisitor, &restored);
-                selectedId_ = 0;
-                for (const auto& o : restored.objects) if (o.name == selectedName) selectedId_ = o.id;
-            }
+            SetSelectedId(EditorHost::ReplaceModel(ctx.scene, history, checkpoint, cmd));
         }
         else if (cmd.type == EditorCommand::SetTexture) {
             result = ctx.scene.setTexture(ctx.scene.context, cmd.objectId, cmd.path.toUtf8().constData(), errorBuf, sizeof(errorBuf));

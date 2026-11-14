@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "SceneObjectType.h"
 #include "EditorLocale.h"
 #include "QtHost.h"
 #include "CommandRegistry.h"
@@ -12,13 +13,11 @@
 #include "Logger.h"
 #include "FolderCommands.h"
 #include "AssetPickerDialog.h"
-
 #include <QAction>
 #include <QFileDialog>
 #include <QMenu>
 #include <QMessageBox>
 #include <chrono>
-
 namespace {
 const IEditorHost::SceneObject* FindObject(const IEditorHost::Snapshot& snap, uint64_t id)
 {
@@ -27,7 +26,6 @@ const IEditorHost::SceneObject* FindObject(const IEditorHost::Snapshot& snap, ui
     return nullptr;
 }
 }
-
 void EditorMainWindow::RegisterAssetCommands()
 {
     FolderCommands::Register(fileDock_, QFileInfo(ProjectPath()).dir().absolutePath(),
@@ -42,29 +40,23 @@ void EditorMainWindow::RegisterAssetCommands()
         [this](const CommandContext& ctx) {
             if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
                 return false;
-
             const int kind = ctx.parameters.value(QStringLiteral("kind"), 0).toInt();
             QString source = ctx.parameters.value(QStringLiteral("source")).toString();
             if (source.isEmpty())
                 source = ctx.parameters.value(QStringLiteral("path")).toString();
-
             const QString title = kind == 1
                 ? Tr("Импорт текстур в проект", "Import Textures to Project")
                 : kind == 2
                     ? Tr("Импорт аудио в проект", "Import Audio to Project")
                     : Tr("Импорт моделей в проект", "Import Models to Project");
-
             const QString filter = EditorCore::DialogFilter(static_cast<EditorCore::AssetKind>(kind));
-
             const QStringList paths = source.isEmpty()
                                           ? QFileDialog::getOpenFileNames(this, title, {}, filter)
                                           : QStringList{source};
-
             if (paths.isEmpty())
             {
                 return false;
             }
-
             float scale = 1.0f;
             QString optionsJson;
             if (kind == 0)
@@ -103,7 +95,6 @@ void EditorMainWindow::RegisterAssetCommands()
                     }
                 }
             }
-
             for (const auto& path : paths)
             {
                 EditorCommand c;
@@ -186,15 +177,17 @@ void EditorMainWindow::RegisterAssetCommands()
         [this](const CommandContext& ctx) {
             if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
                 return false;
-            const uint64_t targetId = ctx.parameters.value(QStringLiteral("objectId"), selectedId_).toULongLong();
+            const uint64_t targetId = ctx.parameters.value(QStringLiteral("objectId")).toULongLong();
             if (targetId == 0) return false;
             const auto snapshot = host_->ReadSnapshot();
             const auto* found = FindObject(snapshot, targetId);
             if (!found) return false;
-            if (found->type != "Engine.Model") {
+            if (!EditorCore::IsModelObjectType(found->type)) {
                 QMessageBox::warning(this, Tr("Замена недоступна", "Replacement Unavailable"),
-                    Tr("Замена геометрии примитива на модель заблокирована (требуется C-ABI движка).",
-                       "Replacing primitive geometry with a model is blocked (requires Engine C-ABI)."));
+                    EditorCore::IsPrimitiveObjectType(found->type) ? Tr("Замена геометрии примитива на модель заблокирована (требуется C-ABI движка).",
+                       "Replacing primitive geometry with a model is blocked (requires Engine C-ABI).") :
+                    Tr("Замена модели не поддерживается для типа %1.", "Model replacement is unsupported for type %1.")
+                        .arg(QString::fromStdString(found->type)));
                 return false;
             }
             QString newModel = ctx.parameters.value(QStringLiteral("model")).toString();
@@ -212,7 +205,7 @@ void EditorMainWindow::RegisterAssetCommands()
             return true;
         },
         [this]() {
-            return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit && selectedId_ != 0;
+            return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit;
         }
     });
 

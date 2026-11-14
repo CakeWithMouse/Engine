@@ -1,3 +1,4 @@
+#include "SceneObjectType.h"
 #include "ObjectInspectorPanel.h"
 #include "CollapsibleCard.h"
 #include "TransformCard.h"
@@ -341,8 +342,8 @@ void ObjectInspectorPanel::Refresh(
 
         selectedType_ = object.type;
         const std::string& type = object.type;
-        const bool isModel = (type == "Engine.Model");
-        const bool isPrimitive = (type.rfind("Primitive.", 0) == 0);
+        const bool isModel = EditorCore::IsModelObjectType(type);
+        const bool isPrimitive = EditorCore::IsPrimitiveObjectType(type);
         const bool isPointLight = object.hasPointLight || (type == "Light.Point") || (type == "Engine.PointLight");
         const bool isDirLight = (type == "Light.Directional");
         selectedLight = isPointLight || isDirLight;

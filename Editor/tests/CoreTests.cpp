@@ -1,4 +1,5 @@
 #include "../Core/IUserPrompt.h"
+#include "../Core/SceneObjectType.h"
 #include "../Core/Logger.h"
 #include "../Core/CommandRegistry.h"
 #include "../Core/FileService.h"
@@ -464,6 +465,12 @@ int main(int argc, char* argv[])
     std::fflush(stdout);
     AssetExtensionsTests::Run(gChecks);
 
+    Check(EditorCore::IsModelObjectType("Engine.Model"), "canonical model type");
+    Check(!EditorCore::IsModelObjectType("Primitive.Cube"), "primitive is not a model");
+    Check(!EditorCore::IsModelObjectType("Project.Model"), "custom types are not implicit model aliases");
+    Check(!EditorCore::IsModelObjectType(""), "empty type is not a model");
+    Check(EditorCore::IsPrimitiveObjectType("Primitive.Cube"), "primitive diagnostic");
+    Check(!EditorCore::IsPrimitiveObjectType("Light.Point"), "nonprimitive diagnostic");
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);
     return 0;

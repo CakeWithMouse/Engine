@@ -57,6 +57,8 @@
         <IntDir Condition="'$(EngineCommandlet)'=='true'">$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/obj/EngineCommandlets/</IntDir>
         <TargetName Condition="'$(EditorUiTest)'=='true'">EditorUiTests</TargetName>
         <IntDir Condition="'$(EditorUiTest)'=='true'">$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/obj/EditorUiTests/</IntDir>
+        <TargetName Condition="'$(EditorUiTest)'=='true' AND '$(ModelReplaceTest)'=='true'">ModelReplaceUiTests</TargetName>
+        <IntDir Condition="'$(EditorUiTest)'=='true' AND '$(ModelReplaceTest)'=='true'">$(RepositoryRoot)Game/build/$(Platform)/$(Configuration)/obj/ModelReplaceUiTests/</IntDir>
     </PropertyGroup>
 
     <!-- ===== Qt: подставьте свою версию/путь ===== -->
@@ -146,7 +148,11 @@
             <PrecompiledHeader>NotUsing</PrecompiledHeader>
             <ForcedIncludeFiles></ForcedIncludeFiles>
         </ClCompile>
-        <ClCompile Include="tests/EditorUiTests.cpp" Condition="'$(EditorUiTest)'=='true'">
+        <ClCompile Include="tests/EditorUiTests.cpp" Condition="'$(EditorUiTest)'=='true' AND '$(ModelReplaceTest)'!='true'">
+            <PrecompiledHeader>NotUsing</PrecompiledHeader>
+            <ForcedIncludeFiles></ForcedIncludeFiles>
+        </ClCompile>
+        <ClCompile Include="tests/ModelReplaceUiTests.cpp" Condition="'$(EditorUiTest)'=='true' AND '$(ModelReplaceTest)'=='true'">
             <PrecompiledHeader>NotUsing</PrecompiledHeader>
             <ForcedIncludeFiles></ForcedIncludeFiles>
         </ClCompile>
