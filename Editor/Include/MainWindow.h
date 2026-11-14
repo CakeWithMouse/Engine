@@ -9,6 +9,7 @@
 
 #include "ObjectInspectorPanel.h"
 #include "IEditorHost.h"
+#include <Engine/Runtime/PhysicsEditApi.h>
 #include "ModelImportSidecarTransaction.h"
 
 class QTreeWidget;
@@ -95,6 +96,8 @@ public:
     void ReloadShaders();
     void OpenUIEditor(const QString& path);
     void ShowHudSettings();
+    // Читает настройки физики в потоке движка и показывает диалог настройки.
+    void ShowPhysicsSettings();
     QString CreateUI(const QString& supplied = {});
 
 public slots:
@@ -119,6 +122,7 @@ private:
     enum class ImportSupport { Options, Defaults, Cancelled };
     ImportSupport EnsureModelImportSupport();
     void ShowProjectTypes();
+    void ShowPhysicsSettingsDialog(uint32_t status, uint32_t available, const EnginePhysicsSettingsState& state);
     void BuildUi();
     void BuildToolBar();
     void UpdatePlayButtons();
@@ -163,6 +167,7 @@ private:
 
     void OnTransformEdited(quint64 objectId, const InspectorTransformValue& value);
     void OnPointLightEdited(quint64 objectId, const InspectorPointLightValue& value);
+    void OnPhysicsEdited(quint64 objectId, const InspectorPhysicsValue& value);
     void OnLightColorRequested(quint64 objectId, const QColor& current);
 
     // Спрашивает о несохранённых материалах и закрывает их окна; false — закрытие отменено.

@@ -14,6 +14,7 @@ bool SceneCommandHandler::CanHandle(EditorCommand::Type type) const
     case EditorCommand::UpdateObjectTransform: case EditorCommand::CreateObject: case EditorCommand::CreateModel:
     case EditorCommand::SetModel: case EditorCommand::SetTexture: case EditorCommand::SetMaterial: case EditorCommand::SetScript:
     case EditorCommand::SetScriptVariables: case EditorCommand::SetPointLight: case EditorCommand::SetProperty: case EditorCommand::SetProjectData:
+    case EditorCommand::SetPhysicsBody:
     case EditorCommand::ConfigurePlay: case EditorCommand::RemoveObject: case EditorCommand::RenameObject:
     case EditorCommand::DuplicateObject: case EditorCommand::SetParent: case EditorCommand::SaveScene:
     case EditorCommand::LoadScene: case EditorCommand::NewScene: case EditorCommand::Undo: case EditorCommand::Redo:
@@ -46,6 +47,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
         cmd.type == EditorCommand::SetModel || cmd.type == EditorCommand::CreateModel || cmd.type == EditorCommand::SetTexture ||
         cmd.type == EditorCommand::SetMaterial || cmd.type == EditorCommand::SetScript || cmd.type == EditorCommand::SetScriptVariables ||
         cmd.type == EditorCommand::SetPointLight || cmd.type == EditorCommand::SetProjectData ||
+        cmd.type == EditorCommand::SetPhysicsBody ||
         cmd.type == EditorCommand::ConfigurePlay || cmd.type == EditorCommand::SetProperty || cmd.type == EditorCommand::SetParent);
 
     if ((mutation || cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene ||
@@ -164,6 +166,17 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
                 std::fflush(stdout);
             }
         }
+        else if (cmd.type == EditorCommand::SetPhysicsBody)
+        {
+            result = (ctx.physicsObject && ctx.physicsObject->write)
+                ? ctx.physicsObject->write(ctx.physicsObject->context, cmd.objectId, &cmd.physicsBody)
+                : EngineSceneReadOnly;
+            if (result == EngineSceneOk)
+            {
+                std::printf("[Info] SetPhysicsBody ok id=%llu enabled=%u body=%u shape=%u", cmd.objectId, cmd.physicsBody.enabled, cmd.physicsBody.bodyType, cmd.physicsBody.shapeType);
+                std::fflush(stdout);
+            }
+        }
         else if (cmd.type == EditorCommand::SetProperty)
         {
             result = ctx.authoring && ctx.authoring->setProperty ? ctx.authoring->setProperty(ctx.authoring->context, cmd.objectId, cmd.path.toUtf8().constData(), cmd.name.toUtf8().constData(), errorBuf, sizeof(errorBuf)) : EngineSceneReadOnly;
@@ -205,6 +218,8 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
             bool hasLight = false;
             bool castShadows = false;
             EngineScenePointLight light{};
+            bool hasPhysics = false;
+            EnginePhysicsObjectState physicsBody{};
 
             if (cmd.type == EditorCommand::DuplicateObject)
             {
@@ -223,6 +238,8 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
                 hasLight = found->hasPointLight;
                 light = found->pointLight;
                 castShadows = found->lightCastShadows;
+                hasPhysics = found->hasPhysics;
+                physicsBody = found->physics;
                 projectData = QString::fromStdString(found->projectData);
             }
             QString name = base;
@@ -248,6 +265,10 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
                     result = (ctx.pointLightV2 && ctx.pointLightV2->set)
                         ? ctx.pointLightV2->set(ctx.pointLightV2->context, id, &light, castShadows ? 1u : 0u)
                         : (api.setPointLight ? api.setPointLight(api.context, id, &light) : EngineSceneReadOnly);
+                if (result == EngineSceneOk && hasPhysics)
+                    result = (ctx.physicsObject && ctx.physicsObject->write)
+                        ? ctx.physicsObject->write(ctx.physicsObject->context, id, &physicsBody)
+                        : EngineSceneReadOnly;
                 if (result == EngineSceneOk && !projectData.isEmpty())
                     result = ctx.projectData.write ? ctx.projectData.write(ctx.projectData.context, id, projectData.toUtf8().constData()) : EngineSceneReadOnly;
                 if (result == EngineSceneOk && !projectData.isEmpty())
@@ -369,6 +390,8 @@ void ENGINE_MODULE_CALL SceneCommandHandler::SceneVisitor(void* context, const E
         info->hasPointLight != 0,
         info->hasPointLight == 2,
         info->pointLight,
+        false,
+        EnginePhysicsObjectState{},
         info->materialAsset ? info->materialAsset : ""
     });
 }
@@ -394,6 +417,19 @@ void SceneCommandHandler::PublishScene(const Context& ctx, IEditorHost::EditorSt
         for (auto& object : view.objects)
             ctx.projectData.read(ctx.projectData.context, object.id,
                 [](void* p, const char* value) { *static_cast<std::string*>(p) = (value ? value : ""); }, &object.projectData);
+    }
+
+    if (ctx.physicsObject && ctx.physicsObject->read)
+    {
+        for (auto& object : view.objects)
+        {
+            EnginePhysicsObjectState state{};
+            if (ctx.physicsObject->read(ctx.physicsObject->context, object.id, &state) == EngineSceneOk)
+            {
+                object.hasPhysics = true;
+                object.physics = state;
+            }
+        }
     }
 
     if (ctx.script && ctx.script->get)

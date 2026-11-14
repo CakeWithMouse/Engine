@@ -6,6 +6,7 @@
 #include <Engine/Runtime/ViewportInputApi.h>
 #include <Engine/Runtime/ViewportCursorApi.h>
 #include <Engine/Runtime/ViewportOverlayApi.h>
+#include <Engine/Runtime/PhysicsObjectEditApi.h>
 
 #include <Engine/Runtime/SceneBatchApi.h>
 #include <Engine/Runtime/EditExtensions.h>
@@ -33,7 +34,7 @@ struct EditorCommand
         FetchScene, UpdateObjectTransform, RefreshScene, SelectObject, CreateObject, RemoveObject,
         RenameObject, DuplicateObject, SaveScene, LoadScene, NewScene, Undo, Redo, PickObject, FocusObject,
         SetGizmoMode, BeginGizmoDrag, EndGizmoDrag, SetParent,
-        ImportModel, ImportTexture, ImportAudio, CreateModel, SetTexture, SetPointLight, SetMaterial, SetProjectData,
+        ImportModel, ImportTexture, ImportAudio, CreateModel, SetTexture, SetPointLight, SetPhysicsBody, SetMaterial, SetProjectData,
         PlayAudio, StopAudio,
         RunTask, WriteRecovery, DiscardRecovery, SetProperty, UpdateAsset,
         SetScript, // path: /Game путь .vscript, пустой — снять скрипт
@@ -53,6 +54,7 @@ struct EditorCommand
     EngineSceneTransform transform{{0, 0, 0}, {0, 0, 0, 1}, {1, 1, 1}};
     EngineScenePointLight pointLight{};
     bool castShadows = false;
+    EnginePhysicsObjectState physicsBody{};
     EditorGizmoMode gizmo = EditorGizmoTranslate;
     QString name;
     float importScale = 1.0f;
@@ -92,6 +94,8 @@ public:
         bool hasPointLight = false;
         bool lightCastShadows = false;
         EngineScenePointLight pointLight{};
+        bool hasPhysics = false;
+        EnginePhysicsObjectState physics{};
         std::string materialAsset;
         std::string scriptAsset; // визуальный скрипт; пусто без него
         std::string scriptVariables; // значения переменных скрипта у объекта (JSON-объект); пусто — как в скрипте

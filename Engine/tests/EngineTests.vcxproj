@@ -8,6 +8,10 @@
     <ProjectGuid>{94C78F3A-C155-4A75-AD59-E14231F655CE}</ProjectGuid>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion><PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <EngineEnableAssimp Condition="'$(EngineEnableAssimp)'==''">false</EngineEnableAssimp>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'=='' and Exists('$(MSBuildThisFileDirectory)..\vcpkg_installed\x64-windows\include\Jolt\Jolt.h')">true</EngineEnableJolt>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'==''">false</EngineEnableJolt>
+    <EngineEnableVcpkg>$(EngineEnableAssimp)</EngineEnableVcpkg>
+    <EngineEnableVcpkg Condition="'$(EngineEnableJolt)'=='true'">true</EngineEnableVcpkg>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
@@ -18,24 +22,24 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup>
-    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VCPKG_ROOT)'!=''">$(VCPKG_ROOT)\</VcpkgRoot>
-    <VcpkgRoot Condition="'$(VcpkgRoot)'==''">C:\vcpkg\</VcpkgRoot>
-    <VcpkgEnableManifest>$(EngineEnableAssimp)</VcpkgEnableManifest>
-    <VcpkgEnabled>$(EngineEnableAssimp)</VcpkgEnabled>
+    <VcpkgEnableManifest>$(EngineEnableVcpkg)</VcpkgEnableManifest>
+    <VcpkgEnabled>$(EngineEnableVcpkg)</VcpkgEnabled>
     <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\</VcpkgManifestRoot>
     <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\vcpkg_installed\</VcpkgInstalledDir>
   </PropertyGroup>
-  <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
+  <Import Project="..\BuildSupport\VcpkgRoot.props" />
+  <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableVcpkg)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Import Project="..\BuildSupport\Cpp.props" />
   <ItemDefinitionGroup Condition="'$(EngineEnableAssimp)'=='true'"><ClCompile><PreprocessorDefinitions>ENGINE_ENABLE_ASSIMP;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile></ItemDefinitionGroup>
-  <ItemGroup><ClCompile Include="SoundDecoderTests.cpp" /></ItemGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true'"><ClCompile><PreprocessorDefinitions>ENGINE_ENABLE_JOLT;%(PreprocessorDefinitions)</PreprocessorDefinitions></ClCompile></ItemDefinitionGroup>
+  <ItemGroup><ClCompile Include="PhysicsTests.cpp" /><ClCompile Include="SoundDecoderTests.cpp" /></ItemGroup>
   <ItemGroup><ClCompile Include="EngineTests.cpp" /><ClCompile Include="PrimitiveApiTests.cpp" /><ClCompile Include="GameSettingsTests.cpp" /><ClCompile Include="SceneTests.cpp" /><ClCompile Include="TraceTests.cpp" /><ClCompile Include="../examples/TraceExamples.cpp" /><ClCompile Include="SceneBatchTests.cpp" /><ClCompile Include="AuthoringTests.cpp" /><ClCompile Include="ScriptTests.cpp" /><ClCompile Include="AiMachineExtensionTests.cpp" /><ClCompile Include="VfsLifecycleTests.cpp" /><ClCompile Include="VfsServiceTests.cpp" /><ClCompile Include="VfsServiceReadTests.cpp" /><ClCompile Include="VfsProxyLifecycleTests.cpp" /></ItemGroup>
   <ItemGroup><ProjectReference Include="..\Engine.vcxproj"><Project>{90A42B03-FDD9-4E98-834D-49B44E58C029}</Project></ProjectReference></ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
-  <Target Name="RequireAssimpDependencies" BeforeTargets="PrepareForBuild" Condition="'$(EngineEnableAssimp)'=='true'">
-    <Error Condition="!Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" Text="EngineEnableAssimp requires vcpkg. Set VCPKG_ROOT or /p:VcpkgRoot to the installed vcpkg directory." />
+  <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets" Condition="'$(EngineEnableVcpkg)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.targets')" />
+  <Target Name="RequireVcpkgDependencies" BeforeTargets="PrepareForBuild" Condition="'$(EngineEnableVcpkg)'=='true'">
+    <Error Condition="!Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" Text="vcpkg-dependent features (assimp, Jolt physics) require vcpkg. Set VCPKG_ROOT or /p:VcpkgRoot to the installed vcpkg directory." />
   </Target>
   <Import Project="..\BuildSupport\Content.targets" />
 </Project>

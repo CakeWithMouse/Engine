@@ -5,6 +5,8 @@
 #include "AssetCommandHandler.h"
 #include "SceneCommandHandler.h"
 #include <Engine/Runtime/EditExtensions.h>
+#include <Engine/Runtime/PhysicsEditApi.h>
+#include <Engine/Runtime/PhysicsObjectEditApi.h>
 
 #include <atomic>
 #include <cstdint>
@@ -77,6 +79,12 @@ public:
     }
     void SetSelectionApi(const EngineSelectionApi& api) { selection_ = api; }
     void SetAudioPreviewApi(const EngineAudioPreviewApi& api) { audio_ = api; }
+    void SetPhysicsApi(const EnginePhysicsApi& api) { physics_ = api; }
+    // Доступен только если игровой модуль реализует EnginePhysicsExtension.
+    const EnginePhysicsApi* PhysicsApi() const { return physics_.read ? &physics_ : nullptr; }
+    void SetPhysicsObjectApi(const EnginePhysicsObjectApi& api) { physicsObject_ = api; }
+    // Доступен только если игровой модуль реализует EnginePhysicsObjectExtension.
+    const EnginePhysicsObjectApi* PhysicsObjectApi() const { return physicsObject_.read ? &physicsObject_ : nullptr; }
     // Доступен только если игровой модуль реализует EngineAudioPreviewExtension.
     const EngineAudioPreviewApi* AudioApi() const { return audio_.play ? &audio_ : nullptr; }
     void SetAssetImportApi(const EngineAssetImportApi& api) { assetImport_ = api; }
@@ -144,6 +152,8 @@ private:
     bool viewportFocused_ = false;
     EngineViewportOverlayApi overlay_{};
     EngineAudioPreviewApi audio_{};
+    EnginePhysicsApi physics_{};
+    EnginePhysicsObjectApi physicsObject_{};
     EngineAssetImportApi assetImport_{};
     uint32_t antialiasingMode_ = 1;
 

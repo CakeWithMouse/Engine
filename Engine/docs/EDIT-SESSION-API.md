@@ -310,6 +310,29 @@ Play-копия и превью. Файл пишет только `saveMaterial`
 наличии `audio.play`. Реализация — `SceneEditSession::GetAudioPreviewApi`
 (`Source/Runtime/SceneEditAudio.cpp`), экспорт — `SceneModule.inl`.
 
+## Дополнение: расширения физики (мир и объекты)
+
+Настройки физики поставляются двумя именованными расширениями вместо роста базовых таблиц.
+Игровой модуль экспортирует их через `EngineGetEditExtension`, host забирает в `GameEditModule`
+и передаёт редактору: мир — экспортом `EngineBindPhysics` (записывает `EnginePhysicsApi`,
+`Include/Engine/Runtime/PhysicsEditApi.h`), объекты — экспортом `EngineBindPhysicsObject`
+(`EnginePhysicsObjectApi`, `Include/Engine/Runtime/PhysicsObjectEditApi.h`).
+
+| Расширение | Назначение |
+|---|---|
+| `Engine.Physics` (v1) | Гравитация, фиксированный шаг, подшаги и итерации solver'а мира. `read`/`write` работают с `EnginePhysicsSettingsState` активной сцены (edit или Play) |
+| `Engine.Scene.PhysicsObject` (v1) | Rigid body отдельного объекта: `read(context, objectId, EnginePhysicsObjectState*)` возвращает Ok либо NotFound, если физика объекта не настраивалась; `write` применяет блок к любому компоненту (только Edit; в Play/Pause мутации сцены уже ReadOnly). `available` — 1, когда движок собран с Jolt |
+
+Состояние объекта: `enabled` (0/1), `bodyType` (0 static / 1 dynamic / 2 kinematic),
+`shapeType` (0 box / 1 sphere / 2 capsule), `friction` и `restitution` (>= 0), `density` (> 0).
+Размеры формы выводятся из мирового масштаба объекта. Значения хранятся в компоненте
+(`GameComponent::SetPhysicsEnabled` и т.д.) и сериализуются в блоке `physics` документа сцены
+(см. [SCENE-JSON](SCENE-JSON.md)). Динамические тела двигают transform компонента во время Play,
+статические и кинематические следуют за ним; режим Edit не симулирует.
+Редактор шлёт правки командой `EditorCommand::SetPhysicsBody` (`SceneCommandHandler`), читает
+состояние в `IEditorHost::Snapshot::SceneObject::physics`. Пример потребителя — карточка
+«Физика» в `Editor/Source/ObjectInspectorPanel.cpp`, мировые настройки — `Editor/Source/PhysicsTools.cpp`.
+
 ## Игровые подсистемы
 
 `ENGINE_SUBSYSTEM()` в заголовке Source автоматически добавляет класс в каталог при обычной сборке. Подсистемы принадлежат GameSession, сохраняются между сценами и при Pause, уничтожаются при Stop. Edit и preview не создают их. Получение: `game.GetSubsystem<T>()`; тик включается только полем `bTickEnabled`. Подробнее: [создание, lifecycle, SDK и переходы между сценами](GAME-SUBSYSTEMS.md).

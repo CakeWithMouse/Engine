@@ -27,6 +27,7 @@
 #include "PropertySection.h"
 #include <Engine/Runtime/LegacyEditApi.h>
 #include <Engine/Runtime/EditExtensions.h>
+#include <Engine/Runtime/PhysicsEditApi.h>
 #include <Engine/Runtime/ProjectDataApi.h>
 #include <Engine/Runtime/GameEditModule.h>
 #include <QDialog>
@@ -286,6 +287,20 @@ int wmain(int argc, wchar_t** argv)
             Check(!query(api.context,EngineViewportCursorExtension,1,sizeof(rejected)-1,&rejected)&&rejected.version==99,"cursor extension size rejected");}
         EngineViewportInputApi viewportInput{};
         if (!legacy && query && query(api.context,EngineViewportInputExtension,1,sizeof(viewportInput),&viewportInput)) host.SetViewportInputApi(viewportInput);
+        EnginePhysicsApi physics{};
+        if (!legacy && query && query(api.context,EnginePhysicsExtension,1,sizeof(physics),&physics)) host.SetPhysicsApi(physics);
+        if (!legacy && physics.read)
+        {
+            EnginePhysicsSettingsState physicsState{};
+            Check(physics.read(physics.context,&physicsState)==EngineSceneOk,"physics settings read");
+            Check(physicsState.enabled==1&&physicsState.gravityY==-9.81f&&physicsState.maxSubSteps==5,"physics settings defaults");
+            const EnginePhysicsSettingsState physicsNext{0,0.0f,-1.5f,0.0f,1.0f/120.0f,3,12,4};
+            Check(physics.write(physics.context,&physicsNext)==EngineSceneOk,"physics settings write");
+            EnginePhysicsSettingsState physicsReread{};
+            Check(physics.read(physics.context,&physicsReread)==EngineSceneOk&&physicsReread.enabled==0&&
+                  physicsReread.velocitySteps==12&&physicsReread.maxSubSteps==3&&physicsReread.fixedTimeStep==1.0f/120.0f,
+                  "physics settings round trip");
+        }
         EngineScriptApi script{};
         if (!legacy && query && query(api.context,EngineScriptExtension,1,sizeof(script),&script)) host.SetScriptApi(script);
         if (!legacy) {

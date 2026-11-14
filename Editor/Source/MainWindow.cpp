@@ -18,6 +18,7 @@
 #include "UIEditorWindow.h"
 
 #include <QActionGroup>
+#include <algorithm>
 #include <QDockWidget>
 #include <QCloseEvent>
 #include <QDir>
@@ -369,6 +370,8 @@ void EditorMainWindow::BuildSceneMenu()
     playMenu_ = menuBar()->addMenu(Tr("Запуск", "Play"));
     auto* hudSettings = playMenu_->addAction(Tr("HUD игры…", "Game HUD…"), this, &EditorMainWindow::ShowHudSettings);
     hudSettings->setObjectName("ProjectHudSettings");
+    playMenu_->addAction(Tr("Физика…", "Physics…"), this, &EditorMainWindow::ShowPhysicsSettings)
+        ->setObjectName("PhysicsSettings");
     if (actPlay_) playMenu_->addAction(actPlay_);
     if (actPause_) playMenu_->addAction(actPause_);
     if (actStop_) playMenu_->addAction(actStop_);
@@ -907,6 +910,9 @@ void EditorMainWindow::ConnectPanels()
     connect(objectInspectorPanel_, &ObjectInspectorPanel::PointLightEditingFinished,
             this, &EditorMainWindow::OnPointLightEdited);
 
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::PhysicsEditingFinished,
+            this, &EditorMainWindow::OnPhysicsEdited);
+
     connect(objectInspectorPanel_, &ObjectInspectorPanel::LightColorRequested,
             this, &EditorMainWindow::OnLightColorRequested);
 }
@@ -1160,6 +1166,50 @@ void EditorMainWindow::OnPointLightEdited(
     }
 }
 
+void EditorMainWindow::OnPhysicsEdited(
+    quint64 objectId,
+    const InspectorPhysicsValue& value
+)
+{
+    if (!objectId || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+        return;
+
+    for (const auto& object : host_->ReadSnapshot().objects)
+    {
+        if (object.id != objectId)
+            continue;
+
+        // Unconfigured objects carry no stored state; compare against the defaults.
+        const EnginePhysicsObjectState current = object.hasPhysics
+            ? object.physics
+            : EnginePhysicsObjectState{0u, 1u, 0u, 0.5f, 0.0f, 1000.0f};
+
+        EditorCommand c;
+        c.type = EditorCommand::SetPhysicsBody;
+        c.objectId = objectId;
+        c.physicsBody = {
+            value.enabled ? 1u : 0u,
+            static_cast<uint32_t>(std::clamp(value.bodyType, 0, 2)),
+            static_cast<uint32_t>(std::clamp(value.shapeType, 0, 2)),
+            static_cast<float>(value.friction),
+            static_cast<float>(value.restitution),
+            static_cast<float>(value.density)};
+
+        const bool changed =
+            c.physicsBody.enabled != current.enabled ||
+            c.physicsBody.bodyType != current.bodyType ||
+            c.physicsBody.shapeType != current.shapeType ||
+            std::abs(c.physicsBody.friction - current.friction) > 0.0006f ||
+            std::abs(c.physicsBody.restitution - current.restitution) > 0.0006f ||
+            std::abs(c.physicsBody.density - current.density) > 0.0006f;
+        if (!changed)
+            return;
+
+        host_->PostCommand(c);
+        return;
+    }
+}
+
 void EditorMainWindow::OnLightColorRequested(quint64 objectId, const QColor& current)
 {
     if (!objectId || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
@@ -1205,6 +1255,7 @@ static bool IsUserFacingCommand(EditorCommand::Type t)
     case EditorCommand::SetModel: case EditorCommand::SetTexture: case EditorCommand::SetMaterial:
     case EditorCommand::SetPointLight: case EditorCommand::SetProjectData: case EditorCommand::UpdateAsset:
     case EditorCommand::SetScriptVariables:
+    case EditorCommand::SetPhysicsBody:
     case EditorCommand::ImportModel: case EditorCommand::ImportTexture: case EditorCommand::ImportAudio:
     case EditorCommand::SaveScene:
     case EditorCommand::LoadScene: case EditorCommand::NewScene: case EditorCommand::ReloadProject: return true;

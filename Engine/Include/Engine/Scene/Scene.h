@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <Engine/Physics/PhysicsWorld.h>
 #include <Engine/Scene/Trace.h>
 #include <map>
 #include <memory>
@@ -51,6 +52,18 @@ struct SceneComponentSnapshot
         bool IsValid() const noexcept;
     };
     std::optional<PointLight> pointLight;
+    // Per-object physics (rigid body) settings; absent when never configured.
+    struct PhysicsBody
+    {
+        bool enabled = false;
+        PhysicsBodyType bodyType = PhysicsBodyType::Dynamic;
+        PhysicsShapeType shapeType = PhysicsShapeType::Box;
+        float friction = 0.5f;
+        float restitution = 0.0f;
+        float density = 1000.0f;
+        bool IsValid() const noexcept;
+    };
+    std::optional<PhysicsBody> physics;
     std::string projectData; // module-defined UTF-8 JSON; scene format 3
     std::string scriptAsset; // /Game path of a .vscript, empty without one ("assets.script")
     std::string scriptVariables; // JSON object of variable values for this object, empty for none ("assets.scriptVariables")
@@ -100,6 +113,8 @@ public:
     SceneResult SetScriptAsset(ComponentId id, const std::string& path);
     SceneResult SetScriptVariables(ComponentId id, const std::string& json);
     SceneResult SetPointLight(ComponentId id, const SceneComponentSnapshot::PointLight& light);
+    // Applies rigid body settings to any component; physics runs only in Play.
+    SceneResult SetPhysicsBody(ComponentId id, const SceneComponentSnapshot::PhysicsBody& body);
     void SetDocumentVersion(uint32_t version);
 
     // Covers custom game update order too. The outermost scope commits pending edits,

@@ -1,4 +1,4 @@
-﻿#include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/MainGame/BaseGameClass/Game.h>
 #define SCENE_MODULE_DOCUMENT_VERSION 3
 #include <Engine/SaveGame/SaveGame.h>
 #ifndef SCENE_MODULE_CREATE_GAME
@@ -287,6 +287,16 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetEditExtension(void* contex
     if (std::strcmp(name, EngineAudioPreviewExtension) == 0 && size == sizeof(EngineAudioPreviewApi))
     {
         *static_cast<EngineAudioPreviewApi*>(output) = static_cast<SceneEditSession*>(context)->GetAudioPreviewApi();
+        return 1;
+    }
+    if (std::strcmp(name, EnginePhysicsExtension) == 0 && size == sizeof(EnginePhysicsApi))
+    {
+        *static_cast<EnginePhysicsApi*>(output) = static_cast<SceneEditSession*>(context)->GetPhysicsApi();
+        return 1;
+    }
+    if (std::strcmp(name, EnginePhysicsObjectExtension) == 0 && size == sizeof(EnginePhysicsObjectApi))
+    {
+        *static_cast<EnginePhysicsObjectApi*>(output) = static_cast<SceneEditSession*>(context)->GetPhysicsObjectApi();
         return 1;
     }
     if (std::strcmp(name, EngineScriptExtension) == 0 && size == sizeof(EngineScriptApi))
