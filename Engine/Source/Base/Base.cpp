@@ -11,6 +11,8 @@
 #include <Engine/Runtime/ViewportSession.h>
 #include <Engine/Runtime/GameEditModule.h>
 #include <Engine/Runtime/EditExtensions.h>
+#include <Engine/Runtime/PhysicsEditApi.h>
+#include <Engine/Runtime/PhysicsObjectEditApi.h>
 #include <Engine/Runtime/GameSceneApi.h>
 #include <Engine/Runtime/GameWindowApi.h>
 #include <Engine/Resources/Paths.h>
@@ -123,6 +125,8 @@ class BaseEngine::LoadedSession
     EngineBindViewportInputFn bindViewportInput = nullptr;
     EngineBindViewportOverlayFn bindViewportOverlay = nullptr;
     EngineBindAudioPreviewFn bindAudioPreview = nullptr;
+    EngineBindPhysicsFn bindPhysics = nullptr;
+    EngineBindPhysicsObjectFn bindPhysicsObject = nullptr;
     using EngineBindAssetImportFn = int (ENGINE_MODULE_CALL *)(uint32_t, uint32_t, void*, const EngineAssetImportApi*);
     EngineBindAssetImportFn bindAssetImport = nullptr;
     std::function<void()> releaseEdit;
@@ -209,7 +213,7 @@ class BaseEngine::LoadedSession
     }
 
     void LoadAndInitialize(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host,
-        const EngineEditSessionApi* editApi = nullptr, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr, const EngineViewportOverlayApi* overlay = nullptr, const EngineAudioPreviewApi* audioPreview = nullptr)
+        const EngineEditSessionApi* editApi = nullptr, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr, const EngineViewportOverlayApi* overlay = nullptr, const EngineAudioPreviewApi* audioPreview = nullptr, const EnginePhysicsApi* physics = nullptr, const EnginePhysicsObjectApi* physicsObject = nullptr)
     {
         originalPath = path;
         moduleKind = kind;
@@ -272,6 +276,14 @@ class BaseEngine::LoadedSession
             if (bindAudioPreview && audioPreview && audioPreview->play &&
                 !bindAudioPreview(1, sizeof(*audioPreview), session, audioPreview))
                 throw std::runtime_error("Cannot bind audio preview API");
+            bindPhysics = reinterpret_cast<EngineBindPhysicsFn>(GetProcAddress(library, "EngineBindPhysics"));
+            if (bindPhysics && physics && physics->read &&
+                !bindPhysics(1, sizeof(*physics), session, physics))
+                throw std::runtime_error("Cannot bind physics API");
+            bindPhysicsObject = reinterpret_cast<EngineBindPhysicsObjectFn>(GetProcAddress(library, "EngineBindPhysicsObject"));
+            if (bindPhysicsObject && physicsObject && physicsObject->read &&
+                !bindPhysicsObject(1, sizeof(*physicsObject), session, physicsObject))
+                throw std::runtime_error("Cannot bind physics object API");
             bindAssetImport = reinterpret_cast<EngineBindAssetImportFn>(GetProcAddress(library, "EngineBindAssetImport"));
             if (bindAssetImport && editApi && editApi->createModel)
             {
@@ -359,11 +371,11 @@ public:
 
     void Open(const std::filesystem::path& path, uint32_t kind, const EngineModuleHost& host,
         const EngineEditSessionApi* editApi = nullptr, std::function<void()> cleanup = {},
-        const std::filesystem::path& startupScene = {}, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr, const EngineViewportOverlayApi* overlay = nullptr, const EngineAudioPreviewApi* audioPreview = nullptr)
+        const std::filesystem::path& startupScene = {}, const EngineProjectDataApi* projectData = nullptr, const EngineSelectionApi* selection = nullptr, const EngineViewportInputApi* viewportInput = nullptr, const EngineViewportOverlayApi* overlay = nullptr, const EngineAudioPreviewApi* audioPreview = nullptr, const EnginePhysicsApi* physics = nullptr, const EnginePhysicsObjectApi* physicsObject = nullptr)
     {
         startupScenePath = startupScene;
         releaseEdit = std::move(cleanup);
-        LoadAndInitialize(path, kind, host, editApi, projectData, selection, viewportInput, overlay, audioPreview);
+        LoadAndInitialize(path, kind, host, editApi, projectData, selection, viewportInput, overlay, audioPreview, physics, physicsObject);
     }
 
     bool Reload()
@@ -422,6 +434,10 @@ public:
         bindProjectData = nullptr;
         if (session && bindAudioPreview) bindAudioPreview(1, sizeof(EngineAudioPreviewApi), session, nullptr);
         bindAudioPreview = nullptr;
+        if (session && bindPhysics) bindPhysics(1, sizeof(EnginePhysicsApi), session, nullptr);
+        bindPhysics = nullptr;
+        if (session && bindPhysicsObject) bindPhysicsObject(1, sizeof(EnginePhysicsObjectApi), session, nullptr);
+        bindPhysicsObject = nullptr;
         if (session && bindAssetImport) bindAssetImport(1, sizeof(EngineAssetImportApi), session, nullptr);
         bindAssetImport = nullptr;
         if (session && bindViewportOverlay) bindViewportOverlay(1, sizeof(EngineViewportOverlayApi), session, nullptr);
@@ -801,7 +817,9 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
         activeSession->Open(options.module, options.mode == RuntimeMode::Game ? ENGINE_MODULE_GAME : ENGINE_MODULE_EDITOR, host,
             editModule ? &editModule->Api() : nullptr, [this] { editModule.reset(); }, options.startupScene,
             editModule ? &editModule->ProjectDataApi() : nullptr, editModule ? &editModule->SelectionApi() : nullptr, editModule ? &editModule->ViewportInputApi() : nullptr, editModule ? &editModule->ViewportOverlayApi() : nullptr,
-            editModule ? &editModule->AudioPreviewApi() : nullptr);
+            editModule ? &editModule->AudioPreviewApi() : nullptr,
+            editModule ? &editModule->PhysicsApi() : nullptr,
+            editModule ? &editModule->PhysicsObjectApi() : nullptr);
         state = State::Playing;
         if (!options.frames && options.mode != RuntimeMode::Editor) std::puts("Interactive stub: Enter = frame, r = reload, b = build, br = build+reload, ls, find, import, info, mkdir, rm/del, mv, cp, cat, q = exit.");
         auto previous = std::chrono::steady_clock::now();

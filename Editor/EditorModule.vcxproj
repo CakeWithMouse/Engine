@@ -35,12 +35,12 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(EngineCommandlet)'=='true'">
-        <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VCPKG_ROOT)'!=''">$(VCPKG_ROOT)\</VcpkgRoot>
         <VcpkgEnableManifest>$(EngineEnableAssimp)</VcpkgEnableManifest>
         <VcpkgEnabled>$(EngineEnableAssimp)</VcpkgEnabled>
         <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\Engine\</VcpkgManifestRoot>
         <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\Engine\vcpkg_installed\</VcpkgInstalledDir>
     </PropertyGroup>
+    <Import Project="..\Engine\BuildSupport\VcpkgRoot.props" />
     <Import Project="$(VcpkgRoot)scripts/buildsystems/msbuild/vcpkg.props" Condition="'$(EngineCommandlet)'=='true' and '$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts/buildsystems/msbuild/vcpkg.props')"/>
     <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props"/>
     <Import Project="..\Engine\BuildSupport\Cpp.props"/>
@@ -239,6 +239,7 @@
         </ClCompile>
         <ClCompile Include="Source/UIEditorWindow.cpp"/>
         <ClCompile Include="Source/HudTools.cpp"/>
+        <ClCompile Include="Source/PhysicsTools.cpp"/>
         <ClCompile Include="../Engine/Source/UI/UIElement.cpp">
             <PrecompiledHeader>NotUsing</PrecompiledHeader>
             <ForcedIncludeFiles></ForcedIncludeFiles>
@@ -449,4 +450,12 @@
     <ImportGroup Label="ExtensionTargets"/>
   <ItemGroup><ClCompile Include="Source/CodeTools.cpp" /><ClCompile Include="Source/ImportMigration.cpp" /></ItemGroup>
     <Import Project="../Engine/BuildSupport/AssimpRuntime.targets" />
+
+  <PropertyGroup>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'=='' and Exists('..\Engine\vcpkg_installed\x64-windows\include\Jolt\Jolt.h')">true</EngineEnableJolt>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'==''">false</EngineEnableJolt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Debug'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/debug/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Release'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+    <Import Project="../Engine/BuildSupport/JoltRuntime.targets"/>
 </Project>
