@@ -1,0 +1,438 @@
+{
+  "title": "PainEngine\nФизика",
+  "outputPrefix": "PainEngine-Physics",
+  "date": "2026-11-14",
+  "revision": 1,
+  "engineVersion": "0.3.1",
+  "sourceCommit": "38aa8d6fcbae032d03d12721b16a6cade885e70f",
+  "slides": [
+    {
+      "type": "cover",
+      "title": "PainEngine\nФизика",
+      "subtitle": "Версия 0.3.1\nРедактор, сцены и C++",
+      "image": "r8/editor-assets.png",
+      "sources": [
+        "Engine/Source/Components/GameComponents.cpp",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Engine/Source/Scene/Scene.cpp",
+        "Engine/Source/Physics/PhysicsWorld.cpp",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp"
+      ],
+      "notes": "Обложка использует исторический реальный снимок редактора. D3D viewport не захватывается Qt. Отдельные снимки карточки и окна физики далее сделаны из кода 0.3.1 с тестовыми значениями."
+    },
+    {
+      "type": "rows",
+      "title": "Что симулирует движок",
+      "items": [
+        [
+          "Jolt 5.6.0",
+          "Твёрдые тела, гравитация и столкновения примитивных форм."
+        ],
+        [
+          "GameComponent",
+          "Любой объект может включить физику. Рисование и физическое тело настраиваются отдельно."
+        ],
+        [
+          "PhysicsWorld",
+          "Мир создаёт тела и рассчитывает движение во время игры."
+        ]
+      ],
+      "notes": "RigidBodyComponent включает физику, но IsRenderable() возвращает false. Для видимого предмета используйте компонент с геометрией.",
+      "sources": [
+        "Engine/Source/Components/GameComponents.cpp",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Engine/Source/Scene/Scene.cpp",
+        "Engine/Source/Physics/PhysicsWorld.cpp",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp"
+      ],
+      "foot": ""
+    },
+    {
+      "type": "table",
+      "title": "Типы физического тела",
+      "headers": [
+        "Тип",
+        "Управление движением"
+      ],
+      "rows": [
+        [
+          "Static",
+          "Неподвижная опора: пол или стена"
+        ],
+        [
+          "Dynamic",
+          "Движение рассчитывает физика"
+        ],
+        [
+          "Kinematic",
+          "Положение задаёт игровой код"
+        ]
+      ],
+      "notes": "Dynamic получает позу от PhysicsWorld. Static и Kinematic передают transform компонента в тело через SetPositionAndRotation. Кинематическое движение сейчас задаётся позой, без отдельного API MoveKinematic.",
+      "sources": [
+        "Engine/Source/Components/GameComponents.cpp",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Engine/Source/Scene/Scene.cpp",
+        "Engine/Source/Physics/PhysicsWorld.cpp",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp"
+      ],
+      "foot": ""
+    },
+    {
+      "type": "shot",
+      "title": "Физическое тело объекта",
+      "image": "r13/physics-body.png",
+      "items": [
+        [
+          "Тип тела",
+          "Статическое для пола. Динамическое для падающего предмета."
+        ],
+        [
+          "Форма",
+          "Куб, сфера или капсула. Размер задаёт масштаб компонента."
+        ],
+        [
+          "Материал",
+          "Трение, упругость и плотность задаются у объекта."
+        ]
+      ],
+      "notes": "Реальная карточка ObjectInspectorPanel из исходников 0.3.1. Снимок отдельного Qt-компонента с тестовыми данными динамического куба, без D3D viewport. Кинематическое тело следует transform из игрового кода. Плотность влияет на массу динамического тела. Коллайдер не повторяет треугольники импортированной модели. Уточнение по реализации: GetScale() возвращает ComponentScale, без масштаба родителя. Поза тела при создании мировая.",
+      "sources": [
+        "Engine/docs/PHYSICS.md",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Editor/Source/PhysicsTools.cpp",
+        "Editor/Source/ObjectInspectorPanel.cpp"
+      ],
+      "foot": "Правка параметров тела доступна в Edit и поддерживает Undo/Redo."
+    },
+    {
+      "type": "table",
+      "title": "Размеры коллайдера",
+      "headers": [
+        "Форма",
+        "Расчёт при создании тела"
+      ],
+      "rows": [
+        [
+          "Box",
+          "Половина размеров = 0.5 × abs(scale)"
+        ],
+        [
+          "Sphere",
+          "Радиус = 0.5 × max(abs(scale))"
+        ],
+        [
+          "Capsule",
+          "Радиус как у сферы, полувысота цилиндра = 0.5 × abs(scale.y)"
+        ]
+      ],
+      "notes": "Источник CreatePhysicsBody(). scale берётся из GetScale(), который возвращает ComponentScale. Это локальный масштаб компонента, хотя комментарий в коде и PHYSICS.md называют его мировым. Масштаб родителя отдельно не учитывается. Форма не строится по треугольникам модели.",
+      "sources": [
+        "Engine/Source/Components/GameComponents.cpp",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Engine/Source/Scene/Scene.cpp",
+        "Engine/Source/Physics/PhysicsWorld.cpp",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp"
+      ],
+      "foot": "Форма использует масштаб компонента. Масштаб родителя отдельно не учитывается."
+    },
+    {
+      "type": "rows",
+      "title": "Материал физического тела",
+      "items": [
+        [
+          "Плотность",
+          "Определяет массу динамического тела вместе с объёмом формы."
+        ],
+        [
+          "Трение",
+          "Задаёт сопротивление скольжению при контакте."
+        ],
+        [
+          "Упругость",
+          "Управляет отскоком при столкновении."
+        ]
+      ],
+      "notes": "Плотность передаётся в Jolt через ConvexShape::SetDensity. Плотность, трение и упругость задавайте до создания тела: сеттеры компонента не обновляют существующее тело автоматически.",
+      "sources": [
+        "Engine/Source/Components/GameComponents.cpp",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Engine/Source/Scene/Scene.cpp",
+        "Engine/Source/Physics/PhysicsWorld.cpp",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp"
+      ],
+      "foot": "Эти параметры задавайте в Edit, до запуска Play."
+    },
+    {
+      "type": "rows",
+      "title": "Проверка падения на пол",
+      "items": [
+        [
+          "Пол",
+          "Широкий низкий куб. Включите физику и выберите статическое тело."
+        ],
+        [
+          "Предмет",
+          "Куб выше пола. Включите динамическое тело с формой Box."
+        ],
+        [
+          "Play и Stop",
+          "Сохраните сцену. В Play куб падает на пол. Stop возвращает сцену Edit."
+        ]
+      ],
+      "notes": "В Edit симуляция не идёт. При выборе объектов меняются параметры только соответствующего тела. В Play/Pause редактирование физики объекта запрещено. Для старых проектов сначала сделайте копию и пересоберите модуль с SDK 0.3.1.",
+      "sources": [
+        "Engine/docs/PHYSICS.md",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Editor/Source/PhysicsTools.cpp",
+        "Editor/Source/ObjectInspectorPanel.cpp"
+      ],
+      "foot": ""
+    },
+    {
+      "type": "shot",
+      "title": "Настройки физического мира",
+      "image": "r13/physics-settings.png",
+      "items": [
+        [
+          "Гравитация",
+          "По умолчанию Y = −9.81. Физика включена для Play."
+        ],
+        [
+          "Шаг",
+          "1/60 секунды, до 5 подшагов за кадр."
+        ],
+        [
+          "Сохранение",
+          "Общие настройки мира не сохраняются в сцену автоматически."
+        ]
+      ],
+      "notes": "Снимок настоящего ShowPhysicsSettingsDialog из PhysicsTools.cpp с настройками по умолчанию и available=1. Открывается командой «Настройки физики». Итерации скорости 10, позиции 2. Если Jolt недоступен, окно отключает поля. Наличие карточки не доказывает наличие backend.",
+      "sources": [
+        "Engine/docs/PHYSICS.md",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Editor/Source/PhysicsTools.cpp",
+        "Editor/Source/ObjectInspectorPanel.cpp"
+      ],
+      "foot": "Параметры отдельных тел сохраняются в блоке physics объекта."
+    },
+    {
+      "type": "rows",
+      "title": "Edit, Play, Pause и Stop",
+      "items": [
+        [
+          "Edit",
+          "Настройка тел, сохранение сцены и Undo/Redo. Симуляция не идёт."
+        ],
+        [
+          "Play / Pause",
+          "Play рассчитывает физику. Pause приостанавливает игровой ход."
+        ],
+        [
+          "Stop",
+          "Возвращает редактируемую сцену. Падение в Play не заменяет её исходную позу."
+        ]
+      ],
+      "notes": "Редактор запрещает редактирование параметров тела в Play/Pause. Сцена Play отделена от редактируемой сцены.",
+      "sources": [
+        "Engine/Source/Components/GameComponents.cpp",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Engine/Source/Scene/Scene.cpp",
+        "Engine/Source/Physics/PhysicsWorld.cpp",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp"
+      ],
+      "foot": "Сохраняйте исходную сцену после настройки объектов."
+    },
+    {
+      "type": "code",
+      "title": "Как объект записывается в сцену",
+      "code": "\"physics\": {\n  \"enabled\": true,\n  \"body\": \"dynamic\",\n  \"shape\": \"box\",\n  \"friction\": 0.5,\n  \"restitution\": 0,\n  \"density\": 1000\n}",
+      "aside": "Блок внутри объекта .scene.json.\n\nПоза и масштаб хранятся в transform.\n\nПри выключении физики сохраняется enabled: false.",
+      "notes": "Блок physics необязателен и записывается только при HasPhysicsSettings(). Внутри блока все шесть полей обязательны. Это фрагмент объекта, не полный файл сцены.",
+      "sources": [
+        "Engine/Source/Components/GameComponents.cpp",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Engine/Source/Scene/Scene.cpp",
+        "Engine/Source/Physics/PhysicsWorld.cpp",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp"
+      ],
+      "codeSize": 24
+    },
+    {
+      "type": "table",
+      "title": "Что восстанавливается после загрузки",
+      "headers": [
+        "Сохраняется",
+        "Не входит в блок physics"
+      ],
+      "rows": [
+        [
+          "Тип тела и форма",
+          "Скорость и состояние сна"
+        ],
+        [
+          "Плотность, трение, упругость",
+          "Накопленные импульсы и контакты"
+        ],
+        [
+          "Флаг enabled",
+          "Внутренний handle тела Jolt"
+        ],
+        [
+          "Transform объекта отдельно",
+          "Общие настройки физического мира"
+        ]
+      ],
+      "notes": "Снимок сцены сохраняет параметры компонента. При Play тело создаётся заново из этих параметров и transform. Для продолжения игры с прежними скоростями нужна отдельная логика SaveGame.",
+      "sources": [
+        "Engine/Source/Components/GameComponents.cpp",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Engine/Source/Scene/Scene.cpp",
+        "Engine/Source/Physics/PhysicsWorld.cpp",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp"
+      ],
+      "foot": "Сохранение сцены не является снимком работающей симуляции."
+    },
+    {
+      "type": "rows",
+      "title": "Порядок обновления",
+      "items": [
+        [
+          "Мир",
+          "Game применяет PhysicsSettings и вызывает PhysicsWorld::Update."
+        ],
+        [
+          "Время",
+          "Накопитель использует фиксированный шаг. По умолчанию до 5 шагов за кадр."
+        ],
+        [
+          "Компоненты",
+          "После расчёта Dynamic получает позу тела. Остальные типы передают свою позу в мир."
+        ]
+      ],
+      "notes": "Game::TickPhysicsWorld вызывается перед TickComponents. Update ограничивает накопитель step * maxSteps. Лишнее время длинного кадра отбрасывается. Тело компонента создаётся лениво из SyncPhysicsBody. Вызовы выполняются на потоке игры.",
+      "sources": [
+        "Engine/Source/Components/GameComponents.cpp",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Engine/Source/Scene/Scene.cpp",
+        "Engine/Source/Physics/PhysicsWorld.cpp",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp"
+      ],
+      "foot": ""
+    },
+    {
+      "type": "code",
+      "title": "Физика объекта из C++",
+      "code": "// Настройка компонента до Play\nvoid Configure(GameComponent& object) {\n  object.SetPhysicsEnabled(true);\n  object.SetPhysicsBodyType(\n      PhysicsBodyType::Dynamic);\n  object.SetPhysicsShapeType(\n      PhysicsShapeType::Box);\n  object.SetPhysicsDensity(1000.0f);\n}\n\n// Когда тело уже создано в Play\nvoid Push(GameComponent& object) {\n  if (object.HasPhysicsBody())\n    object.AddPhysicsImpulse({0, 100, 0});\n}",
+      "codeSize": 22,
+      "aside": "Методы доступны у GameComponent.\n\nИмпульс меняет скорость в зависимости от массы тела.\n\nВызовы выполняйте на игровом потоке.",
+      "notes": "Фрагменты функций для уже созданного компонента. Заголовок Engine/Components/GameComponents.h. Это не полный класс игрового проекта. RigidBodyComponent включает физику при создании, но сам ничего не рисует. Для визуального куба используйте существующий рендерящий компонент.",
+      "sources": [
+        "Engine/docs/PHYSICS.md",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Editor/Source/PhysicsTools.cpp",
+        "Editor/Source/ObjectInspectorPanel.cpp"
+      ]
+    },
+    {
+      "type": "code",
+      "title": "Raycast из C++",
+      "code": "// world: действующий PhysicsWorld\nPhysicsRaycastHit hit;\nconst glm::vec3 origin{0, 10, 0};\nconst glm::vec3 direction{0, -1, 0};\n\nif (world.Raycast(origin, direction,\n                  100.0f, hit)) {\n  // hit.position, hit.normal\n  // hit.distance, hit.body\n}",
+      "aside": "Луч возвращает первое попадание.\n\nНаправление должно иметь длину 1.\n\nhit.body относится к PhysicsWorld.",
+      "notes": "Фрагмент внутри функции с переменной PhysicsWorld& world. Подключите Engine/Physics/PhysicsWorld.h. Handle физического тела не является ID объекта сцены. Все вызовы на потоке игры.",
+      "sources": [
+        "Engine/Source/Components/GameComponents.cpp",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Engine/Source/Scene/Scene.cpp",
+        "Engine/Source/Physics/PhysicsWorld.cpp",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp"
+      ],
+      "codeSize": 24
+    },
+    {
+      "type": "rows",
+      "title": "Почему объект не падает",
+      "items": [
+        [
+          "Режим",
+          "Запущен Play, физика включена у объекта и в настройках мира."
+        ],
+        [
+          "Тип тела",
+          "Выбран Dynamic. Для пола включено Static и задан ненулевой масштаб."
+        ],
+        [
+          "Сборка",
+          "Доступен Jolt, рядом с Runtime есть Jolt.dll, модуль собран с SDK 0.3.1."
+        ]
+      ],
+      "notes": "Без ENGINE_ENABLE_JOLT реализована заглушка. Проверяйте available расширения Engine.Physics. В консоли при неудачной инициализации появляется Physics: и сообщение ошибки. Старые модули могут не поддерживать расширения физики.",
+      "sources": [
+        "Engine/Source/Components/GameComponents.cpp",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Engine/Source/Scene/Scene.cpp",
+        "Engine/Source/Physics/PhysicsWorld.cpp",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp"
+      ],
+      "foot": ""
+    },
+    {
+      "type": "rows",
+      "title": "Физика: возможности и ограничения",
+      "items": [
+        [
+          "Твёрдые тела",
+          "Статические, динамические и кинематические тела. Примитивные формы."
+        ],
+        [
+          "Граница выпуска",
+          "Mesh collision, joints и физический контроллер персонажа пока не входят в выпуск."
+        ],
+        [
+          "Старые проекты",
+          "C++ модуль нужно пересобрать. Сцену с physics сохраняйте движком 0.3.1."
+        ]
+      ],
+      "notes": "Не смешивайте навигацию ИИ в XZ с физическими столкновениями. Старый движок может потерять новый блок physics при пересохранении. Module API 5, Edit API 6, Scene 3 сохраняются, расширения Physics версии 1 необязательны. Связи joints, mesh collision и полноценный физический контроллер персонажа не заявлены. Навигация ИИ в XZ остаётся отдельной системой.",
+      "sources": [
+        "Engine/docs/PHYSICS.md",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Editor/Source/PhysicsTools.cpp",
+        "Editor/Source/ObjectInspectorPanel.cpp"
+      ],
+      "foot": ""
+    }
+  ]
+}

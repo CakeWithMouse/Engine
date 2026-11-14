@@ -1,0 +1,55 @@
+{
+  "title": "PainEngine — Физика",
+  "engineVersion": "0.3.1",
+  "date": "2026-11-14",
+  "revision": 1,
+  "sourceCommit": "38aa8d6fcbae032d03d12721b16a6cade885e70f",
+  "slideCount": 16,
+  "presentation": "releases/PainEngine-Physics-2026-11-14-r1-final.pptx",
+  "pdf": "releases/PainEngine-Physics-2026-11-14-r1-final.pdf",
+  "content": "physics.json",
+  "builder": "build.mjs",
+  "editorialPolicy": "editorial-policy.json",
+  "sources": [
+    {
+      "path": "Engine/Source/Components/GameComponents.cpp",
+      "sha256": "f9c30eee7899ad144fcee40d73771e76f8d638b65cd6ad58e4212d4308152840"
+    },
+    {
+      "path": "Engine/Include/Engine/Components/GameComponents.h",
+      "sha256": "af8181fbdd3ffd061e7e9e6c8e1c7c38d5a7d70d5674782855f6e3c98d2fd00e"
+    },
+    {
+      "path": "Engine/Source/Scene/Scene.cpp",
+      "sha256": "2302432609eea6831761f52fbc73e60595b50987cb75288c5fe0d4007e8b7b3c"
+    },
+    {
+      "path": "Engine/Source/Physics/PhysicsWorld.cpp",
+      "sha256": "619a56d4f98fd84864873ecdb3670ed3072b408f11bb055f27be33491289392b"
+    },
+    {
+      "path": "Engine/Include/Engine/Physics/PhysicsWorld.h",
+      "sha256": "adc77e2c19e7030116102ca08d0127af968de18bc9be1ef0417dafbf0d9ebfaf"
+    },
+    {
+      "path": "Engine/Include/Engine/Physics/PhysicsSettings.h",
+      "sha256": "0fa552b0cd8c015016504ca2f1a3bf9efbf12ca40d826cb1ecf968951d5b6052"
+    },
+    {
+      "path": "Engine/Source/MainGame/BaseGameClass/Game.cpp",
+      "sha256": "ae903b7fec5915a98718a185c11d98ab0847a41a3c3ec167b10bee675a4173d9"
+    },
+    {
+      "path": "Engine/docs/PHYSICS.md",
+      "sha256": "6a117c68a40d06c8909a28adb5cb2f9c206bfcec4155b3b1e95ddf1955766a1f"
+    },
+    {
+      "path": "Editor/Source/PhysicsTools.cpp",
+      "sha256": "f90887ac7f42ea42d451b3fe36b885f78063e18096c2d40b3c4b03deab204dcb"
+    },
+    {
+      "path": "Editor/Source/ObjectInspectorPanel.cpp",
+      "sha256": "c4b84be456a41689c5bbab7891e14b1c5514a459e5d3b2c9280cda065041922b"
+    }
+  ]
+}
