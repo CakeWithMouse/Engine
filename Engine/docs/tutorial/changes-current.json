@@ -1,227 +1,55 @@
 {
   "title": "PainEngine — Изменения выпуска",
-  "engineVersion": "0.3.0",
+  "engineVersion": "0.3.1",
   "date": "2026-11-14",
-  "revision": 5,
-  "sourceCommit": "0585db0",
-  "slideCount": 23,
-  "presentation": "releases/PainEngine-Changes-2026-11-14-r5-final.pptx",
-  "pdf": "releases/PainEngine-Changes-2026-11-14-r5-final.pdf",
+  "revision": 6,
+  "sourceCommit": "a845a0aa152bcc0d6b3202fa490c4babb1f88541",
+  "slideCount": 9,
+  "presentation": "releases/PainEngine-Changes-2026-11-14-r6-final.pptx",
+  "pdf": "releases/PainEngine-Changes-2026-11-14-r6-final.pdf",
   "content": "changes.json",
   "builder": "build.mjs",
   "editorialPolicy": "editorial-policy.json",
   "sources": [
     {
       "path": "Engine/Version.json",
-      "sha256": "0041a7ee822d80805c2eb8db5a102eb3d9e4195e2cfb482d1085277fc715be6f"
+      "sha256": "5b32ad32d3bb2939e6a059b63f3859e3a5663d75bf5a8c093b54603f4107e5b1"
     },
     {
-      "path": "Editor/UI/AssetPickerDialog.cpp",
-      "sha256": "ba3e38ba7d58a31fde58111010887bb650c614e8f993e3bc49bcdc98c681efb6"
+      "path": "Engine/docs/PHYSICS.md",
+      "sha256": "6a117c68a40d06c8909a28adb5cb2f9c206bfcec4155b3b1e95ddf1955766a1f"
     },
     {
-      "path": "Editor/UI/GeometryCard.h",
-      "sha256": "34b71b912bb1df07fd8a56b78f4f150e945c1981be158bbf0b5ddba3e2a3951a"
+      "path": "Engine/Include/Engine/Physics/PhysicsWorld.h",
+      "sha256": "adc77e2c19e7030116102ca08d0127af968de18bc9be1ef0417dafbf0d9ebfaf"
     },
     {
-      "path": "Editor/Source/ImportCommands.cpp",
-      "sha256": "cecf381bcd7d54089949c30b5bbd9c4dd4e724d662ee24ddae88f0253a0a8f07"
+      "path": "Engine/Include/Engine/Physics/PhysicsSettings.h",
+      "sha256": "0fa552b0cd8c015016504ca2f1a3bf9efbf12ca40d826cb1ecf968951d5b6052"
     },
     {
-      "path": "Editor/Host/SceneCommandHandler.cpp",
-      "sha256": "986510851f3e2b50dd8689743112525c2e742cc842a8179e81582792a709734b"
+      "path": "Engine/Include/Engine/Components/GameComponents.h",
+      "sha256": "af8181fbdd3ffd061e7e9e6c8e1c7c38d5a7d70d5674782855f6e3c98d2fd00e"
     },
     {
-      "path": "Editor/Core/SceneObjectType.h",
-      "sha256": "7444a653a296efdb9a7393c2e2d07e94fb955a09a09405235153c65258872db9"
-    },
-    {
-      "path": "Editor/Host/ModelReplacement.h",
-      "sha256": "ff8d4ca1861e8cb28110c4b2da64910b3c2cfa94821317e0a3f41b20379f1ee5"
-    },
-    {
-      "path": "Editor/tests/ModelReplaceUiTests.cpp",
-      "sha256": "fa0aec9b31b693c7948d9e20000fcacdbf5fb1e80ed1bd2c895b73d2b06ebbf8"
-    },
-    {
-      "path": "Engine/docs/SCENE-JSON.md",
-      "sha256": "e6ee571d81a076632a1e5bcad1e7bf7f97596d22fd079bf50ee4ca627932d022"
-    },
-    {
-      "path": "Editor/UI/FolderCommands.h",
-      "sha256": "ae89449816690617078a9306b2bdb181a599bbee5ee86c56985820ef5ff3800b"
-    },
-    {
-      "path": "Editor/Core/FolderPaths.h",
-      "sha256": "8359eefb30f8ececf74cdf4a5dd12f9c0e3e0476bba4fb5324e76c1742845444"
-    },
-    {
-      "path": "Editor/Source/FileBrowser.cpp",
-      "sha256": "33dfb9ebf58cbd18867698d8b3b5449a3029c98abce956d19ac61981323663a7"
-    },
-    {
-      "path": "Editor/Core/AssetExtensions.h",
-      "sha256": "5712a886d1e18ed2dd359f1498a7ff0e441d148486e383847ba7c836b4ca3dad"
-    },
-    {
-      "path": "Editor/Source/MainWindow.cpp",
-      "sha256": "b07fd1f8a3beb384b0a430fc857baa070e03ab9ca1548f26a313150cee858c0e"
+      "path": "Editor/Source/PhysicsTools.cpp",
+      "sha256": "f90887ac7f42ea42d451b3fe36b885f78063e18096c2d40b3c4b03deab204dcb"
     },
     {
       "path": "Editor/Source/ObjectInspectorPanel.cpp",
-      "sha256": "c355963bc8e2844bc54d0b10d6f16be3263de10d50e9eb418a3614e0b9dcaf6a"
+      "sha256": "c4b84be456a41689c5bbab7891e14b1c5514a459e5d3b2c9280cda065041922b"
     },
     {
-      "path": "Editor/UI/ViewportOverlayHelper.cpp",
-      "sha256": "de48b1973d97a8e63bfbce3636ae1a0d80d02d26af76b570aec7f73257ec0a13"
+      "path": "Engine/docs/RELEASE-0.3.1.md",
+      "sha256": "943249a49602387a7c1e6494fd047abf18516b9ad901f00a434b9bcfbdc1bb43"
     },
     {
-      "path": "Engine/Content/Shaders/EditorOverlay.hlsl",
-      "sha256": "c4231f50abc467c586e49e5c403179835006198a012920c3d0dbee209f2bc2bd"
+      "path": "Engine/Source/Physics/PhysicsWorld.cpp",
+      "sha256": "619a56d4f98fd84864873ecdb3670ed3072b408f11bb055f27be33491289392b"
     },
     {
-      "path": "Editor/UI/ImportSettingsDialog.cpp",
-      "sha256": "fbd6177cff7af436f48afeaad63b03e22dcc164fc7bfb5d2efe1e8e134bb6624"
-    },
-    {
-      "path": "Engine/Source/Scene/ModelImport.cpp",
-      "sha256": "7325c301b3b308c4395315d7230143acbe471efd6845b8badbf821828b344621"
-    },
-    {
-      "path": "Editor/Source/AssetDeleteCommand.cpp",
-      "sha256": "9d021178723da4f9d36544d90f01c1cc3a772ca78fd9dd6804885bce43caad6e"
-    },
-    {
-      "path": "Engine/Source/Scene/AssetUpdate.cpp",
-      "sha256": "3b5d82a101c1678ff77b6f7e69ff434c6cb23e32ffbb186a4cb53591e8289f0a"
-    },
-    {
-      "path": "Engine/Include/Engine/Script/ScriptRuntime.h",
-      "sha256": "e6f6a029444c56a2266d31bb5d081f603dd7c00760f67fc66dd846614e7d4c02"
-    },
-    {
-      "path": "Engine/Source/Script/ScriptInstance.cpp",
-      "sha256": "0d5bae9cb95fc06a6b04308c3bc70784f5c18cbd3e89b6ed420ea9beea0f6121"
-    },
-    {
-      "path": "Editor/Source/ScriptEditorWindow.cpp",
-      "sha256": "e206c4c41151b6735662f5efaa516eb739dde4e5b5e8a27b9c40cc4e9898dae2"
-    },
-    {
-      "path": "Editor/UI/ScriptCard.h",
-      "sha256": "38b78ef386c406b65800c5c1d18a3293743c1be74fca50763bfeebd27c51dd28"
-    },
-    {
-      "path": "Game/BasicExamples/Content/Scripts/Spin.vscript",
-      "sha256": "9e51495d8c50a5d2295f39cdda0ba8bf8c2ddb8c5d8929c73ebfe461bd20bcb1"
-    },
-    {
-      "path": "Engine/Include/Engine/AI/AiCharacter.h",
-      "sha256": "df58e8c61bdb6f0c266c80e9c8e54c7dfc929678e2c383cd0ec77fe44a766dfd"
-    },
-    {
-      "path": "Engine/Include/Engine/AI/MachineFile.h",
-      "sha256": "d8de63278df724482f32bf709753f46abd723f4f368189e88b107c63b952dbb3"
-    },
-    {
-      "path": "Editor/Source/AiMachineEditorWindow.cpp",
-      "sha256": "464359678e6e9e120eee0e5ffc64ea5822571ef2527914c2a627d00db9ccf9ad"
-    },
-    {
-      "path": "Engine/Include/Engine/AI/Navigation.h",
-      "sha256": "9a6853d06e81fec2d206216f013d432cdcf1ad2e2d18e874a7180fa08de9c938"
-    },
-    {
-      "path": "Editor/Source/FsmGraphWidget.cpp",
-      "sha256": "7807d69ea4391a56a55fc7e5c18c7c20b3edfa75ed33a1d94018dd0e2d613f0b"
-    },
-    {
-      "path": "Engine/Source/Runtime/SceneEditAi.cpp",
-      "sha256": "937b8c22b68118e3dcf3ce526d00c2859b9352f8aefc4fe36f341bd6d433bd92"
-    },
-    {
-      "path": "Game/AiTutorial/README.md",
-      "sha256": "4530733babed6deb3605c9d593fdf2fcc0b26770774c2d8441a9df054f3071e2"
-    },
-    {
-      "path": "Game/Launcher/Source/Main.cpp",
-      "sha256": "7dfb694d05dae30441b319fdb6a8ca7dbc4ed282f0d36d3040236fc3ee7d358b"
-    },
-    {
-      "path": "Game/AiTutorial/Content/Scripts/Player.vscript",
-      "sha256": "27f5cbff2a2cf70d25089bd2e6fcd19d0d7246326aff25d152989d6a53b7f3d3"
-    },
-    {
-      "path": "Game/AiTutorial/Content/AI/Guard.fsm",
-      "sha256": "6b1a5d24ecadd0d2f7ef5c16b42aa3b1340c3ffec31167c102472bb2d227a930"
-    },
-    {
-      "path": "Engine/Include/Engine/AI/World.h",
-      "sha256": "766efb695153f0d5f8b23051d5f339e56cea5219ac07d530e504138bc21d2b53"
-    },
-    {
-      "path": "Engine/Include/Engine/AI/Controller.h",
-      "sha256": "3c8ba4a423c606a07a47356822483efbc9aa57c2c8a96bd3056d255cf06fe040"
-    },
-    {
-      "path": "Engine/Include/Engine/AI/StateMachine.h",
-      "sha256": "cdc7c2a2ed92c421ad6a65ed85e95c20fb2a950f4e3b8cc749b579e704c7b0c2"
-    },
-    {
-      "path": "Engine/Include/Engine/AI/Ai.h",
-      "sha256": "c032632cf307fdb2c0a20ec11485c8e6d2328bf3478e1f4c6d72e086c3c7ac92"
-    },
-    {
-      "path": "Engine/Include/Engine/AI/Group.h",
-      "sha256": "1c21c830496f042c196cea607191fee79df1feb6f7b7671b18e85185b0072953"
-    },
-    {
-      "path": "Engine/Include/Engine/AI/SmartObject.h",
-      "sha256": "e75ea63e2740cfd36e707f06d7d246aa9d78e523828c35f2481e6c53fcc29f6b"
-    },
-    {
-      "path": "Engine/Include/Engine/AI/Debugger.h",
-      "sha256": "8fbf6b9ad15b5a0b8e9dcf8e526abdbffad88213955b4e7751402df1f8ae42b3"
-    },
-    {
-      "path": "Engine/Include/Engine/AI/Query.h",
-      "sha256": "008f720cbfeb6004ff1be84e464016486b23a7e62d25a3068f1ae3b476810959"
-    },
-    {
-      "path": "Game/Launcher/Source/ProjectLibrary.h",
-      "sha256": "464d161a41dff832e67319709131739fd74bac44931e68ec2704671400092b12"
-    },
-    {
-      "path": "Engine/BuildSupport/Test-ProjectToolchain.ps1",
-      "sha256": "b4579469b42705917907e7932b981ce481df0717d62392628d1a657a4a7534a9"
-    },
-    {
-      "path": "Engine/Source/MainGame/BaseGameClass/Game.cpp",
-      "sha256": "a812c2b925f9a41aa11d0d2898563cca358e46d129fd74d6eb3aa772d530cb0d"
-    },
-    {
-      "path": "Engine/Include/Engine/Sound/AudioEngine.h",
-      "sha256": "935a7357a9ea3cf127749c07aee0ce671cbde58a861153dce325c2fe2722ef07"
-    },
-    {
-      "path": "Editor/Source/ViewportWidget_Input.cpp",
-      "sha256": "9d4f47928c572d9f074aaba0986fb0caf05ed95b97e9dbe4c3c42b0e668d96f2"
-    },
-    {
-      "path": "Editor/Source/GraphEditorWidget.cpp",
-      "sha256": "09e19a7a896e9d1c094624107435a6f5644099e6115329e9da38da53d7d7ea7e"
-    },
-    {
-      "path": "Game/Battle/Source/Main.cpp",
-      "sha256": "8829af9afca085812fe2057d8075df2ab90771c9246864f91a93057420c81137"
-    },
-    {
-      "path": "Game/Battle/Source/BattleAi.cpp",
-      "sha256": "5c0c455c7eb810264cd62d87370a4de0742df576433a4e113c1e82babfa512a9"
-    },
-    {
-      "path": "Game/Battle/Source/BattleGame.cpp",
-      "sha256": "eba45389c41162d3b6c3626a027bff3c0de985df5193cb29c5a6ccf6143747df"
+      "path": "Engine/BuildSupport/Cpp.props",
+      "sha256": "9f644e49774af331b7efcc35bdc421336a81de8d463cb36a0e6387802bac9794"
     }
   ]
 }

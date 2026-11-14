@@ -2,600 +2,232 @@
   "title": "PainEngine\nИзменения выпуска",
   "outputPrefix": "PainEngine-Changes",
   "date": "2026-11-14",
-  "revision": 5,
-  "engineVersion": "0.3.0",
-  "sourceCommit": "0585db0",
-  "baselineCommit": "a7f8c8d89cc4061c155715008d257cb3cd229d60",
+  "revision": 6,
+  "engineVersion": "0.3.1",
+  "sourceCommit": "a845a0aa152bcc0d6b3202fa490c4babb1f88541",
+  "baselineCommit": "3fc1ef9",
   "editorialPolicy": "editorial-policy.json",
   "slides": [
     {
       "type": "cover",
-      "title": "PainEngine\nНовые возможности",
-      "subtitle": "Релиз 0.3.0\nРесурсы, редактор и старые проекты",
-      "image": "r10/ai-machine-window.png",
-      "notes": "Изменения относительно сохранённого туториала r9 и API Reference 7 ноября. Версия 2026.11.11.0, исходники 6899a6ac6a4a3e2a6a9da3cba48c0d790881569a; интеграция PR №24 в release/v0.3.0, c5f52d20cda9501e4e7af3c93b1e4422acd1ef3b\nВыпуск 0.3.0 подготовлен 14.11.2026 после исправления 0585db0. Снимки прежних редакций сохраняют исходную дату.",
+      "title": "PainEngine\nИзменения 0.3.1",
+      "subtitle": "Физика Jolt\nОбновление проектов и SDK",
+      "image": "r13/physics-body.png",
+      "notes": "Изменения 0.3.1 относительно release/v0.3.0, commit 3fc1ef9. PR №25 объединён с main и включён в release/v0.3.1. Изображение показывает реальную Qt-карточку физики на тестовых данных.",
       "sources": [
         "Engine/Version.json"
       ]
     },
     {
-      "type": "evidence",
-      "title": "Выбор модели и материала",
-      "items": [
-        [
-          "Библиотека",
-          "Откройте выбор ресурса, найдите его по имени и подтвердите выбор."
-        ],
-        [
-          "Геометрия",
-          "Заменить модель можно у Engine.Model. Для примитива добавьте отдельный модельный объект."
-        ],
-        [
-          "Текстуры",
-          "Откройте материал и выберите BaseMap. Сохраните материал и сцену."
-        ]
-      ],
-      "foot": "Замена модели — только Engine.Model. Примитив не превращается в модель.",
-      "notes": "PR №24. Общий AssetPickerDialog фильтрует ресурсы по типу, показывает текущий выбор и виртуальный путь /Game. Замена модели проходит через checkpoint/load и Undo/Redo. Старый маршрут превращения примитива в модель заблокирован. C++ API назначения ресурсов не менялся. Снимки реальных Qt-компонентов PR №24 на учебных pyramid.obj и checker.png; отдельный тестовый запуск без сцены.",
-      "sources": [
-        "Editor/UI/AssetPickerDialog.cpp",
-        "Editor/UI/GeometryCard.h",
-        "Editor/Source/ImportCommands.cpp",
-        "Editor/Host/SceneCommandHandler.cpp"
-      ],
-      "images": [
-        {
-          "file": "r11/model-picker.png",
-          "x": 48,
-          "y": 148,
-          "w": 550,
-          "h": 412
-        },
-        {
-          "file": "r11/texture-picker.png",
-          "x": 682,
-          "y": 148,
-          "w": 550,
-          "h": 412
-        }
-      ],
-      "texts": [
-        {
-          "text": "Модель: поиск и выбор из Content",
-          "x": 48,
-          "y": 578,
-          "w": 550,
-          "h": 48,
-          "size": 24
-        },
-        {
-          "text": "BaseMap: миниатюра, импорт и очистка",
-          "x": 682,
-          "y": 578,
-          "w": 550,
-          "h": 48,
-          "size": 24
-        }
-      ]
-    },
-    {
       "type": "rows",
-      "title": "Старая сцена: замена модели",
+      "title": "Что добавлено в 0.3.1",
       "items": [
         [
-          "Модель",
-          "Выберите Engine.Model и замените ресурс. Один Undo возвращает исходное состояние."
-        ],
-        [
-          "Тип объекта",
-          "Примитив нельзя превратить в модель этой кнопкой. Неизвестный тип получает отдельную ошибку."
-        ],
-        [
-          "Старый проект",
-          "Проверена сцена версии 1. JSON и snapshot используют тот же тип Engine.Model."
-        ]
-      ],
-      "foot": "Команда расширения редактора требует явный objectId. Исходный файл меняется только при Save.",
-      "notes": "В 24 реальных сценах репозитория 10 объектов с assets.model, все Engine.Model. Алиасов не найдено. Исправлены подстановка текущего выбора и восстановление выбора после замены; snapshot удерживается локально. Отдельный тест на архивной сцене использует настоящий Game.dll, инспектор и CommandRegistry: замена, одно Undo, полный откат; примитив и свет отклоняются. Сериализатор Engine может создавать checkpoint версии 3 из-за projectData ещё до операции; новый код не вводит миграцию, исходный файл v1 остаётся прежним. Сообщение о legacy-несовместимости не воспроизведено; версию DLL проблемного проекта нужно проверять отдельно.",
-      "sources": [
-        "Editor/Core/SceneObjectType.h",
-        "Editor/Host/ModelReplacement.h",
-        "Editor/Source/ImportCommands.cpp",
-        "Editor/tests/ModelReplaceUiTests.cpp",
-        "Engine/docs/SCENE-JSON.md"
-      ]
-    },
-    {
-      "type": "rows",
-      "title": "Папки в библиотеке проекта",
-      "items": [
-        [
-          "Создать",
-          "ПКМ по папке или свободному месту → Новая папка. Сразу введите имя."
-        ],
-        [
-          "Переименовать",
-          "Папка остаётся в текущем родителе. Корни проекта и Content защищены."
-        ],
-        [
-          "Проверить ссылки",
-          "Для переноса ресурса используйте штатную команду переноса и проверьте сцену."
-        ]
-      ],
-      "foot": "Создание и переименование доступны в Edit.",
-      "notes": "Занятое имя получает числовой суффикс. Проверяются допустимость имени, границы проекта и ссылки на внешние каталоги. Переименование папки само по себе не гарантирует обновления ссылок на все вложенные ассеты. Фильтры и подписи файлов согласованы с типами ресурсов.",
-      "sources": [
-        "Editor/UI/FolderCommands.h",
-        "Editor/Core/FolderPaths.h",
-        "Editor/Source/FileBrowser.cpp",
-        "Editor/Core/AssetExtensions.h"
-      ]
-    },
-    {
-      "type": "rows",
-      "title": "Инспектор и перемещение объектов",
-      "items": [
-        [
-          "Карточки",
-          "Движение объекта сохраняет раскрытие карточек и ввод в активном поле."
-        ],
-        [
-          "Gizmo",
-          "Во время перетаскивания панели обновляются примерно раз в 33 мс."
-        ],
-        [
-          "Раскладка",
-          "Инспектор и панель сцены можно прикрепить к любой стороне окна."
-        ]
-      ],
-      "foot": "Карточки скрипта и автомата ИИ сохранены.",
-      "notes": "PR №24 объединяет обновления gizmo, пропускает лишние обновления от InputCursor и ViewportCamera. Финальное положение обрабатывается таймером после последнего события. Исправлены экранные размеры и hit test иконок viewport. Это не обещание частоты рендера 30 FPS: ограничены только обновления панелей.",
-      "sources": [
-        "Editor/Source/MainWindow.cpp",
-        "Editor/Source/ObjectInspectorPanel.cpp",
-        "Editor/UI/ViewportOverlayHelper.cpp",
-        "Engine/Content/Shaders/EditorOverlay.hlsl"
-      ]
-    },
-    {
-      "type": "shot",
-      "title": "Настройки импорта модели",
-      "items": [
-        [
-          "Масштаб",
-          "Единицы файла включены. Scale меняет размер геометрии."
-        ],
-        [
-          "Дополнительно",
-          "Нормали, UV и объединение мешей доступны в раскрывающейся секции."
-        ],
-        [
-          "Ресурсы",
-          "Флажки включают создание материалов и импорт текстур."
-        ]
-      ],
-      "sources": [
-        "Editor/Source/ImportCommands.cpp",
-        "Editor/UI/ImportSettingsDialog.cpp",
-        "Engine/Source/Scene/ModelImport.cpp"
-      ],
-      "notes": "Настройки хранятся рядом с моделью в .importsettings.json. Для схемы v2 масштаб запекается в геометрию, новый объект получает Transform Scale 1. Старые sidecar v1 сохраняют совместимость. См. ImportSettingsV2Tests и ModelGeometryScaleTests.",
-      "image": "r10/import-settings.png"
-    },
-    {
-      "type": "rows",
-      "title": "Переимпорт и удаление ресурсов",
-      "items": [
-        [
-          "Изменить настройки",
-          "ПКМ по модели: параметры импорта. Применение повторно импортирует исходник."
-        ],
-        [
-          "Сохранить сцену",
-          "Переимпорт сохраняет размещение, выделение и историю Undo сцены."
-        ],
-        [
-          "Удалить",
-          "Delete в Content удаляет файл или папку после подтверждения. Проверяйте ссылки сцены."
-        ]
-      ],
-      "sources": [
-        "Editor/Source/ImportCommands.cpp",
-        "Editor/UI/ImportSettingsDialog.cpp",
-        "Engine/Source/Scene/ModelImport.cpp",
-        "Editor/Source/AssetDeleteCommand.cpp",
-        "Engine/Source/Scene/AssetUpdate.cpp"
-      ],
-      "notes": "При ошибке изменения настроек sidecar восстанавливается. Временные файлы переимпорта лежат вне Content, под mount /_staging. Удалённая модель оставляет placeholder с прежним путём. Перенос ассета по-прежнему очищает Undo. Восстановление удалённых ресурсов не является Undo сцены."
-    },
-    {
-      "type": "shot",
-      "title": "Визуальный скрипт у объекта",
-      "items": [
-        [
-          "Создать",
-          "Карточка «Скрипт» → «Создать». Файл появится в Content/Scripts."
-        ],
-        [
-          "Назначить",
-          "«Выбрать…» подключает существующий .vscript. У объекта один скрипт."
-        ],
-        [
-          "Настроить",
-          "Переменные свои у каждого объекта. ↺ — сброс к файлу."
-        ]
-      ],
-      "sources": [
-        "Engine/Include/Engine/Script/ScriptRuntime.h",
-        "Engine/Source/Script/ScriptInstance.cpp",
-        "Editor/Source/ScriptEditorWindow.cpp",
-        "Editor/UI/ScriptCard.h"
-      ],
-      "notes": "Ссылки assets.script и assets.scriptVariables сохраняются в сцене, копии Play и дубликатах. Старый Game.dll без расширения Script не предоставляет карточку.",
-      "image": "r10/editor-script-card.png"
-    },
-    {
-      "type": "shot",
-      "title": "Окно визуального скрипта",
-      "items": [
-        [
-          "Добавить ноду",
-          "Tab, ПКМ или «+ Нода». Поиск понимает русские и английские названия."
-        ],
-        [
-          "Связать",
-          "Белые пины задают порядок действий, цветные передают значения."
-        ],
-        [
-          "Исправить",
-          "Правки сохраняются сразу. Есть Ctrl+Z/Y, копирование и «Упорядочить»."
-        ]
-      ],
-      "sources": [
-        "Engine/Include/Engine/Script/ScriptRuntime.h",
-        "Engine/Source/Script/ScriptInstance.cpp",
-        "Editor/Source/ScriptEditorWindow.cpp"
-      ],
-      "notes": "Двойной щелчок открывает свойства ноды и значения входов без связи. Пустой Target означает сам объект. Файлы материалов и скриптов используют разные схемы, чужие ноды не вставляются.",
-      "image": "r10/editor-script-trace.png"
-    },
-    {
-      "type": "rows",
-      "title": "Практика: вращение без C++",
-      "items": [
-        [
-          "Событие",
-          "«Каждый кадр» запускает действие «Повернуть»."
-        ],
-        [
-          "Скорость",
-          "Умножьте DeltaTime на вектор (0, 90, 0), подайте результат в Degrees."
-        ],
-        [
-          "Проверка",
-          "Play: куб поворачивается на 90° в секунду. Stop возвращает исходную сцену."
-        ]
-      ],
-      "sources": [
-        "Engine/Include/Engine/Script/ScriptRuntime.h",
-        "Engine/Source/Script/ScriptInstance.cpp",
-        "Editor/Source/ScriptEditorWindow.cpp",
-        "Game/BasicExamples/Content/Scripts/Spin.vscript"
-      ],
-      "notes": "Готовый Spin.vscript находится в Game/BasicExamples/Content/Scripts. Bob.vscript показывает синус и исходную позицию, Move.vscript показывает клавиши и возврат по пробелу. Скрипты интерпретируются движком, SDK и компилятор для их правок не нужны."
-    },
-    {
-      "type": "shot",
-      "title": "Скрипты: события и ошибки",
-      "items": [
-        [
-          "Жизненный цикл",
-          "Начало игры идёт после BeginPlay объекта. Клавиши и Tick идут после его Tick."
-        ],
-        [
-          "Отладка",
-          "В Play видны выполненные ноды, счётчики и последние прочитанные значения."
-        ],
-        [
-          "Ошибка",
-          "Ошибка останавливает один скрипт. Сообщение остаётся после Stop."
-        ]
-      ],
-      "sources": [
-        "Engine/Include/Engine/Script/ScriptRuntime.h",
-        "Engine/Source/Script/ScriptInstance.cpp",
-        "Editor/Source/ScriptEditorWindow.cpp"
-      ],
-      "notes": "Edit и Pause не выполняют скрипт. Правки файла во время Play применяются при следующем запуске экземпляра. Лимит 10 000 шагов на событие и глубина вызовов 16 защищают от циклов. Выход данных показывается, только если его читали.",
-      "image": "r10/editor-script-error.png"
-    },
-    {
-      "type": "rows",
-      "title": "ИИ-персонаж и навигация",
-      "items": [
-        [
-          "Персонаж",
-          "Добавьте ИИ-персонажа, задайте команду и радиус зрения."
-        ],
-        [
-          "Движение",
-          "Объём границ задаёт сетку XZ. Объёмы препятствий закрывают проходы."
-        ],
-        [
-          "Поведение",
-          "Назначьте .fsm в карточке «Автомат ИИ» либо имя автомата из C++."
-        ]
-      ],
-      "sources": [
-        "Engine/Include/Engine/AI/AiCharacter.h",
-        "Engine/Include/Engine/AI/MachineFile.h",
-        "Editor/Source/AiMachineEditorWindow.cpp",
-        "Engine/Include/Engine/AI/Navigation.h"
-      ],
-      "notes": "NavVolume читает позицию и размер при запуске сцены. Это сеточная навигация в XZ, а не полноценная физика. Команда 0 нейтральна, обычный игрок автоматически становится целью команды 1. Для охранника задайте команду 2. AiCharacter с флагом игрока не управляется ИИ."
-    },
-    {
-      "type": "shot",
-      "title": "Редактор автомата ИИ",
-      "items": [
-        [
-          "Состояния",
-          "Двойной щелчок открывает задачи, условия входа и службы."
-        ],
-        [
-          "Переходы",
-          "Двойной щелчок по стрелке: событие, успех, провал, задержка и условия."
-        ],
-        [
-          "Память",
-          "Слева ключи и настройки восприятия. Имена обновляются во всех блоках."
-        ]
-      ],
-      "sources": [
-        "Engine/Include/Engine/AI/AiCharacter.h",
-        "Engine/Include/Engine/AI/MachineFile.h",
-        "Editor/Source/AiMachineEditorWindow.cpp",
-        "Editor/Source/FsmGraphWidget.cpp"
-      ],
-      "notes": "Каждая правка сохраняется и проверяется загрузчиком движка. Красная рамка указывает на ошибку. Родитель содержит дочерние состояния. Состав групп условий «Хотя бы одно из» и «Все из» пока правится в JSON.",
-      "image": "r10/ai-machine-window.png"
-    },
-    {
-      "type": "rows",
-      "title": "Память и проверка автомата",
-      "items": [
-        [
-          "Файл",
-          "Ключи имеют тип: bool, int, float, vec3, string или object."
-        ],
-        [
-          "Экземпляр",
-          "«Память у этого объекта» перекрывает значения файла для одного персонажа."
-        ],
-        [
-          "Play",
-          "Карточка показывает активные состояния, память и последние переходы."
-        ]
-      ],
-      "sources": [
-        "Engine/Include/Engine/AI/AiCharacter.h",
-        "Engine/Include/Engine/AI/MachineFile.h",
-        "Editor/Source/AiMachineEditorWindow.cpp",
-        "Engine/Source/Runtime/SceneEditAi.cpp"
-      ],
-      "notes": "Неизвестные ключи и значения неверного типа пропускаются. Переопределения machineMemory применяются только к .fsm, не к именованному автомату C++. Ошибки назначенного .fsm блокируют запуск Play. Связанные .fsm загружаются с ограничением глубины 8."
-    },
-    {
-      "type": "rows",
-      "title": "Туториал: автоматы ИИ",
-      "items": [
-        [
-          "Открыть",
-          "В лаунчере: «Туториал: Автоматы ИИ» → «Редактировать»."
-        ],
-        [
-          "Наблюдать",
-          "Play, затем WASD: охранник замечает игрока, преследует и ищет за стеной."
-        ],
-        [
-          "Изменить",
-          "В памяти охранника поменяйте PostB. Следующий Play использует новый пост."
-        ]
-      ],
-      "sources": [
-        "Engine/Include/Engine/AI/AiCharacter.h",
-        "Engine/Include/Engine/AI/MachineFile.h",
-        "Editor/Source/AiMachineEditorWindow.cpp",
-        "Game/AiTutorial/README.md",
-        "Game/Launcher/Source/Main.cpp"
-      ],
-      "notes": "Проект без C++ поставляется с собранным лаунчером в Tutorials/AiTutorial. Из исходников: Game/AiTutorial/Create.ps1 -Destination <новая папка>. Нужен актуальный собранный Runtime. Посетитель использует скамейки Bench и колодец Well, занимая свободные места."
-    },
-    {
-      "type": "rows",
-      "title": "Связь скрипта и автомата",
-      "items": [
-        [
-          "Скрипт вызывает ИИ",
-          "E в туториале записывает NoiseAt и отправляет охраннику событие Noise."
-        ],
-        [
-          "ИИ вызывает скрипт",
-          "Состояние Report вызывает OnCaught у игрока. Скрипт возвращает игрока назад."
-        ],
-        [
-          "Общие данные",
-          "Блок «Переменная скрипта» читает значение. Ноды ИИ работают с памятью персонажа."
-        ]
-      ],
-      "sources": [
-        "Engine/Include/Engine/Script/ScriptRuntime.h",
-        "Engine/Source/Script/ScriptInstance.cpp",
-        "Editor/Source/ScriptEditorWindow.cpp",
-        "Engine/Include/Engine/AI/AiCharacter.h",
-        "Engine/Include/Engine/AI/MachineFile.h",
-        "Editor/Source/AiMachineEditorWindow.cpp",
-        "Game/AiTutorial/Content/Scripts/Player.vscript",
-        "Game/AiTutorial/Content/AI/Guard.fsm"
-      ],
-      "notes": "Ai.CallScriptEvent связывает задачи автомата с событиями .vscript. Ai.ScriptVariable позволяет условиям автомата читать переменные скрипта. Проверяйте объект-цель и совпадение имён событий и ключей."
-    },
-    {
-      "type": "rows",
-      "title": "ИИ из C++: владельцы и срок жизни",
-      "items": [
-        [
-          "Мир",
-          "Ai::Get(game) возвращает мир встроенной подсистемы игровой сессии."
-        ],
-        [
-          "Контроллер",
-          "AiCharacter создаёт Controller в BeginPlay. Настройка находится в SetupAi."
-        ],
-        [
-          "Данные",
-          "Контроллер владеет памятью и экземпляром автомата. Определение автомата общее."
-        ]
-      ],
-      "sources": [
-        "Engine/Include/Engine/AI/World.h",
-        "Engine/Include/Engine/AI/Controller.h",
-        "Engine/Include/Engine/AI/StateMachine.h"
-      ],
-      "notes": "Ai::Get вне gameplay выбрасывает исключение. World::Detach уничтожает контроллеры объектов сцены, но сохраняет директоров и группы. Для ссылки на объект используйте ID/ObjectRef, разрешайте его заново и учитывайте удаление."
-    },
-    {
-      "type": "code",
-      "title": "C++: запуск автомата из файла",
-      "code": "#include <Engine/AI/Ai.h>\n\nclass Guard : public AiCharacter {\nprotected:\n  void SetupAi(Ai::Controller& ai) override {\n    auto loaded = Ai::LoadMachineFile(\n        \"/Game/AI/Guard.fsm\");\n    if (!loaded.asset) return;\n    loaded.asset->Run(ai);\n  }\n};",
-      "aside": "Проверьте problems при ошибке загрузки.\n\nВ редакторе тот же файл можно назначить стандартному ИИ-персонажу.",
-      "notes": "Пример показывает переопределение SetupAi. Для появления пользовательского типа в палитре добавьте ENGINE_COMPONENT. Полный контракт загрузки и список ошибок находятся в API Reference.",
-      "sources": [
-        "Engine/Include/Engine/AI/AiCharacter.h",
-        "Engine/Include/Engine/AI/MachineFile.h",
-        "Engine/Include/Engine/AI/Ai.h"
-      ]
-    },
-    {
-      "type": "rows",
-      "title": "Расширение ИИ на C++",
-      "items": [
-        [
-          "Автоматы",
-          "MachineBuilder задаёт состояния, задачи, службы и переходы."
-        ],
-        [
-          "Блоки",
-          "ENGINE_AI_BLOCK регистрирует задачу, условие или службу для редактора .fsm."
-        ],
-        [
-          "Контракты",
-          "Параметры описывает ParamSpec. Фабрика получает проверенные Params."
-        ]
-      ],
-      "sources": [
-        "Engine/Include/Engine/AI/StateMachine.h",
-        "Engine/Include/Engine/AI/MachineFile.h"
-      ],
-      "notes": "Регистрируйте блок в .cpp игрового проекта. Статическая библиотека может потерять регистрацию при линковке. Имена Ai.* и Fsm.* заняты движком. Данные задачи хранятся отдельно для каждого контроллера, определение задачи разделяется. Недопустимые параметры можно отклонить std::invalid_argument."
-    },
-    {
-      "type": "rows",
-      "title": "Группы, умные объекты и диагностика",
-      "items": [
-        [
-          "Отряд",
-          "Group ведёт персонажей или инстансы общим полем движения и расставляет по местам."
-        ],
-        [
-          "Умный объект",
-          "SmartObject хранит метку и места. Claim / Release управляют занятостью."
-        ],
-        [
-          "Отладка",
-          "Debugger показывает пути, зрение и состояние. Query выбирает подходящую точку."
-        ]
-      ],
-      "sources": [
-        "Engine/Include/Engine/AI/Group.h",
-        "Engine/Include/Engine/AI/SmartObject.h",
-        "Engine/Include/Engine/AI/Debugger.h",
-        "Engine/Include/Engine/AI/Query.h"
-      ],
-      "notes": "Group создаётся World::CreateGroup. Состав и форма задаются AddCharacter/AddInstance и SetFormation. QueryBuilder связывает генератор точек, фильтры и оценку. Навигация учитывает радиус и стоимость клеток. Скорость массовых сценариев зависит от карты и бюджета, универсальных показателей FPS нет."
-    },
-    {
-      "type": "rows",
-      "title": "Обновление проекта и совместимость",
-      "items": [
-        [
-          "Версия",
-          "Новые проекты закрепляются за установленной сборкой движка."
-        ],
-        [
-          "Старый C++ проект",
-          "Обновите согласованный SDK и пересоберите Game.dll для новых расширений."
-        ],
-        [
-          "Форматы",
-          "Scene JSON 3, Module API 5, Edit API 6. Поддерживаются Edit API 4, 5 и 6."
-        ]
-      ],
-      "sources": [
-        "Engine/Version.json",
-        "Game/Launcher/Source/ProjectLibrary.h",
-        "Engine/BuildSupport/Test-ProjectToolchain.ps1"
-      ],
-      "notes": "Расширения Script, GraphTrace, AiMachine и Asset.Import запрашиваются отдельно. Номер Edit API сам по себе не гарантирует их наличия. Диагностика toolchain учитывает установленные MSVC и Windows SDK. Старые сохранённые презентации остаются в releases."
-    },
-    {
-      "type": "rows",
-      "title": "Симуляция, звук и инструменты",
-      "items": [
-        [
-          "Edit и Play",
-          "Исправлены различия света и игрового отображения между режимами."
-        ],
-        [
-          "Pause",
-          "Звук и потоковая музыка сохраняют позицию и продолжаются после паузы."
+          "Симуляция",
+          "Jolt 5.6.0. Твёрдые тела в Play и примитивные коллайдеры."
         ],
         [
           "Редактор",
-          "Удаление через Delete, фиксация transform при потере фокуса и общий холст графов."
+          "Параметры тела в инспекторе, настройки мира, сохранение physics в сцене."
+        ],
+        [
+          "C++ SDK",
+          "Методы физики у компонентов, PhysicsWorld и библиотека Jolt."
         ]
       ],
+      "notes": "Изменения ресурcов, скриптов и ИИ предыдущего выпуска сохранены. Основное дополнение 0.3.1: интеграция PR №25 и исправления сборки и физики.",
       "sources": [
-        "Engine/Source/MainGame/BaseGameClass/Game.cpp",
-        "Engine/Include/Engine/Sound/AudioEngine.h",
-        "Editor/Source/ViewportWidget_Input.cpp",
-        "Editor/Source/GraphEditorWidget.cpp"
+        "Engine/docs/PHYSICS.md",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Editor/Source/PhysicsTools.cpp",
+        "Editor/Source/ObjectInspectorPanel.cpp"
       ],
-      "notes": "Изменения проверяются в ModeParityTests, тестах редактора и аудио. Это перечень изменений кода, а не обещание одинаковой производительности во всех сценах."
+      "foot": "Основа сравнения: выпуск 0.3.0."
+    },
+    {
+      "type": "shot",
+      "title": "Физическое тело объекта",
+      "image": "r13/physics-body.png",
+      "items": [
+        [
+          "Тип тела",
+          "Статическое для пола. Динамическое для падающего предмета."
+        ],
+        [
+          "Форма",
+          "Box, Sphere или Capsule. Размер зависит от мирового масштаба."
+        ],
+        [
+          "Материал",
+          "Трение, упругость и плотность задаются у объекта."
+        ]
+      ],
+      "notes": "Реальная карточка ObjectInspectorPanel из исходников 0.3.1. Снимок отдельного Qt-компонента с тестовыми данными динамического куба, без D3D viewport. Кинематическое тело следует transform из игрового кода. Плотность влияет на массу динамического тела. Коллайдер не повторяет треугольники импортированной модели.",
+      "sources": [
+        "Engine/docs/PHYSICS.md",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Editor/Source/PhysicsTools.cpp",
+        "Editor/Source/ObjectInspectorPanel.cpp"
+      ],
+      "foot": "Правка параметров тела доступна в Edit и поддерживает Undo/Redo."
     },
     {
       "type": "rows",
-      "title": "Battle: отряды под управлением ИИ",
+      "title": "Проверка падения на пол",
       "items": [
         [
-          "Запуск",
-          "Battle.exe --ai --hud включает противоборствующие отряды и панель состояния."
+          "Пол",
+          "Широкий низкий куб. Включите физику и выберите статическое тело."
         ],
         [
-          "Наблюдение",
-          "--ai-debug или F9 показывает движение и диагностику ИИ."
+          "Предмет",
+          "Куб выше пола. Включите динамическое тело с формой Box."
         ],
         [
-          "Масштаб",
-          "Group управляет бойцами через общее поле движения и позиции строя."
+          "Play и Stop",
+          "Сохраните сцену. В Play куб падает на пол. Stop возвращает сцену Edit."
         ]
       ],
-      "notes": "Режим AI отключает прежнее движение демонстрации и устанавливает simulation time scale 1. F6 переключает LOD, F7 панели. Число бойцов задаётся --units. Результаты скорости зависят от сцены и оборудования.",
+      "notes": "В Edit симуляция не идёт. При выборе объектов меняются параметры только соответствующего тела. В Play/Pause редактирование физики объекта запрещено. Для старых проектов сначала сделайте копию и пересоберите модуль с SDK 0.3.1.",
       "sources": [
-        "Game/Battle/Source/Main.cpp",
-        "Game/Battle/Source/BattleAi.cpp",
-        "Game/Battle/Source/BattleGame.cpp"
+        "Engine/docs/PHYSICS.md",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Editor/Source/PhysicsTools.cpp",
+        "Editor/Source/ObjectInspectorPanel.cpp"
+      ],
+      "foot": ""
+    },
+    {
+      "type": "shot",
+      "title": "Настройки физического мира",
+      "image": "r13/physics-settings.png",
+      "items": [
+        [
+          "Гравитация",
+          "По умолчанию Y = −9.81. Физика включена для Play."
+        ],
+        [
+          "Шаг",
+          "1/60 секунды, до 5 подшагов за кадр."
+        ],
+        [
+          "Сохранение",
+          "Общие настройки мира не сохраняются в сцену автоматически."
+        ]
+      ],
+      "notes": "Снимок настоящего ShowPhysicsSettingsDialog из PhysicsTools.cpp с настройками по умолчанию и available=1. Открывается командой «Настройки физики». Итерации скорости 10, позиции 2. Если Jolt недоступен, окно отключает поля. Наличие карточки не доказывает наличие backend.",
+      "sources": [
+        "Engine/docs/PHYSICS.md",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Editor/Source/PhysicsTools.cpp",
+        "Editor/Source/ObjectInspectorPanel.cpp"
+      ],
+      "foot": "Параметры отдельных тел сохраняются в блоке physics объекта."
+    },
+    {
+      "type": "rows",
+      "title": "Исправления физики и сборки",
+      "items": [
+        [
+          "Плотность",
+          "Масса динамического тела учитывает заданную плотность."
+        ],
+        [
+          "Усыпление",
+          "SetActive(false) деактивирует тело. SetActive(true) активирует его."
+        ],
+        [
+          "Зависимости",
+          "Сборка подключает Jolt и доставляет DLL потребителям Engine."
+        ]
+      ],
+      "notes": "Исправлены VcpkgRoot.props, дубли интеграции, сборка заглушки без Jolt, инициализация host API и доставка Jolt в SDK. См. RELEASE-0.3.1.md.",
+      "sources": [
+        "Engine/docs/RELEASE-0.3.1.md",
+        "Engine/Source/Physics/PhysicsWorld.cpp",
+        "Engine/BuildSupport/Cpp.props"
+      ],
+      "foot": ""
+    },
+    {
+      "type": "code",
+      "title": "Физика объекта из C++",
+      "code": "// Настройка компонента до Play\nvoid Configure(GameComponent& object) {\n  object.SetPhysicsEnabled(true);\n  object.SetPhysicsBodyType(\n      PhysicsBodyType::Dynamic);\n  object.SetPhysicsShapeType(\n      PhysicsShapeType::Box);\n  object.SetPhysicsDensity(1000.0f);\n}\n\n// Когда тело уже создано в Play\nvoid Push(GameComponent& object) {\n  if (object.HasPhysicsBody())\n    object.AddPhysicsImpulse({0, 100, 0});\n}",
+      "codeSize": 22,
+      "aside": "Методы доступны у GameComponent.\n\nИмпульс меняет скорость в зависимости от массы тела.\n\nВызовы выполняйте на игровом потоке.",
+      "notes": "Фрагменты функций для уже созданного компонента. Заголовок Engine/Components/GameComponents.h. Это не полный класс игрового проекта. RigidBodyComponent включает физику при создании, но сам ничего не рисует. Для визуального куба используйте существующий рендерящий компонент.",
+      "sources": [
+        "Engine/docs/PHYSICS.md",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Editor/Source/PhysicsTools.cpp",
+        "Editor/Source/ObjectInspectorPanel.cpp"
       ]
+    },
+    {
+      "type": "rows",
+      "title": "PhysicsWorld и настройки игры",
+      "items": [
+        [
+          "Мир",
+          "Создание и удаление тел, скорость, импульс, raycast."
+        ],
+        [
+          "Настройки",
+          "Game::GetSettings().Physics() задаёт гравитацию и параметры шага."
+        ],
+        [
+          "Сборка",
+          "SDK 0.3.1 включает Jolt.lib. Runtime должен содержать Jolt.dll."
+        ]
+      ],
+      "notes": "PhysicsWorld::Raycast ожидает нормализованное направление. Его handles непрозрачные, 0 означает отсутствие тела. Без ENGINE_ENABLE_JOLT работает заглушка без симуляции. Проверяйте available расширения Engine.Physics. Все вызовы PhysicsWorld выполняются на потоке игры.",
+      "sources": [
+        "Engine/docs/PHYSICS.md",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Editor/Source/PhysicsTools.cpp",
+        "Editor/Source/ObjectInspectorPanel.cpp"
+      ],
+      "foot": "Справочник: Docs/PHYSICS.md и публичные заголовки SDK."
+    },
+    {
+      "type": "rows",
+      "title": "Физика: возможности и ограничения",
+      "items": [
+        [
+          "Твёрдые тела",
+          "Статические, динамические и кинематические тела. Примитивные формы."
+        ],
+        [
+          "Граница выпуска",
+          "Mesh collision, joints и физический контроллер персонажа пока не входят в выпуск."
+        ],
+        [
+          "Старые проекты",
+          "C++ модуль нужно пересобрать. Сцену с physics сохраняйте движком 0.3.1."
+        ]
+      ],
+      "notes": "Не смешивайте навигацию ИИ в XZ с физическими столкновениями. Старый движок может потерять новый блок physics при пересохранении. Module API 5, Edit API 6, Scene 3 сохраняются, расширения Physics версии 1 необязательны.",
+      "sources": [
+        "Engine/docs/PHYSICS.md",
+        "Engine/Include/Engine/Physics/PhysicsWorld.h",
+        "Engine/Include/Engine/Physics/PhysicsSettings.h",
+        "Engine/Include/Engine/Components/GameComponents.h",
+        "Editor/Source/PhysicsTools.cpp",
+        "Editor/Source/ObjectInspectorPanel.cpp"
+      ],
+      "foot": ""
     }
   ]
 }
