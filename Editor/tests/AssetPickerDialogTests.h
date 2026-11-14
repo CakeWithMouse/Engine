@@ -203,6 +203,48 @@ inline void Run()
         check(true, "Destroying dialog with pending async tasks does not crash");
     }
 
+    // 7. Uniform margins around tile grid (Bug 2)
+    {
+        QTemporaryDir temp;
+        check(temp.isValid(), "Temporary directory for margin tests created");
+        const QString root = temp.path();
+        QDir(root).mkpath(QStringLiteral("Models"));
+        QFile f(root + QStringLiteral("/Models/Hero.glb"));
+        f.open(QIODevice::WriteOnly);
+        f.write("data");
+        f.close();
+
+        AssetPickerDialog picker(EditorCore::AssetKind::Model, root);
+        picker.show();
+        QCoreApplication::processEvents();
+
+        auto* list = picker.ListWidget();
+        check(list != nullptr, "List widget exists");
+        check(list->count() > 0, "Item exists in list widget");
+
+        const QRect r = list->visualItemRect(list->item(0));
+        const int topM = r.top();
+        const int leftM = r.left();
+        check(topM > 0, "Top margin is non-zero (not stuck at zero)");
+        check(leftM > 0, "Left margin is non-zero");
+        check(topM == leftM, "Top margin equals left margin");
+
+        // Verify top/left/right margin equality relative to the first tile when viewport fits tile
+        const int tileWidth = r.width();
+        const int frameWidth = list->frameWidth();
+        const int targetVpWidth = tileWidth + leftM * 2;
+        list->setFixedWidth(targetVpWidth + frameWidth * 2);
+        QCoreApplication::processEvents();
+
+        const QRect rSized = list->visualItemRect(list->item(0));
+        const int sizedTop = rSized.top();
+        const int sizedLeft = rSized.left();
+        const int sizedRight = list->viewport()->width() - rSized.right() - 1;
+        check(sizedTop == sizedLeft, "Uniform margin: top equals left");
+        check(sizedLeft == sizedRight, "Uniform margin: left equals right");
+        check(sizedTop == sizedRight, "Uniform margin: top equals right");
+    }
+
     std::printf("AssetPickerDialog tests: %d checks passed\n", checks);
 }
 

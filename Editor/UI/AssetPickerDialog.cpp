@@ -12,6 +12,13 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
+namespace {
+constexpr int kDialogMargin = 12;
+constexpr int kLayoutSpacing = 8;
+constexpr int kGridSpacing = 8;
+constexpr QSize kIconSize = {96, 96};
+}
+
 AssetPickerDialog::ExecHook AssetPickerDialog::s_execHook = nullptr;
 
 void AssetPickerDialog::SetExecHookForTesting(ExecHook hook)
@@ -58,6 +65,8 @@ AssetPickerDialog::AssetPickerDialog(
     resize(640, 480);
 
     auto* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(kDialogMargin, kDialogMargin, kDialogMargin, kDialogMargin);
+    layout->setSpacing(kLayoutSpacing);
 
     searchEdit_ = new QLineEdit(this);
     if (kind_ == EditorCore::AssetKind::Texture)
@@ -77,12 +86,14 @@ AssetPickerDialog::AssetPickerDialog(
     listWidget_->setResizeMode(QListView::Adjust);
     listWidget_->setMovement(QListView::Static);
     listWidget_->setUniformItemSizes(true);
-    listWidget_->setIconSize({96, 96});
-    listWidget_->setGridSize({124, 132});
+    listWidget_->setIconSize(kIconSize);
+    listWidget_->setSpacing(kGridSpacing);
     listWidget_->setWordWrap(true);
     layout->addWidget(listWidget_, 1);
 
     auto* bottom = new QHBoxLayout;
+    bottom->setContentsMargins(0, 0, 0, 0);
+    bottom->setSpacing(kLayoutSpacing);
     if (allowImport_)
     {
         importBtn_ = new QPushButton(Tr("Импортировать файл…", "Import File…"), this);
@@ -154,7 +165,7 @@ void AssetPickerDialog::PopulateItems()
 {
     listWidget_->setUpdatesEnabled(false);
     const qreal dpr = devicePixelRatioF();
-    const QIcon fallbackIcon(AssetThumbnailCache::CategoryIcon(kind_, 96, dpr));
+    const QIcon fallbackIcon(AssetThumbnailCache::CategoryIcon(kind_, kIconSize.width(), dpr));
 
     if (allowEmpty_)
     {
@@ -180,7 +191,7 @@ void AssetPickerDialog::PopulateItems()
                 kind_,
                 item.fullPath,
                 item.lastModified,
-                96,
+                kIconSize.width(),
                 dpr,
                 this,
                 [listItem](const QPixmap& loaded) {
