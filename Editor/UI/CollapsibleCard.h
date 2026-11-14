@@ -63,6 +63,8 @@ public:
 
     void SetExpanded(bool exp)
     {
+        if (expanded_ == exp)
+            return;
         expanded_ = exp;
         content_->setVisible(expanded_);
         UpdateHeaderText();

@@ -22,6 +22,8 @@
 #include <QMenu>
 #include <QProcess>
 #include <QRegularExpression>
+#include <QStyledItemDelegate>
+#include <QTimer>
 #include <QTreeView>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -29,6 +31,20 @@
 #include <QSortFilterProxyModel>
 
 #include <string>
+
+class FolderNameDelegate final : public QStyledItemDelegate
+{
+public:
+    using QStyledItemDelegate::QStyledItemDelegate;
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const override
+    {
+        auto* editor = new QLineEdit(parent);
+        editor->setObjectName(QStringLiteral("FolderNameEditor"));
+        if (editorCreated) editorCreated(editor);
+        return editor;
+    }
+    std::function<void(QLineEdit*)> editorCreated;
+};
 
 class TablerFileIconProvider final : public QAbstractFileIconProvider
 {
@@ -159,6 +175,15 @@ void FileBrowserDock::BuildUi()
     view_ = new QTreeView(panel);
     view_->setObjectName("ProjectFiles");
     view_->setModel(proxy_);
+    auto* folderDelegate = new FolderNameDelegate(view_);
+    folderDelegate->editorCreated = [this](QLineEdit* editor) { renameEditor_ = editor; };
+    view_->setItemDelegate(folderDelegate);
+    model_->setReadOnly(true);
+    connect(folderDelegate, &QAbstractItemDelegate::closeEditor, this,
+        [this](QWidget* editor) { if (editor == renameEditor_) EndInlineRename(); });
+    connect(model_, &QFileSystemModel::directoryLoaded, this, [this] { TryBeginInlineRename(); });
+    connect(proxy_, &QAbstractItemModel::rowsInserted, this, [this] { TryBeginInlineRename(); });
+    connect(proxy_, &QAbstractItemModel::layoutChanged, this, [this] { TryBeginInlineRename(); });
     view_->hideColumn(3);
     view_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
     view_->setMinimumSize(40, 20);
@@ -190,6 +215,7 @@ void FileBrowserDock::BuildUi()
 
 void FileBrowserDock::RetranslateUi()
 {
+    if (view_) view_->viewport()->update();
     setWindowTitle(Tr("Контент-браузер", "Content Browser"));
     if (imports_) imports_->setText(Tr("Импорт…", "Import…"));
     if (actImportModel_) actImportModel_->setText(Tr("Модель…", "Model…"));
@@ -208,6 +234,7 @@ void FileBrowserDock::RetranslateUi()
 
 void FileBrowserDock::SetRootPath(const QString& path)
 {
+    EndInlineRename();
     proxy_->ShowFull(rootCombo_->currentIndex() == 1);
     const QModelIndex srcIndex = model_->setRootPath(path);
     view_->setRootIndex(proxy_->mapFromSource(srcIndex));
@@ -272,6 +299,20 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     const QString path = hasFile ? model_->filePath(index) : QString();
 
     QMenu menu(this);
+    menu.setObjectName(QStringLiteral("ContentBrowserMenu"));
+    const bool directory = hasFile && model_->isDir(index);
+    QString folderParent = directory ? path : QString();
+    if (!hasFile) folderParent = proxy_->full ? model_->rootPath() : contentDir_;
+    if (!folderParent.isEmpty()) folderParent = QDir(projectDir_).relativeFilePath(folderParent);
+    QAction* createFolder = !folderParent.isEmpty() ? menu.addAction(Tr("Новая папка", "New Folder")) : nullptr;
+    if (createFolder) {
+        createFolder->setObjectName(QStringLiteral("AssetsCreateFolder"));
+        createFolder->setEnabled(CommandRegistry::Instance().CanExecute(QStringLiteral("Assets.CreateFolder")));
+        connect(createFolder, &QAction::triggered, this, [folderParent] {
+            CommandRegistry::Instance().Execute(QStringLiteral("Assets.CreateFolder"),
+                {{QStringLiteral("parent"), folderParent}});
+        });
+    }
     const bool isMaterial = hasFile && path.endsWith(QStringLiteral(".mat"), Qt::CaseInsensitive);
     const bool isScript = hasFile && path.endsWith(QStringLiteral(".vscript"), Qt::CaseInsensitive);
     const bool scripts = host_->ReadSnapshot().scripts;
@@ -307,7 +348,11 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     if (!picked)
         return;
 
-    if (picked == editSettings)
+    if (picked == createFolder)
+    {
+        return;
+    }
+    else if (picked == editSettings)
     {
         CommandRegistry::Instance().Execute(QStringLiteral("Assets.EditImportSettings"), {{QStringLiteral("path"), path}});
     }
@@ -370,6 +415,58 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
         QGuiApplication::clipboard()->setText(path);
     else if (picked == refresh)
         model_->setRootPath(model_->rootPath());
+}
+
+void FileBrowserDock::BeginInlineRename(const QString& absolutePath)
+{
+    EndInlineRename();
+    pendingRenamePath_ = QDir::cleanPath(absolutePath);
+    show();
+    raise();
+    filterEdit_->clear();
+    const QModelIndex parent = model_->index(QFileInfo(pendingRenamePath_).absolutePath());
+    if (parent.isValid()) model_->fetchMore(parent);
+    TryBeginInlineRename();
+}
+
+void FileBrowserDock::TryBeginInlineRename()
+{
+    if (pendingRenamePath_.isEmpty()) return;
+    if (!renameIndex_.isValid()) {
+        const QModelIndex source = model_->index(pendingRenamePath_);
+        if (!source.isValid()) return;
+        const QModelIndex proxyIndex = proxy_->mapFromSource(source.siblingAtColumn(0));
+        if (!proxyIndex.isValid()) return;
+        renameIndex_ = proxyIndex;
+        const QString original = QDir(projectDir_).relativeFilePath(pendingRenamePath_);
+        proxy_->BeginFolderRename(proxyIndex, [original](const QString& name) {
+            return CommandRegistry::Instance().Execute(QStringLiteral("Assets.RenameFolder"),
+                {{QStringLiteral("path"), original}, {QStringLiteral("name"), name}});
+        });
+        for (QModelIndex ancestor = proxyIndex.parent(); ancestor.isValid(); ancestor = ancestor.parent()) view_->expand(ancestor);
+        view_->setCurrentIndex(proxyIndex);
+        view_->scrollTo(proxyIndex);
+        view_->setFocus();
+    }
+    const QPersistentModelIndex editIndex(renameIndex_);
+    QMetaObject::invokeMethod(view_, [this, editIndex] {
+        if (!editIndex.isValid() || renameIndex_ != editIndex ||
+            (renameEditor_ && renameEditor_->isVisible())) return;
+        view_->edit(editIndex);
+        if (!renameEditor_) {
+            QTimer::singleShot(50, view_, [this, editIndex] {
+                if (editIndex.isValid() && renameIndex_ == editIndex) TryBeginInlineRename();
+            });
+        }
+    }, Qt::QueuedConnection);
+}
+
+void FileBrowserDock::EndInlineRename()
+{
+    if (proxy_) proxy_->EndFolderRename();
+    pendingRenamePath_.clear();
+    renameIndex_ = QPersistentModelIndex();
+    renameEditor_.clear();
 }
 
 void FileBrowserDock::DeleteCurrentAsset()

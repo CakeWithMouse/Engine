@@ -5,6 +5,7 @@
 #include "ScriptCard.h"
 #include "AiMachineCard.h"
 #include "GeometryCard.h"
+#include "CommandRegistry.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "EditorLocale.h"
 #include "IconProvider.h"
@@ -90,14 +91,18 @@ void ObjectInspectorPanel::BuildUi()
     inspectorLayout->addWidget(cardTransform_);
 
     cardGeometry_ = new GeometryCard(this);
-    cardGeometry_->onChooseModel = [this] { emit ChooseModelRequested(); };
-    cardGeometry_->onClearModel = [this] { emit ClearModelRequested(); };
-    cardGeometry_->onChooseTexture = [this] { emit ChooseTextureRequested(); };
-    cardGeometry_->onClearTexture = [this] { emit ClearTextureRequested(); };
+    cardGeometry_->onChooseModel = [this] {
+        emit ChooseModelRequested();
+        QVariantMap params;
+        params[QStringLiteral("objectId")] = static_cast<qulonglong>(selectedId_);
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.ReplaceModel"), params);
+    };
 
     cardMaterial_ = new MaterialCard(this);
     cardMaterial_->onEditMaterial = [this](const QString& path) { emit EditMaterialRequested(path); };
-    cardMaterial_->onChooseMaterial = [this] { emit ChooseMaterialRequested(); };
+    cardMaterial_->onChooseMaterial = [this] {
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"));
+    };
     cardMaterial_->onClearMaterial = [this] { emit ClearMaterialRequested(); };
 
     cardScript_ = new ScriptCard(this);
@@ -306,6 +311,7 @@ void ObjectInspectorPanel::Refresh(
         noSelectionLabel_->show();
         cardGeneral_->hide(); cardTransform_->hide(); cardGeometry_->hide();
         cardMaterial_->hide(); cardScript_->hide(); cardAi_->hide(); lightInspector_->hide(); characterInspector_->hide();
+        lastCardsValid_ = false;
         refreshing_ = false;
         return;
     }
@@ -313,9 +319,10 @@ void ObjectInspectorPanel::Refresh(
     noSelectionLabel_->hide();
     cardGeneral_->show();
     cardTransform_->show();
-    cardMaterial_->show();
-    cardGeometry_->Clear();
-    cardMaterial_->Clear();
+    if (selectionChanged) {
+        cardGeometry_->Clear();
+        cardMaterial_->Clear();
+    }
 
     bool selectedLight = false;
 
@@ -371,18 +378,46 @@ void ObjectInspectorPanel::Refresh(
             UpdateLightColorButton(object.pointLight.color); cardLight_->show();
         } else { cardLight_->hide(); }
 
-        const bool showGeometry = isModel;
+        const bool showGeometry = isModel || isPrimitive;
         const bool showMaterial = isModel || isPrimitive;
         const bool showProperties = (!isModel && !isPrimitive && !isPointLight && !isDirLight && !isCamera && !isParticles);
 
         const QString cr = property("contentRoot").toString();
-        cardGeometry_->setVisible(showGeometry);
+        const QString modelPath = QString::fromStdString(object.modelAsset);
+        const QString materialPath = QString::fromStdString(object.materialAsset);
+        const bool materialLight = isPointLight || isDirLight;
+        const QString primType = isPrimitive ? (type.rfind("Primitive.", 0) == 0 ? QString::fromStdString(type.substr(10)) : QString::fromStdString(type)) : QString();
+        const bool cardsDirty = !lastCardsValid_ || selectionChanged
+            || showGeometry != lastCardsShowGeometry_
+            || showMaterial != lastCardsShowMaterial_
+            || modelPath != lastCardsModel_
+            || primType != lastCardsPrimitive_
+            || materialPath != lastCardsMaterial_
+            || materialLight != lastCardsMaterialLight_
+            || cr != lastCardsRoot_;
         if (showGeometry) {
-            cardGeometry_->SetData(QString::fromStdString(object.modelAsset), true, cr, selectionChanged);
-            cardGeometry_->SetTexture(QString::fromStdString(object.textureAsset), cr, selectionChanged);
+            cardGeometry_->UpdateChooseModelButton(isModel, isPrimitive);
         }
-        cardMaterial_->SetData(QString::fromStdString(object.materialAsset), isPointLight || isDirLight, cr, selectionChanged);
-        cardMaterial_->setVisible(showMaterial);
+        if (cardsDirty) {
+            cardGeometry_->setVisible(showGeometry);
+            if (isModel) {
+                cardGeometry_->SetModelData(modelPath, true, cr, selectionChanged);
+            } else if (isPrimitive) {
+                cardGeometry_->SetPrimitiveData(primType);
+            }
+            cardMaterial_->SetData(materialPath, materialLight, cr, selectionChanged);
+            cardMaterial_->setVisible(showMaterial);
+            lastCardsShowGeometry_ = showGeometry;
+            lastCardsShowMaterial_ = showMaterial;
+            lastCardsModel_ = modelPath;
+            lastCardsPrimitive_ = primType;
+            lastCardsMaterial_ = materialPath;
+            lastCardsMaterialLight_ = materialLight;
+            lastCardsRoot_ = cr;
+            lastCardsValid_ = true;
+        }
+        if (properties_->isHidden() == showProperties)
+            properties_->setVisible(showProperties);
         // Скрипт — у любого объекта сцены, если игровой модуль их поддерживает.
         cardScript_->SetData(QString::fromStdString(object.scriptAsset), true);
         cardScript_->SetVariables(QString::fromStdString(object.scriptAsset), QString::fromStdString(object.scriptVariables),
@@ -396,7 +431,6 @@ void ObjectInspectorPanel::Refresh(
             cardAi_->SetData(data.value(QStringLiteral("stateMachine")).toString(), data.value(QStringLiteral("machineMemory")).toString(), true);
         }
         cardAi_->setVisible(aiMachine);
-        properties_->setVisible(showProperties);
 
         if (canReplaceWholeInspector)
         {

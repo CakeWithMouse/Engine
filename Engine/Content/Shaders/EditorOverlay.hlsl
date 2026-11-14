@@ -113,18 +113,10 @@ BillboardPSInput VSBillboard(BillboardVSInput input)
         return output;
     }
 
-    // Clamp billboard size to 18..20 px in screen pixels:
-    // Diameter is maximum 20px (half = 10px), minimum 18px (half = 9px).
-    // Almost constant 18..20 px: scales down to 18px only when distance < 3m, clamped at 20px for dist >= 3m.
-    float2 baseOffset = input.Offset;
-    float currentHalf = max(abs(baseOffset.x), abs(baseOffset.y));
-
-    float dist = max(0.001f, clipCenter.w);
-    float scaleT = saturate(dist / 3.0f);
-    float targetHalf = lerp(9.0f, 10.0f, scaleT);
-    float clampedHalf = clamp(targetHalf, 9.0f, 10.0f);
-    float effectiveScale = (currentHalf > 1e-4f) ? (clampedHalf / currentHalf) : 1.0f;
-    float2 pixelOffset = baseOffset * effectiveScale;
+    // Diameter is driven by the Editor via EngineOverlayBillboard::sizePixels
+    // (fraction of physical viewport height, clamped in physical pixels).
+    // input.Offset is the quad corner offset in physical screen pixels (= sizePixels/2).
+    float2 pixelOffset = input.Offset;
 
     // Invert Y offset for screen coordinates (Y down in screen space, Y up in NDC)
     float2 ndcOffset = float2(pixelOffset.x * 2.0f * ScreenSize.z, -pixelOffset.y * 2.0f * ScreenSize.w) * clipCenter.w;
@@ -147,31 +139,26 @@ float4 PSBillboard(BillboardPSInput input) : SV_Target
     }
 
     float4 texColor = IconTexture.Sample(IconSampler, input.UV);
-    
-    // Contrast circular plate with antialiased edge
+
+    // Antialiased circular edge.
     float edgeAlpha = 1.0f - smoothstep(0.47f, 0.50f, dist);
-    
-    // Background badge plate: tinted light body with dark outer ring
+
+    // Plate is the categorical tint supplied by the Editor (ThemePalette); the
+    // outer rim is a darker shade of the same tint, so it adapts to the theme.
     float3 plateColor = input.Tint.rgb;
     if (dist > 0.44f)
     {
-        // Dark contrast rim for visibility against any background
-        plateColor = float3(0.12f, 0.12f, 0.14f);
+        plateColor = input.Tint.rgb * 0.45f;
     }
-    
-    // If texture has glyph content (alpha > 0.1), blend it over the plate
+
+    // The texture is a theme-neutral glyph alpha mask. Pick a contrasting ink
+    // from the plate luminance so the icon reads on both dark and light themes.
     float3 finalRgb = plateColor;
     if (texColor.a > 0.1f)
     {
-        finalRgb = lerp(plateColor, texColor.rgb, texColor.a);
-    }
-    else
-    {
-        // Procedural inner bulb / point symbol if texture alpha is zero
-        if (dist < 0.22f)
-        {
-            finalRgb = float3(1.0f, 1.0f, 1.0f);
-        }
+        float lum = dot(input.Tint.rgb, float3(0.299f, 0.587f, 0.114f));
+        float3 glyphColor = (lum > 0.5f) ? float3(0.10f, 0.10f, 0.12f) : float3(0.95f, 0.95f, 0.97f);
+        finalRgb = lerp(plateColor, glyphColor, texColor.a);
     }
 
     return float4(finalRgb, edgeAlpha * input.Tint.a);

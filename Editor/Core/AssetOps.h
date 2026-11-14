@@ -14,7 +14,7 @@ public:
     explicit AssetOps(FileService* fileService);
 
     bool CreateFile(const QString& relPath, const QByteArray& content, QString* outError = nullptr);
-    bool CreateFolder(const QString& relPath, QString* outError = nullptr);
+    bool CreateFolder(const QString& relPath, QString* outError = nullptr, bool exclusive = false);
 
     bool Rename(const QString& oldRelPath, const QString& newRelPath, QString* outError = nullptr, bool renameCompanions = false);
     bool Duplicate(const QString& srcRelPath, const QString& dstRelPath = QString(), QString* outError = nullptr, QString* outCreatedPath = nullptr, bool duplicateCompanions = false);

@@ -70,6 +70,10 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     connect(scriptProblems, &QTimer::timeout, this, &EditorMainWindow::PollScriptProblems);
     connect(scriptProblems, &QTimer::timeout, this, &EditorMainWindow::PollAiMachine);
     scriptProblems->start(1000);
+    gizmoRefreshTimer_ = new QTimer(this);
+    gizmoRefreshTimer_->setSingleShot(true);
+    gizmoRefreshTimer_->setInterval(33);
+    connect(gizmoRefreshTimer_, &QTimer::timeout, this, &EditorMainWindow::RefreshSceneUi);
 
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] { RetranslateUi(); });
     themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
@@ -644,7 +648,7 @@ void EditorMainWindow::BuildSceneDocks()
 {
     sceneObjectsDock_ = new QDockWidget(Tr("Сцена / объекты", "Scene / Objects"), this);
     sceneObjectsDock_->setObjectName(QStringLiteral("SceneObjectsDock"));
-    sceneObjectsDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    sceneObjectsDock_->setAllowedAreas(Qt::AllDockWidgetAreas);
     sceneObjectsDock_->setFeatures(
         QDockWidget::DockWidgetMovable |
         QDockWidget::DockWidgetFloatable |
@@ -653,7 +657,7 @@ void EditorMainWindow::BuildSceneDocks()
 
     inspectorDock_ = new QDockWidget(Tr("Инспектор", "Inspector"), this);
     inspectorDock_->setObjectName(QStringLiteral("InspectorDock"));
-    inspectorDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    inspectorDock_->setAllowedAreas(Qt::AllDockWidgetAreas);
     inspectorDock_->setFeatures(
         QDockWidget::DockWidgetMovable |
         QDockWidget::DockWidgetFloatable |
@@ -798,22 +802,6 @@ void EditorMainWindow::ConnectPanels()
                 host_->PostCommand(c);
             });
 
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseModelRequested, this, [this] {
-        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
-        const auto path = QFileDialog::getOpenFileName(this, QStringLiteral("Модель из проекта"),
-            QString::fromUtf8(host_->host().contentRoot), QStringLiteral("Модели (*.glb *.gltf *.obj *.fbx)"));
-        if (path.isEmpty()) return;
-        const auto relative = QDir(QString::fromUtf8(host_->host().contentRoot)).relativeFilePath(path);
-        if (relative == ".." || relative.startsWith("../") || QDir::isAbsolutePath(relative)) {
-            QMessageBox::warning(this, QStringLiteral("Ресурс вне проекта"), QStringLiteral("Сначала импортируйте модель через меню «Импорт».")); return;
-        }
-        EditorCommand c; c.type = EditorCommand::SetModel; c.objectId = selectedId_;
-        c.path = "/Game/" + QDir::fromNativeSeparators(relative); host_->PostCommand(c);
-    });
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearModelRequested, this, [this] {
-        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
-        EditorCommand c; c.type = EditorCommand::SetModel; c.objectId = selectedId_; host_->PostCommand(c);
-    });
     connect(objectInspectorPanel_, &ObjectInspectorPanel::CharacterSpeedEditingFinished, this, [this](quint64 id, double speed) {
         if (sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
         for (const auto& o : host_->ReadSnapshot().objects) if (o.id == id && o.gameplayKind == 1) {
@@ -824,34 +812,9 @@ void EditorMainWindow::ConnectPanels()
             c.path = QString::fromUtf8(QJsonDocument(data).toJson()); host_->PostCommand(c);
         }
     });
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseTextureRequested, this, [this] {
-        if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
-        const QString p = QFileDialog::getOpenFileName(this, QStringLiteral("Текстура из проекта"), QString::fromUtf8(host_->host().contentRoot), QStringLiteral("Текстуры (*.png *.jpg *.jpeg *.bmp *.tga)"));
-        if (!p.isEmpty()) UseAsset(p);
-    });
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearTextureRequested, this, [this] {
-        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
-        EditorCommand c; c.type = EditorCommand::SetTexture; c.objectId = selectedId_; host_->PostCommand(c);
-    });
-
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseMaterialRequested, this, [this]
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseMaterialRequested, this, []
     {
-        if (!host_->HasScene() ||
-            sceneBusy_ ||
-            host_->PlayState() != EditorQtHost::EditorState::Edit)
-        {
-            return;
-        }
-
-        const QString path = QFileDialog::getOpenFileName(
-            this,
-            QStringLiteral("Материал из проекта"),
-            QString::fromUtf8(host_->host().contentRoot),
-            QStringLiteral("Материалы (*.mat)")
-        );
-
-        if (!path.isEmpty())
-            UseAsset(path);
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"));
     });
 
     connect(objectInspectorPanel_, &ObjectInspectorPanel::EditMaterialRequested, this, [this](const QString& material)
@@ -1255,6 +1218,17 @@ void EditorMainWindow::CommandFinished(
     const QString& error
 )
 {
+    if (status == EngineSceneOk &&
+        (command.type == EditorCommand::InputCursor || command.type == EditorCommand::ViewportCamera))
+        return;
+    // Gizmo drags complete at mouse rate; panels follow at <= ~30 Hz and once after the last tick.
+    if (status == EngineSceneOk && command.type == EditorCommand::UpdateObjectTransform &&
+        command.path == QLatin1String("gizmo"))
+    {
+        if (!gizmoRefreshTimer_->isActive()) gizmoRefreshTimer_->start();
+        return;
+    }
+
     if (command.type == EditorCommand::ReloadProject) {
         sceneBusy_ = false; UpdatePlayButtons();
         if (status != EngineSceneOk && !command.name.isEmpty()) {

@@ -38,7 +38,6 @@ void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot
     const auto schema=QJsonDocument::fromJson(QByteArray::fromStdString(object.propertySchema)).object();
     const auto fields=schema["fields"].toArray();
     const bool aiMachine=HasAiMachine(object.propertySchema);
-    properties_->setVisible(!fields.isEmpty());
     QString key=QString::number(object.id)+QString::fromStdString(object.propertySchema)+QString::number(static_cast<int>(EditorLocale::Instance().Language()));
     // Object reference selectors track names/IDs, while numeric edits do not
     // rebuild controls on each scene refresh or steal text-entry focus.

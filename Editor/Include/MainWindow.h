@@ -18,6 +18,7 @@ class QComboBox;
 class QProcess;
 class QLabel;
 class QPlainTextEdit;
+class QTimer;
 class EditorQtHost;
 class FileBrowserDock;
 class ViewportWidget;
@@ -246,6 +247,7 @@ private:
 
     QLabel* playStateLabel_ = nullptr;
     QLabel* statsLabel_ = nullptr;
+    QTimer* gizmoRefreshTimer_ = nullptr;
 
     QString scenePath_;
     QByteArray reloadTypesBefore_, reloadTypesBuilt_;

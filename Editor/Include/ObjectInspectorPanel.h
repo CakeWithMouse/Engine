@@ -89,10 +89,7 @@ signals:
     void LightColorRequested(quint64 objectId, const QColor& current);
 
     void ChooseModelRequested();
-    void ClearModelRequested();
     void CharacterSpeedEditingFinished(quint64 objectId, double speed);
-    void ChooseTextureRequested();
-    void ClearTextureRequested();
     void ChooseMaterialRequested();
     void EditMaterialRequested(const QString& virtualPath);
     void ClearMaterialRequested();
@@ -124,6 +121,11 @@ private:
     quint64 selectedId_ = 0; std::string selectedType_;
     EditorQtHost::Snapshot lastSnapshot_;
     bool refreshing_ = false;
+    QString lastCardsModel_, lastCardsPrimitive_, lastCardsMaterial_, lastCardsRoot_;
+    bool lastCardsShowGeometry_ = false;
+    bool lastCardsShowMaterial_ = false;
+    bool lastCardsMaterialLight_ = false;
+    bool lastCardsValid_ = false;
     int langSubId_ = 0;
     int themeSubId_ = 0;
     QMap<QString, QJsonValue> pendingProperties_;

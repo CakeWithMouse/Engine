@@ -1,4 +1,5 @@
 #include "AssetOps.h"
+#include "FolderPaths.h"
 
 #include <QDir>
 #include <QFile>
@@ -67,22 +68,21 @@ bool AssetOps::CreateFile(const QString& relPath, const QByteArray& content, QSt
     return fileService_->WriteFileAtomic(absPath, content, outError);
 }
 
-bool AssetOps::CreateFolder(const QString& relPath, QString* outError)
+bool AssetOps::CreateFolder(const QString& relPath, QString* outError, bool exclusive)
 {
     if (!fileService_)
     {
-        if (outError) *outError = QStringLiteral("FileService is null");
+        const QString err = QStringLiteral("FileService is null");
+        if (outError) *outError = err;
+        Logger::Instance().Error(QStringLiteral("AssetOps::CreateFolder: ") + err);
         return false;
     }
 
-    const QString absPath = fileService_->ResolveSandboxPath(relPath);
+    const QString absPath = ResolveFolderPath(*fileService_, relPath, outError);
     if (absPath.isEmpty())
-    {
-        if (outError) *outError = QStringLiteral("Path is outside project sandbox: %1").arg(relPath);
         return false;
-    }
 
-    return fileService_->CreateDirectoryPath(absPath, outError);
+    return fileService_->CreateDirectoryPath(absPath, outError, exclusive);
 }
 
 bool AssetOps::Rename(const QString& oldRelPath, const QString& newRelPath, QString* outError, bool renameCompanions)
