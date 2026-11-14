@@ -9,6 +9,8 @@
 #define POINT_SHADOW_SIZE 1024.0f
 #define POINT_SHADOW_NEAR 0.5f
 
+#include "ShadowDepth.hlsli"
+
 // Shared by the materials and the deferred lighting pass.
 // Layout must match ConstantBufferData in Source/Public/Render/ShaderConstants.h.
 cbuffer ConstantBuffer : register(b0)
@@ -130,13 +132,6 @@ float ComputeStaticShadowFactor(float3 worldPos, float3 normal, float3 toLightDi
     return visibility;
 }
 
-int SelectCascade(float viewDepth)
-{
-    if (viewDepth < CascadeSplits.x) return 0;
-    if (viewDepth < CascadeSplits.y) return 1;
-    return 2;
-}
-
 /** Edges of a cascade along the view; CascadeSplits.w is the near edge of the first one. */
 float CascadeStart(int cascadeIndex)
 {
@@ -194,7 +189,7 @@ float ComputeShadowFactor(float3 worldPos, float3 normal, float3 toLightDir, flo
     // coarse edge show around every sharp shadow, which is exactly how columns came out blocky.
     const float baked = ComputeStaticShadowFactor(worldPos, normal, toLightDir);
 
-    int cascadeIndex = SelectCascade(viewDepth);
+    int cascadeIndex = SelectShadowCascade(viewDepth, CascadeSplits);
     float visibility = SampleCascade(cascadeIndex, worldPos, bias);
     if (cascadeIndex >= STATIC_CASTER_CASCADES)
     {
@@ -224,8 +219,8 @@ float ComputeShadowFactor(float3 worldPos, float3 normal, float3 toLightDir, flo
 }
 
 // Point lights + directional light with cascaded shadows. Returns the lit colour (not clamped).
-// Must match PointShadowTextureSlot in ShaderConstants.h. Materials own t6 and up, so the cube array
-// sits well past them.
+// Must match PointShadowTextureSlot in ShaderConstants.h. Material textures may use t6-t127,
+// excluding this reserved cube-array slot; both editor allocators skip it.
 TextureCubeArray pointShadowTex : register(t32);
 
 /** Depth a cube face stores for a point this far along its axis; same mapping as its projection. */
@@ -319,7 +314,7 @@ float3 ComputeSceneLighting(float3 albedo, float3 normal, float3 worldPos, Mater
     }
 
     float3 directionalToLight = normalize(-LightDirection.xyz);
-    float viewDepth = length(CameraPosition.xyz - worldPos);
+    float viewDepth = ShadowViewDepth(worldPos, viewMatrix);
     float shadow = ComputeShadowFactor(worldPos, normal, directionalToLight, viewDepth);
 
     float3 directionalColor = DirectionalLightColorIntensity.rgb;

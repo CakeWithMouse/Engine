@@ -170,20 +170,33 @@
         <ClCompile Include="UI/DockLayoutManager.cpp"/>
         <ClCompile Include="UI/MainToolBar.cpp"/>
         <ClCompile Include="UI/IconProvider.cpp"/>
+        <ClCompile Include="UI/AssetThumbnailCache.cpp"/>
+        <ClCompile Include="UI/AssetPickerDialog.cpp"/>
+        <ClCompile Include="UI/ImportSettingsDialog.cpp"/>
+        <ClCompile Include="UI/ModelImportEditFlow.cpp"/>
         <ClCompile Include="UI/PlaySettingsDialog.cpp"/>
         <ClCompile Include="UI/ExternalGameRunner.cpp"/>
         <ClCompile Include="Source/MainWindow.cpp"/>
         <ClCompile Include="Source/AssetTools.cpp"/>
+        <ClCompile Include="Source/ImportCommands.cpp"/>
+        <ClCompile Include="Source/AssetDeleteCommand.cpp"/>
         <ClCompile Include="Source/FileBrowser.cpp"/>
         <ClCompile Include="Source/ViewportWidget.cpp"/>
         <ClCompile Include="Source/ViewportWidget_Input.cpp"/>
         <ClCompile Include="UI/ViewportOverlayHelper.cpp"/>
         <ClCompile Include="Source/ObjectInspectorPanel.cpp"/>
+        <ClCompile Include="Source/ObjectInspectorLight.cpp"/>
         <ClCompile Include="Source/ProjectProperties.cpp"/>
         <ClCompile Include="Source/SceneObjectsPanel.cpp"/>
         <ClCompile Include="Source/MaterialEditorWindow.cpp"/>
         <ClCompile Include="Source/MaterialTextureTools.cpp"/>
         <ClCompile Include="Source/MaterialGraphWidget.cpp"/>
+        <ClCompile Include="Source/GraphEditorWidget.cpp"/>
+        <ClCompile Include="Source/ScriptGraphWidget.cpp"/>
+        <ClCompile Include="Source/ScriptEditorWindow.cpp"/>
+        <ClCompile Include="Source/FsmBlockListEditor.cpp"/>
+        <ClCompile Include="Source/FsmGraphWidget.cpp"/>
+        <ClCompile Include="Source/AiMachineEditorWindow.cpp"/>
         <ClCompile Include="Core/Logger.cpp"/>
         <ClCompile Include="Core/CommandRegistry.cpp"/>
         <ClCompile Include="Core/FileService.cpp"/>
@@ -197,7 +210,20 @@
         <ClCompile Include="Core/AssetOps.cpp"/>
         <ClCompile Include="Core/HlslGraphCompiler.cpp"/>
         <ClCompile Include="Core/MaterialGraphModel.cpp"/>
+        <ClCompile Include="Core/Graph/GraphDocument.cpp"/>
+        <ClCompile Include="Core/Graph/GraphSchema.cpp"/>
+        <ClCompile Include="Core/Graph/GraphHistory.cpp"/>
+        <ClCompile Include="Core/Graph/GraphClipboard.cpp"/>
+        <ClCompile Include="Core/Graph/GraphSchemaRegistry.cpp"/>
+        <ClCompile Include="Core/Graph/GraphLayout.cpp"/>
+        <ClCompile Include="Core/MaterialGraphSchema.cpp"/>
+        <ClCompile Include="Core/CodeGraphSchema.cpp"/>
+        <ClCompile Include="Core/FsmGraphSchema.cpp"/>
+        <ClCompile Include="Core/ScriptMessages.cpp"/>
         <ClCompile Include="Core/SceneFile.cpp"/>
+        <ClCompile Include="Core/ImportSettings.cpp"/>
+        <ClCompile Include="Core/ModelImportSidecar.cpp"/>
+        <ClCompile Include="Core/ModelImportSidecarTransaction.cpp"/>
         <ClCompile Include="Core/Terminal.cpp"/>
         <ClCompile Include="$(IntDir)moc/moc_Logger.cpp">
             <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -263,7 +289,20 @@
         <ClInclude Include="Core/AssetOps.h"/>
         <ClInclude Include="Core/HlslGraphCompiler.h"/>
         <ClInclude Include="Core/MaterialGraphModel.h"/>
+        <ClInclude Include="Core/Graph/GraphDocument.h"/>
+        <ClInclude Include="Core/Graph/GraphSchema.h"/>
+        <ClInclude Include="Core/Graph/GraphHistory.h"/>
+        <ClInclude Include="Core/Graph/GraphClipboard.h"/>
+        <ClInclude Include="Core/Graph/GraphSchemaRegistry.h"/>
+        <ClInclude Include="Core/Graph/GraphLayout.h"/>
+        <ClInclude Include="Core/MaterialGraphSchema.h"/>
+        <ClInclude Include="Core/CodeGraphSchema.h"/>
+        <ClInclude Include="Core/FsmGraphSchema.h"/>
+        <ClInclude Include="Core/ScriptMessages.h"/>
         <ClInclude Include="Core/SceneFile.h"/>
+        <ClInclude Include="Core/ImportSettings.h"/>
+        <ClInclude Include="Core/ModelImportSidecar.h"/>
+        <ClInclude Include="Core/ModelImportSidecarTransaction.h"/>
         <ClInclude Include="Core/Terminal.h"/>
         <CustomBuild Include="Core/Logger.h">
             <FileType>Document</FileType>
@@ -303,12 +342,26 @@
         <ClInclude Include="Host/SceneCommandHandler.h"/>
         <ClInclude Include="UI/EditorApp.h"/>
         <ClInclude Include="UI/IconProvider.h"/>
+        <ClInclude Include="UI/AssetThumbnailCache.h"/>
+        <ClInclude Include="UI/AssetPickerDialog.h"/>
         <ClInclude Include="UI/ViewportOverlayHelper.h"/>
         <ClInclude Include="UI/SpinBoxArrowStyle.h"/>
+        <ClInclude Include="UI/ImportSettingsDialog.h"/>
+        <ClInclude Include="Include/AssetDeletePrompt.h"/>
         <ClInclude Include="Include/CodeClassDialog.h"/>
+        <ClInclude Include="Include/ImportMigration.h"/>
         <ClInclude Include="Include/FileBrowser.h"/>
         <ClInclude Include="Include/MaterialTextureTools.h"/>
         <ClInclude Include="Include/MaterialGraphWidget.h"/>
+        <ClInclude Include="Include/GraphEditorWidget.h"/>
+        <ClInclude Include="Include/ScriptGraphWidget.h"/>
+        <ClInclude Include="Include/ScriptEditorWindow.h"/>
+        <ClInclude Include="Include/FsmBlockListEditor.h"/>
+        <ClInclude Include="Include/FsmGraphWidget.h"/>
+        <ClInclude Include="Include/AiMachineEditorWindow.h"/>
+        <ClInclude Include="UI/ScriptCard.h"/>
+        <ClInclude Include="UI/AiMachineCard.h"/>
+        <ClInclude Include="UI/VariableValuesEditor.h"/>
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->
         <CustomBuild Include="Include/MainWindow.h">
             <FileType>Document</FileType>
@@ -395,7 +448,7 @@
         <Copy Condition="'$(EngineCommandlet)'=='true'" SourceFiles="$(QtInstallDir)/plugins/platforms/qoffscreen.dll" DestinationFiles="$(OutDir)platforms/qoffscreen.dll" SkipUnchangedFiles="true"/>
     </Target>
     <ImportGroup Label="ExtensionTargets"/>
-  <ItemGroup><ClCompile Include="Source/CodeTools.cpp" /></ItemGroup>
+  <ItemGroup><ClCompile Include="Source/CodeTools.cpp" /><ClCompile Include="Source/ImportMigration.cpp" /></ItemGroup>
     <Import Project="../Engine/BuildSupport/AssimpRuntime.targets" />
 
   <PropertyGroup>

@@ -1,0 +1,42 @@
+[
+  {
+    "mode": "game",
+    "game": "BasicExamples",
+    "exit": 0
+  },
+  {
+    "mode": "game",
+    "game": "Pong",
+    "exit": 0
+  },
+  {
+    "mode": "game",
+    "game": "SunGame",
+    "exit": 0
+  },
+  {
+    "mode": "game",
+    "game": "Battle",
+    "exit": 0
+  },
+  {
+    "mode": "game",
+    "game": "Katamari",
+    "exit": 0
+  },
+  {
+    "mode": "game",
+    "game": "RuntimeExample",
+    "exit": 0
+  },
+  {
+    "mode": "editor",
+    "game": "BasicExamples",
+    "exit": 0
+  },
+  {
+    "mode": "editor",
+    "game": "RuntimeExample",
+    "exit": 0
+  }
+]

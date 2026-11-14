@@ -1,6 +1,8 @@
 #define NOMINMAX
 #include "AssetUpdate.h"
+#include "ModelImportSettings.h"
 #include <Engine/Scene/SceneAssets.h>
+#include "../Resources/VfsRead.h"
 #include "../../ThirdParty/nlohmann/json.hpp"
 #include <Windows.h>
 #include <fstream>
@@ -17,14 +19,31 @@ bool Inside(const fs::path& child,const fs::path& root) {
     auto relative=fs::weakly_canonical(child).lexically_relative(fs::canonical(root));
     return !relative.empty()&&!relative.is_absolute()&&*relative.begin()!="..";
 }
+void CopyFileWithRetry(const fs::path& source,const fs::path& target) {
+    // Antivirus/indexer can hold a freshly written file open for a moment.
+    std::error_code ec;
+    for(int attempt=1;attempt<=3;++attempt) {
+        fs::copy_file(source,target,fs::copy_options::overwrite_existing,ec);
+        if(!ec)return;
+        std::fprintf(stderr,"[Warn] AssetUpdate: copy attempt %d/3 failed for '%s': %s\n",attempt,source.u8string().c_str(),ec.message().c_str());
+        if(ec.value()!=ERROR_SHARING_VIOLATION||attempt==3)break;
+        Sleep(200);
+    }
+    throw fs::filesystem_error("copy_file",source,target,ec);
+}
 void Copy(const fs::path& source,const fs::path& target) {
     if(GetFileAttributesW(source.c_str())&FILE_ATTRIBUTE_REPARSE_POINT)throw std::runtime_error("Linked assets cannot be updated");
     if(fs::is_directory(source)) {
         fs::create_directories(target);
         for(const auto& entry:fs::directory_iterator(source))Copy(entry.path(),target/entry.path().filename());
-    } else {fs::create_directories(target.parent_path());fs::copy_file(source,target,fs::copy_options::overwrite_existing);}
+    } else {fs::create_directories(target.parent_path());CopyFileWithRetry(source,target);}
 }
 void Write(const fs::path& path,const Json& json){std::ofstream f(path,std::ios::binary);f.exceptions(std::ios::failbit|std::ios::badbit);f<<json.dump(2)<<'\n';f.close();}
+constexpr std::string_view kStagingRoot=SceneAssets::StagingRoot;
+struct StagingMount {
+    explicit StagingMount(const fs::path& dir){VfsRead::GetVFS().Mount(kStagingRoot,dir);}
+    ~StagingMount(){VfsRead::GetVFS().Unmount(kStagingRoot);}
+};
 void RemapJson(Json& json,const std::string& before,const std::string& after) {
     if(json.is_string())json=AssetUpdate::Remap(json.get<std::string>(),before,after);
     else if(json.is_structured())for(auto& item:json)RemapJson(item,before,after);
@@ -43,7 +62,7 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
     const bool model=Model(file);
     const bool texture=ext==".png"||ext==".jpg"||ext==".jpeg"||ext==".bmp"||ext==".tga";
     const bool audio=Audio(file);
-    if(!model&&!texture&&!audio&&!(operation==1&&ext==".mat"))throw std::runtime_error("Select a model, texture, audio file or material");
+    if(!model&&!texture&&!audio&&!(operation==1&&(ext==".mat"||ext==".vscript")))throw std::runtime_error("Select a model, texture, audio file, material or script");
     const auto sourceRoot=model?file.parent_path():file;
     if(operation==1&&!model)for(auto folder=file.parent_path();folder!=content&&Inside(folder,content);folder=folder.parent_path())
         for(const auto& entry:fs::directory_iterator(folder))if(entry.is_regular_file()&&Model(entry.path()))throw std::runtime_error("This file belongs to a model bundle; move the model folder to keep its internal references");
@@ -54,7 +73,7 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
     struct Guard{HANDLE h;~Guard(){CloseHandle(h);}} guard{lock};
     const auto backup=work/"AssetBackups"/(std::to_string(GetCurrentProcessId())+"-"+std::to_string(GetTickCount64()));
     fs::create_directories(backup);
-    auto target=file,targetRoot=sourceRoot;std::string before,after;fs::path imported,importRoot;
+    auto target=file,targetRoot=sourceRoot;std::string before,after;fs::path imported,importRoot,staging;
     std::vector<std::pair<fs::path,fs::path>> changed;
     bool moved=false,installed=false;
     try {
@@ -68,8 +87,36 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
             const auto original=fs::u8path(source);
             if(!original.is_absolute() || !fs::is_regular_file(original))throw std::runtime_error("Original source is missing; choose its new location");
             if(Inside(original,sourceRoot.parent_path()) && (original==file || (model&&Inside(original,sourceRoot))))throw std::runtime_error("Choose the external original, not a file inside this import");
-            const auto virtualImport=SceneAssets::Import(content,original,model?SceneAssets::Model:audio?SceneAssets::Audio:SceneAssets::Texture);
-            imported=content/fs::u8path(virtualImport.substr(6));importRoot=model?imported.parent_path():imported;
+            std::string importOptions;
+            bool normalizeSidecar=false;
+            if(model) {
+                const auto sidecar=fs::u8path(file.u8string()+".importsettings.json");
+                if(fs::is_regular_file(sidecar)) {
+                    std::ifstream in(sidecar,std::ios::binary);
+                    if(in) {
+                        const std::string text((std::istreambuf_iterator<char>(in)),std::istreambuf_iterator<char>());
+                        ModelImportSettings parsed{};
+                        std::string err;
+                        if(ModelImportSettings::Parse(text,parsed,&err)) {
+                            importOptions=text;
+                        } else {
+                            std::fprintf(stderr,"[Error] AssetUpdate: broken sidecar '%s': %s; normalizing to defaults\n",sidecar.u8string().c_str(),err.c_str());
+                            Copy(sidecar,backup/"importsettings.broken.json");
+                            normalizeSidecar=true;
+                        }
+                    }
+                } else {
+                    std::fprintf(stderr,"[Info] AssetUpdate: sidecar missing for '%s', using defaults\n",file.u8string().c_str());
+                }
+            }
+            staging=work/"Staging"/(std::to_string(GetCurrentProcessId())+"-"+std::to_string(GetTickCount64()));
+            fs::create_directories(staging);
+            std::string virtualImport;
+            {
+                StagingMount mount(staging);
+                virtualImport=SceneAssets::Import(content,original,model?SceneAssets::Model:audio?SceneAssets::Audio:SceneAssets::Texture,importOptions,staging,kStagingRoot);
+            }
+            imported=staging/fs::u8path(virtualImport.substr(kStagingRoot.size()+1));importRoot=model?imported.parent_path():imported;
             if(Extension(imported)!=ext)throw std::runtime_error("Reimport must keep the asset format (BLEND is converted to GLB)");
             const auto candidate=backup/"candidate";
             Copy(sourceRoot,candidate);
@@ -79,8 +126,10 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
                     if(entry.path()==imported)relative=file.filename();
                     if(entry.path()==fs::u8path(imported.u8string()+".source.json"))relative=fs::u8path(file.filename().u8string()+".source.json");
                     if(entry.path()==fs::u8path(imported.u8string()+".import.json"))relative=fs::u8path(file.filename().u8string()+".import.json");
+                    if(entry.path()==fs::u8path(imported.u8string()+".importsettings.json"))relative=fs::u8path(file.filename().u8string()+".importsettings.json");
                     const auto dest=candidate/relative;
-                    if(fs::exists(dest)&&(entry.path().extension()==".mat"||entry.path().extension()==".hlsl"||entry.path().u8string().find(".import.json")!=std::string::npos))continue;
+                    const auto name=entry.path().u8string();
+                    if(fs::exists(dest)&&(entry.path().extension()==".mat"||entry.path().extension()==".hlsl"||name.find(".import.json")!=std::string::npos||(name.find(".importsettings.json")!=std::string::npos&&!normalizeSidecar)))continue;
                     Copy(entry.path(),dest);
                 }
             } else Copy(imported,candidate);
@@ -97,13 +146,13 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
             target=content/fs::u8path(argument.substr(6));targetRoot=model?target.parent_path():target;
             if(!Inside(target,content)||Extension(target)!=ext||fs::exists(targetRoot))throw std::runtime_error("Choose a new destination inside Content with the same extension");
             if(model && target.filename()!=file.filename())throw std::runtime_error("Rename/move the model's folder; keep the model filename");
-            if(!model)for(const auto* suffix:{".source.json",".import.json"})if(fs::exists(fs::u8path(target.u8string()+suffix)))throw std::runtime_error("Destination metadata already exists");
+            if(!model)for(const auto* suffix:{".source.json",".import.json",".importsettings.json"})if(fs::exists(fs::u8path(target.u8string()+suffix)))throw std::runtime_error("Destination metadata already exists");
             if(model && Inside(targetRoot,sourceRoot))throw std::runtime_error("Destination cannot be inside the moved folder");
             before=model?path.substr(0,path.find_last_of('/')):path;
             after=model?argument.substr(0,argument.find_last_of('/')):argument;
             Copy(sourceRoot,backup/"original");
             fs::create_directories(targetRoot.parent_path());fs::rename(sourceRoot,targetRoot);moved=true;installed=true;
-            if(!model) for(const auto* suffix:{".source.json",".import.json"}) {
+            if(!model) for(const auto* suffix:{".source.json",".import.json",".importsettings.json"}) {
                 const auto old=fs::u8path(file.u8string()+suffix),next=fs::u8path(target.u8string()+suffix);
                 if(fs::exists(old)){Copy(old,backup/suffix);changed.push_back({old,backup/suffix});changed.push_back({next,{}});Copy(old,next);fs::remove(old);}
             }
@@ -134,8 +183,8 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
             if(operation==0){if(installed)fs::remove_all(sourceRoot);fs::rename(backup/"original",sourceRoot);}
             else if(installed)fs::rename(targetRoot,sourceRoot);
         }
-        if(!importRoot.empty()){std::error_code ec;fs::remove_all(importRoot,ec);fs::remove(fs::u8path(imported.u8string()+".source.json"),ec);}
+        if(!staging.empty()){std::error_code ec;fs::remove_all(staging,ec);}
         throw;
     }
-    if(!importRoot.empty()){std::error_code ec;fs::remove_all(importRoot,ec);fs::remove(fs::u8path(imported.u8string()+".source.json"),ec);}
+    if(!staging.empty()){std::error_code ec;fs::remove_all(staging,ec);}
 }

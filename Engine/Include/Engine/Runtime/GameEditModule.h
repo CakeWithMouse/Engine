@@ -37,6 +37,9 @@ public:
     const EngineSelectionApi& SelectionApi() const noexcept { return selection_; }
     const EngineViewportOverlayApi& ViewportOverlayApi() const noexcept { return overlay_; }
     const EnginePointLightV2Api& PointLightV2Api() const noexcept { return pointLightV2_; }
+    const EngineScriptApi& ScriptApi() const noexcept { return script_; }
+    const EngineGraphTraceApi& GraphTraceApi() const noexcept { return graphTrace_; }
+    const EngineAiMachineApi& AiMachineApi() const noexcept { return aiMachine_; }
     const EngineAudioPreviewApi& AudioPreviewApi() const noexcept { return audio_; }
     const EnginePhysicsApi& PhysicsApi() const noexcept { return physics_; }
     const EnginePhysicsObjectApi& PhysicsObjectApi() const noexcept { return physicsObject_; }
@@ -56,6 +59,9 @@ private:
     EngineViewportCursorApi cursor_{};
     EngineViewportOverlayApi overlay_{};
     EnginePointLightV2Api pointLightV2_{};
+    EngineScriptApi script_{};
+    EngineGraphTraceApi graphTrace_{};
+    EngineAiMachineApi aiMachine_{};
     EngineAudioPreviewApi audio_{};
     EnginePhysicsApi physics_{};
     EnginePhysicsObjectApi physicsObject_{};

@@ -1,0 +1,38 @@
+[
+  {
+    "feature_id": "r5-cli-project-and-build",
+    "action": "Создать проект через финальный EngineLauncher --create-project, включить C++, перенести Source/Content r3, собрать на .07.0. Первый build повторён после обновления timestamp исходников копии.",
+    "expected": "Штатный свежий проект собирает DLL и проходит candidate validation/startup.",
+    "actual": "CLI create и enable exit 0. Первая сборка после переноса Source завершилась unresolved ProjectGame symbols, потому что старый timestamp заставил MSBuild пропустить ProjectGame.cpp; после обновления timestamps повторный build exit 0, Game.dll активирована.",
+    "status": "partial",
+    "evidence": "REBUILD.md; evidence/initial-link-failure.log; evidence/rebuild-success.log; ../../../../Engine/build/playtests/20261107-r5/ai-trash/TrashGame/CodeBuild.log",
+    "classification": "copy timestamp/intermediate cache artifact; no Engine edit"
+  },
+  {
+    "feature_id": "trash-projectile-save-load-hit",
+    "action": "Два финальных Runtime процесса: TRASH_SAVE_TEST=save/load, по 180 кадров; один imported multi-material item сохранён во время полёта, продолжен после загрузки.",
+    "expected": "Load восстанавливает один projectile и его elapsed/score; после продолжения предмет попадает в ведро и hits становится 1.",
+    "actual": "Save exit 0: throws=1 hits=0; Load exit 0: elapsed=0.5 PASS, затем resumed hits=1 throws=1 PASS. BMP полёта просмотрен; HUD показывает Hits 0 / Throws 1 до попадания.",
+    "status": "passed",
+    "evidence": "evidence/RoundSaveTest.log; evidence/save.stdout.txt; evidence/load.stdout.txt; evidence/trash-round-save-load.bmp",
+    "classification": "gameplay-and-cross-process-save-load passed; visual flight frame observed"
+  },
+  {
+    "feature_id": "mesh-tangents-normal-mirror-degenerate",
+    "action": "Вызваны EngineCommandlets.exe mesh.tangents на нормальном, зеркальном по U и вырожденном UV треугольниках с normal=+Y.",
+    "expected": "Обычный UV: +X,w=-1; mirrored U: -X,w=+1; degenerate: конечный fallback,w=0.",
+    "actual": "Все три команды exit 0, ok=true. Наборы tangents соответственно [1,0,0,-1] ×3, [-1,0,0,1] ×3, [0,0,-1,0] ×3.",
+    "status": "passed",
+    "evidence": "evidence/normal-request.json; evidence/normal-result.json; evidence/mirror-request.json; evidence/mirror-result.json; evidence/degenerate-request.json; evidence/degenerate-result.json; Engine/docs/COMMANDLETS.md",
+    "classification": "CPU tangent generation passed; no GPU/normal-map or negative transform-scale claim"
+  },
+  {
+    "feature_id": "project-export",
+    "action": "Проверен список EngineCommandlets --list; роль не использовала UI.",
+    "expected": "Если есть поддержанный экспорт без UI, создать экспорт и проверить запуск.",
+    "actual": "В commandlet list нет отдельной export операции; UI принадлежит координатору, поэтому экспорт не пробовал.",
+    "status": "not-tested",
+    "evidence": "diary.md; feedback.md",
+    "classification": "not-tested"
+  }
+]

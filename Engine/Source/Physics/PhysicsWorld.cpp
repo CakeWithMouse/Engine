@@ -1,4 +1,4 @@
-﻿#include <Engine/Physics/PhysicsWorld.h>
+#include <Engine/Physics/PhysicsWorld.h>
 #include <Engine/Physics/PhysicsSettings.h>
 #include <algorithm>
 #include <cmath>
@@ -316,6 +316,7 @@ bool PhysicsWorld::Raycast(const glm::vec3& origin, const glm::vec3& direction, 
 
 // Stub build: the engine was compiled without vcpkg/Jolt. The world stays
 // uninitialized and every operation is a documented no-op.
+struct PhysicsWorld::Impl {};
 PhysicsWorld::PhysicsWorld() = default;
 PhysicsWorld::~PhysicsWorld() = default;
 bool PhysicsWorld::Initialize(const PhysicsSettings&, std::string& error)

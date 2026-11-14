@@ -1,9 +1,11 @@
 #include "EditorTheme.h"
 #include "FileBrowser.h"
+#include "FileService.h"
 #include "EditorLocale.h"
 #include "QtHost.h"
 #include "MainWindow.h"
 #include "IconProvider.h"
+#include "CommandRegistry.h"
 #include <QAbstractFileIconProvider>
 
 #include <QClipboard>
@@ -15,10 +17,13 @@
 #include <QGuiApplication>
 #include <QHeaderView>
 #include <QHBoxLayout>
+#include <QKeyEvent>
 #include <QLineEdit>
 #include <QMenu>
 #include <QProcess>
 #include <QRegularExpression>
+#include <QStyledItemDelegate>
+#include <QTimer>
 #include <QTreeView>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -26,6 +31,20 @@
 #include <QSortFilterProxyModel>
 
 #include <string>
+
+class FolderNameDelegate final : public QStyledItemDelegate
+{
+public:
+    using QStyledItemDelegate::QStyledItemDelegate;
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem&, const QModelIndex&) const override
+    {
+        auto* editor = new QLineEdit(parent);
+        editor->setObjectName(QStringLiteral("FolderNameEditor"));
+        if (editorCreated) editorCreated(editor);
+        return editor;
+    }
+    std::function<void(QLineEdit*)> editorCreated;
+};
 
 class TablerFileIconProvider final : public QAbstractFileIconProvider
 {
@@ -39,26 +58,6 @@ public:
     {
         if (info.isDir()) return IconProvider::FolderIcon();
         return IconProvider::FileIcon();
-    }
-};
-
-class ProjectFilesFilter final : public QSortFilterProxyModel
-{
-public:
-    QString project, content;
-    bool full = false;
-    using QSortFilterProxyModel::QSortFilterProxyModel;
-    void ShowFull(bool value) { full = value; invalidateFilter(); }
-    // Перетаскивание только копирует: файл проекта не должен уехать в проводник.
-    Qt::DropActions supportedDragActions() const override { return Qt::CopyAction; }
-protected:
-    bool filterAcceptsRow(int row, const QModelIndex& parent) const override {
-        const auto* files = static_cast<QFileSystemModel*>(sourceModel());
-        if (!full && QDir::cleanPath(files->filePath(parent)) == project) {
-            const auto index = files->index(row, 0, parent);
-            return files->isDir(index) && (files->fileName(index) == "Source" || QDir::cleanPath(files->filePath(index)) == content);
-        }
-        return true;
     }
 };
 
@@ -116,19 +115,19 @@ void FileBrowserDock::BuildUi()
     actImportModel_ = importMenu->addAction(QString());
     actImportModel_->setEnabled(host_->HasScene());
     connect(actImportModel_, &QAction::triggered, this, [this] {
-        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(false);
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 0}});
     });
 
     actImportTexture_ = importMenu->addAction(QString());
     actImportTexture_->setEnabled(host_->HasScene());
     connect(actImportTexture_, &QAction::triggered, this, [this] {
-        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(1);
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 1}});
     });
 
     actImportAudio_ = importMenu->addAction(QString());
     actImportAudio_->setEnabled(host_->HasScene());
     connect(actImportAudio_, &QAction::triggered, this, [this] {
-        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->ImportAsset(2);
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), {{QStringLiteral("kind"), 2}});
     });
 
     imports_->setMenu(importMenu);
@@ -176,6 +175,15 @@ void FileBrowserDock::BuildUi()
     view_ = new QTreeView(panel);
     view_->setObjectName("ProjectFiles");
     view_->setModel(proxy_);
+    auto* folderDelegate = new FolderNameDelegate(view_);
+    folderDelegate->editorCreated = [this](QLineEdit* editor) { renameEditor_ = editor; };
+    view_->setItemDelegate(folderDelegate);
+    model_->setReadOnly(true);
+    connect(folderDelegate, &QAbstractItemDelegate::closeEditor, this,
+        [this](QWidget* editor) { if (editor == renameEditor_) EndInlineRename(); });
+    connect(model_, &QFileSystemModel::directoryLoaded, this, [this] { TryBeginInlineRename(); });
+    connect(proxy_, &QAbstractItemModel::rowsInserted, this, [this] { TryBeginInlineRename(); });
+    connect(proxy_, &QAbstractItemModel::layoutChanged, this, [this] { TryBeginInlineRename(); });
     view_->hideColumn(3);
     view_->setSizeAdjustPolicy(QAbstractScrollArea::AdjustIgnored);
     view_->setMinimumSize(40, 20);
@@ -195,6 +203,11 @@ void FileBrowserDock::BuildUi()
             [this](const QModelIndex& i) { OnDoubleClicked(i); });
     connect(view_, &QTreeView::customContextMenuRequested, this,
             [this](const QPoint& p) { OnContextMenu(p); });
+
+    // Handle Delete via event filter: a WidgetShortcut action stops firing once Windows deactivates the window.
+    view_->installEventFilter(this);
+    view_->viewport()->installEventFilter(this);
+
     layout->addWidget(view_);
 
     setWidget(panel);
@@ -202,6 +215,7 @@ void FileBrowserDock::BuildUi()
 
 void FileBrowserDock::RetranslateUi()
 {
+    if (view_) view_->viewport()->update();
     setWindowTitle(Tr("Контент-браузер", "Content Browser"));
     if (imports_) imports_->setText(Tr("Импорт…", "Import…"));
     if (actImportModel_) actImportModel_->setText(Tr("Модель…", "Model…"));
@@ -220,6 +234,7 @@ void FileBrowserDock::RetranslateUi()
 
 void FileBrowserDock::SetRootPath(const QString& path)
 {
+    EndInlineRename();
     proxy_->ShowFull(rootCombo_->currentIndex() == 1);
     const QModelIndex srcIndex = model_->setRootPath(path);
     view_->setRootIndex(proxy_->mapFromSource(srcIndex));
@@ -237,7 +252,8 @@ void FileBrowserDock::ApplyFilter(const QString& text)
 
 void FileBrowserDock::OnDoubleClicked(const QModelIndex& proxyIndex)
 {
-    const auto index = proxy_->mapToSource(proxyIndex);
+    const auto col0 = proxyIndex.sibling(proxyIndex.row(), 0);
+    const auto index = proxy_->mapToSource(col0);
     if (!index.isValid() || model_->isDir(index))
         return;
 
@@ -257,6 +273,16 @@ void FileBrowserDock::OnDoubleClicked(const QModelIndex& proxyIndex)
         if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenMaterialEditor(path);
         return;
     }
+    if (path.endsWith(QStringLiteral(".vscript"), Qt::CaseInsensitive))
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenScriptEditor(path);
+        return;
+    }
+    if (path.endsWith(QStringLiteral(".fsm"), Qt::CaseInsensitive))
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenAiMachineEditor(path);
+        return;
+    }
     const QByteArray utf8 = path.toUtf8();
     const std::string msg = "EditorOpenAsset: " + std::string(utf8.constData(), utf8.size());
     host_->Log(msg.c_str());
@@ -266,15 +292,38 @@ void FileBrowserDock::OnDoubleClicked(const QModelIndex& proxyIndex)
 
 void FileBrowserDock::OnContextMenu(const QPoint& pos)
 {
-    const QModelIndex index = proxy_->mapToSource(view_->indexAt(pos));
+    const QModelIndex clicked = view_->indexAt(pos);
+    const QModelIndex col0 = clicked.isValid() ? clicked.sibling(clicked.row(), 0) : QModelIndex();
+    const QModelIndex index = proxy_->mapToSource(col0);
     const bool hasFile = index.isValid();
     const QString path = hasFile ? model_->filePath(index) : QString();
 
     QMenu menu(this);
+    menu.setObjectName(QStringLiteral("ContentBrowserMenu"));
+    const bool directory = hasFile && model_->isDir(index);
+    QString folderParent = directory ? path : QString();
+    if (!hasFile) folderParent = proxy_->full ? model_->rootPath() : contentDir_;
+    if (!folderParent.isEmpty()) folderParent = QDir(projectDir_).relativeFilePath(folderParent);
+    QAction* createFolder = !folderParent.isEmpty() ? menu.addAction(Tr("Новая папка", "New Folder")) : nullptr;
+    if (createFolder) {
+        createFolder->setObjectName(QStringLiteral("AssetsCreateFolder"));
+        createFolder->setEnabled(CommandRegistry::Instance().CanExecute(QStringLiteral("Assets.CreateFolder")));
+        connect(createFolder, &QAction::triggered, this, [folderParent] {
+            CommandRegistry::Instance().Execute(QStringLiteral("Assets.CreateFolder"),
+                {{QStringLiteral("parent"), folderParent}});
+        });
+    }
     const bool isMaterial = hasFile && path.endsWith(QStringLiteral(".mat"), Qt::CaseInsensitive);
-    QAction* use = hasFile && !model_->isDir(index) ? menu.addAction(isMaterial ? Tr("Назначить материал", "Assign Material")
-                                                                               : Tr("Добавить модель / назначить текстуру", "Add Model / Assign Texture")) : nullptr;
+    const bool isScript = hasFile && path.endsWith(QStringLiteral(".vscript"), Qt::CaseInsensitive);
+    const bool scripts = host_->ReadSnapshot().scripts;
+    QAction* use = hasFile && !model_->isDir(index) && (!isScript || scripts)
+        ? menu.addAction(isMaterial ? Tr("Назначить материал", "Assign Material")
+                         : isScript ? Tr("Назначить скрипт выделенному объекту", "Assign Script to Selection")
+                                    : Tr("Добавить модель / назначить текстуру", "Add Model / Assign Texture")) : nullptr;
     QAction* editMaterial = isMaterial && host_->HasMaterials() ? menu.addAction(Tr("Редактировать материал", "Edit Material")) : nullptr;
+    QAction* editScript = isScript ? menu.addAction(Tr("Редактировать скрипт", "Edit Script")) : nullptr;
+    const bool isMachine = hasFile && path.endsWith(QStringLiteral(".fsm"), Qt::CaseInsensitive);
+    QAction* editMachine = isMachine ? menu.addAction(Tr("Редактировать автомат ИИ", "Edit AI State Machine")) : nullptr;
     const bool isAudio = hasFile && !model_->isDir(index) &&
         QStringList{"wav", "ogg", "mp3", "flac"}.contains(QFileInfo(path).suffix().toLower());
     const bool contentAudio = isAudio && !contentDir_.isEmpty() &&
@@ -282,19 +331,36 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     QAction* playAudio = contentAudio && host_->AudioApi() ? menu.addAction(Tr("Прослушать", "Play Audio Preview")) : nullptr;
     QAction* stopAudio = host_->AudioApi() ? menu.addAction(Tr("Остановить звук", "Stop Audio Preview")) : nullptr;
     QAction* newMaterial = host_->HasMaterials() ? menu.addAction(Tr("Новый материал…", "New Material…")) : nullptr;
+    QAction* newScript = scripts ? menu.addAction(Tr("Новый скрипт…", "New Script…")) : nullptr;
+    QAction* newMachine = menu.addAction(Tr("Новый автомат ИИ…", "New AI State Machine…"));
     QAction* open = hasFile ? menu.addAction(Tr("Открыть в приложении", "Open in External App")) : nullptr;
     QAction* reveal = hasFile ? menu.addAction(Tr("Показать в проводнике", "Reveal in Explorer")) : nullptr;
     QAction* copy = hasFile ? menu.addAction(Tr("Копировать путь", "Copy Path")) : nullptr;
     QAction* refresh = menu.addAction(Tr("Обновить", "Refresh"));
-    const bool asset=hasFile&&!model_->isDir(index)&&QStringList{"fbx","obj","gltf","glb","png","jpg","jpeg","bmp","tga","mat"}.contains(QFileInfo(path).suffix().toLower());
-    QAction* reimport=asset&&!isMaterial&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переимпортировать…", "Reimport…")):nullptr;
+    const bool isModel = hasFile && !model_->isDir(index) && QStringList{"fbx", "obj", "gltf", "glb", "blend"}.contains(QFileInfo(path).suffix().toLower());
+    QAction* editSettings = isModel && host_->ReadSnapshot().authoring ? menu.addAction(Tr("Настройки импорта…", "Import Settings…")) : nullptr;
+    const bool asset=hasFile&&!model_->isDir(index)&&QStringList{"fbx","obj","gltf","glb","png","jpg","jpeg","bmp","tga","mat","vscript"}.contains(QFileInfo(path).suffix().toLower());
+    QAction* reimport=asset&&!isMaterial&&!isScript&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переимпортировать…", "Reimport…")):nullptr;
     QAction* move=asset&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переместить / переименовать…", "Move / Rename…")):nullptr;
+    QAction* deleteAction = hasFile && !IsProtectedPath(path) ? menu.addAction(Tr("Удалить", "Delete")) : nullptr;
 
     QAction* picked = menu.exec(view_->viewport()->mapToGlobal(pos));
     if (!picked)
         return;
 
-    if (picked == playAudio || picked == stopAudio)
+    if (picked == createFolder)
+    {
+        return;
+    }
+    else if (picked == editSettings)
+    {
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.EditImportSettings"), {{QStringLiteral("path"), path}});
+    }
+    else if (picked == deleteAction)
+    {
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Delete"), {{QStringLiteral("path"), path}});
+    }
+    else if (picked == playAudio || picked == stopAudio)
     {
         const QString relative = QDir(contentDir_).relativeFilePath(path);
         EditorCommand c;
@@ -313,6 +379,28 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     {
         if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenMaterialEditor(path);
     }
+    else if (picked == editScript)
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenScriptEditor(path);
+    }
+    else if (picked == editMachine)
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenAiMachineEditor(path);
+    }
+    else if (picked == newMachine)
+    {
+        const QString directory = !hasFile ? QString() : model_->isDir(index) ? path : QFileInfo(path).absolutePath();
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget()))
+        {
+            const QString machine = editor->CreateAiMachine(directory);
+            if (!machine.isEmpty()) editor->OpenAiMachineEditor(machine);
+        }
+    }
+    else if (picked == newScript)
+    {
+        const QString directory = !hasFile ? QString() : model_->isDir(index) ? path : QFileInfo(path).absolutePath();
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->CreateScript(directory);
+    }
     else if (picked == newMaterial)
     {
         const QString directory = !hasFile ? QString() : model_->isDir(index) ? path : QFileInfo(path).absolutePath();
@@ -327,4 +415,93 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
         QGuiApplication::clipboard()->setText(path);
     else if (picked == refresh)
         model_->setRootPath(model_->rootPath());
+}
+
+void FileBrowserDock::BeginInlineRename(const QString& absolutePath)
+{
+    EndInlineRename();
+    pendingRenamePath_ = QDir::cleanPath(absolutePath);
+    show();
+    raise();
+    filterEdit_->clear();
+    const QModelIndex parent = model_->index(QFileInfo(pendingRenamePath_).absolutePath());
+    if (parent.isValid()) model_->fetchMore(parent);
+    TryBeginInlineRename();
+}
+
+void FileBrowserDock::TryBeginInlineRename()
+{
+    if (pendingRenamePath_.isEmpty()) return;
+    if (!renameIndex_.isValid()) {
+        const QModelIndex source = model_->index(pendingRenamePath_);
+        if (!source.isValid()) return;
+        const QModelIndex proxyIndex = proxy_->mapFromSource(source.siblingAtColumn(0));
+        if (!proxyIndex.isValid()) return;
+        renameIndex_ = proxyIndex;
+        const QString original = QDir(projectDir_).relativeFilePath(pendingRenamePath_);
+        proxy_->BeginFolderRename(proxyIndex, [original](const QString& name) {
+            return CommandRegistry::Instance().Execute(QStringLiteral("Assets.RenameFolder"),
+                {{QStringLiteral("path"), original}, {QStringLiteral("name"), name}});
+        });
+        for (QModelIndex ancestor = proxyIndex.parent(); ancestor.isValid(); ancestor = ancestor.parent()) view_->expand(ancestor);
+        view_->setCurrentIndex(proxyIndex);
+        view_->scrollTo(proxyIndex);
+        view_->setFocus();
+    }
+    const QPersistentModelIndex editIndex(renameIndex_);
+    QMetaObject::invokeMethod(view_, [this, editIndex] {
+        if (!editIndex.isValid() || renameIndex_ != editIndex ||
+            (renameEditor_ && renameEditor_->isVisible())) return;
+        view_->edit(editIndex);
+        if (!renameEditor_) {
+            QTimer::singleShot(50, view_, [this, editIndex] {
+                if (editIndex.isValid() && renameIndex_ == editIndex) TryBeginInlineRename();
+            });
+        }
+    }, Qt::QueuedConnection);
+}
+
+void FileBrowserDock::EndInlineRename()
+{
+    if (proxy_) proxy_->EndFolderRename();
+    pendingRenamePath_.clear();
+    renameIndex_ = QPersistentModelIndex();
+    renameEditor_.clear();
+}
+
+void FileBrowserDock::DeleteCurrentAsset()
+{
+    const QModelIndex viewIndex = view_->currentIndex();
+    if (!viewIndex.isValid())
+        return;
+
+    const QModelIndex col0 = viewIndex.sibling(viewIndex.row(), 0);
+    const QModelIndex current = proxy_->mapToSource(col0);
+    if (!current.isValid())
+        return;
+
+    const QString path = model_->filePath(current);
+    if (!path.isEmpty() && !IsProtectedPath(path))
+    {
+        CommandRegistry::Instance().Execute(QStringLiteral("Assets.Delete"), {{QStringLiteral("path"), path}});
+    }
+}
+
+bool FileBrowserDock::IsProtectedPath(const QString& path) const
+{
+    return path.isEmpty() || FileService::IsProtectedDirectory(path, projectDir_, contentDir_);
+}
+
+bool FileBrowserDock::eventFilter(QObject* watched, QEvent* event)
+{
+    if ((watched == view_ || watched == view_->viewport()) && event->type() == QEvent::KeyPress)
+    {
+        auto* ke = static_cast<QKeyEvent*>(event);
+        if (ke->key() == Qt::Key_Delete)
+        {
+            DeleteCurrentAsset();
+            return true;
+        }
+    }
+    return QDockWidget::eventFilter(watched, event);
 }

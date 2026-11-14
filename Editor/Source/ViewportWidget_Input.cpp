@@ -33,14 +33,20 @@ uint32_t GameKey(QKeyEvent* key)
 } // namespace
 
 void ViewportWidget::SendCursor(QPointF p,bool valid) {
-    if(!attached_||isResizing_||lastSentW_==0||lastSentH_==0)return;
+    if(!attached_||isResizing_||lastSentW_==0||lastSentH_==0||PhysW()!=lastSentW_||PhysH()!=lastSentH_)return;
     EditorCommand c;c.type=EditorCommand::InputCursor;
-    c.right=float(p.x()*devicePixelRatioF());c.up=float(p.y()*devicePixelRatioF());
+    c.right=float(p.x()*lastSentW_/std::max(width(),1));c.up=float(p.y()*lastSentH_/std::max(height(),1));
     c.w=lastSentW_;c.h=lastSentH_;c.forward=valid?1.f:0.f;host_->PostCommand(c);
 }
 
 bool ViewportWidget::event(QEvent* e)
 {
+    if (e->type() == QEvent::DevicePixelRatioChange)
+    {
+        const bool handled = QWidget::event(e);
+        RequestResize();
+        return handled;
+    }
     // Forward absolute cursor samples in physical pixels, before button edges are queued.
     if(e->type()==QEvent::MouseMove||e->type()==QEvent::MouseButtonPress||e->type()==QEvent::MouseButtonRelease){
         if(e->type()==QEvent::MouseButtonPress)setFocus(Qt::MouseFocusReason);
@@ -165,6 +171,8 @@ bool ViewportWidget::HandleMousePress(QMouseEvent* mouse)
 
     if (mouse->button() == Qt::LeftButton && attached_ && host_->HasScene())
     {
+        if (!RefreshCameraInfo()) return true;
+        const QPointF cameraPos = ToCameraPixels(mouse->position());
         lmbPressed_ = true;
         lmbMoved_ = false;
         draggingSelectedObject_ = false;
@@ -185,8 +193,8 @@ bool ViewportWidget::HandleMousePress(QMouseEvent* mouse)
                     selTrans.position,
                     selTrans.rotation,
                     localOrientation_,
-                    static_cast<float>(mouse->position().x()),
-                    static_cast<float>(mouse->position().y()),
+                    static_cast<float>(cameraPos.x()),
+                    static_cast<float>(cameraPos.y()),
                     lastCameraInfo_,
                     10.0f
                 );
@@ -203,8 +211,8 @@ bool ViewportWidget::HandleMousePress(QMouseEvent* mouse)
             uint64_t bbObj = ViewportOverlayHelper::HitTestBillboard(
                 host_,
                 lastCameraInfo_,
-                static_cast<float>(mouse->position().x()),
-                static_cast<float>(mouse->position().y()),
+                static_cast<float>(cameraPos.x()),
+                static_cast<float>(cameraPos.y()),
                 10.0f
             );
             if (bbObj != 0)
@@ -239,6 +247,8 @@ bool ViewportWidget::HandleMousePress(QMouseEvent* mouse)
 
 bool ViewportWidget::HandleMouseMove(QMouseEvent* mouse)
 {
+    RefreshCameraInfo();
+    const QPointF cameraPos = ToCameraPixels(mouse->position());
     if (rmbPressed_ && !rmbMoved_)
     {
         const QPoint delta = mouse->position().toPoint() - rmbPressPos_;
@@ -279,8 +289,8 @@ bool ViewportWidget::HandleMouseMove(QMouseEvent* mouse)
                 selTrans.position,
                 selTrans.rotation,
                 localOrientation_,
-                static_cast<float>(mouse->position().x()),
-                static_cast<float>(mouse->position().y()),
+                static_cast<float>(cameraPos.x()),
+                static_cast<float>(cameraPos.y()),
                 lastCameraInfo_,
                 10.0f
             );
@@ -398,6 +408,8 @@ bool ViewportWidget::HandleKeyPress(QKeyEvent* key)
     // Hotkeys active when not flying camera with RMB
     if (!looking_)
     {
+        if (draggingSelectedObject_ && !RefreshCameraInfo()) return true;
+        const QPointF cameraDragPos = ToCameraPixels(lastDragPos_);
         if (key->key() == Qt::Key_X)
         {
             activeAxis_ = (activeAxis_ == GizmoMath::AxisLock::X) ? GizmoMath::AxisLock::All : GizmoMath::AxisLock::X;
@@ -407,7 +419,7 @@ bool ViewportWidget::HandleKeyPress(QKeyEvent* key)
                 float ax[3], ay[3], az[3];
                 GizmoGeometry::GetGizmoAxes(dragStartTransform_.rotation, localOrientation_, ax, ay, az);
                 float rO[3], rD[3];
-                GizmoGeometry::ScreenToWorldRay(static_cast<float>(lastDragPos_.x()), static_cast<float>(lastDragPos_.y()), lastCameraInfo_, rO, rD);
+                GizmoGeometry::ScreenToWorldRay(static_cast<float>(cameraDragPos.x()), static_cast<float>(cameraDragPos.y()), lastCameraInfo_, rO, rD);
                 GizmoGeometry::ClosestPointOnAxis(rO, rD, dragStartTransform_.position, ax, dragStartHitPoint_, &dragStartS_);
                 ViewportOverlayHelper::UpdateOverlays(host_, lastCameraInfo_, hasCameraInfo_, hoveredHandle_, static_cast<int>(gizmoMode_), localOrientation_, overlayHash_, activeGizmoHandle_);
             }
@@ -422,7 +434,7 @@ bool ViewportWidget::HandleKeyPress(QKeyEvent* key)
                 float ax[3], ay[3], az[3];
                 GizmoGeometry::GetGizmoAxes(dragStartTransform_.rotation, localOrientation_, ax, ay, az);
                 float rO[3], rD[3];
-                GizmoGeometry::ScreenToWorldRay(static_cast<float>(lastDragPos_.x()), static_cast<float>(lastDragPos_.y()), lastCameraInfo_, rO, rD);
+                GizmoGeometry::ScreenToWorldRay(static_cast<float>(cameraDragPos.x()), static_cast<float>(cameraDragPos.y()), lastCameraInfo_, rO, rD);
                 GizmoGeometry::ClosestPointOnAxis(rO, rD, dragStartTransform_.position, ay, dragStartHitPoint_, &dragStartS_);
                 ViewportOverlayHelper::UpdateOverlays(host_, lastCameraInfo_, hasCameraInfo_, hoveredHandle_, static_cast<int>(gizmoMode_), localOrientation_, overlayHash_, activeGizmoHandle_);
             }
@@ -437,7 +449,7 @@ bool ViewportWidget::HandleKeyPress(QKeyEvent* key)
                 float ax[3], ay[3], az[3];
                 GizmoGeometry::GetGizmoAxes(dragStartTransform_.rotation, localOrientation_, ax, ay, az);
                 float rO[3], rD[3];
-                GizmoGeometry::ScreenToWorldRay(static_cast<float>(lastDragPos_.x()), static_cast<float>(lastDragPos_.y()), lastCameraInfo_, rO, rD);
+                GizmoGeometry::ScreenToWorldRay(static_cast<float>(cameraDragPos.x()), static_cast<float>(cameraDragPos.y()), lastCameraInfo_, rO, rD);
                 GizmoGeometry::ClosestPointOnAxis(rO, rD, dragStartTransform_.position, az, dragStartHitPoint_, &dragStartS_);
                 ViewportOverlayHelper::UpdateOverlays(host_, lastCameraInfo_, hasCameraInfo_, hoveredHandle_, static_cast<int>(gizmoMode_), localOrientation_, overlayHash_, activeGizmoHandle_);
             }

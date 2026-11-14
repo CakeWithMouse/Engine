@@ -1,0 +1,9690 @@
+{
+  "cases": [
+    {
+      "name": "0-mesh-pan",
+      "frames": 12,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 10,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 11,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-mesh-orbit",
+      "frames": 10,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 5,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 6,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 7,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 8,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-copies-pan",
+      "frames": 12,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 10,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 11,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-copies-orbit",
+      "frames": 10,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 5,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 1
+        },
+        {
+          "frame": 6,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 1
+        },
+        {
+          "frame": 7,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 1
+        },
+        {
+          "frame": 8,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 1
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-instances-pan",
+      "frames": 12,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 10,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 11,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-instances-orbit",
+      "frames": 10,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 5,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 6,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 7,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 8,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-skeletal-pan",
+      "frames": 12,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 10,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 11,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-skeletal-orbit",
+      "frames": 10,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 5,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 6,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 7,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 8,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-crowd-pan",
+      "frames": 12,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 10,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 11,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-crowd-orbit",
+      "frames": 10,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 5,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 6,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 7,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 8,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-instances-lod-order",
+      "frames": 7,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                0,
+                3
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-instances-interleave",
+      "frames": 3,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-instances-fade",
+      "frames": 20,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 10,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 11,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 12,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 13,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 14,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 15,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 16,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 17,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 18,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 19,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-instances-dolly-fade",
+      "frames": 9,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-instances-stream-growth",
+      "frames": 3,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            128
+          ],
+          "center": [
+            127,
+            0,
+            127
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                300
+              ]
+            }
+          ],
+          "drawCalls": 299
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-crowd-lod-order",
+      "frames": 7,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                0,
+                3
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-crowd-interleave",
+      "frames": 3,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-crowd-fade",
+      "frames": 20,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 10,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 11,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 12,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 13,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 14,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 15,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 16,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 17,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 18,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 19,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-crowd-dolly-fade",
+      "frames": 9,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-crowd-stream-growth",
+      "frames": 3,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                298,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 300
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            128
+          ],
+          "center": [
+            127,
+            0,
+            127
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                300,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 299
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                298,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 300
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-translucent-impostor",
+      "frames": 3,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 1
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-additive-impostor",
+      "frames": 3,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            51
+          ],
+          "center": [
+            127,
+            0,
+            51
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            51
+          ],
+          "center": [
+            127,
+            0,
+            51
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            51
+          ],
+          "center": [
+            127,
+            0,
+            51
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 1
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-mixed-blends",
+      "frames": 2,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            89
+          ],
+          "center": [
+            127,
+            0,
+            89
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            153
+          ],
+          "center": [
+            127,
+            0,
+            153
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-opaque-occlusion",
+      "frames": 2,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            128,
+            0
+          ],
+          "center": [
+            127,
+            128,
+            0
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            0,
+            128,
+            128
+          ],
+          "center": [
+            0,
+            128,
+            127
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-moving-layers",
+      "frames": 7,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 2,
+          "expected": [
+            64,
+            0,
+            140
+          ],
+          "center": [
+            64,
+            0,
+            140
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 3,
+          "expected": [
+            64,
+            0,
+            140
+          ],
+          "center": [
+            64,
+            0,
+            140
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 4,
+          "expected": [
+            64,
+            0,
+            140
+          ],
+          "center": [
+            64,
+            0,
+            140
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 1
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-equal-depth",
+      "frames": 3,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            64,
+            0,
+            140
+          ],
+          "center": [
+            64,
+            0,
+            140
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 1,
+          "expected": [
+            64,
+            0,
+            140
+          ],
+          "center": [
+            64,
+            0,
+            140
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 2,
+          "expected": [
+            64,
+            0,
+            140
+          ],
+          "center": [
+            64,
+            0,
+            140
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-mesh-pan",
+      "frames": 12,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 10,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 11,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-mesh-orbit",
+      "frames": 10,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 5,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 6,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 7,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 8,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-copies-pan",
+      "frames": 12,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 10,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 11,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-copies-orbit",
+      "frames": 10,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 5,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 6,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 7,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 8,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 2
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-instances-pan",
+      "frames": 12,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 10,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 11,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-instances-orbit",
+      "frames": 10,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 5,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 6,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 7,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 8,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3
+              ]
+            }
+          ],
+          "drawCalls": 4
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-skeletal-pan",
+      "frames": 12,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 10,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        },
+        {
+          "frame": 11,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-skeletal-orbit",
+      "frames": 10,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 5,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 6,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 7,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 8,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [],
+          "drawCalls": 4
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-crowd-pan",
+      "frames": 12,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 10,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 11,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-crowd-orbit",
+      "frames": 10,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 5,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 6,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 7,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 8,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-instances-lod-order",
+      "frames": 7,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                0,
+                3
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 4
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-instances-interleave",
+      "frames": 3,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 1,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 4
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-instances-fade",
+      "frames": 20,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 10,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 11,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 12,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 13,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 14,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 15,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 16,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 17,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 18,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 19,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-instances-dolly-fade",
+      "frames": 9,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 5
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-instances-stream-growth",
+      "frames": 3,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            128
+          ],
+          "center": [
+            127,
+            0,
+            127
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                300
+              ]
+            }
+          ],
+          "drawCalls": 300
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-crowd-lod-order",
+      "frames": 7,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                0,
+                3
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                0,
+                1,
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                1
+              ]
+            }
+          ],
+          "drawCalls": 4
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-crowd-interleave",
+      "frames": 3,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 1,
+          "expected": [
+            32,
+            64,
+            134
+          ],
+          "center": [
+            32,
+            64,
+            134
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            64,
+            38
+          ],
+          "center": [
+            127,
+            64,
+            39
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 4
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-crowd-fade",
+      "frames": 20,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 9,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 10,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 11,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 12,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 13,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 14,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 15,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 16,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 17,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 18,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 19,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1,
+                1,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-crowd-dolly-fade",
+      "frames": 9,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 3,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 4,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 7,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 5
+        },
+        {
+          "frame": 8,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                2,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 5
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-crowd-stream-growth",
+      "frames": 3,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                298,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 301
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            128
+          ],
+          "center": [
+            127,
+            0,
+            127
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                300,
+                0,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 300
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2,
+                298,
+                0
+              ]
+            }
+          ],
+          "drawCalls": 301
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-translucent-impostor",
+      "frames": 3,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            26
+          ],
+          "center": [
+            127,
+            0,
+            26
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-additive-impostor",
+      "frames": 3,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            51
+          ],
+          "center": [
+            127,
+            0,
+            51
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            51
+          ],
+          "center": [
+            127,
+            0,
+            51
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 2,
+          "expected": [
+            128,
+            0,
+            51
+          ],
+          "center": [
+            127,
+            0,
+            51
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 2
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-mixed-blends",
+      "frames": 2,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            89
+          ],
+          "center": [
+            127,
+            0,
+            89
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            153
+          ],
+          "center": [
+            127,
+            0,
+            153
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-opaque-occlusion",
+      "frames": 2,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            128,
+            0
+          ],
+          "center": [
+            127,
+            128,
+            0
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 4
+        },
+        {
+          "frame": 1,
+          "expected": [
+            0,
+            128,
+            128
+          ],
+          "center": [
+            0,
+            128,
+            127
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-moving-layers",
+      "frames": 7,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            64,
+            0,
+            140
+          ],
+          "center": [
+            64,
+            0,
+            140
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 3,
+          "expected": [
+            64,
+            0,
+            140
+          ],
+          "center": [
+            64,
+            0,
+            140
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 4,
+          "expected": [
+            64,
+            0,
+            140
+          ],
+          "center": [
+            64,
+            0,
+            140
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 2
+        },
+        {
+          "frame": 5,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 6,
+          "expected": [
+            128,
+            0,
+            76
+          ],
+          "center": [
+            127,
+            0,
+            77
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                2
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-equal-depth",
+      "frames": 3,
+      "errors": [],
+      "measurements": [
+        {
+          "frame": 0,
+          "expected": [
+            64,
+            0,
+            140
+          ],
+          "center": [
+            64,
+            0,
+            140
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 1,
+          "expected": [
+            64,
+            0,
+            140
+          ],
+          "center": [
+            64,
+            0,
+            140
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        },
+        {
+          "frame": 2,
+          "expected": [
+            64,
+            0,
+            140
+          ],
+          "center": [
+            64,
+            0,
+            140
+          ],
+          "wrongPixels": 0,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                1
+              ]
+            }
+          ],
+          "drawCalls": 3
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    }
+  ],
+  "passed": 52,
+  "frames": 428
+}

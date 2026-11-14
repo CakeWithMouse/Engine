@@ -1,0 +1,37 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+frame-dump E:/Engine/Engine/build/playtests/20261107-point/before-skeletal-0.bmp written=1 size=640x480
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 640x480
+frame-dump E:/Engine/Engine/build/playtests/20261107-point/before-skeletal-5.bmp written=1 size=640x480
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "caster": "skeletal",
+    "frames": [
+        {
+            "count": 0,
+            "image": "E:/Engine/Engine/build/playtests/20261107-point/before-skeletal-0.bmp",
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "time": 0
+        },
+        {
+            "count": 0,
+            "image": "E:/Engine/Engine/build/playtests/20261107-point/before-skeletal-5.bmp",
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "time": 0.5
+        }
+    ],
+    "ok": true
+}

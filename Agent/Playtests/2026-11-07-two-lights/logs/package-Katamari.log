@@ -1,0 +1,124 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Failed to load cube map face: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/cosy.jpg
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/Skybox.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/Skybox.hlsl [VARIANT_DEFAULT]
+Texture loaded: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.jpg (4096x4096)
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/BaseSphereFigure.hlsl [VARIANT_DEFAULT]
+Model loaded: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/test_cube.obj (1 meshes)
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/ReflectiveFBX.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/ReflectiveFBX.hlsl [VARIANT_DEFAULT]
+Model loaded: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture loaded: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg (1024x1024)
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/BaseFBX.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/BaseFBX.hlsl [VARIANT_DEFAULT]
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model loaded: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.obj (1 meshes)
+Texture loaded: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.jpg (4096x4096)
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.jpg
+Model loaded: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture loaded: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg (1024x1024)
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/3.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/1.jpg
+Model cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.obj (1 meshes)
+Texture cache hit: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/GameContent/Models/2.jpg
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/BaseFBX.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/BaseFBX.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/ReflectiveFBX.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/Katamari/EngineContent/Shaders/ReflectiveFBX.hlsl [VARIANT_DEFERRED_GBUFFER]
+Katamari: 30 frames, normal shutdown

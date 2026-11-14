@@ -1,0 +1,17 @@
+Using installed platform toolset: v143
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  TraceExamples.cpp
+  AuthoringTests.cpp
+  EngineTests.cpp
+  GameSettingsTests.cpp
+  PrimitiveApiTests.cpp
+  SceneBatchTests.cpp
+  SceneTests.cpp
+  SoundDecoderTests.cpp
+  TraceTests.cpp
+  VfsLifecycleTests.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\EngineTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Engine\build\x64\Release\EngineTests.exp
+  EngineTests.vcxproj -> E:\Engine\Engine\build\x64\Release\EngineTests.exe
+

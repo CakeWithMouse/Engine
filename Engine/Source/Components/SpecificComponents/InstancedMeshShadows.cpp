@@ -6,10 +6,21 @@ using namespace InstancedMeshDetail;
 
 bool InstancedMeshComponent::BindMaterialShadow(ID3D11DeviceContext* context, const ShadowPassContext& shadowPass)
 {
-    // A masked material clips its silhouette; its shaders read the object constants (b0) and the light (b2).
+    // The material depth pass handles both alpha clipping and the instance LOD dither.
     // Shadows are drawn before the colour passes, so a changed material is compiled here.
     Material* material = GamePtr ? GamePtr->PrepareMaterial(this) : nullptr;
-    if (material == nullptr || !material->HasShadowShaders() || !cb)
+    if (!material && GamePtr)
+    {
+        // Legacy instances have their own colour shaders. Use the existing opaque material
+        // only for depth, so their LOD fade also reaches the shadow pixel shader.
+        material = GamePtr->GetDefaultMaterial().get();
+        if (material)
+        {
+            material->RequireVariant(GetMaterialVariant());
+            if (material->NeedsCompile()) material->Compile(GamePtr->GetDevice(), context);
+        }
+    }
+    if (material == nullptr || !material->HasShadowShaders(GetMaterialVariant()) || !cb)
     {
         return false;
     }
@@ -26,7 +37,9 @@ bool InstancedMeshComponent::BindMaterialShadow(ID3D11DeviceContext* context, co
 
 void InstancedMeshComponent::UnbindMaterialShadow(ID3D11DeviceContext* context)
 {
-    GetMaterial()->Unbind(context);
+    Material* material = GetMaterial();
+    if (!material && GamePtr) material = GamePtr->GetDefaultMaterial().get();
+    if (material) material->Unbind(context);
     context->PSSetShader(nullptr, nullptr, 0);
 }
 
@@ -66,6 +79,7 @@ void InstancedMeshComponent::CollectShadowCasters(
     const MeshInstance& instance, InstData data, int meshLevel, float radius,
     const glm::vec3& lightDirection, const DirectX::XMFLOAT4* cascadeSpheres, int cascadeLimit)
 {
+    const bool bUnknownAnimationBounds = AnimationTextureSRV != nullptr && AnimationBoundsRadius <= 0.0f;
     data.ObjectColor = DirectX::XMFLOAT4(instance.Color.x, instance.Color.y, instance.Color.z, instance.Color.w);
     if (AnimationTextureSRV != nullptr)
     {
@@ -84,14 +98,17 @@ void InstancedMeshComponent::CollectShadowCasters(
             continue;
         }
 
-        const glm::vec3 toInstance = instance.Position - glm::vec3(sphere.x, sphere.y, sphere.z);
-        const float along = std::max(0.0f, std::min(glm::dot(toInstance, -lightDirection), ShadowCasterExtrusion));
-        const glm::vec3 closest = -lightDirection * along;
-        const glm::vec3 offset = toInstance - closest;
-        const float reach = sphere.w + radius;
-        if (glm::dot(offset, offset) > reach * reach)
+        if (!bUnknownAnimationBounds)
         {
-            continue;
+            const glm::vec3 toInstance = instance.Position - glm::vec3(sphere.x, sphere.y, sphere.z);
+            const float along = std::max(0.0f, std::min(glm::dot(toInstance, -lightDirection), ShadowCasterExtrusion));
+            const glm::vec3 closest = -lightDirection * along;
+            const glm::vec3 offset = toInstance - closest;
+            const float reach = sphere.w + radius;
+            if (glm::dot(offset, offset) > reach * reach)
+            {
+                continue;
+            }
         }
 
         // The level follows the on-screen size of the unit, never the cascade. A cascade index says
@@ -106,12 +123,13 @@ void InstancedMeshComponent::CollectShadowCasters(
 
 void InstancedMeshComponent::CollectPointCasters(
     const MeshInstance& instance, InstData data, int meshLevel, float radius,
-    const DirectX::XMFLOAT4* lightSpheres, int lightCount)
+    const DirectX::XMFLOAT4* lightSpheres, int lightCount, float signedFade)
 {
+    const bool bUnknownAnimationBounds = AnimationTextureSRV != nullptr && AnimationBoundsRadius <= 0.0f;
     data.ObjectColor = DirectX::XMFLOAT4(instance.Color.x, instance.Color.y, instance.Color.z, instance.Color.w);
     data.Params = AnimationTextureSRV != nullptr
-        ? DirectX::XMFLOAT4(1.0f, static_cast<float>(instance.ClipId), instance.AnimationPhase, instance.Speed)
-        : DirectX::XMFLOAT4(1.0f, instance.CustomData.x, instance.CustomData.y, instance.CustomData.z);
+        ? DirectX::XMFLOAT4(signedFade, static_cast<float>(instance.ClipId), instance.AnimationPhase, instance.Speed)
+        : DirectX::XMFLOAT4(signedFade, instance.CustomData.x, instance.CustomData.y, instance.CustomData.z);
 
     // The level that is drawn, without the shadow bias of the sun. A coarser caster is a box wider
     // than the hull, and a lamp close by and low down lights exactly the surfaces that end up
@@ -121,15 +139,20 @@ void InstancedMeshComponent::CollectPointCasters(
     {
         const DirectX::XMFLOAT4& sphere = lightSpheres[light];
         const glm::vec3 offset = instance.Position - glm::vec3(sphere.x, sphere.y, sphere.z);
-        const float reach = sphere.w + radius;
-        if (glm::dot(offset, offset) > reach * reach)
+        if (!bUnknownAnimationBounds)
         {
-            continue;
+            const float reach = sphere.w + radius;
+            if (glm::dot(offset, offset) > reach * reach)
+            {
+                continue;
+            }
         }
 
         // Each copy goes only to the faces it can land on: six full streams would draw a dense
         // field six times over.
-        const uint32_t faces = PointShadowFaceMask(offset.x, offset.y, offset.z, radius);
+        const uint32_t faces = bUnknownAnimationBounds
+            ? ((1u << PointShadowFaces) - 1u)
+            : PointShadowFaceMask(offset.x, offset.y, offset.z, radius);
         for (int face = 0; face < PointShadowFaces; ++face)
         {
             if (faces & (1u << face))

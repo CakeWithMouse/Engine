@@ -1,0 +1,18 @@
+﻿
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator: 9 component(s), Project
+  BucketParts.cpp
+  ImportedTrashProjectile.cpp
+  ThrowLane.cpp
+  ThrowLedger.cpp
+  TrashProjectile.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\20261107-r5\ai-trash\TrashGame\Binaries\Release\0859935d294d45c598816455ba5b8024\Game.lib и объект E:\Engine\Engine\build\playtests\20261107-r5\ai-trash\TrashGame\Binaries\Release\0859935d294d45c598816455ba5b8024\Game.exp
+ImportedTrashProjectile.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: void __cdecl ProjectGame::RegisterHit(void)" (?RegisterHit@ProjectGame@@QEAAXXZ) в функции "public: virtual void __cdecl ImportedTrashProjectile::Tick(float)" (?Tick@ImportedTrashProjectile@@UEAAXM@Z). [E:\Engine\Engine\build\playtests\20261107-r5\ai-trash\TrashGame\Game.vcxproj]
+TrashProjectile.obj : error LNK2001: неразрешенный внешний символ "public: void __cdecl ProjectGame::RegisterHit(void)" (?RegisterHit@ProjectGame@@QEAAXXZ). [E:\Engine\Engine\build\playtests\20261107-r5\ai-trash\TrashGame\Game.vcxproj]
+ImportedTrashProjectile.obj : error LNK2019: ссылка на неразрешенный внешний символ "public: void __cdecl ProjectGame::RegisterMiss(class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > const &)" (?RegisterMiss@ProjectGame@@QEAAXAEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z) в функции "public: virtual void __cdecl ImportedTrashProjectile::Tick(float)" (?Tick@ImportedTrashProjectile@@UEAAXM@Z). [E:\Engine\Engine\build\playtests\20261107-r5\ai-trash\TrashGame\Game.vcxproj]
+TrashProjectile.obj : error LNK2001: неразрешенный внешний символ "public: void __cdecl ProjectGame::RegisterMiss(class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> > const &)" (?RegisterMiss@ProjectGame@@QEAAXAEBV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z). [E:\Engine\Engine\build\playtests\20261107-r5\ai-trash\TrashGame\Game.vcxproj]
+GeneratedComponents.obj : error LNK2001: неразрешенный внешний символ "public: virtual void __cdecl ProjectGame::SerializeSaveGame(class SaveArchive &)" (?SerializeSaveGame@ProjectGame@@UEAAXAEAVSaveArchive@@@Z). [E:\Engine\Engine\build\playtests\20261107-r5\ai-trash\TrashGame\Game.vcxproj]
+GeneratedComponents.obj : error LNK2001: неразрешенный внешний символ "public: virtual void __cdecl ProjectGame::OnSaveGameLoaded(void)" (?OnSaveGameLoaded@ProjectGame@@UEAAXXZ). [E:\Engine\Engine\build\playtests\20261107-r5\ai-trash\TrashGame\Game.vcxproj]
+E:\Engine\Engine\build\playtests\20261107-r5\ai-trash\TrashGame\Binaries\Release\0859935d294d45c598816455ba5b8024\Game.dll : fatal error LNK1120: неразрешенных внешних элементов: 4 [E:\Engine\Engine\build\playtests\20261107-r5\ai-trash\TrashGame\Game.vcxproj]

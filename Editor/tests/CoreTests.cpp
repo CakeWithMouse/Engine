@@ -9,6 +9,11 @@
 #include "../Core/MaterialGraphModel.h"
 #include "../Core/HlslGraphCompiler.h"
 #include "core/MaterialGraphTests.h"
+#include "core/GraphCoreTests.h"
+#include "core/CodeGraphSchemaTests.h"
+#include "core/ScriptMessagesTests.h"
+#include "core/FsmGraphSchemaTests.h"
+#include "core/GraphToolsTests.h"
 #include "../Core/SceneFile.h"
 #include "core/SceneFileTests.h"
 #include "../Core/Terminal.h"
@@ -16,6 +21,14 @@
 #include "../Core/AssetOps.h"
 #include "core/AssetOpsTests.h"
 #include "core/GizmoGeometryTests.h"
+#include "../Core/ImportSettings.h"
+#include "core/ImportSettingsTests.h"
+#include "core/ImportSettingsV2Tests.h"
+#include "core/ImportSettingsSpawnV2Tests.h"
+#include "core/SidecarTransactionTests.h"
+#include "core/ImportReimportChainTests.h"
+#include "../Core/AssetExtensions.h"
+#include "core/AssetExtensionsTests.h"
 
 #include <QCoreApplication>
 #include <QTemporaryDir>
@@ -273,6 +286,15 @@ void TestMaterialGraph()
     gChecks += 18;
 }
 
+void TestGraphCore()
+{
+    gChecks += RunGraphCoreTests();
+    gChecks += RunCodeGraphSchemaTests();
+    gChecks += RunScriptMessagesTests();
+    gChecks += RunFsmGraphSchemaTests();
+    gChecks += RunGraphToolsTests();
+}
+
 void TestSceneFile()
 {
     RunSceneFileTests();
@@ -290,8 +312,8 @@ void TestTerminal()
 void TestAssetOps()
 {
     RunAssetOpsTests();
-    // 44 distinct checks in RunAssetOpsTests
-    gChecks += 44;
+    // 132 distinct checks in RunAssetOpsTests
+    gChecks += 132;
 }
 
 void TestEditorLocale()
@@ -402,6 +424,10 @@ int main(int argc, char* argv[])
     std::fflush(stdout);
     TestMaterialGraph();
 
+    std::printf("[Test] TestGraphCore...\n");
+    std::fflush(stdout);
+    TestGraphCore();
+
     std::printf("[Test] TestSceneFile...\n");
     std::fflush(stdout);
     TestSceneFile();
@@ -413,6 +439,30 @@ int main(int argc, char* argv[])
     std::printf("[Test] TestAssetOps...\n");
     std::fflush(stdout);
     TestAssetOps();
+
+    std::printf("[Test] TestImportSettings...\n");
+    std::fflush(stdout);
+    RunImportSettingsTests(gChecks);
+
+    std::printf("[Test] TestImportSettingsV2...\n");
+    std::fflush(stdout);
+    ImportSettingsV2Tests::Run(gChecks);
+
+    std::printf("[Test] TestImportSettingsSpawnV2...\n");
+    std::fflush(stdout);
+    ImportSettingsSpawnV2Tests::Run(gChecks);
+
+    std::printf("[Test] TestSidecarTransaction...\n");
+    std::fflush(stdout);
+    SidecarTransactionTests::Run(gChecks);
+
+    std::printf("[Test] TestImportReimportChain...\n");
+    std::fflush(stdout);
+    ImportReimportChainTests::Run(gChecks);
+
+    std::printf("[Test] TestAssetExtensions...\n");
+    std::fflush(stdout);
+    AssetExtensionsTests::Run(gChecks);
 
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);

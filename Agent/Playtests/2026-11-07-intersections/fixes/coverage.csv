@@ -1,0 +1,7 @@
+bug,function,command,expected,test
+TI-01,intersecting meshes,render.transparency,source-over in per-pixel depth order,TransparencyIntersectionTests.py normal/reverse
+TI-02,self intersections and animation,render.transparency,correct intersecting faces within one mesh,TransparencyIntersectionTests.py self-cross skeletal crowd
+TI-03,mixed blends and depth,render.transparency,additive opaque zero-alpha correct,TransparencyIntersectionTests.py mixed-additive opaque-occlusion zero-alpha
+TI-04,resource lifecycle and depth budget,render.transparency,resize and deep content preserved,TransparencyIntersectionTests.py resize sixteen-depths deep-parallel-tail
+REG-01,layering copies LOD,render.transparency,previous 52 scenarios preserved,TransparencyTests.py
+REG-02,materials shadows compatibility,existing runners,previous behavior preserved,MaterialRenderTests.py PointShadowSlotsLodTests.py PointShadowMotionTests.py EngineTests compatibility

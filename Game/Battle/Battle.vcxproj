@@ -35,6 +35,7 @@
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\BattleGame.cpp" />
     <ClCompile Include="Source\BattleBench.cpp" />
+    <ClCompile Include="Source\BattleAi.cpp" />
     <ClInclude Include="Source\BattleGame.h" />
     <ClInclude Include="Source\BattleBench.h" />
     <ClInclude Include="Source\UnitMesh.h" />

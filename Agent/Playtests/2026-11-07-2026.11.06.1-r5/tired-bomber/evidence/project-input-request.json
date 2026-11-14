@@ -1,0 +1,25 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261107-r5\\tired-bomber\\BomberFinalR5\\Project.json",
+  "steps": [
+    {
+      "kind": "control",
+      "action": "play"
+    },
+    {
+      "kind": "focus",
+      "enabled": true
+    },
+    {
+      "kind": "frames",
+      "count": 600
+    },
+    {
+      "kind": "control",
+      "action": "pause"
+    },
+    {
+      "kind": "frames",
+      "count": 4
+    }
+  ]
+}

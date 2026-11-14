@@ -1,0 +1,15 @@
+slots-r0-mesh: PASS
+slots-r0-skeletal: PASS
+slots-r0-crowd: PASS
+fade-r0-0: cube 0: only 2 depth states across 9 LOD-fade frames (hard pop); cube 1: only 2 depth states across 9 LOD-fade frames (hard pop)
+fade-r0-1: cube 0: only 2 depth states across 9 LOD-fade frames (hard pop); cube 1: only 2 depth states across 9 LOD-fade frames (hard pop)
+distance-r0-import0: PASS
+distance-r0-import1: PASS
+slots-r1-mesh: PASS
+slots-r1-skeletal: PASS
+slots-r1-crowd: PASS
+fade-r1-0: cube 0: only 2 depth states across 9 LOD-fade frames (hard pop); cube 1: only 2 depth states across 9 LOD-fade frames (hard pop)
+fade-r1-1: cube 0: only 2 depth states across 9 LOD-fade frames (hard pop); cube 1: only 2 depth states across 9 LOD-fade frames (hard pop)
+distance-r1-import0: PASS
+distance-r1-import1: PASS
+{"passed": 10, "total": 14, "frames": 178}

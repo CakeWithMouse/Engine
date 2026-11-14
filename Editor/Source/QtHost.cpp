@@ -42,7 +42,7 @@ bool EditorQtHost::Start()
 
     if (HasScene())
     {
-        SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), PhysicsObjectApi()};
+        SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), PhysicsObjectApi(), ScriptApi()};
         sceneHandler_.PublishScene(sctx, playState_.load());
     }
 
@@ -250,20 +250,35 @@ void EditorQtHost::DrainCommands()
         pending.swap(commands_);
     }
 
+    // Gizmo ticks carry absolute transforms and plain refreshes only republish, so a newer one
+    // supersedes older ones; cursor moves between ticks do not break the run.
     int lastResize = -1;
+    bool laterRefresh = false;
+    uint64_t gizmoTarget = 0;
     for (int i = static_cast<int>(pending.size()) - 1; i >= 0; --i)
     {
-        if (pending[i].type == EditorCommand::ViewportResize)
-        {
+        EditorCommand& c = pending[i];
+        if (c.type == EditorCommand::ViewportResize && lastResize < 0)
             lastResize = i;
-            break;
+        if (c.type == EditorCommand::RefreshScene && c.name.isEmpty())
+        {
+            if (laterRefresh) c.type = EditorCommand::None;
+            laterRefresh = true;
         }
+        else if (c.type == EditorCommand::UpdateObjectTransform && c.path == QLatin1String("gizmo"))
+        {
+            if (c.objectId != 0 && c.objectId == gizmoTarget) c.type = EditorCommand::None;
+            gizmoTarget = c.objectId;
+        }
+        else if (c.type != EditorCommand::InputCursor)
+            gizmoTarget = 0;
     }
 
     for (size_t i = 0; i < pending.size(); ++i)
     {
         const EditorCommand& cmd = pending[i];
-        if (cmd.type == EditorCommand::ViewportResize && static_cast<int>(i) != lastResize)
+        if (cmd.type == EditorCommand::None ||
+            (cmd.type == EditorCommand::ViewportResize && static_cast<int>(i) != lastResize))
             continue;
 
         uint32_t result = EngineSceneOk;
@@ -283,12 +298,14 @@ void EditorQtHost::DrainCommands()
             const auto name = sceneHandler_.GetSelectedObjectName();
             result = playState_.load() == Edit && api && api->asset ? api->asset(api->context, cmd.w, cmd.path.toUtf8().constData(), cmd.name.toUtf8().constData(), detail, sizeof(detail)) : EngineSceneReadOnly;
             if (result == EngineSceneOk) {
-                history_.Reset();
-                SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), PhysicsObjectApi()};
-                sceneHandler_.SetSelectedId(0);
+                // Rename/move remaps asset paths, so old checkpoints go stale and
+                // history must be dropped explicitly. Reimport keeps paths: the
+                // checkpoints stay valid, only transform coalescing breaks.
+                if (cmd.w == 1) history_.Reset();
+                else history_.BreakCoalescing();
+                SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), PhysicsObjectApi(), ScriptApi()};
+                sceneHandler_.SelectByName(ctx, name);
                 sceneHandler_.MarkDirty();
-                sceneHandler_.PublishScene(ctx, playState_.load());
-                for (const auto& o : sceneHandler_.ReadSnapshot().objects) if (o.name == name) sceneHandler_.SetSelectedId(o.id);
                 sceneHandler_.PublishScene(ctx, playState_.load());
                 recovery_.Clear(); WriteRecovery();
             }
@@ -320,7 +337,7 @@ void EditorQtHost::DrainCommands()
                 viewportInput_,
                 [this](const char* msg) { Log(msg); },
                 [this] {
-                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), PhysicsObjectApi()};
+                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), PhysicsObjectApi(), ScriptApi()};
                     sceneHandler_.PublishScene(sctx, playState_.load());
                 }
             };
@@ -339,7 +356,7 @@ void EditorQtHost::DrainCommands()
             }
             if (cmd.type == EditorCommand::PickObject) {
                 sceneHandler_.PickSelection(sel, cmd.name == "toggle" && BatchApi());
-                SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), PhysicsObjectApi()};
+                SceneCommandHandler::Context ctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), PhysicsObjectApi(), ScriptApi()};
                 sceneHandler_.PublishScene(ctx, playState_.load());
             }
             if (cmd.type == EditorCommand::TogglePlay && result == EngineSceneOk) InvalidateOverlays();
@@ -354,6 +371,7 @@ void EditorQtHost::DrainCommands()
                 selection_,
                 viewportInput_,
                 audio_,
+                assetImport_,
                 [this](const char* msg) { Log(msg); },
                 [this](const auto& s, const auto& d, const auto& sel, const auto& in, const auto& audio) {
                     recovery_.RefreshBuild();
@@ -366,7 +384,7 @@ void EditorQtHost::DrainCommands()
                 [this] { return sceneHandler_.GetSelectedObjectName(); },
                 [this](uint64_t id) { sceneHandler_.SetSelectedId(id); },
                 [this] {
-                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), PhysicsObjectApi()};
+                    SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), PhysicsObjectApi(), ScriptApi()};
                     sceneHandler_.PublishScene(sctx, playState_.load());
                 }
             };
@@ -379,7 +397,7 @@ void EditorQtHost::DrainCommands()
         }
         else if (sceneHandler_.CanHandle(cmd.type))
         {
-            SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), PhysicsObjectApi()};
+            SceneCommandHandler::Context sctx{scene_, projectData_, selection_, viewportInput_, BatchApi(), AuthoringApi(), PointLightV2Api(), PhysicsObjectApi(), ScriptApi()};
             sceneHandler_.Handle(cmd, sctx, history_, playState_.load(), result, error);
             if (result == EngineSceneOk) {
                 if (cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene || cmd.type == EditorCommand::Undo || cmd.type == EditorCommand::Redo) InvalidateOverlays();

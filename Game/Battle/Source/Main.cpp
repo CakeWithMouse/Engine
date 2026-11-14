@@ -71,16 +71,37 @@ int main(int argc, char** argv)
             if (argument == "--no-point-light") { settings.PointLight = false; continue; }
             if (argument == "--no-point-shadow") { settings.PointShadows = false; continue; }
             if (argument == "--dump-frame" && i + 1 < argc) { settings.DumpFrame = argv[++i]; continue; }
+            if (argument == "--camera-sequence" && i + 1 < argc) { settings.CameraSequence = argv[++i]; continue; }
+            if (argument == "--camera-motion" && i + 1 < argc) { settings.CameraMotion = argv[++i]; continue; }
             if (argument == "--legacy-shaders") { settings.Materials = false; continue; }
             if (argument == "--anim") { settings.Animated = true; continue; }
+            if (argument == "--ai") { settings.Ai = true; continue; }
+            if (argument == "--ai-debug") { settings.Ai = true; settings.AiDebug = true; continue; }
+            if (argument == "--dump-at" && i + 1 < argc) { settings.DumpFrameAt = static_cast<uint64_t>(ParseInt(argv[++i], "--dump-at")); continue; }
             throw std::runtime_error(
                 "Usage: Battle.exe [--bench N] [--warmup N] [--units N] [--types N] [--spacing N] [--camera N]\n"
                 "        [--frames N] [--detail N] [--scenery N] [--sprite-px N] [--sun N] [--shadow-distance N]\n"
                 "        [--no-shadows] [--no-baked-shadows] [--no-impostors] [--forward] [--static] [--lod-debug]\n"
-                "        [--legacy-shaders] [--anim] [--lock-camera] [--auto-lod] [--validate] [--hud|--no-hud] [--no-point-light] [--no-point-shadow]\n"
-                "        [--dump-shadows] [--dump-impostors] [--dump-frame FILE] [--smoke]");
+                "        [--legacy-shaders] [--anim] [--ai|--ai-debug] [--lock-camera] [--auto-lod] [--validate]\n"
+                "        [--hud|--no-hud] [--no-point-light] [--no-point-shadow] [--smoke]\n"
+                "        [--dump-shadows] [--dump-impostors] [--dump-frame FILE] [--dump-at N]\n"
+                "        [--camera-sequence DIR] [--camera-motion orbit|pan|dolly]");
         }
         if (settings.UnitCount < 1) throw std::runtime_error("--units must be positive");
+        if (!settings.CameraSequence.empty())
+        {
+            if (bench || !settings.DumpFrame.empty())
+                throw std::runtime_error("--camera-sequence cannot be combined with --bench or --dump-frame");
+            if (settings.CameraMotion != "orbit" && settings.CameraMotion != "pan" && settings.CameraMotion != "dolly")
+                throw std::runtime_error("--camera-motion must be orbit, pan or dolly");
+            settings.LockCamera = true;
+            settings.Moving = false;
+            frameLimit = 182;
+            const auto output = std::filesystem::u8path(settings.CameraSequence);
+            if (std::filesystem::exists(output) && !std::filesystem::is_empty(output))
+                throw std::runtime_error("--camera-sequence requires a new or empty directory");
+            std::filesystem::create_directories(output);
+        }
         if (smoke && frameLimit == 0) frameLimit = 30;
 
         settings.ContentRoot = ExampleStartup::PrepareContent();

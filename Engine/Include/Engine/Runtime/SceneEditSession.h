@@ -38,6 +38,10 @@ public:
     EngineAudioPreviewApi GetAudioPreviewApi() noexcept;
     EnginePhysicsApi GetPhysicsApi() noexcept;
     EnginePhysicsObjectApi GetPhysicsObjectApi() noexcept;
+    EngineScriptApi GetScriptApi() noexcept;
+    EngineGraphTraceApi GetGraphTraceApi() noexcept;
+    EngineAiMachineApi GetAiMachineApi() noexcept;
+    EngineAssetImportApi GetAssetImportApi() noexcept;
     SceneEditSession(const SceneEditSession&) = delete;
     SceneEditSession& operator=(const SceneEditSession&) = delete;
 private:

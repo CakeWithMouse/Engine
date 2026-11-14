@@ -2,7 +2,10 @@
 #include "CollapsibleCard.h"
 #include "TransformCard.h"
 #include "MaterialCard.h"
+#include "ScriptCard.h"
+#include "AiMachineCard.h"
 #include "GeometryCard.h"
+#include "CommandRegistry.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "EditorLocale.h"
 #include "IconProvider.h"
@@ -13,6 +16,8 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QSignalBlocker>
+#include <QDir>
+#include <QFileInfo>
 #include <QHBoxLayout>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -23,29 +28,6 @@
 #include <QQuaternion>
 #include <QScrollArea>
 #include <QVBoxLayout>
-
-static QWidget* CreateAxisCell(NoWheelDoubleSpinBox* spin, const QString& axisLetter, const QString& badgeColor, QWidget* parent)
-{
-    auto* cell = new QWidget(parent);
-    auto* layout = new QHBoxLayout(cell);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-
-    auto* badge = new QLabel(axisLetter, cell);
-    badge->setFixedSize(16, 22);
-    badge->setAlignment(Qt::AlignCenter);
-    badge->setStyleSheet(QStringLiteral(
-        "background-color: %1; color: white; font-weight: bold; font-size: 10px; "
-        "border-top-left-radius: 4px; border-bottom-left-radius: 4px;"
-    ).arg(badgeColor));
-    layout->addWidget(badge);
-
-    spin->setParent(cell);
-    spin->setFixedHeight(22);
-    spin->setProperty("axisCell", true);
-    layout->addWidget(spin, 1);
-    return cell;
-}
 
 ObjectInspectorPanel::ObjectInspectorPanel(QWidget* parent)
     : QWidget(parent)
@@ -61,16 +43,8 @@ ObjectInspectorPanel::ObjectInspectorPanel(QWidget* parent)
 
 ObjectInspectorPanel::~ObjectInspectorPanel()
 {
-    if (langSubId_)
-    {
-        EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
-        langSubId_ = 0;
-    }
-    if (themeSubId_)
-    {
-        EditorTheme::Instance().UnsubscribeThemeChanged(themeSubId_);
-        themeSubId_ = 0;
-    }
+    if (langSubId_) EditorLocale::Instance().UnsubscribeLanguageChanged(langSubId_);
+    if (themeSubId_) EditorTheme::Instance().UnsubscribeThemeChanged(themeSubId_);
 }
 
 void ObjectInspectorPanel::SetEnabled(bool enabled)
@@ -121,19 +95,45 @@ void ObjectInspectorPanel::BuildUi()
     inspectorLayout->addWidget(cardTransform_);
 
     cardGeometry_ = new GeometryCard(this);
-    cardGeometry_->onChooseModel = [this] { emit ChooseModelRequested(); };
-    cardGeometry_->onClearModel = [this] { emit ClearModelRequested(); };
-    cardGeometry_->onChooseTexture = [this] { emit ChooseTextureRequested(); };
-    cardGeometry_->onClearTexture = [this] { emit ClearTextureRequested(); };
+    cardGeometry_->onChooseModel = [this] {
+        emit ChooseModelRequested();
+        QVariantMap params;
+        params[QStringLiteral("objectId")] = static_cast<qulonglong>(selectedId_);
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.ReplaceModel"), params);
+    };
 
     cardMaterial_ = new MaterialCard(this);
     cardMaterial_->onEditMaterial = [this](const QString& path) { emit EditMaterialRequested(path); };
-    cardMaterial_->onChooseMaterial = [this] { emit ChooseMaterialRequested(); };
+    cardMaterial_->onChooseMaterial = [this] {
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"));
+    };
     cardMaterial_->onClearMaterial = [this] { emit ClearMaterialRequested(); };
+
+    cardScript_ = new ScriptCard(this);
+    cardScript_->setObjectName(QStringLiteral("ScriptCard"));
+    cardScript_->onOpenScript = [this](const QString& path) { emit OpenScriptRequested(path); };
+    cardScript_->onChooseScript = [this] { emit ChooseScriptRequested(); };
+    cardScript_->onClearScript = [this] { emit ClearScriptRequested(); };
+    cardScript_->onVariablesChanged = [this](const QString& json) { emit ScriptVariablesChanged(json); };
+
+    // Автомат ИИ — свойства stateMachine и machineMemory «ИИ-персонажа», правятся как остальные свойства (Undo).
+    cardAi_ = new AiMachineCard(this);
+    cardAi_->setObjectName(QStringLiteral("AiMachineCard"));
+    cardAi_->onSetMachine = [this](const QString& machine) { SubmitProperty(QStringLiteral("/stateMachine"), machine); };
+    cardAi_->onMemoryChanged = [this](const QString& json) { SubmitProperty(QStringLiteral("/machineMemory"), json); };
+    cardAi_->onCreate = [this] { emit CreateAiMachineRequested(); };
+    cardAi_->onOpen = [this](const QString& path) { emit OpenAiMachineRequested(path); };
+    cardAi_->onChoose = [this] { emit ChooseAiMachineRequested(); };
+    cardAi_->fileExists = [this](const QString& path) {
+        const QString root = property("contentRoot").toString();
+        return !root.isEmpty() && path.startsWith(QStringLiteral("/Game/")) && QFileInfo::exists(QDir(root).filePath(path.mid(6)));
+    };
 
     BuildPointLightCard(inspectorLayout);
     inspectorLayout->addWidget(cardGeometry_);
     inspectorLayout->addWidget(cardMaterial_);
+    inspectorLayout->addWidget(cardScript_);
+    inspectorLayout->addWidget(cardAi_);
     BuildCharacterCard(inspectorLayout);
     BuildPhysicsCard(inspectorLayout);
     inspectorLayout->addWidget(properties_);
@@ -142,6 +142,8 @@ void ObjectInspectorPanel::BuildUi()
     cardTransform_->hide();
     cardGeometry_->hide();
     cardMaterial_->hide();
+    cardScript_->hide();
+    cardAi_->hide();
     lightInspector_->hide();
     characterInspector_->hide();
     physicsInspector_->hide();
@@ -198,81 +200,6 @@ void ObjectInspectorPanel::BuildGeneralCard(QVBoxLayout* layout)
     layout->addWidget(cardGeneral_);
 }
 
-void ObjectInspectorPanel::BuildPointLightCard(QVBoxLayout* layout)
-{
-    cardLight_ = new CollapsibleCard(Tr("Свет", "Light"), this, true);
-    lightInspector_ = cardLight_;
-    auto* cl = cardLight_->ContentLayout();
-    auto emitChanged = [this] {
-        if (refreshing_ || selectedId_ == 0) return;
-        if (selectedType_ == "Light.Directional") {
-            SubmitProperty(QStringLiteral("/intensity"), lightValues_[3]->value());
-            SubmitProperty(QStringLiteral("/shadowDistance"), lightValues_[4]->value());
-            return;
-        }
-        emit PointLightEditingFinished(selectedId_, CurrentPointLightValue());
-    };
-    auto* rowTop = new QWidget(cardLight_->Content()); auto* lTop = new QHBoxLayout(rowTop);
-    lTop->setContentsMargins(0, 0, 0, 0); lTop->setSpacing(6);
-    lightEnabled_ = new QCheckBox(Tr("Включён", "Enabled"), rowTop);
-    lightEnabled_->setObjectName(QStringLiteral("LightEnabled")); lightEnabled_->hide();
-    connect(lightEnabled_, &QCheckBox::clicked, this, emitChanged);
-    lightShadows_ = new QCheckBox(Tr("Тени", "Shadows"), rowTop);
-    lightShadows_->setObjectName(QStringLiteral("LightShadows"));
-    connect(lightShadows_, &QCheckBox::clicked, this, [this, emitChanged] {
-        if (refreshing_ || selectedId_ == 0) return;
-        if (selectedType_ == "Light.Directional") { SubmitProperty(QStringLiteral("/shadows"), lightShadows_->isChecked()); return; }
-        emitChanged();
-    });
-    lTop->addWidget(lightShadows_);
-    lightColor_ = new QPushButton(Tr("Выбрать цвет…", "Choose Color…"), rowTop);
-    lightColor_->setObjectName(QStringLiteral("LightColor")); lightColor_->setFixedHeight(24); lightColor_->setIcon(IconProvider::BulbIcon());
-    connect(lightColor_, &QPushButton::clicked, this, [this] {
-        if (refreshing_ || selectedId_ == 0) return;
-        const QColor cur = QColor::fromRgbF(lightValues_[0]->value(), lightValues_[1]->value(), lightValues_[2]->value());
-        if (selectedType_ == "Light.Directional") {
-            const auto chosen = QColorDialog::getColor(cur, this, Tr("Цвет света", "Light Color"));
-            if (chosen.isValid()) {
-                const float c[3] = {static_cast<float>(chosen.redF()), static_cast<float>(chosen.greenF()), static_cast<float>(chosen.blueF())};
-                UpdateLightColorButton(c); for (int i = 0; i < 3; ++i) lightValues_[i]->setValue(c[i]);
-                SubmitProperty(QStringLiteral("/color"), QJsonArray{c[0], c[1], c[2]});
-            } return;
-        }
-        emit LightColorRequested(selectedId_, cur);
-    });
-    lTop->addWidget(lightColor_, 1); cl->addWidget(rowTop);
-    auto* rowRgb = new QWidget(cardLight_->Content()); auto* lRgb = new QHBoxLayout(rowRgb);
-    lRgb->setContentsMargins(0, 0, 0, 0); lRgb->setSpacing(4);
-    const QString rgbL[3] = {QStringLiteral("R"), QStringLiteral("G"), QStringLiteral("B")};
-    const QString rgbC[3] = {QStringLiteral("#EF4444"), QStringLiteral("#22C55E"), QStringLiteral("#3B82F6")};
-    for (int i = 0; i < 3; ++i) {
-        auto* spin = lightValues_[i] = new NoWheelDoubleSpinBox(rowRgb);
-        spin->setObjectName(QStringLiteral("LightValue%1").arg(i)); spin->setRange(0.0, 1.0); spin->setDecimals(2); spin->setSingleStep(0.05); spin->setKeyboardTracking(false);
-        connect(spin, &QDoubleSpinBox::editingFinished, this, [this, emitChanged] {
-            if (refreshing_ || selectedId_ == 0) return;
-            if (selectedType_ == "Light.Directional") {
-                const float c[3] = {static_cast<float>(lightValues_[0]->value()), static_cast<float>(lightValues_[1]->value()), static_cast<float>(lightValues_[2]->value())};
-                UpdateLightColorButton(c); SubmitProperty(QStringLiteral("/color"), QJsonArray{c[0], c[1], c[2]}); return;
-            }
-            emitChanged();
-        });
-        lRgb->addWidget(CreateAxisCell(spin, rgbL[i], rgbC[i], rowRgb), 1);
-    }
-    cl->addWidget(rowRgb);
-    auto addFieldRow = [&](int idx, const QString& label, double minV, double maxV, double step) {
-        auto* row = new QWidget(cardLight_->Content()); auto* l = new QHBoxLayout(row);
-        l->setContentsMargins(0, 0, 0, 0); l->setSpacing(6);
-        lightRowLabels_[idx] = new QLabel(label, row); lightRowLabels_[idx]->setObjectName(QStringLiteral("CardFieldLabel")); lightRowLabels_[idx]->setFixedWidth(80);
-        l->addWidget(lightRowLabels_[idx]);
-        auto* spin = lightValues_[idx] = new NoWheelDoubleSpinBox(row);
-        spin->setObjectName(QStringLiteral("LightValue%1").arg(idx)); spin->setFixedHeight(22); spin->setRange(minV, maxV); spin->setDecimals(2); spin->setSingleStep(step); spin->setKeyboardTracking(false);
-        connect(spin, &QDoubleSpinBox::editingFinished, this, emitChanged); l->addWidget(spin, 1); cl->addWidget(row);
-    };
-    addFieldRow(3, Tr("Интенсивность", "Intensity"), 0.0, 10000.0, 0.5);
-    addFieldRow(4, Tr("Радиус", "Radius"), 0.01, 10000.0, 0.5);
-    layout->addWidget(cardLight_); cardLight_->hide();
-}
-
 void ObjectInspectorPanel::BuildCharacterCard(QVBoxLayout* layout)
 {
     cardCharacter_ = new CollapsibleCard(Tr("Персонаж", "Character"), this, true);
@@ -281,18 +208,14 @@ void ObjectInspectorPanel::BuildCharacterCard(QVBoxLayout* layout)
 
     auto* rowSpeed = new QWidget(cardCharacter_->Content());
     auto* lSpeed = new QHBoxLayout(rowSpeed);
-    lSpeed->setContentsMargins(0, 0, 0, 0);
-    lSpeed->setSpacing(6);
-
+    lSpeed->setContentsMargins(0, 0, 0, 0); lSpeed->setSpacing(6);
     characterSpeedLabel_ = new QLabel(Tr("Скорость, ед/с", "Speed, u/s"), rowSpeed);
     characterSpeedLabel_->setObjectName(QStringLiteral("CardFieldLabel"));
     lSpeed->addWidget(characterSpeedLabel_);
 
     characterSpeed_ = new NoWheelDoubleSpinBox(rowSpeed);
     characterSpeed_->setObjectName(QStringLiteral("CharacterSpeed"));
-    characterSpeed_->setFixedHeight(22);
-    characterSpeed_->setRange(0, 10000);
-    characterSpeed_->setKeyboardTracking(false);
+    characterSpeed_->setFixedHeight(22); characterSpeed_->setRange(0, 10000); characterSpeed_->setKeyboardTracking(false);
     connect(characterSpeed_, &QDoubleSpinBox::editingFinished, this, [this] {
         if (!refreshing_ && selectedId_) emit CharacterSpeedEditingFinished(selectedId_, characterSpeed_->value());
     });
@@ -385,6 +308,8 @@ void ObjectInspectorPanel::RetranslateUi()
     if (cardTransform_) cardTransform_->RetranslateUi();
     if (cardGeometry_) cardGeometry_->RetranslateUi();
     if (cardMaterial_) cardMaterial_->RetranslateUi();
+    if (cardScript_) cardScript_->RetranslateUi();
+    if (cardAi_) cardAi_->RetranslateUi();
 
     if (lightEnabled_) lightEnabled_->setText(Tr("Включён", "Enabled"));
     if (lightShadows_) lightShadows_->setText(Tr("Тени", "Shadows"));
@@ -426,35 +351,42 @@ void ObjectInspectorPanel::RetranslateUi()
         Refresh(lastSnapshot_, selectedId_, true);
 }
 
+void ObjectInspectorPanel::InvalidateAssetCache()
+{
+    if (cardGeometry_) cardGeometry_->InvalidateCache();
+    if (cardMaterial_) cardMaterial_->InvalidateCache();
+    if (selectedId_ != 0 && !lastSnapshot_.objects.empty())
+        Refresh(lastSnapshot_, selectedId_, true);
+}
+
 void ObjectInspectorPanel::ClearFocusIfInside()
 {
-    if (auto* focus = QApplication::focusWidget(); focus && isAncestorOf(focus))
-        focus->clearFocus();
+    if (auto* focus = QApplication::focusWidget(); focus && isAncestorOf(focus)) focus->clearFocus();
+}
+
+void ObjectInspectorPanel::CommitPendingEdits()
+{
+    if (HasFocusedChild())
+    {
+        ClearFocusIfInside();
+        return;
+    }
+    // An inactive window reports no focus widget on Windows, so clearing focus
+    // cannot fire editingFinished. Commit the transform directly; the receiver
+    // drops no-op changes.
+    if (!refreshing_ && selectedId_ != 0 && cardTransform_ && cardTransform_->isVisible())
+        emit TransformEditingFinished(selectedId_, CurrentTransformValue());
 }
 
 bool ObjectInspectorPanel::HasFocusedChild() const
 {
-    const auto* focus = QApplication::focusWidget();
-    return focus && isAncestorOf(focus);
+    const auto* focus = QApplication::focusWidget(); return focus && isAncestorOf(focus);
 }
 
 InspectorTransformValue ObjectInspectorPanel::CurrentTransformValue() const
 {
     InspectorTransformValue value;
-    if (cardTransform_)
-        cardTransform_->GetValues(value.position.data(), value.euler.data(), value.scale.data());
-    return value;
-}
-
-InspectorPointLightValue ObjectInspectorPanel::CurrentPointLightValue() const
-{
-    InspectorPointLightValue value;
-    for (int i = 0; i < 3; ++i)
-        value.color[i] = lightValues_[i]->value();
-    value.intensity = lightValues_[3]->value();
-    value.radius = lightValues_[4]->value();
-    value.enabled = lightEnabled_->isChecked();
-    value.castShadows = lightShadows_ ? lightShadows_->isChecked() : false;
+    if (cardTransform_) cardTransform_->GetValues(value.position.data(), value.euler.data(), value.scale.data());
     return value;
 }
 
@@ -468,15 +400,6 @@ InspectorPhysicsValue ObjectInspectorPanel::CurrentPhysicsValue() const
     value.restitution = physicsRestitution_->value();
     value.density = physicsDensity_->value();
     return value;
-}
-
-void ObjectInspectorPanel::UpdateLightColorButton(const float color[3])
-{
-    const QColor backgroundColor = QColor::fromRgbF(color[0], color[1], color[2]);
-    const double luminance = color[0] * 0.299 + color[1] * 0.587 + color[2] * 0.114;
-    lightColor_->setStyleSheet(QStringLiteral("background-color: %1; color: %2;")
-                               .arg(backgroundColor.name())
-                               .arg(luminance > 0.5 ? QStringLiteral("black") : QStringLiteral("white")));
 }
 
 void ObjectInspectorPanel::Refresh(
@@ -502,7 +425,8 @@ void ObjectInspectorPanel::Refresh(
         noSelectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
         noSelectionLabel_->show();
         cardGeneral_->hide(); cardTransform_->hide(); cardGeometry_->hide();
-        cardMaterial_->hide(); lightInspector_->hide(); characterInspector_->hide();
+        cardMaterial_->hide(); cardScript_->hide(); cardAi_->hide(); lightInspector_->hide(); characterInspector_->hide();
+        lastCardsValid_ = false;
         physicsInspector_->hide();
         refreshing_ = false;
         return;
@@ -511,9 +435,10 @@ void ObjectInspectorPanel::Refresh(
     noSelectionLabel_->hide();
     cardGeneral_->show();
     cardTransform_->show();
-    cardMaterial_->show();
-    cardGeometry_->Clear();
-    cardMaterial_->Clear();
+    if (selectionChanged) {
+        cardGeometry_->Clear();
+        cardMaterial_->Clear();
+    }
 
     bool selectedLight = false;
 
@@ -585,18 +510,59 @@ void ObjectInspectorPanel::Refresh(
             UpdateLightColorButton(object.pointLight.color); cardLight_->show();
         } else { cardLight_->hide(); }
 
-        const bool showGeometry = isModel;
+        const bool showGeometry = isModel || isPrimitive;
         const bool showMaterial = isModel || isPrimitive;
         const bool showProperties = (!isModel && !isPrimitive && !isPointLight && !isDirLight && !isCamera && !isParticles);
 
-        cardGeometry_->setVisible(showGeometry);
+        const QString cr = property("contentRoot").toString();
+        const QString modelPath = QString::fromStdString(object.modelAsset);
+        const QString materialPath = QString::fromStdString(object.materialAsset);
+        const bool materialLight = isPointLight || isDirLight;
+        const QString primType = isPrimitive ? (type.rfind("Primitive.", 0) == 0 ? QString::fromStdString(type.substr(10)) : QString::fromStdString(type)) : QString();
+        const bool cardsDirty = !lastCardsValid_ || selectionChanged
+            || showGeometry != lastCardsShowGeometry_
+            || showMaterial != lastCardsShowMaterial_
+            || modelPath != lastCardsModel_
+            || primType != lastCardsPrimitive_
+            || materialPath != lastCardsMaterial_
+            || materialLight != lastCardsMaterialLight_
+            || cr != lastCardsRoot_;
         if (showGeometry) {
-            cardGeometry_->SetData(QString::fromStdString(object.modelAsset), true);
-            cardGeometry_->SetTexture(QString::fromStdString(object.textureAsset));
+            cardGeometry_->UpdateChooseModelButton(isModel, isPrimitive);
         }
-        cardMaterial_->SetData(QString::fromStdString(object.materialAsset), isPointLight || isDirLight);
-        cardMaterial_->setVisible(showMaterial);
-        properties_->setVisible(showProperties);
+        if (cardsDirty) {
+            cardGeometry_->setVisible(showGeometry);
+            if (isModel) {
+                cardGeometry_->SetModelData(modelPath, true, cr, selectionChanged);
+            } else if (isPrimitive) {
+                cardGeometry_->SetPrimitiveData(primType);
+            }
+            cardMaterial_->SetData(materialPath, materialLight, cr, selectionChanged);
+            cardMaterial_->setVisible(showMaterial);
+            lastCardsShowGeometry_ = showGeometry;
+            lastCardsShowMaterial_ = showMaterial;
+            lastCardsModel_ = modelPath;
+            lastCardsPrimitive_ = primType;
+            lastCardsMaterial_ = materialPath;
+            lastCardsMaterialLight_ = materialLight;
+            lastCardsRoot_ = cr;
+            lastCardsValid_ = true;
+        }
+        if (properties_->isHidden() == showProperties)
+            properties_->setVisible(showProperties);
+        // Скрипт — у любого объекта сцены, если игровой модуль их поддерживает.
+        cardScript_->SetData(QString::fromStdString(object.scriptAsset), true);
+        cardScript_->SetVariables(QString::fromStdString(object.scriptAsset), QString::fromStdString(object.scriptVariables),
+                                  true);
+        cardScript_->setVisible(view.scripts);
+        // Карточка автомата — у типов со свойствами stateMachine и machineMemory (AiCharacter и его наследники).
+        const bool aiMachine = HasAiMachine(object.propertySchema);
+        if (aiMachine)
+        {
+            const auto data = QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object();
+            cardAi_->SetData(data.value(QStringLiteral("stateMachine")).toString(), data.value(QStringLiteral("machineMemory")).toString(), true);
+        }
+        cardAi_->setVisible(aiMachine);
 
         if (canReplaceWholeInspector)
         {
@@ -604,11 +570,7 @@ void ObjectInspectorPanel::Refresh(
 
             const auto& transform = object.transform;
             const QQuaternion rotation(
-                transform.rotation[3],
-                transform.rotation[0],
-                transform.rotation[1],
-                transform.rotation[2]
-            );
+                transform.rotation[3], transform.rotation[0], transform.rotation[1], transform.rotation[2]);
 
             const auto euler = rotation.toEulerAngles();
             const double pos[3] = {transform.position[0], transform.position[1], transform.position[2]};
@@ -623,4 +585,25 @@ void ObjectInspectorPanel::Refresh(
 
     lightInspector_->setVisible(selectedLight);
     refreshing_ = false;
+}
+
+void ObjectInspectorPanel::SetScriptVariablesReader(std::function<QJsonArray(const QString&)> reader)
+{
+    if (cardAi_) cardAi_->readVariables = reader;
+    if (cardScript_) cardScript_->readVariables = std::move(reader);
+}
+
+void ObjectInspectorPanel::SetAiMachineProblems(const QString& machine, const QStringList& lines)
+{
+    if (cardAi_) cardAi_->SetProblems(machine, lines);
+}
+
+void ObjectInspectorPanel::SetAiMachineLive(const QStringList& lines)
+{
+    if (cardAi_) cardAi_->SetLive(lines);
+}
+
+bool ObjectInspectorPanel::HasAiMachine(const std::string& propertySchema)
+{
+    return propertySchema.find("\"/stateMachine\"") != std::string::npos && propertySchema.find("\"/machineMemory\"") != std::string::npos;
 }

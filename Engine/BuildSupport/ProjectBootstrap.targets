@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Imported only for outer builds, including existing projects which have not
+       yet acquired ProjectBootstrap.props. The child imports the normal targets. -->
+  <PropertyGroup>
+    <EngineAutomaticBuildCommand>powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(EngineSdk)\ProjectTools.ps1&quot; -Action Build -Project &quot;$(MSBuildProjectDirectory)\Project.json&quot; -Runtime &quot;$(EngineSdk)\..&quot;</EngineAutomaticBuildCommand>
+  </PropertyGroup>
+  <Target Name="Build">
+    <Error Condition="'$(EnginePinnedConfiguration)'!='' and '$(Configuration)'!='$(EnginePinnedConfiguration)'" Text="Select the configuration pinned in Engine.lock.json: $(EnginePinnedConfiguration)." />
+    <Exec Command="$(EngineAutomaticBuildCommand)" />
+  </Target>
+  <Target Name="Rebuild">
+    <Error Condition="'$(EnginePinnedConfiguration)'!='' and '$(Configuration)'!='$(EnginePinnedConfiguration)'" Text="Select the configuration pinned in Engine.lock.json: $(EnginePinnedConfiguration)." />
+    <Exec Command="$(EngineAutomaticBuildCommand) -Rebuild" />
+  </Target>
+  <Target Name="Clean">
+    <Message Importance="High" Text="Use Rebuild to regenerate project code. Active and previous modules are preserved." />
+  </Target>
+</Project>

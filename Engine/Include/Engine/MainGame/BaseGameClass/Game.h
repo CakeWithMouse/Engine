@@ -61,6 +61,7 @@ enum class RegisterResult
 const char* ToString(RegisterResult result);
 
 class GameComponent;
+namespace Script { struct Problem; }
 class Material;
 class PhysicsWorld;
 class PointLightComponent;
@@ -225,6 +226,13 @@ public:
     bool UnregisterComponent(const std::string& Name);
     GameComponent* FindComponent(const std::string& Name) const;
     Scene& GetScene() noexcept { return scene; }
+    /** Why the script at this /Game path did not start in this game; empty if it compiled or was never started. */
+    std::vector<Script::Problem> GetScriptProblems(const std::string& asset) const;
+    // Visual scripts (Spawn copy): a copy of source — its type, model/texture/material, project data, script,
+    // rotation and scale — at position, named "<source>_N". Added like any object added during play (its own
+    // BeginPlay and script start next frame). Parent, children and light settings are not copied.
+    // Returns the new id; 0 and error when the type is unknown to this game.
+    uint64_t SpawnCopy(const GameComponent& source, const glm::vec3& position, std::string& error);
     const Scene& GetScene() const noexcept { return scene; }
 
     bool CreateProceduralCubeMap(const std::string& cubeMapName, CubeMapPreset preset, int faceSize = 256);
@@ -235,6 +243,9 @@ public:
     Trace::Result RaycastScreen(Trace::ViewportPoint point,const Trace::Query& query={});
     Trace::Result RaycastCursor(const Trace::Query& query={});
     void DebugDrawTrace(const Trace::Ray&,const Trace::Result&,float lifetime=1);
+    /** A world-space line for one frame, colour 0xAABBGGRR. Drawn in Play and in standalone games. */
+    void DebugDrawLine(const glm::vec3& from, const glm::vec3& to, uint32_t abgr);
+    size_t GetFrameDebugLineCount() const { return FrameDebugLines.size(); }
     void ClearDebugTraces();
     size_t GetDebugTraceLineCount();
     Player* GetPlayer() const { return FirstPlayer.get(); }
@@ -432,7 +443,7 @@ protected:
     void SetFullViewport();
     void RenderShadowMaps();
     void RenderPointShadowMaps();
-    void UpdatePointShadows();
+    void UpdatePointShadows(bool enabled);
     bool InitPointShadowResources();
     enum class OpaqueFilter { All, DeferredCapable, ForwardOnly };
     void RenderOpaque(OpaqueFilter filter, ShaderCompileVariant variant);
@@ -542,6 +553,12 @@ protected:
     /** Components whose material asset failed to load try again on their next draw. */
     void RetryFailedMaterialAssets();
 
+    // Visual scripts by resolved .vscript path; a changed file is compiled again at the next start.
+    struct CachedScript;
+    std::map<std::string, std::shared_ptr<const CachedScript>> scriptCache;
+    /** Creates the component's script instance and runs its BeginPlay; errors are logged, never thrown. */
+    void StartScript(GameComponent& component);
+
     // Depth
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;          // opaque: test + write
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilStateReadOnly;  // transparent: test, no write
@@ -596,6 +613,8 @@ protected:
     DirectX::XMFLOAT4X4 CascadeLightViewProjection[MaxShadowCascades] = {};
     // World sphere covered by each cascade, filled by UpdateShadowCascades.
     DirectX::XMFLOAT4 CascadeSpheres[MaxShadowCascades] = {};
+    // Retain projection scale during small camera moves; grow/shrink only outside its margin.
+    float StableCascadeRadii[MaxShadowCascades] = {};
     Microsoft::WRL::ComPtr<ID3D11Texture2D> shadowTexture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shadowSRV;
     Microsoft::WRL::ComPtr<ID3D11DepthStencilView> shadowDSVs[MaxShadowCascades];
@@ -633,6 +652,18 @@ protected:
     Microsoft::WRL::ComPtr<ID3D11BlendState> transparentBlendState;
     Microsoft::WRL::ComPtr<ID3D11BlendState> additiveBlendState; // ONE + ONE
     Microsoft::WRL::ComPtr<ID3D11BlendState> opaqueBlendState;
+
+    // Bounded front-to-back peeling; remaining distant fragments use the sorted queue.
+    static constexpr int TransparentPeelLayers = 16;
+    bool EnsureTransparencyResources();
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> TransparentDepth[2], TransparentLayer, TransparentAccum;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> TransparentDepthRTV[2], TransparentLayerRTV, TransparentAccumRTV;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> TransparentDepthSRV[2], TransparentLayerSRV, TransparentAccumSRV;
+    Microsoft::WRL::ComPtr<ID3D11BlendState> TransparentMinBlend, TransparentPremultBlend, TransparentFrontBlend;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> TransparentPassCB;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader> TransparentCompositeVS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> TransparentCompositePS;
+    Microsoft::WRL::ComPtr<ID3D11Predicate> TransparentOccupied[TransparentPeelLayers];
 
     // Frame data and diagnostics
     FrameConstants CurrentFrame{};
@@ -706,6 +737,7 @@ protected:
 
     struct TimedTraceLine {EngineOverlayLine line;double expiry;};
     std::vector<TimedTraceLine> TraceDebugLines;
+    std::vector<EngineOverlayLine> FrameDebugLines;
     std::vector<EngineOverlayLine> CollectTraceDebugLines();
     std::vector<EngineOverlayLine> PendingOverlayLines;
     float OverlayLineThickness = 1.0f;

@@ -3,6 +3,8 @@
 #include <Engine/Render/ShadowCascades.h>
 #include <Engine/SaveGame/SaveGame.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/AI/Debugger.h>
+#include <Engine/AI/World.h>
 #include <Engine/MainGame/CharacterController.h>
 #include <Engine/Physics/PhysicsWorld.h>
 #include <Engine/Components/Character.h>
@@ -24,12 +26,16 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <iterator>
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/Light/DirectionalLightComponent.h>
 #include <Engine/Render/Material.h>
 #include <Engine/Render/MaterialAsset.h>
 #include <Engine/Render/ShaderCompiler.h>
+#include <Engine/Script/ScriptRuntime.h>
+#include <Engine/Scene/SceneAssets.h>
+#include <Engine/Components/ComponentType.h>
 #include <Engine/Sound/AudioEngine.h>
 #include <dxgi1_6.h>
 #include "../../Resources/VfsRead.h"
@@ -260,8 +266,8 @@ namespace
     )";
 
     const char* MeshSignatureShader = R"(
-        struct VS_IN { float4 pos : POSITION; float4 normal : NORMAL; float2 uv : TEXCOORD; };
-        float4 VSMain(VS_IN input) : SV_Position { return input.pos + input.normal * 1e-9f + float4(input.uv, 0.0f, 0.0f) * 1e-9f; }
+        struct VS_IN { float4 pos : POSITION; float4 normal : NORMAL; float2 uv : TEXCOORD; float4 tangent : TANGENT; };
+        float4 VSMain(VS_IN input) : SV_Position { return input.pos + input.normal * 1e-9f + float4(input.uv, 0.0f, 0.0f) * 1e-9f + input.tangent * 1e-9f; }
     )";
 
     bool CompileSignatureShader(const char* source, Microsoft::WRL::ComPtr<ID3DBlob>& blob)
@@ -385,6 +391,12 @@ void Game::DestroyResources(bool preserveScene)
     transparentBlendState.Reset();
     additiveBlendState.Reset();
     opaqueBlendState.Reset();
+    for (int i = 0; i < 2; ++i) { TransparentDepth[i].Reset(); TransparentDepthRTV[i].Reset(); TransparentDepthSRV[i].Reset(); }
+    TransparentLayer.Reset(); TransparentLayerRTV.Reset(); TransparentLayerSRV.Reset();
+    TransparentAccum.Reset(); TransparentAccumRTV.Reset(); TransparentAccumSRV.Reset();
+    TransparentMinBlend.Reset(); TransparentPremultBlend.Reset(); TransparentFrontBlend.Reset();
+    TransparentPassCB.Reset(); TransparentCompositeVS.Reset(); TransparentCompositePS.Reset();
+    for (auto& query : TransparentOccupied) query.Reset();
     depthStencilState.Reset();
     depthStencilStateReadOnly.Reset();
     depthStencilStateSkybox.Reset();
@@ -1969,7 +1981,7 @@ void Game::RenderDeferredLightingPass()
     Context->PSSetShaderResources(0, 4, gBufferSRVs);
     Context->PSSetSamplers(0, 1, gBufferSamplerState.GetAddressOf());
 
-    if (AreShadowsActive())
+    if (AreShadowsActive() || PointShadowCount > 0)
     {
         ID3D11ShaderResourceView* shadowMapSRV = shadowSRV.Get();
         Context->PSSetShaderResources(4, 1, &shadowMapSRV);
@@ -2244,14 +2256,15 @@ namespace
     /** The near plane sits at PointShadowNearPlane, so a smaller light has no depth range to store. */
     bool CastsPointShadow(const PointLightInfo& light)
     {
-        return light.bEnabled && light.bCastShadows && light.Radius > PointShadowNearPlane + 1.0f;
+        return light.bEnabled && light.bCastShadows && light.Intensity > 0.0f &&
+               light.Radius > PointShadowNearPlane + 1.0f;
     }
 }
 
-void Game::UpdatePointShadows()
+void Game::UpdatePointShadows(bool enabled)
 {
     PointShadowCount = 0;
-    if (!AreShadowsActive() || bPointShadowFailed)
+    if (!enabled || bPointShadowFailed || bShadowInitFailed)
     {
         return;
     }
@@ -2265,7 +2278,14 @@ void Game::UpdatePointShadows()
         }
     }
 
-    if (PointShadowCount > 0 && !InitPointShadowResources())
+    // Scene lamps do not depend on the sun casting shadows. The depth shaders and samplers
+    // are shared with cascades, so initialize them even in a scene with no directional light.
+    if (PointShadowCount > 0 && !bShadowResourcesReady)
+    {
+        bShadowResourcesReady = InitShadowResources();
+        bShadowInitFailed = !bShadowResourcesReady;
+    }
+    if (PointShadowCount > 0 && (!bShadowResourcesReady || !InitPointShadowResources()))
     {
         std::cout << "Point light shadows are unavailable." << std::endl;
         bPointShadowFailed = true;
@@ -2477,19 +2497,11 @@ void Game::UpdateShadowCascades()
             }
         }
 
-        XMVECTOR centroid = XMVectorZero();
-        for (const XMVECTOR& corner : frustumCorners)
-        {
-            centroid = XMVectorAdd(centroid, corner);
-        }
-        centroid = XMVectorScale(centroid, 1.0f / static_cast<float>(frustumCorners.size()));
-
-        float radius = 0.0f;
-        for (const XMVECTOR& corner : frustumCorners)
-        {
-            radius = std::max(radius, XMVectorGetX(XMVector3Length(XMVectorSubtract(corner, centroid))));
-        }
-        radius = std::max(radius, 1.0f);
+        const glm::vec3 center = cameraPosition + cameraForward * ((cascadeNear + cascadeFar) * 0.5f);
+        const XMVECTOR centroid = XMVectorSet(center.x, center.y, center.z, 1.0f);
+        // A light-space AABB changes scale as the camera rotates, even with texel-snapped edges.
+        // This sphere depends only on the projection, not on yaw or floating-point world corners.
+        const float radius = std::max(1.0f, CascadeFrustumSphereRadius(cascadeNear, cascadeFar, tanHalfFovY, aspect));
 
         // Remembered for the shadow pass: casters are culled against this sphere per cascade.
         XMFLOAT3 centroidPosition;
@@ -2506,34 +2518,31 @@ void Game::UpdateShadowCascades()
         // snapping the bounds below would snap to a grid that moves with the camera.
         const XMMATRIX lightView = XMMatrixLookAtLH(XMVectorNegate(lightDirV), XMVectorZero(), up);
 
-        float minX = FLT_MAX;
-        float maxX = -FLT_MAX;
-        float minY = FLT_MAX;
-        float maxY = -FLT_MAX;
         float minZ = FLT_MAX;
         float maxZ = -FLT_MAX;
 
         for (const XMVECTOR& corner : frustumCorners)
         {
             const XMVECTOR cornerLS = XMVector3TransformCoord(corner, lightView);
-            minX = std::min(minX, XMVectorGetX(cornerLS));
-            maxX = std::max(maxX, XMVectorGetX(cornerLS));
-            minY = std::min(minY, XMVectorGetY(cornerLS));
-            maxY = std::max(maxY, XMVectorGetY(cornerLS));
             minZ = std::min(minZ, XMVectorGetZ(cornerLS));
             maxZ = std::max(maxZ, XMVectorGetZ(cornerLS));
         }
 
-        // Static casters are drawn here too, and their edges would crawl if a fraction of a texel of
-        // camera movement shifted the whole map under them.
-        SnapShadowBounds(minX, maxX, ShadowMapSize);
-        SnapShadowBounds(minY, maxY, ShadowMapSize);
+        StableCascadeRadii[cascadeIndex] = StabilizeShadowCascadeRadius(radius, StableCascadeRadii[cascadeIndex]);
+        const XMVECTOR centerLS = XMVector3TransformCoord(centroid, lightView);
+        const auto boundsX = SnapSphereFitAxis(XMVectorGetX(centerLS), StableCascadeRadii[cascadeIndex], ShadowMapSize);
+        const auto boundsY = SnapSphereFitAxis(XMVectorGetY(centerLS), StableCascadeRadii[cascadeIndex], ShadowMapSize);
 
         const float depthPadding = std::max(80.0f, radius * 0.45f);
         minZ -= depthPadding;
         maxZ += depthPadding;
 
-        const XMMATRIX lightProjection = XMMatrixOrthographicOffCenterLH(minX, maxX, minY, maxY, minZ, maxZ);
+        // Do not recompute width as max-min: cancellation at a moving origin introduces scale
+        // noise. Keep both the exact extent and the integral texel offset through matrix creation.
+        XMMATRIX lightProjection = XMMatrixOrthographicLH(boundsX.Extent, boundsY.Extent, minZ, maxZ);
+        lightProjection.r[3] = XMVectorSet(-1.0f - 2.0f * boundsX.OriginTexel / ShadowMapSize,
+                                          -1.0f - 2.0f * boundsY.OriginTexel / ShadowMapSize,
+                                          XMVectorGetZ(lightProjection.r[3]), 1.0f);
         XMStoreFloat4x4(&CascadeLightViewProjection[cascadeIndex], XMMatrixTranspose(XMMatrixMultiply(lightView, lightProjection)));
     }
 }
@@ -3208,9 +3217,9 @@ void Game::RenderEditorOverlay()
 {
     static int sOverlayFrameCounter = 0;
     ++sOverlayFrameCounter;
-    const bool logPeriodic = (sOverlayFrameCounter % 120 == 1);
+    const bool logPeriodic = bEmbedded && (sOverlayFrameCounter % 120 == 1);   // editor diagnostics only
 
-    if (!bEmbedded && TraceDebugLines.empty())
+    if (!bEmbedded && TraceDebugLines.empty() && FrameDebugLines.empty())
     {
         if (logPeriodic) { std::printf("[Info] Overlay: early return (!bEmbedded)\n"); std::fflush(stdout); }
         return;
@@ -3249,6 +3258,7 @@ void Game::RenderEditorOverlay()
 
     auto overlayLines=PendingOverlayLines;
     auto debugLines=CollectTraceDebugLines();overlayLines.insert(overlayLines.end(),debugLines.begin(),debugLines.end());
+    overlayLines.insert(overlayLines.end(),FrameDebugLines.begin(),FrameDebugLines.end());
     if (overlayLines.empty() && PendingOverlayBillboards.empty() && PendingOverlayTriangles.empty())
     {
         if (logPeriodic) { std::printf("[Info] Overlay: early return (empty lines and billboards)\n"); std::fflush(stdout); }
@@ -3971,6 +3981,7 @@ void Game::ProcessHotkeys()
 
 void Game::UpdateFrame(float realDeltaTime)
 {
+    FrameDebugLines.clear();
     SynchronizeSceneResources();
     const float deltaTime = realDeltaTime * SimulationTimeScale;
     RealTime += realDeltaTime;
@@ -4125,16 +4136,112 @@ void Game::StartGameplayComponents()
         auto& component=*entry.second;
         if(component.GameplayStarted)continue;
         component.SetGame(this);component.GameplayStarted=true;component.BeginPlay();
+        StartScript(component);
         if (Session && !Session->IsRunning()) break;
     }
+}
+
+struct Game::CachedScript
+{
+    std::filesystem::file_time_type time;
+    std::shared_ptr<const Script::Program> program;
+    std::vector<Script::Problem> problems;
+};
+
+std::vector<Script::Problem> Game::GetScriptProblems(const std::string& asset) const
+{
+    std::string physical = VfsRead::Active().Resolve(asset);
+    if (physical.empty()) physical = asset;
+    const auto cached = scriptCache.find(ShaderCompiler::NormalizePath(physical));
+    if (cached == scriptCache.end())
+    {
+        std::error_code error;
+        if (std::filesystem::is_regular_file(std::filesystem::u8path(physical), error)) return {};
+        return {{0, "cannot read the file"}};
+    }
+    return cached->second->problems;
+}
+
+uint64_t Game::SpawnCopy(const GameComponent& source, const glm::vec3& position, std::string& error)
+{
+    const SceneComponentSnapshot* row = nullptr;
+    const SceneSnapshot snapshot = GetScene().GetSnapshot();
+    for (const auto& object : snapshot.components)
+        if (object.id == source.GetComponentId()) row = &object;
+    if (!row) { error = "the template is not in the scene"; return 0; }
+    std::unique_ptr<GameComponent> copy;
+    if (row->typeName == SceneAssets::ModelType) copy = SceneAssets::CreateModel(row->modelAsset, false);
+    else if (const ComponentType* type = Saves().Catalog().Find(row->typeName)) copy = type->create();
+    if (!copy) { error = "the object type \"" + row->typeName + "\" cannot be created here"; return 0; }
+    // The same order as a scene restore: skeletal meshes load assets before their project data.
+    const bool skeletal = dynamic_cast<SkeletalMeshComponent*>(copy.get()) != nullptr;
+    if (skeletal) SceneAssets::Apply(*copy, row->modelAsset, row->textureAsset, row->materialAsset);
+    copy->LoadProjectData(source.SaveProjectData());
+    if (!skeletal) SceneAssets::Apply(*copy, row->modelAsset, row->textureAsset, row->materialAsset);
+    copy->SetScriptAsset(source.GetScriptAsset());
+    copy->SetScriptVariables(source.GetScriptVariables());
+    copy->SetPosition(position);
+    copy->SetRotation(source.GetRotation());
+    copy->SetScale(source.GetScale());
+    for (int n = 1; n < 100000; ++n)
+    {
+        const auto added = GetScene().AddComponent(row->name + "_" + std::to_string(n), copy, row->typeName);
+        if (added.result == SceneResult::Ok || added.result == SceneResult::Deferred) return added.id;
+        if (added.result != SceneResult::DuplicateName) { error = "the scene rejected the copy"; return 0; }
+    }
+    error = "no free name for the copy";
+    return 0;
+}
+
+void Game::StartScript(GameComponent& component)
+{
+    component.ScriptState.reset();
+    const std::string asset = component.ScriptAssetPath;
+    if (asset.empty()) return;
+    std::string physical = VfsRead::Active().Resolve(asset);
+    if (physical.empty()) physical = asset;
+    const auto file = std::filesystem::u8path(physical);
+    std::error_code error;
+    const auto time = std::filesystem::last_write_time(file, error);
+    if (error)
+    {
+        std::cout << "[Script] " << asset << ": cannot read the file" << std::endl;
+        return;
+    }
+    auto& cached = scriptCache[ShaderCompiler::NormalizePath(physical)];
+    if (!cached || cached->time != time)
+    {
+        std::ifstream input(file, std::ios::binary);
+        std::string text((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+        if (text.compare(0, 3, "\xef\xbb\xbf") == 0) text.erase(0, 3); // UTF-8 BOM
+        auto entry = std::make_shared<CachedScript>();
+        entry->time = time;
+        auto compiled = Script::Compile(text);
+        entry->program = std::move(compiled.program);
+        entry->problems = std::move(compiled.problems);
+        cached = std::move(entry);
+    }
+    if (!cached->program)
+    {
+        for (const auto& problem : cached->problems)
+            std::cout << "[Script] " << asset << ": " << (problem.node ? "node " + std::to_string(problem.node) + ": " : std::string())
+                      << problem.message << std::endl;
+        std::cout << "[Script] " << asset << ": not started because of the errors above" << std::endl;
+        return;
+    }
+    component.ScriptState = std::make_unique<Script::Instance>(cached->program, component, asset);
+    component.ScriptState->BeginPlay();
 }
 
 void Game::PrepareRenderFrame()
 {
     SynchronizeSceneResources(); // Includes additions committed after gameplay callbacks.
+    // The AI debugger adds its lines every frame, also while paused.
+    if (auto* ai = GetSubsystem<Ai::Subsystem>()) ai->GetWorld().Debug().Draw(*this);
     DirectionalLightComponent* sun = nullptr;
     for (const auto& entry : scene.GetComponents())
         if ((sun = dynamic_cast<DirectionalLightComponent*>(entry.second.get()))) break;
+    const bool pointShadowsEnabled = bShadowsEnabled || bSceneLighting || sun != nullptr;
     if (bSceneLighting || sun)
     {
         const bool lit = sun && sun->IsEnabled() && sun->GetIntensity() > 0;
@@ -4164,7 +4271,7 @@ void Game::PrepareRenderFrame()
     }
 
     UpdateShadowCascades();
-    UpdatePointShadows();
+    UpdatePointShadows(pointShadowsEnabled);
     BuildFrameConstants();
 
     for (auto& pair : Components)
@@ -4313,6 +4420,10 @@ void Game::RenderFrame()
     {
         RenderEditorSelection();
         RenderEditorOverlay();
+    }
+    else if (!TraceDebugLines.empty() || !FrameDebugLines.empty())
+    {
+        RenderEditorOverlay(); // debug lines are useful in a standalone game too
     }
     if (fxaaReady)
     {
@@ -4631,16 +4742,83 @@ void Game::RenderUI()
     Context->RSSetState(DefaultRasterState.Get());
 }
 
+bool Game::EnsureTransparencyResources()
+{
+    D3D11_TEXTURE2D_DESC size{};
+    depthStencilBuffer->GetDesc(&size);
+    auto target = [&](DXGI_FORMAT format, auto& texture, auto& rtv, auto& srv) {
+        if (texture && rtv && srv) {
+            D3D11_TEXTURE2D_DESC old{}; texture->GetDesc(&old);
+            if (old.Width == size.Width && old.Height == size.Height) return true;
+        }
+        D3D11_TEXTURE2D_DESC desc{};
+        desc.Width = size.Width; desc.Height = size.Height; desc.MipLevels = desc.ArraySize = 1;
+        desc.Format = format; desc.SampleDesc.Count = 1;
+        desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+        return SUCCEEDED(Device->CreateTexture2D(&desc, nullptr, texture.ReleaseAndGetAddressOf())) &&
+            SUCCEEDED(Device->CreateRenderTargetView(texture.Get(), nullptr, rtv.ReleaseAndGetAddressOf())) &&
+            SUCCEEDED(Device->CreateShaderResourceView(texture.Get(), nullptr, srv.ReleaseAndGetAddressOf()));
+    };
+    for (int i = 0; i < 2; ++i)
+        if (!target(DXGI_FORMAT_R32_FLOAT, TransparentDepth[i], TransparentDepthRTV[i], TransparentDepthSRV[i])) return false;
+    if (!target(DXGI_FORMAT_R16G16B16A16_FLOAT, TransparentLayer, TransparentLayerRTV, TransparentLayerSRV) ||
+        !target(DXGI_FORMAT_R16G16B16A16_FLOAT, TransparentAccum, TransparentAccumRTV, TransparentAccumSRV)) return false;
+    if (!TransparentMinBlend) {
+        D3D11_BLEND_DESC desc{}; auto& rt = desc.RenderTarget[0];
+        rt.BlendEnable = TRUE; rt.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        rt.SrcBlend = rt.DestBlend = rt.SrcBlendAlpha = rt.DestBlendAlpha = D3D11_BLEND_ONE;
+        rt.BlendOp = rt.BlendOpAlpha = D3D11_BLEND_OP_MIN;
+        if (FAILED(Device->CreateBlendState(&desc, TransparentMinBlend.GetAddressOf()))) return false;
+    }
+    if (!TransparentPremultBlend || !TransparentFrontBlend) {
+        D3D11_BLEND_DESC desc{}; auto& rt = desc.RenderTarget[0];
+        rt.BlendEnable = TRUE; rt.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        rt.SrcBlend = rt.SrcBlendAlpha = D3D11_BLEND_ONE;
+        rt.DestBlend = rt.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+        rt.BlendOp = rt.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+        if (FAILED(Device->CreateBlendState(&desc, TransparentPremultBlend.ReleaseAndGetAddressOf()))) return false;
+        rt.SrcBlend = rt.SrcBlendAlpha = D3D11_BLEND_INV_DEST_ALPHA;
+        rt.DestBlend = rt.DestBlendAlpha = D3D11_BLEND_ONE;
+        if (FAILED(Device->CreateBlendState(&desc, TransparentFrontBlend.ReleaseAndGetAddressOf()))) return false;
+    }
+    if (!TransparentPassCB) {
+        D3D11_BUFFER_DESC desc{}; desc.ByteWidth = 16; desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        if (FAILED(Device->CreateBuffer(&desc, nullptr, TransparentPassCB.GetAddressOf()))) return false;
+    }
+    if (!TransparentCompositeVS || !TransparentCompositePS) {
+        const auto path = EnginePaths::Shader("TransparencyComposite.hlsl").generic_u8string();
+        auto vs = ShaderCompiler::Compile(path, "VSMain", "vs_5_0");
+        auto ps = ShaderCompiler::Compile(path, "PSMain", "ps_5_0");
+        if (!vs.Succeeded() || !ps.Succeeded()) {
+            std::cout << "Transparency composite: " << vs.Errors << ps.Errors << std::endl; return false;
+        }
+        if (FAILED(Device->CreateVertexShader(vs.Blob->GetBufferPointer(), vs.Blob->GetBufferSize(), nullptr, TransparentCompositeVS.ReleaseAndGetAddressOf())) ||
+            FAILED(Device->CreatePixelShader(ps.Blob->GetBufferPointer(), ps.Blob->GetBufferSize(), nullptr, TransparentCompositePS.ReleaseAndGetAddressOf()))) return false;
+    }
+    for (auto& query : TransparentOccupied) if (!query) {
+        D3D11_QUERY_DESC desc{D3D11_QUERY_OCCLUSION_PREDICATE, 0};
+        if (FAILED(Device->CreatePredicate(&desc, query.GetAddressOf()))) return false;
+    }
+    return true;
+}
+
 void Game::RenderTransparent()
 {
     struct SortedDraw
     {
-        float DistanceSq;
+        float Depth;
         GameComponent* Component;
+        InstancedMeshComponent* Batch = nullptr;
+        int Lod = -1;
+        UINT First = 0;
+        UINT Count = 0;
     };
 
     std::vector<SortedDraw> transparentDraws;
     const glm::vec3 cameraPosition(CurrentFrame.CameraPosition.x, CurrentFrame.CameraPosition.y, CurrentFrame.CameraPosition.z);
+    // viewMatrix is stored transposed; its third row is the world-space forward axis.
+    const glm::vec3 forward(CurrentFrame.viewMatrix._31, CurrentFrame.viewMatrix._32, CurrentFrame.viewMatrix._33);
+    auto depth = [&](const glm::vec3& position) { return glm::dot(position - cameraPosition, forward); };
     for (auto* Component : CollectRenderComponents())
     {
         if (!Component->IsRenderable() || Component->IsSkybox() || !Component->HasOpacity() ||
@@ -4648,26 +4826,138 @@ void Game::RenderTransparent()
         {
             continue;
         }
-        const glm::vec3 toCamera = Component->GetWorldPosition() - cameraPosition;
-        transparentDraws.push_back({glm::dot(toCamera, toCamera), Component});
+        if (auto* batch = dynamic_cast<InstancedMeshComponent*>(Component))
+        {
+            batch->EnsureFrameData(Context.Get());
+            for (int level = 0; level < batch->LodCount; ++level)
+            {
+                const auto& stream = batch->Lods[level].ColorStaging;
+                for (UINT index = 0; index < stream.size(); ++index)
+                {
+                    const auto& world = stream[index].World; // transposed instance world matrix
+                    transparentDraws.push_back({depth({world._14, world._24, world._34}), Component, batch, level, index, 1});
+                }
+            }
+        }
+        else if (Component->HasInstances())
+        {
+            for (UINT index = 0; index < Component->InstanceArray.size(); ++index)
+                transparentDraws.push_back({depth(Component->InstanceArray[index]->GetWorldPosition()), Component, nullptr, -1, index, 1});
+        }
+        else transparentDraws.push_back({depth(Component->GetWorldPosition()), Component});
     }
 
-    // Back to front; ties keep registry order. Intersecting transparent meshes are not resolved.
+    // One global back-to-front queue, including copies from different components and LODs.
+    // Equal depths keep their stable input order (including coplanar layers).
     std::stable_sort(transparentDraws.begin(), transparentDraws.end(),
-                     [](const SortedDraw& a, const SortedDraw& b) { return a.DistanceSq > b.DistanceSq; });
+                     [](const SortedDraw& a, const SortedDraw& b) { return a.Depth > b.Depth; });
 
     const float blendFactor[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     Context->OMSetDepthStencilState(depthStencilStateReadOnly.Get(), 0);
     Context->OMSetBlendState(transparentBlendState.Get(), blendFactor, 0xffffffff);
 
-    for (const SortedDraw& draw : transparentDraws)
-    {
-        if (BindComponentShaders(draw.Component, ShaderCompileVariant::Default))
-        {
-            ApplyComponentPipelineState(draw.Component, true);
+    if (transparentDraws.empty()) return;
+    bool peel = true;
+    for (const auto& draw : transparentDraws) {
+        Material* material = PrepareMaterial(draw.Component);
+        if (!material || !material->GetTransparencyPixelShader(draw.Component->GetMaterialVariant())) { peel = false; break; }
+    }
+    peel = peel && EnsureTransparencyResources();
+
+    auto drawQueue = [&](bool peeled, ID3D11BlendState* blend) {
+    if (peeled && blend == TransparentMinBlend.Get()) {
+        // Depth discovery is commutative: retain complete instance batches and all mesh LODs.
+        std::unordered_set<GameComponent*> drawn;
+        for (const auto& draw : transparentDraws) if (drawn.insert(draw.Component).second &&
+            BindComponentShaders(draw.Component, ShaderCompileVariant::Default)) {
+            draw.Component->SetPixelShader(PrepareMaterial(draw.Component)->GetTransparencyPixelShader(draw.Component->GetMaterialVariant()));
+            ApplyComponentPipelineState(draw.Component, false);
+            Context->OMSetBlendState(blend, blendFactor, 0xffffffff);
             draw.Component->Render(Context.Get());
         }
+        return;
     }
+    for (size_t index = 0; index < transparentDraws.size(); ++index)
+    {
+        SortedDraw draw = transparentDraws[index];
+        // Adjacent ranges can stay instanced without changing the sorted blend order.
+        while (draw.Count && index + 1 < transparentDraws.size())
+        {
+            const auto& next = transparentDraws[index + 1];
+            if (next.Component != draw.Component || next.Lod != draw.Lod || !next.Count || next.First != draw.First + draw.Count) break;
+            draw.Count += next.Count;
+            ++index;
+        }
+        if (BindComponentShaders(draw.Component, ShaderCompileVariant::Default))
+        {
+            draw.Component->TransparentInstanceFirst = draw.First;
+            draw.Component->TransparentInstanceCount = draw.Count;
+            if (draw.Batch) draw.Batch->TransparentLod = draw.Lod;
+            ApplyComponentPipelineState(draw.Component, true);
+            if (peeled) draw.Component->SetPixelShader(PrepareMaterial(draw.Component)->GetTransparencyPixelShader(draw.Component->GetMaterialVariant()));
+            if (blend) Context->OMSetBlendState(blend, blendFactor, 0xffffffff);
+            draw.Component->Render(Context.Get());
+            draw.Component->TransparentInstanceCount = 0;
+            if (draw.Batch) draw.Batch->TransparentLod = -1;
+        }
+    }
+    };
+
+    if (peel) {
+        ID3D11ShaderResourceView* nullViews[2]{};
+        const float zero[4]{}, farDepth[4]{1,1,1,1};
+        Context->ClearRenderTargetView(TransparentAccumRTV.Get(), zero);
+        auto mode = [&](UINT value, bool first) {
+            const UINT data[4]{value, first ? 1u : 0u, 0, 0};
+            Context->UpdateSubresource(TransparentPassCB.Get(), 0, nullptr, data, 0, 0);
+            Context->PSSetConstantBuffers(2, 1, TransparentPassCB.GetAddressOf());
+        };
+        auto composite = [&](ID3D11RenderTargetView* target, ID3D11ShaderResourceView* source, ID3D11BlendState* blend) {
+            Context->OMSetRenderTargets(1, &target, nullptr);
+            Context->OMSetBlendState(blend, blendFactor, 0xffffffff);
+            Context->RSSetState(DefaultRasterState.Get());
+            Context->IASetInputLayout(nullptr);
+            Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            Context->VSSetShader(TransparentCompositeVS.Get(), nullptr, 0);
+            Context->PSSetShader(TransparentCompositePS.Get(), nullptr, 0);
+            Context->PSSetShaderResources(0, 1, &source);
+            Context->Draw(3, 0); CountDraw(3);
+            Context->PSSetShaderResources(0, 1, nullViews);
+        };
+        for (int layer = 0; layer < TransparentPeelLayers; ++layer) {
+            const int current = layer % 2, previous = 1 - current;
+            Context->SetPredication(nullptr, FALSE);
+            Context->PSSetShaderResources(2, 2, nullViews);
+            Context->ClearRenderTargetView(TransparentDepthRTV[current].Get(), farDepth);
+            Context->ClearRenderTargetView(TransparentLayerRTV.Get(), zero);
+            // No CPU readback/wait: an empty depth layer predicates subsequent GPU draws off.
+            Context->OMSetRenderTargets(1, TransparentDepthRTV[current].GetAddressOf(), depthStencilView.Get());
+            Context->PSSetShaderResources(2, 1, TransparentDepthSRV[previous].GetAddressOf());
+            mode(0, layer == 0);
+            Context->Begin(TransparentOccupied[layer].Get());
+            Context->SetPredication(layer ? TransparentOccupied[layer-1].Get() : nullptr, FALSE);
+            drawQueue(true, TransparentMinBlend.Get());
+            Context->SetPredication(nullptr, FALSE);
+            Context->End(TransparentOccupied[layer].Get());
+            Context->OMSetRenderTargets(1, TransparentLayerRTV.GetAddressOf(), depthStencilView.Get());
+            Context->PSSetShaderResources(3, 1, TransparentDepthSRV[current].GetAddressOf());
+            mode(1, false);
+            Context->SetPredication(TransparentOccupied[layer].Get(), FALSE);
+            drawQueue(true, TransparentPremultBlend.Get());
+            composite(TransparentAccumRTV.Get(), TransparentLayerSRV.Get(), TransparentFrontBlend.Get());
+        }
+        Context->SetPredication(nullptr, FALSE);
+        Context->PSSetShaderResources(2, 2, nullViews);
+        Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
+        Context->PSSetShaderResources(2, 1, TransparentDepthSRV[(TransparentPeelLayers-1)%2].GetAddressOf());
+        mode(2, false);
+        // Keep deeper content visible beyond the bounded exact region, beneath the peeled layers.
+        drawQueue(true, nullptr);
+        Context->PSSetShaderResources(2, 2, nullViews);
+        composite(RenderTargetView.Get(), TransparentAccumSRV.Get(), TransparentPremultBlend.Get());
+        ID3D11Buffer* nullCB = nullptr; Context->PSSetConstantBuffers(2, 1, &nullCB);
+        Context->OMSetRenderTargets(1, RenderTargetView.GetAddressOf(), depthStencilView.Get());
+    } else drawQueue(false, nullptr);
 
     Context->RSSetState(DefaultRasterState.Get());
     Context->OMSetBlendState(opaqueBlendState.Get(), blendFactor, 0xffffffff);

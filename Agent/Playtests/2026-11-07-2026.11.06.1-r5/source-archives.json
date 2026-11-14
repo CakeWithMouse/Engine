@@ -1,0 +1,34 @@
+[
+  {
+    "role": "calm-city",
+    "archive": "E:\\Engine\\Agent\\Playtests\\2026-11-07-2026.11.06.1-r5\\calm-city\\calm-city-r5-source.zip",
+    "files": 38,
+    "bytes": 101658,
+    "integrity": "passed",
+    "excludedBuildOutputs": true
+  },
+  {
+    "role": "curious-city",
+    "archive": "E:\\Engine\\Agent\\Playtests\\2026-11-07-2026.11.06.1-r5\\curious-city\\CuriousCity-r5-source.zip",
+    "files": 28,
+    "bytes": 94429,
+    "integrity": "passed",
+    "excludedBuildOutputs": true
+  },
+  {
+    "role": "tired-bomber",
+    "archive": "E:\\Engine\\Agent\\Playtests\\2026-11-07-2026.11.06.1-r5\\tired-bomber\\tired-bomber-r5-source.zip",
+    "files": 46,
+    "bytes": 416185,
+    "integrity": "passed",
+    "excludedBuildOutputs": true
+  },
+  {
+    "role": "ai-trash",
+    "archive": "E:\\Engine\\Agent\\Playtests\\2026-11-07-2026.11.06.1-r5\\ai-trash\\ai-trash-r5-source.zip",
+    "files": 42,
+    "bytes": 105011,
+    "integrity": "passed",
+    "excludedBuildOutputs": true
+  }
+]

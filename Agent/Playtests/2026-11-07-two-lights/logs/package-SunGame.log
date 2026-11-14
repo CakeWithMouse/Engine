@@ -1,0 +1,20 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Failed to load cube map face: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/GameContent/cosy.jpg
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/BaseSphereFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/InstanceSphereFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/InstanceSphereFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/InstanceSphereFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/InstanceSphereFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/ReflectiveSphere.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/BaseSphereFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.3-win64/SunGame/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+SunGame: 30 frames, normal shutdown

@@ -55,6 +55,8 @@
 #include <cstdio>
 #include <filesystem>
 #include <stdexcept>
+#include "PointShadowDiagnostics.h"
+#include "TransparencyDiagnostics.h"
 
 namespace {
 std::wstring crashDumpPath;
@@ -163,6 +165,8 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
       return &c.module->BatchApi();
     if (id == EngineAuthoringService)
       return &c.module->AuthoringApi();
+    if (id == EnginePointLightV2Service)
+      return &c.module->PointLightV2Api();
     return nullptr;
   };
   struct CommandCapture : IEditorUiListener {
@@ -633,6 +637,8 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
   return result;
 }
 QJsonObject Run(const QString &command, const QJsonObject &in) {
+  if (command == "render.point-shadows") return PointShadowDiagnostics::Run(in);
+  if (command == "render.transparency") return TransparencyDiagnostics::Run(in);
   if (command == "render.diagnostics") {
     const int width = in["width"].toInt(640), height = in["height"].toInt(480);
     Require(width >= 100 && width <= 1920 && height >= 100 && height <= 1080,
@@ -877,6 +883,44 @@ QJsonObject Run(const QString &command, const QJsonObject &in) {
   if (command.startsWith("ui."))
     EditorTheme::Apply(
         *static_cast<QApplication *>(QCoreApplication::instance()));
+  if (command == "mesh.tangents") {
+    Require(in["vertices"].isArray() && in["indices"].isArray(), "vertices and indices must be arrays");
+    const auto vertices = in["vertices"].toArray();
+    const auto indices = in["indices"].toArray();
+    Require(!vertices.isEmpty() && vertices.size() <= 100000 && indices.size() <= 300000 &&
+            indices.size() % 3 == 0, "invalid mesh size");
+    MeshLodData mesh;
+    for (const auto value : vertices) {
+      Require(value.isObject(), "vertex must be an object");
+      const auto vertex = value.toObject();
+      Require(vertex.contains("position") && vertex.contains("normal") && vertex["uv"].isArray(),
+              "vertex requires position, normal and uv");
+      const auto p = Vector(vertex["position"], {});
+      const auto n = Vector(vertex["normal"], {});
+      const auto uv = vertex["uv"].toArray();
+      Require(uv.size() == 2 && uv[0].isDouble() && uv[1].isDouble() &&
+              std::isfinite(float(uv[0].toDouble())) && std::isfinite(float(uv[1].toDouble())),
+              "uv must contain two finite numbers");
+      MeshVertex v;
+      v.Position = {p.x, p.y, p.z, 1};
+      v.Normal = {n.x, n.y, n.z, 0};
+      v.TexCoord = {float(uv[0].toDouble()), float(uv[1].toDouble()), 0, 0};
+      mesh.Vertices.push_back(v);
+    }
+    for (const auto value : indices) {
+      const double index = value.toDouble(-1);
+      Require(value.isDouble() && index >= 0 && index < vertices.size() && std::floor(index) == index,
+              "index must be an integer within vertices");
+      mesh.Indices.push_back(static_cast<uint32_t>(index));
+    }
+    GenerateTangents(mesh);
+    QJsonArray tangents;
+    for (const auto& vertex : mesh.Vertices) {
+      const auto& t = vertex.Tangent;
+      tangents.push_back(QJsonArray{t.x, t.y, t.z, t.w});
+    }
+    return {{"tangents", tangents}};
+  }
   if (command == "game.settings") {
     Game game;
     auto &settings = game.GetSettings();
@@ -1248,7 +1292,7 @@ int main(int argc, char **argv) {
               "raycast\ngizmo.snap\ngizmo.center\ncamera.screen-ray\nscene."
               "property\nsession.lifecycle\nproject.build\nproject.reload-"
               "input\nproject.input\nproject.scene\nrender."
-              "diagnostics\nmaterial.graph\nmesh.primitive\ngame."
+              "diagnostics\nrender.point-shadows\nrender.transparency\nmaterial.graph\nmesh.primitive\nmesh.tangents\ngame."
               "settings\nasset.import\nsavegame.save\nsavegame.load\nsavegame."
               "validate\nsavegame.list\nsavegame.delete");
     return 0;

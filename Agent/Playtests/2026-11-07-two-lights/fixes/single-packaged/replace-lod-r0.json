@@ -1,0 +1,1 @@
+{"caster": "crowd", "replaceLodOffset": [6, 0, 0], "sceneLighting": true, "rendering": 0, "radius": 5, "intensity": 0.7, "probes": [[0, 0, 0]], "frames": [{"time": 0.5, "position": [-12, 1, 0], "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-two-lights\\single-packaged\\replace-lod-r0-00.bmp"}]}

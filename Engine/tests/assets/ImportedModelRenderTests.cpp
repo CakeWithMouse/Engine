@@ -20,7 +20,7 @@ namespace {
 class AuthoredSkeletalModel : public SkeletalMeshComponent {};
 class PixelGame : public Game {
 public:
-    std::pair<size_t,uint64_t> ShadowDepth(ID3D11ShaderResourceView* view = nullptr) {
+    std::pair<size_t,uint64_t> ShadowDepth(ID3D11ShaderResourceView* view = nullptr, int onlySlice = -1) {
         if(!view) view=GetShadowMapSRV();
         Check(view!=nullptr,"shadow map exists");
         Microsoft::WRL::ComPtr<ID3D11Resource> resource;view->GetResource(&resource);
@@ -32,6 +32,7 @@ public:
         Context->CopyResource(copy.Get(),source.Get());
         size_t count=0;uint64_t hash=14695981039346656037ull;
         for(unsigned slice=0;slice<desc.ArraySize;++slice){
+            if(onlySlice>=0 && slice!=unsigned(onlySlice)) continue;
             D3D11_MAPPED_SUBRESOURCE map{};
             Check(SUCCEEDED(Context->Map(copy.Get(),slice,D3D11_MAP_READ,0,&map)),"shadow readback map");
             for(unsigned y=0;y<desc.Height;++y){
@@ -194,7 +195,16 @@ void RunImportedModelRenderTests(HWND hwnd,const fs::path& content) {
     game.SetStaticShadowArea({0,0,0},8);
     Frame(game,output/"suzanne-static-shadow.bmp");
     const auto staticDepth=game.ShadowDepth(game.GetStaticShadowSRV());
-    Check(staticDepth.first>100 && game.ShadowDepth().first==0,"static imported caster is baked once and excluded from cascades");
+    size_t nearStaticPixels=0,farStaticPixels=0;
+    for(int cascade=0;cascade<MaxShadowCascades;++cascade) {
+        const auto count=game.ShadowDepth(nullptr,cascade).first;
+        (cascade<StaticCasterCascades?nearStaticPixels:farStaticPixels)+=count;
+    }
+    std::cout<<"StaticImportedProbe baked="<<staticDepth.first<<" near="<<nearStaticPixels<<" far="<<farStaticPixels<<'\n';
+    Check(staticDepth.first>100 && nearStaticPixels>100 && farStaticPixels==0,
+          "static imported caster uses precise near cascades and baked far shadow");
+    Check(game.RenderViewportFrame(0) && game.ShadowDepth(game.GetStaticShadowSRV())==staticDepth,
+          "unchanged imported caster keeps its baked shadow");
     suzanne->SetModelYawDegrees(75);
     Check(game.RenderViewportFrame(0),"static model yaw changed");
     Check(game.ShadowDepth(game.GetStaticShadowSRV()).second!=staticDepth.second,"model yaw invalidates the static shadow");

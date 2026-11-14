@@ -65,3 +65,113 @@ inline void SnapShadowBounds(float& minValue, float& maxValue, int mapSize)
     minValue = std::floor(minValue / texel) * texel;
     maxValue = minValue + snappedSize;
 }
+
+struct ShadowAxisBounds
+{
+    float Min = 0.0f;
+    float Max = 0.0f;
+    float Extent = 0.0f;
+    float TexelSize = 0.0f;
+    float OriginTexel = 0.0f;
+};
+
+struct ShadowCascadeProjectionBounds
+{
+    ShadowAxisBounds X;
+    ShadowAxisBounds Y;
+    float SphereRadius = 0.0f;
+};
+
+/**
+ * Circumscribed sphere radius for a perspective frustum slice centered halfway between its
+ * near and far planes. Unlike an AABB measured from rotated world-space corners, this radius
+ * depends only on the camera projection and slice depths, so yaw cannot change its XY extent.
+ */
+inline float CascadeFrustumSphereRadius(float nearDepth, float farDepth,
+                                        float tanHalfFovY, float aspect)
+{
+    if (!std::isfinite(nearDepth) || !std::isfinite(farDepth) ||
+        !std::isfinite(tanHalfFovY) || !std::isfinite(aspect) ||
+        nearDepth < 0.0f || farDepth <= nearDepth || tanHalfFovY <= 0.0f || aspect <= 0.0f)
+    {
+        return 0.0f;
+    }
+
+    const float halfDepth = (farDepth - nearDepth) * 0.5f;
+    const float farHalfHeight = farDepth * tanHalfFovY;
+    const float farHalfWidth = farHalfHeight * aspect;
+    return std::sqrt(halfDepth * halfDepth +
+                     farHalfHeight * farHalfHeight +
+                     farHalfWidth * farHalfWidth);
+}
+
+/**
+ * Hysteresis for the sphere-fit radius when dolly or area-based splits change near/far depths.
+ * Small variations retain the prior projection; growth is immediate and reserves 10%, while
+ * shrink occurs only after the required radius drops below 75% of the prior one. This depends
+ * only on the required and previous radii, not elapsed time or frame count.
+ */
+inline float StabilizeShadowCascadeRadius(float requiredRadius, float previousRadius)
+{
+    if (!std::isfinite(requiredRadius) || requiredRadius <= 0.0f)
+    {
+        return 0.0f;
+    }
+
+    if (std::isfinite(previousRadius) && previousRadius > 0.0f &&
+        requiredRadius <= previousRadius && requiredRadius >= previousRadius * 0.75f)
+    {
+        return previousRadius;
+    }
+
+    const float step = std::exp2(std::floor(std::log2(requiredRadius)) - 4.0f);
+    return std::ceil((requiredRadius * 1.1f) / step) * step;
+}
+
+/**
+ * Places one axis of a sphere-fit projection on the fixed light-space texel grid. The extent
+ * is calculated from the invariant sphere radius, not from center +/- radius (whose subtraction
+ * can lose precision at large world coordinates). Two texels of padding leave room for snapping
+ * the low edge down while keeping the complete sphere in the map.
+ */
+inline ShadowAxisBounds SnapSphereFitAxis(float center, float sphereRadius, int mapSize)
+{
+    ShadowAxisBounds result;
+    if (!std::isfinite(center) || !std::isfinite(sphereRadius) ||
+        !(sphereRadius > 0.0f) || mapSize <= 2)
+    {
+        return result;
+    }
+
+    const float diameter = sphereRadius * 2.0f;
+    result.Extent = diameter * static_cast<float>(mapSize) / static_cast<float>(mapSize - 2);
+    result.TexelSize = result.Extent / static_cast<float>(mapSize);
+    result.OriginTexel = std::floor((center - sphereRadius) / result.TexelSize);
+    result.Min = result.OriginTexel * result.TexelSize;
+    result.Max = result.Min + result.Extent;
+    return result;
+}
+
+inline ShadowCascadeProjectionBounds FitShadowCascadeProjectionBoundsForRadius(
+    float centerLightX, float centerLightY, float sphereRadius, int mapSize)
+{
+    ShadowCascadeProjectionBounds result;
+    result.SphereRadius = sphereRadius;
+    result.X = SnapSphereFitAxis(centerLightX, sphereRadius, mapSize);
+    result.Y = SnapSphereFitAxis(centerLightY, sphereRadius, mapSize);
+    return result;
+}
+
+/**
+ * Stable square XY projection for a perspective cascade slice. `centerLightX/Y` are the
+ * frustum-slice center transformed into the world-anchored light view. Rotation changes only
+ * the snapped grid cell, never the projection extent; caller still uses the actual corners for
+ * depth bounds and caster culling.
+ */
+inline ShadowCascadeProjectionBounds FitShadowCascadeProjectionBounds(
+    float centerLightX, float centerLightY, float nearDepth, float farDepth,
+    float tanHalfFovY, float aspect, int mapSize)
+{
+    const float sphereRadius = CascadeFrustumSphereRadius(nearDepth, farDepth, tanHalfFovY, aspect);
+    return FitShadowCascadeProjectionBoundsForRadius(centerLightX, centerLightY, sphereRadius, mapSize);
+}

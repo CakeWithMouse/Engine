@@ -7,6 +7,8 @@
 
 #include <cmath>
 #include <cstdint>
+#include <cstring>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -296,6 +298,95 @@ void Test_GlbImport()
     SkeletalLoadResult result = LoadSkeletalModelFromVfs("/Game/Models/CesiumMan.glb");
     TEST_CHECK(result.Success, ("CesiumMan.glb import failed: " + result.ErrorMessage).c_str());
     TEST_CHECK(result.Model != nullptr, "Imported model must not be null");
+
+    // Verify bit-for-bit equivalence between absent sidecar and explicit default sidecar
+    {
+        const auto sidecarDiskPath = gameContent / "Models" / "CesiumMan.glb.importsettings.json";
+        const bool hadExistingSidecar = std::filesystem::exists(sidecarDiskPath);
+        std::string existingContent;
+        if (hadExistingSidecar)
+        {
+            std::ifstream in(sidecarDiskPath);
+            existingContent.assign((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+        }
+
+        struct SidecarCleanup
+        {
+            std::filesystem::path path;
+            bool restore;
+            std::string content;
+            ~SidecarCleanup()
+            {
+                std::error_code ec;
+                if (restore)
+                {
+                    std::ofstream out(path);
+                    out << content;
+                }
+                else
+                {
+                    std::filesystem::remove(path, ec);
+                }
+            }
+        } cleanup{sidecarDiskPath, hadExistingSidecar, existingContent};
+
+        {
+            std::ofstream out(sidecarDiskPath);
+            out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":false,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":true}}";
+        }
+
+        SkeletalLoadResult sidecarResult = LoadSkeletalModelFromVfs("/Game/Models/CesiumMan.glb");
+        TEST_CHECK(sidecarResult.Success, "CesiumMan.glb load with default sidecar succeeded");
+        TEST_CHECK(sidecarResult.Model != nullptr, "CesiumMan.glb model with default sidecar not null");
+        TEST_CHECK(sidecarResult.Model->Meshes.size() == result.Model->Meshes.size(), "Mesh count identical with default sidecar");
+        for (size_t m = 0; m < result.Model->Meshes.size(); ++m)
+        {
+            const auto& mOrig = result.Model->Meshes[m];
+            const auto& mSide = sidecarResult.Model->Meshes[m];
+            TEST_CHECK(mOrig.Vertices.size() == mSide.Vertices.size(), "Mesh vertex count identical");
+            TEST_CHECK(std::memcmp(mOrig.Vertices.data(), mSide.Vertices.data(), mOrig.Vertices.size() * sizeof(SkinnedVertex)) == 0,
+                       "Mesh vertices bit-for-bit identical");
+            TEST_CHECK(mOrig.Indices == mSide.Indices, "Mesh indices identical");
+            TEST_CHECK(mOrig.MaterialIndex == mSide.MaterialIndex, "MaterialIndex identical");
+            TEST_CHECK(mOrig.MaterialName == mSide.MaterialName, "MaterialName identical");
+        }
+        TEST_CHECK(sidecarResult.Model->ModelSkeleton.Bones.size() == result.Model->ModelSkeleton.Bones.size(), "Bone count identical");
+        for (size_t b = 0; b < result.Model->ModelSkeleton.Bones.size(); ++b)
+        {
+            const auto& bOrig = result.Model->ModelSkeleton.Bones[b];
+            const auto& bSide = sidecarResult.Model->ModelSkeleton.Bones[b];
+            TEST_CHECK(bOrig.Name == bSide.Name, "Bone name identical");
+            TEST_CHECK(bOrig.ParentIndex == bSide.ParentIndex, "Bone parent identical");
+            TEST_CHECK(std::memcmp(&bOrig.InverseBindPose, &bSide.InverseBindPose, sizeof(XMFLOAT4X4)) == 0, "InverseBindPose bit-for-bit identical");
+            TEST_CHECK(std::memcmp(&bOrig.LocalTransform, &bSide.LocalTransform, sizeof(XMFLOAT4X4)) == 0, "LocalTransform bit-for-bit identical");
+            TEST_CHECK(std::memcmp(&bOrig.RestTranslation, &bSide.RestTranslation, sizeof(XMFLOAT3)) == 0, "RestTranslation bit-for-bit identical");
+            TEST_CHECK(std::memcmp(&bOrig.RestRotation, &bSide.RestRotation, sizeof(XMFLOAT4)) == 0, "RestRotation bit-for-bit identical");
+            TEST_CHECK(std::memcmp(&bOrig.RestScale, &bSide.RestScale, sizeof(XMFLOAT3)) == 0, "RestScale bit-for-bit identical");
+        }
+        TEST_CHECK(sidecarResult.Model->Clips.size() == result.Model->Clips.size(), "Clip count identical");
+        TEST_CHECK(sidecarResult.Model->TotalIndexCount == result.Model->TotalIndexCount, "TotalIndexCount identical");
+        TEST_CHECK(sidecarResult.Model->BoundingRadius == result.Model->BoundingRadius, "BoundingRadius identical");
+        TEST_CHECK(std::memcmp(&sidecarResult.Model->MeshToModel, &result.Model->MeshToModel, sizeof(XMFLOAT4X4)) == 0, "MeshToModel bit-for-bit identical");
+
+        // Verify that useFileUnitScale=true does not modify glTF/CesiumMan (glTF has no unit scaling)
+        {
+            std::ofstream out(sidecarDiskPath);
+            out << "{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":1.0,\"useFileUnitScale\":true,\"normals\":\"file\",\"smoothingAngle\":60.0,\"importMaterials\":true,\"importTextures\":true,\"flipUv\":false,\"mergeMeshes\":true}}";
+        }
+
+        SkeletalLoadResult unitScaleResult = LoadSkeletalModelFromVfs("/Game/Models/CesiumMan.glb");
+        TEST_CHECK(unitScaleResult.Success, "CesiumMan.glb load with useFileUnitScale=true succeeded");
+        TEST_CHECK(unitScaleResult.Model != nullptr, "CesiumMan.glb model with useFileUnitScale=true not null");
+        TEST_CHECK(unitScaleResult.Model->Meshes.size() == result.Model->Meshes.size(), "Mesh count identical with useFileUnitScale=true");
+        for (size_t m = 0; m < result.Model->Meshes.size(); ++m)
+        {
+            const auto& mOrig = result.Model->Meshes[m];
+            const auto& mUnit = unitScaleResult.Model->Meshes[m];
+            TEST_CHECK(mOrig.Vertices.size() == mUnit.Vertices.size(), "Mesh vertex count identical");
+            TEST_CHECK(std::memcmp(mOrig.Vertices.data(), mUnit.Vertices.data(), mOrig.Vertices.size() * sizeof(SkinnedVertex)) == 0,
+                       "Mesh vertices bit-for-bit identical with useFileUnitScale=true");
+        }
+    }
 
     const size_t boneCount = result.Model->ModelSkeleton.Bones.size();
     TEST_CHECK(boneCount > 0, "CesiumMan must contain bones");

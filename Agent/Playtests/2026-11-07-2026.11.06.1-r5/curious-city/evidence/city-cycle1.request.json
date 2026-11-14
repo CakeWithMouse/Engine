@@ -1,0 +1,21 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\20261107-r5\\curious-city\\final-city\\Project.json",
+  "steps": [
+    {
+      "action": "play",
+      "kind": "control"
+    },
+    {
+      "enabled": true,
+      "kind": "focus"
+    },
+    {
+      "count": 130,
+      "kind": "frames"
+    },
+    {
+      "action": "stop",
+      "kind": "control"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+Observed first --enable-code sandbox build failure (partial contemporaneous record)
+Project: E:\Engine\Engine\build\playtests\20261107-r5\curious-city\fresh-city
+Launcher stderr began: EngineLauncher: C++ build failed. Existing project preserved. See E:\Engine\Engine\build\playtests\20261107-r5\curious-city\fresh-city\CodeBuild.log
+Observed CodeBuild.log tail before the escalated retry:
+  LINK : fatal error LNK1101: неправильная версия MSPDB140.DLL; перепроверьте установку этого продукта [E:\Engine\Engine\build\playtests\20261107-r5\curious-city\fresh-city\Game.vcxproj]
+Follow-up: escalated --enable-code retry exit 0. CodeBuild.log was later overwritten by successful project rebuild; this note is the captured relevant error, not the complete original log. Initial launcher exit code was not captured because the PowerShell wrapper was cancelled while waiting.

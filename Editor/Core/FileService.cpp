@@ -15,7 +15,49 @@ FileService::FileService(Logger* logger, QObject* parent)
 void FileService::SetProjectRoot(const QString& projectRoot)
 {
     projectRoot_ = QDir::cleanPath(QFileInfo(projectRoot).absoluteFilePath());
+    if (contentRoot_.isEmpty() || !contentRoot_.startsWith(projectRoot_, Qt::CaseInsensitive))
+    {
+        contentRoot_ = QDir::cleanPath(QDir(projectRoot_).filePath(QStringLiteral("Content")));
+    }
     LogInfo(QStringLiteral("FileService: sandbox root set to '%1'").arg(projectRoot_));
+}
+
+void FileService::SetContentRoot(const QString& contentRoot)
+{
+    contentRoot_ = contentRoot.isEmpty() ? QString() : QDir::cleanPath(QFileInfo(contentRoot).absoluteFilePath());
+}
+
+QString FileService::GetContentRoot() const
+{
+    return contentRoot_;
+}
+
+bool FileService::IsProtectedDirectory(const QString& path, const QString& projectRoot, const QString& contentRoot)
+{
+    if (projectRoot.isEmpty() || path.isEmpty())
+    {
+        return false;
+    }
+
+    const QString cleanProject = QDir::cleanPath(QFileInfo(projectRoot).absoluteFilePath());
+    const QFileInfo targetInfo(path);
+    const QString cleanTarget = targetInfo.isAbsolute()
+        ? QDir::cleanPath(targetInfo.absoluteFilePath())
+        : QDir::cleanPath(QDir(cleanProject).filePath(path));
+
+    const QString cleanContent = contentRoot.isEmpty()
+        ? QDir::cleanPath(QDir(cleanProject).filePath(QStringLiteral("Content")))
+        : QDir::cleanPath(QFileInfo(contentRoot).absoluteFilePath());
+    const QString cleanSource = QDir::cleanPath(QDir(cleanProject).filePath(QStringLiteral("Source")));
+
+    return cleanTarget.compare(cleanProject, Qt::CaseInsensitive) == 0 ||
+           cleanTarget.compare(cleanContent, Qt::CaseInsensitive) == 0 ||
+           cleanTarget.compare(cleanSource, Qt::CaseInsensitive) == 0;
+}
+
+bool FileService::IsProtectedDirectory(const QString& path) const
+{
+    return IsProtectedDirectory(path, projectRoot_, contentRoot_);
 }
 
 bool FileService::IsInSandbox(const QString& path) const
@@ -26,7 +68,8 @@ bool FileService::IsInSandbox(const QString& path) const
     }
 
     const QString clean = QDir::cleanPath(QFileInfo(path).absoluteFilePath());
-    return clean == projectRoot_ || clean.startsWith(projectRoot_ + QStringLiteral("/"), Qt::CaseInsensitive);
+    return clean.compare(projectRoot_, Qt::CaseInsensitive) == 0 ||
+           clean.startsWith(projectRoot_ + QStringLiteral("/"), Qt::CaseInsensitive);
 }
 
 QString FileService::ResolveSandboxPath(const QString& relativeOrAbsolutePath) const
@@ -159,6 +202,53 @@ bool FileService::DeleteFile(const QString& path, QString* outError)
     return true;
 }
 
+bool FileService::DeleteDirectory(const QString& path, QString* outError)
+{
+    const QString resolved = ResolveSandboxPath(path);
+    if (resolved.isEmpty())
+    {
+        const QString err = QStringLiteral("FileService: access denied (outside sandbox)");
+        if (outError) *outError = err;
+        LogError(err);
+        return false;
+    }
+
+    if (IsProtectedDirectory(resolved))
+    {
+        const QString err = QStringLiteral("FileService: cannot delete protected directory '%1'").arg(resolved);
+        if (outError) *outError = err;
+        LogError(err);
+        return false;
+    }
+
+    QDir dir(resolved);
+    if (!dir.exists())
+    {
+        return true;
+    }
+
+    if (!dir.removeRecursively())
+    {
+        const QString err = QStringLiteral("Failed to remove directory ") + resolved;
+        if (outError) *outError = err;
+        LogError(err);
+        return false;
+    }
+
+    LogInfo(QStringLiteral("FileService: deleted directory '%1'").arg(resolved));
+    return true;
+}
+
+bool FileService::FileExists(const QString& path) const
+{
+    const QString resolved = ResolveSandboxPath(path);
+    if (resolved.isEmpty())
+    {
+        return false;
+    }
+    return QFile::exists(resolved);
+}
+
 bool FileService::DirectoryExists(const QString& path) const
 {
     const QString resolved = ResolveSandboxPath(path);
@@ -169,14 +259,51 @@ bool FileService::DirectoryExists(const QString& path) const
     return QDir(resolved).exists();
 }
 
-bool FileService::CreateDirectoryPath(const QString& path, QString* outError)
+bool FileService::CreateDirectoryPath(const QString& path, QString* outError, bool exclusive)
 {
     const QString resolved = ResolveSandboxPath(path);
     if (resolved.isEmpty())
     {
         const QString err = QStringLiteral("Access denied: path is outside project sandbox");
         if (outError) *outError = err;
+        LogError(err);
         return false;
+    }
+
+    if (exclusive)
+    {
+        const auto reject = [&](const QString& err) {
+            if (outError) *outError = err;
+            LogError(err);
+            return false;
+        };
+        const QFileInfo info(resolved);
+        bool linkedTarget = info.isSymLink();
+#ifdef Q_OS_WIN
+        linkedTarget = linkedTarget || info.isJunction();
+#endif
+        if (info.exists() || linkedTarget)
+            return reject(QStringLiteral("Folder target already exists: ") + resolved);
+
+        QDir parent = info.dir();
+        if (!parent.exists())
+            return reject(QStringLiteral("Folder parent does not exist: ") + parent.absolutePath());
+        const QString root = QDir::fromNativeSeparators(QFileInfo(projectRoot_).canonicalFilePath());
+        const QString canonicalParent = QDir::fromNativeSeparators(QFileInfo(parent.absolutePath()).canonicalFilePath());
+#ifdef Q_OS_WIN
+        constexpr auto sensitivity = Qt::CaseInsensitive;
+#else
+        constexpr auto sensitivity = Qt::CaseSensitive;
+#endif
+        const QString prefix = root.endsWith(QLatin1Char('/')) ? root : root + QLatin1Char('/');
+        if (root.isEmpty() || canonicalParent.isEmpty() ||
+            (canonicalParent.compare(root, sensitivity) != 0 && !canonicalParent.startsWith(prefix, sensitivity)))
+            return reject(QStringLiteral("Folder parent resolves outside project sandbox: ") + parent.absolutePath());
+        if (!parent.mkdir(info.fileName()))
+            return reject(QStringLiteral("Failed to create exclusive directory: ") + resolved);
+
+        LogInfo(QStringLiteral("FileService: created directory '%1'").arg(resolved));
+        return true;
     }
 
     QDir dir(resolved);

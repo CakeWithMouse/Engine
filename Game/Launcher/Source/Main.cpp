@@ -31,7 +31,7 @@ std::vector<std::filesystem::path> userProjects;
 
 void RunProjectCodeTool(const std::filesystem::path& project, const wchar_t* action)
 {
-    const auto release = ResolveEngineRelease(ReadRuntimeProject(project), ExampleDeployment::ExecutableDirectory() / "Runtime");
+    const auto release = ProjectLibrary::ResolveRelease(ReadRuntimeProject(project), ExampleDeployment::ExecutableDirectory() / "Runtime");
     const auto script = release.runtime / "SDK/ProjectTools.ps1";
     if (!std::filesystem::is_regular_file(script)) throw std::runtime_error("This engine has no C++ SDK. Upgrade a project copy first.");
     auto command = std::wstring(L"powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"") + script.wstring() +
@@ -134,7 +134,8 @@ INT_PTR CALLBACK CreateDialogProc(HWND window, UINT message, WPARAM wParam, LPAR
             std::string buildWarning;
             {
                 LaunchSplash splash(L"Создание проекта…", true, window);
-                *output = ProjectLibrary::Create(path, Utf8(Text(window, 201)), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll");
+                const auto installed = InstallEngineRelease(ExampleDeployment::ExecutableDirectory() / "Runtime");
+                *output = ProjectLibrary::Create(path, Utf8(Text(window, 201)), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll", &installed);
                 if (IsDlgButtonChecked(window,204) == BST_CHECKED) {
                     try { RunProjectCodeTool(*output,L"Enable"); }
                     catch (const std::exception& error) { buildWarning = error.what(); }
@@ -155,14 +156,20 @@ std::filesystem::path SelectedProject()
 }
 void ReloadProjects(const std::filesystem::path& selected = {})
 {
-    userProjects = ProjectLibrary::ReadRegistry();
+    const auto release = ExampleDeployment::ExecutableDirectory();
+    userProjects = ProjectLibrary::CollectProjects(release, ProjectLibrary::ReadRegistry());
     SendMessageW(list, LB_RESETCONTENT, 0, 0);
     for (const auto& game : Games) SendMessageW(list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(game.title));
     int selection = 0;
     for (size_t i = 0; i < userProjects.size(); ++i)
     {
         std::wstring title;
-        try { title = L"Проект: " + ExampleDeployment::Wide(ReadRuntimeProject(userProjects[i]).name.c_str()); }
+        try {
+            const auto group = userProjects[i].parent_path().parent_path();
+            const wchar_t* prefix = group == release / "Examples" ? L"Пример: " :
+                group == release / "Tutorials" ? L"Туториал: " : L"Проект: ";
+            title = prefix + ExampleDeployment::Wide(ReadRuntimeProject(userProjects[i]).name.c_str());
+        }
         catch (...) { title = L"Недоступен: " + userProjects[i].wstring(); }
         SendMessageW(list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(title.c_str()));
         if (userProjects[i] == selected) selection = static_cast<int>(Games.size() + i);
@@ -194,7 +201,7 @@ int LaunchProject(const std::filesystem::path& file, bool editor, bool smoke = f
     const auto release = ReadEngineRelease(current);
     if(!currentEngine && (!smoke || promptInSmoke) && ProjectVersion::IsNewer(release.version,settings.engineVersion)) {
         bool previousAvailable=false;
-        try { ResolveEngineRelease(settings,current);previousAvailable=true; } catch(const std::exception&) {}
+        try { ProjectLibrary::ResolveRelease(settings,current);previousAvailable=true; } catch(const std::exception&) {}
         const auto destination=ProjectVersion::CopyDestination(project,release.version);
         UpgradePrompt prompt{L"Проект: "+ExampleDeployment::Wide(settings.name)+L"\r\nВерсия проекта: "+ExampleDeployment::Wide(settings.engineVersion)+
             L"\r\nНовая версия движка: "+ExampleDeployment::Wide(release.version)+
@@ -212,7 +219,7 @@ int LaunchProject(const std::filesystem::path& file, bool editor, bool smoke = f
     }
     LaunchSplash splash(editor ? L"Запуск редактора…" : L"Запуск игры…", !smoke, GetActiveWindow());
     LaunchReadiness readiness;
-    const auto runtime = (currentEngine ? release : ResolveEngineRelease(settings, current)).runtime / "EngineRuntime.exe";
+    const auto runtime = (currentEngine ? release : ProjectLibrary::ResolveRelease(settings, current)).runtime / "EngineRuntime.exe";
     if (!std::filesystem::is_regular_file(runtime)) throw std::runtime_error("EngineRuntime.exe is missing");
     std::wstring command = L"\"" + runtime.wstring() + L"\" --project \"" + project.wstring() + L"\" --mode " + (editor ? L"editor --scene-api" : L"game");
     if (smoke) command += L" --frames 3";
@@ -247,7 +254,7 @@ std::filesystem::path GameDirectory(const GameEntry& entry)
 
 std::filesystem::path Validate(const GameEntry& entry, bool editor = false)
 {
-    if (editor && !entry.preview) throw std::runtime_error("Preview is unavailable for this project (Katamari requires Assimp and a scene adapter)");
+    if (editor && !entry.preview) throw std::runtime_error("Preview is unavailable for this example");
     if (entry.runtime || editor)
     {
         const auto runtime = ExampleDeployment::ExecutableDirectory() / "Runtime";
@@ -325,7 +332,7 @@ void UpdateStatus()
                 SetWindowTextW(status,(L"Версия проекта: "+ExampleDeployment::Wide(project.engineVersion)+L". Доступна новая: "+ExampleDeployment::Wide(current.version)+L".\r\nПри запуске будет предложено обновление копии.").c_str());
                 EnableWindow(editButton,TRUE);return;
             }
-            const auto release = ResolveEngineRelease(project, ExampleDeployment::ExecutableDirectory() / "Runtime");
+            const auto release = ProjectLibrary::ResolveRelease(project, ExampleDeployment::ExecutableDirectory() / "Runtime");
             SetWindowTextW(status, (L"Движок: " + ExampleDeployment::Wide(release.version) + L" " + ExampleDeployment::Wide(release.configuration) +
                 (project.engineVersion.empty() ? L" (старый проект, режим совместимости)" : L" (закреплён)") + L"\r\n" + projectFile.wstring()).c_str());
             EnableWindow(editButton, TRUE);
@@ -399,6 +406,15 @@ LRESULT WindowProcImpl(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
         SetMenu(window,bar);
         status = CreateWindowW(L"STATIC", L"", WS_CHILD | WS_VISIBLE | SS_LEFT,
             18, 335, 670, 70, window, nullptr, nullptr, nullptr);
+        // Without WM_SETFONT the controls use the bitmap System font, which has no Cyrillic glyphs when the
+        // system locale is not Russian: the list showed bars instead of letters. Use the Windows UI font.
+        static const HFONT font = [] {
+            NONCLIENTMETRICSW metrics{sizeof(metrics)};
+            return SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0)
+                ? CreateFontIndirectW(&metrics.lfMessageFont) : static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+        }();
+        EnumChildWindows(window, [](HWND child, LPARAM font) { SendMessageW(child, WM_SETFONT, static_cast<WPARAM>(font), TRUE); return TRUE; },
+            reinterpret_cast<LPARAM>(font));
         UpdateStatus();
         return 0;
     }
@@ -571,7 +587,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
             }
             if (option == L"--create-project" && argc == 4)
             {
-                ProjectLibrary::Create(argv[2], Utf8(argv[3]), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll");
+                const auto installed = InstallEngineRelease(ExampleDeployment::ExecutableDirectory() / "Runtime");
+                ProjectLibrary::Create(argv[2], Utf8(argv[3]), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll", &installed);
                 LocalFree(argv); return 0;
             }
             if (argc == 3 && (option == L"--check-project" || option == L"--smoke-project" || option == L"--smoke-project-editor"))
@@ -585,13 +602,15 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
             { LocalFree(argv); return 2; }
             const bool smoke = std::wstring(argv[1]) == L"--smoke" || std::wstring(argv[1]) == L"--smoke-editor";
             const bool editor = std::wstring(argv[1]) == L"--check-editor" || std::wstring(argv[1]) == L"--smoke-editor";
-            const std::wstring name = argv[2];
+            std::wstring name = argv[2];
+            if (name == L"Battle-Anim" || name == L"Battle (Animated Crowd)") name = L"BattleAnim";
             LocalFree(argv); argv = nullptr;
             for (const auto& entry : Games)
             {
                 const bool hasExtra = (entry.extraArgs && *entry.extraArgs);
                 if (name == entry.title ||
-                    (hasExtra && (name == L"BattleAnim" || name == L"Battle-Anim" || name == L"Battle (Animated Crowd)" || name == (std::wstring(entry.directory) + L" " + entry.extraArgs))) ||
+                    (*entry.cliName && name == entry.cliName) ||
+                    (hasExtra && name == (std::wstring(entry.directory) + L" " + entry.extraArgs)) ||
                     (!hasExtra && name == entry.directory))
                 {
                     Validate(entry, editor);
@@ -602,7 +621,9 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
             return 2;
         }
         LocalFree(argv); argv = nullptr;
-        InstallEngineRelease(ExampleDeployment::ExecutableDirectory() / "Runtime");
+        const auto runtime = ExampleDeployment::ExecutableDirectory() / "Runtime";
+        // The games can run from a local build without Qt. Only complete runtimes go in the engine store.
+        if (std::filesystem::is_regular_file(runtime / "Editor.dll")) InstallEngineRelease(runtime);
         WNDCLASSW wc{};
         wc.lpfnWndProc = WindowProc;
         wc.hInstance = instance;

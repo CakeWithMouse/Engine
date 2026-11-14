@@ -1,9 +1,14 @@
 #pragma once
 #include "SceneCommandHandler.h"
+#include "AssetCommandHandler.h"
 #include <QFile>
+#include <QDir>
+#include <QFileInfo>
+#include <QTemporaryDir>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <cmath>
 #include <map>
 
 // In-memory scene with real checkpoint files: tests exercise command routing,
@@ -158,6 +163,192 @@ inline int Run() {
     history.BeginGizmoDrag(1);move.path="gizmo";
     auto now=std::chrono::steady_clock::now();history.OnTransformApplied(move,now);history.ClearHistory();
     check(!history.ShouldCoalesce(move,now),"clearing history invalidates active gesture checkpoint");
+
+    // Test batch import of 3 models at Host level (Remark 3)
+    {
+        AssetCommandHandler assetHandler;
+        AssetCommandHandler::Context assetCtx;
+        assetCtx.scene.context = &s;
+        assetCtx.scene.importAsset = [](void*, const char* source, uint32_t,
+                                        char* outPath, uint32_t outCapacity, char*, uint32_t) -> uint32_t {
+            std::string src(source);
+            auto pos = src.find_last_of("/\\");
+            std::string name = (pos == std::string::npos) ? src : src.substr(pos + 1);
+            std::string virt = "/Game/Models/Batch/" + name;
+            strncpy_s(outPath, outCapacity, virt.c_str(), _TRUNCATE);
+            return EngineSceneOk;
+        };
+
+        QTemporaryDir tempDir;
+        check(tempDir.isValid(), "Temporary directory created for batch import test");
+        const QString projectDir = tempDir.path();
+        const QString contentDir = projectDir + QStringLiteral("/Content");
+        QDir(projectDir).mkpath(QStringLiteral("Content/Models/Batch"));
+
+        struct FileSpec {
+            QString src;
+            float scale;
+        };
+        const std::vector<FileSpec> batch = {
+            { QStringLiteral("C:/Sources/Tree.glb"), 0.01f },
+            { QStringLiteral("C:/Sources/Rock.glb"), 0.1f },
+            { QStringLiteral("C:/Sources/Hero.glb"), 1.0f }
+        };
+
+        std::vector<QString> sidecarPaths;
+
+        for (const auto& item : batch)
+        {
+            EditorCommand cmd;
+            cmd.type = EditorCommand::ImportModel;
+            cmd.path = item.src;
+            cmd.importScale = item.scale;
+
+            EditorCommand completedCmd;
+            uint32_t res = 999;
+            QString err;
+            assetHandler.Handle(cmd, assetCtx, history, IEditorHost::Edit,
+                                nullptr, 0, 0, completedCmd, res, err);
+
+            check(res == EngineSceneOk, "Host AssetCommandHandler imports model successfully");
+            check(completedCmd.type == EditorCommand::ImportModel, "completedCmd type is ImportModel");
+            check(std::abs(completedCmd.importScale - item.scale) < 1e-5f, "completedCmd preserves importScale");
+            check(completedCmd.path.startsWith(QStringLiteral("/Game/Models/Batch/")), "completedCmd has virtual path");
+
+            // OnCommandFinished sidecar write: resolve path and write sidecar JSON
+            const QString virtRel = completedCmd.path.mid(6);
+            const QString diskAsset = contentDir + QStringLiteral("/") + virtRel;
+            const QString sidecarPath = diskAsset + QStringLiteral(".importsettings.json");
+
+            QJsonObject root;
+            root[QStringLiteral("version")] = 1;
+            root[QStringLiteral("scale")] = static_cast<double>(completedCmd.importScale);
+            QFile f(sidecarPath);
+            check(f.open(QIODevice::WriteOnly), "Can write sidecar file at host level");
+            f.write(QJsonDocument(root).toJson(QJsonDocument::Compact));
+            f.close();
+
+            sidecarPaths.push_back(sidecarPath);
+        }
+
+        check(sidecarPaths.size() == 3, "3 sidecars created");
+        check(sidecarPaths[0] != sidecarPaths[1] && sidecarPaths[1] != sidecarPaths[2],
+              "All 3 sidecar paths are distinct");
+
+        for (size_t i = 0; i < batch.size(); ++i)
+        {
+            QFile f(sidecarPaths[i]);
+            check(f.exists(), "Sidecar file exists on disk");
+            check(f.open(QIODevice::ReadOnly), "Sidecar can be opened");
+            auto doc = QJsonDocument::fromJson(f.readAll());
+            check(doc.isObject(), "Sidecar is valid JSON");
+            auto obj = doc.object();
+            check(obj[QStringLiteral("version")].toInt() == 1, "Sidecar version is 1");
+            const float scale = static_cast<float>(obj[QStringLiteral("scale")].toDouble());
+            check(std::abs(scale - batch[i].scale) < 1e-5f, "Sidecar scale matches completedCmd.importScale");
+        }
+    }
+
+    // Test AssetCommandHandler with Engine.Asset.Import extension vs legacy fallback
+    {
+        AssetCommandHandler assetHandler;
+        EditorHistory hist;
+
+        // Case A: Modern Engine with Engine.Asset.Import extension
+        {
+            static bool s_extensionCalled = false;
+            static std::string s_lastOptionsJson;
+            s_extensionCalled = false;
+            s_lastOptionsJson.clear();
+
+            AssetCommandHandler::Context modernCtx;
+            modernCtx.scene.context = &s;
+            modernCtx.assetImport.version = 1;
+            modernCtx.assetImport.context = &s;
+            modernCtx.assetImport.importWithOptions = [](void*, const char*, uint32_t,
+                const char* optionsJson, char* outPath, uint32_t outCapacity, char*, uint32_t) -> uint32_t {
+                s_extensionCalled = true;
+                if (optionsJson) s_lastOptionsJson = optionsJson;
+                strncpy_s(outPath, outCapacity, "/Game/Models/Modern/Modern.glb", _TRUNCATE);
+                return EngineSceneOk;
+            };
+
+            EditorCommand cmd;
+            cmd.type = EditorCommand::ImportModel;
+            cmd.path = QStringLiteral("C:/Sources/Modern.glb");
+            cmd.importScale = 2.0f;
+            cmd.importOptionsJson = QStringLiteral("{\"version\":1,\"kind\":\"model\",\"model\":{\"scale\":2.0}}");
+
+            EditorCommand completedCmd;
+            uint32_t res = 999;
+            QString err;
+            assetHandler.Handle(cmd, modernCtx, hist, IEditorHost::Edit, nullptr, 0, 0, completedCmd, res, err);
+
+            check(res == EngineSceneOk, "Modern AssetCommandHandler succeeds");
+            check(s_extensionCalled, "importWithOptions was called via extension");
+            check(s_lastOptionsJson.find("\"scale\":2.0") != std::string::npos, "optionsJson forwarded to extension");
+            check(completedCmd.path == QStringLiteral("/Game/Models/Modern/Modern.glb"), "completedCmd path updated");
+        }
+
+        // Case B: Old Engine without extension (legacy caller without options)
+        {
+            static bool s_legacyCalled = false;
+            s_legacyCalled = false;
+
+            AssetCommandHandler::Context legacyCtx;
+            legacyCtx.scene.context = &s;
+            legacyCtx.scene.importAsset = [](void*, const char*, uint32_t,
+                char* outPath, uint32_t outCapacity, char*, uint32_t) -> uint32_t {
+                s_legacyCalled = true;
+                strncpy_s(outPath, outCapacity, "/Game/Models/Legacy/Legacy.glb", _TRUNCATE);
+                return EngineSceneOk;
+            };
+
+            EditorCommand cmd;
+            cmd.type = EditorCommand::ImportModel;
+            cmd.path = QStringLiteral("C:/Sources/Legacy.glb");
+            cmd.importScale = 1.0f;
+            cmd.importOptionsJson.clear();
+
+            EditorCommand completedCmd;
+            uint32_t res = 999;
+            QString err;
+            assetHandler.Handle(cmd, legacyCtx, hist, IEditorHost::Edit, nullptr, 0, 0, completedCmd, res, err);
+
+            check(res == EngineSceneOk, "Legacy AssetCommandHandler succeeds without extension");
+            check(s_legacyCalled, "ctx.scene.importAsset fallback was called");
+            check(completedCmd.path == QStringLiteral("/Game/Models/Legacy/Legacy.glb"), "completedCmd path updated via fallback");
+        }
+
+        // Case C: Engine without extension when optionsJson is specified -> MUST NOT silently fall back, must reject
+        {
+            static bool s_legacyCalled = false;
+            s_legacyCalled = false;
+
+            AssetCommandHandler::Context legacyCtx;
+            legacyCtx.scene.context = &s;
+            legacyCtx.scene.importAsset = [](void*, const char*, uint32_t,
+                char*, uint32_t, char*, uint32_t) -> uint32_t {
+                s_legacyCalled = true;
+                return EngineSceneOk;
+            };
+
+            EditorCommand cmd;
+            cmd.type = EditorCommand::ImportModel;
+            cmd.path = QStringLiteral("C:/Sources/Custom.glb");
+            cmd.importScale = 0.01f;
+            cmd.importOptionsJson = QStringLiteral("{\"version\":2,\"kind\":\"model\",\"model\":{\"scale\":0.01,\"normals\":\"flat\"}}");
+
+            EditorCommand completedCmd;
+            uint32_t res = 999;
+            QString err;
+            assetHandler.Handle(cmd, legacyCtx, hist, IEditorHost::Edit, nullptr, 0, 0, completedCmd, res, err);
+
+            check(res == EngineSceneFailure, "AssetCommandHandler rejects optionsJson when extension missing");
+            check(!s_legacyCalled, "ctx.scene.importAsset MUST NOT be called when optionsJson cannot be applied");
+            check(completedCmd.path == cmd.path, "completedCmd path not updated to virtual destination on failure");
+        }
+    }
     std::cout<<"Host regression checks: "<<checks<<std::endl;return checks;
 }
 }

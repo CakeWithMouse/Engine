@@ -8,6 +8,12 @@
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
     <LinkIncremental Condition="'$(Configuration)'=='Debug'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)'!='Debug'">false</LinkIncremental>
+    <!-- vcpkg names the Assimp import library after the MSVC that built it (vc143, vc145, ...): take the one installed. -->
+    <EngineAssimpLibDir>$(RepositoryRoot)Engine\vcpkg_installed\x64-windows\lib\</EngineAssimpLibDir>
+    <EngineAssimpLibDir Condition="'$(Configuration)'=='Debug'">$(RepositoryRoot)Engine\vcpkg_installed\x64-windows\debug\lib\</EngineAssimpLibDir>
+    <EngineAssimpLibPattern>assimp-vc*-mt.lib</EngineAssimpLibPattern>
+    <EngineAssimpLibPattern Condition="'$(Configuration)'=='Debug'">assimp-vc*-mtd.lib</EngineAssimpLibPattern>
+    <EngineAssimpLib Condition="Exists('$(EngineAssimpLibDir)')">$([System.IO.Directory]::GetFiles('$(EngineAssimpLibDir)', '$(EngineAssimpLibPattern)'))</EngineAssimpLib>
   </PropertyGroup>
   <Import Project="$(RepositoryRoot)Engine\Engine.props" />
   <ItemDefinitionGroup>
@@ -25,7 +31,8 @@
       <RuntimeLibrary Condition="'$(Configuration)'=='Release'">MultiThreadedDLL</RuntimeLibrary>
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Release'">NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <WholeProgramOptimization Condition="'$(Configuration)'!='Release'">false</WholeProgramOptimization>
+      <!-- Engine.lib is also consumed by other supported compiler versions. -->
+      <WholeProgramOptimization Condition="'$(Configuration)'!='Release' or '$(MSBuildProjectName)'=='Engine'">false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

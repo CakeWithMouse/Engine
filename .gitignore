@@ -33,6 +33,9 @@
 
 # Visual Studio / MSBuild outputs
 .vs/
+
+# Qoder local agent data
+.qoder/
 [Dd]ebug/
 [Rr]elease/
 x64/
@@ -54,6 +57,7 @@ vcpkg_installed/
 build/
 !AGENTS.md
 !Game/Katamari/Content/Models/*.obj
+!Engine/docs/tutorial/resources/pyramid.obj
 
 # Historical build outputs retained during directory cleanup
 Agent/Archive/
@@ -61,3 +65,8 @@ Agent/Archive/
 
 # Hot-reload shadow cache
 **/.shadow_cache/
+
+# Python diagnostic runner caches
+__pycache__/
+*.pyc
+*.pyo

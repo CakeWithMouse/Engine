@@ -31,8 +31,10 @@ inline RuntimeProject Validate(const std::filesystem::path& file)
         throw std::runtime_error("Project requires an existing startupScene");
     return project;
 }
+// pinned: the release the project is locked to, the installed copy of the template's runtime (a rebuilt
+// version may be installed under the next build number). Without it, the runtime's own manifest.
 inline std::filesystem::path Create(const std::filesystem::path& directory, const std::string& name,
-    const std::filesystem::path& templateModule)
+    const std::filesystem::path& templateModule, const EngineRelease* pinned = nullptr)
 {
     if (name.empty() || name.size() > 200 || name.find_first_of(std::string("\0\r\n", 3)) != std::string::npos ||
         name.find_first_not_of(" \t") == std::string::npos)
@@ -66,7 +68,7 @@ inline std::filesystem::path Create(const std::filesystem::path& directory, cons
             light(4,"Cool Light",{-3,2,1},{0.3,0.55,1.0})})}});
         Write(root / "Project.json", {{"name",name},{"module","Game.dll"},{"content","Content"},
             {"startupScene","Content/Scenes/Main.scene.json"}});
-        const auto release = ReadEngineRelease(templateModule.parent_path().parent_path().parent_path());
+        const auto release = pinned ? *pinned : ReadEngineRelease(templateModule.parent_path().parent_path().parent_path());
         Write(root / "Engine.lock.json", {{"format",1},{"engineVersion",release.version},
             {"engineConfiguration",release.configuration},{"templateId","SceneProject"}});
         Validate(root / "Project.json");
@@ -96,6 +98,48 @@ inline std::vector<std::filesystem::path> ReadRegistry()
     std::vector<std::filesystem::path> result;
     for (const auto& item : json) result.push_back(std::filesystem::u8path(item.get<std::string>()));
     return result;
+}
+// Discover portable projects relative to this launcher, without writing machine-specific
+// paths to the user's registry. A moved/unpacked release works on its first launch.
+inline std::vector<std::filesystem::path> CollectProjects(const std::filesystem::path& release,
+    const std::vector<std::filesystem::path>& registered)
+{
+    std::vector<std::filesystem::path> result;
+    auto append = [&](const std::filesystem::path& file) {
+        const auto full = std::filesystem::absolute(file).lexically_normal();
+        for (const auto& existing : result)
+            if (_wcsicmp(existing.c_str(), full.c_str()) == 0) return;
+        result.push_back(full);
+    };
+    for (const auto* group : {L"Examples", L"Tutorials"}) {
+        std::vector<std::filesystem::path> bundled;
+        std::error_code ec;
+        std::filesystem::directory_iterator it(release / group, ec), end;
+        for (; !ec && it != end; it.increment(ec)) {
+            const auto project = it->path() / "Project.json";
+            std::error_code fileError;
+            if (std::filesystem::is_regular_file(project, fileError)) bundled.push_back(project);
+        }
+        std::sort(bundled.begin(), bundled.end());
+        for (const auto& project : bundled) append(project);
+    }
+    for (const auto& project : registered) append(project);
+    return result;
+}
+inline bool UsesBundledRuntime(const RuntimeProject& project, const EngineRelease& current)
+{
+    if (project.engineVersion != current.version || project.engineConfiguration != current.configuration) return false;
+    const auto group = std::filesystem::absolute(project.file).lexically_normal().parent_path().parent_path();
+    const auto root = std::filesystem::absolute(current.runtime).lexically_normal().parent_path();
+    return _wcsicmp(group.c_str(), (root / "Examples").c_str()) == 0 ||
+        _wcsicmp(group.c_str(), (root / "Tutorials").c_str()) == 0;
+}
+inline EngineRelease ResolveRelease(const RuntimeProject& project, const std::filesystem::path& currentRuntime)
+{
+    const auto current = ReadEngineRelease(currentRuntime);
+    // Bundled examples belong to this portable release, even when another build of
+    // the same version was previously installed. Personal projects keep their pin.
+    return UsesBundledRuntime(project, current) ? current : ResolveEngineRelease(project, currentRuntime);
 }
 inline void Remember(const std::filesystem::path& file)
 {

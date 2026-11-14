@@ -188,7 +188,7 @@ QString HlslGraphCompiler::NameProblem(const QString& name)
     return {};
 }
 
-GraphCompileResult HlslGraphCompiler::Compile(const MaterialGraphModel& model)
+GraphCompileResult HlslGraphCompiler::Compile(const GraphDocument& model)
 {
     GraphCompileResult result;
     QVector<QPair<QString, int>> cbufferParams;       // строка и нода
@@ -253,7 +253,7 @@ GraphCompileResult HlslGraphCompiler::Compile(const MaterialGraphModel& model)
     }
 
     // Текстуры: ноды с одним именем читают одну текстуру; занятый регистр заменяется
-    // следующим свободным (t0-t5 принадлежат движку).
+    // следующим свободным (t0-t5 и t32 принадлежат движку; D3D11 имеет 128 SRV).
     QStringList declaredTextures;
     QList<int> usedSlots;
     for (const auto& n : nodes)
@@ -266,9 +266,18 @@ GraphCompileResult HlslGraphCompiler::Compile(const MaterialGraphModel& model)
             textureDecls[index].second << n.id;
             continue;
         }
-        int slot = std::max(6, n.properties.value(QStringLiteral("slot"), 6).toInt());
-        while (usedSlots.contains(slot))
-            ++slot;
+        int slot = std::clamp(n.properties.value(QStringLiteral("slot"), 6).toInt(), 6, 127);
+        const int first = slot;
+        while (slot == 32 || usedSlots.contains(slot))
+        {
+            slot = slot == 127 ? 6 : slot + 1;
+            if (slot == first)
+            {
+                result.problems.insert(n.id, Tr("Нет свободных слотов текстур материала (максимум 121).",
+                    "No free material texture slots (maximum 121)."));
+                break;
+            }
+        }
         declaredTextures << texName;
         usedSlots << slot;
         textureDecls.append({QStringLiteral("Texture2D %1 : register(t%2);").arg(texName).arg(slot), {n.id}});

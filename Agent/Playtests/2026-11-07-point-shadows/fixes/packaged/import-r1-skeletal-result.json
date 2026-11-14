@@ -1,0 +1,262 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "caster": "skeletal",
+    "frames": [
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 6435,
+                    "sha256": "05210e6c722b5de32c90d1cb5e999480e3a520feccff1ea74f30693c3374cce2"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12285,
+                    "sha256": "f576360c77e5523faa4f5e317cd11f3e279f9637b2762e8c2f10f54c0e860726"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "c2b1efa06f59387bb2aae0848c85afbe56bcbd98a2d033402988f6663856f9b7"
+                },
+                {
+                    "face": 4,
+                    "occupied": 114087,
+                    "sha256": "1e7abd56b37bc149598afb12bb0c11e2809c14c9e53f0740700b382ab9e092da"
+                },
+                {
+                    "face": 5,
+                    "occupied": 25600,
+                    "sha256": "38921b96e58226553cf861517160fb9bf16b79d538a0d4ff419b715d457fccdf"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\import-r1-skeletal-00.bmp",
+            "light": [
+                0,
+                5,
+                -2,
+                30
+            ],
+            "position": [
+                0,
+                0.05000000074505806,
+                0
+            ],
+            "probes": [
+            ],
+            "time": 0
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 6435,
+                    "sha256": "05210e6c722b5de32c90d1cb5e999480e3a520feccff1ea74f30693c3374cce2"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12285,
+                    "sha256": "f576360c77e5523faa4f5e317cd11f3e279f9637b2762e8c2f10f54c0e860726"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "97daac45bc3e9a48decb5a85c462ff3ac8c04d22ee9a5db109615ea55302c3e7"
+                },
+                {
+                    "face": 4,
+                    "occupied": 120535,
+                    "sha256": "d49b7bb40ac77d0c46e44a9b09666fe98ebadd847b9726334bc23cb36fe502cc"
+                },
+                {
+                    "face": 5,
+                    "occupied": 25600,
+                    "sha256": "38921b96e58226553cf861517160fb9bf16b79d538a0d4ff419b715d457fccdf"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\import-r1-skeletal-01.bmp",
+            "light": [
+                0,
+                5,
+                -2,
+                30
+            ],
+            "position": [
+                0,
+                0.05000000074505806,
+                0
+            ],
+            "probes": [
+            ],
+            "time": 0.25
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 8879,
+                    "sha256": "f9a62f2775bed8ba42570a3612c8bfd8784d899c4608b7df389b765a796279ca"
+                },
+                {
+                    "face": 1,
+                    "occupied": 85864,
+                    "sha256": "33a109e75a798df02883e1729a1cc06225de38f941ba6dbbf7280d4f576e4746"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "46b6847e242d9f5f2739f35591e7da0990c8fa52db5b4c8c82031d7f5179ed6d"
+                },
+                {
+                    "face": 4,
+                    "occupied": 58584,
+                    "sha256": "e5730040d9b30a71196c0b48b30d3c89037b99cb4ce9fc98ce57b5ef91de721c"
+                },
+                {
+                    "face": 5,
+                    "occupied": 25600,
+                    "sha256": "38921b96e58226553cf861517160fb9bf16b79d538a0d4ff419b715d457fccdf"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\import-r1-skeletal-02.bmp",
+            "light": [
+                2,
+                5,
+                -2,
+                30
+            ],
+            "position": [
+                0,
+                0.05000000074505806,
+                0
+            ],
+            "probes": [
+            ],
+            "time": 0.5
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 61692,
+                    "sha256": "e4b2a89719eef2ea983c3e8afa4088257fc0f554d7cc645a9d04e2462bfdb045"
+                },
+                {
+                    "face": 1,
+                    "occupied": 17024,
+                    "sha256": "d3807d0d5aef9dc089521dc6ab9e7c0ce835e5d48f5abe02b44f1f0997a6dfa1"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "61f869ee757cf2578af539eed41648c8c4d11637993f61149b7cede279da5d7e"
+                },
+                {
+                    "face": 4,
+                    "occupied": 55302,
+                    "sha256": "94ec97edf9491d5cef8e24b53bd89836941d67486aface244e1dd9edab5dd8c3"
+                },
+                {
+                    "face": 5,
+                    "occupied": 25600,
+                    "sha256": "38921b96e58226553cf861517160fb9bf16b79d538a0d4ff419b715d457fccdf"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\import-r1-skeletal-03.bmp",
+            "light": [
+                -2,
+                5,
+                -2,
+                30
+            ],
+            "position": [
+                0,
+                0.05000000074505806,
+                0
+            ],
+            "probes": [
+            ],
+            "time": 0.75
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 6435,
+                    "sha256": "05210e6c722b5de32c90d1cb5e999480e3a520feccff1ea74f30693c3374cce2"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12285,
+                    "sha256": "f576360c77e5523faa4f5e317cd11f3e279f9637b2762e8c2f10f54c0e860726"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "c2b1efa06f59387bb2aae0848c85afbe56bcbd98a2d033402988f6663856f9b7"
+                },
+                {
+                    "face": 4,
+                    "occupied": 114087,
+                    "sha256": "1e7abd56b37bc149598afb12bb0c11e2809c14c9e53f0740700b382ab9e092da"
+                },
+                {
+                    "face": 5,
+                    "occupied": 25600,
+                    "sha256": "38921b96e58226553cf861517160fb9bf16b79d538a0d4ff419b715d457fccdf"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\import-r1-skeletal-04.bmp",
+            "light": [
+                0,
+                5,
+                -2,
+                30
+            ],
+            "position": [
+                0,
+                0.05000000074505806,
+                0
+            ],
+            "probes": [
+            ],
+            "time": 0
+        }
+    ],
+    "ok": true
+}

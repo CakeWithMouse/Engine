@@ -336,3 +336,15 @@ Play-копия и превью. Файл пишет только `saveMaterial`
 ## Игровые подсистемы
 
 `ENGINE_SUBSYSTEM()` в заголовке Source автоматически добавляет класс в каталог при обычной сборке. Подсистемы принадлежат GameSession, сохраняются между сценами и при Pause, уничтожаются при Stop. Edit и preview не создают их. Получение: `game.GetSubsystem<T>()`; тик включается только полем `bTickEnabled`. Подробнее: [создание, lifecycle, SDK и переходы между сценами](GAME-SUBSYSTEMS.md).
+
+## Дополнение: расширение Engine.Scene.Script (визуальные скрипты)
+
+`EngineScriptApi` version 1 (`EditExtensions.h`), запрос через `EngineGetEditExtension` с проверкой версии и размера.
+Runtime отдаёт его Editor.dll сервисом `EngineScriptService` и запрашивает заново после hot reload. Функции:
+- `describe` — каталог нод;
+- `get` / `set` — путь `.vscript` объекта; `set` только в Edit;
+- `check` — сборка файла;
+- `readProblems` — ошибки скриптов в Play.
+
+Модули без расширения (выпуски до плана 072) работают как раньше, скриптов у них нет. Подробно:
+[VISUAL-SCRIPTING](VISUAL-SCRIPTING.md).

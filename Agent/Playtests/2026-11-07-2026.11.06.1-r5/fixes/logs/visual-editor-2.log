@@ -1,0 +1,592 @@
+Project: Calm City r5
+Mode: editor
+PreviewScene: none
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Game/build/x64/Release/Runtime/EngineContent'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/playtests/20261107-r5/calm-city/CalmCityFinal/Content'
+[VfsRead] using local VFS (no host service)
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+EditorCreate
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'view/grid'
+[Info] SettingsService: Set 'view/gizmo'
+[Info] SettingsService: Set 'view/icons'
+[Info] SettingsService: Set 'view/overlays'
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 0, handler = 0000000000000000
+EditorStart
+Calm City r5
+E:\Engine\Engine\build\playtests\20261107-r5\calm-city\CalmCityFinal\Project.json
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+EditorSceneViewportAttach ok
+[Info] Viewport overlay service: FOUND (version 3)
+[Info] Camera: ok
+Texture loaded: E:/Engine/Engine/build/playtests/20261107-r5/calm-city/CalmCityFinal/Content/Models/blend-suzanne-multiple/Textures/BaseColor_0.png (64x64)
+[Info] FXAA pipeline and shaders compiled successfully
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 1 (FXAA), bb = 713x423
+EngineFrame (edit scene API)
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 121: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 241: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 361: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 481: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 601: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 841: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 961: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1081: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1201: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1321: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1441: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1561: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1681: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1801: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1921: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 2041: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 2161: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 2281: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 2401: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 2521: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 2641: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 2761: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 2881: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 3001: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 3121: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 3241: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 3361: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 3481: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 3601: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 3721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 3841: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 3961: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 4081: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 4201: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 4321: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 4441: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 4561: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 4681: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 4801: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 4921: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 5041: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 5161: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 5281: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 5401: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 5521: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 5641: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 5761: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 5881: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 6001: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 6121: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 6241: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 6361: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 6481: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 6601: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 6721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 6841: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 6961: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 7081: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 7201: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 7321: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 7441: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 7561: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 7681: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 7801: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 7921: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 8041: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 8161: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 8281: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 8401: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 8521: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 8641: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 8761: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 8881: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 9001: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 9121: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 9241: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 9361: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 9481: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 9601: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 9721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 9841: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 9961: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 10081: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 10201: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 10321: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 10441: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 10561: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 10681: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 10801: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 10921: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 11041: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 11161: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 11281: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 11401: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 11521: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 11641: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 11761: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 11881: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 12001: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 12121: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 12241: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 12361: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 12481: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 12601: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 12721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 12841: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 12961: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 13081: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 13201: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 13321: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 13441: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 13561: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 13681: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 13801: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 13921: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 14041: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 14161: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 14281: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 14401: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 14521: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 14641: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 14761: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 14881: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 15001: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 15121: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 15241: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 15361: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 15481: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 15601: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 15721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 15841: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 15961: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 16081: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 16201: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 16321: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 16441: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 16561: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 16681: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 16801: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 16921: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 17041: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 17161: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 17281: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 17401: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 17521: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 17641: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 17761: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 17881: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 18001: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 18121: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 18241: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 18361: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 18481: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 18601: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 18721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 18841: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 18961: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 19081: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 19201: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 19321: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 19441: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 19561: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 19681: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 19801: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 19921: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 20041: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 20161: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 20281: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 20401: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 20521: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 20641: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 20761: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 20881: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 21001: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 21121: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 21241: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 21361: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 21481: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 21601: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 21721: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 21841: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 21961: AntialiasingMode = 1 (FXAA), bb = 713x423
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 22081: AntialiasingMode = 1 (FXAA), bb = 713x423

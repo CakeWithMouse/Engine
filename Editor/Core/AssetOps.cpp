@@ -1,4 +1,5 @@
 #include "AssetOps.h"
+#include "FolderPaths.h"
 
 #include <QDir>
 #include <QFile>
@@ -67,25 +68,24 @@ bool AssetOps::CreateFile(const QString& relPath, const QByteArray& content, QSt
     return fileService_->WriteFileAtomic(absPath, content, outError);
 }
 
-bool AssetOps::CreateFolder(const QString& relPath, QString* outError)
+bool AssetOps::CreateFolder(const QString& relPath, QString* outError, bool exclusive)
 {
     if (!fileService_)
     {
-        if (outError) *outError = QStringLiteral("FileService is null");
+        const QString err = QStringLiteral("FileService is null");
+        if (outError) *outError = err;
+        Logger::Instance().Error(QStringLiteral("AssetOps::CreateFolder: ") + err);
         return false;
     }
 
-    const QString absPath = fileService_->ResolveSandboxPath(relPath);
+    const QString absPath = ResolveFolderPath(*fileService_, relPath, outError);
     if (absPath.isEmpty())
-    {
-        if (outError) *outError = QStringLiteral("Path is outside project sandbox: %1").arg(relPath);
         return false;
-    }
 
-    return fileService_->CreateDirectoryPath(absPath, outError);
+    return fileService_->CreateDirectoryPath(absPath, outError, exclusive);
 }
 
-bool AssetOps::Rename(const QString& oldRelPath, const QString& newRelPath, QString* outError)
+bool AssetOps::Rename(const QString& oldRelPath, const QString& newRelPath, QString* outError, bool renameCompanions)
 {
     if (!fileService_)
     {
@@ -131,10 +131,25 @@ bool AssetOps::Rename(const QString& oldRelPath, const QString& newRelPath, QStr
         }
     }
 
+    if (renameCompanions)
+    {
+        for (const QString& suffix : CompanionSuffixes())
+        {
+            const QString oldCompRel = oldRelPath + suffix;
+            const QString newCompRel = newRelPath + suffix;
+            const QString oldCompAbs = fileService_->ResolveSandboxPath(oldCompRel);
+            const QString newCompAbs = fileService_->ResolveSandboxPath(newCompRel);
+            if (!oldCompAbs.isEmpty() && !newCompAbs.isEmpty() && QFileInfo::exists(oldCompAbs))
+            {
+                QFile::rename(oldCompAbs, newCompAbs);
+            }
+        }
+    }
+
     return true;
 }
 
-bool AssetOps::Duplicate(const QString& srcRelPath, const QString& dstRelPath, QString* outError, QString* outCreatedPath)
+bool AssetOps::Duplicate(const QString& srcRelPath, const QString& dstRelPath, QString* outError, QString* outCreatedPath, bool duplicateCompanions)
 {
     if (!fileService_)
     {
@@ -206,10 +221,29 @@ bool AssetOps::Duplicate(const QString& srcRelPath, const QString& dstRelPath, Q
     if (outCreatedPath)
         *outCreatedPath = targetRel;
 
+    if (duplicateCompanions)
+    {
+        for (const QString& suffix : CompanionSuffixes())
+        {
+            const QString srcCompRel = srcRelPath + suffix;
+            const QString dstCompRel = targetRel + suffix;
+            const QString srcCompAbs = fileService_->ResolveSandboxPath(srcCompRel);
+            if (!srcCompAbs.isEmpty() && QFileInfo::exists(srcCompAbs))
+            {
+                QByteArray data;
+                QString err;
+                if (fileService_->ReadFile(srcCompAbs, data, &err))
+                {
+                    CreateFile(dstCompRel, data, &err);
+                }
+            }
+        }
+    }
+
     return true;
 }
 
-bool AssetOps::Delete(const QString& relPath, QString* outError)
+bool AssetOps::Delete(const QString& relPath, QString* outError, bool deleteCompanions)
 {
     if (!fileService_)
     {
@@ -233,16 +267,30 @@ bool AssetOps::Delete(const QString& relPath, QString* outError)
 
     if (info.isDir())
     {
-        QDir dir(absPath);
-        if (!dir.removeRecursively())
-        {
-            if (outError) *outError = QStringLiteral("Failed to remove directory: %1").arg(relPath);
-            return false;
-        }
-        return true;
+        return fileService_->DeleteDirectory(absPath, outError);
     }
 
-    return fileService_->DeleteFile(absPath, outError);
+    const bool ok = fileService_->DeleteFile(absPath, outError);
+    if (!ok)
+    {
+        return false;
+    }
+
+    if (deleteCompanions)
+    {
+        for (const QString& suffix : CompanionSuffixes())
+        {
+            const QString compRel = relPath + suffix;
+            const QString compAbs = fileService_->ResolveSandboxPath(compRel);
+            if (!compAbs.isEmpty() && QFileInfo::exists(compAbs))
+            {
+                QString err;
+                fileService_->DeleteFile(compAbs, &err);
+            }
+        }
+    }
+
+    return true;
 }
 
 bool AssetOps::Exists(const QString& relPath) const
@@ -288,6 +336,16 @@ QString AssetOps::GenerateDuplicateName(const QString& relPath)
         return copyName;
 
     return dir + QStringLiteral("/") + copyName;
+}
+
+const QStringList& AssetOps::CompanionSuffixes()
+{
+    static const QStringList suffixes = {
+        QStringLiteral(".source.json"),
+        QStringLiteral(".import.json"),
+        QStringLiteral(".importsettings.json")
+    };
+    return suffixes;
 }
 
 } // namespace EditorCore

@@ -66,7 +66,7 @@ struct PS_IN
     float2 uv : TEXCOORD0;
     float4 color : COLOR;
     float3 instanceData : TEXCOORD2;
-    float fade : TEXCOORD3; // LOD cross-fade of the copy, 1 = fully visible
+    nointerpolation float fade : TEXCOORD3; // per-copy weight; interpolation can turn 1 into <1
     // xyz world tangent, w the sign of the bitangent. w stays 0 when the vertex format has no
     // tangent, which is how NormalFromMap knows to fall back to screen-space derivatives.
     float4 tangent : TEXCOORD4;
@@ -96,7 +96,8 @@ PS_IN VSMain(VS_IN input, uint instanceId : SV_InstanceID)
     float4 worldPos = mul(position, instance.World);
     // Copies use a uniform scale, so their matrix transforms normals correctly.
     output.normal = mul(normal, (float3x3)instance.World);
-    output.tangent = float4(mul(vertexTangent.xyz, (float3x3)instance.World), vertexTangent.w);
+    output.tangent = float4(mul(vertexTangent.xyz, (float3x3)instance.World),
+        vertexTangent.w * (determinant((float3x3)instance.World) < 0.0f ? -1.0f : 1.0f));
     output.color = ObjectColor * instance.Color;
 #if !defined(MATERIAL_SKINNED)
     // Animated copies use Params.yzw for their clip, phase and speed instead.
@@ -108,7 +109,10 @@ PS_IN VSMain(VS_IN input, uint instanceId : SV_InstanceID)
     // Inverse-transpose keeps normals perpendicular under non-uniform scale. The tangent lies in
     // the surface instead of across it, so it goes through the world matrix itself.
     output.normal = mul(normal, (float3x3)normalMatrix);
-    output.tangent = float4(mul(vertexTangent.xyz, (float3x3)worldMatrix), vertexTangent.w);
+    // A reflection reverses the orientation of the tangent frame, even though its normal
+    // still uses the inverse transpose. Preserve +V when rebuilding the bitangent.
+    output.tangent = float4(mul(vertexTangent.xyz, (float3x3)worldMatrix),
+        vertexTangent.w * (determinant((float3x3)worldMatrix) < 0.0f ? -1.0f : 1.0f));
     output.color = ObjectColor;
     output.fade = 1.0f;
 #endif
@@ -190,7 +194,36 @@ float4 ShadeForward(MaterialOutput o, float3 worldPos)
 #endif
 }
 
-#if defined(MATERIAL_SHADOW)
+#if defined(MATERIAL_TRANSPARENCY)
+// PS t2/t3 and b2 are engine-owned. The ordinary material resource layout is unchanged.
+Texture2D<float> PreviousTransparentDepth : register(t2);
+Texture2D<float> CurrentTransparentDepth : register(t3);
+cbuffer TransparencyPass : register(b2)
+{
+    uint TransparencyMode; // 0 find nearest depth, 1 shade this layer, 2 sorted tail
+    uint TransparencyFirstLayer;
+    uint2 TransparencyPadding;
+};
+
+float4 PSMain(PS_IN input, bool frontFace : SV_IsFrontFace) : SV_Target
+{
+    int3 pixel = int3(input.pos.xy, 0);
+    if (TransparencyMode == 1)
+        clip(input.pos.z == CurrentTransparentDepth.Load(pixel) ? 1.0f : -1.0f);
+    else if (!TransparencyFirstLayer)
+        clip(input.pos.z > PreviousTransparentDepth.Load(pixel) ? 1.0f : -1.0f);
+    MaterialOutput surface = EvaluateMaterial(input, frontFace);
+    clip(surface.Alpha > 0.0f ? 1.0f : -1.0f);
+    if (TransparencyMode == 0) return input.pos.zzzz;
+    float4 color = ShadeForward(surface, input.worldPos);
+    if (TransparencyMode == 2) return color;
+#if MATERIAL_BLEND == MATERIAL_BLEND_ADDITIVE
+    return float4(color.rgb, 0.0f); // emission does not attenuate the layers behind it
+#else
+    return float4(color.rgb * color.a, color.a);
+#endif
+}
+#elif defined(MATERIAL_SHADOW)
 // Depth only: the pixel survives unless the surface clips it (masked materials).
 void PSMain(PS_IN input, bool frontFace : SV_IsFrontFace)
 {

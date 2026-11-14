@@ -2,6 +2,7 @@
 #include "QtHost.h"
 #include <Engine/Runtime/EditorReloadApi.h>
 #include "CodeClassDialog.h"
+#include "ImportMigration.h"
 #include <QAction>
 #include <QApplication>
 #include <QDialog>
@@ -102,6 +103,51 @@ void EditorMainWindow::RunCodeTool(const QString& action, const QStringList& ext
     args += extra;
     AppendLine(QStringLiteral("C++: ") + action + (extra.isEmpty() ? QString() : " " + extra.join(' ')));
     process->start(QStringLiteral("powershell.exe"), args);
+}
+
+EditorMainWindow::ImportSupport EditorMainWindow::EnsureModelImportSupport()
+{
+    if (host_->AssetImportApi()) return ImportSupport::Options;
+    const auto projectDir = QFileInfo(QString::fromUtf8(host_->host().projectFile)).absolutePath();
+    if (ImportMigration::IsCodeProject(projectDir)) {
+        QMessageBox box(this);
+        box.setWindowTitle(Tr("Совместимость проекта", "Project Compatibility"));
+        box.setText(Tr("Game.dll проекта не поддерживает импорт с настройками.",
+                       "The project's Game.dll does not support import settings."));
+        box.setInformativeText(Tr("Соберите проект текущим SDK или импортируйте с настройками по умолчанию.",
+                                  "Build the project with the current SDK, or import with default settings."));
+        auto* build = box.addButton(Tr("Собрать проект", "Build Project"), QMessageBox::AcceptRole);
+        box.addButton(Tr("Открыть как есть", "Open As Is"), QMessageBox::RejectRole);
+        box.setDefaultButton(build);
+        box.exec();
+        if (box.clickedButton() == build) {
+            RunCodeTool(QStringLiteral("Build"));
+            AppendLine(Tr("Импорт отменён: повторите его после сборки проекта.",
+                          "Import cancelled: repeat it after the project build."));
+            return ImportSupport::Cancelled;
+        }
+        return ImportSupport::Defaults;
+    }
+    QString previousModule;
+    QFile manifest(QDir(projectDir).filePath(QStringLiteral("Project.json")));
+    if (manifest.open(QIODevice::ReadOnly))
+        previousModule = QJsonDocument::fromJson(manifest.readAll()).object()[QStringLiteral("module")].toString();
+    QString error;
+    const auto newModule = ImportMigration::MigrateNoCodeModule(projectDir, QCoreApplication::applicationDirPath(), &error);
+    if (newModule.isEmpty()) {
+        AppendLine(Tr("[Error] Не удалось обновить Game.dll из шаблона: %1",
+                      "[Error] Failed to update Game.dll from the template: %1").arg(error));
+        return ImportSupport::Defaults;
+    }
+    AppendLine(Tr("Game.dll проекта обновлена из шаблона; предыдущая версия сохранена в .painengine/GameDllBackups.",
+                  "Project Game.dll updated from the template; the previous version is kept in .painengine/GameDllBackups."));
+    QMessageBox::information(this, Tr("Совместимость проекта", "Project Compatibility"),
+        Tr("Game.dll проекта обновлена из шаблона. Предыдущая версия сохранена в .painengine/GameDllBackups.",
+           "Project Game.dll updated from the template. The previous version is kept in .painengine/GameDllBackups."));
+    EditorCommand c; c.type = EditorCommand::ReloadProject; c.name = previousModule;
+    c.path = QDir(projectDir).filePath(newModule);
+    host_->PostCommand(c);
+    return ImportSupport::Options;
 }
 
 void EditorMainWindow::BuildCodeTools()

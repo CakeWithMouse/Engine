@@ -1,0 +1,1929 @@
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "caster": "crowd",
+    "frames": [
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 35640,
+                    "sha256": "33fcdca2e99d16e7fee0fbfaa2b6017363000da7bd4f2213a673c3d5af8d50d9"
+                },
+                {
+                    "face": 1,
+                    "occupied": 26624,
+                    "sha256": "388138d6414ddde72180dba6dcbb4e35607926a5b7bd5284cbe8433673545333"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "358a4b0eea491d1a7e0e5fe734d6c64bf1985267f505f899d5968b2b5485a9c2"
+                },
+                {
+                    "face": 4,
+                    "occupied": 17024,
+                    "sha256": "7cc90d60626825280d88acdf9019532e070404215e2389e99e3637ce94a8298d"
+                },
+                {
+                    "face": 5,
+                    "occupied": 17024,
+                    "sha256": "3d1bb5be17f1c874e437c8ac0c8052982d11df64bf33687b71529c7228d8ae8d"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-00.bmp",
+            "light": [
+                -4,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.9216102361679077,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        1.3333333730697632,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8717065453529358
+                }
+            ],
+            "time": 0
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 36134,
+                    "sha256": "220cc829676b9c571d280b1b589b6edad52e3d766fd4950e6a5c4883a5531eed"
+                },
+                {
+                    "face": 1,
+                    "occupied": 24576,
+                    "sha256": "82c605419920d89608459d95c940ae98cc0dd3488eb48856e2e95c43562553a5"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "dcfb8ff5f7870c63b619871db6501fddecef76a1ef8d645eb17a0bc05f4db55b"
+                },
+                {
+                    "face": 4,
+                    "occupied": 17347,
+                    "sha256": "7341a89569a61b0fb406b54666714dfd9997c94fd508fa87b2f09c11d65665d1"
+                },
+                {
+                    "face": 5,
+                    "occupied": 17347,
+                    "sha256": "c6dcf73291dec2c37f7c58a8bf23088c71aaa979a0998e37af27e272494800f5"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-01.bmp",
+            "light": [
+                -3.7333333492279053,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.9199943542480469,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        1.5111111402511597,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8688855171203613
+                }
+            ],
+            "time": 0.01666666753590107
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 35988,
+                    "sha256": "a7db7e5e41a7fcf528dee13171d5b0bcd17c19a085d68b77299ff5b9bc36b010"
+                },
+                {
+                    "face": 1,
+                    "occupied": 24576,
+                    "sha256": "deeac49e3311b1763494d835f18ac05003b2728d82c106613563a21091693453"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "ae75c885f6214e8872fd9c853fbbe1119c168d676ab5608491f98b4ae9fea9eb"
+                },
+                {
+                    "face": 4,
+                    "occupied": 17670,
+                    "sha256": "df478ded74285940fa1f007da2f01efac9357ab27ed06585f9b34eae5aecc2b8"
+                },
+                {
+                    "face": 5,
+                    "occupied": 17670,
+                    "sha256": "2fc1315f818ed94183a5bf59d5eca24ab2f5809ffa8774373e3babfc3a371c44"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-02.bmp",
+            "light": [
+                -3.4666666984558105,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.9183225631713867,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        1.6888889074325562,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8659529089927673
+                }
+            ],
+            "time": 0.03333333507180214
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 35958,
+                    "sha256": "316791f1fa44b084ea605e82a9b52d1c04821b9fc6b04c48ae2a313033464c3f"
+                },
+                {
+                    "face": 1,
+                    "occupied": 23552,
+                    "sha256": "422953ec6e33bd0900600fe1178eea352ad71df5de36323ad01aaba2475892cb"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "6a0b24902543a0d94f9c343cf246bcc86475d6c0878e8bfb3ebc8d4edff1820a"
+                },
+                {
+                    "face": 4,
+                    "occupied": 17993,
+                    "sha256": "46f45d118c9480272697fe07a4b4f19a328890e8e739ba0bbb2978af4527ff93"
+                },
+                {
+                    "face": 5,
+                    "occupied": 17993,
+                    "sha256": "47a9c949c08b37a9584b4e87dc910c494abfbf3226637497840f98983fd08bd4"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-03.bmp",
+            "light": [
+                -3.200000047683716,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.9165923595428467,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        1.8666666746139526,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8629017472267151
+                }
+            ],
+            "time": 0.05000000074505806
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 35826,
+                    "sha256": "3e3e38b5e0a21d69c7c58eebf56ee3e5727207cd516fb7a0202985bbb603ba29"
+                },
+                {
+                    "face": 1,
+                    "occupied": 22528,
+                    "sha256": "dd152373196927fb8cc2f4d6d1baa51034b9ab799206bea86deddc333f7a97ff"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "dc59932da1efee5eb95f6ff659ce2bd71bd239fb3937cdea08e00d6d8f7f1f16"
+                },
+                {
+                    "face": 4,
+                    "occupied": 18316,
+                    "sha256": "90696b7111ebaf258e2bdd1fbd037eed9086fde7cd22c0a94df6197e6e7a4d36"
+                },
+                {
+                    "face": 5,
+                    "occupied": 18316,
+                    "sha256": "2bbad41b8cec09ad3311e90b1dd149411c45c527b5d67b43a5959e076975c2d5"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-04.bmp",
+            "light": [
+                -2.933333396911621,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.9148002862930298,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        2.0444445610046387,
+                        0,
+                        0
+                    ],
+                    "stored": 0.859724760055542
+                }
+            ],
+            "time": 0.06666667014360428
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 35738,
+                    "sha256": "f0d911c33f352b55568d874c61a5f3cce583ead2a523d84a900d9997ad6492dd"
+                },
+                {
+                    "face": 1,
+                    "occupied": 21504,
+                    "sha256": "394aa40e41f9ee2415768f51ad95c7866e96271b52d715b43c331e34a1f0b95e"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "f3af874d62d2c3ca373b280d39dddb7f263dd2394d2a0b0ac30a17d46c10b48f"
+                },
+                {
+                    "face": 4,
+                    "occupied": 18639,
+                    "sha256": "946bc1636ebac44e30a486d0814a95ada4ee0b18ddca2db5372d32215cbc05b1"
+                },
+                {
+                    "face": 5,
+                    "occupied": 18639,
+                    "sha256": "47b99d6ef29791d7c04cc6195e4c7b6e4931495e354c85e661a3e0a75b9729b6"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-05.bmp",
+            "light": [
+                -2.6666667461395264,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.9129428863525391,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        2.222222328186035,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8564139604568481
+                }
+            ],
+            "time": 0.0833333358168602
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 35578,
+                    "sha256": "7b23bd9a08d6fde577c0847e2665a631a92d37c83009d0bf8edbe3cdb429f445"
+                },
+                {
+                    "face": 1,
+                    "occupied": 21504,
+                    "sha256": "f2c50ae14e2eb33991912de8fbc743fb528c93d9aeabaacf1398c782d450afc7"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "e0eeb1e9d428719a49d6067069e946dd5087cace584a0582a63c6b2da22d5a36"
+                },
+                {
+                    "face": 4,
+                    "occupied": 18962,
+                    "sha256": "38c82f87a07dd4027e8da8ff99462677cdf255cc70402a0f0e2d8e1c7af0fff6"
+                },
+                {
+                    "face": 5,
+                    "occupied": 18962,
+                    "sha256": "f9b9e728404aa6a91a89b61cb9d15fa4b7ec6338c79175ebd355b134e96285bb"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-06.bmp",
+            "light": [
+                -2.4000000953674316,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.9110170006752014,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        2.4000000953674316,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8529608845710754
+                }
+            ],
+            "time": 0.10000000149011612
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 35218,
+                    "sha256": "bb610e0d4b82b8f6b4e881d52ca8d26923e5489a86fc4fd6873cb4a2eb38bf62"
+                },
+                {
+                    "face": 1,
+                    "occupied": 20480,
+                    "sha256": "bc395c668ffe1f87b91b80691d97f8f381ba84cdd16c2c30d23e71caae8dd0fb"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "263c572aa5bf0543c9aaa23692fb8f28fd11bc9583158a9c2520cf6ff374dd7f"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19285,
+                    "sha256": "555d1108c1677505da38573578bac0f8071e3c5018e73749f07bd02e69291acf"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19285,
+                    "sha256": "8b386745dcec23cb2da2f782106ae8e409032fa81dca1a4475f68a093b0efa96"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-07.bmp",
+            "light": [
+                -2.133333444595337,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.9090182781219482,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        2.577777862548828,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8493559956550598
+                }
+            ],
+            "time": 0.11666666716337204
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 35400,
+                    "sha256": "98aa44c6fb7d210e58e633df347cb4c2a8a03991e42b7d377124f0d22a3f36b0"
+                },
+                {
+                    "face": 1,
+                    "occupied": 19152,
+                    "sha256": "73d593a157eb0d9c6332084a1efe4286f840c58d98e6520e6c7e223ff45566d2"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "55be7ca78f7d0540090d4d8be73dde2db04beb3a61412a5a3590e6efa050b7b8"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-08.bmp",
+            "light": [
+                -1.8666666746139526,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.90694260597229,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        2.7555556297302246,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8455890417098999
+                }
+            ],
+            "time": 0.13333334028720856
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 35158,
+                    "sha256": "a291347ca4d0121cb8b6a0af22bed429a40ccaaff38561eecd5eef32cf74b471"
+                },
+                {
+                    "face": 1,
+                    "occupied": 17568,
+                    "sha256": "51449ab5f6156d10a56b6ef30580d4fc6894b8d6449d94f9af523b42110cd25c"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "70b7f349baec84f8906ffd8fcb0f83110b8d93108e17dab0e05213bd48cb01dc"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-09.bmp",
+            "light": [
+                -1.600000023841858,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.904785692691803,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        2.933333396911621,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8416488766670227
+                }
+            ],
+            "time": 0.15000000596046448
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 34666,
+                    "sha256": "6133eeb456c75a80365320b9e9d281a48e8218fede2223c508a077c4079dcc7d"
+                },
+                {
+                    "face": 1,
+                    "occupied": 17028,
+                    "sha256": "cb076fc65aa6ba5ed84a422273edd5ea9c08c928798722e832459136c6603120"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "566b2ad907b71654e99f6f621a12469815084cd581c739e012cea9dc0fe726e3"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-10.bmp",
+            "light": [
+                -1.3333333730697632,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.9025423526763916,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        3.1111111640930176,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8375232815742493
+                }
+            ],
+            "time": 0.1666666716337204
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 34332,
+                    "sha256": "2828e38d50ad827df753b2d56f2d64b56a6a93181c5816ba2778b51df896170a"
+                },
+                {
+                    "face": 1,
+                    "occupied": 15606,
+                    "sha256": "397c426100bdbaa89a8e70f4c85892ca28d5a22594739b71d853152813dbf7ed"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "75715ce6c809272db7bf0a7147973affa1a7c3e6dd0bf2fe9c807a928ac54a02"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-11.bmp",
+            "light": [
+                -1.0666667222976685,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.9002075791358948,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        3.288888931274414,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8331989049911499
+                }
+            ],
+            "time": 0.18333333730697632
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 34306,
+                    "sha256": "d69bb2a97360f9090655439db6b25009fddc97a7d4f01e3d3822b10f8b7a5263"
+                },
+                {
+                    "face": 1,
+                    "occupied": 14240,
+                    "sha256": "f28976fb025b56fccb403b7e5df79f7b3d4cfd416b18c1c3483896514a518e69"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "332046a48cbf383b3e1195b691206e1fed5a09c37a1a01c44e5c3f1dbd43d018"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-12.bmp",
+            "light": [
+                -0.800000011920929,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8977753520011902,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        3.4666666984558105,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8286610245704651
+                }
+            ],
+            "time": 0.20000000298023224
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 33116,
+                    "sha256": "94679ce9aed7909e3edabf57a95709b27fea320d197fda6b217c2272b74afb85"
+                },
+                {
+                    "face": 1,
+                    "occupied": 14722,
+                    "sha256": "48039f5cd4167a42ee458fdd9bd64d5493240826d77b92789be935b08f463a86"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "757ef1c55bf0aa0b815bafa42c69f170fc8a47009c035d3c9897fe9883e87a97"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-13.bmp",
+            "light": [
+                -0.5333333611488342,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8952398896217346,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        3.644444465637207,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8238933682441711
+                }
+            ],
+            "time": 0.21666666865348816
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 32392,
+                    "sha256": "894e2198affb702ee291bd8fc9d4239dca05ad7c0154a88c7e04f33b3af8f2df"
+                },
+                {
+                    "face": 1,
+                    "occupied": 13472,
+                    "sha256": "3c47da0f22e7f9bb720f741c2f14cb93424f5e0464614d919b19093e7bfcf963"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "bc9a7ceed378dadcedb9207faaecb9507e966a0ac997b783a0c50aae8c5e5568"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-14.bmp",
+            "light": [
+                -0.2666666805744171,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8925939798355103,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        3.8222222328186035,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8188780546188354
+                }
+            ],
+            "time": 0.23333333432674408
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 32084,
+                    "sha256": "f19067748cc856e893df2026bb76a32177cef510fb861596c39af2537088cd3b"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12300,
+                    "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "072cd9a4988c4eecce80414385e76d72fc9ccaf236add344ad46984978c53fef"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-15.bmp",
+            "light": [
+                0,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 0,
+                    "occluded": true,
+                    "position": [
+                        4,
+                        0,
+                        0
+                    ],
+                    "stored": 0.814588189125061
+                }
+            ],
+            "time": 0.25
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 31166,
+                    "sha256": "f713e5b3decaa97bb0d3d3155bb1a05c5d088b3dc7ba3619d559be3543811385"
+                },
+                {
+                    "face": 1,
+                    "occupied": 11970,
+                    "sha256": "08ba257e6c39854abdd0f22535128aa905fd8f688c9761a009f9dcfe07a07da9"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "91e77376b65e9e96e2f9e6d5a9e6662665df7e6b540d7d5ced59b28d781feea8"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-16.bmp",
+            "light": [
+                0.2666666805744171,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        4.1777777671813965,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.2666666805744171
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 30210,
+                    "sha256": "1eed596d02c700c05de05f419a5af72b2bbbb2316d10b54074d675ed8799eb8d"
+                },
+                {
+                    "face": 1,
+                    "occupied": 11670,
+                    "sha256": "dcc937b90b2ee0ae28f0e45c7d24354e169f276b48467f1dea21242d09afbd72"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "44336ca7238f2408c8e73012f362d1dfbb572822bd3cc8f0166cb4ca4db3b8fe"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-17.bmp",
+            "light": [
+                0.5333333611488342,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        4.355555534362793,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.28333333134651184
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 29736,
+                    "sha256": "aea21c8f2641551209926a48246f370c46405e2b5295028e963dee75bce652b5"
+                },
+                {
+                    "face": 1,
+                    "occupied": 10612,
+                    "sha256": "d4235623f7532a95628cd5e2168f9e4706cabb7e97534ca0916a905a5806d125"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "8482163126314d4c27164a884955e6314d62f0d64f90c2a25605f6e8a72aef08"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-18.bmp",
+            "light": [
+                0.800000011920929,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        4.5333333015441895,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.30000001192092896
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 28674,
+                    "sha256": "a99f58779147957acf2806bd465e7d6977d797d6731e3c7f87dd947b7f7762a9"
+                },
+                {
+                    "face": 1,
+                    "occupied": 10360,
+                    "sha256": "10b3eb45a8925fd6b09db37f0d08a7756374939335df4c26dc52a6814e300667"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "61805b8a408471d68caf26a6e3dc2ee09eebf608bc464b281bcc0021d40e3f47"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-19.bmp",
+            "light": [
+                1.0666667222976685,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        4.711111068725586,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.3166666626930237
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 27552,
+                    "sha256": "e7a6bdd2180034db1c0ef97525e822e71aede7d1ac2bdefcc38cfbbf12b113aa"
+                },
+                {
+                    "face": 1,
+                    "occupied": 9386,
+                    "sha256": "64a96ae275936845cbc907bcca09610c698b79b12fb989260b84b2b485536e3f"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "75c1c887ef4f88f91a1a0eeec0423dc9b2ea10e74e09926ac9b50511e740243d"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-20.bmp",
+            "light": [
+                1.3333333730697632,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        4.888888835906982,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.3333333432674408
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 26914,
+                    "sha256": "d0b1554d4811b8d09530ffb944b3723f8848bfb7861396cc3409eb1fb03c0145"
+                },
+                {
+                    "face": 1,
+                    "occupied": 9178,
+                    "sha256": "f9d0c89192f628dceb5a7afc9a74a0589e3b15ef6570ca3714730e7aaf799b82"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "c7ab28b9ab7175621e4baf5994eb98039edc198493e5500333a8d59e4934f8dc"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-21.bmp",
+            "light": [
+                1.600000023841858,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        5.066666603088379,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.3499999940395355
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 24906,
+                    "sha256": "9799654887cef7ff35dffc7efb3f23559281c936b5f0b5d893766675327f25aa"
+                },
+                {
+                    "face": 1,
+                    "occupied": 8970,
+                    "sha256": "268cbc291742919a1b92a559b543278fcd7e235f995473a86ba461923b535880"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "2365819c662be1cbc0f0a3f23fc829e1e53167591ecf362e5ca216300e0fbdc5"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-22.bmp",
+            "light": [
+                1.8666666746139526,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        5.244444370269775,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.36666667461395264
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 24260,
+                    "sha256": "3819ee4fde7d5ed1d3aeeb521978afe40eb255f883dd373401ff686eecd34066"
+                },
+                {
+                    "face": 1,
+                    "occupied": 8112,
+                    "sha256": "679fdf7b9d8db42d7aaec80fd3657072c4fe7bc4b4761a53172466786974aa38"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "f74a37349c92a1cdea0fb2e38f74f40e51420cabbe9869c206c0b3bf6792a746"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-23.bmp",
+            "light": [
+                2.133333444595337,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        5.422222137451172,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.38333332538604736
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 22724,
+                    "sha256": "dbe238d7bad5e066d1f74f193231da6556667c5af55cbfe0518be2b69e715b50"
+                },
+                {
+                    "face": 1,
+                    "occupied": 8580,
+                    "sha256": "66cb3e6b35b5a441de25fdacbeea74f726149fb03a18745251cf0b83f7d4e10c"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "2465458147a03364ef024e54e84e70967a5f181e7f6c664eec6d27e7699bc849"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-24.bmp",
+            "light": [
+                2.4000000953674316,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        5.599999904632568,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.4000000059604645
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 20942,
+                    "sha256": "10e931dd9a98b725281c1f18cd8c6e46f108d7173273c877bc9f858c8b48c1d4"
+                },
+                {
+                    "face": 1,
+                    "occupied": 7752,
+                    "sha256": "f9208c734fdefb1be35ab6d8d45e5bfcb07857a72272c2b13725bdd6c20cb2ae"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "65a712e8aec54b6c0933270452f4ea10bdefa975ea56f978e7ec5bdd615ac4a3"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-25.bmp",
+            "light": [
+                2.6666667461395264,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        5.777777671813965,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.4166666567325592
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 19924,
+                    "sha256": "31a9af75ed30f57bc1328cce67ec910bf2a087f06213c2866761f6ecf5764ab2"
+                },
+                {
+                    "face": 1,
+                    "occupied": 7608,
+                    "sha256": "b390bb1c00d3b18b510d0820862e4d4dc4e79ba2db08565a929fde4ddc90674b"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "5e86fc49fa7cc59755e06a9ad3117c5d28cb6d12c324d3d5c20682ae2399db92"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-26.bmp",
+            "light": [
+                2.933333396911621,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        5.955555438995361,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.4333333373069763
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 18112,
+                    "sha256": "dd834b87f0f51b412968d52a9335d861521c3ff5d1e8a1823c7551778a58e583"
+                },
+                {
+                    "face": 1,
+                    "occupied": 7440,
+                    "sha256": "387da8b50680edd49f2ddbd8af19ebd7dffeba5b5245ea2371b3e6bbab26a887"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "b54761d3ecca737d14aaef0a6bf60abc655ca79448f658cbb92ec57c9f4fcd3a"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-27.bmp",
+            "light": [
+                3.200000047683716,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        6.133333206176758,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.44999998807907104
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 16859,
+                    "sha256": "591569df605dd21525f25a8da01ed0f448da49ff54093d40cc55108c493fe41c"
+                },
+                {
+                    "face": 1,
+                    "occupied": 6688,
+                    "sha256": "6243c788a11a03f98ee5513c3c981dde5f64387c20cd715f462a78837720a892"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "bd5a7623dd6ffb3b1344c92b0ed4652504f37779682ce9a012ee9700b928ce3c"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-28.bmp",
+            "light": [
+                3.4666666984558105,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        6.311110973358154,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.46666666865348816
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 14600,
+                    "sha256": "69edc0d6c79174c73e1950375d4e85da0a79365eaf01f11046c1d88bb622efe3"
+                },
+                {
+                    "face": 1,
+                    "occupied": 6556,
+                    "sha256": "add62f7b42812ffe02c21e0d36d89db29e002dfdbd805ee1e1cb22fe36f8058e"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "0c5c3ffe08feb7cac88f2b2295be3876d5a630e4a17b54811181037ded65144c"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-29.bmp",
+            "light": [
+                3.7333333492279053,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        6.488888740539551,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.4833333194255829
+        },
+        {
+            "count": 1,
+            "directionalShadows": false,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 12300,
+                    "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                },
+                {
+                    "face": 1,
+                    "occupied": 6446,
+                    "sha256": "9da197cb26290c68dd294f8e32c17586e73b6f54edf5f1ec19a2d635736eddc8"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "47275fdb740706d2c3ae2687ec82321167b0f703e8e6d11fe98e7a2dada88401"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-point\\packaged-motion\\seam-r1-manual0-30.bmp",
+            "light": [
+                4,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        6.666666507720947,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                }
+            ],
+            "time": 0.5
+        }
+    ],
+    "ok": true
+}

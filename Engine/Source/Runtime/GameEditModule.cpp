@@ -89,6 +89,28 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
             {
                 if (plV2.version == 1 && plV2.set) pointLightV2_ = plV2;
             }
+            EngineScriptApi script{};
+            if (query && query(extensionContext, EngineScriptExtension, 1, sizeof(script), &script))
+            {
+                if (script.version != 1 || script.context != extensionContext || !script.describe || !script.get || !script.set ||
+                    !script.check || !script.readProblems || !script.getVariables || !script.setVariables)
+                    throw std::runtime_error("Invalid script API");
+                script_ = script;
+            }
+            EngineGraphTraceApi trace{};
+            if (query && query(extensionContext, EngineGraphTraceExtension, 1, sizeof(trace), &trace))
+            {
+                // Debugging only: a broken table switches the trace off instead of rejecting the module.
+                if (trace.version == 1 && trace.context == extensionContext && trace.listObjects && trace.read && trace.readValues) graphTrace_ = trace;
+            }
+            EngineAiMachineApi ai{};
+            if (query && query(extensionContext, EngineAiMachineExtension, 1, sizeof(ai), &ai))
+            {
+                // Editor support only: a broken table switches it off instead of rejecting the module.
+                if (ai.version == 1 && ai.context == extensionContext && ai.describe && ai.check && ai.listUnits && ai.readStates &&
+                    ai.readMemory && ai.readHistory)
+                    aiMachine_ = ai;
+            }
             EngineAudioPreviewApi audio{};
             if (query && query(extensionContext, EngineAudioPreviewExtension, 1, sizeof(audio), &audio))
             {

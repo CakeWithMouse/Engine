@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QJsonArray>
+#include <functional>
 #include <QWidget>
 #include <QString>
 #include <QColor>
@@ -19,6 +21,8 @@ class NoWheelDoubleSpinBox;
 class CollapsibleCard;
 class TransformCard;
 class MaterialCard;
+class ScriptCard;
+class AiMachineCard;
 class GeometryCard;
 
 struct EditorSnapshot;
@@ -56,6 +60,13 @@ class ObjectInspectorPanel : public QWidget
     Q_OBJECT
 
 public:
+    // Список переменных скрипта (из его файла) для карточки «Скрипт»: /Game путь -> [{"name","type","value"}].
+    void SetScriptVariablesReader(std::function<QJsonArray(const QString&)> reader);
+    // Схема свойств типа со stateMachine и machineMemory: их правит карточка «Автомат ИИ», а не общий список свойств.
+    static bool HasAiMachine(const std::string& propertySchema);
+    // Карточка «Автомат ИИ»: ошибки файла machine по проверке движка и состояние персонажа в Play (пустое — скрыть).
+    void SetAiMachineProblems(const QString& machine, const QStringList& lines);
+    void SetAiMachineLive(const QStringList& lines);
     explicit ObjectInspectorPanel(QWidget* parent = nullptr);
     ~ObjectInspectorPanel() override;
 
@@ -69,7 +80,9 @@ public:
     );
 
     void ClearFocusIfInside();
+    void CommitPendingEdits();
     void RetranslateUi();
+    void InvalidateAssetCache();
     QSize minimumSizeHint() const override { return QSize(80, 60); }
 
 signals:
@@ -94,13 +107,17 @@ signals:
     void LightColorRequested(quint64 objectId, const QColor& current);
 
     void ChooseModelRequested();
-    void ClearModelRequested();
     void CharacterSpeedEditingFinished(quint64 objectId, double speed);
-    void ChooseTextureRequested();
-    void ClearTextureRequested();
     void ChooseMaterialRequested();
     void EditMaterialRequested(const QString& virtualPath);
     void ClearMaterialRequested();
+    void OpenScriptRequested(const QString& virtualPath); // пустой путь: создать скрипт для объекта
+    void ChooseScriptRequested();
+    void ClearScriptRequested();
+    void ScriptVariablesChanged(const QString& json); // значения переменных скрипта у объекта; пустая — как в скрипте
+    void CreateAiMachineRequested();                  // создать .fsm и назначить выделенному «ИИ-персонажу»
+    void OpenAiMachineRequested(const QString& virtualPath);
+    void ChooseAiMachineRequested();
 
 private:
     void BuildUi();
@@ -124,6 +141,11 @@ private:
     quint64 selectedId_ = 0; std::string selectedType_;
     EditorQtHost::Snapshot lastSnapshot_;
     bool refreshing_ = false;
+    QString lastCardsModel_, lastCardsPrimitive_, lastCardsMaterial_, lastCardsRoot_;
+    bool lastCardsShowGeometry_ = false;
+    bool lastCardsShowMaterial_ = false;
+    bool lastCardsMaterialLight_ = false;
+    bool lastCardsValid_ = false;
     int langSubId_ = 0;
     int themeSubId_ = 0;
     QMap<QString, QJsonValue> pendingProperties_;
@@ -136,6 +158,8 @@ private:
     TransformCard* cardTransform_ = nullptr;
     GeometryCard* cardGeometry_ = nullptr;
     MaterialCard* cardMaterial_ = nullptr;
+    ScriptCard* cardScript_ = nullptr;
+    AiMachineCard* cardAi_ = nullptr;
     CollapsibleCard* cardLight_ = nullptr;
     CollapsibleCard* cardCharacter_ = nullptr;
     CollapsibleCard* cardPhysics_ = nullptr;

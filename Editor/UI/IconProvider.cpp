@@ -1,5 +1,6 @@
 #include "IconProvider.h"
 #include "EditorIconData.h"
+#include "EditorIconFallbacks.h"
 #include "EditorTheme.h"
 #include "IEditorHost.h"
 #ifdef ENGINE_HAS_QTSVG
@@ -12,6 +13,19 @@
 
 namespace
 {
+    QImage RenderFallback(const char* svgData, const QColor& color, int size)
+    {
+        const auto asset = EditorIconFallbacks::Find(svgData);
+        QImage image = QImage::fromData(asset.data, asset.size, "PNG");
+        if (image.isNull()) return {};
+        image = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+        QPainter painter(&image);
+        painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        painter.fillRect(image.rect(), color);
+        painter.end();
+        return image.scaled(size, size, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+
     const char* GetTablerSvg(const QString& name)
     {
         if (name == QLatin1String("player-play") || name == QLatin1String("play")) return EditorIcons::TABLER_PLAYER_PLAY;
@@ -73,7 +87,7 @@ namespace
         {
             return QPixmap::fromImage(img.scaled(size, size, Qt::KeepAspectRatio, Qt::SmoothTransformation));
         }
-        return pix;
+        return QPixmap::fromImage(RenderFallback(svgData, color, size));
     }
 }
 
@@ -137,37 +151,35 @@ void IconProvider::UploadIcons(IEditorHost* host, bool force)
     (void)force;
 
     auto renderSvg = [](const char* svgData, EditorIcons::IconId id, int size = 64) -> QImage {
-        (void)id;
+        const int inset = (id == EditorIcons::IconId::PointLight || id == EditorIcons::IconId::SunSky) ? 8 : 12;
+        const int glyphSize = size - 2 * inset;
         QImage image(size, size, QImage::Format_RGBA8888);
         image.fill(Qt::transparent);
 
         QPainter p(&image);
         p.setRenderHint(QPainter::Antialiasing, true);
 
-        // Circular badge plate (white, will be tinted by billboard tint in shader)
-        const QRectF plateRect(3.0, 3.0, size - 6.0, size - 6.0);
-        p.setBrush(QColor(255, 255, 255, 220));
-        p.setPen(QPen(QColor(255, 255, 255, 255), 2.5));
-        p.drawEllipse(plateRect);
-
+        // Theme-neutral glyph alpha mask: no plate, white ink. The billboard
+        // shader supplies the categorical plate tint and derives a contrasting
+        // glyph color from it, so this texture stays valid for both themes.
         const char* svgStart = std::strstr(svgData, "<svg");
         QByteArray bytes(svgStart ? svgStart : svgData);
-        bytes.replace("stroke=\"#FFFFFF\"", "stroke=\"#1A1A1E\"");
-        bytes.replace("stroke=\"currentColor\"", "stroke=\"#1A1A1E\"");
+        bytes.replace("stroke=\"currentColor\"", "stroke=\"#FFFFFF\"");
 
 #ifdef ENGINE_HAS_QTSVG
         QSvgRenderer renderer(bytes);
         if (renderer.isValid())
         {
-            const QRectF iconRect(14.0, 14.0, size - 28.0, size - 28.0);
+            const QRectF iconRect(inset, inset, glyphSize, glyphSize);
             renderer.render(&p, iconRect);
         }
 #else
         QImage glyph;
         glyph.loadFromData(bytes, "SVG");
+        if (glyph.isNull()) glyph = RenderFallback(svgData, QColor(0xFF, 0xFF, 0xFF), glyphSize);
         if (!glyph.isNull())
         {
-            p.drawImage(QRect(14, 14, size - 28, size - 28), glyph);
+            p.drawImage(QRect(inset, inset, glyphSize, glyphSize), glyph);
         }
 #endif
         p.end();

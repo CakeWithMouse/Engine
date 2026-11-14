@@ -4,6 +4,7 @@
 #include "SceneObjectsPanel.h"
 #include "MainToolBar.h"
 #include "ViewportHeaderBar.h"
+#include "IconProvider.h"
 #include <QTreeWidgetItemIterator>
 #include "EditorLocale.h"
 #include "DockLayoutManager.h"
@@ -72,6 +73,26 @@ inline void Run()
 {
     std::cout << "[Test] Running UiSmokeTests..." << std::endl;
     int checks = 0;
+    // A non-null QPixmap can still be fully transparent when QtSvg is absent.
+    // Exercise real alpha coverage for every UI glyph and all QIcon states.
+    for (const char* name : {"play", "pause", "stop", "external", "adjustments", "settings",
+        "translate", "rotate", "scale", "world", "cube", "snap", "reset", "more", "eye",
+        "eye-off", "lock", "lock-open", "import", "add", "remove", "folder", "file", "search",
+        "bulb", "chevron-up", "chevron-down", "chevron-right", "camera", "particles"}) {
+        const auto icon = IconProvider::GetIcon(QString::fromLatin1(name));
+        for (auto mode : {QIcon::Normal, QIcon::Disabled, QIcon::Active, QIcon::Selected}) {
+            const auto image = icon.pixmap(24, 24, mode).toImage();
+            int visible = 0, transparent = 0;
+            for (int y = 0; y < image.height(); ++y)
+                for (int x = 0; x < image.width(); ++x) {
+                    if (qAlpha(image.pixel(x,y)) > 32) ++visible;
+                    if (qAlpha(image.pixel(x,y)) == 0) ++transparent;
+                }
+            if (visible < 10 || transparent < 10)
+                throw std::runtime_error(std::string("Missing/opaque icon: ") + name);
+            ++checks;
+        }
+    }
     {
         QMainWindow window;
         auto* tabs = new QTabBar(&window);

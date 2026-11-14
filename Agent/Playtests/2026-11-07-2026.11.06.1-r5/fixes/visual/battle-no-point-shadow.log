@@ -1,0 +1,28 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Tank LOD0: 2160 triangles
+Tank LOD1: 240 triangles
+Tank LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Apc LOD0: 3024 triangles
+Apc LOD1: 336 triangles
+Apc LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Truck LOD0: 2592 triangles
+Truck LOD1: 288 triangles
+Truck LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Artillery LOD0: 2160 triangles
+Artillery LOD1: 240 triangles
+Artillery LOD2: 48 triangles
+ImpostorAtlas: baked 16x4 views at 128 px, 4 mips.
+Baked shadow map: 4 static components at 4096 px.
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_LIGHTING]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Battle/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFERRED_GBUFFER]
+frame-dump E:/Engine/Agent/Playtests/2026-11-07-2026.11.06.1-r5/fixes/visual/battle-no-point-shadow.bmp written=1 size=1000x500
+battle-measurement units=1000 types=4 scenery=300 mode=deferred shading=materials shadows=on anim=off sprites=on frames=55 frame_ms=0.77 fps=1293.0 gpu_ms=0.48 draws=29.0 instances=2752 visible=755 vertices=75500 lod0=4 lod1=724 lod2=124 sprite=0 culled=245 gpu=NVIDIA GeForce RTX 4070 Laptop GPU

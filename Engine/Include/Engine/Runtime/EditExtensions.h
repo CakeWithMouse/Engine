@@ -32,6 +32,147 @@ struct EngineDocumentCapabilities
     uint32_t minReadVersion, maxReadVersion, preferredWriteVersion;
 };
 
+// Visual scripts (.vscript, see Engine/docs/VISUAL-SCRIPTING.md). Edit scene objects carry a script path
+// (saved as "assets.script"); Play runs the scripts. Modules without this extension have no scripts.
+constexpr const char* EngineScriptExtension = "Engine.Scene.Script";
+constexpr uint32_t EngineScriptService = 0x01534352u;
+// Text valid during the call only.
+using EngineScriptTextVisitor = void (ENGINE_MODULE_CALL *)(void* user, const char* utf8);
+// A problem of a script: node 0 is the file as a whole; objectId 0 when it comes from check().
+struct EngineScriptProblem
+{
+    uint64_t objectId;
+    const char* objectName; // "" without an object
+    const char* script;     // /Game path
+    int32_t node;
+    const char* message;
+    uint32_t runtime;       // 1: stopped while running, 0: did not compile or cannot be read
+};
+using EngineScriptProblemVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineScriptProblem* problem);
+struct EngineScriptApi
+{
+    uint32_t version; // 1
+    void* context;
+    // The node catalog as JSON (schema, nodes, pins, properties, key names). Any state.
+    uint32_t (ENGINE_MODULE_CALL *describe)(void*, EngineScriptTextVisitor, void* user);
+    // Script path of an object of the active scene, the one readActiveScene shows ("" without one). Any state.
+    uint32_t (ENGINE_MODULE_CALL *get)(void*, uint64_t id, EngineScriptTextVisitor, void* user);
+    // Edit state only. "" clears; otherwise an existing .vscript inside /Game.
+    uint32_t (ENGINE_MODULE_CALL *set)(void*, uint64_t id, const char* path, char* error, uint32_t capacity);
+    // Compiles the file now with the same compiler Play uses; every problem is visited. Ok even with problems.
+    uint32_t (ENGINE_MODULE_CALL *check)(void*, const char* path, EngineScriptProblemVisitor, void* user);
+    // Problems of the scripts in the running Play scene: stopped scripts and scripts that did not start.
+    uint32_t (ENGINE_MODULE_CALL *readProblems)(void*, EngineScriptProblemVisitor, void* user);
+    // Values of script variables for one object: a JSON object {"Speed": 45}, "" — the script's defaults
+    // ("assets.scriptVariables"). Any state for get; set only in Edit, "" clears.
+    uint32_t (ENGINE_MODULE_CALL *getVariables)(void*, uint64_t id, EngineScriptTextVisitor, void* user);
+    uint32_t (ENGINE_MODULE_CALL *setVariables)(void*, uint64_t id, const char* json, char* error, uint32_t capacity);
+};
+
+// Live state of graph nodes in the running Play scene, for debugging in graph editors. Today the graphs are
+// visual scripts; other graph runtimes (behavior trees, state machines) report through the same table and add
+// states. Nothing is reported in Edit. Modules without this extension have no trace.
+constexpr const char* EngineGraphTraceExtension = "Engine.Scene.GraphTrace";
+constexpr uint32_t EngineGraphTraceService = 0x01475452u;
+enum EngineGraphNodeState : uint32_t
+{
+    EngineGraphNodeRan = 1,    // ran or was evaluated at least once
+    EngineGraphNodeFailed = 2, // the graph of this object stopped on this node
+};
+// An object of the Play scene that runs a graph asset. objectId — the edit-scene object of the same name
+// (as in EngineScriptProblem); text is valid during the call only.
+struct EngineGraphTraceObject
+{
+    uint64_t objectId;
+    const char* objectName;
+    uint32_t failed; // 1: the graph of this object is stopped
+};
+struct EngineGraphTraceNode
+{
+    int32_t node;       // node id in the file
+    uint32_t state;     // EngineGraphNodeState
+    uint32_t framesAgo; // 0: during the latest frame
+    uint32_t count;     // runs since Play started (saturates)
+};
+// The last value a data output gave to a reader; text is valid during the call only.
+struct EngineGraphTraceValue
+{
+    int32_t node;
+    const char* pin;
+    const char* text;
+};
+using EngineGraphTraceObjectVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineGraphTraceObject* object);
+using EngineGraphTraceNodeVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineGraphTraceNode* node);
+using EngineGraphTraceValueVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineGraphTraceValue* value);
+struct EngineGraphTraceApi
+{
+    uint32_t version; // 1
+    void* context;
+    // Objects of the running Play scene that run the graph asset (/Game path).
+    uint32_t (ENGINE_MODULE_CALL *listObjects)(void*, const char* asset, EngineGraphTraceObjectVisitor, void* user);
+    // Nodes of the asset that ran for objectId (0: the first object running it). NotFound: no such object runs it.
+    uint32_t (ENGINE_MODULE_CALL *read)(void*, const char* asset, uint64_t objectId, EngineGraphTraceNodeVisitor, void* user);
+    // Values on the data outputs for the same object, as read() chooses it.
+    uint32_t (ENGINE_MODULE_CALL *readValues)(void*, const char* asset, uint64_t objectId, EngineGraphTraceValueVisitor, void* user);
+};
+
+// AI state machines (.fsm, see Engine/docs/AI-FSM.md) for the AI editor: the block catalog, a check of a file by
+// the loader Play uses and, in Play, the AI characters with their active states, memory and transition history.
+// Modules without this extension have no AI editor support; .fsm files still run in them if the engine has AI.
+constexpr const char* EngineAiMachineExtension = "Engine.Scene.AiMachine";
+constexpr uint32_t EngineAiMachineService = 0x0141494Du;
+// Text valid during the call only.
+using EngineAiTextVisitor = void (ENGINE_MODULE_CALL *)(void* user, const char* utf8);
+// A problem of a .fsm: node 0 is the file as a whole. Messages are English; the editor translates them.
+struct EngineAiProblem
+{
+    int32_t node;
+    const char* message;
+};
+// An AI character of the running Play scene. objectId — the edit-scene object of the same name (0 without one).
+struct EngineAiUnit
+{
+    uint64_t objectId;
+    const char* objectName;
+    const char* machine;    // the character's "stateMachine": a .fsm /Game path or a C++ machine name
+    const char* activePath; // "Combat/Chase"; "" when nothing is active
+    uint32_t running;       // 0: no machine runs (finished, stopped or never started)
+};
+// One state of the active chain, the outermost first.
+struct EngineAiState
+{
+    int32_t node;      // node id in the .fsm; 0 for a C++ machine or a state of a linked machine
+    const char* name;
+    const char* path;  // "Combat/Chase"
+};
+// One memory value: type is bool, int, float, vec3, string or object; text is readable (an object by its name).
+struct EngineAiMemoryValue
+{
+    const char* key;
+    const char* type;
+    const char* text;
+};
+using EngineAiProblemVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineAiProblem* problem);
+using EngineAiUnitVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineAiUnit* unit);
+using EngineAiStateVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineAiState* state);
+using EngineAiMemoryVisitor = void (ENGINE_MODULE_CALL *)(void* user, const EngineAiMemoryValue* value);
+struct EngineAiMachineApi
+{
+    uint32_t version; // 1
+    void* context;
+    // Node types, triggers, variable types and every block with its parameters as JSON. Any state.
+    uint32_t (ENGINE_MODULE_CALL *describe)(void*, EngineAiTextVisitor, void* user);
+    // Loads the .fsm (/Game path) now with the loader Play uses; every problem is visited. Ok even with problems.
+    uint32_t (ENGINE_MODULE_CALL *check)(void*, const char* path, EngineAiProblemVisitor, void* user);
+    // AI characters of the running Play scene whose "stateMachine" equals machine ("" — every one). Nothing in Edit.
+    uint32_t (ENGINE_MODULE_CALL *listUnits)(void*, const char* machine, EngineAiUnitVisitor, void* user);
+    // For one character (objectId as listUnits gives it): the active chain, the memory, the history lines oldest
+    // first ("  1.20  Patrol -> Chase   event Ai.Spotted"). NotFound: no such AI character in Play.
+    uint32_t (ENGINE_MODULE_CALL *readStates)(void*, uint64_t objectId, EngineAiStateVisitor, void* user);
+    uint32_t (ENGINE_MODULE_CALL *readMemory)(void*, uint64_t objectId, EngineAiMemoryVisitor, void* user);
+    uint32_t (ENGINE_MODULE_CALL *readHistory)(void*, uint64_t objectId, EngineAiTextVisitor, void* user);
+};
+
 // Audio asset preview: decodes and plays a /Game audio file through the edit scene's
 // audio engine. Edit state only — Play owns its game audio.
 constexpr const char* EngineAudioPreviewExtension = "Engine.Scene.AudioPreview";
@@ -44,3 +185,14 @@ struct EngineAudioPreviewApi
 };
 // Optional Editor export; nullptr unbinds before stop/destroy. Editor must copy the table.
 typedef int (ENGINE_MODULE_CALL *EngineBindAudioPreviewFn)(uint32_t, uint32_t, void* editorSession, const EngineAudioPreviewApi*);
+
+// Asset import with options: enables passing serialization options (e.g. sidecar JSON)
+// to model/asset importers without changing the frozen EngineEditSessionApi layout.
+constexpr const char* EngineAssetImportExtension = "Engine.Asset.Import";
+struct EngineAssetImportApi
+{
+    uint32_t version; // 1
+    void* context;
+    uint32_t (ENGINE_MODULE_CALL *importWithOptions)(void* context, const char* source, uint32_t kind,
+        const char* optionsJson, char* virtualPath, uint32_t pathCapacity, char* error, uint32_t errorCapacity);
+};

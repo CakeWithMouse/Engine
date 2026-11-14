@@ -3,6 +3,7 @@
 #include <Engine/MainGame/Player.h>
 #include <Engine/Scene/SceneDocument.h>
 #include <Engine/SaveGame/SaveGame.h>
+#include <Engine/Sound/AudioEngine.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
 #include <Engine/Components/Character.h>
 #include <cstring>
@@ -93,6 +94,8 @@ uint32_t SceneEditSession::Control(uint32_t command)
         }
         candidate->InitializeGameplay();
         candidate->GetInput().SetContextEnabled(Input::Context::Game, inputFocused_);
+        // The edit scene stays alive during Play, but its asset preview must not.
+        if (auto* audio = edit_->GetAudioEngine()) audio->StopAll();
         gameSession_ = std::move(session);
         play_ = std::move(candidate);
         state_ = EnginePlaying;
@@ -114,8 +117,17 @@ uint32_t SceneEditSession::Control(uint32_t command)
         }
         return EngineSceneOk;
     }
-    if (command == EnginePause && state_ == EnginePlaying) { play_->OnFocusLost(); play_->GetInput().SetContextEnabled(Input::Context::Game,false); state_ = EnginePaused; return EngineSceneOk; }
-    if (command == EngineResume && state_ == EnginePaused) { play_->OnFocusLost(); play_->GetInput().SetContextEnabled(Input::Context::Game,inputFocused_); state_ = EnginePlaying; return EngineSceneOk; }
+    if (command == EnginePause && state_ == EnginePlaying) {
+        if (auto* audio = play_->GetAudioEngine()) audio->SetPaused(true);
+        play_->OnFocusLost(); play_->GetInput().SetContextEnabled(Input::Context::Game,false);
+        state_ = EnginePaused; return EngineSceneOk;
+    }
+    if (command == EngineResume && state_ == EnginePaused) {
+        if (auto* audio = play_->GetAudioEngine())
+            if (!audio->SetPaused(false)) return EngineSceneFailure;
+        play_->OnFocusLost(); play_->GetInput().SetContextEnabled(Input::Context::Game,inputFocused_);
+        state_ = EnginePlaying; return EngineSceneOk;
+    }
     return EngineSceneInvalidArgument;
 }
 EngineEditSessionApi SceneEditSession::GetApi() noexcept
@@ -195,7 +207,10 @@ EngineEditSessionApi SceneEditSession::GetApi() noexcept
                 {
                     for (const auto& item : s.play_->GetScene().GetComponents()) item.second->SetGame(s.play_.get());
                     try { s.play_->StepProjectSimulation(static_cast<float>(dt)); }
-                    catch (...) { s.state_ = EnginePaused; return EngineSceneSimulationFailed; }
+                    catch (...) {
+                        if (auto* audio = s.play_->GetAudioEngine()) audio->SetPaused(true);
+                        s.state_ = EnginePaused; return EngineSceneSimulationFailed;
+                    }
                     if (s.pendingStop_) return EngineSceneOk;
                 }
                 if (s.state_ == EngineEditing && s.attached_)

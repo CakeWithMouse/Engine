@@ -1,0 +1,163 @@
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Game/build/x64/Release/Runtime/EngineContent/Shaders/InstancedMesh.hlsl [VARIANT_DEFAULT]
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 640x480
+[Info] Overlay: early return (empty lines and billboards)
+frame-dump E:/Engine/Engine/build/playtests/20261107-point/baseline-crowd-0.bmp written=1 size=640x480
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 640x480
+frame-dump E:/Engine/Engine/build/playtests/20261107-point/baseline-crowd-5.bmp written=1 size=640x480
+{
+    "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU",
+    "caster": "crowd",
+    "frames": [
+        {
+            "count": 1,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 6446,
+                    "sha256": "9da197cb26290c68dd294f8e32c17586e73b6f54edf5f1ec19a2d635736eddc8"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12300,
+                    "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "cc69497b3b548511f9a51d8c6fda2f90eab234ba7aa7a1ad451b00b0301a3ea3"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:/Engine/Engine/build/playtests/20261107-point/baseline-crowd-0.bmp",
+            "light": [
+                0,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": true,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.8135951161384583
+                },
+                {
+                    "depth": 0.9533898830413818,
+                    "face": 0,
+                    "occluded": false,
+                    "position": [
+                        8,
+                        0,
+                        0
+                    ],
+                    "stored": 1
+                }
+            ],
+            "time": 0
+        },
+        {
+            "count": 1,
+            "faces": [
+                {
+                    "face": 0,
+                    "occupied": 6446,
+                    "sha256": "9da197cb26290c68dd294f8e32c17586e73b6f54edf5f1ec19a2d635736eddc8"
+                },
+                {
+                    "face": 1,
+                    "occupied": 12300,
+                    "sha256": "adcf45361cef157e28b1bcc87bf775583926e74dc8ebb71a22c51e8cb11f9055"
+                },
+                {
+                    "face": 2,
+                    "occupied": 0,
+                    "sha256": "e678838a4ec435fcfc028f3b3de044af1e44847e3b5d6e73ea19e21788531e2d"
+                },
+                {
+                    "face": 3,
+                    "occupied": 1048576,
+                    "sha256": "358a4b0eea491d1a7e0e5fe734d6c64bf1985267f505f899d5968b2b5485a9c2"
+                },
+                {
+                    "face": 4,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                },
+                {
+                    "face": 5,
+                    "occupied": 19456,
+                    "sha256": "4a1164347f278229397aa18995244fee45a267e1060f981f7ccc6430e2f63e34"
+                }
+            ],
+            "image": "E:/Engine/Engine/build/playtests/20261107-point/baseline-crowd-5.bmp",
+            "light": [
+                0,
+                4,
+                0,
+                30
+            ],
+            "position": [
+                0,
+                1,
+                0
+            ],
+            "probes": [
+                {
+                    "depth": 0.8898305296897888,
+                    "face": 3,
+                    "occluded": false,
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "stored": 0.889866292476654
+                },
+                {
+                    "depth": 0.9533898830413818,
+                    "face": 0,
+                    "occluded": false,
+                    "position": [
+                        8,
+                        0,
+                        0
+                    ],
+                    "stored": 1
+                }
+            ],
+            "time": 0.5
+        }
+    ],
+    "ok": true
+}

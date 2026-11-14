@@ -1,0 +1,3658 @@
+{
+  "passed": 0,
+  "frames": 280,
+  "cases": [
+    {
+      "name": "0-mesh-normal",
+      "frames": 14,
+      "errors": [
+        "0-mesh-normal-00.bmp: 132/543 wrong pixels, max error 96",
+        "0-mesh-normal-01.bmp: 340/526 wrong pixels, max error 96",
+        "0-mesh-normal-02.bmp: 539/539 wrong pixels, max error 96",
+        "0-mesh-normal-03.bmp: 541/541 wrong pixels, max error 96",
+        "0-mesh-normal-04.bmp: 539/539 wrong pixels, max error 96",
+        "0-mesh-normal-05.bmp: 360/546 wrong pixels, max error 96",
+        "0-mesh-normal-06.bmp: 182/522 wrong pixels, max error 95",
+        "0-mesh-normal-07.bmp: 132/543 wrong pixels, max error 96",
+        "0-mesh-normal-08.bmp: 539/539 wrong pixels, max error 96",
+        "0-mesh-normal-09.bmp: 541/541 wrong pixels, max error 96",
+        "0-mesh-normal-10.bmp: 539/539 wrong pixels, max error 96",
+        "0-mesh-normal-11.bmp: 182/522 wrong pixels, max error 95",
+        "0-mesh-normal-12.bmp: 132/543 wrong pixels, max error 96",
+        "0-mesh-normal-13.bmp: 541/541 wrong pixels, max error 96"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-normal-00.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-normal-01.bmp",
+          "samples": 526,
+          "wrongPixels": 340,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-normal-02.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-normal-03.bmp",
+          "samples": 541,
+          "wrongPixels": 541,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-normal-04.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-normal-05.bmp",
+          "samples": 546,
+          "wrongPixels": 360,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-normal-06.bmp",
+          "samples": 522,
+          "wrongPixels": 182,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-normal-07.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-normal-08.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-normal-09.bmp",
+          "samples": 541,
+          "wrongPixels": 541,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-normal-10.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-normal-11.bmp",
+          "samples": 522,
+          "wrongPixels": 182,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-normal-12.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-normal-13.bmp",
+          "samples": 541,
+          "wrongPixels": 541,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-mesh-reverse",
+      "frames": 14,
+      "errors": [
+        "0-mesh-reverse-00.bmp: 227/543 wrong pixels, max error 96",
+        "0-mesh-reverse-01.bmp: 338/526 wrong pixels, max error 95",
+        "0-mesh-reverse-02.bmp: 353/539 wrong pixels, max error 95",
+        "0-mesh-reverse-03.bmp: 354/541 wrong pixels, max error 95",
+        "0-mesh-reverse-04.bmp: 354/539 wrong pixels, max error 95",
+        "0-mesh-reverse-05.bmp: 340/546 wrong pixels, max error 95",
+        "0-mesh-reverse-06.bmp: 338/522 wrong pixels, max error 96",
+        "0-mesh-reverse-07.bmp: 227/543 wrong pixels, max error 96",
+        "0-mesh-reverse-08.bmp: 353/539 wrong pixels, max error 95",
+        "0-mesh-reverse-09.bmp: 354/541 wrong pixels, max error 95",
+        "0-mesh-reverse-10.bmp: 354/539 wrong pixels, max error 95",
+        "0-mesh-reverse-11.bmp: 338/522 wrong pixels, max error 96",
+        "0-mesh-reverse-12.bmp: 227/543 wrong pixels, max error 96",
+        "0-mesh-reverse-13.bmp: 354/541 wrong pixels, max error 95"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-reverse-00.bmp",
+          "samples": 543,
+          "wrongPixels": 227,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-reverse-01.bmp",
+          "samples": 526,
+          "wrongPixels": 338,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-reverse-02.bmp",
+          "samples": 539,
+          "wrongPixels": 353,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-reverse-03.bmp",
+          "samples": 541,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-reverse-04.bmp",
+          "samples": 539,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-reverse-05.bmp",
+          "samples": 546,
+          "wrongPixels": 340,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-reverse-06.bmp",
+          "samples": 522,
+          "wrongPixels": 338,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-reverse-07.bmp",
+          "samples": 543,
+          "wrongPixels": 227,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-reverse-08.bmp",
+          "samples": 539,
+          "wrongPixels": 353,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-reverse-09.bmp",
+          "samples": 541,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-reverse-10.bmp",
+          "samples": 539,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-reverse-11.bmp",
+          "samples": 522,
+          "wrongPixels": 338,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-reverse-12.bmp",
+          "samples": 543,
+          "wrongPixels": 227,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-mesh-reverse-13.bmp",
+          "samples": 541,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-copies-normal",
+      "frames": 14,
+      "errors": [
+        "0-copies-normal-00.bmp: 132/543 wrong pixels, max error 96",
+        "0-copies-normal-01.bmp: 340/526 wrong pixels, max error 96",
+        "0-copies-normal-02.bmp: 539/539 wrong pixels, max error 96",
+        "0-copies-normal-03.bmp: 541/541 wrong pixels, max error 96",
+        "0-copies-normal-04.bmp: 539/539 wrong pixels, max error 96",
+        "0-copies-normal-05.bmp: 360/546 wrong pixels, max error 96",
+        "0-copies-normal-06.bmp: 182/522 wrong pixels, max error 95",
+        "0-copies-normal-07.bmp: 132/543 wrong pixels, max error 96",
+        "0-copies-normal-08.bmp: 539/539 wrong pixels, max error 96",
+        "0-copies-normal-09.bmp: 541/541 wrong pixels, max error 96",
+        "0-copies-normal-10.bmp: 539/539 wrong pixels, max error 96",
+        "0-copies-normal-11.bmp: 182/522 wrong pixels, max error 95",
+        "0-copies-normal-12.bmp: 132/543 wrong pixels, max error 96",
+        "0-copies-normal-13.bmp: 541/541 wrong pixels, max error 96"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-normal-00.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-normal-01.bmp",
+          "samples": 526,
+          "wrongPixels": 340,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-normal-02.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-normal-03.bmp",
+          "samples": 541,
+          "wrongPixels": 541,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-normal-04.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-normal-05.bmp",
+          "samples": 546,
+          "wrongPixels": 360,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-normal-06.bmp",
+          "samples": 522,
+          "wrongPixels": 182,
+          "maxError": 95,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-normal-07.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-normal-08.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-normal-09.bmp",
+          "samples": 541,
+          "wrongPixels": 541,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-normal-10.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-normal-11.bmp",
+          "samples": 522,
+          "wrongPixels": 182,
+          "maxError": 95,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-normal-12.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-normal-13.bmp",
+          "samples": 541,
+          "wrongPixels": 541,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-copies-reverse",
+      "frames": 14,
+      "errors": [
+        "0-copies-reverse-00.bmp: 227/543 wrong pixels, max error 96",
+        "0-copies-reverse-01.bmp: 338/526 wrong pixels, max error 95",
+        "0-copies-reverse-02.bmp: 353/539 wrong pixels, max error 95",
+        "0-copies-reverse-03.bmp: 354/541 wrong pixels, max error 95",
+        "0-copies-reverse-04.bmp: 354/539 wrong pixels, max error 95",
+        "0-copies-reverse-05.bmp: 340/546 wrong pixels, max error 95",
+        "0-copies-reverse-06.bmp: 338/522 wrong pixels, max error 96",
+        "0-copies-reverse-07.bmp: 227/543 wrong pixels, max error 96",
+        "0-copies-reverse-08.bmp: 353/539 wrong pixels, max error 95",
+        "0-copies-reverse-09.bmp: 354/541 wrong pixels, max error 95",
+        "0-copies-reverse-10.bmp: 354/539 wrong pixels, max error 95",
+        "0-copies-reverse-11.bmp: 338/522 wrong pixels, max error 96",
+        "0-copies-reverse-12.bmp: 227/543 wrong pixels, max error 96",
+        "0-copies-reverse-13.bmp: 354/541 wrong pixels, max error 95"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-reverse-00.bmp",
+          "samples": 543,
+          "wrongPixels": 227,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-reverse-01.bmp",
+          "samples": 526,
+          "wrongPixels": 338,
+          "maxError": 95,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-reverse-02.bmp",
+          "samples": 539,
+          "wrongPixels": 353,
+          "maxError": 95,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-reverse-03.bmp",
+          "samples": 541,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-reverse-04.bmp",
+          "samples": 539,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-reverse-05.bmp",
+          "samples": 546,
+          "wrongPixels": 340,
+          "maxError": 95,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-reverse-06.bmp",
+          "samples": 522,
+          "wrongPixels": 338,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-reverse-07.bmp",
+          "samples": 543,
+          "wrongPixels": 227,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-reverse-08.bmp",
+          "samples": 539,
+          "wrongPixels": 353,
+          "maxError": 95,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-reverse-09.bmp",
+          "samples": 541,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-reverse-10.bmp",
+          "samples": 539,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-reverse-11.bmp",
+          "samples": 522,
+          "wrongPixels": 338,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-reverse-12.bmp",
+          "samples": 543,
+          "wrongPixels": 227,
+          "maxError": 96,
+          "drawCalls": 1,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-copies-reverse-13.bmp",
+          "samples": 541,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 1,
+          "lod": []
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-instances-normal",
+      "frames": 14,
+      "errors": [
+        "0-instances-normal-00.bmp: 169/543 wrong pixels, max error 96",
+        "0-instances-normal-01.bmp: 327/526 wrong pixels, max error 96",
+        "0-instances-normal-02.bmp: 465/539 wrong pixels, max error 96",
+        "0-instances-normal-03.bmp: 454/541 wrong pixels, max error 96",
+        "0-instances-normal-04.bmp: 474/539 wrong pixels, max error 96",
+        "0-instances-normal-05.bmp: 333/546 wrong pixels, max error 96",
+        "0-instances-normal-06.bmp: 202/522 wrong pixels, max error 96",
+        "0-instances-normal-07.bmp: 178/543 wrong pixels, max error 96",
+        "0-instances-normal-08.bmp: 467/539 wrong pixels, max error 96",
+        "0-instances-normal-09.bmp: 478/541 wrong pixels, max error 96",
+        "0-instances-normal-10.bmp: 443/539 wrong pixels, max error 96",
+        "0-instances-normal-11.bmp: 202/522 wrong pixels, max error 96",
+        "0-instances-normal-12.bmp: 169/543 wrong pixels, max error 96",
+        "0-instances-normal-13.bmp: 454/541 wrong pixels, max error 96"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-normal-00.bmp",
+          "samples": 543,
+          "wrongPixels": 169,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-normal-01.bmp",
+          "samples": 526,
+          "wrongPixels": 327,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-normal-02.bmp",
+          "samples": 539,
+          "wrongPixels": 465,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-normal-03.bmp",
+          "samples": 541,
+          "wrongPixels": 454,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-normal-04.bmp",
+          "samples": 539,
+          "wrongPixels": 474,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-normal-05.bmp",
+          "samples": 546,
+          "wrongPixels": 333,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-normal-06.bmp",
+          "samples": 522,
+          "wrongPixels": 202,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-normal-07.bmp",
+          "samples": 543,
+          "wrongPixels": 178,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-normal-08.bmp",
+          "samples": 539,
+          "wrongPixels": 467,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-normal-09.bmp",
+          "samples": 541,
+          "wrongPixels": 478,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-normal-10.bmp",
+          "samples": 539,
+          "wrongPixels": 443,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-normal-11.bmp",
+          "samples": 522,
+          "wrongPixels": 202,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-normal-12.bmp",
+          "samples": 543,
+          "wrongPixels": 169,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-normal-13.bmp",
+          "samples": 541,
+          "wrongPixels": 454,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-instances-reverse",
+      "frames": 14,
+      "errors": [
+        "0-instances-reverse-00.bmp: 243/543 wrong pixels, max error 96",
+        "0-instances-reverse-01.bmp: 327/526 wrong pixels, max error 96",
+        "0-instances-reverse-02.bmp: 378/539 wrong pixels, max error 96",
+        "0-instances-reverse-03.bmp: 379/541 wrong pixels, max error 96",
+        "0-instances-reverse-04.bmp: 370/539 wrong pixels, max error 96",
+        "0-instances-reverse-05.bmp: 348/546 wrong pixels, max error 96",
+        "0-instances-reverse-06.bmp: 287/522 wrong pixels, max error 96",
+        "0-instances-reverse-07.bmp: 238/543 wrong pixels, max error 96",
+        "0-instances-reverse-08.bmp: 381/539 wrong pixels, max error 96",
+        "0-instances-reverse-09.bmp: 371/541 wrong pixels, max error 96",
+        "0-instances-reverse-10.bmp: 365/539 wrong pixels, max error 96",
+        "0-instances-reverse-11.bmp: 296/522 wrong pixels, max error 96",
+        "0-instances-reverse-12.bmp: 243/543 wrong pixels, max error 96",
+        "0-instances-reverse-13.bmp: 379/541 wrong pixels, max error 96"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-reverse-00.bmp",
+          "samples": 543,
+          "wrongPixels": 243,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-reverse-01.bmp",
+          "samples": 526,
+          "wrongPixels": 327,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-reverse-02.bmp",
+          "samples": 539,
+          "wrongPixels": 378,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-reverse-03.bmp",
+          "samples": 541,
+          "wrongPixels": 379,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-reverse-04.bmp",
+          "samples": 539,
+          "wrongPixels": 370,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-reverse-05.bmp",
+          "samples": 546,
+          "wrongPixels": 348,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-reverse-06.bmp",
+          "samples": 522,
+          "wrongPixels": 287,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-reverse-07.bmp",
+          "samples": 543,
+          "wrongPixels": 238,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-reverse-08.bmp",
+          "samples": 539,
+          "wrongPixels": 381,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-reverse-09.bmp",
+          "samples": 541,
+          "wrongPixels": 371,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-reverse-10.bmp",
+          "samples": 539,
+          "wrongPixels": 365,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-reverse-11.bmp",
+          "samples": 522,
+          "wrongPixels": 296,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-reverse-12.bmp",
+          "samples": 543,
+          "wrongPixels": 243,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-instances-reverse-13.bmp",
+          "samples": 541,
+          "wrongPixels": 379,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-skeletal-normal",
+      "frames": 14,
+      "errors": [
+        "0-skeletal-normal-00.bmp: 132/543 wrong pixels, max error 96",
+        "0-skeletal-normal-01.bmp: 359/526 wrong pixels, max error 96",
+        "0-skeletal-normal-02.bmp: 504/504 wrong pixels, max error 96",
+        "0-skeletal-normal-03.bmp: 523/523 wrong pixels, max error 96",
+        "0-skeletal-normal-04.bmp: 521/521 wrong pixels, max error 96",
+        "0-skeletal-normal-05.bmp: 360/546 wrong pixels, max error 96",
+        "0-skeletal-normal-06.bmp: 166/504 wrong pixels, max error 95",
+        "0-skeletal-normal-07.bmp: 130/506 wrong pixels, max error 96",
+        "0-skeletal-normal-08.bmp: 539/539 wrong pixels, max error 96",
+        "0-skeletal-normal-09.bmp: 541/541 wrong pixels, max error 96",
+        "0-skeletal-normal-10.bmp: 521/521 wrong pixels, max error 96",
+        "0-skeletal-normal-11.bmp: 182/541 wrong pixels, max error 95",
+        "0-skeletal-normal-12.bmp: 132/543 wrong pixels, max error 96",
+        "0-skeletal-normal-13.bmp: 523/523 wrong pixels, max error 96"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-normal-00.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-normal-01.bmp",
+          "samples": 526,
+          "wrongPixels": 359,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-normal-02.bmp",
+          "samples": 504,
+          "wrongPixels": 504,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-normal-03.bmp",
+          "samples": 523,
+          "wrongPixels": 523,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-normal-04.bmp",
+          "samples": 521,
+          "wrongPixels": 521,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-normal-05.bmp",
+          "samples": 546,
+          "wrongPixels": 360,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-normal-06.bmp",
+          "samples": 504,
+          "wrongPixels": 166,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-normal-07.bmp",
+          "samples": 506,
+          "wrongPixels": 130,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-normal-08.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-normal-09.bmp",
+          "samples": 541,
+          "wrongPixels": 541,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-normal-10.bmp",
+          "samples": 521,
+          "wrongPixels": 521,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-normal-11.bmp",
+          "samples": 541,
+          "wrongPixels": 182,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-normal-12.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-normal-13.bmp",
+          "samples": 523,
+          "wrongPixels": 523,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-skeletal-reverse",
+      "frames": 14,
+      "errors": [
+        "0-skeletal-reverse-00.bmp: 208/543 wrong pixels, max error 96",
+        "0-skeletal-reverse-01.bmp: 319/526 wrong pixels, max error 95",
+        "0-skeletal-reverse-02.bmp: 336/504 wrong pixels, max error 95",
+        "0-skeletal-reverse-03.bmp: 337/523 wrong pixels, max error 95",
+        "0-skeletal-reverse-04.bmp: 337/521 wrong pixels, max error 95",
+        "0-skeletal-reverse-05.bmp: 340/546 wrong pixels, max error 95",
+        "0-skeletal-reverse-06.bmp: 375/504 wrong pixels, max error 96",
+        "0-skeletal-reverse-07.bmp: 246/506 wrong pixels, max error 96",
+        "0-skeletal-reverse-08.bmp: 336/539 wrong pixels, max error 95",
+        "0-skeletal-reverse-09.bmp: 337/541 wrong pixels, max error 95",
+        "0-skeletal-reverse-10.bmp: 337/521 wrong pixels, max error 95",
+        "0-skeletal-reverse-11.bmp: 338/541 wrong pixels, max error 96",
+        "0-skeletal-reverse-12.bmp: 208/543 wrong pixels, max error 96",
+        "0-skeletal-reverse-13.bmp: 337/523 wrong pixels, max error 95"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-reverse-00.bmp",
+          "samples": 543,
+          "wrongPixels": 208,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-reverse-01.bmp",
+          "samples": 526,
+          "wrongPixels": 319,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-reverse-02.bmp",
+          "samples": 504,
+          "wrongPixels": 336,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-reverse-03.bmp",
+          "samples": 523,
+          "wrongPixels": 337,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-reverse-04.bmp",
+          "samples": 521,
+          "wrongPixels": 337,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-reverse-05.bmp",
+          "samples": 546,
+          "wrongPixels": 340,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-reverse-06.bmp",
+          "samples": 504,
+          "wrongPixels": 375,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-reverse-07.bmp",
+          "samples": 506,
+          "wrongPixels": 246,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-reverse-08.bmp",
+          "samples": 539,
+          "wrongPixels": 336,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-reverse-09.bmp",
+          "samples": 541,
+          "wrongPixels": 337,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-reverse-10.bmp",
+          "samples": 521,
+          "wrongPixels": 337,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-reverse-11.bmp",
+          "samples": 541,
+          "wrongPixels": 338,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-reverse-12.bmp",
+          "samples": 543,
+          "wrongPixels": 208,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-skeletal-reverse-13.bmp",
+          "samples": 523,
+          "wrongPixels": 337,
+          "maxError": 95,
+          "drawCalls": 3,
+          "lod": []
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-crowd-normal",
+      "frames": 14,
+      "errors": [
+        "0-crowd-normal-00.bmp: 164/543 wrong pixels, max error 96",
+        "0-crowd-normal-01.bmp: 324/526 wrong pixels, max error 96",
+        "0-crowd-normal-02.bmp: 432/504 wrong pixels, max error 96",
+        "0-crowd-normal-03.bmp: 468/523 wrong pixels, max error 96",
+        "0-crowd-normal-04.bmp: 452/521 wrong pixels, max error 96",
+        "0-crowd-normal-05.bmp: 331/546 wrong pixels, max error 96",
+        "0-crowd-normal-06.bmp: 198/504 wrong pixels, max error 96",
+        "0-crowd-normal-07.bmp: 185/506 wrong pixels, max error 96",
+        "0-crowd-normal-08.bmp: 465/539 wrong pixels, max error 96",
+        "0-crowd-normal-09.bmp: 462/541 wrong pixels, max error 96",
+        "0-crowd-normal-10.bmp: 459/521 wrong pixels, max error 96",
+        "0-crowd-normal-11.bmp: 203/541 wrong pixels, max error 96",
+        "0-crowd-normal-12.bmp: 164/543 wrong pixels, max error 96",
+        "0-crowd-normal-13.bmp: 468/523 wrong pixels, max error 96"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-normal-00.bmp",
+          "samples": 543,
+          "wrongPixels": 164,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-normal-01.bmp",
+          "samples": 526,
+          "wrongPixels": 324,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-normal-02.bmp",
+          "samples": 504,
+          "wrongPixels": 432,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-normal-03.bmp",
+          "samples": 523,
+          "wrongPixels": 468,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-normal-04.bmp",
+          "samples": 521,
+          "wrongPixels": 452,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-normal-05.bmp",
+          "samples": 546,
+          "wrongPixels": 331,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-normal-06.bmp",
+          "samples": 504,
+          "wrongPixels": 198,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-normal-07.bmp",
+          "samples": 506,
+          "wrongPixels": 185,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-normal-08.bmp",
+          "samples": 539,
+          "wrongPixels": 465,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-normal-09.bmp",
+          "samples": 541,
+          "wrongPixels": 462,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-normal-10.bmp",
+          "samples": 521,
+          "wrongPixels": 459,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-normal-11.bmp",
+          "samples": 541,
+          "wrongPixels": 203,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-normal-12.bmp",
+          "samples": 543,
+          "wrongPixels": 164,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-normal-13.bmp",
+          "samples": 523,
+          "wrongPixels": 468,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "0-crowd-reverse",
+      "frames": 14,
+      "errors": [
+        "0-crowd-reverse-00.bmp: 233/543 wrong pixels, max error 96",
+        "0-crowd-reverse-01.bmp: 333/526 wrong pixels, max error 96",
+        "0-crowd-reverse-02.bmp: 344/504 wrong pixels, max error 96",
+        "0-crowd-reverse-03.bmp: 360/523 wrong pixels, max error 96",
+        "0-crowd-reverse-04.bmp: 356/521 wrong pixels, max error 96",
+        "0-crowd-reverse-05.bmp: 340/546 wrong pixels, max error 96",
+        "0-crowd-reverse-06.bmp: 329/504 wrong pixels, max error 96",
+        "0-crowd-reverse-07.bmp: 265/506 wrong pixels, max error 96",
+        "0-crowd-reverse-08.bmp: 357/539 wrong pixels, max error 96",
+        "0-crowd-reverse-09.bmp: 356/541 wrong pixels, max error 96",
+        "0-crowd-reverse-10.bmp: 348/521 wrong pixels, max error 96",
+        "0-crowd-reverse-11.bmp: 301/541 wrong pixels, max error 96",
+        "0-crowd-reverse-12.bmp: 233/543 wrong pixels, max error 96",
+        "0-crowd-reverse-13.bmp: 360/523 wrong pixels, max error 96"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-reverse-00.bmp",
+          "samples": 543,
+          "wrongPixels": 233,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-reverse-01.bmp",
+          "samples": 526,
+          "wrongPixels": 333,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-reverse-02.bmp",
+          "samples": 504,
+          "wrongPixels": 344,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-reverse-03.bmp",
+          "samples": 523,
+          "wrongPixels": 360,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-reverse-04.bmp",
+          "samples": 521,
+          "wrongPixels": 356,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-reverse-05.bmp",
+          "samples": 546,
+          "wrongPixels": 340,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-reverse-06.bmp",
+          "samples": 504,
+          "wrongPixels": 329,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-reverse-07.bmp",
+          "samples": 506,
+          "wrongPixels": 265,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-reverse-08.bmp",
+          "samples": 539,
+          "wrongPixels": 357,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-reverse-09.bmp",
+          "samples": 541,
+          "wrongPixels": 356,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-reverse-10.bmp",
+          "samples": 521,
+          "wrongPixels": 348,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-reverse-11.bmp",
+          "samples": 541,
+          "wrongPixels": 301,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-reverse-12.bmp",
+          "samples": 543,
+          "wrongPixels": 233,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\0-crowd-reverse-13.bmp",
+          "samples": 523,
+          "wrongPixels": 360,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-mesh-normal",
+      "frames": 14,
+      "errors": [
+        "1-mesh-normal-00.bmp: 132/543 wrong pixels, max error 96",
+        "1-mesh-normal-01.bmp: 340/526 wrong pixels, max error 96",
+        "1-mesh-normal-02.bmp: 539/539 wrong pixels, max error 96",
+        "1-mesh-normal-03.bmp: 541/541 wrong pixels, max error 96",
+        "1-mesh-normal-04.bmp: 539/539 wrong pixels, max error 96",
+        "1-mesh-normal-05.bmp: 360/546 wrong pixels, max error 96",
+        "1-mesh-normal-06.bmp: 182/522 wrong pixels, max error 95",
+        "1-mesh-normal-07.bmp: 132/543 wrong pixels, max error 96",
+        "1-mesh-normal-08.bmp: 539/539 wrong pixels, max error 96",
+        "1-mesh-normal-09.bmp: 541/541 wrong pixels, max error 96",
+        "1-mesh-normal-10.bmp: 539/539 wrong pixels, max error 96",
+        "1-mesh-normal-11.bmp: 182/522 wrong pixels, max error 95",
+        "1-mesh-normal-12.bmp: 132/543 wrong pixels, max error 96",
+        "1-mesh-normal-13.bmp: 541/541 wrong pixels, max error 96"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-normal-00.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-normal-01.bmp",
+          "samples": 526,
+          "wrongPixels": 340,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-normal-02.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-normal-03.bmp",
+          "samples": 541,
+          "wrongPixels": 541,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-normal-04.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-normal-05.bmp",
+          "samples": 546,
+          "wrongPixels": 360,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-normal-06.bmp",
+          "samples": 522,
+          "wrongPixels": 182,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-normal-07.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-normal-08.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-normal-09.bmp",
+          "samples": 541,
+          "wrongPixels": 541,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-normal-10.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-normal-11.bmp",
+          "samples": 522,
+          "wrongPixels": 182,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-normal-12.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-normal-13.bmp",
+          "samples": 541,
+          "wrongPixels": 541,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-mesh-reverse",
+      "frames": 14,
+      "errors": [
+        "1-mesh-reverse-00.bmp: 227/543 wrong pixels, max error 96",
+        "1-mesh-reverse-01.bmp: 338/526 wrong pixels, max error 95",
+        "1-mesh-reverse-02.bmp: 353/539 wrong pixels, max error 95",
+        "1-mesh-reverse-03.bmp: 354/541 wrong pixels, max error 95",
+        "1-mesh-reverse-04.bmp: 354/539 wrong pixels, max error 95",
+        "1-mesh-reverse-05.bmp: 340/546 wrong pixels, max error 95",
+        "1-mesh-reverse-06.bmp: 338/522 wrong pixels, max error 96",
+        "1-mesh-reverse-07.bmp: 227/543 wrong pixels, max error 96",
+        "1-mesh-reverse-08.bmp: 353/539 wrong pixels, max error 95",
+        "1-mesh-reverse-09.bmp: 354/541 wrong pixels, max error 95",
+        "1-mesh-reverse-10.bmp: 354/539 wrong pixels, max error 95",
+        "1-mesh-reverse-11.bmp: 338/522 wrong pixels, max error 96",
+        "1-mesh-reverse-12.bmp: 227/543 wrong pixels, max error 96",
+        "1-mesh-reverse-13.bmp: 354/541 wrong pixels, max error 95"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-reverse-00.bmp",
+          "samples": 543,
+          "wrongPixels": 227,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-reverse-01.bmp",
+          "samples": 526,
+          "wrongPixels": 338,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-reverse-02.bmp",
+          "samples": 539,
+          "wrongPixels": 353,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-reverse-03.bmp",
+          "samples": 541,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-reverse-04.bmp",
+          "samples": 539,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-reverse-05.bmp",
+          "samples": 546,
+          "wrongPixels": 340,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-reverse-06.bmp",
+          "samples": 522,
+          "wrongPixels": 338,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-reverse-07.bmp",
+          "samples": 543,
+          "wrongPixels": 227,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-reverse-08.bmp",
+          "samples": 539,
+          "wrongPixels": 353,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-reverse-09.bmp",
+          "samples": 541,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-reverse-10.bmp",
+          "samples": 539,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-reverse-11.bmp",
+          "samples": 522,
+          "wrongPixels": 338,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-reverse-12.bmp",
+          "samples": 543,
+          "wrongPixels": 227,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-mesh-reverse-13.bmp",
+          "samples": 541,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-copies-normal",
+      "frames": 14,
+      "errors": [
+        "1-copies-normal-00.bmp: 132/543 wrong pixels, max error 96",
+        "1-copies-normal-01.bmp: 340/526 wrong pixels, max error 96",
+        "1-copies-normal-02.bmp: 539/539 wrong pixels, max error 96",
+        "1-copies-normal-03.bmp: 541/541 wrong pixels, max error 96",
+        "1-copies-normal-04.bmp: 539/539 wrong pixels, max error 96",
+        "1-copies-normal-05.bmp: 360/546 wrong pixels, max error 96",
+        "1-copies-normal-06.bmp: 182/522 wrong pixels, max error 95",
+        "1-copies-normal-07.bmp: 132/543 wrong pixels, max error 96",
+        "1-copies-normal-08.bmp: 539/539 wrong pixels, max error 96",
+        "1-copies-normal-09.bmp: 541/541 wrong pixels, max error 96",
+        "1-copies-normal-10.bmp: 539/539 wrong pixels, max error 96",
+        "1-copies-normal-11.bmp: 182/522 wrong pixels, max error 95",
+        "1-copies-normal-12.bmp: 132/543 wrong pixels, max error 96",
+        "1-copies-normal-13.bmp: 541/541 wrong pixels, max error 96"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-normal-00.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-normal-01.bmp",
+          "samples": 526,
+          "wrongPixels": 340,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-normal-02.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-normal-03.bmp",
+          "samples": 541,
+          "wrongPixels": 541,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-normal-04.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-normal-05.bmp",
+          "samples": 546,
+          "wrongPixels": 360,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-normal-06.bmp",
+          "samples": 522,
+          "wrongPixels": 182,
+          "maxError": 95,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-normal-07.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-normal-08.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-normal-09.bmp",
+          "samples": 541,
+          "wrongPixels": 541,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-normal-10.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-normal-11.bmp",
+          "samples": 522,
+          "wrongPixels": 182,
+          "maxError": 95,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-normal-12.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-normal-13.bmp",
+          "samples": 541,
+          "wrongPixels": 541,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-copies-reverse",
+      "frames": 14,
+      "errors": [
+        "1-copies-reverse-00.bmp: 227/543 wrong pixels, max error 96",
+        "1-copies-reverse-01.bmp: 338/526 wrong pixels, max error 95",
+        "1-copies-reverse-02.bmp: 353/539 wrong pixels, max error 95",
+        "1-copies-reverse-03.bmp: 354/541 wrong pixels, max error 95",
+        "1-copies-reverse-04.bmp: 354/539 wrong pixels, max error 95",
+        "1-copies-reverse-05.bmp: 340/546 wrong pixels, max error 95",
+        "1-copies-reverse-06.bmp: 338/522 wrong pixels, max error 96",
+        "1-copies-reverse-07.bmp: 227/543 wrong pixels, max error 96",
+        "1-copies-reverse-08.bmp: 353/539 wrong pixels, max error 95",
+        "1-copies-reverse-09.bmp: 354/541 wrong pixels, max error 95",
+        "1-copies-reverse-10.bmp: 354/539 wrong pixels, max error 95",
+        "1-copies-reverse-11.bmp: 338/522 wrong pixels, max error 96",
+        "1-copies-reverse-12.bmp: 227/543 wrong pixels, max error 96",
+        "1-copies-reverse-13.bmp: 354/541 wrong pixels, max error 95"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-reverse-00.bmp",
+          "samples": 543,
+          "wrongPixels": 227,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-reverse-01.bmp",
+          "samples": 526,
+          "wrongPixels": 338,
+          "maxError": 95,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-reverse-02.bmp",
+          "samples": 539,
+          "wrongPixels": 353,
+          "maxError": 95,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-reverse-03.bmp",
+          "samples": 541,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-reverse-04.bmp",
+          "samples": 539,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-reverse-05.bmp",
+          "samples": 546,
+          "wrongPixels": 340,
+          "maxError": 95,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-reverse-06.bmp",
+          "samples": 522,
+          "wrongPixels": 338,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-reverse-07.bmp",
+          "samples": 543,
+          "wrongPixels": 227,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-reverse-08.bmp",
+          "samples": 539,
+          "wrongPixels": 353,
+          "maxError": 95,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-reverse-09.bmp",
+          "samples": 541,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-reverse-10.bmp",
+          "samples": 539,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-reverse-11.bmp",
+          "samples": 522,
+          "wrongPixels": 338,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-reverse-12.bmp",
+          "samples": 543,
+          "wrongPixels": 227,
+          "maxError": 96,
+          "drawCalls": 2,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-copies-reverse-13.bmp",
+          "samples": 541,
+          "wrongPixels": 354,
+          "maxError": 95,
+          "drawCalls": 2,
+          "lod": []
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-instances-normal",
+      "frames": 14,
+      "errors": [
+        "1-instances-normal-00.bmp: 169/543 wrong pixels, max error 96",
+        "1-instances-normal-01.bmp: 327/526 wrong pixels, max error 96",
+        "1-instances-normal-02.bmp: 465/539 wrong pixels, max error 96",
+        "1-instances-normal-03.bmp: 454/541 wrong pixels, max error 96",
+        "1-instances-normal-04.bmp: 474/539 wrong pixels, max error 96",
+        "1-instances-normal-05.bmp: 333/546 wrong pixels, max error 96",
+        "1-instances-normal-06.bmp: 202/522 wrong pixels, max error 96",
+        "1-instances-normal-07.bmp: 178/543 wrong pixels, max error 96",
+        "1-instances-normal-08.bmp: 467/539 wrong pixels, max error 96",
+        "1-instances-normal-09.bmp: 478/541 wrong pixels, max error 96",
+        "1-instances-normal-10.bmp: 443/539 wrong pixels, max error 96",
+        "1-instances-normal-11.bmp: 202/522 wrong pixels, max error 96",
+        "1-instances-normal-12.bmp: 169/543 wrong pixels, max error 96",
+        "1-instances-normal-13.bmp: 454/541 wrong pixels, max error 96"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-normal-00.bmp",
+          "samples": 543,
+          "wrongPixels": 169,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-normal-01.bmp",
+          "samples": 526,
+          "wrongPixels": 327,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-normal-02.bmp",
+          "samples": 539,
+          "wrongPixels": 465,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-normal-03.bmp",
+          "samples": 541,
+          "wrongPixels": 454,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-normal-04.bmp",
+          "samples": 539,
+          "wrongPixels": 474,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-normal-05.bmp",
+          "samples": 546,
+          "wrongPixels": 333,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-normal-06.bmp",
+          "samples": 522,
+          "wrongPixels": 202,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-normal-07.bmp",
+          "samples": 543,
+          "wrongPixels": 178,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-normal-08.bmp",
+          "samples": 539,
+          "wrongPixels": 467,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-normal-09.bmp",
+          "samples": 541,
+          "wrongPixels": 478,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-normal-10.bmp",
+          "samples": 539,
+          "wrongPixels": 443,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-normal-11.bmp",
+          "samples": 522,
+          "wrongPixels": 202,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-normal-12.bmp",
+          "samples": 543,
+          "wrongPixels": 169,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-normal-13.bmp",
+          "samples": 541,
+          "wrongPixels": 454,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-instances-reverse",
+      "frames": 14,
+      "errors": [
+        "1-instances-reverse-00.bmp: 243/543 wrong pixels, max error 96",
+        "1-instances-reverse-01.bmp: 327/526 wrong pixels, max error 96",
+        "1-instances-reverse-02.bmp: 378/539 wrong pixels, max error 96",
+        "1-instances-reverse-03.bmp: 379/541 wrong pixels, max error 96",
+        "1-instances-reverse-04.bmp: 370/539 wrong pixels, max error 96",
+        "1-instances-reverse-05.bmp: 348/546 wrong pixels, max error 96",
+        "1-instances-reverse-06.bmp: 287/522 wrong pixels, max error 96",
+        "1-instances-reverse-07.bmp: 238/543 wrong pixels, max error 96",
+        "1-instances-reverse-08.bmp: 381/539 wrong pixels, max error 96",
+        "1-instances-reverse-09.bmp: 371/541 wrong pixels, max error 96",
+        "1-instances-reverse-10.bmp: 365/539 wrong pixels, max error 96",
+        "1-instances-reverse-11.bmp: 296/522 wrong pixels, max error 96",
+        "1-instances-reverse-12.bmp: 243/543 wrong pixels, max error 96",
+        "1-instances-reverse-13.bmp: 379/541 wrong pixels, max error 96"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-reverse-00.bmp",
+          "samples": 543,
+          "wrongPixels": 243,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-reverse-01.bmp",
+          "samples": 526,
+          "wrongPixels": 327,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-reverse-02.bmp",
+          "samples": 539,
+          "wrongPixels": 378,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-reverse-03.bmp",
+          "samples": 541,
+          "wrongPixels": 379,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-reverse-04.bmp",
+          "samples": 539,
+          "wrongPixels": 370,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-reverse-05.bmp",
+          "samples": 546,
+          "wrongPixels": 348,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-reverse-06.bmp",
+          "samples": 522,
+          "wrongPixels": 287,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-reverse-07.bmp",
+          "samples": 543,
+          "wrongPixels": 238,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-reverse-08.bmp",
+          "samples": 539,
+          "wrongPixels": 381,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-reverse-09.bmp",
+          "samples": 541,
+          "wrongPixels": 371,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-reverse-10.bmp",
+          "samples": 539,
+          "wrongPixels": 365,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-reverse-11.bmp",
+          "samples": 522,
+          "wrongPixels": 296,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-reverse-12.bmp",
+          "samples": 543,
+          "wrongPixels": 243,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-instances-reverse-13.bmp",
+          "samples": 541,
+          "wrongPixels": 379,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3
+              ]
+            }
+          ]
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-skeletal-normal",
+      "frames": 14,
+      "errors": [
+        "1-skeletal-normal-00.bmp: 132/543 wrong pixels, max error 96",
+        "1-skeletal-normal-01.bmp: 359/526 wrong pixels, max error 96",
+        "1-skeletal-normal-02.bmp: 504/504 wrong pixels, max error 96",
+        "1-skeletal-normal-03.bmp: 523/523 wrong pixels, max error 96",
+        "1-skeletal-normal-04.bmp: 521/521 wrong pixels, max error 96",
+        "1-skeletal-normal-05.bmp: 360/546 wrong pixels, max error 96",
+        "1-skeletal-normal-06.bmp: 166/504 wrong pixels, max error 95",
+        "1-skeletal-normal-07.bmp: 130/506 wrong pixels, max error 96",
+        "1-skeletal-normal-08.bmp: 539/539 wrong pixels, max error 96",
+        "1-skeletal-normal-09.bmp: 541/541 wrong pixels, max error 96",
+        "1-skeletal-normal-10.bmp: 521/521 wrong pixels, max error 96",
+        "1-skeletal-normal-11.bmp: 182/541 wrong pixels, max error 95",
+        "1-skeletal-normal-12.bmp: 132/543 wrong pixels, max error 96",
+        "1-skeletal-normal-13.bmp: 523/523 wrong pixels, max error 96"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-normal-00.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-normal-01.bmp",
+          "samples": 526,
+          "wrongPixels": 359,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-normal-02.bmp",
+          "samples": 504,
+          "wrongPixels": 504,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-normal-03.bmp",
+          "samples": 523,
+          "wrongPixels": 523,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-normal-04.bmp",
+          "samples": 521,
+          "wrongPixels": 521,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-normal-05.bmp",
+          "samples": 546,
+          "wrongPixels": 360,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-normal-06.bmp",
+          "samples": 504,
+          "wrongPixels": 166,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-normal-07.bmp",
+          "samples": 506,
+          "wrongPixels": 130,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-normal-08.bmp",
+          "samples": 539,
+          "wrongPixels": 539,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-normal-09.bmp",
+          "samples": 541,
+          "wrongPixels": 541,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-normal-10.bmp",
+          "samples": 521,
+          "wrongPixels": 521,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-normal-11.bmp",
+          "samples": 541,
+          "wrongPixels": 182,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-normal-12.bmp",
+          "samples": 543,
+          "wrongPixels": 132,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-normal-13.bmp",
+          "samples": 523,
+          "wrongPixels": 523,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-skeletal-reverse",
+      "frames": 14,
+      "errors": [
+        "1-skeletal-reverse-00.bmp: 208/543 wrong pixels, max error 96",
+        "1-skeletal-reverse-01.bmp: 319/526 wrong pixels, max error 95",
+        "1-skeletal-reverse-02.bmp: 336/504 wrong pixels, max error 95",
+        "1-skeletal-reverse-03.bmp: 337/523 wrong pixels, max error 95",
+        "1-skeletal-reverse-04.bmp: 337/521 wrong pixels, max error 95",
+        "1-skeletal-reverse-05.bmp: 340/546 wrong pixels, max error 95",
+        "1-skeletal-reverse-06.bmp: 375/504 wrong pixels, max error 96",
+        "1-skeletal-reverse-07.bmp: 246/506 wrong pixels, max error 96",
+        "1-skeletal-reverse-08.bmp: 336/539 wrong pixels, max error 95",
+        "1-skeletal-reverse-09.bmp: 337/541 wrong pixels, max error 95",
+        "1-skeletal-reverse-10.bmp: 337/521 wrong pixels, max error 95",
+        "1-skeletal-reverse-11.bmp: 338/541 wrong pixels, max error 96",
+        "1-skeletal-reverse-12.bmp: 208/543 wrong pixels, max error 96",
+        "1-skeletal-reverse-13.bmp: 337/523 wrong pixels, max error 95"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-reverse-00.bmp",
+          "samples": 543,
+          "wrongPixels": 208,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-reverse-01.bmp",
+          "samples": 526,
+          "wrongPixels": 319,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-reverse-02.bmp",
+          "samples": 504,
+          "wrongPixels": 336,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-reverse-03.bmp",
+          "samples": 523,
+          "wrongPixels": 337,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-reverse-04.bmp",
+          "samples": 521,
+          "wrongPixels": 337,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-reverse-05.bmp",
+          "samples": 546,
+          "wrongPixels": 340,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-reverse-06.bmp",
+          "samples": 504,
+          "wrongPixels": 375,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-reverse-07.bmp",
+          "samples": 506,
+          "wrongPixels": 246,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-reverse-08.bmp",
+          "samples": 539,
+          "wrongPixels": 336,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-reverse-09.bmp",
+          "samples": 541,
+          "wrongPixels": 337,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-reverse-10.bmp",
+          "samples": 521,
+          "wrongPixels": 337,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-reverse-11.bmp",
+          "samples": 541,
+          "wrongPixels": 338,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-reverse-12.bmp",
+          "samples": 543,
+          "wrongPixels": 208,
+          "maxError": 96,
+          "drawCalls": 4,
+          "lod": []
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-skeletal-reverse-13.bmp",
+          "samples": 523,
+          "wrongPixels": 337,
+          "maxError": 95,
+          "drawCalls": 4,
+          "lod": []
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-crowd-normal",
+      "frames": 14,
+      "errors": [
+        "1-crowd-normal-00.bmp: 164/543 wrong pixels, max error 96",
+        "1-crowd-normal-01.bmp: 324/526 wrong pixels, max error 96",
+        "1-crowd-normal-02.bmp: 432/504 wrong pixels, max error 96",
+        "1-crowd-normal-03.bmp: 468/523 wrong pixels, max error 96",
+        "1-crowd-normal-04.bmp: 452/521 wrong pixels, max error 96",
+        "1-crowd-normal-05.bmp: 331/546 wrong pixels, max error 96",
+        "1-crowd-normal-06.bmp: 198/504 wrong pixels, max error 96",
+        "1-crowd-normal-07.bmp: 185/506 wrong pixels, max error 96",
+        "1-crowd-normal-08.bmp: 465/539 wrong pixels, max error 96",
+        "1-crowd-normal-09.bmp: 462/541 wrong pixels, max error 96",
+        "1-crowd-normal-10.bmp: 459/521 wrong pixels, max error 96",
+        "1-crowd-normal-11.bmp: 203/541 wrong pixels, max error 96",
+        "1-crowd-normal-12.bmp: 164/543 wrong pixels, max error 96",
+        "1-crowd-normal-13.bmp: 468/523 wrong pixels, max error 96"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-normal-00.bmp",
+          "samples": 543,
+          "wrongPixels": 164,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-normal-01.bmp",
+          "samples": 526,
+          "wrongPixels": 324,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-normal-02.bmp",
+          "samples": 504,
+          "wrongPixels": 432,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-normal-03.bmp",
+          "samples": 523,
+          "wrongPixels": 468,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-normal-04.bmp",
+          "samples": 521,
+          "wrongPixels": 452,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-normal-05.bmp",
+          "samples": 546,
+          "wrongPixels": 331,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-normal-06.bmp",
+          "samples": 504,
+          "wrongPixels": 198,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-normal-07.bmp",
+          "samples": 506,
+          "wrongPixels": 185,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-normal-08.bmp",
+          "samples": 539,
+          "wrongPixels": 465,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-normal-09.bmp",
+          "samples": 541,
+          "wrongPixels": 462,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-normal-10.bmp",
+          "samples": 521,
+          "wrongPixels": 459,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-normal-11.bmp",
+          "samples": 541,
+          "wrongPixels": 203,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-normal-12.bmp",
+          "samples": 543,
+          "wrongPixels": 164,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-normal-13.bmp",
+          "samples": 523,
+          "wrongPixels": 468,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    },
+    {
+      "name": "1-crowd-reverse",
+      "frames": 14,
+      "errors": [
+        "1-crowd-reverse-00.bmp: 233/543 wrong pixels, max error 96",
+        "1-crowd-reverse-01.bmp: 333/526 wrong pixels, max error 96",
+        "1-crowd-reverse-02.bmp: 344/504 wrong pixels, max error 96",
+        "1-crowd-reverse-03.bmp: 360/523 wrong pixels, max error 96",
+        "1-crowd-reverse-04.bmp: 356/521 wrong pixels, max error 96",
+        "1-crowd-reverse-05.bmp: 340/546 wrong pixels, max error 96",
+        "1-crowd-reverse-06.bmp: 329/504 wrong pixels, max error 96",
+        "1-crowd-reverse-07.bmp: 265/506 wrong pixels, max error 96",
+        "1-crowd-reverse-08.bmp: 357/539 wrong pixels, max error 96",
+        "1-crowd-reverse-09.bmp: 356/541 wrong pixels, max error 96",
+        "1-crowd-reverse-10.bmp: 348/521 wrong pixels, max error 96",
+        "1-crowd-reverse-11.bmp: 301/541 wrong pixels, max error 96",
+        "1-crowd-reverse-12.bmp: 233/543 wrong pixels, max error 96",
+        "1-crowd-reverse-13.bmp: 360/523 wrong pixels, max error 96"
+      ],
+      "measurements": [
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-reverse-00.bmp",
+          "samples": 543,
+          "wrongPixels": 233,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-reverse-01.bmp",
+          "samples": 526,
+          "wrongPixels": 333,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-reverse-02.bmp",
+          "samples": 504,
+          "wrongPixels": 344,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-reverse-03.bmp",
+          "samples": 523,
+          "wrongPixels": 360,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-reverse-04.bmp",
+          "samples": 521,
+          "wrongPixels": 356,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-reverse-05.bmp",
+          "samples": 546,
+          "wrongPixels": 340,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-reverse-06.bmp",
+          "samples": 504,
+          "wrongPixels": 329,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-reverse-07.bmp",
+          "samples": 506,
+          "wrongPixels": 265,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-reverse-08.bmp",
+          "samples": 539,
+          "wrongPixels": 357,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-reverse-09.bmp",
+          "samples": 541,
+          "wrongPixels": 356,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-reverse-10.bmp",
+          "samples": 521,
+          "wrongPixels": 348,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-reverse-11.bmp",
+          "samples": 541,
+          "wrongPixels": 301,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-reverse-12.bmp",
+          "samples": 543,
+          "wrongPixels": 233,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "image": "E:\\Engine\\Engine\\build\\playtests\\20261107-intersections\\before\\1-crowd-reverse-13.bmp",
+          "samples": 523,
+          "wrongPixels": 360,
+          "maxError": 96,
+          "drawCalls": 3,
+          "lod": [
+            {
+              "impostor": -1,
+              "levels": [
+                3,
+                3,
+                0
+              ]
+            }
+          ]
+        }
+      ],
+      "adapter": "NVIDIA GeForce RTX 4070 Laptop GPU"
+    }
+  ]
+}

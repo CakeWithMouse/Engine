@@ -31,6 +31,7 @@ class Game;
 class Material;
 class SaveArchive;
 struct MeshLodData;
+namespace Script { class Instance; struct Problem; }
 
 /** Shader pair of one pass variant, resolved lazily by Game::BindComponentShaders. */
 struct ComponentShaderVariant
@@ -87,6 +88,20 @@ public:
     bool SetMaterialAsset(const std::string& path);
     const std::string& GetMaterialAsset() const { return MaterialAssetPath; }
     virtual bool SupportsMaterials() const { return false; }
+
+    /**
+     * Visual script asset by its /Game path (a .vscript; scenes store this). It starts in Play and in
+     * the game after BeginPlay and runs after Tick every frame. A change during Play applies from the
+     * next Play. Empty clears it. See Engine/docs/VISUAL-SCRIPTING.md.
+     */
+    void SetScriptAsset(const std::string& path) { ScriptAssetPath = path; }
+    const std::string& GetScriptAsset() const { return ScriptAssetPath; }
+    // Values of script variables for this object: a JSON object {"Speed": 45}; "" — the script's defaults.
+    void SetScriptVariables(const std::string& json) { ScriptVariableValues = json; }
+    const std::string& GetScriptVariables() const { return ScriptVariableValues; }
+    /** The running script of this play session; null in Edit, without a script or when it did not compile. */
+    const Script::Instance* GetScriptInstance() const { return ScriptState.get(); }
+    Script::Instance* GetScriptInstance() { return ScriptState.get(); }
     /** Drawn only through a material: without one of its own, the game uses its default material. */
     virtual bool RequiresMaterial() const { return false; }
     /** MaterialVariant flags of the shader set this component draws with (instances, skinning). */
@@ -268,12 +283,18 @@ protected:
     void UpdateInstanceTransform();
     InstData GetInstanceData() const;
     bool UploadInstanceData(ID3D11DeviceContext* context);
+    ID3D11ShaderResourceView* InstanceRangeView(ID3D11DeviceContext* context, ID3D11Buffer* buffer,
+        ID3D11ShaderResourceView* fullView, size_t capacity,
+        std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>>& ranges);
     void BindMaterialResources(ID3D11DeviceContext* context);
     void UnbindMaterialResources(ID3D11DeviceContext* context);
     void CreateSamplerState();
     void LoadPendingTexture();
 
     std::vector<std::unique_ptr<GameComponent>> InstanceArray;
+    // Internal range selected by Game's global transparent queue; zero count draws the whole batch.
+    uint32_t TransparentInstanceFirst = 0;
+    uint32_t TransparentInstanceCount = 0;
 
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureSRV;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerState;
@@ -322,6 +343,7 @@ protected:
     // Instance stream: capacity grows geometrically, count is InstanceArray.size().
     Microsoft::WRL::ComPtr<ID3D11Buffer> instanceBuffer;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> instanceSRV;
+    std::vector<Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> InstanceRangeViews;
     size_t InstanceCapacity = 0;
     uint64_t InstanceUploadFrame = UINT64_MAX;
     std::vector<InstData> InstanceStaging;
@@ -371,6 +393,9 @@ private:
     ComponentId SceneComponentId = 0;
     std::string SceneName;
     std::string SceneTypeName; // assigned by Scene on addition, independent of instance name
+    std::string ScriptAssetPath;
+    std::string ScriptVariableValues;
+    std::unique_ptr<Script::Instance> ScriptState; // created by Game at BeginPlay, ticked by Scene
     Game* RenderOwner = nullptr;
     std::string VertexShaderName;
     std::string PixelShaderName;

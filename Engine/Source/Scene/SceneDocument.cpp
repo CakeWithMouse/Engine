@@ -6,9 +6,11 @@
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/SpecificComponents/SkeletalMeshComponent.h>
 #include <Engine/Scene/SceneAssets.h>
+#include "../Resources/VfsRead.h"
 #include "../../ThirdParty/nlohmann/json.hpp"
 #include <atomic>
 #include <cmath>
+#include <cstdio>
 #include <fstream>
 #include <set>
 
@@ -109,7 +111,7 @@ void Structure(const SceneSnapshot& data)
         if (item.pointLight && !item.pointLight->IsValid()) Invalid("Invalid point light parameters");
         if (item.physics && !item.physics->IsValid()) Invalid("Invalid physics body parameters");
         if (!SceneAssets::ValidPath(item.modelAsset) || !SceneAssets::ValidPath(item.textureAsset) ||
-            !SceneAssets::ValidPath(item.materialAsset))
+            !SceneAssets::ValidPath(item.materialAsset) || !SceneAssets::ValidPath(item.scriptAsset))
             Invalid("Assets must be canonical /Game paths without traversal");
         if (item.typeName == SceneAssets::ModelType && item.modelAsset.empty())
             Invalid("Engine.Model requires a model asset");
@@ -224,15 +226,29 @@ SceneSnapshot SceneDocument::Parse(const std::string& text)
             }
             if (o.contains("assets"))
             {
-                // "material" is optional: documents written before materials stay readable.
+                // "material" and "script" are optional: documents written without them stay readable,
+                // and they are written only when assigned, so such documents stay readable by older builds.
                 const auto& a = o.at("assets");
-                if (a.is_object() && a.contains("material")) RequireFields(a, {"model", "texture", "material"});
-                else RequireFields(a, {"model", "texture"});
+                if (!a.is_object()) Invalid("Invalid asset reference");
+                auto required = a;
+                required.erase("material"); required.erase("script"); required.erase("scriptVariables");
+                RequireFields(required, {"model", "texture"});
                 if (!a.at("model").is_string() || !a.at("texture").is_string() ||
-                    (a.contains("material") && !a.at("material").is_string())) Invalid("Invalid asset reference");
+                    (a.contains("material") && !a.at("material").is_string()) ||
+                    (a.contains("script") && !a.at("script").is_string())) Invalid("Invalid asset reference");
                 item.modelAsset = a.at("model").get<std::string>();
                 item.textureAsset = a.at("texture").get<std::string>();
                 if (a.contains("material")) item.materialAsset = a.at("material").get<std::string>();
+                if (a.contains("script")) item.scriptAsset = a.at("script").get<std::string>();
+                if (a.contains("scriptVariables"))
+                {
+                    // Values of the script's variables for this object: an object of literals.
+                    const auto& values = a.at("scriptVariables");
+                    if (!values.is_object() || values.empty()) Invalid("Invalid script variables");
+                    for (const auto& value : values)
+                        if (!value.is_boolean() && !value.is_number() && !value.is_string() && !value.is_array()) Invalid("Invalid script variables");
+                    item.scriptVariables = values.dump();
+                }
             }
             item.id = Id(o.at("id")); item.parentId = Id(o.at("parent"));
             item.name = Text(o.at("name")); item.typeName = Text(o.at("type"));
@@ -262,11 +278,13 @@ std::string SceneDocument::Serialize(const SceneSnapshot& data)
             {"transform", {{"position", {t.position.x,t.position.y,t.position.z}},
                 {"rotation", {t.rotation.x,t.rotation.y,t.rotation.z,t.rotation.w}},
                 {"scale", {t.scale.x,t.scale.y,t.scale.z}}}}});
-        if (!o.modelAsset.empty() || !o.textureAsset.empty() || !o.materialAsset.empty())
+        if (!o.modelAsset.empty() || !o.textureAsset.empty() || !o.materialAsset.empty() || !o.scriptAsset.empty() || !o.scriptVariables.empty())
         {
             auto& assets = json["objects"].back()["assets"];
             assets = {{"model", o.modelAsset}, {"texture", o.textureAsset}};
             if (!o.materialAsset.empty()) assets["material"] = o.materialAsset;
+            if (!o.scriptAsset.empty()) assets["script"] = o.scriptAsset;
+            if (!o.scriptVariables.empty()) assets["scriptVariables"] = nlohmann::json::parse(o.scriptVariables);
         }
         if (o.pointLight)
         {
@@ -313,6 +331,58 @@ void SceneDocument::Validate(const SceneSnapshot& data, ComponentTypeCatalog cat
         if (o.typeName != SceneAssets::ModelType && !catalog.Find(o.typeName))
             throw SceneDocumentError(EngineSceneUnknownType, "Unknown component type: " + o.typeName);
 }
+static bool CheckModelPhysicallyExists(const std::string& modelAsset)
+{
+    try
+    {
+        return VfsRead::Active().Exists(modelAsset);
+    }
+    catch (const std::exception& e)
+    {
+        std::printf("[Error] SceneDocument: VFS Exists failed for '%s': %s\n", modelAsset.c_str(), e.what());
+        throw;
+    }
+    catch (...)
+    {
+        std::printf("[Error] SceneDocument: unknown VFS Exists error for '%s'\n", modelAsset.c_str());
+        throw;
+    }
+}
+
+static std::unique_ptr<GameComponent> CreateMissingModelPlaceholder(const std::string& modelAsset, const std::string& projectData)
+{
+    auto dummy = std::make_unique<SkeletalMeshComponent>();
+    auto model = std::make_shared<SkeletalModel>();
+    if (!projectData.empty())
+    {
+        try
+        {
+            const auto json = Json::parse(projectData);
+            if (json.is_object() && json.contains("materialSlots") && json["materialSlots"].is_object())
+            {
+                for (auto it = json["materialSlots"].begin(); it != json["materialSlots"].end(); ++it)
+                {
+                    SkeletalMesh mesh;
+                    mesh.MaterialIndex = static_cast<uint32_t>(std::stoul(it.key()));
+                    model->Meshes.push_back(std::move(mesh));
+                }
+            }
+        }
+        catch (const std::exception& e)
+        {
+            std::printf("[Error] SceneDocument: cannot parse placeholder materialSlots for '%s': %s\n",
+                modelAsset.c_str(), e.what());
+        }
+        catch (...)
+        {
+            std::printf("[Error] SceneDocument: unknown error parsing placeholder materialSlots for '%s'\n",
+                modelAsset.c_str());
+        }
+    }
+    dummy->SetAssetModel(modelAsset, std::move(model));
+    return dummy;
+}
+
 void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog catalog, Scene& target)
 {
     Validate(data, catalog); // No constructors before all data and keys have been checked.
@@ -322,14 +392,62 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
     std::map<ComponentId, ComponentId> ids;
     for (const auto& o : data.components)
     {
-        auto object = o.typeName == SceneAssets::ModelType ? SceneAssets::CreateModel(o.modelAsset, false) : catalog.Find(o.typeName)->create();
+        std::unique_ptr<GameComponent> object;
+        bool placeholder = false;
+        if (o.typeName == SceneAssets::ModelType)
+        {
+            try
+            {
+                object = SceneAssets::CreateModel(o.modelAsset, false);
+            }
+            catch (const std::exception& e)
+            {
+                if (CheckModelPhysicallyExists(o.modelAsset))
+                {
+                    throw;
+                }
+                std::printf("[Error] SceneDocument: missing model '%s': %s\n", o.modelAsset.c_str(), e.what());
+                object = CreateMissingModelPlaceholder(o.modelAsset, o.projectData);
+                placeholder = true;
+            }
+        }
+        else
+        {
+            object = catalog.Find(o.typeName)->create();
+        }
         if (!object) throw std::runtime_error("Component factory returned null");
         // Engine.Model is already loaded by its factory; project subclasses are not.
         // Their material-slot codec validates source IDs against the loaded geometry.
         const bool skeletal = dynamic_cast<SkeletalMeshComponent*>(object.get()) != nullptr;
-        if (skeletal) SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
-        object->LoadProjectData(o.projectData);
-        if (!skeletal) SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
+        if (placeholder)
+        {
+            try
+            {
+                SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
+            }
+            catch (const std::exception& e)
+            {
+                std::printf("[Error] SceneDocument: cannot apply model '%s' to placeholder '%s': %s\n",
+                    o.modelAsset.c_str(), o.name.c_str(), e.what());
+            }
+            try
+            {
+                object->LoadProjectData(o.projectData);
+            }
+            catch (const std::exception& e)
+            {
+                std::printf("[Error] SceneDocument: cannot load project data for placeholder '%s': %s\n",
+                    o.name.c_str(), e.what());
+            }
+        }
+        else
+        {
+            if (skeletal) SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
+            object->LoadProjectData(o.projectData);
+            if (!skeletal) SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
+        }
+        object->SetScriptAsset(o.scriptAsset); // a missing or broken file only fails in Play
+        object->SetScriptVariables(o.scriptVariables);
         auto added = target.AddComponent(o.name, object, o.typeName);
         if (added.result != SceneResult::Ok || target.SetTransform(added.id, o.transform) != SceneResult::Ok)
             throw std::runtime_error("Cannot restore object: " + o.name);

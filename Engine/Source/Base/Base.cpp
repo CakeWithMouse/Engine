@@ -127,6 +127,8 @@ class BaseEngine::LoadedSession
     EngineBindAudioPreviewFn bindAudioPreview = nullptr;
     EngineBindPhysicsFn bindPhysics = nullptr;
     EngineBindPhysicsObjectFn bindPhysicsObject = nullptr;
+    using EngineBindAssetImportFn = int (ENGINE_MODULE_CALL *)(uint32_t, uint32_t, void*, const EngineAssetImportApi*);
+    EngineBindAssetImportFn bindAssetImport = nullptr;
     std::function<void()> releaseEdit;
     void* session = nullptr;
     bool started = false;
@@ -282,6 +284,26 @@ class BaseEngine::LoadedSession
             if (bindPhysicsObject && physicsObject && physicsObject->read &&
                 !bindPhysicsObject(1, sizeof(*physicsObject), session, physicsObject))
                 throw std::runtime_error("Cannot bind physics object API");
+            bindAssetImport = reinterpret_cast<EngineBindAssetImportFn>(GetProcAddress(library, "EngineBindAssetImport"));
+            if (bindAssetImport && editApi && editApi->createModel)
+            {
+                HMODULE hGame = nullptr;
+                if (GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                    reinterpret_cast<LPCWSTR>(editApi->createModel), &hGame) && hGame)
+                {
+                    const auto query = reinterpret_cast<EngineGetEditExtensionFn>(GetProcAddress(hGame, "EngineGetEditExtension"));
+                    if (query)
+                    {
+                        EngineAssetImportApi assetImport{};
+                        if (query(editApi->context, EngineAssetImportExtension, 1, sizeof(assetImport), &assetImport) &&
+                            assetImport.version == 1 && assetImport.importWithOptions)
+                        {
+                            if (!bindAssetImport(1, sizeof(assetImport), session, &assetImport))
+                                throw std::runtime_error("Cannot bind asset import API");
+                        }
+                    }
+                }
+            }
             bindEdit = reinterpret_cast<EngineBindEditSessionFn>(GetProcAddress(library, "EngineBindEditSession"));
             if (kind != ENGINE_MODULE_EDITOR || !bindEdit ||
                 !bindEdit(ENGINE_EDIT_API_VERSION, sizeof(*editApi), session, editApi))
@@ -416,6 +438,8 @@ public:
         bindPhysics = nullptr;
         if (session && bindPhysicsObject) bindPhysicsObject(1, sizeof(EnginePhysicsObjectApi), session, nullptr);
         bindPhysicsObject = nullptr;
+        if (session && bindAssetImport) bindAssetImport(1, sizeof(EngineAssetImportApi), session, nullptr);
+        bindAssetImport = nullptr;
         if (session && bindViewportOverlay) bindViewportOverlay(1, sizeof(EngineViewportOverlayApi), session, nullptr);
         bindViewportOverlay = nullptr;
         if (session && bindViewportInput) bindViewportInput(1, sizeof(EngineViewportInputApi), session, nullptr);
@@ -704,6 +728,9 @@ int BaseEngine::Play(const RuntimeLaunchOptions& options)
         if (serviceId == EngineViewportOverlayService && minVersion <= 3 && engine->editModule && engine->editModule->ViewportOverlayApi().getCamera) return &engine->editModule->ViewportOverlayApi();
         if (serviceId == EngineViewportCursorService && minVersion <= 1 && engine->editModule && engine->editModule->ViewportCursorApi().set) return &engine->editModule->ViewportCursorApi();
         if (serviceId == EnginePointLightV2Service && minVersion <= 1 && engine->editModule && engine->editModule->PointLightV2Api().set) return &engine->editModule->PointLightV2Api();
+        if (serviceId == EngineScriptService && minVersion <= 1 && engine->editModule && engine->editModule->ScriptApi().set) return &engine->editModule->ScriptApi();
+        if (serviceId == EngineGraphTraceService && minVersion <= 1 && engine->editModule && engine->editModule->GraphTraceApi().read) return &engine->editModule->GraphTraceApi();
+        if (serviceId == EngineAiMachineService && minVersion <= 1 && engine->editModule && engine->editModule->AiMachineApi().check) return &engine->editModule->AiMachineApi();
         if(serviceId==EngineAuthoringService && minVersion<=1 && engine->editModule && engine->editModule->AuthoringApi().describe) return &engine->editModule->AuthoringApi();
         if (serviceId == EngineEditorBatchService && minVersion <= 1 && engine->editModule && engine->editModule->BatchApi().apply) return &engine->editModule->BatchApi();
         if (serviceId == ENGINE_SERVICE_VFS && minVersion <= ENGINE_VFS_API_VERSION)

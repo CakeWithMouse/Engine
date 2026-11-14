@@ -12,7 +12,7 @@ struct PS_IN
     float3 normal : NORMAL;
     float2 texCoord : TEXCOORD0;
     float3 worldPos : TEXCOORD1;
-    float fade : TEXCOORD2; // signed LOD cross-fade of the copy, see InstData.Params
+    nointerpolation float fade : TEXCOORD2; // signed per-copy LOD weight, see InstData.Params
     float4 color : COLOR;
 };
 

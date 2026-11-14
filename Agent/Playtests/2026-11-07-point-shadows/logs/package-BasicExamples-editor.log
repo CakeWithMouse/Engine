@@ -1,0 +1,46 @@
+Project: BasicExamples
+Mode: editor
+PreviewScene: BasicExamples
+EngineStarting
+ResourcesReady (stub)
+EngineServicesReady (stub: no window or GPU)
+EngineReady
+[VFS] Mounted '/Engine' -> 'E:/Engine/Engine/build/releases/PainEngine-2026.11.07.2-win64/Runtime/EngineContent'
+[VFS] Mounted '/Game' -> 'E:/Engine/Engine/build/releases/PainEngine-2026.11.07.2-win64/Runtime/Projects/BasicExamples/Content'
+ModuleLoaded
+[VfsRead] Bind host VFS service v1
+EditorCreate
+[ToolBarFacts] initial tb geom=0,0 100x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'viewport/antialiasing'
+[Info] QtHost::SetAntialiasing: mode = 1, serviceVersion = 0, handler = 0000000000000000
+EditorStart
+BasicExamples
+E:\Engine\Engine\build\releases\PainEngine-2026.11.07.2-win64\Runtime\Projects\BasicExamples\Project.json
+[Info] Viewport overlay service: NOT FOUND (version 0)
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=0 | snapObjs=0 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=0 | tris=0
+[DirectX] Selected GPU: NVIDIA GeForce RTX 4070 Laptop GPU (VRAM: 7948 MB)
+Created device with feature level 11.1 on NVIDIA GeForce RTX 4070 Laptop GPU (7948 MB dedicated)
+[VfsRead] using local VFS (no host service)
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.2-win64/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+Successfully registered shader: E:/Engine/Engine/build/releases/PainEngine-2026.11.07.2-win64/Runtime/EngineContent/Shaders/RotatedFigure.hlsl [VARIANT_DEFAULT]
+ViewportReady
+EditorViewportAttach ok
+[Info] Camera: zero
+[Info] Overlay: entered, pipelineReady=0, lineCount=0, billboardCount=0, backbuffer 713x423
+[Info] Overlay: early return (empty lines and billboards)
+[Info] Frame 1: AntialiasingMode = 0 (Off), bb = 713x423
+EngineRender (viewport)
+EngineFrameEnd (viewport)
+EngineRender (viewport)
+EngineFrameEnd (viewport)
+EngineRender (viewport)
+EngineFrameEnd (viewport)
+ViewportStopped
+EditorUpdates=3
+EditorStop
+EditorDestroy
+[VfsRead] Unbind
+ModuleUnloaded
+ResourcesStopped (stub)
+EngineStopped
