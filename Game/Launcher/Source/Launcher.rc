@@ -32,4 +32,4 @@ BEGIN
     PUSHBUTTON "Отмена", IDCANCEL, 308, 201, 70, 17
 END
 
-301 RCDATA "../../../Engine/docs/tutorial/assets/cover.png"
+301 RCDATA "splash_1920.jpg"
