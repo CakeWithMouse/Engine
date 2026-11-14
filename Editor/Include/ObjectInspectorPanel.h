@@ -24,6 +24,7 @@ class MaterialCard;
 class ScriptCard;
 class AiMachineCard;
 class GeometryCard;
+class CameraGuideCard;
 
 struct EditorSnapshot;
 
@@ -60,6 +61,7 @@ class ObjectInspectorPanel : public QWidget
     Q_OBJECT
 
 public:
+    std::function<bool(EngineCameraInfo&)> readViewportCamera;
     // Список переменных скрипта (из его файла) для карточки «Скрипт»: /Game путь -> [{"name","type","value"}].
     void SetScriptVariablesReader(std::function<QJsonArray(const QString&)> reader);
     // Схема свойств типа со stateMachine и machineMemory: их правит карточка «Автомат ИИ», а не общий список свойств.
@@ -120,6 +122,7 @@ signals:
     void ChooseAiMachineRequested();
 
 private:
+    CameraGuideCard* cardCamera_ = nullptr;
     void BuildUi();
     void RefreshProjectProperties(const EditorQtHost::Snapshot&, const EditorQtHost::SceneObject&);
     void SubmitProperty(const QString& path, const QJsonValue& value);

@@ -6,6 +6,7 @@
 #include "../Core/SettingsService.h"
 #include "../Core/GizmoMath.h"
 #include "core/GizmoMathTests.h"
+#include "core/CameraGuideTests.h"
 #include "../Core/MaterialGraphModel.h"
 #include "../Core/HlslGraphCompiler.h"
 #include "core/MaterialGraphTests.h"
@@ -464,6 +465,7 @@ int main(int argc, char* argv[])
     std::fflush(stdout);
     AssetExtensionsTests::Run(gChecks);
 
+    RunCameraGuideTests(gChecks);
     std::printf("CoreTests: %d checks passed.\n", gChecks);
     std::fflush(stdout);
     return 0;
