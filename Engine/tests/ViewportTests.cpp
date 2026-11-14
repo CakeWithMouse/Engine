@@ -366,16 +366,17 @@ int main(int argc, char** argv)
                     CHECK(game.RenderRedPixels() == 0);
                 }
                 for (float dist : {1.0f, 3.0f, 15.0f, 60.0f})
+                for (float size : {16.0f, 32.0f, 64.0f})
                 {
                     const auto r = game.ScreenPointToRay({350.0f, 250.0f});
                     const auto p = r.ray.origin + r.ray.direction * dist;
-                    const EngineOverlayBillboard bb{1, p.x, p.y, p.z, 32.0f, 0xFF0000FF, 0};
+                    const EngineOverlayBillboard bb{1, p.x, p.y, p.z, size, 0xFF0000FF, 0};
                     game.SetOverlayBillboards(&bb, 1);
                     const auto bounds = game.MeasureBillboardBounds();
                     const int diam = bounds.Diameter();
                     std::cout << "Billboard readback at dist " << dist << ": diameter = " << diam << " px (bounds ["
                               << bounds.minX << "," << bounds.minY << " .. " << bounds.maxX << "," << bounds.maxY << "])" << std::endl;
-                    CHECK(diam >= 18 && diam <= 22);
+                    CHECK(diam >= size - 2 && diam <= size + 2);
                     game.SetOverlayBillboards(nullptr, 0);
                 }
             }
