@@ -272,6 +272,8 @@ int wmain(int argc, wchar_t** argv)
         if (!legacy && query && query(api.context,EngineProjectDataExtension,1,sizeof(projectData),&projectData)) host.SetProjectDataApi(projectData);
         EngineSceneBatchApi batch{};
         if (!legacy && query && query(api.context,EngineSceneBatchExtension,1,sizeof(batch),&batch)) host.SetBatchApi(batch);
+        EngineAssetImportApi assetImport{};
+        if (!legacy && query && query(api.context,EngineAssetImportExtension,1,sizeof(assetImport),&assetImport)) host.SetAssetImportApi(assetImport);
         EngineAuthoringApi authoring{};
         if (!legacy && query && query(api.context,EngineAuthoringExtension,1,sizeof(authoring),&authoring)) host.SetAuthoringApi(authoring);
         EngineSelectionApi selection{};
