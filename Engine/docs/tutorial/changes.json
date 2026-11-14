@@ -1,920 +1,574 @@
 {
   "title": "PainEngine\nИзменения выпуска",
-  "date": "2026-11-07",
-  "revision": 2,
-  "engineVersion": "2026.11.07.6",
-  "editorialPolicy": "editorial-policy.json",
-  "sourceCommit": "a7f8c8d89cc4061c155715008d257cb3cd229d60",
   "outputPrefix": "PainEngine-Changes",
+  "date": "2026-11-14",
+  "revision": 4,
+  "engineVersion": "2026.11.11.0",
+  "sourceCommit": "53db2724c3b78bce138fcd0cace20e51a2ef0aeb",
+  "baselineCommit": "a7f8c8d89cc4061c155715008d257cb3cd229d60",
+  "editorialPolicy": "editorial-policy.json",
   "slides": [
     {
       "type": "cover",
-      "title": "PainEngine\nИзменения выпуска",
-      "subtitle": "После туториала от 1 ноября\nРедакторы, код, звук и материалы",
-      "image": "r8/editor-assets.png",
+      "title": "PainEngine\nНовые возможности",
+      "subtitle": "Скрипты, ИИ, импорт\nи исправления редактора PR №24",
+      "image": "r10/ai-machine-window.png",
+      "notes": "Изменения относительно сохранённого туториала r9 и API Reference 7 ноября. Версия 2026.11.11.0, исходники 6899a6ac6a4a3e2a6a9da3cba48c0d790881569a; интеграция PR №24 в release/v0.3.0, c5f52d20cda9501e4e7af3c93b1e4422acd1ef3b",
       "sources": [
-        "Engine/Version.json",
-        "Engine/docs/tutorial/examples/README.txt"
+        "Engine/Version.json"
+      ]
+    },
+    {
+      "type": "evidence",
+      "title": "Выбор модели и материала",
+      "items": [
+        [
+          "Библиотека",
+          "Откройте выбор ресурса, найдите его по имени и подтвердите выбор."
+        ],
+        [
+          "Геометрия",
+          "Заменить модель можно у Engine.Model. Для примитива добавьте отдельный модельный объект."
+        ],
+        [
+          "Текстуры",
+          "Откройте материал и выберите BaseMap. Сохраните материал и сцену."
+        ]
       ],
-      "notes": "Практический маршрут прежнего туториала сохранён. Новые разделы дополняют его после основного курса. Полные исходники находятся в tutorial/examples. Снимки интерфейса сняты с текущего редактора; Qt grab не захватывает D3D viewport."
+      "foot": "Замена модели — только Engine.Model. Примитив не превращается в модель.",
+      "notes": "PR №24. Общий AssetPickerDialog фильтрует ресурсы по типу, показывает текущий выбор и виртуальный путь /Game. Замена модели проходит через checkpoint/load и Undo/Redo. Старый маршрут превращения примитива в модель заблокирован. C++ API назначения ресурсов не менялся. Снимки реальных Qt-компонентов PR №24 на учебных pyramid.obj и checker.png; отдельный тестовый запуск без сцены.",
+      "sources": [
+        "Editor/UI/AssetPickerDialog.cpp",
+        "Editor/UI/GeometryCard.h",
+        "Editor/Source/ImportCommands.cpp",
+        "Editor/Host/SceneCommandHandler.cpp"
+      ],
+      "images": [
+        {
+          "file": "r11/model-picker.png",
+          "x": 48,
+          "y": 148,
+          "w": 550,
+          "h": 412
+        },
+        {
+          "file": "r11/texture-picker.png",
+          "x": 682,
+          "y": 148,
+          "w": 550,
+          "h": 412
+        }
+      ],
+      "texts": [
+        {
+          "text": "Модель: поиск и выбор из Content",
+          "x": 48,
+          "y": 578,
+          "w": 550,
+          "h": 48,
+          "size": 24
+        },
+        {
+          "text": "BaseMap: миниатюра, импорт и очистка",
+          "x": 682,
+          "y": 578,
+          "w": 550,
+          "h": 48,
+          "size": 24
+        }
+      ]
     },
     {
       "type": "rows",
-      "title": "Редактор: схемы и раскладка",
+      "title": "Папки в библиотеке проекта",
       "items": [
         [
-          "Управление",
-          "Две схемы: Unreal / Unity и Blender. Выбор находится в меню «Правка»."
+          "Создать",
+          "ПКМ по папке или свободному месту → Новая папка. Сразу введите имя."
         ],
         [
-          "Окна",
-          "Перенос и сохранение панелей, темы, язык и сброс раскладки через «Вид»."
+          "Переименовать",
+          "Папка остаётся в текущем родителе. Корни проекта и Content защищены."
         ],
         [
-          "Viewport",
-          "Gizmo, сетка и FXAA получили исправления выбора, глубины и очистки кадра."
+          "Проверить ссылки",
+          "Для переноса ресурса используйте штатную команду переноса и проверьте сцену."
         ]
       ],
+      "foot": "Создание и переименование доступны в Edit.",
+      "notes": "Занятое имя получает числовой суффикс. Проверяются допустимость имени, границы проекта и ссылки на внешние каталоги. Переименование папки само по себе не гарантирует обновления ссылок на все вложенные ассеты. Фильтры и подписи файлов согласованы с типами ресурсов.",
+      "sources": [
+        "Editor/UI/FolderCommands.h",
+        "Editor/Core/FolderPaths.h",
+        "Editor/Source/FileBrowser.cpp",
+        "Editor/Core/AssetExtensions.h"
+      ]
+    },
+    {
+      "type": "rows",
+      "title": "Инспектор и перемещение объектов",
+      "items": [
+        [
+          "Карточки",
+          "Движение объекта сохраняет раскрытие карточек и ввод в активном поле."
+        ],
+        [
+          "Gizmo",
+          "Во время перетаскивания панели обновляются примерно раз в 33 мс."
+        ],
+        [
+          "Раскладка",
+          "Инспектор и панель сцены можно прикрепить к любой стороне окна."
+        ]
+      ],
+      "foot": "Карточки скрипта и автомата ИИ сохранены.",
+      "notes": "PR №24 объединяет обновления gizmo, пропускает лишние обновления от InputCursor и ViewportCamera. Финальное положение обрабатывается таймером после последнего события. Исправлены экранные размеры и hit test иконок viewport. Это не обещание частоты рендера 30 FPS: ограничены только обновления панелей.",
       "sources": [
         "Editor/Source/MainWindow.cpp",
-        "Editor/Core/GizmoMath.cpp",
-        "Editor/Core/ViewportOverlay.cpp"
-      ],
-      "notes": "Изменения после r7: редактор v2, локализация, единые иконки, исправления gizmo и FXAA. Для проверки измените transform, отмените действие и перезапустите редактор.",
-      "foot": ""
-    },
-    {
-      "type": "shot",
-      "title": "Материалы: узловой граф",
-      "image": "r8/editor-material-graph.png",
-      "items": [
-        [
-          "Ноды и связи",
-          "Tab открывает поиск. Соедините выход ноды со входом Surface."
-        ],
-        [
-          "Результат",
-          "Граф создаёт HLSL. Сохраните .mat и .mat.graph.json вместе."
-        ]
-      ],
-      "sources": [
-        "Editor/Source/MaterialGraphWidget.cpp",
-        "Editor/Core/HlslGraphCompiler.cpp"
-      ],
-      "notes": "Ранее материал настраивался через параметры и ручной HLSL. Теперь граф генерирует HLSL, поддерживает текстуры и вычисления. Полный маршрут: materials.html.",
-      "foot": ""
-    },
-    {
-      "type": "shot",
-      "title": "Граф: поиск, отмена и ошибки",
-      "image": "r8/editor-material-graph-error.png",
-      "items": [
-        [
-          "Правки",
-          "Ctrl+Z / Ctrl+Y, копирование, вставка и дублирование нод."
-        ],
-        [
-          "Диагностика",
-          "Проверьте ошибку графа. Откат восстанавливает согласованные файлы."
-        ]
-      ],
-      "sources": [
-        "Editor/Source/MaterialEditorWindow.cpp",
-        "Editor/Core/MaterialGraphModel.cpp"
-      ],
-      "notes": "Исправлены согласованность rollback и сохранение пресетов проекта. Поиск принимает русские названия и английские типы. F показывает граф целиком.",
-      "foot": ""
-    },
-    {
-      "type": "evidence",
-      "title": "Материалы модели: где редактировать",
-      "images": [
-        {
-          "file": "r9/model-files.png",
-          "x": 460,
-          "y": 205,
-          "w": 766,
-          "h": 180
-        },
-        {
-          "file": "r9/model-override.png",
-          "x": 460,
-          "y": 522,
-          "w": 766,
-          "h": 98
-        }
-      ],
-      "texts": [
-        {
-          "text": "1. Файлы слотов",
-          "x": 48,
-          "y": 162,
-          "w": 370,
-          "h": 42,
-          "size": 29,
-          "bold": true,
-          "color": "#08778E",
-          "face": "Arial"
-        },
-        {
-          "text": "В Content/Models откройте папку модели, затем Materials. Двойной щелчок по Material_0.mat открывает редактор.",
-          "x": 48,
-          "y": 211,
-          "w": 370,
-          "h": 195,
-          "size": 26,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        },
-        {
-          "text": "2. Общий материал",
-          "x": 48,
-          "y": 414,
-          "w": 370,
-          "h": 42,
-          "size": 29,
-          "bold": true,
-          "color": "#08778E",
-          "face": "Arial"
-        },
-        {
-          "text": "«Убрать» снимает общий override. Исходные назначения слотов сохраняются.",
-          "x": 48,
-          "y": 463,
-          "w": 370,
-          "h": 130,
-          "size": 26,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        },
-        {
-          "text": "Content/Models/blend-suzanne-multiple/Materials",
-          "x": 460,
-          "y": 155,
-          "w": 766,
-          "h": 45,
-          "size": 23,
-          "bold": true
-        }
-      ],
-      "sources": [
-        "Editor/Source/FileBrowser.cpp",
         "Editor/Source/ObjectInspectorPanel.cpp",
-        "Editor/UI/MaterialCard.h"
-      ],
-      "foot": "Пример: CuriousCity/Content/Models/blend-suzanne-multiple/Materials",
-      "notes": "Реальные Qt-панели версии .6. В этом выпуске ObjectInspectorPanel скрывает properties_ для Engine.Model, поэтому прежняя инструкция менять отдельный слот прямо в инспекторе была неверной. Здесь показано редактирование существующих файлов .mat. Для переназначения слота используйте API на следующем слайде. Верхний снимок показывает папку Materials, нижний — общую карточку материала."
+        "Editor/UI/ViewportOverlayHelper.cpp",
+        "Engine/Content/Shaders/EditorOverlay.hlsl"
+      ]
     },
     {
-      "type": "evidence",
-      "title": "Материалы модели: замена слота в C++",
-      "images": [
-        {
-          "file": "r9/material-code.png",
-          "x": 40,
-          "y": 151,
-          "w": 854,
-          "h": 470
-        }
-      ],
-      "texts": [
-        {
-          "text": "Фрагмент цикла из CuriousCity.\n\nID берём из GetMaterialSlots(): номера могут иметь пропуски.\n\nПроверяйте bool. Очистка общего материала возвращает отдельные слоты.",
-          "x": 923,
-          "y": 163,
-          "w": 304,
-          "h": 450,
-          "size": 25,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        }
-      ],
-      "sources": [
-        "Engine/docs/tutorial/examples/PresentationSources/ProjectGame.cpp",
-        "Engine/Include/Engine/Components/SpecificComponents/SkeletalMeshComponent.h"
-      ],
-      "foot": "Полный пример: Examples/CuriousCity/Source/ProjectGame.cpp",
-      "notes": "Снимок показывает существующий проверочный код проекта, переносы длинных строк изменены для слайда. Указатель skeletal получен dynamic_cast в цикле по scene.GetComponents(); continue относится к этому циклу. Не полный отдельный translation unit.\nКод на снимке:\nconst auto slots = skeletal->GetMaterialSlots();\nif (slots.empty()) continue;\nconst uint32_t sourceId = slots.begin()->first;\nconst std::string originalPath = slots.begin()->second;\nconst std::string material =\n    \"/Game/Models/CesiumMan/Materials/Material_0.mat\";\nconst bool slotSet =\n    skeletal->SetMaterialSlot(sourceId, material);\nconst bool unknownSlotSet =\n    skeletal->SetMaterialSlot(UINT32_MAX, material);\nconst bool overrideSet = skeletal->SetMaterialAsset(material);\nconst std::string overridePath = skeletal->GetMaterialAsset();\nconst bool overrideCleared = skeletal->SetMaterialAsset(\"\");"
-    },
-    {
-      "type": "evidence",
-      "title": "Звук в редакторе: tutorial.wav",
-      "images": [
-        {
-          "file": "r9/audio-browser.png",
-          "x": 445,
-          "y": 150,
-          "w": 785,
-          "h": 280
-        },
-        {
-          "file": "r9/audio-menu.png",
-          "x": 850,
-          "y": 441,
-          "w": 360,
-          "h": 185
-        }
-      ],
-      "texts": [
-        {
-          "text": "1. Импорт",
-          "x": 48,
-          "y": 160,
-          "w": 350,
-          "h": 45,
-          "size": 29,
-          "bold": true,
-          "color": "#08778E",
-          "face": "Arial"
-        },
-        {
-          "text": "Сцена → Ресурсы → Импорт аудио…\nВыберите tutorial.wav.",
-          "x": 48,
-          "y": 208,
-          "w": 350,
-          "h": 120,
-          "size": 26,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        },
-        {
-          "text": "2. Прослушивание",
-          "x": 48,
-          "y": 349,
-          "w": 350,
-          "h": 45,
-          "size": 29,
-          "bold": true,
-          "color": "#08778E",
-          "face": "Arial"
-        },
-        {
-          "text": "ПКМ по файлу в Content/Audio → «Прослушать».\n\n«Остановить звук» завершает предпрослушивание.",
-          "x": 48,
-          "y": 400,
-          "w": 350,
-          "h": 205,
-          "size": 26,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        },
-        {
-          "text": "Контекстное меню\nвыбранного WAV",
-          "x": 450,
-          "y": 489,
-          "w": 345,
-          "h": 90,
-          "size": 26,
-          "bold": true
-        }
-      ],
-      "sources": [
-        "Editor/Source/AssetTools.cpp",
-        "Editor/Source/FileBrowser.cpp",
-        "Engine/docs/tutorial/examples/AudioTutorial.cpp"
-      ],
-      "foot": "Учебный файл: Tutorials/LearningLab/Content/Audio/tutorial.wav",
-      "notes": "Два отдельных настоящих снимка Qt: дерево файлов и контекстное меню выбранного WAV. PCM WAV 16-bit mono 22050 Hz, 440 Hz, 0.5 s. Повторный импорт создаёт имя tutorial_1.wav. Программный вызов предпрослушивания прошёл, субъективное прослушивание не заявляется. MP3/FLAC/OGG зависят от доступных Windows-декодеров."
-    },
-    {
-      "type": "code",
-      "title": "Звук из игрового C++",
-      "code": "auto* audio = GetGame()->GetAudioEngine();\nif (!audio) return;\nauto path = EngineModuleVfs::Resolve(\n    \"/Game/Audio/tutorial.wav\");\nauto id = audio->LoadSound(\n    std::filesystem::u8path(path).wstring());\nif (!id.IsValid()) return;\naudio::AudioEngine::PlayOptions options;\noptions.volume = 0.25f;\naudio->Play2D(id, options);",
-      "aside": "Фрагмент BeginPlay.\n\nПолный класс и includes:\nAudioTutorial.h/.cpp\n\nGame управляет временем жизни AudioEngine.",
-      "sources": [
-        "Engine/docs/tutorial/examples/AudioTutorial.h",
-        "Engine/docs/tutorial/examples/AudioTutorial.cpp",
-        "Engine/Include/Engine/Sound/AudioEngine.h"
-      ],
-      "notes": "Добавьте Audio tutorial в сцену после сборки. BeginPlay воспроизводит тон один раз. SoundId принадлежит создавшему его AudioEngine. Полный компонент проверяет ошибки."
-    },
-    {
-      "type": "rows",
-      "title": "3D-звук и потоковая музыка",
+      "type": "shot",
+      "title": "Настройки импорта модели",
       "items": [
         [
-          "Короткий эффект",
-          "LoadSound и Play3D используют SoundId и копию AudioEmitter3D."
+          "Масштаб",
+          "Единицы файла включены. Scale меняет размер геометрии."
         ],
         [
-          "Музыка",
-          "PlayStream читает файл потоково. Сохраните StreamHandle для StopStream."
+          "Дополнительно",
+          "Нормали, UV и объединение мешей доступны в раскрывающейся секции."
         ],
         [
-          "Ограничение",
-          "Для активного 3D-источника пока нет публичного handle перемещения."
+          "Ресурсы",
+          "Флажки включают создание материалов и импорт текстур."
         ]
       ],
       "sources": [
+        "Editor/Source/ImportCommands.cpp",
+        "Editor/UI/ImportSettingsDialog.cpp",
+        "Engine/Source/Scene/ModelImport.cpp"
+      ],
+      "notes": "Настройки хранятся рядом с моделью в .importsettings.json. Для схемы v2 масштаб запекается в геометрию, новый объект получает Transform Scale 1. Старые sidecar v1 сохраняют совместимость. См. ImportSettingsV2Tests и ModelGeometryScaleTests.",
+      "image": "r10/import-settings.png"
+    },
+    {
+      "type": "rows",
+      "title": "Переимпорт и удаление ресурсов",
+      "items": [
+        [
+          "Изменить настройки",
+          "ПКМ по модели: параметры импорта. Применение повторно импортирует исходник."
+        ],
+        [
+          "Сохранить сцену",
+          "Переимпорт сохраняет размещение, выделение и историю Undo сцены."
+        ],
+        [
+          "Удалить",
+          "Delete в Content удаляет файл или папку после подтверждения. Проверяйте ссылки сцены."
+        ]
+      ],
+      "sources": [
+        "Editor/Source/ImportCommands.cpp",
+        "Editor/UI/ImportSettingsDialog.cpp",
+        "Engine/Source/Scene/ModelImport.cpp",
+        "Editor/Source/AssetDeleteCommand.cpp",
+        "Engine/Source/Scene/AssetUpdate.cpp"
+      ],
+      "notes": "При ошибке изменения настроек sidecar восстанавливается. Временные файлы переимпорта лежат вне Content, под mount /_staging. Удалённая модель оставляет placeholder с прежним путём. Перенос ассета по-прежнему очищает Undo. Восстановление удалённых ресурсов не является Undo сцены."
+    },
+    {
+      "type": "shot",
+      "title": "Визуальный скрипт у объекта",
+      "items": [
+        [
+          "Создать",
+          "Карточка «Скрипт» → «Создать». Файл появится в Content/Scripts."
+        ],
+        [
+          "Назначить",
+          "«Выбрать…» подключает существующий .vscript. У объекта один скрипт."
+        ],
+        [
+          "Настроить",
+          "Переменные свои у каждого объекта. ↺ — сброс к файлу."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/Script/ScriptRuntime.h",
+        "Engine/Source/Script/ScriptInstance.cpp",
+        "Editor/Source/ScriptEditorWindow.cpp",
+        "Editor/UI/ScriptCard.h"
+      ],
+      "notes": "Ссылки assets.script и assets.scriptVariables сохраняются в сцене, копии Play и дубликатах. Старый Game.dll без расширения Script не предоставляет карточку.",
+      "image": "r10/editor-script-card.png"
+    },
+    {
+      "type": "shot",
+      "title": "Окно визуального скрипта",
+      "items": [
+        [
+          "Добавить ноду",
+          "Tab, ПКМ или «+ Нода». Поиск понимает русские и английские названия."
+        ],
+        [
+          "Связать",
+          "Белые пины задают порядок действий, цветные передают значения."
+        ],
+        [
+          "Исправить",
+          "Правки сохраняются сразу. Есть Ctrl+Z/Y, копирование и «Упорядочить»."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/Script/ScriptRuntime.h",
+        "Engine/Source/Script/ScriptInstance.cpp",
+        "Editor/Source/ScriptEditorWindow.cpp"
+      ],
+      "notes": "Двойной щелчок открывает свойства ноды и значения входов без связи. Пустой Target означает сам объект. Файлы материалов и скриптов используют разные схемы, чужие ноды не вставляются.",
+      "image": "r10/editor-script-trace.png"
+    },
+    {
+      "type": "rows",
+      "title": "Практика: вращение без C++",
+      "items": [
+        [
+          "Событие",
+          "«Каждый кадр» запускает действие «Повернуть»."
+        ],
+        [
+          "Скорость",
+          "Умножьте DeltaTime на вектор (0, 90, 0), подайте результат в Degrees."
+        ],
+        [
+          "Проверка",
+          "Play: куб поворачивается на 90° в секунду. Stop возвращает исходную сцену."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/Script/ScriptRuntime.h",
+        "Engine/Source/Script/ScriptInstance.cpp",
+        "Editor/Source/ScriptEditorWindow.cpp",
+        "Game/BasicExamples/Content/Scripts/Spin.vscript"
+      ],
+      "notes": "Готовый Spin.vscript находится в Game/BasicExamples/Content/Scripts. Bob.vscript показывает синус и исходную позицию, Move.vscript показывает клавиши и возврат по пробелу. Скрипты интерпретируются движком, SDK и компилятор для их правок не нужны."
+    },
+    {
+      "type": "shot",
+      "title": "Скрипты: события и ошибки",
+      "items": [
+        [
+          "Жизненный цикл",
+          "Начало игры идёт после BeginPlay объекта. Клавиши и Tick идут после его Tick."
+        ],
+        [
+          "Отладка",
+          "В Play видны выполненные ноды, счётчики и последние прочитанные значения."
+        ],
+        [
+          "Ошибка",
+          "Ошибка останавливает один скрипт. Сообщение остаётся после Stop."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/Script/ScriptRuntime.h",
+        "Engine/Source/Script/ScriptInstance.cpp",
+        "Editor/Source/ScriptEditorWindow.cpp"
+      ],
+      "notes": "Edit и Pause не выполняют скрипт. Правки файла во время Play применяются при следующем запуске экземпляра. Лимит 10 000 шагов на событие и глубина вызовов 16 защищают от циклов. Выход данных показывается, только если его читали.",
+      "image": "r10/editor-script-error.png"
+    },
+    {
+      "type": "rows",
+      "title": "ИИ-персонаж и навигация",
+      "items": [
+        [
+          "Персонаж",
+          "Добавьте ИИ-персонажа, задайте команду и радиус зрения."
+        ],
+        [
+          "Движение",
+          "Объём границ задаёт сетку XZ. Объёмы препятствий закрывают проходы."
+        ],
+        [
+          "Поведение",
+          "Назначьте .fsm в карточке «Автомат ИИ» либо имя автомата из C++."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/AI/AiCharacter.h",
+        "Engine/Include/Engine/AI/MachineFile.h",
+        "Editor/Source/AiMachineEditorWindow.cpp",
+        "Engine/Include/Engine/AI/Navigation.h"
+      ],
+      "notes": "NavVolume читает позицию и размер при запуске сцены. Это сеточная навигация в XZ, а не полноценная физика. Команда 0 нейтральна, обычный игрок автоматически становится целью команды 1. Для охранника задайте команду 2. AiCharacter с флагом игрока не управляется ИИ."
+    },
+    {
+      "type": "shot",
+      "title": "Редактор автомата ИИ",
+      "items": [
+        [
+          "Состояния",
+          "Двойной щелчок открывает задачи, условия входа и службы."
+        ],
+        [
+          "Переходы",
+          "Двойной щелчок по стрелке: событие, успех, провал, задержка и условия."
+        ],
+        [
+          "Память",
+          "Слева ключи и настройки восприятия. Имена обновляются во всех блоках."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/AI/AiCharacter.h",
+        "Engine/Include/Engine/AI/MachineFile.h",
+        "Editor/Source/AiMachineEditorWindow.cpp",
+        "Editor/Source/FsmGraphWidget.cpp"
+      ],
+      "notes": "Каждая правка сохраняется и проверяется загрузчиком движка. Красная рамка указывает на ошибку. Родитель содержит дочерние состояния. Состав групп условий «Хотя бы одно из» и «Все из» пока правится в JSON.",
+      "image": "r10/ai-machine-window.png"
+    },
+    {
+      "type": "rows",
+      "title": "Память и проверка автомата",
+      "items": [
+        [
+          "Файл",
+          "Ключи имеют тип: bool, int, float, vec3, string или object."
+        ],
+        [
+          "Экземпляр",
+          "«Память у этого объекта» перекрывает значения файла для одного персонажа."
+        ],
+        [
+          "Play",
+          "Карточка показывает активные состояния, память и последние переходы."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/AI/AiCharacter.h",
+        "Engine/Include/Engine/AI/MachineFile.h",
+        "Editor/Source/AiMachineEditorWindow.cpp",
+        "Engine/Source/Runtime/SceneEditAi.cpp"
+      ],
+      "notes": "Неизвестные ключи и значения неверного типа пропускаются. Переопределения machineMemory применяются только к .fsm, не к именованному автомату C++. Ошибки назначенного .fsm блокируют запуск Play. Связанные .fsm загружаются с ограничением глубины 8."
+    },
+    {
+      "type": "rows",
+      "title": "Туториал: автоматы ИИ",
+      "items": [
+        [
+          "Открыть",
+          "В лаунчере: «Туториал: Автоматы ИИ» → «Редактировать»."
+        ],
+        [
+          "Наблюдать",
+          "Play, затем WASD: охранник замечает игрока, преследует и ищет за стеной."
+        ],
+        [
+          "Изменить",
+          "В памяти охранника поменяйте PostB. Следующий Play использует новый пост."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/AI/AiCharacter.h",
+        "Engine/Include/Engine/AI/MachineFile.h",
+        "Editor/Source/AiMachineEditorWindow.cpp",
+        "Game/AiTutorial/README.md",
+        "Game/Launcher/Source/Main.cpp"
+      ],
+      "notes": "Проект без C++ поставляется с собранным лаунчером в Tutorials/AiTutorial. Из исходников: Game/AiTutorial/Create.ps1 -Destination <новая папка>. Нужен актуальный собранный Runtime. Посетитель использует скамейки Bench и колодец Well, занимая свободные места."
+    },
+    {
+      "type": "rows",
+      "title": "Связь скрипта и автомата",
+      "items": [
+        [
+          "Скрипт вызывает ИИ",
+          "E в туториале записывает NoiseAt и отправляет охраннику событие Noise."
+        ],
+        [
+          "ИИ вызывает скрипт",
+          "Состояние Report вызывает OnCaught у игрока. Скрипт возвращает игрока назад."
+        ],
+        [
+          "Общие данные",
+          "Блок «Переменная скрипта» читает значение. Ноды ИИ работают с памятью персонажа."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/Script/ScriptRuntime.h",
+        "Engine/Source/Script/ScriptInstance.cpp",
+        "Editor/Source/ScriptEditorWindow.cpp",
+        "Engine/Include/Engine/AI/AiCharacter.h",
+        "Engine/Include/Engine/AI/MachineFile.h",
+        "Editor/Source/AiMachineEditorWindow.cpp",
+        "Game/AiTutorial/Content/Scripts/Player.vscript",
+        "Game/AiTutorial/Content/AI/Guard.fsm"
+      ],
+      "notes": "Ai.CallScriptEvent связывает задачи автомата с событиями .vscript. Ai.ScriptVariable позволяет условиям автомата читать переменные скрипта. Проверяйте объект-цель и совпадение имён событий и ключей."
+    },
+    {
+      "type": "rows",
+      "title": "ИИ из C++: владельцы и срок жизни",
+      "items": [
+        [
+          "Мир",
+          "Ai::Get(game) возвращает мир встроенной подсистемы игровой сессии."
+        ],
+        [
+          "Контроллер",
+          "AiCharacter создаёт Controller в BeginPlay. Настройка находится в SetupAi."
+        ],
+        [
+          "Данные",
+          "Контроллер владеет памятью и экземпляром автомата. Определение автомата общее."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/AI/World.h",
+        "Engine/Include/Engine/AI/Controller.h",
+        "Engine/Include/Engine/AI/StateMachine.h"
+      ],
+      "notes": "Ai::Get вне gameplay выбрасывает исключение. World::Detach уничтожает контроллеры объектов сцены, но сохраняет директоров и группы. Для ссылки на объект используйте ID/ObjectRef, разрешайте его заново и учитывайте удаление."
+    },
+    {
+      "type": "code",
+      "title": "C++: запуск автомата из файла",
+      "code": "#include <Engine/AI/Ai.h>\n\nclass Guard : public AiCharacter {\nprotected:\n  void SetupAi(Ai::Controller& ai) override {\n    auto loaded = Ai::LoadMachineFile(\n        \"/Game/AI/Guard.fsm\");\n    if (!loaded.asset) return;\n    loaded.asset->Run(ai);\n  }\n};",
+      "aside": "Проверьте problems при ошибке загрузки.\n\nВ редакторе тот же файл можно назначить стандартному ИИ-персонажу.",
+      "notes": "Пример показывает переопределение SetupAi. Для появления пользовательского типа в палитре добавьте ENGINE_COMPONENT. Полный контракт загрузки и список ошибок находятся в API Reference.",
+      "sources": [
+        "Engine/Include/Engine/AI/AiCharacter.h",
+        "Engine/Include/Engine/AI/MachineFile.h",
+        "Engine/Include/Engine/AI/Ai.h"
+      ]
+    },
+    {
+      "type": "rows",
+      "title": "Расширение ИИ на C++",
+      "items": [
+        [
+          "Автоматы",
+          "MachineBuilder задаёт состояния, задачи, службы и переходы."
+        ],
+        [
+          "Блоки",
+          "ENGINE_AI_BLOCK регистрирует задачу, условие или службу для редактора .fsm."
+        ],
+        [
+          "Контракты",
+          "Параметры описывает ParamSpec. Фабрика получает проверенные Params."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/AI/StateMachine.h",
+        "Engine/Include/Engine/AI/MachineFile.h"
+      ],
+      "notes": "Регистрируйте блок в .cpp игрового проекта. Статическая библиотека может потерять регистрацию при линковке. Имена Ai.* и Fsm.* заняты движком. Данные задачи хранятся отдельно для каждого контроллера, определение задачи разделяется. Недопустимые параметры можно отклонить std::invalid_argument."
+    },
+    {
+      "type": "rows",
+      "title": "Группы, умные объекты и диагностика",
+      "items": [
+        [
+          "Отряд",
+          "Group ведёт персонажей или инстансы общим полем движения и расставляет по местам."
+        ],
+        [
+          "Умный объект",
+          "SmartObject хранит метку и места. Claim / Release управляют занятостью."
+        ],
+        [
+          "Отладка",
+          "Debugger показывает пути, зрение и состояние. Query выбирает подходящую точку."
+        ]
+      ],
+      "sources": [
+        "Engine/Include/Engine/AI/Group.h",
+        "Engine/Include/Engine/AI/SmartObject.h",
+        "Engine/Include/Engine/AI/Debugger.h",
+        "Engine/Include/Engine/AI/Query.h"
+      ],
+      "notes": "Group создаётся World::CreateGroup. Состав и форма задаются AddCharacter/AddInstance и SetFormation. QueryBuilder связывает генератор точек, фильтры и оценку. Навигация учитывает радиус и стоимость клеток. Скорость массовых сценариев зависит от карты и бюджета, универсальных показателей FPS нет."
+    },
+    {
+      "type": "rows",
+      "title": "Обновление проекта и совместимость",
+      "items": [
+        [
+          "Версия",
+          "Новые проекты закрепляются за установленной сборкой движка."
+        ],
+        [
+          "Старый C++ проект",
+          "Обновите согласованный SDK и пересоберите Game.dll для новых расширений."
+        ],
+        [
+          "Форматы",
+          "Scene JSON 3, Module API 5, Edit API 6. Поддерживаются Edit API 4, 5 и 6."
+        ]
+      ],
+      "sources": [
+        "Engine/Version.json",
+        "Game/Launcher/Source/ProjectLibrary.h",
+        "Engine/BuildSupport/Test-ProjectToolchain.ps1"
+      ],
+      "notes": "Расширения Script, GraphTrace, AiMachine и Asset.Import запрашиваются отдельно. Номер Edit API сам по себе не гарантирует их наличия. Диагностика toolchain учитывает установленные MSVC и Windows SDK. Старые сохранённые презентации остаются в releases."
+    },
+    {
+      "type": "rows",
+      "title": "Симуляция, звук и инструменты",
+      "items": [
+        [
+          "Edit и Play",
+          "Исправлены различия света и игрового отображения между режимами."
+        ],
+        [
+          "Pause",
+          "Звук и потоковая музыка сохраняют позицию и продолжаются после паузы."
+        ],
+        [
+          "Редактор",
+          "Удаление через Delete, фиксация transform при потере фокуса и общий холст графов."
+        ]
+      ],
+      "sources": [
+        "Engine/Source/MainGame/BaseGameClass/Game.cpp",
         "Engine/Include/Engine/Sound/AudioEngine.h",
-        "Engine/Include/Engine/Sound/Audio3D.h",
-        "Engine/Source/Sound/AudioEngine.cpp"
+        "Editor/Source/ViewportWidget_Input.cpp",
+        "Editor/Source/GraphEditorWidget.cpp"
       ],
-      "notes": "Game обновляет listener по камере. PlayOptions задаёт volume, pitchSemitones и loop. StopAll останавливает всё в текущем AudioEngine. Физический wide path получают через VFS и filesystem.",
-      "foot": ""
-    },
-    {
-      "type": "evidence",
-      "title": "Игровые подсистемы: один счётчик на сессию",
-      "images": [
-        {
-          "file": "r9/subsystem-code.png",
-          "x": 40,
-          "y": 151,
-          "w": 854,
-          "h": 470
-        }
-      ],
-      "texts": [
-        {
-          "text": "Добавьте .h в Source проекта и выполните Build.cmd. Генератор зарегистрирует класс по макросу.\n\nOnSceneReady считает сцены. Tick работает, потому что bTickEnabled = true.",
-          "x": 923,
-          "y": 163,
-          "w": 304,
-          "h": 450,
-          "size": 25,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        }
-      ],
-      "sources": [
-        "Game/BasicExamples/Source/SessionCounterSubsystem.h",
-        "Engine/Include/Engine/MainGame/GameSubsystem.h"
-      ],
-      "foot": "Реальный исходник: Game/BasicExamples/Source/SessionCounterSubsystem.h",
-      "notes": "\nКод на снимке:\n#pragma once\n#include <Engine/MainGame/GameSubsystem.h>\n\nENGINE_SUBSYSTEM()\nclass SessionCounterSubsystem final : public GameSubsystem\n{\npublic:\n    SessionCounterSubsystem() { bTickEnabled = true; }\n    unsigned scenesOpened = 0;\n    unsigned ticks = 0;\n    void OnSceneReady(Scene&) override { ++scenesOpened; }\n    void Tick(float) override { ++ticks; }\n};"
-    },
-    {
-      "type": "code",
-      "title": "Подсистема: получение и срок жизни",
-      "code": "#include \"SessionCounterSubsystem.h\"\n#include <Engine/MainGame/BaseGameClass/Game.h>\n\n// game — текущий Game& на игровом потоке\nauto* counter =\n    game.GetSubsystem<SessionCounterSubsystem>();\nif (counter) {\n    const auto opened = counter->scenesOpened;\n    const auto ticks = counter->ticks;\n    // Передайте opened и ticks в свой HUD.\n}",
-      "aside": "Смена сцены сохраняет экземпляр.\n\nВ OnSceneClosing очищайте ссылки на старую сцену. В OnSceneReady получайте новые.\n\nStop уничтожает подсистему. Hot Reload не переносит её состояние.",
-      "sources": [
-        "Engine/Include/Engine/MainGame/GameSubsystem.h",
-        "Engine/Include/Engine/MainGame/BaseGameClass/Game.h",
-        "Engine/docs/tutorial/examples/PresentationSources/PresentationSnippets.cpp"
-      ],
-      "foot": "Для экономики готовый пример: Examples/CuriousCity/Source/CityEconomySubsystem.*",
-      "notes": "Учебный фрагмент использования SDK. SessionCounterSubsystem.h — исходник BasicExamples на предыдущем слайде. Null-check обязателен, если подсистема отсутствует в каталоге. После Load заново привязывайте scene pointers через OnSaveGameLoaded. Полные компилируемые варианты фрагментов: examples/PresentationSources/PresentationSnippets.cpp."
-    },
-    {
-      "type": "evidence",
-      "title": "SaveGame: данные экономики",
-      "images": [
-        {
-          "file": "r9/save-code.png",
-          "x": 40,
-          "y": 151,
-          "w": 854,
-          "h": 470
-        }
-      ],
-      "texts": [
-        {
-          "text": "Вызов базы сохраняет контракт подсистемы.\n\nSection отделяет данные экономики. Version задаёт версию секции. Field работает при записи и чтении.\n\nСохраняются баланс, число домов и таймер дохода.",
-          "x": 923,
-          "y": 163,
-          "w": 304,
-          "h": 450,
-          "size": 25,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        }
-      ],
-      "sources": [
-        "Engine/docs/tutorial/examples/PresentationSources/CityEconomySubsystem.cpp",
-        "Engine/Include/Engine/SaveGame/SaveArchive.h"
-      ],
-      "foot": "Examples/CuriousCity/Source/CityEconomySubsystem.cpp · подключение: Engine/SaveGame/SaveArchive.h",
-      "notes": "\nКод на снимке:\nvoid CityEconomySubsystem::SerializeSaveGame(SaveArchive& archive)\n{\n    GameSubsystem::SerializeSaveGame(archive);\n    archive.Section(\"CuriousCity.Economy\", [&](SaveArchive& state) {\n        state.Version(1);\n        state.Field(\"balance\", balance);\n        state.Field(\"houses\", houses);\n        state.Field(\"incomeClock\", incomeClock);\n    });\n}"
-    },
-    {
-      "type": "code",
-      "title": "SaveGame: запрос и завершение",
-      "code": "#include <Engine/SaveGame/SaveGame.h>\n#include <Engine/MainGame/BaseGameClass/Game.h>\n\n// При действии «Сохранить»:\nconst auto request = game.Saves().RequestSave(\"city\");\nconst auto ticket = request.ticket;\n\n// В последующих кадрах, на том же игровом потоке:\nconst auto& result = game.Saves().LastResult();\nif (result.ticket == ticket &&\n    result.status == SaveGameResult::Status::Saved) {\n    // Теперь можно показать «Сохранено».\n}\n// Загрузка: game.Saves().RequestLoad(\"city\");",
-      "codeSize": 21,
-      "aside": "Accepted означает постановку в очередь.\n\nСохраните ticket между кадрами. Обрабатывайте Failed и message, а также отказ Busy.\n\nПосле Loaded прежние указатели на сцену недействительны.",
-      "sources": [
-        "Engine/Include/Engine/SaveGame/SaveGame.h",
-        "Engine/docs/tutorial/examples/PresentationSources/ProjectGame.cpp",
-        "Engine/docs/tutorial/examples/PresentationSources/CityInteractionComponent.cpp",
-        "Engine/docs/tutorial/examples/PresentationSources/PresentationSnippets.cpp"
-      ],
-      "foot": "В CuriousCity кнопки Save / Load связаны с RequestSave / RequestLoad.",
-      "notes": "Фрагмент для двух мест вызова: действие пользователя и последующие кадры. Переменная ticket должна быть полем/состоянием вызывающего объекта, не локальной переменной, теряемой между кадрами. Полная работающая реализация с обработкой статусов находится в ProjectGame::TickComponents. Сохранение общих данных до перезапуска требует стабильного gameId и корня SaveData. Полные компилируемые варианты фрагментов: examples/PresentationSources/PresentationSnippets.cpp."
-    },
-    {
-      "type": "code",
-      "title": "Код: создание, сборка и запуск",
-      "code": "EngineLauncher.exe --create-project \"MyDemo\" \"MyDemo\"\nEngineLauncher.exe --enable-code \"MyDemo\\Project.json\"\n\nrem После изменения Source/*.cpp:\nEngineLauncher.exe --build-project \"MyDemo\\Project.json\"\n\nRuntime\\EngineRuntime.exe --project \"MyDemo\\Project.json\" ^\n    --mode editor\n\nrem Готовый учебный проект:\nTutorials\\LearningLab\\Build.cmd\nTutorials\\LearningLab\\Run.cmd",
-      "codeSize": 23,
-      "aside": "Команды для cmd.exe из корня комплекта.\n\nНужны MSVC v143 и Windows SDK.\n\nПри ошибке Hot Reload рабочая DLL остаётся активной. Исправьте ошибку компилятора и повторите сборку.",
-      "sources": [
-        "Game/Launcher/Source/Main.cpp",
-        "Editor/Source/CodeTools.cpp"
-      ],
-      "foot": "Для существующего проекта пропустите create-project и enable-code.",
-      "notes": "Команды приведены с относительными путями. Новая папка MyDemo не должна существовать. Символ ^ — продолжение строки cmd.exe. Полный исходный комплект Tutorial LearningLab уже проверен Build.cmd и запуском."
-    },
-    {
-      "type": "evidence",
-      "title": "Диагностика: данные завершённого кадра",
-      "images": [
-        {
-          "file": "r9/diagnostic-code.png",
-          "x": 40,
-          "y": 151,
-          "w": 854,
-          "h": 470
-        }
-      ],
-      "texts": [
-        {
-          "text": "ProjectGame::PreUpdate читает предыдущий завершённый кадр.\n\nF7 показывает панель. F8 выбирает следующий компонент с экземплярами.\n\nDrawCalls включает тени и другие проходы. Это не GPU timing и не FPS.",
-          "x": 923,
-          "y": 163,
-          "w": 304,
-          "h": 450,
-          "size": 25,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        }
-      ],
-      "sources": [
-        "Engine/docs/tutorial/examples/PresentationSources/ProjectGame.cpp",
-        "Engine/docs/RENDER-DIAGNOSTICS.md"
-      ],
-      "foot": "Examples/CuriousCity/Source/ProjectGame.cpp · полный контекст: PreUpdate",
-      "notes": "Фрагмент с переносами строк для чтения. previous — статический uint64_t, log — открытый std::ofstream, полный код рядом. Пример включается CURIOUS_CITY_FRAME_STATS=1 и CURIOUS_CITY_LOG=<path>.\nКод на снимке:\nconst auto& frame = GetCompletedFrameStats();\nif (frame.valid && frame.frameIndex != previous) {\n    previous = frame.frameIndex;\n    log << \"completed_frame valid=true index=\"\n        << frame.frameIndex\n        << \" draw_calls=\" << frame.counters.DrawCalls\n        << \" visible=\" << frame.counters.VisibleObjects\n        << \" culled=\" << frame.counters.CulledObjects\n        << '\\n';\n}"
+      "notes": "Изменения проверяются в ModeParityTests, тестах редактора и аудио. Это перечень изменений кода, а не обещание одинаковой производительности во всех сценах."
     },
     {
       "type": "rows",
-      "title": "Исправления теней и нормалей",
+      "title": "Battle: отряды под управлением ИИ",
       "items": [
         [
-          "Каскады",
-          "Исправлены выбор и устойчивость солнечных каскадов при изменении камеры."
+          "Запуск",
+          "Battle.exe --ai --hud включает противоборствующие отряды и панель состояния."
         ],
         [
-          "Точечный свет",
-          "Тени следуют за лампой и анимацией. Следующие слайды показывают настройку и границы."
+          "Наблюдение",
+          "--ai-debug или F9 показывает движение и диагностику ИИ."
         ],
         [
-          "Normal map",
-          "GPU получает TANGENT. Зеркальный масштаб корректирует знак базиса."
+          "Масштаб",
+          "Group управляет бойцами через общее поле движения и позиции строя."
         ]
       ],
+      "notes": "Режим AI отключает прежнее движение демонстрации и устанавливает simulation time scale 1. F6 переключает LOD, F7 панели. Число бойцов задаётся --units. Результаты скорости зависят от сцены и оборудования.",
       "sources": [
-        "Engine/docs/ENGINE-VERSIONS.md",
-        "Engine/docs/MATERIALS.md"
-      ],
-      "notes": "MeshVertex 64 байта, нужна пересборка C++ модулей. Skeletal normal map использует производные UV."
-    },
-    {
-      "type": "evidence",
-      "title": "Точечный свет: тень движущегося объекта",
-      "images": [
-        {
-          "file": "r9/point-before.png",
-          "x": 48,
-          "y": 196,
-          "w": 568,
-          "h": 330
-        },
-        {
-          "file": "r9/point-after.png",
-          "x": 664,
-          "y": 196,
-          "w": 568,
-          "h": 330
-        }
-      ],
-      "texts": [
-        {
-          "text": "До: анимация вышла за старые границы",
-          "x": 48,
-          "y": 151,
-          "w": 568,
-          "h": 40,
-          "size": 25,
-          "bold": true,
-          "color": "#243646",
-          "face": "Arial"
-        },
-        {
-          "text": "После: границы учитывают все позы",
-          "x": 664,
-          "y": 151,
-          "w": 568,
-          "h": 40,
-          "size": 25,
-          "bold": true,
-          "color": "#243646",
-          "face": "Arial"
-        },
-        {
-          "text": "Движок вычисляет границы всех поз анимации, поэтому объект попадает в карту тени. Карта обновляется при движении лампы и объекта.",
-          "x": 48,
-          "y": 552,
-          "w": 1184,
-          "h": 76,
-          "size": 28,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        }
-      ],
-      "sources": [
-        "Agent/Playtests/2026-11-07-point-shadows/report.md",
-        "Agent/Tasks/068-point-shadow-slots-lod.md"
-      ],
-      "foot": "Регрессия: 34/34 сценария движения, 282 кадра. Повторена в дистрибутиве .6.",
-      "notes": "Исторические реальные кадры baseline/fixed из проверки .2. Это тестовая синтетическая VAT-анимация, не пользовательская игра. Регрессия повторена в финальном .6 по отчёту intersections. Сцена с точечным светом больше не требует активного солнца."
-    },
-    {
-      "type": "code",
-      "title": "Точечный свет: настройка и ограничения",
-      "code": "#include <Engine/Components/Light/PointLightComponent.h>\n#include <Engine/Scene/Scene.h>\n#include <memory>\n\n// scene — текущая Scene&\nauto lamp = std::make_unique<PointLightComponent>(\n    glm::vec3(0, 4, 0), glm::vec3(1, 0.7f, 0.4f),\n    1.4f, 12.0f); // интенсивность, радиус\nlamp->SetCastShadows(true);\nstd::unique_ptr<GameComponent> object = std::move(lamp);\nscene.AddComponent(\"Lamp\", object, \"Light.Point\");",
-      "codeSize": 22,
-      "aside": "До двух теневых ламп одновременно.\n\nКуб 1024 × 1024 × 6 на лампу. Резерв двух кубов: 48 MiB.\n\nIntensity = 0 освобождает слот. Mesh LOD-тень следует dither-переходу.",
-      "sources": [
-        "Engine/Include/Engine/Components/Light/PointLightComponent.h",
-        "Agent/Tasks/064-soft-shadows-and-point-light-shadows.md",
-        "Agent/Tasks/068-point-shadow-slots-lod.md",
-        "Engine/Include/Engine/Scene/Scene.h",
-        "Engine/Include/Engine/Project/StandardTypes.h",
-        "Engine/docs/tutorial/examples/PresentationSources/PresentationSnippets.cpp"
-      ],
-      "foot": "Distance LOD без fade переключается резко. Для impostor тень сохраняет последний mesh.",
-      "notes": "Учебный фрагмент C++: вызов внутри инициализации сцены. Тип Light.Point находится в каталоге StandardTypes.h. Третий источник может освещать без карты тени. Карты выделяются при первой активной теневой лампе. Цена памяти вычислена как 2*6*1024*1024*4 bytes. Кнопка точечной тени в текущем Qt-инспекторе скрыта, показан действующий C++ путь. Полные компилируемые варианты фрагментов: examples/PresentationSources/PresentationSnippets.cpp."
-    },
-    {
-      "type": "evidence",
-      "title": "Прозрачность: пересечение поверхностей",
-      "images": [
-        {
-          "file": "r9/intersections-before.png",
-          "x": 48,
-          "y": 180,
-          "w": 568,
-          "h": 380
-        },
-        {
-          "file": "r9/intersections-after.png",
-          "x": 664,
-          "y": 180,
-          "w": 568,
-          "h": 380
-        }
-      ],
-      "texts": [
-        {
-          "text": "До: один порядок на объект",
-          "x": 48,
-          "y": 141,
-          "w": 568,
-          "h": 40,
-          "size": 27,
-          "bold": true,
-          "color": "#243646",
-          "face": "Arial"
-        },
-        {
-          "text": "Теперь: порядок по пикселю",
-          "x": 664,
-          "y": 141,
-          "w": 568,
-          "h": 40,
-          "size": 27,
-          "bold": true,
-          "color": "#243646",
-          "face": "Arial"
-        },
-        {
-          "text": "Depth peeling обрабатывает 16 ближайших различных глубин. LOD-dither больше не смешивает один и тот же слой дважды.",
-          "x": 48,
-          "y": 574,
-          "w": 1184,
-          "h": 60,
-          "size": 25,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        }
-      ],
-      "sources": [
-        "Agent/Playtests/2026-11-07-intersections/report.md",
-        "Agent/Playtests/2026-11-07-transparency/report.md"
-      ],
-      "foot": "Кадры до и после: та же геометрия и камера.",
-      "notes": "Кадры intersections-before/after из сохранённого GPU-прогона. Дальний остаток за 16 глубинами использует старую очередь. Legacy/custom PS без material-варианта переводит весь прозрачный проход на старую сортировку."
-    },
-    {
-      "type": "table",
-      "title": "Прозрачность: измеренная точность",
-      "headers": [
-        "Проверка",
-        "Результат"
-      ],
-      "rows": [
-        [
-          "Исходная матрица до фикса",
-          "0/20 сценариев · 280 кадров"
-        ],
-        [
-          "Та же матрица после фикса",
-          "20/20 · 280 кадров"
-        ],
-        [
-          "Расширенный набор выпуска .6",
-          "46/46 · 556 кадров"
-        ],
-        [
-          "Проверено пиксельных пересечений",
-          "297 230 · максимум ошибки 1/255"
-        ],
-        [
-          "Регрессия слоёв и LOD",
-          "52/52 · 428 кадров"
-        ]
-      ],
-      "sources": [
-        "Agent/Playtests/2026-11-07-intersections/report.md",
-        "Agent/Playtests/2026-11-07-intersections/fixes/intersections-final-summary.json"
-      ],
-      "foot": "Windows x64 Release · RTX 4070 Laptop · D3D11 Forward / Deferred · сохранённый прогон 07.11",
-      "notes": "Числа относятся к сохранённому прогону выпущенной версии 2026.11.07.6, повторный GPU benchmark в рамках правки презентации не выполнялся. Допуск 4/255. Ray/plane oracle исключает точки около силуэтов и почти совпадающих пересечений. Матрица до и после 20 сценариев сопоставима; расширенный набор 46 не называется тем же набором."
-    },
-    {
-      "type": "table",
-      "title": "Прозрачность: стоимость и границы",
-      "headers": [
-        "Метрика",
-        "Значение"
-      ],
-      "rows": [
-        [
-          "Экранные текстуры",
-          "24 байта/пиксель ≈ 47,5 MiB при 1920×1080"
-        ],
-        [
-          "Геометрические проходы",
-          "До 33"
-        ],
-        [
-          "Композиция",
-          "16 промежуточных + 1 финальная"
-        ],
-        [
-          "Контрольная сцена, mesh normal",
-          "116 отправленных draw calls / кадр"
-        ],
-        [
-          "После 16 глубин или legacy PS",
-          "Запасная сортировка с ограничениями"
-        ]
-      ],
-      "sources": [
-        "Agent/Playtests/2026-11-07-intersections/report.md",
-        "Agent/Playtests/2026-11-07-intersections/fixes/intersections-final-summary.json"
-      ],
-      "foot": "Draw calls включают команды, пропущенные GPU predicate. FPS и GPU-время здесь не измерялись.",
-      "notes": "116 — первая контрольная fixture 0-mesh-normal, не среднее по всем играм. 47.5 MiB = 1920*1080*24/1024^2, оценка выделенной экранной памяти, не замер общей VRAM. Последний mesh LOD используется вместо прозрачного impostor."
-    },
-    {
-      "type": "evidence",
-      "title": "Примеры: движение, экономика и SaveGame",
-      "images": [
-        {
-          "file": "r9/calm-city.png",
-          "x": 48,
-          "y": 193,
-          "w": 568,
-          "h": 284
-        },
-        {
-          "file": "r9/curious-city.png",
-          "x": 664,
-          "y": 193,
-          "w": 568,
-          "h": 284
-        }
-      ],
-      "texts": [
-        {
-          "text": "CalmCity",
-          "x": 48,
-          "y": 145,
-          "w": 568,
-          "h": 40,
-          "size": 30,
-          "bold": true,
-          "color": "#08778E",
-          "face": "Arial"
-        },
-        {
-          "text": "Движущаяся машина, квартал и LOD.\nСмотрите Source/ProjectGame.cpp: состояние города и сохранение.",
-          "x": 48,
-          "y": 501,
-          "w": 568,
-          "h": 118,
-          "size": 26,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        },
-        {
-          "text": "CuriousCity",
-          "x": 664,
-          "y": 145,
-          "w": 568,
-          "h": 40,
-          "size": 30,
-          "bold": true,
-          "color": "#08778E",
-          "face": "Arial"
-        },
-        {
-          "text": "«Дом 100» строит дом и уменьшает баланс. Save / Load сохраняют город.\nSource/CityEconomySubsystem.cpp",
-          "x": 664,
-          "y": 501,
-          "w": 568,
-          "h": 118,
-          "size": 26,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        }
-      ],
-      "sources": [
-        "Agent/Playtests/2026-11-07-2026.11.06.1-r5/report.md"
-      ],
-      "foot": "Examples/<имя>/Run.cmd — запуск · Open.cmd — редактор · Source/ — код · Content/ — ресурсы",
-      "notes": "Реальные кадры четырёх исходных агентских проектов r5 из проверки учебного пакета версии .6. CuriousCity и AITrash показаны в начальном состоянии, CalmCity и TiredBomber во время выполнения. Это учебные проекты, не законченные игры."
-    },
-    {
-      "type": "evidence",
-      "title": "Примеры: действие, попадание и счёт",
-      "images": [
-        {
-          "file": "r9/tired-bomber.png",
-          "x": 48,
-          "y": 193,
-          "w": 568,
-          "h": 284
-        },
-        {
-          "file": "r9/ai-trash.png",
-          "x": 664,
-          "y": 193,
-          "w": 568,
-          "h": 284
-        }
-      ],
-      "texts": [
-        {
-          "text": "TiredBomber",
-          "x": 48,
-          "y": 145,
-          "w": 568,
-          "h": 40,
-          "size": 30,
-          "bold": true,
-          "color": "#08778E",
-          "face": "Arial"
-        },
-        {
-          "text": "B сбрасывает бомбу. На кадре Hits: 1.\nРазберите трассировку попадания, эффекты и сохранение раунда.",
-          "x": 48,
-          "y": 501,
-          "w": 568,
-          "h": 118,
-          "size": 26,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        },
-        {
-          "text": "AITrash",
-          "x": 664,
-          "y": 145,
-          "w": 568,
-          "h": 40,
-          "size": 30,
-          "bold": true,
-          "color": "#08778E",
-          "face": "Arial"
-        },
-        {
-          "text": "Left / Right меняют прицел. T или Space бросает предмет.\nHUD показывает броски и попадания.",
-          "x": 664,
-          "y": 501,
-          "w": 568,
-          "h": 118,
-          "size": 26,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        }
-      ],
-      "sources": [
-        "Agent/Playtests/2026-11-07-2026.11.06.1-r5/report.md"
-      ],
-      "foot": "Examples/<имя>/Run.cmd — запуск · Open.cmd — редактор · Source/ — код · Content/ — ресурсы",
-      "notes": "Реальные кадры четырёх исходных агентских проектов r5 из проверки учебного пакета версии .6. CuriousCity и AITrash показаны в начальном состоянии, CalmCity и TiredBomber во время выполнения. Это учебные проекты, не законченные игры."
-    },
-    {
-      "type": "evidence",
-      "title": "Учебный комплект: точное расположение",
-      "images": [
-        {
-          "file": "r9/package-folder.png",
-          "x": 440,
-          "y": 150,
-          "w": 792,
-          "h": 472
-        }
-      ],
-      "texts": [
-        {
-          "text": "После распаковки",
-          "x": 48,
-          "y": 155,
-          "w": 355,
-          "h": 75,
-          "size": 29,
-          "bold": true,
-          "color": "#08778E",
-          "face": "Arial"
-        },
-        {
-          "text": "README.html\nПорядок первого запуска\n\nDocs/index.html\nРуководства и API\n\nTutorials/LearningLab\nBuild.cmd и Run.cmd\n\nExamples/<имя>\nЧетыре проекта с кодом",
-          "x": 48,
-          "y": 248,
-          "w": 360,
-          "h": 370,
-          "size": 24,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        }
-      ],
-      "sources": [
-        "Engine/docs/tutorial/examples/README.txt"
-      ],
-      "foot": "Путь на снимке — пример распаковки. Внутри комплекта используются относительные пути.",
-      "notes": "Настоящий снимок локального каталога в браузере. Откройте Docs/index.html; звук: Tutorials/LearningLab/Source/AudioTutorial.cpp и Content/Audio/tutorial.wav. Презентации лежат в Presentations. Новая редакция слайдов выдаётся отдельно, прежний архив содержит r8/r1."
-    },
-    {
-      "type": "evidence",
-      "title": "Учебный комплект: полный исходник звука",
-      "images": [
-        {
-          "file": "r9/learning-source-folder.png",
-          "x": 440,
-          "y": 150,
-          "w": 792,
-          "h": 472
-        }
-      ],
-      "texts": [
-        {
-          "text": "Tutorials / LearningLab",
-          "x": 48,
-          "y": 159,
-          "w": 355,
-          "h": 65,
-          "size": 29,
-          "bold": true,
-          "color": "#08778E",
-          "face": "Arial"
-        },
-        {
-          "text": "Source/AudioTutorial.h\nОбъявление компонента\n\nSource/AudioTutorial.cpp\nЗагрузка и Play2D\n\nContent/Audio/tutorial.wav\nГотовый PCM WAV\n\nBuild.cmd, затем Run.cmd\nСборка и проверка",
-          "x": 48,
-          "y": 246,
-          "w": 362,
-          "h": 360,
-          "size": 24,
-          "bold": false,
-          "color": "#243646",
-          "face": "Arial"
-        }
-      ],
-      "sources": [
-        "Engine/docs/tutorial/examples/AudioTutorial.cpp",
-        "Engine/docs/tutorial/examples/AudioTutorial.h"
-      ],
-      "foot": "Для сборки: Visual Studio C++ Build Tools v143 и Windows SDK.",
-      "notes": "Снимок показывает реальный каталог Source из распакованного комплекта. Полный пример содержит подключения, инициализацию и остановку аудио, а не только короткий фрагмент слайда."
+        "Game/Battle/Source/Main.cpp",
+        "Game/Battle/Source/BattleAi.cpp",
+        "Game/Battle/Source/BattleGame.cpp"
+      ]
     }
   ]
 }

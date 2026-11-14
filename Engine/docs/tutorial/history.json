@@ -102,5 +102,53 @@
     "kind": "Changes",
     "content": "releases/PainEngine-Changes-2026-11-07-r2.content.json",
     "summary": "Снимки материалов и звука, C++ подсистем и SaveGame, команды и диагностика, подробности теней, измеренные метрики прозрачности, четыре проекта и расположение учебного комплекта."
+  },
+  {
+    "engineVersion": "2026.11.11.0",
+    "date": "2026-11-14",
+    "revision": 10,
+    "sourceCommit": "6899a6ac6a4a3e2a6a9da3cba48c0d790881569a",
+    "slideCount": 88,
+    "presentation": "releases/PainEngine-Tutorial-2026-11-14-r10-v3-final.pptx",
+    "pdf": "releases/PainEngine-Tutorial-2026-11-14-r10-v3-final.pdf",
+    "kind": "Tutorial",
+    "content": "releases/PainEngine-Tutorial-2026-11-14-r10.content.json",
+    "summary": "Обновление относительно a7f8c8d: визуальные скрипты, редактор FSM, подсистема ИИ и C++ API, учебный проект AI, импорт и переимпорт, пауза звука и совместимость. Реальные снимки текущего интерфейса; прежние редакции сохранены."
+  },
+  {
+    "engineVersion": "2026.11.11.0",
+    "date": "2026-11-14",
+    "revision": 3,
+    "sourceCommit": "6899a6ac6a4a3e2a6a9da3cba48c0d790881569a",
+    "slideCount": 19,
+    "presentation": "releases/PainEngine-Changes-2026-11-14-r3-v3-final.pptx",
+    "pdf": "releases/PainEngine-Changes-2026-11-14-r3-v3-final.pdf",
+    "kind": "Changes",
+    "content": "releases/PainEngine-Changes-2026-11-14-r3.content.json",
+    "summary": "Обновление относительно a7f8c8d: визуальные скрипты, редактор FSM, подсистема ИИ и C++ API, учебный проект AI, импорт и переимпорт, пауза звука и совместимость. Реальные снимки текущего интерфейса; прежние редакции сохранены."
+  },
+  {
+    "engineVersion": "2026.11.11.0",
+    "date": "2026-11-14",
+    "revision": 11,
+    "sourceCommit": "53db2724c3b78bce138fcd0cace20e51a2ef0aeb",
+    "slideCount": 91,
+    "presentation": "releases/PainEngine-Tutorial-2026-11-14-r11-final.pptx",
+    "pdf": "releases/PainEngine-Tutorial-2026-11-14-r11-final.pdf",
+    "kind": "Tutorial",
+    "content": "releases/PainEngine-Tutorial-2026-11-14-r11.content.json",
+    "summary": "PR №24: выбор ресурсов с актуальными снимками, папки, ограничения замены модели, обновление инспектора и закрепление панелей; сохранены скрипты и ИИ."
+  },
+  {
+    "engineVersion": "2026.11.11.0",
+    "date": "2026-11-14",
+    "revision": 4,
+    "sourceCommit": "53db2724c3b78bce138fcd0cace20e51a2ef0aeb",
+    "slideCount": 22,
+    "presentation": "releases/PainEngine-Changes-2026-11-14-r4-final.pptx",
+    "pdf": "releases/PainEngine-Changes-2026-11-14-r4-final.pdf",
+    "kind": "Changes",
+    "content": "releases/PainEngine-Changes-2026-11-14-r4.content.json",
+    "summary": "PR №24: выбор ресурсов с актуальными снимками, папки, ограничения замены модели, обновление инспектора и закрепление панелей; сохранены скрипты и ИИ."
   }
 ]

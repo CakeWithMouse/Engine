@@ -10,7 +10,7 @@ const browser=await chromium.launch({headless:true,channel:'msedge'});
 const page=await browser.newPage({viewport:{width:1400,height:1000}});
 const errors=[];page.on('pageerror',e=>errors.push(e.message));
 const names=['index','editor','materials','audio','code','assets','scene','API-REFERENCE'];
-let links=0;
+let links=0, apiRoutes=0, apiMethods=0;
 for(const name of names){
  await page.goto(pathToFileURL(path.join(dir,name+'.html')).href);
  if(await page.locator('img').evaluateAll(xs=>xs.some(x=>!x.complete||x.naturalWidth===0)))throw Error('Broken image '+name);
@@ -22,6 +22,7 @@ for(const name of names){
  await page.screenshot({path:path.join(out,name+'.png'),fullPage:false});
  if(name==='API-REFERENCE'){
   const ids=await page.locator('script#reference-data').textContent().then(JSON.parse);
+  apiRoutes=ids.pages.length; apiMethods=ids.pages.reduce((sum,p)=>sum+p.methods.length,0);
   for(const p of ids.pages){
    await page.goto(pathToFileURL(path.join(dir,name+'.html')).href+'#'+p.id);
    if(!await page.locator('#'+p.id).isVisible())throw Error('Broken route '+p.id);
@@ -38,5 +39,5 @@ for(const name of names){
  await page.setViewportSize({width:1400,height:1000});
 }
 await browser.close();if(errors.length)throw Error(errors.join('\n'));
-fs.writeFileSync(path.join(out,'result.json'),JSON.stringify({pages:names.length,links,apiRoutes:40,apiMethods:317,search:true,mobile:true,errors},null,2));
-console.log('PASS: 8 HTML pages, 40 API routes, 317 source links, search, mobile; '+links+' local links');
+fs.writeFileSync(path.join(out,'result.json'),JSON.stringify({pages:names.length,links,apiRoutes,apiMethods,search:true,mobile:true,errors},null,2));
+console.log(`PASS: ${names.length} HTML pages, ${apiRoutes} API routes, ${apiMethods} source links, search, mobile; ${links} local links`);

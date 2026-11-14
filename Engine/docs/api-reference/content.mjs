@@ -189,6 +189,7 @@ page('particles', 4, 'ParticleSystemComponent', 'GPU-эмиттер, движе�
  'Сортировку отключайте только для режимов, не зависящих от порядка, например additive. Компонент не отбрасывает тени; Exact scene trace не пересекает отдельные GPU-частицы.'
 ], [['SetParticleCount','Размер пула частиц.'],['SetBaseLifetime','Базовое время жизни.'],['SetSpreadRadius','Область рождения.'],['SetBaseVelocity','Начальная скорость.'],['SetAcceleration','Ускорение.'],['SetBaseSize','Размер частицы.'],['SetBrightness','Яркость.'],['SetDepthCollision','Столкновения по depth buffer.'],['SetDepthCollisionResponse','Bias, bounce, friction.'],['SetSortingEnabled','GPU-сортировка.'],['SetSimulationRate','Частота симуляции частиц.']], {related:['trace-limits','diagnostics']});
 page('assets', 4, 'Пути и ассеты сцены', 'Переносимые /Game ссылки и разрешение пути в DLL.', 'assets', [
+ 'Редактор после PR №24: замена геометрии через GUI доступна только Engine.Model; примитив не превращается в модель. Модель и материал выбираются в библиотеке проекта с поиском. Текстуры настраиваются в слотах материала; это ограничение интерфейса не меняет C++ API SceneAssets и SetModelAsset.',
  'SceneAssets ожидает канонические /Game пути либо пустую ссылку. CreateModel создаёт компонент модели; Apply назначает набор model/texture/material. Import копирует внешний файл в новую уникальную папку Content и не перезаписывает существующие ассеты.',
  'В DLL проекта EngineModuleVfs::Resolve("/Game/…") получает путь через мост хоста. Пустая строка означает отсутствие результата. Штатный шаблон модуля привязывает сервис; не создавайте независимый VFS с ожидаемыми, но отсутствующими mount points.',
  'EnginePaths::SetContentRoot вызывается до Game для старого самостоятельного запуска. EnginePaths::Shader строит путь к шейдеру. Это другой уровень, чем сохраняемые ссылки SceneAssets.'
@@ -262,4 +263,21 @@ page('audio', 4, 'AudioEngine: звук и музыка', '2D, 3D и поток�
  'PlayStream принимает физический путь и StreamOptions (loop, volume, framesPerBuffer), возвращает StreamHandle. StopStream останавливает выбранный поток, StopAll — все звуки этого AudioEngine. Публичного handle для остановки отдельного Play2D нет.',
  'WAV использует WavDecoder, прочие расширения — MediaFoundationDecoder. Поддержка конкретных MP3/FLAC/OGG зависит от Windows Media Foundation. Импорт в редакторе копирует ресурс, предпрослушивание доступно в Edit; автоматического звукового компонента сцены нет.'
 ], [['GetAudioEngine','Заимствованный указатель, возможен nullptr.',H.game],['LoadSound','Физический wide path → SoundId.'],['Play2D','SoundId, const PlayOptions& → bool.'],['Play3D','SoundId, const AudioEmitter3D&, const PlayOptions& → bool.'],['PlayStream','const std::wstring&, const StreamOptions& → StreamHandle.'],['StopStream','Остановка потока по StreamHandle.'],['SetListener','Копирует AudioListener3D; Game обновляет слушателя камерой.'],['StopAll','Остановка всех голосов и потоков.'],['Update','Обновление 3D и streaming, Game вызывает автоматически.']], {related:['game','vfs','assets']});
+groups.push('Искусственный интеллект', 'Визуальные скрипты');
+const {addAiScriptPages} = await import('./ai-script-content.mjs');
+addAiScriptPages(page);
+const overview = pages.find(p => p.id === 'overview');
+overview.note = 'Справочник описывает реализованный API, включая сеточную навигацию XZ, автоматы ИИ и визуальные скрипты. Полноценная физика, экономика и правила игры остаются отдельной задачей проекта.';
+overview.cards.push('ai-world','visual-scripts','import-options');
+const audioPage = pages.find(p => p.id === 'audio');
+audioPage.paragraphs.push('SetPaused замораживает все голоса, включая потоки, без потери позиции. Возобновление продолжает воспроизведение. Editor Pause/Play использует эту возможность автоматически.');
+audioPage.methods.push(['SetPaused','bool paused → bool; заморозка всех голосов и потоков.']);
+pages.find(p => p.id === 'assets').related.push('import-options');
+pages.find(p => p.id === 'scene').methods.push(
+ ['SetScriptAsset','Сохраняет путь без проверки файла; Busy при обновлении, NotFound для отсутствующего объекта.'],
+ ['SetScriptVariables','Сохраняет JSON значений; Busy при обновлении, NotFound для отсутствующего объекта.']);
+pages.find(p => p.id === 'savegame').methods.push(
+ ['Catalog','Возвращает текущий ComponentTypeCatalog.'],
+ ['Raw','Заимствованный JSON текущего уровня архива; для отложенного восстановления скопируйте данные.','SaveGame/SaveArchive.h']);
+pages.find(p => p.id === 'class-map').paragraphs.push('Ai::World принадлежит встроенной подсистеме сессии и владеет Controller и Group. AiCharacter связывает Character с контроллером. Blackboard и данные исполнения индивидуальны, определение StateMachine общее. Script::Instance принадлежит компоненту и исполняет общую скомпилированную программу .vscript.');
 export {pages};
