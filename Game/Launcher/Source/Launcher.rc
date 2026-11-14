@@ -1,4 +1,10 @@
 ﻿#include <windows.h>
+
+#ifndef IDI_ICON
+#define IDI_ICON 101
+#endif
+IDI_ICON ICON "icon_pain_multisize.ico"
+
 200 DIALOGEX 0, 0, 350, 164
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Создать проект"

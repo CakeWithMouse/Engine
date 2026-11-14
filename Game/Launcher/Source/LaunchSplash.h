@@ -8,6 +8,10 @@
 #include <string>
 #include <stdexcept>
 
+#ifndef IDI_ICON
+#define IDI_ICON 101
+#endif
+
 // A separate UI thread keeps the loading screen responsive during SDK/build work.
 // The owner is disabled until the operation succeeds or unwinds with an error.
 class LaunchSplash final {
@@ -78,13 +82,22 @@ public:
                         } else GlobalFree(buffer);
                     }
                 }
-                WNDCLASSW cls{}; cls.lpfnWndProc = Proc; cls.hInstance = GetModuleHandleW(nullptr);
+                WNDCLASSEXW cls{}; cls.cbSize = sizeof(cls);
+                cls.lpfnWndProc = Proc; cls.hInstance = GetModuleHandleW(nullptr);
                 cls.lpszClassName = L"PainEngineLoading"; cls.hCursor = LoadCursorW(nullptr,IDC_ARROW);
-                RegisterClassW(&cls);
+                cls.hIcon = LoadIconW(cls.hInstance, MAKEINTRESOURCEW(IDI_ICON));
+                cls.hIconSm = static_cast<HICON>(LoadImageW(cls.hInstance, MAKEINTRESOURCEW(IDI_ICON), IMAGE_ICON,
+                    GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR));
+                if (!cls.hIcon) cls.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
+                RegisterClassExW(&cls);
                 const auto window = CreateWindowExW(WS_EX_TOPMOST|WS_EX_TOOLWINDOW,cls.lpszClassName,L"PainEngine — загрузка",
                     WS_POPUP|WS_VISIBLE,(GetSystemMetrics(SM_CXSCREEN)-800)/2,(GetSystemMetrics(SM_CYSCREEN)-450)/2,
                     800,450,nullptr,nullptr,cls.hInstance,this);
-                if (window) { SetTimer(window,1,25,nullptr); UpdateWindow(window); }
+                if (window) {
+                    if (cls.hIcon) SendMessageW(window, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(cls.hIcon));
+                    if (cls.hIconSm) SendMessageW(window, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(cls.hIconSm));
+                    SetTimer(window,1,25,nullptr); UpdateWindow(window);
+                }
                 ready.set_value(window);
                 if (window) { MSG msg{}; while (GetMessageW(&msg,nullptr,0,0)>0) { TranslateMessage(&msg); DispatchMessageW(&msg); } }
                 cover_.reset(); if (stream) stream->Release(); if (token) Gdiplus::GdiplusShutdown(token);
