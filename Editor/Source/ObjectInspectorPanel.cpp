@@ -5,12 +5,17 @@
 #include "ScriptCard.h"
 #include "AiMachineCard.h"
 #include "GeometryCard.h"
+#include "CommandRegistry.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "EditorLocale.h"
 #include "IconProvider.h"
 
 #include <QApplication>
+#include <algorithm>
+#include <QColorDialog>
 #include <QCheckBox>
+#include <QComboBox>
+#include <QSignalBlocker>
 #include <QDir>
 #include <QFileInfo>
 #include <QHBoxLayout>
@@ -90,14 +95,18 @@ void ObjectInspectorPanel::BuildUi()
     inspectorLayout->addWidget(cardTransform_);
 
     cardGeometry_ = new GeometryCard(this);
-    cardGeometry_->onChooseModel = [this] { emit ChooseModelRequested(); };
-    cardGeometry_->onClearModel = [this] { emit ClearModelRequested(); };
-    cardGeometry_->onChooseTexture = [this] { emit ChooseTextureRequested(); };
-    cardGeometry_->onClearTexture = [this] { emit ClearTextureRequested(); };
+    cardGeometry_->onChooseModel = [this] {
+        emit ChooseModelRequested();
+        QVariantMap params;
+        params[QStringLiteral("objectId")] = static_cast<qulonglong>(selectedId_);
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.ReplaceModel"), params);
+    };
 
     cardMaterial_ = new MaterialCard(this);
     cardMaterial_->onEditMaterial = [this](const QString& path) { emit EditMaterialRequested(path); };
-    cardMaterial_->onChooseMaterial = [this] { emit ChooseMaterialRequested(); };
+    cardMaterial_->onChooseMaterial = [this] {
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"));
+    };
     cardMaterial_->onClearMaterial = [this] { emit ClearMaterialRequested(); };
 
     cardScript_ = new ScriptCard(this);
@@ -126,6 +135,7 @@ void ObjectInspectorPanel::BuildUi()
     inspectorLayout->addWidget(cardScript_);
     inspectorLayout->addWidget(cardAi_);
     BuildCharacterCard(inspectorLayout);
+    BuildPhysicsCard(inspectorLayout);
     inspectorLayout->addWidget(properties_);
 
     cardGeneral_->hide();
@@ -136,6 +146,7 @@ void ObjectInspectorPanel::BuildUi()
     cardAi_->hide();
     lightInspector_->hide();
     characterInspector_->hide();
+    physicsInspector_->hide();
     noSelectionLabel_->show();
 
     inspectorLayout->addStretch(1);
@@ -215,12 +226,85 @@ void ObjectInspectorPanel::BuildCharacterCard(QVBoxLayout* layout)
     cardCharacter_->hide();
 }
 
+void ObjectInspectorPanel::BuildPhysicsCard(QVBoxLayout* layout)
+{
+    cardPhysics_ = new CollapsibleCard(Tr("Физика", "Physics"), this, true);
+    physicsInspector_ = cardPhysics_;
+    auto* cl = cardPhysics_->ContentLayout();
+    auto emitChanged = [this] {
+        if (refreshing_ || selectedId_ == 0) return;
+        emit PhysicsEditingFinished(selectedId_, CurrentPhysicsValue());
+    };
+
+    auto* rowTop = new QWidget(cardPhysics_->Content());
+    auto* lTop = new QHBoxLayout(rowTop);
+    lTop->setContentsMargins(0, 0, 0, 0);
+    lTop->setSpacing(6);
+    physicsEnabled_ = new QCheckBox(Tr("Включить физику", "Enable physics"), rowTop);
+    physicsEnabled_->setObjectName(QStringLiteral("PhysicsEnabled"));
+    connect(physicsEnabled_, &QCheckBox::clicked, this, emitChanged);
+    lTop->addWidget(physicsEnabled_);
+    physicsEnabledNote_ = new QLabel(rowTop);
+    physicsEnabledNote_->setObjectName(QStringLiteral("PhysicsNote"));
+    physicsEnabledNote_->setWordWrap(true);
+    lTop->addWidget(physicsEnabledNote_, 1);
+    cl->addWidget(rowTop);
+
+    auto addComboRow = [&](int labelIndex, const QString& label, QComboBox*& combo) {
+        auto* row = new QWidget(cardPhysics_->Content());
+        auto* l = new QHBoxLayout(row);
+        l->setContentsMargins(0, 0, 0, 0);
+        l->setSpacing(6);
+        physicsRowLabels_[labelIndex] = new QLabel(label, row);
+        physicsRowLabels_[labelIndex]->setObjectName(QStringLiteral("CardFieldLabel"));
+        physicsRowLabels_[labelIndex]->setFixedWidth(80);
+        l->addWidget(physicsRowLabels_[labelIndex]);
+        combo = new QComboBox(row);
+        combo->setObjectName(QStringLiteral("PhysicsCombo%1").arg(labelIndex));
+        combo->setFixedHeight(22);
+        connect(combo, &QComboBox::currentIndexChanged, this, [emitChanged](int) { emitChanged(); });
+        l->addWidget(combo, 1);
+        cl->addWidget(row);
+    };
+    addComboRow(0, Tr("Тип тела", "Body type"), physicsBodyType_);
+    addComboRow(1, Tr("Форма коллизии", "Collision shape"), physicsShape_);
+
+    auto addSpinRow = [&](int labelIndex, const QString& label, NoWheelDoubleSpinBox*& spin,
+                          double minV, double maxV, double step) {
+        auto* row = new QWidget(cardPhysics_->Content());
+        auto* l = new QHBoxLayout(row);
+        l->setContentsMargins(0, 0, 0, 0);
+        l->setSpacing(6);
+        physicsRowLabels_[labelIndex] = new QLabel(label, row);
+        physicsRowLabels_[labelIndex]->setObjectName(QStringLiteral("CardFieldLabel"));
+        physicsRowLabels_[labelIndex]->setFixedWidth(80);
+        l->addWidget(physicsRowLabels_[labelIndex]);
+        spin = new NoWheelDoubleSpinBox(row);
+        spin->setObjectName(QStringLiteral("PhysicsValue%1").arg(labelIndex));
+        spin->setFixedHeight(22);
+        spin->setRange(minV, maxV);
+        spin->setDecimals(2);
+        spin->setSingleStep(step);
+        spin->setKeyboardTracking(false);
+        connect(spin, &QDoubleSpinBox::editingFinished, this, emitChanged);
+        l->addWidget(spin, 1);
+        cl->addWidget(row);
+    };
+    addSpinRow(2, Tr("Трение", "Friction"), physicsFriction_, 0.0, 1000.0, 0.05);
+    addSpinRow(3, Tr("Упругость", "Restitution"), physicsRestitution_, 0.0, 1.0, 0.05);
+    addSpinRow(4, Tr("Плотность", "Density"), physicsDensity_, 0.01, 1000000.0, 10.0);
+
+    layout->addWidget(cardPhysics_);
+    cardPhysics_->hide();
+}
+
 void ObjectInspectorPanel::RetranslateUi()
 {
     if (noSelectionLabel_) noSelectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
     if (cardGeneral_) cardGeneral_->SetTitle(Tr("Общие", "General"));
     if (cardLight_) cardLight_->SetTitle(Tr("Свет", "Light"));
     if (cardCharacter_) cardCharacter_->SetTitle(Tr("Персонаж", "Character"));
+    if (cardPhysics_) cardPhysics_->SetTitle(Tr("Физика", "Physics"));
     if (cardTransform_) cardTransform_->RetranslateUi();
     if (cardGeometry_) cardGeometry_->RetranslateUi();
     if (cardMaterial_) cardMaterial_->RetranslateUi();
@@ -234,6 +318,30 @@ void ObjectInspectorPanel::RetranslateUi()
     if (lightRowLabels_[4]) lightRowLabels_[4]->setText(Tr("Радиус", "Radius"));
     if (characterSpeedLabel_) characterSpeedLabel_->setText(Tr("Скорость, ед/с", "Speed, u/s"));
     if (labelName_) labelName_->setText(Tr("Имя", "Name"));
+    if (physicsEnabled_) physicsEnabled_->setText(Tr("Включить физику", "Enable physics"));
+    if (physicsEnabledNote_) physicsEnabledNote_->setText(Tr("Работает в Play", "Simulated in Play"));
+    if (physicsRowLabels_[0]) physicsRowLabels_[0]->setText(Tr("Тип тела", "Body type"));
+    if (physicsRowLabels_[1]) physicsRowLabels_[1]->setText(Tr("Форма коллизии", "Collision shape"));
+    if (physicsRowLabels_[2]) physicsRowLabels_[2]->setText(Tr("Трение", "Friction"));
+    if (physicsRowLabels_[3]) physicsRowLabels_[3]->setText(Tr("Упругость", "Restitution"));
+    if (physicsRowLabels_[4]) physicsRowLabels_[4]->setText(Tr("Плотность", "Density"));
+    if (physicsBodyType_)
+    {
+        QSignalBlocker blocker(physicsBodyType_);
+        const int current = physicsBodyType_->currentIndex();
+        physicsBodyType_->clear();
+        physicsBodyType_->addItems({Tr("Статичное", "Static"), Tr("Динамическое", "Dynamic"),
+                                    Tr("Кинематическое", "Kinematic")});
+        physicsBodyType_->setCurrentIndex(current < 0 ? 1 : current);
+    }
+    if (physicsShape_)
+    {
+        QSignalBlocker blocker(physicsShape_);
+        const int current = physicsShape_->currentIndex();
+        physicsShape_->clear();
+        physicsShape_->addItems({Tr("Куб", "Box"), Tr("Сфера", "Sphere"), Tr("Капсула", "Capsule")});
+        physicsShape_->setCurrentIndex(current < 0 ? 0 : current);
+    }
 
     if (selectedId_ == 0 && selectionLabel_)
         selectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
@@ -282,6 +390,18 @@ InspectorTransformValue ObjectInspectorPanel::CurrentTransformValue() const
     return value;
 }
 
+InspectorPhysicsValue ObjectInspectorPanel::CurrentPhysicsValue() const
+{
+    InspectorPhysicsValue value;
+    value.enabled = physicsEnabled_->isChecked();
+    value.bodyType = physicsBodyType_->currentIndex();
+    value.shapeType = physicsShape_->currentIndex();
+    value.friction = physicsFriction_->value();
+    value.restitution = physicsRestitution_->value();
+    value.density = physicsDensity_->value();
+    return value;
+}
+
 void ObjectInspectorPanel::Refresh(
     const EditorQtHost::Snapshot& view,
     quint64 selectedId,
@@ -306,6 +426,8 @@ void ObjectInspectorPanel::Refresh(
         noSelectionLabel_->show();
         cardGeneral_->hide(); cardTransform_->hide(); cardGeometry_->hide();
         cardMaterial_->hide(); cardScript_->hide(); cardAi_->hide(); lightInspector_->hide(); characterInspector_->hide();
+        lastCardsValid_ = false;
+        physicsInspector_->hide();
         refreshing_ = false;
         return;
     }
@@ -313,9 +435,10 @@ void ObjectInspectorPanel::Refresh(
     noSelectionLabel_->hide();
     cardGeneral_->show();
     cardTransform_->show();
-    cardMaterial_->show();
-    cardGeometry_->Clear();
-    cardMaterial_->Clear();
+    if (selectionChanged) {
+        cardGeometry_->Clear();
+        cardMaterial_->Clear();
+    }
 
     bool selectedLight = false;
 
@@ -331,6 +454,22 @@ void ObjectInspectorPanel::Refresh(
         characterInspector_->setVisible(object.gameplayKind == 1 && object.propertySchema.find("/moveSpeed") == std::string::npos);
         if (object.gameplayKind == 1 && canReplaceField(characterSpeed_))
             characterSpeed_->setValue(QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object()["moveSpeed"].toDouble(5));
+
+        // Physics is available on every object; unconfigured objects show the defaults.
+        {
+            const EnginePhysicsObjectState state = object.hasPhysics
+                ? object.physics
+                : EnginePhysicsObjectState{0u, 1u, 0u, 0.5f, 0.0f, 1000.0f};
+            if (canReplaceField(physicsEnabled_)) physicsEnabled_->setChecked(state.enabled != 0);
+            if (canReplaceField(physicsBodyType_))
+                physicsBodyType_->setCurrentIndex(std::min(std::max(static_cast<int>(state.bodyType), 0), 2));
+            if (canReplaceField(physicsShape_))
+                physicsShape_->setCurrentIndex(std::min(std::max(static_cast<int>(state.shapeType), 0), 2));
+            if (canReplaceField(physicsFriction_)) physicsFriction_->setValue(state.friction);
+            if (canReplaceField(physicsRestitution_)) physicsRestitution_->setValue(state.restitution);
+            if (canReplaceField(physicsDensity_)) physicsDensity_->setValue(state.density);
+            physicsInspector_->show();
+        }
 
         selectedType_ = object.type;
         const std::string& type = object.type;
@@ -371,18 +510,46 @@ void ObjectInspectorPanel::Refresh(
             UpdateLightColorButton(object.pointLight.color); cardLight_->show();
         } else { cardLight_->hide(); }
 
-        const bool showGeometry = isModel;
+        const bool showGeometry = isModel || isPrimitive;
         const bool showMaterial = isModel || isPrimitive;
         const bool showProperties = (!isModel && !isPrimitive && !isPointLight && !isDirLight && !isCamera && !isParticles);
 
         const QString cr = property("contentRoot").toString();
-        cardGeometry_->setVisible(showGeometry);
+        const QString modelPath = QString::fromStdString(object.modelAsset);
+        const QString materialPath = QString::fromStdString(object.materialAsset);
+        const bool materialLight = isPointLight || isDirLight;
+        const QString primType = isPrimitive ? (type.rfind("Primitive.", 0) == 0 ? QString::fromStdString(type.substr(10)) : QString::fromStdString(type)) : QString();
+        const bool cardsDirty = !lastCardsValid_ || selectionChanged
+            || showGeometry != lastCardsShowGeometry_
+            || showMaterial != lastCardsShowMaterial_
+            || modelPath != lastCardsModel_
+            || primType != lastCardsPrimitive_
+            || materialPath != lastCardsMaterial_
+            || materialLight != lastCardsMaterialLight_
+            || cr != lastCardsRoot_;
         if (showGeometry) {
-            cardGeometry_->SetData(QString::fromStdString(object.modelAsset), true, cr, selectionChanged);
-            cardGeometry_->SetTexture(QString::fromStdString(object.textureAsset), cr, selectionChanged);
+            cardGeometry_->UpdateChooseModelButton(isModel, isPrimitive);
         }
-        cardMaterial_->SetData(QString::fromStdString(object.materialAsset), isPointLight || isDirLight, cr, selectionChanged);
-        cardMaterial_->setVisible(showMaterial);
+        if (cardsDirty) {
+            cardGeometry_->setVisible(showGeometry);
+            if (isModel) {
+                cardGeometry_->SetModelData(modelPath, true, cr, selectionChanged);
+            } else if (isPrimitive) {
+                cardGeometry_->SetPrimitiveData(primType);
+            }
+            cardMaterial_->SetData(materialPath, materialLight, cr, selectionChanged);
+            cardMaterial_->setVisible(showMaterial);
+            lastCardsShowGeometry_ = showGeometry;
+            lastCardsShowMaterial_ = showMaterial;
+            lastCardsModel_ = modelPath;
+            lastCardsPrimitive_ = primType;
+            lastCardsMaterial_ = materialPath;
+            lastCardsMaterialLight_ = materialLight;
+            lastCardsRoot_ = cr;
+            lastCardsValid_ = true;
+        }
+        if (properties_->isHidden() == showProperties)
+            properties_->setVisible(showProperties);
         // Скрипт — у любого объекта сцены, если игровой модуль их поддерживает.
         cardScript_->SetData(QString::fromStdString(object.scriptAsset), true);
         cardScript_->SetVariables(QString::fromStdString(object.scriptAsset), QString::fromStdString(object.scriptVariables),
@@ -396,7 +563,6 @@ void ObjectInspectorPanel::Refresh(
             cardAi_->SetData(data.value(QStringLiteral("stateMachine")).toString(), data.value(QStringLiteral("machineMemory")).toString(), true);
         }
         cardAi_->setVisible(aiMachine);
-        properties_->setVisible(showProperties);
 
         if (canReplaceWholeInspector)
         {

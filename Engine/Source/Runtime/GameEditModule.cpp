@@ -122,6 +122,19 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
                 if (assetImport.version == 1 && assetImport.context == extensionContext && assetImport.importWithOptions)
                     assetImport_ = assetImport;
             }
+            EnginePhysicsApi physics{};
+            if (query && query(extensionContext, EnginePhysicsExtension, 1, sizeof(physics), &physics))
+            {
+                if (physics.version == 1 && physics.context && physics.read && physics.write && physics.available)
+                    physics_ = physics;
+            }
+            EnginePhysicsObjectApi physicsObject{};
+            if (query && query(extensionContext, EnginePhysicsObjectExtension, 1, sizeof(physicsObject), &physicsObject))
+            {
+                if (physicsObject.version == 1 && physicsObject.context && physicsObject.read &&
+                    physicsObject.write && physicsObject.available)
+                    physicsObject_ = physicsObject;
+            }
         }
         if (!projectContent.empty())
         {
@@ -186,6 +199,7 @@ uint32_t GameEditModule::Reload(const std::filesystem::path& module, const std::
         swap(pointLightV2_, candidate->pointLightV2_); swap(script_, candidate->script_);
         swap(graphTrace_, candidate->graphTrace_); swap(aiMachine_, candidate->aiMachine_);
         swap(assetImport_, candidate->assetImport_);
+        swap(physics_, candidate->physics_); swap(physicsObject_, candidate->physicsObject_);
         swap(legacyFactory_, candidate->legacyFactory_); swap(legacy_, candidate->legacy_);
         swap(legacy5Factory_, candidate->legacy5Factory_); swap(legacy5_, candidate->legacy5_);
         // Heap-owned adapter tables move with their DLL, preserving session identity.

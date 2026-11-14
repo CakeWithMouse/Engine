@@ -41,6 +41,12 @@ int wmain(int argc,wchar_t** argv) {
         Check(data.write(data.context,hero,"{\"version\":1,\"moveSpeed\":9,\"playerControlled\":true}")==EngineSceneOk,"custom speed");
         const auto play="{\"version\":1,\"character\":"+std::to_string(hero)+",\"camera\":0,\"standardControl\":true,\"cameraDistance\":5,\"cameraHeight\":2,\"lookSensitivity\":0.005}";
         Check(data.write(data.context,settings,play.c_str())==EngineSceneOk,"assign Play");
+        const auto initialPhysicsObject=module.PhysicsObjectApi();
+        Check(initialPhysicsObject.context==api.context && initialPhysicsObject.write,
+            "initial physics object extension belongs to live session");
+        const EnginePhysicsObjectState initialBody{0,EnginePhysicsBodyStatic,EnginePhysicsShapeBox,.65f,.1f,1000.f};
+        Check(initialPhysicsObject.write(initialPhysicsObject.context,hero,&initialBody)==EngineSceneOk,
+            "configure disabled physics body before checkpoint");
         Check(api.attachViewport(api.context,window,320,240)==EngineSceneOk,"attach old viewport");
         Check(api.camera(api.context,1,2,3,.2f,.1f,0)==EngineSceneOk,"move editor camera");
         EngineEditorCameraState before{}; Check(module.EditorCameraApi().read(module.EditorCameraApi().context,&before)==EngineSceneOk,"read camera before reload");
@@ -94,6 +100,20 @@ int wmain(int argc,wchar_t** argv) {
         Check(std::abs(before.x-after.x)<.0001f && std::abs(before.y-after.y)<.0001f && std::abs(before.z-after.z)<.0001f && std::abs(before.yaw-after.yaw)<.0001f && std::abs(before.pitch-after.pitch)<.0001f,"editor camera restored across DLL replacement");
         Check(module.Reload(candidate,checkpoint,window,320,240,error,sizeof(error))==EngineSceneOk && module.Api().context==api.context,"unchanged build keeps session and mounts");
         auto objects=Read(api);
+        const auto physics=module.PhysicsApi();
+        const auto physicsObject=module.PhysicsObjectApi();
+        Check(physics.context==api.context && physics.read && physics.write && physics.available,
+            "physics settings extension follows reloaded session");
+        Check(physicsObject.context==api.context && physicsObject.read && physicsObject.write && physicsObject.available,
+            "physics object extension follows reloaded session");
+        EnginePhysicsSettingsState physicsState{};
+        Check(physics.read(physics.context,&physicsState)==EngineSceneOk,
+            "physics settings callback callable after unloading old DLL");
+        EnginePhysicsObjectState bodyState{};
+        Check(physicsObject.read(physicsObject.context,objects.at("Hero").id,&bodyState)==EngineSceneOk,
+            "physics object callback callable after unloading old DLL");
+        Check(bodyState.enabled==0 && bodyState.bodyType==EnginePhysicsBodyStatic && std::abs(bodyState.friction-.65f)<.0001f,
+            "physics object settings restored across DLL replacement");
         Check(module.AuthoringApi().context==api.context && module.AuthoringApi().describe,
             "authoring extension follows reloaded session");
         std::string schema;
@@ -114,6 +134,8 @@ int wmain(int argc,wchar_t** argv) {
         Check(api.control(api.context,EngineStop)==EngineSceneOk,"final Stop");
         Check(module.Reload(original,checkpoint,window,320,240,error,sizeof(error))==EngineSceneOk,"second reload");
         Check(module.ViewportOverlayApi().context==module.Api().context,"overlay follows repeated reload");
+        Check(module.PhysicsApi().context==module.Api().context && module.PhysicsObjectApi().context==module.Api().context,
+            "both physics extensions follow repeated reload");
         Check(module.AiMachineApi().context==module.Api().context && module.ScriptApi().context==module.Api().context &&
             module.GraphTraceApi().context==module.Api().context && module.PointLightV2Api().context==module.Api().scene.context &&
             module.AssetImportApi().context==module.Api().context,"all new extensions follow repeated reload");

@@ -14,6 +14,7 @@
 class QLabel;
 class QLineEdit;
 class QCheckBox;
+class QComboBox;
 class QPushButton;
 class QVBoxLayout;
 class NoWheelDoubleSpinBox;
@@ -40,6 +41,18 @@ struct InspectorPointLightValue
     double radius = 0.0;
     bool enabled = false;
     bool castShadows = false;
+};
+
+// Rigid body settings of one scene object. bodyType/shapeType follow the engine
+// constants (0/1/2), the combos keep the same order.
+struct InspectorPhysicsValue
+{
+    bool enabled = false;
+    int bodyType = 1;   // 0 static, 1 dynamic, 2 kinematic
+    int shapeType = 0;  // 0 box, 1 sphere, 2 capsule
+    double friction = 0.5;
+    double restitution = 0.0;
+    double density = 1000.0;
 };
 
 class ObjectInspectorPanel : public QWidget
@@ -86,13 +99,15 @@ signals:
         const InspectorPointLightValue& value
     );
 
+    void PhysicsEditingFinished(
+        quint64 objectId,
+        const InspectorPhysicsValue& value
+    );
+
     void LightColorRequested(quint64 objectId, const QColor& current);
 
     void ChooseModelRequested();
-    void ClearModelRequested();
     void CharacterSpeedEditingFinished(quint64 objectId, double speed);
-    void ChooseTextureRequested();
-    void ClearTextureRequested();
     void ChooseMaterialRequested();
     void EditMaterialRequested(const QString& virtualPath);
     void ClearMaterialRequested();
@@ -115,15 +130,22 @@ private:
     void BuildGeneralCard(QVBoxLayout* layout);
     void BuildPointLightCard(QVBoxLayout* layout);
     void BuildCharacterCard(QVBoxLayout* layout);
+    void BuildPhysicsCard(QVBoxLayout* layout);
 
     void UpdateLightColorButton(const float color[3]);
     InspectorTransformValue CurrentTransformValue() const;
     InspectorPointLightValue CurrentPointLightValue() const;
+    InspectorPhysicsValue CurrentPhysicsValue() const;
     bool HasFocusedChild() const;
 
     quint64 selectedId_ = 0; std::string selectedType_;
     EditorQtHost::Snapshot lastSnapshot_;
     bool refreshing_ = false;
+    QString lastCardsModel_, lastCardsPrimitive_, lastCardsMaterial_, lastCardsRoot_;
+    bool lastCardsShowGeometry_ = false;
+    bool lastCardsShowMaterial_ = false;
+    bool lastCardsMaterialLight_ = false;
+    bool lastCardsValid_ = false;
     int langSubId_ = 0;
     int themeSubId_ = 0;
     QMap<QString, QJsonValue> pendingProperties_;
@@ -140,6 +162,7 @@ private:
     AiMachineCard* cardAi_ = nullptr;
     CollapsibleCard* cardLight_ = nullptr;
     CollapsibleCard* cardCharacter_ = nullptr;
+    CollapsibleCard* cardPhysics_ = nullptr;
 
     // General
     QLabel* selectionLabel_ = nullptr;
@@ -159,4 +182,15 @@ private:
     QWidget* characterInspector_ = nullptr;
     NoWheelDoubleSpinBox* characterSpeed_ = nullptr;
     QLabel* characterSpeedLabel_ = nullptr;
+
+    // Physics
+    QWidget* physicsInspector_ = nullptr;
+    QCheckBox* physicsEnabled_ = nullptr;
+    QComboBox* physicsBodyType_ = nullptr;
+    QComboBox* physicsShape_ = nullptr;
+    NoWheelDoubleSpinBox* physicsFriction_ = nullptr;
+    NoWheelDoubleSpinBox* physicsRestitution_ = nullptr;
+    NoWheelDoubleSpinBox* physicsDensity_ = nullptr;
+    QLabel* physicsRowLabels_[5]{};
+    QLabel* physicsEnabledNote_ = nullptr;
 };

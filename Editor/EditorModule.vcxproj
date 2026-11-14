@@ -35,12 +35,12 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(EngineCommandlet)'=='true'">
-        <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VCPKG_ROOT)'!=''">$(VCPKG_ROOT)\</VcpkgRoot>
         <VcpkgEnableManifest>$(EngineEnableAssimp)</VcpkgEnableManifest>
         <VcpkgEnabled>$(EngineEnableAssimp)</VcpkgEnabled>
         <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\Engine\</VcpkgManifestRoot>
         <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\Engine\vcpkg_installed\</VcpkgInstalledDir>
     </PropertyGroup>
+    <Import Project="..\Engine\BuildSupport\VcpkgRoot.props" />
     <Import Project="$(VcpkgRoot)scripts/buildsystems/msbuild/vcpkg.props" Condition="'$(EngineCommandlet)'=='true' and '$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts/buildsystems/msbuild/vcpkg.props')"/>
     <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props"/>
     <Import Project="..\Engine\BuildSupport\Cpp.props"/>
@@ -170,6 +170,8 @@
         <ClCompile Include="UI/DockLayoutManager.cpp"/>
         <ClCompile Include="UI/MainToolBar.cpp"/>
         <ClCompile Include="UI/IconProvider.cpp"/>
+        <ClCompile Include="UI/AssetThumbnailCache.cpp"/>
+        <ClCompile Include="UI/AssetPickerDialog.cpp"/>
         <ClCompile Include="UI/ImportSettingsDialog.cpp"/>
         <ClCompile Include="UI/ModelImportEditFlow.cpp"/>
         <ClCompile Include="UI/PlaySettingsDialog.cpp"/>
@@ -237,6 +239,7 @@
         </ClCompile>
         <ClCompile Include="Source/UIEditorWindow.cpp"/>
         <ClCompile Include="Source/HudTools.cpp"/>
+        <ClCompile Include="Source/PhysicsTools.cpp"/>
         <ClCompile Include="../Engine/Source/UI/UIElement.cpp">
             <PrecompiledHeader>NotUsing</PrecompiledHeader>
             <ForcedIncludeFiles></ForcedIncludeFiles>
@@ -339,6 +342,8 @@
         <ClInclude Include="Host/SceneCommandHandler.h"/>
         <ClInclude Include="UI/EditorApp.h"/>
         <ClInclude Include="UI/IconProvider.h"/>
+        <ClInclude Include="UI/AssetThumbnailCache.h"/>
+        <ClInclude Include="UI/AssetPickerDialog.h"/>
         <ClInclude Include="UI/ViewportOverlayHelper.h"/>
         <ClInclude Include="UI/SpinBoxArrowStyle.h"/>
         <ClInclude Include="UI/ImportSettingsDialog.h"/>
@@ -440,9 +445,18 @@
         </PropertyGroup>
         <Error Condition="!Exists('$(RedistributableD3DCompiler)')" Text="Windows SDK x64 D3D redistributable is missing; never substitute the System32 DLL."/>
         <Copy SourceFiles="$(RedistributableD3DCompiler)" DestinationFiles="$(OutDir)D3Dcompiler_47.dll" SkipUnchangedFiles="true"/>
+        <Copy SourceFiles="$(MSBuildThisFileDirectory)Resources/icon_pain_multisize.ico" DestinationFiles="$(OutDir)icon_pain_multisize.ico" SkipUnchangedFiles="true"/>
         <Copy Condition="'$(EngineCommandlet)'=='true'" SourceFiles="$(QtInstallDir)/plugins/platforms/qoffscreen.dll" DestinationFiles="$(OutDir)platforms/qoffscreen.dll" SkipUnchangedFiles="true"/>
     </Target>
     <ImportGroup Label="ExtensionTargets"/>
   <ItemGroup><ClCompile Include="Source/CodeTools.cpp" /><ClCompile Include="Source/ImportMigration.cpp" /></ItemGroup>
     <Import Project="../Engine/BuildSupport/AssimpRuntime.targets" />
+
+  <PropertyGroup>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'=='' and Exists('..\Engine\vcpkg_installed\x64-windows\include\Jolt\Jolt.h')">true</EngineEnableJolt>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'==''">false</EngineEnableJolt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Debug'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/debug/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(Configuration)'=='Release'"><Link><AdditionalDependencies>$(RepositoryRoot)Engine/vcpkg_installed/x64-windows/lib/Jolt.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
+    <Import Project="../Engine/BuildSupport/JoltRuntime.targets"/>
 </Project>

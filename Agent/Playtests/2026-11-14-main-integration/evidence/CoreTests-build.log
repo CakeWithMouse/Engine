@@ -1,0 +1,15 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  MOC FileService.h
+  AssetOps.cpp
+  FileService.cpp
+  ImportSettings.cpp
+  ModelImportSidecar.cpp
+  ModelImportSidecarTransaction.cpp
+  SceneFile.cpp
+  ViewportOverlay.cpp
+  CoreTests.cpp
+  moc_FileService.cpp
+  CoreTests.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\CoreTests.exe
+

@@ -1,0 +1,1 @@
+{"passed": 9, "cases": ["wizard", "dialog-cancel", "dialog-presets", "startup", "invalid-property-ui", "recovery-write", "recovery-load", "wizard-generate", "wizard-duplicate"], "visual": "Actual themed Qt widgets; PNGs exclude native D3D viewport."}

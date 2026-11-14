@@ -54,24 +54,21 @@ private:
     void Highlight(bool on);
 };
 
+#include "AssetPickerDialog.h"
+
 // Выбор текстуры проекта: сетка миниатюр с поиском, «Нет текстуры» и импорт файла извне.
-class MaterialTexturePicker final : public QDialog
+// Использует единый графический компонент AssetPickerDialog.
+class MaterialTexturePicker final : public AssetPickerDialog
 {
 public:
     // current: файл на диске, он будет выделен.
-    MaterialTexturePicker(const QString& contentRoot, const QString& current, const QString& slot, QWidget* parent);
+    MaterialTexturePicker(const QString& contentRoot, const QString& current, const QString& slot, QWidget* parent = nullptr)
+        : AssetPickerDialog(EditorCore::AssetKind::Texture, contentRoot, current, parent, slot, true, true)
+    {
+    }
 
     // После accept: файл на диске, в том числе вне Content; пустая строка — «Нет текстуры».
-    const QString& Selected() const { return selected_; }
-
-private:
-    void Import();
-    void LoadNextThumbnail();
-
-    QListWidget* list_ = nullptr;
-    QTimer* thumbnails_ = nullptr;
-    int nextThumbnail_ = 1; // первая строка — «Нет текстуры»
-    QString selected_;
+    const QString& Selected() const { return SelectedDiskPath(); }
 };
 
 // Назначение и имя нового слота.

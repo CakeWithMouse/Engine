@@ -1,0 +1,17 @@
+{
+  "passed": 11,
+  "cases": [
+    "invalid-0",
+    "invalid-1",
+    "invalid-2",
+    "invalid-3",
+    "invalid-4",
+    "invalid-5",
+    "invalid-6",
+    "invalid-options-0",
+    "invalid-options-1",
+    "dotted-reimport-move",
+    "default-scale"
+  ],
+  "visual": "editor-layout.png is Qt layout only; D3D viewport needs separate observation"
+}

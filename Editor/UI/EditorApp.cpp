@@ -10,6 +10,9 @@
 #include "../Core/CommandRegistry.h"
 #include "../Core/EditorLocale.h"
 #include <QApplication>
+#include <QIcon>
+#include <QFile>
+#include <QDir>
 #include <QTimer>
 #include <QPixmap>
 #include <QQuaternion>
@@ -34,9 +37,39 @@ namespace
         app.setApplicationName(QStringLiteral("Engine Editor"));
         EditorTheme::Apply(app);
 
+        const QString appDir = QCoreApplication::applicationDirPath();
+        const QString iconCandidates[] = {
+            appDir + QStringLiteral("/icon_pain_multisize.ico"),
+            appDir + QStringLiteral("/Resources/icon_pain_multisize.ico"),
+            appDir + QStringLiteral("/../../../../Editor/Resources/icon_pain_multisize.ico"),
+            QStringLiteral("Editor/Resources/icon_pain_multisize.ico"),
+            QStringLiteral("Resources/icon_pain_multisize.ico"),
+            QStringLiteral("icon_pain_multisize.ico")
+        };
+        QIcon appIcon;
+        for (const auto& candidate : iconCandidates)
+        {
+            if (QFile::exists(candidate))
+            {
+                appIcon = QIcon(candidate);
+                if (!appIcon.isNull())
+                {
+                    break;
+                }
+            }
+        }
+        if (!appIcon.isNull())
+        {
+            app.setWindowIcon(appIcon);
+        }
+
         auto* qtHost = dynamic_cast<EditorQtHost*>(host);
         qtHost->InitializeRecovery();
         EditorMainWindow window(qtHost);
+        if (!appIcon.isNull())
+        {
+            window.setWindowIcon(appIcon);
+        }
         host->SetUiListener(&window);
         window.show();
         ready->store(true);

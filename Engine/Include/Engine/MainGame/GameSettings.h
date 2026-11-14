@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <Engine/Physics/PhysicsSettings.h>
 
 enum RenderType
 {
@@ -32,6 +33,10 @@ public:
     // Embedded editor Play ignores this request; it never closes the editor window.
     void RequestWindowClose() { closeRequested_ = true; }
 
+    // Settings of the physics world created by Game while simulation runs.
+    PhysicsSettings& Physics() { return physics_; }
+    const PhysicsSettings& Physics() const { return physics_; }
+
 private:
     friend class Game;
     GameSettings() = default;
@@ -39,4 +44,5 @@ private:
     RenderType renderingType_ = Forward;
     uint32_t antialiasing_ = 0;
     bool closeRequested_ = false;
+    PhysicsSettings physics_;
 };

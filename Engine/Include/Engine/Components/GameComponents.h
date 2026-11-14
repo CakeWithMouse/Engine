@@ -13,6 +13,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <Engine/Render/ShaderConstants.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
+#include <Engine/Physics/PhysicsWorld.h>
 
 namespace GameComponentNames
 {
@@ -204,6 +205,31 @@ public:
     bool IsSkybox() const { return bIsSkybox; }
     virtual bool DoSmthWithCollision(GameComponent* AnotherComponent) { return false; }
 
+    // Physics. Every scene object can join the Game physics world: enable it here
+    // and tune the collision shape. During Play dynamic bodies drive the component
+    // transform; static and kinematic bodies follow the transform instead. The
+    // editor Edit mode never simulates, so these settings only persist there.
+    void SetPhysicsEnabled(bool enabled);
+    bool IsPhysicsEnabled() const { return physicsEnabled_; }
+    // True once any physics setting was assigned; drives scene serialization.
+    bool HasPhysicsSettings() const { return physicsConfigured_; }
+    void SetPhysicsBodyType(PhysicsBodyType type);
+    PhysicsBodyType GetPhysicsBodyType() const { return physicsBodyType_; }
+    void SetPhysicsShapeType(PhysicsShapeType shape);
+    PhysicsShapeType GetPhysicsShapeType() const { return physicsShape_; }
+    // Dynamic bodies only: density used to compute the mass.
+    void SetPhysicsDensity(float density);
+    float GetPhysicsDensity() const { return physicsDensity_; }
+    void SetPhysicsFriction(float friction);
+    float GetPhysicsFriction() const { return physicsFriction_; }
+    void SetPhysicsRestitution(float restitution);
+    float GetPhysicsRestitution() const { return physicsRestitution_; }
+    // Valid only while the body exists (Play with physics enabled in the world settings).
+    bool HasPhysicsBody() const { return physicsBodyHandle_ != 0; }
+    glm::vec3 GetPhysicsLinearVelocity() const;
+    void SetPhysicsLinearVelocity(const glm::vec3& velocity);
+    void AddPhysicsImpulse(const glm::vec3& impulse);
+
     // Instancing: the owner is a template, only its instances are drawn (colour and shadow passes).
     GameComponent* CreateInstance(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm::vec4 Color);
     size_t GetInstanceCount() const { return InstanceArray.size(); }
@@ -340,6 +366,21 @@ protected:
     ID3D11PixelShader* pixelShader = nullptr;
 
 private:
+    void SyncPhysicsBody();
+    void CreatePhysicsBody();
+    void DestroyPhysicsBody();
+    void DestroyBodyAndRecreate();
+
+    bool physicsEnabled_ = false;
+    bool physicsConfigured_ = false;
+    PhysicsBodyType physicsBodyType_ = PhysicsBodyType::Dynamic;
+    PhysicsShapeType physicsShape_ = PhysicsShapeType::Box;
+    float physicsFriction_ = 0.5f;
+    float physicsRestitution_ = 0.0f;
+    float physicsDensity_ = 1000.0f;
+    // Handle in the Game physics world; 0 when no body exists.
+    uint32_t physicsBodyHandle_ = 0;
+
     std::unique_ptr<GameComponent> VisualComponent;
     std::string VisualModelAsset;
     bool VisualPrimitive = false;

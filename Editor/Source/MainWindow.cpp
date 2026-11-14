@@ -18,6 +18,7 @@
 #include "UIEditorWindow.h"
 
 #include <QActionGroup>
+#include <algorithm>
 #include <QDockWidget>
 #include <QCloseEvent>
 #include <QDir>
@@ -70,6 +71,10 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     connect(scriptProblems, &QTimer::timeout, this, &EditorMainWindow::PollScriptProblems);
     connect(scriptProblems, &QTimer::timeout, this, &EditorMainWindow::PollAiMachine);
     scriptProblems->start(1000);
+    gizmoRefreshTimer_ = new QTimer(this);
+    gizmoRefreshTimer_->setSingleShot(true);
+    gizmoRefreshTimer_->setInterval(33);
+    connect(gizmoRefreshTimer_, &QTimer::timeout, this, &EditorMainWindow::RefreshSceneUi);
 
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] { RetranslateUi(); });
     themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
@@ -365,6 +370,8 @@ void EditorMainWindow::BuildSceneMenu()
     playMenu_ = menuBar()->addMenu(Tr("Запуск", "Play"));
     auto* hudSettings = playMenu_->addAction(Tr("HUD игры…", "Game HUD…"), this, &EditorMainWindow::ShowHudSettings);
     hudSettings->setObjectName("ProjectHudSettings");
+    playMenu_->addAction(Tr("Физика…", "Physics…"), this, &EditorMainWindow::ShowPhysicsSettings)
+        ->setObjectName("PhysicsSettings");
     if (actPlay_) playMenu_->addAction(actPlay_);
     if (actPause_) playMenu_->addAction(actPause_);
     if (actStop_) playMenu_->addAction(actStop_);
@@ -644,7 +651,7 @@ void EditorMainWindow::BuildSceneDocks()
 {
     sceneObjectsDock_ = new QDockWidget(Tr("Сцена / объекты", "Scene / Objects"), this);
     sceneObjectsDock_->setObjectName(QStringLiteral("SceneObjectsDock"));
-    sceneObjectsDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    sceneObjectsDock_->setAllowedAreas(Qt::AllDockWidgetAreas);
     sceneObjectsDock_->setFeatures(
         QDockWidget::DockWidgetMovable |
         QDockWidget::DockWidgetFloatable |
@@ -653,7 +660,7 @@ void EditorMainWindow::BuildSceneDocks()
 
     inspectorDock_ = new QDockWidget(Tr("Инспектор", "Inspector"), this);
     inspectorDock_->setObjectName(QStringLiteral("InspectorDock"));
-    inspectorDock_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    inspectorDock_->setAllowedAreas(Qt::AllDockWidgetAreas);
     inspectorDock_->setFeatures(
         QDockWidget::DockWidgetMovable |
         QDockWidget::DockWidgetFloatable |
@@ -798,22 +805,6 @@ void EditorMainWindow::ConnectPanels()
                 host_->PostCommand(c);
             });
 
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseModelRequested, this, [this] {
-        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
-        const auto path = QFileDialog::getOpenFileName(this, QStringLiteral("Модель из проекта"),
-            QString::fromUtf8(host_->host().contentRoot), QStringLiteral("Модели (*.glb *.gltf *.obj *.fbx)"));
-        if (path.isEmpty()) return;
-        const auto relative = QDir(QString::fromUtf8(host_->host().contentRoot)).relativeFilePath(path);
-        if (relative == ".." || relative.startsWith("../") || QDir::isAbsolutePath(relative)) {
-            QMessageBox::warning(this, QStringLiteral("Ресурс вне проекта"), QStringLiteral("Сначала импортируйте модель через меню «Импорт».")); return;
-        }
-        EditorCommand c; c.type = EditorCommand::SetModel; c.objectId = selectedId_;
-        c.path = "/Game/" + QDir::fromNativeSeparators(relative); host_->PostCommand(c);
-    });
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearModelRequested, this, [this] {
-        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
-        EditorCommand c; c.type = EditorCommand::SetModel; c.objectId = selectedId_; host_->PostCommand(c);
-    });
     connect(objectInspectorPanel_, &ObjectInspectorPanel::CharacterSpeedEditingFinished, this, [this](quint64 id, double speed) {
         if (sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
         for (const auto& o : host_->ReadSnapshot().objects) if (o.id == id && o.gameplayKind == 1) {
@@ -824,34 +815,9 @@ void EditorMainWindow::ConnectPanels()
             c.path = QString::fromUtf8(QJsonDocument(data).toJson()); host_->PostCommand(c);
         }
     });
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseTextureRequested, this, [this] {
-        if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
-        const QString p = QFileDialog::getOpenFileName(this, QStringLiteral("Текстура из проекта"), QString::fromUtf8(host_->host().contentRoot), QStringLiteral("Текстуры (*.png *.jpg *.jpeg *.bmp *.tga)"));
-        if (!p.isEmpty()) UseAsset(p);
-    });
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearTextureRequested, this, [this] {
-        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
-        EditorCommand c; c.type = EditorCommand::SetTexture; c.objectId = selectedId_; host_->PostCommand(c);
-    });
-
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseMaterialRequested, this, [this]
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseMaterialRequested, this, []
     {
-        if (!host_->HasScene() ||
-            sceneBusy_ ||
-            host_->PlayState() != EditorQtHost::EditorState::Edit)
-        {
-            return;
-        }
-
-        const QString path = QFileDialog::getOpenFileName(
-            this,
-            QStringLiteral("Материал из проекта"),
-            QString::fromUtf8(host_->host().contentRoot),
-            QStringLiteral("Материалы (*.mat)")
-        );
-
-        if (!path.isEmpty())
-            UseAsset(path);
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"));
     });
 
     connect(objectInspectorPanel_, &ObjectInspectorPanel::EditMaterialRequested, this, [this](const QString& material)
@@ -943,6 +909,9 @@ void EditorMainWindow::ConnectPanels()
 
     connect(objectInspectorPanel_, &ObjectInspectorPanel::PointLightEditingFinished,
             this, &EditorMainWindow::OnPointLightEdited);
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::PhysicsEditingFinished,
+            this, &EditorMainWindow::OnPhysicsEdited);
 
     connect(objectInspectorPanel_, &ObjectInspectorPanel::LightColorRequested,
             this, &EditorMainWindow::OnLightColorRequested);
@@ -1197,6 +1166,50 @@ void EditorMainWindow::OnPointLightEdited(
     }
 }
 
+void EditorMainWindow::OnPhysicsEdited(
+    quint64 objectId,
+    const InspectorPhysicsValue& value
+)
+{
+    if (!objectId || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+        return;
+
+    for (const auto& object : host_->ReadSnapshot().objects)
+    {
+        if (object.id != objectId)
+            continue;
+
+        // Unconfigured objects carry no stored state; compare against the defaults.
+        const EnginePhysicsObjectState current = object.hasPhysics
+            ? object.physics
+            : EnginePhysicsObjectState{0u, 1u, 0u, 0.5f, 0.0f, 1000.0f};
+
+        EditorCommand c;
+        c.type = EditorCommand::SetPhysicsBody;
+        c.objectId = objectId;
+        c.physicsBody = {
+            value.enabled ? 1u : 0u,
+            static_cast<uint32_t>(std::clamp(value.bodyType, 0, 2)),
+            static_cast<uint32_t>(std::clamp(value.shapeType, 0, 2)),
+            static_cast<float>(value.friction),
+            static_cast<float>(value.restitution),
+            static_cast<float>(value.density)};
+
+        const bool changed =
+            c.physicsBody.enabled != current.enabled ||
+            c.physicsBody.bodyType != current.bodyType ||
+            c.physicsBody.shapeType != current.shapeType ||
+            std::abs(c.physicsBody.friction - current.friction) > 0.0006f ||
+            std::abs(c.physicsBody.restitution - current.restitution) > 0.0006f ||
+            std::abs(c.physicsBody.density - current.density) > 0.0006f;
+        if (!changed)
+            return;
+
+        host_->PostCommand(c);
+        return;
+    }
+}
+
 void EditorMainWindow::OnLightColorRequested(quint64 objectId, const QColor& current)
 {
     if (!objectId || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
@@ -1242,6 +1255,7 @@ static bool IsUserFacingCommand(EditorCommand::Type t)
     case EditorCommand::SetModel: case EditorCommand::SetTexture: case EditorCommand::SetMaterial:
     case EditorCommand::SetPointLight: case EditorCommand::SetProjectData: case EditorCommand::UpdateAsset:
     case EditorCommand::SetScriptVariables:
+    case EditorCommand::SetPhysicsBody:
     case EditorCommand::ImportModel: case EditorCommand::ImportTexture: case EditorCommand::ImportAudio:
     case EditorCommand::SaveScene:
     case EditorCommand::LoadScene: case EditorCommand::NewScene: case EditorCommand::ReloadProject: return true;
@@ -1255,6 +1269,17 @@ void EditorMainWindow::CommandFinished(
     const QString& error
 )
 {
+    if (status == EngineSceneOk &&
+        (command.type == EditorCommand::InputCursor || command.type == EditorCommand::ViewportCamera))
+        return;
+    // Gizmo drags complete at mouse rate; panels follow at <= ~30 Hz and once after the last tick.
+    if (status == EngineSceneOk && command.type == EditorCommand::UpdateObjectTransform &&
+        command.path == QLatin1String("gizmo"))
+    {
+        if (!gizmoRefreshTimer_->isActive()) gizmoRefreshTimer_->start();
+        return;
+    }
+
     if (command.type == EditorCommand::ReloadProject) {
         sceneBusy_ = false; UpdatePlayButtons();
         if (status != EngineSceneOk && !command.name.isEmpty()) {

@@ -1,6 +1,10 @@
 #include "SceneTestAccess.h"
 #include <Engine/Scene/Scene.h>
+#include <Engine/Scene/SceneDocument.h>
+#include <Engine/Components/ComponentType.h>
 #include <Engine/Components/GameComponents.h>
+#include "../ThirdParty/nlohmann/json.hpp"
+#include <cmath>
 #include <functional>
 #include <limits>
 #include <stdexcept>
@@ -145,4 +149,68 @@ void SceneDeferredTests()
     CHECK(deaths == 2 && !scene.FindComponent(cancelled));
     auto finalComponent = Component();
     CHECK(scene.AddComponent("Final", finalComponent).id > cancelled);
+}
+
+void PhysicsObjectSceneTests()
+{
+    // Per-object rigid body settings: any component accepts them, the snapshot
+    // carries them, invalid values are rejected without touching stored state.
+    Scene scene;
+    auto component = Component();
+    const auto id = scene.AddComponent("Crate", component, "Test.Body").id;
+    SceneComponentSnapshot::PhysicsBody body;
+    body.enabled = true;
+    body.bodyType = PhysicsBodyType::Kinematic;
+    body.shapeType = PhysicsShapeType::Capsule;
+    body.friction = 0.25f;
+    body.restitution = 0.5f;
+    body.density = 500.0f;
+    CHECK(scene.SetPhysicsBody(id, body) == SceneResult::Ok);
+    auto snapshot = SceneTestAccess::Snapshot(scene);
+    CHECK(snapshot.components.size() == 1 && snapshot.components[0].physics.has_value());
+    CHECK(snapshot.components[0].physics->enabled);
+    CHECK(snapshot.components[0].physics->bodyType == PhysicsBodyType::Kinematic);
+    CHECK(snapshot.components[0].physics->shapeType == PhysicsShapeType::Capsule);
+    CHECK(std::abs(snapshot.components[0].physics->friction - 0.25f) < 1e-6f);
+    CHECK(std::abs(snapshot.components[0].physics->density - 500.0f) < 1e-6f);
+    body.density = -1.0f;
+    CHECK(scene.SetPhysicsBody(id, body) == SceneResult::InvalidTransform);
+    CHECK(SceneTestAccess::Snapshot(scene).components[0].physics->density == 500.0f);
+    CHECK(scene.SetPhysicsBody(999, body) == SceneResult::NotFound);
+    auto plain = Component();
+    CHECK(scene.AddComponent("Plain", plain, "Test.Body").id != 0);
+    CHECK(!SceneTestAccess::Snapshot(scene).components[1].physics.has_value());
+
+    // Scene documents round-trip the physics block; malformed blocks are rejected.
+    const auto text = SceneDocument::Serialize(SceneTestAccess::Snapshot(scene));
+    const auto parsed = SceneDocument::Parse(text);
+    CHECK(parsed.components[0].physics.has_value());
+    CHECK(parsed.components[0].physics->bodyType == PhysicsBodyType::Kinematic);
+    CHECK(parsed.components[0].physics->shapeType == PhysicsShapeType::Capsule);
+    CHECK(std::abs(parsed.components[0].physics->restitution - 0.5f) < 1e-6f);
+    CHECK(SceneDocument::Serialize(parsed) == text);
+
+    auto broken = nlohmann::json::parse(text);
+    broken["objects"][0]["physics"]["body"] = "floating";
+    bool rejected = false;
+    try { (void)SceneDocument::Parse(broken.dump()); } catch (const SceneDocumentError&) { rejected = true; }
+    CHECK(rejected);
+    broken = nlohmann::json::parse(text);
+    broken["objects"][0]["physics"] = {{"enabled", true}};
+    rejected = false;
+    try { (void)SceneDocument::Parse(broken.dump()); } catch (const SceneDocumentError&) { rejected = true; }
+    CHECK(rejected);
+
+    // Restore reapplies physics to the recreated component.
+    const ComponentType types[] = {{"Test.Body", "Body", EngineComponentDetail::Create<GameComponent>}};
+    const ComponentTypeCatalog catalog{types, sizeof(types) / sizeof(types[0])};
+    Scene restored;
+    SceneDocument::Restore(parsed, catalog, restored);
+    const auto* recreated = restored.FindComponentByName("Crate");
+    CHECK(recreated && recreated->IsPhysicsEnabled());
+    CHECK(recreated->GetPhysicsBodyType() == PhysicsBodyType::Kinematic);
+    CHECK(recreated->GetPhysicsShapeType() == PhysicsShapeType::Capsule);
+    CHECK(std::abs(recreated->GetPhysicsRestitution() - 0.5f) < 1e-6f);
+    const auto* untouched = restored.FindComponentByName("Plain");
+    CHECK(untouched && !untouched->HasPhysicsSettings());
 }

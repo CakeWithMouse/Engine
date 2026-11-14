@@ -1,0 +1,197 @@
+[Test] Running UiTestHelperTests...
+UiTestHelperTests: 15 checks passed.
+[Test] Running ImportSettingsDialogTests...
+[Info] SettingsService: Remove 'import/model/scale'
+[Info] SettingsService: Remove 'import/model/useFileUnitScale'
+[Info] SettingsService: Remove 'import/model/importMaterials'
+[Info] SettingsService: Remove 'import/model/importTextures'
+[Info] SettingsService: Remove 'import/model/normals'
+[Info] SettingsService: Remove 'import/model/smoothingAngle'
+[Info] SettingsService: Remove 'import/model/flipUv'
+[Info] SettingsService: Remove 'import/model/mergeMeshes'
+[Info] SettingsService: Set 'import/model/useFileUnitScale'
+[Info] SettingsService: Set 'import/model/importMaterials'
+[Info] SettingsService: Set 'import/model/importTextures'
+[Info] SettingsService: Set 'import/model/normals'
+[Info] SettingsService: Set 'import/model/smoothingAngle'
+[Info] SettingsService: Set 'import/model/mergeMeshes'
+[Info] SettingsService: Set 'import/model/scale'
+[Info] SettingsService: Set 'import/model/flipUv'
+[Info] SettingsService: Remove 'import/model/scale'
+[Info] SettingsService: Remove 'import/model/flipUv'
+[Info] SettingsService: Set 'import/model/useFileUnitScale'
+[Info] SettingsService: Set 'import/model/importMaterials'
+[Info] SettingsService: Set 'import/model/importTextures'
+[Info] SettingsService: Set 'import/model/normals'
+[Info] SettingsService: Set 'import/model/smoothingAngle'
+[Info] SettingsService: Set 'import/model/mergeMeshes'
+[Info] SettingsService: Set 'import/model/useFileUnitScale'
+[Info] SettingsService: Set 'import/model/importMaterials'
+[Info] SettingsService: Set 'import/model/importTextures'
+[Info] SettingsService: Set 'import/model/normals'
+[Info] SettingsService: Set 'import/model/smoothingAngle'
+[Info] SettingsService: Set 'import/model/mergeMeshes'
+[Info] SettingsService: Remove 'import/model/useFileUnitScale'
+[Info] SettingsService: Remove 'import/model/importMaterials'
+[Info] SettingsService: Remove 'import/model/importTextures'
+[Info] SettingsService: Remove 'import/model/normals'
+[Info] SettingsService: Remove 'import/model/smoothingAngle'
+[Info] SettingsService: Remove 'import/model/mergeMeshes'
+[Info] SettingsService: Set 'import/model/scale'
+[Info] SettingsService: Set 'import/model/flipUv'
+[Info] SettingsService: Remove 'import/model/scale'
+[Info] SettingsService: Remove 'import/model/flipUv'
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-rdCZdt'
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-rdCZdt/Content/Models'
+[Info] FileService: wrote 294 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-rdCZdt/Content/Defaults/CmModel.fbx.importsettings.json'
+[DialogResizeDiag] before: 274, expanded: 396, after: 274
+[Error] ImportSettings: JSON parse error: unterminated object
+[Error] Invalid import options: ImportSettings: JSON parse error: unterminated object
+[Error] ImportSettings: JSON parse error: no error occurred
+[Error] Invalid import options: ImportSettings: JSON parse error: no error occurred
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+[Error] Import scale must be a finite number in [0.0001, 10000]
+ImportSettingsDialogTests: 38 checks passed.
+[Test] Running EditImportSettingsTests...
+[Info] SettingsService: Remove 'import/model/useFileUnitScale'
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-CUrAye'
+[Info] FileService: wrote 355 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-CUrAye/Hero.glb.importsettings.json'
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HpXsMa'
+[Info] ImportSettings: sidecar not found for 'NoSidecar.glb.importsettings.json', using default settings
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-gpUhGl'
+[Error] ImportSettings: JSON parse error: unterminated object
+[Info] SettingsService: Remove 'import/model/normals'
+EditImportSettingsTests: 18 checks passed.
+[Test] Running ImportSettingsV2EditTests...
+[Info] SettingsService: Set 'import/model/scale'
+[Info] SettingsService: Set 'import/model/flipUv'
+[Info] SettingsService: Set 'import/model/normals'
+[Info] SettingsService: Set 'import/model/mergeMeshes'
+[Info] SettingsService: Remove 'import/model/scale'
+[Info] SettingsService: Remove 'import/model/flipUv'
+[Info] SettingsService: Remove 'import/model/normals'
+[Info] SettingsService: Remove 'import/model/mergeMeshes'
+ImportSettingsV2EditTests: 5 checks passed.
+[Test] Running AssetDeleteTests...
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-ISfMDH'
+[Error] FileService: path '../outside.glb' is outside sandbox 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-ISfMDH'
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-zuLNCp'
+[Info] FileService: wrote 8 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-zuLNCp/Content/Models/Hero.fbx'
+[Info] FileService: wrote 14 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-zuLNCp/Content/Models/Hero.fbx.importsettings.json'
+[Info] FileService: wrote 28 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-zuLNCp/Content/Models/Hero.fbx.source.json'
+[Info] FileService: wrote 17 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-zuLNCp/Content/Models/Hero.fbx.import.json'
+[Info] FileService: wrote 9 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-zuLNCp/Content/Models/Other.fbx'
+[Info] FileService: wrote 13 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-zuLNCp/Content/Models/Other.fbx.importsettings.json'
+[Info] FileService: deleted 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-zuLNCp/Content/Models/Hero.fbx'
+[Info] FileService: deleted 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-zuLNCp/Content/Models/Hero.fbx.source.json'
+[Info] FileService: deleted 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-zuLNCp/Content/Models/Hero.fbx.import.json'
+[Info] FileService: deleted 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-zuLNCp/Content/Models/Hero.fbx.importsettings.json'
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-WWvGmu'
+[Info] FileService: wrote 4 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-WWvGmu/Folder/Sub/item.txt'
+[Info] FileService: deleted directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-WWvGmu/Folder'
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-gRtLHg'
+[Error] FileService: path '../outside' is outside sandbox 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-gRtLHg'
+[Error] FileService: access denied (outside sandbox)
+[Info] FileService: deleted directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-gRtLHg/TestDir'
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/Content'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/Source'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/content'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/CONTENT'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/source'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/SOURCE'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/Content'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/Content'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/Content'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/Content'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/Source'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/Source'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS'
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/Content'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/content'
+[Error] FileService: cannot delete protected directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/Source'
+[Info] FileService: deleted directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/Content/Source'
+[Info] FileService: deleted directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/Content/Content'
+[Info] FileService: deleted directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/Content/CONTENT'
+[Info] FileService: deleted directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-yHleqS/Content/SOURCE'
+AssetDeleteTests: 15 checks passed.
+[Test] Running InspectorRefreshTests...
+InspectorRefreshTests: 8 checks passed.
+[Test] Running InspectorRefresh mouse-move jitter regression...
+InspectorRefresh mouse-move jitter regression: 1 checks passed.
+[Test] Running Inspector choose model button regression (Bug 1)...
+Inspector choose model button regression: 4 checks passed.
+[Test] Running DockRedockTests...
+DockRedockTests: 7 checks passed.
+[Info] SettingsService: Set 'view/icons'
+[Info] SettingsService: Set 'view/overlays'
+Light icon 1 alpha bounds: 40x40 of 64x64
+Light icon 2 alpha bounds: 40x40 of 64x64
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=3 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=3 | tris=0
+Viewport billboard position checks: PASS
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=3 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=3 | tris=0
+Viewport billboard size checks: PASS
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=6 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=6 | tris=0
+[Info] SettingsService: Set 'ui/theme_mode'
+[OverlayDiag] flags: grid=1 gizmo=1 icons=1 | hasCam=1 | snapObjs=6 | lines=138 (grid=138, gizmo=0, dir=0) | bbs=6 | tris=0
+[Info] SettingsService: Set 'ui/theme_mode'
+Viewport billboard tint checks: PASS
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-VBpWjW'
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-VBpWjW/Content'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-VBpWjW/Content/test.fbx'
+Content icons dark contrast: folder 13.63 file 13.64
+[Info] SettingsService: Set 'ui/theme_mode'
+Content icons light contrast: folder 14.79 file 14.84
+[Info] SettingsService: Set 'ui/theme_mode'
+Content icons dark contrast: folder 13.63 file 13.64
+ContentBrowser icon tests: 19 checks passed
+[Info] FileService: sandbox root set to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm'
+[Info] FileService: created directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.GLB'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.GLTF'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.OBJ'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.FBX'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.BLEND'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.PNG'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.JPG'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.JPEG'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.BMP'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.TGA'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.WAV'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.OGG'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.MP3'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.FLAC'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.MAT'
+[Info] FileService: wrote 7 bytes to 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression/type.XYZ'
+[Info] SettingsService: Set 'ui/language'
+[Info] SettingsService: Set 'ui/language'
+[Info] SettingsService: Set 'ui/language'
+[Info] SettingsService: Set 'ui/language'
+[Info] FileService: deleted directory 'E:/Engine/Engine/build/main-integration-20261114/Temp/UiTests-HZseMm/Content/FileTypeRegression'
+ContentBrowser type tests: 77 checks passed
+Geometry texture action tests: 28 checks passed
+[Diag] 500 resources dialog open elapsed: 8 ms
+AssetPickerDialog tests: 42 checks passed
+[Test] Running UiSmokeTests...
+[ToolBarFacts] initial tb geom=0,0 640x36, margins=(0,0,0,0), layoutMargins=(6,6,6,6), PM_ToolBarFrameWidth=6, PM_ItemMargin=0, PM_ItemSpacing=4
+[ToolBarFacts] configured tb height=36, btn height=28, topMargin=4, bottomMargin=4
+[Info] SettingsService: Set 'ui/language'
+[Info] SettingsService: Set 'ui/language'
+[SpinDiag] Dark grab size: 120x22
+[SpinDiag] Dark contrasting pixels in button zone: 26
+[Info] SettingsService: Set 'ui/theme_mode'
+[SpinDiag] Light grab size: 120x22
+[SpinDiag] Light contrasting pixels in button zone: 42
+[Info] SettingsService: Set 'ui/theme_mode'
+UiSmokeTests: 407 checks passed (111 Cyrillic strings in RU mode).

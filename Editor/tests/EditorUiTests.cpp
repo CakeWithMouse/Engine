@@ -27,6 +27,7 @@
 #include "PropertySection.h"
 #include <Engine/Runtime/LegacyEditApi.h>
 #include <Engine/Runtime/EditExtensions.h>
+#include <Engine/Runtime/PhysicsEditApi.h>
 #include <Engine/Runtime/ProjectDataApi.h>
 #include <Engine/Runtime/GameEditModule.h>
 #include <QDialog>
@@ -87,6 +88,11 @@
 #include <cstdio>
 #include <stdexcept>
 #include "ViewportDpiTests.h"
+#include "ViewportCompletionTests.h"
+#include "GizmoCompletionTests.h"
+#include "ContentBrowserTests.h"
+#include "ContentBrowserTypeTests.h"
+#include "FolderCreationTests.h"
 namespace
 {
 int checks = 0;
@@ -267,6 +273,8 @@ int wmain(int argc, wchar_t** argv)
         if (!legacy && query && query(api.context,EngineProjectDataExtension,1,sizeof(projectData),&projectData)) host.SetProjectDataApi(projectData);
         EngineSceneBatchApi batch{};
         if (!legacy && query && query(api.context,EngineSceneBatchExtension,1,sizeof(batch),&batch)) host.SetBatchApi(batch);
+        EngineAssetImportApi assetImport{};
+        if (!legacy && query && query(api.context,EngineAssetImportExtension,1,sizeof(assetImport),&assetImport)) host.SetAssetImportApi(assetImport);
         EngineAuthoringApi authoring{};
         if (!legacy && query && query(api.context,EngineAuthoringExtension,1,sizeof(authoring),&authoring)) host.SetAuthoringApi(authoring);
         EngineSelectionApi selection{};
@@ -279,6 +287,20 @@ int wmain(int argc, wchar_t** argv)
             Check(!query(api.context,EngineViewportCursorExtension,1,sizeof(rejected)-1,&rejected)&&rejected.version==99,"cursor extension size rejected");}
         EngineViewportInputApi viewportInput{};
         if (!legacy && query && query(api.context,EngineViewportInputExtension,1,sizeof(viewportInput),&viewportInput)) host.SetViewportInputApi(viewportInput);
+        EnginePhysicsApi physics{};
+        if (!legacy && query && query(api.context,EnginePhysicsExtension,1,sizeof(physics),&physics)) host.SetPhysicsApi(physics);
+        if (!legacy && physics.read)
+        {
+            EnginePhysicsSettingsState physicsState{};
+            Check(physics.read(physics.context,&physicsState)==EngineSceneOk,"physics settings read");
+            Check(physicsState.enabled==1&&physicsState.gravityY==-9.81f&&physicsState.maxSubSteps==5,"physics settings defaults");
+            const EnginePhysicsSettingsState physicsNext{0,0.0f,-1.5f,0.0f,1.0f/120.0f,3,12,4};
+            Check(physics.write(physics.context,&physicsNext)==EngineSceneOk,"physics settings write");
+            EnginePhysicsSettingsState physicsReread{};
+            Check(physics.read(physics.context,&physicsReread)==EngineSceneOk&&physicsReread.enabled==0&&
+                  physicsReread.velocitySteps==12&&physicsReread.maxSubSteps==3&&physicsReread.fixedTimeStep==1.0f/120.0f,
+                  "physics settings round trip");
+        }
         EngineScriptApi script{};
         if (!legacy && query && query(api.context,EngineScriptExtension,1,sizeof(script),&script)) host.SetScriptApi(script);
         if (!legacy) {
@@ -341,6 +363,15 @@ int wmain(int argc, wchar_t** argv)
             for (int i = 0; i < 30; ++i) pump();
         };
         until([&] { return host.ViewportActive(); });
+        Ui([](auto* window) { ViewportCompletionTests::Run(window); });
+        Ui([](auto* window) { GizmoCompletionTests::Run(window); });
+        if (argc == 4 && std::wstring(argv[3]) == L"--viewport-completion") return 0;
+        Ui([](auto* window) { ContentBrowserTests::RunNative(window); });
+        if (argc == 4 && std::wstring(argv[3]) == L"--content-browser") return 0;
+        Ui([](auto* window) { ContentBrowserTypeTests::RunNative(window); });
+        if (argc == 4 && std::wstring(argv[3]) == L"--file-types") return 0;
+        Ui([](auto* window) { FolderCreationTests::RunNative(window); });
+        if (argc == 4 && std::wstring(argv[3]) == L"--create-folder") return 0;
         if (argc == 4 && std::wstring(argv[3]) == L"--hud-restart") {
             std::fprintf(stderr,"HUD restart: viewport ready\n");
             Ui([&](auto* w) {
@@ -652,7 +683,7 @@ int wmain(int argc, wchar_t** argv)
         Ui([&](auto* w) {
             Check(w->findChild<QToolButton*>("ImportAssets")->menu() != nullptr, "imports grouped into menu");
             Check(w->findChild<QPushButton*>("ChooseModel") != nullptr, "model picker exists");
-            Check(w->findChild<QLineEdit*>("ModelAsset")->isReadOnly() && w->findChild<QLineEdit*>("TextureAsset")->isReadOnly(), "asset paths locked");
+            Check(w->findChild<QLineEdit*>("ModelAsset")->isReadOnly() && w->findChild<QLineEdit*>("TextureAsset") == nullptr, "model path locked and texture row removed");
             for (const auto& title : {QStringLiteral("Общие"),QStringLiteral("Трансформация"),QStringLiteral("Геометрия"),QStringLiteral("Материал")}) {
                 bool found=false; for (auto* group : w->template findChildren<QGroupBox*>()) found |= group->title()==title;
                 for(auto* header:w->template findChildren<QToolButton*>())found|=header->objectName().startsWith("Section.")&&header->text()==title;
@@ -2105,10 +2136,12 @@ int wmain(int argc, wchar_t** argv)
                 EditorCommand replace; replace.type=EditorCommand::SetModel; replace.objectId=o.id;
                 replace.path=QStringLiteral("/Game/")+QString::fromStdWString(std::filesystem::relative(importedModel,root/"Content").generic_wstring()); host.PostCommand(replace);
             }
-            until([&] { for(const auto& o:host.ReadSnapshot().objects) if(o.type=="Primitive.Sphere" && !o.modelAsset.empty()) return true; return false; });
-            Check(host.ReadSnapshot().objects.size()==6 && host.ReadSnapshot().selected!=0,"replace primitive model preserves count and selection");
-            Ui([](auto* w) { Action(w,QStringLiteral("Отменить"))->trigger(); });
-            until([&] { for(const auto& o:host.ReadSnapshot().objects) if(o.type=="Primitive.Sphere" && o.modelAsset.empty()) return true; return false; });
+            until([&] { bool rejected=false; Ui([&](auto* w) {
+                rejected=w->template findChild<QPlainTextEdit*>(QStringLiteral("Console"))->toPlainText().contains(QStringLiteral("Замена геометрии примитива на модель заблокирована"));
+            }); return rejected; });
+            Check(host.ReadSnapshot().objects.size()==6 && host.ReadSnapshot().selected!=0,"rejected primitive replacement preserves count and selection");
+            for (const auto& o : host.ReadSnapshot().objects)
+                if (o.type == "Primitive.Sphere") Check(o.modelAsset.empty(), "rejected primitive replacement preserves geometry");
             Ui([&](auto* w) { w->AddModel(QString::fromStdWString(importedModel.wstring())); });
             until([&] { return host.ReadSnapshot().objects.size() == 7; });
             if (std::filesystem::exists(std::filesystem::path(importedModel.wstring() + L".import.json")))
@@ -2171,16 +2204,28 @@ int wmain(int argc, wchar_t** argv)
         EditorQtHost::SceneObject sphere;
         for (const auto& o : host.ReadSnapshot().objects) if (o.type == "Primitive.Sphere") sphere = o;
         Check(sphere.id != 0, "gizmo target exists after undo/redo");
+        Ui([](auto* w) {
+            auto* tree = w->findChild<QTreeWidget*>();
+            for (int i = 0; i < tree->topLevelItemCount(); ++i) if (tree->topLevelItem(i)->text(1) == QStringLiteral("Primitive.Sphere")) tree->setCurrentItem(tree->topLevelItem(i));
+        });
+        until([&] { return host.ReadSnapshot().selected == sphere.id; });
+        QDoubleSpinBox* inspectorX = nullptr;
+        Ui([&](auto* w) { inspectorX = w->findChild<QDoubleSpinBox*>(QStringLiteral("Transform0")); });
+        Check(inspectorX != nullptr, "inspector position field exists before the drag");
         EditorCommand drag; drag.type = EditorCommand::BeginGizmoDrag; drag.objectId = sphere.id;
         host.PostCommand(drag);
         EditorCommand transform; transform.type = EditorCommand::UpdateObjectTransform;
         transform.objectId = sphere.id; transform.path = QStringLiteral("gizmo"); transform.transform = sphere.transform;
+        for (int i = 1; i <= 200; ++i) { transform.transform.position[0] = sphere.transform.position[0] + i * 0.01f; host.PostCommand(transform); }
+        const float dragX = transform.transform.position[0];
         transform.transform.scale[0] = 2; host.PostCommand(transform);
         transform.transform.scale[0] = 3; host.PostCommand(transform);
         drag.type = EditorCommand::EndGizmoDrag; host.PostCommand(drag);
-        until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere.id) return o.transform.scale[0] == 3; return false; });
+        until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere.id) return o.transform.scale[0] == 3 && o.transform.position[0] == dragX; return false; });
+        until([&] { double shown = 0; Ui([&](auto* w) { if (auto* x = w->findChild<QDoubleSpinBox*>(QStringLiteral("Transform0"))) shown = x->value(); }); return std::abs(shown - dragX) < 0.01; });
+        Ui([&](auto* w) { Check(w->findChild<QDoubleSpinBox*>(QStringLiteral("Transform0")) == inspectorX, "gizmo drag updates inspector Transform fields without rebuilding them"); });
         Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
-        until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.name == sphere.name) return o.transform.scale[0] == sphere.transform.scale[0]; return false; });
+        until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.name == sphere.name) return o.transform.scale[0] == sphere.transform.scale[0] && o.transform.position[0] == sphere.transform.position[0]; return false; });
         Check(true, "one Undo restores the transform before the whole gizmo drag");
         // Select the sphere through the actual tree before testing a focused-field save.
         Ui([](auto* w) {

@@ -629,11 +629,17 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
         wc.hInstance = instance;
         wc.lpszClassName = L"EngineLauncherWindow";
         wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+        wc.hIcon = LoadIconW(instance, MAKEINTRESOURCEW(101));
+        if (!wc.hIcon) wc.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
         wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
         if (!RegisterClassW(&wc)) throw std::runtime_error("Cannot register launcher window");
         HWND window = CreateWindowW(wc.lpszClassName, L"Engine Launcher", WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX,
             CW_USEDEFAULT, CW_USEDEFAULT, 730, 510, nullptr, nullptr, instance, nullptr);
         if (!window) throw std::runtime_error("Cannot create launcher window");
+        HICON smIcon = static_cast<HICON>(LoadImageW(instance, MAKEINTRESOURCEW(101), IMAGE_ICON,
+            GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR));
+        if (wc.hIcon) SendMessageW(window, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(wc.hIcon));
+        if (smIcon) SendMessageW(window, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(smIcon));
         ShowWindow(window, show);
         MSG msg{};
         BOOL result;

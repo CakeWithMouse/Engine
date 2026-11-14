@@ -2202,11 +2202,13 @@ void TraceGameTests();
 void SceneOwnershipTests();
 void SceneHierarchyTests();
 void SceneDeferredTests();
+void PhysicsObjectSceneTests();
 void SceneBatchTests();
 void AuthoringTests();
 void SoundDecoderTests();
 void PrimitiveApiTests();
 void GameSettingsTests();
+void PhysicsWorldTests();
 
 void ScriptTests();
 void AiMachineExtensionTests();
@@ -2219,6 +2221,7 @@ int main()
         {"trace math", TraceMathTests},
         {"ready primitives and hidden geometry setup", PrimitiveApiTests},
         {"owned GameSettings and rendering dispatch", GameSettingsTests},
+        {"physics world: gravity, stepping, impulses, raycasts", PhysicsWorldTests},
         {"assigned primitives: GPU, materials and instances", AssignedPrimitiveRendering},
         {"trace scene geometry and filters", TraceSceneTests},
         {"trace screen coordinates and projection", TraceScreenTests},
@@ -2226,6 +2229,7 @@ int main()
         {"scene ownership and IDs (no GPU)", SceneOwnershipTests},
         {"scene hierarchy and snapshots (no GPU)", SceneHierarchyTests},
         {"scene deferred mutations (no GPU)", SceneDeferredTests},
+        {"per-object physics settings and scene documents", PhysicsObjectSceneTests},
         {"atomic group transforms, references and deletion (no GPU)", SceneBatchTests},
         {"wav decoder: RIFF parsing, read, seek", SoundDecoderTests},
         {"typed properties and transactional asset updates", AuthoringTests},

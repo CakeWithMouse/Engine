@@ -17,6 +17,7 @@ bool SceneCommandHandler::CanHandle(EditorCommand::Type type) const
     case EditorCommand::UpdateObjectTransform: case EditorCommand::CreateObject: case EditorCommand::CreateModel:
     case EditorCommand::SetModel: case EditorCommand::SetTexture: case EditorCommand::SetMaterial: case EditorCommand::SetScript:
     case EditorCommand::SetScriptVariables: case EditorCommand::SetPointLight: case EditorCommand::SetProperty: case EditorCommand::SetProjectData:
+    case EditorCommand::SetPhysicsBody:
     case EditorCommand::ConfigurePlay: case EditorCommand::RemoveObject: case EditorCommand::RenameObject:
     case EditorCommand::DuplicateObject: case EditorCommand::SetParent: case EditorCommand::SaveScene:
     case EditorCommand::LoadScene: case EditorCommand::NewScene: case EditorCommand::Undo: case EditorCommand::Redo:
@@ -49,6 +50,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
         cmd.type == EditorCommand::SetModel || cmd.type == EditorCommand::CreateModel || cmd.type == EditorCommand::SetTexture ||
         cmd.type == EditorCommand::SetMaterial || cmd.type == EditorCommand::SetScript || cmd.type == EditorCommand::SetScriptVariables ||
         cmd.type == EditorCommand::SetPointLight || cmd.type == EditorCommand::SetProjectData ||
+        cmd.type == EditorCommand::SetPhysicsBody ||
         cmd.type == EditorCommand::ConfigurePlay || cmd.type == EditorCommand::SetProperty || cmd.type == EditorCommand::SetParent);
 
     if ((mutation || cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene ||
@@ -123,38 +125,43 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
             if (result == EngineSceneOk)
                 history.OnTransformApplied(cmd, now);
         }
-        else if (cmd.type == EditorCommand::RemoveObject)
-        {
+        else if (cmd.type == EditorCommand::RemoveObject) {
             result = api.removeObject(api.context, cmd.objectId);
         }
-        else if (cmd.type == EditorCommand::RenameObject)
-        {
+        else if (cmd.type == EditorCommand::RenameObject) {
             result = api.renameObject(api.context, cmd.objectId, cmd.name.toUtf8().constData());
         }
-        else if (cmd.type == EditorCommand::SetParent)
-        {
+        else if (cmd.type == EditorCommand::SetParent) {
             result = ctx.scene.setParent ? ctx.scene.setParent(ctx.scene.context, cmd.objectId, cmd.parentId, 1) : EngineSceneReadOnly;
         }
         else if (cmd.type == EditorCommand::SetModel)
         {
+            if (cmd.path.trimmed().isEmpty()) {
+                result = EngineSceneInvalidArgument;
+                error = QStringLiteral("Путь к модели не может быть пустым.");
+                return;
+            }
             const auto selectedName = GetSelectedObjectName();
             QFile input(checkpoint);
             if (!input.open(QIODevice::ReadOnly)) throw std::runtime_error("Cannot read model change checkpoint");
             auto document = QJsonDocument::fromJson(input.readAll()).object();
             auto objects = document["objects"].toArray();
             bool found = false;
-            for (int i = 0; i < objects.size(); ++i)
-            {
+            for (int i = 0; i < objects.size(); ++i) {
                 auto object = objects[i].toObject();
                 if (object["id"].toInteger() != static_cast<qint64>(cmd.objectId)) continue;
-                const auto type = object["type"].toString();
-                if(type == "Engine.Model" && cmd.path.isEmpty()) object["type"] = "Primitive.Cube";
+                if (object["type"].toString() != "Engine.Model") {
+                    result = EngineSceneFailure;
+                    error = QStringLiteral("Замена геометрии примитива на модель заблокирована (требуется C-ABI).");
+                    return;
+                }
                 auto assets = object["assets"].toObject();
                 assets["model"] = cmd.path;
                 if (!assets.contains("texture")) assets["texture"] = "";
                 object["assets"] = assets;
                 objects[i] = object;
                 found = true;
+                break;
             }
             if (!found) throw std::runtime_error("Object no longer exists");
             document["objects"] = objects;
@@ -166,22 +173,18 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
             candidate.close();
             uint64_t id = 0;
             result = ctx.scene.loadScene(ctx.scene.context, candidate.fileName().toUtf8().constData(), &id, errorBuf, sizeof(errorBuf));
-            if (result == EngineSceneOk)
-            {
+            if (result == EngineSceneOk) {
                 IEditorHost::Snapshot restored;
                 EngineSceneInfo sinfo{};
                 ctx.scene.readActiveScene(ctx.scene.context, &sinfo, SceneVisitor, &restored);
                 selectedId_ = 0;
-                for (const auto& o : restored.objects)
-                    if (o.name == selectedName) selectedId_ = o.id;
+                for (const auto& o : restored.objects) if (o.name == selectedName) selectedId_ = o.id;
             }
         }
-        else if (cmd.type == EditorCommand::SetTexture)
-        {
+        else if (cmd.type == EditorCommand::SetTexture) {
             result = ctx.scene.setTexture(ctx.scene.context, cmd.objectId, cmd.path.toUtf8().constData(), errorBuf, sizeof(errorBuf));
         }
-        else if (cmd.type == EditorCommand::SetMaterial)
-        {
+        else if (cmd.type == EditorCommand::SetMaterial) {
             result = ctx.scene.setMaterial
                 ? ctx.scene.setMaterial(ctx.scene.context, cmd.objectId, cmd.path.toUtf8().constData(), errorBuf, sizeof(errorBuf))
                 : EngineSceneReadOnly;
@@ -206,6 +209,17 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
             if (result == EngineSceneOk)
             {
                 std::printf("[Info] SetPointLight ok id=%llu castShadows=%u\n", cmd.objectId, cmd.castShadows ? 1u : 0u);
+                std::fflush(stdout);
+            }
+        }
+        else if (cmd.type == EditorCommand::SetPhysicsBody)
+        {
+            result = (ctx.physicsObject && ctx.physicsObject->write)
+                ? ctx.physicsObject->write(ctx.physicsObject->context, cmd.objectId, &cmd.physicsBody)
+                : EngineSceneReadOnly;
+            if (result == EngineSceneOk)
+            {
+                std::printf("[Info] SetPhysicsBody ok id=%llu enabled=%u body=%u shape=%u", cmd.objectId, cmd.physicsBody.enabled, cmd.physicsBody.bodyType, cmd.physicsBody.shapeType);
                 std::fflush(stdout);
             }
         }
@@ -250,6 +264,8 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
             bool hasLight = false;
             bool castShadows = false;
             EngineScenePointLight light{};
+            bool hasPhysics = false;
+            EnginePhysicsObjectState physicsBody{};
 
             if (cmd.type == EditorCommand::DuplicateObject)
             {
@@ -268,6 +284,8 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
                 hasLight = found->hasPointLight;
                 light = found->pointLight;
                 castShadows = found->lightCastShadows;
+                hasPhysics = found->hasPhysics;
+                physicsBody = found->physics;
                 projectData = QString::fromStdString(found->projectData);
             }
             QString name = base;
@@ -293,6 +311,10 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
                     result = (ctx.pointLightV2 && ctx.pointLightV2->set)
                         ? ctx.pointLightV2->set(ctx.pointLightV2->context, id, &light, castShadows ? 1u : 0u)
                         : (api.setPointLight ? api.setPointLight(api.context, id, &light) : EngineSceneReadOnly);
+                if (result == EngineSceneOk && hasPhysics)
+                    result = (ctx.physicsObject && ctx.physicsObject->write)
+                        ? ctx.physicsObject->write(ctx.physicsObject->context, id, &physicsBody)
+                        : EngineSceneReadOnly;
                 if (result == EngineSceneOk && !projectData.isEmpty())
                     result = ctx.projectData.write ? ctx.projectData.write(ctx.projectData.context, id, projectData.toUtf8().constData()) : EngineSceneReadOnly;
                 if (result == EngineSceneOk && !projectData.isEmpty())
@@ -414,6 +436,8 @@ void ENGINE_MODULE_CALL SceneCommandHandler::SceneVisitor(void* context, const E
         info->hasPointLight != 0,
         info->hasPointLight == 2,
         info->pointLight,
+        false,
+        EnginePhysicsObjectState{},
         info->materialAsset ? info->materialAsset : ""
     });
 }
@@ -439,6 +463,19 @@ void SceneCommandHandler::PublishScene(const Context& ctx, IEditorHost::EditorSt
         for (auto& object : view.objects)
             ctx.projectData.read(ctx.projectData.context, object.id,
                 [](void* p, const char* value) { *static_cast<std::string*>(p) = (value ? value : ""); }, &object.projectData);
+    }
+
+    if (ctx.physicsObject && ctx.physicsObject->read)
+    {
+        for (auto& object : view.objects)
+        {
+            EnginePhysicsObjectState state{};
+            if (ctx.physicsObject->read(ctx.physicsObject->context, object.id, &state) == EngineSceneOk)
+            {
+                object.hasPhysics = true;
+                object.physics = state;
+            }
+        }
     }
 
     if (ctx.script && ctx.script->get)

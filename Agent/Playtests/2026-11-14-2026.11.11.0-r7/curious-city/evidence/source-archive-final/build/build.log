@@ -1,0 +1,14 @@
+﻿
+  ComponentGenerator: 7 component(s), Project
+  CityEconomySubsystem.cpp
+  CityInteractionComponent.cpp
+  HouseComponent.cpp
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  RotatingCube.cpp
+  TraceExamples.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\20261114-r7\curious-city\final-source-archive-verify\Binaries\Release\7d634a7354a94a46918cc5bb3a92ab9c\Game.lib и объект E:\Engine\Engine\build\playtests\20261114-r7\curious-city\final-source-archive-verify\Binaries\Release\7d634a7354a94a46918cc5bb3a92ab9c\Game.exp
+  Game.vcxproj -> E:\Engine\Engine\build\playtests\20261114-r7\curious-city\final-source-archive-verify\Binaries\Release\7d634a7354a94a46918cc5bb3a92ab9c\Game.dll
