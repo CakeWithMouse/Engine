@@ -253,4 +253,108 @@ inline void RunMouseRefreshJitter()
     std::cout << "InspectorRefresh mouse-move jitter regression: " << checks << " checks passed." << std::endl;
 }
 
+inline void RunModelReplaceButtonRegression()
+{
+    std::cout << "[Test] Running Inspector choose model button regression (Bug 1)..." << std::endl;
+    int checks = 0;
+
+    EditorQtHost::Snapshot snap;
+    EditorQtHost::SceneObject modelObj;
+    modelObj.id = 10;
+    modelObj.type = "Engine.Model";
+    modelObj.name = "MyModel";
+    modelObj.modelAsset = "/Game/Models/Original.fbx";
+    modelObj.transform.scale[0] = modelObj.transform.scale[1] = modelObj.transform.scale[2] = 1.0f;
+
+    EditorQtHost::SceneObject primObj;
+    primObj.id = 20;
+    primObj.type = "Primitive.Cube";
+    primObj.name = "MyBox";
+    primObj.transform.scale[0] = primObj.transform.scale[1] = primObj.transform.scale[2] = 1.0f;
+
+    snap.objects = {modelObj, primObj};
+    snap.selected = 10;
+
+    int undoCount = 0;
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("Scene.ReplaceModel"),
+        QStringLiteral("Replace Model"),
+        QString(),
+        QStringLiteral("Test replace model"),
+        [&](const CommandContext& ctx) {
+            const uint64_t targetId = ctx.parameters.value(QStringLiteral("objectId"), 0).toULongLong();
+            for (auto& o : snap.objects) {
+                if (o.id == targetId && o.type == "Engine.Model") {
+                    o.modelAsset = ctx.parameters.value(QStringLiteral("model"), QStringLiteral("/Game/Models/Replaced.fbx")).toString().toStdString();
+                    ++undoCount;
+                    return true;
+                }
+            }
+            return false;
+        },
+        []() { return true; }
+    });
+
+    ObjectInspectorPanel panel;
+    panel.show();
+    QApplication::processEvents();
+
+    auto* chooseBtn = panel.findChild<QPushButton*>(QStringLiteral("ChooseModel"));
+    Check(chooseBtn != nullptr, "ChooseModel button found by objectName");
+    auto* modelEdit = panel.findChild<QLineEdit*>(QStringLiteral("ModelAsset"));
+    Check(modelEdit != nullptr, "ModelAsset edit found by objectName");
+
+    // 1. Select Engine.Model -> button enabled
+    panel.Refresh(snap, 10, true);
+    QApplication::processEvents();
+    Check(chooseBtn->isEnabled(), "ChooseModel button enabled for Engine.Model");
+    Check(chooseBtn->toolTip().isEmpty(), "ChooseModel tooltip empty for Engine.Model");
+    ++checks;
+
+    // 2. Scene.ReplaceModel -> path replaced, 1 Undo point
+    QVariantMap params;
+    params[QStringLiteral("objectId")] = static_cast<qulonglong>(10);
+    params[QStringLiteral("model")] = QStringLiteral("/Game/Models/Replaced.fbx");
+    const bool replaced = CommandRegistry::Instance().Execute(QStringLiteral("Scene.ReplaceModel"), params);
+    Check(replaced, "Scene.ReplaceModel executed successfully");
+    Check(snap.objects[0].modelAsset == "/Game/Models/Replaced.fbx", "Model path replaced in scene object");
+    Check(undoCount == 1, "Exactly one Undo point recorded");
+    panel.Refresh(snap, 10, false);
+    QApplication::processEvents();
+    Check(modelEdit->text() == QStringLiteral("Models/Replaced.fbx"), "Inspector reflects replaced model path");
+    Check(chooseBtn->isEnabled(), "ChooseModel button remains enabled after replacement");
+    ++checks;
+
+    // 3. Select primitive -> disabled with primitive blocking tooltip
+    snap.selected = 20;
+    panel.Refresh(snap, 20, true);
+    QApplication::processEvents();
+    Check(!chooseBtn->isEnabled(), "ChooseModel button disabled for Primitive.Cube");
+    Check(chooseBtn->toolTip().contains(QStringLiteral("C-ABI")), "ChooseModel tooltip indicates primitive replacement blocked");
+    panel.Refresh(snap, 20, false);
+    QApplication::processEvents();
+    Check(!chooseBtn->isEnabled(), "ChooseModel button remains disabled on unchanged primitive Refresh");
+    ++checks;
+
+    // 4. Select model again -> enabled (catches stuck disabled state)
+    snap.selected = 10;
+    panel.Refresh(snap, 10, true);
+    QApplication::processEvents();
+    Check(chooseBtn->isEnabled(), "ChooseModel button enabled again for Engine.Model (not stuck)");
+    Check(chooseBtn->toolTip().isEmpty(), "ChooseModel tooltip cleared again for Engine.Model");
+
+    // Stuck state regression: simulate button disabled by prior primitive/external state,
+    // followed by an unchanged Refresh(..., false). Must be re-enabled on EVERY Refresh.
+    chooseBtn->setEnabled(false);
+    chooseBtn->setToolTip(QStringLiteral("stuck"));
+    panel.Refresh(snap, 10, false);
+    QApplication::processEvents();
+    Check(chooseBtn->isEnabled(), "ChooseModel button re-enabled on every Refresh even when cardsDirty is false");
+    Check(chooseBtn->toolTip().isEmpty(), "ChooseModel tooltip cleared on every Refresh even when cardsDirty is false");
+    ++checks;
+
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.ReplaceModel"));
+    std::cout << "Inspector choose model button regression: " << checks << " checks passed." << std::endl;
+}
+
 } // namespace InspectorRefreshTests

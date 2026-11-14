@@ -30,6 +30,7 @@ int main(int argc, char* argv[])
         AssetDeleteTests::Run();
         InspectorRefreshTests::Run();
         InspectorRefreshTests::RunMouseRefreshJitter();
+        InspectorRefreshTests::RunModelReplaceButtonRegression();
         DockRedockTests::Run();
         ViewportBillboardTests::Run();
         ContentBrowserTests::Run();

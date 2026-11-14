@@ -89,7 +89,9 @@ void ObjectInspectorPanel::BuildUi()
     cardGeometry_ = new GeometryCard(this);
     cardGeometry_->onChooseModel = [this] {
         emit ChooseModelRequested();
-        CommandRegistry::Instance().Execute(QStringLiteral("Scene.ReplaceModel"));
+        QVariantMap params;
+        params[QStringLiteral("objectId")] = static_cast<qulonglong>(selectedId_);
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.ReplaceModel"), params);
     };
 
     cardMaterial_ = new MaterialCard(this);
@@ -363,6 +365,9 @@ void ObjectInspectorPanel::Refresh(
             || materialPath != lastCardsMaterial_
             || materialLight != lastCardsMaterialLight_
             || cr != lastCardsRoot_;
+        if (showGeometry) {
+            cardGeometry_->UpdateChooseModelButton(isModel, isPrimitive);
+        }
         if (cardsDirty) {
             cardGeometry_->setVisible(showGeometry);
             if (isModel) {

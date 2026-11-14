@@ -73,6 +73,26 @@ public:
                                    "Replacing primitive geometry with a model is blocked (requires C-ABI)"));
     }
 
+    void UpdateChooseModelButton(bool isModel, bool isPrimitive)
+    {
+        if (isModel)
+        {
+            chooseModel_->setEnabled(true);
+            chooseModel_->setToolTip(QString());
+        }
+        else if (isPrimitive)
+        {
+            chooseModel_->setEnabled(false);
+            chooseModel_->setToolTip(Tr("Замена геометрии примитива на модель заблокирована (требуется C-ABI)",
+                                       "Replacing primitive geometry with a model is blocked (requires C-ABI)"));
+        }
+        else
+        {
+            chooseModel_->setEnabled(false);
+            chooseModel_->setToolTip(Tr("Замена модели недоступна", "Model replacement unavailable"));
+        }
+    }
+
     void SetData(const QString& model, bool canChooseModel, const QString& contentRoot = QString(), bool forceCheck = false)
     {
         SetModelData(model, canChooseModel, contentRoot, forceCheck);

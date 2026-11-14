@@ -766,6 +766,15 @@
 
 ---
 
+## Исправление багов (fix/editor-ui-bugfix)
+
+- [x] **БАГ 1 (ui/inspector):** Устранено залипание состояния кнопки «Заменить модель…» (`GeometryCard::ChooseModel`) при переключении с примитива на `Engine.Model`:
+  - *Причина:* состояние `chooseModel_->setEnabled(...)` и `setToolTip(...)` выставлялось исключительно внутри `SetModelData`/`SetPrimitiveData` в блоке `if (cardsDirty)`. При переключении выделения или последующих кадрах/тиках, когда `cardsDirty` не пересчитывался, кнопка оставалась в залипшем `disabled` состоянии с подсказкой «Замена геометрии примитива на модель заблокирована».
+  - *Правка:* в `GeometryCard` добавлен метод `UpdateChooseModelButton(bool isModel, bool isPrimitive)`. В `ObjectInspectorPanel::Refresh` состояние кнопки и её тултип теперь гарантированно и безусловно обновляются на **каждом Refresh** при `showGeometry`. В `onChooseModel` добавлен явный проброс `objectId = selectedId_` в параметры вызова команды `Scene.ReplaceModel`.
+  - *Тесты:* добавлен `InspectorRefreshTests::RunModelReplaceButtonRegression` в `UiTests` (цепочка «Engine.Model -> enabled -> Scene.ReplaceModel -> путь заменён, 1 Undo -> примитив -> disabled с тултипом C-ABI -> повторно модель -> enabled, тултип очищен»). Тест гарантированно падает при откате правки. Все тесты PASS (Core: 810, Host: 163, UI: 640/609).
+
+---
+
 ## Проверено в рантайме (автоматический smoke-editor и прямой D3D readback)
 
 - [x] Отрисовка координатной сетки Y=0 во вьюпорте и генерация линий сетки (139-141 линий).
