@@ -312,6 +312,11 @@ void World::AddTarget(GameComponent& object, Team team)
     targets_.push_back({id, team});
 }
 
+bool World::IsTarget(ComponentId object) const
+{
+    return std::any_of(targets_.begin(), targets_.end(), [&](const TargetEntry& t) { return t.id == object; });
+}
+
 void World::RemoveTarget(ComponentId object)
 {
     targets_.erase(std::remove_if(targets_.begin(), targets_.end(), [&](const TargetEntry& t) { return t.id == object; }), targets_.end());

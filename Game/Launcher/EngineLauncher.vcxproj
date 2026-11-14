@@ -24,7 +24,11 @@
   <ItemDefinitionGroup><Link><SubSystem>Windows</SubSystem><AdditionalDependencies>gdiplus.lib;shell32.lib;ole32.lib;uuid.lib;%(AdditionalDependencies)</AdditionalDependencies></Link></ItemDefinitionGroup>
   <ItemGroup><ProjectReference Include="../../Engine/Runtime/EngineRuntime.vcxproj"><Project>{30B3ACB8-B4EF-5CF4-8E65-FA5CB8AC1DC6}</Project><LinkLibraryDependencies>false</LinkLibraryDependencies></ProjectReference></ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Target Name="DeployProjectSdk" AfterTargets="Build">
+  <!-- Bundled tutorials the launcher lists as «Туториал: …». Before the SDK: that step needs the v142 tools. -->
+  <Target Name="DeployTutorials" AfterTargets="Build">
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -File &quot;$(RepositoryRoot)Game/AiTutorial/Create.ps1&quot; -Destination &quot;$(OutDir)Tutorials\AiTutorial&quot; -Runtime &quot;$(OutDir)Runtime&quot; -Bundled" />
+  </Target>
+  <Target Name="DeployProjectSdk" AfterTargets="DeployTutorials">
     <PropertyGroup>
       <ProjectSdkOptions Condition="'$(Configuration)'=='Debug'">-UseBuildToolset</ProjectSdkOptions>
     </PropertyGroup>

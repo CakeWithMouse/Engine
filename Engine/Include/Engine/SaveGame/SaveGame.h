@@ -16,6 +16,7 @@ public:
     explicit SaveGame(Game& game);
     // Catalog is supplied automatically by scene modules/editor Play. Standalone games set it explicitly.
     void SetCatalog(ComponentTypeCatalog catalog) { catalog_=catalog; }
+    ComponentTypeCatalog Catalog() const { return catalog_; }
     void Configure(std::string gameId, std::filesystem::path root = {});
     SaveGameResult RequestSave(const std::string& slot);
     SaveGameResult RequestLoad(const std::string& slot);

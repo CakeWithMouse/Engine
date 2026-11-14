@@ -1,0 +1,213 @@
+#pragma once
+
+#include "Graph/GraphDocument.h"
+#include "Graph/GraphHistory.h"
+#include "Graph/GraphSchema.h"
+
+#include <QHash>
+#include <QList>
+#include <QPointF>
+#include <QString>
+#include <QVariant>
+#include <QWidget>
+#include <functional>
+
+class QGraphicsPathItem;
+class QGraphicsScene;
+class QGraphicsView;
+class QHBoxLayout;
+class QPainter;
+class QToolButton;
+
+// Состояние ноды в идущей игре (отладка): рамка вокруг ноды и подпись в углу. Ошибки валидации — отдельно
+// (SetNodeProblems). Running/Success/Failure — для деревьев поведения.
+enum class GraphNodeState { None, Active, Done, Failed, Running, Success, Failure };
+struct GraphNodeStatus
+{
+    GraphNodeState state = GraphNodeState::None;
+    QString badge; // «×12»; пустая — без подписи
+    QHash<QString, QString> values; // выход -> последнее значение («Out» -> «37.2»): подпись справа от пина
+    bool operator==(const GraphNodeStatus& other) const { return state == other.state && badge == other.badge && values == other.values; }
+};
+
+// Рамка вокруг группы нод (состояние автомата и его дети): рисуется под нодами, следует за ними, мышь не ловит.
+struct GraphNodeFrame
+{
+    QList<int> nodes; // ноды внутри рамки
+    QColor color;
+    int level = 0;    // сколько рамок вложено внутрь этой: внешние рамки шире
+};
+
+// Общий нодовый редактор: холст с сеткой, ноды и связи, выделение, история, буфер обмена, поиск нод,
+// ошибки на нодах. Что за ноды и что с чем соединяется, говорит GraphSchema; как выглядит содержимое
+// ноды и как правятся её свойства, решает наследник (MaterialGraphWidget, редактор скрипта).
+// Без Q_OBJECT: о правках сообщает функциями обратного вызова.
+class GraphEditorWidget : public QWidget
+{
+public:
+    // Схема живёт дольше виджета (обычно статический экземпляр).
+    explicit GraphEditorWidget(const EditorCore::GraphSchema& schema, QWidget* parent = nullptr);
+    ~GraphEditorWidget() override;
+
+    std::function<void()> structureChanged; // ноды, связи, имена или свойства, от которых зависит результат
+    std::function<void()> layoutChanged;    // ноды сдвинуты: сохранить граф, результат прежний
+
+    const EditorCore::GraphSchema& Schema() const { return schema_; }
+
+    // Загрузка: история начинается заново, ошибки нод сбрасываются.
+    void SetDocument(const EditorCore::GraphDocument& document);
+    const EditorCore::GraphDocument& Document() const { return document_; }
+
+    // Свободные имена и свойства по умолчанию подставляет схема; возвращает id ноды.
+    int AddNode(const QString& type, const QPointF& pos, const QVariantMap& props = {});
+    // Выход -> вход; занятый одиночный пин освобождается. false: связь недопустима (см. GraphSchema).
+    bool Connect(int fromNode, const QString& fromPin, int toNode, const QString& toPin);
+    void RemoveNodes(const QList<int>& ids); // обязательные ноды остаются
+    bool RenameNode(int nodeId, const QString& name);
+
+    // История правок (Ctrl+Z, Ctrl+Y).
+    void Undo();
+    void Redo();
+    bool CanUndo() const { return history_.CanUndo(); }
+    bool CanRedo() const { return history_.CanRedo(); }
+
+    // Выделение и буфер обмена: ноды со связями между ними, JSON в буфере обмена системы,
+    // так что ноды переносятся и между окнами. Обязательные ноды не копируются.
+    QList<int> SelectedNodes() const;
+    void SelectNodes(const QList<int>& ids);
+    bool CopyNodes(const QList<int>& ids) const;
+    bool CanPaste() const;
+    QList<int> PasteNodes(const QPointF& topLeft); // id вставленных нод
+    QList<int> DuplicateNodes(const QList<int>& ids);
+    void FrameNodes(); // выделенные, а без выделения — весь граф
+
+    // Ошибки на нодах: красная рамка, значок, текст в подсказке. Ключ — id ноды.
+    void SetNodeProblems(const QHash<int, QString>& problems);
+    // Предупреждения: жёлтая рамка и значок; у ноды с ошибкой показывается ошибка.
+    void SetNodeWarnings(const QHash<int, QString>& warnings);
+    const QHash<int, QString>& NodeWarnings() const { return warnings_; }
+    void FocusNode(int nodeId);
+
+    // Состояние нод в игре: перерисовка без пересборки сцены, история не меняется. Ключ — id ноды.
+    void SetNodeStatuses(const QHash<int, GraphNodeStatus>& statuses);
+    const QHash<int, GraphNodeStatus>& NodeStatuses() const { return statuses_; }
+
+    // Связи: выделение (щелчок или рамка), удаление (Del, меню связи), свойства (двойной щелчок, меню).
+    QVector<EditorCore::GraphConnectionData> SelectedLinks() const;
+    void SelectLink(const EditorCore::GraphConnectionData& link);
+    void RemoveLinks(const QVector<EditorCore::GraphConnectionData>& links);
+    // Свойства связи целиком — один шаг отмены. false: связи нет.
+    bool SetLinkProperties(const EditorCore::GraphConnectionData& link, const QVariantMap& properties);
+
+    // «Упорядочить»: автораскладка по стилю схемы — один шаг отмены; false — раскладка не изменилась.
+    bool ArrangeNodes();
+
+    // Комментарии: рамка с подписью. Новая — вокруг выделенных нод или в центре вида; id нового комментария.
+    int AddComment(const QString& text = {});
+    bool SetCommentText(int commentId, const QString& text);
+    QList<int> SelectedComments() const;
+    void SelectComment(int commentId);
+
+    // Последнее сообщение пользователю (вставка чужих нод и т.п.); показывается подсказкой у курсора.
+    const QString& LastNotice() const { return lastNotice_; }
+
+    // Список нод с поиском (ПКМ по холсту, Tab, «+ Нода»): выбранная нода встаёт в scenePos.
+    void ShowNodeSearch(const QPoint& screenPos, const QPointF& scenePos);
+
+    QGraphicsView* View() const { return view_; }
+    QPointF PinScenePos(int nodeId, const QString& pin) const;
+
+    class NodeItem;
+    class LinkItem;
+    class CommentItem;
+
+protected:
+    // Внешний вид ноды. decoration — данные, посчитанные один раз при построении ноды (миниатюра и т.п.).
+    virtual qreal NodeWidth(const EditorCore::GraphNodeData& node) const { return 150; }
+    virtual qreal NodeContentHeight(const EditorCore::GraphNodeData& node) const { return 0; }
+    virtual QVariant NodeDecoration(const EditorCore::GraphNodeData& node) const { return {}; }
+    virtual void PaintNodeContent(QPainter* painter, const EditorCore::GraphNodeData& node, const QRectF& content,
+                                  const QVariant& decoration) const {}
+
+    // Рамки групп нод; пересчитываются при перестройке сцены и перемещении нод.
+    virtual QVector<GraphNodeFrame> NodeFrames() const { return {}; }
+    // Свойства ноды: двойной щелчок и первый пункт меню ноды.
+    virtual void EditNode(int nodeId) {}
+    virtual QString EditActionText(const EditorCore::GraphNodeData& node) const;
+    virtual QString RenameTitle() const;
+    // Свойства связи: по умолчанию окно с полями GraphSchema::LinkFields.
+    virtual void EditLink(const EditorCore::GraphConnectionData& link);
+    // Отмена или повтор заменили граф; before — граф до замены.
+    virtual void OnRestored(const EditorCore::GraphDocument& before) {}
+
+    // Кнопка на панели после стандартных (+ Нода, отмена, повтор, «Показать всё»).
+    void AddToolbarWidget(QWidget* widget);
+
+    EditorCore::GraphDocument& MutableDocument() { return document_; }
+    // Снимок до правки; правки с одинаковым ключом подряд — один шаг отмены.
+    void Checkpoint(const QString& mergeKey = {});
+    // Замена графа без сброса истории: обязательные ноды добавляются, вид встаёт на граф.
+    void ReplaceDocument(const EditorCore::GraphDocument& document);
+    void RebuildScene();
+    void NotifyStructure();
+    void RequestRename(int nodeId);
+    static QPointF Snap(const QPointF& point);
+    static constexpr qreal GridStep = 20.0;
+
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
+private:
+    void BuildUi();
+    void UpdateConnections();
+    void UpdateFrames();
+    NodeItem* FindItem(int nodeId) const;
+    // Пин под точкой сцены: id ноды и имя; false — пусто.
+    bool PinAt(const QPointF& scenePos, int& nodeId, QString& pin, bool& input) const;
+    void StartLink(const QPointF& scenePos);
+    void FinishLink(const QPointF& scenePos);
+    void ShowNodeMenu(const QPoint& screenPos, int nodeId);
+    void ShowLinkMenu(const QPoint& screenPos, const EditorCore::GraphConnectionData& link);
+    void EditComment(int commentId);
+    void CommentChanged(int commentId, const QRectF& rect); // перетаскивание или новый размер
+    void Notice(const QString& text);
+    QString ForeignClipboardNotice() const;
+    void DeleteSelected();
+    void NodeMoved(int nodeId, const QPointF& pos);
+    void RestoreSnapshot(const QString& snapshot);
+    void UpdateHistoryButtons();
+    QString ClipboardJson(const QList<int>& ids) const;
+    QString ClipboardGraph() const;
+    QList<int> InsertNodes(const QString& json, const QPointF& topLeft);
+    QPointF CursorScenePos() const;
+    bool IsFixed(int nodeId) const;
+
+    const EditorCore::GraphSchema& schema_;
+    EditorCore::GraphDocument document_;
+    EditorCore::GraphHistory history_;
+    QGraphicsScene* scene_ = nullptr;
+    QGraphicsView* view_ = nullptr;
+    QHBoxLayout* toolbar_ = nullptr;
+    int toolbarIndex_ = 0;
+    QList<QGraphicsPathItem*> links_;
+    QList<QGraphicsPathItem*> frames_;
+
+    // Тянущаяся связь: от выхода (linkFromInput_ == false) или от входа.
+    QGraphicsPathItem* dragLink_ = nullptr;
+    int linkNode_ = 0;
+    QString linkPin_;
+    bool linkFromInput_ = false;
+    QPointF linkStart_;
+
+    bool panning_ = false, panMoved_ = false, moved_ = false;
+    QPoint panStart_, panLast_;
+
+    QString pressSnapshot_; // граф на нажатии ЛКМ: перетаскивание нод — один шаг отмены
+    QString linkKey_;       // снятие связи с пина и её новое подключение — один шаг
+    int linkSerial_ = 0;
+    QHash<int, QString> problems_;
+    QHash<int, GraphNodeStatus> statuses_;
+    QHash<int, QString> warnings_;
+    QString lastNotice_;
+    QToolButton* undoButton_ = nullptr;
+    QToolButton* redoButton_ = nullptr;
+};

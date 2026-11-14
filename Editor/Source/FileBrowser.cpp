@@ -246,6 +246,16 @@ void FileBrowserDock::OnDoubleClicked(const QModelIndex& proxyIndex)
         if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenMaterialEditor(path);
         return;
     }
+    if (path.endsWith(QStringLiteral(".vscript"), Qt::CaseInsensitive))
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenScriptEditor(path);
+        return;
+    }
+    if (path.endsWith(QStringLiteral(".fsm"), Qt::CaseInsensitive))
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenAiMachineEditor(path);
+        return;
+    }
     const QByteArray utf8 = path.toUtf8();
     const std::string msg = "EditorOpenAsset: " + std::string(utf8.constData(), utf8.size());
     host_->Log(msg.c_str());
@@ -263,9 +273,16 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
 
     QMenu menu(this);
     const bool isMaterial = hasFile && path.endsWith(QStringLiteral(".mat"), Qt::CaseInsensitive);
-    QAction* use = hasFile && !model_->isDir(index) ? menu.addAction(isMaterial ? Tr("Назначить материал", "Assign Material")
-                                                                               : Tr("Добавить модель / назначить текстуру", "Add Model / Assign Texture")) : nullptr;
+    const bool isScript = hasFile && path.endsWith(QStringLiteral(".vscript"), Qt::CaseInsensitive);
+    const bool scripts = host_->ReadSnapshot().scripts;
+    QAction* use = hasFile && !model_->isDir(index) && (!isScript || scripts)
+        ? menu.addAction(isMaterial ? Tr("Назначить материал", "Assign Material")
+                         : isScript ? Tr("Назначить скрипт выделенному объекту", "Assign Script to Selection")
+                                    : Tr("Добавить модель / назначить текстуру", "Add Model / Assign Texture")) : nullptr;
     QAction* editMaterial = isMaterial && host_->HasMaterials() ? menu.addAction(Tr("Редактировать материал", "Edit Material")) : nullptr;
+    QAction* editScript = isScript ? menu.addAction(Tr("Редактировать скрипт", "Edit Script")) : nullptr;
+    const bool isMachine = hasFile && path.endsWith(QStringLiteral(".fsm"), Qt::CaseInsensitive);
+    QAction* editMachine = isMachine ? menu.addAction(Tr("Редактировать автомат ИИ", "Edit AI State Machine")) : nullptr;
     const bool isAudio = hasFile && !model_->isDir(index) &&
         QStringList{"wav", "ogg", "mp3", "flac"}.contains(QFileInfo(path).suffix().toLower());
     const bool contentAudio = isAudio && !contentDir_.isEmpty() &&
@@ -273,14 +290,16 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     QAction* playAudio = contentAudio && host_->AudioApi() ? menu.addAction(Tr("Прослушать", "Play Audio Preview")) : nullptr;
     QAction* stopAudio = host_->AudioApi() ? menu.addAction(Tr("Остановить звук", "Stop Audio Preview")) : nullptr;
     QAction* newMaterial = host_->HasMaterials() ? menu.addAction(Tr("Новый материал…", "New Material…")) : nullptr;
+    QAction* newScript = scripts ? menu.addAction(Tr("Новый скрипт…", "New Script…")) : nullptr;
+    QAction* newMachine = menu.addAction(Tr("Новый автомат ИИ…", "New AI State Machine…"));
     QAction* open = hasFile ? menu.addAction(Tr("Открыть в приложении", "Open in External App")) : nullptr;
     QAction* reveal = hasFile ? menu.addAction(Tr("Показать в проводнике", "Reveal in Explorer")) : nullptr;
     QAction* copy = hasFile ? menu.addAction(Tr("Копировать путь", "Copy Path")) : nullptr;
     QAction* refresh = menu.addAction(Tr("Обновить", "Refresh"));
     const bool isModel = hasFile && !model_->isDir(index) && QStringList{"fbx", "obj", "gltf", "glb", "blend"}.contains(QFileInfo(path).suffix().toLower());
     QAction* editSettings = isModel && host_->ReadSnapshot().authoring ? menu.addAction(Tr("Настройки импорта…", "Import Settings…")) : nullptr;
-    const bool asset=hasFile&&!model_->isDir(index)&&QStringList{"fbx","obj","gltf","glb","png","jpg","jpeg","bmp","tga","mat"}.contains(QFileInfo(path).suffix().toLower());
-    QAction* reimport=asset&&!isMaterial&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переимпортировать…", "Reimport…")):nullptr;
+    const bool asset=hasFile&&!model_->isDir(index)&&QStringList{"fbx","obj","gltf","glb","png","jpg","jpeg","bmp","tga","mat","vscript"}.contains(QFileInfo(path).suffix().toLower());
+    QAction* reimport=asset&&!isMaterial&&!isScript&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переимпортировать…", "Reimport…")):nullptr;
     QAction* move=asset&&host_->ReadSnapshot().authoring?menu.addAction(Tr("Переместить / переименовать…", "Move / Rename…")):nullptr;
     QAction* deleteAction = hasFile && !IsProtectedPath(path) ? menu.addAction(Tr("Удалить", "Delete")) : nullptr;
 
@@ -314,6 +333,28 @@ void FileBrowserDock::OnContextMenu(const QPoint& pos)
     else if (picked == editMaterial)
     {
         if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenMaterialEditor(path);
+    }
+    else if (picked == editScript)
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenScriptEditor(path);
+    }
+    else if (picked == editMachine)
+    {
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->OpenAiMachineEditor(path);
+    }
+    else if (picked == newMachine)
+    {
+        const QString directory = !hasFile ? QString() : model_->isDir(index) ? path : QFileInfo(path).absolutePath();
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget()))
+        {
+            const QString machine = editor->CreateAiMachine(directory);
+            if (!machine.isEmpty()) editor->OpenAiMachineEditor(machine);
+        }
+    }
+    else if (picked == newScript)
+    {
+        const QString directory = !hasFile ? QString() : model_->isDir(index) ? path : QFileInfo(path).absolutePath();
+        if (auto* editor = qobject_cast<EditorMainWindow*>(parentWidget())) editor->CreateScript(directory);
     }
     else if (picked == newMaterial)
     {

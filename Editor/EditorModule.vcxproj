@@ -189,6 +189,12 @@
         <ClCompile Include="Source/MaterialEditorWindow.cpp"/>
         <ClCompile Include="Source/MaterialTextureTools.cpp"/>
         <ClCompile Include="Source/MaterialGraphWidget.cpp"/>
+        <ClCompile Include="Source/GraphEditorWidget.cpp"/>
+        <ClCompile Include="Source/ScriptGraphWidget.cpp"/>
+        <ClCompile Include="Source/ScriptEditorWindow.cpp"/>
+        <ClCompile Include="Source/FsmBlockListEditor.cpp"/>
+        <ClCompile Include="Source/FsmGraphWidget.cpp"/>
+        <ClCompile Include="Source/AiMachineEditorWindow.cpp"/>
         <ClCompile Include="Core/Logger.cpp"/>
         <ClCompile Include="Core/CommandRegistry.cpp"/>
         <ClCompile Include="Core/FileService.cpp"/>
@@ -202,6 +208,16 @@
         <ClCompile Include="Core/AssetOps.cpp"/>
         <ClCompile Include="Core/HlslGraphCompiler.cpp"/>
         <ClCompile Include="Core/MaterialGraphModel.cpp"/>
+        <ClCompile Include="Core/Graph/GraphDocument.cpp"/>
+        <ClCompile Include="Core/Graph/GraphSchema.cpp"/>
+        <ClCompile Include="Core/Graph/GraphHistory.cpp"/>
+        <ClCompile Include="Core/Graph/GraphClipboard.cpp"/>
+        <ClCompile Include="Core/Graph/GraphSchemaRegistry.cpp"/>
+        <ClCompile Include="Core/Graph/GraphLayout.cpp"/>
+        <ClCompile Include="Core/MaterialGraphSchema.cpp"/>
+        <ClCompile Include="Core/CodeGraphSchema.cpp"/>
+        <ClCompile Include="Core/FsmGraphSchema.cpp"/>
+        <ClCompile Include="Core/ScriptMessages.cpp"/>
         <ClCompile Include="Core/SceneFile.cpp"/>
         <ClCompile Include="Core/ImportSettings.cpp"/>
         <ClCompile Include="Core/ModelImportSidecar.cpp"/>
@@ -270,6 +286,16 @@
         <ClInclude Include="Core/AssetOps.h"/>
         <ClInclude Include="Core/HlslGraphCompiler.h"/>
         <ClInclude Include="Core/MaterialGraphModel.h"/>
+        <ClInclude Include="Core/Graph/GraphDocument.h"/>
+        <ClInclude Include="Core/Graph/GraphSchema.h"/>
+        <ClInclude Include="Core/Graph/GraphHistory.h"/>
+        <ClInclude Include="Core/Graph/GraphClipboard.h"/>
+        <ClInclude Include="Core/Graph/GraphSchemaRegistry.h"/>
+        <ClInclude Include="Core/Graph/GraphLayout.h"/>
+        <ClInclude Include="Core/MaterialGraphSchema.h"/>
+        <ClInclude Include="Core/CodeGraphSchema.h"/>
+        <ClInclude Include="Core/FsmGraphSchema.h"/>
+        <ClInclude Include="Core/ScriptMessages.h"/>
         <ClInclude Include="Core/SceneFile.h"/>
         <ClInclude Include="Core/ImportSettings.h"/>
         <ClInclude Include="Core/ModelImportSidecar.h"/>
@@ -322,6 +348,15 @@
         <ClInclude Include="Include/FileBrowser.h"/>
         <ClInclude Include="Include/MaterialTextureTools.h"/>
         <ClInclude Include="Include/MaterialGraphWidget.h"/>
+        <ClInclude Include="Include/GraphEditorWidget.h"/>
+        <ClInclude Include="Include/ScriptGraphWidget.h"/>
+        <ClInclude Include="Include/ScriptEditorWindow.h"/>
+        <ClInclude Include="Include/FsmBlockListEditor.h"/>
+        <ClInclude Include="Include/FsmGraphWidget.h"/>
+        <ClInclude Include="Include/AiMachineEditorWindow.h"/>
+        <ClInclude Include="UI/ScriptCard.h"/>
+        <ClInclude Include="UI/AiMachineCard.h"/>
+        <ClInclude Include="UI/VariableValuesEditor.h"/>
         <!-- MainWindow.h требует moc: генерируем в $(IntDir)moc/moc_MainWindow.cpp -->
         <CustomBuild Include="Include/MainWindow.h">
             <FileType>Document</FileType>

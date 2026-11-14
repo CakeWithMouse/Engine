@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QJsonArray>
+#include <functional>
 #include <QWidget>
 #include <QString>
 #include <QColor>
@@ -18,6 +20,8 @@ class NoWheelDoubleSpinBox;
 class CollapsibleCard;
 class TransformCard;
 class MaterialCard;
+class ScriptCard;
+class AiMachineCard;
 class GeometryCard;
 
 struct EditorSnapshot;
@@ -43,6 +47,13 @@ class ObjectInspectorPanel : public QWidget
     Q_OBJECT
 
 public:
+    // Список переменных скрипта (из его файла) для карточки «Скрипт»: /Game путь -> [{"name","type","value"}].
+    void SetScriptVariablesReader(std::function<QJsonArray(const QString&)> reader);
+    // Схема свойств типа со stateMachine и machineMemory: их правит карточка «Автомат ИИ», а не общий список свойств.
+    static bool HasAiMachine(const std::string& propertySchema);
+    // Карточка «Автомат ИИ»: ошибки файла machine по проверке движка и состояние персонажа в Play (пустое — скрыть).
+    void SetAiMachineProblems(const QString& machine, const QStringList& lines);
+    void SetAiMachineLive(const QStringList& lines);
     explicit ObjectInspectorPanel(QWidget* parent = nullptr);
     ~ObjectInspectorPanel() override;
 
@@ -85,6 +96,13 @@ signals:
     void ChooseMaterialRequested();
     void EditMaterialRequested(const QString& virtualPath);
     void ClearMaterialRequested();
+    void OpenScriptRequested(const QString& virtualPath); // пустой путь: создать скрипт для объекта
+    void ChooseScriptRequested();
+    void ClearScriptRequested();
+    void ScriptVariablesChanged(const QString& json); // значения переменных скрипта у объекта; пустая — как в скрипте
+    void CreateAiMachineRequested();                  // создать .fsm и назначить выделенному «ИИ-персонажу»
+    void OpenAiMachineRequested(const QString& virtualPath);
+    void ChooseAiMachineRequested();
 
 private:
     void BuildUi();
@@ -118,6 +136,8 @@ private:
     TransformCard* cardTransform_ = nullptr;
     GeometryCard* cardGeometry_ = nullptr;
     MaterialCard* cardMaterial_ = nullptr;
+    ScriptCard* cardScript_ = nullptr;
+    AiMachineCard* cardAi_ = nullptr;
     CollapsibleCard* cardLight_ = nullptr;
     CollapsibleCard* cardCharacter_ = nullptr;
 

@@ -134,7 +134,8 @@ INT_PTR CALLBACK CreateDialogProc(HWND window, UINT message, WPARAM wParam, LPAR
             std::string buildWarning;
             {
                 LaunchSplash splash(L"Создание проекта…", true, window);
-                *output = ProjectLibrary::Create(path, Utf8(Text(window, 201)), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll");
+                const auto installed = InstallEngineRelease(ExampleDeployment::ExecutableDirectory() / "Runtime");
+                *output = ProjectLibrary::Create(path, Utf8(Text(window, 201)), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll", &installed);
                 if (IsDlgButtonChecked(window,204) == BST_CHECKED) {
                     try { RunProjectCodeTool(*output,L"Enable"); }
                     catch (const std::exception& error) { buildWarning = error.what(); }
@@ -405,6 +406,15 @@ LRESULT WindowProcImpl(HWND window, UINT message, WPARAM wParam, LPARAM lParam)
         SetMenu(window,bar);
         status = CreateWindowW(L"STATIC", L"", WS_CHILD | WS_VISIBLE | SS_LEFT,
             18, 335, 670, 70, window, nullptr, nullptr, nullptr);
+        // Without WM_SETFONT the controls use the bitmap System font, which has no Cyrillic glyphs when the
+        // system locale is not Russian: the list showed bars instead of letters. Use the Windows UI font.
+        static const HFONT font = [] {
+            NONCLIENTMETRICSW metrics{sizeof(metrics)};
+            return SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0)
+                ? CreateFontIndirectW(&metrics.lfMessageFont) : static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
+        }();
+        EnumChildWindows(window, [](HWND child, LPARAM font) { SendMessageW(child, WM_SETFONT, static_cast<WPARAM>(font), TRUE); return TRUE; },
+            reinterpret_cast<LPARAM>(font));
         UpdateStatus();
         return 0;
     }
@@ -577,7 +587,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show)
             }
             if (option == L"--create-project" && argc == 4)
             {
-                ProjectLibrary::Create(argv[2], Utf8(argv[3]), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll");
+                const auto installed = InstallEngineRelease(ExampleDeployment::ExecutableDirectory() / "Runtime");
+                ProjectLibrary::Create(argv[2], Utf8(argv[3]), ExampleDeployment::ExecutableDirectory() / "Runtime/Templates/SceneProject/Game.dll", &installed);
                 LocalFree(argv); return 0;
             }
             if (argc == 3 && (option == L"--check-project" || option == L"--smoke-project" || option == L"--smoke-project-editor"))

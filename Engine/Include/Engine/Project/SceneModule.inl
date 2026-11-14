@@ -289,6 +289,21 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetEditExtension(void* contex
         *static_cast<EngineAudioPreviewApi*>(output) = static_cast<SceneEditSession*>(context)->GetAudioPreviewApi();
         return 1;
     }
+    if (std::strcmp(name, EngineScriptExtension) == 0 && size == sizeof(EngineScriptApi))
+    {
+        *static_cast<EngineScriptApi*>(output) = static_cast<SceneEditSession*>(context)->GetScriptApi();
+        return 1;
+    }
+    if (std::strcmp(name, EngineGraphTraceExtension) == 0 && size == sizeof(EngineGraphTraceApi))
+    {
+        *static_cast<EngineGraphTraceApi*>(output) = static_cast<SceneEditSession*>(context)->GetGraphTraceApi();
+        return 1;
+    }
+    if (std::strcmp(name, EngineAiMachineExtension) == 0 && size == sizeof(EngineAiMachineApi))
+    {
+        *static_cast<EngineAiMachineApi*>(output) = static_cast<SceneEditSession*>(context)->GetAiMachineApi();
+        return 1;
+    }
     if (std::strcmp(name, EngineAssetImportExtension) == 0 && size == sizeof(EngineAssetImportApi))
     {
         *static_cast<EngineAssetImportApi*>(output) = static_cast<SceneEditSession*>(context)->GetAssetImportApi();

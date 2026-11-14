@@ -3,6 +3,7 @@
 #include <Engine/Components/GameComponents.h>
 #include <Engine/Components/Light/PointLightComponent.h>
 #include <Engine/Components/Light/DirectionalLightComponent.h>
+#include <Engine/Script/ScriptRuntime.h>
 #include <atomic>
 #include <cmath>
 #include <stdexcept>
@@ -201,6 +202,8 @@ SceneSnapshot Scene::GetSnapshot() const
         if (const auto* light = dynamic_cast<const PointLightComponent*>(&c))
             result.components.back().pointLight = {light->GetLightColor(), light->GetIntensity(), light->GetRadius(), light->IsEnabled(), light->CastsShadow()};
         result.components.back().projectData = c.SaveProjectData();
+        result.components.back().scriptAsset = c.GetScriptAsset();
+        result.components.back().scriptVariables = c.GetScriptVariables();
         if (!result.components.back().projectData.empty()) result.documentVersion = 3;
     }
     return result;
@@ -255,6 +258,26 @@ SceneResult Scene::SetMaterialAsset(ComponentId id, const std::string& path)
     return SceneResult::Ok;
 }
 
+SceneResult Scene::SetScriptVariables(ComponentId id, const std::string& json)
+{
+    if (IsUpdating()) return SceneResult::Busy;
+    auto* object = FindComponent(id);
+    if (!object) return SceneResult::NotFound;
+    object->SetScriptVariables(json);
+    ++revision_;
+    return SceneResult::Ok;
+}
+
+SceneResult Scene::SetScriptAsset(ComponentId id, const std::string& path)
+{
+    if (IsUpdating()) return SceneResult::Busy;
+    auto* object = FindComponent(id);
+    if (!object) return SceneResult::NotFound;
+    object->SetScriptAsset(path);
+    ++revision_;
+    return SceneResult::Ok;
+}
+
 Scene::UpdateScope::UpdateScope(Scene& scene) : scene_(scene) { ++scene_.updateDepth_; }
 Scene::UpdateScope::~UpdateScope() { scene_.EndUpdate(); }
 void Scene::EndUpdate() noexcept
@@ -280,6 +303,7 @@ void Scene::Tick(float dt, bool pauseNonSkybox)
             entry.second->Tick(seconds);
             auto* visual=entry.second->GetRenderComponent();
             if(visual!=entry.second.get())visual->Tick(seconds);
+            if(entry.second->ScriptState)entry.second->ScriptState->Tick(seconds);
         }
     }
     catch (...) { ticking_ = false; throw; }

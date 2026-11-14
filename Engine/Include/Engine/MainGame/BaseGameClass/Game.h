@@ -61,6 +61,7 @@ enum class RegisterResult
 const char* ToString(RegisterResult result);
 
 class GameComponent;
+namespace Script { struct Problem; }
 class Material;
 class PointLightComponent;
 class UIComponent;
@@ -219,6 +220,13 @@ public:
     bool UnregisterComponent(const std::string& Name);
     GameComponent* FindComponent(const std::string& Name) const;
     Scene& GetScene() noexcept { return scene; }
+    /** Why the script at this /Game path did not start in this game; empty if it compiled or was never started. */
+    std::vector<Script::Problem> GetScriptProblems(const std::string& asset) const;
+    // Visual scripts (Spawn copy): a copy of source — its type, model/texture/material, project data, script,
+    // rotation and scale — at position, named "<source>_N". Added like any object added during play (its own
+    // BeginPlay and script start next frame). Parent, children and light settings are not copied.
+    // Returns the new id; 0 and error when the type is unknown to this game.
+    uint64_t SpawnCopy(const GameComponent& source, const glm::vec3& position, std::string& error);
     const Scene& GetScene() const noexcept { return scene; }
 
     bool CreateProceduralCubeMap(const std::string& cubeMapName, CubeMapPreset preset, int faceSize = 256);
@@ -535,6 +543,12 @@ protected:
     std::shared_ptr<Material> errorMaterial;
     /** Components whose material asset failed to load try again on their next draw. */
     void RetryFailedMaterialAssets();
+
+    // Visual scripts by resolved .vscript path; a changed file is compiled again at the next start.
+    struct CachedScript;
+    std::map<std::string, std::shared_ptr<const CachedScript>> scriptCache;
+    /** Creates the component's script instance and runs its BeginPlay; errors are logged, never thrown. */
+    void StartScript(GameComponent& component);
 
     // Depth
     Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;          // opaque: test + write

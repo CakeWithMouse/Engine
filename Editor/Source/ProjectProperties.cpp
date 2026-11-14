@@ -37,6 +37,7 @@ void ObjectInspectorPanel::SubmitProperty(const QString& path,const QJsonValue& 
 void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot& view,const EditorQtHost::SceneObject& object) {
     const auto schema=QJsonDocument::fromJson(QByteArray::fromStdString(object.propertySchema)).object();
     const auto fields=schema["fields"].toArray();
+    const bool aiMachine=HasAiMachine(object.propertySchema);
     properties_->setVisible(!fields.isEmpty());
     QString key=QString::number(object.id)+QString::fromStdString(object.propertySchema)+QString::number(static_cast<int>(EditorLocale::Instance().Language()));
     // Object reference selectors track names/IDs, while numeric edits do not
@@ -50,6 +51,7 @@ void ObjectInspectorPanel::RefreshProjectProperties(const EditorQtHost::Snapshot
         for(const auto& value:fields) {
             const auto field=value.toObject();const auto path=field["path"].toString(),type=field["type"].toString();
             if(!path.startsWith('/')||path=="/version")continue;
+            if(aiMachine&&(path=="/stateMachine"||path=="/machineMemory"))continue; // карточка «Автомат ИИ»
             auto group=field["group"].toString(Tr("Свойства класса", "Class Properties"));if(group.isEmpty())group=Tr("Свойства класса", "Class Properties");
             auto* layout=propertiesLayout_;QString prefix;
             for(const auto& part:group.split('/',Qt::SkipEmptyParts)) {

@@ -5,6 +5,7 @@
 #include <chrono>
 #include <QCoreApplication>
 #include "HostRegressionTests.h"
+#include "HostScriptTests.h"
 #include "OverlayHostTests.h"
 #include "ImportMigrationTests.h"
 #include "AssetUpdateHostTests.h"
@@ -154,6 +155,7 @@ int main(int argc, char** argv)
     }
 
     checksPassed += HostRegressionTests::Run();
+    checksPassed += HostScriptTests::Run();
     checksPassed += OverlayHostTests::Run();
     checksPassed += ImportMigrationTests::Run();
     checksPassed += AssetUpdateHostTests::Run();

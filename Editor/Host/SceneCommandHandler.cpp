@@ -15,8 +15,8 @@ bool SceneCommandHandler::CanHandle(EditorCommand::Type type) const
     {
     case EditorCommand::FetchScene: case EditorCommand::SelectObject: case EditorCommand::RefreshScene:
     case EditorCommand::UpdateObjectTransform: case EditorCommand::CreateObject: case EditorCommand::CreateModel:
-    case EditorCommand::SetModel: case EditorCommand::SetTexture: case EditorCommand::SetMaterial:
-    case EditorCommand::SetPointLight: case EditorCommand::SetProperty: case EditorCommand::SetProjectData:
+    case EditorCommand::SetModel: case EditorCommand::SetTexture: case EditorCommand::SetMaterial: case EditorCommand::SetScript:
+    case EditorCommand::SetScriptVariables: case EditorCommand::SetPointLight: case EditorCommand::SetProperty: case EditorCommand::SetProjectData:
     case EditorCommand::ConfigurePlay: case EditorCommand::RemoveObject: case EditorCommand::RenameObject:
     case EditorCommand::DuplicateObject: case EditorCommand::SetParent: case EditorCommand::SaveScene:
     case EditorCommand::LoadScene: case EditorCommand::NewScene: case EditorCommand::Undo: case EditorCommand::Redo:
@@ -47,7 +47,8 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
     const bool mutation = (cmd.type == EditorCommand::UpdateObjectTransform || cmd.type == EditorCommand::CreateObject ||
         cmd.type == EditorCommand::RemoveObject || cmd.type == EditorCommand::RenameObject || cmd.type == EditorCommand::DuplicateObject ||
         cmd.type == EditorCommand::SetModel || cmd.type == EditorCommand::CreateModel || cmd.type == EditorCommand::SetTexture ||
-        cmd.type == EditorCommand::SetMaterial || cmd.type == EditorCommand::SetPointLight || cmd.type == EditorCommand::SetProjectData ||
+        cmd.type == EditorCommand::SetMaterial || cmd.type == EditorCommand::SetScript || cmd.type == EditorCommand::SetScriptVariables ||
+        cmd.type == EditorCommand::SetPointLight || cmd.type == EditorCommand::SetProjectData ||
         cmd.type == EditorCommand::ConfigurePlay || cmd.type == EditorCommand::SetProperty || cmd.type == EditorCommand::SetParent);
 
     if ((mutation || cmd.type == EditorCommand::LoadScene || cmd.type == EditorCommand::NewScene ||
@@ -185,6 +186,18 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
                 ? ctx.scene.setMaterial(ctx.scene.context, cmd.objectId, cmd.path.toUtf8().constData(), errorBuf, sizeof(errorBuf))
                 : EngineSceneReadOnly;
         }
+        else if (cmd.type == EditorCommand::SetScript)
+        {
+            result = ctx.script && ctx.script->set
+                ? ctx.script->set(ctx.script->context, cmd.objectId, cmd.path.toUtf8().constData(), errorBuf, sizeof(errorBuf))
+                : EngineSceneReadOnly;
+        }
+        else if (cmd.type == EditorCommand::SetScriptVariables)
+        {
+            result = ctx.script && ctx.script->setVariables
+                ? ctx.script->setVariables(ctx.script->context, cmd.objectId, cmd.name.toUtf8().constData(), errorBuf, sizeof(errorBuf))
+                : EngineSceneReadOnly;
+        }
         else if (cmd.type == EditorCommand::SetPointLight)
         {
             result = (ctx.pointLightV2 && ctx.pointLightV2->set)
@@ -230,7 +243,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
             auto view = ReadSnapshot();
             QString type = cmd.path, base = cmd.name;
             QString model = (cmd.type == EditorCommand::CreateModel ? cmd.path : QString());
-            QString texture, material, projectData;
+            QString texture, material, script, projectData;
             EngineSceneTransform transform = cmd.transform;
             uint64_t parent = cmd.parentId;
             bool inherit = true;
@@ -251,6 +264,7 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
                 model = QString::fromStdString(found->modelAsset);
                 texture = QString::fromStdString(found->textureAsset);
                 material = QString::fromStdString(found->materialAsset);
+                script = QString::fromStdString(found->scriptAsset);
                 hasLight = found->hasPointLight;
                 light = found->pointLight;
                 castShadows = found->lightCastShadows;
@@ -273,6 +287,8 @@ void SceneCommandHandler::Handle(const EditorCommand& cmd,
                     result = ctx.scene.setTexture(ctx.scene.context, id, texture.toUtf8().constData(), errorBuf, sizeof(errorBuf));
                 if (result == EngineSceneOk && !material.isEmpty())
                     result = ctx.scene.setMaterial ? ctx.scene.setMaterial(ctx.scene.context, id, material.toUtf8().constData(), errorBuf, sizeof(errorBuf)) : EngineSceneReadOnly;
+                if (result == EngineSceneOk && !script.isEmpty())
+                    result = ctx.script && ctx.script->set ? ctx.script->set(ctx.script->context, id, script.toUtf8().constData(), errorBuf, sizeof(errorBuf)) : EngineSceneReadOnly;
                 if (result == EngineSceneOk && hasLight)
                     result = (ctx.pointLightV2 && ctx.pointLightV2->set)
                         ? ctx.pointLightV2->set(ctx.pointLightV2->context, id, &light, castShadows ? 1u : 0u)
@@ -423,6 +439,18 @@ void SceneCommandHandler::PublishScene(const Context& ctx, IEditorHost::EditorSt
         for (auto& object : view.objects)
             ctx.projectData.read(ctx.projectData.context, object.id,
                 [](void* p, const char* value) { *static_cast<std::string*>(p) = (value ? value : ""); }, &object.projectData);
+    }
+
+    if (ctx.script && ctx.script->get)
+    {
+        view.scripts = true;
+        for (auto& object : view.objects)
+            ctx.script->get(ctx.script->context, object.id,
+                [](void* p, const char* value) { *static_cast<std::string*>(p) = (value ? value : ""); }, &object.scriptAsset);
+        if (ctx.script->getVariables)
+            for (auto& object : view.objects)
+                ctx.script->getVariables(ctx.script->context, object.id,
+                    [](void* p, const char* value) { *static_cast<std::string*>(p) = (value ? value : ""); }, &object.scriptVariables);
     }
 
     if (ctx.viewportInput.objectKind)

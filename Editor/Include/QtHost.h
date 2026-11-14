@@ -84,6 +84,24 @@ public:
     void InitializeRecovery();
     void SetBatchApi(const EngineSceneBatchApi& api) { batch_ = api; }
     void SetAuthoringApi(const EngineAuthoringApi& api) { authoring_ = api; }
+    void SetScriptApi(const EngineScriptApi& api) { script_ = api; }
+    void SetGraphTraceApi(const EngineGraphTraceApi& api) { graphTrace_ = api; }
+    void SetAiMachineApi(const EngineAiMachineApi& api) { aiMachine_ = api; }
+    // Автоматы ИИ (.fsm): каталог, проверка файла, состояние персонажей в Play — из сервиса runtime или заданные тестом.
+    const EngineAiMachineApi* AiMachineApi() const {
+        if (host_.getService) return static_cast<const EngineAiMachineApi*>(host_.getService(host_.user, EngineAiMachineService, 1));
+        return aiMachine_.check ? &aiMachine_ : nullptr;
+    }
+    // Состояние нод графов в Play (отладка): из сервиса runtime или заданное тестом.
+    const EngineGraphTraceApi* GraphTraceApi() const {
+        if (host_.getService) return static_cast<const EngineGraphTraceApi*>(host_.getService(host_.user, EngineGraphTraceService, 1));
+        return graphTrace_.read ? &graphTrace_ : nullptr;
+    }
+    // Визуальные скрипты: из сервиса runtime (перезапрашивается после hot reload) или заданные тестом.
+    const EngineScriptApi* ScriptApi() const {
+        if (host_.getService) return static_cast<const EngineScriptApi*>(host_.getService(host_.user, EngineScriptService, 1));
+        return script_.set ? &script_ : nullptr;
+    }
     void SetViewportOverlayApi(const EngineViewportOverlayApi& api);
     void SetAntialiasing(uint32_t mode);
     uint64_t ViewportResizeCount() const;
@@ -99,6 +117,9 @@ private:
     EngineSelectionApi selection_{};
     EngineSceneBatchApi batch_{};
     EngineAuthoringApi authoring_{};
+    EngineScriptApi script_{};
+    EngineGraphTraceApi graphTrace_{};
+    EngineAiMachineApi aiMachine_{};
     const EngineSceneBatchApi* BatchApi() const {
         if (host_.getService) return static_cast<const EngineSceneBatchApi*>(host_.getService(host_.user, EngineEditorBatchService, 1));
         return batch_.apply ? &batch_ : nullptr;

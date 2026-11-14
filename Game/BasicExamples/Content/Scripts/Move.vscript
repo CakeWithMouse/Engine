@@ -1,0 +1,338 @@
+{
+    "format": "ITMOEngine.Graph",
+    "version": 1,
+    "schema": "code",
+    "schemaVersion": 1,
+    "variables": [
+        {
+            "name": "Start",
+            "type": "vec3",
+            "value": [
+                0,
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Speed",
+            "type": "float",
+            "value": 4
+        }
+    ],
+    "nodes": [
+        {
+            "id": 1,
+            "type": "Event.BeginPlay",
+            "title": "",
+            "x": 0,
+            "y": 0,
+            "properties": {}
+        },
+        {
+            "id": 2,
+            "type": "Object.GetPosition",
+            "title": "",
+            "x": 0,
+            "y": 120,
+            "properties": {}
+        },
+        {
+            "id": 3,
+            "type": "Variable.Set",
+            "title": "",
+            "x": 260,
+            "y": 0,
+            "properties": {
+                "variable": "Start"
+            }
+        },
+        {
+            "id": 4,
+            "type": "Action.Print",
+            "title": "",
+            "x": 520,
+            "y": 0,
+            "properties": {
+                "inputs": {
+                    "Text": "Стрелки ← → двигают куб, пробел возвращает его на место"
+                }
+            }
+        },
+        {
+            "id": 5,
+            "type": "Event.Tick",
+            "title": "",
+            "x": 0,
+            "y": 280,
+            "properties": {}
+        },
+        {
+            "id": 6,
+            "type": "Flow.Sequence",
+            "title": "",
+            "x": 240,
+            "y": 280,
+            "properties": {
+                "outputs": 2
+            }
+        },
+        {
+            "id": 7,
+            "type": "Variable.Get",
+            "title": "",
+            "x": 0,
+            "y": 420,
+            "properties": {
+                "variable": "Speed"
+            }
+        },
+        {
+            "id": 8,
+            "type": "Math.Multiply",
+            "title": "",
+            "x": 240,
+            "y": 420,
+            "properties": {}
+        },
+        {
+            "id": 9,
+            "type": "Input.KeyDown",
+            "title": "",
+            "x": 240,
+            "y": 660,
+            "properties": {
+                "key": "Left"
+            }
+        },
+        {
+            "id": 10,
+            "type": "Flow.Branch",
+            "title": "",
+            "x": 480,
+            "y": 560,
+            "properties": {}
+        },
+        {
+            "id": 11,
+            "type": "Vec3.Scale",
+            "title": "",
+            "x": 480,
+            "y": 680,
+            "properties": {
+                "inputs": {
+                    "Vector": [
+                        -1,
+                        0,
+                        0
+                    ]
+                }
+            }
+        },
+        {
+            "id": 12,
+            "type": "Action.Translate",
+            "title": "",
+            "x": 740,
+            "y": 560,
+            "properties": {}
+        },
+        {
+            "id": 13,
+            "type": "Input.KeyDown",
+            "title": "",
+            "x": 240,
+            "y": 920,
+            "properties": {
+                "key": "Right"
+            }
+        },
+        {
+            "id": 14,
+            "type": "Flow.Branch",
+            "title": "",
+            "x": 480,
+            "y": 820,
+            "properties": {}
+        },
+        {
+            "id": 15,
+            "type": "Vec3.Scale",
+            "title": "",
+            "x": 480,
+            "y": 940,
+            "properties": {
+                "inputs": {
+                    "Vector": [
+                        1,
+                        0,
+                        0
+                    ]
+                }
+            }
+        },
+        {
+            "id": 16,
+            "type": "Action.Translate",
+            "title": "",
+            "x": 740,
+            "y": 820,
+            "properties": {}
+        },
+        {
+            "id": 17,
+            "type": "Event.KeyPressed",
+            "title": "",
+            "x": 0,
+            "y": 1120,
+            "properties": {
+                "key": "Space"
+            }
+        },
+        {
+            "id": 18,
+            "type": "Variable.Get",
+            "title": "",
+            "x": 0,
+            "y": 1240,
+            "properties": {
+                "variable": "Start"
+            }
+        },
+        {
+            "id": 19,
+            "type": "Action.SetPosition",
+            "title": "",
+            "x": 260,
+            "y": 1120,
+            "properties": {}
+        },
+        {
+            "id": 20,
+            "type": "Action.Print",
+            "title": "",
+            "x": 520,
+            "y": 1120,
+            "properties": {
+                "inputs": {
+                    "Text": "Куб вернулся на место"
+                }
+            }
+        }
+    ],
+    "connections": [
+        {
+            "fromNode": 1,
+            "fromPin": "then",
+            "toNode": 3,
+            "toPin": "exec"
+        },
+        {
+            "fromNode": 2,
+            "fromPin": "Position",
+            "toNode": 3,
+            "toPin": "Value"
+        },
+        {
+            "fromNode": 3,
+            "fromPin": "then",
+            "toNode": 4,
+            "toPin": "exec"
+        },
+        {
+            "fromNode": 5,
+            "fromPin": "then",
+            "toNode": 6,
+            "toPin": "exec"
+        },
+        {
+            "fromNode": 7,
+            "fromPin": "Value",
+            "toNode": 8,
+            "toPin": "A"
+        },
+        {
+            "fromNode": 5,
+            "fromPin": "DeltaTime",
+            "toNode": 8,
+            "toPin": "B"
+        },
+        {
+            "fromNode": 6,
+            "fromPin": "then0",
+            "toNode": 10,
+            "toPin": "exec"
+        },
+        {
+            "fromNode": 9,
+            "fromPin": "Down",
+            "toNode": 10,
+            "toPin": "Condition"
+        },
+        {
+            "fromNode": 8,
+            "fromPin": "Out",
+            "toNode": 11,
+            "toPin": "Factor"
+        },
+        {
+            "fromNode": 11,
+            "fromPin": "Out",
+            "toNode": 12,
+            "toPin": "Offset"
+        },
+        {
+            "fromNode": 10,
+            "fromPin": "True",
+            "toNode": 12,
+            "toPin": "exec"
+        },
+        {
+            "fromNode": 6,
+            "fromPin": "then1",
+            "toNode": 14,
+            "toPin": "exec"
+        },
+        {
+            "fromNode": 13,
+            "fromPin": "Down",
+            "toNode": 14,
+            "toPin": "Condition"
+        },
+        {
+            "fromNode": 8,
+            "fromPin": "Out",
+            "toNode": 15,
+            "toPin": "Factor"
+        },
+        {
+            "fromNode": 15,
+            "fromPin": "Out",
+            "toNode": 16,
+            "toPin": "Offset"
+        },
+        {
+            "fromNode": 14,
+            "fromPin": "True",
+            "toNode": 16,
+            "toPin": "exec"
+        },
+        {
+            "fromNode": 17,
+            "fromPin": "then",
+            "toNode": 19,
+            "toPin": "exec"
+        },
+        {
+            "fromNode": 18,
+            "fromPin": "Value",
+            "toNode": 19,
+            "toPin": "Position"
+        },
+        {
+            "fromNode": 19,
+            "fromPin": "then",
+            "toNode": 20,
+            "toPin": "exec"
+        }
+    ]
+}

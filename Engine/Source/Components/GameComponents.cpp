@@ -12,6 +12,7 @@
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/Render/Material.h>
 #include <Engine/Render/TextureLoader.h>
+#include <Engine/Script/ScriptRuntime.h>
 #include <glm/gtx/matrix_decompose.hpp>
 
 namespace

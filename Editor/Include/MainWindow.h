@@ -3,6 +3,7 @@
 #include <QMainWindow>
 #include <QHash>
 #include <QPointer>
+#include <QSet>
 #include <functional>
 #include <cstdint>
 
@@ -26,6 +27,8 @@ class QPushButton;
 class QAction;
 class SceneObjectsPanel;
 class MaterialEditorWindow;
+class ScriptEditorWindow;
+class AiMachineEditorWindow;
 class MainToolBar;
 class ExternalGameRunner;
 class UIEditorWindow;
@@ -71,6 +74,22 @@ public:
     QString CreateMaterial(const QString& directory, const QString& name = {});
     // Для объекта с материалом по умолчанию: новый материал в Content/Materials, назначение и редактор.
     void CreateMaterialForSelection();
+    // path: файл .vscript или его /Game путь. Одно окно на скрипт.
+    void OpenScriptEditor(const QString& path);
+    // Создаёт .vscript с событиями «Начало игры» и «Каждый кадр» и открывает его; без имени спрашивает его.
+    QString CreateScript(const QString& directory, const QString& name = {});
+    // Новый скрипт в Content/Scripts для выделенного объекта: создание, назначение и окно.
+    void CreateScriptForSelection();
+    // Автомат ИИ (.fsm) выделенного «ИИ-персонажа»: новый файл в Content/AI, выбор файла, открытие.
+    void CreateAiMachineForSelection();
+    // Новый .fsm в каталоге (пустой — Content/AI); без имени спрашивает его. Возвращает /Game путь; пустой — отказ.
+    QString CreateAiMachine(const QString& directory, const QString& name = {});
+    // Окно автомата ИИ: /Game путь или файл в Content.
+    void OpenAiMachineEditor(const QString& path);
+    AiMachineEditorWindow* AiMachineEditor(const QString& machine) const;
+    void SetSelectedProperty(const QString& path, const QString& text); // строковое свойство выделенного объекта, через Undo
+    // Открытое окно скрипта (/Game путь) или nullptr.
+    ScriptEditorWindow* ScriptEditor(const QString& script) const;
     // F6: перекомпилировать все шейдеры и материалы с диска во всех сценах и превью.
     void ReloadShaders();
     void OpenUIEditor(const QString& path);
@@ -121,6 +140,17 @@ private:
     QString ProjectPath() const;
 
     void RefreshSceneUi();
+    // Ошибки скриптов в Play пишутся в Console, даже если окно скрипта закрыто.
+    void PollScriptProblems();
+    // Карточка «Автомат ИИ» выделенного персонажа: проверка .fsm движком в Edit, состояние в Play.
+    void PollAiMachine();
+    bool pollingAiMachine_ = false;
+    QString aiMachineChecked_; // путь и время файла последней проверки
+    QSet<QString> reportedScriptProblems_;
+    bool pollingScriptProblems_ = false;
+    bool scriptProblemsPlaying_ = false;
+    // Окно скрипта, закрытое на время переноса файла: открывается снова по новому пути.
+    QString reopenScriptAfterMove_;
 
     void SaveScene(bool saveAs = false, std::function<void()> after = {});
     void SetStartupScene();
@@ -137,6 +167,8 @@ private:
     // Спрашивает о несохранённых материалах и закрывает их окна; false — закрытие отменено.
     bool CloseMaterialEditors(std::function<void()> afterSave = {});
     QHash<QString, QPointer<MaterialEditorWindow>> materialEditors_;
+    QHash<QString, QPointer<ScriptEditorWindow>> scriptEditors_;
+    QHash<QString, QPointer<AiMachineEditorWindow>> aiMachineEditors_;
     QHash<QString, QPointer<UIEditorWindow>> uiEditors_;
 
     EditorQtHost* host_ = nullptr;

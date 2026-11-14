@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include <QDateTime>
 #include "QtHost.h"
+#include "ScriptMessages.h"
 #include "FileBrowser.h"
 #include "ViewportWidget.h"
 #include "SceneObjectsPanel.h"
@@ -31,11 +32,14 @@
 #include <QToolBar>
 #include <QProcess>
 #include <QPoint>
+#include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QComboBox>
 #include <QDoubleSpinBox>
+#include <QDesktopServices>
 #include <QFileDialog>
+#include <QUrl>
 #include <QLineEdit>
 #include <QTreeWidget>
 #include <QPushButton>
@@ -62,6 +66,10 @@ EditorMainWindow::EditorMainWindow(EditorQtHost* host, QWidget* parent)
     auto* timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &EditorMainWindow::RefreshStats);
     timer->start(250);
+    auto* scriptProblems = new QTimer(this);
+    connect(scriptProblems, &QTimer::timeout, this, &EditorMainWindow::PollScriptProblems);
+    connect(scriptProblems, &QTimer::timeout, this, &EditorMainWindow::PollAiMachine);
+    scriptProblems->start(1000);
 
     langSubId_ = EditorLocale::Instance().SubscribeLanguageChanged([this] { RetranslateUi(); });
     themeSubId_ = EditorTheme::Instance().SubscribeThemeChanged([this] {
@@ -459,6 +467,130 @@ void EditorMainWindow::RefreshStats()
     );
 }
 
+void EditorMainWindow::PollScriptProblems()
+{
+    const bool playing = host_->PlayState() != EditorQtHost::Edit;
+    if (playing && !scriptProblemsPlaying_) reportedScriptProblems_.clear(); // каждый Play сообщает заново
+    scriptProblemsPlaying_ = playing;
+    if (!playing || pollingScriptProblems_ || !host_->ScriptApi()) return;
+    pollingScriptProblems_ = true;
+    QPointer<EditorMainWindow> self(this);
+    EditorQtHost* host = host_;
+    EditorCommand c;
+    c.type = EditorCommand::RunTask;
+    c.task = [self, host](const EngineEditSessionApi&) {
+        struct Row { QString script, object, message; int node = 0; };
+        QVector<Row> rows;
+        if (const EngineScriptApi* api = host->ScriptApi())
+            api->readProblems(api->context, [](void* user, const EngineScriptProblem* problem) {
+                static_cast<QVector<Row>*>(user)->append({QString::fromUtf8(problem->script), QString::fromUtf8(problem->objectName),
+                                                          EditorCore::LocalizeScriptMessage(QString::fromUtf8(problem->message)), problem->node});
+            }, &rows);
+        host->RunOnUi([self, rows] {
+            if (!self) return;
+            self->pollingScriptProblems_ = false;
+            for (const auto& row : rows)
+            {
+                QString where = row.script;
+                if (!row.object.isEmpty()) where += QStringLiteral(" · ") + row.object;
+                if (row.node) where += QStringLiteral(" · ") + Tr("нода %1", "node %1").arg(row.node);
+                const QString line = Tr("[Скрипт] %1: %2", "[Script] %1: %2").arg(where, row.message);
+                if (self->reportedScriptProblems_.contains(line)) continue;
+                self->reportedScriptProblems_.insert(line);
+                self->host_->Log(line.toUtf8().constData());
+            }
+        });
+    };
+    host_->PostCommand(c);
+}
+
+void EditorMainWindow::PollAiMachine()
+{
+    if (pollingAiMachine_ || !objectInspectorPanel_ || !host_->AiMachineApi()) return;
+    const auto snapshot = host_->ReadSnapshot();
+    const quint64 selected = snapshot.selected;
+    QString machine;
+    for (const auto& object : snapshot.objects)
+        if (object.id == selected && ObjectInspectorPanel::HasAiMachine(object.propertySchema))
+            machine = QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object().value(QStringLiteral("stateMachine")).toString();
+    const bool playing = host_->PlayState() != EditorQtHost::Edit;
+    if (!playing) objectInspectorPanel_->SetAiMachineLive({});
+    if (machine.isEmpty()) return;
+
+    // Edit: файл проверяется движком, когда он или выбор меняется.
+    QString checkKey;
+    if (!playing)
+    {
+        const QFileInfo file(QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(machine.mid(6)));
+        if (!machine.endsWith(QStringLiteral(".fsm"), Qt::CaseInsensitive) || !machine.startsWith(QStringLiteral("/Game/")) || !file.exists())
+        {
+            objectInspectorPanel_->SetAiMachineProblems(machine, {});
+            aiMachineChecked_.clear();
+            return;
+        }
+        checkKey = machine + QChar(1) + QString::number(file.lastModified().toMSecsSinceEpoch()) + QChar(1) + QString::number(file.size());
+        if (checkKey == aiMachineChecked_) return;
+    }
+
+    pollingAiMachine_ = true;
+    QPointer<EditorMainWindow> self(this);
+    EditorQtHost* host = host_;
+    const QByteArray path = machine.toUtf8();
+    EditorCommand c;
+    c.type = EditorCommand::RunTask;
+    c.task = [self, host, path, machine, selected, playing, checkKey](const EngineEditSessionApi&) {
+        QStringList lines;
+        const EngineAiMachineApi* api = host->AiMachineApi();
+        if (api && !playing)
+        {
+            api->check(api->context, path.constData(), [](void* user, const EngineAiProblem* problem) {
+                const QString message = EditorCore::LocalizeScriptMessage(QString::fromUtf8(problem->message));
+                static_cast<QStringList*>(user)->append(problem->node ? Tr("нода %1: %2", "node %1: %2").arg(problem->node).arg(message) : message);
+            }, &lines);
+        }
+        else if (api)
+        {
+            struct Unit { bool found = false, running = false; QString active; quint64 wanted = 0; } unit;
+            unit.wanted = selected;
+            api->listUnits(api->context, path.constData(), [](void* user, const EngineAiUnit* item) {
+                auto& u = *static_cast<Unit*>(user);
+                if (item->objectId != u.wanted) return;
+                u.found = true;
+                u.running = item->running != 0;
+                u.active = QString::fromUtf8(item->activePath);
+            }, &unit);
+            if (unit.found)
+            {
+                lines << (unit.running ? Tr("Сейчас: %1", "Now: %1").arg(QString(unit.active).replace(QLatin1Char('/'), QStringLiteral(" › ")))
+                                       : Tr("Автомат не работает: закончился или не запустился.", "The machine is not running: finished or did not start."));
+                QStringList memory;
+                api->readMemory(api->context, selected, [](void* user, const EngineAiMemoryValue* value) {
+                    static_cast<QStringList*>(user)->append(QStringLiteral("%1 = %2").arg(QString::fromUtf8(value->key), QString::fromUtf8(value->text)));
+                }, &memory);
+                if (!memory.isEmpty()) lines << Tr("Память: %1", "Memory: %1").arg(memory.join(QStringLiteral("; ")));
+                QStringList history;
+                api->readHistory(api->context, selected, [](void* user, const char* line) {
+                    static_cast<QStringList*>(user)->append(QString::fromUtf8(line).simplified());
+                }, &history);
+                if (!history.isEmpty()) lines << Tr("Переходы:", "Transitions:") << history.mid(std::max<qsizetype>(0, history.size() - 3));
+            }
+            else lines << Tr("В Play этот персонаж не управляется ИИ.", "In Play this character is not driven by AI.");
+        }
+        host->RunOnUi([self, machine, lines, playing, checkKey] {
+            if (!self) return;
+            self->pollingAiMachine_ = false;
+            if (playing)
+            {
+                if (self->host_->PlayState() != EditorQtHost::Edit) self->objectInspectorPanel_->SetAiMachineLive(lines);
+                return;
+            }
+            self->aiMachineChecked_ = checkKey;
+            self->objectInspectorPanel_->SetAiMachineProblems(machine, lines);
+        });
+    };
+    host_->PostCommand(c);
+}
+
 void EditorMainWindow::ShowViewportContextMenu(const QPoint& globalPos)
 {
     UpdatePlayButtons();
@@ -728,6 +860,66 @@ void EditorMainWindow::ConnectPanels()
             OpenMaterialEditor(material);
         else
             CreateMaterialForSelection();
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::OpenScriptRequested, this, [this](const QString& script)
+    {
+        if (!script.isEmpty()) OpenScriptEditor(script);
+        else CreateScriptForSelection();
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseScriptRequested, this, [this]
+    {
+        if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
+        const QString path = QFileDialog::getOpenFileName(this, Tr("Скрипт из проекта", "Script from the project"),
+            QString::fromUtf8(host_->host().contentRoot), Tr("Визуальные скрипты (*.vscript)", "Visual scripts (*.vscript)"));
+        if (!path.isEmpty()) UseAsset(path);
+    });
+
+    // Переменные скрипта у объекта: карточка читает их список из файла скрипта.
+    objectInspectorPanel_->SetScriptVariablesReader([this](const QString& script) {
+        QFile file(QDir(QString::fromUtf8(host_->host().contentRoot)).filePath(script.mid(6)));
+        if (!script.startsWith(QStringLiteral("/Game/")) || !file.open(QIODevice::ReadOnly)) return QJsonArray();
+        return QJsonDocument::fromJson(file.readAll()).object().value(QStringLiteral("variables")).toArray();
+    });
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ScriptVariablesChanged, this, [this](const QString& json)
+    {
+        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
+        EditorCommand c;
+        c.type = EditorCommand::SetScriptVariables;
+        c.objectId = selectedId_;
+        c.name = json;
+        host_->PostCommand(c);
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::CreateAiMachineRequested, this, [this] { CreateAiMachineForSelection(); });
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseAiMachineRequested, this, [this]
+    {
+        if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
+        const QString root = QString::fromUtf8(host_->host().contentRoot);
+        const QString path = QFileDialog::getOpenFileName(this, Tr("Автомат ИИ из проекта", "AI state machine from the project"), root,
+                                                          Tr("Автоматы ИИ (*.fsm)", "AI state machines (*.fsm)"));
+        if (path.isEmpty()) return;
+        const QString relative = QDir(root).relativeFilePath(path);
+        if (relative.startsWith(QStringLiteral("..")) || QDir::isAbsolutePath(relative))
+        {
+            AppendLine(Tr("Автомат должен лежать в Content проекта.", "The machine must be inside the project's Content."));
+            return;
+        }
+        SetSelectedProperty(QStringLiteral("/stateMachine"), QStringLiteral("/Game/") + QDir::fromNativeSeparators(relative));
+    });
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::OpenAiMachineRequested, this, [this](const QString& machine)
+    {
+        if (machine.startsWith(QStringLiteral("/Game/"))) OpenAiMachineEditor(machine);
+    });
+
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearScriptRequested, this, [this]
+    {
+        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit) return;
+        EditorCommand c;
+        c.type = EditorCommand::SetScript;
+        c.objectId = selectedId_;
+        host_->PostCommand(c);
     });
 
     connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearMaterialRequested, this, [this]
@@ -1049,6 +1241,7 @@ static bool IsUserFacingCommand(EditorCommand::Type t)
     case EditorCommand::DuplicateObject: case EditorCommand::SetParent: case EditorCommand::SetProperty:
     case EditorCommand::SetModel: case EditorCommand::SetTexture: case EditorCommand::SetMaterial:
     case EditorCommand::SetPointLight: case EditorCommand::SetProjectData: case EditorCommand::UpdateAsset:
+    case EditorCommand::SetScriptVariables:
     case EditorCommand::ImportModel: case EditorCommand::ImportTexture: case EditorCommand::ImportAudio:
     case EditorCommand::SaveScene:
     case EditorCommand::LoadScene: case EditorCommand::NewScene: case EditorCommand::ReloadProject: return true;
@@ -1150,6 +1343,13 @@ void EditorMainWindow::CommandFinished(
         command.type == EditorCommand::NewScene || command.type == EditorCommand::UpdateAsset)
     {
         sceneBusy_ = false;
+    }
+
+    if (command.type == EditorCommand::UpdateAsset && !reopenScriptAfterMove_.isEmpty())
+    {
+        const QString script = status == EngineSceneOk && command.w == 1 ? command.name : reopenScriptAfterMove_;
+        reopenScriptAfterMove_.clear();
+        OpenScriptEditor(script);
     }
 
     if (command.type == EditorCommand::UpdateAsset && sidecarTx_.active())

@@ -93,3 +93,5 @@
 - [071: Пересечения прозрачных мешей](071-transparent-intersections.md) — depth peeling, самопересечения, камера и сборка 2026.11.07.6.
 - [072: Освещение и звук в Edit/Play/Game](072-editor-game-lighting-audio-parity.md) — режим света после загрузки C++-сцены, остановка предпрослушивания, Pause/Resume аудио и сравнение GPU-кадров.
 - [073: Общая пересборка и интеграция в main](073-main-rebuild-2026-11-08.md) — Debug/Release, SDK v142/v143/v145, запуск игр, регрессия старых дат исходников и руководства.
+
+- [072: Визуальный редактор кода на нодах](072-visual-scripting-plan.md) — общее ядро графа (материалы и скрипты), интерпретатор `.vscript` в движке, `assets.script` и расширение `Engine.Scene.Script`, окно скрипта, сцена «Скрипты» в BasicExamples; [руководство](../../Engine/docs/VISUAL-SCRIPTING.md).

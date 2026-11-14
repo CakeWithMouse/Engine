@@ -2,6 +2,8 @@
 #include "CollapsibleCard.h"
 #include "TransformCard.h"
 #include "MaterialCard.h"
+#include "ScriptCard.h"
+#include "AiMachineCard.h"
 #include "GeometryCard.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "EditorLocale.h"
@@ -9,6 +11,8 @@
 
 #include <QApplication>
 #include <QCheckBox>
+#include <QDir>
+#include <QFileInfo>
 #include <QHBoxLayout>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -96,9 +100,31 @@ void ObjectInspectorPanel::BuildUi()
     cardMaterial_->onChooseMaterial = [this] { emit ChooseMaterialRequested(); };
     cardMaterial_->onClearMaterial = [this] { emit ClearMaterialRequested(); };
 
+    cardScript_ = new ScriptCard(this);
+    cardScript_->setObjectName(QStringLiteral("ScriptCard"));
+    cardScript_->onOpenScript = [this](const QString& path) { emit OpenScriptRequested(path); };
+    cardScript_->onChooseScript = [this] { emit ChooseScriptRequested(); };
+    cardScript_->onClearScript = [this] { emit ClearScriptRequested(); };
+    cardScript_->onVariablesChanged = [this](const QString& json) { emit ScriptVariablesChanged(json); };
+
+    // Автомат ИИ — свойства stateMachine и machineMemory «ИИ-персонажа», правятся как остальные свойства (Undo).
+    cardAi_ = new AiMachineCard(this);
+    cardAi_->setObjectName(QStringLiteral("AiMachineCard"));
+    cardAi_->onSetMachine = [this](const QString& machine) { SubmitProperty(QStringLiteral("/stateMachine"), machine); };
+    cardAi_->onMemoryChanged = [this](const QString& json) { SubmitProperty(QStringLiteral("/machineMemory"), json); };
+    cardAi_->onCreate = [this] { emit CreateAiMachineRequested(); };
+    cardAi_->onOpen = [this](const QString& path) { emit OpenAiMachineRequested(path); };
+    cardAi_->onChoose = [this] { emit ChooseAiMachineRequested(); };
+    cardAi_->fileExists = [this](const QString& path) {
+        const QString root = property("contentRoot").toString();
+        return !root.isEmpty() && path.startsWith(QStringLiteral("/Game/")) && QFileInfo::exists(QDir(root).filePath(path.mid(6)));
+    };
+
     BuildPointLightCard(inspectorLayout);
     inspectorLayout->addWidget(cardGeometry_);
     inspectorLayout->addWidget(cardMaterial_);
+    inspectorLayout->addWidget(cardScript_);
+    inspectorLayout->addWidget(cardAi_);
     BuildCharacterCard(inspectorLayout);
     inspectorLayout->addWidget(properties_);
 
@@ -106,6 +132,8 @@ void ObjectInspectorPanel::BuildUi()
     cardTransform_->hide();
     cardGeometry_->hide();
     cardMaterial_->hide();
+    cardScript_->hide();
+    cardAi_->hide();
     lightInspector_->hide();
     characterInspector_->hide();
     noSelectionLabel_->show();
@@ -196,6 +224,8 @@ void ObjectInspectorPanel::RetranslateUi()
     if (cardTransform_) cardTransform_->RetranslateUi();
     if (cardGeometry_) cardGeometry_->RetranslateUi();
     if (cardMaterial_) cardMaterial_->RetranslateUi();
+    if (cardScript_) cardScript_->RetranslateUi();
+    if (cardAi_) cardAi_->RetranslateUi();
 
     if (lightEnabled_) lightEnabled_->setText(Tr("Включён", "Enabled"));
     if (lightShadows_) lightShadows_->setText(Tr("Тени", "Shadows"));
@@ -275,7 +305,7 @@ void ObjectInspectorPanel::Refresh(
         noSelectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
         noSelectionLabel_->show();
         cardGeneral_->hide(); cardTransform_->hide(); cardGeometry_->hide();
-        cardMaterial_->hide(); lightInspector_->hide(); characterInspector_->hide();
+        cardMaterial_->hide(); cardScript_->hide(); cardAi_->hide(); lightInspector_->hide(); characterInspector_->hide();
         refreshing_ = false;
         return;
     }
@@ -353,6 +383,19 @@ void ObjectInspectorPanel::Refresh(
         }
         cardMaterial_->SetData(QString::fromStdString(object.materialAsset), isPointLight || isDirLight, cr, selectionChanged);
         cardMaterial_->setVisible(showMaterial);
+        // Скрипт — у любого объекта сцены, если игровой модуль их поддерживает.
+        cardScript_->SetData(QString::fromStdString(object.scriptAsset), true);
+        cardScript_->SetVariables(QString::fromStdString(object.scriptAsset), QString::fromStdString(object.scriptVariables),
+                                  true);
+        cardScript_->setVisible(view.scripts);
+        // Карточка автомата — у типов со свойствами stateMachine и machineMemory (AiCharacter и его наследники).
+        const bool aiMachine = HasAiMachine(object.propertySchema);
+        if (aiMachine)
+        {
+            const auto data = QJsonDocument::fromJson(QByteArray::fromStdString(object.projectData)).object();
+            cardAi_->SetData(data.value(QStringLiteral("stateMachine")).toString(), data.value(QStringLiteral("machineMemory")).toString(), true);
+        }
+        cardAi_->setVisible(aiMachine);
         properties_->setVisible(showProperties);
 
         if (canReplaceWholeInspector)
@@ -376,4 +419,25 @@ void ObjectInspectorPanel::Refresh(
 
     lightInspector_->setVisible(selectedLight);
     refreshing_ = false;
+}
+
+void ObjectInspectorPanel::SetScriptVariablesReader(std::function<QJsonArray(const QString&)> reader)
+{
+    if (cardAi_) cardAi_->readVariables = reader;
+    if (cardScript_) cardScript_->readVariables = std::move(reader);
+}
+
+void ObjectInspectorPanel::SetAiMachineProblems(const QString& machine, const QStringList& lines)
+{
+    if (cardAi_) cardAi_->SetProblems(machine, lines);
+}
+
+void ObjectInspectorPanel::SetAiMachineLive(const QStringList& lines)
+{
+    if (cardAi_) cardAi_->SetLive(lines);
+}
+
+bool ObjectInspectorPanel::HasAiMachine(const std::string& propertySchema)
+{
+    return propertySchema.find("\"/stateMachine\"") != std::string::npos && propertySchema.find("\"/machineMemory\"") != std::string::npos;
 }

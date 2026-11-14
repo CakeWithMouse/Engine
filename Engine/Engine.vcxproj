@@ -54,6 +54,8 @@
     <ClCompile Include="Source\Scene\BlendImport.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditAssets.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditAudio.cpp" />
+    <ClCompile Include="Source\Runtime\SceneEditScripts.cpp" />
+    <ClCompile Include="Source\Runtime\SceneEditAi.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditMaterials.cpp" />
     <ClInclude Include="Include\Engine\Scene\SceneDocument.h" />
     <ClCompile Include="Source\Runtime\SceneEditSession.cpp" />
@@ -101,6 +103,8 @@
     <ClCompile Include="Source\AI\Controller.cpp" />
     <ClCompile Include="Source\AI\Debugger.cpp" />
     <ClCompile Include="Source\AI\Group.cpp" />
+    <ClCompile Include="Source\AI\MachineBlocks.cpp" />
+    <ClCompile Include="Source\AI\MachineFile.cpp" />
     <ClCompile Include="Source\AI\MachineInstance.cpp" />
     <ClCompile Include="Source\AI\Navigation.cpp" />
     <ClCompile Include="Source\AI\Query.cpp" />
@@ -116,6 +120,7 @@
     <ClInclude Include="Include\Engine\AI\Controller.h" />
     <ClInclude Include="Include\Engine\AI\Debugger.h" />
     <ClInclude Include="Include\Engine\AI\Group.h" />
+    <ClInclude Include="Include\Engine\AI\MachineFile.h" />
     <ClInclude Include="Include\Engine\AI\MachineInstance.h" />
     <ClInclude Include="Include\Engine\AI\Navigation.h" />
     <ClInclude Include="Include\Engine\AI\Perception.h" />
@@ -132,6 +137,9 @@
     <ClCompile Include="Source\Render\Material.cpp" />
     <ClCompile Include="Source\Render\MeshData.cpp" />
     <ClCompile Include="Source\Render\MaterialAsset.cpp" />
+    <ClCompile Include="Source\Script\ScriptCatalog.cpp" />
+    <ClCompile Include="Source\Script\ScriptProgram.cpp" />
+    <ClCompile Include="Source\Script\ScriptInstance.cpp" />
     <ClCompile Include="Source\Render\MeshPrimitives.cpp" />
     <ClCompile Include="Source\Render\MeshSimplifier.cpp" />
     <ClCompile Include="Source\Render\MeshValidation.cpp" />
@@ -200,6 +208,8 @@
     <ClInclude Include="Include\Engine\Render\ImpostorAtlas.h" />
     <ClInclude Include="Include\Engine\Render\Material.h" />
     <ClInclude Include="Include\Engine\Render\MaterialAsset.h" />
+    <ClInclude Include="Include\Engine\Script\ScriptRuntime.h" />
+    <ClInclude Include="Source\Script\ScriptProgram.h" />
     <ClInclude Include="Include\Engine\Render\MeshSimplifier.h" />
     <ClInclude Include="Include\Engine\Render\PointShadow.h" />
     <ClInclude Include="Include\Engine\Render\ShadowCascades.h" />

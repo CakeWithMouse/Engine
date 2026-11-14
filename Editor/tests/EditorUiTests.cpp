@@ -5,6 +5,19 @@
 #include "MaterialEditorWindow.h"
 #include "MaterialTextureTools.h"
 #include "MaterialGraphWidget.h"
+#include "ScriptEditorWindow.h"
+#include "AiMachineEditorWindow.h"
+#include "FsmBlockListEditor.h"
+#include "FsmGraphWidget.h"
+#include "ScriptGraphWidget.h"
+#include "ScriptMessages.h"
+#include "Graph/GraphClipboard.h"
+#include "Graph/GraphSchemaRegistry.h"
+#include "MaterialGraphSchema.h"
+#include <QPlainTextEdit>
+#include <QTableWidget>
+#include <QHeaderView>
+#include <atomic>
 #include "HlslGraphCompiler.h"
 #include "UIEditorWindow.h"
 #include <Engine/UI/UIMarkup.h>
@@ -112,7 +125,7 @@ void Add(EditorMainWindow* window, int index) {
     auto* panel=window->findChild<SceneObjectsPanel*>();Check(panel && panel->isEnabled(), "add palette enabled");
     QList<QAction*> actions;
     for(auto* action:panel->findChildren<QAction*>()) if(action->objectName().startsWith("CreateObject.")) actions.push_back(action);
-    Check(actions.size()==14,"categorized add menu includes all placeable types");
+    Check(actions.size()==17,"categorized add menu includes all placeable types");
     const QStringList types={"Primitive.Cube","Primitive.Sphere","Primitive.Plane","Primitive.Cylinder","Primitive.Cone","Primitive.Pyramid","Light.Point","Light.Directional","Particle.Sparks","Particle.Smoke","Environment.Sky","Gameplay.Character","Gameplay.Camera","Gameplay.Player"};
     Check(index>=0 && index<types.size(),"valid object menu index");CreateAction(window,types[index])->trigger();
 }
@@ -266,6 +279,25 @@ int wmain(int argc, wchar_t** argv)
             Check(!query(api.context,EngineViewportCursorExtension,1,sizeof(rejected)-1,&rejected)&&rejected.version==99,"cursor extension size rejected");}
         EngineViewportInputApi viewportInput{};
         if (!legacy && query && query(api.context,EngineViewportInputExtension,1,sizeof(viewportInput),&viewportInput)) host.SetViewportInputApi(viewportInput);
+        EngineScriptApi script{};
+        if (!legacy && query && query(api.context,EngineScriptExtension,1,sizeof(script),&script)) host.SetScriptApi(script);
+        if (!legacy) {
+            Check(script.version==1 && script.set && script.get && script.describe && script.check && script.readProblems,"current module supplies the script extension");
+            EngineScriptApi rejected{99,nullptr};
+            Check(!query(api.context,EngineScriptExtension,2,sizeof(rejected),&rejected)&&rejected.version==99,"script extension version rejected");
+            Check(!query(api.context,EngineScriptExtension,1,sizeof(rejected)-1,&rejected)&&rejected.version==99,"script extension size rejected");
+            Check(host.ScriptApi() && host.ScriptApi()->set==script.set,"host exposes the script extension");
+        }
+        EngineGraphTraceApi trace{};
+        if (!legacy && query && query(api.context,EngineGraphTraceExtension,1,sizeof(trace),&trace)) host.SetGraphTraceApi(trace);
+        EngineAiMachineApi aiMachine{};
+        if (!legacy && query && query(api.context,EngineAiMachineExtension,1,sizeof(aiMachine),&aiMachine)) host.SetAiMachineApi(aiMachine);
+        if (!legacy) {
+            Check(trace.version==1 && trace.context==script.context && trace.listObjects && trace.read,"current module supplies the graph trace extension");
+            EngineGraphTraceApi rejected{99,nullptr};
+            Check(!query(api.context,EngineGraphTraceExtension,1,sizeof(rejected)-1,&rejected)&&rejected.version==99,"graph trace extension size rejected");
+            Check(host.GraphTraceApi() && host.GraphTraceApi()->read==trace.read,"host exposes the graph trace");
+        }
         struct HostCleanup
         {
             EditorQtHost& host; EngineEditModuleApi factory; void*& context;
@@ -1484,6 +1516,551 @@ int wmain(int argc, wchar_t** argv)
             Check(!std::filesystem::exists(graphJson) && readText(graphHlsl) == savedHlsl, "retry deletes new graph and restores original code material");
         }
         Ui([](auto* w) { w->activateWindow(); });
+
+        // Visual script: created from the inspector, edited in its window, checked by the engine, run in Play.
+        {
+            Ui([](auto* w) {
+                auto* tree = w->findChild<QTreeWidget*>();
+                for (int i = 0; i < tree->topLevelItemCount(); ++i) if (tree->topLevelItem(i)->text(1) == QStringLiteral("Primitive.Sphere")) tree->setCurrentItem(tree->topLevelItem(i));
+            });
+            until([&] { return host.ReadSnapshot().selected != 0; });
+            const uint64_t sphere = host.ReadSnapshot().selected;
+            std::string sphereName;
+            for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere) sphereName = o.name;
+            Check(host.ReadSnapshot().scripts, "current module publishes script support");
+            Ui([](auto* w) {
+                auto* card = w->template findChild<QWidget*>(QStringLiteral("ScriptCard"));
+                auto* open = w->template findChild<QPushButton*>(QStringLiteral("OpenScript"));
+                Check(card && card->isVisible() && open && open->isEnabled() && open->text() == QStringLiteral("Создать"), "script card offers to create a script");
+                open->click();
+            });
+            std::string script;
+            until([&] { for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere) script = o.scriptAsset; return !script.empty(); });
+            QString scriptPath = QString::fromStdString(script); // меняется после переноса файла
+            const auto scriptFile = root / "Content" / std::filesystem::u8path(script.substr(6));
+            Check(script.rfind("/Game/Scripts/", 0) == 0 && std::filesystem::exists(scriptFile), "new script created in Content/Scripts and assigned");
+            auto window = [&](auto* w) { return w->ScriptEditor(scriptPath); };
+            until([&] { bool ready = false; Ui([&](auto* w) { ready = window(w) && window(w)->IsReady(); }); return ready; });
+            auto readText = [](const std::filesystem::path& file) { QFile f(QString::fromStdWString(file.wstring())); f.open(QIODevice::ReadOnly); return QString::fromUtf8(f.readAll()); };
+
+            int begin = 0, tick = 0, spin = 0, scale = 0, rotate = 0, pressed = 0, print = 0;
+            int checksBefore = 0;
+            Ui([&](auto* w) {
+                auto* e = window(w);
+                auto* g = e->Graph();
+                Check(!e->IsReadOnly() && g->isEnabled(), "script window is editable");
+                for (const auto& n : g->Document().Nodes())
+                {
+                    if (n.type == QStringLiteral("Event.BeginPlay")) begin = n.id;
+                    if (n.type == QStringLiteral("Event.Tick")) tick = n.id;
+                }
+                Check(begin && tick && g->Document().Nodes().size() == 2, "new script starts with Begin play and Every frame");
+                spin = g->AddNode(QStringLiteral("Const.Vec3"), QPointF(0, 400), {{QStringLiteral("value"), QVariantList{0.0, 90.0, 0.0}}});
+                scale = g->AddNode(QStringLiteral("Vec3.Scale"), QPointF(250, 300));
+                rotate = g->AddNode(QStringLiteral("Action.Rotate"), QPointF(500, 200));
+                Check(g->Connect(tick, QStringLiteral("then"), rotate, QStringLiteral("exec")) &&
+                      g->Connect(spin, QStringLiteral("Value"), scale, QStringLiteral("Vector")) &&
+                      g->Connect(tick, QStringLiteral("DeltaTime"), scale, QStringLiteral("Factor")) &&
+                      g->Connect(scale, QStringLiteral("Out"), rotate, QStringLiteral("Degrees")), "connect the rotation graph");
+                Check(!g->Connect(spin, QStringLiteral("Value"), rotate, QStringLiteral("exec")), "a value cannot feed the flow");
+                Check(!g->Connect(tick, QStringLiteral("DeltaTime"), scale, QStringLiteral("Vector")), "a number cannot feed a vector input");
+                g->Undo();
+                Check(g->Document().Connections().size() == 3, "undo removes the last link");
+                g->Redo();
+                Check(g->Document().Connections().size() == 4, "redo restores it");
+                pressed = g->AddNode(QStringLiteral("Event.KeyPressed"), QPointF(0, 700));
+                print = g->AddNode(QStringLiteral("Action.Print"), QPointF(300, 700), {{QStringLiteral("inputs"), QVariantMap{{QStringLiteral("Text"), QStringLiteral("pressed")}}}});
+                Check(g->Document().FindNode(pressed)->properties.value(QStringLiteral("key")).toString() == QStringLiteral("Space"), "key event defaults to Space");
+                Check(g->Connect(pressed, QStringLiteral("then"), print, QStringLiteral("exec")) && g->Connect(begin, QStringLiteral("then"), print, QStringLiteral("exec")),
+                      "an exec input takes several links");
+                Check(g->NodeSummary(*g->Document().FindNode(print)).join(QLatin1Char(' ')).contains(QStringLiteral("pressed")), "the node shows its input value");
+                {
+                    // AI nodes come from the engine catalog in their own group; a new one reads the perception target key.
+                    const int memory = g->AddNode(QStringLiteral("Ai.GetObject"), QPointF(900, 600));
+                    Check(memory && g->Schema().DisplayName(QStringLiteral("Ai.SendEvent")) == QStringLiteral("Отправить событие ИИ"), "AI nodes are in the script catalog");
+                    Check(g->NodeSummary(*g->Document().FindNode(memory)).join(QLatin1Char(' ')).contains(QStringLiteral("Ключ: Target")), "an AI memory node shows its key");
+                    g->Undo();
+                }
+
+                // Variables: added through the panel, undone with the graph.
+                auto* table = e->template findChild<QTableWidget*>(QStringLiteral("ScriptVariables"));
+                e->template findChild<QPushButton*>(QStringLiteral("ScriptAddVariable"))->click();
+                Check(table->rowCount() == 1 && g->Document().Variables().size() == 1, "variable added");
+                g->Undo();
+                Check(table->rowCount() == 0 && g->Document().Variables().isEmpty(), "variable addition undone");
+                g->Redo();
+                Check(table->rowCount() == 1, "variable addition redone");
+                e->template findChild<QPushButton*>(QStringLiteral("ScriptAddVariable"))->click();
+                auto* second = qobject_cast<QLineEdit*>(table->cellWidget(1, 0));
+                Check(table->rowCount() == 2 && second && second->text() == QStringLiteral("Var2") && second->isVisible(), "every variable row shows its name");
+                g->Undo();
+                checksBefore = e->CheckCount();
+                e->SaveNow();
+            });
+            until([&] { bool done = false; Ui([&](auto* w) { done = window(w)->CheckCount() > checksBefore; }); return done; });
+            Ui([&](auto* w) {
+                Check(window(w)->Problems().isEmpty(), "engine accepts the graph");
+                Check(readText(scriptFile).contains(QStringLiteral("Action.Rotate")), "edits are written to the file");
+
+                auto* g = window(w)->Graph();
+                // A link is selected and deleted with Del; undo brings it back.
+                const EditorCore::GraphConnectionData flow{tick, QStringLiteral("then"), rotate, QStringLiteral("exec"), {}};
+                g->SelectLink(flow);
+                Check(g->SelectedLinks().size() == 1 && g->SelectedNodes().isEmpty(), "a link can be selected");
+                const int links = g->Document().Connections().size();
+                QKeyEvent del(QEvent::KeyPress, Qt::Key_Delete, Qt::NoModifier);
+                QApplication::sendEvent(g->View(), &del);
+                Check(g->Document().Connections().size() == links - 1, "Del removes the selected link");
+                g->Undo();
+                Check(g->Document().Connections().size() == links, "undo restores the link");
+
+                // «Упорядочить»: the flow goes left to right in one undo step.
+                const QString arranged = g->Document().ExportToJson();
+                Check(g->ArrangeNodes(), "arrange moves the nodes");
+                const auto x = [&](int id) { return g->Document().FindNode(id)->pos.x(); };
+                Check(x(tick) < x(rotate) && x(scale) < x(rotate) && x(begin) < x(print), "arranged left to right along the links");
+                Check(!g->ArrangeNodes(), "arranging twice changes nothing");
+                g->Undo();
+                Check(g->Document().ExportToJson() == arranged, "arrange is one undo step");
+
+                // Material nodes in the clipboard are named instead of being silently ignored.
+                EditorCore::GraphDocument material;
+                material.AddNode(QStringLiteral("Constant"), {}, QPointF(0, 0));
+                QGuiApplication::clipboard()->setText(EditorCore::GraphClipboard::Encode(material, {1},
+                    EditorCore::MaterialGraphSchema::Instance().ClipboardMarker(), {}));
+                const int nodes = g->Document().Nodes().size();
+                Check(g->PasteNodes(QPointF(0, 0)).isEmpty() && g->Document().Nodes().size() == nodes, "material nodes are not pasted");
+                Check(g->LastNotice().contains(EditorCore::GraphSchemaRegistry::Instance().DisplayName(QString())), "the notice names the material graph");
+
+                // The finished graph has no warnings; a lonely random number has (Min = Max = 0 unless set).
+                Check(window(w)->Warnings().isEmpty(), "a connected graph has no warnings");
+                const int lonely = g->AddNode(QStringLiteral("Math.Random"), QPointF(900, 900));
+                Check(g->Document().FindNode(lonely)->properties.value(QStringLiteral("inputs")).toMap().value(QStringLiteral("Max")).toDouble() == 1.0,
+                      "a new Random gets Max = 1");
+                window(w)->SaveNow();
+            });
+            until([&] { bool warned = false; Ui([&](auto* w) { warned = !window(w)->Warnings().isEmpty() && window(w)->Graph()->NodeWarnings().size() == 1; }); return warned; });
+            Ui([&](auto* w) {
+                auto* g = window(w)->Graph();
+                g->Undo(); // the lonely node goes away
+
+                // A comment frames the selected node; undo removes it.
+                g->SelectNodes({rotate});
+                const int comment = g->AddComment(QStringLiteral("Поворот"));
+                Check(g->Document().Comments().size() == 1 && g->Document().FindComment(comment)->rect.contains(g->Document().FindNode(rotate)->pos),
+                      "the comment frames the selected node");
+                Check(g->SetCommentText(comment, QStringLiteral("Вращение")) && g->Document().FindComment(comment)->text == QStringLiteral("Вращение"),
+                      "the comment text changes");
+                g->Undo();
+                g->Undo();
+                Check(g->Document().Comments().isEmpty(), "undo removes the comment");
+                window(w)->SaveNow();
+            });
+
+            // Variables of this object: the script card edits values for the sphere only; scene undo restores them.
+            auto sphereVariables = [&] {
+                std::string values = "?";
+                for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere) values = o.scriptVariables;
+                return values;
+            };
+            until([&] { bool shown = false; Ui([&](auto* w) { shown = w->template findChild<QLineEdit*>(QStringLiteral("ScriptVariable_Var")) != nullptr; }); return shown; });
+            Ui([&](auto* w) {
+                auto* field = w->template findChild<QLineEdit*>(QStringLiteral("ScriptVariable_Var"));
+                Check(field->text().isEmpty() && field->placeholderText() == QStringLiteral("0"), "the field shows the script's value as a hint");
+                field->setText(QStringLiteral("5,5"));
+                QMetaObject::invokeMethod(field, "editingFinished");
+            });
+            until([&] { return sphereVariables() == R"({"Var":5.5})"; });
+            Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
+            until([&] { return sphereVariables().empty(); });
+            Ui([](auto* w) { Action(w, QStringLiteral("Повторить"))->trigger(); });
+            until([&] { return sphereVariables() == R"({"Var":5.5})"; });
+            {
+                EditorCommand select; select.type = EditorCommand::SelectObject; select.objectId = sphere; host.PostCommand(select);
+            }
+            until([&] { bool shown = false; Ui([&](auto* w) {
+                auto* reset = w->template findChild<QToolButton*>(QStringLiteral("ScriptVariableReset_Var"));
+                shown = host.ReadSnapshot().selected == sphere && reset && !reset->isHidden(); }); return shown; });
+            Ui([](auto* w) { w->template findChild<QToolButton*>(QStringLiteral("ScriptVariableReset_Var"))->click(); });
+            until([&] { return sphereVariables().empty(); });
+
+            // AI character: the "AI State Machine" card creates a .fsm, edits memory values of this object, undo works.
+            {
+                const auto count = host.ReadSnapshot().objects.size();
+                Ui([](auto* w) { CreateAction(w, "Gameplay.AiCharacter")->trigger(); });
+                until([&] { return host.ReadSnapshot().objects.size() == count + 1; });
+            }
+            uint64_t guard = 0;
+            for (const auto& o : host.ReadSnapshot().objects) if (o.type == "Gameplay.AiCharacter") guard = o.id;
+            Check(guard != 0, "an AI character is placed");
+            auto selectGuard = [&] {
+                EditorCommand none; none.type = EditorCommand::SelectObject; none.objectId = 0; host.PostCommand(none);
+                EditorCommand select; select.type = EditorCommand::SelectObject; select.objectId = guard; host.PostCommand(select);
+            };
+            auto guardData = [&] {
+                for (const auto& o : host.ReadSnapshot().objects)
+                    if (o.id == guard) return QJsonDocument::fromJson(QByteArray::fromStdString(o.projectData)).object();
+                return QJsonObject();
+            };
+            auto cardShown = [&] {
+                bool shown = false;
+                Ui([&](auto* w) {
+                    auto* card = w->template findChild<QWidget*>(QStringLiteral("AiMachineCard"));
+                    shown = host.ReadSnapshot().selected == guard && card && !card->isHidden();
+                });
+                return shown;
+            };
+            selectGuard();
+            until(cardShown);
+            Ui([](auto* w) {
+                Check(!w->template findChild<QWidget*>(QStringLiteral("Property/stateMachine")) && !w->template findChild<QWidget*>(QStringLiteral("Property/machineMemory")),
+                      "the AI card replaces the raw machine properties");
+                Check(w->template findChild<QWidget*>(QStringLiteral("Property/sightRadius")) != nullptr, "other AI properties stay in the list");
+                auto* create = w->template findChild<QPushButton*>(QStringLiteral("AiMachineOpen"));
+                Check(create && create->text() == QStringLiteral("Создать") && create->isEnabled(), "an empty machine offers Create");
+                create->click();
+            });
+            until([&] { return guardData().value(QStringLiteral("stateMachine")).toString().startsWith(QStringLiteral("/Game/AI/")); });
+            const QString machine = guardData().value(QStringLiteral("stateMachine")).toString();
+            until([&] { bool open = false; Ui([&](auto* w) { open = w->AiMachineEditor(machine) != nullptr; }); return open; });
+            Ui([&](auto* w) { w->AiMachineEditor(machine)->close(); });
+            const auto machineFile = root / "Content" / std::filesystem::u8path(machine.mid(6).toStdString());
+            QJsonObject fsm;
+            {
+                QFile file(QString::fromStdWString(machineFile.wstring()));
+                Check(file.open(QIODevice::ReadOnly), "the machine file is created");
+                fsm = QJsonDocument::fromJson(file.readAll()).object();
+            }
+            Check(fsm.value(QStringLiteral("schema")).toString() == QStringLiteral("ai.fsm") &&
+                  fsm.value(QStringLiteral("nodes")).toArray().at(0).toObject().value(QStringLiteral("type")).toString() == QStringLiteral("Fsm.State"),
+                  "a new machine is an ai.fsm graph with one state");
+
+            // Variables of the file become fields; an object key has no literal and is not shown.
+            fsm[QStringLiteral("variables")] = QJsonArray{
+                QJsonObject{{QStringLiteral("name"), QStringLiteral("Target")}, {QStringLiteral("type"), QStringLiteral("object")}},
+                QJsonObject{{QStringLiteral("name"), QStringLiteral("Speed")}, {QStringLiteral("type"), QStringLiteral("float")}, {QStringLiteral("value"), 2}},
+                QJsonObject{{QStringLiteral("name"), QStringLiteral("Lives")}, {QStringLiteral("type"), QStringLiteral("int")}, {QStringLiteral("value"), 3}}};
+            {
+                QFile file(QString::fromStdWString(machineFile.wstring()));
+                Check(file.open(QIODevice::WriteOnly | QIODevice::Truncate) && file.write(QJsonDocument(fsm).toJson()) > 0, "the machine file is rewritten");
+            }
+            selectGuard();
+            until([&] { bool shown = cardShown(); if (shown) Ui([&](auto* w) { shown = w->template findChild<QLineEdit*>(QStringLiteral("AiMemory_Speed")) != nullptr; }); return shown; });
+            Ui([](auto* w) {
+                Check(!w->template findChild<QWidget*>(QStringLiteral("AiMemory_Target")), "an object key is not editable as a value");
+                Check(w->template findChild<QPushButton*>(QStringLiteral("AiMachineOpen"))->text() == QStringLiteral("Открыть"), "an assigned machine offers Open");
+                auto* lives = w->template findChild<QLineEdit*>(QStringLiteral("AiMemory_Lives"));
+                Check(lives && lives->placeholderText() == QStringLiteral("3"), "the field shows the file's value as a hint");
+                lives->setText(QStringLiteral("1.5"));
+                QMetaObject::invokeMethod(lives, "editingFinished");
+                Check(lives->text().isEmpty(), "a fraction is refused for an int key");
+                auto* speed = w->template findChild<QLineEdit*>(QStringLiteral("AiMemory_Speed"));
+                speed->setText(QStringLiteral("3,5"));
+                QMetaObject::invokeMethod(speed, "editingFinished");
+            });
+            until([&] { return guardData().value(QStringLiteral("machineMemory")).toString() == QStringLiteral(R"({"Speed":3.5})"); });
+            Ui([](auto* w) { Action(w, QStringLiteral("Отменить"))->trigger(); });
+            until([&] { return guardData().value(QStringLiteral("machineMemory")).toString().isEmpty(); });
+            Ui([](auto* w) { Action(w, QStringLiteral("Повторить"))->trigger(); });
+            until([&] { return guardData().value(QStringLiteral("machineMemory")).toString() == QStringLiteral(R"({"Speed":3.5})"); });
+
+            // Engine.Scene.AiMachine: the engine checks the file; errors appear under the card and go away when fixed.
+            auto writeMachine = [&](const QJsonObject& json) {
+                QFile file(QString::fromStdWString(machineFile.wstring()));
+                Check(file.open(QIODevice::WriteOnly | QIODevice::Truncate) && file.write(QJsonDocument(json).toJson()) > 0, "the machine file is written");
+            };
+            Check(host.AiMachineApi() != nullptr, "current module supplies the AI machine extension");
+            {
+                QJsonObject broken = fsm;
+                QJsonArray nodes = broken[QStringLiteral("nodes")].toArray();
+                QJsonObject state = nodes[0].toObject();
+                QJsonObject properties = state[QStringLiteral("properties")].toObject();
+                properties[QStringLiteral("tasks")] = QJsonArray{QJsonObject{{QStringLiteral("type"), QStringLiteral("Ai.Fly")}}};
+                state[QStringLiteral("properties")] = properties;
+                nodes[0] = state;
+                broken[QStringLiteral("nodes")] = nodes;
+                writeMachine(broken);
+            }
+            selectGuard();
+            auto problemsText = [&] {
+                QString text;
+                Ui([&](auto* w) {
+                    auto* problems = w->template findChild<QLabel*>(QStringLiteral("AiMachineProblems"));
+                    text = problems && !problems->isHidden() ? problems->text() : QString();
+                });
+                return text;
+            };
+            until([&] { return problemsText().contains(QStringLiteral("Ai.Fly")); });
+            writeMachine(fsm);
+            until([&] { return problemsText().isEmpty(); });
+
+            // Play: the card shows the character's active state, its memory and the transitions.
+            selectGuard();
+            until(cardShown);
+            Ui([](auto* w) { Action(w, QStringLiteral("▶ Play"))->trigger(); });
+            until([&] { return host.PlayState() == EditorQtHost::Play; });
+            auto liveText = [&] {
+                QString text;
+                Ui([&](auto* w) {
+                    auto* live = w->template findChild<QLabel*>(QStringLiteral("AiMachineLive"));
+                    text = live && !live->isHidden() ? live->text() : QString();
+                });
+                return text;
+            };
+            until([&] { const QString text = liveText(); return text.contains(QStringLiteral("Idle")) && text.contains(QStringLiteral("Speed = 3.5")); });
+            Ui([](auto* w) { Action(w, QStringLiteral("⏹ Stop"))->trigger(); });
+            until([&] { return host.PlayState() == EditorQtHost::Edit; });
+            until([&] { return liveText().isEmpty(); });
+
+            // The AI editor window: "Open" in the card, edits are saved and checked by the engine, undo works.
+            selectGuard();
+            until(cardShown);
+            Ui([](auto* w) { w->template findChild<QPushButton*>(QStringLiteral("AiMachineOpen"))->click(); });
+            auto fsmWindow = [&](auto* w) { return w->AiMachineEditor(machine); };
+            until([&] { bool ready = false; Ui([&](auto* w) { ready = fsmWindow(w) && fsmWindow(w)->IsReady() && fsmWindow(w)->CheckCount() > 0; }); return ready; });
+            int chase = 0, checks = 0;
+            Ui([&](auto* w) {
+                auto* window = fsmWindow(w);
+                auto* g = window->Graph();
+                Check(!window->IsReadOnly() && window->Problems().isEmpty(), "the machine window opens a valid machine");
+                Check(g->Document().Nodes().size() == 1 && g->Schema().NodeName(g->Document().Nodes().first()) == QStringLiteral("Idle"), "the window shows the file's state");
+                chase = g->AddNode(QStringLiteral("Fsm.State"), QPointF(400, 0), {{QStringLiteral("name"), QStringLiteral("Chase")},
+                    {QStringLiteral("tasks"), QVariantList{QVariantMap{{QStringLiteral("type"), QStringLiteral("Ai.MoveTo")}, {QStringLiteral("target"), QStringLiteral("Target")}}}}});
+                Check(g->Connect(1, QStringLiteral("out"), chase, QStringLiteral("in")) && g->Connect(chase, QStringLiteral("out"), 1, QStringLiteral("in")), "transitions both ways");
+                EditorCore::GraphConnectionData link;
+                link.fromNode = 1; link.fromPin = QStringLiteral("out"); link.toNode = chase; link.toPin = QStringLiteral("in");
+                Check(g->SetLinkProperties(link, {{QStringLiteral("trigger"), QStringLiteral("tick")},
+                    {QStringLiteral("conditions"), QVariantList{QVariantMap{{QStringLiteral("type"), QStringLiteral("Ai.CanSee")}, {QStringLiteral("target"), QStringLiteral("Target")}}}}}),
+                      "transition properties");
+                checks = window->CheckCount();
+                window->SaveNow();
+            });
+            until([&] { bool done = false; Ui([&](auto* w) { done = fsmWindow(w)->CheckCount() > checks; }); return done; });
+            Ui([&](auto* w) {
+                auto* window = fsmWindow(w);
+                Check(window->Problems().isEmpty(), "two states with transitions pass the engine's check");
+                QFile file(QString::fromStdWString(machineFile.wstring()));
+                Check(file.open(QIODevice::ReadOnly), "the machine file is saved");
+                const QJsonObject saved = QJsonDocument::fromJson(file.readAll()).object();
+                Check(saved.value(QStringLiteral("nodes")).toArray().size() == 2 && saved.value(QStringLiteral("connections")).toArray().size() == 2, "the file has both states and transitions");
+                // A key the memory does not have: the engine's error lands on the node, in Russian.
+                auto* g = window->Graph();
+                QVariantMap properties = g->Document().FindNode(chase)->properties;
+                properties[QStringLiteral("tasks")] = QVariantList{QVariantMap{{QStringLiteral("type"), QStringLiteral("Ai.MoveTo")}, {QStringLiteral("target"), QStringLiteral("Nowhere")}}};
+                Check(g->SetNodeProperties(chase, properties), "state properties change");
+                checks = window->CheckCount();
+                window->SaveNow();
+            });
+            until([&] { bool done = false; Ui([&](auto* w) { done = fsmWindow(w)->CheckCount() > checks; }); return done; });
+            Ui([&](auto* w) {
+                auto* window = fsmWindow(w);
+                Check(window->Problems().value(chase).contains(QStringLiteral("нет переменной «Nowhere»")), "the engine's problem is shown on the node in Russian");
+                window->Graph()->Undo();
+                checks = window->CheckCount();
+                window->SaveNow();
+            });
+            until([&] { bool done = false; Ui([&](auto* w) { done = fsmWindow(w)->CheckCount() > checks; }); return done; });
+            Ui([&](auto* w) {
+                auto* window = fsmWindow(w);
+                auto* g = window->Graph();
+                Check(window->Problems().isEmpty(), "undo brings the valid machine back");
+                // Memory and settings go to the file and through undo; a renamed key is renamed in the blocks too.
+                const int keys = static_cast<int>(g->Document().Variables().size());
+                window->AddVariable();
+                Check(g->Document().Variables().size() == keys + 1, "a memory key is added");
+                QJsonArray variables = g->Document().Variables();
+                QJsonObject target = variables[0].toObject();
+                target[QStringLiteral("name")] = QStringLiteral("Enemy");
+                variables[0] = target;
+                g->SetVariables(variables, {{QStringLiteral("Target"), QStringLiteral("Enemy")}});
+                Check(g->Document().FindNode(chase)->properties.value(QStringLiteral("tasks")).toList().first().toMap().value(QStringLiteral("target")) == QStringLiteral("Enemy"),
+                      "renaming a key renames it in the blocks");
+                Check(g->Settings().value(QStringLiteral("targetKey")).toString() == QStringLiteral("Enemy"), "and in the settings");
+                {
+                    auto* table = window->template findChild<QTableWidget*>(QStringLiteral("FsmVariables"));
+                    const QJsonArray shown = g->Document().Variables();
+                    QStringList names, expected;
+                    for (int row = 0; row < table->rowCount(); ++row) { auto* field = qobject_cast<QLineEdit*>(table->cellWidget(row, 0)); names << (field ? field->text() : QStringLiteral("<none>")); }
+                    for (const auto& v : shown) expected << v.toObject().value(QStringLiteral("name")).toString();
+                    if (names != expected) std::printf("memory table: [%s] vs [%s]\n", names.join(',').toUtf8().constData(), expected.join(',').toUtf8().constData());
+                    Check(names == expected, "the memory table shows every key");
+                }
+                QJsonObject settings = g->Settings();
+                settings[QStringLiteral("thinkInterval")] = 0.25;
+                g->SetSettings(settings);
+                Check(g->Settings().value(QStringLiteral("thinkInterval")).toDouble() == 0.25, "settings change");
+                g->Undo();
+                Check(!g->Settings().contains(QStringLiteral("thinkInterval")), "settings go through undo");
+                // A child state: the parent is framed on the canvas.
+                const int child = g->AddNode(QStringLiteral("Fsm.State"), QPointF(400, 200), {{QStringLiteral("name"), QStringLiteral("Strafe")},
+                    {QStringLiteral("parent"), chase}, {QStringLiteral("tasks"), QVariantList{QVariantMap{{QStringLiteral("type"), QStringLiteral("Ai.Wait")}}}}});
+                int frames = 0;
+                for (auto* item : g->View()->scene()->items()) if (item->data(0).toString() == QStringLiteral("frame")) ++frames;
+                Check(child && frames == 1, "a parent state is framed with its children");
+                g->RemoveNodes({chase});
+                Check(!g->Document().FindNode(child)->properties.contains(QStringLiteral("parent")), "removing a parent moves its children to the top");
+                g->Undo();
+                Check(g->Document().FindNode(child)->properties.value(QStringLiteral("parent")).toInt() == chase, "undo restores the parent");
+                checks = window->CheckCount();
+                window->SaveNow();
+
+                // The block list editor: blocks from the catalog with typed parameter fields.
+                FsmBlockListEditor blocks(window->Schema(), QStringLiteral("task"), QStringLiteral("TestBlocks"));
+                Check(blocks.AddBlock(QStringLiteral("Ai.Wait")) && !blocks.AddBlock(QStringLiteral("Ai.CanSee")), "only blocks of the editor's kind are added");
+                auto* seconds = blocks.template findChild<QDoubleSpinBox*>(QStringLiteral("TestBlocksParam_seconds"));
+                Check(seconds && seconds->value() == 1.0, "a parameter shows the catalog default");
+                seconds->setValue(2.5);
+                Check(blocks.Blocks().first().toMap().value(QStringLiteral("seconds")).toDouble() == 2.5, "a parameter field writes the block");
+                Check(blocks.AddBlock(QStringLiteral("Ai.MoveTo")) && blocks.Blocks().last().toMap().value(QStringLiteral("target")).toString() == QStringLiteral("Enemy"),
+                      "a key parameter starts with the first fitting key");
+                auto* key = blocks.template findChild<QComboBox*>(QStringLiteral("TestBlocksParam_target"));
+                Check(key && key->findText(QStringLiteral("Enemy")) >= 0 && key->findText(QStringLiteral("Speed")) < 0, "a key parameter offers only fitting keys");
+            });
+            until([&] { bool done = false; Ui([&](auto* w) { done = fsmWindow(w)->CheckCount() > checks; }); return done; });
+            Ui([&](auto* w) {
+                Check(fsmWindow(w)->Problems().isEmpty(), "a parent with a child passes the engine's check");
+                fsmWindow(w)->Graph()->FrameNodes();
+            });
+            for (int i = 0; i < 20; ++i) pump();
+            Ui([&](auto* w) {
+                fsmWindow(w)->grab().save(QString::fromStdWString((root / "ai-machine-window.png").wstring()));
+                fsmWindow(w)->close();
+            });
+
+            // A C++ machine name is typed in the same field; "Clear" removes the machine.
+            selectGuard();
+            until(cardShown);
+            Ui([](auto* w) {
+                auto* field = w->template findChild<QLineEdit*>(QStringLiteral("AiMachine"));
+                field->setText(QStringLiteral("Guard"));
+                QMetaObject::invokeMethod(field, "editingFinished");
+            });
+            until([&] { return guardData().value(QStringLiteral("stateMachine")).toString() == QStringLiteral("Guard"); });
+            until([&] { bool shown = false; Ui([&](auto* w) {
+                auto* status = w->template findChild<QLabel*>(QStringLiteral("AiMachineStatus"));
+                auto* memory = w->template findChild<QWidget*>(QStringLiteral("AiMemoryValues"));
+                shown = status && !status->isHidden() && status->text().contains(QStringLiteral("C++")) && memory && memory->isHidden(); }); return shown; });
+            Ui([](auto* w) { w->template findChild<QPushButton*>(QStringLiteral("AiMachineClear"))->click(); });
+            until([&] { return guardData().value(QStringLiteral("stateMachine")).toString().isEmpty(); });
+            // The checks below expect the scene as it was: the character and its file go away, the sphere is selected again.
+            {
+                const auto count = host.ReadSnapshot().objects.size();
+                EditorCommand remove; remove.type = EditorCommand::RemoveObject; remove.objectId = guard; host.PostCommand(remove);
+                until([&] { return host.ReadSnapshot().objects.size() == count - 1; });
+                std::filesystem::remove(machineFile);
+                EditorCommand select; select.type = EditorCommand::SelectObject; select.objectId = sphere; host.PostCommand(select);
+                until([&] { return host.ReadSnapshot().selected == sphere; });
+            }
+
+            // Nodes copied from one script are pasted into another.
+            Ui([&](auto* w) {
+                auto* g = window(w)->Graph();
+                Check(g->CopyNodes({spin, scale}), "copy script nodes");
+                Check(!w->CreateScript({}, QStringLiteral("SecondScript")).isEmpty(), "second script created from the main window");
+            });
+            until([&] { bool ready = false; Ui([&](auto* w) { ready = w->ScriptEditor(QStringLiteral("/Game/Scripts/SecondScript.vscript")) &&
+                                                                        w->ScriptEditor(QStringLiteral("/Game/Scripts/SecondScript.vscript"))->IsReady(); }); return ready; });
+            Ui([&](auto* w) {
+                auto* second = w->ScriptEditor(QStringLiteral("/Game/Scripts/SecondScript.vscript"));
+                const auto created = second->Graph()->PasteNodes(QPointF(0, 500));
+                Check(created.size() == 2 && second->Graph()->Document().Connections().size() == 1, "pasted nodes keep their link");
+                second->close();
+            });
+
+            // Play runs the script: the sphere turns.
+            auto rotation = [&] {
+                struct Read { std::string name; float w = 2; } read{sphereName};
+                std::atomic<bool> done{false};
+                EditorCommand c;
+                c.type = EditorCommand::RunTask;
+                c.task = [&](const EngineEditSessionApi& api) {
+                    EngineSceneInfo info{};
+                    api.readActiveScene(api.context, &info, [](void* p, const EngineSceneObjectInfo* o) {
+                        auto& r = *static_cast<Read*>(p);
+                        if (r.name == o->name) r.w = o->transform.rotation[3];
+                    }, &read);
+                    done = true;
+                };
+                host.PostCommand(c);
+                until([&] { return done.load(); });
+                return read.w;
+            };
+            const float before = rotation();
+            Ui([](auto* w) { Action(w, QStringLiteral("▶ Play"))->trigger(); });
+            until([&] { return host.PlayState() == EditorQtHost::Play; });
+            until([&] { return std::abs(rotation() - before) > 0.01f; });
+            // Engine.Scene.GraphTrace: the open window shows which nodes of the sphere's script run.
+            Check(host.GraphTraceApi() != nullptr, "current module supplies the graph trace");
+            until([&] {
+                bool shown = false;
+                Ui([&](auto* w) {
+                    const auto& statuses = window(w)->Graph()->NodeStatuses();
+                    shown = statuses.value(tick).state == GraphNodeState::Active && statuses.value(rotate).state == GraphNodeState::Active &&
+                            statuses.value(begin).state == GraphNodeState::Done && statuses.value(begin).badge == QStringLiteral("\u00d71") &&
+                            !statuses.contains(pressed) && statuses.value(scale).values.contains(QStringLiteral("Out")) &&
+                            statuses.value(tick).values.contains(QStringLiteral("DeltaTime"));
+                });
+                return shown;
+            });
+            Ui([&](auto* w) {
+                auto* objects = window(w)->template findChild<QComboBox*>(QStringLiteral("ScriptTraceObject"));
+                Check(objects && objects->isVisible() && objects->count() == 1 && objects->currentText() == QString::fromStdString(sphereName),
+                      "the traced object is chosen in the status bar");
+                Check(window(w)->Graph()->Document().FindNode(rotate) != nullptr, "trace does not touch the graph");
+                Check(window(w)->grab().save(QString::fromStdWString((root / "editor-script-trace.png").wstring())), "save script trace");
+            });
+            Ui([](auto* w) { Action(w, QStringLiteral("⏹ Stop"))->trigger(); });
+            until([&] { return host.PlayState() == EditorQtHost::Edit; });
+            Check(std::abs(rotation() - before) < 1e-5f, "Stop returns the edit scene untouched");
+            until([&] { bool cleared = false; Ui([&](auto* w) { cleared = window(w)->Graph()->NodeStatuses().isEmpty(); }); return cleared; });
+
+            // A runtime error is shown on its node; fixing the graph clears it.
+            int divide = 0;
+            Ui([&](auto* w) {
+                auto* g = window(w)->Graph();
+                divide = g->AddNode(QStringLiteral("Math.Divide"), QPointF(0, 900), {{QStringLiteral("inputs"), QVariantMap{{QStringLiteral("A"), 1.0}}}});
+                Check(g->Connect(divide, QStringLiteral("Out"), print, QStringLiteral("Text")), "feed the division into Print");
+                window(w)->SaveNow();
+            });
+            for (int i = 0; i < 30; ++i) pump();
+            Ui([](auto* w) { Action(w, QStringLiteral("▶ Play"))->trigger(); });
+            until([&] { return host.PlayState() == EditorQtHost::Play; });
+            // Текст движка показывается на языке редактора (по-русски — «деление на ноль»).
+            const QString divisionByZero = EditorCore::LocalizeScriptMessage(QStringLiteral("division by zero"));
+            until([&] { bool shown = false; Ui([&](auto* w) { shown = window(w)->Problems().value(divide).contains(divisionByZero); }); return shown; });
+            // Та же ошибка один раз попадает в Console главного окна, даже без открытого окна скрипта.
+            until([&] {
+                int lines = 0;
+                Ui([&](auto* w) { for (auto* console : w->template findChildren<QPlainTextEdit*>())
+                    for (const QString& line : console->toPlainText().split(QLatin1Char('\n')))
+                        if (line.contains(divisionByZero) && line.contains(QStringLiteral(".vscript"))) ++lines; });
+                return lines == 1;
+            });
+            Ui([&](auto* w) {
+                bool marked = false;
+                for (auto* item : window(w)->Graph()->View()->scene()->items()) marked = marked || item->toolTip().contains(divisionByZero);
+                Check(marked, "the failing node shows the Play error");
+                Check(window(w)->grab().save(QString::fromStdWString((root / "editor-script-error.png").wstring())), "save script error");
+            });
+            Ui([](auto* w) { Action(w, QStringLiteral("⏹ Stop"))->trigger(); });
+            until([&] { return host.PlayState() == EditorQtHost::Edit; });
+            // Files → «Переместить / переименовать…» с открытым окном: объект и сцена идут за файлом,
+            // окно закрывается и открывается по новому пути.
+            const auto movedFile = root / "Content/Logic/Moved.vscript";
+            Ui([&](auto* w) { w->UpdateAsset(QString::fromStdWString(scriptFile.wstring()), true, QStringLiteral("Logic/Moved.vscript")); });
+            until([&] { std::string now; for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere) now = o.scriptAsset; return now == "/Game/Logic/Moved.vscript"; });
+            Check(std::filesystem::exists(movedFile) && !std::filesystem::exists(scriptFile), "script file moved with its references");
+            scriptPath = QStringLiteral("/Game/Logic/Moved.vscript");
+            until([&] { bool reopened = false; Ui([&](auto* w) { reopened = window(w) && window(w)->IsReady() && !w->ScriptEditor(QString::fromStdString(script)); }); return reopened; });
+            Ui([&](auto* w) {
+                window(w)->Graph()->RemoveNodes({divide});
+                Check(w->grab().save(QString::fromStdWString((root / "editor-script-card.png").wstring())), "save script card");
+                w->template findChild<QPushButton*>(QStringLiteral("ClearScript"))->click();
+            });
+            until([&] { bool cleared = false; for (const auto& o : host.ReadSnapshot().objects) if (o.id == sphere) cleared = o.scriptAsset.empty(); return cleared; });
+            Ui([&](auto* w) { window(w)->close(); });
+            for (int i = 0; i < 20; ++i) pump();
+        }
 
         // "Редактировать" on the default material: a new material is created, assigned and opened.
         Ui([](auto* w) {

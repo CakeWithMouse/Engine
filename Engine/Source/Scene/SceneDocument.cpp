@@ -74,7 +74,7 @@ void Structure(const SceneSnapshot& data)
         }
         if (item.pointLight && !item.pointLight->IsValid()) Invalid("Invalid point light parameters");
         if (!SceneAssets::ValidPath(item.modelAsset) || !SceneAssets::ValidPath(item.textureAsset) ||
-            !SceneAssets::ValidPath(item.materialAsset))
+            !SceneAssets::ValidPath(item.materialAsset) || !SceneAssets::ValidPath(item.scriptAsset))
             Invalid("Assets must be canonical /Game paths without traversal");
         if (item.typeName == SceneAssets::ModelType && item.modelAsset.empty())
             Invalid("Engine.Model requires a model asset");
@@ -172,15 +172,29 @@ SceneSnapshot SceneDocument::Parse(const std::string& text)
             }
             if (o.contains("assets"))
             {
-                // "material" is optional: documents written before materials stay readable.
+                // "material" and "script" are optional: documents written without them stay readable,
+                // and they are written only when assigned, so such documents stay readable by older builds.
                 const auto& a = o.at("assets");
-                if (a.is_object() && a.contains("material")) RequireFields(a, {"model", "texture", "material"});
-                else RequireFields(a, {"model", "texture"});
+                if (!a.is_object()) Invalid("Invalid asset reference");
+                auto required = a;
+                required.erase("material"); required.erase("script"); required.erase("scriptVariables");
+                RequireFields(required, {"model", "texture"});
                 if (!a.at("model").is_string() || !a.at("texture").is_string() ||
-                    (a.contains("material") && !a.at("material").is_string())) Invalid("Invalid asset reference");
+                    (a.contains("material") && !a.at("material").is_string()) ||
+                    (a.contains("script") && !a.at("script").is_string())) Invalid("Invalid asset reference");
                 item.modelAsset = a.at("model").get<std::string>();
                 item.textureAsset = a.at("texture").get<std::string>();
                 if (a.contains("material")) item.materialAsset = a.at("material").get<std::string>();
+                if (a.contains("script")) item.scriptAsset = a.at("script").get<std::string>();
+                if (a.contains("scriptVariables"))
+                {
+                    // Values of the script's variables for this object: an object of literals.
+                    const auto& values = a.at("scriptVariables");
+                    if (!values.is_object() || values.empty()) Invalid("Invalid script variables");
+                    for (const auto& value : values)
+                        if (!value.is_boolean() && !value.is_number() && !value.is_string() && !value.is_array()) Invalid("Invalid script variables");
+                    item.scriptVariables = values.dump();
+                }
             }
             item.id = Id(o.at("id")); item.parentId = Id(o.at("parent"));
             item.name = Text(o.at("name")); item.typeName = Text(o.at("type"));
@@ -210,11 +224,13 @@ std::string SceneDocument::Serialize(const SceneSnapshot& data)
             {"transform", {{"position", {t.position.x,t.position.y,t.position.z}},
                 {"rotation", {t.rotation.x,t.rotation.y,t.rotation.z,t.rotation.w}},
                 {"scale", {t.scale.x,t.scale.y,t.scale.z}}}}});
-        if (!o.modelAsset.empty() || !o.textureAsset.empty() || !o.materialAsset.empty())
+        if (!o.modelAsset.empty() || !o.textureAsset.empty() || !o.materialAsset.empty() || !o.scriptAsset.empty() || !o.scriptVariables.empty())
         {
             auto& assets = json["objects"].back()["assets"];
             assets = {{"model", o.modelAsset}, {"texture", o.textureAsset}};
             if (!o.materialAsset.empty()) assets["material"] = o.materialAsset;
+            if (!o.scriptAsset.empty()) assets["script"] = o.scriptAsset;
+            if (!o.scriptVariables.empty()) assets["scriptVariables"] = nlohmann::json::parse(o.scriptVariables);
         }
         if (o.pointLight)
         {
@@ -369,6 +385,8 @@ void SceneDocument::Restore(const SceneSnapshot& data, ComponentTypeCatalog cata
             object->LoadProjectData(o.projectData);
             if (!skeletal) SceneAssets::Apply(*object, o.modelAsset, o.textureAsset, o.materialAsset);
         }
+        object->SetScriptAsset(o.scriptAsset); // a missing or broken file only fails in Play
+        object->SetScriptVariables(o.scriptVariables);
         auto added = target.AddComponent(o.name, object, o.typeName);
         if (added.result != SceneResult::Ok || target.SetTransform(added.id, o.transform) != SceneResult::Ok)
             throw std::runtime_error("Cannot restore object: " + o.name);

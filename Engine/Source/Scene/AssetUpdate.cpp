@@ -62,7 +62,7 @@ void AssetUpdate::Run(const fs::path& content,unsigned operation,const std::stri
     const bool model=Model(file);
     const bool texture=ext==".png"||ext==".jpg"||ext==".jpeg"||ext==".bmp"||ext==".tga";
     const bool audio=Audio(file);
-    if(!model&&!texture&&!audio&&!(operation==1&&ext==".mat"))throw std::runtime_error("Select a model, texture, audio file or material");
+    if(!model&&!texture&&!audio&&!(operation==1&&(ext==".mat"||ext==".vscript")))throw std::runtime_error("Select a model, texture, audio file, material or script");
     const auto sourceRoot=model?file.parent_path():file;
     if(operation==1&&!model)for(auto folder=file.parent_path();folder!=content&&Inside(folder,content);folder=folder.parent_path())
         for(const auto& entry:fs::directory_iterator(folder))if(entry.is_regular_file()&&Model(entry.path()))throw std::runtime_error("This file belongs to a model bundle; move the model folder to keep its internal references");
