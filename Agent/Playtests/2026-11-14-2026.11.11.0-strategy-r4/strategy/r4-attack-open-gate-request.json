@@ -1,0 +1,145 @@
+{
+  "steps": [
+    {
+      "action": "play",
+      "kind": "control"
+    },
+    {
+      "enabled": true,
+      "kind": "focus"
+    },
+    {
+      "count": 3,
+      "kind": "frames"
+    },
+    {
+      "key": 69,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 69,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 150,
+      "kind": "frames"
+    },
+    {
+      "x": 365,
+      "valid": true,
+      "kind": "cursor",
+      "y": 476
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "x": 270,
+      "valid": true,
+      "kind": "cursor",
+      "y": 443
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 5,
+      "kind": "frames"
+    },
+    {
+      "x": 365,
+      "valid": true,
+      "kind": "cursor",
+      "y": 194
+    },
+    {
+      "key": 501,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 501,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "x": 320,
+      "valid": true,
+      "kind": "cursor",
+      "y": 333
+    },
+    {
+      "key": 501,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 501,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "x": 365,
+      "valid": true,
+      "kind": "cursor",
+      "y": 194
+    },
+    {
+      "key": 501,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 501,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 600,
+      "kind": "frames"
+    },
+    {
+      "action": "stop",
+      "kind": "control"
+    }
+  ],
+  "project": "E:/Engine/Engine/build/playtests/strategy-r4/RepairCorridor/Project.json"
+}

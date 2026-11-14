@@ -1,0 +1,172 @@
+{
+  "project": "Repair Corridor r4",
+  "projectPath": "E:/Engine/Engine/build/playtests/strategy-r4/RepairCorridor",
+  "sourceArchive": {
+    "path": "RepairCorridor-r4-source.zip",
+    "sha256": "D8CAD02B7D333D9149C804372A5DEDE765B1B561A73C0E3A20DFFE2862BCAD48",
+    "audit": "zip-audit.json"
+  },
+  "engine": {
+    "version": "2026.11.11.0-localOnly",
+    "base": "87a9cf85",
+    "engineLib": "E:/Engine/Game/build/x64/Release/Runtime/SDK/Lib/Engine.lib",
+    "engineLibSha256": "358E352C9E30FCCD6ED87D7FE54581FC7F3820BBCDD3E6B31CDE7D142626ABEE",
+    "fixes": [
+      "STRATEGY-003",
+      "STRATEGY-007",
+      "STRATEGY-008",
+      "STRATEGY-013",
+      "STRATEGY-015",
+      "STRATEGY-016"
+    ]
+  },
+  "featuresUsed": [
+    "Physics/Jolt impulse and collision",
+    "AI FSM",
+    "AI NavGrid",
+    "AI Group",
+    "AI Controller MoveTo(ObjectRef)",
+    "Input",
+    "Camera",
+    "HUD",
+    "Scene Trace",
+    "World ReportDamage"
+  ],
+  "evidence": [
+    {
+      "id": "selection-reverse-rectangle",
+      "status": "passed",
+      "files": [
+        "r4-selection-rect-request.json",
+        "r4-selection-rect-telemetry.log",
+        "r4-selection-rect.bmp"
+      ]
+    },
+    {
+      "id": "selection-visual-empty-and-two",
+      "status": "passed",
+      "files": [
+        "r4-selection-stable-empty.bmp",
+        "r4-selection-two-stable.bmp",
+        "r4-selection-two-stable-telemetry.log"
+      ]
+    },
+    {
+      "id": "selection-resize-and-focus-cancel",
+      "status": "passed",
+      "files": [
+        "r4-selection-controls-request.json",
+        "r4-selection-controls-telemetry.log",
+        "r4-selection-controls-resized.bmp"
+      ]
+    },
+    {
+      "id": "hud-input-block-and-fast-release",
+      "status": "passed",
+      "files": [
+        "r4-hud-fast-release-request.json",
+        "r4-hud-fast-release-telemetry.log",
+        "r4-hud-fast-release.bmp"
+      ]
+    },
+    {
+      "id": "independent-unselected-order",
+      "status": "passed",
+      "files": [
+        "r4-selection-independent-request.json",
+        "r4-selection-independent-telemetry.log"
+      ]
+    },
+    {
+      "id": "attack-replaces-with-floor-order",
+      "status": "passed",
+      "files": [
+        "r4-order-replace-final-request.json",
+        "r4-order-replace-final-telemetry.log",
+        "r4-order-replace-final.bmp"
+      ]
+    },
+    {
+      "id": "moving-target-combat-win",
+      "status": "passed",
+      "files": [
+        "r4-attack-single-request.json",
+        "r4-attack-single-telemetry.log",
+        "r4-attack-single-late.bmp"
+      ]
+    },
+    {
+      "id": "final-archive-clean-build-and-play",
+      "status": "passed",
+      "files": [
+        "r4-clean-extract-build.log",
+        "r4-clean-extract-build.status",
+        "r4-clean-extract-play-request.json",
+        "r4-clean-extract-play-telemetry.log",
+        "r4-clean-extract-play-win.bmp"
+      ]
+    },
+    {
+      "id": "final-runtime-standalone-60-frames",
+      "status": "passed",
+      "files": [
+        "r4-clean-extract-runtime.stdout.log",
+        "r4-clean-extract-runtime.stderr.log",
+        "r4-clean-extract-runtime.exit"
+      ]
+    },
+    {
+      "id": "closed-gate-attack-request",
+      "status": "failed",
+      "files": [
+        "r4-attack-chase-request.json",
+        "r4-attack-chase-telemetry.log",
+        "r4-attack-chase-late.bmp"
+      ],
+      "note": "Приказ до открытия gate корректно получил Unreachable; нужен новый приказ после открытия сетки. Сохранено как ошибочная последовательность игры, не дефект Engine."
+    },
+    {
+      "id": "first-two-of-three-screenshot",
+      "status": "failed",
+      "files": [
+        "r4-selection-stable-two.bmp",
+        "r4-selection-two-stable.bmp"
+      ],
+      "note": "Ранний кадр показывает 1/3 и не используется; чистый повтор подтверждает 2/3."
+    },
+    {
+      "id": "edit-scene-authoring",
+      "status": "partial",
+      "files": [
+        "RepairCorridor-r4-source.zip"
+      ],
+      "note": "Content/Scenes/Main.scene.json внутри архива; сцена создаётся в игровом bootstrap, Edit viewport пустой."
+    },
+    {
+      "id": "user-code-build-error-strategy-017",
+      "status": "failed",
+      "files": [
+        "r4-build-first.log",
+        "r4-build-after-user-fix.log"
+      ],
+      "note": "Собственная ошибка C2065 selectionRectTests_ была исправлена. Не является ошибкой Engine."
+    }
+  ],
+  "result": {
+    "won": true,
+    "lost": false,
+    "guardHp": 0,
+    "attackHits": 4,
+    "acceptedAttackOrders": 1,
+    "activeAttackOrdersAfterDeath": 0,
+    "barrierViolationFrames": 0,
+    "standaloneExit": 0,
+    "standaloneGameUpdates": 60,
+    "standaloneStopped": true
+  },
+  "knownEngineIssue": {
+    "id": "STRATEGY-016",
+    "status": "fixed-and-rechecked",
+    "note": "Group MoveTo(ObjectRef) now follows moving targets during an active order; r4 fresh play confirms it."
+  }
+}

@@ -48,6 +48,7 @@ void HeadOnTests();
 void CrowdToOnePointTests();
 void StandingUnitIsNotPushedTests();
 void SquadThroughGapTests();
+void GroupMovingTargetTests();
 void GroupCharacterTargetTests();
 void GroupUnreachableGoalTests();
 void SmallGroupDetourTests();
@@ -115,6 +116,7 @@ int main(int argc, char** argv)
         {"stage8 crowd to one point: no overlap, no jitter", CrowdToOnePointTests},
         {"stage8 a standing unit is walked around", StandingUnitIsNotPushedTests},
         {"stage9 squad of 100 through a gap on one field", SquadThroughGapTests},
+        {"stage9 group follows moving and removed targets", GroupMovingTargetTests},
         {"stage9 character target does not avoid itself", GroupCharacterTargetTests},
         {"stage9 unreachable group goal and reopened passage", GroupUnreachableGoalTests},
         {"stage9 small group completes barrier detour", SmallGroupDetourTests},

@@ -156,6 +156,8 @@ bool Group::SyncBody()
 
 void Group::AssignSlots(glm::vec2 center)
 {
+    pathGoal_ = goalPoint_;
+    repathTimer_ = 0;
     std::vector<size_t> alive;
     for (size_t i = 0; i < members_.size(); ++i) if (members_[i].alive) alive.push_back(i);
     if (alive.empty()) return;
@@ -191,6 +193,7 @@ void Group::MoveTo(glm::vec3 point, float acceptanceRadius)
 {
     if (Size() == 0) { moveStatus_ = MoveStatus::Unavailable; return; }
     goal_ = Goal::Point;
+    goalObject_ = {};
     goalPoint_ = point;
     acceptance_ = acceptanceRadius;
     orderTime_ = world_->Time();
@@ -226,6 +229,7 @@ void Group::MoveTo(ObjectRef target, float acceptanceRadius)
     const glm::vec3 at = ObjectPosition(target);
     if (!std::isfinite(at.x)) { StopMovement(); moveStatus_ = MoveStatus::Unreachable; return; }
     MoveTo(at, acceptanceRadius);
+    if (Size()) { goal_ = Goal::Object; goalObject_ = target; }
 }
 
 void Group::StopMovement()
@@ -237,10 +241,30 @@ void Group::StopMovement()
     if (moveStatus_ == MoveStatus::Waiting || moveStatus_ == MoveStatus::Moving) moveStatus_ = MoveStatus::Idle;
 }
 
-void Group::UpdateMovement(float)
+void Group::UpdateMovement(float dt)
 {
     if (!moving_) return;
     NavGrid& grid = world_->Navigation();
+    if (goal_ == Goal::Object)
+    {
+        const glm::vec3 at = ObjectPosition(goalObject_);
+        if (!std::isfinite(at.x))
+        {
+            StopMovement();
+            moveStatus_ = MoveStatus::Unreachable;
+            OnMoveFinished(MoveStatus::Unreachable);
+            return;
+        }
+        goalPoint_ = at;
+        repathTimer_ += dt;
+        const float moved = glm::length(glm::vec2(at.x - pathGoal_.x, at.z - pathGoal_.z));
+        // Like a single controller, follow the object without rebuilding every frame.
+        if (moved > std::max(1.0f, grid.CellSize()) || (repathTimer_ > 1.0f && moved > 0.1f))
+        {
+            AssignSlots({at.x, at.z});
+            RequestField();
+        }
+    }
     const float largest = largest_;
     if (grid.IsConfigured() && (!field_ || field_->version != grid.Version())) RequestField();
     if (grid.IsConfigured() && !field_->ready) { moveStatus_ = MoveStatus::Waiting; return; }
@@ -321,6 +345,13 @@ void Group::UpdateMovement(float)
 
     if (alive && static_cast<float>(settled) >= arrivedFraction_ * static_cast<float>(alive))
     {
+        // Reaching the old slots is not arrival if the tracked object moved since planning.
+        if (goal_ == Goal::Object && glm::length(glm::vec2(goalPoint_.x - pathGoal_.x, goalPoint_.z - pathGoal_.z)) > 0.1f)
+        {
+            AssignSlots({goalPoint_.x, goalPoint_.z});
+            RequestField();
+            return;
+        }
         // The order is done: stragglers stop where they are instead of drifting on.
         for (Member& m : members_) { m.velocity = glm::vec2(0); m.settled = true; }
         moving_ = false;
@@ -455,6 +486,8 @@ void Group::SerializeSaveGame(SaveArchive& archive)
         else members_ = std::move(saved);
         Recount();
         reloadPositions_ = true;
+        pathGoal_ = goalPoint_;
+        repathTimer_ = 0;
         field_.reset();
         if (goal_ != Goal::None) { moving_ = true; needsPath_ = false; moveStatus_ = MoveStatus::Waiting; orderTime_ = world_->Time(); }
         else moving_ = false;

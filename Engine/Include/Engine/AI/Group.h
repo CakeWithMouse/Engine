@@ -51,6 +51,7 @@ public:
 
     using Controller::MoveTo;
     void MoveTo(glm::vec3 point, float acceptanceRadius = 0.5f) override;
+    /** Tracks the object while the order is active; a removed target finishes as Unreachable. */
     void MoveTo(ObjectRef target, float acceptanceRadius = 1.5f) override;
     void StopMovement() override;
     void SerializeSaveGame(SaveArchive& archive) override;

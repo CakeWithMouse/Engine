@@ -31,6 +31,58 @@ float MinimumGap(const Ai::Group& group)
 }
 } // namespace
 
+// An ObjectRef order must keep tracking its object until it finishes or is cancelled.
+void GroupMovingTargetTests()
+{
+    for (bool navigation : {false, true})
+    {
+        Game game;
+        auto& soldier = AddToScene<Character>(game, "Soldier", {-8, 0, 0});
+        soldier.SetMoveSpeed(4);
+        auto& target = AddToScene<Character>(game, "Target", {3, 0, 0});
+        const auto targetId = target.GetComponentId();
+        game.InitializeGameplay();
+        auto& world = Ai::Get(game);
+        if (navigation) world.Navigation().SetBounds({-20, -20}, {20, 20}, 0.5f);
+        auto& group = world.CreateGroup("Hunters");
+        group.AddCharacter(soldier);
+        group.MoveTo(Ai::ObjectRef{targetId});
+        for (int i = 0; i < 60; ++i)
+        {
+            target.SetPosition({3, 0, 0.05f * (i + 1)});
+            // Dynamic obstacles elsewhere must not make us forget which position the slots use.
+            if (navigation && i % 10 == 0)
+                world.Navigation().SetCost({15, 15}, {16, 16}, i % 20 == 0 ? 2 : 1);
+            game.StepProjectSimulation(0.05f);
+        }
+        CHECK(glm::length(FlatOf(group.Destination()) - FlatOf(target.GetWorldPosition())) < 0.1f);
+        Step(game, 5);
+        CHECK(group.GetMoveStatus() == Ai::MoveStatus::Arrived);
+        CHECK(glm::length(FlatOf(soldier.GetWorldPosition()) - FlatOf(target.GetWorldPosition())) < 0.15f);
+
+        // Replacing a chase with a point order must forget the target.
+        target.SetPosition({8, 0, 8});
+        group.MoveTo(Ai::ObjectRef{targetId});
+        Step(game, 0.2f);
+        const glm::vec3 point(-3, 0, -3);
+        group.MoveTo(point);
+        target.SetPosition({-10, 0, 10});
+        Step(game, 8);
+        CHECK(group.GetMoveStatus() == Ai::MoveStatus::Arrived);
+        CHECK(glm::length(FlatOf(soldier.GetWorldPosition()) - FlatOf(point)) < 0.15f);
+
+        // An object removed during an active chase invalidates the order immediately.
+        group.MoveTo(Ai::ObjectRef{targetId});
+        Step(game, 0.2f);
+        CHECK(game.GetScene().RemoveComponent(targetId) == SceneResult::Ok);
+        Step(game, 0.1f);
+        CHECK(group.GetMoveStatus() == Ai::MoveStatus::Unreachable);
+        const auto stopped = soldier.GetWorldPosition();
+        Step(game, 1);
+        CHECK(glm::length(soldier.GetWorldPosition() - stopped) < 0.001f);
+    }
+}
+
 void SquadThroughGapTests()
 {
     Game game;

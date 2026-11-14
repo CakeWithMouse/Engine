@@ -1,0 +1,17 @@
+EngineLib SHA256=358E352C9E30FCCD6ED87D7FE54581FC7F3820BBCDD3E6B31CDE7D142626ABEE
+Using v143, MSVC 14.44.35207, Windows SDK 10.0.26100.0.
+MSBuild: C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe
+
+  ComponentGenerator: 3 component(s), Project
+  Module.cpp
+  ProjectComponent.cpp
+  ProjectGame.cpp
+  RotatingCube.cpp
+  GeneratedComponents.cpp
+  Создание кода...
+     Создается библиотека E:\Engine\Engine\build\playtests\strategy-r4\RepairCorridor\Binaries\Release\7644e669f93d4688bdd39b779ad9e728\Game.lib и объект E:\Engine\Engine\build\playtests\strategy-r4\RepairCorridor\Binaries\Release\7644e669f93d4688bdd39b779ad9e728\Game.exp
+  Game.vcxproj -> E:\Engine\Engine\build\playtests\strategy-r4\RepairCorridor\Binaries\Release\7644e669f93d4688bdd39b779ad9e728\Game.dll
+
+Full build log: E:\Engine\Engine\build\playtests\strategy-r4\RepairCorridor\Binaries\Release\7644e669f93d4688bdd39b779ad9e728\build.log
+Build validated and activated. Use Hot Reload in the editor, or reopen the project.
+ProjectTools returned; native exit=0

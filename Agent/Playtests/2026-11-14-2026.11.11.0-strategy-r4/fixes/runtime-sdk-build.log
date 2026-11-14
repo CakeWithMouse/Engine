@@ -1,0 +1,21 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Editor.dll
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator.vcxproj -> E:\Engine\Engine\build\x64\Release\ComponentGenerator.exe
+  ComponentGenerator: 2 component(s), RuntimeExample
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Projects/RuntimeExample/Game.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Projects/RuntimeExample/Game.exp
+  RuntimeExample.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Projects\RuntimeExample\Game.dll
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Templates/SceneProject/Game.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/Templates/SceneProject/Game.exp
+  SceneProject.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\Templates\SceneProject\Game.dll
+  BattleAi.cpp
+  BattleGame.cpp
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineRuntime.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineRuntime.exp
+  EngineRuntime.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\EngineRuntime.exe
+  EngineLauncher.vcxproj -> E:\Engine\Game\build\x64\Release\EngineLauncher.exe
+  Tutorial ready: E:\Engine\Game\build\x64\Release\Tutorials\AiTutorial
+  Building Release SDK with v143 / MSVC 14.44.35207.
+  SDK compatibility: v143 / 14.44.35207 headers and whole-archive link passed.
+

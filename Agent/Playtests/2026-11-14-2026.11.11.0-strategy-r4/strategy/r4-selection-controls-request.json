@@ -1,0 +1,295 @@
+{
+  "project": "E:/Engine/Engine/build/playtests/strategy-r4/RepairCorridor/Project.json",
+  "steps": [
+    {
+      "action": "play",
+      "kind": "control"
+    },
+    {
+      "enabled": true,
+      "kind": "focus"
+    },
+    {
+      "count": 3,
+      "kind": "frames"
+    },
+    {
+      "y": 458,
+      "valid": true,
+      "kind": "cursor",
+      "x": 287
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 51,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 51,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 49,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 49,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 16,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "y": 440,
+      "valid": true,
+      "kind": "cursor",
+      "x": 304
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "y": 476,
+      "valid": true,
+      "kind": "cursor",
+      "x": 336
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 16,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 30,
+      "kind": "frames"
+    },
+    {
+      "key": 16,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "y": 458,
+      "valid": true,
+      "kind": "cursor",
+      "x": 320
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 16,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 30,
+      "kind": "frames"
+    },
+    {
+      "y": 370,
+      "valid": true,
+      "kind": "cursor",
+      "x": 450
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "y": 330,
+      "valid": true,
+      "kind": "cursor",
+      "x": 500
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 30,
+      "kind": "frames"
+    },
+    {
+      "kind": "resize",
+      "height": 720,
+      "width": 1000
+    },
+    {
+      "count": 2,
+      "kind": "frames"
+    },
+    {
+      "y": 710,
+      "valid": true,
+      "kind": "cursor",
+      "x": 580
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "y": 655,
+      "valid": true,
+      "kind": "cursor",
+      "x": 420
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "count": 30,
+      "kind": "frames"
+    },
+    {
+      "y": 500,
+      "valid": true,
+      "kind": "cursor",
+      "x": 700
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "y": 600,
+      "valid": true,
+      "kind": "cursor",
+      "x": 800
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "enabled": false,
+      "kind": "focus"
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "enabled": true,
+      "kind": "focus"
+    },
+    {
+      "y": 600,
+      "valid": true,
+      "kind": "cursor",
+      "x": 800
+    },
+    {
+      "count": 30,
+      "kind": "frames"
+    },
+    {
+      "action": "stop",
+      "kind": "control"
+    }
+  ]
+}

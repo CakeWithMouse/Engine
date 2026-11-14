@@ -1,0 +1,101 @@
+{
+  "steps": [
+    {
+      "action": "play",
+      "kind": "control"
+    },
+    {
+      "enabled": true,
+      "kind": "focus"
+    },
+    {
+      "count": 3,
+      "kind": "frames"
+    },
+    {
+      "x": 365,
+      "y": 476,
+      "valid": true,
+      "kind": "cursor"
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "x": 270,
+      "y": 443,
+      "valid": true,
+      "kind": "cursor"
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 500,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 5,
+      "kind": "frames"
+    },
+    {
+      "key": 69,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 69,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "count": 150,
+      "kind": "frames"
+    },
+    {
+      "x": 364,
+      "y": 190,
+      "valid": true,
+      "kind": "cursor"
+    },
+    {
+      "key": 501,
+      "kind": "key",
+      "down": true
+    },
+    {
+      "count": 1,
+      "kind": "frames"
+    },
+    {
+      "key": 501,
+      "kind": "key",
+      "down": false
+    },
+    {
+      "count": 600,
+      "kind": "frames"
+    },
+    {
+      "action": "stop",
+      "kind": "control"
+    }
+  ],
+  "project": "E:/Engine/Engine/build/playtests/strategy-r4/RepairCorridor/Project.json"
+}
