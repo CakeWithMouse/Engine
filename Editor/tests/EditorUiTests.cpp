@@ -212,6 +212,7 @@ void ReloadUiChecks(const std::filesystem::path& root, const std::filesystem::pa
     std::printf("Reload EditorUiTests: %d checks passed\n",checks);
 }
 #include "AiDiagnosticsUiTests.h"
+#include "CameraGuideUiTests.h"
 
 int wmain(int argc, wchar_t** argv)
 {
@@ -365,8 +366,9 @@ int wmain(int argc, wchar_t** argv)
             for (int i = 0; i < 30; ++i) pump();
         };
         until([&] { return host.ViewportActive(); });
-        if (argc == 4 && std::wstring(argv[3]) == L"--ai-diagnostics") {
-            RunAiDiagnosticsChecks(host,api,query,root,pump);
+        if (argc == 4 && (std::wstring(argv[3]) == L"--ai-diagnostics" || std::wstring(argv[3]) == L"--camera-guides")) {
+            if(std::wstring(argv[3]) == L"--camera-guides")RunCameraGuideChecks(host,api,query,root,pump);
+            else RunAiDiagnosticsChecks(host,api,query,root,pump);
             Ui([](auto* w){w->close();});
             for(int i=0;i<5;++i)pump();
             Ui([](auto*){if(auto* box=qobject_cast<QMessageBox*>(QApplication::activeModalWidget())) box->button(QMessageBox::Discard)->click();});

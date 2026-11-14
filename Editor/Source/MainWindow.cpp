@@ -232,6 +232,11 @@ void EditorMainWindow::BuildUi()
     actGrid_ = addToggle(Tr("Сетка", "Grid"), QStringLiteral("View.ToggleGrid"), QStringLiteral("view/grid"));
     actGizmo_ = addToggle(Tr("Гизмо", "Gizmo"), QStringLiteral("View.ToggleGizmo"), QStringLiteral("view/gizmo"));
     actIcons_ = addToggle(Tr("Иконки объектов", "Object Icons"), QStringLiteral("View.ToggleIcons"), QStringLiteral("view/icons"));
+    auto* cameraGuides = viewMenu_->addAction(Tr("Камеры: направление и границы", "Cameras: direction and frustum"));
+    cameraGuides->setObjectName("ViewCameraGuides");
+    cameraGuides->setCheckable(true);
+    connect(cameraGuides, &QAction::triggered, this, [](bool enabled) { SettingsService::Instance().SetValue("view/cameras", enabled); });
+    connect(viewMenu_, &QMenu::aboutToShow, this, [cameraGuides] { cameraGuides->setChecked(SettingsService::Instance().GetValue("view/cameras", true).toBool()); });
     connect(viewMenu_, &QMenu::aboutToShow, this, [this] {
         if (actGrid_) actGrid_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool());
         if (actGizmo_) actGizmo_->setChecked(SettingsService::Instance().GetValue(QStringLiteral("view/gizmo"), true).toBool());
@@ -991,6 +996,7 @@ void EditorMainWindow::RefreshSceneUi()
     if (objectInspectorPanel_)
     {
         objectInspectorPanel_->SetEnabled(edit && selectedId_);
+        objectInspectorPanel_->readViewportCamera = [this](EngineCameraInfo& camera) { return host_->GetCamera(camera); };
         objectInspectorPanel_->Refresh(view, selectedId_, selectionChanged);
         objectInspectorPanel_->SetMaterialsAvailable(host_->HasMaterials());
     }

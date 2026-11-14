@@ -7,6 +7,7 @@
 #include "BillboardMetrics.h"
 #include "IEditorHost.h"
 #include "SettingsService.h"
+#include "CameraGuide.h"
 
 #include <algorithm>
 #include <cmath>
@@ -38,7 +39,7 @@ namespace
             return static_cast<uint32_t>(EditorIcons::IconId::SunSky);
         }
 
-        if (obj.gameplayKind != 2 && (obj.type == "Camera" || obj.name.find("Camera") != std::string::npos))
+        if (CameraGuide::IsCamera(obj) && obj.gameplayKind != 2)
         {
             outColor = TintFromColor(pal.iconCamera);
             return static_cast<uint32_t>(EditorIcons::IconId::Camera);
@@ -83,6 +84,10 @@ void ViewportOverlayHelper::UpdateOverlays(
     const bool gridEnabled = SettingsService::Instance().GetValue(QStringLiteral("view/grid"), true).toBool();
     const bool gizmoEnabled = SettingsService::Instance().GetValue(QStringLiteral("view/gizmo"), true).toBool();
     const bool iconsEnabled = SettingsService::Instance().GetValue(QStringLiteral("view/icons"), true).toBool();
+    const bool camerasEnabled = SettingsService::Instance().GetValue("view/cameras", true).toBool();
+    const bool cameraFull = SettingsService::Instance().GetValue("view/cameraFull", false).toBool();
+    const bool cameraXray = SettingsService::Instance().GetValue("view/cameraXray", false).toBool();
+    const float cameraDepth = SettingsService::Instance().GetValue("view/cameraDepth", 10.).toFloat();
     const bool overlaysEnabled = gizmoEnabled || iconsEnabled;
 
     const auto snapshot = host->ReadSnapshot();
@@ -102,8 +107,19 @@ void ViewportOverlayHelper::UpdateOverlays(
     float lightRad = (selectedObj && selectedObj->hasPointLight) ? selectedObj->pointLight.radius : 0.0f;
 
     uint64_t objectsHash = 14695981039346656037ull;
+    auto hashBytes = [&](const void* data, size_t size) {
+        auto* bytes = static_cast<const unsigned char*>(data);
+        for (size_t i=0;i<size;++i) { objectsHash ^= bytes[i]; objectsHash *= 1099511628211ull; }
+    };
+    hashBytes(&camerasEnabled,sizeof(camerasEnabled));hashBytes(&cameraFull,sizeof(cameraFull));
+    hashBytes(&cameraXray,sizeof(cameraXray));hashBytes(&cameraDepth,sizeof(cameraDepth));
+    hashBytes(&cam.width,sizeof(cam.width));
     for (const auto& obj : snapshot.objects)
     {
+        // Parent transforms and camera optics also invalidate the guide cache.
+        hashBytes(&obj.transform,sizeof(obj.transform));hashBytes(&obj.parent,sizeof(obj.parent));
+        hashBytes(&obj.inheritScale,sizeof(obj.inheritScale));
+        if(CameraGuide::IsCamera(obj))hashBytes(obj.projectData.data(),obj.projectData.size());
         objectsHash ^= obj.id;
         objectsHash *= 1099511628211ull;
         objectsHash ^= static_cast<uint64_t>(obj.hasPointLight ? 1 : 0);
@@ -162,6 +178,10 @@ void ViewportOverlayHelper::UpdateOverlays(
                 bb.x = obj.transform.position[0];
                 bb.y = obj.transform.position[1];
                 bb.z = obj.transform.position[2];
+                if (CameraGuide::IsCamera(obj)) {
+                    const auto world = CameraGuide::World(obj, snapshot);
+                    bb.x=world[3].x;bb.y=world[3].y;bb.z=world[3].z;
+                }
                 bb.sizePixels = BillboardMetrics::SizePixels(static_cast<float>(cam.height));
                 bb.rgbaTint = iconColor;
                 bb.objectId = obj.id;
@@ -196,6 +216,13 @@ void ViewportOverlayHelper::UpdateOverlays(
         lines.push_back(sunLine);
         dirLineCount = 1;
     }
+
+    if (camerasEnabled && hasCamera)
+        for (const auto& object : snapshot.objects) if (CameraGuide::IsCamera(object)) {
+            const auto camera=CameraGuide::Read(object,snapshot,cam.height?float(cam.width)/cam.height:16.f/9.f);
+            auto guide=CameraGuide::Lines(camera,object.id==snapshot.selected,cameraDepth,cameraFull,cameraXray);
+            lines.insert(lines.end(),guide.begin(),guide.end());
+        }
 
     if (gizmoEnabled && selectedObj && hasCamera)
     {
@@ -273,7 +300,7 @@ uint64_t ViewportOverlayHelper::HitTestBillboard(
 {
     if (!host || cam.width <= 0 || cam.height <= 0) return 0;
 
-    const bool overlaysEnabled = SettingsService::Instance().GetValue(QStringLiteral("view/overlays"), true).toBool();
+    const bool overlaysEnabled = SettingsService::Instance().GetValue(QStringLiteral("view/icons"), true).toBool();
     if (!overlaysEnabled) return 0;
 
     const auto snapshot = host->ReadSnapshot();
@@ -294,6 +321,10 @@ uint64_t ViewportOverlayHelper::HitTestBillboard(
         };
 
         float screen[2]{};
+        if(CameraGuide::IsCamera(obj)) {
+            const auto world=CameraGuide::World(obj,snapshot);
+            pos[0]=world[3].x;pos[1]=world[3].y;pos[2]=world[3].z;
+        }
         if (GizmoGeometry::ProjectPointToScreen(pos, cam.viewMatrix, cam.projMatrix, cam.width, cam.height, screen))
         {
             float dx = screen[0] - screenX;

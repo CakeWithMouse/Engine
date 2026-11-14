@@ -5,6 +5,7 @@
 #include "ScriptCard.h"
 #include "AiMachineCard.h"
 #include "GeometryCard.h"
+#include "CameraGuideCard.h"
 #include "CommandRegistry.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "EditorLocale.h"
@@ -93,6 +94,10 @@ void ObjectInspectorPanel::BuildUi()
         emit TransformEditingFinished(selectedId_, CurrentTransformValue());
     });
     inspectorLayout->addWidget(cardTransform_);
+    cardCamera_ = new CameraGuideCard(this);
+    inspectorLayout->addWidget(cardCamera_);
+    cardCamera_->hide();
+    inspectorLayout->addWidget(properties_);
 
     cardGeometry_ = new GeometryCard(this);
     cardGeometry_->onChooseModel = [this] {
@@ -136,7 +141,6 @@ void ObjectInspectorPanel::BuildUi()
     inspectorLayout->addWidget(cardAi_);
     BuildCharacterCard(inspectorLayout);
     BuildPhysicsCard(inspectorLayout);
-    inspectorLayout->addWidget(properties_);
 
     cardGeneral_->hide();
     cardTransform_->hide();
@@ -421,6 +425,7 @@ void ObjectInspectorPanel::Refresh(
 
     if (selectedId_ == 0)
     {
+        cardCamera_->hide();
         properties_->hide();
         noSelectionLabel_->setText(Tr("Объект не выбран", "No object selected"));
         noSelectionLabel_->show();
@@ -448,6 +453,13 @@ void ObjectInspectorPanel::Refresh(
             continue;
 
         RefreshProjectProperties(view, object);
+        const bool sceneCamera = CameraGuide::IsCamera(object);
+        cardCamera_->setVisible(sceneCamera);
+        if (sceneCamera) {
+            EngineCameraInfo editor{};
+            const bool valid = readViewportCamera && readViewportCamera(editor);
+            cardCamera_->Refresh(object, view, valid ? &editor : nullptr);
+        }
         // selectedLight updated below after determining type
         typeBadgeLabel_->setText(QString::fromStdString(object.type));
         selectionLabel_->setText(QStringLiteral("%1 · ID %2").arg(QString::fromStdString(object.name)).arg(object.id));
@@ -479,7 +491,6 @@ void ObjectInspectorPanel::Refresh(
         const bool isDirLight = (type == "Light.Directional");
         selectedLight = isPointLight || isDirLight;
         const bool isCharacter = (object.gameplayKind == 1 || type == "Gameplay.Character" || type == "Character");
-        const bool isCamera = (type == "Engine.Camera" || type == "Gameplay.Camera" || type == "Camera");
         const bool isParticles = (type == "Particles" || type.find("Particle") != std::string::npos);
 
         if (isDirLight) {
@@ -512,7 +523,7 @@ void ObjectInspectorPanel::Refresh(
 
         const bool showGeometry = isModel || isPrimitive;
         const bool showMaterial = isModel || isPrimitive;
-        const bool showProperties = (!isModel && !isPrimitive && !isPointLight && !isDirLight && !isCamera && !isParticles);
+        const bool showProperties = (!isModel && !isPrimitive && !isPointLight && !isDirLight && !isParticles);
 
         const QString cr = property("contentRoot").toString();
         const QString modelPath = QString::fromStdString(object.modelAsset);
