@@ -2119,10 +2119,12 @@ int wmain(int argc, wchar_t** argv)
                 EditorCommand replace; replace.type=EditorCommand::SetModel; replace.objectId=o.id;
                 replace.path=QStringLiteral("/Game/")+QString::fromStdWString(std::filesystem::relative(importedModel,root/"Content").generic_wstring()); host.PostCommand(replace);
             }
-            until([&] { for(const auto& o:host.ReadSnapshot().objects) if(o.type=="Primitive.Sphere" && !o.modelAsset.empty()) return true; return false; });
-            Check(host.ReadSnapshot().objects.size()==6 && host.ReadSnapshot().selected!=0,"replace primitive model preserves count and selection");
-            Ui([](auto* w) { Action(w,QStringLiteral("Отменить"))->trigger(); });
-            until([&] { for(const auto& o:host.ReadSnapshot().objects) if(o.type=="Primitive.Sphere" && o.modelAsset.empty()) return true; return false; });
+            until([&] { bool rejected=false; Ui([&](auto* w) {
+                rejected=w->template findChild<QPlainTextEdit*>(QStringLiteral("Console"))->toPlainText().contains(QStringLiteral("Замена геометрии примитива на модель заблокирована"));
+            }); return rejected; });
+            Check(host.ReadSnapshot().objects.size()==6 && host.ReadSnapshot().selected!=0,"rejected primitive replacement preserves count and selection");
+            for (const auto& o : host.ReadSnapshot().objects)
+                if (o.type == "Primitive.Sphere") Check(o.modelAsset.empty(), "rejected primitive replacement preserves geometry");
             Ui([&](auto* w) { w->AddModel(QString::fromStdWString(importedModel.wstring())); });
             until([&] { return host.ReadSnapshot().objects.size() == 7; });
             if (std::filesystem::exists(std::filesystem::path(importedModel.wstring() + L".import.json")))

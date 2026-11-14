@@ -127,7 +127,7 @@ AssetPickerDialog::AssetPickerDialog(
             const QString virt = item->data(Qt::UserRole).toString();
             if (virt.isEmpty())
             {
-                item->setHidden(!query.isEmpty());
+                item->setHidden(false); // Clearing a texture stays available while filtering.
             }
             else
             {
