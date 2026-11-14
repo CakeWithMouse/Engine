@@ -1,0 +1,9 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  The vcpkg manifest was disabled, but we found a manifest file in E:\Engine\Engine\. You may want to enable vcpkg manifests in your properties page or pass /p:VcpkgEnableManifest=true to the msbuild invocation.
+  ComponentGenerator.vcxproj -> E:\Engine\Engine\build\x64\Release\ComponentGenerator.exe
+  ComponentGenerator: 3 component(s), AiTests
+  AiTests.vcxproj -> E:\Engine\Engine\build\x64\Release\AiTests.exe
+

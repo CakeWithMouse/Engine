@@ -1,0 +1,67 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  MOC ObjectInspectorPanel.h
+  moc_MainWindow.cpp
+  moc_ObjectInspectorPanel.cpp
+  EditorUiTests.cpp
+E:\Engine\Editor\tests\EditorUiTests.cpp(2421,209): warning C4305: аргумент: усечение из "double" в "float" [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\tests\EditorUiTests.cpp(2421,209): message : контекст создания экземпляра шаблона (сначала самый старый) [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\tests\EditorUiTests.cpp(2421,303): message : во время компиляции функции-члена класс шаблон "std::function<void (EditorMainWindow *)>::function(_Fx &&)" [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\tests\EditorUiTests.cpp(2421,303): message : при обработке аргумента шаблона по умолчанию "std::function<void (EditorMainWindow *)>::function(_Fx &&)" [E:\Engine\Editor\EditorModule.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\functional(1102,92): message : выполняется компиляция ссылки на экземпляр псевдоним шаблон функции "std::_Func_class<_Ret,EditorMainWindow *>::_Enable_if_callable_t<wmain::<lambda_496>,std::function<void (EditorMainWindow *)>>" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _Ret=void
+          ] (компилируется исходный файл tests/EditorUiTests.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\functional(940,47): message : выполняется компиляция ссылки на шаблон переменной "const bool conjunction_v<std::negation<std::is_same<`wmain'::`3'::<lambda_496>,std::function<void __cdecl(EditorMainWindow *)> > >,std::_Is_invocable_r<void,`wmain'::`3'::<lambda_496> &,EditorMainWindow *> >" (компилируется исходный файл tests/EditorUiTests.cpp) [E:\Engine\Editor\EditorModule.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\functional(940,47): message : выполняется компиляция ссылки на экземпляр класс шаблон функции "std::_Is_invocable_r<_Ret,wmain::<lambda_496> &,EditorMainWindow *>" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _Ret=void
+          ] (компилируется исходный файл tests/EditorUiTests.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(1827,26): message : выполняется компиляция ссылки на экземпляр псевдоним шаблон функции "std::_Is_invocable_r_<_Rx,_Callable,EditorMainWindow*>" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _Rx=void,
+              _Callable=wmain::<lambda_496> &
+          ] (компилируется исходный файл tests/EditorUiTests.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(1789,38): message : выполняется компиляция ссылки на экземпляр псевдоним шаблон функции "std::_Decltype_invoke_nonzero<_Callable,EditorMainWindow*,>" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _Callable=wmain::<lambda_496> &
+          ] (компилируется исходный файл tests/EditorUiTests.cpp)
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(1785,71): message : во время компиляции функции-члена класс шаблон "unknown-type std::_Invoker_functor::_Call(_Callable &&,_Types ...) noexcept(<expr>)" (компилируется исходный файл tests/EditorUiTests.cpp) [E:\Engine\Editor\EditorModule.vcxproj]
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\type_traits(1576,46): message : выполняется компиляция ссылки на экземпляр шаблон функции "auto wmain::<lambda_496>::operator ()<EditorMainWindow>(_T1 *) const" [E:\Engine\Editor\EditorModule.vcxproj]
+          with
+          [
+              _T1=EditorMainWindow
+          ] (компилируется исходный файл tests/EditorUiTests.cpp)
+E:\Engine\Editor\tests\EditorUiTests.cpp(2421,205): warning C4305: аргумент: усечение из "double" в "float" [E:\Engine\Editor\EditorModule.vcxproj]
+  AssetDeleteCommand.cpp
+  AssetTools.cpp
+  CodeTools.cpp
+  FileBrowser.cpp
+  HudTools.cpp
+  ImportCommands.cpp
+  MainWindow.cpp
+  ObjectInspectorLight.cpp
+  ObjectInspectorPanel.cpp
+  PhysicsTools.cpp
+  ProjectProperties.cpp
+  ViewportWidget.cpp
+  EditorApp.cpp
+  ViewportOverlayHelper.cpp
+E:\Engine\Editor\Source\MainWindow.cpp(355,32): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(363,33): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(367,31): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(371,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(379,37): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(401,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(402,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(403,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EditorUiTests.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EditorUiTests.exp
+  Создание кода
+  Создание кода завершено
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\EditorUiTests.exe
+

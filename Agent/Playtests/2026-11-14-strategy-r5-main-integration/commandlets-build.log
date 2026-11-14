@@ -1,0 +1,35 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+  MOC ObjectInspectorPanel.h
+  moc_MainWindow.cpp
+  moc_ObjectInspectorPanel.cpp
+  EngineCommandlets.cpp
+  AssetDeleteCommand.cpp
+  AssetTools.cpp
+  CodeTools.cpp
+  FileBrowser.cpp
+  HudTools.cpp
+  ImportCommands.cpp
+  MainWindow.cpp
+  ObjectInspectorLight.cpp
+  ObjectInspectorPanel.cpp
+  PhysicsTools.cpp
+  ProjectProperties.cpp
+  ViewportWidget.cpp
+  EditorApp.cpp
+  ViewportOverlayHelper.cpp
+E:\Engine\Editor\Source\MainWindow.cpp(355,32): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(363,33): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(367,31): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(371,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(379,37): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(401,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(402,30): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+E:\Engine\Editor\Source\MainWindow.cpp(403,35): warning C4996: 'QMenu::addAction': Use addAction(text, shortcut, object, slot) instead. [E:\Engine\Editor\EditorModule.vcxproj]
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineCommandlets.lib и объект E:\Engine\Engine\BuildSupport\..\..\Game/build/x64/Release/Runtime/EngineCommandlets.exp
+  Создание кода
+  Создание кода завершено
+  EditorModule.vcxproj -> E:\Engine\Game\build\x64\Release\Runtime\EngineCommandlets.exe
+

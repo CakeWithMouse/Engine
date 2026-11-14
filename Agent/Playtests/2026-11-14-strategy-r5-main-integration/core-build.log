@@ -1,0 +1,39 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  MOC Logger.h
+  MOC CommandRegistry.h
+  MOC FileService.h
+  CoreTests.cpp
+  Logger.cpp
+  CommandRegistry.cpp
+  FileService.cpp
+  EditorLocale.cpp
+  SettingsService.cpp
+  GizmoMath.cpp
+  ViewportOverlay.cpp
+  GizmoGeometry.cpp
+  GizmoTriangles.cpp
+  AssetOps.cpp
+  HlslGraphCompiler.cpp
+  MaterialGraphModel.cpp
+  GraphDocument.cpp
+  GraphSchema.cpp
+  GraphHistory.cpp
+  GraphClipboard.cpp
+  GraphSchemaRegistry.cpp
+  GraphLayout.cpp
+  MaterialGraphSchema.cpp
+  CodeGraphSchema.cpp
+  FsmGraphSchema.cpp
+  ScriptMessages.cpp
+  SceneFile.cpp
+  ImportSettings.cpp
+  ModelImportSidecar.cpp
+  ModelImportSidecarTransaction.cpp
+  Terminal.cpp
+  moc_Logger.cpp
+  moc_CommandRegistry.cpp
+  moc_FileService.cpp
+  CoreTests.vcxproj -> E:\Engine\Game\build\x64\Debug\Runtime\CoreTests.exe
+
