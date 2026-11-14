@@ -1,0 +1,6 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  LauncherUiTests.cpp
+  LauncherUiTests.vcxproj -> E:\Engine\Engine\build\x64\Release\LauncherUiTests.exe
+

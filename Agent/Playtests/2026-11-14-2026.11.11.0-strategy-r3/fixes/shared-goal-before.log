@@ -1,0 +1,10 @@
+[VfsRead] using local VFS (no host service)
+PASS: stage9 squad of 100 through a gap on one field
+PASS: stage9 character target does not avoid itself
+FAIL: stage9 unreachable group goal and reopened passage: group.GetMoveStatus() == Ai::MoveStatus::Unreachable  (E:\Engine\Engine\tests\ai\Source\CrowdTests.cpp:139)
+PASS: stage9 small group completes barrier detour
+FAIL: stage9 small group changes shared goal: replacement order followed old shared goal: -1.662243,-4.430356
+PASS: stage9 shared field and open ground
+PASS: stage9 squad machine, teams, losses
+PASS: stage9 flow field window and widening
+6/8 AI tests passed

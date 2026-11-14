@@ -77,6 +77,159 @@ void SquadThroughGapTests()
     CHECK(std::abs(batch.GetMeshInstance(first.index).Yaw - Pi / 2) < 0.3f || !first.settled);
 }
 
+// Registering a group member as a perception target must not make it avoid itself.
+void GroupCharacterTargetTests()
+{
+    auto trajectory = [](bool target) {
+        Game game;
+        auto& soldier = AddToScene<Character>(game, "Soldier", {-3, 0, 0});
+        soldier.SetMoveSpeed(3);
+        game.InitializeGameplay();
+        auto& world = Ai::Get(game);
+        if (target) world.AddTarget(soldier, {1});
+        auto& group = world.CreateGroup("Selected");
+        group.GetPerception().SetTeam({1});
+        group.AddCharacter(soldier, 0.4f);
+        group.MoveTo(glm::vec3(3, 0, 0));
+        std::vector<glm::vec3> positions;
+        for (int i = 0; i < 30; ++i) {
+            game.StepProjectSimulation(0.05f);
+            positions.push_back(soldier.GetWorldPosition());
+        }
+        if (target) {
+            // Disbanding leaves the registered target visible to senses and avoidance.
+            world.Destroy(group);
+            game.StepProjectSimulation(0.05f);
+            CHECK(world.IsTarget(soldier.GetComponentId()));
+            const auto& entries = world.Neighbours().Entries();
+            CHECK(std::count_if(entries.begin(), entries.end(), [&](const auto& entry) {
+                return entry.object == soldier.GetComponentId() && entry.controller == 0;
+            }) == 1);
+        }
+        return positions;
+    };
+    const auto plain = trajectory(false), target = trajectory(true);
+    for (size_t i = 0; i < plain.size(); ++i) {
+        const float difference = glm::length(plain[i] - target[i]);
+        if (difference > 1e-4f)
+            throw std::runtime_error("perception target changes its own group movement at frame " +
+                std::to_string(i) + ": difference=" + std::to_string(difference));
+    }
+}
+
+void GroupUnreachableGoalTests()
+{
+    Game game;
+    auto& soldier = AddToScene<Character>(game, "Soldier", {-5, 0, 0});
+    soldier.SetMoveSpeed(3);
+    game.InitializeGameplay();
+    auto& world = Ai::Get(game);
+    auto& grid = world.Navigation();
+    grid.SetBounds({-10, -10}, {10, 10}, 0.5f);
+    grid.BlockBox({-1, -10}, {1, 10});
+    auto& group = world.CreateGroup("Selected");
+    group.AddCharacter(soldier, 0.4f);
+    // Cache a reachable goal in the same coarse region, across the wall from the next goal.
+    group.MoveTo(glm::vec3(-5, 0, -1));
+    Step(game, 2);
+    CHECK(group.GetMoveStatus() == Ai::MoveStatus::Arrived);
+    group.MoveTo(glm::vec3(5, 0, 0));
+    Step(game, 5);
+    CHECK(soldier.GetWorldPosition().x < -1);
+    CHECK(group.GetMoveStatus() == Ai::MoveStatus::Unreachable);
+    const auto stopped = soldier.GetWorldPosition();
+    Step(game, 0.5f);
+    CHECK(glm::length(soldier.GetWorldPosition() - stopped) < 1e-4f);
+    // An opened passage and a new order must recover from the failed order.
+    grid.ClearBox({-1, -2}, {1, 2});
+    group.MoveTo(glm::vec3(5, 0, 0));
+    Step(game, 10);
+    CHECK(group.GetMoveStatus() == Ai::MoveStatus::Arrived);
+    CHECK(glm::length(soldier.GetWorldPosition() - glm::vec3(5, 0, 0)) < 0.4f);
+}
+
+void SmallGroupDetourTests()
+{
+    Game game;
+    std::vector<Character*> soldiers;
+    for (int i = 0; i < 3; ++i) {
+        auto& soldier = AddToScene<Character>(game, "Soldier" + std::to_string(i), {-1.5f + i * 1.5f, 0, -6});
+        soldier.SetMoveSpeed(3);
+        soldiers.push_back(&soldier);
+    }
+    game.InitializeGameplay();
+    auto& world = Ai::Get(game);
+    auto& grid = world.Navigation();
+    grid.SetBounds({-3, -10.8f}, {3, 10.8f}, 0.25f);
+    grid.BlockBox({-3, 1.1f}, {-1, 2.9f});
+    grid.BlockBox({1, 1.1f}, {3, 2.9f});
+    grid.BlockBox({-0.9f, 1.3f}, {0.9f, 2.7f});
+    grid.BlockBox({-1.2f, -2.35f}, {1.2f, -1.65f});
+    auto& group = world.CreateGroup("Selected");
+    group.GetPerception().SetTeam({1});
+    group.SetFacing(Pi / 2);
+    group.SetFormation({0.9f, 1});
+    for (auto* soldier : soldiers) {
+        world.AddTarget(*soldier, {1});
+        group.AddCharacter(*soldier, 0.4f);
+    }
+    group.MoveTo(glm::vec3(0, 0, -0.2625f));
+    for (int frame = 0; frame < 1200 && group.GetMoveStatus() != Ai::MoveStatus::Arrived; ++frame) {
+        game.StepProjectSimulation(0.016f);
+        for (auto* soldier : soldiers) {
+            const auto p = FlatOf(soldier->GetWorldPosition());
+            const auto nearest = glm::clamp(p, glm::vec2(-1.2f, -2.35f), glm::vec2(1.2f, -1.65f));
+            CHECK(glm::length(p - nearest) >= 0.399f);
+        }
+    }
+    if (group.GetMoveStatus() != Ai::MoveStatus::Arrived) {
+        std::string positions;
+        for (const auto& m : group.Members()) positions += " [" + std::to_string(m.position.x) + "," + std::to_string(m.position.y) + "]";
+        throw std::runtime_error("small group did not finish its detour:" + positions);
+    }
+    CHECK(MinimumGap(group) >= 0.79f);
+}
+
+void SmallGroupSharedGoalTests()
+{
+    {
+        Game game;
+        auto& left = AddToScene<Character>(game, "Left", {-1.5f, 0, -6});
+        auto& right = AddToScene<Character>(game, "Right", {0, 0, -6});
+        left.SetMoveSpeed(3); right.SetMoveSpeed(3);
+        game.InitializeGameplay();
+        auto& world = Ai::Get(game);
+        world.Navigation().SetBounds({-3, -10.8f}, {3, 10.8f}, 0.25f);
+        auto& a = world.CreateGroup("Left order"); a.AddCharacter(left, 0.4f); a.SetFormation({0.9f, 1});
+        auto& b = world.CreateGroup("Right order"); b.AddCharacter(right, 0.4f); b.SetFormation({0.9f, 1});
+        a.MoveTo(glm::vec3(-2, 0, -4.5f));
+        b.MoveTo(glm::vec3(2, 0, -4.5f));
+        Step(game, 0.5f);
+        CHECK(right.GetWorldPosition().x > 0.3f); // an independent right-hand order must not follow the left field
+        Step(game, 5);
+        CHECK(a.GetMoveStatus() == Ai::MoveStatus::Arrived && b.GetMoveStatus() == Ai::MoveStatus::Arrived);
+    }
+    Game game;
+    auto& soldier = AddToScene<Character>(game, "Soldier", {0, 0, -6});
+    soldier.SetMoveSpeed(3);
+    game.InitializeGameplay();
+    auto& world = Ai::Get(game);
+    world.Navigation().SetBounds({-3, -10.8f}, {3, 10.8f}, 0.25f);
+    auto& group = world.CreateGroup("Selected");
+    group.AddCharacter(soldier, 0.4f);
+    group.SetFormation({0.9f, 1});
+    group.MoveTo(glm::vec3(-2, 0, -4.5f));
+    Step(game, 3);
+    CHECK(group.GetMoveStatus() == Ai::MoveStatus::Arrived);
+    group.MoveTo(glm::vec3(2, 0, -4.5f));
+    Step(game, 6);
+    if (group.GetMoveStatus() != Ai::MoveStatus::Arrived) {
+        const auto p = soldier.GetWorldPosition();
+        throw std::runtime_error("replacement order followed old shared goal: " + std::to_string(p.x) + "," + std::to_string(p.z));
+    }
+    CHECK(glm::length(soldier.GetWorldPosition() - glm::vec3(2, 0, -4.5f)) < 0.11f);
+}
+
 // The same gap at 60 FPS: soldiers choose their velocity every fourth frame, in turns.
 void StaggeredReplanTests()
 {

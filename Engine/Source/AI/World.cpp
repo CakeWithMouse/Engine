@@ -12,6 +12,7 @@
 #include <chrono>
 #include <cmath>
 #include <stdexcept>
+#include <unordered_set>
 
 namespace Ai
 {
@@ -208,6 +209,7 @@ void World::Tick(float dt)
 
     // 2. Neighbours: bodies, squad soldiers, plain targets.
     neighbours_->Begin();
+    std::unordered_set<ComponentId> representedBodies;
     float largest = 1;
     for (auto& c : controllers_)
     {
@@ -219,19 +221,22 @@ void World::Tick(float dt)
                 const auto& m = group->members_[i];
                 if (!m.alive) continue;
                 neighbours_->Add({m.position, m.radius, m.character, c->serial_, static_cast<uint32_t>(i), c->perception_.team_, m.settled, m.velocity});
+                if (m.character) representedBodies.insert(m.character);
                 largest = std::max(largest, m.radius);
             }
             stats_.soldiers += static_cast<uint32_t>(group->Size());
             continue;
         }
         if (!c->owner_) continue;
+        representedBodies.insert(c->owner_);
         neighbours_->Add({Flat(c->position_), c->radius_, c->owner_, c->serial_, 0, c->perception_.team_,
                            c->moveStatus_ != MoveStatus::Moving && c->moveStatus_ != MoveStatus::Waiting, Flat(c->velocity_)});
         largest = std::max(largest, c->radius_);
     }
     targets_.erase(std::remove_if(targets_.begin(), targets_.end(), [&](const TargetEntry& t) { return !Resolve(t.id); }), targets_.end());
     for (const auto& target : targets_)
-        if (!Find(target.id)) neighbours_->Add({Flat(Resolve(target.id)->GetWorldPosition()), 0.4f, target.id, 0, 0, target.team, true});
+        // A group's Character is already a moving body, even though it has no owner controller.
+        if (!representedBodies.count(target.id)) neighbours_->Add({Flat(Resolve(target.id)->GetWorldPosition()), 0.4f, target.id, 0, 0, target.team, true});
     neighbours_->Build(std::max(4.0f, 4 * largest));   // 2x was measured: slower
     stats_.syncMs = Ms(stepStart);
 

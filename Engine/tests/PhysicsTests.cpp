@@ -1,5 +1,7 @@
 ﻿#include <Engine/Physics/PhysicsWorld.h>
 #include <cmath>
+#include <iostream>
+#include <limits>
 #include <stdexcept>
 
 #include "TestSkipped.h"
@@ -78,6 +80,45 @@ void PhysicsWorldTests()
     world.ApplySettings(settings);
     Require(world.GetSettings().GetGravity().y == -3.0f && world.GetSettings().GetFixedTimeStep() == 1.0f / 120.0f,
             "settings were not applied");
+
+    // Equal impulses must produce velocities derived from the requested density,
+    // not Jolt's default density. Test every supported primitive shape.
+    for (const auto shape : {PhysicsShapeType::Box, PhysicsShapeType::Sphere, PhysicsShapeType::Capsule})
+    {
+        PhysicsBodyDesc lightDesc;
+        lightDesc.shape = shape;
+        lightDesc.position = glm::vec3(30.0f, 20.0f, 0.0f);
+        lightDesc.density = 10.0f;
+        auto heavyDesc = lightDesc;
+        heavyDesc.position.x = 35.0f;
+        heavyDesc.density = 100.0f;
+        const auto light = world.CreateBody(lightDesc), heavy = world.CreateBody(heavyDesc);
+        Require(light && heavy, "density test bodies were not created");
+        const float pi = std::acos(-1.0f);
+        const float sphereVolume = 4.0f / 3.0f * pi * .5f * .5f * .5f;
+        const float volume = shape == PhysicsShapeType::Box ? 1.0f :
+            shape == PhysicsShapeType::Sphere ? sphereVolume : sphereVolume + pi * .5f * .5f;
+        world.AddImpulse(light, glm::vec3(100.0f, 0.0f, 0.0f));
+        world.AddImpulse(heavy, glm::vec3(100.0f, 0.0f, 0.0f));
+        const float lightSpeed = world.GetLinearVelocity(light).x;
+        const float heavySpeed = world.GetLinearVelocity(heavy).x;
+        std::cout << "Physics density shape=" << int(shape) << " light=" << lightSpeed
+                  << " heavy=" << heavySpeed << " volume=" << volume << '\n';
+        Require(Near(lightSpeed, 100.0f / (volume * lightDesc.density)),
+                "dynamic body mass must use requested density");
+        Require(Near(heavySpeed, 100.0f / (volume * heavyDesc.density)),
+                "higher density must reduce equal-impulse velocity");
+        world.DestroyBody(light);
+        world.DestroyBody(heavy);
+    }
+
+    for (const float density : {0.0f, -1.0f, std::numeric_limits<float>::infinity(),
+                                std::numeric_limits<float>::quiet_NaN()})
+    {
+        PhysicsBodyDesc invalid;
+        invalid.density = density;
+        Require(world.CreateBody(invalid) == 0, "invalid density must not create a body");
+    }
 
     world.Shutdown();
     Require(!world.IsInitialized(), "world still initialized after shutdown");

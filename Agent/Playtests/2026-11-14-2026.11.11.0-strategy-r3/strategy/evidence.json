@@ -1,0 +1,94 @@
+{
+  "run": "RepairCorridor r3",
+  "sdk": {
+    "engineVersion": "2026.11.11.0 localOnly",
+    "base": "main 388d7e9 + STRATEGY-003/007/008/013/015",
+    "runtime": "E:/Engine/Game/build/x64/Release/Runtime",
+    "engineLibSha256": "18622FC582C05F0DEC25753C4297C3276C44C736D764FBFDA460D2E56F35B1B3"
+  },
+  "sourceArchive": {
+    "path": "RepairCorridor-r3-source.zip",
+    "sha256": "5134954F87EBBE5B9660D73862037870716B41F28E1666D88769DF394752E3C1",
+    "entries": 16,
+    "audit": "source-only; ZIP CRC OK; no SDK/Binaries/Intermediate/SaveData; fresh extraction source mismatch 0"
+  },
+  "features": [
+    {
+      "id": "R3-BASELINE",
+      "status": "passed",
+      "action": "Opened the r2 source project in a new r3 scratch copy and ran actual Play before changes",
+      "actual": "Original game bootstrap and input ran in Play",
+      "evidence": ["baseline-play-request.json", "baseline-play-result.json", "baseline-play.log", "baseline-play.bmp"]
+    },
+    {
+      "id": "R3-BUILD-FINAL-SDK",
+      "status": "passed",
+      "action": "ProjectTools Build -Rebuild on explicit final Runtime, then fresh extraction Build -Rebuild",
+      "actual": "Both game DLL builds validated and activated on Engine.lib SHA 18622FC5…; fresh process exit code 0",
+      "evidence": ["r3-build-sdk-18622.log", "fresh-build.log", "fresh-build.exit"]
+    },
+    {
+      "id": "R3-GROUP-SELECTION-REGROUP",
+      "status": "passed",
+      "action": "Real LMB/Shift+LMB selection, independent rightward order, resize to 1000x720, shared order for selected pair",
+      "actual": "Unit 2 moved right x=0.0679→1.1199→1.7527; after regroup units 1/2 joined group 5, unselected unit 3 remained group 4 and kept its old target; acceptedOrders=4",
+      "evidence": ["r3-selection-regroup-after015-exact-request.json", "r3-selection-regroup-after015-exact-result.json", "r3-selection-regroup-after015-exact-telemetry.log", "r3-selection-regroup-after015-exact.bmp"]
+    },
+    {
+      "id": "R3-GROUP-DETOUR-CENTRAL",
+      "status": "passed",
+      "action": "Issue the original transverse 3-unit formation across the visible central barrier",
+      "actual": "All three units reached separate slots; barrierViolationFrames=0. Root confirmed the group movement repeat after STRATEGY-013",
+      "evidence": ["r3-detour-wide-approach-request.json", "r3-central-fixed-arrival-result.json", "r3-central-fixed-arrival-telemetry.log", "r3-central-fixed-arrival.bmp"]
+    },
+    {
+      "id": "R3-GATE-CLOSED-OPEN-ARRIVAL-FRESH",
+      "status": "passed",
+      "action": "Fresh archive Play: order behind closed gate, apply E impulse, reissue as soon as connectivity opens, wait for arrival",
+      "actual": "Closed route Unreachable; crate stopped at z≈5.5106; NavGrid version 8→176 and gateConnected=1; acceptedOrders=3; all selected units Connected then Arrived; navConnectedSelected=3; barrierViolationFrames=0. Final game outcome was loss to guard (won=0,lost=1), while the accepted route still completed",
+      "evidence": ["fresh-central-gate-request.json", "fresh-central-gate-result.json", "fresh-central-gate-telemetry.log", "fresh-central-gate.bmp", "fresh-central-gate-commandlet.log", "fresh-central-gate.exit"]
+    },
+    {
+      "id": "R3-STRATEGY-015-RECHECK",
+      "status": "passed",
+      "action": "Repeat the exact independent rightward order and regroup scenario after root's Engine fix",
+      "actual": "The previously wrong-way unit moved right; selected/ unselected group memberships and accepted resize order were correct",
+      "evidence": ["r3-selection-regroup-after015-exact-request.json", "r3-selection-regroup-after015-exact-telemetry.log", "r3-selection-regroup-after015-exact.bmp"]
+    },
+    {
+      "id": "R3-HUD-POINTER-RESIZE",
+      "status": "passed",
+      "action": "Check pointer capture then issue a floor order after cursor update and viewport resize",
+      "actual": "HUD hover returned InputBlocked; subsequent floor order was accepted after cursor/hover updates; resized group order accepted",
+      "evidence": ["r3-selection-regroup-pause-request.json", "r3-selection-regroup-pause-telemetry.log", "r3-selection-regroup-after015-exact-request.json", "r3-selection-regroup-after015-exact-telemetry.log"]
+    },
+    {
+      "id": "R3-PAUSE-RESUME",
+      "status": "passed",
+      "action": "Pause then resume the active tactical scenario",
+      "actual": "Root reviewed the saved control run: object coordinates stayed fixed while paused and changed after resume",
+      "evidence": ["r3-selection-regroup-pause-request.json", "r3-selection-regroup-pause-result.json"]
+    },
+    {
+      "id": "R3-STRATEGY-015-BEFORE-FIX",
+      "status": "failed",
+      "action": "Original pre-fix independent rightward order for unit 2",
+      "actual": "Target x=2.0625,z=-4.47917; x moved 0→−0.735→−1.447. Root reproduced and recorded STRATEGY-015; this historical failure was fixed and the exact scenario passed afterward",
+      "evidence": ["r3-selection-regroup-pause-request.json", "r3-selection-regroup-pause-telemetry.log", "r3-selection-regroup-confirm-telemetry.log", "r3-selection-regroup-after015-exact-telemetry.log"]
+    },
+    {
+      "id": "R3-EDIT-AUTHORING",
+      "status": "partial",
+      "action": "Inspect edit/start scene representation",
+      "actual": "The corridor is procedurally created during gameplay bootstrap; Main scene remains empty and the map is not editable in the scene editor",
+      "evidence": ["fresh-central-gate-result.json", "REBUILD.md"]
+    },
+    {
+      "id": "R3-STANDALONE-SMOKE",
+      "status": "passed",
+      "action": "Launch the fresh extracted project in standalone Runtime for 60 frames",
+      "actual": "Exit code 0; log records GameUpdates=60 and EngineStopped. This is a smoke run, not visual proof",
+      "evidence": ["fresh-standalone.stdout.log", "fresh-standalone.stderr.log", "fresh-standalone.exit"]
+    }
+  ]
+}

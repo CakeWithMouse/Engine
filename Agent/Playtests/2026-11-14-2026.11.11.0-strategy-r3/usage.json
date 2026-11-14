@@ -1,0 +1,39 @@
+{
+  "bucket": "codex",
+  "windowDurationMins": 10080,
+  "resetsAt": 1794928911,
+  "overallBaselineUsedPercent": 42,
+  "phaseStartUsedPercent": 47,
+  "softStopOverallDelta": 25,
+  "maximumOverallDelta": 30,
+  "checkpoints": [
+    {
+      "usedPercent": 47,
+      "phase": "Same developer: group selection and navigation"
+    },
+    {
+      "phase": "STRATEGY-007 fixed; AI 53/53; SDK rebuilt",
+      "usedPercent": 48
+    },
+    {
+      "phase": "Group selection and active grid verified; arrival scenarios underway",
+      "usedPercent": 49
+    },
+    {
+      "usedPercent": 50,
+      "phase": "STRATEGY-013 exact game reproduction passed; AI55/55"
+    },
+    {
+      "phase": "STRATEGY-015 passed in game; AI56/56; final packaging",
+      "usedPercent": 51
+    },
+    {
+      "phase": "Fresh archive, Play arrival and standalone60 completed",
+      "usedPercent": 51
+    }
+  ],
+  "note": "Continues r1/r2 baseline; account-wide rounded usage, not exact thread usage.",
+  "finalUsedPercent": 51,
+  "observedPhaseDelta": 4,
+  "observedOverallDelta": 9
+}

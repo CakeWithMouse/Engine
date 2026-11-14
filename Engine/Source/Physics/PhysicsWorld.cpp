@@ -139,10 +139,10 @@ bool PhysicsWorld::IsInitialized() const
 
 uint32_t PhysicsWorld::CreateBody(const PhysicsBodyDesc& desc)
 {
-    if (!impl_) return 0;
+    if (!impl_ || !std::isfinite(desc.density) || desc.density <= 0.0f) return 0;
     try
     {
-        JPH::ShapeRefC shape;
+        JPH::Ref<JPH::ConvexShape> shape;
         switch (desc.shape)
         {
         case PhysicsShapeType::Box:
@@ -157,6 +157,8 @@ uint32_t PhysicsWorld::CreateBody(const PhysicsBodyDesc& desc)
         default:
             return 0;
         }
+        // Set density before Jolt derives the body's mass and inertia from the shape.
+        shape->SetDensity(desc.density);
         JPH::EMotionType motionType = JPH::EMotionType::Dynamic;
         JPH::ObjectLayer layer = LayerMoving;
         if (desc.type == PhysicsBodyType::Static)

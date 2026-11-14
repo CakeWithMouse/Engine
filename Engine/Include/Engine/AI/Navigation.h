@@ -236,6 +236,9 @@ public:
      */
     std::shared_ptr<const FlowField> Request(const NavGrid& grid, glm::vec2 goal, float radius,
                                              glm::vec2 areaMin, glm::vec2 areaMax, float margin = 64);
+    /** Limit goal sharing to the caller's final-approach distance; negative keeps coarse-cell sharing. */
+    std::shared_ptr<const FlowField> Request(const NavGrid& grid, glm::vec2 goal, float radius,
+                                             glm::vec2 areaMin, glm::vec2 areaMax, float margin, float goalTolerance);
     std::shared_ptr<const FlowField> Request(const NavGrid& grid, glm::vec2 goal, float radius) { return Request(grid, goal, radius, goal, goal, -1); }
     /** Cells held by every cached field. */
     size_t Cells() const;

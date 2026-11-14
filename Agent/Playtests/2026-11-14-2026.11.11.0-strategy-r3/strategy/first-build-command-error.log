@@ -1,0 +1,2 @@
+Command: ProjectTools.ps1 -Action Rebuild -Project <Project.json> -Runtime <Runtime>
+Result: exit 1. ProjectTools rejected Rebuild as Action; valid Action values are Enable, Build, AddClass. Correct invocation uses -Action Build -Rebuild.

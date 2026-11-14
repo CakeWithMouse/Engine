@@ -217,7 +217,8 @@ void Group::RequestField()
         low = glm::min(low, glm::min(m.position, m.slot));
         high = glm::max(high, glm::max(m.position, m.slot));
     }
-    field_ = world_->Fields().Request(grid, {goalPoint_.x, goalPoint_.z}, largest, low, high, fieldMargin_);
+    const float approachRadius = formation_.spacing * std::sqrt(static_cast<float>(std::max(Size(), size_t(1)))) * 0.75f + 2 * largest;
+    field_ = world_->Fields().Request(grid, {goalPoint_.x, goalPoint_.z}, largest, low, high, fieldMargin_, approachRadius);
 }
 
 void Group::MoveTo(ObjectRef target, float acceptanceRadius)
@@ -257,6 +258,15 @@ void Group::UpdateMovement(float)
             moveStatus_ = MoveStatus::Waiting;
             return;
         }
+        if (alive && reach == 0)
+        {
+            // After widening to the whole grid, no member can reach the goal.
+            // Do not report Moving for ten minutes while pushing against a wall.
+            StopMovement();
+            moveStatus_ = MoveStatus::Unreachable;
+            OnMoveFinished(MoveStatus::Unreachable);
+            return;
+        }
     }
     moveStatus_ = MoveStatus::Moving;
 
@@ -276,7 +286,9 @@ void Group::UpdateMovement(float)
         ++alive;
         const glm::vec2 toSlot = m.slot - m.position;
         const float distance = glm::length(toSlot);
-        if (distance <= std::max(0.3f, 0.25f * m.radius) || (m.settled && distance <= m.radius))
+        // Small soldiers must settle close enough to their slots to leave their neighbours room.
+        const float arrivalDistance = std::min(0.3f, 0.25f * m.radius);
+        if (distance <= arrivalDistance || (m.settled && distance <= m.radius))
         {
             m.settled = true;
             m.velocity = glm::vec2(0);
@@ -290,7 +302,13 @@ void Group::UpdateMovement(float)
         glm::vec2 direction(0);
         // Once the line to the slot is clear the soldier walks it; the line is checked again only now and then.
         if (grid.IsConfigured() && (!m.direct || (frame / stride + i) % 8 == 0))
-            m.direct = glm::length(m.position - glm::vec2(goalPoint_.x, goalPoint_.z)) <= formationRadius && grid.CanWalkStraight(m.position, m.slot, m.radius);
+        {
+            // A shared field may end near a different order. Hand off to the actual slot there,
+            // and keep following it while clear instead of turning back toward the cached goal.
+            const bool nearGoal = glm::length(m.position - glm::vec2(goalPoint_.x, goalPoint_.z)) <= formationRadius;
+            const bool nearFieldGoal = field_ && glm::length(m.position - field_->goal) <= formationRadius;
+            m.direct = (m.direct || nearGoal || nearFieldGoal) && grid.CanWalkStraight(m.position, m.slot, m.radius);
+        }
         const bool direct = !grid.IsConfigured() || m.direct;
         if (!direct) direction = field_->Sample(grid, m.position);
         if (glm::length(direction) < 1e-3f) direction = toSlot / distance;

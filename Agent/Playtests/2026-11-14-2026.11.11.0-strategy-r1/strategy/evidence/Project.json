@@ -1,0 +1,6 @@
+{
+  "content": "Content",
+  "module": "Binaries/Release/e7d213dcec204ffa8707d4d31799a9c3/Game.dll",
+  "name": "Ремонтный коридор",
+  "startupScene": "Content/Scenes/Main.scene.json"
+}

@@ -48,6 +48,10 @@ void HeadOnTests();
 void CrowdToOnePointTests();
 void StandingUnitIsNotPushedTests();
 void SquadThroughGapTests();
+void GroupCharacterTargetTests();
+void GroupUnreachableGoalTests();
+void SmallGroupDetourTests();
+void SmallGroupSharedGoalTests();
 void SharedFieldAndOpenFieldTests();
 void SquadMachineAndTeamsTests();
 void WindowedFieldTests();
@@ -111,6 +115,10 @@ int main(int argc, char** argv)
         {"stage8 crowd to one point: no overlap, no jitter", CrowdToOnePointTests},
         {"stage8 a standing unit is walked around", StandingUnitIsNotPushedTests},
         {"stage9 squad of 100 through a gap on one field", SquadThroughGapTests},
+        {"stage9 character target does not avoid itself", GroupCharacterTargetTests},
+        {"stage9 unreachable group goal and reopened passage", GroupUnreachableGoalTests},
+        {"stage9 small group completes barrier detour", SmallGroupDetourTests},
+        {"stage9 small group changes shared goal", SmallGroupSharedGoalTests},
         {"stage9 shared field and open ground", SharedFieldAndOpenFieldTests},
         {"stage9 squad machine, teams, losses", SquadMachineAndTeamsTests},
         {"stage9 flow field window and widening", WindowedFieldTests},
