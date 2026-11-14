@@ -1,0 +1,63 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\strategy-r5\\diagnostics-after\\Project.json",
+  "steps": [
+    {
+      "kind": "diagnostics",
+      "request": {
+        "layers": 1
+      }
+    },
+    {
+      "kind": "control",
+      "action": "play"
+    },
+    {
+      "kind": "frames",
+      "count": 100
+    },
+    {
+      "kind": "diagnostics",
+      "request": {
+        "selectedOnly": false,
+        "layers": 255
+      }
+    },
+    {
+      "kind": "control",
+      "action": "pause"
+    },
+    {
+      "kind": "diagnostics",
+      "request": {
+        "selectedOnly": false,
+        "layers": 255
+      }
+    },
+    {
+      "kind": "diagnostics",
+      "request": {
+        "layers": 0
+      }
+    },
+    {
+      "kind": "control",
+      "action": "resume"
+    },
+    {
+      "kind": "diagnostics",
+      "request": {
+        "layers": 1
+      }
+    },
+    {
+      "kind": "control",
+      "action": "stop"
+    },
+    {
+      "kind": "diagnostics",
+      "request": {
+        "layers": 1
+      }
+    }
+  ]
+}

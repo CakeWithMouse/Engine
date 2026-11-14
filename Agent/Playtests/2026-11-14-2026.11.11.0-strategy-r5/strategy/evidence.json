@@ -1,0 +1,94 @@
+{
+  "project": "Repair Corridor r5",
+  "projectPath": "E:/Engine/Engine/build/playtests/strategy-r5/fresh-final-sdk020b/RepairCorridor",
+  "sourceArchive": {
+    "path": "RepairCorridor-r5-source.zip",
+    "sha256": "8AF67B7BD0B20F24830436187B5786C66B5AA8EAC498075626E6344AD85A7C03",
+    "audit": "r5-final-zip-audit.json",
+    "pre020Archive": {
+      "path": "RepairCorridor-r5-source-pre020.zip",
+      "sha256": "C8D93F47125C17330676F5968351DB7559BE5AA02907F11F56C89098EEACBD75"
+    }
+  },
+  "engine": {
+    "version": "2026.11.11.0-localOnly",
+    "base": "a5468726",
+    "aiDiagnostics": "0947535b",
+    "runtime": "E:/Engine/Game/build/x64/Release/Runtime",
+    "engineLib": "E:/Engine/Game/build/x64/Release/Runtime/SDK/Lib/Engine.lib",
+    "engineLibSha256": "4202492B1EFB832315DA1CD86281B9A540B5D3641011AB33BB76D6D1851B3FC2",
+    "fixes": ["STRATEGY-019", "STRATEGY-020"]
+  },
+  "featuresUsed": [
+    "Engine.Scene.AiDiagnostics v1 / Task 074",
+    "AI FSM and perception",
+    "AI NavGrid, Group, formation and MoveTo",
+    "Physics/Jolt rigid-body impulse and collision",
+    "Input, camera, HUD, Scene Trace",
+    "World ReportDamage combat delivery"
+  ],
+  "evidence": [
+    {
+      "id": "AI-DIAGNOSTICS-LIVE-GAME",
+      "status": "passed",
+      "action": "Play the actual Repair Corridor game, pause its live AI world, request group AUTO radius, A-to-B, flow field, clearance, formation and guard perception; render layers on the D3D viewport.",
+      "actual": "Group serial 5 AUTO radius .40000000596, field ready, A-to-B found, gate cell clearance .875 and walkable. Manual radius 1.0 makes that cell non-walkable and probe partial. Guard serial 1 FSM history Patrol→Pause→Patrol; separate perception response has 34 lines. The selected-group overlay BMP visibly contains grid/cost/clearance, field, formation slots and probe.",
+      "evidence": ["r5-ai-diagnostics-game-retry-request.json", "r5-ai-diagnostics-game-retry-result.json", "r5-ai-diagnostics-game-retry-0.json", "r5-ai-diagnostics-game-retry-1.json", "r5-ai-diagnostics-game-retry-2.json", "r5-ai-diagnostics-game-retry-3.json", "r5-ai-diagnostics-game-retry-telemetry.log", "r5-ai-diagnostics-game-retry-line.bmp", "r5-ai-diagnostics-game-retry-overlay.bmp", "r5-final-clean-play-result.json"]
+    },
+    {
+      "id": "STRATEGY-019-AUTO-GROUP-RADIUS-RECHECK",
+      "status": "passed",
+      "action": "Compare AUTO and explicit 1.0 radius on the same selected group and gateway cell, then repeat AUTO on final SDK020b.",
+      "actual": "AUTO tracks the 0.4m living soldiers; gateway clearance is 0.875m. Explicit 1.0 radius cannot cross. Final clean Play response again reports AUTO radius .40000000596 and configured group field.",
+      "evidence": ["r5-ai-diagnostics-game-retry-0.json", "r5-ai-diagnostics-game-retry-1.json", "r5-final-clean-play-result.json", "r5-fresh-post020b-build.status"]
+    },
+    {
+      "id": "GROUP-FORMATION-TOGGLE-AND-ARRIVAL",
+      "status": "passed",
+      "action": "Issue a line order, toggle F once, verify old slots persist until the next RMB, then wait for the new column order around the physical gate/barrier.",
+      "actual": "The final SDK020b run accepted the second order and reached Arrived. Diagnostics says movement Arrived; all three selected agents remain connected and barrierViolationFrames=0. S2 ends at (-.791471,-.971346), assigned slot (-.875,-.925), approximately .095m away. The guard later captures the squad (lost=1), so this route is not a campaign victory.",
+      "evidence": ["r5-final-clean-play-request.json", "r5-final-clean-play-telemetry.log", "r5-final-clean-play-result.json", "r5-final-clean-play-arrived.bmp", "r5-final-clean-play.exit"]
+    },
+    {
+      "id": "STRATEGY-020-PRE-FIX-REPRODUCTION",
+      "status": "failed",
+      "action": "Repeat the exact long fresh-archive column-order request before the final path/projection correction.",
+      "actual": "On the pre-fix SDK, order remained Moving while S2 stopped at (1.26277,-1.20864), assigned slot (-.125,-.925); the position was unchanged for roughly 720 frames. On the first SDK020 correction it stopped again at (1.26075,-1.23988), slot (-.875,-.925), before loss. These are preserved failing reproductions, not final behavior.",
+      "evidence": ["r5-fresh-long-column-extended-request.json", "r5-fresh-long-column-telemetry.log", "r5-fresh-long-column-post020-telemetry.log", "r5-fresh-long-column-post020-result.json"]
+    },
+    {
+      "id": "STRATEGY-020-FINAL-RECHECK",
+      "status": "passed",
+      "action": "Repeat that unchanged long request after STRATEGY-020b using the explicit final Runtime SDK.",
+      "actual": "ProjectTools build validated and activated; commandlet exit 0. The same group reached Arrived with AUTO .4, field ready, path found, navConnectedSelected=3, and zero barrier violations. Root's independent CPU phases and AI suite also passed; game logic was not patched to work around the defect.",
+      "evidence": ["r5-fresh-post020b-build.log", "r5-fresh-post020b-build.status", "r5-fresh-long-column-post020b-commandlet.log", "r5-fresh-long-column-post020b.exit", "r5-fresh-long-column-post020b-telemetry.log", "r5-fresh-long-column-post020b-result.json"]
+    },
+    {
+      "id": "FINAL-ARCHIVE-FRESH-BUILD-PLAY-RUNTIME",
+      "status": "passed",
+      "action": "Extract the final source archive into a clean directory, rebuild on the exact SDK, run the long live project.input Play+diagnostics request, then run the actual standalone Runtime for 60 frames.",
+      "actual": "ZIP audit: 18 entries, 17,884 bytes, all 18 match current source, no binaries/SDK/Intermediate/SaveData. Fresh build validated and activated (buildId dfc14c308aae4201bee2ce749c742837). Actual Play exit 0 and Arrived; direct Runtime exit 0, GameUpdates=60 and EngineStopped.",
+      "evidence": ["RepairCorridor-r5-source.zip", "RepairCorridor-r5-source-pre020.zip", "r5-final-zip-audit.json", "r5-final-clean-build.log", "r5-final-clean-build.status", "r5-final-clean-play-request.json", "r5-final-clean-play-commandlet.log", "r5-final-clean-play-result.json", "r5-final-clean-play-telemetry.log", "r5-final-clean-play-arrived.bmp", "r5-final-clean-play.exit", "r5-final-runtime60.stdout.log", "r5-final-runtime60.stderr.log", "r5-final-runtime60.exit"]
+    },
+    {
+      "id": "AI-QT-PANEL-ON-OWN-PROJECT",
+      "status": "partial",
+      "action": "Attempt to open the project in the actual Editor and visually inspect its AI panel.",
+      "actual": "The correct Runtime editor process launched, but screenshot-only CUA window-state capture hung twice (STRATEGY-018); this agent never visually inspected the Qt panel on the project. The real API and D3D overlay were inspected through project.input instead. Root separately reports its native UI/API check passed; that does not count as this project's manual layout review.",
+      "evidence": ["r5-runtime-editor.stdout.log", "r5-runtime-editor.stderr.log", "r5-runtime-editor.exit", "r5-editor-process.txt", "../../../../Agent/Tasks/074-ai-viewport-diagnostics.md"]
+    },
+    {
+      "id": "PRESERVED-INVOCATION-ERRORS",
+      "status": "failed",
+      "action": "Preserve two incorrect project.input invocations from early work.",
+      "actual": "An unsupported {kind:resume} step returned unknown project.input step; a later request exceeded the documented 600-frame per-step bound. Both were invocation mistakes, not Engine defects; corrected runs used documented control.action and 600+400 frames.",
+      "evidence": ["r5-ai-diagnostics-game-request.json", "r5-ai-diagnostics-game-result.json", "r5-ai-diagnostics-game-commandlet.log", "r5-fresh-long-column-bounded-error-request.json", "r5-fresh-long-column-bounded-error-result.json", "r5-fresh-long-column-bounded-error-commandlet.log"]
+    }
+  ],
+  "limitations": [
+    "Main.scene.json is empty; the level is procedurally built only when Play starts.",
+    "Navigation uses the existing NavGrid and group flow field; no general NavMesh or full pathfinding authoring workflow was added.",
+    "This agent did not manually inspect the Qt AI panel on its project due STRATEGY-018; the real diagnostics API and overlay were inspected in actual Play.",
+    "The final long route reached Arrived, but the guard captured the squad afterward; the final outcome is loss, not victory."
+  ]
+}

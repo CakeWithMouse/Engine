@@ -1,0 +1,3 @@
+[VfsRead] using local VFS (no host service)
+FAIL: stage9 small group changes formation near barrier: formation replacement did not arrive: [-0.073471,-0.292081 -> 0.000000,-0.354167] [-0.143969,-1.049875 -> -0.125000,-0.925000] [0.091280,0.570710 -> 0.000000,0.545833]
+0/1 AI tests passed

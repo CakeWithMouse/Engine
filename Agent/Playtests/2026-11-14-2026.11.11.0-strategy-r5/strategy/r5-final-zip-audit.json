@@ -1,0 +1,10 @@
+{
+  "archive": "RepairCorridor-r5-source.zip",
+  "sha256": "8AF67B7BD0B20F24830436187B5786C66B5AA8EAC498075626E6344AD85A7C03",
+  "zipBytes": 17884,
+  "entries": 18,
+  "uncompressedBytes": 50685,
+  "sourceEntriesByteMatch": 18,
+  "sourceOnlyNoSDKBuildSaveData": true,
+  "previousPre020ArchiveSha256": "C8D93F47125C17330676F5968351DB7559BE5AA02907F11F56C89098EEACBD75"
+}

@@ -52,6 +52,7 @@ void GroupMovingTargetTests();
 void GroupCharacterTargetTests();
 void GroupUnreachableGoalTests();
 void SmallGroupDetourTests();
+void SmallGroupFormationChangeTests();
 void SmallGroupSharedGoalTests();
 void SharedFieldAndOpenFieldTests();
 void SquadMachineAndTeamsTests();
@@ -120,6 +121,7 @@ int main(int argc, char** argv)
         {"stage9 character target does not avoid itself", GroupCharacterTargetTests},
         {"stage9 unreachable group goal and reopened passage", GroupUnreachableGoalTests},
         {"stage9 small group completes barrier detour", SmallGroupDetourTests},
+        {"stage9 small group changes formation near barrier", SmallGroupFormationChangeTests},
         {"stage9 small group changes shared goal", SmallGroupSharedGoalTests},
         {"stage9 shared field and open ground", SharedFieldAndOpenFieldTests},
         {"stage9 squad machine, teams, losses", SquadMachineAndTeamsTests},

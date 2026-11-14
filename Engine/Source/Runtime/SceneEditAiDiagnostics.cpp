@@ -113,7 +113,24 @@ EngineAiDiagnosticsApi SceneEditSession::GetAiDiagnosticsApi() noexcept
                             chosen = c;
                     }
                     if (chosen && q.value("agentRadius", true))
+                    {
                         radius = chosen->Radius();
+                        // A group navigates using its largest living member, not
+                        // the radius of its virtual centre controller.
+                        if (auto *group = dynamic_cast<Ai::Group *>(chosen))
+                        {
+                            float largest = 0;
+                            bool hasMember = false;
+                            for (const auto &member : group->Members())
+                                if (member.alive)
+                                {
+                                    hasMember = true;
+                                    largest = std::max(largest, member.radius);
+                                }
+                            if (hasMember)
+                                radius = largest;
+                        }
+                    }
                     if (chosen)
                         result["details"] = world->Debug().Describe(*chosen);
                     auto &grid = world->Navigation();

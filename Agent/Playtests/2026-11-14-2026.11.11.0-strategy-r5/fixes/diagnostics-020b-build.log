@@ -1,0 +1,7 @@
+Using v143 / MSVC 14.44.35207 / Windows SDK 10.0.26100.0
+Assimp enabled: true
+
+  Engine.vcxproj -> E:\Engine\Engine\build\x64\Release\Engine.lib
+     Создается библиотека E:\Engine\Engine\BuildSupport\..\..\Engine/build/x64/Release/AiDiagnosticsFixture/Game.lib и объект E:\Engine\Engine\BuildSupport\..\..\Engine/build/x64/Release/AiDiagnosticsFixture/Game.exp
+  DiagnosticsModule.vcxproj -> E:\Engine\Engine\build\x64\Release\AiDiagnosticsFixture\Game.dll
+

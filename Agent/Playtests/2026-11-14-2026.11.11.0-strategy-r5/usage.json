@@ -1,0 +1,24 @@
+{
+  "bucket": "codex",
+  "windowDurationMins": 10080,
+  "resetsAt": 1794928911,
+  "overallBaselineUsedPercent": 42,
+  "phaseStartUsedPercent": 56,
+  "checkpoints": [
+    {
+      "usedPercent": 56,
+      "phase": "r5 start: same strategy developer and AI diagnostics"
+    },
+    {
+      "phase": "AUTO radius fixed; native UI and diagnostics commandlet regressions passed; game author retesting",
+      "usedPercent": 58
+    },
+    {
+      "usedPercent": 63,
+      "phase": "both engine fixes passed CPU/UI/API and original author gameplay retest; final archive underway"
+    }
+  ],
+  "note": "Account-wide rounded usage, not exact thread usage. User previously authorized continuing to completion. Only the same strategy developer runs this bounded step.",
+  "phaseEndUsedPercent": 63,
+  "status": "complete"
+}

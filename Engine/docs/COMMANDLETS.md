@@ -236,6 +236,14 @@ Cursor использует новый размер. Выполните хотя
 после каждого шага. При завершении вызывается Stop. Игровые обработчики могут
 записывать свои SaveGame — используйте отдельный проект и каталог сохранений.
 
+`{"kind":"diagnostics","request":{"layers":255,"controller":1,"agentRadius":true}}`
+вызывает необязательный `Engine.Scene.AiDiagnostics` v1 на том же потоке сцены.
+Ответ находится в `steps[].diagnostics`: source, units, radius, field, path,
+cell и число линий/треугольников. Это данные настоящей диагностики, не снимок UI.
+Сначала запросите units без controller; идентификаторы действуют только в текущей
+сессии. `layers:0` очищает overlay. В Edit используется preview, в Play/Pause —
+живой мир. Поля запроса и маски описаны в `tests/ai/diagnostics/README.md`.
+
 `render.diagnostics` создаёт скрытый D3D viewport без игровой DLL и отрисовывает
 параметризованный InstancedMesh из кубов. Пример проверки ортографического LOD:
 

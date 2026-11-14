@@ -1,0 +1,33 @@
+{
+  "cell": {
+    "clearance": 0.875,
+    "cost": 1,
+    "walkable": true,
+    "x": 12,
+    "z": 52
+  },
+  "cellSize": 0.25,
+  "configured": true,
+  "details": "Player order 131  state: -\nmovement: Moving to (0.0, -0.4), corners left 0\nsoldiers: 3\n",
+  "expanded": 236,
+  "field": "ready",
+  "height": 87,
+  "lines": 7992,
+  "path": "found",
+  "radius": 0.4000000059604645,
+  "source": "paused",
+  "stride": 1,
+  "triangles": 4176,
+  "units": [
+    {
+      "id": 1,
+      "name": "CorridorGuard"
+    },
+    {
+      "id": 5,
+      "name": "Player order 131"
+    }
+  ],
+  "version": 176,
+  "width": 24
+}

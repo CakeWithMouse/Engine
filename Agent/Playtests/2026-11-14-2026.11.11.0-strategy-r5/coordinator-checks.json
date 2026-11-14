@@ -1,0 +1,20 @@
+{
+  "ai58": true,
+  "nativeUi": true,
+  "cleanPlay": true,
+  "runtime60": true,
+  "finalDiagnostics": true,
+  "arrivedBeforeLoss": true,
+  "noBarrierViolation": true,
+  "matrixEvidenceExists": true,
+  "agentEvidence": {
+    "entries": 8,
+    "statusCounts": {
+      "passed": 5,
+      "failed": 2,
+      "partial": 1
+    },
+    "fileLinks": 54,
+    "missing": []
+  }
+}

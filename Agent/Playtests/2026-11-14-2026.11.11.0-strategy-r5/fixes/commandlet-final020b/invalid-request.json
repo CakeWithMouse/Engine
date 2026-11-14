@@ -1,0 +1,9 @@
+{
+  "project": "E:\\Engine\\Engine\\build\\playtests\\strategy-r5\\diagnostics-final020b\\Project.json",
+  "steps": [
+    {
+      "request": "invalid",
+      "kind": "diagnostics"
+    }
+  ]
+}

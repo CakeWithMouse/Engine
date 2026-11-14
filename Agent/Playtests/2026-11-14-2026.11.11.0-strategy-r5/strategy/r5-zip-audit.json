@@ -1,0 +1,25 @@
+{
+  "entries": 18,
+  "bytes": 50267.0,
+  "forbidden": 0,
+  "files": [
+    "Build.ps1",
+    "Engine.lock.json",
+    "Game.sln",
+    "Game.vcxproj",
+    "Project.code.json",
+    "Project.json",
+    "Project.json.before-build",
+    "ProjectTypes.tsv",
+    "README.md",
+    "Content/ProjectGame.txt",
+    "Content/Scenes/Main.scene.json",
+    "Source/Module.cpp",
+    "Source/ProjectComponent.cpp",
+    "Source/ProjectComponent.h",
+    "Source/ProjectGame.cpp",
+    "Source/ProjectGame.h",
+    "Source/RotatingCube.cpp",
+    "Source/RotatingCube.h"
+  ]
+}

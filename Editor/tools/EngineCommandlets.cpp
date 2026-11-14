@@ -710,6 +710,7 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
       Require(value.isObject(), "step must be an object");
       const auto step = value.toObject();
       const auto kind = step["kind"].toString();
+      QJsonObject diagnostics;
       if (kind == "control") {
         const auto action = step["action"].toString();
         const int control = action == "play"     ? EnginePlay
@@ -721,6 +722,19 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
         Require(module.Api().control(module.Api().context, control) ==
                     EngineSceneOk,
                 "play control failed");
+      } else if (kind == "diagnostics") {
+        Require(step["request"].isObject(), "diagnostics request object required");
+        const auto api = module.AiDiagnosticsApi();
+        Require(api.version == 1 && api.inspect, "AI diagnostics API unavailable");
+        QByteArray reply;
+        const auto request = QJsonDocument(step["request"].toObject()).toJson(QJsonDocument::Compact);
+        Require(api.inspect(api.context, request.constData(),
+                            [](void *user, const char *json) {
+                              *static_cast<QByteArray *>(user) = json ? json : "";
+                            }, &reply) == EngineSceneOk, "AI diagnostics failed");
+        const auto parsed = QJsonDocument::fromJson(reply);
+        Require(parsed.isObject(), "AI diagnostics returned invalid JSON");
+        diagnostics = parsed.object();
       } else if (kind == "frames") {
         const int count = step["count"].toInt(-1);
         totalFrames += count;
@@ -776,6 +790,8 @@ QJsonObject ProjectCommand(const QString &command, const QJsonObject &in) {
         throw std::runtime_error("unknown project.input step");
       QJsonObject state{{"kind",kind},{"objects",objects()},
                         {"viewportRequested",QJsonArray{viewportWidth,viewportHeight}}};
+      if (kind == "diagnostics")
+        state["diagnostics"] = diagnostics;
       EngineCameraInfo camera{};
       if(host.GetCamera(camera)) {
         QJsonArray projection;for(float v:camera.projMatrix)projection.append(v);

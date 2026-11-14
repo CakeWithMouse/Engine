@@ -142,11 +142,20 @@ inline void RunAiDiagnosticsChecks(EditorQtHost &host, const EngineEditSessionAp
     settle();
     Ui([](auto *w){auto* combo=w->template findChild<QComboBox *>("AiSubject");Check(combo->view()->isVisible(),"subject popup survives snapshot refresh");combo->hidePopup();});
     choose(guard);
+    auto guardRadius = inspect({{"layers", 4}, {"controller", guard}, {"agentRadius", true}});
+    Check(std::abs(guardRadius["radius"].toDouble() - .6) < .0001,
+          "automatic character radius matches its movement radius");
     layers(8);
     capture("06-live-path");
     layers(32);
     capture("07-perception");
     choose(squad);
+    auto squadRadius = inspect({{"layers", 4}, {"controller", squad}, {"agentRadius", true}});
+    Check(std::abs(squadRadius["radius"].toDouble() - .4) < .0001,
+          "automatic squad radius matches its living soldiers, not the group centre");
+    auto manualRadius = inspect({{"layers", 4}, {"controller", squad}, {"agentRadius", false}, {"radius", 1.7}});
+    Check(std::abs(manualRadius["radius"].toDouble() - 1.7) < .0001,
+          "manual squad radius remains an explicit navigation probe override");
     layers(16);
     capture("08-live-field");
     layers(64);

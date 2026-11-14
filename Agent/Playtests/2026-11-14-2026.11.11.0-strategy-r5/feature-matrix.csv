@@ -1,0 +1,13 @@
+feature,status,verifier,evidence
+Next-order line/column and held F,passed,strategy_developer,strategy/r5-ai-diagnostics-game-retry-telemetry.log
+Formation arrival after barrier detour,passed,strategy_developer,strategy/r5-fresh-long-column-post020b-telemetry.log
+Selected group AUTO radius and flow field,passed,strategy_developer,strategy/r5-ai-diagnostics-game-retry-0.json
+Manual radius clearance and A-to-B probe,passed,strategy_developer,strategy/r5-ai-diagnostics-game-retry-1.json
+Guard perception and state diagnostics API,passed,strategy_developer,strategy/r5-ai-diagnostics-game-retry-2.json
+Real game diagnostic overlay,passed,strategy_developer,strategy/r5-ai-diagnostics-game-retry-overlay.bmp
+Native AI panel regression,passed,coordinator,fixes/ai-ui-final020b.log
+Diagnostics lifecycle and request validation,passed,coordinator,fixes/commandlet-final020b/result.json
+All AI regressions including two formation phases,passed,coordinator,fixes/ai-final-barrier.log
+Manual AI panel experience on game,partial,strategy_developer,issues.md
+Final archive clean build and Play arrival,passed,strategy_developer,strategy/r5-final-clean-play-result.json
+Final standalone Runtime 60 updates,passed,strategy_developer,strategy/r5-final-runtime60.stdout.log

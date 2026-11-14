@@ -242,6 +242,65 @@ void SmallGroupDetourTests()
     CHECK(MinimumGap(group) >= 0.79f);
 }
 
+void SmallGroupFormationChangeTests()
+{
+    Game game;
+    std::vector<Character*> soldiers;
+    for (int i = 0; i < 3; ++i) {
+        auto& soldier = AddToScene<Character>(game, "Soldier" + std::to_string(i), {-1.5f + i * 1.5f, 0, -6});
+        soldier.SetMoveSpeed(3);
+        soldiers.push_back(&soldier);
+    }
+    game.InitializeGameplay();
+    auto& world = Ai::Get(game);
+    auto& grid = world.Navigation();
+    grid.SetBounds({-3, -10.8f}, {3, 10.8f}, .25f);
+    grid.BlockBox({-3, 1.1f}, {-1, 2.9f});
+    grid.BlockBox({1, 1.1f}, {3, 2.9f});
+    grid.BlockBox({-1.2f, -2.35f}, {1.2f, -1.65f});
+    auto& group = world.CreateGroup("Formation change");
+    group.SetFormation({.9f, 3});
+    for (auto* soldier : soldiers) group.AddCharacter(*soldier, .4f);
+    group.MoveTo(glm::vec3(0, 0, -1.04167f));
+    Step(game, 96 * .016f, .016f);
+    group.SetFormation({.9f, 1});
+    group.MoveTo(glm::vec3(0, 0, -.354167f));
+    for (int frame = 0; frame < 1800 && group.GetMoveStatus() != Ai::MoveStatus::Arrived; ++frame) {
+        game.StepProjectSimulation(.016f);
+        for (const auto& m : group.Members()) {
+            const auto nearest = glm::clamp(m.position, glm::vec2(-1.2f, -2.35f), glm::vec2(1.2f, -1.65f));
+            CHECK(glm::length(m.position - nearest) >= .399f);
+        }
+    }
+    if (group.GetMoveStatus() != Ai::MoveStatus::Arrived) {
+        std::string positions;
+        for (const auto& m : group.Members()) positions += " [" + std::to_string(m.position.x) + "," + std::to_string(m.position.y) + " -> " + std::to_string(m.slot.x) + "," + std::to_string(m.slot.y) + "]";
+        throw std::runtime_error("formation replacement did not arrive:" + positions);
+    }
+    CHECK(MinimumGap(group) >= .79f);
+    // The live physics scene can leave one member close to the cabinet corner.
+    // It still needs a route to its slot, even when the other members have settled.
+    soldiers[0]->SetPosition({-.09f, 0, .55f});
+    soldiers[1]->SetPosition({1.26075f, 0, -1.23988f});
+    soldiers[2]->SetPosition({.089f, 0, -.392f});
+    game.StepProjectSimulation(.016f);
+    group.MoveTo(glm::vec3(0, 0, -.354167f));
+    for (int frame = 0; frame < 1250 && group.GetMoveStatus() != Ai::MoveStatus::Arrived; ++frame) {
+        game.StepProjectSimulation(.016f);
+        for (const auto& m : group.Members()) {
+            const auto nearest = glm::clamp(m.position, glm::vec2(-1.2f, -2.35f), glm::vec2(1.2f, -1.65f));
+            CHECK(glm::length(m.position - nearest) >= .399f);
+        }
+    }
+    if (group.GetMoveStatus() != Ai::MoveStatus::Arrived) {
+        const auto& m = group.Members()[1];
+        throw std::runtime_error("corner approach did not arrive: " + std::to_string(m.position.x) + "," + std::to_string(m.position.y)
+            + " fieldReaches=" + std::to_string(group.DiagnosticField()->Reaches(grid, m.position))
+            + " fieldRadius=" + std::to_string(group.DiagnosticField()->radius)
+            + " memberWalkable=" + std::to_string(grid.IsWalkable(m.position, m.radius)));
+    }
+}
+
 void SmallGroupSharedGoalTests()
 {
     {

@@ -6,8 +6,10 @@
 #include <glm/gtc/quaternion.hpp>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <numeric>
 #include <stdexcept>
+#include <unordered_map>
 
 namespace Ai
 {
@@ -169,6 +171,25 @@ void Group::AssignSlots(glm::vec2 center)
     std::sort(alive.begin(), alive.end(), [&](size_t a, size_t b) {
         return glm::dot(members_[a].position - center, forward) > glm::dot(members_[b].position - center, forward); });
     NavGrid& grid = world_->Navigation();
+    // Projecting each slot independently can collapse neighbours onto the same
+    // edge of an obstacle. Reserve space as slots are assigned, using local
+    // buckets so large formations do not compare every pair of soldiers.
+    const float bucketSize = std::max(.1f, 2 * largest_ + .05f);
+    std::unordered_map<uint64_t, std::vector<size_t>> occupied;
+    auto bucket = [&](glm::vec2 p) { return glm::ivec2(glm::floor(p / bucketSize)); };
+    auto key = [](glm::ivec2 c) { return (uint64_t(uint32_t(c.x)) << 32) | uint32_t(c.y); };
+    auto vacant = [&](glm::vec2 p, float radius) {
+        const auto cell = bucket(p);
+        for (int y = -1; y <= 1; ++y) for (int x = -1; x <= 1; ++x) {
+            const auto it = occupied.find(key(cell + glm::ivec2(x, y)));
+            if (it == occupied.end()) continue;
+            for (const size_t index : it->second) {
+                const auto& other = members_[index];
+                if (glm::length(p - other.slot) < radius + other.radius + .05f) return false;
+            }
+        }
+        return true;
+    };
     for (int row = 0; row < rows; ++row)
     {
         const auto first = alive.begin() + row * columns;
@@ -182,6 +203,26 @@ void Group::AssignSlots(glm::vec2 center)
             const glm::vec2 offset = right * ((static_cast<float>(column) - (inRow - 1) * 0.5f) * formation_.spacing)
                                    - forward * ((static_cast<float>(row) - (rows - 1) * 0.5f) * formation_.spacing);
             m.slot = grid.IsConfigured() ? grid.NearestWalkable(center + offset, m.radius) : center + offset;
+            if (grid.IsConfigured() && !vacant(m.slot, m.radius)) {
+                const auto origin = grid.CellOf(m.slot);
+                const int rings = std::max(1, int(std::ceil(16 / grid.CellSize())));
+                bool found = false;
+                for (int ring = 1; ring <= rings && !found; ++ring) {
+                    float best = std::numeric_limits<float>::max();
+                    glm::vec2 candidate = m.slot;
+                    for (int y = -ring; y <= ring; ++y) for (int x = -ring; x <= ring; ++x) {
+                        if (std::max(std::abs(x), std::abs(y)) != ring) continue;
+                        const auto cell = origin + glm::ivec2(x, y);
+                        const auto p = grid.CenterOf(cell);
+                        if (!grid.IsWalkableCell(cell, m.radius) || !vacant(p, m.radius) ||
+                            !grid.CanWalkStraight(m.slot, p, m.radius)) continue;
+                        const float distance = glm::length(p - (center + offset));
+                        if (distance < best) { best = distance; candidate = p; found = true; }
+                    }
+                    if (found) m.slot = candidate;
+                }
+            }
+            occupied[key(bucket(m.slot))].push_back(*(first + column));
             m.hasSlot = true;
             m.settled = false;
             m.direct = false;
@@ -335,6 +376,23 @@ void Group::UpdateMovement(float dt)
         }
         const bool direct = !grid.IsConfigured() || m.direct;
         if (!direct) direction = field_->Sample(grid, m.position);
+        if (!direct && glm::length(direction) < 1e-3f &&
+            !grid.CanWalkStraight(m.position, m.slot, m.radius)) {
+            // Cached fields round radii up. Avoidance/physics can put a member
+            // in a cell valid for its own radius but outside that field. Rejoin
+            // a reachable neighbour instead of pointing through the obstacle.
+            const auto cell = grid.CellOf(m.position);
+            float best = std::numeric_limits<float>::max();
+            for (int y = -1; y <= 1; ++y) for (int x = -1; x <= 1; ++x) {
+                const auto p = grid.CenterOf(cell + glm::ivec2(x, y));
+                if (!field_->Reaches(grid, p) || !grid.CanWalkStraight(m.position, p, m.radius)) continue;
+                const float distance = glm::length(p - m.position);
+                if (distance > 1e-4f && distance < best) {
+                    best = distance;
+                    direction = (p - m.position) / distance;
+                }
+            }
+        }
         if (glm::length(direction) < 1e-3f) direction = toSlot / distance;
         float speed = m.speed;
         if (direct) speed *= std::clamp(distance / std::max(0.01f, 0.5f * m.speed), 0.3f, 1.0f);
