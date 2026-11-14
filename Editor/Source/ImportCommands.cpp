@@ -11,13 +11,22 @@
 #include "AssetExtensions.h"
 #include "Logger.h"
 #include "FolderCommands.h"
-#include "ModelPickerDialog.h"
+#include "AssetPickerDialog.h"
 
 #include <QAction>
 #include <QFileDialog>
 #include <QMenu>
 #include <QMessageBox>
 #include <chrono>
+
+namespace {
+const IEditorHost::SceneObject* FindObject(const IEditorHost::Snapshot& snap, uint64_t id)
+{
+    for (const auto& o : snap.objects)
+        if (o.id == id) return &o;
+    return nullptr;
+}
+}
 
 void EditorMainWindow::RegisterAssetCommands()
 {
@@ -31,19 +40,13 @@ void EditorMainWindow::RegisterAssetCommands()
         QString(),
         QStringLiteral("Import models, textures, or audio into the project"),
         [this](const CommandContext& ctx) {
-            if (!host_->HasScene() ||
-                sceneBusy_ ||
-                host_->PlayState() != EditorQtHost::EditorState::Edit)
-            {
+            if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
                 return false;
-            }
 
             const int kind = ctx.parameters.value(QStringLiteral("kind"), 0).toInt();
             QString source = ctx.parameters.value(QStringLiteral("source")).toString();
             if (source.isEmpty())
-            {
                 source = ctx.parameters.value(QStringLiteral("path")).toString();
-            }
 
             const QString title = kind == 1
                 ? Tr("Импорт текстур в проект", "Import Textures to Project")
@@ -51,11 +54,7 @@ void EditorMainWindow::RegisterAssetCommands()
                     ? Tr("Импорт аудио в проект", "Import Audio to Project")
                     : Tr("Импорт моделей в проект", "Import Models to Project");
 
-            const QString filter = kind == 1
-                ? Tr("Текстуры (*.png *.jpg *.jpeg *.bmp *.tga)", "Textures (*.png *.jpg *.jpeg *.bmp *.tga)")
-                : kind == 2
-                    ? Tr("Аудио (*.wav *.ogg *.mp3 *.flac)", "Audio (*.wav *.ogg *.mp3 *.flac)")
-                    : Tr("Модели (*.glb *.gltf *.obj *.fbx *.blend)", "Models (*.glb *.gltf *.obj *.fbx *.blend)");
+            const QString filter = EditorCore::DialogFilter(static_cast<EditorCore::AssetKind>(kind));
 
             const QStringList paths = source.isEmpty()
                                           ? QFileDialog::getOpenFileNames(this, title, {}, filter)
@@ -187,39 +186,58 @@ void EditorMainWindow::RegisterAssetCommands()
         [this](const CommandContext& ctx) {
             if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
                 return false;
-
             const uint64_t targetId = ctx.parameters.value(QStringLiteral("objectId"), selectedId_).toULongLong();
             if (targetId == 0) return false;
-
-            const auto snapshot = host_->ReadSnapshot();
-            const IEditorHost::SceneObject* foundObj = nullptr;
-            for (const auto& o : snapshot.objects) {
-                if (o.id == targetId) { foundObj = &o; break; }
-            }
-            if (!foundObj) return false;
-
-            if (foundObj->type != "Engine.Model") {
+            const auto* found = FindObject(host_->ReadSnapshot(), targetId);
+            if (!found) return false;
+            if (found->type != "Engine.Model") {
                 QMessageBox::warning(this, Tr("Замена недоступна", "Replacement Unavailable"),
                     Tr("Замена геометрии примитива на модель заблокирована (требуется C-ABI движка).",
                        "Replacing primitive geometry with a model is blocked (requires Engine C-ABI)."));
                 return false;
             }
-
             QString newModel = ctx.parameters.value(QStringLiteral("model")).toString();
             if (newModel.isEmpty()) {
-                const QString currentModel = QString::fromStdString(foundObj->modelAsset);
-                ModelPickerDialog picker(QString::fromUtf8(host_->host().contentRoot), currentModel, this);
-                if (picker.exec() != QDialog::Accepted)
-                    return false;
-                newModel = picker.SelectedModel();
+                AssetPickerDialog picker(EditorCore::AssetKind::Model, QString::fromUtf8(host_->host().contentRoot), QString::fromStdString(found->modelAsset), this);
+                if (picker.exec() != QDialog::Accepted) return false;
+                newModel = picker.SelectedVirtualPath();
             }
-
             if (newModel.isEmpty()) return false;
-
             EditorCommand c;
             c.type = EditorCommand::SetModel;
             c.objectId = targetId;
             c.path = newModel;
+            host_->PostCommand(c);
+            return true;
+        },
+        [this]() {
+            return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit && selectedId_ != 0;
+        }
+    });
+
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("Scene.AssignMaterial"),
+        QStringLiteral("Assign Material"),
+        QString(),
+        QStringLiteral("Assign project material to selected scene object"),
+        [this](const CommandContext& ctx) {
+            if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+                return false;
+            const uint64_t targetId = ctx.parameters.value(QStringLiteral("objectId"), selectedId_).toULongLong();
+            if (targetId == 0) return false;
+            const auto* found = FindObject(host_->ReadSnapshot(), targetId);
+            if (!found) return false;
+            QString newMaterial = ctx.parameters.value(QStringLiteral("material")).toString();
+            if (newMaterial.isEmpty()) {
+                AssetPickerDialog picker(EditorCore::AssetKind::Material, QString::fromUtf8(host_->host().contentRoot), QString::fromStdString(found->materialAsset), this);
+                if (picker.exec() != QDialog::Accepted) return false;
+                newMaterial = picker.SelectedVirtualPath();
+            }
+            if (newMaterial.isEmpty()) return false;
+            EditorCommand c;
+            c.type = EditorCommand::SetMaterial;
+            c.objectId = targetId;
+            c.path = newMaterial;
             host_->PostCommand(c);
             return true;
         },
@@ -235,7 +253,7 @@ void EditorMainWindow::UnregisterAssetCommands()
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.EditImportSettings"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Delete"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.ReplaceModel"));
-    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Delete"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.AssignMaterial"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.CreateFolder"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.RenameFolder"));
 }
@@ -266,18 +284,14 @@ void EditorMainWindow::ImportAsset(int kind, const QString& source)
     QVariantMap params;
     params[QStringLiteral("kind")] = kind;
     if (!source.isEmpty())
-    {
         params[QStringLiteral("source")] = source;
-    }
     CommandRegistry::Instance().Execute(QStringLiteral("Assets.Import"), params);
 }
 
 bool EditorMainWindow::EditModelImportSettings(const QString& path, bool showDialog, const QVariantMap& overrideParams)
 {
     if (path.isEmpty() || !host_)
-    {
         return false;
-    }
 
     const QString projectDir = QFileInfo(ProjectPath()).dir().absolutePath();
     const QString contentRoot = QString::fromUtf8(host_->host().contentRoot);

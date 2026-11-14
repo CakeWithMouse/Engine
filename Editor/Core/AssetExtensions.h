@@ -101,6 +101,8 @@ struct ProjectAssetItem
     QString virtualPath;  // "/Game/Models/Hero.glb"
     QString relativePath; // "Models/Hero.glb"
     QString fileName;     // "Hero.glb"
+    QString fullPath;     // "C:/Project/Content/Models/Hero.glb"
+    qint64 lastModified = 0;
 };
 
 inline std::vector<ProjectAssetItem> ListProjectAssets(const QString& contentRoot, AssetKind kind)
@@ -125,7 +127,9 @@ inline std::vector<ProjectAssetItem> ListProjectAssets(const QString& contentRoo
     const QDir root(contentRoot);
     for (QDirIterator it(contentRoot, nameFilters, QDir::Files, QDirIterator::Subdirectories); it.hasNext();)
     {
-        const QString fullPath = it.next();
+        it.next();
+        const QFileInfo fi = it.fileInfo();
+        const QString fullPath = fi.filePath();
         if (fullPath.endsWith(QStringLiteral(".importsettings.json"), Qt::CaseInsensitive) ||
             fullPath.endsWith(QStringLiteral(".source.json"), Qt::CaseInsensitive) ||
             fullPath.endsWith(QStringLiteral(".import.json"), Qt::CaseInsensitive) ||
@@ -139,7 +143,9 @@ inline std::vector<ProjectAssetItem> ListProjectAssets(const QString& contentRoo
         ProjectAssetItem item;
         item.relativePath = QDir::fromNativeSeparators(rel);
         item.virtualPath = QStringLiteral("/Game/") + item.relativePath;
-        item.fileName = QFileInfo(fullPath).fileName();
+        item.fileName = fi.fileName();
+        item.fullPath = fullPath;
+        item.lastModified = fi.lastModified().toMSecsSinceEpoch();
         items.push_back(std::move(item));
     }
 

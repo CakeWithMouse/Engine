@@ -680,24 +680,9 @@ void EditorMainWindow::ConnectPanels()
             c.path = QString::fromUtf8(QJsonDocument(data).toJson()); host_->PostCommand(c);
         }
     });
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseMaterialRequested, this, [this]
+    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseMaterialRequested, this, []
     {
-        if (!host_->HasScene() ||
-            sceneBusy_ ||
-            host_->PlayState() != EditorQtHost::EditorState::Edit)
-        {
-            return;
-        }
-
-        const QString path = QFileDialog::getOpenFileName(
-            this,
-            QStringLiteral("Материал из проекта"),
-            QString::fromUtf8(host_->host().contentRoot),
-            QStringLiteral("Материалы (*.mat)")
-        );
-
-        if (!path.isEmpty())
-            UseAsset(path);
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"));
     });
 
     connect(objectInspectorPanel_, &ObjectInspectorPanel::EditMaterialRequested, this, [this](const QString& material)

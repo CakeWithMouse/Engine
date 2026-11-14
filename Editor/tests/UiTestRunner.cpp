@@ -10,6 +10,7 @@
 #include "ContentBrowserTests.h"
 #include "ContentBrowserTypeTests.h"
 #include "GeometryTextureActionTests.h"
+#include "AssetPickerDialogTests.h"
 #include "EditorTheme.h"
 #include <QApplication>
 #include <iostream>
@@ -34,6 +35,7 @@ int main(int argc, char* argv[])
         ContentBrowserTests::Run();
         ContentBrowserTypeTests::RunStandalone();
         GeometryTextureActionTests::Run();
+        AssetPickerDialogTests::Run();
         UiSmokeTests::Run();
         return 0;
     }

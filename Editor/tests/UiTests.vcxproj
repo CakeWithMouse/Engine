@@ -92,6 +92,8 @@
         <ClCompile Include="../Core/ModelImportSidecar.cpp"/>
         <ClCompile Include="../Core/AssetOps.cpp"/>
         <ClCompile Include="../UI/ImportSettingsDialog.cpp"/>
+        <ClCompile Include="../UI/AssetThumbnailCache.cpp"/>
+        <ClCompile Include="../UI/AssetPickerDialog.cpp"/>
         <ClCompile Include="../UI/ModelImportEditFlow.cpp"/>
         <ClCompile Include="../UI/ViewportOverlayHelper.cpp"/>
         <ClCompile Include="../Core/ViewportOverlay.cpp"/>
@@ -114,6 +116,9 @@
         <ClInclude Include="ImportSettingsV2EditTests.h"/>
         <ClInclude Include="..\Include\AssetDeletePrompt.h"/>
         <ClInclude Include="AssetDeleteTests.h"/>
+        <ClInclude Include="AssetPickerDialogTests.h"/>
+        <ClInclude Include="..\UI\AssetPickerDialog.h"/>
+        <ClInclude Include="..\UI\AssetThumbnailCache.h"/>
         <ClInclude Include="InspectorRefreshTests.h"/>
         <ClInclude Include="DockRedockTests.h"/>
         <ClInclude Include="ViewportBillboardTests.h"/>

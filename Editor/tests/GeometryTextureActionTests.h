@@ -2,7 +2,7 @@
 
 #include "GeometryCard.h"
 #include "MaterialCard.h"
-#include "ModelPickerDialog.h"
+#include "AssetPickerDialog.h"
 #include <QApplication>
 #include <QDir>
 #include <QFile>
@@ -51,7 +51,7 @@ inline void Run()
     check(chooseModel->text() == Tr("Заменить модель…", "Replace Model…"), "Button text is Replace Model");
     check(!geometry.grab().isNull(), "Native geometry card paints cleanly");
 
-    // ModelPickerDialog tests
+    // AssetPickerDialog (Model mode) tests (replaces legacy ModelPickerDialog)
     {
         QTemporaryDir temp;
         check(temp.isValid(), "Temporary directory created for picker test");
@@ -71,7 +71,7 @@ inline void Run()
         touch(root + QStringLiteral("/Models/Hero.fbx"));
         touch(root + QStringLiteral("/Textures/Albedo.png"));
 
-        ModelPickerDialog picker(root, QStringLiteral("/Game/Models/CesiumMan.glb"));
+        AssetPickerDialog picker(EditorCore::AssetKind::Model, root, QStringLiteral("/Game/Models/CesiumMan.glb"));
         check(picker.ListWidget() != nullptr, "Picker list widget exists");
         check(picker.ListWidget()->count() == 2, "Picker lists only project models");
         check(picker.ListWidget()->currentItem() &&
@@ -87,12 +87,12 @@ inline void Run()
         check(!picker.ListWidget()->item(0)->isHidden(), "Clearing search restores visibility");
 
         // Test hook
-        ModelPickerDialog::SetExecHookForTesting([](ModelPickerDialog* dlg) {
+        AssetPickerDialog::SetExecHookForTesting([](AssetPickerDialog* dlg) {
             dlg->ListWidget()->setCurrentRow(1);
             return QDialog::Accepted;
         });
         check(picker.exec() == QDialog::Accepted, "Picker test hook accepts");
-        ModelPickerDialog::SetExecHookForTesting(nullptr);
+        AssetPickerDialog::SetExecHookForTesting(nullptr);
     }
 
     // MaterialCard tests preserved

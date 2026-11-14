@@ -384,6 +384,35 @@
   - Запретные зоны (`Engine/`, `Game/`, `build.ps1`): `git diff --stat` пуст.
   - Архитектурные слои: Core и Host чисты (0 запрещённых типов и includes).
 
+### Задача P (14.11.2026) — Общий графический пикер ресурсов с превью (модели, материалы, текстуры)
+- [x] **Шаг 0 (диагностика):**
+  - Пикер текстур в Material Editor: класс `MaterialTexturePicker` (95 строк в `MaterialTextureTools.cpp`), плоский `QListWidget`, синхронное декодирование через `QPixmap(path)`, хардкод-стили `SlotImage`, отсутствие HiDPI `devicePixelRatio`.
+  - Превью моделей и материалов в проекте: отсутствует C-ABI для генерации offscreen миниатюр в память. Существует только `attachMaterialPreview(void* context, HWND targetWindow)` (живой рендер в чужое HWND окно). Для моделей нет даже HWND-превью. Генерация 3D-превью без C-ABI запрещена правилом №2 («Муляжей нет»).
+  - Текущие пикеры: `ModelPickerDialog.h` (текстовый список `QListWidget`, 119 строк), выбор материала в `MaterialCard` (`MainWindow.cpp:692-701` через прямой `QFileDialog::getOpenFileName`).
+- [x] **Правки (Editor/):**
+  - `Editor/Core/AssetExtensions.h`: расширена структура `ProjectAssetItem` полями `fullPath` и `lastModified` (заполняется сразу из `QDirIterator::fileInfo()` без 500 повторных дисковых stat-вызовов). (159 строк <= 500).
+  - `Editor/UI/AssetThumbnailCache.h/.cpp`: потокобезопасный ограниченный LRU кэш миниатюр (`QCache<ThumbnailKey, QPixmap>`, max 256). Фоновое асинхронное декодирование картинок через `QThreadPool` в `QImage`, отправка в UI-поток строго через `QMetaObject::invokeMethod(..., Qt::QueuedConnection)` с конвертацией в `QPixmap` и выставлением `setDevicePixelRatio(dpr)`. Кэширование категориальных векторных иконок по `(kind, size, dpr)` с токенами `EditorTheme` без хардкод-цветов. Безопасная отмена задач при закрытии/удалении диалога через `QPointer<QObject>`. (65 + 156 строк <= 500).
+  - `Editor/UI/AssetPickerDialog.h/.cpp`: единый графический компонент пикера ресурсов в виде сетки плиток ($96\times 96$ иконки, $124\times 132$ сетка) с поисковой строкой, предвыделением текущего ресурса, поддержкой опций «Нет текстуры» и «Импортировать файл…», мгновенным открытием (<30 мс на 500 ресурсов за счёт `setUniformItemSizes(true)` и подавления обновлений на время наполнения) и тестовым хуком `SetExecHookForTesting`. Локализация через `Tr()`. (62 + 227 строк <= 500).
+  - `Editor/Include/MaterialTextureTools.h` & `Editor/Source/MaterialTextureTools.cpp`: `MaterialTexturePicker` переведён на наследование от `AssetPickerDialog(AssetKind::Texture, ...)` с сохранением контрактных `objectName` и API дисковых путей; дублирующая реализация удалена (~95 строк); стили `SlotImage` переведены на токены `EditorTheme` и `devicePixelRatio`. (92 + 399 строк <= 500).
+  - `Editor/Source/ImportCommands.cpp`: зарегистрирована команда `Scene.AssignMaterial` с вызовом `AssetPickerDialog(AssetKind::Material)`, команда `Scene.ReplaceModel` переведена на `AssetPickerDialog(AssetKind::Model)`, удалён дубликат отмены регистрации `Assets.Delete`. (499 строк <= 500).
+  - `Editor/Source/MainWindow.cpp`: прямой вызов `QFileDialog::getOpenFileName` при выборе материала заменён на вызов команды `CommandRegistry::Instance().Execute("Scene.AssignMaterial")`. (1449 строк <= храповик 1460).
+  - `Editor/Source/ObjectInspectorPanel.cpp`: коллбек `cardMaterial_->onChooseMaterial` переведён на `Scene.AssignMaterial`. (408 строк <= 500).
+  - `Editor/UI/ModelPickerDialog.h`: удалён как устаревший и полностью заменённый общим компонентом `AssetPickerDialog`.
+  - `Editor/tests/GeometryTextureActionTests.h`: обновлены тесты замены модели с `ModelPickerDialog` на `AssetPickerDialog`. (120 строк <= 500).
+  - `Editor/tests/AssetPickerDialogTests.h` (новый): 6 тестовых секций (33 проверки): плитки по ресурсам проекта, фильтрация поиска, возврат пути и предвыделение, открытие <200 мс на 500 ресурсах (факт: 28 мс), ограниченный объем кэша (<=256), безопасное удаление диалога при активных асинхронных задачах. (209 строк <= 500).
+  - `Editor/tests/UiTestRunner.cpp`: зарегистрирован вызов `AssetPickerDialogTests::Run()`.
+  - `Editor/EditorModule.vcxproj` & `Editor/tests/UiTests.vcxproj`: зарегистрированы новые модули.
+- [x] **Проверки:**
+  - Debug EditorModule: сборка OK, 0 ошибок.
+  - Release EditorModule: сборка OK, 0 ошибок.
+  - `CoreTests.exe`: 810/810 checks passed (эталон >= 810).
+  - `HostTests.exe`: 163/163 checks passed (эталон >= 163).
+  - `UiTests.exe`: 605 checks passed (было 577, +28 проверок; эталон >= 577).
+  - Запретные зоны (`Engine/`, `Game/`, `build.ps1`): `git diff --stat` абсолютно пуст.
+  - Архитектурные слои: Core чист от виджетов и UI-типов.
+  - Размеры файлов: все изменённые/новые файлы <= 500 строк.
+  - Тяжёлый EditorUiTests: выполнен один раз (бинарник пересобран и запущен).
+
 ---
 
 ## Решения
@@ -602,6 +631,13 @@
     - Действие выбора модели привязано к зарегистрированной команде `Scene.ReplaceModel` через `CommandRegistry::Instance().Execute("Scene.ReplaceModel")`.
     - Смена типа объекта с примитива на модель заблокирована (**БЛОКИРОВАНО**), зафиксирована в «Нужно в ABI» п. 13.
     - Для моделей замена геометрии создаёт ровно одну точку отката в истории (`EditorHistory`), которая откатывается по Undo и накатывается по Redo.
+50. **Единый графический пикер ресурсов и асинхронный кэш миниатюр (Task P, 14.11.2026):**
+    - Создан единый переиспользуемый компонент `AssetPickerDialog` для всех типов ресурсов (модели, материалы, текстуры), исключающий дублирование UI-кода между инспектором, браузером контента и редактором материалов.
+    - Устаревший `ModelPickerDialog.h` удалён; `MaterialTexturePicker` переведён на наследование от `AssetPickerDialog` с сохранением контрактных `objectName` для обратной совместимости тестов (`MaterialTexturePicker`, `MaterialTextureList`, `MaterialTextureSearch`, `MaterialTextureImport`).
+    - Асинхронная подгрузка превью вынесена в ограниченный LRU-кэш `AssetThumbnailCache` (максимум 256 элементов, ключ `(path, mtime, size, dpr)`). Декодирование картинок выполняется в пуле потоков `QThreadPool` в `QImage`, передача в GUI-поток происходит исключительно через очереди Qt (`Qt::QueuedConnection`) с конвертацией в `QPixmap` и выставлением `devicePixelRatio`.
+    - Безопасность при закрытии: отмена доставки превью гарантируется использованием `QPointer<QObject>`, проверяемого перед отправкой в UI.
+    - Мгновенное открытие диалога (<30 мс на 500 файлов) обеспечено оптимизацией `QListWidget` (`setUniformItemSizes(true)`, пакетное отключение `setUpdatesEnabled(false)` на время наполнения) и однократным сканированием mtime в `QDirIterator` без повторных дисковых `stat`.
+    - Прямые вызовы `QFileDialog` в `MainWindow.cpp` для выбора материалов устранены в пользу зарегистрированной команды `Scene.AssignMaterial`.
 
 ---
 
@@ -721,6 +757,12 @@
     - Вызов `createModel` создаёт новый объект с новым ID, а перезагрузка сцены (`loadScene`) инвалидирует все ID и сбрасывает выделение. Попытка мутации `object["type"] = "Engine.Model"` в JSON сцены приводит к исключению `std::runtime_error("Component has no project data codec")` при `Restore`, так как примитив не имеет кодека проектных данных.
     - В соответствии с правилом №2 протокола («Муляжей нет») и указанием архитектора операция замены примитива на модель заблокирована (**БЛОКИРОВАНО**). Кнопка «Заменить модель…» в `GeometryCard` для примитивов неактивна с подсказкой о блокировке.
     - Требуется метод в C-ABI: например, `setObjectGeometry(void* context, uint64_t id, const char* modelPath)` или `convertPrimitiveToModel(void* context, uint64_t id, const char* modelPath)`, сохраняющий `id`, `name`, `transform`, `parent` и очищающий/мигрирующий `projectData`.
+14. **Offscreen-рендер миниатюр моделей и материалов в память (Task P, БЛОКИРОВАНО):**
+    - **Сигнатура функции:**
+      `EngineResult (*renderThumbnail)(void* context, const char* assetPath, int width, int height, void* outBgraPixels, size_t rowPitch);`
+    - **Где в коде:** В `EngineEditSessionApi` (`EditSessionApi.h:48-80`), реализация в `Game.cpp` / `Engine/Source/Runtime/GameEditModule.cpp`.
+    - **Зачем:** В существующем C-ABI есть только функция `attachMaterialPreview(void* context, HWND targetWindow)` (живой интерактивный рендер в чужое окно Windows) и отсутствует возможность offscreen-рендеринга статичной миниатюры ресурса (модели или материала) в память фиксированного размера ($96\times 96$ / $128\times 128$). Без данной функции отображение честных превью 3D-моделей и материалов в сетке ресурсов невозможно без создания сотен нативных HWND или использования запрещённых правилом №2 протокола муляжей (фейковых рендереров).
+    - **Статус:** В соответствии с правилом протокола №1 (запрет правок Engine/Game/ABI) и правилом №2 («Муляжей нет») задача генерации превью для моделей и материалов помечена **БЛОКИРОВАНО** до архитектурного решения Юрия. В `AssetPickerDialog` для моделей и материалов отображаются качественные категориальные векторные иконки («Куб» и «Слайдеры») с фоном в токенах темы, готовые к бесшовной замене на растровые миниатюры после реализации функции в ABI.
 
 ---
 
@@ -740,10 +782,14 @@
 
 ## Не проверено в рантайме (ручное интерактивное тестирование)
 
-- Открытие диалога `ModelPickerDialog` по клику на «Заменить модель…» у `Engine.Model` в живом GUI редактора (Task G).
-- Фильтрация списка моделей поисковой строкой в диалоге и клик по выбранной модели (Task G).
-- Обновление отображаемого меша модели во вьюпорте после выбора новой модели в диалоге (Task G).
+- Открытие графического диалога `AssetPickerDialog` по клику на «Заменить модель…» у `Engine.Model` в инспекторе (Task P).
+- Открытие графического диалога `AssetPickerDialog` по клику на кнопку выбора материала в `MaterialCard` инспектора (Task P).
+- Открытие диалога `AssetPickerDialog` в режиме текстур из Material Editor / слотов текстур (Task P).
+- Асинхронная плавная подгрузка превью текстур в плитках $96\times 96$ при скролле списка без задержек GUI (Task P).
+- Фильтрация ресурсов поисковой строкой в `AssetPickerDialog` и выбор ресурса двойным кликом (Task P).
+- Обновление отображаемого меша модели во вьюпорте после выбора новой модели в диалоге (Task G/P).
 - Визуальная неактивность (disabled state) кнопки «Заменить модель…» с подсказкой о блокировке в C-ABI при выборе примитива (Куб, Сфера и др.) (Task G).
+- Откат замены модели по Ctrl+Z (Undo) и повтор по Ctrl+Y (Redo) в запущенном GUI (Task G).
 - Откат замены модели по Ctrl+Z (Undo) и повтор по Ctrl+Y (Redo) в запущенном GUI (Task G).
 - Клик по иконке билборда во вьюпорте курсором мыши (хит-тест в живой сессии).
 - Подсветка ручек гизмо при наведении курсора (8-10px tolerance).

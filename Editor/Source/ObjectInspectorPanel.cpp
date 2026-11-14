@@ -94,7 +94,9 @@ void ObjectInspectorPanel::BuildUi()
 
     cardMaterial_ = new MaterialCard(this);
     cardMaterial_->onEditMaterial = [this](const QString& path) { emit EditMaterialRequested(path); };
-    cardMaterial_->onChooseMaterial = [this] { emit ChooseMaterialRequested(); };
+    cardMaterial_->onChooseMaterial = [this] {
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.AssignMaterial"));
+    };
     cardMaterial_->onClearMaterial = [this] { emit ClearMaterialRequested(); };
 
     BuildPointLightCard(inspectorLayout);
