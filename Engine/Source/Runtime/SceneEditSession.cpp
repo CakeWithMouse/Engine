@@ -474,6 +474,60 @@ EnginePhysicsApi SceneEditSession::GetPhysicsApi() noexcept
         }};
 }
 
+EnginePhysicsObjectApi SceneEditSession::GetPhysicsObjectApi() noexcept
+{
+    return {1, this,
+        [](void* p, uint64_t objectId, EnginePhysicsObjectState* output) -> uint32_t {
+            if (!output) return EngineSceneInvalidArgument;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                const auto* component = s.Active().GetScene().FindComponent(objectId);
+                // Distinguishes "never configured" (no physics block in the document) from
+                // an explicitly disabled body so duplicates only copy real settings.
+                if (!component || !component->HasPhysicsSettings()) return EngineSceneNotFound;
+                uint32_t bodyType = EnginePhysicsBodyDynamic;
+                if (component->GetPhysicsBodyType() == PhysicsBodyType::Static) bodyType = EnginePhysicsBodyStatic;
+                else if (component->GetPhysicsBodyType() == PhysicsBodyType::Kinematic) bodyType = EnginePhysicsBodyKinematic;
+                uint32_t shapeType = EnginePhysicsShapeBox;
+                if (component->GetPhysicsShapeType() == PhysicsShapeType::Sphere) shapeType = EnginePhysicsShapeSphere;
+                else if (component->GetPhysicsShapeType() == PhysicsShapeType::Capsule) shapeType = EnginePhysicsShapeCapsule;
+                *output = {component->IsPhysicsEnabled() ? 1u : 0u, bodyType, shapeType,
+                           component->GetPhysicsFriction(), component->GetPhysicsRestitution(),
+                           component->GetPhysicsDensity()};
+                return EngineSceneOk;
+            });
+        },
+        [](void* p, uint64_t objectId, const EnginePhysicsObjectState* value) -> uint32_t {
+            if (!value || value->enabled > 1 ||
+                (value->bodyType != EnginePhysicsBodyStatic && value->bodyType != EnginePhysicsBodyDynamic &&
+                 value->bodyType != EnginePhysicsBodyKinematic) ||
+                (value->shapeType != EnginePhysicsShapeBox && value->shapeType != EnginePhysicsShapeSphere &&
+                 value->shapeType != EnginePhysicsShapeCapsule) ||
+                !std::isfinite(value->friction) || value->friction < 0.0f ||
+                !std::isfinite(value->restitution) || value->restitution < 0.0f ||
+                !std::isfinite(value->density) || value->density <= 0.0f)
+                return EngineSceneInvalidArgument;
+            return Invoke(p, [&](SceneEditSession& s) -> uint32_t {
+                PhysicsBodyType bodyType = PhysicsBodyType::Dynamic;
+                if (value->bodyType == EnginePhysicsBodyStatic) bodyType = PhysicsBodyType::Static;
+                else if (value->bodyType == EnginePhysicsBodyKinematic) bodyType = PhysicsBodyType::Kinematic;
+                PhysicsShapeType shapeType = PhysicsShapeType::Box;
+                if (value->shapeType == EnginePhysicsShapeSphere) shapeType = PhysicsShapeType::Sphere;
+                else if (value->shapeType == EnginePhysicsShapeCapsule) shapeType = PhysicsShapeType::Capsule;
+                const auto result = s.Active().GetScene().SetPhysicsBody(objectId,
+                    {value->enabled != 0, bodyType, shapeType, value->friction, value->restitution, value->density});
+                return result == SceneResult::Ok ? EngineSceneOk :
+                    (result == SceneResult::NotFound ? EngineSceneNotFound : EngineSceneInvalidArgument);
+            });
+        },
+        [](void*) -> uint32_t {
+#ifdef ENGINE_ENABLE_JOLT
+            return 1;
+#else
+            return 0;
+#endif
+        }};
+}
+
 void SceneEditSession::ReplaceEdit(const SceneSnapshot& data)
 {
     auto candidate = EmptyGame();

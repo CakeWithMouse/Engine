@@ -14,16 +14,12 @@
   <EngineEnableJolt Condition="'$(EngineEnableJolt)'==''">false</EngineEnableJolt>
     <EngineEnableVcpkg>$(EngineEnableAssimp)</EngineEnableVcpkg>
     <EngineEnableVcpkg Condition="'$(EngineEnableJolt)'=='true'">true</EngineEnableVcpkg>
-  <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VCPKG_ROOT)'!=''">$(VCPKG_ROOT)\</VcpkgRoot>
-  <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VsInstallRoot)'!='' and Exists('$(VsInstallRoot)\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">$(VsInstallRoot)\VC\vcpkg\</VcpkgRoot>
-  <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\</VcpkgRoot>
-  <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\</VcpkgRoot>
-  <VcpkgRoot Condition="'$(VcpkgRoot)'==''">C:\vcpkg\</VcpkgRoot>
   <VcpkgEnableManifest>$(EngineEnableVcpkg)</VcpkgEnableManifest>
   <VcpkgEnabled>$(EngineEnableVcpkg)</VcpkgEnabled>
   <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\..\Engine\</VcpkgManifestRoot>
   <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\..\Engine\vcpkg_installed\</VcpkgInstalledDir>
 </PropertyGroup>
+<Import Project="..\..\Engine\BuildSupport\VcpkgRoot.props" />
 <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableVcpkg)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
 <Import Project="$(VCTargetsPath)/Microsoft.Cpp.props" />
 <Import Project="..\..\Engine\BuildSupport\Cpp.props" />

@@ -23,16 +23,12 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup>
-    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VCPKG_ROOT)'!=''">$(VCPKG_ROOT)\</VcpkgRoot>
-    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VsInstallRoot)'!='' and Exists('$(VsInstallRoot)\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">$(VsInstallRoot)\VC\vcpkg\</VcpkgRoot>
-    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\18\Community\VC\vcpkg\</VcpkgRoot>
-    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and Exists('C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\scripts\buildsystems\msbuild\vcpkg.props')">C:\Program Files\Microsoft Visual Studio\2022\Community\VC\vcpkg\</VcpkgRoot>
-    <VcpkgRoot Condition="'$(VcpkgRoot)'==''">C:\vcpkg\</VcpkgRoot>
     <VcpkgEnableManifest>$(EngineEnableVcpkg)</VcpkgEnableManifest>
     <VcpkgEnabled>$(EngineEnableVcpkg)</VcpkgEnabled>
     <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\Engine\</VcpkgManifestRoot>
     <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\Engine\vcpkg_installed\</VcpkgInstalledDir>
   </PropertyGroup>
+  <Import Project="BuildSupport\VcpkgRoot.props" />
   <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableVcpkg)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Import Project="BuildSupport\Cpp.props" />
@@ -60,6 +56,7 @@
     <ClCompile Include="Source\Runtime\SceneEditMaterials.cpp" />
     <ClInclude Include="Include\Engine\Components\SpecificComponents\RigidBodyComponent.h" />
     <ClInclude Include="Include\Engine\Runtime\PhysicsEditApi.h" />
+    <ClInclude Include="Include\Engine\Runtime\PhysicsObjectEditApi.h" />
     <ClInclude Include="Include\Engine\Scene\SceneDocument.h" />
     <ClCompile Include="Source\Runtime\SceneEditSession.cpp" />
     <ClCompile Include="Source\Runtime\SceneEditBatch.cpp" />

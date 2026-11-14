@@ -19,13 +19,12 @@
     <UseDebugLibraries Condition="'$(Configuration)'!='Debug'">false</UseDebugLibraries>
   </PropertyGroup>
   <PropertyGroup>
-    <VcpkgRoot Condition="'$(VcpkgRoot)'=='' and '$(VCPKG_ROOT)'!=''">$(VCPKG_ROOT)\</VcpkgRoot>
-    <VcpkgRoot Condition="'$(VcpkgRoot)'==''">C:\vcpkg\</VcpkgRoot>
     <VcpkgEnableManifest>$(EngineEnableAssimp)</VcpkgEnableManifest>
     <VcpkgEnabled>$(EngineEnableAssimp)</VcpkgEnabled>
     <VcpkgManifestRoot>$(MSBuildThisFileDirectory)..\..\</VcpkgManifestRoot>
     <VcpkgInstalledDir>$(MSBuildThisFileDirectory)..\..\vcpkg_installed\</VcpkgInstalledDir>
   </PropertyGroup>
+  <Import Project="..\..\BuildSupport\VcpkgRoot.props" />
   <Import Project="$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props" Condition="'$(EngineEnableAssimp)'=='true' and Exists('$(VcpkgRoot)scripts\buildsystems\msbuild\vcpkg.props')" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <Import Project="..\..\BuildSupport\Cpp.props" />

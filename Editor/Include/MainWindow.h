@@ -124,6 +124,7 @@ private:
 
     void OnTransformEdited(quint64 objectId, const InspectorTransformValue& value);
     void OnPointLightEdited(quint64 objectId, const InspectorPointLightValue& value);
+    void OnPhysicsEdited(quint64 objectId, const InspectorPhysicsValue& value);
     void OnLightColorRequested(quint64 objectId, const QColor& current);
 
     // Спрашивает о несохранённых материалах и закрывает их окна; false — закрытие отменено.

@@ -291,6 +291,11 @@ extern "C" __declspec(dllexport) int __cdecl EngineGetEditExtension(void* contex
         *static_cast<EnginePhysicsApi*>(output) = static_cast<SceneEditSession*>(context)->GetPhysicsApi();
         return 1;
     }
+    if (std::strcmp(name, EnginePhysicsObjectExtension) == 0 && size == sizeof(EnginePhysicsObjectApi))
+    {
+        *static_cast<EnginePhysicsObjectApi*>(output) = static_cast<SceneEditSession*>(context)->GetPhysicsObjectApi();
+        return 1;
+    }
     if (std::strcmp(name, EnginePointLightExtension) != 0 || size != sizeof(EnginePointLightApi)) return 0;
     const auto scene = static_cast<SceneEditSession*>(context)->GetApi().scene;
     *static_cast<EnginePointLightApi*>(output) = {1, scene.context, scene.setPointLight};

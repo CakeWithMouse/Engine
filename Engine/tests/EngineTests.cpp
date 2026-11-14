@@ -2030,6 +2030,7 @@ void TraceGameTests();
 void SceneOwnershipTests();
 void SceneHierarchyTests();
 void SceneDeferredTests();
+void PhysicsObjectSceneTests();
 void SceneBatchTests();
 void AuthoringTests();
 void SoundDecoderTests();
@@ -2053,6 +2054,7 @@ int main()
         {"scene ownership and IDs (no GPU)", SceneOwnershipTests},
         {"scene hierarchy and snapshots (no GPU)", SceneHierarchyTests},
         {"scene deferred mutations (no GPU)", SceneDeferredTests},
+        {"per-object physics settings and scene documents", PhysicsObjectSceneTests},
         {"atomic group transforms, references and deletion (no GPU)", SceneBatchTests},
         {"wav decoder: RIFF parsing, read, seek", SoundDecoderTests},
         {"typed properties and transactional asset updates", AuthoringTests},

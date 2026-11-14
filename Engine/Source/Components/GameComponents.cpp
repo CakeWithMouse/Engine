@@ -53,7 +53,10 @@ GameComponent::GameComponent(glm::vec3 pos, glm::vec3 rot, glm::vec3 scale, glm:
     }
 }
 
-GameComponent::~GameComponent() = default;
+GameComponent::~GameComponent()
+{
+    DestroyPhysicsBody();
+}
 
 void GameComponent::GetEditorBounds(glm::vec3& minimum, glm::vec3& maximum)
 {
@@ -274,6 +277,144 @@ void GameComponent::UpdateInstanceTransform()
 
 void GameComponent::Tick(float deltaTime)
 {
+    SyncPhysicsBody();
+}
+
+void GameComponent::SetPhysicsEnabled(bool enabled)
+{
+    physicsConfigured_ = true;
+    if (physicsEnabled_ == enabled) return;
+    physicsEnabled_ = enabled;
+    if (!enabled) DestroyPhysicsBody();
+}
+
+void GameComponent::SetPhysicsBodyType(PhysicsBodyType type)
+{
+    physicsConfigured_ = true;
+    if (physicsBodyType_ == type) return;
+    physicsBodyType_ = type;
+    DestroyBodyAndRecreate();
+}
+
+void GameComponent::SetPhysicsShapeType(PhysicsShapeType shape)
+{
+    physicsConfigured_ = true;
+    if (physicsShape_ == shape) return;
+    physicsShape_ = shape;
+    DestroyBodyAndRecreate();
+}
+
+void GameComponent::SetPhysicsDensity(float density)
+{
+    physicsConfigured_ = true;
+    if (density > 0.0f && std::isfinite(density)) physicsDensity_ = density;
+}
+
+void GameComponent::SetPhysicsFriction(float friction)
+{
+    physicsConfigured_ = true;
+    if (friction >= 0.0f && std::isfinite(friction)) physicsFriction_ = friction;
+}
+
+void GameComponent::SetPhysicsRestitution(float restitution)
+{
+    physicsConfigured_ = true;
+    if (restitution >= 0.0f && std::isfinite(restitution)) physicsRestitution_ = restitution;
+}
+
+glm::vec3 GameComponent::GetPhysicsLinearVelocity() const
+{
+    PhysicsWorld* world = GamePtr ? GamePtr->GetPhysicsWorld() : nullptr;
+    if (!world || !physicsBodyHandle_) return glm::vec3(0.0f);
+    return world->GetLinearVelocity(physicsBodyHandle_);
+}
+
+void GameComponent::SetPhysicsLinearVelocity(const glm::vec3& velocity)
+{
+    PhysicsWorld* world = GamePtr ? GamePtr->GetPhysicsWorld() : nullptr;
+    if (world && physicsBodyHandle_) world->SetLinearVelocity(physicsBodyHandle_, velocity);
+}
+
+void GameComponent::AddPhysicsImpulse(const glm::vec3& impulse)
+{
+    PhysicsWorld* world = GamePtr ? GamePtr->GetPhysicsWorld() : nullptr;
+    if (world && physicsBodyHandle_) world->AddImpulse(physicsBodyHandle_, impulse);
+}
+
+void GameComponent::DestroyBodyAndRecreate()
+{
+    // Shape/motion type changes rebuild the body so the new desc reaches the physics world.
+    if (physicsBodyHandle_) DestroyPhysicsBody();
+    SyncPhysicsBody();
+}
+
+void GameComponent::SyncPhysicsBody()
+{
+    PhysicsWorld* world = GamePtr ? GamePtr->GetPhysicsWorld() : nullptr;
+    if (!physicsEnabled_ || !GameplayStarted || !world)
+    {
+        // Play stopped or the world settings disabled physics: the body is gone with the world.
+        if (physicsBodyHandle_ && !world) DestroyPhysicsBody();
+        return;
+    }
+    // The world can be recreated at runtime (settings toggle, resource teardown):
+    // stale handles map to nothing, so rebuild the body instead of driving a ghost.
+    if (physicsBodyHandle_ && !world->IsValid(physicsBodyHandle_)) physicsBodyHandle_ = 0;
+    if (!physicsBodyHandle_) CreatePhysicsBody();
+    if (!physicsBodyHandle_) return;
+    if (physicsBodyType_ == PhysicsBodyType::Dynamic)
+    {
+        // Physics drives the visual transform. Convert the world pose back to local
+        // space so parented objects follow their parent while simulating.
+        const glm::vec3 worldPosition = world->GetPosition(physicsBodyHandle_);
+        const glm::quat worldRotation = world->GetRotation(physicsBodyHandle_);
+        if (Parent)
+        {
+            const glm::mat4 inverseParent = glm::inverse(Parent->GetWorldMatrixGLM());
+            SetPosition(glm::vec3(inverseParent * glm::vec4(worldPosition, 1.0f)));
+            SetRotationQuat(glm::inverse(Parent->GetWorldRotationQuat()) * worldRotation);
+        }
+        else
+        {
+            SetPosition(worldPosition);
+            SetRotationQuat(worldRotation);
+        }
+    }
+    else
+    {
+        // Gameplay drives the physics body.
+        world->SetPositionAndRotation(physicsBodyHandle_, GetWorldPosition(), GetWorldRotationQuat());
+    }
+}
+
+void GameComponent::CreatePhysicsBody()
+{
+    if (physicsBodyHandle_) return;
+    PhysicsWorld* world = GamePtr ? GamePtr->GetPhysicsWorld() : nullptr;
+    if (!world || !physicsEnabled_) return;
+    PhysicsBodyDesc desc;
+    desc.type = physicsBodyType_;
+    desc.shape = physicsShape_;
+    desc.position = GetWorldPosition();
+    desc.rotation = GetWorldRotationQuat();
+    // Shape dimensions are derived from the world scale (box: half extents,
+    // sphere: max axis, capsule: y height), like the visual mesh.
+    const glm::vec3 scale = glm::abs(GetScale());
+    desc.halfExtents = 0.5f * scale;
+    desc.radius = 0.5f * std::max({scale.x, scale.y, scale.z});
+    desc.halfHeight = 0.5f * scale.y;
+    desc.density = physicsDensity_;
+    desc.friction = physicsFriction_;
+    desc.restitution = physicsRestitution_;
+    physicsBodyHandle_ = world->CreateBody(desc);
+}
+
+void GameComponent::DestroyPhysicsBody()
+{
+    if (!physicsBodyHandle_) return;
+    PhysicsWorld* world = GamePtr ? GamePtr->GetPhysicsWorld() : nullptr;
+    if (world) world->DestroyBody(physicsBodyHandle_);
+    physicsBodyHandle_ = 0;
 }
 
 void GameComponent::SetRotation(glm::vec3 rot)

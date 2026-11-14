@@ -200,6 +200,16 @@ SceneSnapshot Scene::GetSnapshot() const
                 c.GetModelAsset(), c.GetTexturePath(), c.GetMaterialAsset()});
         if (const auto* light = dynamic_cast<const PointLightComponent*>(&c))
             result.components.back().pointLight = {light->GetLightColor(), light->GetIntensity(), light->GetRadius(), light->IsEnabled(), light->CastsShadow()};
+        if (c.HasPhysicsSettings())
+        {
+            auto& physics = result.components.back().physics.emplace();
+            physics.enabled = c.IsPhysicsEnabled();
+            physics.bodyType = c.GetPhysicsBodyType();
+            physics.shapeType = c.GetPhysicsShapeType();
+            physics.friction = c.GetPhysicsFriction();
+            physics.restitution = c.GetPhysicsRestitution();
+            physics.density = c.GetPhysicsDensity();
+        }
         result.components.back().projectData = c.SaveProjectData();
         if (!result.components.back().projectData.empty()) result.documentVersion = 3;
     }
@@ -211,6 +221,17 @@ bool SceneComponentSnapshot::PointLight::IsValid() const noexcept
     return Finite(color) && color.x >= 0 && color.x <= 1 && color.y >= 0 && color.y <= 1 &&
         color.z >= 0 && color.z <= 1 && std::isfinite(intensity) && intensity >= 0 &&
         std::isfinite(radius) && radius > 0;
+}
+
+bool SceneComponentSnapshot::PhysicsBody::IsValid() const noexcept
+{
+    const auto typeValid = bodyType == PhysicsBodyType::Static || bodyType == PhysicsBodyType::Dynamic ||
+        bodyType == PhysicsBodyType::Kinematic;
+    const auto shapeValid = shapeType == PhysicsShapeType::Box || shapeType == PhysicsShapeType::Sphere ||
+        shapeType == PhysicsShapeType::Capsule;
+    return typeValid && shapeValid && std::isfinite(friction) && friction >= 0.0f &&
+        std::isfinite(restitution) && restitution >= 0.0f &&
+        std::isfinite(density) && density > 0.0f;
 }
 
 void Scene::SetDocumentVersion(uint32_t version)
@@ -231,6 +252,22 @@ SceneResult Scene::SetPointLight(ComponentId id, const SceneComponentSnapshot::P
     component->SetRadius(light.radius);
     component->SetEnabled(light.enabled);
     component->SetCastShadows(light.castShadows);
+    ++revision_;
+    return SceneResult::Ok;
+}
+
+SceneResult Scene::SetPhysicsBody(ComponentId id, const SceneComponentSnapshot::PhysicsBody& body)
+{
+    if (IsUpdating()) return SceneResult::Busy;
+    auto* object = FindComponent(id);
+    if (!object) return SceneResult::NotFound;
+    if (!body.IsValid()) return SceneResult::InvalidTransform;
+    object->SetPhysicsEnabled(body.enabled);
+    object->SetPhysicsBodyType(body.bodyType);
+    object->SetPhysicsShapeType(body.shapeType);
+    object->SetPhysicsFriction(body.friction);
+    object->SetPhysicsRestitution(body.restitution);
+    object->SetPhysicsDensity(body.density);
     ++revision_;
     return SceneResult::Ok;
 }

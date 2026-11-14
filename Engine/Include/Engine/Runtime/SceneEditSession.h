@@ -7,6 +7,7 @@
 #include <Engine/Scene/SceneCommands.h>
 #include <Engine/Runtime/ProjectDataApi.h>
 #include <Engine/Runtime/PhysicsEditApi.h>
+#include <Engine/Runtime/PhysicsObjectEditApi.h>
 #include <Engine/Runtime/SelectionApi.h>
 #include <Engine/Runtime/SceneBatchApi.h>
 #include <Engine/Runtime/AuthoringApi.h>
@@ -36,6 +37,7 @@ public:
     EnginePointLightV2Api GetPointLightV2Api() noexcept;
     EngineAudioPreviewApi GetAudioPreviewApi() noexcept;
     EnginePhysicsApi GetPhysicsApi() noexcept;
+    EnginePhysicsObjectApi GetPhysicsObjectApi() noexcept;
     SceneEditSession(const SceneEditSession&) = delete;
     SceneEditSession& operator=(const SceneEditSession&) = delete;
 private:

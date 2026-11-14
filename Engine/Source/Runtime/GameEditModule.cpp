@@ -100,6 +100,13 @@ GameEditModule::GameEditModule(const std::filesystem::path& module, const std::f
                 if (physics.version == 1 && physics.context && physics.read && physics.write && physics.available)
                     physics_ = physics;
             }
+            EnginePhysicsObjectApi physicsObject{};
+            if (query && query(extensionContext, EnginePhysicsObjectExtension, 1, sizeof(physicsObject), &physicsObject))
+            {
+                if (physicsObject.version == 1 && physicsObject.context && physicsObject.read &&
+                    physicsObject.write && physicsObject.available)
+                    physicsObject_ = physicsObject;
+            }
         }
         if (!projectContent.empty())
         {
