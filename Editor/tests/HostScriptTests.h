@@ -72,7 +72,8 @@ inline int Run() {
     auto check = [&](bool ok, const char* message) { if (!ok) throw std::runtime_error(message); ++checks; };
     Scene s; SceneCommandHandler handler; EditorHistory history;
     check(history.Initialize(), "script history initialization");
-    SceneCommandHandler::Context ctx{s.api, {}, {}, {}, nullptr, nullptr, nullptr, &s.script};
+    SceneCommandHandler::Context ctx{s.api};
+    ctx.script = &s.script;
     auto run = [&](EditorCommand c, IEditorHost::EditorState state = IEditorHost::Edit) {
         uint32_t result = 999; QString error; handler.Handle(c, ctx, history, state, result, error); return result;
     };

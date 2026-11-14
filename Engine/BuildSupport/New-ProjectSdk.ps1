@@ -10,6 +10,7 @@ $sdkToolchain = Resolve-EngineToolchain -Toolset $sdkFamily
 $baselineDir = Join-Path $engineRoot "build/sdk/x64/$Configuration/$($sdkToolchain.version)"
 [IO.Directory]::CreateDirectory($baselineDir) | Out-Null
 $baselineLog = Join-Path $baselineDir 'build.log'
+$useJolt = Test-Path -LiteralPath "$engineRoot/vcpkg_installed/x64-windows/include/Jolt/Jolt.h"
 $useAssimp = if ($Assimp -eq 'auto') { Test-Path -LiteralPath "$engineRoot/vcpkg_installed/x64-windows/include/assimp/scene.h" } else { $Assimp -eq 'true' }
 $buildArgs = @((Join-Path $engineRoot 'Engine.vcxproj'), '/nologo', '/m:1', '/nr:false', '/noconsolelogger',
     "/flp:LogFile=$baselineLog;Encoding=UTF-8;Verbosity=minimal",
@@ -57,7 +58,7 @@ Copy-Item -LiteralPath "$PSScriptRoot/ProjectBootstrap.props" -Destination "$sdk
 Copy-Item -LiteralPath "$PSScriptRoot/ProjectBootstrap.targets" -Destination "$sdk/Build/ProjectBootstrap.targets" -Force
 Copy-Item -LiteralPath "$PSScriptRoot/ProjectSdk.targets" -Destination "$sdk/Build/ProjectSdk.targets" -Force
 $importDir = if ($Configuration -eq 'Debug') { "$engineRoot/vcpkg_installed/x64-windows/debug/lib" } else { "$engineRoot/vcpkg_installed/x64-windows/lib" }
-if ($useAssimp -and (Test-Path -LiteralPath $importDir)) { Copy-Item -Path "$importDir/*.lib" -Destination "$sdk/Lib" -Force }
+if (($useAssimp -or $useJolt) -and (Test-Path -LiteralPath $importDir)) { Copy-Item -Path "$importDir/*.lib" -Destination "$sdk/Lib" -Force }
 New-Item -ItemType Directory -Force (Join-Path $sdk 'Examples'),(Join-Path $sdk 'Docs') | Out-Null
 Copy-Item -LiteralPath "$engineRoot/../Game/BasicExamples/Source/SessionCounterSubsystem.h" -Destination "$sdk/Examples/SessionCounterSubsystem.h" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/GAME-SUBSYSTEMS.md" -Destination "$sdk/Docs/GAME-SUBSYSTEMS.md" -Force
@@ -65,7 +66,7 @@ Copy-Item -LiteralPath "$engineRoot/docs/SAVEGAME.md" -Destination "$sdk/Docs/SA
 Copy-Item -LiteralPath "$engineRoot/docs/RENDER-DIAGNOSTICS.md" -Destination "$sdk/Docs/RENDER-DIAGNOSTICS.md" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/COMMANDLETS.md" -Destination "$sdk/Docs/COMMANDLETS.md" -Force
 Copy-Item -LiteralPath "$engineRoot/docs/RENDERING.md" -Destination "$sdk/Docs/RENDERING.md" -Force
-foreach($document in @('PROJECT-ASSETS.md','MATERIALS.md','ENGINE-VERSIONS.md')) {
+foreach($document in @('PROJECT-ASSETS.md','MATERIALS.md','ENGINE-VERSIONS.md','PHYSICS.md','RELEASE-0.3.1.md')) {
     Copy-Item -LiteralPath "$engineRoot/docs/$document" -Destination "$sdk/Docs/$document" -Force
 }
 Copy-Item -LiteralPath "$engineRoot/docs/SAVEGAME.html" -Destination "$sdk/Docs/SAVEGAME.html" -Force
@@ -84,7 +85,7 @@ New-Item -ItemType Directory -Force (Join-Path $sdk 'Examples/ApiReference') | O
 Copy-Item -Path "$engineRoot/docs/api-reference/examples/*" -Destination "$sdk/Examples/ApiReference" -Force
 $manifest = @{format=2;version=$release.version;configuration=$Configuration;platform='x64';toolset=$sdkToolchain.toolset;crt= $(if($Configuration -eq 'Debug'){'MDd'}else{'MD'});
     buildTools=@{version=$sdkToolchain.version;minimumVersion=$sdkToolchain.version;compilerVersion=$sdkToolchain.compilerVersion;wholeProgramOptimization=$false;windowsSdk=$sdkToolchain.windowsSdk.version};
-    assimp=$useAssimp;engineLibrarySha256=(Get-FileHash -LiteralPath "$sdk/Lib/Engine.lib").Hash}
+    assimp=$useAssimp;jolt=$useJolt;engineLibrarySha256=(Get-FileHash -LiteralPath "$sdk/Lib/Engine.lib").Hash}
 [IO.File]::WriteAllText("$sdk/Sdk.json", ($manifest | ConvertTo-Json), [Text.UTF8Encoding]::new($false))
 # Reject too-new dependencies or incompatible public headers before publication.
 $validationArgs = @{ Sdk = $sdk; OutputDirectory = "$baselineDir/validation" }

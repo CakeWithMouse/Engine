@@ -3,6 +3,10 @@
   <PropertyGroup>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
     <RepositoryRoot>$(MSBuildThisFileDirectory)..\..\</RepositoryRoot>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'=='' and Exists('$(RepositoryRoot)Engine\vcpkg_installed\x64-windows\include\Jolt\Jolt.h')">true</EngineEnableJolt>
+    <EngineEnableJolt Condition="'$(EngineEnableJolt)'==''">false</EngineEnableJolt>
+    <EngineJoltLib>$(RepositoryRoot)Engine\vcpkg_installed\x64-windows\lib\Jolt.lib</EngineJoltLib>
+    <EngineJoltLib Condition="'$(Configuration)'=='Debug'">$(RepositoryRoot)Engine\vcpkg_installed\x64-windows\debug\lib\Jolt.lib</EngineJoltLib>
     <OutDir>$(RepositoryRoot)Engine\build\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(RepositoryRoot)Engine\build\obj\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
@@ -42,4 +46,8 @@
       <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;dxgi.lib;dxguid.lib;user32.lib;gdi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(EngineEnableJolt)'=='true' and '$(ConfigurationType)'!='StaticLibrary'">
+    <Link><AdditionalDependencies>$(EngineJoltLib);%(AdditionalDependencies)</AdditionalDependencies></Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(MSBuildThisFileDirectory)JoltRuntime.targets" />
 </Project>

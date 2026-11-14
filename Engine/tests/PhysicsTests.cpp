@@ -1,4 +1,4 @@
-﻿#include <Engine/Physics/PhysicsWorld.h>
+#include <Engine/Physics/PhysicsWorld.h>
 #include <cmath>
 #include <stdexcept>
 
@@ -71,6 +71,21 @@ void PhysicsWorldTests()
     Require(world.GetBodyCount() == 1, "body count did not drop after destroy");
     Require(world.Raycast(glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), 100.0f, hit) && hit.body == floor,
             "raycast missed the floor");
+
+    // Density affects mass: a unit box at 2000 kg/m^3 gains 1 m/s from 2000 Ns.
+    boxDesc.density = 2000.0f;
+    const uint32_t denseBox = world.CreateBody(boxDesc);
+    Require(denseBox != 0, "dense body was not created");
+    world.AddImpulse(denseBox, glm::vec3(0.0f, 2000.0f, 0.0f));
+    Require(Near(world.GetLinearVelocity(denseBox).y, 1.0f), "density did not affect mass");
+    world.SetActive(denseBox, false);
+    const float sleepingY = world.GetPosition(denseBox).y;
+    world.Update(settings.GetFixedTimeStep());
+    Require(Near(world.GetPosition(denseBox).y, sleepingY), "deactivated body kept simulating");
+    world.SetActive(denseBox, true);
+    world.Update(settings.GetFixedTimeStep());
+    Require(world.GetPosition(denseBox).y < sleepingY, "reactivated body did not resume gravity");
+    world.DestroyBody(denseBox);
 
     // Settings round-trip: gravity and step values reach the world unchanged.
     settings.SetGravity(glm::vec3(0.0f, -3.0f, 0.0f));

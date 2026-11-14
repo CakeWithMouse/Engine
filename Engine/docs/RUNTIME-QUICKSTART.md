@@ -1,4 +1,4 @@
-# EngineRuntime: игра и редактор — 0.3.0
+# EngineRuntime: игра и редактор — 0.3.1
 
 Готовый Windows x64 пакет распакуйте полностью. Запустите `EngineLauncher.exe`,
 создайте проект в новой папке или выберите существующий `Project.json`.
@@ -33,7 +33,7 @@ Visual Studio C++ и Windows SDK нужны для сборки. Qt 6 MSVC x64 �
 ## Проект и версия
 
 `Project.json` содержит имя, путь Game.dll, Content и startupScene.
-`Engine.lock.json` закрепляет runtime. Текущая версия — 0.3.0; сцены v1/v2/v3,
+`Engine.lock.json` закрепляет runtime. Текущая версия — 0.3.1; сцены v1/v2/v3,
 Module API 5, Edit API 6 с адаптерами 4/5/6. Обновляйте старый проект в копии;
 не подменяйте неизвестную пользовательскую DLL шаблонной.
 
@@ -66,3 +66,5 @@ BasicExamples, Pong, SunGame и Battle также предоставляют pre
 Полное описание: [передача разработчику](DEVELOPER-HANDOFF.md),
 [формат сцены](SCENE-JSON.md), [версии](ENGINE-VERSIONS.md),
 [релиз 0.3.0](RELEASE-0.3.0.md). Исторический консольный каркас не описывает этот выпуск.
+
+Физика в 0.3.1: [руководство](PHYSICS.md), [состав и проверки выпуска](RELEASE-0.3.1.md).

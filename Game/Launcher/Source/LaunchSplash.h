@@ -35,7 +35,15 @@ class LaunchSplash final {
             Gdiplus::Bitmap frame(rect.right,rect.bottom,PixelFormat32bppARGB);
             Gdiplus::Graphics g(&frame);
             g.Clear(Gdiplus::Color(255,7,18,28));
-            if (self->cover_) g.DrawImage(self->cover_.get(),0,0,rect.right,rect.bottom);
+            if (self->cover_ && self->cover_->GetWidth() && self->cover_->GetHeight()) {
+                const float imageWidth = static_cast<float>(self->cover_->GetWidth());
+                const float imageHeight = static_cast<float>(self->cover_->GetHeight());
+                const float scaleX = rect.right / imageWidth, scaleY = rect.bottom / imageHeight;
+                const float scale = scaleX > scaleY ? scaleX : scaleY;
+                const float width = imageWidth * scale, height = imageHeight * scale;
+                g.SetInterpolationMode(Gdiplus::InterpolationModeHighQualityBicubic);
+                g.DrawImage(self->cover_.get(), (rect.right-width)/2, (rect.bottom-height)/2, width, height);
+            }
             Gdiplus::SolidBrush shade(Gdiplus::Color(145,0,7,15));
             g.FillRectangle(&shade,0,0,rect.right,rect.bottom);
             g.SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);

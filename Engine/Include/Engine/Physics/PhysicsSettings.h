@@ -1,9 +1,9 @@
-﻿#pragma once
+#pragma once
 #include <glm/glm.hpp>
 
 // Simulation settings of the physics world. Plain data; applied on the next
 // PhysicsWorld::Update/ApplySettings call. Obtain by reference through
-// Game::GetPhysicsSettings(); not serialized into scenes automatically.
+// Game::GetSettings().Physics(); not serialized into scenes automatically.
 class PhysicsSettings
 {
 public:

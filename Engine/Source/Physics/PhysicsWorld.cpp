@@ -139,10 +139,10 @@ bool PhysicsWorld::IsInitialized() const
 
 uint32_t PhysicsWorld::CreateBody(const PhysicsBodyDesc& desc)
 {
-    if (!impl_) return 0;
+    if (!impl_ || !std::isfinite(desc.density) || desc.density <= 0.0f) return 0;
     try
     {
-        JPH::ShapeRefC shape;
+        JPH::Ref<JPH::ConvexShape> shape;
         switch (desc.shape)
         {
         case PhysicsShapeType::Box:
@@ -157,6 +157,8 @@ uint32_t PhysicsWorld::CreateBody(const PhysicsBodyDesc& desc)
         default:
             return 0;
         }
+        shape->SetDensity(desc.density);
+
         JPH::EMotionType motionType = JPH::EMotionType::Dynamic;
         JPH::ObjectLayer layer = LayerMoving;
         if (desc.type == PhysicsBodyType::Static)
@@ -254,7 +256,9 @@ void PhysicsWorld::AddImpulse(uint32_t handle, const glm::vec3& impulse)
 void PhysicsWorld::SetActive(uint32_t handle, bool active)
 {
     if (!IsValid(handle)) return;
-    impl_->system.GetBodyInterface().ActivateBody(impl_->bodies.at(handle));
+    auto& bodies = impl_->system.GetBodyInterface();
+    if (active) bodies.ActivateBody(impl_->bodies.at(handle));
+    else bodies.DeactivateBody(impl_->bodies.at(handle));
 }
 
 void PhysicsWorld::Update(float deltaTime)

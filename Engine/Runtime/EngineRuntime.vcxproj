@@ -57,5 +57,5 @@
 </Target>
 <Import Project="../BuildSupport/AssimpRuntime.targets" />
 
-  <Import Project="..\BuildSupport\JoltRuntime.targets" />
+
 </Project>
