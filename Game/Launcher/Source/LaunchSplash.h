@@ -62,28 +62,25 @@ class LaunchSplash final {
             Gdiplus::SolidBrush shade(Gdiplus::Color(65,0,0,0));
             g.FillRectangle(&shade,0,0,w,h);
 
-            Gdiplus::SolidBrush textBackdrop(Gdiplus::Color(90, 8, 3, 5));
-            g.FillRectangle(&textBackdrop, 0, h - 160, 560, 160);
-
             g.SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
             Gdiplus::FontFamily family(L"Segoe UI");
-            Gdiplus::Font heading(&family,32,Gdiplus::FontStyleBold,Gdiplus::UnitPixel);
-            Gdiplus::Font label(&family,18,Gdiplus::FontStyleRegular,Gdiplus::UnitPixel);
+            Gdiplus::Font heading(&family,38,Gdiplus::FontStyleBold,Gdiplus::UnitPixel);
+            Gdiplus::Font label(&family,16,Gdiplus::FontStyleRegular,Gdiplus::UnitPixel);
             Gdiplus::SolidBrush white(Gdiplus::Color(255,245,248,255));
             Gdiplus::SolidBrush textMuted(Gdiplus::Color(255,215,222,230));
 
-            g.DrawString(L"PainEngine",-1,&heading,Gdiplus::PointF(48.0f,42.0f),&white);
+            g.DrawString(L"PainEngine",-1,&heading,Gdiplus::PointF(40.0f,34.0f),&white);
 
-            const float barX = 48.0f;
-            const float barW = 460.0f;
+            const float barX = 40.0f;
+            const float barW = 380.0f;
             const float barH = 4.0f;
-            const float barY = static_cast<float>(h - 58);
+            const float barY = static_cast<float>(h - 50);
 
-            g.DrawString(self->title_.c_str(),-1,&label,Gdiplus::RectF(barX,barY - 32.0f,barW,28.0f),nullptr,&textMuted);
+            g.DrawString(self->title_.c_str(),-1,&label,Gdiplus::RectF(barX,barY - 28.0f,barW,24.0f),nullptr,&textMuted);
 
             Gdiplus::SolidBrush track(Gdiplus::Color(140,80,60,70)), red(Gdiplus::Color(255,220,38,38));
             g.FillRectangle(&track,barX,barY,barW,barH);
-            const float runnerW = 110.0f;
+            const float runnerW = 95.0f;
             const float travel = barW - runnerW;
             const int period = 140;
             const int step = static_cast<int>(self->tick_ % period);
@@ -127,8 +124,8 @@ public:
                     GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR));
                 if (!cls.hIcon) cls.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
                 RegisterClassExW(&cls);
-                const int splashW = 960;
-                const int splashH = 540;
+                const int splashW = 800;
+                const int splashH = 450;
                 const auto window = CreateWindowExW(WS_EX_TOPMOST|WS_EX_TOOLWINDOW,cls.lpszClassName,L"PainEngine — загрузка",
                     WS_POPUP|WS_VISIBLE,(GetSystemMetrics(SM_CXSCREEN)-splashW)/2,(GetSystemMetrics(SM_CYSCREEN)-splashH)/2,
                     splashW,splashH,nullptr,nullptr,cls.hInstance,this);
@@ -182,7 +179,16 @@ public:
                 auto& s=*reinterpret_cast<Search*>(p); DWORD id=0;GetWindowThreadProcessId(w,&id);
                 wchar_t cls[128]{};GetClassNameW(w,cls,128);
                 RECT rect{};GetClientRect(w,&rect);
-                if(id==s.pid && IsWindowVisible(w) && wcscmp(cls,L"ConsoleWindowClass") && rect.right>200 && rect.bottom>150) s.found=true;
+                if(id==s.pid) {
+                    if(wcscmp(cls,L"ConsoleWindowClass")==0) {
+                        HICON hIcon = LoadIconW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(IDI_ICON));
+                        HICON hIconSm = static_cast<HICON>(LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(IDI_ICON), IMAGE_ICON,
+                            GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR));
+                        if(hIcon) SendMessageW(w, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(hIcon));
+                        if(hIconSm) SendMessageW(w, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(hIconSm));
+                    }
+                    if(IsWindowVisible(w) && wcscmp(cls,L"ConsoleWindowClass") && rect.right>200 && rect.bottom>150) s.found=true;
+                }
                 return TRUE;
             },reinterpret_cast<LPARAM>(&search));
             // Compatibility fallback only after allowing an actual readiness signal.

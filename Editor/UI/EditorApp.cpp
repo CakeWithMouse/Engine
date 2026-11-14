@@ -61,6 +61,24 @@ namespace
         if (!appIcon.isNull())
         {
             app.setWindowIcon(appIcon);
+            HWND consoleWnd = ::GetConsoleWindow();
+            if (consoleWnd)
+            {
+                for (const auto& candidate : iconCandidates)
+                {
+                    if (QFile::exists(candidate))
+                    {
+                        const std::wstring path = QDir::toNativeSeparators(candidate).toStdWString();
+                        HICON hBig = static_cast<HICON>(LoadImageW(nullptr, path.c_str(), IMAGE_ICON,
+                            GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_LOADFROMFILE));
+                        HICON hSm = static_cast<HICON>(LoadImageW(nullptr, path.c_str(), IMAGE_ICON,
+                            GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_LOADFROMFILE));
+                        if (hBig) SendMessageW(consoleWnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(hBig));
+                        if (hSm) SendMessageW(consoleWnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(hSm));
+                        break;
+                    }
+                }
+            }
         }
 
         auto* qtHost = dynamic_cast<EditorQtHost*>(host);
