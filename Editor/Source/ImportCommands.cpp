@@ -11,6 +11,7 @@
 #include "AssetExtensions.h"
 #include "Logger.h"
 #include "FolderCommands.h"
+#include "ModelPickerDialog.h"
 
 #include <QAction>
 #include <QFileDialog>
@@ -177,12 +178,63 @@ void EditorMainWindow::RegisterAssetCommands()
             return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit;
         }
     });
+
+    CommandRegistry::Instance().RegisterCommand({
+        QStringLiteral("Scene.ReplaceModel"),
+        QStringLiteral("Replace Model"),
+        QString(),
+        QStringLiteral("Replace model geometry on selected scene object"),
+        [this](const CommandContext& ctx) {
+            if (!host_->HasScene() || sceneBusy_ || host_->PlayState() != EditorQtHost::EditorState::Edit)
+                return false;
+
+            const uint64_t targetId = ctx.parameters.value(QStringLiteral("objectId"), selectedId_).toULongLong();
+            if (targetId == 0) return false;
+
+            const auto snapshot = host_->ReadSnapshot();
+            const IEditorHost::SceneObject* foundObj = nullptr;
+            for (const auto& o : snapshot.objects) {
+                if (o.id == targetId) { foundObj = &o; break; }
+            }
+            if (!foundObj) return false;
+
+            if (foundObj->type != "Engine.Model") {
+                QMessageBox::warning(this, Tr("Замена недоступна", "Replacement Unavailable"),
+                    Tr("Замена геометрии примитива на модель заблокирована (требуется C-ABI движка).",
+                       "Replacing primitive geometry with a model is blocked (requires Engine C-ABI)."));
+                return false;
+            }
+
+            QString newModel = ctx.parameters.value(QStringLiteral("model")).toString();
+            if (newModel.isEmpty()) {
+                const QString currentModel = QString::fromStdString(foundObj->modelAsset);
+                ModelPickerDialog picker(QString::fromUtf8(host_->host().contentRoot), currentModel, this);
+                if (picker.exec() != QDialog::Accepted)
+                    return false;
+                newModel = picker.SelectedModel();
+            }
+
+            if (newModel.isEmpty()) return false;
+
+            EditorCommand c;
+            c.type = EditorCommand::SetModel;
+            c.objectId = targetId;
+            c.path = newModel;
+            host_->PostCommand(c);
+            return true;
+        },
+        [this]() {
+            return host_ && host_->HasScene() && !sceneBusy_ && host_->PlayState() == EditorQtHost::EditorState::Edit && selectedId_ != 0;
+        }
+    });
 }
 
 void EditorMainWindow::UnregisterAssetCommands()
 {
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Import"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.EditImportSettings"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Delete"));
+    CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Scene.ReplaceModel"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.Delete"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.CreateFolder"));
     CommandRegistry::Instance().UnregisterCommand(QStringLiteral("Assets.RenameFolder"));

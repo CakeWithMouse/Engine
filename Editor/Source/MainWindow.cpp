@@ -670,22 +670,6 @@ void EditorMainWindow::ConnectPanels()
                 host_->PostCommand(c);
             });
 
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ChooseModelRequested, this, [this] {
-        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
-        const auto path = QFileDialog::getOpenFileName(this, QStringLiteral("Модель из проекта"),
-            QString::fromUtf8(host_->host().contentRoot), QStringLiteral("Модели (*.glb *.gltf *.obj *.fbx)"));
-        if (path.isEmpty()) return;
-        const auto relative = QDir(QString::fromUtf8(host_->host().contentRoot)).relativeFilePath(path);
-        if (relative == ".." || relative.startsWith("../") || QDir::isAbsolutePath(relative)) {
-            QMessageBox::warning(this, QStringLiteral("Ресурс вне проекта"), QStringLiteral("Сначала импортируйте модель через меню «Импорт».")); return;
-        }
-        EditorCommand c; c.type = EditorCommand::SetModel; c.objectId = selectedId_;
-        c.path = "/Game/" + QDir::fromNativeSeparators(relative); host_->PostCommand(c);
-    });
-    connect(objectInspectorPanel_, &ObjectInspectorPanel::ClearModelRequested, this, [this] {
-        if (!selectedId_ || sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
-        EditorCommand c; c.type = EditorCommand::SetModel; c.objectId = selectedId_; host_->PostCommand(c);
-    });
     connect(objectInspectorPanel_, &ObjectInspectorPanel::CharacterSpeedEditingFinished, this, [this](quint64 id, double speed) {
         if (sceneBusy_ || host_->PlayState() != EditorQtHost::Edit) return;
         for (const auto& o : host_->ReadSnapshot().objects) if (o.id == id && o.gameplayKind == 1) {

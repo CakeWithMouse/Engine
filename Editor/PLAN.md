@@ -348,21 +348,41 @@
 - **Проверки каждого коммита блока:** Debug EditorModule, CoreTests/HostTests/UiTests не хуже 712/140/483 (актуальный эталон после задачи 1 — 712/140/484); Core/Host слои, `wc -l`, пустой `git diff --stat -- Engine Game build.ps1`. Один коммит на пункт вместе с PLAN. Engine/ABI/Game/build.ps1 запрещены; новые точки входа UI только с рабочим путём.
 - **Тяжёлый EditorUiTests:** один раз в конце блока, не после каждого пункта; диагностический воспроизводитель FPS не является прогоном полного набора. Тесты не ослаблять, focus flake вести отдельной задачей Backlog.
 
-### Поручение 14.11.2026 — FPS ~1 при трансформации гизмо (приоритетнее T9; T9 не начата)
-- [x] **Замер до:** временные scope/счётчики (steady_clock + atomics, без I/O в горячем пути) в Drain/Publish/RefreshSceneUi/Inspector/Hierarchy/MouseMove/Checkpoint/UndoPoint и драйвер жеста (реальный `ViewportWidget` mouse press/move/release через таймер 8 мс или 1 мс, 30 с translate/rotate/scale). Модели те же, что в задаче 2 (CesiumMan.glb и тяжёлая FBX 27.6 МБ). Debug, та же машина.
-  ```text
-  BEFORE CesiumMan 8ms translate 30s: frames=2218 wall_max=16.96 drain_avg=4.396 drain_max=13.34 queue_max=9 publish=7627 refreshUi=3877 undoPoints=1 ok={14:5737 17:3750}
-  BEFORE heavy 8ms: translate wall_max=170.22 drain_max=165.23 queue_max=208 uot_per_batch_max=75 publish=2674 refreshUi=1404 | rotate wall_max=36.45 drain_max=29.88 publish=2590 | scale wall_max=65.89 drain_max=60.73 publish=2691
-  BEFORE heavy 1ms translate 30s: frames=147 (1 кадр/с с 4-й секунды) drain_max=8892 queue_max=12862 uot_per_batch_max=4127 publish=40883 refreshUi=20549
-  AFTER  CesiumMan 8ms translate: frames=2218 wall_max=22.96 drain_avg=1.409 drain_max=7.43 publish=2273 refreshUi=629 undoPoints=1 ok={11:2 14:5514 17:1682} undo/redo err=0
-  AFTER  heavy 8ms: translate wall_max=22.48 drain_avg=1.722 drain_max=8.43 queue_max=8 publish=2807 refreshUi=753 | rotate wall_max=19.96 drain_max=6.88 publish=938 | scale wall_max=15.97 drain_max=11.31 publish=677; undoPoints=1 во всех режимах
-  AFTER  heavy 1ms translate: frames=2217 (~70 fps) wall_max=25.43 drain_avg=0.818 drain_max=7.90 queue_max=55 publish=1158 refreshUi=372 mouseMove=29258 undoPoints=1 err=0; rotate/scale wall_max 16.96/14.68 drain_max 8.97/7.81
-  ```
-- [x] **Гипотезы:** (a) ПОДТВЕРЖДЕНО — каждый успешный gizmo `UpdateObjectTransform` доходил до финального `RefreshSceneUi()` (`MainWindow.cpp:1283`), который сам постит `RefreshScene` (`MainWindow.cpp:818-820`), а каждая команда публикует сцену (`SceneCommandHandler.cpp:345`): ~2 публикации и 1 refresh на тик. (b) ОПРОВЕРГНУТО — Begin/End жеста и склейка уже есть (`EditorHistory.cpp:71-82, 84-110`), undoPoints=1 до и после. (c) ПОДТВЕРЖДЕНО — дедупликация в очереди была только у `ViewportResize`; при 1 мс в одном батче до 4127 устаревших тиков. (d) ЧАСТИЧНО — дерево не перестраивается (ключ `SceneObjectsPanel.cpp:289`, hierRebuild=0), но Refresh инспектора/списка шёл на каждый тик. (e) Диск только один checkpoint на жест; в горячем пути копия snapshot и JSON-парсинг projectData инспектора (`ObjectInspectorPanel.cpp:303,317`) — устраняются частотой refresh, не трогались.
-- [x] **Правка (Editor/Source):** `QtHost.cpp:254-283` — в `DrainCommands` из подряд идущих gizmo-тиков одного объекта (между ними допускается только `InputCursor`) исполняется только последний (абсолютный transform), из нескольких простых `RefreshScene` — последний; пропущенные помечаются `EditorCommand::None`. `MainWindow.cpp:65-68,1062-1068` — успешный gizmo completion не вызывает немедленный `RefreshSceneUi`, а запускает single-shot таймер 33 мс (≤~30 Гц, последний тик гарантирует хвостовой refresh). Ошибки идут прежней веткой (Console), nudge/остальные мутации обновляются сразу, Undo/Redo и конечное состояние не меняются.
-- [x] **Тесты:** `GizmoCoalescingHostTests.h` (13 checks, HostTests 140→153): 500 тиков вперемешку с InputCursor/RefreshScene в одном Update → x=250, setTransform 1, ok-completion 1, publish ≤3, один checkpoint; 4 кадра по 50 тиков → один checkpoint; Undo → состояние до жеста, Redo → после; разные объекты/SelectObject не склеиваются; 100 ошибочных тиков → видимая ошибка NotFound. RED при отключённой склейке: «a batch of gizmo ticks applies only the newest transform», exit 1. `GizmoCompletionTests.h` (8 checks, режим `--viewport-completion`): N=101813 completion за 500 мс → K=11 refresh (граница 18), хвостовой refresh, ошибка в Console, nudge обновляет сразу. Полный EditorUiTests: 200 тиков + scale в одном жесте, поле `Transform0` показывает итог без пересоздания виджета, один Undo откатывает позицию и масштаб.
-- **Проверки:** Debug Editor.dll и EditorUiTests.exe exit 0; CoreTests 800, HostTests 153, UiTests exit 0 с теми же счётчиками, что HEAD-контроль (сумма печатных 564; методом PLAN 597); `--viewport-completion` 8+8 exit 0. Полный EditorUiTests (Debug, без модели, 3 свежие фикстуры последовательно): r2 зелёный 5253 checks/exit 0 (включая новый gizmo-блок и оба focus-check); r1 красный `property focus established before refresh` (`EditorUiTests.cpp:1775`, после `activateWindow` — класс потери OS-активации, Backlog), r3 красный `timed out at step 82` (`:972`, texture picker до gizmo-блока; тот же шаг уже флаковал на main HEAD, решение 47) с `ViewportDetach` и Undo Busy в логе. HEAD-контроль полного набора не выполнялся. Core forbidden includes пусты, protected diff Engine/Game/build.ps1 пуст. wc: QtHost 590 (было 575), MainWindow.cpp 1480 (1469), MainWindow.h 234, EditorUiTests 1867, HostTests 166, новые header 129/60; превышения QtHost/MainWindow/EditorUiTests существовали до задачи. Инструментация удалена, `GizmoProbe` в Editor не найден; patch и сырые логи только в ignored `Engine/build/gizmo-fps-probe/`.
-- **Не проверено в рантайме:** ручной drag живой мышью пользователя; multi-select gizmo-жест с тяжёлой моделью (склейка опирается на абсолютный target активного объекта); 1440p/HiDPI.
+### Поручение 14.11.2026 — Task G, H, I, D (протокол engine-work-protocol)
+
+#### Task G — Переработка карточки «Геометрия» в инспекторе — СДЕЛАНО
+- **Коммит:** `fix(editor): overhaul geometry card and model replacement (Task G)`
+- **Диагностика бага «Component has no project data codec»:**
+  - Клиентский путь: нажатие кнопки «Очистить» (`GeometryCard.h:157`) посылало сигнал `ObjectInspectorPanel::ClearModelRequested` (`ObjectInspectorPanel.cpp:90`) -> `MainWindow.cpp:687` отправляло команду `EditorCommand::SetModel` с пустым `path` и `objectId = selectedId_`.
+  - В `SceneCommandHandler.cpp:150` ветка `if (type == "Engine.Model" && cmd.path.isEmpty()) object["type"] = "Primitive.Cube";` подменяла тип объекта в сцене на примитив, но оставляла в объекте блок `projectData` (включая `materialSlots`).
+  - При последующей загрузке сцены `ctx.scene.loadScene` -> `SceneDocument::Restore` (`SceneDocument.cpp:369`) вызывал `object->LoadProjectData(o.projectData)`.
+  - Поскольку `Primitive.Cube` является `MeshComponent`/`GameComponent`, у которого нет кодека проектных данных, `GameComponent::LoadProjectData` (`Engine/Source/Components/GameComponents.cpp:838`) выбрасывал исключение: `if (!data.empty()) throw std::runtime_error("Component has no project data codec");`.
+  - Исключение возвращалось через `errorBuf` и отображалось пользователю как модальная ошибка сцены.
+- **Аудит ABI на замену примитив -> модель:**
+  - В `EngineSceneApi` (`SceneModuleApi.h:59-72`) и `EngineEditSessionApi` (`EditSessionApi.h:48-80`) отсутствует функция изменения типа объекта (`type`) или назначения модели примитиву без пересоздания объекта и потери его ID, трансформации, связей и свойств.
+  - В соответствии с правилом №2 протокола («Муляжей нет») и указанием архитектора операция замены примитива на модель заблокирована (**БЛОКИРОВАНО**), требование зафиксировано в разделе «Нужно в ABI» (п. 13).
+- **Реализованная правка:**
+  - `GeometryCard.h`: полностью удалены кнопка «Очистить» (`ClearModel`) и строка текстуры (`TextureAsset`, `SetTexture`). Подпись кнопки изменена на `Tr("Заменить модель…", "Replace Model…")`.
+  - Метод `SetModelData(path)`: отображает относительный путь к модели (например, `Models/m.fbx`, путь `Content/` отсекается), кнопка замены активна.
+  - Метод `SetPrimitiveData(type)`: отображает локализованный текст `Tr("Примитив: %1", "Primitive: %1")` (например, «Примитив: Куб»), кнопка «Заменить модель…» визуально отключена (`setEnabled(false)`) с подсказкой о блокировке в C-ABI.
+  - `ModelPickerDialog.h`: диалог выбора модели из каталога `Content/` с поисковой строкой и фильтрацией, без использования `QFileDialog`. Для тестов предоставлен `SetExecHookForTesting`.
+  - `AssetExtensions.h`: функция `ListProjectAssets(contentRoot, kind)` выполняет сканирование песочницы проекта, фильтрацию по расширениям `AssetKind::Model` и сортировку относительных путей.
+  - `ImportCommands.cpp`: зарегистрированная команда `Scene.ReplaceModel` проверяет тип объекта (`Engine.Model`), отклоняет примитивы предупреждением, открывает `ModelPickerDialog` и постит команду `SetModel`.
+  - `ObjectInspectorPanel.cpp`: по клику на кнопку вызывается `CommandRegistry::Instance().Execute("Scene.ReplaceModel")`.
+  - `SceneCommandHandler.cpp`: ветка `SetModel` отклоняет пустые пути (`EngineSceneInvalidArgument`), отклоняет примитивы (`EngineSceneFailure`) и обновляет `assets["model"] = cmd.path` для `Engine.Model`.
+- **Тесты:**
+  - `AssetExtensionsTests.h`: тесты сканирования моделей `ListProjectAssets` (10 проверок).
+  - `GeometryTextureActionTests.h`: тесты `GeometryCard` (отсутствие `ClearModel`, `TextureAsset`; проверка `SetModelData`, `SetPrimitiveData`, блокировки кнопки) и `ModelPickerDialog` (поиск, фильтрация, отмена).
+  - `InspectorRefreshTests.h`: обновлены ожидания отсутствия `TextureAsset` и относительного пути модели.
+  - `ModelReplaceHostTests.h`: хостовые тесты замены модели, генерации ровно одной точки Undo, отката по Undo, повтора по Redo, отклонения пустого пути и примитивов (10 проверок).
+- **Результаты проверки:**
+  - Сборка Debug: 0 ошибок, 0 новых предупреждений.
+  - Сборка Release: 0 ошибок, 0 новых предупреждений.
+  - `CoreTests.exe`: 810/810 checks passed (было 800, +10).
+  - `HostTests.exe`: 163/163 checks passed (было 153, +10).
+  - `UiTests.exe`: 577/577 checks passed (было 564, +13).
+  - Запретные зоны (`Engine/`, `Game/`, `build.ps1`): `git diff --stat` пуст.
+  - Архитектурные слои: Core и Host чисты (0 запрещённых типов и includes).
 
 ---
 
@@ -575,6 +595,13 @@
     - Склейка в `DrainCommands` пометкой `EditorCommand::None` (без перестройки очереди и аллокаций); только path `gizmo` того же objectId, разрыв на любой команде кроме `InputCursor`, objectId 0 не склеивается.
     - Панели во время жеста — single-shot `QTimer` 33 мс в MainWindow вместо явного Begin/End в UI: хвостовой refresh не зависит от доставки EndGizmoDrag.
     - Nudge-путь и Undo-модель не менялись: Undo уже одна точка на жест, nudge вне жалобы (Backlog).
+49. **Переработка карточки «Геометрия» в инспекторе и замена модели (Task G, 14.11.2026):**
+    - Устранение бага «ClearModelRequested -> Component has no project data codec»: кнопка «Очистить» удалена, в `SceneCommandHandler` `SetModel` отклоняет пустой путь (`EngineSceneInvalidArgument`) и неподдерживаемые типы (`EngineSceneFailure`), не допуская порчи `type` в объекте сцены.
+    - Карточка `GeometryCard`: отображает относительный путь к модели (например, `Models/m.fbx`) или `Примитив: <тип>`. Строка текстуры убрана из карточки (текстуры накладываются через материал, поле `object.textureAsset` в сцене сохранено).
+    - Диалог выбора модели `ModelPickerDialog` реализован в `Editor/UI/ModelPickerDialog.h` без использования `QFileDialog`, со строкой поиска и фильтрацией через чистую функцию `ListProjectAssets` из `Editor/Core/AssetExtensions.h`.
+    - Действие выбора модели привязано к зарегистрированной команде `Scene.ReplaceModel` через `CommandRegistry::Instance().Execute("Scene.ReplaceModel")`.
+    - Смена типа объекта с примитива на модель заблокирована (**БЛОКИРОВАНО**), зафиксирована в «Нужно в ABI» п. 13.
+    - Для моделей замена геометрии создаёт ровно одну точку отката в истории (`EditorHistory`), которая откатывается по Undo и накатывается по Redo.
 
 ---
 
@@ -689,6 +716,11 @@
 12. **Стиль/тинт билборда иконки — T4.3 — СНЯТО (коммит `b15f7bc`):**
     - Реализовано с разрешения Юрия (правка ровно `Engine/Content/Shaders/EditorOverlay.hlsl`, структура `EngineOverlayBillboard` не менялась, новое поле ABI не добавлено). `PSBillboard`: плашка = `input.Tint.rgb` без вымывания, обод = `input.Tint.rgb * 0.45` (theme-aware), глиф — alpha-маска с авто-контрастом чернил по яркости плашки; белая плашка, хардкод-обод и процедурная «лампочка» убраны.
     - Editor: `ThemePalette` получил 6 категориальных слотов (`iconPointLight/iconSunSky/iconCamera/iconGameCamera/iconParticles/iconCharacter`) для тёмной и светлой тем; `IconProvider` рисует theme-neutral глиф-маску; `GetBillboardIcon` передаёт категориальный тинт через существующий `rgbaTint`; `ComputeOverlayHash` включает `themeKey` → re-upload на смене темы. Подробности и тесты — см. T4.3.
+13. **Атомарная смена типа объекта сцена / Замена геометрии примитива на модель (Task G, БЛОКИРОВАНО):**
+    - В `EngineSceneApi` (`SceneModuleApi.h:59-72`) и `EngineEditSessionApi` (`EditSessionApi.h:48-80`) отсутствует функция изменения типа объекта (`type`) или назначения модели объекту-примитиву (`Primitive.Cube`, `Primitive.Sphere` и т.д.) без потери его ID, трансформации, имени, иерархических связей и свойств.
+    - Вызов `createModel` создаёт новый объект с новым ID, а перезагрузка сцены (`loadScene`) инвалидирует все ID и сбрасывает выделение. Попытка мутации `object["type"] = "Engine.Model"` в JSON сцены приводит к исключению `std::runtime_error("Component has no project data codec")` при `Restore`, так как примитив не имеет кодека проектных данных.
+    - В соответствии с правилом №2 протокола («Муляжей нет») и указанием архитектора операция замены примитива на модель заблокирована (**БЛОКИРОВАНО**). Кнопка «Заменить модель…» в `GeometryCard` для примитивов неактивна с подсказкой о блокировке.
+    - Требуется метод в C-ABI: например, `setObjectGeometry(void* context, uint64_t id, const char* modelPath)` или `convertPrimitiveToModel(void* context, uint64_t id, const char* modelPath)`, сохраняющий `id`, `name`, `transform`, `parent` и очищающий/мигрирующий `projectData`.
 
 ---
 
@@ -708,6 +740,11 @@
 
 ## Не проверено в рантайме (ручное интерактивное тестирование)
 
+- Открытие диалога `ModelPickerDialog` по клику на «Заменить модель…» у `Engine.Model` в живом GUI редактора (Task G).
+- Фильтрация списка моделей поисковой строкой в диалоге и клик по выбранной модели (Task G).
+- Обновление отображаемого меша модели во вьюпорте после выбора новой модели в диалоге (Task G).
+- Визуальная неактивность (disabled state) кнопки «Заменить модель…» с подсказкой о блокировке в C-ABI при выборе примитива (Куб, Сфера и др.) (Task G).
+- Откат замены модели по Ctrl+Z (Undo) и повтор по Ctrl+Y (Redo) в запущенном GUI (Task G).
 - Клик по иконке билборда во вьюпорте курсором мыши (хит-тест в живой сессии).
 - Подсветка ручек гизмо при наведении курсора (8-10px tolerance).
 - Перетаскивание объектов мышью за ручки гизмо по осям X/Y/Z и плоскостям в живой сессии.

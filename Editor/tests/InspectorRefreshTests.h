@@ -110,9 +110,8 @@ inline void Run()
     auto* modelEdit = panel.findChild<QLineEdit*>(QStringLiteral("ModelAsset"));
     auto* textureEdit = panel.findChild<QLineEdit*>(QStringLiteral("TextureAsset"));
     auto* materialEdit = panel.findChild<QLineEdit*>(QStringLiteral("MaterialAsset"));
-    Check(modelEdit && textureEdit && materialEdit, "card asset edits found by objectName");
-    Check(modelEdit->text() == QStringLiteral("/Game/Models/m.fbx"), "model path applied on first Refresh");
-    Check(textureEdit->text() == QStringLiteral("/Game/Textures/t.png"), "texture path applied on first Refresh");
+    Check(modelEdit && !textureEdit && materialEdit, "card asset edits found by objectName, TextureAsset removed");
+    Check(modelEdit->text() == QStringLiteral("Models/m.fbx"), "relative model path applied on first Refresh");
     Check(materialEdit->text() == QStringLiteral("/Game/Materials/mat.mat"), "material path applied on first Refresh");
     ++checks;
 
@@ -141,7 +140,7 @@ inline void Run()
     snap.objects[0].modelAsset = "/Game/Models/m2.fbx";
     panel.Refresh(snap, 7, false);
     QApplication::processEvents();
-    Check(modelEdit->text() == QStringLiteral("/Game/Models/m2.fbx"), "changed model path applied without selectionChanged");
+    Check(modelEdit->text() == QStringLiteral("Models/m2.fbx"), "changed model path applied without selectionChanged");
     ++checks;
 
     snap.objects[0].type = "Light.Point";
@@ -167,12 +166,12 @@ inline void Run()
     panel.Refresh(snap, 7, false);
     QApplication::processEvents();
     Check(!geomCard->isHidden() && !matCard->isHidden(), "cards visible again after switching back to model");
-    Check(modelEdit->text() == QStringLiteral("/Game/Models/m2.fbx"), "model path restored after type round-trip");
+    Check(modelEdit->text() == QStringLiteral("Models/m2.fbx"), "model path restored after type round-trip");
     ++checks;
 
     panel.Refresh(snap, 7, true);
     QApplication::processEvents();
-    Check(modelEdit->text() == QStringLiteral("/Game/Models/m2.fbx"), "selectionChanged=true re-applies same data");
+    Check(modelEdit->text() == QStringLiteral("Models/m2.fbx"), "selectionChanged=true re-applies same data");
     ++checks;
 
     auto* posSpin = panel.findChild<QDoubleSpinBox*>(QStringLiteral("Transform0"));

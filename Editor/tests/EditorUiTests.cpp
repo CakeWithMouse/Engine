@@ -634,7 +634,7 @@ int wmain(int argc, wchar_t** argv)
         Ui([&](auto* w) {
             Check(w->findChild<QToolButton*>("ImportAssets")->menu() != nullptr, "imports grouped into menu");
             Check(w->findChild<QPushButton*>("ChooseModel") != nullptr, "model picker exists");
-            Check(w->findChild<QLineEdit*>("ModelAsset")->isReadOnly() && w->findChild<QLineEdit*>("TextureAsset")->isReadOnly(), "asset paths locked");
+            Check(w->findChild<QLineEdit*>("ModelAsset")->isReadOnly() && w->findChild<QLineEdit*>("TextureAsset") == nullptr, "model path locked and texture row removed");
             for (const auto& title : {QStringLiteral("Общие"),QStringLiteral("Трансформация"),QStringLiteral("Геометрия"),QStringLiteral("Материал")}) {
                 bool found=false; for (auto* group : w->template findChildren<QGroupBox*>()) found |= group->title()==title;
                 for(auto* header:w->template findChildren<QToolButton*>())found|=header->objectName().startsWith("Section.")&&header->text()==title;

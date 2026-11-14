@@ -2,7 +2,11 @@
 
 #include "GeometryCard.h"
 #include "MaterialCard.h"
+#include "ModelPickerDialog.h"
 #include <QApplication>
+#include <QDir>
+#include <QFile>
+#include <QTemporaryDir>
 #include <cstdio>
 #include <stdexcept>
 
@@ -12,22 +16,86 @@ inline void Run()
 {
     int checks = 0;
     auto check = [&](bool value, const char* message) { if (!value) throw std::runtime_error(message); ++checks; };
+
     GeometryCard geometry;
-    geometry.SetTexture(QStringLiteral("/Game/Textures/existing.png"));
     geometry.show();
     QApplication::processEvents();
-    check(!geometry.findChild<QPushButton*>(QStringLiteral("ChooseTexture")), "GeometryCard has no redundant texture picker");
-    check(!geometry.findChild<QPushButton*>(QStringLiteral("ClearTexture")), "GeometryCard has no redundant texture clear action");
-    auto* texture = geometry.findChild<QLineEdit*>(QStringLiteral("TextureAsset"));
-    check(texture && texture->isReadOnly(), "legacy object texture remains visible read-only");
-    check(texture->text() == QStringLiteral("/Game/Textures/existing.png"), "existing object texture display preserved");
-    check(geometry.findChild<QPushButton*>(QStringLiteral("ChooseModel")) && geometry.findChild<QPushButton*>(QStringLiteral("ClearModel")), "model actions preserved");
+
+    check(!geometry.findChild<QPushButton*>(QStringLiteral("ChooseTexture")), "GeometryCard has no texture picker");
+    check(!geometry.findChild<QPushButton*>(QStringLiteral("ClearTexture")), "GeometryCard has no texture clear action");
+    check(!geometry.findChild<QPushButton*>(QStringLiteral("ClearModel")), "GeometryCard has no ClearModel action");
+    check(!geometry.findChild<QLineEdit*>(QStringLiteral("TextureAsset")), "GeometryCard has no TextureAsset row");
+
+    auto* chooseModel = geometry.findChild<QPushButton*>(QStringLiteral("ChooseModel"));
+    auto* modelAsset = geometry.findChild<QLineEdit*>(QStringLiteral("ModelAsset"));
+    check(chooseModel != nullptr, "GeometryCard retains ChooseModel button");
+    check(modelAsset != nullptr, "GeometryCard retains ModelAsset field");
+
+    // Primitive data display and blocked button
+    geometry.SetPrimitiveData(QStringLiteral("Cube"));
+    check(modelAsset->text() == Tr("Примитив: Cube", "Primitive: Cube"), "Primitive displayed as Примитив: <тип>");
+    check(!chooseModel->isEnabled(), "ChooseModel is disabled for primitives");
+    check(!chooseModel->toolTip().isEmpty(), "ChooseModel has blocked tooltip for primitives");
+
+    // Model data display and enabled button
+    geometry.SetModelData(QStringLiteral("/Game/Models/CesiumMan.glb"), true);
+    check(modelAsset->text() == QStringLiteral("Models/CesiumMan.glb"), "Model displayed as relative project path");
+    check(chooseModel->isEnabled(), "ChooseModel is enabled for models");
+
     geometry.Clear();
-    check(texture->text().isEmpty(), "clearing inspector still clears texture display");
-    geometry.SetTexture(QStringLiteral("/Game/Textures/restored.png"));
+    check(modelAsset->text().isEmpty(), "Clearing geometry card clears model text");
+    check(!chooseModel->isEnabled(), "Clearing geometry card disables ChooseModel");
+
+    geometry.SetModelData(QStringLiteral("/Game/Models/Hero.fbx"), true);
     geometry.RetranslateUi();
-    check(texture->text() == QStringLiteral("/Game/Textures/restored.png"), "refresh and retranslation retain object texture");
-    check(!geometry.grab().isNull(), "native geometry card paints without removed controls");
+    check(chooseModel->text() == Tr("Заменить модель…", "Replace Model…"), "Button text is Replace Model");
+    check(!geometry.grab().isNull(), "Native geometry card paints cleanly");
+
+    // ModelPickerDialog tests
+    {
+        QTemporaryDir temp;
+        check(temp.isValid(), "Temporary directory created for picker test");
+        const QString root = temp.path();
+
+        QDir(root).mkpath(QStringLiteral("Models"));
+        QDir(root).mkpath(QStringLiteral("Textures"));
+
+        auto touch = [](const QString& filePath) {
+            QFile f(filePath);
+            f.open(QIODevice::WriteOnly);
+            f.write("test");
+            f.close();
+        };
+
+        touch(root + QStringLiteral("/Models/CesiumMan.glb"));
+        touch(root + QStringLiteral("/Models/Hero.fbx"));
+        touch(root + QStringLiteral("/Textures/Albedo.png"));
+
+        ModelPickerDialog picker(root, QStringLiteral("/Game/Models/CesiumMan.glb"));
+        check(picker.ListWidget() != nullptr, "Picker list widget exists");
+        check(picker.ListWidget()->count() == 2, "Picker lists only project models");
+        check(picker.ListWidget()->currentItem() &&
+              picker.ListWidget()->currentItem()->data(Qt::UserRole).toString() == QStringLiteral("/Game/Models/CesiumMan.glb"),
+              "Current model preselected");
+
+        // Search filtering
+        picker.SearchEdit()->setText(QStringLiteral("Hero"));
+        check(picker.ListWidget()->item(0)->isHidden(), "Non-matching model is hidden");
+        check(!picker.ListWidget()->item(1)->isHidden(), "Matching model remains visible");
+
+        picker.SearchEdit()->clear();
+        check(!picker.ListWidget()->item(0)->isHidden(), "Clearing search restores visibility");
+
+        // Test hook
+        ModelPickerDialog::SetExecHookForTesting([](ModelPickerDialog* dlg) {
+            dlg->ListWidget()->setCurrentRow(1);
+            return QDialog::Accepted;
+        });
+        check(picker.exec() == QDialog::Accepted, "Picker test hook accepts");
+        ModelPickerDialog::SetExecHookForTesting(nullptr);
+    }
+
+    // MaterialCard tests preserved
     MaterialCard material;
     material.SetMaterialsAvailable(true);
     material.SetData(QStringLiteral("/Game/Materials/test.mat"), false);
@@ -46,6 +114,7 @@ inline void Run()
     check(!edit->isEnabled(), "legacy module capability guard retained");
     edit->click();
     check(requests == 2, "unavailable material editing cannot dispatch");
+
     std::printf("Geometry texture action tests: %d checks passed\n", checks);
 }
 }

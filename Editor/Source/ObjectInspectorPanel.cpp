@@ -3,6 +3,7 @@
 #include "TransformCard.h"
 #include "MaterialCard.h"
 #include "GeometryCard.h"
+#include "CommandRegistry.h"
 #include "NoWheelDoubleSpinBox.h"
 #include "EditorLocale.h"
 #include "IconProvider.h"
@@ -86,8 +87,10 @@ void ObjectInspectorPanel::BuildUi()
     inspectorLayout->addWidget(cardTransform_);
 
     cardGeometry_ = new GeometryCard(this);
-    cardGeometry_->onChooseModel = [this] { emit ChooseModelRequested(); };
-    cardGeometry_->onClearModel = [this] { emit ClearModelRequested(); };
+    cardGeometry_->onChooseModel = [this] {
+        emit ChooseModelRequested();
+        CommandRegistry::Instance().Execute(QStringLiteral("Scene.ReplaceModel"));
+    };
 
     cardMaterial_ = new MaterialCard(this);
     cardMaterial_->onEditMaterial = [this](const QString& path) { emit EditMaterialRequested(path); };
@@ -341,35 +344,36 @@ void ObjectInspectorPanel::Refresh(
             UpdateLightColorButton(object.pointLight.color); cardLight_->show();
         } else { cardLight_->hide(); }
 
-        const bool showGeometry = isModel;
+        const bool showGeometry = isModel || isPrimitive;
         const bool showMaterial = isModel || isPrimitive;
         const bool showProperties = (!isModel && !isPrimitive && !isPointLight && !isDirLight && !isCamera && !isParticles);
 
         const QString cr = property("contentRoot").toString();
         const QString modelPath = QString::fromStdString(object.modelAsset);
-        const QString texturePath = QString::fromStdString(object.textureAsset);
         const QString materialPath = QString::fromStdString(object.materialAsset);
         const bool materialLight = isPointLight || isDirLight;
+        const QString primType = isPrimitive ? (type.rfind("Primitive.", 0) == 0 ? QString::fromStdString(type.substr(10)) : QString::fromStdString(type)) : QString();
         const bool cardsDirty = !lastCardsValid_ || selectionChanged
             || showGeometry != lastCardsShowGeometry_
             || showMaterial != lastCardsShowMaterial_
             || modelPath != lastCardsModel_
-            || texturePath != lastCardsTexture_
+            || primType != lastCardsPrimitive_
             || materialPath != lastCardsMaterial_
             || materialLight != lastCardsMaterialLight_
             || cr != lastCardsRoot_;
         if (cardsDirty) {
             cardGeometry_->setVisible(showGeometry);
-            if (showGeometry) {
-                cardGeometry_->SetData(modelPath, true, cr, selectionChanged);
-                cardGeometry_->SetTexture(texturePath, cr, selectionChanged);
+            if (isModel) {
+                cardGeometry_->SetModelData(modelPath, true, cr, selectionChanged);
+            } else if (isPrimitive) {
+                cardGeometry_->SetPrimitiveData(primType);
             }
             cardMaterial_->SetData(materialPath, materialLight, cr, selectionChanged);
             cardMaterial_->setVisible(showMaterial);
             lastCardsShowGeometry_ = showGeometry;
             lastCardsShowMaterial_ = showMaterial;
             lastCardsModel_ = modelPath;
-            lastCardsTexture_ = texturePath;
+            lastCardsPrimitive_ = primType;
             lastCardsMaterial_ = materialPath;
             lastCardsMaterialLight_ = materialLight;
             lastCardsRoot_ = cr;

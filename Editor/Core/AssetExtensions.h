@@ -2,9 +2,13 @@
 
 #include "EditorLocale.h"
 
+#include <QDir>
+#include <QDirIterator>
 #include <QFileInfo>
 #include <QString>
 #include <QStringList>
+#include <algorithm>
+#include <vector>
 
 namespace EditorCore
 {
@@ -90,6 +94,60 @@ inline bool ReimportSourceMatches(const QString& assetPath, const QString& sourc
 {
     const AssetKind kind = KindForFile(assetPath);
     return kind != AssetKind::Unknown && KindForFile(sourcePath) == kind;
+}
+
+struct ProjectAssetItem
+{
+    QString virtualPath;  // "/Game/Models/Hero.glb"
+    QString relativePath; // "Models/Hero.glb"
+    QString fileName;     // "Hero.glb"
+};
+
+inline std::vector<ProjectAssetItem> ListProjectAssets(const QString& contentRoot, AssetKind kind)
+{
+    if (contentRoot.isEmpty() || !QDir(contentRoot).exists())
+        return {};
+
+    const auto& extensions = (kind == AssetKind::Model) ? ModelExtensions()
+        : (kind == AssetKind::Texture) ? TextureExtensions()
+        : (kind == AssetKind::Audio) ? AudioExtensions()
+        : (kind == AssetKind::Material) ? MaterialExtensions()
+        : QStringList{};
+
+    if (extensions.isEmpty())
+        return {};
+
+    QStringList nameFilters;
+    for (const auto& ext : extensions)
+        nameFilters << QStringLiteral("*.") + ext;
+
+    std::vector<ProjectAssetItem> items;
+    const QDir root(contentRoot);
+    for (QDirIterator it(contentRoot, nameFilters, QDir::Files, QDirIterator::Subdirectories); it.hasNext();)
+    {
+        const QString fullPath = it.next();
+        if (fullPath.endsWith(QStringLiteral(".importsettings.json"), Qt::CaseInsensitive) ||
+            fullPath.endsWith(QStringLiteral(".source.json"), Qt::CaseInsensitive) ||
+            fullPath.endsWith(QStringLiteral(".import.json"), Qt::CaseInsensitive) ||
+            fullPath.contains(QStringLiteral("/.painengine/")) ||
+            fullPath.contains(QStringLiteral("\\.painengine\\")))
+        {
+            continue;
+        }
+
+        const QString rel = root.relativeFilePath(fullPath);
+        ProjectAssetItem item;
+        item.relativePath = QDir::fromNativeSeparators(rel);
+        item.virtualPath = QStringLiteral("/Game/") + item.relativePath;
+        item.fileName = QFileInfo(fullPath).fileName();
+        items.push_back(std::move(item));
+    }
+
+    std::sort(items.begin(), items.end(), [](const ProjectAssetItem& a, const ProjectAssetItem& b) {
+        return a.relativePath.compare(b.relativePath, Qt::CaseInsensitive) < 0;
+    });
+
+    return items;
 }
 
 } // namespace EditorCore
