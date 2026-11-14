@@ -6,6 +6,7 @@
 #include <Engine/Sound/AudioEngine.h>
 #include <Engine/Components/SpecificComponents/ParticleSystemComponent.h>
 #include <Engine/Components/Character.h>
+#include <Engine/AI/World.h>
 #include <cstring>
 #include <cmath>
 #include <climits>

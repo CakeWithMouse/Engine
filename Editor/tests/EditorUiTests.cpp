@@ -211,6 +211,8 @@ void ReloadUiChecks(const std::filesystem::path& root, const std::filesystem::pa
     host.SetModuleApi({}); ownedModule.reset(); host.Stop();
     std::printf("Reload EditorUiTests: %d checks passed\n",checks);
 }
+#include "AiDiagnosticsUiTests.h"
+
 int wmain(int argc, wchar_t** argv)
 {
     try
@@ -363,6 +365,13 @@ int wmain(int argc, wchar_t** argv)
             for (int i = 0; i < 30; ++i) pump();
         };
         until([&] { return host.ViewportActive(); });
+        if (argc == 4 && std::wstring(argv[3]) == L"--ai-diagnostics") {
+            RunAiDiagnosticsChecks(host,api,query,root,pump);
+            Ui([](auto* w){w->close();});
+            for(int i=0;i<5;++i)pump();
+            Ui([](auto*){if(auto* box=qobject_cast<QMessageBox*>(QApplication::activeModalWidget())) box->button(QMessageBox::Discard)->click();});
+            until([&]{return exit;});return 0;
+        }
         Ui([](auto* window) { ViewportCompletionTests::Run(window); });
         Ui([](auto* window) { GizmoCompletionTests::Run(window); });
         if (argc == 4 && std::wstring(argv[3]) == L"--viewport-completion") return 0;

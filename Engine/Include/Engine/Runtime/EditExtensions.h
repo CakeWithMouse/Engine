@@ -1,4 +1,5 @@
 #pragma once
+#include <Engine/Runtime/AiDiagnosticsApi.h>
 #include <Engine/Runtime/SceneModuleApi.h>
 #include <Engine/Runtime/EditSessionApi.h>
 
