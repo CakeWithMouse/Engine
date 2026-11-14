@@ -445,6 +445,7 @@
         </PropertyGroup>
         <Error Condition="!Exists('$(RedistributableD3DCompiler)')" Text="Windows SDK x64 D3D redistributable is missing; never substitute the System32 DLL."/>
         <Copy SourceFiles="$(RedistributableD3DCompiler)" DestinationFiles="$(OutDir)D3Dcompiler_47.dll" SkipUnchangedFiles="true"/>
+        <Copy SourceFiles="$(MSBuildThisFileDirectory)Resources/icon_pain_multisize.ico" DestinationFiles="$(OutDir)icon_pain_multisize.ico" SkipUnchangedFiles="true"/>
         <Copy Condition="'$(EngineCommandlet)'=='true'" SourceFiles="$(QtInstallDir)/plugins/platforms/qoffscreen.dll" DestinationFiles="$(OutDir)platforms/qoffscreen.dll" SkipUnchangedFiles="true"/>
     </Target>
     <ImportGroup Label="ExtensionTargets"/>

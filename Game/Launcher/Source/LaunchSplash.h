@@ -8,6 +8,10 @@
 #include <string>
 #include <stdexcept>
 
+#ifndef IDI_ICON
+#define IDI_ICON 101
+#endif
+
 // A separate UI thread keeps the loading screen responsive during SDK/build work.
 // The owner is disabled until the operation succeeds or unwinds with an error.
 class LaunchSplash final {
@@ -32,23 +36,60 @@ class LaunchSplash final {
         if (message == WM_PAINT) {
             PAINTSTRUCT paint{}; HDC dc = BeginPaint(window,&paint);
             RECT rect{}; GetClientRect(window,&rect);
-            Gdiplus::Bitmap frame(rect.right,rect.bottom,PixelFormat32bppARGB);
+            const int w = rect.right;
+            const int h = rect.bottom;
+            Gdiplus::Bitmap frame(w,h,PixelFormat32bppARGB);
             Gdiplus::Graphics g(&frame);
-            g.Clear(Gdiplus::Color(255,7,18,28));
-            if (self->cover_) g.DrawImage(self->cover_.get(),0,0,rect.right,rect.bottom);
-            Gdiplus::SolidBrush shade(Gdiplus::Color(145,0,7,15));
-            g.FillRectangle(&shade,0,0,rect.right,rect.bottom);
+            g.Clear(Gdiplus::Color(255,10,4,8));
+            if (self->cover_) {
+                const float imgW = static_cast<float>(self->cover_->GetWidth());
+                const float imgH = static_cast<float>(self->cover_->GetHeight());
+                if (imgW > 0.0f && imgH > 0.0f) {
+                    const float winAspect = static_cast<float>(w) / static_cast<float>(h);
+                    const float imgAspect = imgW / imgH;
+                    float srcX = 0.0f, srcY = 0.0f, srcW = imgW, srcH = imgH;
+                    if (imgAspect > winAspect) {
+                        srcW = imgH * winAspect;
+                        srcX = (imgW - srcW) * 0.5f;
+                    } else {
+                        srcH = imgW / winAspect;
+                        srcY = (imgH - srcH) * 0.5f;
+                    }
+                    g.DrawImage(self->cover_.get(), Gdiplus::RectF(0.0f, 0.0f, static_cast<float>(w), static_cast<float>(h)),
+                        srcX, srcY, srcW, srcH, Gdiplus::UnitPixel);
+                }
+            }
+            Gdiplus::SolidBrush shade(Gdiplus::Color(65,0,0,0));
+            g.FillRectangle(&shade,0,0,w,h);
+
+            Gdiplus::SolidBrush textBackdrop(Gdiplus::Color(90, 8, 3, 5));
+            g.FillRectangle(&textBackdrop, 0, h - 160, 560, 160);
+
             g.SetTextRenderingHint(Gdiplus::TextRenderingHintAntiAliasGridFit);
             Gdiplus::FontFamily family(L"Segoe UI");
-            Gdiplus::Font heading(&family,36,Gdiplus::FontStyleBold,Gdiplus::UnitPixel);
-            Gdiplus::Font label(&family,20,Gdiplus::FontStyleRegular,Gdiplus::UnitPixel);
-            Gdiplus::SolidBrush white(Gdiplus::Color(255,240,248,255));
-            g.DrawString(L"PainEngine",-1,&heading,Gdiplus::PointF(44,50),&white);
-            g.DrawString(self->title_.c_str(),-1,&label,Gdiplus::RectF(44,305,700,55),nullptr,&white);
-            Gdiplus::SolidBrush track(Gdiplus::Color(120,120,160,180)), cyan(Gdiplus::Color(255,30,215,239));
-            g.FillRectangle(&track,44,389,712,4);
-            const int step = static_cast<int>(self->tick_ % 160);
-            g.FillRectangle(&cyan,44 + (step < 80 ? step : 160-step)*7,389,150,4);
+            Gdiplus::Font heading(&family,32,Gdiplus::FontStyleBold,Gdiplus::UnitPixel);
+            Gdiplus::Font label(&family,18,Gdiplus::FontStyleRegular,Gdiplus::UnitPixel);
+            Gdiplus::SolidBrush white(Gdiplus::Color(255,245,248,255));
+            Gdiplus::SolidBrush textMuted(Gdiplus::Color(255,215,222,230));
+
+            g.DrawString(L"PainEngine",-1,&heading,Gdiplus::PointF(48.0f,42.0f),&white);
+
+            const float barX = 48.0f;
+            const float barW = 460.0f;
+            const float barH = 4.0f;
+            const float barY = static_cast<float>(h - 58);
+
+            g.DrawString(self->title_.c_str(),-1,&label,Gdiplus::RectF(barX,barY - 32.0f,barW,28.0f),nullptr,&textMuted);
+
+            Gdiplus::SolidBrush track(Gdiplus::Color(140,80,60,70)), red(Gdiplus::Color(255,220,38,38));
+            g.FillRectangle(&track,barX,barY,barW,barH);
+            const float runnerW = 110.0f;
+            const float travel = barW - runnerW;
+            const int period = 140;
+            const int step = static_cast<int>(self->tick_ % period);
+            const float runnerX = barX + ((step < period / 2) ? (step * travel / (period / 2)) : ((period - step) * travel / (period / 2)));
+            g.FillRectangle(&red,runnerX,barY,runnerW,barH);
+
             Gdiplus::Graphics target(dc); target.DrawImage(&frame,0,0);
             EndPaint(window,&paint); return 0;
         }
@@ -78,13 +119,24 @@ public:
                         } else GlobalFree(buffer);
                     }
                 }
-                WNDCLASSW cls{}; cls.lpfnWndProc = Proc; cls.hInstance = GetModuleHandleW(nullptr);
+                WNDCLASSEXW cls{}; cls.cbSize = sizeof(cls);
+                cls.lpfnWndProc = Proc; cls.hInstance = GetModuleHandleW(nullptr);
                 cls.lpszClassName = L"PainEngineLoading"; cls.hCursor = LoadCursorW(nullptr,IDC_ARROW);
-                RegisterClassW(&cls);
+                cls.hIcon = LoadIconW(cls.hInstance, MAKEINTRESOURCEW(IDI_ICON));
+                cls.hIconSm = static_cast<HICON>(LoadImageW(cls.hInstance, MAKEINTRESOURCEW(IDI_ICON), IMAGE_ICON,
+                    GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR));
+                if (!cls.hIcon) cls.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
+                RegisterClassExW(&cls);
+                const int splashW = 960;
+                const int splashH = 540;
                 const auto window = CreateWindowExW(WS_EX_TOPMOST|WS_EX_TOOLWINDOW,cls.lpszClassName,L"PainEngine — загрузка",
-                    WS_POPUP|WS_VISIBLE,(GetSystemMetrics(SM_CXSCREEN)-800)/2,(GetSystemMetrics(SM_CYSCREEN)-450)/2,
-                    800,450,nullptr,nullptr,cls.hInstance,this);
-                if (window) { SetTimer(window,1,25,nullptr); UpdateWindow(window); }
+                    WS_POPUP|WS_VISIBLE,(GetSystemMetrics(SM_CXSCREEN)-splashW)/2,(GetSystemMetrics(SM_CYSCREEN)-splashH)/2,
+                    splashW,splashH,nullptr,nullptr,cls.hInstance,this);
+                if (window) {
+                    if (cls.hIcon) SendMessageW(window, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(cls.hIcon));
+                    if (cls.hIconSm) SendMessageW(window, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(cls.hIconSm));
+                    SetTimer(window,1,25,nullptr); UpdateWindow(window);
+                }
                 ready.set_value(window);
                 if (window) { MSG msg{}; while (GetMessageW(&msg,nullptr,0,0)>0) { TranslateMessage(&msg); DispatchMessageW(&msg); } }
                 cover_.reset(); if (stream) stream->Release(); if (token) Gdiplus::GdiplusShutdown(token);
