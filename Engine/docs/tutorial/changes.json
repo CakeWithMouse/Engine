@@ -2,18 +2,18 @@
   "title": "PainEngine\nИзменения выпуска",
   "outputPrefix": "PainEngine-Changes",
   "date": "2026-11-14",
-  "revision": 4,
-  "engineVersion": "2026.11.11.0",
-  "sourceCommit": "53db2724c3b78bce138fcd0cace20e51a2ef0aeb",
+  "revision": 5,
+  "engineVersion": "0.3.0",
+  "sourceCommit": "0585db0",
   "baselineCommit": "a7f8c8d89cc4061c155715008d257cb3cd229d60",
   "editorialPolicy": "editorial-policy.json",
   "slides": [
     {
       "type": "cover",
       "title": "PainEngine\nНовые возможности",
-      "subtitle": "Скрипты, ИИ, импорт\nи исправления редактора PR №24",
+      "subtitle": "Релиз 0.3.0\nРесурсы, редактор и старые проекты",
       "image": "r10/ai-machine-window.png",
-      "notes": "Изменения относительно сохранённого туториала r9 и API Reference 7 ноября. Версия 2026.11.11.0, исходники 6899a6ac6a4a3e2a6a9da3cba48c0d790881569a; интеграция PR №24 в release/v0.3.0, c5f52d20cda9501e4e7af3c93b1e4422acd1ef3b",
+      "notes": "Изменения относительно сохранённого туториала r9 и API Reference 7 ноября. Версия 2026.11.11.0, исходники 6899a6ac6a4a3e2a6a9da3cba48c0d790881569a; интеграция PR №24 в release/v0.3.0, c5f52d20cda9501e4e7af3c93b1e4422acd1ef3b\nВыпуск 0.3.0 подготовлен 14.11.2026 после исправления 0585db0. Снимки прежних редакций сохраняют исходную дату.",
       "sources": [
         "Engine/Version.json"
       ]
@@ -76,6 +76,33 @@
           "h": 48,
           "size": 24
         }
+      ]
+    },
+    {
+      "type": "rows",
+      "title": "Старая сцена: замена модели",
+      "items": [
+        [
+          "Модель",
+          "Выберите Engine.Model и замените ресурс. Один Undo возвращает исходное состояние."
+        ],
+        [
+          "Тип объекта",
+          "Примитив нельзя превратить в модель этой кнопкой. Неизвестный тип получает отдельную ошибку."
+        ],
+        [
+          "Старый проект",
+          "Проверена сцена версии 1. JSON и snapshot используют тот же тип Engine.Model."
+        ]
+      ],
+      "foot": "Команда расширения редактора требует явный objectId. Исходный файл меняется только при Save.",
+      "notes": "В 24 реальных сценах репозитория 10 объектов с assets.model, все Engine.Model. Алиасов не найдено. Исправлены подстановка текущего выбора и восстановление выбора после замены; snapshot удерживается локально. Отдельный тест на архивной сцене использует настоящий Game.dll, инспектор и CommandRegistry: замена, одно Undo, полный откат; примитив и свет отклоняются. Сериализатор Engine может создавать checkpoint версии 3 из-за projectData ещё до операции; новый код не вводит миграцию, исходный файл v1 остаётся прежним. Сообщение о legacy-несовместимости не воспроизведено; версию DLL проблемного проекта нужно проверять отдельно.",
+      "sources": [
+        "Editor/Core/SceneObjectType.h",
+        "Editor/Host/ModelReplacement.h",
+        "Editor/Source/ImportCommands.cpp",
+        "Editor/tests/ModelReplaceUiTests.cpp",
+        "Engine/docs/SCENE-JSON.md"
       ]
     },
     {

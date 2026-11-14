@@ -150,5 +150,29 @@
     "kind": "Changes",
     "content": "releases/PainEngine-Changes-2026-11-14-r4.content.json",
     "summary": "PR №24: выбор ресурсов с актуальными снимками, папки, ограничения замены модели, обновление инспектора и закрепление панелей; сохранены скрипты и ИИ."
+  },
+  {
+    "engineVersion": "0.3.0",
+    "date": "2026-11-14",
+    "revision": 12,
+    "sourceCommit": "0585db0",
+    "slideCount": 92,
+    "presentation": "releases/PainEngine-Tutorial-2026-11-14-r12-final.pptx",
+    "pdf": "releases/PainEngine-Tutorial-2026-11-14-r12-final.pdf",
+    "kind": "Tutorial",
+    "content": "releases/PainEngine-Tutorial-2026-11-14-r12.content.json",
+    "summary": "Выпуск 0.3.0: замена модели старой сцены, явный ID и Undo, актуальная документация разработчика."
+  },
+  {
+    "engineVersion": "0.3.0",
+    "date": "2026-11-14",
+    "revision": 5,
+    "sourceCommit": "0585db0",
+    "slideCount": 23,
+    "presentation": "releases/PainEngine-Changes-2026-11-14-r5-final.pptx",
+    "pdf": "releases/PainEngine-Changes-2026-11-14-r5-final.pdf",
+    "kind": "Changes",
+    "content": "releases/PainEngine-Changes-2026-11-14-r5.content.json",
+    "summary": "Выпуск 0.3.0: замена модели старой сцены, явный ID и Undo, актуальная документация разработчика."
   }
 ]

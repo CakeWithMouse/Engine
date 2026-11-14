@@ -1,19 +1,19 @@
 {
   "title": "PainEngine — Изменения выпуска",
-  "engineVersion": "2026.11.11.0",
+  "engineVersion": "0.3.0",
   "date": "2026-11-14",
-  "revision": 4,
-  "sourceCommit": "53db2724c3b78bce138fcd0cace20e51a2ef0aeb",
-  "slideCount": 22,
-  "presentation": "releases/PainEngine-Changes-2026-11-14-r4-final.pptx",
-  "pdf": "releases/PainEngine-Changes-2026-11-14-r4-final.pdf",
+  "revision": 5,
+  "sourceCommit": "0585db0",
+  "slideCount": 23,
+  "presentation": "releases/PainEngine-Changes-2026-11-14-r5-final.pptx",
+  "pdf": "releases/PainEngine-Changes-2026-11-14-r5-final.pdf",
   "content": "changes.json",
   "builder": "build.mjs",
   "editorialPolicy": "editorial-policy.json",
   "sources": [
     {
       "path": "Engine/Version.json",
-      "sha256": "7512606b88532b0c526b486910446869ca7766f5e9eff2446cfe395bcc474364"
+      "sha256": "0041a7ee822d80805c2eb8db5a102eb3d9e4195e2cfb482d1085277fc715be6f"
     },
     {
       "path": "Editor/UI/AssetPickerDialog.cpp",
@@ -25,11 +25,27 @@
     },
     {
       "path": "Editor/Source/ImportCommands.cpp",
-      "sha256": "756a051f11edb4179e07ac31ef79a0f5d1378f84d854e81bd0e7c0994a147e73"
+      "sha256": "cecf381bcd7d54089949c30b5bbd9c4dd4e724d662ee24ddae88f0253a0a8f07"
     },
     {
       "path": "Editor/Host/SceneCommandHandler.cpp",
-      "sha256": "7cda35d2bdacace285c9f2d995dfc47775f8b25837e5141450e1c9bc07c4fa6f"
+      "sha256": "986510851f3e2b50dd8689743112525c2e742cc842a8179e81582792a709734b"
+    },
+    {
+      "path": "Editor/Core/SceneObjectType.h",
+      "sha256": "7444a653a296efdb9a7393c2e2d07e94fb955a09a09405235153c65258872db9"
+    },
+    {
+      "path": "Editor/Host/ModelReplacement.h",
+      "sha256": "ff8d4ca1861e8cb28110c4b2da64910b3c2cfa94821317e0a3f41b20379f1ee5"
+    },
+    {
+      "path": "Editor/tests/ModelReplaceUiTests.cpp",
+      "sha256": "fa0aec9b31b693c7948d9e20000fcacdbf5fb1e80ed1bd2c895b73d2b06ebbf8"
+    },
+    {
+      "path": "Engine/docs/SCENE-JSON.md",
+      "sha256": "e6ee571d81a076632a1e5bcad1e7bf7f97596d22fd079bf50ee4ca627932d022"
     },
     {
       "path": "Editor/UI/FolderCommands.h",
@@ -53,7 +69,7 @@
     },
     {
       "path": "Editor/Source/ObjectInspectorPanel.cpp",
-      "sha256": "34ccd49463b683d3271111fab98eba798532acb3abc828cfc09b308c336efb2c"
+      "sha256": "c355963bc8e2844bc54d0b10d6f16be3263de10d50e9eb418a3614e0b9dcaf6a"
     },
     {
       "path": "Editor/UI/ViewportOverlayHelper.cpp",

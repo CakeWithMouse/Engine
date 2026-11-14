@@ -1,4 +1,6 @@
 #define NOMINMAX
+// Parse engine properties before Qt defines its slots keyword macro.
+#include <Engine/Project/StandardTypes.h>
 #include "EditorStyles.h"
 #include "EditorTheme.h"
 #include "GizmoMath.h"
@@ -14,7 +16,6 @@
 #include <Engine/InputDevice/Keys.h>
 #include <Engine/MainGame/BaseGameClass/Game.h>
 #include <Engine/MainGame/GameSession.h>
-#include <Engine/Project/StandardTypes.h>
 #include <Engine/Render/SkeletalLoader.h>
 #include <Engine/Resources/Paths.h>
 #include <Engine/Runtime/EditorReloadApi.h>
